@@ -1,5 +1,7 @@
 # Description
 
+![Screenshot of TestTrack](./doc/img/screenshot1.png)
+
 TestTrack is a tool created by the Security Engineering team at Rackspace to
 track testing efforts. It attempts to streamline the testing process by
 offering features such as templating, report generation, metrics, and baseline
