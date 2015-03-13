@@ -1,0 +1,75 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# C extensions
+*.so
+
+# Distribution / packaging
+bin/
+build/
+develop-eggs/
+dist/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+.tox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+
+# Translations
+*.mo
+
+# Mr Developer
+.mr.developer.cfg
+.project
+.pydevproject
+.settings
+
+# Rope
+.ropeproject
+
+# Django stuff:
+*.log
+*.pot
+tracker/settings.py
+
+# Vim swapfiles
+*.swp
+*.swo
+
+# Sphinx documentation
+docs/_build/
+
+#others
+.DS_Store
+*.crt
+*.csr
+*.key
+tracker/migrations
+tracker/static/img/threat/*
+tracker/uploads/risk/*
+tracker/scans/scan*
+tracker/uploads/threat/*
+.idea
+
+weekly.txt
+Monthly.txt
+Quarterly.txt
+
+# Vagrant
+.vagrant
