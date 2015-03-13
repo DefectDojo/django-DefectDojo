@@ -14,9 +14,9 @@ For more information, please see [the doc folder](./doc)
 
 # Installation
 
-## [Vagrant](./doc/install_vagrant.md)
+### [Vagrant](./doc/install_vagrant.md)
 
-## [Debian- or RHEL-based Install Script](./doc/install_bash.md)
+### [Debian- or RHEL-based Install Script](./doc/install_bash.md)
 
 
 # About Us
