@@ -1,4 +1,4 @@
-# Debian- or RHEL-based Linux Install (Bash Script)
+# Debian- or RHEL-based Bash Install Script
 
 There is a script in the main folder called `setup.bash` that will allow you to
 interactively install TestTrack on some Linux-based systems. The user
