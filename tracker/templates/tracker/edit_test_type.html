@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+    <h3> Edit Test Type {{ pt.name }}</h3>
+    <form class="form-horizontal" action="/test_type/{{ pt.id }}/edit" method="post">{% csrf_token %}
+        {% include "tracker/form_fields.html" with form=form %}
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <input class="btn btn-primary" type="submit" value="Submit"/>
+            </div>
+        </div>
+    </form>
+{% endblock %}

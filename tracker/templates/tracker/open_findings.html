@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="row">
+        <div class="col-md-9">
+            {% if findings %}
+                <div class="panel panel-default">
+                    <table id="open_findings"
+                           class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th> Date</th>
+                            <th>Severity</th>
+                            <th>Product</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for finding in findings %}
+                            <tr>
+                                <td class="nowrap"><a title="{{ finding.title }}"
+                                                      href="/{{ finding.id }}/view_finding">{{ finding.title|truncatechars:50 }}</a>
+                                </td>
+                                <td class="nowrap">{{ finding.date }}</td>
+                                <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
+                                    <p class="text-error">
+                                {% else %}<p>{% endif %}{{ finding.severity }}</p></td>
+                                <td><a
+                                        href="/product/{{ finding.test.engagement.product.id }}"
+                                        title="{{ finding.test.engagement.product }}">{{ finding.test.engagement.product|truncatechars:15 }}</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% include "tracker/paging_snippet.html" with page=findings %}
+            {% else %}
+                No findings found.
+            {% endif %}
+        </div>
+        <div class="col-md-3">
+            <div class="panel panel-default filters">
+                {% if filtered.form %}
+                    <div class="panel-heading">Filters</div>
+                    <form method="get" class="panel-body">
+                        {{ filtered.form.as_p }}
+                        <div class="centered">
+                            <input type="submit" class="btn btn-primary inline top" value="Apply"/><br/><br/>
+                            <a href="/open_findings"> [Clear Filters] </a>
+                        </div>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}
+{% block postscript %}
+    <script>
+        $(function () {
+            var availableTags = [
+                {% for word in title_words %}
+                    "{{word}}",
+                {% endfor %}
+            ];
+            $("#id_title").autocomplete({
+                source: availableTags
+            });
+        });
+    </script>
+{% endblock %}

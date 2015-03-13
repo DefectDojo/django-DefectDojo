@@ -1,0 +1,580 @@
+{% extends "base.html" %}
+{% load event_tags %}
+{% block add_styles %}
+    nav.navbar {display: none;}
+    #page-wrapper {
+    margin: 0 0 0 0;
+    padding: 0 0;
+    }
+    br {margin: 0;}
+    h2 {margin: -5px 0px 0px;background-color: white;padding: 5px 15px 8px;border-bottom: 1px solid #e8e8e8;}
+
+    ul.breadcrumb {display:none}
+    span.close_link {font-size: 14px;}
+    .metric-data{margin-top: 40px;}
+    .graph {height: 45vh; width: 100%;}
+{% endblock %}
+{% block content %}
+    <div class="row navbar-fixed-top">
+        <div class="col-md-12">
+            <h2>{{ name }} For {{ start_date.date }} - {{ end_date.date }}
+                <a class="btn close pull-right" href="/all_metrics" aria-hidden="true">&times;</a>
+            </h2>
+        </div>
+    </div>
+    <div class="row metric-data">
+        <div class="col-md-6 section-start">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Open Bug Count by Month
+                </div>
+                <!-- /.panel-heading -->
+                <div class="panel-body">
+                    <div id="chart_div" class="graph"></div>
+                </div>
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+        </div>
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Accepted Bug Count by Month
+                </div>
+                <!-- /.panel-heading -->
+                <div class="panel-body">
+                    <div id="chart_div2" class="graph"></div>
+                </div>
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+        </div>
+        <div class="col-md-12 section-start">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Open Bug Count by Week
+                </div>
+                <!-- /.panel-heading -->
+                <div class="panel-body">
+                    <div id="chart_div3" class="graph"></div>
+                </div>
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+        </div>
+        <div class="col-md-12 section-start">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Accepted Bug Count by Week
+                </div>
+                <!-- /.panel-heading -->
+                <div class="panel-body">
+                    <div id="chart_div4" class="graph"></div>
+                </div>
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+        </div>
+
+
+        {% if top_ten_products %}
+            <div class="col-md-12 section-start">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Top {{ update|length }} Products By Bug Severity
+                    </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body">
+                        <div id="top-ten" class="graph"></div>
+                    </div>
+                    <!-- /.panel-body -->
+                </div>
+                <!-- /.panel -->
+            </div>
+        {% endif %}
+        <div class="col-md-4 section-start">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Total Findings In Period By Severity
+                </div>
+                <!-- /.panel-heading -->
+                <div class="panel-body">
+                    <div id="opened_in_period" class="graph"></div>
+                </div>
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+        </div>
+        <div class="col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Total Findings Accepted In Period By Severity
+                </div>
+                <!-- /.panel-heading -->
+                <div class="panel-body">
+                    <div id="total_accepted_in_period" class="graph"></div>
+                </div>
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+        </div>
+        <div class="col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Total Findings Closed In Period By Severity
+                </div>
+                <!-- /.panel-heading -->
+                <div class="panel-body">
+                    <div id="total_closed_in_period" class="graph"></div>
+                </div>
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+        </div>
+    </div>
+    <br/>
+{% endblock %}
+{% block postscript %}
+    <!-- Flot Charts JavaScript -->
+    <script src="{{ STATIC_URL }}js/excanvas.min.js"></script>
+    <script src="{{ STATIC_URL }}js/jquery.flot.js"></script>
+    <script src="{{ STATIC_URL }}js/jquery.flot.pie.js"></script>
+    <script src="{{ STATIC_URL }}js/jquery.flot.time.js"></script>
+    <script src="{{ STATIC_URL }}js/jquery.flot.tooltip.min.js"></script>
+    <script src="{{ STATIC_URL }}js/jquery.flot.stack.js"></script>
+    <script>
+        $(function () {
+            setInterval(function () {
+                window.location.reload();
+            }, 900000);
+
+
+            var i = 0;
+            items = $('.section-start');
+            setInterval(function () {
+                item = items.get(i);
+                ++i;
+                $('html, body').animate({
+
+                    scrollTop: $(item).offset().top - 55
+                }, 4000);
+                if (i >= items.length) i = 0;
+
+            }, 20000);
+
+
+            var options = {
+                xaxes: [{
+                    mode: 'time',
+                    timeformat: "%m/%y"
+                }],
+                yaxes: [{
+                    min: 0
+                }],
+                series: {
+                    lines: {
+                        show: true
+                    },
+                    points: {
+                        show: true
+                    }
+                },
+                grid: {
+                    hoverable: false,
+                    borderWidth: 1,
+                    borderColor: '#e7e7e7',
+
+                },
+                tooltip: false,
+            };
+            chart_div();
+            chart_div2();
+            chart_div3();
+            chart_div4();
+            top_ten_products();
+            severity_pie();
+            total_accepted_pie();
+            total_closed_pie();
+
+
+            function chart_div() {
+                var critical = [],
+                            high = [],
+                            medium = [],
+                            low = [];
+
+                    {% for month in opened_per_month|slice:'1:' %}
+                        critical.push([{{ month.0 }}, {{ month.2 }}]);
+                        high.push([{{ month.0 }}, {{ month.3 }}]);
+                        medium.push([{{ month.0 }}, {{ month.4 }}]);
+                        low.push([{{ month.0 }}, {{ month.5 }}]);
+                    {% endfor %}
+
+
+                $.plot($("#chart_div"), [{
+                            data: critical,
+                            label: " Critical",
+                            color: "#d9534f",
+                        }, {
+                            data: high,
+                            label: " High",
+                            color: '#f0ad4e',
+                        }, {
+                            data: medium,
+                            label: " Medium",
+                            color: '#f0de28',
+                        }, {
+                            data: low,
+                            label: " Low",
+                            color: '#337ab7',
+                        }],
+                        options);
+            };
+
+            function chart_div2() {
+                var critical = [],
+                            high = [],
+                            medium = [],
+                            low = [];
+
+                    {% for month in accepted_per_month|slice:'1:' %}
+                        critical.push([{{ month.0 }}, {{ month.2 }}]);
+                        high.push([{{ month.0 }}, {{ month.3 }}]);
+                        medium.push([{{ month.0 }}, {{ month.4 }}]);
+                        low.push([{{ month.0 }}, {{ month.5 }}]);
+                    {% endfor %}
+
+
+                $.plot($("#chart_div2"), [{
+                            data: critical,
+                            label: " Critical",
+                            color: "#d9534f",
+                        }, {
+                            data: high,
+                            label: " High",
+                            color: '#f0ad4e',
+                        }, {
+                            data: medium,
+                            label: " Medium",
+                            color: '#f0de28',
+                        }, {
+                            data: low,
+                            label: " Low",
+                            color: '#337ab7',
+                        }],
+                        options);
+            };
+
+            function chart_div3() {
+                var critical = [],
+                        high = [],
+                        medium = [],
+                        low = [];
+
+                {% for month in opened_per_week|slice:'1:' %}
+                    critical.push([{{ month.0 }}, {{ month.2 }}]);
+                    high.push([{{ month.0 }}, {{ month.3 }}]);
+                    medium.push([{{ month.0 }}, {{ month.4 }}]);
+                    low.push([{{ month.0 }}, {{ month.5 }}]);
+                {% endfor %}
+                var options = {
+                    xaxes: [{
+                        mode: 'time',
+                        timeformat: "%m/%d/%Y"
+                    }],
+                    yaxes: [{
+                        min: 0
+                    }],
+                    series: {
+                        lines: {
+                            show: true
+                        },
+                        points: {
+                            show: true
+                        }
+                    },
+                    grid: {
+                        hoverable: true,
+                        borderWidth: 1,
+                        borderColor: '#e7e7e7',
+
+                    },
+                    tooltip: true,
+                };
+
+
+                var plotObj = $.plot($("#chart_div3"), [{
+                            data: critical,
+                            label: " Critical",
+                            color: "#d9534f",
+                        }, {
+                            data: high,
+                            label: " High",
+                            color: '#f0ad4e',
+                        }, {
+                            data: medium,
+                            label: " Medium",
+                            color: '#f0de28',
+                        }, {
+                            data: low,
+                            label: " Low",
+                            color: '#337ab7',
+                        }],
+                        options);
+            }
+
+            function chart_div4() {
+                var critical = [],
+                        high = [],
+                        medium = [],
+                        low = [];
+
+                {% for month in accepted_per_week|slice:'1:' %}
+                    critical.push([{{ month.0 }}, {{ month.2 }}]);
+                    high.push([{{ month.0 }}, {{ month.3 }}]);
+                    medium.push([{{ month.0 }}, {{ month.4 }}]);
+                    low.push([{{ month.0 }}, {{ month.5 }}]);
+                {% endfor %}
+                var options = {
+                    xaxes: [{
+                        mode: 'time',
+                        timeformat: "%m/%d/%Y"
+                    }],
+                    yaxes: [{
+                        min: 0
+                    }],
+                    series: {
+                        lines: {
+                            show: true
+                        },
+                        points: {
+                            show: true
+                        }
+                    },
+                    grid: {
+                        hoverable: false,
+                        borderWidth: 1,
+                        borderColor: '#e7e7e7',
+
+                    },
+                    tooltip: false,
+                };
+
+
+                var plotObj = $.plot($("#chart_div4"), [{
+                            data: critical,
+                            label: " Critical",
+                            color: "#d9534f",
+                        }, {
+                            data: high,
+                            label: " High",
+                            color: '#f0ad4e',
+                        }, {
+                            data: medium,
+                            label: " Medium",
+                            color: '#f0de28',
+                        }, {
+                            data: low,
+                            label: " Low",
+                            color: '#337ab7',
+                        }],
+                        options);
+            }
+
+            function top_ten_products() {
+                var critical = [];
+                var high = [];
+                var medium = [];
+                var low = [];
+                var ticks = []
+                {% for t in top_ten_products %}
+                    ttp = {{forloop.counter}}
+                            ticks.push([ttp, $("{{t.0|safe}}").text()]),
+                            critical.push([ttp, {{t.1}}]);
+                    high.push([ttp, {{t.2}}]);
+                    medium.push([ttp, {{t.3}}]);
+                    low.push([ttp, {{t.4}}]);
+                {% endfor %}
+
+                data1 = [
+                    {
+                        data: critical,
+                        color: "#d9534f",
+                        bars: {fill: 1},
+                        label: 'Critical',
+                    },
+                    {
+                        data: high,
+                        color: "#f0ad4e",
+                        bars: {fill: 1},
+                        label: 'High',
+
+                    },
+                    {
+                        data: medium,
+                        color: "#f0de28",
+                        bars: {fill: 1},
+                        label: 'Medium',
+                    },
+                    {
+                        data: low,
+                        color: "#337ab7",
+                        bars: {fill: 1},
+                        label: 'Low',
+                    },
+                ];
+
+                $.plot("#top-ten", data1, {
+                    series: {
+                        stack: true,
+                        bars: {
+                            show: true,
+                            barWidth:.9,
+                            'align': "center",
+                        },
+
+                    },
+                    grid: {
+                        hoverable: false,
+                        borderWidth: 1,
+                        borderColor: '#e7e7e7',
+
+                    },
+                    tooltip: false,
+                    legend: {
+                        position: "ne"
+                    },
+                    xaxis: {
+                        ticks: ticks,
+                    },
+                });
+            }
+
+            function severity_pie() {
+                var data = [{
+                    label: "Critical",
+                    color: "#d9534f",
+                    data: {{in_period_counts.Critical}}
+                }, {
+                    label: "High",
+                    color: "#f0ad4e",
+                    data: {{in_period_counts.High}}
+                }, {
+                    label: "Medium",
+                    color: "#f0de28",
+                    data: {{in_period_counts.Medium}}
+                }, {
+                    label: "Low",
+                    color: "#337ab7",
+                    data: {{in_period_counts.Low}}
+                }];
+
+                var plotObj = $.plot($("#opened_in_period"), data, {
+                    series: {
+                        pie: {
+                            show: true,
+                            radius: 1,
+                            label: {
+                                show: true,
+                                radius: 2 / 3,
+                                formatter: function (label, series) {
+                                    return '<div style="font-size:8pt;text-align:center;padding:2px;color:black;z-index:9999;">' + label + '<br/>' + series.data[0][1] + '</div>';
+
+                                },
+
+                            }
+                        }
+                    },
+                    grid: {
+                        hoverable: false
+                    },
+                });
+            }
+
+            function total_accepted_pie() {
+                var data = [{
+                    label: "Critical",
+                    color: "#d9534f",
+                    data: {{accepted_in_period_counts.Critical}}
+                }, {
+                    label: "High",
+                    color: "#f0ad4e",
+                    data: {{accepted_in_period_counts.High}}
+                }, {
+                    label: "Medium",
+                    color: "#f0de28",
+                    data: {{accepted_in_period_counts.Medium}}
+                }, {
+                    label: "Low",
+                    color: "#337ab7",
+                    data: {{accepted_in_period_counts.Low}}
+                }];
+
+                var plotObj = $.plot($("#total_accepted_in_period"), data, {
+                    series: {
+                        pie: {
+                            show: true,
+                            radius: 1,
+                            label: {
+                                show: true,
+                                radius: 2 / 3,
+                                formatter: function (label, series) {
+                                    return '<div style="font-size:8pt;text-align:center;padding:2px;color:black;z-index:9999;">' + label + '<br/>' + series.data[0][1] + '</div>';
+
+                                },
+
+                            }
+                        }
+                    },
+                    grid: {
+                        hoverable: false
+                    },
+                });
+            }
+
+            function total_closed_pie() {
+                var data = [{
+                    label: "Critical",
+                    color: "#d9534f",
+                    data: {{closed_in_period_counts.Critical}}
+                }, {
+                    label: "High",
+                    color: "#f0ad4e",
+                    data: {{closed_in_period_counts.High}}
+                }, {
+                    label: "Medium",
+                    color: "#f0de28",
+                    data: {{closed_in_period_counts.Medium}}
+                }, {
+                    label: "Low",
+                    color: "#337ab7",
+                    data: {{closed_in_period_counts.Low}}
+                }];
+
+                var plotObj = $.plot($("#total_closed_in_period"), data, {
+                    series: {
+                        pie: {
+                            show: true,
+                            radius: 1,
+                            label: {
+                                show: true,
+                                radius: 2 / 3,
+                                formatter: function (label, series) {
+                                    return '<div style="font-size:8pt;text-align:center;padding:2px;color:black;z-index:9999;">' + label + '<br/>' + series.data[0][1] + '</div>';
+
+                                },
+
+                            }
+                        }
+                    },
+                    grid: {
+                        hoverable: false
+                    },
+                });
+
+
+            }
+
+        })
+    </script>
+{% endblock %}

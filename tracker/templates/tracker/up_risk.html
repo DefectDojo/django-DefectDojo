@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+    <div id="upload-risk" class="{{ show_add_findings_form }}">
+        <p>
+            In order to accept the risk of any given finding you need to provide documentation.
+            This documentation can be in the form of an image or PDF file. Select the findings
+            that apply to this acceptance. These findings will be automatically be deactivated.
+        </p>
+
+        <form enctype="multipart/form-data" method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <input class="btn btn-primary" type="submit" value="Add Risk Acceptance"/>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+    <h3> Engineers </h3>
+    <div class="panel panel-default">
+        <table id="engineers"
+               class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
+            <thead>
+            <tr>
+                <th>Name (username)</th>
+                <th>Email</th>
+                <th>Last Login</th>
+                <th>Active</th>
+                <th>Staff</th>
+                <th>Superuser</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for user in users %}
+                <tr>
+                    <td><a href="/{{ user.id }}/view_engineer">{{ user.get_full_name }}</a></td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.last_login }}</td>
+                    <td>{{ user.is_active }}</td>
+                    <td>{{ user.is_staff }}</td>
+                    <td>{{ user.is_superuser }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

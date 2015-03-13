@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load event_tags %}
+
+{% block content %}
+    <h2> {{ name }}</h2>
+    <p>Below is your current API Key, to regenerate click the button below.</p>
+    <hr/>
+    <p>Your current API key is <code>{{ key.key }}</code></p>
+    <p>Your current API Authorization Header value is <code>ApiKey {{ user.username }}:{{ key.key }}</code></p>
+    <p>Has your key been exposed? Are you ready for a new one?</p>
+    <form action="/api_key" method="post" class="inline-form">
+        {% csrf_token %}
+        <input class="btn btn-primary" type="submit" value="Generate New Key"/>
+    </form>
+    <hr/>
+    <p>
+        That's great, but how do I make calls to the API? Take a look at the
+        <a href="/api/v1/doc/" title="API Documentation">API Documentation</a>.
+    </p>
+    <p>
+        To use your API Key you need to specify an Authorization header. Example:
+    </p>
+    <pre>
+# As a header
+# Format is ``Authorization: ApiKey &lt;username&gt;:&lt;api_key&gt;
+Authorization: ApiKey {{ user.username }}:{{ key.key }}
+	</pre>
+    <p>Here is a simple python example against the /users endpoint</p>
+    <pre>
+import requests
+
+url = 'https://10.23.245.200:8000/api/v1/users'
+headers = {'content-type': 'application/json',
+		   'Authorization': 'ApiKey {{ user.username }}:{{ key.key }}'}
+r = requests.get(url, headers=headers, verify=False) # don't verify ssl cert since it is self-signed
+
+for key, value in r.__dict__.iteritems():
+  print key
+  print value
+  print '------------------'
+	</pre>
+{% endblock %}

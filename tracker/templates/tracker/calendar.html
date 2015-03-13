@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="calendar"></div>
+{% endblock %}
+{% block postscript %}
+    <script>
+        $(function () {
+            $('.calendar').fullCalendar({
+                theme: true
+            });
+            {% for e in engagements %}
+                var newEvent = {};
+                newEvent.title = "{{e.product.name}}";
+                newEvent.start = "{{e.target_start|date:"U"}}";
+                newEvent.end = "{{e.target_end|date:"U"}}";
+                newEvent.allDay = false;
+                newEvent.url = "/engagement/{{e.id}}";
+                newEvent.color = "#337ab7";
+                $('.calendar').fullCalendar('renderEvent', newEvent, true);
+            {% endfor %}
+        });
+    </script>
+{% endblock %}

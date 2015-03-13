@@ -1,0 +1,39 @@
+{% extends "base.html" %} {% block content %}
+    <h4>Product: {{ scan.scan_settings.product }}</h4>
+    <b>Date:</b>
+    {{ scan.date }}
+    <hr>
+    <table class="table table-condensed table-hover table-striped table-600">
+        <tr>
+            <th>Address</th>
+            <th>Port</th>
+            <th>Protocol</th>
+            <th>Status</th>
+            <th>Service</th>
+        </tr>
+        {% for sc in ipScans %}
+            <tr>
+                {% for value in sc %}
+                    <td>{{ value }}</td> {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+    <br/>
+    <br/>
+
+    <div class="danger-zone panel panel-danger">
+        <div class="panel-heading">
+            <h3>Danger Zone</h3>
+        </div>
+        <p>Deleting this Scan will delete all port discovery results.</p>
+
+        <form class="form-horizontal" method="post">
+            {% csrf_token %} {{ form }}
+            <div class="form-group">
+                <input class="btn btn-danger" type="submit" value="Delete Scan"/>
+            </div>
+        </form>
+    </div>
+
+    <!-- <a href='/{{special}}/shell_scan' class='btn btn-primary' > Launch shell Scan </a> -->
+{% endblock %}

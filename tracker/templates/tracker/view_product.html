@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block content %}
+    <h3> {{ prod }}
+        {% if user.is_staff %}
+            <div class="btn-group">
+            <a class="btn btn-sm btn-warning" href="/{{ prod.id }}/edit_product">Edit</a>
+        {% endif %}
+        <a class="btn btn-sm btn-primary" href="/product/{{ prod.id }}/findings">Open Findings</a>
+        {% if user.is_staff %}
+            </div>
+        {% endif %}
+    </h3>
+    <div class="row">
+        <div class="col-md-5">
+            <ul class="no-bullets well">
+                <li><b> Product Type: </b>{{ prod.prod_type }} </li>
+                <li><b> Team Manager: </b> {{ prod.manager }} </li>
+                <li><b> Product Manager: </b>{{ prod.prod_manager }} </li>
+                <li><b> Tech Contact: </b> {{ prod.tech_contact }}</li>
+                {% if prod.authorized_users.all %}
+                    <li>
+                        <b>Authorized Users</b>
+                        <ul>
+                            {% for au in prod.authorized_users.all %}
+                                <li>{{ au }}</li>
+                            {% endfor %}
+                        </ul>
+                    <li>
+                {% endif %}
+            </ul>
+        </div>
+        <div class="col-md-7">
+            <ul class="no-bullets well">
+                <li><b> Description: </b>{{ prod.description }} </li>
+            </ul>
+        </div>
+    </div>
+    <br/>
+    {% if user.is_staff %}
+        <h4> Active Engagements <a class="btn btn-sm btn-primary" href="/{{ prod.id }}/new_engagement"> New
+            Engagement </a></h4>
+        {% if engs %}
+            <table class="tablesorter-bootstrap table table-condensed table-striped table-hover">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Lead</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for eng in engs %}
+                    <tr>
+                    <td>{% if eng.name %}{{ eng.name }}{% else %} N/A {% endif %}</td>
+                    <td>{{ eng.lead }}</td>
+                    <td>{{ eng.target_start }}</td>
+                    <td>{{ eng.target_end }}</td>
+                    <td><a class="btn btn-sm btn-primary" href="/engagement/{{ eng.id }}">View Details</a>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No active engagements found.</p>
+        {% endif %}
+    {% endif %}
+    <hr/>
+    {% if authorized %}
+        <h4> Scans
+            <a class="btn btn-success btn-sm" href="/{{ prod.id }}/gmap"> Set Baseline</a>
+        </h4>
+        {% if scan_sets %}
+            <table class="tablesorter-bootstrap table table-condensed table-striped table-hover">
+                <thead>
+                <tr>
+                    <th>Creator</th>
+                    <th>Date</th>
+                    <th>Frequency</th>
+                    <th>Protocol</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for scan in scan_sets %}
+                    <tr>
+                        <td>{{ scan.user }}</td>
+                        <td>{{ scan.date }}</td>
+                        <td>{{ scan.frequency }}</td>
+                        <td>{{ scan.protocol }}</td>
+                        <td><a class="btn btn-sm btn-primary" href="/{{ scan.id }}/view_scan_settings"> View
+                            Details </a></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            No scans configured.
+        {% endif %}
+    {% endif %}
+    <hr/>
+    {% if user.is_staff and i_engs %}
+        <h4> Closed Engagements </h4>
+        <table class="tablesorter-bootstrap table table-condensed table-striped table-hover">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Lead</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for eng in i_engs %}
+                <tr>
+                <td>{% if eng.name %}{{ eng.name }}{% else %} N/A {% endif %}</td>
+                <td>{{ eng.lead }}</td>
+                <td>{{ eng.target_start }}</td>
+                <td>{{ eng.target_end }}</td>
+                <td><a class="btn btn-sm btn-primary" href="/engagement/{{ eng.id }}">View Details</a>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+{% endblock %}

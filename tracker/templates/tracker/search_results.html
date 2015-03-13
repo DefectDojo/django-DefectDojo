@@ -1,0 +1,4 @@
+Results for: {{ query_string }}
+{% for finding in found_entries %}
+    <p><a href="/{{ tid }}/add_findings/{{ finding.id }}">{{ finding }}  </a></p>
+{% endfor %}

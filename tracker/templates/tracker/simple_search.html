@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% load event_tags %}
+
+{% block content %}
+    <h2> {{ name }}</h2>
+    <p>This simple search function will return Tests whose findings, or notes contain the search query, Findings
+        whose title, URL, description, endpoints or references contain the search query and Products whose
+        name or description contain the search query.</p>
+    <div role="tabpanel">
+
+        <!-- Nav tabs -->
+        <ul class="nav nav-tabs" role="tablist">
+            {% if products %}
+                <li class="active" role="presentation"><a role="tab" data-toggle="tab"
+                                                                                         href="#tabs">Product Results</a>
+                </li>
+            {% endif %}
+            {% if findings %}
+                <li role="presentation" {% if not products %}class="active"{% endif %}><a href="#tabs-1" role="tab" data-toggle="tab">Finding
+                    Results</a></li>
+            {% endif %}
+            {% if tests %}
+                <li {% if not findings and not products %}class="active"{% endif %} role="presentation"><a role="tab" data-toggle="tab"
+                                                                                         href="#tabs-2">Test Results</a>
+                </li>
+            {% endif %}
+        </ul>
+        <!-- Tab panes -->
+        <div class="tab-content">
+            {% if products %}
+                <div role="tabpanel" class="tab-pane active" id="tabs">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Description</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for product in products %}
+                            <tr>
+                                <td><a class="search-finding"
+                                       href="/product/{{ product.id }}">{{ product.name }}</a></td>
+                                <td>{{ product.description|truncatechars:20 }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+            {% if findings %}
+                <div role="tabpanel" class="tab-pane {% if not products %}active{% endif %}" id="tabs-1">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Date</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for finding in findings %}
+                            <tr>
+                                <td><a class="search-finding"
+                                       href="/{{ finding.id }}/view_finding">{{ finding.title }}</a></td>
+                                <td>{{ finding.date }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+            {% if tests %}
+                <div role="tabpanel" class="tab-pane" id="tabs-2">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Date</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for test in tests %}
+                            <tr>
+                                <td><a class="search-finding" href="/{{ test.id }}/view_test">{{ test.test_type }}</a>
+                                </td>
+                                <td>{{ test.target_start }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+
+{% endblock %}
+{% block postscript %}
+    <script type="text/javascript">
+        $(function () {
+            $('input#simple_search').val("{{clean_query|escapejs}}");
+        });
+    </script>
+{% endblock %}

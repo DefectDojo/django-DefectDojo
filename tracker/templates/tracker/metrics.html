@@ -1,0 +1,812 @@
+{% extends "base.html" %}
+{% load event_tags %}
+{% block add_styles %}
+    .tabs-below > .nav-tabs,
+    .tabs-right > .nav-tabs,
+    .tabs-left > .nav-tabs {
+    border-bottom: 0;
+    }
+
+    .tab-content > .tab-pane,
+    .pill-content > .pill-pane {
+    display: none;
+    }
+
+    .tab-content > .active,
+    .pill-content > .active {
+    display: block;
+    }
+
+    .tabs-below > .nav-tabs {
+    border-top: 1px solid #ddd;
+    }
+
+    .tabs-below > .nav-tabs > li {
+    margin-top: -1px;
+    margin-bottom: 0;
+    }
+
+    .tabs-below > .nav-tabs > li > a {
+    -webkit-border-radius: 0 0 4px 4px;
+    -moz-border-radius: 0 0 4px 4px;
+    border-radius: 0 0 4px 4px;
+    }
+
+    .tabs-below > .nav-tabs > li > a:hover,
+    .tabs-below > .nav-tabs > li > a:focus {
+    border-top-color: #ddd;
+    border-bottom-color: transparent;
+    }
+
+    .tabs-below > .nav-tabs > .active > a,
+    .tabs-below > .nav-tabs > .active > a:hover,
+    .tabs-below > .nav-tabs > .active > a:focus {
+    border-color: transparent #ddd #ddd #ddd;
+    }
+
+    .tabs-left > .nav-tabs > li,
+    .tabs-right > .nav-tabs > li {
+    float: none;
+    }
+
+    .tabs-left > .nav-tabs > li > a,
+    .tabs-right > .nav-tabs > li > a {
+    min-width: 74px;
+    margin-right: 0;
+    margin-bottom: 3px;
+    }
+
+    .tabs-left > .nav-tabs {
+    float: left;
+    margin-right: 19px;
+    border-right: 1px solid #ddd;
+    }
+
+    .tabs-left > .nav-tabs > li > a {
+    margin-right: -1px;
+    -webkit-border-radius: 4px 0 0 4px;
+    -moz-border-radius: 4px 0 0 4px;
+    border-radius: 4px 0 0 4px;
+    }
+
+    .tabs-left > .nav-tabs > li > a:hover,
+    .tabs-left > .nav-tabs > li > a:focus {
+    border-color: #eeeeee #dddddd #eeeeee #eeeeee;
+    }
+
+    .tabs-left > .nav-tabs .active > a,
+    .tabs-left > .nav-tabs .active > a:hover,
+    .tabs-left > .nav-tabs .active > a:focus {
+    border-color: #ddd transparent #ddd #ddd;
+    *border-right-color: #ffffff;
+    }
+
+    .tabs-right > .nav-tabs {
+    float: right;
+    margin-left: 19px;
+    border-left: 1px solid #ddd;
+    }
+
+    .tabs-right > .nav-tabs > li > a {
+    margin-left: -1px;
+    -webkit-border-radius: 0 4px 4px 0;
+    -moz-border-radius: 0 4px 4px 0;
+    border-radius: 0 4px 4px 0;
+    }
+
+    .tabs-right > .nav-tabs > li > a:hover,
+    .tabs-right > .nav-tabs > li > a:focus {
+    border-color: #eeeeee #eeeeee #eeeeee #dddddd;
+    }
+
+    .tabs-right > .nav-tabs .active > a,
+    .tabs-right > .nav-tabs .active > a:hover,
+    .tabs-right > .nav-tabs .active > a:focus {
+    border-color: #ddd #ddd #ddd transparent;
+    *border-left-color: #ffffff;
+    }
+
+    #chart_div, #chart_div2, #chart_div3, #chart_div4 {height: 300px}
+{% endblock %}
+{% block content %}
+
+
+    <h2>{{ name }}</h2>
+
+    <div class="row metric-data">
+        <div class="col-md-10">
+            <div class="row">
+                {% if opened_per_month %}
+                    <div class="col-lg-6">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                Open Bug Count by Month
+                            </div>
+                            <!-- /.panel-heading -->
+                            <div class="panel-body">
+                                <div id="chart_div"></div>
+                            </div>
+                            <!-- /.panel-body -->
+                        </div>
+                        <!-- /.panel -->
+                    </div>
+                {% endif %}
+                {% if accepted_per_month %}
+                    <div class="col-lg-6">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                Accepted Bug Count by Month
+                            </div>
+                            <!-- /.panel-heading -->
+                            <div class="panel-body">
+                                <div id="chart_div2"></div>
+                            </div>
+                            <!-- /.panel-body -->
+                        </div>
+                        <!-- /.panel -->
+                    </div>
+                {% endif %}
+                <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Open Bug Count by Week
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <div id="chart_div3"></div>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                </div>
+                <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Accepted Bug Count by Week
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <div id="chart_div4"></div>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="filters panel panel-default">
+                <div class="panel-heading">
+                    Filter
+                </div>
+                <form class="metric_form panel-body" method="get">
+                    <ul class="filter_form">
+                        {{ findings.form.as_p }}
+                    </ul>
+                    <div class="centered">
+                        <input type="submit" class="btn btn-sm btn-primary" name="filters"
+                               value="Apply Filters"/>
+                        <br/><br/>
+                        <a href="/new_metrics">[Clear Filters]</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="row" id="metric_counts">
+        <div class="col-md-12">
+            <h3>Metric Counts</h3>
+        </div>
+        <div class="col-md-12">
+            <div class="tabbable tabs-left">
+                <ul class="nav nav-tabs">
+                    {% if top_ten_products %}
+                        <li class="active"><a data-toggle="tab" href="#tabs-1">Top
+                            10 Products <br/> by bug severity
+                        </a></li> {% endif %}
+                    <li><a data-toggle="tab" href="#tabs-2">Detail Breakdown</a></li>
+                    <li><a data-toggle="tab" href="#tabs-3">Opened Findings</a></li>
+                    <li><a data-toggle="tab" href="#tabs-4">Accepted Findings</a></li>
+                    <li><a data-toggle="tab" href="#tabs-5">Closed Findings</a></li>
+                    <li><a data-toggle="tab" href="#tabs-6">Trending Open <br/>
+                        Bug Count
+                    </a></li>
+                    <li><a data-toggle="tab" href="#tabs-7">Trending Accepted <br/>
+                        Bug Count
+                    </a></li>
+                    <li><a data-toggle="tab" href="#tabs-8">Age of Issues</a></li>
+                </ul>
+                <div class="tab-content">
+                    {% if top_ten_products %}
+                        <div class="tab-pane active" id="tabs-1">
+                            <table
+                                    class="table table-bordered table-condensed table-striped table-400">
+                                <tr>
+                                    <th>Product</th>
+                                    <th>S0</th>
+                                    <th>S1</th>
+                                    <th>S2</th>
+                                    <th>S3</th>
+                                    <th>Total</th>
+                                </tr>
+                                {% for t in top_ten_products %}
+                                    <tr>
+                                        <td>{{ t.0|safe }}</td>
+                                        <td>{{ t.1 }}</td>
+                                        <td>{{ t.2 }}</td>
+                                        <td>{{ t.3 }}</td>
+                                        <td>{{ t.4 }}</td>
+                                        <td>{{ t.5 }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+                    {% endif %}
+                    <div class="tab-pane" id="tabs-2">
+                        <table class="table table-bordered table-condensed table-striped table-600">
+                            <tr>
+                                <th class="nowrap">Team</th>
+                                <th class="">Product</th>
+                                <th>Severity</th>
+                                <th>Description</th>
+                                <th class="nowrap">Days<br/>Open</th>
+                                <th class="nowrap">Status</th>
+                                <th class="nowrap">Engineer</th>
+
+                            </tr>
+                            {% for detail in detailed_breakdown %}
+                                <tr>
+                                    <td>{{ detail.0 }}</td>
+                                    <td><span title="{{ detail.1 }}">{{ detail.1|truncatechars:20 }}</span></td>
+                                    <td>{{ detail.2 }}</td>
+                                    <td><a href="/{{ detail.7 }}/view_finding"
+                                           title="{{ detail.3 }}">{{ detail.3|truncatechars:20 }}</a></td>
+                                    <td>{{ detail.4 }}</td>
+                                    <td>{{ detail.5 }}</td>
+                                    <td>{{ detail.6 }}</td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                    <div class="tab-pane" id="tabs-3">
+                        <div>
+                            <h4>Opened During Period</h4>
+                            <table
+                                    class="table table-bordered table-condensed table-striped table-600">
+                                <tr>
+                                    <th>S0</th>
+                                    <th>S1</th>
+                                    <th>S2</th>
+                                    <th>S3</th>
+                                    <th>Total</th>
+                                </tr>
+                                <tr>
+                                    <td>{{ in_period_counts.Critical }}</td>
+                                    <td>{{ in_period_counts.High }}</td>
+                                    <td>{{ in_period_counts.Medium }}</td>
+                                    <td>{{ in_period_counts.Low }}</td>
+                                    <td>{{ in_period_counts.Total }}</td>
+                                </tr>
+                            </table>
+                            <table
+                                    class="table table-bordered table-condensed table-striped table-600">
+                                <tr>
+                                    <th>Product</th>
+                                    <th>S0</th>
+                                    <th>S1</th>
+                                    <th>S2</th>
+                                    <th>S3</th>
+                                    <th>Total</th>
+
+                                </tr>
+                                {% for key, value in in_period_details.items %}
+                                    <tr>
+                                        <td><a href="{{ value.path }}">{{ key }}</a></td>
+                                        <td>{{ value.Critical }}</td>
+                                        <td>{{ value.High }}</td>
+                                        <td>{{ value.Medium }}</td>
+                                        <td>{{ value.Low }}</td>
+                                        <td>{{ value.Total }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+                    </div>
+                    <div class="tab-pane" id="tabs-4">
+                        <div>
+                            <h4>Accepted in Period</h4>
+                            <table
+                                    class="table table-bordered table-condensed table-striped table-600">
+                                <tr>
+                                    <th>S0</th>
+                                    <th>S1</th>
+                                    <th>S2</th>
+                                    <th>S3</th>
+                                    <th>Total</th>
+                                </tr>
+                                <tr>
+                                    <td>{{ accepted_in_period_counts.Critical }}</td>
+                                    <td>{{ accepted_in_period_counts.High }}</td>
+                                    <td>{{ accepted_in_period_counts.Medium }}</td>
+                                    <td>{{ accepted_in_period_counts.Low }}</td>
+                                    <td>{{ accepted_in_period_counts.Total }}</td>
+                                </tr>
+                            </table>
+                            <table
+                                    class="table table-bordered table-condensed table-striped table-600">
+                                <tr>
+                                    <th>Product</th>
+                                    <th>S0</th>
+                                    <th>S1</th>
+                                    <th>S2</th>
+                                    <th>S3</th>
+                                    <th>Total</th>
+
+                                </tr>
+                                {% for key, value in accepted_in_period_details.items %}
+                                    <tr>
+                                        <td><a href="{{ value.path }}">{{ key }}</a></td>
+                                        <td>{{ value.Critical }}</td>
+                                        <td>{{ value.High }}</td>
+                                        <td>{{ value.Medium }}</td>
+                                        <td>{{ value.Low }}</td>
+                                        <td>{{ value.Total }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+
+
+                    </div>
+                    <div class="tab-pane" id="tabs-5">
+                        <div>
+                            <h4>Closed in Period</h4>
+                            <table
+                                    class="table table-bordered table-condensed table-striped table-600">
+                                <tr>
+                                    <th>S0</th>
+                                    <th>S1</th>
+                                    <th>S2</th>
+                                    <th>S3</th>
+                                    <th>Total</th>
+                                </tr>
+                                <tr>
+                                    <td>{{ closed_in_period_counts.Critical }}</td>
+                                    <td>{{ closed_in_period_counts.High }}</td>
+                                    <td>{{ closed_in_period_counts.Medium }}</td>
+                                    <td>{{ closed_in_period_counts.Low }}</td>
+                                    <td>{{ closed_in_period_counts.Total }}</td>
+                                </tr>
+                            </table>
+                            <table
+                                    class="table table-bordered table-condensed table-striped table-600">
+                                <tr>
+                                    <th>Product</th>
+                                    <th>S0</th>
+                                    <th>S1</th>
+                                    <th>S2</th>
+                                    <th>S3</th>
+                                    <th>Total</th>
+
+                                </tr>
+                                {% for key, value in closed_in_period_details.items %}
+                                    <tr>
+                                        <td>{{ key }}</td>
+                                        <td>{{ value.Critical }}</td>
+                                        <td>{{ value.High }}</td>
+                                        <td>{{ value.Medium }}</td>
+                                        <td>{{ value.Low }}</td>
+                                        <td>{{ value.Total }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+                    </div>
+                    <div class="tab-pane" id="tabs-6">
+                        <div class="metric-half">
+                            <table class="table table-bordered table-condensed table-striped">
+                                <tr>
+                                    <th>Weekly</th>
+                                    <th>S0</th>
+                                    <th>S1</th>
+                                    <th>S2</th>
+                                    <th>S3</th>
+                                    <th>Total</th>
+                                    <th>Closed*</th>
+                                </tr>
+                                {% for week in opened_per_week|slice:'1:' %}
+                                    <tr>
+                                        <td>{{ week.1|date:"m-d-Y" }}</td>
+                                        <td>{{ week.2 }}</td>
+                                        <td>{{ week.3 }}</td>
+                                        <td>{{ week.4 }}</td>
+                                        <td>{{ week.5 }}</td>
+                                        <td>{{ week.6 }}</td>
+                                        <td>{{ week.7 }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+                        <div class="metric-half">
+                            <table class="table table-bordered table-condensed table-striped">
+                                <tr>
+                                    <th>Monthly</th>
+                                    <th>S0</th>
+                                    <th>S1</th>
+                                    <th>S2</th>
+                                    <th>S3</th>
+                                    <th>Total</th>
+                                    <th>Closed*</th>
+                                </tr>
+                                {% for month in opened_per_month|slice:'1:' %}
+                                    <tr>
+                                        <td>{{ month.1|date:"m-Y" }}</td>
+                                        <td>{{ month.2 }}</td>
+                                        <td>{{ month.3 }}</td>
+                                        <td>{{ month.4 }}</td>
+                                        <td>{{ month.5 }}</td>
+                                        <td>{{ month.6 }}</td>
+                                        <td>{{ month.7 }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                            <p>*Closed findings may have been opened outside of requested period.</p>
+                        </div>
+                    </div>
+                    <div class="tab-pane" id="tabs-7">
+                        <div class="metric-half">
+                            <table class="table table-bordered table-condensed table-striped">
+                                <tr>
+                                    <th>By Week</th>
+                                    <th>S0</th>
+                                    <th>S1</th>
+                                    <th>S2</th>
+                                    <th>S3</th>
+                                    <th>Total</th>
+                                </tr>
+                                {% for week in accepted_per_week|slice:'1:' %}
+                                    <tr>
+                                        <td>{{ week.1|date:"m-d-Y" }}</td>
+                                        <td>{{ week.2 }}</td>
+                                        <td>{{ week.3 }}</td>
+                                        <td>{{ week.4 }}</td>
+                                        <td>{{ week.5 }}</td>
+                                        <td>{{ week.6 }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+                        <div class="metric-half">
+                            <table class="table table-bordered table-condensed table-striped">
+                                <tr>
+                                    <th>By Month</th>
+                                    <th>S0</th>
+                                    <th>S1</th>
+                                    <th>S2</th>
+                                    <th>S3</th>
+                                    <th>Total</th>
+                                </tr>
+                                {% for month in accepted_per_month|slice:'1:' %}
+                                    <tr>
+                                        <td>{{ month.1|date:"m-Y" }}</td>
+                                        <td>{{ month.2 }}</td>
+                                        <td>{{ month.3 }}</td>
+                                        <td>{{ month.4 }}</td>
+                                        <td>{{ month.5 }}</td>
+                                        <td>{{ month.6 }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+                    </div>
+                    <div class="tab-pane" id="tabs-8">
+                        <table
+                                class="table table-bordered table-condensed table-striped table-400">
+                            <tr>
+                                <th>Days</th>
+                                <th>Bug Count</th>
+                            </tr>
+                            <tr>
+                                <td>0 - 30 Days</td>
+                                <td>{{ age_detail.0 }}</td>
+                            </tr>
+                            <tr>
+                                <td>31 - 60 Days</td>
+                                <td>{{ age_detail.1 }}</td>
+                            </tr>
+                            <tr>
+                                <td>61 - 90 Days</td>
+                                <td>{{ age_detail.2 }}</td>
+                            </tr>
+                            <tr>
+                                <td>91+ Days</td>
+                                <td>{{ age_detail.3 }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br/>
+    <br/>
+    <br/>
+{% endblock %}
+{% block postscript %}
+    <!-- Flot Charts JavaScript -->
+    <script src="{{ STATIC_URL }}js/excanvas.min.js"></script>
+    <script src="{{ STATIC_URL }}js/jquery.flot.js"></script>
+    <script src="{{ STATIC_URL }}js/jquery.flot.pie.js"></script>
+    <script src="{{ STATIC_URL }}js/jquery.flot.resize.js"></script>
+    <script src="{{ STATIC_URL }}js/jquery.flot.time.js"></script>
+    <script src="{{ STATIC_URL }}js/jquery.flot.tooltip.min.js"></script>
+    <script src="{{ STATIC_URL }}js/jquery.flot.stack.js"></script>
+    <script>
+        $(function () {
+
+            {% if opened_per_month %}
+                chart_div();
+            {% endif %}
+            {%  if accepted_per_month %}
+                chart_div2();
+            {%  endif %}
+            chart_div3();
+            chart_div4();
+
+            {% if opened_per_month %}
+                function chart_div() {
+                    var critical = [],
+                            high = [],
+                            medium = [],
+                            low = [];
+
+                    {% for month in opened_per_month|slice:'1:' %}
+                        critical.push([{{ month.0 }}, {{ month.2 }}]);
+                        high.push([{{ month.0 }}, {{ month.3 }}]);
+                        medium.push([{{ month.0 }}, {{ month.4 }}]);
+                        low.push([{{ month.0 }}, {{ month.5 }}]);
+                    {% endfor %}
+
+
+                    var options = {
+                        xaxis: {
+                            mode: "time",
+                            timeformat: "%m-%Y",
+                            timezone: 'browser'
+                        },
+                        xaxes: [{
+                            ticks: 7
+                        }],
+                        yaxes: [{
+                            min: 0
+                        }],
+                        series: {
+                            lines: {
+                                show: true
+                            },
+                            points: {
+                                show: true
+                            }
+                        },
+                        grid: {
+                            hoverable: true,
+                            borderWidth: 1,
+                            borderColor: '#e7e7e7'
+
+                        },
+                        tooltip: true
+                    };
+                    var plotObj = $.plot($("#chart_div"), [{
+                                data: critical,
+                                label: " Critical",
+                                color: "#d9534f",
+
+                            }, {
+                                data: high,
+                                label: " High",
+                                color: '#f0ad4e',
+
+                            }, {
+                                data: medium,
+                                label: " Medium",
+                                color: '#f0de28',
+
+                            }, {
+                                data: low,
+                                label: " Low",
+                                color: '#337ab7',
+
+                            }],
+                            options);
+                }
+            {%  endif %}
+            {%  if accepted_per_month %}
+                function chart_div2() {
+                    var critical = [],
+                            high = [],
+                            medium = [],
+                            low = [];
+
+                    {% for month in accepted_per_month|slice:'1:' %}
+                        critical.push([{{ month.0 }}, {{ month.2 }}]);
+                        high.push([{{ month.0 }}, {{ month.3 }}]);
+                        medium.push([{{ month.0 }}, {{ month.4 }}]);
+                        low.push([{{ month.0 }}, {{ month.5 }}]);
+                    {% endfor %}
+
+
+                    var options = {
+                        xaxis: {
+                            mode: "time",
+                            timeformat: "%m-%Y",
+                            timezone: 'browser'
+                        },
+                        xaxes: [{
+                            ticks: 7
+                        }],
+                        yaxes: [{
+                            min: 0
+                        }],
+                        series: {
+                            lines: {
+                                show: true
+                            },
+                            points: {
+                                show: true
+                            }
+                        },
+                        grid: {
+                            hoverable: true,
+                            borderWidth: 1,
+                            borderColor: '#e7e7e7'
+
+                        },
+                        tooltip: true
+                    };
+                    var plotObj = $.plot($("#chart_div2"), [{
+                                data: critical,
+                                label: " Critical",
+                                color: "#d9534f"
+                            }, {
+                                data: high,
+                                label: " High",
+                                color: '#f0ad4e'
+                            }, {
+                                data: medium,
+                                label: " Medium",
+                                color: '#f0de28'
+                            }, {
+                                data: low,
+                                label: " Low",
+                                color: '#337ab7'
+                            }],
+                            options);
+                }
+            {% endif %}
+
+            function chart_div3() {
+                var critical = [],
+                        high = [],
+                        medium = [],
+                        low = [];
+
+                {% for month in opened_per_week|slice:'1:' %}
+                    critical.push([{{ month.0 }}, {{ month.2 }}]);
+                    high.push([{{ month.0 }}, {{ month.3 }}]);
+                    medium.push([{{ month.0 }}, {{ month.4 }}]);
+                    low.push([{{ month.0 }}, {{ month.5 }}]);
+                {% endfor %}
+                var options = {
+                    xaxis: {
+                        mode: "time",
+                        timeformat: "%m-%d-%Y",
+                        timezone: 'browser'
+                    },
+                    xaxes: [{
+                        ticks: 7
+                    }],
+                    yaxes: [{
+                        min: 0
+                    }],
+                    series: {
+                        lines: {
+                            show: true
+                        },
+                        points: {
+                            show: true
+                        }
+                    },
+                    grid: {
+                        hoverable: true,
+                        borderWidth: 1,
+                        borderColor: '#e7e7e7'
+
+                    },
+                    tooltip: true
+                };
+
+
+                var plotObj = $.plot($("#chart_div3"), [{
+                            data: critical,
+                            label: " Critical",
+                            color: "#d9534f"
+                        }, {
+                            data: high,
+                            label: " High",
+                            color: '#f0ad4e'
+                        }, {
+                            data: medium,
+                            label: " Medium",
+                            color: '#f0de28'
+                        }, {
+                            data: low,
+                            label: " Low",
+                            color: '#337ab7'
+                        }],
+                        options);
+            }
+
+            function chart_div4() {
+                var critical = [],
+                        high = [],
+                        medium = [],
+                        low = [];
+
+                {% for month in accepted_per_week|slice:'1:' %}
+                    critical.push([{{ month.0 }}, {{ month.2 }}]);
+                    high.push([{{ month.0 }}, {{ month.3 }}]);
+                    medium.push([{{ month.0 }}, {{ month.4 }}]);
+                    low.push([{{ month.0 }}, {{ month.5 }}]);
+                {% endfor %}
+                var options = {
+                    xaxis: {
+                        mode: "time",
+                        timeformat: "%m-%d-%Y",
+                        timezone: 'browser'
+                    },
+                    xaxes: [{
+                        ticks: 7
+                    }],
+                    yaxes: [{
+                        min: 0
+                    }],
+                    series: {
+                        lines: {
+                            show: true
+                        },
+                        points: {
+                            show: true
+                        }
+                    },
+                    grid: {
+                        hoverable: true,
+                        borderWidth: 1,
+                        borderColor: '#e7e7e7'
+
+                    },
+                    tooltip: true
+                };
+
+
+                var plotObj = $.plot($("#chart_div4"), [{
+                            data: critical,
+                            label: " Critical",
+                            color: "#d9534f"
+                        }, {
+                            data: high,
+                            label: " High",
+                            color: '#f0ad4e'
+                        }, {
+                            data: medium,
+                            label: " Medium",
+                            color: '#f0de28'
+                        }, {
+                            data: low,
+                            label: " Low",
+                            color: '#337ab7'
+                        }],
+                        options);
+            }
+        });
+    </script>
+{% endblock %}

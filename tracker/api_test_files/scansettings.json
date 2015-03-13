@@ -1,0 +1,7 @@
+{
+	"addresses": "127.0.0.1, 127.0.0.1",
+	"product": "api/v1/products/757/",
+	"user": "/api/v1/user/2/",
+	"frequency": "Monthly",
+	"protocol": "TCP"
+}

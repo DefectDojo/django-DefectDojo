@@ -1,0 +1,15 @@
+{% load navigation_tags %}
+<nav class="pull-right">
+    <ul class="pagination pagination-sm">
+        {% for num in page|paginate:3 %}
+            <li {% if num.is_current %}class="active"{% endif %}>
+                {% if num.page_number %}
+                    <a href="?{% url_replace request parm_name num.page_number %}"> {{ num.display }}</a>
+                {% else %}
+                    <a>{{ num.display }}</a>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+</nav>
+
