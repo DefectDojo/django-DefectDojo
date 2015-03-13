@@ -1,4 +1,4 @@
-## Vagrant
+# Vagrant Install
 
 Installing with Vagrant is the easiest way to get started with TestTrack.
 
