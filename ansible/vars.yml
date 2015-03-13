@@ -23,7 +23,7 @@ tt_super_user_pass: 'An0th3r@SuPeR@Secure@PASSWORD'
 tt_super_user_email: 'root@localhost'
 
 # Repo link for TestTrack
-tt_git_repo: git@github.com:rackerlabs/django-TestTrack.git
+tt_git_repo: 'https://github.com/rackerlabs/django-TestTrack.git'
 
 # Gunicorn settings
 gunicorn_num_workers: 3

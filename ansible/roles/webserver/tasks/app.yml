@@ -3,9 +3,7 @@
   file: path={{ tt_install_dir }} state=directory owner={{ tt_user }} group=www-data
 
 - name: Download TestTrack
-  git: repo={{ tt_git_repo }} dest={{ tt_install_dir }} accept_hostkey=yes
-  sudo: yes
-  sudo_user: '{{ tt_user }}'
+  git: repo={{ tt_git_repo }} dest={{ tt_install_dir }} accept_hostkey=yes version=master force=yes recursive=no key_file=/home/{{ tt_user }}/.ssh/id_rsa
 
 - name: Give ownership to tt_user
   file: path={{ tt_install_dir }} recurse=yes owner={{ tt_user }} group=www-data state=directory
