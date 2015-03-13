@@ -1,0 +1,32 @@
+---
+application_name: 'TestTrack'
+root_pass: 'r00tr00t'
+
+# The Linux user account that TestTrack will run under
+tt_user: 'tt'
+tt_user_pass: 'th1sisasup3rs3cur3passw0rd12345'
+
+# MySQL settings
+tt_sql_user: 'tt'
+tt_sql_pass: 'pl34se$replace@these^stupid&passwords'
+tt_sql_db: 'tt'
+
+# Defines where the TestTrack application will be installed
+tt_install_dir: /usr/share/django-TestTrack
+
+# Defines the folder where TestTrack's virtualenv will be stored
+venv_dir: /home/{{ tt_user }}/.venvs/{{ application_name }}
+
+# Set up the Django/TestTrack superuser
+tt_super_user: 'root'
+tt_super_user_pass: 'An0th3r@SuPeR@Secure@PASSWORD'
+tt_super_user_email: 'root@localhost'
+
+# Repo link for TestTrack
+tt_git_repo: git@github.com:rackerlabs/django-TestTrack.git
+
+# Gunicorn settings
+gunicorn_num_workers: 3
+gunicorn_timeout: 120
+gunicorn_port: 9999
+gunicorn_log_file: '{{ tt_install_dir }}/gunicorn.log'

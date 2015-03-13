@@ -1,0 +1,7 @@
+---
+- name: TestTrack
+  hosts: servers
+  roles:
+    - webserver
+  vars_files:
+    - vars.yml

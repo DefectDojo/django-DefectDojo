@@ -1,0 +1,28 @@
+---
+- name: Add APT GPG signing key for MariaDB
+  apt_key: url=http://keyserver.ubuntu.com:80/pks/lookup?op=get&search=0xcbcb082a1bb943db state=present id=cbcb082a1bb943db
+
+- name: Add APT repository for MariaDB
+  apt_repository: repo='deb http://ftp.osuosl.org/pub/mariadb/repo/10.0/ubuntu trusty main' state=present update_cache=yes
+
+- name: Install MariaDB Client lib
+  apt: name=libmariadbclient-dev state=latest
+
+- name: Install MariaDB client
+  apt: name=mariadb-client-10.0 state=latest force=yes
+
+- name: Install MariaDB server
+  apt: name=mariadb-server-10.0 state=latest force=yes
+
+- name: Install Python MySQL bindings
+  apt: name=python-mysqldb state=present
+
+- name: Start MySQL server
+  service: name=mysql state=started enabled=true 
+
+- name: Create MySQL DB for TestTrack
+  mysql_db: name={{ tt_sql_db }} state=present collation=utf8_general_ci
+
+- name: Create MySQL User for TestTrack
+  mysql_user: name={{ tt_sql_user }} password={{ tt_sql_pass }} priv={{ tt_sql_db }}.*:ALL host=localhost state=present
+ 

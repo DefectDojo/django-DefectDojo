@@ -1,0 +1,143 @@
+---
+- name: Create TestTrack directory
+  file: path={{ tt_install_dir }} state=directory owner={{ tt_user }} group=www-data
+
+- name: Download TestTrack
+  git: repo={{ tt_git_repo }} dest={{ tt_install_dir }} accept_hostkey=yes
+  sudo: yes
+  sudo_user: '{{ tt_user }}'
+
+- name: Give ownership to tt_user
+  file: path={{ tt_install_dir }} recurse=yes owner={{ tt_user }} group=www-data state=directory
+
+- name: Check if gunicorn log file exists
+  stat: path={{ gunicorn_log_file }}
+  register: glf
+
+- name: Create gunicorn log file
+  file: path={{ gunicorn_log_file }} state=touch owner={{ tt_user }} group=www-data
+  when: glf.stat.exists == False
+
+- name: Generate Django secret
+  shell: 'cat /dev/urandom | tr -dc "a-zA-Z0-9" | head -c 128'
+  args:
+    creates: '{{ tt_install_dir }}/tracker/settings.py'
+  register: django_secret
+
+- name: Populate TestTrack settings file
+  template: src=settings.j2 dest={{ tt_install_dir }}/tracker/settings.py owner={{ tt_user }} group=www-data
+
+- name: Install virtualenv
+  pip: name=virtualenv
+
+- name: Setup virtualenv
+  shell: virtualenv {{ venv_dir }} creates={{ venv_dir }}/bin/activate
+  sudo: yes
+  sudo_user: '{{ tt_user }}'
+
+- name: Install Django
+  pip: name=Django version=1.6.10 virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ tt_user }}'
+
+- name: Install MySQL-Python
+  pip: name=MySQL-python virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ tt_user }}'
+
+- name: Install Pillow
+  pip: name=Pillow version=2.3.0 virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ tt_user }}'
+
+- name: Install South
+  pip: name=South version=0.8.4 virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ tt_user }}'
+
+- name: Install django-secure
+  pip: name=django-secure version=1.0 virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ tt_user }}'
+
+- name: Install django-tastypie
+  pip: name=django-tastypie version=0.11.1 virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ tt_user }}'
+
+- name: Install gunicorn
+  pip: name=gunicorn version=19.1.1 virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ tt_user }}'
+
+- name: Install Python-nmap
+  pip: name=python-nmap version=0.3.4 virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ tt_user }}'
+
+- name: Install pytz
+  pip: name=pytz version=2013.9 virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ tt_user }}'
+
+- name: Install requests
+  pip: name=requests version=2.2.1 virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ tt_user }}'
+
+- name: Install wsgiref
+  pip: name=wsgiref version=0.1.2 virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ tt_user }}'
+
+- name: Install django-tastypie-swagger
+  pip: name=django-tastypie-swagger virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ tt_user }}'
+
+- name: Install django-filter
+  pip: name=django-filter virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ tt_user }}'
+
+- name: Install supervisor
+  pip: name=supervisor state=present virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ tt_user }}'
+
+- name: Install humanize
+  pip: name=humanize state=present virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ tt_user }}'
+
+- name: Run Django 'syncdb' command
+  django_manage: command=syncdb app_path={{ tt_install_dir }} virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ tt_user }}'
+
+- name: Create Django superuser
+  shell: echo "from django.contrib.auth.models import User; User.objects.create_superuser('{{ tt_super_user }}', '{{ tt_super_user_email }}', '{{ tt_super_user_pass }}')" | {{ venv_dir }}/bin/python {{ tt_install_dir }}/manage.py shell && touch /home/{{ tt_user }}/.supercreated 
+  args:
+    creates: /home/{{ tt_user }}/.supercreated
+    sudo: yes
+    sudo_user: '{{ tt_user }}'
+
+- name: Run Django 'migrate' command
+  django_manage: command=migrate app_path={{ tt_install_dir }} virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ tt_user }}'
+
+- name: Find any running TT instances on our gunicorn port
+  shell: "ps aux | grep '[r]unserver' | grep '{{ gunicorn_port }}' | awk '{print $2}'"
+  register: instances
+  ignore_errors: True
+
+- name: Kill any TT instances on our gunicorn port
+  shell: "kill {{ instances.stdout }}"
+  when: instances.stdout
+  ignore_errors: True
+
+- name: Start TT
+  shell: 'nohup {{ venv_dir }}/bin/python {{ tt_install_dir }}/manage.py runserver 0.0.0.0:{{ gunicorn_port }} >>{{ gunicorn_log_file }} 2>&1 &'
+  sudo: yes
+  sudo_user: '{{ tt_user }}'
