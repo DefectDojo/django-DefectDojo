@@ -1,11 +1,16 @@
-.h1, .h2, .h3, h1, h2, h3 {
+.h1,
+.h2,
+.h3,
+h1,
+h2,
+h3 {
     margin-top: 10px;
     margin-bottom: 10px;
 }
 
 .navbar-brand {
-    padding: 5px 10px;
-    margin-left: 25px;
+    padding: 5px 5px;
+    margin-left: 0px;
 }
 
 .navbar-brand > img {
@@ -16,6 +21,19 @@
     margin-top: 5px;
 }
 
+div.filters select, div.filters textarea, div.filters input[type="text"], div.filters input[type="password"], div.filters input[type="datetime"], div.filters input[type="datetime-local"], div.filters input[type="date"], div.filters input[type="month"], div.filters input[type="time"], div.filters input[type="week"], div.filters input[type="number"], div.filters input[type="email"], div.filters input[type="url"], div.filters input[type="search"], div.filters input[type="tel"], div.filters input[type="color"], div.filters .uneditable-input {
+    width: 100%;
+    border-radius: 4px;
+    background-color: #fff;
+    background-image: none;
+    border: 1px solid #ccc;
+}
+
+input[type="file"] {
+    border: 0px;
+    width: auto;
+}
+
 textarea {
     width: 50% !important;
 }
@@ -24,7 +42,8 @@ textarea {
     padding: 0 !important;
 }
 
-.hilite, .hilite1 {
+.hilite,
+.hilite1 {
     background: #FF0;
 }
 
@@ -93,7 +112,11 @@ a.eng_link {
     font-size: .8em;
 }
 
-form.metric_form, form.metric_form select, form.metric_form p, form.metric_form ul, form.metric_form ul li {
+form.metric_form,
+form.metric_form select,
+form.metric_form p,
+form.metric_form ul,
+form.metric_form ul li {
     list-style-type: none;
     font-size: 11px
 }
@@ -173,7 +196,8 @@ a.search-finding {
     list-style: none;
 }
 
-.inline-form, .inline-label {
+.inline-form,
+.inline-label {
     display: inline;
 }
 
@@ -221,7 +245,8 @@ form ul#id_accepted_findings li:nth-child(odd) {
     background-color: #f0f0f0;
 }
 
-div#upload-risk .helptext, div.show_add_findings_form .helptext {
+div#upload-risk .helptext,
+div.show_add_findings_form .helptext {
     display: block;
     font-size: 13px;
     font-style: italic;
@@ -278,7 +303,8 @@ ul.messages {
     padding: 2px 3px;
 }
 
-.top, form ul#id_accepted_findings input {
+.top,
+form ul#id_accepted_findings input {
     vertical-align: top;
 }
 
@@ -290,7 +316,8 @@ ul.messages {
     color: #b94a48;
 }
 
-.Pass, .messages li.success {
+.Pass,
+.messages li.success {
     color: #468847;
 }
 
@@ -364,14 +391,6 @@ div.filters h3 {
     font-size: 122% !important;
     line-height: 20px;
     margin: 0px 0 5px 0 !important;
-}
-
-div.filters select, div.filters textarea, div.filters input[type="text"], div.filters input[type="password"], div.filters input[type="datetime"], div.filters input[type="datetime-local"], div.filters input[type="date"], div.filters input[type="month"], div.filters input[type="time"], div.filters input[type="week"], div.filters input[type="number"], div.filters input[type="email"], div.filters input[type="url"], div.filters input[type="search"], div.filters input[type="tel"], div.filters input[type="color"], div.filters .uneditable-input {
-    width: 100%;
-    border-radius: 4px;
-    background-color: #fff;
-    background-image: none;
-    border: 1px solid #ccc;
 }
 
 div.filters a.clear {
@@ -455,7 +474,9 @@ input#simple_search {
     font-weight: bold;
 }
 
-html, body, .container {
+html,
+body,
+.container {
     height: 100%;
 }
 
@@ -464,7 +485,8 @@ body > .container {
     min-height: 100%;
 }
 
-body #header form#api_selector .input a#explore:hover, body #header form#api_selector .input a#explore {
+body #header form#api_selector .input a#explore:hover,
+body #header form#api_selector .input a#explore {
     background-color: #09d !important;
 }
 
@@ -477,7 +499,11 @@ body #header form#api_selector .input a#explore:hover, body #header form#api_sel
     width: 170px
 }
 
-label, input, button, select, textarea {
+label,
+input,
+button,
+select,
+textarea {
     font-size: 14px
 }
 
@@ -528,13 +554,22 @@ input[type="checkbox"] {
     box-shadow: none
 }
 
-.navbar-top-links .dropdown-messages, .navbar-top-links .dropdown-tasks, .navbar-top-links .dropdown-alerts {
+.navbar-top-links .dropdown-messages,
+.navbar-top-links .dropdown-tasks,
+.navbar-top-links .dropdown-alerts {
     width: 415px;
     min-width: 0;
 }
 
-.footer {font-size: x-small}
+.footer {
+    font-size: x-small
+}
+
 .footer img.logo {
-    width: 10%;
-    height: 10%
+    width: 5%;
+    height: 5%;
+}
+
+td .fa-fw {
+    font-size: 18px;
 }
