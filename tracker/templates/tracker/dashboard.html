@@ -2,6 +2,7 @@
 {% block add_styles %}
     .chart {height: 300px}
     .status .panel {min-height: 185px;background-color: #f5f5f5;}
+    #punchcard {height: 350px}
 {% endblock %}
 {% block content %}
     <h3>Dashboard for {{ request.user.get_full_name }}</h3>
@@ -128,6 +129,25 @@
         </div>
         <!-- /.col-lg-6 -->
     </div>
+    <div class="row">
+        {% if punchcard %}
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Weekly activity, displayed by day, of findings you reported.*
+                    </div>
+                    <div class="panel-body">
+                        <div class="chart" id="punchcard"></div>
+                        <p class="text-center text-muted small">Week begins on date displayed.</p>
+                        <p>
+                            <br/>
+                            <span class="text-muted small">* Weeks are only displayed if findings are available.</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
 {% endblock %}
 {% block postscript %}
     <!-- Flot Charts JavaScript -->
@@ -136,8 +156,10 @@
     <script src="{{ STATIC_URL }}js/jquery.flot.pie.js"></script>
     <script src="{{ STATIC_URL }}js/jquery.flot.resize.js"></script>
     <script src="{{ STATIC_URL }}js/jquery.flot.time.js"></script>
+    <script src="{{ STATIC_URL }}js/jquery.flot.mouse.js"></script>
     <script src="{{ STATIC_URL }}js/jquery.flot.tooltip.min.js"></script>
-    <script src="{{ STATIC_URL }}js/jquery.flot.stack.js"></script>
+    <script src="{{ STATIC_URL }}js/jquery.flot.JUMlib.js"></script>
+    <script src="{{ STATIC_URL }}js/jquery.flot.bubbles.js"></script>
     <script>
         $(function () {
             var options = {
@@ -156,12 +178,12 @@
                     }
                 },
                 grid: {
-                    hoverable: false,
+                    hoverable: true,
                     borderWidth: 1,
                     borderColor: '#e7e7e7',
 
                 },
-                tooltip: false,
+                tooltip: true,
             };
             chart_div();
             severity_pie();
@@ -247,6 +269,94 @@
                     },
                 });
             }
+
+            {%  if punchcard %}
+
+                punchcard();
+                function punchcard() {
+                    var d1 = {{ punchcard|safe }};
+                    var ticks = {{ ticks|safe }};
+
+                    var options = {
+                        xaxis: {
+                            ticks: ticks,
+                            min: -.8,
+                            max: ticks.length - .2,
+                            tickLength: 0,
+                        },
+                        series: {
+                            bubbles: {
+                                active: true,
+                                show: true,
+                                bubblelabel: {
+                                    show: false,
+                                },
+                            },
+                            nearBy: {
+                                distance: 5
+                            }
+                        },
+                        yaxis: {
+                            autoscaleMargin: 0.1,
+                            ticks: [[6, 'Sun'], [5, 'Mon'], [4, 'Tue'], [3, 'Wed'], [2, 'Thur'], [1, 'Fri'], [0, 'Sat']],
+                            min: -.5,
+                            max: 6.5,
+                            tickLength: 0,
+                        },
+                        grid: {
+                            hoverable: true,
+                            borderWidth: { top: 0, right: 0, bottom: 1, left: 0},
+                            borderColor: '#e7e7e7',
+                            clickable: true,
+                            markings: function (axes) {
+                                var markings = [];
+
+                                for (var x = 0; x < axes.yaxis.max; x += .5)
+                                    markings.push({yaxis: {from: x, to: x},});
+
+                                for (var x = -0; x < axes.xaxis.max; x += 1)
+                                    markings.push({xaxis: {from: x, to: x}});
+
+                                for (var x = -.5; x < axes.yaxis.max+1; x += 1)
+                                    markings.push({yaxis: {from: x, to: x -.75}, color: 'white'});
+
+
+                                return markings;
+
+
+                            }
+                        },
+                        tooltip: true,
+                        tooltipOpts: {
+                            content: function(label, xval, yval, flotItem){
+                                for (var x=0;x<flotItem.series.data.length;x++){
+                                    if (xval==flotItem.series.data[x][0] && yval==flotItem.series.data[x][1]) {
+                                        yeah = flotItem.series.data[x][2] * {{ highest_count }};
+                                        break;
+                                    }
+                                }
+                                return yeah + ' Findings';
+                            },
+                            shifts: {
+                                y:  -40,
+                                x: -20
+                            }
+                        },
+                        legend: {
+                            show: false,
+                        }
+
+
+                    };
+                    var p4 = $.plot($("#punchcard"),
+                            [{
+                                data: d1,
+                                color: "#444",
+                            }],
+                            options);
+
+                }
+            {%  endif %}
 
         });
 
