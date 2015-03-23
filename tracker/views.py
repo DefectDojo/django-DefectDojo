@@ -914,7 +914,9 @@ def get_period_counts(findings, period_interval, start_date, relative_delta='mon
                 closed_count += 1
 
         total = crit_count + high_count + med_count + low_count
-        opened_in_period.append([(tcalendar.timegm(new_date.timetuple()) * 1000), new_date, crit_count, high_count, med_count, low_count, total, closed_count])
+        opened_in_period.append(
+            [(tcalendar.timegm(new_date.timetuple()) * 1000), new_date, crit_count, high_count, med_count, low_count,
+             total, closed_count])
         crit_count, high_count, med_count, low_count, closed_count = [0, 0, 0, 0, 0]
         for ra in risks_a.all():
             for finding in ra.accepted_findings.all():
@@ -928,7 +930,9 @@ def get_period_counts(findings, period_interval, start_date, relative_delta='mon
                     low_count += 1
 
         total = crit_count + high_count + med_count + low_count
-        accepted_in_period.append([(tcalendar.timegm(new_date.timetuple()) * 1000), new_date, crit_count, high_count, med_count, low_count, total])
+        accepted_in_period.append(
+            [(tcalendar.timegm(new_date.timetuple()) * 1000), new_date, crit_count, high_count, med_count, low_count,
+             total])
 
     return {'opened_per_period': opened_in_period,
             'accepted_per_period': accepted_in_period}
@@ -1108,6 +1112,44 @@ def metrics(request, mtype):
         ][finding.severity] += 1
         accepted_in_period_details[finding.test.engagement.product.name]['Total'] += 1
 
+    punchcard = list()
+    ticks = list()
+    highest_count = 0
+
+    if 'view' in request.GET and 'dashboard' == request.GET['view']:
+        tick = 0
+        week_count = 1
+
+        # mon 0, tues 1, wed 2, thurs 3, fri 4, sat 5, sun 6
+        # sat 0, sun 6, mon 5, tue 4, wed 3, thur 2, fri 1
+        day_offset = {0: 5, 1: 4, 2: 3, 3: 2, 4: 1, 5: 0, 6: 6}
+        for x in range(0, weeks_between):
+            # week starts the monday before
+            new_date = start_date + relativedelta(weeks=x, weekday=MO(1))
+            end_date = new_date + relativedelta(weeks=1, weekday=MO(1))
+            append_tick = True
+            days = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0}
+            for finding in findings:
+                if new_date.date() <= finding.date <= end_date.date():
+                    # [0,0,(20*.02)]
+                    # [week, day, weight]
+                    days[day_offset[finding.date.weekday()]] += 1
+                    if days[day_offset[finding.date.weekday()]] > highest_count:
+                        highest_count = days[day_offset[finding.date.weekday()]]
+
+            if sum(days.values()) > 0:
+                for day, count in days.items():
+                    punchcard.append([tick, day, count])
+                    if append_tick:
+                        ticks.append([tick, new_date.strftime("<span class='small'>%m/%d</span>")])
+                        append_tick = False
+                tick += 1
+            week_count += 1
+        # adjust the size
+
+        for punch in punchcard:
+            punch[2] = (float(punch[2]) / float(highest_count))
+
     return render(request, template, {
         'name': page_name,
         'breadcrumbs': get_breadcrumbs(title="%s Metrics" % mtype),
@@ -1127,6 +1169,9 @@ def metrics(request, mtype):
         'accepted_in_period_details': accepted_in_period_details,
         'closed_in_period_counts': closed_in_period_counts,
         'closed_in_period_details': closed_in_period_details,
+        'punchcard': punchcard,
+        'ticks': ticks,
+        'highest_count': highest_count
     })
 
 
@@ -2354,13 +2399,14 @@ def close_finding(request, fid):
         form = CloseFindingForm(request.POST)
 
         if form.is_valid():
+            now = localtz.localize(datetime.now())
             new_note = form.save(commit=False)
             new_note.author = request.user
-            new_note.date = datetime.now()
+            new_note.date = now
             new_note.save()
             finding.notes.add(new_note)
             finding.active = False
-            finding.mitigated = datetime.now()
+            finding.mitigated = now
             finding.save()
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -3506,22 +3552,20 @@ def dashboard(request):
         reporter=request.user, created__range=[seven_days_ago, now])
                           for finding in ra.accepted_findings.all()])
 
-    critical_count = Finding.objects.filter(reporter=request.user,
-                                            verified=True,
-                                            severity='Critical').count()
-    high_count = Finding.objects.filter(reporter=request.user,
-                                        verified=True,
-                                        severity='High').count()
-    medium_count = Finding.objects.filter(reporter=request.user,
-                                          verified=True,
-                                          severity='Medium').count()
-    low_count = Finding.objects.filter(reporter=request.user,
-                                       verified=True,
-                                       severity='Low').count()
-    info_count = Finding.objects.filter(reporter=request.user,
-                                        verified=True,
-                                        severity='Info').count()
-    by_month = []
+    # forever counts
+    findings = Finding.objects.filter(reporter=request.user,
+                                      verified=True)
+
+    sev_counts = {'Critical': 0,
+                  'High': 0,
+                  'Medium': 0,
+                  'Low': 0,
+                  'Info': 0}
+
+    for finding in findings:
+        sev_counts[finding.severity] += 1
+
+    by_month = list()
 
     dates_to_use = [now,
                     now - relativedelta(months=1),
@@ -3558,18 +3602,64 @@ def dashboard(request):
                 sourcedata['e'] += 1
         by_month.append(sourcedata)
 
+    punchcard = list()
+    ticks = list()
+
+    start_date = now - timedelta(days=180)
+
+    r = relativedelta(now, start_date)
+    weeks_between = int(ceil((((r.years * 12) + r.months) * 4.33) + (r.days / 7)))
+    if weeks_between <= 0:
+        weeks_between += 2
+
+    highest_count = 0
+    tick = 0
+    week_count = 1
+
+    # mon 0, tues 1, wed 2, thurs 3, fri 4, sat 5, sun 6
+    # sat 0, sun 6, mon 5, tue 4, wed 3, thur 2, fri 1
+    day_offset = {0: 5, 1: 4, 2: 3, 3: 2, 4: 1, 5: 0, 6: 6}
+    for x in range(0, weeks_between):
+        # week starts the monday before
+        new_date = start_date + relativedelta(weeks=x, weekday=MO(1))
+        end_date = new_date + relativedelta(weeks=1, weekday=MO(1))
+        append_tick = True
+        days = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0}
+        for finding in findings:
+            if new_date.date() <= finding.date <= end_date.date():
+                # [0,0,(20*.02)]
+                # [week, day, weight]
+                days[day_offset[finding.date.weekday()]] += 1
+                if days[day_offset[finding.date.weekday()]] > highest_count:
+                    highest_count = days[day_offset[finding.date.weekday()]]
+
+        if sum(days.values()) > 0:
+            for day, count in days.items():
+                punchcard.append([tick, day, count])
+                if append_tick:
+                    ticks.append([tick, new_date.strftime("%m-%d<br/>%Y")])
+                    append_tick = False
+            tick += 1
+        week_count += 1
+    # adjust the size
+    for punch in punchcard:
+        punch[2] = (float(punch[2]) / float(highest_count))
+
     return render(request,
                   'tracker/dashboard.html',
                   {'engagement_count': engagement_count,
                    'finding_count': finding_count,
                    'mitigated_count': mitigated_count,
                    'accepted_count': accepted_count,
-                   'critical': critical_count,
-                   'high': high_count,
-                   'medium': medium_count,
-                   'low': low_count,
-                   'info': info_count,
-                   'by_month': by_month})
+                   'critical': sev_counts['Critical'],
+                   'high': sev_counts['High'],
+                   'medium': sev_counts['Medium'],
+                   'low': sev_counts['Low'],
+                   'info': sev_counts['Info'],
+                   'by_month': by_month,
+                   'punchcard': punchcard,
+                   'ticks': ticks,
+                   'highest_count': highest_count})
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -3600,6 +3690,7 @@ def get_page_items(request, items, page_size, param_name='page'):
 
 def get_alerts(user):
     import humanize
+
     alerts = []
     now = localtz.localize(datetime.today())
     start = now - timedelta(days=7)
