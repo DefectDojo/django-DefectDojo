@@ -116,6 +116,9 @@ class MetricsDateRangeFilter(ChoiceFilter):
     def past_ninety_days(self, qs, name):
         return self.past_x_days(qs, name, 90)
 
+    def past_six_months(self, qs, name):
+        return self.past_x_days(qs, name, 183)
+
     def past_year(self, qs, name):
         return self.past_x_days(qs, name, 365)
 
@@ -125,8 +128,9 @@ class MetricsDateRangeFilter(ChoiceFilter):
         2: (_('Past 90 days'), past_ninety_days),
         3: (_('Current month'), current_month),
         4: (_('Current year'), current_year),
-        5: (_('Past year'), past_year),
-        6: (_('Any date'), any),
+        5: (_('Past 6 Months'), past_six_months),
+        6: (_('Past year'), past_year),
+        7: (_('Any date'), any),
     }
 
     def __init__(self, *args, **kwargs):
