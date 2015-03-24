@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+<head>
+</head>
+{% block content %}
+    {% if edit %}
+        <h3> Edit Engagement </h3>
+    {% else %}
+        <h3> New Engagement </h3>
+    {% endif %}
+    <form class="form-horizontal" method="post">{% csrf_token %}
+        {% include "dojo/form_fields.html" with form=form %}
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <input class="btn btn-primary" type="submit" name="_Add Tests" value="Add Tests"/>
+                <input class="btn btn-primary" type="submit" value="Done"/>
+            </div>
+        </div>
+    </form>
+{% endblock %}

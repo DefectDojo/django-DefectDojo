@@ -1,7 +1,7 @@
 # Debian- or RHEL-based Bash Install Script
 
 There is a script in the main folder called `setup.bash` that will allow you to
-interactively install TestTrack on some Linux-based systems. The user
+interactively install DefectDojo on some Linux-based systems. The user
 you use to run the installation script will need sudo access, but should not
 be the root account.
 
@@ -22,6 +22,6 @@ __Instructions:__
 MySQL database, install dependencies, and set up a Django superuser.
 0. Edit the settings.py file to modify any other settings that you want to 
 change, such as your SMTP server information, which we leave off by default.
-0. When you are ready to run TestTrack, run the server with
+0. When you are ready to run DefectDojo, run the server with
 
     `python manage.py runserver`
