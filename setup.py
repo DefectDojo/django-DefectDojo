@@ -4,16 +4,15 @@ from setuptools import setup
 
 setup(
     name='DefectDojo',
-    version='0.9.0',
+    version='1.0',
     author='Greg Anderson',
     description="Tool for managing vulnerability engagements",
     install_requires=[
-        'Django==1.6.10',
+        'Django>=1.7',
         'MySQL-python==1.2.5',
         'Pillow==2.3.0',
-        'South==0.8.4',
         'django-secure==1.0',
-        'django-tastypie==0.11.1',
+        'django-tastypie==0.12.1',
         'gunicorn==19.1.1',
         'python-nmap==0.3.4',
         'pytz==2013.9',

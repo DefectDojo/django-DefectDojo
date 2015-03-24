@@ -108,16 +108,19 @@ class MonthYearWidget(Widget):
 class Product_TypeForm(forms.ModelForm):
     class Meta:
         model = Product_Type
+        fields = ['name']
 
 
 class Test_TypeForm(forms.ModelForm):
     class Meta:
         model = Test_Type
+        fields = ['name']
 
 
 class Development_EnvironmentForm(forms.ModelForm):
     class Meta:
         model = Development_Environment
+        fields = ['name']
 
 
 class ProductForm(forms.ModelForm):
@@ -145,6 +148,7 @@ class ProductForm(forms.ModelForm):
 
     class Meta:
         model = Product
+        fields = ['name', 'description', 'prod_manager', 'tech_contact', 'manager', 'prod_type', 'authorized_users']
 
 
 class Product_TypeProductForm(forms.ModelForm):
@@ -168,6 +172,7 @@ class Product_TypeProductForm(forms.ModelForm):
 
     class Meta:
         model = Product
+        fields = ['name', 'description', 'prod_manager', 'tech_contact', 'manager', 'prod_type', 'authorized_users']
 
 
 class UploadFileForm(forms.Form):
@@ -217,6 +222,9 @@ class UploadRiskForm(forms.ModelForm):
 
     class Meta:
         model = Risk_Acceptance
+        fields = ['accepted_findings', 'path', 'reporter', 'notes']
+
+
 
 
 class ReplaceRiskAcceptanceForm(forms.ModelForm):
@@ -264,6 +272,7 @@ class ScanSettingsForm(forms.ModelForm):
 
     class Meta:
         model = ScanSettings
+        fields = ['addresses', 'frequency', 'email', 'protocol']
 
 
 class DeleteIPScanForm(forms.ModelForm):
@@ -288,6 +297,7 @@ class VaForm(forms.ModelForm):
 
     class Meta:
         model = VA
+        fields = ['start', 'addresses']
 
 
 class CheckForm(forms.ModelForm):
@@ -315,6 +325,8 @@ class CheckForm(forms.ModelForm):
 
     class Meta:
         model = Check_List
+        fields = ['session_management', 'encryption_crypto', 'configuration_management', 'authentication',
+                  'authorization_and_access_control', ]
 
 
 class EngForm(forms.ModelForm):
@@ -377,6 +389,7 @@ class TestForm(forms.ModelForm):
 
     class Meta:
         model = Test
+        fields = ['test_type', 'target_start', 'target_end', 'environment']
 
 
 class DeleteTestForm(forms.ModelForm):
@@ -435,6 +448,7 @@ class NoteForm(forms.ModelForm):
 
     class Meta:
         model = Notes
+        fields = ['entry']
 
 
 class CloseFindingForm(forms.ModelForm):
@@ -447,6 +461,7 @@ class CloseFindingForm(forms.ModelForm):
 
     class Meta:
         model = Notes
+        fields = ['entry']
 
 
 class WeeklyMetricsForm(forms.Form):

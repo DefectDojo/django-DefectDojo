@@ -2263,7 +2263,7 @@ def view_test(request, tid):
         if (form.is_valid()):
             new_note = form.save(commit=False)
             new_note.author = request.user
-            new_note.date = datetime.now()
+            new_note.date = datetime.now(tz=localtz)
             new_note.save()
             test.notes.add(new_note)
             form = NoteForm()
@@ -2374,7 +2374,7 @@ def view_finding(request, fid):
         if (form.is_valid()):
             new_note = form.save(commit=False)
             new_note.author = request.user
-            new_note.date = datetime.now()
+            new_note.date = datetime.now(tz=localtz)
             new_note.save()
             finding.notes.add(new_note)
             form = NoteForm()
@@ -2399,7 +2399,7 @@ def close_finding(request, fid):
         form = CloseFindingForm(request.POST)
 
         if form.is_valid():
-            now = localtz.localize(datetime.now())
+            now = datetime.now(tz=localtz)
             new_note = form.save(commit=False)
             new_note.author = request.user
             new_note.date = now
@@ -2485,7 +2485,7 @@ def view_risk(request, eid, raid):
         if (note_form.is_valid()):
             new_note = note_form.save(commit=False)
             new_note.author = request.user
-            new_note.date = datetime.now()
+            new_note.date = datetime.now(tz=localtz)
             new_note.save()
             risk_approval.notes.add(new_note)
             messages.add_message(request,
@@ -2855,7 +2855,7 @@ def calc(request, last_month):
     for find in findings:
         count = count + 1
         if count >= last_month:
-            find.date = datetime.now()
+            find.date = datetime.now(tz=localtz).date()
             find.save()
     return HttpResponseRedirect('/login')
 
@@ -2887,7 +2887,7 @@ def add_findings(request, tid):
             new_finding.numerical_severity = get_numerical_severity(
                 new_finding.severity)
             if new_finding.false_p or new_finding.active is False:
-                new_finding.mitigated = datetime.now()
+                new_finding.mitigated = datetime.now(tz=localtz)
             new_finding.save()
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -2921,7 +2921,7 @@ def add_temp_finding(request, tid, fid):
             new_finding.severity)
         new_finding.date = datetime.today()
         if new_finding.false_p or new_finding.active is False:
-            new_finding.mitigated = datetime.now()
+            new_finding.mitigated = datetime.now(tz=localtz)
         # new_finding.pk = None
         new_finding.save()
         messages.add_message(request,
@@ -2950,7 +2950,7 @@ def edit_finding(request, fid):
             new_finding.numerical_severity = get_numerical_severity(
                 new_finding.severity)
             if new_finding.false_p or new_finding.active is False:
-                new_finding.mitigated = datetime.now()
+                new_finding.mitigated = datetime.now(tz=localtz)
             if new_finding.active is True:
                 new_finding.false_p = False
                 new_finding.mitigated = None
@@ -3011,15 +3011,6 @@ def named_month(month_number):
     Return the name of the month, given the number.
     """
     return date(1900, month_number, 1).strftime("%B")
-
-
-@user_passes_test(lambda u: u.is_staff)
-def this_month(request):
-    """
-    Show calendar of events this month.
-    """
-    today = datetime.now()
-    return calendar(request, today.year, today.month)
 
 
 @user_passes_test(lambda u: u.is_staff)
