@@ -325,8 +325,11 @@ class CheckForm(forms.ModelForm):
 
     class Meta:
         model = Check_List
-        fields = ['session_management', 'encryption_crypto', 'configuration_management', 'authentication',
-                  'authorization_and_access_control', ]
+        fields = ['session_management', 'session_issues', 'encryption_crypto', 'crypto_issues',
+                  'configuration_management', 'config_issues', 'authentication', 'auth_issues',
+                  'authorization_and_access_control', 'author_issues',
+                  'data_input_sanitization_validation', 'data_issues',
+                  'sensitive_data', 'sensitive_issues', 'other', 'other_issues', ]
 
 
 class EngForm(forms.ModelForm):
