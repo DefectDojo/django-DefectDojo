@@ -20,9 +20,9 @@
 - name: Start MySQL server
   service: name=mysql state=started enabled=true 
 
-- name: Create MySQL DB for TestTrack
-  mysql_db: name={{ tt_sql_db }} state=present collation=utf8_general_ci
+- name: Create MySQL DB for DefectDojo
+  mysql_db: name={{ dd_sql_db }} state=present collation=utf8_general_ci
 
-- name: Create MySQL User for TestTrack
-  mysql_user: name={{ tt_sql_user }} password={{ tt_sql_pass }} priv={{ tt_sql_db }}.*:ALL host=localhost state=present
+- name: Create MySQL User for DefectDojo
+  mysql_user: name={{ dd_sql_user }} password={{ dd_sql_pass }} priv={{ dd_sql_db }}.*:ALL host=localhost state=present
  

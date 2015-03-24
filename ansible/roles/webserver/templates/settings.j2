@@ -1,4 +1,4 @@
-# Django settings for tracker project.
+# Django settings for dojo project.
 import os
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -16,16 +16,16 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-TRACKER_ROOT = '{{ tt_install_dir }}/tracker'
+DOJO_ROOT = '{{ dd_install_dir }}/dojo'
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',  # Add 'postgresql_psycopg2',
                                                # 'mysql','sqlite3' or 'oracle'.
-        'NAME': '{{ tt_sql_db }}',         # Or path to database file if using sqlite3.
+        'NAME': '{{ dd_sql_db }}',         # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
-        'USER': '{{ tt_sql_user }}',
-        'PASSWORD': '{{ tt_sql_pass }}',
+        'USER': '{{ dd_sql_user }}',
+        'PASSWORD': '{{ dd_sql_pass }}',
         'HOST': 'localhost',       # Empty for localhost through domain sockets
                                    # or '127.0.0.1' for localhost through TCP.
         'PORT': '3306',            # Set to empty string for default.
@@ -61,7 +61,7 @@ USE_TZ = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
-MEDIA_ROOT = '{{ tt_install_dir }}/media/'
+MEDIA_ROOT = '{{ dd_install_dir }}/media/'
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -119,10 +119,10 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'tracker.middleware.LoginRequiredMiddleware',
+    'dojo.middleware.LoginRequiredMiddleware',
 )
 
-ROOT_URLCONF = 'tracker.urls'
+ROOT_URLCONF = 'dojo.urls'
 LOGIN_URL = '/login'
 LOGIN_EXEMPT_URLS = (
     r'^static/',
@@ -133,7 +133,7 @@ LOGIN_EXEMPT_URLS = (
 )
 
 # Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'tracker.wsgi.application'
+WSGI_APPLICATION = 'dojo.wsgi.application'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates"
@@ -150,7 +150,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'south',
-    'tracker',
+    'dojo',
     'django.contrib.admin',
     'gunicorn',
     'tastypie',

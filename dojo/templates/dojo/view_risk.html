@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block content %}
+    <div id="risk_acceptance">
+        <h2>Risk Acceptance added by {{ risk_approval.reporter.get_full_name }}</h2>
+
+        <h3>Findings Accepted</h3>
+        {% if accepted_findings %}
+            <table id="open_findings" class="table table-condensed table-striped table-bordered">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th> Date</th>
+                    <th>Severity</th>
+                    <th>Product</th>
+                    <th>Active</th>{% if authorized %}
+                    <th>Actions</th>{% endif %}</tr>
+                </thead>
+                <tbody>
+                {% for finding in accepted_findings %}
+                    <tr>
+                        <td><a href="/{{ finding.id }}/view_finding"
+                               title="{{ finding.title }}">{{ finding.title|truncatechars:65 }}</a></td>
+                        <td>{{ finding.date }}</td>
+                        <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
+                            <span class="text-error">
+                        {% else %}<span>{% endif %}{{ finding.severity }}</span></td>
+                        <td>{{ finding.test.engagement.product }}</td>
+                        <td>{{ finding.active }}</td>
+
+                        {% if authorized %}
+                            <td>
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="remove_finding_id" value="{{ finding.id }}"/>
+                                    <input class="btn btn-sm btn-warning" type="submit" name="remove_finding"
+                                           value="Remove"/>
+                                </form>
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% include "dojo/paging_snippet.html" with page=accepted_findings %}
+            <br/><br/>
+        {% else %}
+            <p><b>No findings associated with this Risk Acceptance.</b></p>
+        {% endif %}
+        {% if show_add_findings_form %}
+            {% if authorized %}
+                <h3>Accept Additional Findings</h3>
+                <form method="post" class="form-horizontal">{% csrf_token %}
+                    <div class="show_add_findings_form">
+                        {{ add_findings_form.as_p }}
+                    </div>
+                    {% include "dojo/paging_snippet.html" with page=add_findings parm_name="apage" %}
+                    <br/><br/><br/>
+
+                    <p style="margin: auto; text-align: center; background-color: #e0e0e0; padding: 7px;">
+                        <input class="btn btn-primary" name="add_findings" type="submit" value="Add Selected Findings"/>
+                    </p>
+                </form>
+            {% endif %}
+        {% endif %}
+        <h3>Uploaded Document</h3>
+        <table id="doc" class="tablesorter-bootstrap table table-condensed table-striped">
+            <thead>
+            <tr>
+                <th>Current File</th>
+                <th>Date Added</th>{% if authorized %}
+                <th>Actions</th>{% endif %}</tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>
+                    <a href="{{ risk_approval.id }}/download">{{ risk_approval.filename }}</a>
+                </td>
+                <td>
+                    {{ risk_approval.created }}
+                </td>
+                {% if authorized %}
+                    <td>
+                        <form id="replace_risk_file" enctype="multipart/form-data" method="post">
+                            {% csrf_token %}
+                            <label class="btn btn-sm btn-primary">
+                                Replace File
+                                <input accept="application/pdf,image/*" id="id_path" name="path" type="file"/>
+                            </label>
+                            <input type="hidden" name="replace_file" value="Replace File"/>
+                        </form>
+                    </td>
+                {% endif %}
+            </tr>
+            </tbody>
+        </table>
+
+
+        <h3>Notes</h3>
+
+        <div class="to_highlight">
+            {% if notes %}
+                <table id="notes" class="tablesorter-bootstrap table table-condensed table-striped">
+                    <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Date</th>
+                        <th>Note</th>{% if authorized %}
+                        <th>Actions</th>{% endif %}</tr>
+                    </thead>
+                    <tbody>
+                    {% for note in notes %}
+                        <tr>
+                            <td>
+                                {{ note.author.username }}
+                            </td>
+                            <td>
+                                {{ note.date }}
+                            </td>
+                            <td>
+                                {{ note }}
+                            </td>
+                            {% if authorized %}
+                                <td>
+                                    <form method="post">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="delete_note_id" value="{{ note.id }}"/>
+                                        <input class="btn btn-sm btn-danger" type="submit" name="delete_note"
+                                               value="Delete"/>
+                                    </form>
+                                </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+
+                    </tbody>
+                </table>
+            {% else %}
+                No notes saved.
+            {% endif %}
+        </div>
+        <form class="form-horizontal" method="post">{% csrf_token %}
+            {% include "dojo/form_fields.html" with form=note_form %}
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <input class="btn" type="submit" value="Add Note"/>
+                </div>
+            </div>
+        </form>
+
+        <br/>
+        <br/>
+    </div>
+
+    {% if authorized %}
+        <div class="danger-zone panel panel-danger">
+            <div class="panel-heading"><h3>Danger Zone</h3></div>
+            <p>
+                Deleting this Risk Acceptance will remove the uploaded file, delete associated Notes and make related
+                findings active.
+            </p>
+
+            <form class="form-horizontal" action="{{ risk_approval.id }}/delete" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <input class="btn btn-danger" type="submit" value="Delete Risk Acceptance"/>
+                </div>
+            </form>
+        </div>
+        <br/>
+        <br/>
+    {% endif %}
+
+{% endblock %}
