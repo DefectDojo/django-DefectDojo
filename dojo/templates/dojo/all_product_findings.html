@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block content %}
+    <h4> Findings </h4>
+    <div class="row">
+
+        <div class="col-md-9">
+            {% if findings %}
+                <div class="panel panel-default">
+                    <table id="findings"
+                           class="tablesorter-bootstrap table table-condensed table-striped table-bordered">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Severity</th>
+                            <th>Verified</th>
+                            <th>Active</th>
+                            <th>Age</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for finding in findings %}
+                            <tr>
+                                <td class="nowrap"><a title="{{ finding.title }}"
+                                                      href="/{{ finding.id }}/view_finding">{{ finding.title|truncatechars:60 }}</a>
+                                </td>
+                                <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
+                                    <p class="text-error">
+                                {% else %}<p>{% endif %}{{ finding.severity }}</p>
+                                <td>{{ finding.verified }}</td>
+                                <td>{{ finding.active }}</td>
+                                <td>{{ finding.age }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% include "dojo/paging_snippet.html" with page=findings %}
+            {% else %}
+                No findings found for this product.
+            {% endif %}
+        </div>
+        <div class="col-md-3">
+            <div class="filters panel panel-default">
+                <div class="panel-heading">Actions</div>
+                <div class="panel-body centered">
+                    {{ test.test_type }} <a class="btn btn-primary" href="gen_report_all?{{ request.GET.urlencode }}">
+                    Generate Report</a>
+                    <span class="report_note"><b><i>Note:</i></b> Generated based on filters.</span>
+                </div>
+                {% if filtered.form %}
+                    <div class="panel-heading">Filters</div>
+                    <form method="get" class="panel-body">
+                        {{ filtered.form.as_p }}
+                        <div class="centered">
+                            <input type="submit" class="btn btn-primary" value="Apply"/><br/><br/>
+                            <a href="?" class=""> [Clear Filters] </a>
+                        </div>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load event_tags %}
+{% block content %}
+    <h3> Edit a Finding</h3>
+    {% if temp %}
+
+        <form class="form-horizontal" action="{{ fid }}" method="post">
+            {% csrf_token %}
+            {% include "dojo/form_fields.html" with form=form %}
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <input type="submit" value="Add Another Finding"/>
+                    <input type="submit" value="Finished"/>
+                </div>
+            </div>
+        </form>
+    {% else %}
+        <form class="form-horizontal" action="edit_finding" method="post">
+        {% csrf_token %}
+        {% include "dojo/form_fields.html" with form=form %}
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <input class="btn btn-primary" name="_Finished" type="submit" value="Finished"/>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

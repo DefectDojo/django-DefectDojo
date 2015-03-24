@@ -46,7 +46,7 @@ coverage.xml
 # Django stuff:
 *.log
 *.pot
-tracker/settings.py
+dojo/settings.py
 
 # Vim swapfiles
 *.swp
@@ -60,11 +60,11 @@ docs/_build/
 *.crt
 *.csr
 *.key
-tracker/migrations
-tracker/static/img/threat/*
-tracker/uploads/risk/*
-tracker/scans/scan*
-tracker/uploads/threat/*
+dojo/migrations
+dojo/static/img/threat/*
+dojo/uploads/risk/*
+dojo/scans/scan*
+dojo/uploads/threat/*
 .idea
 
 weekly.txt

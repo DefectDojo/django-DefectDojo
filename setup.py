@@ -3,7 +3,7 @@
 from setuptools import setup
 
 setup(
-    name='TestTrack',
+    name='DefectDojo',
     version='0.9.0',
     author='Greg Anderson',
     description="Tool for managing vulnerability engagements",
@@ -23,8 +23,8 @@ setup(
         'django-filter',
         'supervisor',
         'humanize'],
-    # packages=['TestTracker'],
-    url='https://github.com/rackerlabs/django-TestTrack'
+    # packages=['DefectDojo'],
+    url='https://github.com/rackerlabs/django-DefectDojo'
 
         """
         entry_points={

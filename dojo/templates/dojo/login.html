@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+    <h3>Login</h3>
+    <hr/>
+    {% if form.errors and not form.non_field_errors and not form.this_is_the_login_form.errors %}
+        <div class="alert alert-danger" role="alert">
+            {% if form.errors.items|length == 1 %}Please correct the error below.{% else %}Please correct the errors
+                below.{% endif %}
+        </div>
+    {% endif %}
+
+    {% if form.non_field_errors or form.this_is_the_login_form.errors %}
+        {% for error in form.non_field_errors|add:form.this_is_the_login_form.errors %}
+            <p class="errornote">
+                {{ error }}
+            </p>
+        {% endfor %}
+    {% endif %}
+
+    <form class="form-horizontal" method="POST"> {% csrf_token %}
+
+        <fieldset class="col-md-offset-3 col-md-6">
+            {% include "dojo/form_fields.html" with form=form %}
+
+
+            <!-- Button -->
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <button class="btn btn-success">Login</button>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+{% endblock %}

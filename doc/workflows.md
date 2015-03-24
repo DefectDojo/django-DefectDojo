@@ -7,7 +7,7 @@ his boss exactly what issues he reports, and statistics about how long it
 takes to close them.
 
 When he is asked to audit an application, Bill registers a new Product in
-TestTrack, and creates a new Engagement. Here he sets some basic information,
+DefectDojo, and creates a new Engagement. Here he sets some basic information,
 like how long he expects the Engagement will take, who will be leading the
 testing (himself), what Product he will be working on, and what tests he
 will be doing.
@@ -35,7 +35,7 @@ supposed to based on their severity.
 ## Example 2 - John the QE manager
 
 John wants to keep tabs on what his team members are up to, and find issues
-that are taking a long time to get fixed. He creates his own TestTrack account
+that are taking a long time to get fixed. He creates his own DefectDojo account
 with superuser privileges so that he can view other team members' metrics.
 
 To get a better idea of what his team members are currently working on, he

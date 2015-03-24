@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+    <h3> Engineer Profile - {{ user.get_full_name }}</h3>
+    <div class="row">
+        <div class="col-md-7">
+            <form class="form-horizontal" method="post">{% csrf_token %}
+                {% include "dojo/form_fields.html" with form=form %}
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <input class="btn btn-primary" type="submit" value="Submit"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-4 well">
+            <ul class="list-unstyled">
+                <li><b>Last Login: </b>{{ user.last_login }}</li>
+                <li><b>Date Joined: </b>{{ user.date_joined }}</li>
+            </ul>
+            <div class="center" style="margin: auto; text-align: center;"
+            ">
+            {% if user.has_usable_password %}
+                <a class="btn btn-sm btn-primary" href="/change_password">Change Password</a>
+            {% endif %}
+            <a class="btn btn-sm btn-primary" href="api_key">API Key</a>
+        </div>
+    </div>
+    </div>
+{% endblock %}

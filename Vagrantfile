@@ -9,9 +9,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.ssh.forward_agent = true
 
-  config.vm.hostname = "tt"
+  config.vm.hostname = "dd"
   config.vm.network :private_network, ip: "192.168.13.37"
-  config.vm.define "tt" do |tt|
+  config.vm.define "dd" do |dd|
   end
 
   config.vm.provision "ansible" do |ansible|

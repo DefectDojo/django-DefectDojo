@@ -1,10 +1,10 @@
 # About
 
-## TestTrack Basics
+## DefectDojo Basics
 
 ### Terms
 There are several terms that will be helpful to understand as you work with
-TestTrack.
+DefectDojo.
 
 ##### Products
 This is the name of any project, program, team, or company that you are
