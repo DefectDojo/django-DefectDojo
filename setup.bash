@@ -39,7 +39,7 @@ if [[ $EUID = 0 ]]; then
     exit 1;
 fi
 
-echo "Welcome to TestTrack! This is a quick script to get you up and running."
+echo "Welcome to DefectDojo! This is a quick script to get you up and running."
 echo
 echo "NEED SUDO PRIVILEGES FOR NEXT STEPS!"
 echo
@@ -68,14 +68,14 @@ get_db_details
 SECRET=`cat /dev/urandom | tr -dc "a-zA-Z0-9" | head -c 128`
 
 unset HISTFILE
-cp tracker/settings.dist.py tracker/settings.py
+cp dojo/settings.dist.py dojo/settings.py
 
 # Save MySQL details in settings file
-sed -i  "s/MYSQLUSER/$SQLUSER/g" tracker/settings.py
-sed -i  "s/MYSQLPWD/$SQLPWD/g" tracker/settings.py
-sed -i  "s/MYSQLDB/$DBNAME/g" tracker/settings.py
-sed -i  "s#TRACKERDIR#$PWD/tracker#g" tracker/settings.py
-sed -i  "s/TRACKERSECRET/$SECRET/g" tracker/settings.py
+sed -i  "s/MYSQLUSER/$SQLUSER/g" dojo/settings.py
+sed -i  "s/MYSQLPWD/$SQLPWD/g" dojo/settings.py
+sed -i  "s/MYSQLDB/$DBNAME/g" dojo/settings.py
+sed -i  "s#DOJODIR#$PWD/dojo#g" dojo/settings.py
+sed -i  "s/DOJOSECRET/$SECRET/g" dojo/settings.py
 
 # Detect if we're in a a virtualenv
 if python -c 'import sys; print sys.real_prefix' 2>/dev/null; then
@@ -91,6 +91,6 @@ fi
 
 echo "=============================================================================="
 echo
-echo "SUCCESS! Now edit your settings.py file in the 'tracker' directory to complete the installation."
+echo "SUCCESS! Now edit your settings.py file in the 'dojo' directory to complete the installation."
 echo
-echo "When you're ready to start the TestTrack server, type 'python manage.py runserver' in this directory."
+echo "When you're ready to start the DefectDojo server, type 'python manage.py runserver' in this directory."

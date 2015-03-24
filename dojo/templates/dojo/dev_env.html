@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+    {% if user.is_staff %}
+        <a class="btn btn-primary" href="/dev_env/add"> New Development Environment </a>
+        <br/>
+        <br/>
+    {% endif %}
+    {% if devs %}
+        <div class="panel panel-default">
+            <table id="test_types" class="tablesorter-bootstrap table table-bordered table-condensed table-striped">
+                <thead>
+                <tr>
+                    <th> Development Environment</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for de in devs %}
+                    <tr>
+                        {% if user.is_staff %}
+                            <td><a href="/dev_env/{{ de.id }}/edit"> {{ de.name }} </a></td>
+                        {% else %}
+                            <td> {{ de.name }} </a> </td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        No development environments found.
+    {% endif %}
+
+    {% include "dojo/paging_snippet.html" with page=devs %}
+{% endblock %}

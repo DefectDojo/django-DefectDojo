@@ -1,6 +1,6 @@
 # Vagrant Install
 
-Installing with Vagrant is the easiest way to get started with TestTrack.
+Installing with Vagrant is the easiest way to get started with DefectDojo.
 
 __You will need:__
 
