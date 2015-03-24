@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+    <form action="edit_scan_settings" method="post" class="form-horizontal">{% csrf_token %}
+        {% include "dojo/form_fields.html" with form=form %}
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <input class="btn btn-warning" name="edit" type="submit" value="Edit"/>
+                <input class="btn btn-danger" name="delete" type="submit" value="Delete"/>
+            </div>
+        </div>
+    </form>
+{% endblock %}
