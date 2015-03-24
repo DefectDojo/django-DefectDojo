@@ -7,14 +7,15 @@
             that apply to this acceptance. These findings will be automatically be deactivated.
         </p>
 
-        <form enctype="multipart/form-data" method="post">
+        <form enctype="multipart/form-data" method="post" class="form-horizontal">
             {% csrf_token %}
-            {{ form.as_p }}
+            {% include "dojo/form_fields.html" with form=form %}
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
                     <input class="btn btn-primary" type="submit" value="Add Risk Acceptance"/>
                 </div>
             </div>
+            <br/><br/>
         </form>
     </div>
 {% endblock %}
