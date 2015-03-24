@@ -48,11 +48,6 @@
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
-- name: Install South
-  pip: name=South version=0.8.4 virtualenv={{ venv_dir }}
-  sudo: yes
-  sudo_user: '{{ dd_user }}'
-
 - name: Install django-secure
   pip: name=django-secure version=1.0 virtualenv={{ venv_dir }}
   sudo: yes
