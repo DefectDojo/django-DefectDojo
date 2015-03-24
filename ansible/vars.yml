@@ -1,32 +1,32 @@
 ---
-application_name: 'TestTrack'
+application_name: 'DefectDojo'
 root_pass: 'r00tr00t'
 
-# The Linux user account that TestTrack will run under
-tt_user: 'tt'
-tt_user_pass: 'th1sisasup3rs3cur3passw0rd12345'
+# The Linux user account that DefectDojo will run under
+dd_user: 'dd'
+dd_user_pass: 'th1sisasup3rs3cur3passw0rd12345'
 
 # MySQL settings
-tt_sql_user: 'tt'
-tt_sql_pass: 'pl34se$replace@these^stupid&passwords'
-tt_sql_db: 'tt'
+dd_sql_user: 'dd'
+dd_sql_pass: 'pl34se$replace@these^stupid&passwords'
+dd_sql_db: 'dd'
 
-# Defines where the TestTrack application will be installed
-tt_install_dir: /usr/share/django-TestTrack
+# Defines where the DefectDojo application will be installed
+dd_install_dir: /usr/share/django-DefectDojo
 
-# Defines the folder where TestTrack's virtualenv will be stored
-venv_dir: /home/{{ tt_user }}/.venvs/{{ application_name }}
+# Defines the folder where DefectDojo's virtualenv will be stored
+venv_dir: /home/{{ dd_user }}/.venvs/{{ application_name }}
 
-# Set up the Django/TestTrack superuser
-tt_super_user: 'root'
-tt_super_user_pass: 'An0th3r@SuPeR@Secure@PASSWORD'
-tt_super_user_email: 'root@localhost'
+# Set up the Django/DefectDojo superuser
+dd_super_user: 'root'
+dd_super_user_pass: 'An0th3r@SuPeR@Secure@PASSWORD'
+dd_super_user_email: 'root@localhost'
 
-# Repo link for TestTrack
-tt_git_repo: 'https://github.com/rackerlabs/django-TestTrack.git'
+# Repo link for DefectDojo
+dd_git_repo: 'https://github.com/rackerlabs/django-DefectDojo.git'
 
 # Gunicorn settings
 gunicorn_num_workers: 3
 gunicorn_timeout: 120
 gunicorn_port: 9999
-gunicorn_log_file: '{{ tt_install_dir }}/gunicorn.log'
+gunicorn_log_file: '{{ dd_install_dir }}/gunicorn.log'
