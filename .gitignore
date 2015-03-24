@@ -46,6 +46,8 @@ coverage.xml
 # Django stuff:
 *.log
 *.pot
+*/settings.py
+settings.py
 dojo/settings.py
 
 # Vim swapfiles
