@@ -33,12 +33,6 @@ function get_db_details() {
     fi
 }
 
-# Make sure we're not running as root
-if [[ $EUID = 0 ]]; then
-    echo "ERROR: Refusing to run as root. Please run again as another user."
-    exit 1;
-fi
-
 echo "Welcome to DefectDojo! This is a quick script to get you up and running."
 echo
 echo "NEED SUDO PRIVILEGES FOR NEXT STEPS!"
@@ -65,9 +59,10 @@ echo
 
 get_db_details
 
+unset HISTFILE
+
 SECRET=`cat /dev/urandom | tr -dc "a-zA-Z0-9" | head -c 128`
 
-unset HISTFILE
 cp dojo/settings.dist.py dojo/settings.py
 
 # Save MySQL details in settings file
