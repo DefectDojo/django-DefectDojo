@@ -120,7 +120,6 @@ def view_engineer(request, eid):
             or request.user.username == user.username):
         return HttpResponseRedirect('/engineer_metrics')
     now = localtz.localize(datetime.today())
-    pt = Product_Type.objects.get(name='Foundation')
 
     findings = Finding.objects.filter(reporter=user, verified=True)
     findings_with_core = findings
@@ -231,7 +230,7 @@ def view_engineer(request, eid):
 
         week[5] = sum(week[1:])
 
-    products = Product.objects.filter(prod_type=pt)
+    products = Product.objects.all()
     vulns = {}
     for product in products:
         f_count = 0
