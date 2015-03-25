@@ -75,12 +75,14 @@ sed -i  "s/DOJOSECRET/$SECRET/g" dojo/settings.py
 # Detect if we're in a a virtualenv
 if python -c 'import sys; print sys.real_prefix' 2>/dev/null; then
     python setup.py install
-    python manage.py syncdb
+    python manage.py makemigrations dojo
     python manage.py migrate
+    python manage.py syncdb
 else
     sudo python setup.py install
-    sudo python manage.py syncdb
+    sudo python manage.py makemigrations dojo
     sudo python manage.py migrate
+    sudo python manage.py syncdb
 fi
 
 
