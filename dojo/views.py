@@ -983,7 +983,7 @@ def metrics(request, mtype):
     r = relativedelta(end_date, start_date)
     months_between = (r.years * 12) + r.months
     # include current month
-    if months_between > 1 or months_between == 0:
+    if months_between <= 1:
         months_between += 1
 
     weeks_between = int(ceil((((r.years * 12) + r.months) * 4.33) + (r.days / 7)))
