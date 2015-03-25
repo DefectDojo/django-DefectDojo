@@ -18,7 +18,7 @@ setup(
         'pytz==2013.9',
         'requests==2.2.1',
         'wsgiref==0.1.2',
-        'django-tastypie-swagger',
+        'django-tastypie-swagger>=0.1.3',
         'django-filter',
         'supervisor',
         'humanize'],
