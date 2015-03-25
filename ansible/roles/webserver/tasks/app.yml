@@ -84,7 +84,7 @@
   sudo_user: '{{ dd_user }}'
 
 - name: Install django-tastypie-swagger
-  pip: name=django-tastypie-swagger virtualenv={{ venv_dir }}
+  pip: name=django-tastypie-swagger=0.1.3 virtualenv={{ venv_dir }}
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
