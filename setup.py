@@ -18,10 +18,11 @@ setup(
         'pytz==2013.9',
         'requests==2.2.1',
         'wsgiref==0.1.2',
-        'django-tastypie-swagger>=0.1.3',
+        '-e git+git@github.com:concentricsky/django-tastypie-swagger.git@v0.1.3#egg=django-tastypie-swagger',
         'django-filter',
         'supervisor',
-        'humanize'],
+        'humanize',
+        'django-bower'],
     # packages=['DefectDojo'],
     url='https://github.com/rackerlabs/django-DefectDojo'
 
