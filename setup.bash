@@ -78,11 +78,15 @@ if python -c 'import sys; print sys.real_prefix' 2>/dev/null; then
     python manage.py makemigrations dojo
     python manage.py migrate
     python manage.py syncdb
+    python manage.py bower install
+    python manage.py collectstatic
 else
     sudo python setup.py install
     sudo python manage.py makemigrations dojo
     sudo python manage.py migrate
     sudo python manage.py syncdb
+    sudo python manage.py bower install
+    sudo python manage.py collectstatic
 fi
 
 

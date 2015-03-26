@@ -75,3 +75,11 @@ Quarterly.txt
 
 # Vagrant
 .vagrant
+
+# bower
+components/*
+!components/bower.json
+bower_components/
+dojo/static/*
+!dojo/static/dojo/*
+

@@ -84,7 +84,7 @@
   sudo_user: '{{ dd_user }}'
 
 - name: Install django-tastypie-swagger
-  pip: name=django-tastypie-swagger=0.1.3 virtualenv={{ venv_dir }}
+  pip: name=-e git+git@github.com:concentricsky/django-tastypie-swagger.git@v0.1.3#egg=django-tastypie-swagger virtualenv={{ venv_dir }}
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
@@ -103,8 +103,18 @@
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
-- name: Run Django 'syncdb' command
-  django_manage: command=syncdb app_path={{ dd_install_dir }} virtualenv={{ venv_dir }}
+- name: Install humanize
+  pip: name=django-bower state=present virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ dd_user }}'
+
+- name: Run Django 'makemigrations' command
+  django_manage: command=makemigrations app_path={{ dd_install_dir }} virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ dd_user }}'
+
+- name: Run Django 'migrate' command
+  django_manage: command=migrate app_path={{ dd_install_dir }} virtualenv={{ venv_dir }}
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
@@ -115,8 +125,13 @@
     sudo: yes
     sudo_user: '{{ dd_user }}'
 
-- name: Run Django 'migrate' command
-  django_manage: command=migrate app_path={{ dd_install_dir }} virtualenv={{ venv_dir }}
+- name: Run Django 'bower install' command
+  django_manage: command=bower install app_path={{ dd_install_dir }} virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ dd_user }}'
+
+- name: Run Django 'collectstatic' command
+  django_manage: command=collectstatic app_path={{ dd_install_dir }} virtualenv={{ venv_dir }}
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
