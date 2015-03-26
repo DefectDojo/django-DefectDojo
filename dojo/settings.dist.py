@@ -91,6 +91,25 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'djangobower.finders.BowerFinder',
+)
+
+# where should bower install components
+# collect static will move them to the static root
+BOWER_COMPONENTS_ROOT = DOJO_ROOT+'/components/'
+
+# what components should be installed
+BOWER_INSTALLED_APPS = (
+    'startbootstrap-sb-admin-2',
+    'fullcalendar',
+    'jquery-cookie',
+    'jquery.tablesorter',
+    'jquery-ui',
+    'text-highlighter',
+    # directly from github since no bower comp available
+    'https://github.com/jumjum123/JUMFlot/blob/gh-pages/javascripts/jquery.flot.bubbles.js',
+    'https://github.com/jumjum123/JUMFlot/blob/gh-pages/javascripts/JUMFlot.min.js',
+    'https://github.com/jumjum123/JUMFlot/blob/gh-pages/javascripts/jquery.flot.mouse.js',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -154,6 +173,8 @@ INSTALLED_APPS = (
     'gunicorn',
     'tastypie',
     'tastypie_swagger',
+    'humanize',
+    'django-bower',
 )
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

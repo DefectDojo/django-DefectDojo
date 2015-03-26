@@ -40,7 +40,7 @@
         <h4> Active Engagements <a class="btn btn-sm btn-primary" href="/{{ prod.id }}/new_engagement"> New
             Engagement </a></h4>
         {% if engs %}
-            <table class="tablesorter-bootstrap table table-condensed table-striped table-hover">
+            <table class="table-responsive tablesorter-bootstrap table table-condensed table-striped table-hover">
                 <thead>
                 <tr>
                     <th>Name</th>
@@ -71,7 +71,7 @@
             <a class="btn btn-success btn-sm" href="/{{ prod.id }}/gmap"> Set Baseline</a>
         </h4>
         {% if scan_sets %}
-            <table class="tablesorter-bootstrap table table-condensed table-striped table-hover">
+            <table class="table-responsive tablesorter-bootstrap table table-condensed table-striped table-hover">
                 <thead>
                 <tr>
                     <th>Creator</th>
@@ -101,7 +101,7 @@
     <hr/>
     {% if user.is_staff and i_engs %}
         <h4> Closed Engagements </h4>
-        <table class="tablesorter-bootstrap table table-condensed table-striped table-hover">
+        <table class="table-responsive tablesorter-bootstrap table table-condensed table-striped table-hover">
             <thead>
             <tr>
                 <th>Name</th>
