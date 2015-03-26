@@ -19,7 +19,7 @@
     <div class="to_highlight">
         {% if findings %}
             <div class="panel panel-default">
-                <table id="test_findings" class="table-bordered table table-condensed table-hover">
+                <table id="test_findings" class="table-responsive table-bordered table table-condensed table-hover">
 
 
                     <thead>
@@ -57,7 +57,7 @@
         <div>
             <h3>Notes</h3><br>
             {% if notes %}
-                <table id="notes" class="tablesorter-bootstrap table table-condensed table-hover">
+                <table id="notes" class="table-responsive tablesorter-bootstrap table table-condensed table-hover">
                     <thead>
                     <tr>
                         <th>User</th>
@@ -104,8 +104,8 @@
     </div>
 {% endblock %}
 {% block postscript %}
-    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.cookie.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/SearchHighlight.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}jquery-cookie/jquery.cookie.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}text-highlighter/build/TextHighlighter.min.js"></script>
     <script type="text/javascript">
         $(function () {
             if (document.referrer.indexOf('simple_search') > 0) {

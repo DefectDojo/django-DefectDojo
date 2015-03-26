@@ -1,0 +1,39 @@
+{
+  "name": "django-DefectDojo",
+  "version": "1.0",
+  "homepage": "https://github.com/rackerlabs/django-DefectDojo",
+  "authors": [
+    "@_GRRegg",
+    "@ccneill",
+    "@jjpaz"
+  ],
+  "description": "DefectDojo is an open source defect tracker",
+  "keywords": [
+    "defect",
+    "tracker",
+    "python",
+    "django",
+    "open",
+    "source"
+  ],
+  "license": "http://creativecommons.org/licenses/by-sa/4.0/",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "JUMFlot.min": "https://raw.githubusercontent.com/jumjum123/JUMFlot/gh-pages/javascripts/JUMFlot.min.js",
+    "fullcalendar": "~2.3.1",
+    "jquery-cookie": "~1.4.1",
+    "jquery-ui": "~1.11.4",
+    "jquery.flot.bubbles": "https://raw.githubusercontent.com/jumjum123/JUMFlot/gh-pages/javascripts/jquery.flot.bubbles.js",
+    "jquery.flot.mouse": "https://raw.githubusercontent.com/jumjum123/JUMFlot/gh-pages/javascripts/jquery.flot.mouse.js",
+    "jquery.tablesorter": "~2.21.2",
+    "startbootstrap-sb-admin-2": "~1.0.5",
+    "text-highlighter": "~1.2.0"
+  }
+}
