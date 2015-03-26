@@ -151,15 +151,17 @@
 {% endblock %}
 {% block postscript %}
     <!-- Flot Charts JavaScript -->
-    <script src="{{ STATIC_URL }}js/excanvas.min.js"></script>
-    <script src="{{ STATIC_URL }}js/jquery.flot.js"></script>
-    <script src="{{ STATIC_URL }}js/jquery.flot.pie.js"></script>
-    <script src="{{ STATIC_URL }}js/jquery.flot.resize.js"></script>
-    <script src="{{ STATIC_URL }}js/jquery.flot.time.js"></script>
-    <script src="{{ STATIC_URL }}js/jquery.flot.mouse.js"></script>
-    <script src="{{ STATIC_URL }}js/jquery.flot.tooltip.min.js"></script>
-    <script src="{{ STATIC_URL }}js/jquery.flot.JUMlib.js"></script>
-    <script src="{{ STATIC_URL }}js/jquery.flot.bubbles.js"></script>
+    <script src="{{ STATIC_URL }}flot/excanvas.min.js"></script>
+    <script src="{{ STATIC_URL }}flot/jquery.flot.js"></script>
+    <script src="{{ STATIC_URL }}flot/jquery.flot.pie.js"></script>
+    <script src="{{ STATIC_URL }}flot/jquery.flot.time.js"></script>
+    <script src="{{ STATIC_URL }}flot.tooltip/js/jquery.flot.tooltip.min.js"></script>
+    <script src="{{ STATIC_URL }}flot/jquery.flot.stack.js"></script>
+    {% if punchcard %}
+        <script src="{{ STATIC_URL }}jquery.flot.mouse/index.js"></script>
+        <script src="{{ STATIC_URL }}JUMFlot.min/index.js"></script>
+        <script src="{{ STATIC_URL }}jquery.flot.bubbles/index.js"></script>
+    {% endif %}
     <script>
         $(function () {
             var options = {

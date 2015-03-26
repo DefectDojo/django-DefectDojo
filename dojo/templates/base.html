@@ -23,19 +23,19 @@
     {% block add_css_before %}
     {% endblock %}
     <!-- Bootstrap Core CSS -->
-    <link href="{{ STATIC_URL }}css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ STATIC_URL }}bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- MetisMenu CSS -->
-    <link href="{{ STATIC_URL }}css/metisMenu.min.css" rel="stylesheet">
+    <link href="{{ STATIC_URL }}metisMenu/dist/metisMenu.min.css" rel="stylesheet">
 
     <!-- Timeline CSS -->
-    <link href="{{ STATIC_URL }}css/timeline.css" rel="stylesheet">
+    <link href="{{ STATIC_URL }}startbootstrap-sb-admin-2/dist/css/timeline.css" rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link href="{{ STATIC_URL }}css/sb-admin-2.css" rel="stylesheet">
+    <link href="{{ STATIC_URL }}startbootstrap-sb-admin-2/dist/css/sb-admin-2.css" rel="stylesheet">
 
     <!-- Custom Fonts -->
-    <link href="{{ STATIC_URL }}css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="{{ STATIC_URL }}font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -45,10 +45,10 @@
     <![endif]-->
     {% block add_css %}
     {% endblock %}
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/dojo-jquery-ui/jquery-ui-1.10.4.custom.min.css">
-    <link rel="shortcut icon" href="{{ STATIC_URL }}img/favicon.ico"/>
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/fullcalendar.css">
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/dojo.css">
+    <link rel="stylesheet" href="{{ STATIC_URL }}jquery-ui/themes/base/jquery-ui.min.css">
+    <link rel="shortcut icon" href="{{ STATIC_URL }}dojo/img/favicon.ico"/>
+    <link rel="stylesheet" href="{{ STATIC_URL }}fullcalendar/dist/fullcalendar.min.css">
+    <link rel="stylesheet" href="{{ STATIC_URL }}dojo/css/dojo.css">
     <style>
         {% block add_styles %}
         {% endblock %}
@@ -67,7 +67,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="/"><img src="{{ STATIC_URL }}img/logo.png" alt="DefectDojo Logo"
+                <a class="navbar-brand" href="/"><img src="{{ STATIC_URL }}dojo/img/logo.png" alt="DefectDojo Logo"
                                                       width="240"/></a>
             </div>
             <!-- /.navbar-header -->
@@ -266,7 +266,7 @@
             <div class="row">
                 <div class="col-md-12 text-center text-">
                     <p>
-                        <a href="/"><img class="logo" src="{{ STATIC_URL }}img/chop.png" alt="DefectDojo Chop" height="45"/></a>
+                        <a href="/"><img class="logo" src="{{ STATIC_URL }}dojo/img/chop.png" alt="DefectDojo Chop" height="45"/></a>
                     </p>
 
                     <p>
@@ -285,24 +285,24 @@
 <!-- /#wrapper -->
 
 <!-- jQuery -->
-<script src="{{ STATIC_URL }}js/jquery.min.js"></script>
+<script src="{{ STATIC_URL }}jquery/dist/jquery.min.js"></script>
 <!--  jQuery UI -->
-<script src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
+<script src="{{ STATIC_URL }}jquery-ui/jquery-ui.min.js"></script>
 <!-- Bootstrap Core JavaScript -->
-<script src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
+<script src="{{ STATIC_URL }}bootstrap/dist/js/bootstrap.min.js"></script>
 
 <!-- Metis Menu Plugin JavaScript -->
-<script src="{{ STATIC_URL }}js/metisMenu.min.js"></script>
+<script src="{{ STATIC_URL }}metisMenu/dist/metisMenu.min.js"></script>
 
 <!-- Custom Theme JavaScript -->
-<script src="{{ STATIC_URL }}js/sb-admin-2.js"></script>
+<script src="{{ STATIC_URL }}startbootstrap-sb-admin-2/dist/js/sb-admin-2.js"></script>
 <!-- Calendar JavaScript -->
-<script src="{{ STATIC_URL }}js/moment.min.js"></script>
-<script src="{{ STATIC_URL }}js/fullcalendar.min.js"></script>
+<script src="{{ STATIC_URL }}moment/min/moment.min.js"></script>
+<script src="{{ STATIC_URL }}fullcalendar/dist/fullcalendar.min.js"></script>
 <!-- Table sorter JavaScript -->
-<script src="{{ STATIC_URL }}js/jquery.tablesorter.min.js"></script>
+<script src="{{ STATIC_URL }}jquery.tablesorter/dist/js/jquery.tablesorter.min.js"></script>
 <!-- our JS -->
-<script src="{{ STATIC_URL }}js/index.js"></script>
+<script src="{{ STATIC_URL }}dojo/js/index.js"></script>
 {% block postscript %}
 {% endblock %}
 </body>

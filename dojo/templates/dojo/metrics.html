@@ -220,7 +220,7 @@
                     {% if top_ten_products %}
                         <div class="tab-pane active" id="tabs-1">
                             <table
-                                    class="table table-bordered table-condensed table-striped table-400">
+                                    class="table-responsive table table-bordered table-condensed table-striped table-400">
                                 <tr>
                                     <th>Product</th>
                                     <th>S0</th>
@@ -243,7 +243,7 @@
                         </div>
                     {% endif %}
                     <div class="tab-pane" id="tabs-2">
-                        <table class="table table-bordered table-condensed table-striped table-600">
+                        <table class="table-responsive table table-bordered table-condensed table-striped table-600">
                             <tr>
                                 <th class="nowrap">Team</th>
                                 <th class="">Product</th>
@@ -272,7 +272,7 @@
                         <div>
                             <h4>Opened During Period</h4>
                             <table
-                                    class="table table-bordered table-condensed table-striped table-600">
+                                    class="table-responsive table table-bordered table-condensed table-striped table-600">
                                 <tr>
                                     <th>S0</th>
                                     <th>S1</th>
@@ -289,7 +289,7 @@
                                 </tr>
                             </table>
                             <table
-                                    class="table table-bordered table-condensed table-striped table-600">
+                                    class="table-responsive table table-bordered table-condensed table-striped table-600">
                                 <tr>
                                     <th>Product</th>
                                     <th>S0</th>
@@ -316,7 +316,7 @@
                         <div>
                             <h4>Accepted in Period</h4>
                             <table
-                                    class="table table-bordered table-condensed table-striped table-600">
+                                    class="table-responsive table table-bordered table-condensed table-striped table-600">
                                 <tr>
                                     <th>S0</th>
                                     <th>S1</th>
@@ -333,7 +333,7 @@
                                 </tr>
                             </table>
                             <table
-                                    class="table table-bordered table-condensed table-striped table-600">
+                                    class="table-responsive table table-bordered table-condensed table-striped table-600">
                                 <tr>
                                     <th>Product</th>
                                     <th>S0</th>
@@ -362,7 +362,7 @@
                         <div>
                             <h4>Closed in Period</h4>
                             <table
-                                    class="table table-bordered table-condensed table-striped table-600">
+                                    class="table-responsive table table-bordered table-condensed table-striped table-600">
                                 <tr>
                                     <th>S0</th>
                                     <th>S1</th>
@@ -379,7 +379,7 @@
                                 </tr>
                             </table>
                             <table
-                                    class="table table-bordered table-condensed table-striped table-600">
+                                    class="table-responsive table table-bordered table-condensed table-striped table-600">
                                 <tr>
                                     <th>Product</th>
                                     <th>S0</th>
@@ -404,7 +404,7 @@
                     </div>
                     <div class="tab-pane" id="tabs-6">
                         <div class="metric-half">
-                            <table class="table table-bordered table-condensed table-striped">
+                            <table class="table-responsive table table-bordered table-condensed table-striped">
                                 <tr>
                                     <th>Weekly</th>
                                     <th>S0</th>
@@ -428,7 +428,7 @@
                             </table>
                         </div>
                         <div class="metric-half">
-                            <table class="table table-bordered table-condensed table-striped">
+                            <table class="table-responsive table table-bordered table-condensed table-striped">
                                 <tr>
                                     <th>Monthly</th>
                                     <th>S0</th>
@@ -455,7 +455,7 @@
                     </div>
                     <div class="tab-pane" id="tabs-7">
                         <div class="metric-half">
-                            <table class="table table-bordered table-condensed table-striped">
+                            <table class="table-responsive table table-bordered table-condensed table-striped">
                                 <tr>
                                     <th>By Week</th>
                                     <th>S0</th>
@@ -477,7 +477,7 @@
                             </table>
                         </div>
                         <div class="metric-half">
-                            <table class="table table-bordered table-condensed table-striped">
+                            <table class="table-responsive table table-bordered table-condensed table-striped">
                                 <tr>
                                     <th>By Month</th>
                                     <th>S0</th>
@@ -501,7 +501,7 @@
                     </div>
                     <div class="tab-pane" id="tabs-8">
                         <table
-                                class="table table-bordered table-condensed table-striped table-400">
+                                class="table-responsive table table-bordered table-condensed table-striped table-400">
                             <tr>
                                 <th>Days</th>
                                 <th>Bug Count</th>
@@ -534,13 +534,13 @@
 {% endblock %}
 {% block postscript %}
     <!-- Flot Charts JavaScript -->
-    <script src="{{ STATIC_URL }}js/excanvas.min.js"></script>
-    <script src="{{ STATIC_URL }}js/jquery.flot.js"></script>
-    <script src="{{ STATIC_URL }}js/jquery.flot.pie.js"></script>
-    <script src="{{ STATIC_URL }}js/jquery.flot.resize.js"></script>
-    <script src="{{ STATIC_URL }}js/jquery.flot.time.js"></script>
-    <script src="{{ STATIC_URL }}js/jquery.flot.tooltip.min.js"></script>
-    <script src="{{ STATIC_URL }}js/jquery.flot.stack.js"></script>
+    <script src="{{ STATIC_URL }}flot/excanvas.min.js"></script>
+    <script src="{{ STATIC_URL }}flot/jquery.flot.js"></script>
+    <script src="{{ STATIC_URL }}flot/jquery.flot.pie.js"></script>
+    <script src="{{ STATIC_URL }}flot/jquery.flot.resize.js"></script>
+    <script src="{{ STATIC_URL }}flot/jquery.flot.time.js"></script>
+    <script src="{{ STATIC_URL }}flot.tooltip/js/jquery.flot.tooltip.min.js"></script>
+    <script src="{{ STATIC_URL }}flot/jquery.flot.stack.js"></script>
     <script>
         $(function () {
 

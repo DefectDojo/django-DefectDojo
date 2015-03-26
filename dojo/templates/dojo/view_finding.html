@@ -61,7 +61,7 @@
     <p><b>Notes:</b></p>
     <div class="to_highlight">
         {% if notes %}
-            <table id="notes" class="tablesorter-bootstrap table table-condensed table-striped">
+            <table id="notes" class="table-responsive tablesorter-bootstrap table table-condensed table-striped">
                 <thead>
                 <tr>
                     <th>User</th>
@@ -106,8 +106,8 @@
 
 {% endblock %}
 {% block postscript %}
-    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.cookie.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/SearchHighlight.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}jquery-cookie/jquery.cookie.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}text-highlighter/build/TextHighlighter.min.js"></script>
     <script type="text/javascript">
         $(function () {
             if (document.referrer.indexOf('simple_search') > 0) {
