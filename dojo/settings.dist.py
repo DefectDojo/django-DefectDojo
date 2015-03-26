@@ -174,7 +174,7 @@ INSTALLED_APPS = (
     'tastypie',
     'tastypie_swagger',
     'humanize',
-    'django-bower',
+    'djangobower',
 )
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
