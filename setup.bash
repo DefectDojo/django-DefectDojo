@@ -47,7 +47,7 @@ YUM_CMD=$(which yum)
 APT_GET_CMD=$(which apt-get)
 
 if [[ ! -z $YUM_CMD ]]; then
-	sudo yum install gcc libmysqlclient-dev python-devel mysql-server mysql-devel mysql-python -y
+	sudo yum install gcc libmysqlclient-dev python-devel mysql-server mysql-devel mysql-python python-setuptools -y
 elif [[ ! -z $APT_GET_CMD ]]; then
     sudo apt-get install gcc libssl-dev python-dev libmysqlclient-dev python-pip mysql-server -y
 else
