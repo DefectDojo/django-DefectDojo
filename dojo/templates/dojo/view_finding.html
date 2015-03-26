@@ -113,14 +113,13 @@
             if (document.referrer.indexOf('simple_search') > 0) {
                 terms = '';
                 if ($.cookie('highlight')) {
-                    terms = $.cookie('highlight');
+                    terms = $.cookie('highlight').split(' ');
 
-                    var options = {
-                        exact: "partial",
-                        highlight: ".to_highlight",
-                        keys: terms
+                    var hltr = new TextHighlighter(document.body);
+
+                    for (var i = 0; i < terms.length; i++) {
+                        hltr.find(terms[i], false);
                     }
-                    $(document).SearchHighlight(options);
                 }
 
                 $('input#simple_search').val(terms);

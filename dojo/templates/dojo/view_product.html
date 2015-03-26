@@ -124,3 +124,25 @@
         </table>
     {% endif %}
 {% endblock %}
+{% block postscript %}
+    <script type="text/javascript" src="{{ STATIC_URL }}jquery-cookie/jquery.cookie.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}text-highlighter/build/TextHighlighter.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            if (document.referrer.indexOf('simple_search') > 0) {
+                terms = '';
+                if ($.cookie('highlight')) {
+                    terms = $.cookie('highlight').split(' ');
+
+                    var hltr = new TextHighlighter(document.body);
+
+                    for (var i = 0; i < terms.length; i++) {
+                        hltr.find(terms[i], false);
+                    }
+                }
+
+                $('input#simple_search').val(terms);
+            }
+        });
+    </script>
+{% endblock %}
