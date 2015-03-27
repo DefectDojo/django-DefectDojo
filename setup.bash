@@ -47,13 +47,18 @@ YUM_CMD=$(which yum)
 APT_GET_CMD=$(which apt-get)
 
 if [[ ! -z $YUM_CMD ]]; then
-	sudo yum install gcc libmysqlclient-dev python-devel mysql-server mysql-devel mysql-python python-setuptools -y
+    sudo curl -sL https://rpm.nodesource.com/setup | sudo bash -
+	sudo yum install gcc libmysqlclient-dev python-devel mysql-server mysql-devel MySQL-python python-setuptools python-pip nodejs npm -y
+	sudo yum groupinstall 'Development Tools'
 elif [[ ! -z $APT_GET_CMD ]]; then
-    sudo apt-get install gcc libssl-dev python-dev libmysqlclient-dev python-pip mysql-server -y
+    sudo apt-get install gcc libssl-dev python-dev libmysqlclient-dev python-pip mysql-server nodejs-legacy npm -y
 else
 	echo "ERROR! OS not supported. Try the Vagrant option."
 	exit 1;
 fi
+
+# bower install
+sudo npm install -g bower
 
 echo 
 
@@ -71,22 +76,34 @@ sed -i  "s/MYSQLPWD/$SQLPWD/g" dojo/settings.py
 sed -i  "s/MYSQLDB/$DBNAME/g" dojo/settings.py
 sed -i  "s#DOJODIR#$PWD/dojo#g" dojo/settings.py
 sed -i  "s/DOJOSECRET/$SECRET/g" dojo/settings.py
+sed -i  "s#BOWERDIR#$PWD/components#g" dojo/settings.py
+sed -i  "s#DOJO_MEDIA_ROOT#$PWD/media/#g" dojo/settings.py
+sed -i  "s#DOJO_STATIC_ROOT#$PWD/static/#g" dojo/settings.py
+
+# Detect Python version
+PYV=`python -c "import sys;t='{v[0]}.{v[1]}'.format(v=list(sys.version_info[:2]));sys.stdout.write(t)";`
+if [[ "$PYV"<"2.7" ]]; then
+    echo "Reverting to Django 1.6"
+    sed -i  "s/Django>=1.7/Django==1.6.11/g" setup.py
+else
+    echo "Leaving Django 1.7 requirement"
+fi  
 
 # Detect if we're in a a virtualenv
 if python -c 'import sys; print sys.real_prefix' 2>/dev/null; then
-    python setup.py install
-    python manage.py makemigrations dojo
-    python manage.py migrate
+    pip install .
+    if [[ "$PYV">="2.7" ]]; then
+        python manage.py makemigrations dojo
+        python manage.py migrate
+    fi
     python manage.py syncdb
-    python manage.py bower install
-    python manage.py collectstatic
 else
-    sudo python setup.py install
-    sudo python manage.py makemigrations dojo
-    sudo python manage.py migrate
+    sudo pip install .
+    if [[ "$PYV">="2.7" ]]; then    
+        sudo python manage.py makemigrations dojo
+        sudo python manage.py migrate
+    fi
     sudo python manage.py syncdb
-    sudo python manage.py bower install
-    sudo python manage.py collectstatic
 fi
 
 
@@ -94,4 +111,11 @@ echo "==========================================================================
 echo
 echo "SUCCESS! Now edit your settings.py file in the 'dojo' directory to complete the installation."
 echo
-echo "When you're ready to start the DefectDojo server, type 'python manage.py runserver' in this directory."
+echo "When you're ready to start the DefectDojo server, type in this directory:"
+echo "    1. python manage.py bower install"
+echo "    2. python manage.py collectstatic"
+echo "    3. python manage.py runserver"
+echo
+echo "Note: If git cannot connect using the git:// protocol when downloading bower artifacts, you can run the command "
+echo "below to switch over to https://"
+echo '          git config --global url."https://".insteadOf git://'
