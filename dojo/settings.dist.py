@@ -6,6 +6,7 @@ LOGIN_REDIRECT_URL = '/'
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTOCOL', 'https')
 SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_HTTPONLY = True
+TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 # Uncomment this line if you enable SSL
 # SESSION_COOKIE_SECURE = True
@@ -107,9 +108,7 @@ BOWER_INSTALLED_APPS = (
     'jquery-ui',
     'text-highlighter',
     # directly from github since no bower comp available
-    'https://github.com/jumjum123/JUMFlot/blob/gh-pages/javascripts/jquery.flot.bubbles.js',
-    'https://github.com/jumjum123/JUMFlot/blob/gh-pages/javascripts/JUMFlot.min.js',
-    'https://github.com/jumjum123/JUMFlot/blob/gh-pages/javascripts/jquery.flot.mouse.js',
+    'https://github.com/jumjum123/JUMFlot.git',
 )
 
 # Make this unique, and don't share it with anybody.
