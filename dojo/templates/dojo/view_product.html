@@ -3,7 +3,7 @@
     <h3> {{ prod }}
         {% if user.is_staff %}
             <div class="btn-group">
-            <a class="btn btn-sm btn-warning" href="/{{ prod.id }}/edit_product">Edit</a>
+            <a class="btn btn-sm btn-warning" href="{% url 'edit_product' prod.id %}">Edit</a>
         {% endif %}
         <a class="btn btn-sm btn-primary" href="/product/{{ prod.id }}/findings">Open Findings</a>
         {% if user.is_staff %}
@@ -37,7 +37,7 @@
     </div>
     <br/>
     {% if user.is_staff %}
-        <h4> Active Engagements <a class="btn btn-sm btn-primary" href="/{{ prod.id }}/new_engagement"> New
+        <h4> Active Engagements <a class="btn btn-sm btn-primary" href="{% url 'new_eng_for_prod' prod.id %}"> New
             Engagement </a></h4>
         {% if engs %}
             <table class="table-responsive tablesorter-bootstrap table table-condensed table-striped table-hover">

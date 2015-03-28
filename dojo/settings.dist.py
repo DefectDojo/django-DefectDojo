@@ -144,6 +144,7 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'dojo.urls'
 LOGIN_URL = '/login'
 LOGIN_EXEMPT_URLS = (
+    r'^',
     r'^static/',
     r'^all_metrics$',
     r'^product_type/(?P<mtype>\d+)/metrics$',

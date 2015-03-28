@@ -23,6 +23,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.validators import validate_ipv46_address
 from django.db.models import Q
 from django.http import HttpResponseRedirect, StreamingHttpResponse
+from django.core.urlresolvers import reverse
 from django.shortcuts import render, get_object_or_404
 from pytz import timezone
 from tastypie.models import ApiKey
@@ -1611,7 +1612,11 @@ def view_checklist(request, cid):
 
 
 def home(request):
-    return HttpResponseRedirect('/product')
+    if request.user.is_authenticated() and request.user.is_staff:
+        return HttpResponseRedirect(reverse('dashboard'))
+
+    return HttpResponseRedirect(reverse('metrics'))
+
 
 
 """
