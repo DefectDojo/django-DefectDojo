@@ -35,7 +35,7 @@
             <div class="filters panel panel-default">
                 <div class="panel-heading">Actions</div>
                 <div class="panel-body centered">
-                    <a class="btn btn-primary" href="/new_engagement">
+                    <a class="btn btn-primary" href="{% url 'new_eng' %}">
                         New Engagement
                     </a>
                 </div>
@@ -44,7 +44,7 @@
                     {{ filtered.form.as_p }}
                     <div class="centered">
                         <input type="submit" class="btn btn-primary" value="Apply"/><br/><br/>
-                        <a href="/engagements"> [Clear Filters] </a>
+                        <a href="/engagement"> [Clear Filters] </a>
                     </div>
                 </form>
             </div>
