@@ -9,8 +9,6 @@ self-service tools. Though it was designed with security folks in mind, there
 is nothing keeping QA/QE testers, or any other testers for that matter, from
 using it productively.
 
-For more information, please see [the doc folder](./doc)
-
 
 # Installation
 
@@ -22,10 +20,10 @@ Jay has also created a detailed guide for setting up DefectDojo on
 
 # Getting Started
 
-We recommend checking out the [about](./docs/about.md) document to learn the 
+We recommend checking out the [about](./doc/about.md) document to learn the 
 terminology of DefectDojo, and the
-[getting started guide](./docs/getting_started.md) for setting up a new
-installation. We've also created some example [workflows](./docs/workflows.md)
+[getting started guide](./doc/getting_started.md) for setting up a new
+installation. We've also created some example [workflows](./doc/workflows.md)
 that should give you an idea of how to use DefectDojo for your own team.
 
 
