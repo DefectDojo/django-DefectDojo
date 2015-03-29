@@ -15,8 +15,18 @@ For more information, please see [the doc folder](./doc)
 # Installation
 
 ### [Debian or RHEL-based Install Script](./doc/install_bash.md)
+Jay has also created a detailed guide for setting up DefectDojo on 
+[Ubuntu 14.04](https://github.com/rackerlabs/django-DefectDojo/wiki/DefectDojo-Installation-Guide---Ubuntu-Desktop-14.04).
 
 ### [Vagrant](./doc/install_vagrant.md)
+
+# Getting Started
+
+We recommend checking out the [about](./docs/about.md) document to learn the 
+terminology of DefectDojo, and the
+[getting started guide](./docs/getting_started.md) for setting up a new
+installation. We've also created some example [workflows](./docs/workflows.md)
+that should give you an idea of how to use DefectDojo for your own team.
 
 
 # About Us
