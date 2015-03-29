@@ -4,6 +4,16 @@ DefectDojo is designed to make tracking testing engagements simple and
 intuitive. The [about page](./about.md) will help you understand
 the terminology we use below, so we recommend taking a look at that first.
 
+## Table of Contents
+- [Create a new Product Type](#create-a-new-product-type)
+- [Create a new Test Type](#create-a-new-test-type)
+- [Create a new Development Environment](#create-a-new-development-environment)
+- [Create a new Engagement](#create-a-new-engagement)
+- [Adding Tests to an Engagement](#adding-tests-to-an-engagement)
+- [Adding Findings to a Test](#adding-findings-to-a-test)
+- [Viewing an Engagement](#viewing-an-engagement)
+- [Tracking your Engagements in the calendar](#tracking-your-engagements-in-the-calendar)
+- [Tracking metrics for your Products](#tracking-metrics-for-your-products)
 
 ## Create a new Product Type
 
