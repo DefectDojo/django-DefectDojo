@@ -15,10 +15,10 @@
 
                         {% for p in products %}
                             <tr>
-                                <td class="prod_name"><a href="/product/{{ p.id }}">{{ p.name }}</a></td>
+                                <td class="prod_name"><a href="{% url 'view_product' p.id %}">{{ p.name }}</a></td>
                                 <td>
                                     {% for e in p.engagement_set.all %}
-                                        <a class="eng_link" href="/engagement/{{ e.id }}">
+                                        <a class="eng_link" href="{% url 'view_engagement' e.id %}">
                                             {% if e.name %}{{ e.name }} {% endif %}{{ e.target_start }}</a>
                                     {% endfor %}
                                 </td>
@@ -44,7 +44,7 @@
                     {{ filtered.form.as_p }}
                     <div class="centered">
                         <input type="submit" class="btn btn-primary" value="Apply"/><br/><br/>
-                        <a href="/engagement"> [Clear Filters] </a>
+                        <a href="{% url 'engagement' %}"> [Clear Filters] </a>
                     </div>
                 </form>
             </div>

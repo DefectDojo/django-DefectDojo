@@ -20,9 +20,9 @@
             <div class="center" style="margin: auto; text-align: center;"
             ">
             {% if user.has_usable_password %}
-                <a class="btn btn-sm btn-primary" href="/change_password">Change Password</a>
+                <a class="btn btn-sm btn-primary" href="{% url 'change_password' %}">Change Password</a>
             {% endif %}
-            <a class="btn btn-sm btn-primary" href="api_key">API Key</a>
+            <a class="btn btn-sm btn-primary" href="{% url 'api_key' %}">API Key</a>
         </div>
     </div>
     </div>

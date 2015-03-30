@@ -21,7 +21,7 @@
                         {% for finding in findings %}
                             <tr>
                                 <td class="nowrap"><a title="{{ finding.title }}"
-                                                      href="/{{ finding.id }}/view_finding">{{ finding.title|truncatechars:60 }}</a>
+                                                      href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars:60 }}</a>
                                 </td>
                                 <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
                                     <p class="text-error">
@@ -43,7 +43,7 @@
             <div class="filters panel panel-default">
                 <div class="panel-heading">Actions</div>
                 <div class="panel-body centered">
-                    {{ test.test_type }} <a class="btn btn-primary" href="gen_report_all?{{ request.GET.urlencode }}">
+                    {{ test.test_type }} <a class="btn btn-primary" href="{% url 'product_report' pid %}?{{ request.GET.urlencode }}">
                     Generate Report</a>
                     <span class="report_note"><b><i>Note:</i></b> Generated based on filters.</span>
                 </div>

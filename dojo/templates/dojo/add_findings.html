@@ -15,19 +15,19 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <form action="search" id="searchForm" name="searchForm">
+                        <form action="{% url 'search' tid %}" id="searchForm" name="searchForm">
                             <input type="text" name="q" id="id_q" placeholder="Leave blank to display all "/>
                             <input type="submit" value="Search"/>
                         </form>
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
                         <h3 id="myModalLabel">Template findings</h3>
                     </div>
-                    <div class="modal-body">
+                    <div id="result" class="modal-body">
                         {% if not findings %}
                             No templates found
                         {% endif %}
                         {% for finding in findings %}
-                            <p><a href="/{{ tid }}/add_findings/{{ finding.id }}">{{ finding }}  </a></p>
+                            <p><a href="{% url 'add_temp_finding' tid finding.id %}">{{ finding }}  </a></p>
                         {% endfor %}
                     </div>
                     <div class="modal-footer">
@@ -42,7 +42,7 @@
 
         <br> <br>
 
-        <form class="form-horizontal" action="{{ fid }}" method="post">
+        <form class="form-horizontal" action="{% url 'add_temp_finding' tid fid %}" method="post">
             {% csrf_token %}
             {% include "dojo/form_fields.html" with form=form %}
             <div class="form-group">
@@ -53,7 +53,7 @@
             </div>
         </form>
     {% else %}
-        <form class="form-horizontal" action="add_findings" method="post">
+        <form class="form-horizontal" action="{% url 'add_findings' tid %}" method="post">
             {% csrf_token %}
             {% include "dojo/form_fields.html" with form=form %}
             <div class="form-group">

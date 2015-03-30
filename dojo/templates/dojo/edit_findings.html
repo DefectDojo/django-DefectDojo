@@ -4,7 +4,7 @@
     <h3> Edit a Finding</h3>
     {% if temp %}
 
-        <form class="form-horizontal" action="{{ fid }}" method="post">
+        <form class="form-horizontal" action="{% url 'edit_finding' finding.id %}" method="post">
             {% csrf_token %}
             {% include "dojo/form_fields.html" with form=form %}
             <div class="form-group">
@@ -15,7 +15,7 @@
             </div>
         </form>
     {% else %}
-        <form class="form-horizontal" action="edit_finding" method="post">
+        <form class="form-horizontal" action="{% url 'edit_finding' finding.id %}" method="post">
         {% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
         <div class="form-group">

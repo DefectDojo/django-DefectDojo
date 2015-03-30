@@ -54,11 +54,11 @@
     <!-- end breadcrums //-->
     <h3> {{ eng.product }} <span class="text-muted">{{ eng.status }}</span>
         <div class="btn-group">
-            <a class="btn btn-sm btn-warning" href="/engagement/{{ eng.id }}/edit"> Edit Engagement </a>
+            <a class="btn btn-sm btn-warning" href="{% url 'edit_engagement' eng.id %}"> Edit Engagement </a>
             {% if eng.active %}
-                <a class="btn btn-sm btn-danger" href="/engagement/{{ eng.id }}/close"> Close Engagement</a>
+                <a class="btn btn-sm btn-danger" href="{% url 'close_engagement' eng.id %}"> Close Engagement</a>
             {% else %}
-                <a class="btn btn-sm btn-primary" href="/engagement/{{ eng.id }}/reopen"> Reopen Engagement</a>
+                <a class="btn btn-sm btn-primary" href="{% url 'reopen_engagement' eng.id %}"> Reopen Engagement</a>
             {% endif %}
         </div>
     </h3>
@@ -74,7 +74,7 @@
                     {% endif %}
                 </h4>
                 {% if not eng.lead %}
-                    <p><b><i><sub><a class="" href="/engagement/{{ eng.id }}/edit"> Edit </a> this engagement to add a
+                    <p><b><i><sub><a class="" href="{% url 'edit_engagement' eng.id %}"> Edit </a> this engagement to add a
                         lead.</sub></i></b></p>
                 {% endif %}
                 {% if eng.name %}
@@ -92,7 +92,7 @@
                     <a class="btn btn-sm btn-primary" target="_blank" href="{{ eng.test_strategy }}"> View Test
                         Strategy </a>
                 {% else %}
-                    <p><b><i><sub><a class="" href="/engagement/{{ eng.id }}/edit"> Edit </a> this engagement to add a
+                    <p><b><i><sub><a class="" href="{% url 'edit_engagement' eng.id %}"> Edit </a> this engagement to add a
                         test strategy.</sub></i></b></p>
                 {% endif %}
             </div>
@@ -103,11 +103,11 @@
                     {% if threat != 'none' %}
                         </h4>
                         <div class="btn-group">
-                            <a class="btn btn-sm btn-primary" href="/threatmodel/{{ eng.id }}"> Download Model</a>
-                            <a class="btn btn-sm btn-warning" href="/{{ eng.id }}/upload_threatmodel"> Edit</a>
+                            <a class="btn btn-sm btn-primary" href="{% url 'view_threatmodel' eng.id %}"> Download Model</a>
+                            <a class="btn btn-sm btn-warning" href="{% url 'upload_threatmodel' eng.id %}"> Edit</a>
                         </div>
                     {% else %}
-                        <a class="btn btn-sm btn-primary" href="/{{ eng.id }}/upload_threatmodel"> Upload Model</a></h4>
+                        <a class="btn btn-sm btn-primary" href="{% url 'upload_threatmodel' eng.id %}"> Upload Model</a></h4>
                     {% endif %}
             </div>
         </div>
@@ -116,9 +116,9 @@
     <h4 id="tests">
         Tests &nbsp;
         <div class="btn-group">
-            <a class="btn btn-sm btn-primary" href="/engagement/{{ eng.id }}/add_tests"> Add Tests</a>
-            <a class="btn btn-sm btn-primary" href="/engagement/{{ eng.id }}/add_nessus_scan">Upload Nessus Scan</a>
-            <a class="btn btn-sm btn-primary" href="/product/{{ eng.product.id }}">Done Testing</a>
+            <a class="btn btn-sm btn-primary" href="{% url 'add_tests' eng.id %}"> Add Tests</a>
+            <a class="btn btn-sm btn-primary" href="{% url 'add_nessus_scan' eng.id %}">Upload Nessus Scan</a>
+            <a class="btn btn-sm btn-primary" href="{% url 'view_product' eng.product.id %}">Done Testing</a>
         </div>
     </h4>
     {% if tests %}
@@ -143,9 +143,9 @@
                     <td>{{ test.notes.all|length }}</td>
                     <td>
                         <div class="btn-group">
-                            <a class="btn btn-sm btn-primary" href="/{{ test.id }}/view_test">View</a>
-                            <a class="btn btn-sm btn-warning" href="/{{ test.id }}/edit_test">Edit</a>
-                            <a class="btn btn-sm btn-danger" href="/{{ test.id }}/delete_test">Delete</a>
+                            <a class="btn btn-sm btn-primary" href="{% url 'view_test' test.id %}">View</a>
+                            <a class="btn btn-sm btn-warning" href="{% url 'edit_test' test.id %}">Edit</a>
+                            <a class="btn btn-sm btn-danger"  href="{% url 'delete_test' test.id %}">Delete</a>
                         </div>
                     </td>
                 </tr>
@@ -160,7 +160,7 @@
     <br/>
     <h4 id="checklist"> Check List
         {% if check %}
-            <a class="btn btn-sm btn-warning" href="/engagement/{{ eng.id }}/complete_checklist"> Edit </a>
+            <a class="btn btn-sm btn-warning" href="{% url 'complete_checklist' eng.id %}"> Edit </a>
             </h4>
 
             <table class="table-responsive tablesorter-bootstrap table table-condensed table-striped">
@@ -197,14 +197,14 @@
                 </tbody>
             </table>
         {% else %}
-            <a class="btn btn-sm btn-primary" href="/engagement/{{ eng.id }}/complete_checklist"> Complete Check
+            <a class="btn btn-sm btn-primary" href="{% url 'complete_checklist' eng.id %}"> Complete Check
                 List</a></h4>
         {% endif %}
     <br/>
     <hr/>
     <h4> Risk Acceptance
         {% if can_add_risk %}
-            <a class="btn btn-sm btn-primary" href="/engagement/{{ eng.id }}/upload_risk_acceptance"> Add </a>
+            <a class="btn btn-sm btn-primary" href="{% url 'upload_risk_acceptance$' eng.id %}"> Add </a>
         {% endif %}
     </h4>
     {% if risks_accepted %}
@@ -223,9 +223,9 @@
                     <td>{{ risk.reporter }}</td>
                     <td>{{ risk.created }}</td>
                     <td>{{ risk.accepted_findings.all|length }}</td>
-                    <td><a href="{{ eng.id }}/risk_approval/{{ risk.id }}/download">{{ risk.filename }}</a></td>
+                    <td><a href="{% url 'download_risk' eng.id risk.id %}">{{ risk.filename }}</a></td>
                     <td>
-                        <a class="btn btn-sm btn-primary" href="{{ eng.id }}/risk_approval/{{ risk.id }}"> View
+                        <a class="btn btn-sm btn-primary" href="{% url 'view_risk' eng.id risk.id %}"> View
                             Approval</a>
                     </td>
                 </tr>

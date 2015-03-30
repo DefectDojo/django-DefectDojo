@@ -7,6 +7,17 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Q
 from django.utils.timezone import now
+from pytz import timezone
+
+localtz = timezone(settings.TIME_ZONE)
+
+
+def get_current_date():
+    return localtz.normalize(now()).date()
+
+
+def get_current_datetime():
+    return localtz.normalize(now())
 
 
 # proxy class for convenience and UI
@@ -180,7 +191,7 @@ class ScanSettings(models.Model):
     addresses = models.TextField(default="none")
     user = models.ForeignKey(User, editable=False)
     date = models.DateTimeField(editable=False, blank=True,
-                                default=now)
+                                default=get_current_datetime)
     frequency = models.CharField(max_length=10000, null=True,
                                  blank=True)
     email = models.CharField(max_length=512)
@@ -201,7 +212,7 @@ removed ip_scans field
 class Scan(models.Model):
     scan_settings = models.ForeignKey(ScanSettings, default=1, editable=False)
     date = models.DateTimeField(editable=False, blank=True,
-                                default=now)
+                                default=get_current_datetime)
     protocol = models.CharField(max_length=10, default='TCP')
     status = models.CharField(max_length=10, default='Pending', editable=False)
     baseline = models.BooleanField(default=False,
@@ -298,7 +309,7 @@ class Endpoint(models.Model):
 class Notes(models.Model):
     entry = models.CharField(max_length=2400)
     date = models.DateTimeField(null=False, editable=False,
-                                default=now)
+                                default=get_current_datetime)
     author = models.ForeignKey(User, editable=False)
 
     def __unicode__(self):
@@ -341,7 +352,7 @@ class VA(models.Model):
 
 class Finding(models.Model):
     title = models.TextField(max_length=1000)
-    date = models.DateField(default=date.today)
+    date = models.DateField(default=get_current_date)
     cwe = models.IntegerField(default=0, null=True, blank=True)
     url = models.TextField(null=True, blank=True, editable=False)
     severity = models.CharField(max_length=200)
@@ -386,9 +397,12 @@ class Finding(models.Model):
 
     def age(self):
         if self.mitigated:
-            return (self.mitigated.date() - self.date).days
+            days = (self.mitigated.date() - localtz.localize(datetime.combine(self.date,
+                                                                              datetime.min.time())).date()).days
         else:
-            return (datetime.now().date() - self.date).days
+            days = (get_current_date() - localtz.localize(datetime.combine(self.date, datetime.min.time())).date()).days
+
+        return days if days > 0 else 0
 
     def long_desc(self):
         long_desc = ''
