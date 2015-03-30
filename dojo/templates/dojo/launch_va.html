@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-    <form class="form-horizontal" action="/{{ pid }}/launch_va" method="post">{% csrf_token %}
+    <form class="form-horizontal" action="{% url 'launch_va' pid %}" method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">

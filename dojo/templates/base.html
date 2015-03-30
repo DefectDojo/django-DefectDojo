@@ -67,7 +67,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="/"><img src="{{ STATIC_URL }}dojo/img/logo.png" alt="DefectDojo Logo"
+                <a class="navbar-brand" href="{% url 'home' %}"><img src="{{ STATIC_URL }}dojo/img/logo.png" alt="DefectDojo Logo"
                                                       width="240"/></a>
             </div>
             <!-- /.navbar-header -->
@@ -91,13 +91,13 @@
                     <ul class="dropdown-menu dropdown-user">
                         {% block settings-dropdown-items %}
                             {% if request.user.is_authenticated %}
-                                <li><a href="/profile"><i class="fa fa-user fa-fw"></i> {{ request.user.username }}</a>
+                                <li><a href="{% url 'view_profile' %}"><i class="fa fa-user fa-fw"></i> {{ request.user.username }}</a>
                                 </li>
                             {% endif %}
-                            <li><a href="/api/v1/doc/"><i class="fa fa-book fa-fw"></i> API Docs</a></li>
+                            <li><a href="{% url 'tastypie_swagger:index' %}"><i class="fa fa-book fa-fw"></i> API Docs</a></li>
                         {% endblock %}
                         {% if request.user.is_authenticated %}
-                            <li><a href="/logout"><i class="fa fa-sign-out fa-fw"></i> Logout</a></li>
+                            <li><a href="{% url 'logout' %}"><i class="fa fa-sign-out fa-fw"></i> Logout</a></li>
                         {% endif %}
                     </ul>
                     <!-- /.dropdown-user -->
@@ -111,7 +111,7 @@
                     <ul class="nav" id="side-menu">
                         <li class="sidebar-search">
                             <div class="input-group custom-search-form">
-                                <form role="search" method="get" action="/simple_search">
+                                <form role="search" method="get" action="{% url 'simple_search' %}">
                                     <div class="input-group">
                                         <input id="simple_search" type="text" name="query" class="form-control"
                                                placeholder="Search...">
@@ -126,15 +126,15 @@
                             <!-- /input-group -->
                         </li>
                         <li>
-                            <a href="/dashboard"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
+                            <a href="{% url 'dashboard' %}"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
                         </li>
                         <li>
-                            <a href="/product"><i class="fa fa-list fa-fw"></i> Products{% if request.user.is_staff %}<span class="glyphicon arrow"></span>{% endif %}</a>
+                            <a href="{% url 'product' %}"><i class="fa fa-list fa-fw"></i> Products{% if request.user.is_staff %}<span class="glyphicon arrow"></span>{% endif %}</a>
                             {% if request.user.is_staff %}
                             <ul class="nav nav-second-level">
 
                                     <li>
-                                        <a href="/product/type">View Product Types</a>
+                                        <a href="{% url 'product_type' %}">View Product Types</a>
                                     </li>
 
                             </ul>
@@ -143,50 +143,50 @@
                         </li>
                         {% if request.user.is_staff %}
                             <li>
-                                <a href="/engagement"><i class="fa fa-inbox fa-fw"></i> Engagements<span class="glyphicon arrow"></span></a>
+                                <a href="{% url 'engagement' %}"><i class="fa fa-inbox fa-fw"></i> Engagements<span class="glyphicon arrow"></span></a>
                                 <ul class="nav nav-second-level">
                                     <li>
-                                        <a href="/test_type">Test Types</a>
+                                        <a href="{% url 'test_type' %}">Test Types</a>
                                     </li>
                                     <li>
-                                        <a href="/dev_env">Development Environments</a>
+                                        <a href="{% url 'dev_env' %}">Development Environments</a>
                                     </li>
                                 </ul>
                                 <!-- /.nav-second-level -->
                             </li>
                             <li>
-                                <a href="#"><i class="fa fa-exclamation-triangle fa-fw"></i> Findings<span
+                                <a href="{% url 'open_findings' %}"><i class="fa fa-exclamation-triangle fa-fw"></i> Findings<span
                                         class="glyphicon arrow"></span></a>
                                 <ul class="nav nav-second-level">
                                     <li>
-                                        <a href="/open_findings">Open Findings</a>
+                                        <a href="{% url 'open_findings' %}">Open Findings</a>
                                     </li>
                                     <li>
-                                        <a href="/accepted_findings">Accepted Findings</a>
+                                        <a href="{% url 'accepted_findings' %}">Accepted Findings</a>
                                     </li>
                                     <li>
-                                        <a href="/closed_findings">Closed Findings</a>
+                                        <a href="{% url 'closed_findings' %}">Closed Findings</a>
                                     </li>
                                 </ul>
                                 <!-- /.nav-second-level -->
                             </li>
                         {% endif %}
                         <li>
-                            <a href="#"><i class="fa fa-line-chart  fa-fw"></i> Metrics<span
+                            <a href="{% url 'metrics' %}"><i class="fa fa-line-chart  fa-fw"></i> Metrics<span
                                     class="glyphicon arrow"></span></a>
                             <ul class="nav nav-second-level">
-                                <li><a href="/all_metrics"> All </a></li>
+                                <li><a href="{% url 'metrics_all' %}"> All </a></li>
                                 {% pt_metric_nav %}
-                                <li><a href="/all_metrics?date=5&view=dashboard"> Dashboard </a></li>
+                                <li><a href="{% url 'metrics' %}?date=5&view=dashboard"> Dashboard </a></li>
                                 {% if user.is_staff %}
 
 
                                     <li>
                                         <a href="#">Additional Metrics <span class="glyphicon arrow"></span></a>
                                         <ul class="nav nav-third-level">
-                                            <li><a href="/simple_metrics"> Simple Metrics </a></li>
-                                            <li><a href="/engineer_metrics"> Engineer Metrics </a></li>
-                                            <li><a href="/research_metrics"> Security Research Metrics </a></li>
+                                            <li><a href="{% url 'simple_metrics' %}"> Simple Metrics </a></li>
+                                            <li><a href="{% url 'engineer_metrics' %}"> Engineer Metrics </a></li>
+                                            <li><a href="{% url 'research_metrics' %}"> Security Research Metrics </a></li>
                                         </ul>
                                         <!-- /.nav-third-level -->
                                     </li>
@@ -201,7 +201,7 @@
                             <!-- /.nav-second-level -->
                         </li>
                         <li>
-                            <a href="/calendar"><i class="fa fa-calendar fa-fw"></i> Calendar</a>
+                            <a href="{% url 'calendar' %}"><i class="fa fa-calendar fa-fw"></i> Calendar</a>
                         </li>
 
                     </ul>
@@ -262,7 +262,7 @@
             <div class="row">
                 <div class="col-md-12 text-center text-">
                     <p>
-                        <a href="/"><img class="logo" src="{{ STATIC_URL }}dojo/img/chop.png" alt="DefectDojo Chop" height="45"/></a>
+                        <a href="{% url 'home' %}"><img class="logo" src="{{ STATIC_URL }}dojo/img/chop.png" alt="DefectDojo Chop" height="45"/></a>
                     </p>
 
                     <p>

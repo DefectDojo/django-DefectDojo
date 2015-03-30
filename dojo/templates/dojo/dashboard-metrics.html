@@ -21,7 +21,7 @@
     <div class="row navbar-fixed-top">
         <div class="col-md-12">
             <h2>{{ name }} For {{ start_date.date }} - {{ end_date.date }}
-                <a class="btn close pull-right" href="/all_metrics" aria-hidden="true">&times;</a>
+                <a class="btn close pull-right" href="{% url 'metrics' %}" aria-hidden="true">&times;</a>
             </h2>
         </div>
     </div>

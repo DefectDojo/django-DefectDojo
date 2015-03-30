@@ -20,11 +20,11 @@
                         {% for prod in prod_list %}
                             <tr>
                                 <td>
-                                    <a href="/product/{{ prod.id }}"><b>{{ prod.name }}</b></a>
+                                    <a href="{% url 'view_product' prod.id %}"><b>{{ prod.name }}</b></a>
                                 </td>
                                 <td>
                                     {% if prod.findings_count %}
-                                        <a href="/product/{{ prod.id }}/findings"><b>{{ prod.findings_count }}</b></a>
+                                        <a href="{% url 'view_product_findings' prod.id %}"><b>{{ prod.findings_count }}</b></a>
                                     {% else %}
                                         {{ prod.findings_count }}
                                     {% endif %}
@@ -52,7 +52,7 @@
                 {% if request.user.is_staff %}
                     <div class="panel-heading">Actions</div>
                     <div class="panel-body centered">
-                        <a class="btn btn-sm btn-primary" href="/product/add">
+                        <a class="btn btn-sm btn-primary" href="{% url 'new_product' %}">
                             Add Product
                         </a>
                     </div>
@@ -62,7 +62,7 @@
                     {{ prods.form.as_p }}
                     <div class="centered">
                         <input type="submit" class="btn btn-sm btn-primary" value="Apply"/><br/><br/>
-                        <a href="/product" class="clear"> [Clear Filters] </a>
+                        <a href="{% url 'product' %}" class="clear"> [Clear Filters] </a>
                     </div>
                 </form>
             </div>
