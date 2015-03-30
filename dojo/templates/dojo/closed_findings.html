@@ -19,7 +19,7 @@
                         {% for finding in findings %}
                             <tr>
                                 <td class="nowrap"><a title="{{ finding.title }}"
-                                                      href="/{{ finding.id }}/view_finding">{{ finding.title|truncatechars:50 }}</a>
+                                                      href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars:50 }}</a>
                                 </td>
                                 <td class="nowrap">{{ finding.date }}</td>
                                 <td class="">{{ finding.mitigated.date }}</td>
@@ -27,7 +27,7 @@
                                     <p class="text-error">
                                 {% else %}<p>{% endif %}{{ finding.severity }}</p></td>
                                 <td><a
-                                        href="/product/{{ finding.test.engagement.product.id }}"
+                                        href="{% url 'view_product' finding.test.engagement.product.id %}"
                                         title="{{ finding.test.engagement.product }}">{{ finding.test.engagement.product|truncatechars:15 }}</a>
                                 </td>
                             </tr>
@@ -48,7 +48,7 @@
                         {{ filtered.form.as_p }}
                         <div class="centered">
                             <input type="submit" class="btn btn-primary inline top" value="Apply"/><br/><br/>
-                            <a href="/open_findings"> [Clear Filters] </a>
+                            <a href="{% url 'closed_findings' %}"> [Clear Filters] </a>
                         </div>
                     </form>
                 {% endif %}

@@ -1,6 +1,6 @@
 <div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-header">
-        <form action="search" id="searchForm" name="searchForm">
+        <form action="{%  url 'search' tid %}" id="searchForm" name="searchForm">
             <input type="text" name="q" id="id_q" placeholder="Leave blank to display all "/>
             <input type="submit" value="Search"/>
         </form>
@@ -12,7 +12,7 @@
             No templates found
         {% endif %}
         {% for finding in findings %}
-            <p><a href="/{{ tid }}/add_findings/{{ finding.id }}">{{ finding }}  </a></p>
+            <p><a href="{% url 'add_findings' tid finding.id %}">{{ finding }}  </a></p>
         {% endfor %}
     </div>
     <script>

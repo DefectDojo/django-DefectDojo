@@ -40,7 +40,7 @@
                         {% for product in products %}
                             <tr>
                                 <td><a class="search-finding"
-                                       href="/product/{{ product.id }}">{{ product.name }}</a></td>
+                                       href="{%  url 'view_product' product.id %}">{{ product.name }}</a></td>
                                 <td>{{ product.description|truncatechars:20 }}</td>
                             </tr>
                         {% endfor %}
@@ -61,7 +61,7 @@
                         {% for finding in findings %}
                             <tr>
                                 <td><a class="search-finding"
-                                       href="/{{ finding.id }}/view_finding">{{ finding.title }}</a></td>
+                                       href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a></td>
                                 <td>{{ finding.date }}</td>
                             </tr>
                         {% endfor %}
@@ -81,7 +81,7 @@
                         <tbody>
                         {% for test in tests %}
                             <tr>
-                                <td><a class="search-finding" href="/{{ test.id }}/view_test">{{ test.test_type }}</a>
+                                <td><a class="search-finding" href="{% url 'view_test' test.id %}">{{ test.test_type }}</a>
                                 </td>
                                 <td>{{ test.target_start }}</td>
                             </tr>

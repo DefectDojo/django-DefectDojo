@@ -6,6 +6,7 @@ LOGIN_REDIRECT_URL = '/'
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTOCOL', 'https')
 SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_HTTPONLY = True
+TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 # Uncomment this line if you enable SSL
 # SESSION_COOKIE_SECURE = True
@@ -61,7 +62,7 @@ USE_TZ = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
-MEDIA_ROOT = 'DOJO_MEIDA_ROOT'
+MEDIA_ROOT = 'DOJO_MEDIA_ROOT'
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -72,7 +73,7 @@ MEDIA_URL = '/media/'
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/var/www/example.com/static/"
-STATIC_ROOT = "/var/www/example.com/static/"
+STATIC_ROOT = "DOJO_STATIC_ROOT"
 
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
@@ -107,9 +108,7 @@ BOWER_INSTALLED_APPS = (
     'jquery-ui',
     'text-highlighter',
     # directly from github since no bower comp available
-    'https://github.com/jumjum123/JUMFlot/blob/gh-pages/javascripts/jquery.flot.bubbles.js',
-    'https://github.com/jumjum123/JUMFlot/blob/gh-pages/javascripts/JUMFlot.min.js',
-    'https://github.com/jumjum123/JUMFlot/blob/gh-pages/javascripts/jquery.flot.mouse.js',
+    'https://github.com/jumjum123/JUMFlot.git',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -144,6 +143,7 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'dojo.urls'
 LOGIN_URL = '/login'
 LOGIN_EXEMPT_URLS = (
+    r'^',
     r'^static/',
     r'^all_metrics$',
     r'^product_type/(?P<mtype>\d+)/metrics$',
