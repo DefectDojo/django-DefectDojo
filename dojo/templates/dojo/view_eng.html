@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load display_tags %}
 {% block content %}
     <!-- start status bread crums -->
     <ul class="breadcrumb">
@@ -178,21 +179,21 @@
                 </thead>
                 <tbody>
                 <tr>
-                    <td><span class="pass_fail {{ check.session_management }}">{{ check.session_management }}</span>
+                    <td><span class="label label-{{ check.session_management|checklist_status }}">{{ check.session_management }}</span>
                     </td>
-                    <td><span class="pass_fail {{ check.encryption_crypto }}">{{ check.encryption_crypto }}</span></td>
+                    <td><span class="label label-{{ check.encryption_crypto|checklist_status }}">{{ check.encryption_crypto }}</span></td>
                     <td><span
-                            class="pass_fail {{ check.configuration_management }}">{{ check.configuration_management }}</span>
+                            class="label label-{{ check.configuration_management|checklist_status }}">{{ check.configuration_management }}</span>
                     </td>
-                    <td><span class="pass_fail {{ check.authentication }}">{{ check.authentication }}</span></td>
+                    <td><span class="label label-{{ check.authentication|checklist_status }}">{{ check.authentication }}</span></td>
                     <td><span
-                            class="pass_fail {{ check.authorization_and_access_control }}">{{ check.authorization_and_access_control }}</span>
+                            class="label label-{{ check.authorization_and_access_control|checklist_status }}">{{ check.authorization_and_access_control }}</span>
                     </td>
                     <td><span
-                            class="pass_fail {{ check.data_input_sanitization_validation }}">{{ check.data_input_sanitization_validation }}</span>
+                            class="label label-{{ check.data_input_sanitization_validation|checklist_status }}">{{ check.data_input_sanitization_validation }}</span>
                     </td>
-                    <td><span class="pass_fail {{ check.sensitive_data }}">{{ check.sensitive_data }}</span></td>
-                    <td><span class="pass_fail {{ check.other }}">{{ check.other }}</span></td>
+                    <td><span class="label label-{{ check.sensitive_data|checklist_status }}">{{ check.sensitive_data }}</span></td>
+                    <td><span class="label label-{{ check.other|checklist_status }}">{{ check.other }}</span></td>
                 </tr>
                 </tbody>
             </table>
