@@ -1632,7 +1632,7 @@ def complete_checklist(request, eid):
     return render(request,
                   'dojo/checklist.html',
                   {'form': form,
-
+                   'eid': eng.id,
                    'findings': findings,
                    'breadcrumbs': breadcrumbs})
 

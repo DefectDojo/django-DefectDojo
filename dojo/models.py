@@ -464,6 +464,15 @@ class Check_List(models.Model):
     engagement = models.ForeignKey(Engagement, editable=False,
                                    related_name='eng_for_check')
 
+    @staticmethod
+    def get_status(pass_fail):
+        if pass_fail == 'Pass':
+            return 'success'
+        elif pass_fail == 'Fail':
+            return 'danger'
+        else:
+            return 'warning'
+
 
 class BurpRawIssues(models.Model):
     burpVersion = models.CharField(max_length=12)
