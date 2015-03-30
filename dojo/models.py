@@ -6,6 +6,7 @@ from django.contrib import admin
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Q
+from django.utils.timezone import now
 
 
 # proxy class for convenience and UI
@@ -179,7 +180,7 @@ class ScanSettings(models.Model):
     addresses = models.TextField(default="none")
     user = models.ForeignKey(User, editable=False)
     date = models.DateTimeField(editable=False, blank=True,
-                                default=datetime.now)
+                                default=now)
     frequency = models.CharField(max_length=10000, null=True,
                                  blank=True)
     email = models.CharField(max_length=512)
@@ -200,7 +201,7 @@ removed ip_scans field
 class Scan(models.Model):
     scan_settings = models.ForeignKey(ScanSettings, default=1, editable=False)
     date = models.DateTimeField(editable=False, blank=True,
-                                default=datetime.now)
+                                default=now)
     protocol = models.CharField(max_length=10, default='TCP')
     status = models.CharField(max_length=10, default='Pending', editable=False)
     baseline = models.BooleanField(default=False,
@@ -297,7 +298,7 @@ class Endpoint(models.Model):
 class Notes(models.Model):
     entry = models.CharField(max_length=2400)
     date = models.DateTimeField(null=False, editable=False,
-                                default=datetime.now)
+                                default=now)
     author = models.ForeignKey(User, editable=False)
 
     def __unicode__(self):
@@ -497,7 +498,7 @@ class Risk_Acceptance(models.Model):
     reporter = models.ForeignKey(User, editable=False)
     notes = models.ManyToManyField(Notes, editable=False)
     created = models.DateTimeField(null=False, editable=False,
-                                   default=datetime.now)
+                                   default=now)
 
     def __unicode__(self):
         return "Risk Acceptance added on %s" % self.created.strftime(
