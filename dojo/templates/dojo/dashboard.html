@@ -158,9 +158,9 @@
     <script src="{{ STATIC_URL }}flot.tooltip/js/jquery.flot.tooltip.min.js"></script>
     <script src="{{ STATIC_URL }}flot/jquery.flot.stack.js"></script>
     {% if punchcard %}
-        <script src="{{ STATIC_URL }}jquery.flot.mouse/index.js"></script>
-        <script src="{{ STATIC_URL }}JUMFlot.min/index.js"></script>
-        <script src="{{ STATIC_URL }}jquery.flot.bubbles/index.js"></script>
+        <script src="{{ STATIC_URL }}JUMFlot/JUMFlot.min.js"></script>
+        <script src="{{ STATIC_URL }}JUMFlot/jquery.flot.mouse.js"></script>
+        <script src="{{ STATIC_URL }}JUMFlot/jquery.flot.bubbles.js"></script>
     {% endif %}
     <script>
         $(function () {
@@ -289,6 +289,9 @@
                         series: {
                             bubbles: {
                                 active: true,
+                                debug: {
+                                    active: false
+                                },
                                 show: true,
                                 bubblelabel: {
                                     show: false,
