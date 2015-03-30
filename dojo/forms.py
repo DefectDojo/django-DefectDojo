@@ -199,8 +199,8 @@ class DoneForm(forms.Form):
 
 
 class UploadThreatForm(forms.Form):
-    file = forms.ImageField(widget=forms.widgets.FileInput(
-        attrs={"accept": ".jpg,.png"}),
+    file = forms.FileField(widget=forms.widgets.FileInput(
+        attrs={"accept": ".jpg,.png,.pdf"}),
                             label="Select Threat Model")
 
 

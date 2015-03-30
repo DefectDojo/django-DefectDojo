@@ -2,8 +2,8 @@
 {% block content %}
     <h3> {{ test.test_type }}
         <div class="btn-group">
-            <a class="btn btn-primary btn-sm" href="gen_report"> Generate Report</a>
-            <a class="btn btn-primary btn-sm" href="add_findings"> Add Findings </a>
+            <a class="btn btn-primary btn-sm" href="{% url 'test_report' test.id %}"> Generate Report</a>
+            <a class="btn btn-primary btn-sm" href="{% url 'add_findings' test.id %}"> Add Findings </a>
             <a class="btn btn-primary btn-sm" href="#add_notes"> Add Notes </a>
         </div>
     </h3>
@@ -34,7 +34,7 @@
                     <tbody>
                     {% for finding in findings %}
                         <tr class={% if finding.active %} "active_finding" {% else %} "inactive_finding" {% endif %}>
-                        <td><a href="/{{ finding.id }}/view_finding">{{ finding.title }}</a></td>
+                        <td><a href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a></td>
                         <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
                             <span class="text-error">
                         {% else %}<span>{% endif %}{{ finding.severity }}</span></td>
@@ -77,7 +77,7 @@
                             <td>
                                 {{ note }}
                                 {% ifequal person note.author.username %}
-                                    <a href="/{{ test.id }}/view_test/{{ note.id }}"> [X] </a>
+                                    <a href="{% url 'delete_test_note' test.id note.id%}"> [X] </a>
                                 {% endifequal %}
                             </td>
                         </tr>
@@ -91,7 +91,7 @@
         </div>
         <br/>
 
-        <form class="form-horizontal" id="add_notes" action="/{{ test.id }}/view_test" method="post">{% csrf_token %}
+        <form class="form-horizontal" id="add_notes" action="{% url 'view_test' test.id %}" method="post">{% csrf_token %}
             {% include "dojo/form_fields.html" with form=form %}
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">

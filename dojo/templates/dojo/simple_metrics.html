@@ -4,7 +4,7 @@
 {% block content %}
 
     <h2> {{ name }}</h2>
-    <form class="simple_metrics" action="/simple_metrics" method="post">{% csrf_token %}
+    <form class="simple_metrics" action="{% url 'simple_metrics' %}" method="post">{% csrf_token %}
         {{ form.as_p }}
         <input class="btn btn-primary" type="submit" value="Generate Metrics For Selected Month/Year"/>
     </form>
@@ -13,7 +13,7 @@
     {% for key, value in findings.items %}
 
         <h3 class="inline-block">{{ key.name }}</h3> [
-        <a href="/product_type/{{ key.id }}/metrics" class="inline-block">View Details</a>]
+        <a href="{% url 'product_type_metrics' key.id %}" class="inline-block">View Details</a>]
         <div class="panel panel-default">
             <table class="table-responsive table table-bordered table-condensed table-striped">
                 <thead>

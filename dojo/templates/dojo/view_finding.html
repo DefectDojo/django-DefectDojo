@@ -16,7 +16,7 @@
                 {% if finding.risk_acceptance_set.all %}
                     <li>
                         <b> Acceptance: </b> <a
-                            href="/engagement/{{ finding.test.engagement.id }}/risk_approval/{{ finding.risk_acceptance_set.all.0.id }}">View
+                            href="{% url 'view_risk' finding.test.engagement.id finding.risk_acceptance_set.all.0.id %}">View
                         Risk Acceptance</a>
                     </li>
                 {% endif %}
@@ -46,10 +46,10 @@
 
     {% if user.is_staff %}
         <div class="btn-group">
-            <a class="btn btn-warning" href="edit_finding"> Edit Finding </a>
-            <a class="btn btn-info" href="mktemplate"> Make Finding a Template</a>
-            <a class="btn btn-primary" href="close_finding"> Close Finding</a>
-            <a class="btn btn-danger" href="delete_finding"
+            <a class="btn btn-warning" href="{% url 'edit_finding' finding.id %}"> Edit Finding </a>
+            <a class="btn btn-info" href="{% url 'mktemplate' finding.id %}"> Make Finding a Template</a>
+            <a class="btn btn-primary" href="{% url 'close_finding' finding.id %}"> Close Finding</a>
+            <a class="btn btn-danger" href="{% url 'delete_finding' finding.id %}"
                onclick="return confirm('Are you sure you want to delete this finding?')"> Delete Finding </a>
         </div>
     {% endif %}
@@ -81,7 +81,7 @@
                         <td>
                             {{ note }}
                             {% ifequal user.username note.author.username %}
-                                <a href="view_finding/{{ note.id }}"> [X] </a>
+                                <a href="{% url 'delete_finding_note' finding.id note.id %}"> [X] </a>
                             {% endifequal %}
                         </td>
                     </tr>
@@ -94,7 +94,7 @@
         {% endif %}
     </div>
     <br/>
-    <form class="form-horizontal" action="/{{ finding.id }}/view_finding" method="post">{% csrf_token %}
+    <form class="form-horizontal" action="{% url 'view_finding' finding.id %}" method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">

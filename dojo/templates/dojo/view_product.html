@@ -3,9 +3,9 @@
     <h3> {{ prod }}
         {% if user.is_staff %}
             <div class="btn-group">
-            <a class="btn btn-sm btn-warning" href="/{{ prod.id }}/edit_product">Edit</a>
+            <a class="btn btn-sm btn-warning" href="{% url 'edit_product' prod.id %}">Edit</a>
         {% endif %}
-        <a class="btn btn-sm btn-primary" href="/product/{{ prod.id }}/findings">Open Findings</a>
+        <a class="btn btn-sm btn-primary" href="{% url 'view_product_findings' prod.id %}">Open Findings</a>
         {% if user.is_staff %}
             </div>
         {% endif %}
@@ -37,7 +37,7 @@
     </div>
     <br/>
     {% if user.is_staff %}
-        <h4> Active Engagements <a class="btn btn-sm btn-primary" href="/{{ prod.id }}/new_engagement"> New
+        <h4> Active Engagements <a class="btn btn-sm btn-primary" href="{% url 'new_eng_for_prod' prod.id %}"> New
             Engagement </a></h4>
         {% if engs %}
             <table class="table-responsive tablesorter-bootstrap table table-condensed table-striped table-hover">
@@ -57,7 +57,7 @@
                     <td>{{ eng.lead }}</td>
                     <td>{{ eng.target_start }}</td>
                     <td>{{ eng.target_end }}</td>
-                    <td><a class="btn btn-sm btn-primary" href="/engagement/{{ eng.id }}">View Details</a>
+                    <td><a class="btn btn-sm btn-primary" href="{% url 'view_engagement' eng.id %}">View Details</a>
                 {% endfor %}
                 </tbody>
             </table>
@@ -68,7 +68,7 @@
     <hr/>
     {% if authorized %}
         <h4> Scans
-            <a class="btn btn-success btn-sm" href="/{{ prod.id }}/gmap"> Set Baseline</a>
+            <a class="btn btn-success btn-sm" href="{% url 'gmap' prod.id %}"> Set Baseline</a>
         </h4>
         {% if scan_sets %}
             <table class="table-responsive tablesorter-bootstrap table table-condensed table-striped table-hover">
@@ -88,7 +88,7 @@
                         <td>{{ scan.date }}</td>
                         <td>{{ scan.frequency }}</td>
                         <td>{{ scan.protocol }}</td>
-                        <td><a class="btn btn-sm btn-primary" href="/{{ scan.id }}/view_scan_settings"> View
+                        <td><a class="btn btn-sm btn-primary" href="{% url 'view_scan_settings' scan.product.id scan.id %}"> View
                             Details </a></td>
                     </tr>
                 {% endfor %}
@@ -118,7 +118,7 @@
                 <td>{{ eng.lead }}</td>
                 <td>{{ eng.target_start }}</td>
                 <td>{{ eng.target_end }}</td>
-                <td><a class="btn btn-sm btn-primary" href="/engagement/{{ eng.id }}">View Details</a>
+                <td><a class="btn btn-sm btn-primary" href="{% url 'view_engagement' eng.id %}">View Details</a>
             {% endfor %}
             </tbody>
         </table>

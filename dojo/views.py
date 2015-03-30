@@ -22,7 +22,8 @@ from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.validators import validate_ipv46_address
 from django.db.models import Q
-from django.http import HttpResponseRedirect, StreamingHttpResponse
+from django.http import HttpResponseRedirect, StreamingHttpResponse, HttpResponseForbidden
+from django.core.urlresolvers import reverse
 from django.shortcuts import render, get_object_or_404
 from pytz import timezone
 from tastypie.models import ApiKey
@@ -95,7 +96,7 @@ def engineer_metrics(request):
     if request.user.is_superuser:
         users = Dojo_User.objects.filter(is_staff=True).order_by('username')
     else:
-        return HttpResponseRedirect('/%d/view_engineer' % (request.user.id))
+        return HttpResponseRedirect(reverse('view_engineer', args=(request.user.id,)))
 
     return render(request,
                   'dojo/engineer_metrics.html',
@@ -118,7 +119,7 @@ def view_engineer(request, eid):
     if not (request.user.is_superuser
             or request.user.username == 'root'
             or request.user.username == user.username):
-        return HttpResponseRedirect('/engineer_metrics')
+        return HttpResponseRedirect(reverse('engineer_metrics'))
     now = localtz.localize(datetime.today())
 
     findings = Finding.objects.filter(reporter=user, verified=True)
@@ -279,9 +280,7 @@ def view_engineer(request, eid):
                     severity='Low'
                 ).count()
         prod = Product.objects.get(id=product)
-        all_findings_link = "<a href='/product/%d/findings'>%s</a>" % (
-            prod.id,
-            prod.name)
+        all_findings_link = "<a href='%s'>%s</a>" % (reverse('view_product_findings', args=(prod.id,)), prod.name)
         update.append([all_findings_link, z_count, o_count, t_count, h_count,
                        z_count + o_count + t_count + h_count])
     total_update = []
@@ -313,8 +312,7 @@ def view_engineer(request, eid):
                     mitigated__isnull=True,
                     severity='Low').count()
         prod = Product.objects.get(id=product)
-        all_findings_link = "<a href='/product/%d/findings'>%s</a>" % (
-            prod.id, prod.name)
+        all_findings_link = "<a href='%s'>%s</a>" % (reverse('view_product_findings', args=(prod.id,)), prod.name)
         total_update.append([all_findings_link, z_count, o_count, t_count,
                              h_count, z_count + o_count + t_count + h_count])
 
@@ -563,6 +561,7 @@ def all_product_findings(request, pid):
     return render(request,
                   "dojo/all_product_findings.html",
                   {"findings": page,
+                   "pid": pid,
                    "filtered": result,
                    "user": request.user,
                    "breadcrumbs": get_breadcrumbs(p)})
@@ -1002,7 +1001,7 @@ def metrics(request, mtype):
     for p in top_ten_products:
         open_finds = p.open_findings(start_date, end_date)
         update.append(
-            ["<a href='/product/%d/findings'>%s</a>" % (p.id, p.name),
+            ["<a href='%s'>%s</a>" % (reverse('view_product_findings', args=(p.id,)), p.name),
              open_finds['Critical'],
              open_finds['High'],
              open_finds['Medium'],
@@ -1046,8 +1045,7 @@ def metrics(request, mtype):
 
         if finding.test.engagement.product.name not in in_period_details:
             in_period_details[finding.test.engagement.product.name] = {
-                'path': '/product/%d/findings' % (
-                    finding.test.engagement.product.id),
+                'path': reverse('view_product_findings', args=(finding.test.engagement.product.id,)),
                 'Critical': 0, 'High': 0, 'Medium': 0, 'Low': 0, 'Info': 0, 'Total': 0}
         in_period_details[
             finding.test.engagement.product.name
@@ -1060,8 +1058,7 @@ def metrics(request, mtype):
 
             if finding.test.engagement.product.name not in closed_in_period_details:
                 closed_in_period_details[finding.test.engagement.product.name] = {
-                    'path': '/product/%d/findings' % (
-                        finding.test.engagement.product.id),
+                    'path': reverse('view_product_findings', args=(finding.test.engagement.product.id,)),
                     'Critical': 0, 'High': 0, 'Medium': 0, 'Low': 0, 'Info': 0, 'Total': 0}
             closed_in_period_details[
                 finding.test.engagement.product.name
@@ -1103,8 +1100,7 @@ def metrics(request, mtype):
         accepted_in_period_counts['Total'] += 1
         if finding.test.engagement.product.name not in accepted_in_period_details:
             accepted_in_period_details[finding.test.engagement.product.name] = {
-                'path': '/product/%d/findings' % (
-                    finding.test.engagement.product.id),
+                'path': reverse('view_product_findings', args=(finding.test.engagement.product.id,)),
                 'Critical': 0, 'High': 0, 'Medium': 0, 'Low': 0, 'Info': 0, 'Total': 0}
         accepted_in_period_details[
             finding.test.engagement.product.name
@@ -1440,7 +1436,7 @@ def old_metrics(request, mtype):
     for p in top_ten_products:
         open_finds = p.open_findings(start_date, end_date)
         update.append(
-            ["<a href='/product/%d/findings'>%s</a>" % (p.id, p.name),
+            ["<a href='%s'>%s</a>" % (reverse('view_product_findings', args=(p.id,)), p.name),
              open_finds['Critical'],
              open_finds['High'],
              open_finds['Medium'],
@@ -1492,8 +1488,7 @@ def old_metrics(request, mtype):
     for finding in findings:
         if finding.test.engagement.product.name not in in_period_details:
             in_period_details[finding.test.engagement.product.name] = {
-                'path': '/product/%d/findings' % (
-                    finding.test.engagement.product.id),
+                'path': reverse('view_product_findings', args=(finding.test.engagement.product.id,)),
                 'Critical': 0, 'High': 0, 'Medium': 0, 'Low': 0, 'Total': 0}
         in_period_details[
             finding.test.engagement.product.name
@@ -1532,8 +1527,7 @@ def old_metrics(request, mtype):
         if finding.test.engagement.product.name not in accepted_in_pd_deets:
             accepted_in_pd_deets[
                 finding.test.engagement.product.name
-            ] = {'path': '/product/%d/findings' % (
-                finding.test.engagement.product.id),
+            ] = {'path': reverse('view_product_findings', args=(finding.test.engagement.product.id,)),
                  'Critical': 0, 'High': 0, 'Medium': 0,
                  'Low': 0, 'Total': 0}
         accepted_in_pd_deets[
@@ -1590,40 +1584,11 @@ def old_metrics(request, mtype):
     })
 
 
-"""
-Greg
-status:??
-TODO: figure it out
-I'm not sure if we're still using this
-"""
-
-
-@user_passes_test(lambda u: u.is_staff)
-def view_checklist(request, cid):
-    check = get_object_or_404(Check_List, id=cid)
-    test = Test.objects.get(id=check.test_id)
-    return render(request,
-                  'dojo/view_checklist.html',
-                  {'check': check,
-                   'breadcrumbs': get_breadcrumbs(
-                       title="View Checklist",
-                       obj=test)})
-
-
 def home(request):
-    return HttpResponseRedirect('/product')
+    if request.user.is_authenticated() and request.user.is_staff:
+        return HttpResponseRedirect(reverse('dashboard'))
 
-
-"""
-Greg:
-status: not in use, most likely obslete
-self-service tool portal that has been moved down to a product level
-"""
-
-
-@user_passes_test(lambda u: u.is_staff)
-def tools(request):
-    return render(request, 'dojo/tools.html')
+    return HttpResponseRedirect(reverse('metrics'))
 
 
 """
@@ -1658,7 +1623,7 @@ def complete_checklist(request, eid):
                                  messages.SUCCESS,
                                  'Checklist saved.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect('/engagement/%s' % eid)
+            return HttpResponseRedirect(reverse('view_engagement', args=(eid,)))
     else:
         tests = Test.objects.filter(engagement=eng)
         findings = Finding.objects.filter(test__in=tests).all()
@@ -1667,6 +1632,7 @@ def complete_checklist(request, eid):
     return render(request,
                   'dojo/checklist.html',
                   {'form': form,
+
                    'findings': findings,
                    'breadcrumbs': breadcrumbs})
 
@@ -1697,7 +1663,7 @@ def gmap(request, pid):
                                  messages.SUCCESS,
                                  'Scan settings saved.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect('/product/%s' % pid)
+            return HttpResponseRedirect(reverse('view_product', args=(pid,)))
         else:
             messages.add_message(request,
                                  messages.ERROR,
@@ -1734,7 +1700,7 @@ def view_scan(request, sid):
                                  'Scan results deleted successfully.',
                                  extra_tags='alert-success')
             return HttpResponseRedirect(
-                '/%d/view_scan_settings' % scan_settings_id)
+                reverse('view_scan_settings', args=(prod.id, scan.id,)))
         else:
             messages.add_message(
                 request,
@@ -1770,7 +1736,7 @@ status: completed in use
 """
 
 
-def view_scan_settings(request, sid):
+def view_scan_settings(request, pid, sid):
     scan_settings = get_object_or_404(ScanSettings, id=sid)
     user = request.user
     if (user.is_staff or user in scan_settings.product.authorized_users.all()):
@@ -1802,7 +1768,7 @@ def view_scan_settings(request, sid):
                                  'Scan successfully started.',
                                  extra_tags='alert-success')
             # need to redirect else reload will kick off new scans
-            return HttpResponseRedirect('/%s/view_scan_settings' % sid)
+            return HttpResponseRedirect(reverse('view_scan_settings', args=(scan_settings.product.id, sid,)))
 
     for scan in scan_settings.scan_set.all():
         if scan.status in ["Running", "Pending"]:
@@ -1824,8 +1790,9 @@ view scan settings for self-service scan
 """
 
 
-def edit_scan_settings(request, sid):
+def edit_scan_settings(request, pid, sid):
     old_scan = ScanSettings.objects.get(id=sid)
+    pid = old_scan.product.id
     user = request.user
     if (user.is_staff or user in old_scan.product.authorized_users.all()):
         pass
@@ -1841,7 +1808,7 @@ def edit_scan_settings(request, sid):
                                      messages.SUCCESS,
                                      'Scan settings saved.',
                                      extra_tags='alert-success')
-                return HttpResponseRedirect('/%s/view_scan_settings' % sid)
+                return HttpResponseRedirect(reverse('view_scan_settings', args=(old_scan.product.id, sid,)))
             else:
                 messages.add_message(request,
                                      messages.ERROR,
@@ -1851,7 +1818,8 @@ def edit_scan_settings(request, sid):
                               'dojo/edit_scan_settings.html',
                               {'form': form,
                                'breadcrumbs': get_breadcrumbs(title="Scan"),
-                               'sid': sid})
+                               'sid': sid,
+                               'pid': pid})
         elif request.POST.get('delete'):
             pid = old_scan.product.id
             old_scan.delete()
@@ -1859,7 +1827,7 @@ def edit_scan_settings(request, sid):
                                  messages.SUCCESS,
                                  'Scan settings deleted.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect("/product/" + str(pid))
+            return HttpResponseRedirect(reverse('view_product', args=(pid,)))
     try:
         form = ScanSettingsForm(instance=old_scan)
     except:
@@ -1868,7 +1836,8 @@ def edit_scan_settings(request, sid):
                   'dojo/edit_scan_settings.html',
                   {'form': form,
                    'breadcrumbs': get_breadcrumbs(obj=old_scan),
-                   'sid': sid})
+                   'sid': sid,
+                   'pid': pid})
 
 
 """
@@ -1894,12 +1863,13 @@ def upload_threatmodel(request, eid):
                                  messages.SUCCESS,
                                  'Threat model saved.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect('/engagement/%s' % eid)
+            return HttpResponseRedirect(reverse('view_engagement', args=(eid,)))
     else:
         form = UploadThreatForm()
     return render(request,
                   'dojo/up_threat.html',
                   {'form': form,
+                   'eng': eng,
                    'breadcrumbs': breadcrumbs})
 
 
@@ -1926,13 +1896,14 @@ def add_nessus_scan(request, eid):
                                  messages.SUCCESS,
                                  'Nessus scan saved.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect('/engagement/%s' % eid)
+            return HttpResponseRedirect(reverse('view_engagement', args=(eid,)))
     else:
         form = UploadFileForm()
 
     return render(request,
                   'dojo/add_nessus_scan.html',
                   {'form': form,
+                   'eid': eng.id,
                    'breadcrumbs': get_breadcrumbs(title="Upload a Nessus scan",
                                                   obj=eng)})
 
@@ -2122,7 +2093,7 @@ def upload_risk(request, eid):
                                  messages.SUCCESS,
                                  'Risk acceptance saved.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect('/engagement/%s' % eid)
+            return HttpResponseRedirect(reverse('view_engagement', args=(eid,)))
     else:
         form = UploadRiskForm(initial={'reporter': request.user})
 
@@ -2152,12 +2123,12 @@ def handle_uploaded_file(f, eid, user, scan_date):
 
 
 def handle_uploaded_threat(f, eng):
-    with open(settings.MEDIA_ROOT + '/threat/%s.pdf' % eng.id,
+    name, extension = os.path.splitext(f.name)
+    with open(settings.MEDIA_ROOT + '/threat/%s%s' % (eng.id, extension),
               'wb+') as destination:
         for chunk in f.chunks():
             destination.write(chunk)
-    eng.tmodel_path = settings.MEDIA_ROOT + '/threat/%s.pdf' % (
-        eng.id)
+    eng.tmodel_path = settings.MEDIA_ROOT + '/threat/%s%s' % (eng.id, extension)
     eng.save()
 
 
@@ -2175,7 +2146,7 @@ def change_password(request):
                                      messages.SUCCESS,
                                      'Your password has been changed.',
                                      extra_tags='alert-success')
-                return HttpResponseRedirect('/profile')
+                return HttpResponseRedirect(reverse('view_profile'))
 
         messages.add_message(request,
                              messages.ERROR,
@@ -2192,7 +2163,7 @@ def logout_view(request):
                          messages.SUCCESS,
                          'You have logged out successfully.',
                          extra_tags='alert-success')
-    return HttpResponseRedirect('/login')
+    return HttpResponseRedirect(reverse('login'))
 
 
 def template_search(request):
@@ -2324,7 +2295,7 @@ def delete_test(request, tid):
                                      messages.SUCCESS,
                                      'Test and relationships removed.',
                                      extra_tags='alert-success')
-                return HttpResponseRedirect('/engagement/%d' % eng.id)
+                return HttpResponseRedirect(reverse('view_engagement', args=(eng.id,)))
 
     return render(request, 'dojo/delete_test.html',
                   {'test': test,
@@ -2333,28 +2304,34 @@ def delete_test(request, tid):
                    'breadcrumbs': get_breadcrumbs(obj=test)})
 
 
+@user_passes_test(lambda u: u.is_staff)
 def delete_test_note(request, tid, nid):
     note = Notes.objects.get(id=nid)
     test = Test.objects.get(id=tid)
-    test.notes.remove(note)
-    note.delete()
-    messages.add_message(request,
-                         messages.SUCCESS,
-                         'Note removed.',
-                         extra_tags='alert-success')
-    return view_test(request, tid)
+    if note.author == request.user:
+        test.notes.remove(note)
+        note.delete()
+        messages.add_message(request,
+                             messages.SUCCESS,
+                             'Note removed.',
+                             extra_tags='alert-success')
+        return view_test(request, tid)
+    return HttpResponseForbidden()
 
 
+@user_passes_test(lambda u: u.is_staff)
 def delete_finding_note(request, tid, nid):
     note = get_object_or_404(Notes, id=nid)
-    finding = get_object_or_404(Finding, id=tid)
-    finding.notes.remove(note)
-    note.delete()
-    messages.add_message(request,
-                         messages.SUCCESS,
-                         'Note removed.',
-                         extra_tags='alert-success')
-    return view_finding(request, tid)
+    if note.author == request.user:
+        finding = get_object_or_404(Finding, id=tid)
+        finding.notes.remove(note)
+        note.delete()
+        messages.add_message(request,
+                             messages.SUCCESS,
+                             'Note removed.',
+                             extra_tags='alert-success')
+        return view_finding(request, tid)
+    return HttpResponseForbidden()
 
 
 def view_finding(request, fid):
@@ -2411,7 +2388,7 @@ def close_finding(request, fid):
                                  messages.SUCCESS,
                                  'Finding closed.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect('/%s/view_test' % finding.test.id)
+            return HttpResponseRedirect(reverse('view_test', args=(finding.test.id,)))
 
     else:
         form = CloseFindingForm()
@@ -2431,7 +2408,7 @@ def delete_finding(request, fid):
                          messages.SUCCESS,
                          'Finding deleted successfully.',
                          extra_tags='alert-success')
-    return HttpResponseRedirect('/%s/view_test' % tid)
+    return HttpResponseRedirect(reverse('view_test', args=(tid,)))
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -2443,7 +2420,7 @@ def close_eng(request, eid):
                          messages.SUCCESS,
                          'Engagement closed successfully.',
                          extra_tags='alert-success')
-    return HttpResponseRedirect('/product/%s' % eng.product.id)
+    return HttpResponseRedirect(reverse('view_product', args=(eng.product.id,)))
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -2455,7 +2432,7 @@ def reopen_eng(request, eid):
                          messages.SUCCESS,
                          'Engagement reopened successfully.',
                          extra_tags='alert-success')
-    return HttpResponseRedirect('/engagement/%s' % eid)
+    return HttpResponseRedirect(reverse('view_engagement', args=(eid,)))
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -2463,7 +2440,8 @@ def view_threatmodel(request, eid):
     eng = get_object_or_404(Engagement, pk=eid)
     response = StreamingHttpResponse(
         FileIterWrapper(open(eng.tmodel_path)))
-    response['Content-Disposition'] = 'attachment; filename=threatmodel.pdf'
+    fileName, fileExtension = os.path.splitext(eng.tmodel_path)
+    response['Content-Disposition'] = 'attachment; filename=threatmodel' + fileExtension
 
     return response
 
@@ -2608,7 +2586,7 @@ def delete_risk(request, eid, raid):
                          messages.SUCCESS,
                          'Risk acceptance deleted successfully.',
                          extra_tags='alert-success')
-    return HttpResponseRedirect("/engagement/%d" % eng.id)
+    return HttpResponseRedirect(reverse("view_engagement", args=(eng.id,)))
 
 
 class FileIterWrapper(object):
@@ -2683,7 +2661,7 @@ def new_product(request):
                                  messages.SUCCESS,
                                  'Product added successfully.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect('/product')
+            return HttpResponseRedirect(reverse('product'))
     else:
         form = ProductForm()
     return render(request, 'dojo/new_product.html',
@@ -2702,7 +2680,7 @@ def edit_product(request, pid):
                                  messages.SUCCESS,
                                  'Product updated successfully.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect('/product/%s' % pid)
+            return HttpResponseRedirect(reverse('view_product', args=(pid,)))
     else:
         form = ProductForm(instance=prod,
                            initial={'auth_users': prod.authorized_users.all()})
@@ -2747,10 +2725,9 @@ def new_engagement(request):
                                  'Engagement added successfully.',
                                  extra_tags='alert-success')
             if "_Add Tests" in request.POST:
-                return HttpResponseRedirect('/engagement/' +
-                                            str(new_eng.id) + '/add_tests')
+                return HttpResponseRedirect(reverse('add_tests', args=(new_eng.id,)))
             else:
-                return HttpResponseRedirect('/engagement/%d' % new_eng.id)
+                return HttpResponseRedirect(reverse('view_engagement', args=(new_eng.id,)))
     else:
         form = EngForm2()
 
@@ -2771,10 +2748,9 @@ def edit_engagement(request, eid):
                                  'Engagement updated successfully.',
                                  extra_tags='alert-success')
             if '_Add Tests' in request.POST:
-                return HttpResponseRedirect(
-                    '/engagement/' + str(eng.id) + '/add_tests')
+                return HttpResponseRedirect(reverse('add_tests', args=(eng.id,)))
             else:
-                return HttpResponseRedirect('/engagement/%d' % eng.id)
+                return HttpResponseRedirect(reverse('view_engagement', args=(eng.id,)))
     else:
         form = EngForm2(instance=eng)
     return render(request, 'dojo/new_eng.html',
@@ -2801,10 +2777,9 @@ def new_eng_for_app(request, pid):
                                  'Engagement added successfully.',
                                  extra_tags='alert-success')
             if "_Add Tests" in request.POST:
-                return HttpResponseRedirect(
-                    '/engagement/' + str(new_eng.id) + '/add_tests')
+                return HttpResponseRedirect(reverse('add_tests', args=(new_eng.id,)))
             else:
-                return HttpResponseRedirect('/engagement/%d' % new_eng.id)
+                return HttpResponseRedirect(reverse('view_engagement', args=(new_eng.id,)))
     else:
         form = EngForm(initial={})
     return render(request, 'dojo/new_eng.html',
@@ -2827,13 +2802,11 @@ def add_tests(request, eid):
                                  'Test added successfully.',
                                  extra_tags='alert-success')
             if '_Add Another Test' in request.POST:
-                return HttpResponseRedirect(
-                    '/engagement/%d/add_tests' % (eng.id))
+                return HttpResponseRedirect(reverse('add_tests', args=(eng.id,)))
             elif '_Add Findings' in request.POST:
-                return HttpResponseRedirect(
-                    '/' + str(new_test.id) + '/add_findings')
+                return HttpResponseRedirect(reverse('add_findings', args=(new_test.id,)))
             elif '_Finished' in request.POST:
-                return HttpResponseRedirect('/engagement/%d' % eng.id)
+                return HttpResponseRedirect(reverse('view_engagement', args=(eng.id,)))
     else:
         form = TestForm()
     return render(request, 'dojo/add_tests.html',
@@ -2856,7 +2829,7 @@ def calc(request, last_month):
         if count >= last_month:
             find.date = datetime.now(tz=localtz).date()
             find.save()
-    return HttpResponseRedirect('/login')
+    return HttpResponseRedirect(reverse('login'))
 
 
 def get_numerical_severity(s):
@@ -2893,9 +2866,9 @@ def add_findings(request, tid):
                                  'Finding added successfully.',
                                  extra_tags='alert-success')
             if '_Finished' in request.POST:
-                return HttpResponseRedirect('view_test')
+                return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
             else:
-                return HttpResponseRedirect('add_findings')
+                return HttpResponseRedirect(reverse('add_findings', args=(test.id,)))
 
     else:
         form = FindingForm()
@@ -2927,13 +2900,14 @@ def add_temp_finding(request, tid, fid):
                              messages.SUCCESS,
                              'Temp finding added successfully.',
                              extra_tags='alert-success')
-        return HttpResponseRedirect('/%d/view_test' % test.id)
+        return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
 
     else:
         form = FindingForm(instance=finding)
     return render(request, 'dojo/add_findings.html',
                   {'form': form, 'findings': findings,
                    'temp': True, 'fid': finding.id,
+                   'tid': test.id,
                    'breadcrumbs': get_breadcrumbs(title="Add finding",
                                                   obj=test)})
 
@@ -2958,11 +2932,12 @@ def edit_finding(request, fid):
                                  messages.SUCCESS,
                                  'Finding saved successfully.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect('/%d/view_test' % new_finding.test.id)
+            return HttpResponseRedirect(reverse('view_test', args=(new_finding.test.id,)))
     else:
         form = FindingForm(instance=finding)
     return render(request, 'dojo/edit_findings.html',
                   {'form': form,
+                   'finding': finding,
                    'breadcrumbs': get_breadcrumbs(title="Edit finding",
                                                   obj=finding)})
 
@@ -2994,6 +2969,7 @@ def gen_report_all(request, pid):
                                            -ord(f.severity[0])))
     return render(request, 'dojo/gen_report.html',
                   {'findings': result,
+                   'pid': pid,
                    'breadcrumbs': get_breadcrumbs(title="Generate Report")})
 
 
@@ -3002,7 +2978,11 @@ def mktemplate(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     finding.is_template = True
     finding.save()
-    return HttpResponseRedirect('/%d/view_finding' % finding.id)
+    messages.add_message(request,
+                         messages.SUCCESS,
+                         'Finding template added successfully.',
+                         extra_tags='alert-success')
+    return HttpResponseRedirect(reverse('view_finding', args=(finding.id,)))
 
 
 def named_month(month_number):
@@ -3091,43 +3071,43 @@ def get_breadcrumbs(obj=None, active=True, title=None):
     """
     result = [{"active": False,
                "title": "Home",
-               "link": "/"}]
+               "link": reverse('home')}]
 
     if title is None:
         if type(obj).__name__ == "Product":
             p = Product.objects.get(id=obj.id)
             result.append({"active": False,
                            "title": "Product",
-                           "link": "/product"})
+                           "link": reverse('product')})
             result.append({"active": active,
                            "title": obj.name,
-                           "link": "/product/%d" % obj.id})
+                           "link": reverse("view_product", args=(obj.id,))})
 
         elif type(obj).__name__ == "Engagement":
             p = Product.objects.get(id=obj.product_id)
             result = get_breadcrumbs(p, False)
             result.append({"active": active,
                            "title": obj,
-                           "link": "/engagement/%d" % obj.id})
+                           "link": reverse('view_engagement', args=(obj.id,))})
 
         elif type(obj).__name__ == "Test":
             e = Engagement.objects.get(id=obj.engagement_id)
             result = get_breadcrumbs(e, False)
             result.append({"active": active,
                            "title": obj,
-                           "link": "/%d/view_test" % obj.id})
+                           "link": reverse('view_test', args=(obj.id,))})
 
         elif type(obj).__name__ == "Finding":
             t = Test.objects.get(id=obj.test_id)
             result = get_breadcrumbs(t, False)
             result.append({"active": True,
                            "title": obj.title,
-                           "link": "/%d/view_finding" % obj.id})
+                           "link": reverse('view_finding', args=(obj.id,))})
         elif type(obj).__name__ == "ScanSettings":
             result = get_breadcrumbs(obj.product, False)
             result.append({"active": active,
                            "title": "%s Scan Settings" % obj.frequency,
-                           "link": "/%d/view_scan_settings" % obj.id})
+                           "link": reverse('view_scan_settings', args=(obj.product.id, obj.id,))})
         elif type(obj).__name__ == "Scan":
             result = get_breadcrumbs(obj.scan_settings, False)
             result.append({"active": active,
@@ -3135,7 +3115,7 @@ def get_breadcrumbs(obj=None, active=True, title=None):
                                obj.protocol,
                                obj.date.astimezone(localtz).strftime(
                                    "%b. %d, %Y, %I:%M %p")),
-                           "link": "/%d/view_scan" % obj.id})
+                           "link": reverse('view_scan', args=(obj.id,))})
         else:
             result.append({"active": True,
                            "title": title,
@@ -3336,7 +3316,7 @@ def add_product_type(request):
                                  messages.SUCCESS,
                                  'Product type added successfully.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect('/product_type')
+            return HttpResponseRedirect(reverse('product_type'))
 
     return render(request, 'dojo/new_product_type.html', {
         'name': 'Add Product Type',
@@ -3359,7 +3339,7 @@ def edit_product_type(request, ptid):
                                  messages.SUCCESS,
                                  'Product type updated successfully.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect('/product_type')
+            return HttpResponseRedirect(reverse('product_type'))
 
     return render(request, 'dojo/edit_product_type.html', {
         'name': 'Edit Product Type',
@@ -3410,7 +3390,7 @@ def add_test_type(request):
                                  messages.SUCCESS,
                                  'Test type added successfully.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect('/test_type')
+            return HttpResponseRedirect(reverse('test_type'))
 
     return render(request, 'dojo/new_test_type.html', {
         'name': 'Add Test Type',
@@ -3433,7 +3413,7 @@ def edit_test_type(request, ptid):
                                  messages.SUCCESS,
                                  'Test type updated successfully.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect('/test_type')
+            return HttpResponseRedirect(reverse('test_type'))
 
     return render(request, 'dojo/edit_test_type.html', {
         'name': 'Edit Test Type',
@@ -3467,7 +3447,7 @@ def add_dev_env(request):
                                  messages.SUCCESS,
                                  'Development environment added successfully.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect('/dev_env')
+            return HttpResponseRedirect(reverse('dev_env'))
 
     return render(request, 'dojo/new_dev_env.html', {
         'name': 'Add Development Environment',
@@ -3491,7 +3471,7 @@ def edit_dev_env(request, deid):
                 messages.SUCCESS,
                 'Development environment updated successfully.',
                 extra_tags='alert-success')
-            return HttpResponseRedirect('/dev_env')
+            return HttpResponseRedirect(reverse('dev_env'))
 
     return render(request, 'dojo/edit_dev_env.html', {
         'name': 'Edit Development Environment',
@@ -3694,12 +3674,12 @@ def get_alerts(user):
         alerts.append(['Scan Completed',
                        humanize.naturaltime(localtz.normalize(now) - localtz.normalize(scan.date)),
                        'crosshairs',
-                       '/%d/view_scan' % (scan.id)])
+                       reverse('view_scan', args=(scan.id,))])
     for scan in running_scans:
         alerts.append(['Scan Running',
                        humanize.naturaltime(localtz.normalize(now) - localtz.normalize(scan.date)),
                        'crosshairs',
-                       '/%d/view_scan_settings' % (scan.scan_settings.id)])
+                       reverse('view_scan_settings', args=(scan.scan_settings.product.id, scan.scan_settings.id,))])
 
     upcoming_tests = Test.objects.filter(
         target_start__gt=now,
@@ -3710,7 +3690,7 @@ def get_alerts(user):
                 test.test_type.name if test.test_type is not None else 'Test'),
             'Target Start ' + test.target_start.strftime("%b. %d, %Y"),
             'user-secret',
-            '/%d/view_test' % (test.id)])
+            reverse('view_test', args=(test.id,))])
 
     outstanding_engagements = Engagement.objects.filter(
         target_end__lt=now,
@@ -3722,7 +3702,7 @@ def get_alerts(user):
                 eng.name if eng.name is not None else 'Engagement'),
             'Target End ' + eng.target_end.strftime("%b. %d, %Y"),
             'bullseye',
-            '/engagement/%d' % (eng.id)])
+            reverse('view_engagement', args=(eng.id,))])
 
     twenty_four_hours_ago = now - timedelta(hours=24)
     outstanding_s0_findings = Finding.objects.filter(
@@ -3738,7 +3718,7 @@ def get_alerts(user):
                 finding.title if finding.title is not None else 'Finding'),
             'Reported On ' + finding.date.strftime("%b. %d, %Y"),
             'bug',
-            '/%d/view_finding' % (finding.id)])
+            reverse('view_finding', args=(finding.id,))])
 
     seven_days_ago = now - timedelta(days=7)
     outstanding_s1_findings = Finding.objects.filter(
@@ -3754,7 +3734,7 @@ def get_alerts(user):
                 finding.title if finding.title is not None else 'Finding'),
             'Reported On ' + finding.date.strftime("%b. %d, %Y"),
             'bug',
-            '/%d/view_finding' % (finding.id)])
+            reverse('view_finding', args=(finding.id,))])
 
     fourteen_days_ago = now - timedelta(days=14)
     outstanding_s2_findings = Finding.objects.filter(
@@ -3770,5 +3750,5 @@ def get_alerts(user):
                 finding.title if finding.title is not None else 'Finding'),
             'Reported On ' + finding.date.strftime("%b. %d, %Y"),
             'bug',
-            '/%d/view_finding' % (finding.id)])
+            reverse('view_finding', args=(finding.id,))])
     return alerts
