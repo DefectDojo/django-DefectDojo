@@ -2,7 +2,7 @@
 {% block content %}
     <h3> Register a new Product! </h3>
     <b><span class="text-error"> That product is already registered</span> </b>
-    <form class="form-horizontal" action="/product/add" method="post">{% csrf_token %}
+    <form class="form-horizontal" action="{% url 'new_product' %}" method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">

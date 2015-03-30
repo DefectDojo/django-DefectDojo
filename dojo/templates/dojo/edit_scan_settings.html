@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
-    <form action="edit_scan_settings" method="post" class="form-horizontal">{% csrf_token %}
+    <form action="{% url 'edit_scan_settings' pid sid %}" method="post" class="form-horizontal">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">

@@ -187,7 +187,7 @@
                         <input type="submit" class="btn btn-sm btn-primary" name="filters"
                                value="Apply Filters"/>
                         <br/><br/>
-                        <a href="/new_metrics">[Clear Filters]</a>
+                        <a href="{% url 'metrics' %}">[Clear Filters]</a>
                     </div>
                 </form>
             </div>
@@ -259,7 +259,7 @@
                                     <td>{{ detail.0 }}</td>
                                     <td><span title="{{ detail.1 }}">{{ detail.1|truncatechars:20 }}</span></td>
                                     <td>{{ detail.2 }}</td>
-                                    <td><a href="/{{ detail.7 }}/view_finding"
+                                    <td><a href="{% url 'view_finding' detail.7 %}"
                                            title="{{ detail.3 }}">{{ detail.3|truncatechars:20 }}</a></td>
                                     <td>{{ detail.4 }}</td>
                                     <td>{{ detail.5 }}</td>

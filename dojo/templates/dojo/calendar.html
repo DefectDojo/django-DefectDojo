@@ -20,7 +20,7 @@
                             title: '{{e.product.name}}',
                             start: '{{e.target_start|date:"c"}}',
                             end: '{{e.target_end|date:"c"}}',
-                            url: '/engagement/{{e.id}}',
+                            url: '{% url 'view_engagement' e.id %}',
                             color: '#337ab7',
                             overlap: true
                         },
