@@ -143,12 +143,11 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'dojo.urls'
 LOGIN_URL = '/login'
 LOGIN_EXEMPT_URLS = (
-    r'^',
     r'^static/',
-    r'^all_metrics$',
-    r'^product_type/(?P<mtype>\d+)/metrics$',
-    r'^simple_metrics$',
-    r'^wiki_metrics$',
+    r'^metrics/all$'
+    r'^metrics$',
+    r'^metrics/product/type/(?P<mtype>\d+)$',
+    r'^metrics/simple$',
 )
 
 # Python dotted path to the WSGI application used by Django's runserver.
