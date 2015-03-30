@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
     <h3> Register a new Development Environment </h3>
-    <form class="form-horizontal" action="/dev_env/add" method="post">{% csrf_token %}
+    <form class="form-horizontal" action="{% url 'add_dev_env' %}" method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">

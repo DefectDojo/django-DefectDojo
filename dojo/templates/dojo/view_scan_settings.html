@@ -31,7 +31,7 @@
                         <div class="form-group col-sm-offset-1">
                             <div>
                                 <div class="btn-group" role="group">
-                                    <a role="button" href='/{{ scan_settings.id }}/edit_scan_settings'
+                                    <a role="button" href='{% url 'edit_scan_settings' scan_settings.product.id scan_settings.id %}'
                                        class='btn btn-sm btn-warning'>Edit Settings</a>
                                     <input type="submit" name="scan_now" value="Scan Now"
                                            class="btn btn-sm btn-danger"/>
@@ -74,7 +74,7 @@
                     <tbody>
                     {% for sc in scans %}
                         <tr>
-                            <td><a href='/{{ sc.id }}/view_scan' class=''> {{ sc.date }} </a></td>
+                            <td><a href='{% url 'view_scan' sc.id%}' class=''> {{ sc.date }} </a></td>
                             <td>{{ sc.protocol }}</td>
                             <td>{{ sc|ports_open }} </td>
                             <td>{% ifequal sc.status "Running" %}

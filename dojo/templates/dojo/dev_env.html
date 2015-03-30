@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
     {% if user.is_staff %}
-        <a class="btn btn-primary" href="/dev_env/add"> New Development Environment </a>
+        <a class="btn btn-primary" href="{%  url 'add_dev_env' %}"> New Development Environment </a>
         <br/>
         <br/>
     {% endif %}
@@ -18,7 +18,7 @@
                 {% for de in devs %}
                     <tr>
                         {% if user.is_staff %}
-                            <td><a href="/dev_env/{{ de.id }}/edit"> {{ de.name }} </a></td>
+                            <td><a href="{% url 'edit_dev_env' de.id %}"> {{ de.name }} </a></td>
                         {% else %}
                             <td> {{ de.name }} </a> </td>
                         {% endif %}

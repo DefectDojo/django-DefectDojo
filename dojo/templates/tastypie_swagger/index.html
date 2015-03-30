@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 {% load url from future %}
 {% block add_css_before %}
-    <link href='//fonts.googleapis.com/css?family=Droid+Sans:400,700' rel='stylesheet' type='text/css'/>
     <!-- TastyPie Swagger CSS -->
     <link href='{{ STATIC_URL }}tastypie_swagger/css/hightlight.default.css' media='screen' rel='stylesheet'
           type='text/css'/>
@@ -14,7 +13,7 @@
 {% block content %}
     <div class="row">
         <div class="col-md-12">
-            <p>Copy your authorization header value from <a href="/api_key">here</a> and paste into this form. Click
+            <p>Copy your authorization header value from <a href="{% url 'api_key' %}">here</a> and paste into this form. Click
                 explore to apply the key, you should now be able to test each call.</p>
 
             <div id='header'>

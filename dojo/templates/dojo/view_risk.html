@@ -18,7 +18,7 @@
                 <tbody>
                 {% for finding in accepted_findings %}
                     <tr>
-                        <td><a href="/{{ finding.id }}/view_finding"
+                        <td><a href="{% url 'view_finding' finding.id %}"
                                title="{{ finding.title }}">{{ finding.title|truncatechars:65 }}</a></td>
                         <td>{{ finding.date }}</td>
                         <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
@@ -73,7 +73,7 @@
             <tbody>
             <tr>
                 <td>
-                    <a href="{{ risk_approval.id }}/download">{{ risk_approval.filename }}</a>
+                    <a href="{% url 'download_risk' eng.id risk_approval.id %}">{{ risk_approval.filename }}</a>
                 </td>
                 <td>
                     {{ risk_approval.created }}
@@ -159,7 +159,7 @@
                 findings active.
             </p>
 
-            <form class="form-horizontal" action="{{ risk_approval.id }}/delete" method="post">
+            <form class="form-horizontal" action="{% url 'delete_risk' risk_approval.id %}" method="post">
                 {% csrf_token %}
                 <div class="form-group">
                     <input class="btn btn-danger" type="submit" value="Delete Risk Acceptance"/>

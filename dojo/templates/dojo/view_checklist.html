@@ -8,7 +8,7 @@
         <span class="text-error"> Fail </span>
         <div>
             {% for issue in check.session_issues.all %}
-                <a href="/{{ issue.id }}/view_finding">{{ issue.title }} </a>
+                <a href="{% url 'view_finding' issue.id %}">{{ issue.title }} </a>
             {% endfor %}
         </div>
 
@@ -23,7 +23,7 @@
         <span class="text-error"> Fail </span>
         <div>
             {% for issue in check.crypto_issues.all %}
-                <a href="/{{ issue.id }}/view_finding">{{ issue.title }} </a>
+                <a href="{% url 'view_finding' issue.id %}">{{ issue.title }} </a>
             {% endfor %}
         </div>
     {% else %}
@@ -37,7 +37,7 @@
         <span class="text-error"> Fail </span>
         <div>
             {% for issue in check.config_issues.all %}
-                <a href="/{{ issue.id }}/view_finding">{{ issue.title }} </a>
+                <a href="{% url 'view_finding' issue.id %}">{{ issue.title }} </a>
             {% endfor %}
         </div>
     {% else %}
@@ -51,7 +51,7 @@
         <span class="text-error"> Fail </span>
         <div>
             {% for issue in check.auth_issuses.all %}
-                <a href="/{{ issue.id }}/view_finding">{{ issue.title }} </a>
+                <a href="{% url 'view_finding' issue.id %}">{{ issue.title }} </a>
             {% endfor %}
         </div>
     {% else %}
@@ -65,7 +65,7 @@
         <span class="text-error"> Fail </span>
         <div>
             {% for issue in check.author_issues.all %}
-                <a href="/{{ issue.id }}/view_finding">{{ issue.title }} </a>
+                <a href="{% url 'view_finding' issue.id %}">{{ issue.title }} </a>
             {% endfor %}
         </div>
     {% else %}
@@ -79,7 +79,7 @@
         <span class="text-error"> Fail </span>
         <div>
             {% for issue in check.data_issues.all %}
-                <a href="/{{ issue.id }}/view_finding">{{ issue.title }} </a>
+                <a href="{% url 'view_finding' issue.id %}">{{ issue.title }} </a>
             {% endfor %}
         </div>
     {% else %}
@@ -93,7 +93,7 @@
         <span class="text-error"> Fail </span>
         <div>
             {% for issue in check.sensitive_issues.all %}
-                <a href="/{{ issue.id }}/view_finding">{{ issue.title }} </a>
+                <a href="{% url 'view_finding' issue.id %}">{{ issue.title }} </a>
             {% endfor %}
         </div>
     {% else %}
@@ -107,7 +107,7 @@
         <span class="text-error"> Fail </span>
         <div>
             {% for issue in check.other_issues.all %}
-                <a href="/{{ issue.id }}/view_finding">{{ issue.title }} </a>
+                <a href="{% url 'view_finding' issue.id %}">{{ issue.title }} </a>
             {% endfor %}
         </div>
     {% else %}
