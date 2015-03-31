@@ -1,101 +1,161 @@
 {% extends "base.html" %}
 {% block content %}
-    <h3> {{ test.test_type }}
-        <div class="btn-group">
-            <a class="btn btn-primary btn-sm" href="{% url 'test_report' test.id %}"> Generate Report</a>
-            <a class="btn btn-primary btn-sm" href="{% url 'add_findings' test.id %}"> Add Findings </a>
-            <a class="btn btn-primary btn-sm" href="#add_notes"> Add Notes </a>
-        </div>
-    </h3>
-    <h4> Development Environment </h4>
-    {% if test.environment %}
-        {{ test.environment }}
-    {% else %}
-        <b><i>Unknown</i></b>
-    {% endif %}
-    <br/>
-    <br/>
-    <h4> Findings </h4>
-    <div class="to_highlight">
-        {% if findings %}
-            <div class="panel panel-default">
-                <table id="test_findings" class="table-responsive table-bordered table table-condensed table-hover">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="clearfix">
+                <h3 class="pull-left"> {{ test.test_type }}</h3>
 
-
-                    <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Severity</th>
-                        <th>Reporter</th>
-                        <th>Verified</th>
-                        <th>Active</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for finding in findings %}
-                        <tr class={% if finding.active %} "active_finding" {% else %} "inactive_finding" {% endif %}>
-                        <td><a href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a></td>
-                        <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
-                            <span class="text-error">
-                        {% else %}<span>{% endif %}{{ finding.severity }}</span></td>
-                        <td>{{ finding.reporter.username }}</td>
-                        <td>{{ finding.verified }}</td>
-                        <td>{{ finding.active }}</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-
-
-                </table>
+                <div class="dropdown pull-right">
+                    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
+                            data-toggle="dropdown" aria-expanded="true">
+                        <span class="fa fa-gear"></span>
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                        <li role="presentation"><a
+                                href="{% url 'test_report' test.id %}"> Generate Report</a></li>
+                        <li role="presentation"><a
+                                href="{% url 'add_findings' test.id %}"> Add Findings </a></li>
+                        <li role="presentation"><a href="#add_notes"> Add Notes </a></li>
+                        <li role="presentation" class="divider"></li>
+                        <li role="presentation"><a href="{% url 'edit_test' test.id %}"> Edit Test </a></li>
+                    </ul>
+                </div>
             </div>
-            {% include "dojo/paging_snippet.html" with page=findings %}
-        {% else %}
-            <p>No findings found.</p>
-        {% endif %}
-        <br><br>
-
-        <div>
-            <h3>Notes</h3><br>
-            {% if notes %}
-                <table id="notes" class="table-responsive tablesorter-bootstrap table table-condensed table-hover">
-                    <thead>
-                    <tr>
-                        <th>User</th>
-                        <th>Date</th>
-                        <th>Note</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for note in notes %}
-                        <tr>
-                            <td>
-                                {{ note.author.username }}
-                            </td>
-                            <td>
-                                {{ note.date }}
-                            </td>
-                            <td>
-                                {{ note }}
-                                {% ifequal person note.author.username %}
-                                    <a href="{% url 'delete_test_note' test.id note.id%}"> [X] </a>
-                                {% endifequal %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-
-                    </tbody>
-                </table>
-            {% else %}
-                <p>No notes found.</p>
-            {% endif %}
         </div>
-        <br/>
+        <div class="panel-body">
+            <dl class="dl-horizontal">
+                <dt>Development Environment</dt>
+                <dd>
+                    {% if test.environment %}
+                        {{ test.environment }}
+                    {% else %}
+                        <b><i>Unknown</i></b>
+                    {% endif %}
+                </dd>
+                <dt>
+                    Engagement
+                </dt>
+                <dd>
+                    <a href="{% url 'view_engagement' test.engagement.id %}">{{ test.engagement }}</a>
+                </dd>
+                <dt>
+                    Target Start Date
+                </dt>
+                <dd>
+                    {{ test.target_start.date }}
+                </dd>
+                <dt>
+                    Target End Date
+                </dt>
+                <dd>
+                    {{ test.target_end.date }}
+                </dd>
+                {% if test.percent_complete > 0 %}
+                    <dt>
+                        Progress
+                    </dt>
+                    <dd>
+                        <div class="progress">
+                            <div class="progress-bar" role="progressbar" aria-valuenow="{{ test.percent_complete }}"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100" style="width: {{ test.percent_complete }}%;">
+                                {{ test.percent_complete }}%
+                            </div>
+                        </div>
+                    </dd>
+                {% endif %}
+            </dl>
+        </div>
+    </div>
+    <div class="panel panel-default to_highlight">
+        <div class="panel-heading">
+            <h4>Findings</h4>
+        </div>
+        {% if findings %}
+            <table id="test_findings" class="table-responsive table-bordered table table-condensed table-hover">
 
-        <form class="form-horizontal" id="add_notes" action="{% url 'view_test' test.id %}" method="post">{% csrf_token %}
+
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Severity</th>
+                    <th>Reporter</th>
+                    <th>Verified</th>
+                    <th>Active</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for finding in findings %}
+                    <tr class={% if finding.active %} "active_finding" {% else %} "inactive_finding" {% endif %}>
+                    <td><a href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a></td>
+                    <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
+                        <span class="text-error">
+                    {% else %}<span>{% endif %}{{ finding.severity }}</span></td>
+                    <td>{{ finding.reporter.username }}</td>
+                    <td>{{ finding.verified }}</td>
+                    <td>{{ finding.active }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+
+
+            </table>
+            <div class="panel-body">
+                {% include "dojo/paging_snippet.html" with page=findings %}
+            </div>
+        {% else %}
+            <div class="panel-body">
+                <p>No findings found.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="panel panel-default to_highlight">
+        <div class="panel-heading">
+            <h3>Notes</h3>
+        </div>
+        {% if notes %}
+            <table id="notes" class="table-responsive table-striped table table-condensed table-hover">
+                <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Date</th>
+                    <th>Note</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for note in notes %}
+                    <tr>
+                        <td>
+                            {{ note.author.username }}
+                        </td>
+                        <td>
+                            {{ note.date }}
+                        </td>
+                        <td>
+                            {{ note }}
+                            {% ifequal person note.author.username %}
+                                <a href="{% url 'delete_test_note' test.id note.id %}"> [X] </a>
+                            {% endifequal %}
+                        </td>
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+            </table>
+        {% else %}
+
+            <p class="text-center">No notes found.</p>
+        {% endif %}
+        <hr/>
+
+        <form class="form-horizontal" id="add_notes" action="{% url 'view_test' test.id %}"
+              method="post">{% csrf_token %}
             {% include "dojo/form_fields.html" with form=form %}
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
-                    <input class="btn" type="submit" value="Add Note"/>
+                    <input class="btn btn-default" type="submit" value="Add Note"/>
                 </div>
             </div>
         </form>

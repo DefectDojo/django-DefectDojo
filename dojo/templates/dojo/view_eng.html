@@ -53,188 +53,299 @@
         {% endif %}
     </ul>
     <!-- end breadcrums //-->
-    <h3> {{ eng.product }} <span class="text-muted">{{ eng.status }}</span>
-        <div class="btn-group">
-            <a class="btn btn-sm btn-warning" href="{% url 'edit_engagement' eng.id %}"> Edit Engagement </a>
-            {% if eng.active %}
-                <a class="btn btn-sm btn-danger" href="{% url 'close_engagement' eng.id %}"> Close Engagement</a>
-            {% else %}
-                <a class="btn btn-sm btn-primary" href="{% url 'reopen_engagement' eng.id %}"> Reopen Engagement</a>
-            {% endif %}
-        </div>
-    </h3>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="clearfix">
+                <h3 class="pull-left">
+                    {{ eng.product }} <span class="text-muted">{{ eng.status }}</span>
+                </h3>
 
-    <div class='row'>
-        <div class="col-md-4">
-            <div class="well">
-                <h4>Testing Lead:
-                    {% if eng.lead.get_full_name and eng.lead.get_full_name.strip %}
-                        {{ eng.lead.get_full_name }}
-                    {% else %}
-                        {{ eng.lead }}
-                    {% endif %}
-                </h4>
-                {% if not eng.lead %}
-                    <p><b><i><sub><a class="" href="{% url 'edit_engagement' eng.id %}"> Edit </a> this engagement to add a
-                        lead.</sub></i></b></p>
-                {% endif %}
-                {% if eng.name %}
-                    <p> Engagement Name: {{ eng.name }} </p>
-                {% endif %}
-                <p> Target Start Date: {{ eng.target_start }} </p>
-
-                <p> Target End Date: {{ eng.target_end }} </p>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="well">
-                <h4> Test Strategy </h4>
-                {% if eng.test_strategy %}
-                    <a class="btn btn-sm btn-primary" target="_blank" href="{{ eng.test_strategy }}"> View Test
-                        Strategy </a>
-                {% else %}
-                    <p><b><i><sub><a class="" href="{% url 'edit_engagement' eng.id %}"> Edit </a> this engagement to add a
-                        test strategy.</sub></i></b></p>
-                {% endif %}
-            </div>
-        </div>
-        <div id="threat-model" class="col-md-4">
-            <div class="well">
-                <h4> Threat Model
-                    {% if threat != 'none' %}
-                        </h4>
-                        <div class="btn-group">
-                            <a class="btn btn-sm btn-primary" href="{% url 'view_threatmodel' eng.id %}"> Download Model</a>
-                            <a class="btn btn-sm btn-warning" href="{% url 'upload_threatmodel' eng.id %}"> Edit</a>
-                        </div>
-                    {% else %}
-                        <a class="btn btn-sm btn-primary" href="{% url 'upload_threatmodel' eng.id %}"> Upload Model</a></h4>
-                    {% endif %}
+                <div class="dropdown pull-right">
+                    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
+                            data-toggle="dropdown" aria-expanded="true">
+                        <span class="fa fa-gear"></span>
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                        <li role="presentation"><a class="" href="{% url 'edit_engagement' eng.id %}"> Edit
+                            Engagement </a>
+                        </li>
+                        <li role="presentation">
+                            {% if eng.active %}
+                                <a class="" href="{% url 'close_engagement' eng.id %}"> Close
+                                    Engagement</a>
+                            {% else %}
+                                <a class="" href="{% url 'reopen_engagement' eng.id %}"> Reopen
+                                    Engagement</a>
+                            {% endif %}
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
-    <hr/>
-    <h4 id="tests">
-        Tests &nbsp;
-        <div class="btn-group">
-            <a class="btn btn-sm btn-primary" href="{% url 'add_tests' eng.id %}"> Add Tests</a>
-            <a class="btn btn-sm btn-primary" href="{% url 'add_nessus_scan' eng.id %}">Upload Nessus Scan</a>
-            <a class="btn btn-sm btn-primary" href="{% url 'view_product' eng.product.id %}">Done Testing</a>
-        </div>
-    </h4>
-    {% if tests %}
-        <table class="table-responsive tablesorter-bootstrap table table-condensed table-striped">
-            <thead>
-            <tr>
-                <th>Type</th>
-                <th>Start Date</th>
-                <th>End Date</th>
-                <th>Findings</th>
-                <th>Notes</th>
-                <th>Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for test in tests %}
-                <tr>
-                    <td>{{ test.test_type }}</td>
-                    <td>{{ test.target_start.date }}</td>
-                    <td>{{ test.target_end.datae }}</td>
-                    <td>{{ test.finding_set.all|length }}</td>
-                    <td>{{ test.notes.all|length }}</td>
-                    <td>
-                        <div class="btn-group">
-                            <a class="btn btn-sm btn-primary" href="{% url 'view_test' test.id %}">View</a>
-                            <a class="btn btn-sm btn-warning" href="{% url 'edit_test' test.id %}">Edit</a>
-                            <a class="btn btn-sm btn-danger"  href="{% url 'delete_test' test.id %}">Delete</a>
-                        </div>
-                    </td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        No tests found.
-    {% endif %}
-    <br/>
-    <hr/>
-    <br/>
-    <h4 id="checklist"> Check List
-        {% if check %}
-            <a class="btn btn-sm btn-warning" href="{% url 'complete_checklist' eng.id %}"> Edit </a>
-            </h4>
 
-            <table class="table-responsive tablesorter-bootstrap table table-condensed table-striped">
-                <thead>
-                <tr>
-                    <th>Session</th>
-                    <th>Encryption</th>
-                    <th>Configuration</th>
-                    <th>Authentication</th>
-                    <th>Authorization</th>
-                    <th>Data Input</th>
-                    <th>Sensitive Data</th>
-                    <th>Other</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td><span class="label label-{{ check.session_management|checklist_status }}">{{ check.session_management }}</span>
-                    </td>
-                    <td><span class="label label-{{ check.encryption_crypto|checklist_status }}">{{ check.encryption_crypto }}</span></td>
-                    <td><span
-                            class="label label-{{ check.configuration_management|checklist_status }}">{{ check.configuration_management }}</span>
-                    </td>
-                    <td><span class="label label-{{ check.authentication|checklist_status }}">{{ check.authentication }}</span></td>
-                    <td><span
-                            class="label label-{{ check.authorization_and_access_control|checklist_status }}">{{ check.authorization_and_access_control }}</span>
-                    </td>
-                    <td><span
-                            class="label label-{{ check.data_input_sanitization_validation|checklist_status }}">{{ check.data_input_sanitization_validation }}</span>
-                    </td>
-                    <td><span class="label label-{{ check.sensitive_data|checklist_status }}">{{ check.sensitive_data }}</span></td>
-                    <td><span class="label label-{{ check.other|checklist_status }}">{{ check.other }}</span></td>
-                </tr>
-                </tbody>
-            </table>
-        {% else %}
-            <a class="btn btn-sm btn-primary" href="{% url 'complete_checklist' eng.id %}"> Complete Check
-                List</a></h4>
-        {% endif %}
-    <br/>
-    <hr/>
-    <h4> Risk Acceptance
-        {% if can_add_risk %}
-            <a class="btn btn-sm btn-primary" href="{% url 'upload_risk_acceptance$' eng.id %}"> Add </a>
-        {% endif %}
-    </h4>
-    {% if risks_accepted %}
-        <table id="open_findings" class="table-responsive tablesorter-bootstrap table table-condensed table-striped">
-            <thead>
-            <tr>
-                <th>Reporter</th>
-                <th> Date</th>
-                <th>Findings Accepted</th>
-                <th>View File</th>
-                <th>Actions</th>
-            </thead>
-            <tbody>
-            {% for risk in risks_accepted %}
-                <tr>
-                    <td>{{ risk.reporter }}</td>
-                    <td>{{ risk.created }}</td>
-                    <td>{{ risk.accepted_findings.all|length }}</td>
-                    <td><a href="{% url 'download_risk' eng.id risk.id %}">{{ risk.filename }}</a></td>
-                    <td>
-                        <a class="btn btn-sm btn-primary" href="{% url 'view_risk' eng.id risk.id %}"> View
-                            Approval</a>
-                    </td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        No Risk Acceptances found.
-    {% endif %}
-    <br/>
+    <div class="row same-height-panel-row">
+        <div class="col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4>Testing Lead:
+                        {% if eng.lead.get_full_name and eng.lead.get_full_name.strip %}
+                            {{ eng.lead.get_full_name }}
+                        {% else %}
+                            {{ eng.lead }}
+                        {% endif %}
+                    </h4>
+                </div>
+                <div class="panel-body">
+                    {% if not eng.lead %}
+                        <p><b><i><sub><a class="" href="{% url 'edit_engagement' eng.id %}"> Edit </a> this
+                            engagement
+                            to
+                            add a
+                            lead.</sub></i></b></p>
+                    {% endif %}
+                    {% if eng.name %}
+                        <p> Engagement Name: {{ eng.name }} </p>
+                    {% endif %}
+                    <p> Target Start Date: {{ eng.target_start }} </p>
+
+                    <p> Target End Date: {{ eng.target_end }} </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4> Test Strategy </h4>
+                </div>
+                <div class="panel-body text-center">
+                    {% if eng.test_strategy %}
+                        <a class="btn btn-sm btn-primary" target="_blank" href="{{ eng.test_strategy }}"> View Test
+                            Strategy </a>
+                    {% else %}
+                        <p><b><i><sub><a class="" href="{% url 'edit_engagement' eng.id %}"> Edit </a> this
+                            engagement
+                            to
+                            add a
+                            test strategy.</sub></i></b></p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div id="threat-model" class="col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4> Threat Model </h4>
+                </div>
+                <div class="panel-body text-center">
+                    {% if threat != 'none' %}
+                        <div class="btn-group">
+                            <a class="btn btn-sm btn-primary" href="{% url 'view_threatmodel' eng.id %}"> Download
+                                Model</a>
+                            <a class="btn btn-sm btn-warning" href="{% url 'upload_threatmodel' eng.id %}"> Edit</a>
+                        </div>
+                    {% else %}
+                        <a class="btn btn-sm btn-primary" href="{% url 'upload_threatmodel' eng.id %}"> Upload
+                            Model</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="clearfix">
+                        <h4 class="pull-left">
+                            Tests
+                            </h3>
+
+                            <div class="dropdown pull-right">
+                                <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
+                                        data-toggle="dropdown" aria-expanded="true">
+                                    <span class="fa fa-gear"></span>
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                                    <li role="presentation">
+                                        <a class="" href="{% url 'add_tests' eng.id %}"> Add Tests</a>
+                                    </li>
+                                    <li role="presentation">
+                                        <a class="" href="{% url 'add_nessus_scan' eng.id %}">Upload Nessus Scan</a>
+                                    </li>
+                                    <li role="presentation">
+                                        <a class="" href="{% url 'view_product' eng.product.id %}">Done Testing</a>
+                                    </li>
+                                </ul>
+                            </div>
+                    </div>
+                </div>
+                {% if tests %}
+                    <table class="table-responsive tablesorter-bootstrap table table-condensed table-striped">
+                        <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Findings</th>
+                            <th>Notes</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for test in tests %}
+                            <tr>
+                                <td>{{ test.test_type }}</td>
+                                <td>{{ test.target_start.date }}</td>
+                                <td>{{ test.target_end.datae }}</td>
+                                <td>{{ test.finding_set.all|length }}</td>
+                                <td>{{ test.notes.all|length }}</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a class="btn btn-sm btn-primary"
+                                           href="{% url 'view_test' test.id %}">View</a>
+                                        <a class="btn btn-sm btn-warning"
+                                           href="{% url 'edit_test' test.id %}">Edit</a>
+                                        <a class="btn btn-sm btn-danger"
+                                           href="{% url 'delete_test' test.id %}">Delete</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div class="panel-body">
+                        <p>No tests found.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 id="checklist"> Check List
+                        {% if check %}
+                            <a title="Edit Checklist" class="btn btn-default pull-right"
+                               href="{% url 'complete_checklist' eng.id %}">
+                                <span class="fa fa-edit"></span></a>
+                        {% else %}
+                            <a title="Complete Check List" class="btn btn-sm btn-primary pull-right"
+                               href="{% url 'complete_checklist' eng.id %}">
+                                <span class="fa fa-edit"></span></a></a>
+                        {% endif %}
+                    </h4>
+                </div>
+
+                {% if check %}
+                    <table class="table-responsive tablesorter-bootstrap table table-condensed table-striped">
+                        <thead>
+                        <tr>
+                            <th>Session</th>
+                            <th>Encryption</th>
+                            <th>Configuration</th>
+                            <th>Authentication</th>
+                            <th>Authorization</th>
+                            <th>Data Input</th>
+                            <th>Sensitive Data</th>
+                            <th>Other</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td><span
+                                    class="label label-{{ check.session_management|checklist_status }}">{{ check.session_management }}</span>
+                            </td>
+                            <td><span
+                                    class="label label-{{ check.encryption_crypto|checklist_status }}">{{ check.encryption_crypto }}</span>
+                            </td>
+                            <td><span
+                                    class="label label-{{ check.configuration_management|checklist_status }}">{{ check.configuration_management }}</span>
+                            </td>
+                            <td><span
+                                    class="label label-{{ check.authentication|checklist_status }}">{{ check.authentication }}</span>
+                            </td>
+                            <td><span
+                                    class="label label-{{ check.authorization_and_access_control|checklist_status }}">{{ check.authorization_and_access_control }}</span>
+                            </td>
+                            <td><span
+                                    class="label label-{{ check.data_input_sanitization_validation|checklist_status }}">{{ check.data_input_sanitization_validation }}</span>
+                            </td>
+                            <td><span
+                                    class="label label-{{ check.sensitive_data|checklist_status }}">{{ check.sensitive_data }}</span>
+                            </td>
+                            <td><span class="label label-{{ check.other|checklist_status }}">{{ check.other }}</span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div class="panel-body">
+                        <p>Checklinst has not been completed.</p>
+                    </div>
+                {% endif %}
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4> Risk Acceptance
+                        {% if can_add_risk %}
+                            <a title="Add Risk Acceptance" class="pull-right btn btn-sm btn-default"
+                               href="{% url 'upload_risk_acceptance$' eng.id %}"><span class="fa fa-plus"></span></a></a>
+                        {% endif %}
+                    </h4>
+                </div>
+                {% if risks_accepted %}
+                    <table id="open_findings"
+                           class="table-responsive tablesorter-bootstrap table table-condensed table-striped">
+                        <thead>
+                        <tr>
+                            <th>Reporter</th>
+                            <th> Date</th>
+                            <th>Findings Accepted</th>
+                            <th>View File</th>
+                            <th>Actions</th>
+                        </thead>
+                        <tbody>
+                        {% for risk in risks_accepted %}
+                            <tr>
+                                <td>{{ risk.reporter }}</td>
+                                <td>{{ risk.created }}</td>
+                                <td>{{ risk.accepted_findings.all|length }}</td>
+                                <td><a href="{% url 'download_risk' eng.id risk.id %}">{{ risk.filename }}</a></td>
+                                <td>
+                                    <a class="btn btn-sm btn-primary" href="{% url 'view_risk' eng.id risk.id %}"> View
+                                        Approval</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div class="panel-body">
+                        <p>No Risk Acceptances found.</p>
+                    </div>
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
 {% endblock %}
