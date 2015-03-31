@@ -2546,7 +2546,6 @@ def view_risk(request, eid, raid):
 
     authorized = (request.user == risk_approval.reporter.username
                   or request.user.is_staff)
-
     return render(request, 'dojo/view_risk.html',
                   {'risk_approval': risk_approval,
                    'accepted_findings': fpage,
