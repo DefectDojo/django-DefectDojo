@@ -1,128 +1,189 @@
 {% extends "base.html" %}
 {% block content %}
-    <h3> {{ prod }}
-        {% if user.is_staff %}
-            <div class="btn-group">
-            <a class="btn btn-sm btn-warning" href="{% url 'edit_product' prod.id %}">Edit</a>
-        {% endif %}
-        <a class="btn btn-sm btn-primary" href="{% url 'view_product_findings' prod.id %}">Open Findings</a>
-        {% if user.is_staff %}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="clearfix">
+                <h3 class="pull-left">
+                    {{ prod }}
+                </h3>
+
+                <div class="dropdown pull-right">
+                    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
+                            data-toggle="dropdown" aria-expanded="true">
+                        <span class="fa fa-gear"></span>
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                        {% if user.is_staff %}
+                            <li role="presentation"><a class="" href="{% url 'edit_product' prod.id %}">Edit</a>
+                            </li>
+                        {% endif %}
+                        <li role="presentation">
+                            <a href="{% url 'view_product_findings' prod.id %}">View Open Findings</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
-        {% endif %}
-    </h3>
-    <div class="row">
-        <div class="col-md-5">
-            <ul class="no-bullets well">
-                <li><b> Product Type: </b>{{ prod.prod_type }} </li>
-                <li><b> Team Manager: </b> {{ prod.manager }} </li>
-                <li><b> Product Manager: </b>{{ prod.prod_manager }} </li>
-                <li><b> Tech Contact: </b> {{ prod.tech_contact }}</li>
-                {% if prod.authorized_users.all %}
-                    <li>
-                        <b>Authorized Users</b>
-                        <ul>
-                            {% for au in prod.authorized_users.all %}
-                                <li>{{ au }}</li>
-                            {% endfor %}
-                        </ul>
-                    <li>
-                {% endif %}
-            </ul>
-        </div>
-        <div class="col-md-7">
-            <ul class="no-bullets well">
-                <li><b> Description: </b>{{ prod.description }} </li>
-            </ul>
         </div>
     </div>
-    <br/>
-    {% if user.is_staff %}
-        <h4> Active Engagements <a class="btn btn-sm btn-primary" href="{% url 'new_eng_for_prod' prod.id %}"> New
-            Engagement </a></h4>
-        {% if engs %}
-            <table class="table-responsive tablesorter-bootstrap table table-condensed table-striped table-hover">
-                <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Lead</th>
-                    <th>Start Date</th>
-                    <th>End Date</th>
-                    <th>Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for eng in engs %}
-                    <tr>
-                    <td>{% if eng.name %}{{ eng.name }}{% else %} N/A {% endif %}</td>
-                    <td>{{ eng.lead }}</td>
-                    <td>{{ eng.target_start }}</td>
-                    <td>{{ eng.target_end }}</td>
-                    <td><a class="btn btn-sm btn-primary" href="{% url 'view_engagement' eng.id %}">View Details</a>
-                {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>No active engagements found.</p>
+
+
+
+
+    <div class="row">
+        <div class="col-md-5">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <b>Details</b>
+                </div>
+                <ul class="list-group">
+                    <li class="list-group-item"><b> Product Type: </b>{{ prod.prod_type }} </li>
+                    <li class="list-group-item"><b> Team Manager: </b> {{ prod.manager }} </li>
+                    <li class="list-group-item"><b> Product Manager: </b>{{ prod.prod_manager }} </li>
+                    <li class="list-group-item"><b> Tech Contact: </b> {{ prod.tech_contact }}</li>
+                    {% if prod.authorized_users.all %}
+                        <li class="list-group-item">
+                            <b>Authorized Users</b>
+                            <ul class="">
+                                {% for au in prod.authorized_users.all %}
+                                    <li class="">{{ au }}</li>
+                                {% endfor %}
+                            </ul>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-7">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <b>Description</b>
+                </div>
+                <div class="panel-body">
+                    {{ prod.description }}
+                </div>
+            </div>
+        </div>
+
+
+        {% if user.is_staff %}
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4> Active Engagements <a title="Add New Engagement" class="pull-right btn btn-sm btn-default"
+                                                   href="{% url 'new_eng_for_prod' prod.id %}"><span
+                                class="fa fa-plus"></span> </a></h4>
+                    </div>
+                    {% if engs %}
+                        <table class="table-responsive tablesorter-bootstrap table table-condensed table-striped table-hover">
+                            <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Lead</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for eng in engs %}
+                                <tr>
+                                <td>{% if eng.name %}{{ eng.name }}{% else %} N/A {% endif %}</td>
+                                <td>{{ eng.lead }}</td>
+                                <td>{{ eng.target_start }}</td>
+                                <td>{{ eng.target_end }}</td>
+                                <td>
+                                <a class="btn btn-sm btn-primary" href="{% url 'view_engagement' eng.id %}">View
+                                    Details</a>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <div class="panel-body">
+                            <p>No active engagements found.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
         {% endif %}
-    {% endif %}
-    <hr/>
-    {% if authorized %}
-        <h4> Scans
-            <a class="btn btn-success btn-sm" href="{% url 'gmap' prod.id %}"> Set Baseline</a>
-        </h4>
-        {% if scan_sets %}
-            <table class="table-responsive tablesorter-bootstrap table table-condensed table-striped table-hover">
-                <thead>
-                <tr>
-                    <th>Creator</th>
-                    <th>Date</th>
-                    <th>Frequency</th>
-                    <th>Protocol</th>
-                    <th>Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for scan in scan_sets %}
-                    <tr>
-                        <td>{{ scan.user }}</td>
-                        <td>{{ scan.date }}</td>
-                        <td>{{ scan.frequency }}</td>
-                        <td>{{ scan.protocol }}</td>
-                        <td><a class="btn btn-sm btn-primary" href="{% url 'view_scan_settings' scan.product.id scan.id %}"> View
-                            Details </a></td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            No scans configured.
+
+        {% if authorized %}
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4>Scans
+                            <a title="Add New Scan" class="pull-right btn btn-default btn-sm"
+                               href="{% url 'gmap' prod.id %}"><span class="fa fa-plus"></span></a>
+                        </h4>
+                    </div>
+                    {% if scan_sets %}
+                        <table class="table-responsive tablesorter-bootstrap table table-condensed table-striped table-hover">
+                            <thead>
+                            <tr>
+                                <th>Creator</th>
+                                <th>Date</th>
+                                <th>Frequency</th>
+                                <th>Protocol</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for scan in scan_sets %}
+                                <tr>
+                                    <td>{{ scan.user }}</td>
+                                    <td>{{ scan.date }}</td>
+                                    <td>{{ scan.frequency }}</td>
+                                    <td>{{ scan.protocol }}</td>
+                                    <td><a class="btn btn-sm btn-primary"
+                                           href="{% url 'view_scan_settings' scan.product.id scan.id %}"> View
+                                        Details </a></td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <div class="panel-body">
+                            <p>No scans configured.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
         {% endif %}
-    {% endif %}
-    <hr/>
-    {% if user.is_staff and i_engs %}
-        <h4> Closed Engagements </h4>
-        <table class="table-responsive tablesorter-bootstrap table table-condensed table-striped table-hover">
-            <thead>
-            <tr>
-                <th>Name</th>
-                <th>Lead</th>
-                <th>Start Date</th>
-                <th>End Date</th>
-                <th>Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for eng in i_engs %}
-                <tr>
-                <td>{% if eng.name %}{{ eng.name }}{% else %} N/A {% endif %}</td>
-                <td>{{ eng.lead }}</td>
-                <td>{{ eng.target_start }}</td>
-                <td>{{ eng.target_end }}</td>
-                <td><a class="btn btn-sm btn-primary" href="{% url 'view_engagement' eng.id %}">View Details</a>
-            {% endfor %}
-            </tbody>
-        </table>
-    {% endif %}
+        {% if user.is_staff and i_engs %}
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4> Closed Engagements </h4>
+                    </div>
+                    <table class="table-responsive tablesorter-bootstrap table table-condensed table-striped table-hover">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Lead</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for eng in i_engs %}
+                            <tr>
+                            <td>{% if eng.name %}{{ eng.name }}{% else %} N/A {% endif %}</td>
+                            <td>{{ eng.lead }}</td>
+                            <td>{{ eng.target_start }}</td>
+                            <td>{{ eng.target_end }}</td>
+                            <td>
+                            <a class="btn btn-sm btn-primary" href="{% url 'view_engagement' eng.id %}">View Details</a>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endif %}
+
+
+    </div>
+
 {% endblock %}
 {% block postscript %}
     <script type="text/javascript" src="{{ STATIC_URL }}jquery-cookie/jquery.cookie.js"></script>
