@@ -331,7 +331,7 @@ class Test(models.Model):
     estimated_time = models.TimeField(null=True, blank=True, editable=False)
     actual_time = models.TimeField(null=True, blank=True, editable=False, )
     percent_complete = models.IntegerField(null=True, blank=True,
-                                           editable=False)
+                                           editable=True)
     notes = models.ManyToManyField(Notes, null=True, blank=True,
                                    editable=False)
     environment = models.ForeignKey(Development_Environment, null=True,

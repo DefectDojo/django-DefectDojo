@@ -235,7 +235,6 @@ form ul {
 form ul#id_accepted_findings {
     list-style: none;
     margin-left: 0;
-    height: 500px;
     overflow: scroll;
 }
 
@@ -354,7 +353,7 @@ form ul#id_accepted_findings input {
 }
 
 .pagination {
-    margin: 10px 0 60px;
+    margin: 10px 0 15px;
 }
 
 #risk_acceptance table form {
@@ -574,4 +573,28 @@ input[type="checkbox"] {
 
 td .fa-fw {
     font-size: 18px;
+}
+
+.same-height-panel-row .panel {
+    min-height: 150px;
+}
+
+.view-finding .panel-body pre {
+    background-color: transparent;
+    border: 0px;
+}
+
+h4.finding-title {
+    width: 90%;
+}
+
+@media (min-width: 768px) {
+    .dl-horizontal dt {
+        width: 180px;
+    }
+
+    .dl-horizontal dd {
+        margin-left: 200px;
+    }
+
 }

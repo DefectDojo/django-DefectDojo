@@ -1,9 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
-    <div id="risk_acceptance">
-        <h2>Risk Acceptance added by {{ risk_approval.reporter.get_full_name }}</h2>
-
-        <h3>Findings Accepted</h3>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h2>Risk Acceptance added by {{ risk_approval.reporter.get_full_name }}</h2>
+        </div>
+    </div>
+    <div id="risk_acceptance" class="panel panel-default">
+        <div class="panel-heading">
+            <h3>Findings Accepted</h3>
+        </div>
         {% if accepted_findings %}
             <table id="open_findings" class="table-responsive table table-condensed table-striped table-bordered">
                 <thead>
@@ -41,28 +46,42 @@
                 {% endfor %}
                 </tbody>
             </table>
+            <div class="panel-body">
             {% include "dojo/paging_snippet.html" with page=accepted_findings %}
-            <br/><br/>
+            </div>
         {% else %}
-            <p><b>No findings associated with this Risk Acceptance.</b></p>
+            <div class="panel-body">
+                <p><b>No findings associated with this Risk Acceptance.</b></p>
+            </div>
         {% endif %}
-        {% if show_add_findings_form %}
-            {% if authorized %}
-                <h3>Accept Additional Findings</h3>
+    </div>
+
+    {% if show_add_findings_form %}
+        {% if authorized %}
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3>Accept Additional Findings</h3>
+                </div>
                 <form method="post" class="form-horizontal">{% csrf_token %}
                     <div class="show_add_findings_form">
                         {{ add_findings_form.as_p }}
-                    </div>
-                    {% include "dojo/paging_snippet.html" with page=add_findings parm_name="apage" %}
-                    <br/><br/><br/>
 
-                    <p style="margin: auto; text-align: center; background-color: #e0e0e0; padding: 7px;">
+                    </div>
+                    <div class="panel-body">
+                        {% include "dojo/paging_snippet.html" with page=add_findings parm_name="apage" %}
+                    </div>
+                    <div class="panel-footer text-center">
                         <input class="btn btn-primary" name="add_findings" type="submit" value="Add Selected Findings"/>
-                    </p>
+                    </div>
                 </form>
-            {% endif %}
+            </div>
         {% endif %}
-        <h3>Uploaded Document</h3>
+    {% endif %}
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3>Uploaded Document</h3>
+        </div>
         <table id="doc" class="table-responsive tablesorter-bootstrap table table-condensed table-striped">
             <thead>
             <tr>
@@ -93,51 +112,52 @@
             </tr>
             </tbody>
         </table>
+    </div>
 
-
-        <h3>Notes</h3>
-
-        <div class="to_highlight">
-            {% if notes %}
-                <table id="notes" class="table-responsive tablesorter-bootstrap table table-condensed table-striped">
-                    <thead>
-                    <tr>
-                        <th>User</th>
-                        <th>Date</th>
-                        <th>Note</th>{% if authorized %}
-                        <th>Actions</th>{% endif %}</tr>
-                    </thead>
-                    <tbody>
-                    {% for note in notes %}
-                        <tr>
-                            <td>
-                                {{ note.author.username }}
-                            </td>
-                            <td>
-                                {{ note.date }}
-                            </td>
-                            <td>
-                                {{ note }}
-                            </td>
-                            {% if authorized %}
-                                <td>
-                                    <form method="post">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="delete_note_id" value="{{ note.id }}"/>
-                                        <input class="btn btn-sm btn-danger" type="submit" name="delete_note"
-                                               value="Delete"/>
-                                    </form>
-                                </td>
-                            {% endif %}
-                        </tr>
-                    {% endfor %}
-
-                    </tbody>
-                </table>
-            {% else %}
-                No notes saved.
-            {% endif %}
+    <div class="panel panel-default to_highlight">
+        <div class="panel-heading">
+            <h3>Notes</h3>
         </div>
+        {% if notes %}
+            <table id="notes" class="table-responsive tablesorter-bootstrap table table-condensed table-striped">
+                <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Date</th>
+                    <th>Note</th>{% if authorized %}
+                    <th>Actions</th>{% endif %}</tr>
+                </thead>
+                <tbody>
+                {% for note in notes %}
+                    <tr>
+                        <td>
+                            {{ note.author.username }}
+                        </td>
+                        <td>
+                            {{ note.date }}
+                        </td>
+                        <td>
+                            {{ note }}
+                        </td>
+                        {% if authorized %}
+                            <td>
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="delete_note_id" value="{{ note.id }}"/>
+                                    <input class="btn btn-sm btn-danger" type="submit" name="delete_note"
+                                           value="Delete"/>
+                                </form>
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+            </table>
+        {% else %}
+            <p class="text-center">No notes saved.</p>
+        {% endif %}
+        <hr/>
         <form class="form-horizontal" method="post">{% csrf_token %}
             {% include "dojo/form_fields.html" with form=note_form %}
             <div class="form-group">
@@ -146,28 +166,27 @@
                 </div>
             </div>
         </form>
-
-        <br/>
-        <br/>
     </div>
 
+
     {% if authorized %}
-        <div class="danger-zone panel panel-danger">
-            <div class="panel-heading"><h3>Danger Zone</h3></div>
-            <p>
-                Deleting this Risk Acceptance will remove the uploaded file, delete associated Notes and make related
-                findings active.
-            </p>
+        <div class="panel panel-danger">
+            <div class="panel-heading text-center"><h3>Danger Zone</h3></div>
+            <div class="panel-body text-center">
+                <p>
+                    Deleting this Risk Acceptance will remove the uploaded file, delete associated Notes and make
+                    related
+                    findings active.
+                </p>
 
-            <form class="form-horizontal" action="{% url 'delete_risk' risk_approval.id %}" method="post">
-                {% csrf_token %}
-                <div class="form-group">
-                    <input class="btn btn-danger" type="submit" value="Delete Risk Acceptance"/>
-                </div>
-            </form>
+                <form class="form-horizontal" action="{% url 'delete_risk' eng.id risk_approval.id %}" method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <input class="btn btn-danger" type="submit" value="Delete Risk Acceptance"/>
+                    </div>
+                </form>
+            </div>
         </div>
-        <br/>
-        <br/>
     {% endif %}
-
+    <br/>
 {% endblock %}
