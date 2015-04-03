@@ -11,7 +11,7 @@ setup(
         "https://github.com/concentricsky/django-tastypie-swagger/tarball/v0.1.3#egg=django-tastypie-swagger"
     ],
     install_requires=[
-        'Django>=1.7',
+        'Django==1.7.7',
         'MySQL-python==1.2.3',
         'Pillow==2.3.0',
         'django-secure==1.0',

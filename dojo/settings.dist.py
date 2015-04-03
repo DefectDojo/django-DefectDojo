@@ -97,7 +97,7 @@ STATICFILES_FINDERS = (
 
 # where should bower install components
 # collect static will move them to the static root
-BOWER_COMPONENTS_ROOT = DOJO_ROOT+'/components/'
+BOWER_COMPONENTS_ROOT = 'BOWERDIR'
 
 # what components should be installed
 BOWER_INSTALLED_APPS = (

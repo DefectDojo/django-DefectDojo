@@ -84,9 +84,9 @@ sed -i  "s#DOJO_STATIC_ROOT#$PWD/static/#g" dojo/settings.py
 PYV=`python -c "import sys;t='{v[0]}.{v[1]}'.format(v=list(sys.version_info[:2]));sys.stdout.write(t)";`
 if [[ "$PYV"<"2.7" ]]; then
     echo "Reverting to Django 1.6"
-    sed -i  "s/Django>=1.7/Django==1.6.11/g" setup.py
+    sed -i  "s/Django==1.7.7/Django==1.6.11/g" setup.py
 else
-    echo "Leaving Django 1.7 requirement"
+    echo "Leaving Django 1.7.7 requirement"
 fi  
 
 # Detect if we're in a a virtualenv
@@ -106,15 +106,27 @@ else
     sudo python manage.py syncdb
 fi
 
+if [[ "$USER" == "root" ]]; then
+    cd components && bower install --allow-root && cd ..
+else
+    cd components && bower install && cd ..
+fi
+
+# Detect if we're in a a virtualenv
+if python -c 'import sys; print sys.real_prefix' 2>/dev/null; then
+    python manage.py collectstatic --noinput
+else
+    sudo manage.py collectstatic --noinput
+fi
+
 
 echo "=============================================================================="
 echo
 echo "SUCCESS! Now edit your settings.py file in the 'dojo' directory to complete the installation."
 echo
 echo "When you're ready to start the DefectDojo server, type in this directory:"
-echo "    1. python manage.py bower install"
-echo "    2. python manage.py collectstatic"
-echo "    3. python manage.py runserver"
+echo
+echo "    python manage.py runserver"
 echo
 echo "Note: If git cannot connect using the git:// protocol when downloading bower artifacts, you can run the command "
 echo "below to switch over to https://"

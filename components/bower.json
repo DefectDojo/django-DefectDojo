@@ -26,14 +26,12 @@
     "tests"
   ],
   "dependencies": {
-    "JUMFlot.min": "https://raw.githubusercontent.com/jumjum123/JUMFlot/gh-pages/javascripts/JUMFlot.min.js",
+    "startbootstrap-sb-admin-2": "~1.0.5",
     "fullcalendar": "~2.3.1",
     "jquery-cookie": "~1.4.1",
+    "jquery.tablesorter": "~2.21.4",
     "jquery-ui": "~1.11.4",
-    "jquery.flot.bubbles": "https://raw.githubusercontent.com/jumjum123/JUMFlot/gh-pages/javascripts/jquery.flot.bubbles.js",
-    "jquery.flot.mouse": "https://raw.githubusercontent.com/jumjum123/JUMFlot/gh-pages/javascripts/jquery.flot.mouse.js",
-    "jquery.tablesorter": "~2.21.2",
-    "startbootstrap-sb-admin-2": "~1.0.5",
-    "text-highlighter": "~1.2.0"
+    "text-highlighter": "~1.2.0",
+    "JUMFlot": "https://github.com/jumjum123/JUMFlot.git"
   }
 }
