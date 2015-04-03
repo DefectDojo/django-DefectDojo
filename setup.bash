@@ -116,7 +116,7 @@ fi
 if python -c 'import sys; print sys.real_prefix' 2>/dev/null; then
     python manage.py collectstatic --noinput
 else
-    sudo manage.py collectstatic --noinput
+    sudo python manage.py collectstatic --noinput
 fi
 
 
