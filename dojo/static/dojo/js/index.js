@@ -22,6 +22,12 @@ $(function () {
         $("ul#id_accepted_findings input").attr('checked', true);
     })
 
+
+    setTimeout(function(){
+        $('.alert-dismissible').slideUp('slow')
+    }, 20000);
+
+
 });
 
 $(function () {

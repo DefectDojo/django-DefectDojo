@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="well">Upload your Veracode scan in XML format, and all the findings
+        will be imported automatically.
+    </div>
+    <form class="form-horizontal" action="{% url 'add_veracode_scan' eid %}" enctype="multipart/form-data" method="post">
+        {% csrf_token %}
+        {% include "dojo/form_fields.html" with form=form %}
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <input class="btn btn-primary" type="submit" value="Upload File"/>
+            </div>
+        </div>
+    </form>
+{% endblock %}

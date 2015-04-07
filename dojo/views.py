@@ -4,12 +4,14 @@ import collections
 import csv
 from datetime import date, datetime, timedelta
 import logging
-from math import floor, ceil
+from math import ceil
 from operator import itemgetter
 import operator
 import os
 import re
 from threading import Thread
+from xml.etree import ElementTree
+from xml.dom import NamespaceErr
 import time
 import calendar as tcalendar
 
@@ -36,7 +38,7 @@ from dojo.forms import VaForm, WeeklyMetricsForm, \
     SimpleSearchForm, Product_TypeForm, Product_TypeProductForm, \
     Test_TypeForm, ReplaceRiskAcceptanceForm, FINDING_STATUS, \
     AddFindingsRiskAcceptanceForm, Development_EnvironmentForm, DojoUserForm, \
-    DeleteIPScanForm, DeleteTestForm
+    DeleteIPScanForm, DeleteTestForm, UploadVeracodeForm
 from dojo.management.commands.run_scan import run_on_deman_scan
 from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
     Check_List, Scan, IPScan, ScanSettings, Test_Type, Notes, \
@@ -1873,6 +1875,40 @@ def upload_threatmodel(request, eid):
                    'breadcrumbs': breadcrumbs})
 
 
+@user_passes_test(lambda u: u.is_staff)
+def add_veracode_scan(request, eid):
+    eng = get_object_or_404(Engagement, id=eid)
+
+    if request.method == 'POST':
+        form = UploadVeracodeForm(request.POST, request.FILES)
+        if form.is_valid():
+            scan_date = form.cleaned_data['scan_date']
+            try:
+                count = handle_veracode_file(request.FILES['file'],
+                                             eid,
+                                             request.user,
+                                             scan_date)
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'Veracode scan processed, a total of %d findings were imported.' % count,
+                                     extra_tags='alert-success')
+                return HttpResponseRedirect(reverse('view_engagement', args=(eid,)))
+            except NamespaceErr as nse:
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     nse.message,
+                                     extra_tags='alert-danger')
+    else:
+        form = UploadVeracodeForm()
+
+    return render(request,
+                  'dojo/add_veracode_scan.html',
+                  {'form': form,
+                   'eid': eng.id,
+                   'breadcrumbs': get_breadcrumbs(title="Upload a Veracode scan",
+                                                  obj=eng)})
+
+
 """
 Greg
 status: in production
@@ -2051,6 +2087,95 @@ def process_nessus_scan_file(filename, eid, user, scan_date):
     os.unlink("%s-filtered" % filename)
 
 
+def process_veracode_file(filename, eid, user, scan_date):
+    vscan = ElementTree.parse(filename)
+    root = vscan.getroot()
+
+    if 'https://www.veracode.com/schema/reports/export/1.0' not in str(root):
+        # version not supported
+        os.unlink(filename)
+        raise NamespaceErr('This version of Veracode report is not supported.  '
+                           'Please make sure the export is formatted using the '
+                           'https://www.veracode.com/schema/reports/export/1.0 schema.')
+
+    e = Engagement.objects.get(id=eid)
+
+    time = scan_date
+
+    tt, t_created = Test_Type.objects.get_or_create(name="Veracode Scan")
+    # will save in development environment
+    environment, env_created = Development_Environment.objects.get_or_create(name="Development")
+
+    t = Test(engagement=e, test_type=tt, target_start=time,
+             target_end=time, environment=environment)
+    t.full_clean()
+    t.save()
+
+    dupes = {}
+    finding_count = 0
+
+    for severity in root.iter('{https://www.veracode.com/schema/reports/export/1.0}severity'):
+        if severity.attrib['level'] == '5':
+            sev = 'Critical'
+        elif severity.attrib['level'] == '4':
+            sev = 'High'
+        elif severity.attrib['level'] == '3':
+            sev = 'Medium'
+        elif severity.attrib['level'] == '2':
+            sev = 'Low'
+        else:
+            sev = 'Info'
+
+        for category in severity.iter('{https://www.veracode.com/schema/reports/export/1.0}category'):
+            recommendations = category.find('{https://www.veracode.com/schema/reports/export/1.0}recommendations')
+            mitigation = ''
+            for para in recommendations.iter('{https://www.veracode.com/schema/reports/export/1.0}para'):
+                mitigation += para.attrib['text'] + '\n\n'
+                for bullet in para.iter('{https://www.veracode.com/schema/reports/export/1.0}bulletitem'):
+                    mitigation += "    - " + bullet.attrib['text'] + '\n'
+
+                for flaw in category.iter('{https://www.veracode.com/schema/reports/export/1.0}flaw'):
+                    dupe_key = sev + flaw.attrib['cweid'] + flaw.attrib['module'] + flaw.attrib['type']
+
+                    if dupe_key in dupes:
+                        pass
+                    else:
+                        dupes[dupe_key] = True
+                        description = flaw.attrib['description'].replace('. ', '.\n')
+                        if 'References:' in description:
+                            references = description[description.index('References:') + 13:].replace(')  ', ')\n')
+                        else:
+                            references = 'None'
+
+                        if 'date_first_occurrence' in flaw.attrib:
+                            find_date = datetime.strptime(flaw.attrib['date_first_occurrence'], '%Y-%m-%d %H:%M:%S %Z')
+                        else:
+                            find_date = scan_date
+
+                        find = Finding(title=flaw.attrib['categoryname'],
+                                       cwe=int(flaw.attrib['cweid']),
+                                       test=t,
+                                       active=False,
+                                       verified=False,
+                                       description=description,
+                                       severity=sev,
+                                       numerical_severity=get_numerical_severity(sev),
+                                       mitigation=mitigation,
+                                       impact='CIA Impact: ' + flaw.attrib['cia_impact'].upper(),
+                                       references=references,
+                                       url='N/A',
+                                       endpoint="Module: " + flaw.attrib['module'] + ' Type: ' + flaw.attrib['type'],
+                                       date=find_date,
+                                       reporter=user)
+
+                        find.clean()
+                        find.save()
+                        finding_count += 1
+
+    os.unlink(filename)
+    return finding_count
+
+
 """
 Greg
 status: in produciton
@@ -2120,6 +2245,16 @@ def handle_uploaded_file(f, eid, user, scan_date):
             destination.write(chunk)
         destination.close()
     process_nessus_scan_file(fname, eid, user, scan_date)
+
+
+def handle_veracode_file(f, eid, user, scan_date):
+    t = int(time.time())
+    fname = settings.DOJO_ROOT + '/scans/scan-%s-%d' % (eid, t)
+    with open(fname, 'wb+') as destination:
+        for chunk in f.chunks():
+            destination.write(chunk)
+        destination.close()
+    return process_veracode_file(fname, eid, user, scan_date)
 
 
 def handle_uploaded_threat(f, eng):
@@ -2525,8 +2660,8 @@ def view_risk(request, eid, raid):
                 messages.add_message(
                     request,
                     messages.SUCCESS,
-                    'Finding%s added successfully.' % 's'
-                    if len(findings) > 1 else '',
+                    'Finding%s added successfully.' % ('s'
+                                                       if len(findings) > 1 else ''),
                     extra_tags='alert-success')
 
     note_form = NoteForm()
