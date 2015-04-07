@@ -159,7 +159,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <div class="clearfix">
-                        <h4 class="pull-left">
+                        <h3 class="pull-left">
                             Tests
                             </h3>
 
@@ -175,6 +175,9 @@
                                     </li>
                                     <li role="presentation">
                                         <a class="" href="{% url 'add_nessus_scan' eng.id %}">Upload Nessus Scan</a>
+                                    </li>
+                                    <li role="presentation">
+                                        <a class="" href="{% url 'add_veracode_scan' eng.id %}">Upload Veracode Scan</a>
                                     </li>
                                     <li role="presentation">
                                         <a class="" href="{% url 'view_product' eng.product.id %}">Done Testing</a>
@@ -200,7 +203,7 @@
                             <tr>
                                 <td>{{ test.test_type }}</td>
                                 <td>{{ test.target_start.date }}</td>
-                                <td>{{ test.target_end.datae }}</td>
+                                <td>{{ test.target_end.date }}</td>
                                 <td>{{ test.finding_set.all|length }}</td>
                                 <td>{{ test.notes.all|length }}</td>
                                 <td>

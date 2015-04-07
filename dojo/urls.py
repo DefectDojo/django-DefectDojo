@@ -86,6 +86,8 @@ urlpatterns = patterns(
         name='add_tests'),
     url(r'^engagement/(?P<eid>\d+)/add_nessus_scan$',
         'dojo.views.add_nessus_scan', name='add_nessus_scan'),
+    url(r'^engagement/(?P<eid>\d+)/add_veracode_scan$',
+        'dojo.views.add_veracode_scan', name='add_veracode_scan'),
     url(r'^engagement/(?P<eid>\d+)/close$', 'dojo.views.close_eng',
         name='close_engagement'),
     url(r'^engagement/(?P<eid>\d+)/reopen$', 'dojo.views.reopen_eng',
