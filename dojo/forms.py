@@ -193,6 +193,24 @@ class UploadFileForm(forms.Form):
             raise forms.ValidationError("The date cannot be in the future!")
         return date
 
+class UploadVeracodeForm(forms.Form):
+    scan_date = forms.DateTimeField(
+        required=True,
+        label="Veracode Scan Date",
+        help_text="Scan date will be used on findings without specific date.",
+        initial=datetime.now().strftime("%m/%d/%Y"),
+        widget=forms.TextInput(attrs={'class': 'datepicker'}))
+    file = forms.FileField(widget=forms.widgets.FileInput(
+        attrs={"accept": ".xml"}),
+                           label="Select Veracode Export")
+
+    # date can only be today or in the past, not the future
+    def clean_scan_date(self):
+        date = self.cleaned_data['scan_date']
+        if date.date() > datetime.today().date():
+            raise forms.ValidationError("The date cannot be in the future!")
+        return date
+
 
 class DoneForm(forms.Form):
     done = forms.BooleanField()
@@ -405,7 +423,8 @@ class DeleteTestForm(forms.ModelForm):
                    'environment',
                    'target_start',
                    'target_end',
-                   'engagement')
+                   'engagement',
+                   'percent_complete')
 
 
 class FindingForm(forms.ModelForm):
