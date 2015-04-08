@@ -2572,11 +2572,15 @@ def reopen_eng(request, eid):
 
 @user_passes_test(lambda u: u.is_staff)
 def view_threatmodel(request, eid):
+    import mimetypes
+    mimetypes.init()
     eng = get_object_or_404(Engagement, pk=eid)
+    mimetype, encoding = mimetypes.guess_type(eng.tmodel_path)
     response = StreamingHttpResponse(
         FileIterWrapper(open(eng.tmodel_path)))
     fileName, fileExtension = os.path.splitext(eng.tmodel_path)
     response['Content-Disposition'] = 'attachment; filename=threatmodel' + fileExtension
+    response['Content-Type'] = mimetype
 
     return response
 
@@ -2740,6 +2744,9 @@ class FileIterWrapper(object):
 
 
 def download_risk(request, eid, raid):
+    import mimetypes
+    mimetypes.init()
+
     risk_approval = get_object_or_404(Risk_Acceptance, pk=raid)
     en = get_object_or_404(Engagement, pk=eid)
     if (request.user.is_staff
@@ -2753,6 +2760,9 @@ def download_risk(request, eid, raid):
             settings.MEDIA_ROOT + "/" + risk_approval.path.name)))
     response['Content-Disposition'] = 'attachment; filename="%s"' \
                                       % risk_approval.filename()
+    mimetype, encoding = mimetypes.guess_type(risk_approval.path.name)
+    print mimetype
+    response['Content-Type'] = mimetype
     return response
 
 
