@@ -236,6 +236,7 @@ form ul#id_accepted_findings {
     list-style: none;
     margin-left: 0;
     overflow: scroll;
+    max-height: 500px;
 }
 
 form ul#id_accepted_findings li {
