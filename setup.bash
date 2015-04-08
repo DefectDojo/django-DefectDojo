@@ -124,10 +124,17 @@ echo "==========================================================================
 echo
 echo "SUCCESS! Now edit your settings.py file in the 'dojo' directory to complete the installation."
 echo
+echo "We suggest you consider changing the following defaults:"
+echo
+echo "    DEBUG = True  # you should set this to False when you are ready for production."
+echo "    Uncomment the following lines if you enabled SSL/TLS on your server:"
+echo "        SESSION_COOKIE_SECURE = True"
+echo "        CSRF_COOKIE_SECURE = True"
+echo
 echo "When you're ready to start the DefectDojo server, type in this directory:"
 echo
 echo "    python manage.py runserver"
 echo
 echo "Note: If git cannot connect using the git:// protocol when downloading bower artifacts, you can run the command "
 echo "below to switch over to https://"
-echo '          git config --global url."https://".insteadOf git://'
+echo "          git config --global url."https://".insteadOf git://"
