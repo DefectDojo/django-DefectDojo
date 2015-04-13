@@ -10,7 +10,6 @@ from django.utils.dates import MONTHS
 from django.utils.safestring import mark_safe
 from pytz import timezone
 
-
 from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Scan
@@ -25,6 +24,9 @@ FINDING_STATUS = (('verified', 'Verified'),
                   ('false_p', 'False Positive'),
                   ('duplicate', 'Duplicate'),
                   ('out_of_scope', 'Out of Scope'))
+
+SEVERITY_CHOICES = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
+                    ('High', 'High'), ('Critical', 'Critical'))
 
 
 class MonthYearWidget(Widget):
@@ -182,6 +184,8 @@ class UploadFileForm(forms.Form):
         help_text="Scan completion date will be used on all findings.",
         initial=datetime.now().strftime("%m/%d/%Y"),
         widget=forms.TextInput(attrs={'class': 'datepicker'}))
+    minimum_severity = forms.ChoiceField(help_text='Select the minimum severity level to be imported',
+                                         choices=SEVERITY_CHOICES)
     file = forms.FileField(widget=forms.widgets.FileInput(
         attrs={"accept": ".txt,.csv"}),
                            label="Select Nessus Export")
@@ -193,6 +197,7 @@ class UploadFileForm(forms.Form):
             raise forms.ValidationError("The date cannot be in the future!")
         return date
 
+
 class UploadVeracodeForm(forms.Form):
     scan_date = forms.DateTimeField(
         required=True,
@@ -200,9 +205,32 @@ class UploadVeracodeForm(forms.Form):
         help_text="Scan date will be used on findings without specific date.",
         initial=datetime.now().strftime("%m/%d/%Y"),
         widget=forms.TextInput(attrs={'class': 'datepicker'}))
+    minimum_severity = forms.ChoiceField(help_text='Select the minimum severity level to be imported',
+                                         choices=SEVERITY_CHOICES)
     file = forms.FileField(widget=forms.widgets.FileInput(
         attrs={"accept": ".xml"}),
                            label="Select Veracode Export")
+
+    # date can only be today or in the past, not the future
+    def clean_scan_date(self):
+        date = self.cleaned_data['scan_date']
+        if date.date() > datetime.today().date():
+            raise forms.ValidationError("The date cannot be in the future!")
+        return date
+
+
+class UploadBurpForm(forms.Form):
+    scan_date = forms.DateTimeField(
+        required=True,
+        label="Burp Scan Date",
+        help_text="Scan completion date will be used on all findings.",
+        initial=datetime.now().strftime("%m/%d/%Y"),
+        widget=forms.TextInput(attrs={'class': 'datepicker'}))
+    minimum_severity = forms.ChoiceField(help_text='Select the minimum severity level to be imported',
+                                         choices=SEVERITY_CHOICES[0:4])
+    file = forms.FileField(widget=forms.widgets.FileInput(
+        attrs={"accept": ".xml"}),
+                           label="Select Burp XML Export")
 
     # date can only be today or in the past, not the future
     def clean_scan_date(self):
@@ -219,7 +247,7 @@ class DoneForm(forms.Form):
 class UploadThreatForm(forms.Form):
     file = forms.FileField(widget=forms.widgets.FileInput(
         attrs={"accept": ".jpg,.png,.pdf"}),
-                            label="Select Threat Model")
+                           label="Select Threat Model")
 
 
 class UploadRiskForm(forms.ModelForm):
@@ -241,8 +269,6 @@ class UploadRiskForm(forms.ModelForm):
     class Meta:
         model = Risk_Acceptance
         fields = ['accepted_findings', 'path', 'reporter', 'notes']
-
-
 
 
 class ReplaceRiskAcceptanceForm(forms.ModelForm):
