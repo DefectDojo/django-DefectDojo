@@ -7,23 +7,26 @@
                     {{ finding.title }}
                 </h4>
                 {% if user.is_staff %}
-                <div class="dropdown pull-right">
-                    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
-                            data-toggle="dropdown" aria-expanded="true">
-                        <span class="fa fa-gear"></span>
-                        <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
-                        <li role="presentation"><a href="{% url 'edit_finding' finding.id %}"> Edit Finding </a></li>
-                        <li role="presentation"><a href="{% url 'mktemplate' finding.id %}"> Make Finding a Template</a>
-                        </li>
-                        <li role="presentation"><a href="{% url 'close_finding' finding.id %}"> Close Finding</a></li>
-                        <li role="presentation"><a href="{% url 'delete_finding' finding.id %}"
-                                                   onclick="return confirm('Are you sure you want to delete this finding?')">
-                            Delete Finding </a></li>
-                        </li>
-                    </ul>
-                </div>
+                    <div class="dropdown pull-right">
+                        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
+                                data-toggle="dropdown" aria-expanded="true">
+                            <span class="fa fa-gear"></span>
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                            <li role="presentation"><a href="{% url 'edit_finding' finding.id %}"> Edit Finding </a>
+                            </li>
+                            <li role="presentation"><a href="{% url 'mktemplate' finding.id %}"> Make Finding a
+                                Template</a>
+                            </li>
+                            <li role="presentation"><a href="{% url 'close_finding' finding.id %}"> Close Finding</a>
+                            </li>
+                            <li role="presentation"><a href="{% url 'delete_finding' finding.id %}"
+                                                       onclick="return confirm('Are you sure you want to delete this finding?')">
+                                Delete Finding </a></li>
+                            </li>
+                        </ul>
+                    </div>
                 {% endif %}
             </div>
         </div>
@@ -57,10 +60,10 @@
             </div>
         </div>
         <div class="col-md-7">
-            <div class="panel panel-default">
+            <div class="panel panel-default endpoints">
                 <div class="panel-heading">Endpoints / Systems</div>
                 <div class="panel-body">
-                    {{ finding.endpoint }}
+                    <pre>{{ finding.endpoint }}</pre>
                 </div>
 
             </div>
@@ -84,6 +87,29 @@
                 <pre>{{ finding.mitigation }}</pre>
             </div>
         </div>
+        {% if burp_request %}
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Request
+                    <span class="pull-right clickable  panel-collapsed"><i class="glyphicon glyphicon-chevron-down"></i></span>
+                </div>
+                <div class="panel-body" style="display: none">
+                    <pre>{{ burp_request }}</pre>
+                </div>
+            </div>
+        {% endif %}
+        {% if burp_response %}
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Response
+                    <span class="pull-right clickable  panel-collapsed"><i class="glyphicon glyphicon-chevron-down"></i></span>
+                </div>
+
+                <div class="panel-body" style="display: none">
+                    <pre>{{ burp_response }}</pre>
+                </div>
+            </div>
+        {% endif %}
         <div class="panel panel-default">
             <div class="panel-heading">Impact</div>
             <div class="panel-body">
@@ -167,5 +193,20 @@
                 $('input#simple_search').val(terms);
             }
         });
+
+        $(document).on('click', '.panel-heading span.clickable', function (e) {
+            var $this = $(this);
+            if (!$this.hasClass('panel-collapsed')) {
+                $this.parents('.panel').find('.panel-body').slideUp();
+                $this.addClass('panel-collapsed');
+                $this.find('i').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
+            } else {
+                $this.parents('.panel').find('.panel-body').slideDown();
+                $this.removeClass('panel-collapsed');
+                $this.find('i').removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
+            }
+        })
+
+
     </script>
 {% endblock %}
