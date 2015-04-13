@@ -474,43 +474,10 @@ class Check_List(models.Model):
             return 'warning'
 
 
-class BurpRawIssues(models.Model):
-    burpVersion = models.CharField(max_length=12)
-    # Note:  ExportTime looks like some ISO date -
-    # e.x. exportTime="Thu Dec 12 14:43:09 CST 2013"
-    # maybe should be of type models.DateTimeField??
-    burpExportTime = models.CharField(max_length=30)
-
-
-class BurpRawIssue(models.Model):
-    burpIssues = models.ForeignKey(BurpRawIssues, editable=False)
-    burpSerialNumber = models.CharField(max_length=30)
-    burpType = models.CharField(max_length=10)
-    burpName = models.CharField(max_length=200)
-    burpHost = models.CharField(max_length=255)
-    burpHostIP = models.CharField(max_length=20)
-    burpPath = models.CharField(max_length=500)
-    burpLocation = models.CharField(max_length=500)
-    burpSeverity = models.CharField(max_length=15)
-    burpConfidence = models.CharField(max_length=15)
-    burpIssueBackground = models.CharField(max_length=3000)
-    burpRemediationBackground = models.CharField(max_length=3000)
-    burpIssueDetail = models.CharField(max_length=3000)
-    burpRemediationDetail = models.CharField(max_length=3000)
-
-
-class BurpRawIssueDetailItems(models.Model):
-    burpRawIssue = models.ForeignKey(BurpRawIssue, editable=False)
-    burpIssueDetailItem = models.CharField(max_length=3000)
-
-
 class BurpRawRequestResponse(models.Model):
-    burpRequest = models.CharField(max_length=10000)
-    burpRequestMethod = models.CharField(max_length=20)
-    burpRequestBase64 = models.BooleanField(default=False)
-    burpResponse = models.CharField(max_length=10000)
-    burpResponseBase64 = models.BooleanField(default=False)
-    burpResponseRedirected = models.CharField(max_length=255)
+    finding = models.ForeignKey(Finding, blank=True, null=True)
+    burpRequestBase64 = models.BinaryField()
+    burpResponseBase64 = models.BinaryField()
 
 
 class Risk_Acceptance(models.Model):
