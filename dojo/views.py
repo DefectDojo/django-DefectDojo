@@ -1,5 +1,6 @@
 from calendar import monthrange
 from collections import OrderedDict
+import base64
 import collections
 import csv
 from datetime import date, datetime, timedelta
@@ -14,6 +15,7 @@ from xml.etree import ElementTree
 from xml.dom import NamespaceErr
 import time
 import calendar as tcalendar
+from xml.etree.ElementTree import ParseError
 
 from dateutil.relativedelta import relativedelta, MO
 from django.conf import settings
@@ -38,11 +40,11 @@ from dojo.forms import VaForm, WeeklyMetricsForm, \
     SimpleSearchForm, Product_TypeForm, Product_TypeProductForm, \
     Test_TypeForm, ReplaceRiskAcceptanceForm, FINDING_STATUS, \
     AddFindingsRiskAcceptanceForm, Development_EnvironmentForm, DojoUserForm, \
-    DeleteIPScanForm, DeleteTestForm, UploadVeracodeForm
+    DeleteIPScanForm, DeleteTestForm, UploadVeracodeForm, UploadBurpForm
 from dojo.management.commands.run_scan import run_on_deman_scan
 from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
     Check_List, Scan, IPScan, ScanSettings, Test_Type, Notes, \
-    Risk_Acceptance, Dojo_User, Development_Environment
+    Risk_Acceptance, Dojo_User, Development_Environment, BurpRawRequestResponse
 from dojo.filters import ProductFilter, OpenFindingFilter, \
     OpenFingingSuperFilter, AcceptedFingingSuperFilter, \
     AcceptedFindingFilter, ProductFindingFilter, EngagementFilter, \
@@ -58,6 +60,9 @@ logging.basicConfig(
     filename=settings.DOJO_ROOT + '/../django_app.log',
 )
 logger = logging.getLogger(__name__)
+
+SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
+              'High': 1, 'Critical': 0}
 
 """
 Greg
@@ -1883,11 +1888,13 @@ def add_veracode_scan(request, eid):
         form = UploadVeracodeForm(request.POST, request.FILES)
         if form.is_valid():
             scan_date = form.cleaned_data['scan_date']
+            min_sev = form.cleaned_data['minimum_severity']
             try:
                 count = handle_veracode_file(request.FILES['file'],
                                              eid,
                                              request.user,
-                                             scan_date)
+                                             scan_date,
+                                             min_sev)
                 messages.add_message(request,
                                      messages.SUCCESS,
                                      'Veracode scan processed, a total of %d findings were imported.' % count,
@@ -1909,6 +1916,42 @@ def add_veracode_scan(request, eid):
                                                   obj=eng)})
 
 
+@user_passes_test(lambda u: u.is_staff)
+def add_burp_scan(request, eid):
+    eng = get_object_or_404(Engagement, id=eid)
+
+    if request.method == 'POST':
+        form = UploadBurpForm(request.POST, request.FILES)
+        if form.is_valid():
+            scan_date = form.cleaned_data['scan_date']
+            min_sev = form.cleaned_data['minimum_severity']
+            try:
+                count = handle_burp_file(request.FILES['file'],
+                                         eid,
+                                         request.user,
+                                         scan_date,
+                                         min_sev)
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'Burp scan processed, a total of %d findings were imported.' % count,
+                                     extra_tags='alert-success')
+                return HttpResponseRedirect(reverse('view_engagement', args=(eid,)))
+            except NamespaceErr as nse:
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     nse.message,
+                                     extra_tags='alert-danger')
+    else:
+        form = UploadBurpForm()
+
+    return render(request,
+                  'dojo/add_burp_scan.html',
+                  {'form': form,
+                   'eid': eng.id,
+                   'breadcrumbs': get_breadcrumbs(title="Upload a Burp scan",
+                                                  obj=eng)})
+
+
 """
 Greg
 status: in production
@@ -1924,10 +1967,12 @@ def add_nessus_scan(request, eid):
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
             scan_date = form.cleaned_data['scan_date']
+            min_sev = form.cleaned_data['minimum_severity']
             handle_uploaded_file(request.FILES['file'],
                                  eid,
                                  request.user,
-                                 scan_date)
+                                 scan_date,
+                                 min_sev)
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Nessus scan saved.',
@@ -1951,7 +1996,7 @@ Charles magic.
 """
 
 
-def process_nessus_scan_file(filename, eid, user, scan_date):
+def process_nessus_scan_file(filename, eid, user, scan_date, min_sev):
     first = True
     dat = {}
 
@@ -2055,6 +2100,9 @@ def process_nessus_scan_file(filename, eid, user, scan_date):
             if not dat['title']:
                 continue
 
+            if SEVERITIES[dat['severity']] > SEVERITIES[min_sev]:
+                continue
+
             dup_find = Finding.objects.filter(test=t, title=dat['title'])
             if dup_find:
                 find = dup_find[0]
@@ -2087,7 +2135,7 @@ def process_nessus_scan_file(filename, eid, user, scan_date):
     os.unlink("%s-filtered" % filename)
 
 
-def process_veracode_file(filename, eid, user, scan_date):
+def process_veracode_file(filename, eid, user, scan_date, min_sev):
     vscan = ElementTree.parse(filename)
     root = vscan.getroot()
 
@@ -2117,14 +2165,24 @@ def process_veracode_file(filename, eid, user, scan_date):
     for severity in root.iter('{https://www.veracode.com/schema/reports/export/1.0}severity'):
         if severity.attrib['level'] == '5':
             sev = 'Critical'
+            if SEVERITIES[min_sev] < 0:
+                continue
         elif severity.attrib['level'] == '4':
             sev = 'High'
+            if SEVERITIES[min_sev] < 1:
+                continue
         elif severity.attrib['level'] == '3':
             sev = 'Medium'
+            if SEVERITIES[min_sev] < 2:
+                continue
         elif severity.attrib['level'] == '2':
             sev = 'Low'
+            if SEVERITIES[min_sev] < 3:
+                continue
         else:
             sev = 'Info'
+            if SEVERITIES[min_sev] < 4:
+                continue
 
         for category in severity.iter('{https://www.veracode.com/schema/reports/export/1.0}category'):
             recommendations = category.find('{https://www.veracode.com/schema/reports/export/1.0}recommendations')
@@ -2171,6 +2229,104 @@ def process_veracode_file(filename, eid, user, scan_date):
                         find.clean()
                         find.save()
                         finding_count += 1
+
+    os.unlink(filename)
+    return finding_count
+
+
+def process_burp_file(filename, eid, user, scan_date, min_sev):
+    finding_count = 0
+    try:
+        vscan = ElementTree.parse(filename)
+    except ParseError as pe:
+        raise NamespaceErr('The XML report is not valid.  Please make sure the request and response values '
+                           'have been Base 64 encoded.')
+
+    root = vscan.getroot()
+
+    issues = root.iter('issue')
+
+    if not sum(1 for e in issues):
+        # no issues to import
+        os.unlink(filename)
+        raise NamespaceErr('There appears to be no issues to import.  Verify report and try again.')
+
+    e = Engagement.objects.get(id=eid)
+
+    time = scan_date
+
+    tt, t_created = Test_Type.objects.get_or_create(name="Burp Scan")
+    # will save in development environment
+    environment, env_created = Development_Environment.objects.get_or_create(name="Development")
+
+    t = Test(engagement=e, test_type=tt, target_start=time,
+             target_end=time, environment=environment)
+    t.full_clean()
+    t.save()
+
+    dupes = {}
+
+    for issue in root.iter('issue'):
+        sev = issue.find('severity').text
+        if issue.find('severity').text == 'Information':
+            sev = 'Info'
+
+        if SEVERITIES[sev] > SEVERITIES[min_sev]:
+            continue
+
+        dupe_key = sev + issue.find('name').text + issue.find('path').text
+
+        if dupe_key in dupes:
+            pass
+        else:
+            dupes[dupe_key] = True
+            description = issue.find('issueBackground').text + '\n\n' + issue.find('issueDetail').text if issue.find(
+                'issueDetail') is not None else ''
+            find_date = scan_date
+            mitigation = issue.find('remediationBackground').text if issue.find(
+                'remediationBackground') is not None else 'N/A'
+            url = issue.find('host').text if issue.find('host') is not None else '' + issue.find(
+                'location').text if issue.find('location') is not None else ''
+
+            if issue.find('requestresponse') is not None and issue.find('requestresponse').find(
+                    'request[@base64="true"]') is not None:
+                req = issue.find('requestresponse').find('request[@base64="true"]').text
+            else:
+                req = None
+
+            if issue.find('requestresponse') is not None and issue.find('requestresponse').find(
+                    'response[@base64="true"]') is not None:
+                res = issue.find('requestresponse').find('response[@base64="true"]').text
+            else:
+                res = None
+
+            find = Finding(title=issue.find('name').text,
+                           test=t,
+                           active=False,
+                           verified=False,
+                           description=description,
+                           severity=sev,
+                           numerical_severity=get_numerical_severity(sev),
+                           mitigation=mitigation,
+                           impact='N/A',
+                           references='N/A',
+                           url=url,
+                           endpoint=issue.find('host').text if issue.find('host') is not None else 'N/A',
+                           date=find_date,
+                           reporter=user)
+
+            find.clean()
+            find.save()
+
+            if req is not None and res is not None:
+                burp_rr = BurpRawRequestResponse(finding=find,
+                                                 burpRequestBase64=req,
+                                                 burpResponseBase64=res,
+                                                 )
+                burp_rr.clean()
+                burp_rr.save()
+
+        finding_count += 1
 
     os.unlink(filename)
     return finding_count
@@ -2237,24 +2393,34 @@ file upload
 """
 
 
-def handle_uploaded_file(f, eid, user, scan_date):
+def handle_uploaded_file(f, eid, user, scan_date, min_sev):
     t = int(time.time())
     fname = settings.DOJO_ROOT + '/scans/scan-%s-%d' % (eid, t)
     with open(fname, 'wb+') as destination:
         for chunk in f.chunks():
             destination.write(chunk)
         destination.close()
-    process_nessus_scan_file(fname, eid, user, scan_date)
+    process_nessus_scan_file(fname, eid, user, scan_date, min_sev)
 
 
-def handle_veracode_file(f, eid, user, scan_date):
+def handle_veracode_file(f, eid, user, scan_date, min_sev):
     t = int(time.time())
     fname = settings.DOJO_ROOT + '/scans/scan-%s-%d' % (eid, t)
     with open(fname, 'wb+') as destination:
         for chunk in f.chunks():
             destination.write(chunk)
         destination.close()
-    return process_veracode_file(fname, eid, user, scan_date)
+    return process_veracode_file(fname, eid, user, scan_date, min_sev)
+
+
+def handle_burp_file(f, eid, user, scan_date, min_sev):
+    t = int(time.time())
+    fname = settings.DOJO_ROOT + '/scans/scan-%s-%d' % (eid, t)
+    with open(fname, 'wb+') as destination:
+        for chunk in f.chunks():
+            destination.write(chunk)
+        destination.close()
+    return process_burp_file(fname, eid, user, scan_date, min_sev)
 
 
 def handle_uploaded_threat(f, eng):
@@ -2482,7 +2648,7 @@ def view_finding(request, fid):
 
     if request.method == 'POST':
         form = NoteForm(request.POST)
-        if (form.is_valid()):
+        if form.is_valid():
             new_note = form.save(commit=False)
             new_note.author = request.user
             new_note.date = datetime.now(tz=localtz)
@@ -2495,8 +2661,20 @@ def view_finding(request, fid):
                                  extra_tags='alert-success')
     else:
         form = NoteForm()
+
+    try:
+        reqres = BurpRawRequestResponse.objects.get(finding=finding)
+        burp_request = base64.b64decode(reqres.burpRequestBase64)
+        burp_response = base64.b64decode(reqres.burpResponseBase64)
+    except:
+        reqres = None
+        burp_request = None
+        burp_response = None
+
     return render(request, 'dojo/view_finding.html',
                   {'finding': finding,
+                   'burp_request': burp_request,
+                   'burp_response': burp_response,
                    'breadcrumbs': get_breadcrumbs(obj=finding),
                    'user': user, 'notes': notes, 'form': form})
 
@@ -2573,6 +2751,7 @@ def reopen_eng(request, eid):
 @user_passes_test(lambda u: u.is_staff)
 def view_threatmodel(request, eid):
     import mimetypes
+
     mimetypes.init()
     eng = get_object_or_404(Engagement, pk=eid)
     mimetype, encoding = mimetypes.guess_type(eng.tmodel_path)
@@ -2745,6 +2924,7 @@ class FileIterWrapper(object):
 
 def download_risk(request, eid, raid):
     import mimetypes
+
     mimetypes.init()
 
     risk_approval = get_object_or_404(Risk_Acceptance, pk=raid)
@@ -2761,7 +2941,6 @@ def download_risk(request, eid, raid):
     response['Content-Disposition'] = 'attachment; filename="%s"' \
                                       % risk_approval.filename()
     mimetype, encoding = mimetypes.guess_type(risk_approval.path.name)
-    print mimetype
     response['Content-Type'] = mimetype
     return response
 

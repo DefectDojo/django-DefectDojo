@@ -580,9 +580,10 @@ td .fa-fw {
     min-height: 150px;
 }
 
-.view-finding .panel-body pre {
+.view-finding .panel-body pre, .endpoints pre {
     background-color: transparent;
     border: 0px;
+    padding: 0px;
 }
 
 h4.finding-title {
@@ -598,4 +599,8 @@ h4.finding-title {
         margin-left: 200px;
     }
 
+}
+
+.panel-heading span.clickable{
+    cursor: pointer;
 }
