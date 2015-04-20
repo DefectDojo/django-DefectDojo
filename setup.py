@@ -13,7 +13,7 @@ setup(
     install_requires=[
         'Django==1.7.7',
         'MySQL-python==1.2.3',
-        'Pillow==2.3.0',
+        'Pillow>=2.3.0',
         'django-secure==1.0',
         'django-tastypie==0.12.1',
         'django-tastypie-swagger',
@@ -28,7 +28,7 @@ setup(
         'django-bower',
         'django-easy-pdf',
         'xhtml2pdf>=0.0.6',
-        'reportlab>=2.7,<3'],
+        'reportlab'],
     # packages=['DefectDojo'],
     url='https://github.com/rackerlabs/django-DefectDojo'
 

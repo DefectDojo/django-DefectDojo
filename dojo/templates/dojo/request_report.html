@@ -119,14 +119,23 @@
 
                             <select class="form-control" id="id_report_type" name="report_type">
                                 <option value="AsciiDoc">AsciiDoc</option>
-                                <option value="PDF">PDF</option>
+                                {% if findings|length <= 150 %}
+                                    <option value="PDF">PDF</option>
+                                {% endif %}
                             </select>
                         </p>
-                        <div class="alert alert-warning" role="alert">
-                            <span class="fa fa-cogs" aria-hidden="true"></span>
-                            <span class=""><b>Note:</b></span>
-                            PDF reports can take some time to generate depending on the number of findings included.
-                        </div>
+                        {% if findings|length <= 150 %}
+                            <div class="alert alert-warning" role="alert">
+                                <span class="fa fa-cogs" aria-hidden="true"></span>
+                                <span class=""><b>Warning:</b></span>
+                                PDF reports can take some time to generate depending on the number of findings included.
+                            </div>
+                            <div class="alert alert-info" role="alert">
+                                <span class="fa fa-info-circle" aria-hidden="true"></span>
+                                <span class=""><b>Note:</b></span>
+                                For PDF reports, the finding description will be truncated at 500 characters to aid in redering speed.
+                            </div>
+                        {% endif %}
                         <div class="centered">
                             <input class="btn btn-primary" name="_generate" type="submit"
                                    value="Generate Report"/><br/><br/>
