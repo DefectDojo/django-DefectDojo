@@ -9,16 +9,18 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils import six
 from django_filters import FilterSet, CharFilter, \
     ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter, \
-    BooleanFilter
+    TypedChoiceFilter, BooleanFilter
 from django.contrib.auth.models import User
-from django.forms.widgets import CheckboxInput
 from pytz import timezone
+from distutils.util import strtobool
 
 from dojo.models import Dojo_User, Product_Type, Finding, \
     Product, Test_Type
 
-
 local_tz = timezone(settings.TIME_ZONE)
+SEVERITY_CHOICES = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
+                    ('High', 'High'), ('Critical', 'Critical'))
+BOOLEAN_CHOICES = (('false', 'No'), ('true', 'Yes'),)
 
 
 def now():
@@ -26,7 +28,6 @@ def now():
 
 
 class DateRangeFilter(ChoiceFilter):
-
     options = {
         '': (_('Any date'), lambda qs, name: qs.all()),
         1: (_('Today'), lambda qs, name: qs.filter(**{
@@ -63,6 +64,54 @@ class DateRangeFilter(ChoiceFilter):
         kwargs['choices'] = [
             (key, value[0]) for key, value in six.iteritems(self.options)]
         super(DateRangeFilter, self).__init__(*args, **kwargs)
+
+    def filter(self, qs, value):
+        try:
+            value = int(value)
+        except (ValueError, TypeError):
+            value = ''
+        return self.options[value][1](qs, self.name)
+
+
+class MitigatedDateRangeFilter(ChoiceFilter):
+    options = {
+        '': (_('Either'), lambda qs, name: qs.all()),
+        1: (_('Yes'), lambda qs, name: qs.filter(**{
+            '%s__isnull' % name: False
+        })),
+        2: (_('No'), lambda qs, name: qs.filter(**{
+            '%s__isnull' % name: True
+        })),
+    }
+
+    def __init__(self, *args, **kwargs):
+        kwargs['choices'] = [
+            (key, value[0]) for key, value in six.iteritems(self.options)]
+        super(MitigatedDateRangeFilter, self).__init__(*args, **kwargs)
+
+    def filter(self, qs, value):
+        try:
+            value = int(value)
+        except (ValueError, TypeError):
+            value = ''
+        return self.options[value][1](qs, self.name)
+
+
+class ReportBooleanFilter(ChoiceFilter):
+    options = {
+        '': (_('Either'), lambda qs, name: qs.all()),
+        1: (_('Yes'), lambda qs, name: qs.filter(**{
+            '%s' % name: True
+        })),
+        2: (_('No'), lambda qs, name: qs.filter(**{
+            '%s' % name: False
+        })),
+    }
+
+    def __init__(self, *args, **kwargs):
+        kwargs['choices'] = [
+            (key, value[0]) for key, value in six.iteritems(self.options)]
+        super(ReportBooleanFilter, self).__init__(*args, **kwargs)
 
     def filter(self, qs, value):
         try:
@@ -376,3 +425,20 @@ class MetricsFindingFilter(FilterSet):
                     for finding in self.queryset.distinct()
                     if finding.severity not in sevs)
         self.form.fields['severity'].choices = sevs.items()
+
+
+class ReportFindingFilter(FilterSet):
+    severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
+    active = ReportBooleanFilter()
+    mitigated = MitigatedDateRangeFilter()
+    verified = ReportBooleanFilter()
+    false_p = ReportBooleanFilter(label="False Positive")
+    duplicate = ReportBooleanFilter()
+    out_of_scope = ReportBooleanFilter()
+
+    class Meta:
+        model = Finding
+        exclude = ['title', 'date', 'cwe', 'url', 'description', 'mitigation', 'impact',
+                   'endpoint', 'references', 'test', 'is_template',
+                   'thread_id', 'notes',
+                   'numerical_severity', 'reporter']

@@ -34,7 +34,7 @@
   sudo_user: '{{ dd_user }}'
 
 - name: Install Django
-  pip: name=Django version=1.6.10 virtualenv={{ venv_dir }}
+  pip: name=Django version=1.7.7 virtualenv={{ venv_dir }}
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
@@ -103,8 +103,23 @@
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
-- name: Install humanize
+- name: Install django-bower
   pip: name=django-bower state=present virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ dd_user }}'
+
+- name: Install django-ez-pdf
+  pip: name=django-easy-pdf state=present virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ dd_user }}'
+
+- name: Install xhtml2pdf
+  pip: name=xhtml2pdf version=0.0.6 virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ dd_user }}'
+
+- name: Install reportlab
+  pip: name=reportlab version=2.7 virtualenv={{ venv_dir }}
   sudo: yes
   sudo_user: '{{ dd_user }}'
 

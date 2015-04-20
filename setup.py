@@ -25,7 +25,10 @@ setup(
         'django-filter',
         'supervisor',
         'humanize',
-        'django-bower'],
+        'django-bower',
+        'django-easy-pdf',
+        'xhtml2pdf>=0.0.6',
+        'reportlab>=2.7,<3'],
     # packages=['DefectDojo'],
     url='https://github.com/rackerlabs/django-DefectDojo'
 

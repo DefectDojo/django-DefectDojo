@@ -13,7 +13,6 @@ from pytz import timezone
 from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Scan
-from dojo.filters import DateRangeFilter
 from dojo import settings
 
 
