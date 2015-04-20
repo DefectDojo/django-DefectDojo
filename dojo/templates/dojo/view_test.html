@@ -81,6 +81,7 @@
                     <th>Name</th>
                     <th>Severity</th>
                     <th>Reporter</th>
+                    <th>Mitigation Date</th>
                     <th>Verified</th>
                     <th>Active</th>
                 </tr>
@@ -93,6 +94,7 @@
                         <span class="text-error">
                     {% else %}<span>{% endif %}{{ finding.severity }}</span></td>
                     <td>{{ finding.reporter.username }}</td>
+                    <td>{{ finding.mitigated }}</td>
                     <td>{{ finding.verified }}</td>
                     <td>{{ finding.active }}</td>
                     </tr>

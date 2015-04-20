@@ -4,6 +4,7 @@ import base64
 import collections
 import csv
 from datetime import date, datetime, timedelta
+from easy_pdf.rendering import render_to_pdf_response
 import logging
 from math import ceil
 from operator import itemgetter
@@ -26,7 +27,7 @@ from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.validators import validate_ipv46_address
 from django.db.models import Q
-from django.http import HttpResponseRedirect, StreamingHttpResponse, HttpResponseForbidden
+from django.http import HttpResponseRedirect, StreamingHttpResponse, HttpResponseForbidden, Http404
 from django.core.urlresolvers import reverse
 from django.shortcuts import render, get_object_or_404
 from pytz import timezone
@@ -48,7 +49,7 @@ from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
 from dojo.filters import ProductFilter, OpenFindingFilter, \
     OpenFingingSuperFilter, AcceptedFingingSuperFilter, \
     AcceptedFindingFilter, ProductFindingFilter, EngagementFilter, \
-    ClosedFingingSuperFilter, ClosedFindingFilter, MetricsFindingFilter
+    ClosedFingingSuperFilter, ClosedFindingFilter, MetricsFindingFilter, ReportFindingFilter
 
 
 localtz = timezone(settings.TIME_ZONE)
@@ -1707,7 +1708,7 @@ def view_scan(request, sid):
                                  'Scan results deleted successfully.',
                                  extra_tags='alert-success')
             return HttpResponseRedirect(
-                reverse('view_scan_settings', args=(prod.id, scan.id,)))
+                reverse('view_scan_settings', args=(prod.id, scan_settings_id,)))
         else:
             messages.add_message(
                 request,
@@ -3266,34 +3267,108 @@ def edit_finding(request, fid):
 
 
 @user_passes_test(lambda u: u.is_staff)
-def gen_report(request, tid):
-    test = Test.objects.get(id=tid)
-    findings = Finding.objects.filter(
-        test=test, active=True).order_by('numerical_severity', '-severity')
-    return render(request, 'dojo/gen_report.html',
-                  {'test': test, 'findings': findings,
-                   'breadcrumbs': get_breadcrumbs(obj=test,
-                                                  title="Generate Report")})
+def product_type_report(request, ptid):
+    product_type = get_object_or_404(Product_Type, id=ptid)
+    return generate_report(request, product_type)
 
 
-def gen_report_all(request, pid):
-    p = Product.objects.get(id=pid)
-    if request.user.is_staff or request.user in p.authorized_users.all():
+@user_passes_test(lambda u: u.is_staff)
+def product_report(request, pid):
+    product = get_object_or_404(Product, id=pid)
+    if request.user.is_staff or request.user in product.authorized_users.all():
         pass  # user is authorized for this product
     else:
         raise PermissionDenied
+    return generate_report(request, product)
 
-    result = ProductFindingFilter(
-        request.GET,
-        queryset=Finding.objects.filter(test__engagement__product=p,
-                                        active=True,
-                                        verified=True))
-    result = sorted(result, key=lambda f: (f.numerical_severity,
-                                           -ord(f.severity[0])))
-    return render(request, 'dojo/gen_report.html',
-                  {'findings': result,
-                   'pid': pid,
-                   'breadcrumbs': get_breadcrumbs(title="Generate Report")})
+
+@user_passes_test(lambda u: u.is_staff)
+def engagement_report(request, eid):
+    engagement = get_object_or_404(Engagement, id=eid)
+    return generate_report(request, engagement)
+
+
+@user_passes_test(lambda u: u.is_staff)
+def test_report(request, tid):
+    test = get_object_or_404(Test, id=tid)
+    return generate_report(request, test)
+
+
+@user_passes_test(lambda u: u.is_staff)
+def generate_report(request, obj):
+    product_type = None
+    product = None
+    engagement = None
+    test = None
+    user = Dojo_User.objects.get(id=request.user.id)
+    report_format = request.GET.get('report_type', 'AsciiDoc')
+    include_finding_notes = int(request.GET.get('include_finding_notes', 0))
+    include_executive_summary = int(request.GET.get('include_executive_summary', 0))
+    include_table_of_contents = int(request.GET.get('include_table_of_contents', 0))
+    generate = "_generate" in request.GET
+
+    if type(obj).__name__ == "Product_Type":
+        product_type = obj
+        findings = ReportFindingFilter(request.GET, queryset=Finding.objects.filter(
+            test__engagement__product__prod_type=product_type))
+        filename = "product_type_finding_report.pdf"
+    elif type(obj).__name__ == "Product":
+        product = obj
+        findings = ReportFindingFilter(request.GET, queryset=Finding.objects.filter(test__engagement__product=product))
+        filename = "product_finding_report.pdf"
+    elif type(obj).__name__ == "Engagement":
+        engagement = obj
+        findings = ReportFindingFilter(request.GET, queryset=Finding.objects.filter(test__engagement=engagement))
+        filename = "engagement_finding_report.pdf"
+    elif type(obj).__name__ == "Test":
+        test = obj
+        findings = ReportFindingFilter(request.GET, queryset=Finding.objects.filter(test=test))
+        filename = "test_finding_report.pdf"
+    else:
+        return Http404()
+
+    if generate:
+        if report_format == 'AsciiDoc':
+            return render(request,
+                          'dojo/asciidoc_report.html',
+                          {'product_type': product_type,
+                           'product': product,
+                           'engagement': engagement,
+                           'test': test,
+                           'findings': findings,
+                           'include_finding_notes': include_finding_notes,
+                           'include_executive_summary': include_executive_summary,
+                           'include_table_of_contents': include_table_of_contents,
+                           'user': user,
+                           'title': 'Generate Report',
+                           'breadcrumbs': get_breadcrumbs(obj=obj,
+                                                          title="Generate Report")})
+        elif report_format == 'PDF':
+            return render_to_pdf_response(request,
+                                          'dojo/pdf_report.html',
+                                          {'product_type': product_type,
+                                           'product': product,
+                                           'engagement': engagement,
+                                           'test': test,
+                                           'findings': findings,
+                                           'include_finding_notes': include_finding_notes,
+                                           'include_executive_summary': include_executive_summary,
+                                           'include_table_of_contents': include_table_of_contents,
+                                           'user': user,
+                                           'title': 'Generate Report'},
+                                          filename=filename, )
+        else:
+            return Http404
+    paged_findings = get_page_items(request, findings, 30)
+    return render(request, 'dojo/request_report.html',
+                  {'product_type': product_type,
+                   'product': product,
+                   'engagement': engagement,
+                   'test': test,
+                   'findings': findings,
+                   'paged_findings': paged_findings,
+                   'breadcrumbs': get_breadcrumbs(obj=obj,
+                                                  title="Generate Report")})
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -3397,8 +3472,14 @@ def get_breadcrumbs(obj=None, active=True, title=None):
                "link": reverse('home')}]
 
     if title is None:
-        if type(obj).__name__ == "Product":
+        if type(obj).__name__ == "Product_Type":
+            p = Product_Type.objects.get(id=obj.id)
+            result.append({"active": False,
+                           "title": p.name,
+                           "link": reverse('product_type')})
+        elif type(obj).__name__ == "Product":
             p = Product.objects.get(id=obj.id)
+            result = get_breadcrumbs(p.prod_type, True)
             result.append({"active": False,
                            "title": "Product",
                            "link": reverse('product')})

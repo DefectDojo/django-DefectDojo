@@ -45,7 +45,6 @@
                 <div class="panel-body centered">
                     {{ test.test_type }} <a class="btn btn-primary" href="{% url 'product_report' pid %}?{{ request.GET.urlencode }}">
                     Generate Report</a>
-                    <span class="report_note"><b><i>Note:</i></b> Generated based on filters.</span>
                 </div>
                 {% if filtered.form %}
                     <div class="panel-heading">Filters</div>

@@ -187,11 +187,14 @@ urlpatterns = patterns(
         'dojo.views.edit_scan_settings', name='edit_scan_settings'),
 
     #  reports
-    url(r'^test/(?P<tid>\d+)/report$', 'dojo.views.gen_report',
-        name='test_report'),
+    url(r'^product/type/(?P<ptid>\d+)/report$',
+        'dojo.views.product_type_report', name='product_type_report'),
     url(r'^product/(?P<pid>\d+)/report$',
-        'dojo.views.gen_report_all', name='product_report'),
-
+        'dojo.views.product_report', name='product_report'),
+    url(r'^engagement/(?P<eid>\d+)/report$', 'dojo.views.engagement_report',
+        name='engagement_report'),
+    url(r'^test/(?P<tid>\d+)/report$', 'dojo.views.test_report',
+        name='test_report'),
 
     # other
     url(r'^launch_va/(?P<pid>\d+)$', 'dojo.views.launch_va',

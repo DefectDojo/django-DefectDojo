@@ -21,7 +21,12 @@ h3 {
     margin-top: 5px;
 }
 
-div.filters select, div.filters textarea, div.filters input[type="text"], div.filters input[type="password"], div.filters input[type="datetime"], div.filters input[type="datetime-local"], div.filters input[type="date"], div.filters input[type="month"], div.filters input[type="time"], div.filters input[type="week"], div.filters input[type="number"], div.filters input[type="email"], div.filters input[type="url"], div.filters input[type="search"], div.filters input[type="tel"], div.filters input[type="color"], div.filters .uneditable-input {
+form.filters {
+    margin-top: 0px;
+    padding: 0px 5px 5px;
+}
+
+.filters select, .filters textarea, .filters input[type="text"], .filters input[type="password"], .filters input[type="datetime"], .filters input[type="datetime-local"], .filters input[type="date"], .filters input[type="month"], .filters input[type="time"], .filters input[type="week"], .filters input[type="number"], .filters input[type="email"], .filters input[type="url"], .filters input[type="search"], .filters input[type="tel"], .filters input[type="color"], .filters .uneditable-input {
     width: 100%;
     border-radius: 4px;
     background-color: #fff;
@@ -389,18 +394,18 @@ br {
     margin: 21px 0;
 }
 
-div.filters h3 {
+.filters h3 {
     font-size: 122% !important;
     line-height: 20px;
     margin: 0px 0 5px 0 !important;
 }
 
-div.filters a.clear {
+.filters a.clear {
     clear: both;
     float: right;
 }
 
-div.filters .helptext {
+.filters .helptext {
     display: none;
 }
 
@@ -601,6 +606,6 @@ h4.finding-title {
 
 }
 
-.panel-heading span.clickable{
+.panel-heading span.clickable {
     cursor: pointer;
 }
