@@ -103,6 +103,9 @@ class Product(models.Model):
     def __unicode__(self):
         return self.name
 
+    class Meta:
+        ordering = ('name',)
+
     @property
     def findings_count(self):
         findings = Finding.objects.filter(active=True, mitigated__isnull=True,
@@ -312,6 +315,9 @@ class Notes(models.Model):
                                 default=get_current_datetime)
     author = models.ForeignKey(User, editable=False)
 
+    class Meta:
+        ordering = ['-date']
+
     def __unicode__(self):
         return self.entry
 
@@ -375,6 +381,9 @@ class Finding(models.Model):
                                    editable=False)
     numerical_severity = models.CharField(max_length=4)
 
+    class Meta:
+        ordering = ('numerical_severity', '-date')
+
     def __unicode__(self):
         return self.title
 
@@ -384,6 +393,8 @@ class Finding(models.Model):
             status += ['Active']
         if self.verified:
             status += ['Verified']
+        if self.mitigated:
+            status += ['Mitigated']
         if self.false_p:
             status += ['False Positive']
         if self.out_of_scope:
@@ -392,6 +403,9 @@ class Finding(models.Model):
             status += ['Duplicate']
         if len(self.risk_acceptance_set.all()) > 0:
             status += ['Accepted']
+
+        if not len(status):
+            status += ['Unknown']
 
         return ", ".join([str(s) for s in status])
 
