@@ -3344,19 +3344,26 @@ def generate_report(request, obj):
                            'breadcrumbs': get_breadcrumbs(obj=obj,
                                                           title="Generate Report")})
         elif report_format == 'PDF':
-            return render_to_pdf_response(request,
-                                          'dojo/pdf_report.html',
-                                          {'product_type': product_type,
-                                           'product': product,
-                                           'engagement': engagement,
-                                           'test': test,
-                                           'findings': findings,
-                                           'include_finding_notes': include_finding_notes,
-                                           'include_executive_summary': include_executive_summary,
-                                           'include_table_of_contents': include_table_of_contents,
-                                           'user': user,
-                                           'title': 'Generate Report'},
-                                          filename=filename, )
+            if len(findings) <= 150:
+                return render_to_pdf_response(request,
+                                              'dojo/pdf_report.html',
+                                              {'product_type': product_type,
+                                               'product': product,
+                                               'engagement': engagement,
+                                               'test': test,
+                                               'findings': findings,
+                                               'include_finding_notes': include_finding_notes,
+                                               'include_executive_summary': include_executive_summary,
+                                               'include_table_of_contents': include_table_of_contents,
+                                               'user': user,
+                                               'title': 'Generate Report'},
+                                              filename=filename, )
+            else:
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     'PDF reports are limited to finding counts of 150 or less. Please use the '
+                                     'filters below to reduce the number of findings.',
+                                     extra_tags='alert-danger')
         else:
             return Http404
     paged_findings = get_page_items(request, findings, 30)
