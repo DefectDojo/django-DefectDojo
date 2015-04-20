@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
     {% if user.is_staff %}
-        <a class="btn btn-primary" href="{%  url 'add_product_type' %}"> New Product Type </a>
+        <a class="btn btn-primary" href="{% url 'add_product_type' %}"> New Product Type </a>
         <br/>
         <br/>
     {% endif %}
@@ -15,21 +15,26 @@
                     <th> # of Products</th>
                     <th> # of active findings</th>
                     {% if user.is_staff %}
-                        <th> Product</th>{% endif %}
+                        <th> Actions</th>{% endif %}
                 </tr>
                 </thead>
                 <tbody>
                 {% for pt in pts %}
                     <tr>
-                        <td><a href="{%  url 'edit_product_type' pt.id %}"> {{ pt.name }} </a></td>
+                        <td><a href="{% url 'edit_product_type' pt.id %}"> {{ pt.name }} </a></td>
                         <td> {{ pt.products_count }}</td>
                         <td> {{ pt.findings_count }}</td>
                         {% if user.is_staff %}
-                            <td><a href="{%  url 'add_product_to_product_type' pt.id %}">
-                                <div class="btn btn-sm btn-primary">
-                                    Add Product
+                            <td>
+                                <div class="btn-group">
+                                    <a class="btn btn-sm btn-primary" href="{% url 'add_product_to_product_type' pt.id %}">
+                                        Add Product
+                                    </a>
+                                    <a class="btn btn-sm btn-warning" href="{% url 'product_type_report' pt.id %}">
+                                        Generate Report
+                                    </a>
                                 </div>
-                            </a></td>
+                            </td>
                         {% endif %}
 
                     </tr>

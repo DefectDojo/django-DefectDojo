@@ -171,11 +171,12 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'dojo',
     'django.contrib.admin',
+    'django.contrib.humanize',
     'gunicorn',
     'tastypie',
     'tastypie_swagger',
-    'humanize',
     'djangobower',
+    'easy_pdf',
 )
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
