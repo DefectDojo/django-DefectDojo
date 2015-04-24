@@ -168,6 +168,6 @@
   ignore_errors: True
 
 - name: Start DD
-  shell: 'nohup {{ venv_dir }}/bin/python {{ dd_install_dir }}/manage.py runserver 0.0.0.0:{{ gunicorn_port }} >>{{ gunicorn_log_file }} 2>&1 &'
+  shell: '. {{ venv_dir }}/bin/activate && nohup {{ venv_dir }}/bin/python {{ dd_install_dir }}/manage.py runserver 0.0.0.0:{{ gunicorn_port }} >>{{ gunicorn_log_file }} 2>&1 &'
   sudo: yes
   sudo_user: '{{ dd_user }}'
