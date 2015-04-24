@@ -54,7 +54,7 @@
   sudo_user: '{{ dd_user }}'
 
 - name: Install django-tastypie
-  pip: name=django-tastypie version=0.11.1 virtualenv={{ venv_dir }}
+  pip: name=django-tastypie virtualenv={{ venv_dir }}
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
@@ -140,10 +140,17 @@
     sudo: yes
     sudo_user: '{{ dd_user }}'
 
-- name: Run Django 'bower install' command
-  django_manage: command=bower install app_path={{ dd_install_dir }} virtualenv={{ venv_dir }}
+#- name: Run Django 'bower install' command
+#  django_manage: command='bower install' app_path={{ dd_install_dir }} virtualenv={{ venv_dir }}
+#  sudo: yes
+#  sudo_user: '{{ dd_user }}'
+
+- name: Run 'bower install' command
+  command: bower install
   sudo: yes
   sudo_user: '{{ dd_user }}'
+  args: 
+    chdir: '{{ dd_install_dir }}/components/'
 
 - name: Run Django 'collectstatic' command
   django_manage: command=collectstatic app_path={{ dd_install_dir }} virtualenv={{ venv_dir }}
