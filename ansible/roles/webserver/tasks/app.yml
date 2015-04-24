@@ -3,7 +3,7 @@
   file: path={{ dd_install_dir }} state=directory owner={{ dd_user }} group=www-data
 
 - name: Download DefectDojo
-  git: repo={{ dd_git_repo }} dest={{ dd_install_dir }} accept_hostkey=yes version=master force=yes recursive=no key_file=/home/{{ dd_user }}/.ssh/id_rsa
+  git: repo={{ dd_git_repo }} dest={{ dd_install_dir }} accept_hostkey=yes version={{ dd_git_branch }} force=yes recursive=no key_file=/home/{{ dd_user }}/.ssh/id_rsa
 
 - name: Give ownership to dd_user
   file: path={{ dd_install_dir }} recurse=yes owner={{ dd_user }} group=www-data state=directory
