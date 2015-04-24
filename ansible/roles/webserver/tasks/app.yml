@@ -23,7 +23,7 @@
   register: django_secret
 
 - name: Populate DefectDojo settings file
-  template: src=seddings.j2 dest={{ dd_install_dir }}/dojo/settings.py owner={{ dd_user }} group=www-data
+  template: src=settings.j2 dest={{ dd_install_dir }}/dojo/settings.py owner={{ dd_user }} group=www-data
 
 - name: Install virtualenv
   pip: name=virtualenv
@@ -84,7 +84,7 @@
   sudo_user: '{{ dd_user }}'
 
 - name: Install django-tastypie-swagger
-  pip: name=-e git+git@github.com:concentricsky/django-tastypie-swagger.git@v0.1.3#egg=django-tastypie-swagger virtualenv={{ venv_dir }}
+  pip: name=django-tastypie-swagger virtualenv={{ venv_dir }}
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
@@ -124,7 +124,7 @@
   sudo_user: '{{ dd_user }}'
 
 - name: Run Django 'makemigrations' command
-  django_manage: command=makemigrations app_path={{ dd_install_dir }} virtualenv={{ venv_dir }}
+  django_manage: command='makemigrations dojo' app_path={{ dd_install_dir }} virtualenv={{ venv_dir }}
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
