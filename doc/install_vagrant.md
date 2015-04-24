@@ -1,6 +1,12 @@
 # Vagrant Install
 
-Installing with Vagrant is the easiest way to get started with DefectDojo.
+__NOTE:__
+We recommend only installing with Vagrant for development / testing purposes.
+If you are deploying to production, we recommend following the quick 
+[bash install guide](./install_bash.md), or if you're on Ubuntu 14.04, check out
+[Jay's wiki page](https://github.com/rackerlabs/django-DefectDojo/wiki/DefectDojo-Installation-Guide---Ubuntu-Desktop-14.04),
+on Ubuntu installation, complete with in-depth instructions and explanations.
+
 
 __You will need:__
 
