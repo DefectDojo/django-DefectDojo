@@ -22,8 +22,10 @@ dd_super_user: 'root'
 dd_super_user_pass: 'An0th3r@SuPeR@Secure@PASSWORD'
 dd_super_user_email: 'root@localhost'
 
-# Repo link for DefectDojo
+# Git repository information for DefectDojo (Change this if you want to test a
+# fork)
 dd_git_repo: 'https://github.com/rackerlabs/django-DefectDojo.git'
+dd_git_branch: 'master'
 
 # Gunicorn settings
 gunicorn_num_workers: 3
