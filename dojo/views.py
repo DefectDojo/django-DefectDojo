@@ -26,6 +26,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.validators import validate_ipv46_address
+from django.utils.html import escape
 from django.db.models import Q
 from django.http import HttpResponseRedirect, StreamingHttpResponse, HttpResponseForbidden, Http404
 from django.core.urlresolvers import reverse
@@ -288,7 +289,7 @@ def view_engineer(request, eid):
                     severity='Low'
                 ).count()
         prod = Product.objects.get(id=product)
-        all_findings_link = "<a href='%s'>%s</a>" % (reverse('view_product_findings', args=(prod.id,)), prod.name)
+        all_findings_link = "<a href='%s'>%s</a>" % (reverse('view_product_findings', args=(prod.id,)), escape(prod.name))
         update.append([all_findings_link, z_count, o_count, t_count, h_count,
                        z_count + o_count + t_count + h_count])
     total_update = []
@@ -320,7 +321,7 @@ def view_engineer(request, eid):
                     mitigated__isnull=True,
                     severity='Low').count()
         prod = Product.objects.get(id=product)
-        all_findings_link = "<a href='%s'>%s</a>" % (reverse('view_product_findings', args=(prod.id,)), prod.name)
+        all_findings_link = "<a href='%s'>%s</a>" % (reverse('view_product_findings', args=(prod.id,)), escape(prod.name))
         total_update.append([all_findings_link, z_count, o_count, t_count,
                              h_count, z_count + o_count + t_count + h_count])
 
@@ -1009,7 +1010,7 @@ def metrics(request, mtype):
     for p in top_ten_products:
         open_finds = p.open_findings(start_date, end_date)
         update.append(
-            ["<a href='%s'>%s</a>" % (reverse('view_product_findings', args=(p.id,)), p.name),
+            ["<a href='%s'>%s</a>" % (reverse('view_product_findings', args=(p.id,)), escape(p.name)),
              open_finds['Critical'],
              open_finds['High'],
              open_finds['Medium'],
@@ -1444,7 +1445,7 @@ def old_metrics(request, mtype):
     for p in top_ten_products:
         open_finds = p.open_findings(start_date, end_date)
         update.append(
-            ["<a href='%s'>%s</a>" % (reverse('view_product_findings', args=(p.id,)), p.name),
+            ["<a href='%s'>%s</a>" % (reverse('view_product_findings', args=(p.id,)), escape(p.name)),
              open_finds['Critical'],
              open_finds['High'],
              open_finds['Medium'],
