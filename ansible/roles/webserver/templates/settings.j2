@@ -8,6 +8,7 @@ SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+VERSION = '1.0.2'
 
 # Enable this if you have SSL turned on
 # SESSION_COOKIE_SECURE = True
@@ -103,6 +104,7 @@ BOWER_COMPONENTS_ROOT = '{{ dd_install_dir }}/components'
 
 # what components should be installed
 BOWER_INSTALLED_APPS = (
+    'fontawesome',
     'startbootstrap-sb-admin-2',
     'fullcalendar',
     'jquery-cookie',
@@ -110,7 +112,8 @@ BOWER_INSTALLED_APPS = (
     'jquery-ui',
     'text-highlighter',
     # directly from github since no bower comp available
-    'git://github.com/jumjum123/JUMFlot.git'
+    'https://github.com/jumjum123/JUMFlot.git',
+    'https://github.com/markrcote/flot-axislabels.git',
 )
 
 # Make this unique, and don't share it with anybody.

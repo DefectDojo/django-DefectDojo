@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
     <div class="row">
-        <div class="col-md-9">
+        <div class="col-md-10">
             {% if findings %}
-                <div class="panel panel-default">
+                <div class="table-responsive panel panel-default">
                     <table id="open_findings"
-                           class="table-responsive tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
+                           class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
                         <thead>
                         <tr>
                             <th>Name</th>
@@ -18,7 +18,7 @@
                         <tbody>
                         {% for finding in findings %}
                             <tr>
-                                <td class="nowrap"><a title="{{ finding.title }}"
+                                <td><a title="{{ finding.title }}"
                                                       href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars:50 }}</a>
                                 </td>
                                 <td class="nowrap">{{ finding.date }}</td>
@@ -40,7 +40,7 @@
                 No findings found.
             {% endif %}
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <div class="panel panel-default filters">
                 {% if filtered.form %}
                     <div class="panel-heading">Filters</div>

@@ -26,12 +26,14 @@
     "tests"
   ],
   "dependencies": {
+    "fontawesome": "~4.3.0",
     "startbootstrap-sb-admin-2": "~1.0.5",
     "fullcalendar": "~2.3.1",
     "jquery-cookie": "~1.4.1",
     "jquery.tablesorter": "~2.21.4",
     "jquery-ui": "~1.11.4",
     "text-highlighter": "~1.2.0",
-    "JUMFlot": "https://github.com/jumjum123/JUMFlot.git"
+    "JUMFlot": "https://github.com/jumjum123/JUMFlot.git",
+    "flot-axis": "https://github.com/markrcote/flot-axislabels.git"
   }
 }

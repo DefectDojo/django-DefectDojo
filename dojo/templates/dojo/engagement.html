@@ -3,11 +3,11 @@
     <h4> Active Engagements</h4>
     <br/>
     <div class="row">
-        <div class="col-md-9">
+        <div class="col-md-10">
             {% if products %}
-                <div class="panel panel-default">
+                <div class="table-responsive panel panel-default">
                     <table id="engagements"
-                           class="table-responsive tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
+                           class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
                         <tr>
                             <th class="prod_name">Product</th>
                             <th>Active Engagements</th>
@@ -31,11 +31,11 @@
                 <h5> No active engagements </h5>
             {% endif %}
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <div class="filters panel panel-default">
                 <div class="panel-heading">Actions</div>
                 <div class="panel-body centered">
-                    <a class="btn btn-primary" href="{% url 'new_eng' %}">
+                    <a class="btn btn-sm btn-primary" href="{% url 'new_eng' %}">
                         New Engagement
                     </a>
                 </div>

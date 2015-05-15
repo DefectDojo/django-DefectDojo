@@ -1,15 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
     <div class="row">
-        <div class="col-md-9">
+        <div class="col-md-10">
             {% if prod_list %}
-                <div class="panel panel-default">
+                <div class="panel panel-default table-responsive">
                     <table id="products"
-                           class="table-responsive tablesorter-bootstrap table table-bordered table-condensed table-striped">
+                           class="tablesorter-bootstrap table table-bordered table-condensed table-striped">
                         <thead>
                         <tr>
                             <th> Product</th>
-                            <th> Active findings</th>
+                            <th> Active<br/>findings</th>
+                            <th> Vulnerable<br/>endpoints</th>
                             <th> Product Type</th>
                             {% if user.is_staff %}
                                 <th> Engagement</th>
@@ -29,6 +30,9 @@
                                         {{ prod.findings_count }}
                                     {% endif %}
                                 </td>
+                                <td>
+                                    <a href="{% url 'endpoints' %}?product={{ prod.id }}"><b>{{ prod.endpoint_count }}</b></a>
+                                </td>
                                 <td> {{ prod.prod_type.name }}</td>
                                 {% if user.is_staff %}
                                     <td>
@@ -47,16 +51,21 @@
                 No products found.
             {% endif %}
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <div class="panel panel-default filters">
-                {% if request.user.is_staff %}
-                    <div class="panel-heading">Actions</div>
-                    <div class="panel-body centered">
+
+                <div class="panel-heading">Actions</div>
+                <div class="panel-body centered">
+                    {% if request.user.is_staff %}
                         <a class="btn btn-sm btn-primary" href="{% url 'new_product' %}">
                             Add Product
-                        </a>
-                    </div>
-                {% endif %}
+                        </a><hr>
+                    {% endif %}
+                    <a class="btn btn-sm btn-primary" href="{% url 'product_findings_report' %}">
+                        Generate Report
+                    </a>
+                </div>
+
                 <div class="panel-heading">Filters</div>
                 <form method="get" class="panel-body">
                     {{ prods.form.as_p }}

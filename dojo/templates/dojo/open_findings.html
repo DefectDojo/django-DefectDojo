@@ -1,32 +1,34 @@
 {% extends "base.html" %}
 {% block content %}
     <div class="row">
-        <div class="col-md-9">
+        <div class="col-md-10">
             {% if findings %}
-                <div class="panel panel-default">
+                <div class="panel panel-default table-responsive">
                     <table id="open_findings"
-                           class="table-responsive tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
+                           class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
                         <thead>
                         <tr>
                             <th>Name</th>
                             <th> Date</th>
                             <th>Severity</th>
+                            <th>Age</th>
                             <th>Product</th>
                         </tr>
                         </thead>
                         <tbody>
                         {% for finding in findings %}
                             <tr>
-                                <td class="nowrap"><a title="{{ finding.title }}"
-                                                      href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars:50 }}</a>
+                                <td><a title="{{ finding.title }}"
+                                                      href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a>
                                 </td>
                                 <td class="nowrap">{{ finding.date }}</td>
                                 <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
                                     <p class="text-error">
                                 {% else %}<p>{% endif %}{{ finding.severity }}</p></td>
+                                <td>{{ finding.age }}</td>
                                 <td><a
                                         href="{% url 'view_product' finding.test.engagement.product.id %}"
-                                        title="{{ finding.test.engagement.product }}">{{ finding.test.engagement.product|truncatechars:15 }}</a>
+                                        title="{{ finding.test.engagement.product }}">{{ finding.test.engagement.product }}</a>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -38,7 +40,7 @@
                 No findings found.
             {% endif %}
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <div class="panel panel-default filters">
                 {% if filtered.form %}
                     <div class="panel-heading">Filters</div>
