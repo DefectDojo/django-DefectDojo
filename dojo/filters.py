@@ -15,7 +15,7 @@ from pytz import timezone
 from distutils.util import strtobool
 
 from dojo.models import Dojo_User, Product_Type, Finding, \
-    Product, Test_Type
+    Product, Test_Type, Endpoint
 
 local_tz = timezone(settings.TIME_ZONE)
 SEVERITY_CHOICES = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
@@ -228,6 +228,16 @@ class ProductFilter(FilterSet):
         queryset=Product_Type.objects.all().order_by('name'),
         label="Product Type")
 
+    def __init__(self, *args, **kwargs):
+        self.user = None
+        if 'user' in kwargs:
+            self.user = kwargs.pop('user')
+        super(ProductFilter, self).__init__(*args, **kwargs)
+
+        if self.user is not None and not self.user.is_staff:
+            self.form.fields['prod_type'].queryset = Product_Type.objects.filter(
+                prod_type__authorized_users__in=[self.user])
+
     class Meta:
         model = Product
         fields = ['name', 'prod_type']
@@ -260,6 +270,9 @@ class OpenFindingFilter(FilterSet):
                    'numerical_severity', 'reporter']
 
     def __init__(self, *args, **kwargs):
+        self.user = None
+        if 'user' in kwargs:
+            self.user = kwargs.pop('user')
         super(OpenFindingFilter, self).__init__(*args, **kwargs)
         cwe = dict()
         cwe = dict([finding.cwe, finding.cwe]
@@ -272,11 +285,19 @@ class OpenFindingFilter(FilterSet):
                     for finding in self.queryset.distinct()
                     if finding.severity not in sevs)
         self.form.fields['severity'].choices = sevs.items()
+        if self.user is not None:
+            self.form.fields['test__engagement__product'].queryset = Product.objects.filter(
+                authorized_users__in=[self.user])
+            self.form.fields['endpoints'].queryset = Endpoint.objects.filter(
+                product__authorized_users__in=[self.user]).distinct()
 
 
 class OpenFingingSuperFilter(OpenFindingFilter):
     reporter = ModelMultipleChoiceFilter(
         queryset=Dojo_User.objects.all())
+    test__engagement__product__prod_type = ModelMultipleChoiceFilter(
+        queryset=Product_Type.objects.all().order_by('name'),
+        label="Product Type")
 
 
 class ClosedFindingFilter(FilterSet):
@@ -303,7 +324,7 @@ class ClosedFindingFilter(FilterSet):
                    'endpoint', 'references', 'test', 'is_template',
                    'active', 'verified', 'out_of_scope', 'false_p',
                    'duplicate', 'thread_id', 'date', 'notes',
-                   'numerical_severity', 'reporter']
+                   'numerical_severity', 'reporter', 'endpoints']
 
     def __init__(self, *args, **kwargs):
         super(ClosedFindingFilter, self).__init__(*args, **kwargs)
@@ -354,7 +375,7 @@ class AcceptedFindingFilter(FilterSet):
                    'endpoint', 'references', 'test', 'is_template',
                    'active', 'verified', 'out_of_scope', 'false_p',
                    'duplicate', 'thread_id', 'mitigated', 'notes',
-                   'numerical_severity', 'reporter']
+                   'numerical_severity', 'reporter', 'endpoints']
 
     def __init__(self, *args, **kwargs):
         super(AcceptedFindingFilter, self).__init__(*args, **kwargs)
@@ -394,7 +415,7 @@ class ProductFindingFilter(FilterSet):
                    'endpoint', 'references', 'test', 'is_template',
                    'active', 'verified', 'out_of_scope', 'false_p',
                    'duplicate', 'thread_id', 'mitigated', 'notes',
-                   'numerical_severity', 'reporter']
+                   'numerical_severity', 'reporter', 'endpoints']
 
     def __init__(self, *args, **kwargs):
         super(ProductFindingFilter, self).__init__(*args, **kwargs)
@@ -411,12 +432,55 @@ class ProductFindingFilter(FilterSet):
         self.form.fields['severity'].choices = sevs.items()
 
 
+class FindingStatusFilter(ChoiceFilter):
+    def any(self, qs, name):
+        return qs.all()
+
+    def open(self, qs, name):
+        return qs.filter(mitigated__isnull=True,
+                         verified=True,
+                         false_p=False,
+                         duplicate=False,
+                         out_of_scope=False)
+
+    def closed(self, qs, name):
+        return qs.filter(mitigated__isnull=False)
+
+    options = {
+        '': (_('Any'), any),
+        0: (_('Open'), open),
+        1: (_('Closed'), closed),
+    }
+
+    def __init__(self, *args, **kwargs):
+        kwargs['choices'] = [
+            (key, value[0]) for key, value in six.iteritems(self.options)]
+        super(FindingStatusFilter, self).__init__(*args, **kwargs)
+
+        findings = Finding.objects.all()
+        if findings:
+            first_date = findings.order_by('date')[:1][0].date
+            start_date = local_tz.localize(datetime.combine(
+                first_date, datetime.min.time())
+            )
+            self.start_date = _truncate(start_date - timedelta(days=1))
+            self.end_date = _truncate(now() + timedelta(days=1))
+
+    def filter(self, qs, value):
+        try:
+            value = int(value)
+        except (ValueError, TypeError):
+            value = ''
+        return self.options[value][1](self, qs, self.name)
+
+
 class MetricsFindingFilter(FilterSet):
     date = MetricsDateRangeFilter()
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all().order_by('name'),
         label="Product Type")
     severity = MultipleChoiceFilter(choices=[])
+    status = FindingStatusFilter()
 
     def __init__(self, *args, **kwargs):
         super(MetricsFindingFilter, self).__init__(*args, **kwargs)
@@ -425,6 +489,28 @@ class MetricsFindingFilter(FilterSet):
                     for finding in self.queryset.distinct()
                     if finding.severity not in sevs)
         self.form.fields['severity'].choices = sevs.items()
+
+
+class EndpointFilter(FilterSet):
+    product = ModelMultipleChoiceFilter(
+        queryset=Product.objects.all().order_by('name'),
+        label="Product")
+    host = CharFilter(lookup_type='icontains')
+    path = CharFilter(lookup_type='icontains')
+    query = CharFilter(lookup_type='icontains')
+    fragment = CharFilter(lookup_type='icontains')
+
+    def __init__(self, *args, **kwargs):
+        self.user = None
+        if 'user' in kwargs:
+            self.user = kwargs.pop('user')
+        super(EndpointFilter, self).__init__(*args, **kwargs)
+        if self.user and not self.user.is_staff:
+            self.form.fields['product'].queryset = Product.objects.filter(
+                authorized_users__in=[self.user]).distinct().order_by('name')
+
+    class Meta:
+        model = Endpoint
 
 
 class ReportFindingFilter(FilterSet):
@@ -440,5 +526,32 @@ class ReportFindingFilter(FilterSet):
         model = Finding
         exclude = ['title', 'date', 'cwe', 'url', 'description', 'mitigation', 'impact',
                    'endpoint', 'references', 'test', 'is_template',
-                   'thread_id', 'notes',
+                   'thread_id', 'notes', 'endpoints',
+                   'numerical_severity', 'reporter']
+
+
+class ReportAuthedFindingFilter(FilterSet):
+    test__engagement__product = ModelMultipleChoiceFilter(queryset=Product.objects.all(), label="Product")
+    severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
+    active = ReportBooleanFilter()
+    mitigated = MitigatedDateRangeFilter()
+    verified = ReportBooleanFilter()
+    false_p = ReportBooleanFilter(label="False Positive")
+    duplicate = ReportBooleanFilter()
+    out_of_scope = ReportBooleanFilter()
+
+    def __init__(self, *args, **kwargs):
+        self.user = None
+        if 'user' in kwargs:
+            self.user = kwargs.pop('user')
+        super(ReportAuthedFindingFilter, self).__init__(*args, **kwargs)
+        if not self.user.is_staff:
+            self.form.fields['test__engagement__product'].queryset = Product.objects.filter(
+                authorized_users__in=[self.user])
+
+    class Meta:
+        model = Finding
+        exclude = ['title', 'date', 'cwe', 'url', 'description', 'mitigation', 'impact',
+                   'endpoint', 'references', 'test', 'is_template',
+                   'thread_id', 'notes', 'endpoints',
                    'numerical_severity', 'reporter']

@@ -1,10 +1,12 @@
 import collections
 from datetime import datetime, date
 import re
+from urlparse import urlsplit, urlunsplit
 
 from dateutil.relativedelta import relativedelta
 from django import forms
 from django.core import validators
+from django.core.validators import RegexValidator
 from django.forms.widgets import Widget, Select
 from django.utils.dates import MONTHS
 from django.utils.safestring import mark_safe
@@ -12,7 +14,7 @@ from pytz import timezone
 
 from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
-    Development_Environment, Dojo_User, Scan
+    Development_Environment, Dojo_User, Scan, Endpoint
 from dojo import settings
 
 
@@ -26,6 +28,22 @@ FINDING_STATUS = (('verified', 'Verified'),
 
 SEVERITY_CHOICES = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
                     ('High', 'High'), ('Critical', 'Critical'))
+
+
+class SelectWithPop(forms.Select):
+    def render(self, name, *args, **kwargs):
+        html = super(SelectWithPop, self).render(name, *args, **kwargs)
+        popup_plus = '<div class="input-group">' + html + '<span class="input-group-btn"><a href="/' + name + '/add" class="btn btn-primary" class="add-another" id="add_id_' + name + '" onclick="return showAddAnotherPopup(this);"><span class="glyphicon glyphicon-plus"></span></a></span></div>'
+
+        return mark_safe(popup_plus)
+
+
+class MultipleSelectWithPop(forms.SelectMultiple):
+    def render(self, name, *args, **kwargs):
+        html = super(MultipleSelectWithPop, self).render(name, *args, **kwargs)
+        popup_plus = '<div class="input-group">' + html + '<span class="input-group-btn"><a href="/' + name + '/add" class="btn btn-primary" class="add-another" id="add_id_' + name + '" onclick="return showAddAnotherPopup(this);"><span class="glyphicon glyphicon-plus"></span></a></span></div>'
+
+        return mark_safe(popup_plus)
 
 
 class MonthYearWidget(Widget):
@@ -150,6 +168,17 @@ class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
         fields = ['name', 'description', 'prod_manager', 'tech_contact', 'manager', 'prod_type', 'authorized_users']
+
+
+class DeleteProductForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = Product
+        exclude = ['name', 'description', 'prod_manager', 'tech_contact', 'manager', 'created',
+                   'prod_type', 'updated', 'tid', 'authorized_users']
+
 
 
 class Product_TypeProductForm(forms.ModelForm):
@@ -424,6 +453,18 @@ class EngForm2(forms.ModelForm):
                    'real_end', 'requester', 'reason', 'updated', 'report_type')
 
 
+class DeleteEngagementForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = Engagement
+        exclude = ['name', 'version', 'eng_type', 'first_contacted', 'target_start',
+                   'target_end', 'lead', 'requester', 'reason', 'report_type',
+                   'product', 'test_strategy', 'threat_model', 'api_test', 'pen_test',
+                   'check_list', 'status']
+
+
 class TestForm(forms.ModelForm):
     test_type = forms.ModelChoiceField(queryset=Test_Type.objects.all())
     environment = forms.ModelChoiceField(
@@ -468,8 +509,8 @@ class FindingForm(forms.ModelForm):
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
     mitigation = forms.CharField(widget=forms.Textarea)
     impact = forms.CharField(widget=forms.Textarea)
-    endpoint = forms.CharField(widget=forms.Textarea,
-                               label='Systems / Endpoints')
+    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, label='Systems / Endpoints',
+                                               widget=MultipleSelectWithPop(attrs={'size': '11'}))
     references = forms.CharField(widget=forms.Textarea, required=False)
 
     def clean(self):
@@ -485,8 +526,195 @@ class FindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        order = ('title', 'severity', 'endpoint', 'description', 'impact')
-        exclude = ('reporter', 'url', 'numerical_severity')
+        order = ('title', 'severity', 'endpoints', 'description', 'impact')
+        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint')
+
+
+class EditEndpointForm(forms.ModelForm):
+    class Meta:
+        model = Endpoint
+        exclude = ['product']
+
+    def __init__(self, *args, **kwargs):
+        self.product = None
+        self.endpoint_instance = None
+        super(EditEndpointForm, self).__init__(*args, **kwargs)
+        if 'instance' in kwargs:
+            self.endpoint_instance = kwargs.pop('instance')
+            self.product = self.endpoint_instance.product
+
+
+    def clean(self):
+        from django.core.validators import URLValidator, validate_ipv46_address
+
+        port_re = "(:[0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])"
+        cleaned_data = super(EditEndpointForm, self).clean()
+
+        if 'host' in cleaned_data:
+            host = cleaned_data['host']
+        else:
+            raise forms.ValidationError('Please enter a valid URL or IP address.',
+                                        code='invalid')
+
+        protocol = cleaned_data['protocol']
+        path = cleaned_data['path']
+        query = cleaned_data['query']
+        fragment = cleaned_data['fragment']
+
+        if protocol:
+            endpoint = urlunsplit((protocol, host, path, query, fragment))
+        else:
+            endpoint = host
+
+        try:
+            url_validator = URLValidator()
+            url_validator(endpoint)
+        except forms.ValidationError:
+            try:
+                # do we have a port number?
+                regex = re.compile(port_re)
+                host = endpoint
+                if regex.findall(endpoint):
+                    for g in regex.findall(endpoint):
+                        host = re.sub(port_re, '', host)
+                validate_ipv46_address(host)
+            except forms.ValidationError:
+                try:
+                    validate_hostname = RegexValidator(regex=r'[a-zA-Z0-9-_]*\.[a-zA-Z]{2,6}')
+                    # do we have a port number?
+                    regex = re.compile(port_re)
+                    host = endpoint
+                    if regex.findall(endpoint):
+                        for g in regex.findall(endpoint):
+                            host = re.sub(port_re, '', host)
+                    validate_hostname(host)
+                except:
+                    raise forms.ValidationError(
+                        'It does not appear as though this endpoint is a valid URL or IP address.',
+                        code='invalid')
+
+        endpoint = Endpoint.objects.filter(protocol=protocol,
+                                           host=host,
+                                           path=path,
+                                           query=query,
+                                           fragment=fragment,
+                                           product=self.product)
+        if endpoint.count() > 0:
+            raise forms.ValidationError(
+                'It does not appear as though an endpoint wiht this data already exists for this product.',
+                code='invalid')
+
+        return cleaned_data
+
+
+class AddEndpointForm(forms.Form):
+    endpoint = forms.CharField(max_length=5000, required=True,
+                               help_text="The IP address, host name or full URL. You may enter one endpoint per line. "
+                                         "Each must be valid.",
+                               widget=forms.widgets.Textarea(attrs={'rows': '15', 'cols': '400'}))
+    product = forms.CharField(required=True,
+                              widget=forms.widgets.HiddenInput(), help_text="The product this endpoint should be "
+                                                                            "associated with.")
+
+    def __init__(self, *args, **kwargs):
+        product = None
+        if 'product' in kwargs:
+            product = kwargs.pop('product')
+        super(AddEndpointForm, self).__init__(*args, **kwargs)
+        if product is None:
+            self.fields['product'] = forms.ModelChoiceField(queryset=Product.objects.all())
+        else:
+            self.fields['product'].initial = product.id
+
+        self.product = product
+        self.endpoints_to_process = []
+
+    def save(self):
+        processed_endpoints = []
+        for e in self.endpoints_to_process:
+            endpoint, created = Endpoint.objects.get_or_create(protocol=e[0],
+                                                               host=e[1],
+                                                               path=e[2],
+                                                               query=e[3],
+                                                               fragment=e[4],
+                                                               product=self.product)
+            processed_endpoints.append(endpoint)
+        return processed_endpoints
+
+    def clean(self):
+        from django.core.validators import URLValidator, validate_ipv46_address
+
+        port_re = "(:[0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])"
+        cleaned_data = super(AddEndpointForm, self).clean()
+
+        if 'endpoint' in cleaned_data and 'product' in cleaned_data:
+            endpoint = cleaned_data['endpoint']
+            product = cleaned_data['product']
+            if isinstance(product, Product):
+                self.product = product
+            else:
+                self.product = Product.objects.get(id=int(product))
+        else:
+            raise forms.ValidationError('Please enter a valid URL or IP address.',
+                                        code='invalid')
+
+        endpoints = endpoint.split()
+        count = 0
+        error = False
+        for endpoint in endpoints:
+            try:
+                url_validator = URLValidator()
+                url_validator(endpoint)
+                protocol, host, path, query, fragment = urlsplit(endpoint)
+                self.endpoints_to_process.append([protocol, host, path, query, fragment])
+            except forms.ValidationError:
+                try:
+                    # do we have a port number?
+                    host = endpoint
+                    regex = re.compile(port_re)
+                    if regex.findall(endpoint):
+                        for g in regex.findall(endpoint):
+                            host = re.sub(port_re, '', host)
+                    validate_ipv46_address(host)
+                    protocol, host, path, query, fragment = ("", endpoint, "", "", "")
+                    self.endpoints_to_process.append([protocol, host, path, query, fragment])
+                except forms.ValidationError:
+                    try:
+                        regex = re.compile(
+                            r'^(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}(?<!-)\.?)|'  # domain...
+                            r'localhost|'  # localhost...
+                            r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|'  # ...or ipv4
+                            r'\[?[A-F0-9]*:[A-F0-9:]+\]?)'  # ...or ipv6
+                            r'(?::\d+)?'  # optional port
+                            r'(?:/?|[/?]\S+)$', re.IGNORECASE)
+                        validate_hostname = RegexValidator(regex=regex)
+                        validate_hostname(host)
+                        protocol, host, path, query, fragment = (None, host, None, None, None)
+                        if "/" in host or "?" in host or "#" in host:
+                            # add a fake protocol just to join, wont use in update to database
+                            host_with_protocol = "http://" + host
+                            p, host, path, query, fragment = urlsplit(host_with_protocol)
+                        self.endpoints_to_process.append([protocol, host, path, query, fragment])
+                    except forms.ValidationError:
+                        raise forms.ValidationError(
+                            'Please check items entered, one or more do not appear to be a valid URL or IP address.',
+                            code='invalid')
+
+        return cleaned_data
+
+
+class DeleteEndpointForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = Endpoint
+        exclude = ('protocol',
+                   'host',
+                   'path',
+                   'query',
+                   'fragment',
+                   'product')
 
 
 class NoteForm(forms.ModelForm):

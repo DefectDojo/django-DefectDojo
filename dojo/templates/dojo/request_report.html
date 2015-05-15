@@ -26,9 +26,9 @@
     <div class="row">
         <div class="col-md-9">
             {% if findings %}
-                <div class="panel panel-default">
+                <div class="panel panel-default table-responsive">
                     <table id="open_findings"
-                           class="table-responsive tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
+                           class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
                         <thead>
                         <tr>
                             <th>Title</th>
@@ -36,12 +36,13 @@
                             <th>Status</th>
                             <th>Mitigated</th>
                             <th>Severity</th>
+                            <th>Product</th>
                         </tr>
                         </thead>
                         <tbody>
                         {% for finding in paged_findings %}
                             <tr>
-                                <td class="nowrap"><a title="{{ finding.title }}"
+                                <td><a title="{{ finding.title }}"
                                                       href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars:50 }}</a>
                                 </td>
                                 <td class="nowrap">{{ finding.date }}</td>
@@ -50,6 +51,7 @@
                                 <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
                                     <p class="text-error">
                                 {% else %}<p>{% endif %}{{ finding.severity }}</p></td>
+                                <td>{{ finding.test.engagement.product }}</td>
                             </tr>
                         {% endfor %}
                         </tbody>

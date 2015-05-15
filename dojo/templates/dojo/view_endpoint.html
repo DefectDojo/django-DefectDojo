@@ -1,0 +1,453 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block add_styles %}
+    .graph {min-height: 158px;}
+    h3 { margin-top: 5px; margin-bottom: 5px; font-size: 20px; line-height: 22px;}
+{% endblock %}
+{% block content %}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="clearfix">
+                <h4 class="pull-left to_highlight finding-title">
+                    {{ endpoint|truncatechars:115 }}
+                    <span class="text-muted endpoint_product">{{ endpoint.product }}</span>
+                </h4>
+
+
+                <div class="dropdown pull-right">
+                    <div class="btn-group">
+                        <button class="btn btn-default clickable panel-collapsed">
+                            <span><i class="fa fa-bar-chart"></i></span>
+                        </button>
+                        {% if user.is_staff %}
+                            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
+                                    data-toggle="dropdown" aria-expanded="true">
+                                <span class="fa fa-gear"></span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                                <li role="presentation"><a href="{% url 'edit_endpoint' endpoint.id %}"> Edit
+                                    Endpoint </a>
+                                </li>
+                                <li role="presentation"><a href="{% url 'endpoint_report' endpoint.id %}"> Generate
+                                    Report</a>
+                                </li>
+                                <li role="presentation"><a href="{% url 'delete_endpoint' endpoint.id %}">
+                                    Delete Endpoint </a></li>
+                                </li>
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel-body product-graphs">
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <i class="fa fa-calendar fa-2x"></i>
+
+                                <div class="pull-right inline-block text-right">
+                                    <span class=" fa-2x">&nbsp;</span>
+                                    <span>
+                                        Finding Age ({{ all_findings|length|apnumber }} verified
+                                        finding{{ all_findings|length|pluralize }})
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="finding_age" class="graph"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <i class="fa fa-bug fa-2x"></i>
+
+                                <div class="pull-right inline-block text-right">
+                                    <span class=" fa-2x">{{ all_findings|length }}</span>
+                                    <span><a href="{% url 'endpoint_report' endpoint.id %}">endpoint
+                                        finding{{ all_findings|length|pluralize }} <i
+                                                class="fa fa-arrow-circle-right"></i></a>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="open_findings" class="graph"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <i class="fa fa-bug fa-2x"></i>
+
+                                <div class="pull-right inline-block text-right">
+                                    <span>Opened bug count by month</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body">
+                        <div id="opened_per_month" class="graph"></div>
+                    </div>
+                    <!-- /.panel-body -->
+                </div>
+                <!-- /.panel -->
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="panel panel-default table-responsive">
+        <div class="panel-heading">
+            <h4>Findings</h4>
+        </div>
+        {% if findings %}
+            <table id="findings" class="tablesorter-bootstrap table table-striped table-bordered">
+                <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Date</th>
+                    <th>Severity</th>
+                    <th>Age</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for finding in findings %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a>
+                        </td>
+                        <td>
+                            {{ finding.date }}
+                        </td>
+                        <td>
+                            {{ finding.severity }}
+                        </td>
+                        <td>
+                            {{ finding.age }}
+                        </td>
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+            </table>
+            </div>
+            {% include "dojo/paging_snippet.html" with page=findings %}
+        {% else %}
+            <p class="text-center">No findings found.</p>
+            </div>
+        {% endif %}
+
+    </div>
+
+{% endblock %}
+{% block postscript %}
+    <!-- Flot Charts JavaScript -->
+    <script src="{{ STATIC_URL }}flot/excanvas.min.js"></script>
+    <script src="{{ STATIC_URL }}flot/jquery.flot.js"></script>
+    <script src="{{ STATIC_URL }}flot/jquery.flot.resize.js"></script>
+    <script src="{{ STATIC_URL }}flot/jquery.flot.time.js"></script>
+    <script src="{{ STATIC_URL }}flot-axislabels/jquery.flot.axislabels.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $(document).on('click', '.panel-heading button.clickable', function (e) {
+                var $this = $(this);
+                if (!$this.hasClass('panel-collapsed')) {
+                    $this.parents('.panel').find('.panel-body').slideUp();
+                    $this.addClass('panel-collapsed');
+                    $this.find('i').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
+                } else {
+                    $this.parents('.panel').find('.panel-body').slideDown();
+                    $this.removeClass('panel-collapsed');
+                    $this.find('i').removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
+                }
+            });
+
+            finding_age();
+            open_findings();
+            $(".product-graphs").hide();
+
+        });
+
+        function finding_age() {
+            var data = {};
+            var data_1 = []
+            var ticks = []
+            {% for f in all_findings %}
+                if (data[{{ f.age }}]) {
+                    data[{{ f.age }}] += 1
+                }
+                else {
+                    data[{{ f.age }}] = 1
+                }
+            {% endfor %}
+            var i = 0;
+            $.each(data, function (index, value) {
+                if (value > 0) {
+                    data_1.push([i, value]);
+                    ticks.push([i, index])
+                }
+                i++;
+            });
+
+
+            var dataset = [
+                {data: data_1, color: "#337ab7", fillColor: "#337ab7"}
+            ];
+
+            var options = {
+                series: {
+                    bars: {
+                        show: true,
+                        fill: true,
+                        fillColor: "#337ab7"
+                    }
+                },
+                bars: {
+                    align: "center",
+                    barWidth: 0.5
+                },
+                xaxis: {
+                    axisLabel: "Days Open",
+                    axisLabelUseCanvas: true,
+                    axisLabelFontSizePixels: 12,
+                    axisLabelFontFamily: 'Verdana, Arial',
+                    axisLabelPadding: 10,
+                    ticks: ticks,
+                },
+                yaxis: {
+                    axisLabel: "Number of Findings",
+                    axisLabelUseCanvas: true,
+                    axisLabelFontSizePixels: 12,
+                    axisLabelFontFamily: 'Verdana, Arial',
+                    axisLabelPadding: 3,
+                },
+                legend: {
+                    show: false,
+                },
+                grid: {
+                    borderWidth: 1,
+                    borderColor: '#e7e7e7',
+                }
+            };
+
+
+            $.plot("#finding_age", dataset, options);
+        }
+        ;
+        function open_findings() {
+            var critical = 0;
+            var high = 0;
+            var medium = 0;
+            var low = 0;
+            var info = 0;
+            var ticks = [
+                [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
+            ];
+
+            {% for f in all_findings %}
+                {% if f.severity == 'Critical' %}
+                    critical += 1;
+                {% elif f.severity == 'High' %}
+                    high += 1;
+                {% elif f.severity == 'Medium' %}
+                    medium += 1;
+                {% elif f.severity == 'Low' %}
+                    low += 1;
+                {% elif f.severity == 'Info' %}
+                    info += 1;
+                {% endif %}
+            {% endfor %}
+
+            var d1 = [
+                [0, critical],
+            ];
+            var d2 = [
+                [1, high],
+            ];
+            var d3 = [
+                [2, medium],
+            ];
+            var d4 = [
+                [3, low],
+            ];
+            var d5 = [
+                [4, info],
+            ];
+
+            var data = [
+                {
+                    label: "Critical",
+                    data: d1,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 1,
+                        fillColor: "#d9534f"
+                    },
+                    color: "#d9534f"
+                },
+                {
+                    label: "High",
+                    data: d2,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 2,
+                        fillColor: "#f0ad4e"
+                    },
+                    color: "#f0ad4e"
+                },
+                {
+                    label: "Medium",
+                    data: d3,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 3,
+                        fillColor: "#f0de28"
+                    },
+                    color: "#f0de28"
+                },
+                {
+                    label: "Low",
+                    data: d4,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 4,
+                        fillColor: "#337ab7"
+                    },
+                    color: "#337ab7"
+                },
+                {
+                    label: "info",
+                    data: d5,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 4,
+                        fillColor: "#80699B"
+                    },
+                    color: "#80699B"
+                }
+            ];
+
+            $.plot("#open_findings", data, {
+                series: {
+                    stack: true,
+                    bars: {
+                        show: true,
+                        barWidth: .9,
+                        'align': "center",
+                    },
+
+                },
+                grid: {
+                    hoverable: false,
+                    borderWidth: 1,
+                    borderColor: '#e7e7e7',
+
+                },
+                tooltip: false,
+                legend: {
+                    show: false,
+                    position: "ne"
+                },
+                xaxis: {
+                    ticks: ticks,
+                },
+
+            });
+        }
+        ;
+        {% if opened_per_month %}
+            opened_per_month();
+            function opened_per_month() {
+                var critical = [],
+                        high = [],
+                        medium = [],
+                        low = [];
+
+                {% for month in opened_per_month|slice:'1:' %}
+                    critical.push([{{ month.0 }}, {{ month.2 }}]);
+                    high.push([{{ month.0 }}, {{ month.3 }}]);
+                    medium.push([{{ month.0 }}, {{ month.4 }}]);
+                    low.push([{{ month.0 }}, {{ month.5 }}]);
+                {% endfor %}
+
+                var tick_count = critical.length < 7 ? critical.length : 7;
+                var options = {
+                    xaxis: {
+                        mode: "time",
+                        timeformat: "%m-%d-%Y",
+                        timezone: 'browser'
+                    },
+                    xaxes: [{
+                        ticks: tick_count
+                    }],
+                    yaxes: [{
+                        min: 0
+                    }],
+                    series: {
+                        lines: {
+                            show: true
+                        },
+                        points: {
+                            show: true
+                        }
+                    },
+                    grid: {
+                        hoverable: true,
+                        borderWidth: 1,
+                        borderColor: '#e7e7e7'
+
+                    },
+                    tooltip: true
+                };
+                var plotObj = $.plot($("#opened_per_month"), [{
+                            data: critical,
+                            label: " Critical",
+                            color: "#d9534f",
+
+                        }, {
+                            data: high,
+                            label: " High",
+                            color: '#f0ad4e',
+
+                        }, {
+                            data: medium,
+                            label: " Medium",
+                            color: '#f0de28',
+
+                        }, {
+                            data: low,
+                            label: " Low",
+                            color: '#337ab7',
+
+                        }],
+                        options);
+            }
+        {%  endif %}
+    </script>
+{% endblock %}

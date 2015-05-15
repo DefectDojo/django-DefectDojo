@@ -28,8 +28,8 @@
         <!-- Tab panes -->
         <div class="tab-content">
             {% if products %}
-                <div role="tabpanel" class="tab-pane active" id="tabs">
-                    <table class="table-responsive table table-bordered table-striped">
+                <div role="tabpanel" class="table-responsive tab-pane active" id="tabs">
+                    <table class="table table-bordered table-striped">
                         <thead>
                         <tr>
                             <th>Name</th>
@@ -49,8 +49,8 @@
                 </div>
             {% endif %}
             {% if findings %}
-                <div role="tabpanel" class="tab-pane {% if not products %}active{% endif %}" id="tabs-1">
-                    <table class="table-responsive table table-bordered table-striped">
+                <div role="tabpanel" class="table-responsive tab-pane {% if not products %}active{% endif %}" id="tabs-1">
+                    <table class="table table-bordered table-striped">
                         <thead>
                         <tr>
                             <th>Title</th>
@@ -70,8 +70,8 @@
                 </div>
             {% endif %}
             {% if tests %}
-                <div role="tabpanel" class="tab-pane" id="tabs-2">
-                    <table class="table-responsive table table-bordered table-striped">
+                <div role="tabpanel" class="table-responsive tab-pane" id="tabs-2">
+                    <table class="table table-bordered table-striped">
                         <thead>
                         <tr>
                             <th>Type</th>

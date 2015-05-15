@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block add_css %}
+    <script type="application/javascript" src="{{ STATIC_URL }}admin/js/admin/RelatedObjectLookups.js"></script>
+{% endblock %}
+
+{% block content %}
+    <h3> Add Endpoint</h3>
+    <form class="form-horizontal" method="post">{% csrf_token %}
+        {% include "dojo/form_fields.html" with form=form %}
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <input class="btn btn-primary" type="submit" name="add_endpoint" value="Submit"/>
+            </div>
+        </div>
+    </form>
+{% endblock %}

@@ -13,7 +13,7 @@
                             <span class="fa fa-gear"></span>
                             <span class="caret"></span>
                         </button>
-                        <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                             <li role="presentation"><a href="{% url 'edit_finding' finding.id %}"> Edit Finding </a>
                             </li>
                             <li role="presentation"><a href="{% url 'mktemplate' finding.id %}"> Make Finding a
@@ -31,10 +31,6 @@
             </div>
         </div>
     </div>
-
-
-
-
 
     <div class="row to_highlight">
         <div class="col-md-5">
@@ -62,14 +58,21 @@
         <div class="col-md-7">
             <div class="panel panel-default endpoints">
                 <div class="panel-heading">Endpoints / Systems</div>
-                <div class="panel-body">
-                    <pre>{{ finding.endpoint }}</pre>
+                <div id="vuln_endpoints" class="panel-body">
+                    {%  if finding.endpoints.all %}
+                        <ul>
+                        {% for endpoint in finding.endpoints.all %}
+                            <li><a title="View endpoint details" href="{% url 'view_endpoint' endpoint.id %}">{{ endpoint }}</a></li>
+                        {% endfor %}
+                        </ul>
+                    {% else %}
+                        No endpoints.
+                    {% endif %}
                 </div>
 
             </div>
         </div>
     </div>
-    <br/>
 
     <div class="view-finding to_highlight">
         <div class="panel panel-default">
@@ -126,12 +129,12 @@
 
 
 
-    <div class="panel panel-default to_highlight">
+    <div class="panel panel-default to_highlight table-responsive">
         <div class="panel-heading">
             <h3>Notes</h3>
         </div>
         {% if notes %}
-            <table id="notes" class="table-responsive tablesorter-bootstrap table table-condensed table-striped">
+            <table id="notes" class="tablesorter-bootstrap table table-condensed table-striped">
                 <thead>
                 <tr>
                     <th>User</th>
