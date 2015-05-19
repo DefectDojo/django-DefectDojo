@@ -82,5 +82,10 @@
             });
         });
     </script>
+    <script type="application/javascript">
+        $('#add_id_endpoints').attr('href', '/endpoints/{{ test.engagement.product.id }}/add');
+        $('#id_endpoints').find('option').remove();
+    </script>
+    <script type="application/javascript" src="{{ STATIC_URL }}admin/js/admin/RelatedObjectLookups.js"></script>
 
 {% endblock %}

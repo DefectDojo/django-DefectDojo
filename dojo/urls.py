@@ -229,7 +229,7 @@ urlpatterns = patterns(
         name='add_endpoint'),
     url(r'^endpoint/(?P<eid>\d+)/delete$', 'dojo.views.delete_endpoint',
         name='delete_endpoint'),
-    url(r'^endpoint/add$', 'dojo.views.add_product_endpoint',
+    url(r'^endpoints/add$', 'dojo.views.add_product_endpoint',
         name='add_product_endpoint'),
 
 )
