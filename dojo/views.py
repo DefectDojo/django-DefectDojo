@@ -44,7 +44,7 @@ from dojo.forms import VaForm, WeeklyMetricsForm, \
     Test_TypeForm, ReplaceRiskAcceptanceForm, FINDING_STATUS, \
     AddFindingsRiskAcceptanceForm, Development_EnvironmentForm, DojoUserForm, \
     DeleteIPScanForm, DeleteTestForm, UploadVeracodeForm, UploadBurpForm, EditEndpointForm, \
-    DeleteEndpointForm, AddEndpointForm, DeleteProductForm, DeleteEngagementForm
+    DeleteEndpointForm, AddEndpointForm, DeleteProductForm, DeleteEngagementForm, AddFindingForm
 from dojo.management.commands.run_scan import run_on_deman_scan
 from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
     Check_List, Scan, IPScan, ScanSettings, Test_Type, Notes, \
@@ -3321,9 +3321,10 @@ def get_numerical_severity(s):
 def add_findings(request, tid):
     test = Test.objects.get(id=tid)
     findings = Finding.objects.filter(is_template=True).distinct()
+    form = AddFindingForm()
 
     if request.method == 'POST':
-        form = FindingForm(request.POST)
+        form = AddFindingForm(request.POST)
         if form.is_valid():
             new_finding = form.save(commit=False)
             new_finding.test = test
@@ -3332,7 +3333,14 @@ def add_findings(request, tid):
                 new_finding.severity)
             if new_finding.false_p or new_finding.active is False:
                 new_finding.mitigated = datetime.now(tz=localtz)
+
+
             new_finding.save()
+
+            new_finding.endpoints = form.cleaned_data['endpoints']
+
+            new_finding.save()
+
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Finding added successfully.',
@@ -3342,10 +3350,10 @@ def add_findings(request, tid):
             else:
                 return HttpResponseRedirect(reverse('add_findings', args=(test.id,)))
 
-    else:
-        form = FindingForm()
+
     return render(request, 'dojo/add_findings.html',
                   {'form': form, 'findings': findings,
+                   'test': test,
                    'temp': False, 'tid': tid,
                    'breadcrumbs': get_breadcrumbs(title="Add finding",
                                                   obj=test,
@@ -4393,7 +4401,10 @@ def view_endpoint(request, eid):
         raise PermissionDenied
 
     findings = endpoint.finding_set.order_by('-date')
-    start_date = localtz.localize(datetime.combine(findings.last().date, datetime.min.time()))
+    if findings:
+        start_date = localtz.localize(datetime.combine(findings.last().date, datetime.min.time()))
+    else:
+        start_date = localtz.localize(datetime.today())
     end_date = localtz.localize(datetime.today())
 
     r = relativedelta(end_date, start_date)
