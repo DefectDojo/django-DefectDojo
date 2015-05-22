@@ -189,26 +189,19 @@
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
+- name: Port check
+  wait_for: port={{ gunicorn_port }} delay=10 timeout=20
+  ignore_errors: True
+
 - name: Instance Availability Check
   get_url: url='http://localhost:{{ gunicorn_port}}/' dest=/tmp/url_check force=True
   register: availability
   ignore_errors: True
 
-- name: Restart DD if needed
-  shell: '. {{ venv_dir }}/bin/activate && nohup {{ venv_dir }}/bin/python {{ dd_install_dir }}/manage.py runserver 0.0.0.0:{{ gunicorn_port }} >>{{ gunicorn_log_file }} 2>&1 &'
-  sudo: yes
-  sudo_user: '{{ dd_user }}'
-  when: "'OK' not in availability.msg"
-
-- name: Instance Availability Check 2
-  get_url: url='http://localhost:{{ gunicorn_port}}/' dest=/tmp/url_check force=True
-  register: availability2
-  ignore_errors: True
-
 - name: Instance Failure Check
   fail: msg="Instance failed to start. Fix any errors that have been reported during the provisioning process, and try running 'vagrant provision' again. Also ensure that you're not using an old VirtualBox instance by checking the output of 'virtualbox list vms'."
-  when: "availability2.changed and 'OK' not in availability2.msg"
+  when: "availability.changed and 'OK' not in availability.msg"
 
 - name: Post-Install Message
   debug: msg='DefectDojo is now running on 192.168.13.37:{{ gunicorn_port }}!'
-  when: "(availability2.changed and 'OK' in availability2.msg) or 'OK' in availability.msg"
+  when: "'OK' in availability.msg"
