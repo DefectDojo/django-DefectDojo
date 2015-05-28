@@ -18,8 +18,10 @@
                                 <td class="prod_name"><a href="{% url 'view_product' p.id %}">{{ p.name }}</a></td>
                                 <td>
                                     {% for e in p.engagement_set.all %}
+                                        {%  if e.active %}
                                         <a class="eng_link" href="{% url 'view_engagement' e.id %}">
                                             {% if e.name %}{{ e.name }} {% endif %}{{ e.target_start }}</a>
+                                        {% endif %}
                                     {% endfor %}
                                 </td>
                             </tr>

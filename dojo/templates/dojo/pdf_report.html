@@ -70,7 +70,7 @@
     <h2 style="-pdf-outline: false;margin: 0;border: 1px solid #d0d0d0;background-color: #646D7E;padding: 8px 5px 3px 5px;color: #f5f5f5;">{{ product_type }}</h2>
 {% elif product %}
     <h1 style="-pdf-outline: false;margin: 0;border: 1px solid #d0d0d0;background-color: #566D7E;padding: 8px 5px 3px 5px;color: #f5f5f5;">
-        Product Report</h1>
+        Product Report {% if endpoints %} - Endpoints {% endif %}</h1>
     <h2 style="-pdf-outline: false;margin: 0;border: 1px solid #d0d0d0;background-color: #646D7E;padding: 8px 5px 3px 5px;color: #f5f5f5;">{{ product }}</h2>
 {% elif engagement %}
     <h1 style="-pdf-outline: false;margin: 0;border: 1px solid #d0d0d0;background-color: #566D7E;padding: 8px 5px 3px 5px;color: #f5f5f5;">
@@ -305,8 +305,10 @@
         {% endfor %}
     </table>
 {% endif %}
-<h3 style="-pdf-outline: true;background-color: #616D7E;padding: 8px 5px 3px 5px;color: #f5f5f5" id="findings">
-    Findings</h3>
+{% if findings %}
+    <h3 style="-pdf-outline: true;background-color: #616D7E;padding: 8px 5px 3px 5px;color: #f5f5f5" id="findings">
+        Findings</h3>
+{% endif %}
 {% for find in findings %}
     <h4 style="margin-top: 20px;-pdf-outline: false;background-color: #657383;padding: 8px 5px 3px 5px;color: #f5f5f5;margin-bottom: 0;"
         id="finding_{{ find.id }}">Finding {{ find.id }}: {{ find.title | nice_title }}
@@ -377,5 +379,80 @@
         </p>
     {% endif %}
 {% endfor %}
+{% if endpoints %}
+    <h3 style="-pdf-outline: true;background-color: #616D7E;padding: 8px 5px 3px 5px;color: #f5f5f5" id="endpoints">
+        Endpoints</h3>
+    {% for endpoint in endpoints %}
+        <h4 style="margin-top: 20px;-pdf-outline: true;background-color: #657383;padding: 8px 5px 3px 5px;color: #f5f5f5;margin-bottom: 0;">
+            {{ endpoint }}
+        </h4>
+        {% for find in endpoint.active_findings %}
+            <h4 style="margin-top: 20px;-pdf-outline: false;background-color: #657383;padding: 8px 5px 3px 5px;color: #f5f5f5;margin-bottom: 0;"
+                id="finding_{{ find.id }}">Finding {{ find.id }}: {{ find.title | nice_title }}
+                {% if find.mitigated %}Mitigated on: {{ find.mitigated }} {% endif %}</h4>
+            <h5 style="-pdf-outline: false;border: 1px solid #d0d0d0;margin-top: 0px;margin-bottom: 0px;padding: 8px 5px 3px 5px;background-color: #98AFC7;margin-left: 10px;margin-right: 10px;">
+                Product:</h5>
+            <p style="margin: 0px 13px 0px 13px;padding: 10px 10px 5px 10px;background-color: #f0f0f0;border: 1px solid #d0d0d0;">
+                {{ find.test.engagement.product.name }}
+            </p>
+            <h5 style="-pdf-outline: false;border: 1px solid #d0d0d0;margin-top: 0px;margin-bottom: 0px;padding: 8px 5px 3px 5px;background-color: #98AFC7;margin-left: 10px;margin-right: 10px;">
+                Status:</h5>
+            <p style="margin: 0px 13px 0px 13px;padding: 10px 10px 5px 10px;background-color: #f0f0f0;border: 1px solid #d0d0d0;">
+                {{ find.status }}
+            </p>
+
+            <h5 style="-pdf-outline: false;border: 1px solid #d0d0d0;margin-top: 0px;margin-bottom: 0px;padding: 8px 5px 3px 5px;background-color: #98AFC7;margin-left: 10px;margin-right: 10px;">
+                Severity: {{ find.severity }}</h5>
+            <p style="margin: 0px 13px 0px 13px;padding: 10px 10px 5px 10px;background-color: #f0f0f0;border: 1px solid #d0d0d0;">
+                <span style="color:
+                        {% if find.severity == 'Critical' %} Red
+                        {% elif find.severity == 'High' %} Magenta
+                        {% elif find.severity == 'Medium' %} Orange
+                        {% elif find.severity == 'Low' %} #00CC00
+                        {% elif find.severity == 'Info' %} Blue {% endif %}">
+                {{ find.severity }} ({{ find.numerical_severity }})
+                </span>
+            </p>
+            <h5 style="-pdf-outline: false;border: 1px solid #d0d0d0;margin-top: 0px;margin-bottom: 0px;padding: 8px 5px 3px 5px;background-color: #98AFC7;margin-left: 10px;margin-right: 10px;">
+                Description / Exploit:</h5>
+            <p style="margin: 0px 13px 0px 13px;padding: 10px 10px 5px 10px;background-color: #f0f0f0;border: 1px solid #d0d0d0;">
+                {{ find.description|linebreaksbr|truncatechars:500 }}
+            </p>
+            <h5 style="-pdf-outline: false;border: 1px solid #d0d0d0;margin-top: 0px;margin-bottom: 0px;padding: 8px 5px 3px 5px;background-color: #98AFC7;margin-left: 10px;margin-right: 10px;">
+                Impact:</h5>
+            <p style="margin: 0px 13px 0px 13px;padding: 10px 10px 5px 10px;background-color: #f0f0f0;border: 1px solid #d0d0d0;">
+                {{ find.impact|linebreaksbr }}
+            </p>
+            <h5 style="-pdf-outline: false;border: 1px solid #d0d0d0;margin-top: 0px;margin-bottom: 0px;padding: 8px 5px 3px 5px;background-color: #98AFC7;margin-left: 10px;margin-right: 10px;">
+                Systems Vulnerable:</h5>
+            <p style="margin: 0px 13px 0px 13px;padding: 10px 10px 5px 10px;background-color: #f0f0f0;border: 1px solid #d0d0d0;">
+                {{ find.endpoint|linebreaksbr }}
+            </p>
+            <h5 style="-pdf-outline: false;border: 1px solid #d0d0d0;margin-top: 0px;margin-bottom: 0px;padding: 8px 5px 3px 5px;background-color: #98AFC7;margin-left: 10px;margin-right: 10px;">
+                Suggested Mitigation:</h5>
+            <p style="margin: 0px 13px 0px 13px;padding: 10px 10px 5px 10px;background-color: #f0f0f0;border: 1px solid #d0d0d0;">
+                {{ find.mitigation|linebreaksbr }}
+            </p>
+            <h5 style="-pdf-outline: false;border: 1px solid #d0d0d0;margin-top: 0px;margin-bottom: 0px;padding: 8px 5px 3px 5px;background-color: #98AFC7;margin-left: 10px;margin-right: 10px;">
+                Further References:</h5>
+            <p style="margin: 0px 13px 0px 13px;padding: 10px 10px 5px 10px;background-color: #f0f0f0;border: 1px solid #d0d0d0;">
+                {{ find.references|linebreaksbr }}
+            </p>
+            {% if include_finding_notes %}
+                <h5 style="-pdf-outline: false;border: 1px solid #d0d0d0;margin-top: 0px;margin-bottom: 0px;padding: 8px 5px 3px 5px;background-color: #98AFC7;margin-left: 10px;margin-right: 10px;">
+                    Finding Notes:</h5>
+                <p style="margin: 0px 13px 0px 13px;padding: 10px 10px 5px 10px;background-color: #f0f0f0;border: 1px solid #d0d0d0;">
+                    {% if find.notes.all %}
+                        {% for note in find.notes.all %}
+                            {{ note.author }} - {{ note.date }} - {{ note }} <br>
+                        {% endfor %}
+                    {% else %}
+                        No notes found.
+                    {% endif %}
+                </p>
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+{% endif %}
 </body>
 </html>

@@ -12,9 +12,9 @@
                     {{ prod }}
                     <br/>
                     <small>{{ prod.endpoint_count }}
-                    <a href="{% url 'endpoints' %}?product={{ prod.id }}">
-                        affected endpoint{{ prod.endpoint_count|pluralize }}
-                        <i class="fa fa-arrow-circle-right"></i></a>
+                        <a href="{% url 'vulnerable_endpoints' %}?product={{ prod.id }}">
+                            affected endpoint{{ prod.endpoint_count|pluralize }}
+                            <i class="fa fa-arrow-circle-right"></i></a>
                     </small>
                 </h3>
 
@@ -41,6 +41,11 @@
                             <li role="presentation">
                                 <a href="{% url 'product_report' prod.id %}">Generate Report</a>
                             </li>
+                            {% if prod.endpoint_count > 0 %}
+                                <li role="presentation">
+                                    <a href="{% url 'product_endpoint_report' prod.id %}">Generate Endpoint Report</a>
+                                </li>
+                            {% endif %}
                         </ul>
                     </div>
                 </div>
