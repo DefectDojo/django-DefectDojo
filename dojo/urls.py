@@ -195,6 +195,8 @@ urlpatterns = patterns(
         'dojo.views.product_type_report', name='product_type_report'),
     url(r'^product/(?P<pid>\d+)/report$',
         'dojo.views.product_report', name='product_report'),
+    url(r'^product/(?P<pid>\d+)/endpoint/report$',
+        'dojo.views.product_endpoint_report', name='product_endpoint_report'),
     url(r'^engagement/(?P<eid>\d+)/report$', 'dojo.views.engagement_report',
         name='engagement_report'),
     url(r'^test/(?P<tid>\d+)/report$', 'dojo.views.test_report',

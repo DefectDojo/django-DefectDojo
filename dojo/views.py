@@ -53,8 +53,7 @@ from dojo.filters import ProductFilter, OpenFindingFilter, \
     OpenFingingSuperFilter, AcceptedFingingSuperFilter, \
     AcceptedFindingFilter, ProductFindingFilter, EngagementFilter, \
     ClosedFingingSuperFilter, ClosedFindingFilter, MetricsFindingFilter, ReportFindingFilter, EndpointFilter, \
-    ReportAuthedFindingFilter
-
+    ReportAuthedFindingFilter, EndpointReportFilter
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -470,7 +469,6 @@ def open_findings(request):
     else:
         findings = findings.filter(test__engagement__product__authorized_users__in=[request.user])
         findings = OpenFindingFilter(request.GET, queryset=findings, user=request.user)
-
 
     title_words = [word
                    for finding in findings
@@ -1247,7 +1245,7 @@ def old_metrics(request, mtype):
                     Q.AND)
             if ('exclude_product_types' in filter_form.cleaned_data
                 and len(
-                        filter_form.cleaned_data['exclude_product_types']) > 0):
+                    filter_form.cleaned_data['exclude_product_types']) > 0):
                 exclude.add(
                     Q(test__engagement__product__prod_type__in=filter_form.
                       cleaned_data['exclude_product_types']),
@@ -1323,11 +1321,11 @@ def old_metrics(request, mtype):
                 new_date.year,
                 new_date.month, 1,
                 tzinfo=localtz),
-                              datetime(new_date.year,
-                                       new_date.month,
-                                       monthrange(new_date.year,
-                                                  new_date.month)[1],
-                                       tzinfo=localtz)]).count()
+                datetime(new_date.year,
+                         new_date.month,
+                         monthrange(new_date.year,
+                                    new_date.month)[1],
+                         tzinfo=localtz)]).count()
 
         a_crit_findings = len([finding for ra in risks_a
                                for finding in ra.accepted_findings.filter(
@@ -2134,7 +2132,7 @@ def process_nessus_scan_file(filename, eid, user, scan_date, min_sev):
                                verified=False, description=dat['description'],
                                severity=dat['severity'],
                                numerical_severity=get_numerical_severity(dat[
-                                   'severity']),
+                                                                             'severity']),
                                mitigation=dat['mitigation'],
                                impact=dat['impact'],
                                references=dat['references'],
@@ -2813,6 +2811,7 @@ def delete_finding(request, fid):
 def close_eng(request, eid):
     eng = Engagement.objects.get(id=eid)
     eng.active = False
+    eng.status = 'Completed'
     eng.save()
     messages.add_message(request,
                          messages.SUCCESS,
@@ -2825,6 +2824,7 @@ def close_eng(request, eid):
 def reopen_eng(request, eid):
     eng = Engagement.objects.get(id=eid)
     eng.active = True
+    eng.status = 'In Progress'
     eng.save()
     messages.add_message(request,
                          messages.SUCCESS,
@@ -3135,14 +3135,17 @@ def delete_product(request, pid):
 @user_passes_test(lambda u: u.is_staff)
 def engagement(request):
     filtered = EngagementFilter(request.GET, queryset=Product.objects.filter(
-        ~Q(engagement=None)).distinct())
+        ~Q(engagement=None),
+        engagement__active=True, ).distinct())
     prods = get_page_items(request, filtered, 15)
     name_words = [product.name for product in
                   Product.objects.filter(
-                      ~Q(engagement=None)).distinct()]
+                      ~Q(engagement=None),
+                      engagement__active=True, ).distinct()]
     eng_words = [engagement.name for product in
                  Product.objects.filter(
-                     ~Q(engagement=None)).distinct()
+                     ~Q(engagement=None),
+                     engagement__active=True, ).distinct()
                  for engagement in product.engagement_set.all()]
     return render(request, 'dojo/engagement.html',
                   {'products': prods,
@@ -3334,7 +3337,6 @@ def add_findings(request, tid):
             if new_finding.false_p or new_finding.active is False:
                 new_finding.mitigated = datetime.now(tz=localtz)
 
-
             new_finding.save()
 
             new_finding.endpoints = form.cleaned_data['endpoints']
@@ -3349,7 +3351,6 @@ def add_findings(request, tid):
                 return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
             else:
                 return HttpResponseRedirect(reverse('add_findings', args=(test.id,)))
-
 
     return render(request, 'dojo/add_findings.html',
                   {'form': form, 'findings': findings,
@@ -3474,6 +3475,80 @@ def endpoint_report(request, eid):
         raise PermissionDenied
 
     return generate_report(request, endpoint)
+
+
+def product_endpoint_report(request, pid):
+    product = get_object_or_404(Product, id=pid)
+    endpoints = Endpoint.objects.filter(product=product,
+                                        finding__active=True,
+                                        finding__verified=True,
+                                        finding__false_p=False,
+                                        finding__duplicate=False,
+                                        finding__out_of_scope=False,
+                                        finding__is_template=False)
+
+    if request.user.is_staff or request.user in product.authorized_users.all():
+        pass  # user is authorized for this product
+    else:
+        raise PermissionDenied
+    breadcrumbs = get_breadcrumbs(obj=product, title="Vulnerable Product Endpoints Report", user=request.user)
+    endpoints = EndpointReportFilter(request.GET, queryset=endpoints)
+    paged_endpoints = get_page_items(request, endpoints, 30)
+    report_format = request.GET.get('report_type', 'AsciiDoc')
+    include_finding_notes = int(request.GET.get('include_finding_notes', 0))
+    include_executive_summary = int(request.GET.get('include_executive_summary', 0))
+    include_table_of_contents = int(request.GET.get('include_table_of_contents', 0))
+    generate = "_generate" in request.GET
+
+    if generate:
+        if report_format == 'AsciiDoc':
+            return render(request,
+                          'dojo/asciidoc_report.html',
+                          {'product_type': None,
+                           'product': product,
+                           'engagement': None,
+                           'test': None,
+                           'endpoints': endpoints,
+                           'endpoint': None,
+                           'findings': None,
+                           'include_finding_notes': include_finding_notes,
+                           'include_executive_summary': include_executive_summary,
+                           'include_table_of_contents': include_table_of_contents,
+                           'user': request.user,
+                           'title': 'Generate Report',
+                           'breadcrumbs': breadcrumbs})
+        elif report_format == 'PDF':
+            if len(endpoints) <= 50:
+                return render_to_pdf_response(request,
+                                              'dojo/pdf_report.html',
+                                              {'product_type': None,
+                                               'product': product,
+                                               'engagement': None,
+                                               'test': None,
+                                               'endpoints': endpoints,
+                                               'endpoint': None,
+                                               'findings': None,
+                                               'include_finding_notes': include_finding_notes,
+                                               'include_executive_summary': include_executive_summary,
+                                               'include_table_of_contents': include_table_of_contents,
+                                               'user': request.user,
+                                               'title': 'Generate Report', },
+                                              filename='product_endpoint_report', )
+            else:
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     'PDF reports are limited to endpoint counts of 50 or less. Please use the '
+                                     'filters below to reduce the number of endpoints.',
+                                     extra_tags='alert-danger')
+        else:
+            raise Http404()
+
+    return render(request,
+                  'dojo/request_endpoint_report.html',
+                  {"endpoints": paged_endpoints,
+                   "filtered": endpoints,
+                   "name": "Vulnerable Product Endpoints",
+                   'breadcrumbs': breadcrumbs})
 
 
 def generate_report(request, obj):

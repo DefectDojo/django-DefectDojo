@@ -513,6 +513,19 @@ class EndpointFilter(FilterSet):
         model = Endpoint
 
 
+class EndpointReportFilter(FilterSet):
+    host = CharFilter(lookup_type='icontains')
+    path = CharFilter(lookup_type='icontains')
+    query = CharFilter(lookup_type='icontains')
+    fragment = CharFilter(lookup_type='icontains')
+    finding__severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
+    finding__mitigated = MitigatedDateRangeFilter()
+
+    class Meta:
+        model = Endpoint
+        exclude = ['product']
+
+
 class ReportFindingFilter(FilterSet):
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     active = ReportBooleanFilter()

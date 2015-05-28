@@ -346,6 +346,15 @@ class Endpoint(models.Model):
                                           verified=True)
         return findings.count()
 
+    def active_findings(self):
+        return Finding.objects.filter(endpoints__in=[self],
+                                      active=True,
+                                      verified=True,
+                                      mitigated__isnull=True,
+                                      false_p=False,
+                                      duplicate=False,
+                                      is_template=False).order_by('numerical_severity')
+
 
 class Notes(models.Model):
     entry = models.CharField(max_length=2400)
