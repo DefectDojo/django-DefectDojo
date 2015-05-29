@@ -1,5 +1,11 @@
 {% load event_tags %}
-{{ form.non_field_errors }}
+{% if form.non_field_errors %}
+    <div class="alert alert-danger alert-dismissible" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                aria-hidden="true">&times;</span></button>
+        {{ form.non_field_errors }}
+    </div>
+{% endif %}
 {% for field in form.hidden_fields %}
     {{ field }}
 {% endfor %}

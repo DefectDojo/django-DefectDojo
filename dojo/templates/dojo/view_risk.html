@@ -5,12 +5,12 @@
             <h2>Risk Acceptance added by {{ risk_approval.reporter.get_full_name }}</h2>
         </div>
     </div>
-    <div id="risk_acceptance" class="panel panel-default">
+    <div id="risk_acceptance" class="panel panel-default table-responsive">
         <div class="panel-heading">
             <h3>Findings Accepted</h3>
         </div>
         {% if accepted_findings %}
-            <table id="open_findings" class="table-responsive table table-condensed table-striped table-bordered">
+            <table id="open_findings" class="table table-condensed table-striped table-bordered">
                 <thead>
                 <tr>
                     <th>Name</th>
@@ -78,11 +78,11 @@
         {% endif %}
     {% endif %}
 
-    <div class="panel panel-default">
+    <div class="panel panel-default table-responsive">
         <div class="panel-heading">
             <h3>Uploaded Document</h3>
         </div>
-        <table id="doc" class="table-responsive tablesorter-bootstrap table table-condensed table-striped">
+        <table id="doc" class="tablesorter-bootstrap table table-condensed table-striped">
             <thead>
             <tr>
                 <th>Current File</th>
@@ -114,12 +114,12 @@
         </table>
     </div>
 
-    <div class="panel panel-default to_highlight">
+    <div class="panel panel-default to_highlight table-responsive">
         <div class="panel-heading">
             <h3>Notes</h3>
         </div>
         {% if notes %}
-            <table id="notes" class="table-responsive tablesorter-bootstrap table table-condensed table-striped">
+            <table id="notes" class="tablesorter-bootstrap table table-condensed table-striped">
                 <thead>
                 <tr>
                     <th>User</th>

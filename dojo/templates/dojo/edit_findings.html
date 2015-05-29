@@ -16,12 +16,20 @@
         </form>
     {% else %}
         <form class="form-horizontal" action="{% url 'edit_finding' finding.id %}" method="post">
-        {% csrf_token %}
-        {% include "dojo/form_fields.html" with form=form %}
-        <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-10">
-                <input class="btn btn-primary" name="_Finished" type="submit" value="Finished"/>
+            {% csrf_token %}
+            {% include "dojo/form_fields.html" with form=form %}
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <input class="btn btn-primary" name="_Finished" type="submit" value="Finished"/>
+                </div>
             </div>
-        </div>
+        </form>
     {% endif %}
+
+{% endblock %}
+{% block postscript %}
+    <script type="application/javascript">
+        $('#add_id_endpoints').attr('href', '/endpoints/{{ finding.test.engagement.product.id }}/add');
+    </script>
+    <script type="application/javascript" src="{{ STATIC_URL }}admin/js/admin/RelatedObjectLookups.js"></script>
 {% endblock %}

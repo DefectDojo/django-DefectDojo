@@ -1,4 +1,5 @@
 {% load navigation_tags %}
+{% load display_tags %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -35,7 +36,7 @@
     <link href="{{ STATIC_URL }}startbootstrap-sb-admin-2/dist/css/sb-admin-2.css" rel="stylesheet">
 
     <!-- Custom Fonts -->
-    <link href="{{ STATIC_URL }}font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="{{ STATIC_URL }}fontawesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -67,8 +68,9 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="{% url 'home' %}"><img src="{{ STATIC_URL }}dojo/img/logo.png" alt="DefectDojo Logo"
-                                                      width="240"/></a>
+                <a class="navbar-brand" href="{% url 'home' %}"><img src="{{ STATIC_URL }}dojo/img/logo.png"
+                                                                     alt="DefectDojo Logo"
+                                                                     width="240"/></a>
             </div>
             <!-- /.navbar-header -->
 
@@ -91,10 +93,12 @@
                     <ul class="dropdown-menu dropdown-user">
                         {% block settings-dropdown-items %}
                             {% if request.user.is_authenticated %}
-                                <li><a href="{% url 'view_profile' %}"><i class="fa fa-user fa-fw"></i> {{ request.user.username }}</a>
+                                <li><a href="{% url 'view_profile' %}"><i
+                                        class="fa fa-user fa-fw"></i> {{ request.user.username }}</a>
                                 </li>
                             {% endif %}
-                            <li><a href="{% url 'tastypie_swagger:index' %}"><i class="fa fa-book fa-fw"></i> API Docs</a></li>
+                            <li><a href="{% url 'tastypie_swagger:index' %}"><i class="fa fa-book fa-fw"></i> API
+                                Docs</a></li>
                         {% endblock %}
                         {% if request.user.is_authenticated %}
                             <li><a href="{% url 'logout' %}"><i class="fa fa-sign-out fa-fw"></i> Logout</a></li>
@@ -125,25 +129,29 @@
                             </div>
                             <!-- /input-group -->
                         </li>
+                        {% if request.user.is_staff %}
+                            <li>
+                                <a href="{% url 'dashboard' %}"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
+                            </li>
+                        {% endif %}
                         <li>
-                            <a href="{% url 'dashboard' %}"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
-                        </li>
-                        <li>
-                            <a href="{% url 'product' %}"><i class="fa fa-list fa-fw"></i> Products{% if request.user.is_staff %}<span class="glyphicon arrow"></span>{% endif %}</a>
+                            <a href="{% url 'product' %}"><i class="fa fa-list fa-fw"></i> Products
+                                {% if request.user.is_staff %}<span class="glyphicon arrow"></span>{% endif %}</a>
                             {% if request.user.is_staff %}
-                            <ul class="nav nav-second-level">
+                                <ul class="nav nav-second-level">
 
                                     <li>
                                         <a href="{% url 'product_type' %}">View Product Types</a>
                                     </li>
 
-                            </ul>
+                                </ul>
                             {% endif %}
                             <!-- /.nav-second-level -->
                         </li>
                         {% if request.user.is_staff %}
                             <li>
-                                <a href="{% url 'engagement' %}"><i class="fa fa-inbox fa-fw"></i> Engagements<span class="glyphicon arrow"></span></a>
+                                <a href="{% url 'engagement' %}"><i class="fa fa-inbox fa-fw"></i> Engagements<span
+                                        class="glyphicon arrow"></span></a>
                                 <ul class="nav nav-second-level">
                                     <li>
                                         <a href="{% url 'test_type' %}">Test Types</a>
@@ -155,8 +163,20 @@
                                 <!-- /.nav-second-level -->
                             </li>
                             <li>
-                                <a href="{% url 'open_findings' %}"><i class="fa fa-exclamation-triangle fa-fw"></i> Findings<span
+                                <a href="{% url 'endpoints' %}"><i class="fa fa-sitemap fa-fw"></i> Endpoints<span
                                         class="glyphicon arrow"></span></a>
+                                <ul class="nav nav-second-level">
+                                    <li>
+                                        <a href="{% url 'vulnerable_endpoints' %}">
+                                            Vulnerable Endpoints
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="{% url 'open_findings' %}"><i class="fa fa-bug fa-fw"></i>
+                                    Findings<span
+                                            class="glyphicon arrow"></span></a>
                                 <ul class="nav nav-second-level">
                                     <li>
                                         <a href="{% url 'open_findings' %}">Open Findings</a>
@@ -172,7 +192,7 @@
                             </li>
                         {% endif %}
                         <li>
-                            <a href="{% url 'metrics' %}"><i class="fa fa-line-chart  fa-fw"></i> Metrics<span
+                            <a href="{% url 'metrics' %}"><i class="fa fa-bar-chart fa-fw"></i> Metrics<span
                                     class="glyphicon arrow"></span></a>
                             <ul class="nav nav-second-level">
                                 <li><a href="{% url 'metrics_all' %}"> All </a></li>
@@ -186,7 +206,8 @@
                                         <ul class="nav nav-third-level">
                                             <li><a href="{% url 'simple_metrics' %}"> Simple Metrics </a></li>
                                             <li><a href="{% url 'engineer_metrics' %}"> Engineer Metrics </a></li>
-                                            <li><a href="{% url 'research_metrics' %}"> Security Research Metrics </a></li>
+                                            <li><a href="{% url 'research_metrics' %}"> Security Research Metrics </a>
+                                            </li>
                                         </ul>
                                         <!-- /.nav-third-level -->
                                     </li>
@@ -200,9 +221,11 @@
                             </ul>
                             <!-- /.nav-second-level -->
                         </li>
-                        <li>
-                            <a href="{% url 'calendar' %}"><i class="fa fa-calendar fa-fw"></i> Calendar</a>
-                        </li>
+                        {% if request.user.is_staff %}
+                            <li>
+                                <a href="{% url 'calendar' %}"><i class="fa fa-calendar fa-fw"></i> Calendar</a>
+                            </li>
+                        {% endif %}
 
                     </ul>
                 </div>
@@ -219,10 +242,12 @@
                     {% if breadcrumbs %}
                         <ul class="breadcrumb main">
                             {% for b in breadcrumbs %}
-                                {% if b.active %}
+                                {% if b.active or not b.link %}
                                     <li class="active">{{ b.title }}</li>
                                 {% else %}
-                                    <li><a href="{{ b.link }}">{{ b.title }}</a></li>
+                                    <li>
+                                        <a href="{{ b.link }}">{{ b.title }}</a>
+                                    </li>
                                 {% endif %}
                             {% endfor %}
                         </ul>
@@ -262,16 +287,13 @@
             <div class="row">
                 <div class="col-md-12 text-center text-">
                     <p>
-                        <a href="{% url 'home' %}"><img class="logo" src="{{ STATIC_URL }}dojo/img/chop.png" alt="DefectDojo Chop" height="45"/></a>
+                        <a href="{% url 'home' %}"><img class="logo" src="{{ STATIC_URL }}dojo/img/chop.png"
+                                                        alt="DefectDojo Chop" height="45"/></a><br/>
+                        {% dojo_version %}
                     </p>
 
                     <p>
-                        <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img
-                                alt="Creative Commons License" style="border-width:0"
-                                src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png"/></a><br/>This work is
-                        licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
-                        Commons Attribution-ShareAlike 4.0 International License</a>.
-                    </p>
+                    DefectDojo is licensed under the <a href="https://github.com/rackerlabs/django-DefectDojo/blob/master/LICENSE.md">Simplified BSD license</a>.
                 </div>
             </div>
         </div>
@@ -281,7 +303,7 @@
 <!-- /#wrapper -->
 
 <!-- jQuery -->
-<script src="{{ STATIC_URL }}jquery/dist/jquery.min.js"></script>
+<script src="{{ STATIC_URL }}jquery/dist/jquery.js"></script>
 <!--  jQuery UI -->
 <script src="{{ STATIC_URL }}jquery-ui/jquery-ui.min.js"></script>
 <!-- Bootstrap Core JavaScript -->

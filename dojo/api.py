@@ -81,7 +81,6 @@ class UserProductsOnlyAuthorization(Authorization):
         # This assumes a ``QuerySet`` from ``ModelResource``.
         if bundle.request.user.is_staff:
             return object_list
-
         return object_list.filter(authorized_users__in=[bundle.request.user])
 
     def read_detail(self, object_list, bundle):

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+    <h4>{{ name }}</h4>
+    <br/>
+    <div class="row">
+        <div class="col-md-10">
+            {% if endpoints %}
+                <div class="table-responsive panel panel-default">
+                    <table id="endpoints"
+                           class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
+                        <tr>
+                            <th>Endpoint</th>
+                            <th>Product</th>
+                            <th nowrap="nowrap">Number of <br/> Open Findings</th>
+                        </tr>
+
+                        {% for e in endpoints %}
+                            <tr>
+                                <td><a href="{% url 'view_endpoint' e.id %}">{{ e|truncatechars:70 }}</a></td>
+                                <td><a href="{% url 'view_product' e.product.id %}">{{ e.product }}</a></td>
+                                <td class="text-center">
+                                    <a href="{% url 'open_findings' %}?endpoints={{ e.id}}">{{ e.finding_count }}</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+                {% include "dojo/paging_snippet.html" with page=endpoints %}
+            {% else %}
+                <h5> No endpoints </h5>
+            {% endif %}
+        </div>
+        <div class="col-md-2">
+            <div class="filters panel panel-default">
+                {% if request.user.is_staff %}
+                    <div class="panel-heading">Actions</div>
+                    <div class="panel-body centered">
+                        <a class="btn btn-sm btn-primary" href="{% url 'add_product_endpoint' %}">
+                            New Endpoint
+                        </a>
+                    </div>
+                {% endif %}
+                <div class="panel-heading">Filters</div>
+                <form method="get" class="panel-body">
+                    {{ filtered.form.as_p }}
+                    <div class="centered">
+                        <input type="submit" class="btn btn-primary" value="Apply"/><br/><br/>
+                        <a href="{% url 'endpoints' %}"> [Clear Filters] </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
