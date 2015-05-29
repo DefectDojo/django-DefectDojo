@@ -33,12 +33,12 @@ are working properly before submitting a pull request.
 0. All submitted code should conform to [__PEP8 standards__][pep8].
 
 
-[ansible_vars]: ../ansible/vars.yml "Ansible variables file"
-[dojo_settings]: ../dojo/settings.dist.py "DefectDojo settings file"
-[ansible_settings]: ../ansible/roles/webserver/templates/settings.j2 "Ansible settings template"
-[setup_py]: ../setup.py "Python setup script"
-[ansible_app]: ../ansible/roles/webserver/tasks/app.yml "Ansible app tasks"
-[setup_bash]: ../setup.bash "Bash setup script"
-[ansible_folder]: ../ansible "Ansible folder"
+[ansible_vars]: /ansible/vars.yml "Ansible variables file"
+[dojo_settings]: /dojo/settings.dist.py "DefectDojo settings file"
+[ansible_settings]: /ansible/roles/webserver/templates/settings.j2 "Ansible settings template"
+[setup_py]: /setup.py "Python setup script"
+[ansible_app]: /ansible/roles/webserver/tasks/app.yml "Ansible app tasks"
+[setup_bash]: /setup.bash "Bash setup script"
+[ansible_folder]: /ansible "Ansible folder"
 [modifying_dojo]: #modifying-defectdojo-and-testing-with-vagrant "Modifying DefectDojo and testing with Vagrant"
 [pep8]: https://www.python.org/dev/peps/pep-0008/ "PEP8"
