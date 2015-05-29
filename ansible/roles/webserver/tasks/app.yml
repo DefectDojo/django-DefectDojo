@@ -54,7 +54,7 @@
   sudo_user: '{{ dd_user }}'
 
 - name: Install django-tastypie
-  pip: name=django-tastypie virtualenv={{ venv_dir }}
+  pip: name=django-tastypie version=0.12.1 virtualenv={{ venv_dir }}
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
@@ -140,17 +140,34 @@
     sudo: yes
     sudo_user: '{{ dd_user }}'
 
-#- name: Run Django 'bower install' command
-#  django_manage: command='bower install' app_path={{ dd_install_dir }} virtualenv={{ venv_dir }}
-#  sudo: yes
-#  sudo_user: '{{ dd_user }}'
-
 - name: Run 'bower install' command
   command: bower install
   sudo: yes
   sudo_user: '{{ dd_user }}'
+  register: bower_install
+  ignore_errors: True
   args: 
     chdir: '{{ dd_install_dir }}/components/'
+
+- name: Git HTTPS Preference
+  command: "git config --global url.'https://'.insteadOf 'git://'"
+  sudo: yes
+  sudo_user: '{{ dd_user }}'
+  when: "bower_install.changed and bower_install.stderr and 'unable to connect to github.com' in bower_install.stderr"
+
+- name: Reinstall Bower
+  command: bower install
+  sudo: yes
+  sudo_user: '{{ dd_user }}'
+  register: bower_install2
+  ignore_errors: True
+  args: 
+    chdir: '{{ dd_install_dir }}/components/'
+  when: "bower_install.changed and bower_install.stderr and 'unable to connect to github.com' in bower_install.stderr"
+
+- name: Bower Failure
+  fail: msg="It looks like the 'bower install' command has failed. Usually executing `git config --global url.'https://'.insteadOf 'git://'` fixes this issue, but it appears that has not fixed it in this case. Please ensure that you have network connectivity while running the provisioning process."
+  when: "bower_install2.changed and bower_install2.stderr and 'unable to connect to github.com' in bower_install2.stderr"
 
 - name: Run Django 'collectstatic' command
   django_manage: command=collectstatic app_path={{ dd_install_dir }} virtualenv={{ venv_dir }}
@@ -162,7 +179,7 @@
   register: instances
   ignore_errors: True
 
-- name: Kill any DD instances on our gunicorn port
+- name: Kill zombie DD instances
   shell: "kill {{ instances.stdout }}"
   when: instances.stdout
   ignore_errors: True
@@ -171,3 +188,20 @@
   shell: '. {{ venv_dir }}/bin/activate && nohup {{ venv_dir }}/bin/python {{ dd_install_dir }}/manage.py runserver 0.0.0.0:{{ gunicorn_port }} >>{{ gunicorn_log_file }} 2>&1 &'
   sudo: yes
   sudo_user: '{{ dd_user }}'
+
+- name: Port check
+  wait_for: port={{ gunicorn_port }} delay=10 timeout=20
+  ignore_errors: True
+
+- name: Instance Availability Check
+  get_url: url='http://localhost:{{ gunicorn_port}}/' dest=/tmp/url_check force=True
+  register: availability
+  ignore_errors: True
+
+- name: Instance Failure Check
+  fail: msg="Instance failed to start. Fix any errors that have been reported during the provisioning process, and try running 'vagrant provision' again. Also ensure that you're not using an old VirtualBox instance by checking the output of 'virtualbox list vms'."
+  when: "availability.changed and 'OK' not in availability.msg"
+
+- name: Post-Install Message
+  debug: msg='DefectDojo is now running on 192.168.13.37:{{ gunicorn_port }}!'
+  when: "'OK' in availability.msg"

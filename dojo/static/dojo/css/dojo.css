@@ -34,13 +34,18 @@ form.filters {
     border: 1px solid #ccc;
 }
 
+.filters hr {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
 input[type="file"] {
     border: 0px;
     width: auto;
 }
 
 textarea {
-    width: 50% !important;
+    width: 70% !important;
 }
 
 .home-icon a {
@@ -391,7 +396,7 @@ div.prod_info {
 
 br {
     border: 0;
-    margin: 21px 0;
+
 }
 
 .filters h3 {
@@ -608,4 +613,18 @@ h4.finding-title {
 
 .panel-heading span.clickable {
     cursor: pointer;
+}
+
+span.endpoint_product {
+    display: block;
+    font-size: 14px;
+    font-weight: normal;
+    margin-top: 3px;
+}
+
+#vuln_endpoints ul {
+    list-style-type: square;
+    margin-left: 5px;
+    padding-left: 5px;
+    width: 100%;
 }

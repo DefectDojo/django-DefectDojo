@@ -37,10 +37,10 @@ urlpatterns = patterns(
 
     #  user specific
     url(r'^login$', 'django.contrib.auth.views.login',
-        {'template_name': 'dojo/login.html'}, name="login"),
+        {'template_name': 'dojo/login.html'}, name='login'),
     url(r'^logout$', 'dojo.views.logout_view', name='logout'),
     url(r'^alerts$', 'dojo.views.alerts', name='alerts'),
-    url(r'^profile$', 'dojo.views.view_profile', name="view_profile"),
+    url(r'^profile$', 'dojo.views.view_profile', name='view_profile'),
     url(r'^change_password$', 'dojo.views.change_password',
         name='change_password'),
 
@@ -59,6 +59,8 @@ urlpatterns = patterns(
         name='view_product'),
     url(r'^product/(?P<pid>\d+)/edit$', 'dojo.views.edit_product',
         name='edit_product'),
+    url(r'^product/(?P<pid>\d+)/delete$', 'dojo.views.delete_product',
+        name='delete_product'),
     url(r'^product/add', 'dojo.views.new_product', name='new_product'),
     url(r'^product/(?P<pid>\d+)/findings$',
         'dojo.views.all_product_findings', name='view_product_findings'),
@@ -82,6 +84,8 @@ urlpatterns = patterns(
         name='view_engagement'),
     url(r'^engagement/(?P<eid>\d+)/edit$', 'dojo.views.edit_engagement',
         name='edit_engagement'),
+    url(r'^engagement/(?P<eid>\d+)/delete$', 'dojo.views.delete_engagement',
+        name='delete_engagement'),
     url(r'^engagement/(?P<eid>\d+)/add_tests$', 'dojo.views.add_tests',
         name='add_tests'),
     url(r'^engagement/(?P<eid>\d+)/add_nessus_scan$',
@@ -191,10 +195,16 @@ urlpatterns = patterns(
         'dojo.views.product_type_report', name='product_type_report'),
     url(r'^product/(?P<pid>\d+)/report$',
         'dojo.views.product_report', name='product_report'),
+    url(r'^product/(?P<pid>\d+)/endpoint/report$',
+        'dojo.views.product_endpoint_report', name='product_endpoint_report'),
     url(r'^engagement/(?P<eid>\d+)/report$', 'dojo.views.engagement_report',
         name='engagement_report'),
     url(r'^test/(?P<tid>\d+)/report$', 'dojo.views.test_report',
         name='test_report'),
+    url(r'^endpoint/(?P<eid>\d+)/report$', 'dojo.views.endpoint_report',
+        name='endpoint_report'),
+    url(r'^product/report$',
+        'dojo.views.product_findings_report', name='product_findings_report'),
 
     # other
     url(r'^launch_va/(?P<pid>\d+)$', 'dojo.views.launch_va',
@@ -207,6 +217,23 @@ urlpatterns = patterns(
             "tastypie_api_module": "dojo.urls.v1_api",
             "namespace": "tastypie_swagger",
             "version": "1.0"}),
+
+    # endpoints
+    url(r'^endpoint$', 'dojo.views.all_endpoints',
+        name='endpoints'),
+    url(r'^endpoint/vulnerable$', 'dojo.views.vulnerable_endpoints',
+        name='vulnerable_endpoints'),
+    url(r'^endpoint/(?P<eid>\d+)$', 'dojo.views.view_endpoint',
+        name='view_endpoint'),
+    url(r'^endpoint/(?P<eid>\d+)/edit$', 'dojo.views.edit_endpoint',
+        name='edit_endpoint'),
+    url(r'^endpoints/(?P<pid>\d+)/add$', 'dojo.views.add_endpoint',
+        name='add_endpoint'),
+    url(r'^endpoint/(?P<eid>\d+)/delete$', 'dojo.views.delete_endpoint',
+        name='delete_endpoint'),
+    url(r'^endpoints/add$', 'dojo.views.add_product_endpoint',
+        name='add_product_endpoint'),
+
 )
 
 urlpatterns += staticfiles_urlpatterns()

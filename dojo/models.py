@@ -118,6 +118,13 @@ class Product(models.Model):
                 f_count += findings.filter(test=test).count()
         return f_count
 
+    @property
+    def endpoint_count(self):
+        return Endpoint.objects.filter(finding__test__engagement__product=self,
+                                       finding__active=True,
+                                       finding__verified=True,
+                                       finding__mitigated__isnull=True).distinct().count()
+
     def open_findings(self, start_date=None, end_date=None):
         if start_date is None or end_date is None:
             return {}
@@ -284,13 +291,6 @@ class Engagement(models.Model):
                                             "%b %d, %Y"))
 
 
-class ThreatModel(models.Model):
-    threat_model = models.ImageField(upload_to=settings.DOJO_ROOT +
-                                               '/threat/',
-                                     default='pic_folder/None/no-img.jpg')
-    engagement = models.ForeignKey(Engagement, editable=False, default=1)
-
-
 class CWE(models.Model):
     url = models.CharField(max_length=1000)
     description = models.CharField(max_length=2000)
@@ -298,15 +298,62 @@ class CWE(models.Model):
 
 
 class Endpoint(models.Model):
-    ip = models.IPAddressField()
-    mask = models.IPAddressField()
-    url = models.CharField(max_length=1000)
-    host_name = models.CharField(max_length=300)
-    # credentials?
-    notes = models.CharField(max_length=2000)
-    num_api_methods = models.IntegerField()
-    lines_of_code = models.IntegerField()
-    user_shell_available = models.BooleanField(default=False)
+    protocol = models.CharField(null=True, blank=True, max_length=10,
+                                help_text="The communication protocl such as 'http', 'ftp', etc.")
+    host = models.CharField(null=True, blank=True, max_length=500,
+                            help_text="The host name or IP address, you can also include the port number. For example"
+                                      "'127.0.0.1', '127.0.0.1:8080', 'localhost', 'yourdomain.com'.")
+    path = models.CharField(null=True, blank=True, max_length=500,
+                            help_text="The location of the resource, it should start with a '/'. For example"
+                                      "/endpoint/420/edit")
+    query = models.CharField(null=True, blank=True, max_length=5000,
+                             help_text="The query string, the question mark should be omitted."
+                                       "For example 'group=4&team=8'")
+    fragment = models.CharField(null=True, blank=True, max_length=500,
+                                help_text="The fragment identifier which follows the hash mark. The hash mark should "
+                                          "be omitted. For example 'section-13', 'paragraph-2'.")
+    product = models.ForeignKey(Product, null=True, blank=True, )
+
+    class Meta:
+        ordering = ['product', 'protocol', 'host', 'path', 'query', 'fragment']
+
+    def __unicode__(self):
+        from urlparse import urlunsplit, uses_netloc
+
+        netloc = self.host
+        scheme = self.protocol
+        url = self.path if self.path else ''
+        query = self.query
+        fragment = self.fragment
+
+        if netloc or (scheme and scheme in uses_netloc and url[:2] != '//'):
+            if url and url[:1] != '/': url = '/' + url
+            if scheme:
+                url = '//' + (netloc or '') + url
+            else:
+                url = (netloc or '') + url
+        if scheme:
+            url = scheme + ':' + url
+        if query:
+            url = url + '?' + query
+        if fragment:
+            url = url + '#' + fragment
+        return url
+
+    def finding_count(self):
+        findings = Finding.objects.filter(endpoints__in=[self],
+                                          active=True,
+                                          verified=True)
+        return findings.count()
+
+    def active_findings(self):
+        return Finding.objects.filter(endpoints__in=[self],
+                                      active=True,
+                                      verified=True,
+                                      mitigated__isnull=True,
+                                      false_p=False,
+                                      duplicate=False,
+                                      is_template=False).order_by('numerical_severity')
 
 
 class Notes(models.Model):
@@ -365,7 +412,9 @@ class Finding(models.Model):
     description = models.TextField()
     mitigation = models.TextField()
     impact = models.TextField()
+    # will deprecate in version 1.0.3
     endpoint = models.TextField()
+    endpoints = models.ManyToManyField(Endpoint, null=True, blank=True, )
     references = models.TextField(null=True, blank=True, db_column="refs")
     test = models.ForeignKey(Test, editable=False)
     is_template = models.BooleanField(default=False)
@@ -519,3 +568,5 @@ admin.site.register(Engagement)
 admin.site.register(Risk_Acceptance)
 admin.site.register(Check_List)
 admin.site.register(Test_Type)
+admin.site.register(Endpoint)
+admin.site.register(Product)

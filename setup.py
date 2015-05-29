@@ -4,12 +4,9 @@ from setuptools import setup
 
 setup(
     name='DefectDojo',
-    version='1.0',
+    version='1.0.2',
     author='Greg Anderson',
     description="Tool for managing vulnerability engagements",
-    dependency_links=[
-        "https://github.com/concentricsky/django-tastypie-swagger/tarball/v0.1.3#egg=django-tastypie-swagger"
-    ],
     install_requires=[
         'Django==1.7.7',
         'MySQL-python==1.2.3',
@@ -29,14 +26,5 @@ setup(
         'django-easy-pdf',
         'xhtml2pdf>=0.0.6',
         'reportlab'],
-    # packages=['DefectDojo'],
     url='https://github.com/rackerlabs/django-DefectDojo'
-
-        """
-        entry_points={
-        'console_scripts': [
-        'supernova = supernova.executable:run_supernova',
-        'supernova-keyring = supernova.executable:run_supernova_keyring'],
-        },
-        """
 )

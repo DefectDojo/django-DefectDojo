@@ -35,3 +35,7 @@ def linebreaksasciidocbr(value, autoescape=None):
 
     return mark_safe(value.replace('\n', '&nbsp;+<br />'))
 
+@register.simple_tag
+def dojo_version():
+    from dojo.settings import VERSION
+    return 'v. ' + VERSION

@@ -66,8 +66,11 @@
                         <span class="fa fa-gear"></span>
                         <span class="caret"></span>
                     </button>
-                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                    <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                         <li role="presentation"><a class="" href="{% url 'edit_engagement' eng.id %}"> Edit
+                            Engagement </a>
+                        </li>
+                        <li role="presentation"><a class="" href="{% url 'delete_engagement' eng.id %}"> Delete
                             Engagement </a>
                         </li>
                         <li role="presentation">
@@ -164,68 +167,70 @@
                     <div class="clearfix">
                         <h3 class="pull-left">
                             Tests
-                            </h3>
+                        </h3>
 
-                            <div class="dropdown pull-right">
-                                <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
-                                        data-toggle="dropdown" aria-expanded="true">
-                                    <span class="fa fa-gear"></span>
-                                    <span class="caret"></span>
-                                </button>
-                                <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
-                                    <li role="presentation">
-                                        <a class="" href="{% url 'add_tests' eng.id %}"> Add Tests</a>
-                                    </li>
-                                    <li role="presentation">
-                                        <a class="" href="{% url 'add_burp_scan' eng.id %}">Upload Burp Scan</a>
-                                    </li>
-                                    <li role="presentation">
-                                        <a class="" href="{% url 'add_nessus_scan' eng.id %}">Upload Nessus Scan</a>
-                                    </li>
-                                    <li role="presentation">
-                                        <a class="" href="{% url 'add_veracode_scan' eng.id %}">Upload Veracode Scan</a>
-                                    </li>
-                                    <li role="presentation">
-                                        <a class="" href="{% url 'view_product' eng.product.id %}">Done Testing</a>
-                                    </li>
-                                </ul>
-                            </div>
+                        <div class="dropdown pull-right">
+                            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
+                                    data-toggle="dropdown" aria-expanded="true">
+                                <span class="fa fa-gear"></span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                                <li role="presentation">
+                                    <a class="" href="{% url 'add_tests' eng.id %}"> Add Tests</a>
+                                </li>
+                                <li role="presentation">
+                                    <a class="" href="{% url 'add_burp_scan' eng.id %}">Upload Burp Scan</a>
+                                </li>
+                                <li role="presentation">
+                                    <a class="" href="{% url 'add_nessus_scan' eng.id %}">Upload Nessus Scan</a>
+                                </li>
+                                <li role="presentation">
+                                    <a class="" href="{% url 'add_veracode_scan' eng.id %}">Upload Veracode Scan</a>
+                                </li>
+                                <li role="presentation">
+                                    <a class="" href="{% url 'view_product' eng.product.id %}">Done Testing</a>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
                 {% if tests %}
-                    <table class="table-responsive tablesorter-bootstrap table table-condensed table-striped">
-                        <thead>
-                        <tr>
-                            <th>Type</th>
-                            <th>Start Date</th>
-                            <th>End Date</th>
-                            <th>Findings</th>
-                            <th>Notes</th>
-                            <th>Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for test in tests %}
+                    <div class="table-responsive">
+                        <table class="tablesorter-bootstrap table table-condensed table-striped">
+                            <thead>
                             <tr>
-                                <td>{{ test.test_type }}</td>
-                                <td>{{ test.target_start.date }}</td>
-                                <td>{{ test.target_end.date }}</td>
-                                <td>{{ test.finding_set.all|length }}</td>
-                                <td>{{ test.notes.all|length }}</td>
-                                <td>
-                                    <div class="btn-group">
-                                        <a class="btn btn-sm btn-primary"
-                                           href="{% url 'view_test' test.id %}">View</a>
-                                        <a class="btn btn-sm btn-warning"
-                                           href="{% url 'edit_test' test.id %}">Edit</a>
-                                        <a class="btn btn-sm btn-danger"
-                                           href="{% url 'delete_test' test.id %}">Delete</a>
-                                    </div>
-                                </td>
+                                <th>Type</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Findings</th>
+                                <th>Notes</th>
+                                <th>Actions</th>
                             </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                            {% for test in tests %}
+                                <tr>
+                                    <td>{{ test.test_type }}</td>
+                                    <td>{{ test.target_start.date }}</td>
+                                    <td>{{ test.target_end.date }}</td>
+                                    <td>{{ test.finding_set.all|length }}</td>
+                                    <td>{{ test.notes.all|length }}</td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a class="btn btn-sm btn-primary"
+                                               href="{% url 'view_test' test.id %}">View</a>
+                                            <a class="btn btn-sm btn-warning"
+                                               href="{% url 'edit_test' test.id %}">Edit</a>
+                                            <a class="btn btn-sm btn-danger"
+                                               href="{% url 'delete_test' test.id %}">Delete</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 {% else %}
                     <div class="panel-body">
                         <p>No tests found.</p>
@@ -247,7 +252,7 @@
                                href="{% url 'complete_checklist' eng.id %}">
                                 <span class="fa fa-edit"></span></a>
                         {% else %}
-                            <a title="Complete Check List" class="btn btn-sm btn-primary pull-right"
+                            <a title="Complete Check List" class="btn btn-sm btn-default pull-right"
                                href="{% url 'complete_checklist' eng.id %}">
                                 <span class="fa fa-edit"></span></a></a>
                         {% endif %}
@@ -255,47 +260,50 @@
                 </div>
 
                 {% if check %}
-                    <table class="table-responsive tablesorter-bootstrap table table-condensed table-striped">
-                        <thead>
-                        <tr>
-                            <th>Session</th>
-                            <th>Encryption</th>
-                            <th>Configuration</th>
-                            <th>Authentication</th>
-                            <th>Authorization</th>
-                            <th>Data Input</th>
-                            <th>Sensitive Data</th>
-                            <th>Other</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <td><span
-                                    class="label label-{{ check.session_management|checklist_status }}">{{ check.session_management }}</span>
-                            </td>
-                            <td><span
-                                    class="label label-{{ check.encryption_crypto|checklist_status }}">{{ check.encryption_crypto }}</span>
-                            </td>
-                            <td><span
-                                    class="label label-{{ check.configuration_management|checklist_status }}">{{ check.configuration_management }}</span>
-                            </td>
-                            <td><span
-                                    class="label label-{{ check.authentication|checklist_status }}">{{ check.authentication }}</span>
-                            </td>
-                            <td><span
-                                    class="label label-{{ check.authorization_and_access_control|checklist_status }}">{{ check.authorization_and_access_control }}</span>
-                            </td>
-                            <td><span
-                                    class="label label-{{ check.data_input_sanitization_validation|checklist_status }}">{{ check.data_input_sanitization_validation }}</span>
-                            </td>
-                            <td><span
-                                    class="label label-{{ check.sensitive_data|checklist_status }}">{{ check.sensitive_data }}</span>
-                            </td>
-                            <td><span class="label label-{{ check.other|checklist_status }}">{{ check.other }}</span>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="tablesorter-bootstrap table table-condensed table-striped">
+                            <thead>
+                            <tr>
+                                <th>Session</th>
+                                <th>Encryption</th>
+                                <th>Configuration</th>
+                                <th>Authentication</th>
+                                <th>Authorization</th>
+                                <th>Data Input</th>
+                                <th>Sensitive Data</th>
+                                <th>Other</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td><span
+                                        class="label label-{{ check.session_management|checklist_status }}">{{ check.session_management }}</span>
+                                </td>
+                                <td><span
+                                        class="label label-{{ check.encryption_crypto|checklist_status }}">{{ check.encryption_crypto }}</span>
+                                </td>
+                                <td><span
+                                        class="label label-{{ check.configuration_management|checklist_status }}">{{ check.configuration_management }}</span>
+                                </td>
+                                <td><span
+                                        class="label label-{{ check.authentication|checklist_status }}">{{ check.authentication }}</span>
+                                </td>
+                                <td><span
+                                        class="label label-{{ check.authorization_and_access_control|checklist_status }}">{{ check.authorization_and_access_control }}</span>
+                                </td>
+                                <td><span
+                                        class="label label-{{ check.data_input_sanitization_validation|checklist_status }}">{{ check.data_input_sanitization_validation }}</span>
+                                </td>
+                                <td><span
+                                        class="label label-{{ check.sensitive_data|checklist_status }}">{{ check.sensitive_data }}</span>
+                                </td>
+                                <td><span
+                                        class="label label-{{ check.other|checklist_status }}">{{ check.other }}</span>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 {% else %}
                     <div class="panel-body">
                         <p>Checklist has not been completed.</p>
@@ -316,36 +324,40 @@
                     <h4> Risk Acceptance
                         {% if can_add_risk %}
                             <a title="Add Risk Acceptance" class="pull-right btn btn-sm btn-default"
-                               href="{% url 'upload_risk_acceptance$' eng.id %}"><span class="fa fa-plus"></span></a></a>
+                               href="{% url 'upload_risk_acceptance$' eng.id %}"><span class="fa fa-plus"></span></a>
+                            </a>
                         {% endif %}
                     </h4>
                 </div>
                 {% if risks_accepted %}
-                    <table id="open_findings"
-                           class="table-responsive tablesorter-bootstrap table table-condensed table-striped">
-                        <thead>
-                        <tr>
-                            <th>Reporter</th>
-                            <th> Date</th>
-                            <th>Findings Accepted</th>
-                            <th>View File</th>
-                            <th>Actions</th>
-                        </thead>
-                        <tbody>
-                        {% for risk in risks_accepted %}
+                    <div class="table-responsive">
+                        <table id="open_findings"
+                               class="tablesorter-bootstrap table table-condensed table-striped">
+                            <thead>
                             <tr>
-                                <td>{{ risk.reporter }}</td>
-                                <td>{{ risk.created }}</td>
-                                <td>{{ risk.accepted_findings.all|length }}</td>
-                                <td><a href="{% url 'download_risk' eng.id risk.id %}">{{ risk.filename }}</a></td>
-                                <td>
-                                    <a class="btn btn-sm btn-primary" href="{% url 'view_risk' eng.id risk.id %}"> View
-                                        Approval</a>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
+                                <th>Reporter</th>
+                                <th> Date</th>
+                                <th>Findings Accepted</th>
+                                <th>View File</th>
+                                <th>Actions</th>
+                            </thead>
+                            <tbody>
+                            {% for risk in risks_accepted %}
+                                <tr>
+                                    <td>{{ risk.reporter }}</td>
+                                    <td>{{ risk.created }}</td>
+                                    <td>{{ risk.accepted_findings.all|length }}</td>
+                                    <td><a href="{% url 'download_risk' eng.id risk.id %}">{{ risk.filename }}</a></td>
+                                    <td>
+                                        <a class="btn btn-sm btn-primary" href="{% url 'view_risk' eng.id risk.id %}">
+                                            View
+                                            Approval</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 {% else %}
                     <div class="panel-body">
                         <p>No Risk Acceptances found.</p>

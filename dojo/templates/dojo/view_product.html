@@ -1,40 +1,156 @@
 {% extends "base.html" %}
+{% load humanize %}
+{% block add_styles %}
+    .graph {min-height: 158px;}
+    h3 { margin-top: 5px; margin-bottom: 5px; font-size: 20px; line-height: 22px;}
+{% endblock %}
 {% block content %}
     <div class="panel panel-default">
-        <div class="panel-heading">
+        <div class="panel-heading tight">
             <div class="clearfix">
                 <h3 class="pull-left">
                     {{ prod }}
+                    <br/>
+                    <small>{{ prod.endpoint_count }}
+                        <a href="{% url 'vulnerable_endpoints' %}?product={{ prod.id }}">
+                            affected endpoint{{ prod.endpoint_count|pluralize }}
+                            <i class="fa fa-arrow-circle-right"></i></a>
+                    </small>
                 </h3>
 
                 <div class="dropdown pull-right">
-                    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
-                            data-toggle="dropdown" aria-expanded="true">
-                        <span class="fa fa-gear"></span>
-                        <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
-                        {% if user.is_staff %}
-                            <li role="presentation"><a class="" href="{% url 'edit_product' prod.id %}">Edit</a>
+                    <div class="btn-group">
+                        <button class="btn btn-default clickable panel-collapsed">
+                            <span><i class="fa fa-bar-chart"></i></span>
+                        </button>
+                        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
+                                data-toggle="dropdown" aria-expanded="true">
+                            <span class="fa fa-gear"></span>
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                            {% if user.is_staff %}
+                                <li role="presentation"><a class="" href="{% url 'edit_product' prod.id %}">Edit</a>
+                                </li>
+                                <li role="presentation"><a class="" href="{% url 'delete_product' prod.id %}">Delete</a>
+                                </li>
+                            {% endif %}
+                            <li role="presentation">
+                                <a href="{% url 'view_product_findings' prod.id %}">View Open Findings</a>
                             </li>
-                        {% endif %}
-                        <li role="presentation">
-                            <a href="{% url 'view_product_findings' prod.id %}">View Open Findings</a>
-                        </li>
-                        <li role="presentation">
-                            <a href="{% url 'product_report' prod.id %}">Generate Report</a>
-                        </li>
-                    </ul>
+                            <li role="presentation">
+                                <a href="{% url 'product_report' prod.id %}">Generate Report</a>
+                            </li>
+                            {% if prod.endpoint_count > 0 %}
+                                <li role="presentation">
+                                    <a href="{% url 'product_endpoint_report' prod.id %}">Generate Endpoint Report</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel-body product-graphs">
+            <div class="col-md-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <i class="fa fa-bug fa-2x"></i>
+
+                                <div class="pull-right inline-block text-right">
+                                    <span class=" fa-2x">{{ open_findings|length }}</span>
+                                    <span><a href="{% url 'open_findings' %}?test__engagement__product={{ prod.id }}">open
+                                        finding{{ open_findings|length|pluralize }} <i
+                                                class="fa fa-arrow-circle-right"></i></a>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="open_findings" class="graph"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <i class="fa fa-fire-extinguisher fa-2x"></i>
+
+                                <div class="text-right pull-right">
+                                    <span class="fa-2x">{{ closed_findings|length }}</span>
+                                    <span><a href="{% url 'closed_findings' %}?test__engagement__product={{ prod.id }}">closed
+                                        finding{{ closed_findings|length|pluralize }}. <i
+                                                class="fa fa-arrow-circle-right"></i></a>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="closed_findings" class="graph"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <i class="fa fa-check fa-2x"></i>
+
+                                <div class="pull-right text-right">
+                                    <span class="fa-2x">{{ accepted_findings|length }}</span>
+                                <span><a href="{% url 'accepted_findings' %}?test__engagement__product={{ prod.id }}">Accepted
+                                    findings. <i class="fa fa-arrow-circle-right"></i></a>
+                                </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="reported_findings" class="graph"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Finding Age ({{ verified_findings|length|apnumber }} verified
+                        finding{{ verified_findings|length|pluralize }})
+                    </div>
+                    <div class="panel-body">
+                        <div id="finding_age" class="graph"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Weekly activity, displayed by day, of findings reported.<i
+                            title="Weeks are only displayed if findings are available."
+                            class="text-info fa fa-info-circle"></i>
+                    </div>
+                    <div class="panel-body">
+                        <div class="graph" id="punchcard"></div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <div class="row">
 
+    </div>
 
 
     <div class="row">
-        <div class="col-md-5">
+        <div class="col-md-4">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <b>Details</b>
@@ -57,7 +173,7 @@
                 </ul>
             </div>
         </div>
-        <div class="col-md-7">
+        <div class="col-md-8">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <b>Description</b>
@@ -71,14 +187,14 @@
 
         {% if user.is_staff %}
             <div class="col-md-12">
-                <div class="panel panel-default">
+                <div class="panel panel-default table-responsive">
                     <div class="panel-heading">
                         <h4> Active Engagements <a title="Add New Engagement" class="pull-right btn btn-sm btn-default"
                                                    href="{% url 'new_eng_for_prod' prod.id %}"><span
                                 class="fa fa-plus"></span> </a></h4>
                     </div>
                     {% if engs %}
-                        <table class="table-responsive tablesorter-bootstrap table table-condensed table-striped table-hover">
+                        <table class="tablesorter-bootstrap table table-condensed table-striped table-hover">
                             <thead>
                             <tr>
                                 <th>Name</th>
@@ -112,7 +228,7 @@
 
         {% if authorized %}
             <div class="col-md-12">
-                <div class="panel panel-default">
+                <div class="panel panel-default table-responsive">
                     <div class="panel-heading">
                         <h4>Scans
                             <a title="Add New Scan" class="pull-right btn btn-default btn-sm"
@@ -120,7 +236,7 @@
                         </h4>
                     </div>
                     {% if scan_sets %}
-                        <table class="table-responsive tablesorter-bootstrap table table-condensed table-striped table-hover">
+                        <table class="tablesorter-bootstrap table table-condensed table-striped table-hover">
                             <thead>
                             <tr>
                                 <th>Creator</th>
@@ -154,11 +270,11 @@
         {% endif %}
         {% if user.is_staff and i_engs %}
             <div class="col-md-12">
-                <div class="panel panel-default">
+                <div class="panel panel-default table-responsive">
                     <div class="panel-heading">
                         <h4> Closed Engagements </h4>
                     </div>
-                    <table class="table-responsive tablesorter-bootstrap table table-condensed table-striped table-hover">
+                    <table class="tablesorter-bootstrap table table-condensed table-striped table-hover">
                         <thead>
                         <tr>
                             <th>Name</th>
@@ -191,7 +307,19 @@
 {% block postscript %}
     <script type="text/javascript" src="{{ STATIC_URL }}jquery-cookie/jquery.cookie.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}text-highlighter/build/TextHighlighter.min.js"></script>
+    <!-- Flot Charts JavaScript -->
+    <script src="{{ STATIC_URL }}flot/excanvas.min.js"></script>
+    <script src="{{ STATIC_URL }}flot/jquery.flot.js"></script>
+    <script src="{{ STATIC_URL }}flot/jquery.flot.resize.js"></script>
+    <script src="{{ STATIC_URL }}flot-axislabels/jquery.flot.axislabels.js"></script>
+    {% if punchcard %}
+        <script src="{{ STATIC_URL }}flot.tooltip/js/jquery.flot.tooltip.min.js"></script>
+        <script src="{{ STATIC_URL }}JUMFlot/JUMFlot.min.js"></script>
+        <script src="{{ STATIC_URL }}JUMFlot/jquery.flot.mouse.js"></script>
+        <script src="{{ STATIC_URL }}JUMFlot/jquery.flot.bubbles.js"></script>
+    {% endif %}
     <script type="text/javascript">
+        var highest_count = {{ highest_count }};
         $(function () {
             if (document.referrer.indexOf('simple_search') > 0) {
                 terms = '';
@@ -207,6 +335,495 @@
 
                 $('input#simple_search').val(terms);
             }
+            ;
+
+            $(document).on('click', '.panel-heading button.clickable', function (e) {
+                var $this = $(this);
+                if (!$this.hasClass('panel-collapsed')) {
+                    $this.parents('.panel').find('.panel-body').slideUp();
+                    $this.addClass('panel-collapsed');
+                    $this.find('i').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
+                } else {
+                    $this.parents('.panel').find('.panel-body').slideDown();
+                    $this.removeClass('panel-collapsed');
+                    $this.find('i').removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
+                }
+            });
+
+            accepted_findings();
+            open_findings();
+            closed_findings();
+            finding_age();
+            $(".product-graphs").hide();
+
         });
+
+        function accepted_findings() {
+            var critical = 0;
+            var high = 0;
+            var medium = 0;
+            var low = 0;
+            var info = 0;
+            var ticks = [
+                [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
+            ];
+
+            {% for f in accepted_findings %}
+                {% if f.severity == 'Critical' %}
+                    critical += 1;
+                {% elif f.severity == 'High' %}
+                    high += 1;
+                {% elif f.severity == 'Medium' %}
+                    medium += 1;
+                {% elif f.severity == 'Low' %}
+                    low += 1;
+                {% elif f.severity == 'Info' %}
+                    info += 1;
+                {% endif %}
+            {% endfor %}
+
+            var d1 = [
+                [0, critical],
+            ];
+            var d2 = [
+                [1, high],
+            ];
+            var d3 = [
+                [2, medium],
+            ];
+            var d4 = [
+                [3, low],
+            ];
+            var d5 = [
+                [4, info],
+            ];
+
+            var data = [
+                {
+                    label: "Critical",
+                    data: d1,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 1,
+                        fillColor: "#d9534f"
+                    },
+                    color: "#d9534f"
+                },
+                {
+                    label: "High",
+                    data: d2,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 2,
+                        fillColor: "#f0ad4e"
+                    },
+                    color: "#f0ad4e"
+                },
+                {
+                    label: "Medium",
+                    data: d3,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 3,
+                        fillColor: "#f0de28"
+                    },
+                    color: "#f0de28"
+                },
+                {
+                    label: "Low",
+                    data: d4,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 4,
+                        fillColor: "#337ab7"
+                    },
+                    color: "#337ab7"
+                },
+                {
+                    label: "info",
+                    data: d5,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 4,
+                        fillColor: "#80699B"
+                    },
+                    color: "#80699B"
+                }
+            ];
+
+            $.plot("#reported_findings", data, {
+                series: {
+                    stack: true,
+                    bars: {
+                        show: true,
+                        barWidth: .9,
+                        'align': "center",
+                    },
+
+                },
+                grid: {
+                    hoverable: false,
+                    borderWidth: 1,
+                    borderColor: '#e7e7e7',
+
+                },
+                tooltip: false,
+                legend: {
+                    show: false,
+                    position: "ne"
+                },
+                xaxis: {
+                    ticks: ticks,
+                },
+
+            });
+        }
+        ;
+        function open_findings() {
+            var critical = 0;
+            var high = 0;
+            var medium = 0;
+            var low = 0;
+            var info = 0;
+            var ticks = [
+                [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
+            ];
+
+            {% for f in open_findings %}
+                {% if f.severity == 'Critical' %}
+                    critical += 1;
+                {% elif f.severity == 'High' %}
+                    high += 1;
+                {% elif f.severity == 'Medium' %}
+                    medium += 1;
+                {% elif f.severity == 'Low' %}
+                    low += 1;
+                {% elif f.severity == 'Info' %}
+                    info += 1;
+                {% endif %}
+            {% endfor %}
+
+            var d1 = [
+                [0, critical],
+            ];
+            var d2 = [
+                [1, high],
+            ];
+            var d3 = [
+                [2, medium],
+            ];
+            var d4 = [
+                [3, low],
+            ];
+            var d5 = [
+                [4, info],
+            ];
+
+            var data = [
+                {
+                    label: "Critical",
+                    data: d1,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 1,
+                        fillColor: "#d9534f"
+                    },
+                    color: "#d9534f"
+                },
+                {
+                    label: "High",
+                    data: d2,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 2,
+                        fillColor: "#f0ad4e"
+                    },
+                    color: "#f0ad4e"
+                },
+                {
+                    label: "Medium",
+                    data: d3,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 3,
+                        fillColor: "#f0de28"
+                    },
+                    color: "#f0de28"
+                },
+                {
+                    label: "Low",
+                    data: d4,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 4,
+                        fillColor: "#337ab7"
+                    },
+                    color: "#337ab7"
+                },
+                {
+                    label: "info",
+                    data: d5,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 4,
+                        fillColor: "#80699B"
+                    },
+                    color: "#80699B"
+                }
+            ];
+
+            $.plot("#open_findings", data, {
+                series: {
+                    stack: true,
+                    bars: {
+                        show: true,
+                        barWidth: .9,
+                        'align': "center",
+                    },
+
+                },
+                grid: {
+                    hoverable: false,
+                    borderWidth: 1,
+                    borderColor: '#e7e7e7',
+
+                },
+                tooltip: false,
+                legend: {
+                    show: false,
+                    position: "ne"
+                },
+                xaxis: {
+                    ticks: ticks,
+                },
+
+            });
+        }
+        ;
+        function closed_findings() {
+            var critical = 0;
+            var high = 0;
+            var medium = 0;
+            var low = 0;
+            var info = 0;
+            var ticks = [
+                [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
+            ];
+
+            {% for f in closed_findings %}
+                {% if f.severity == 'Critical' %}
+                    critical += 1;
+                {% elif f.severity == 'High' %}
+                    high += 1;
+                {% elif f.severity == 'Medium' %}
+                    medium += 1;
+                {% elif f.severity == 'Low' %}
+                    low += 1;
+                {% elif f.severity == 'Info' %}
+                    info += 1;
+                {% endif %}
+            {% endfor %}
+
+            var d1 = [
+                [0, critical],
+            ];
+            var d2 = [
+                [1, high],
+            ];
+            var d3 = [
+                [2, medium],
+            ];
+            var d4 = [
+                [3, low],
+            ];
+            var d5 = [
+                [4, info],
+            ];
+
+            var data = [
+                {
+                    label: "Critical",
+                    data: d1,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 1,
+                        fillColor: "#d9534f"
+                    },
+                    color: "#d9534f"
+                },
+                {
+                    label: "High",
+                    data: d2,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 2,
+                        fillColor: "#f0ad4e"
+                    },
+                    color: "#f0ad4e"
+                },
+                {
+                    label: "Medium",
+                    data: d3,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 3,
+                        fillColor: "#f0de28"
+                    },
+                    color: "#f0de28"
+                },
+                {
+                    label: "Low",
+                    data: d4,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 4,
+                        fillColor: "#337ab7"
+                    },
+                    color: "#337ab7"
+                },
+                {
+                    label: "info",
+                    data: d5,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 4,
+                        fillColor: "#80699B"
+                    },
+                    color: "#80699B"
+                }
+            ];
+
+            $.plot("#closed_findings", data, {
+                series: {
+                    stack: true,
+                    bars: {
+                        show: true,
+                        barWidth: .9,
+                        'align': "center",
+                    },
+
+                },
+                grid: {
+                    hoverable: false,
+                    borderWidth: 1,
+                    borderColor: '#e7e7e7',
+
+                },
+                tooltip: false,
+                legend: {
+                    show: false,
+                    position: "ne"
+                },
+                xaxis: {
+                    ticks: ticks,
+                },
+
+            });
+        }
+        ;
+
+        function finding_age() {
+            var data = {};
+            var data_1 = []
+            var ticks = []
+            {% for f in verified_findings %}
+                if (data[{{ f.age }}]) {
+                    data[{{ f.age }}] += 1
+                }
+                else {
+                    data[{{ f.age }}] = 1
+                }
+            {% endfor %}
+            var i = 0;
+            $.each(data, function (index, value) {
+                if (value > 0) {
+                    data_1.push([i, value]);
+                    ticks.push([i, index])
+                }
+                i++;
+            });
+
+
+            var dataset = [
+                {data: data_1, color: "#337ab7", fillColor: "#337ab7"}
+            ];
+
+            var options = {
+                series: {
+                    bars: {
+                        show: true,
+                        fill: true,
+                        fillColor: "#337ab7"
+                    }
+                },
+                bars: {
+                    align: "center",
+                    barWidth: 0.5
+                },
+                xaxis: {
+                    axisLabel: "Days Open",
+                    axisLabelUseCanvas: true,
+                    axisLabelFontSizePixels: 12,
+                    axisLabelFontFamily: 'Verdana, Arial',
+                    axisLabelPadding: 10,
+                    ticks: ticks,
+                },
+                yaxis: {
+                    axisLabel: "Number of Findings",
+                    axisLabelUseCanvas: true,
+                    axisLabelFontSizePixels: 12,
+                    axisLabelFontFamily: 'Verdana, Arial',
+                    axisLabelPadding: 3,
+                },
+                legend: {
+                    show: false,
+                },
+                grid: {
+                    borderWidth: 1,
+                    borderColor: '#e7e7e7',
+                }
+            };
+
+
+            $.plot("#finding_age", dataset, options);
+        }
+
+        {%  if punchcard %}
+
+            punchcard("#punchcard", {{ punchcard|safe }}, {{ ticks|safe }});
+
+        {%  endif %}
+
+
     </script>
 {% endblock %}

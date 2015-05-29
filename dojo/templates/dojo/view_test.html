@@ -11,7 +11,7 @@
                         <span class="fa fa-gear"></span>
                         <span class="caret"></span>
                     </button>
-                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                    <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                         <li role="presentation"><a
                                 href="{% url 'test_report' test.id %}"> Generate Report</a></li>
                         <li role="presentation"><a
@@ -68,12 +68,12 @@
             </dl>
         </div>
     </div>
-    <div class="panel panel-default to_highlight">
+    <div class="panel panel-default to_highlight table-responsive">
         <div class="panel-heading">
             <h4>Findings</h4>
         </div>
         {% if findings %}
-            <table id="test_findings" class="table-responsive table-bordered table table-condensed table-hover">
+            <table id="test_findings" class="table-bordered table table-condensed table-hover">
 
 
                 <thead>
@@ -113,12 +113,12 @@
         {% endif %}
     </div>
 
-    <div class="panel panel-default to_highlight">
+    <div class="panel panel-default to_highlight table-responsive">
         <div class="panel-heading">
             <h3>Notes</h3>
         </div>
         {% if notes %}
-            <table id="notes" class="table-responsive table-striped table table-condensed table-hover">
+            <table id="notes" class="table-striped table table-condensed table-hover">
                 <thead>
                 <tr>
                     <th>User</th>

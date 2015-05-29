@@ -3,11 +3,11 @@
     <h4> Findings </h4>
     <div class="row">
 
-        <div class="col-md-9">
+        <div class="col-md-10">
             {% if findings %}
-                <div class="panel panel-default">
+                <div class="table-responsive panel panel-default">
                     <table id="findings"
-                           class="table-responsive tablesorter-bootstrap table table-condensed table-striped table-bordered">
+                           class="tablesorter-bootstrap table table-condensed table-striped table-bordered">
                         <thead>
                         <tr>
                             <th>Name</th>
@@ -20,7 +20,7 @@
                         <tbody>
                         {% for finding in findings %}
                             <tr>
-                                <td class="nowrap"><a title="{{ finding.title }}"
+                                <td><a title="{{ finding.title }}"
                                                       href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars:60 }}</a>
                                 </td>
                                 <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
@@ -39,11 +39,11 @@
                 No findings found for this product.
             {% endif %}
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <div class="filters panel panel-default">
                 <div class="panel-heading">Actions</div>
                 <div class="panel-body centered">
-                    {{ test.test_type }} <a class="btn btn-primary" href="{% url 'product_report' pid %}?{{ request.GET.urlencode }}">
+                    {{ test.test_type }} <a class="btn btn-sm btn-primary" href="{% url 'product_report' pid %}?{{ request.GET.urlencode }}">
                     Generate Report</a>
                 </div>
                 {% if filtered.form %}
