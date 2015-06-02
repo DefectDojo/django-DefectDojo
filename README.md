@@ -14,6 +14,14 @@ using it productively.
 If you'd like to check out a demo of DefectDojo before installing it, you can
 check out our [PythonAnywhere demo site](http://defectdojo.pythonanywhere.com/).
 
+You can log in as an administrator like so:
+
+![Admin](https://inventropy.us/dd/admin.png)
+
+You can also log in as a product owner / non-staff user:
+
+![Product owner](https://inventropy.us/dd/owner.png)
+
 # Installation
 
 ### [Debian or RHEL-based Install Script](./doc/install_bash.md)
