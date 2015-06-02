@@ -9,6 +9,10 @@ self-service tools. Though it was designed with security folks in mind, there
 is nothing keeping QA/QE testers, or any other testers for that matter, from
 using it productively.
 
+# Demo
+
+If you'd like to check out a demo of DefectDojo before installing it, you can
+check out our [PythonAnywhere demo site](http://defectdojo.pythonanywhere.com/).
 
 # Installation
 
