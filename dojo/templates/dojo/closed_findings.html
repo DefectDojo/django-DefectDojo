@@ -11,6 +11,7 @@
                             <th>Name</th>
                             <th>Date</th>
                             <th>Mitigated On</th>
+                            <th>Age</th>
                             <th>Severity</th>
                             <th>Product</th>
                         </tr>
@@ -23,6 +24,7 @@
                                 </td>
                                 <td class="nowrap">{{ finding.date }}</td>
                                 <td class="">{{ finding.mitigated.date }}</td>
+                                <td>{{ finding.age }}</td>
                                 <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
                                     <p class="text-error">
                                 {% else %}<p>{% endif %}{{ finding.severity }}</p></td>

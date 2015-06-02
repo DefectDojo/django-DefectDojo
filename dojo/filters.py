@@ -310,6 +310,9 @@ class ClosedFindingFilter(FilterSet):
     test__engagement__product = ModelMultipleChoiceFilter(
         queryset=Product.objects.all(),
         label="Product")
+    test__engagement__product__prod_type = ModelMultipleChoiceFilter(
+        queryset=Product_Type.objects.all(),
+        label="Product Type")
 
     class Meta:
         model = Finding
@@ -358,6 +361,9 @@ class AcceptedFindingFilter(FilterSet):
     test__engagement__product = ModelMultipleChoiceFilter(
         queryset=Product.objects.all(),
         label="Product")
+    test__engagement__product__prod_type = ModelMultipleChoiceFilter(
+        queryset=Product_Type.objects.all(),
+        label="Product Type")
 
     class Meta:
         model = Finding
