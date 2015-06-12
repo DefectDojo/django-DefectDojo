@@ -3064,13 +3064,13 @@ def view_engagement(request, eid):
 def new_product(request):
     if request.method == 'POST':
         form = ProductForm(request.POST)
-        if (form.is_valid()):
-            form.save()
+        if form.is_valid():
+            product = form.save()
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Product added successfully.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('product'))
+            return HttpResponseRedirect(reverse('view_product', args=(product.id,)))
     else:
         form = ProductForm()
     return render(request, 'dojo/new_product.html',

@@ -53,6 +53,7 @@
             margin-left: 4em;
             font-style: italic;
         }
+
     </style>
 </head>
 <body>
@@ -353,7 +354,9 @@
     <h5 style="-pdf-outline: false;border: 1px solid #d0d0d0;margin-top: 0px;margin-bottom: 0px;padding: 8px 5px 3px 5px;background-color: #98AFC7;margin-left: 10px;margin-right: 10px;">
         Systems Vulnerable:</h5>
     <p style="margin: 0px 13px 0px 13px;padding: 10px 10px 5px 10px;background-color: #f0f0f0;border: 1px solid #d0d0d0;">
-        {{ find.endpoint|linebreaksbr }}
+        {% for endpoint in  find.endpoints.all %}
+            {{ endpoint }}<br/>
+        {% endfor %}
     </p>
     <h5 style="-pdf-outline: false;border: 1px solid #d0d0d0;margin-top: 0px;margin-bottom: 0px;padding: 8px 5px 3px 5px;background-color: #98AFC7;margin-left: 10px;margin-right: 10px;">
         Suggested Mitigation:</h5>
@@ -425,9 +428,11 @@
             </p>
             <h5 style="-pdf-outline: false;border: 1px solid #d0d0d0;margin-top: 0px;margin-bottom: 0px;padding: 8px 5px 3px 5px;background-color: #98AFC7;margin-left: 10px;margin-right: 10px;">
                 Systems Vulnerable:</h5>
-            <p style="margin: 0px 13px 0px 13px;padding: 10px 10px 5px 10px;background-color: #f0f0f0;border: 1px solid #d0d0d0;">
-                {{ find.endpoint|linebreaksbr }}
-            </p>
+            <div class="endpoints" style="margin: 0px 13px 0px 13px;padding: 10px 10px 5px 10px;background-color: #f0f0f0;border: 1px solid #d0d0d0;">
+                {% for endpoint in  find.endpoints.all %}
+                    {{ endpoint }}<br/>
+                {% endfor %}
+            </div>
             <h5 style="-pdf-outline: false;border: 1px solid #d0d0d0;margin-top: 0px;margin-bottom: 0px;padding: 8px 5px 3px 5px;background-color: #98AFC7;margin-left: 10px;margin-right: 10px;">
                 Suggested Mitigation:</h5>
             <p style="margin: 0px 13px 0px 13px;padding: 10px 10px 5px 10px;background-color: #f0f0f0;border: 1px solid #d0d0d0;">
