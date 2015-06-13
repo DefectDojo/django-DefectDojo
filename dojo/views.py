@@ -4570,8 +4570,9 @@ def add_endpoint(request, pid):
             if '_popup' in request.GET:
                 resp = ''
                 for endpoint in endpoints:
-                    resp += '<script type="text/javascript">opener.dismissAddAnotherPopup(window, "%s", "%s");</script>' \
+                    resp += '<script type="text/javascript">opener.dismissAddAnotherPopupDojo(window, "%s", "%s");</script>' \
                             % (escape(endpoint._get_pk_val()), escape(endpoint))
+                resp += '<script type="text/javascript">window.close();</script>'
                 return HttpResponse(resp)
 
     return render(request, template, {

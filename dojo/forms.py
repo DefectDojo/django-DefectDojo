@@ -585,7 +585,7 @@ class EditEndpointForm(forms.ModelForm):
     def clean(self):
         from django.core.validators import URLValidator, validate_ipv46_address
 
-        port_re = "(:[0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])"
+        port_re = "(:[0-9]{1,5}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])"
         cleaned_data = super(EditEndpointForm, self).clean()
 
         if 'host' in cleaned_data:
@@ -682,7 +682,7 @@ class AddEndpointForm(forms.Form):
     def clean(self):
         from django.core.validators import URLValidator, validate_ipv46_address
 
-        port_re = "(:[0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])"
+        port_re = "(:[0-9]{1,5}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])"
         cleaned_data = super(AddEndpointForm, self).clean()
 
         if 'endpoint' in cleaned_data and 'product' in cleaned_data:
