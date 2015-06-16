@@ -29,10 +29,10 @@ Authorization: ApiKey {{ user.username }}:{{ key.key }}
     <pre>
 import requests
 
-url = 'https://10.23.245.200:8000/api/v1/users'
+url = '{% if request.is_secure %}https{% else %}http{% endif %}://{{ request.META.HTTP_HOST }}/api/v1/users'
 headers = {'content-type': 'application/json',
 		   'Authorization': 'ApiKey {{ user.username }}:{{ key.key }}'}
-r = requests.get(url, headers=headers, verify=False) # don't verify ssl cert since it is self-signed
+r = requests.get(url, headers=headers, verify=True) # set verify to False if ssl cert is self-signed
 
 for key, value in r.__dict__.iteritems():
   print key
