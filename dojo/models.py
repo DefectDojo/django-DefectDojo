@@ -52,7 +52,8 @@ class Product_Type(models.Model):
 
     def findings_count(self):
         findings = Finding.objects.filter(active=True, mitigated__isnull=True,
-                                          false_p=False, verified=True)
+                                          false_p=False, verified=True,
+                                          is_template=False)
         findings = findings.filter(Q(severity="Critical") |
                                    Q(severity="High") |
                                    Q(severity="Medium") |

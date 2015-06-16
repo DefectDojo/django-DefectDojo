@@ -463,7 +463,8 @@ engineer
 def open_findings(request):
     findings = Finding.objects.filter(active=True,
                                       verified=True,
-                                      mitigated__isnull=True)
+                                      mitigated__isnull=True,
+                                      is_template=False)
     if request.user.is_staff:
         findings = OpenFingingSuperFilter(request.GET, queryset=findings, user=request.user)
     else:
@@ -522,7 +523,8 @@ def accepted_findings(request):
 
 @user_passes_test(lambda u: u.is_staff)
 def closed_findings(request):
-    findings = Finding.objects.filter(mitigated__isnull=False)
+    findings = Finding.objects.filter(mitigated__isnull=False,
+                                      is_template=False)
     findings = ClosedFingingSuperFilter(request.GET, queryset=findings)
     title_words = [word
                    for finding in findings
@@ -551,7 +553,8 @@ def all_product_findings(request, pid):
         request.GET,
         queryset=Finding.objects.filter(test__engagement__product=p,
                                         active=True,
-                                        verified=True))
+                                        verified=True,
+                                        is_template=False))
     page = get_page_items(request, result, 20)
     return render(request,
                   "dojo/all_product_findings.html",
@@ -982,10 +985,11 @@ def metrics(request, mtype):
     if mtype == 'All' or mtype == 'wiki':
         pt = Product_Type.objects.all()
         findings = Finding.objects.filter(test__engagement__product__prod_type__in=pt,
-                                          verified=True).prefetch_related('test__engagement__product',
-                                                                          'test__engagement__product__prod_type',
-                                                                          'test__engagement__risk_acceptance',
-                                                                          'reporter')
+                                          verified=True,
+                                          is_template=False).prefetch_related('test__engagement__product',
+                                                                              'test__engagement__product__prod_type',
+                                                                              'test__engagement__risk_acceptance',
+                                                                              'reporter')
         page_name = "Metrics"
         if 'view' in request.GET and 'dashboard' == request.GET['view']:
             template = 'dojo/dashboard-metrics.html'
@@ -997,7 +1001,8 @@ def metrics(request, mtype):
         request.GET._mutable = False
         mtype = pt[0].name
         findings = Finding.objects.filter(test__engagement__product__prod_type=pt,
-                                          verified=True)
+                                          verified=True,
+                                          is_template=False)
         page_name = '%s Metrics' % mtype
 
     findings = MetricsFindingFilter(request.GET, queryset=findings)
@@ -1014,9 +1019,11 @@ def metrics(request, mtype):
     prod_type = findings.form.cleaned_data['test__engagement__product__prod_type']
     if len(prod_type) > 0:
         findings_closed = Finding.objects.filter(mitigated__range=[start_date, end_date],
-                                                 test__engagement__product__prod_type__in=prod_type)
+                                                 test__engagement__product__prod_type__in=prod_type,
+                                                 is_template=False)
     else:
-        findings_closed = Finding.objects.filter(mitigated__range=[start_date, end_date])
+        findings_closed = Finding.objects.filter(mitigated__range=[start_date, end_date],
+                                                 is_template=False)
 
     r = relativedelta(end_date, start_date)
     months_between = (r.years * 12) + r.months
@@ -1175,420 +1182,6 @@ def metrics(request, mtype):
         'punchcard': punchcard,
         'ticks': ticks,
         'highest_count': highest_count
-    })
-
-
-"""
-status: deprecated see metrics above
-generic metrics method
-"""
-
-
-def old_metrics(request, mtype):
-    oldest_finding_date = Finding.objects.all().order_by('date')[:1][0].date
-    page_name = 'Metrics'
-    template = 'dojo/metrics.html'
-    now = localtz.localize(datetime.today())
-    # start on the first of the current month
-    start_date = date(now.year, now.month, 1)
-    # end on the last day of the current month
-    end_date = date(now.year, now.month, monthrange(now.year, now.month)[1])
-    # save the original start date
-    r = relativedelta(end_date, start_date)
-    months_between = (r.years * 12) + r.months
-    orig_date = localtz.localize(datetime.combine(start_date,
-                                                  datetime.min.time()))
-    exclude_pt = False
-
-    exclude = Q()
-    filters = Q()
-    date_range = Q()
-
-    if mtype == 'All' or mtype == 'wiki':
-        pt = Product_Type.objects.all()
-        filters.add(Q(test__engagement__product__prod_type__in=pt), Q.AND)
-        if 'view' in request.GET and 'dashboard' == request.GET['view']:
-            template = 'dojo/dashboard-metrics.html'
-            page_name = getattr(settings, 'TEAM_NAME', '') + ' Metrics'
-            start_date = start_date - relativedelta(months=6)
-    else:
-        pt = Product_Type.objects.filter(id=mtype)
-        mtype = pt[0].name
-        filters.add(Q(test__engagement__product__prod_type=pt), Q.AND)
-        exclude_pt = True
-        page_name = '%s Metrics' % mtype
-
-    if 'filters' in request.GET:
-        # apply filters
-        filter_form = MetricsFilterForm(request.GET,
-                                        exclude_product_types=exclude_pt)
-        if filter_form.is_valid():
-            start_date = filter_form.cleaned_data['start_date']
-            if start_date < oldest_finding_date:
-                start_date = oldest_finding_date
-                messages.add_message(
-                    request,
-                    messages.INFO,
-                    "Start date was adjusted to date of oldest finding (%s)." % start_date,
-                    extra_tags='alert-info')
-            end_date = filter_form.cleaned_data['end_date']
-            date_range.add(
-                Q(date__range=[filter_form.cleaned_data['start_date'],
-                               filter_form.cleaned_data['end_date']]), Q.AND)
-            for key, value in FINDING_STATUS:
-                filters.add(Q(**{key: key in
-                                      filter_form.cleaned_data['finding_status']}),
-                            Q.AND)
-            if len(filter_form.cleaned_data['severity']) > 0:
-                filters.add(
-                    Q(severity__in=filter_form.cleaned_data['severity']),
-                    Q.AND)
-            if ('exclude_product_types' in filter_form.cleaned_data
-                and len(
-                    filter_form.cleaned_data['exclude_product_types']) > 0):
-                exclude.add(
-                    Q(test__engagement__product__prod_type__in=filter_form.
-                      cleaned_data['exclude_product_types']),
-                    Q.AND)
-    else:
-        # use defaults
-        filter_form = MetricsFilterForm(
-            {'finding_status': ['verified'],
-             'severity': ['Critical', 'High',
-                          'Medium', 'Low'],
-             'start_date': start_date.strftime("%m/%d/%Y"),
-             'end_date': end_date.strftime("%m/%d/%Y")},
-            exclude_product_types=exclude_pt)
-        filters.add(Q(severity__in=['Critical', 'High', 'Medium', 'Low']),
-                    Q.AND)
-        date_range.add(Q(date__range=[start_date, end_date]), Q.AND)
-        filters.add(Q(verified=True), Q.AND)
-
-    # these are all findings in the period based on filters added
-    # or the defaults
-    findings = Finding.objects.filter(filters) \
-        .filter(date_range) \
-        .exclude(exclude)
-
-    # Data for the monthly charts
-    chart_data = []
-    trending_open_bug_count = []
-    trending_open_bug_count.append(['Date', 'S0', 'S1', 'S2',
-                                    'S3', 'Total', 'Closed'])
-    a_chart_data = []
-    a_chart_data_trend = []
-    a_chart_data_trend.append(['Date', 0, 0, 0, 0, 0])
-
-    r = relativedelta(end_date, start_date)
-    months_between = (r.years * 12) + r.months
-    orig_date = localtz.localize(datetime.combine(start_date,
-                                                  datetime.min.time()))
-    # step through all the months in the range provided
-    for x in range(0, months_between):
-        new_date = start_date + relativedelta(months=x)
-        risks_a = Risk_Acceptance.objects.filter(
-            created__range=[datetime(new_date.year,
-                                     new_date.month, 1,
-                                     tzinfo=localtz),
-                            datetime(new_date.year,
-                                     new_date.month,
-                                     monthrange(new_date.year,
-                                                new_date.month)[1],
-                                     tzinfo=localtz)])
-
-        crit_findings = findings.filter(
-            severity="Critical",
-            date__year=new_date.year,
-            date__month=new_date.month
-        ).count()
-        high_findings = findings.filter(
-            severity="High",
-            date__year=new_date.year,
-            date__month=new_date.month
-        ).count()
-        med_findings = findings.filter(
-            severity="Medium",
-            date__year=new_date.year,
-            date__month=new_date.month
-        ).count()
-        low_findings = findings.filter(
-            severity="Low",
-            date__year=new_date.year,
-            date__month=new_date.month
-        ).count()
-        closed_findings = findings.filter(
-            mitigated__range=[datetime(
-                new_date.year,
-                new_date.month, 1,
-                tzinfo=localtz),
-                datetime(new_date.year,
-                         new_date.month,
-                         monthrange(new_date.year,
-                                    new_date.month)[1],
-                         tzinfo=localtz)]).count()
-
-        a_crit_findings = len([finding for ra in risks_a
-                               for finding in ra.accepted_findings.filter(
-                severity="Critical")])
-        a_high_findings = len([finding for ra in risks_a
-                               for finding in ra.accepted_findings.filter(
-                severity="High")])
-        a_med_findings = len([finding for ra in risks_a
-                              for finding in ra.accepted_findings.filter(
-                severity="Medium")])
-        a_low_findings = len([finding for ra in risks_a
-                              for finding in ra.accepted_findings.filter(
-                severity="Low")])
-
-        chart_data.append({'y': new_date.strftime("%Y-%m"),
-                           'a': crit_findings,
-                           'b': high_findings,
-                           'c': med_findings,
-                           'd': low_findings})
-        trending_open_bug_count.append([new_date.strftime("%b %Y"),
-                                        crit_findings,
-                                        high_findings,
-                                        med_findings,
-                                        low_findings,
-                                        (crit_findings +
-                                         high_findings +
-                                         med_findings +
-                                         low_findings),
-                                        closed_findings])
-        a_chart_data.append({'y': new_date.strftime("%Y-%m"),
-                             'a': a_crit_findings,
-                             'b': a_high_findings,
-                             'c': a_med_findings,
-                             'd': a_low_findings})
-    week_chart_data = []
-    trending_week_chart_data = []
-    trending_week_chart_data.append(['Date', 'S0', 'S1', 'S2',
-                                     'S3', 'Total', 'Closed'])
-    week_a_chart_data = []
-    in_period = True
-    add_week = 1
-    week_start_date = datetime(start_date.year, start_date.month,
-                               start_date.day, tzinfo=localtz)
-    # step through all weeks in given period
-    while in_period:
-        new_date = start_date + relativedelta(weeks=add_week)
-        new_date = datetime(new_date.year, new_date.month,
-                            new_date.day, tzinfo=localtz)
-        risks_a = Risk_Acceptance.objects.filter(
-            created__range=[week_start_date, new_date])
-
-        weekly_findings = findings.filter(
-            date__range=[week_start_date, new_date]
-        )
-
-        crit_findings = weekly_findings.filter(
-            severity="Critical")
-        high_findings = weekly_findings.filter(
-            severity="High", )
-        med_findings = weekly_findings.filter(
-            severity="Medium")
-        low_findings = weekly_findings.filter(
-            severity="Low")
-        closed_findings = weekly_findings.filter(
-            mitigated__range=[week_start_date, new_date])
-
-        a_crit_findings = len([finding for ra in risks_a
-                               for finding in ra.accepted_findings.filter(
-                severity="Critical")])
-        a_high_findings = len([finding for ra in risks_a
-                               for finding in ra.accepted_findings.filter(
-                severity="High")])
-        a_med_findings = len([finding for ra in risks_a
-                              for finding in ra.accepted_findings.filter(
-                severity="Medium")])
-        a_low_findings = len([finding for ra in risks_a
-                              for finding in ra.accepted_findings.filter(
-                severity="Low")])
-
-        label = week_start_date.strftime("%b %d") + '-' \
-                + new_date.strftime("%b %d, %Y")
-        week_chart_data.append({'y': label,
-                                'a': crit_findings.count(),
-                                'b': high_findings.count(),
-                                'c': med_findings.count(),
-                                'd': low_findings.count()})
-        trending_week_chart_data.append(
-            [week_start_date.strftime("%b %d") + ' - ' +
-             new_date.strftime("%b %d"),
-             crit_findings.count(),
-             high_findings.count(),
-             med_findings.count(),
-             low_findings.count(),
-             (crit_findings.count() + high_findings.count() +
-              med_findings.count() + low_findings.count()),
-             closed_findings.count()])
-
-        week_a_chart_data.append({'y': label,
-                                  'a': a_crit_findings,
-                                  'b': a_high_findings,
-                                  'c': a_med_findings,
-                                  'd': a_low_findings})
-        week_start_date = new_date + relativedelta(days=1)
-        if new_date.date() > end_date:
-            in_period = False
-        else:
-            add_week = add_week + 1
-
-    top_ten_products = sorted(
-        Product.objects.filter(
-            engagement__test__finding__in=findings
-        ).distinct().all(),
-        key=lambda t: t.findings_count, reverse=True)[: 10]
-
-    update = []
-    for p in top_ten_products:
-        open_finds = p.open_findings(start_date, end_date)
-        update.append(
-            ["<a href='%s'>%s</a>" % (reverse('view_product_findings', args=(p.id,)), escape(p.name)),
-             open_finds['Critical'],
-             open_finds['High'],
-             open_finds['Medium'],
-             open_finds['Low'],
-             open_finds['Total']])
-
-    update = sorted(update, key=lambda s: s[5], reverse=True)
-
-    details = []
-    for find in findings:
-        team = find.test.engagement.product.prod_type.name
-        name = find.test.engagement.product.name
-        severity = find.severity
-        if severity == 'Critical':
-            severity = 'S0'
-        elif severity == 'High':
-            severity = 'S1'
-        elif severity == 'Medium':
-            severity = 'S2'
-        else:
-            severity = 'S3'
-        description = find.title
-        life = date.today() - find.date
-        life = life.days
-        status = 'Accepted'
-        if len(find.risk_acceptance_set.all()) == 0:
-            status = 'Active'
-        detail = []
-        detail.append(team)
-        detail.append(name)
-        detail.append(severity)
-        detail.append(description)
-        detail.append(life)
-        detail.append(status)
-        detail.append(find.reporter)
-        detail.append(find.id)
-        details.append(detail)
-
-    details = sorted(details, key=lambda x: x[2])
-
-    in_period_counts = {
-        "critical": findings.filter(severity="Critical").count(),
-        "high": findings.filter(severity="High").count(),
-        "medium": findings.filter(severity="Medium").count(),
-        "low": findings.filter(severity="Low").count(),
-        "total": len(findings)}
-    in_period_details = {}
-    age_detail = [0, 0, 0, 0]
-    for finding in findings:
-        if finding.test.engagement.product.name not in in_period_details:
-            in_period_details[finding.test.engagement.product.name] = {
-                'path': reverse('view_product_findings', args=(finding.test.engagement.product.id,)),
-                'Critical': 0, 'High': 0, 'Medium': 0, 'Low': 0, 'Total': 0}
-        in_period_details[
-            finding.test.engagement.product.name
-        ][finding.severity] += 1
-        in_period_details[finding.test.engagement.product.name]['Total'] += 1
-
-        age = 0
-        if finding.mitigated:
-            age = (finding.mitigated.date() - finding.date).days
-        else:
-            age = (datetime.now().date() - finding.date).days
-        if age >= 0 and age <= 30:
-            age_detail[0] += 1
-        elif age > 30 and age <= 60:
-            age_detail[1] += 1
-        elif age > 60 and age <= 90:
-            age_detail[2] += 1
-        elif age > 90:
-            age_detail[3] += 1
-
-    end_date = localtz.localize(
-        datetime.combine(end_date, datetime.min.time()))
-
-    accepted_findings = [finding for ra in Risk_Acceptance.objects.filter(
-        created__range=[orig_date, end_date])
-                         for finding in ra.accepted_findings.filter(~Q(severity='Info'))]
-    accepted_in_period_counts = {
-        "critical": sum(f.severity == "Critical" for f in accepted_findings),
-        "high": sum(f.severity == "High" for f in accepted_findings),
-        "medium": sum(f.severity == "Medium" for f in accepted_findings),
-        "low": sum(f.severity == "Low" for f in accepted_findings),
-        "total": len(accepted_findings)}
-
-    accepted_in_pd_deets = {}
-    for finding in accepted_findings:
-        if finding.test.engagement.product.name not in accepted_in_pd_deets:
-            accepted_in_pd_deets[
-                finding.test.engagement.product.name
-            ] = {'path': reverse('view_product_findings', args=(finding.test.engagement.product.id,)),
-                 'Critical': 0, 'High': 0, 'Medium': 0,
-                 'Low': 0, 'Total': 0}
-        accepted_in_pd_deets[
-            finding.test.engagement.product.name][finding.severity] += 1
-        accepted_in_pd_deets[
-            finding.test.engagement.product.name]['Total'] += 1
-    closed_findings = Finding.objects.filter(
-        mitigated__range=[orig_date, end_date]) \
-        .filter(filters).exclude(exclude)
-
-    closed_in_period_counts = {
-        "critical": closed_findings.filter(severity="Critical").count(),
-        "high": closed_findings.filter(severity="High").count(),
-        "medium": closed_findings.filter(severity="Medium").count(),
-        "low": closed_findings.filter(severity="Low").count(),
-        "total": len(closed_findings)}
-
-    closed_in_pd_details = {}
-    for finding in closed_findings:
-        if finding.test.engagement.product.name not in closed_in_pd_details:
-            closed_in_pd_details[finding.test.engagement.product.name] = {
-                'Critical': 0, 'High': 0, 'Medium': 0, 'Low': 0, 'Total': 0}
-        closed_in_pd_details[
-            finding.test.engagement.product.name][finding.severity] += 1
-        closed_in_pd_details[
-            finding.test.engagement.product.name]['Total'] += 1
-    return render(request, template, {
-        'name': page_name,
-        'breadcrumbs': get_breadcrumbs(title="%s Metrics" % mtype, user=request.user),
-        'metric': True,
-        'user': request.user,
-        'mtype': mtype,
-        'wmform': WeeklyMetricsForm(),
-        'filter_form': filter_form,
-        'start_date': start_date,
-        'end_date': end_date,
-        'update': update,
-        'details': details,
-        'chart_data': chart_data,
-        'a_chart_data': a_chart_data,
-        'week_chart_data': week_chart_data,
-        'week_a_chart_data': week_a_chart_data,
-        'top_ten_products': top_ten_products,
-        'in_period_counts': in_period_counts,
-        'in_period_details': in_period_details,
-        'accepted_in_period_counts': accepted_in_period_counts,
-        'accepted_in_pd_deets': accepted_in_pd_deets,
-        'closed_in_period_counts': closed_in_period_counts,
-        'closed_in_pd_details': closed_in_pd_details,
-        'trending_open_bug_count': trending_open_bug_count,
-        'trending_week_chart_data': trending_week_chart_data,
-        'age_detail': age_detail,
-
     })
 
 
