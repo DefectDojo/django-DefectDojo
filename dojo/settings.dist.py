@@ -114,6 +114,8 @@ BOWER_INSTALLED_APPS = (
     # directly from github since no bower comp available
     'https://github.com/jumjum123/JUMFlot.git',
     'https://github.com/markrcote/flot-axislabels.git',
+    'chosen',
+    'chosen-bootstrap',
 )
 
 # Make this unique, and don't share it with anybody.

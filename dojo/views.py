@@ -4,7 +4,6 @@ import base64
 import collections
 import csv
 from datetime import date, datetime, timedelta
-from easy_pdf.rendering import render_to_pdf_response
 import logging
 from math import ceil, pi, sqrt
 from operator import itemgetter
@@ -17,8 +16,10 @@ from xml.dom import NamespaceErr
 import time
 import calendar as tcalendar
 from urlparse import urlsplit
+
 from xml.etree.ElementTree import ParseError
 
+from easy_pdf.rendering import render_to_pdf_response
 from dateutil.relativedelta import relativedelta, MO
 from django.conf import settings
 from django.contrib import messages
@@ -35,25 +36,24 @@ from django.shortcuts import render, get_object_or_404
 from pytz import timezone
 from tastypie.models import ApiKey
 
-from dojo.forms import VaForm, WeeklyMetricsForm, \
-    SimpleMetricsForm, MetricsFilterForm, CheckForm, \
+from dojo.forms import VaForm, SimpleMetricsForm, CheckForm, \
     ScanSettingsForm, UploadThreatForm, UploadFileForm, \
     UploadRiskForm, NoteForm, CloseFindingForm, DoneForm, \
     ProductForm, EngForm2, EngForm, TestForm, FindingForm, \
     SimpleSearchForm, Product_TypeForm, Product_TypeProductForm, \
-    Test_TypeForm, ReplaceRiskAcceptanceForm, FINDING_STATUS, \
-    AddFindingsRiskAcceptanceForm, Development_EnvironmentForm, DojoUserForm, \
-    DeleteIPScanForm, DeleteTestForm, UploadVeracodeForm, UploadBurpForm, EditEndpointForm, \
-    DeleteEndpointForm, AddEndpointForm, DeleteProductForm, DeleteEngagementForm, AddFindingForm
+    Test_TypeForm, ReplaceRiskAcceptanceForm, AddFindingsRiskAcceptanceForm, Development_EnvironmentForm, \
+    DojoUserForm, DeleteIPScanForm, DeleteTestForm, UploadVeracodeForm, UploadBurpForm, EditEndpointForm, \
+    DeleteEndpointForm, AddEndpointForm, DeleteProductForm, DeleteEngagementForm, AddFindingForm, \
+    AddDojoUserForm, DeleteUserForm
 from dojo.management.commands.run_scan import run_on_deman_scan
 from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
     Check_List, Scan, IPScan, ScanSettings, Test_Type, Notes, \
     Risk_Acceptance, Dojo_User, Development_Environment, BurpRawRequestResponse, Endpoint
 from dojo.filters import ProductFilter, OpenFindingFilter, \
     OpenFingingSuperFilter, AcceptedFingingSuperFilter, \
-    AcceptedFindingFilter, ProductFindingFilter, EngagementFilter, \
-    ClosedFingingSuperFilter, ClosedFindingFilter, MetricsFindingFilter, ReportFindingFilter, EndpointFilter, \
-    ReportAuthedFindingFilter, EndpointReportFilter
+    ProductFindingFilter, EngagementFilter, \
+    ClosedFingingSuperFilter, MetricsFindingFilter, ReportFindingFilter, EndpointFilter, \
+    ReportAuthedFindingFilter, EndpointReportFilter, UserFilter
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -3416,6 +3416,13 @@ def get_breadcrumbs(obj=None, active=True, title=None, user=None):
                                obj.date.astimezone(localtz).strftime(
                                    "%b. %d, %Y, %I:%M %p")),
                            "link": reverse('view_scan', args=(obj.id,))})
+        elif type(obj).__name__ == "User" or type(obj).__name__ == "Dojo_User":
+            result.append({"active": False,
+                           "title": "Users",
+                           "link": reverse('users')})
+            result.append({"active": active,
+                           "title": obj.username,
+                           "link": ""})
         else:
             result.append({"active": True,
                            "title": title,
@@ -4194,3 +4201,127 @@ def add_product_endpoint(request):
                   {'name': 'Add Endpoint',
                    'form': form,
                    'breadcrumbs': get_breadcrumbs(title="Add Endpoint", user=request.user)})
+
+
+@user_passes_test(lambda u: u.is_staff)
+def user(request):
+    users = Dojo_User.objects.all().order_by('username', 'last_name', 'first_name')
+    users = UserFilter(request.GET, queryset=users)
+    paged_users = get_page_items(request, users, 25)
+
+    return render(request,
+                  'dojo/users.html',
+                  {"users": paged_users,
+                   "filtered": users,
+                   "name": "All Users",
+                   'breadcrumbs': get_breadcrumbs(title="All Users", user=request.user)})
+
+
+@user_passes_test(lambda u: u.is_staff)
+def add_user(request):
+    form = AddDojoUserForm()
+    user = None
+
+    if request.method == 'POST':
+        form = AddDojoUserForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.set_unusable_password()
+            user.is_staff = False
+            user.is_superuser = False
+            user.active = True
+            user.save()
+            if 'authorized_products' in form.cleaned_data and len(form.cleaned_data['authorized_products'])>0:
+                for p in form.cleaned_data['authorized_products']:
+                    p.authorized_users.add(user)
+                    p.save()
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'User added successfully, you may edit if necessary.',
+                                 extra_tags='alert-success')
+            return HttpResponseRedirect(reverse('edit_user', args=(user.id,)))
+        else:
+            messages.add_message(request,
+                                 messages.ERROR,
+                                 'User was not added successfully.',
+                                 extra_tags='alert-danger')
+
+    return render(request, "dojo/add_user.html", {
+        'name': 'Add User',
+        'breadcrumbs': get_breadcrumbs(obj=user,
+                                       title="Add User",
+                                       user=request.user),
+        'form': form,
+        'to_add': True})
+
+
+@user_passes_test(lambda u: u.is_staff)
+def edit_user(request, uid):
+    user = get_object_or_404(Dojo_User, id=uid)
+    authed_products = Product.objects.filter(authorized_users__in=[user])
+    form = AddDojoUserForm(instance=user, initial={'authorized_products': authed_products})
+
+    if request.method == 'POST':
+        form = AddDojoUserForm(request.POST, instance=user, initial={'authorized_products': authed_products})
+        if form.is_valid():
+            form.save()
+            if 'authorized_products' in form.cleaned_data and len(form.cleaned_data['authorized_products'])>0:
+                for p in form.cleaned_data['authorized_products']:
+                    p.authorized_users.add(user)
+                    p.save()
+
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'User saved successfully.',
+                                 extra_tags='alert-success')
+        else:
+            messages.add_message(request,
+                                 messages.ERROR,
+                                 'User was not saved successfully.',
+                                 extra_tags='alert-danger')
+
+    return render(request, "dojo/add_user.html", {
+        'name': 'Edit User',
+        'breadcrumbs': get_breadcrumbs(obj=user,
+                                       title="Edit User",
+                                       user=request.user),
+        'form': form,
+        'to_edit': user})
+
+
+@user_passes_test(lambda u: u.is_staff)
+def delete_user(request, uid):
+    user = get_object_or_404(Dojo_User, id=uid)
+    form = DeleteUserForm(instance=user)
+
+    from django.contrib.admin.util import NestedObjects
+    from django.db import DEFAULT_DB_ALIAS
+
+    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+    collector.collect([user])
+    rels = collector.nested()
+
+    if user.id == request.user.id:
+        messages.add_message(request,
+                             messages.ERROR,
+                             'You may not delete yourself.',
+                             extra_tags='alert-danger')
+        return HttpResponseRedirect(reverse('edit_user', args=(user.id,)))
+
+    if request.method == 'POST':
+        if 'id' in request.POST and str(user.id) == request.POST['id']:
+            form = DeleteUserForm(request.POST, instance=user)
+            if form.is_valid():
+                user.delete()
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'User and relationships removed.',
+                                     extra_tags='alert-success')
+                return HttpResponseRedirect(reverse('users'))
+
+    return render(request, 'dojo/delete_user.html',
+                  {'to_delete': user,
+                   'form': form,
+                   'rels': rels,
+                   'breadcrumbs': get_breadcrumbs(title="Delete User", obj=user, user=request.user)})
+

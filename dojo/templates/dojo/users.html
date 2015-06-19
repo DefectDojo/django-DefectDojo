@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+    <h4>{{ name }}</h4>
+    <br/>
+    <div class="row">
+        <div class="col-md-10">
+            {% if users %}
+                <div class="table-responsive panel panel-default">
+                    <table id="users"
+                           class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
+                        <tr>
+                            <th>Username</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Active</th>
+                            <th>Staff</th>
+                            <th>Super User</th>
+                            <th>Actions</th>
+                        </tr>
+
+                        {% for u in users %}
+                            <tr>
+                                <td>{{ u.username }}</td>
+                                <td>{{ u.get_full_name }}</td>
+                                <td>{{ u.email }}</td>
+                                <td class="text-center">{% if u.is_active %}<i class="text-success fa fa-check"></i>{% else %}<i class="text-danger fa fa-times"></i>{% endif %}</td>
+                                <td class="text-center">{% if u.is_staff %}<i class="text-success fa fa-check"></i>{% else %}<i class="text-danger fa fa-times"></i>{% endif %}</td>
+                                <td class="text-center">{% if u.is_superuser %}<i class="text-success fa fa-check"></i>{% else %}<i class="text-danger fa fa-times"></i>{% endif %}</td>
+                                <td class="text-center"><a class="btn btn-sm btn-primary" href="{% url 'edit_user' u.id %}">Edit</a></td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+                {% include "dojo/paging_snippet.html" with page=users %}
+            {% else %}
+                <h5> No Users </h5>
+            {% endif %}
+        </div>
+        <div class="col-md-2">
+            <div class="filters panel panel-default">
+                {% if request.user.is_staff %}
+                    <div class="panel-heading">Actions</div>
+                    <div class="panel-body centered">
+                        <a class="btn btn-sm btn-primary" href="{% url 'add_user' %}">
+                            New User
+                        </a>
+                    </div>
+                {% endif %}
+                <div class="panel-heading">Filters</div>
+                <form method="get" class="panel-body">
+                    {{ filtered.form.as_p }}
+                    <div class="centered">
+                        <input type="submit" class="btn btn-primary" value="Apply"/><br/><br/>
+                        <a href="{% url 'endpoints' %}"> [Clear Filters] </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

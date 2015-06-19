@@ -17,7 +17,6 @@ from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
     Development_Environment, Dojo_User, Scan, Endpoint
 from dojo import settings
 
-
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
 localtz = timezone(settings.TIME_ZONE)
 
@@ -180,7 +179,6 @@ class DeleteProductForm(forms.ModelForm):
                    'prod_type', 'updated', 'tid', 'authorized_users']
 
 
-
 class Product_TypeProductForm(forms.ModelForm):
     name = forms.CharField(max_length=50, required=True)
     description = forms.CharField(widget=forms.Textarea(attrs={}),
@@ -216,7 +214,7 @@ class UploadFileForm(forms.Form):
                                          choices=SEVERITY_CHOICES)
     file = forms.FileField(widget=forms.widgets.FileInput(
         attrs={"accept": ".txt,.csv"}),
-                           label="Select Nessus Export")
+        label="Select Nessus Export")
 
     # date can only be today or in the past, not the future
     def clean_scan_date(self):
@@ -237,7 +235,7 @@ class UploadVeracodeForm(forms.Form):
                                          choices=SEVERITY_CHOICES)
     file = forms.FileField(widget=forms.widgets.FileInput(
         attrs={"accept": ".xml"}),
-                           label="Select Veracode Export")
+        label="Select Veracode Export")
 
     # date can only be today or in the past, not the future
     def clean_scan_date(self):
@@ -258,7 +256,7 @@ class UploadBurpForm(forms.Form):
                                          choices=SEVERITY_CHOICES[0:4])
     file = forms.FileField(widget=forms.widgets.FileInput(
         attrs={"accept": ".xml"}),
-                           label="Select Burp XML Export")
+        label="Select Burp XML Export")
 
     # date can only be today or in the past, not the future
     def clean_scan_date(self):
@@ -275,7 +273,7 @@ class DoneForm(forms.Form):
 class UploadThreatForm(forms.Form):
     file = forms.FileField(widget=forms.widgets.FileInput(
         attrs={"accept": ".jpg,.png,.pdf"}),
-                           label="Select Threat Model")
+        label="Select Threat Model")
 
 
 class UploadRiskForm(forms.ModelForm):
@@ -581,7 +579,6 @@ class EditEndpointForm(forms.ModelForm):
             self.endpoint_instance = kwargs.pop('instance')
             self.product = self.endpoint_instance.product
 
-
     def clean(self):
         from django.core.validators import URLValidator, validate_ipv46_address
 
@@ -862,3 +859,27 @@ class DojoUserForm(forms.ModelForm):
         exclude = ['password', 'last_login', 'is_superuser', 'groups',
                    'username', 'is_staff', 'is_active', 'date_joined',
                    'user_permissions']
+
+
+class AddDojoUserForm(forms.ModelForm):
+    authorized_products = forms.ModelMultipleChoiceField(
+        queryset=Product.objects.all(), required=False,
+        help_text='Select the products this user should have access to.')
+
+    class Meta:
+        model = Dojo_User
+        fields = ['username', 'first_name', 'last_name', 'email', 'is_active',
+                  'is_staff', 'is_superuser']
+        exclude = ['password', 'last_login', 'groups',
+                   'date_joined', 'user_permissions']
+
+
+class DeleteUserForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = User
+        exclude = ['username', 'first_name', 'last_name', 'email', 'is_active',
+                   'is_staff', 'is_superuser', 'password', 'last_login', 'groups',
+                   'date_joined', 'user_permissions']
