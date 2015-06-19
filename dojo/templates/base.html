@@ -135,11 +135,13 @@
                             </li>
                         {% endif %}
                         <li>
-                            <a href="{% url 'product' %}"><i class="fa fa-list fa-fw"></i> Products
+                            <a href="#"><i class="fa fa-list fa-fw"></i> Products
                                 {% if request.user.is_staff %}<span class="glyphicon arrow"></span>{% endif %}</a>
                             {% if request.user.is_staff %}
                                 <ul class="nav nav-second-level">
-
+                                    <li>
+                                        <a href="{% url 'product' %}"> All Products</a>
+                                    </li>
                                     <li>
                                         <a href="{% url 'product_type' %}">View Product Types</a>
                                     </li>
@@ -150,9 +152,12 @@
                         </li>
                         {% if request.user.is_staff %}
                             <li>
-                                <a href="{% url 'engagement' %}"><i class="fa fa-inbox fa-fw"></i> Engagements<span
+                                <a href="#"><i class="fa fa-inbox fa-fw"></i> Engagements<span
                                         class="glyphicon arrow"></span></a>
                                 <ul class="nav nav-second-level">
+                                    <li>
+                                        <a href="{% url 'engagement' %}">All Engagements</a>
+                                    </li>
                                     <li>
                                         <a href="{% url 'test_type' %}">Test Types</a>
                                     </li>
@@ -163,9 +168,12 @@
                                 <!-- /.nav-second-level -->
                             </li>
                             <li>
-                                <a href="{% url 'endpoints' %}"><i class="fa fa-sitemap fa-fw"></i> Endpoints<span
+                                <a href="#"><i class="fa fa-sitemap fa-fw"></i> Endpoints<span
                                         class="glyphicon arrow"></span></a>
                                 <ul class="nav nav-second-level">
+                                    <li>
+                                        <a href="{% url 'endpoints' %}">All Endpoints</a>
+                                    </li>
                                     <li>
                                         <a href="{% url 'vulnerable_endpoints' %}">
                                             Vulnerable Endpoints
@@ -174,7 +182,7 @@
                                 </ul>
                             </li>
                             <li>
-                                <a href="{% url 'open_findings' %}"><i class="fa fa-bug fa-fw"></i>
+                                <a href="#"><i class="fa fa-bug fa-fw"></i>
                                     Findings<span
                                             class="glyphicon arrow"></span></a>
                                 <ul class="nav nav-second-level">
@@ -192,7 +200,7 @@
                             </li>
                         {% endif %}
                         <li>
-                            <a href="{% url 'metrics' %}"><i class="fa fa-bar-chart fa-fw"></i> Metrics<span
+                            <a href="#"><i class="fa fa-bar-chart fa-fw"></i> Metrics<span
                                     class="glyphicon arrow"></span></a>
                             <ul class="nav nav-second-level">
                                 <li><a href="{% url 'metrics_all' %}"> All </a></li>
@@ -221,6 +229,11 @@
                             </ul>
                             <!-- /.nav-second-level -->
                         </li>
+                        {% if request.user.is_staff %}
+                            <li>
+                                <a href="{% url 'users' %}"><i class="fa fa-user fa-fw"></i> Users</a>
+                            </li>
+                        {% endif %}
                         {% if request.user.is_staff %}
                             <li>
                                 <a href="{% url 'calendar' %}"><i class="fa fa-calendar fa-fw"></i> Calendar</a>
@@ -293,7 +306,9 @@
                     </p>
 
                     <p>
-                    DefectDojo is licensed under the <a href="https://github.com/rackerlabs/django-DefectDojo/blob/master/LICENSE.md">Simplified BSD license</a>.
+                        DefectDojo is licensed under the <a
+                            href="https://github.com/rackerlabs/django-DefectDojo/blob/master/LICENSE.md">Simplified BSD
+                        license</a>.
                 </div>
             </div>
         </div>

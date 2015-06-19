@@ -33,7 +33,7 @@ $(function () {
 $(function () {
 
     $('#side-menu').metisMenu(
-        {doubleTapToGo: true}
+        {doubleTapToGo: false}
     );
 
 });

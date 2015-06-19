@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block add_css %}
+    <link rel="stylesheet" href="{{ STATIC_URL }}chosen-bootstrap/chosen.bootstrap.min.css">
+{% endblock %}
+{% block content %}
+    <h3> {{ name }} {% if to_edit %}- {{ to_edit.username }}{% endif %}</h3>
+    <div class="alert alert-info" role="alert">
+        By default all users are created with an unusable password.  If a password is needed it can be set using the
+        {% if to_edit %}
+            <a href="{% url 'admin:auth_user_change' to_edit.id %}"><b>Admin interface</b></a>
+        {% else %}
+            Admin interface
+        {% endif %}.
+    </div>
+
+
+    <form class="form-horizontal" method="post">{% csrf_token %}
+        {% include "dojo/form_fields.html" with form=form %}
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <input class="btn btn-primary" type="submit" name="add_user" value="{{ name }}"/>
+                &nbsp;&nbsp;
+                {% if to_edit and to_edit.id != user.id %}
+                    <a class="btn btn-danger" href="{% url 'delete_user' to_edit.id %}">Delete User</a>
+                {% endif %}
+            </div>
+        </div>
+    </form>
+{% endblock %}
+{% block postscript %}
+    {%  if to_add or to_edit and not to_edit.is_staff %}
+        <script type="application/javascript" src="{{ STATIC_URL }}chosen/chosen.jquery.min.js"></script>
+        <script type="application/javascript">
+            $(function () {
+                $('#id_authorized_products').chosen({'placeholder_text_multiple':'Select some products...'});
+            });
+        </script>
+    {% else %}
+        <script type="application/javascript">
+            $(function () {
+                $('#id_authorized_products').parents(".form-group").remove();
+            });
+        </script>
+    {% endif %}
+    {% if not user.is_superuser %}
+        <script type="application/javascript">
+            $(function () {
+                $('#id_is_superuser').parents(".form-group").remove();
+            });
+        </script>
+    {% endif %}
+{% endblock %}

@@ -43,6 +43,12 @@ urlpatterns = patterns(
     url(r'^profile$', 'dojo.views.view_profile', name='view_profile'),
     url(r'^change_password$', 'dojo.views.change_password',
         name='change_password'),
+    url(r'^user$', 'dojo.views.user', name='users'),
+    url(r'^user/add$', 'dojo.views.add_user', name='add_user'),
+    url(r'^user/(?P<uid>\d+)/edit$', 'dojo.views.edit_user',
+        name='edit_user'),
+    url(r'^user/(?P<uid>\d+)/delete', 'dojo.views.delete_user',
+        name='delete_user'),
 
     #  search
     url(r'^simple_search$', 'dojo.views.simple_search',

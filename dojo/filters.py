@@ -574,3 +574,17 @@ class ReportAuthedFindingFilter(FilterSet):
                    'endpoint', 'references', 'test', 'is_template',
                    'thread_id', 'notes', 'endpoints',
                    'numerical_severity', 'reporter']
+
+
+class UserFilter(FilterSet):
+    first_name = CharFilter(lookup_type='icontains')
+    last_name = CharFilter(lookup_type='icontains')
+    username = CharFilter(lookup_type='icontains')
+
+    class Meta:
+        model = Dojo_User
+        fields = ['is_staff', 'is_superuser', 'is_active', 'first_name', 'last_name', 'username']
+        exclude = ['password', 'last_login', 'groups', 'user_permissions', 'date_joined']
+        order_by = (('username', 'User Name'),
+                    ('last_name', 'Last Name'),
+                    ('first_name', 'First Name'),)
