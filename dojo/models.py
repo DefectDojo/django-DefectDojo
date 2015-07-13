@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import datetime
 import os
 
 from django.conf import settings
@@ -8,7 +8,7 @@ from django.db import models
 from django.db.models import Q
 from django.utils.timezone import now
 from pytz import timezone
-
+from auditlog.registry import auditlog
 localtz = timezone(settings.TIME_ZONE)
 
 
@@ -319,7 +319,7 @@ class Endpoint(models.Model):
         ordering = ['product', 'protocol', 'host', 'path', 'query', 'fragment']
 
     def __unicode__(self):
-        from urlparse import urlunsplit, uses_netloc
+        from urlparse import uses_netloc
 
         netloc = self.host
         scheme = self.protocol
@@ -562,6 +562,15 @@ class Risk_Acceptance(models.Model):
         return os.path.basename(self.path.name) \
             if self.path is not None else ''
 
+
+# Register for automatic logging to database
+auditlog.register(Dojo_User)
+auditlog.register(Endpoint)
+auditlog.register(Engagement)
+auditlog.register(Finding)
+auditlog.register(Product)
+auditlog.register(Test)
+auditlog.register(Risk_Acceptance)
 
 admin.site.register(Test)
 admin.site.register(Finding)

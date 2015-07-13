@@ -51,7 +51,8 @@ function dismissAddAnotherPopupDojo(win, newId, newRepr) {
         if (elemName == 'SELECT') {
             o = new Option(newRepr, newId);
             elem.options[elem.options.length] = o;
-            o.selected = true;
+            o.selected = true
+            $(o).attr('selected', 'selected');
         } else if (elemName == 'INPUT') {
             if (elem.className.indexOf('vManyToManyRawIdAdminField') != -1 && elem.value) {
                 elem.value += ',' + newId;

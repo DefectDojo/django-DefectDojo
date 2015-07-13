@@ -1,8 +1,20 @@
 {% extends "base.html" %}
+{% load display_tags %}
 {% block content %}
     <div class="panel panel-default">
-        <div class="panel-heading">
-            <h2>Risk Acceptance added by {{ risk_approval.reporter.get_full_name }}</h2>
+        <div class="panel-heading tight">
+            <div class="clearfix">
+                <h3 class="pull-left">
+                    Risk Acceptance added by {{ risk_approval.reporter.get_full_name }}
+                </h3>
+                <div class="dropdown pull-right">
+                    <a href="{% url 'action_history' risk_approval|content_type risk_approval.id %}"
+                       class="btn btn-default"
+                       title="View History">
+                        <span><i class="fa fa-history"></i></span>
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
     <div id="risk_acceptance" class="panel panel-default table-responsive">
@@ -47,7 +59,7 @@
                 </tbody>
             </table>
             <div class="panel-body">
-            {% include "dojo/paging_snippet.html" with page=accepted_findings %}
+                {% include "dojo/paging_snippet.html" with page=accepted_findings %}
             </div>
         {% else %}
             <div class="panel-body">

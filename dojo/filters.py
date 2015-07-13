@@ -1,3 +1,5 @@
+from auditlog.models import LogEntry
+
 __author__ = 'Jay Paz'
 from datetime import timedelta, datetime
 import collections
@@ -588,3 +590,14 @@ class UserFilter(FilterSet):
         order_by = (('username', 'User Name'),
                     ('last_name', 'Last Name'),
                     ('first_name', 'First Name'),)
+
+
+class LogEntryFilter(FilterSet):
+    from auditlog.models import LogEntry
+    action = MultipleChoiceFilter(choices=LogEntry.Action.choices)
+    actor = ModelMultipleChoiceFilter(queryset=Dojo_User.objects.all())
+    timestamp = DateRangeFilter()
+
+    class Meta:
+        model = LogEntry
+        exclude = ['content_type', 'object_pk', 'object_id', 'object_repr', 'changes']

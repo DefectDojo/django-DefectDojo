@@ -113,133 +113,135 @@
             <div class="navbar-default sidebar" role="navigation">
                 <div class="sidebar-nav navbar-collapse">
                     <ul class="nav" id="side-menu">
-                        <li class="sidebar-search">
-                            <div class="input-group custom-search-form">
-                                <form role="search" method="get" action="{% url 'simple_search' %}">
-                                    <div class="input-group">
-                                        <input id="simple_search" type="text" name="query" class="form-control"
-                                               placeholder="Search...">
+                        {% block sidebar-items %}
+                            <li class="sidebar-search">
+                                <div class="input-group custom-search-form">
+                                    <form role="search" method="get" action="{% url 'simple_search' %}">
+                                        <div class="input-group">
+                                            <input id="simple_search" type="text" name="query" class="form-control"
+                                                   placeholder="Search...">
 	                                    <span class="input-group-btn">
 	                                        <button class="btn btn-default" type="submit">
                                                 <i class="fa fa-search"></i>
                                             </button>
 	                                    </span>
-                                    </div>
-                                </form>
-                            </div>
-                            <!-- /input-group -->
-                        </li>
-                        {% if request.user.is_staff %}
-                            <li>
-                                <a href="{% url 'dashboard' %}"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
+                                        </div>
+                                    </form>
+                                </div>
+                                <!-- /input-group -->
                             </li>
-                        {% endif %}
-                        <li>
-                            <a href="#"><i class="fa fa-list fa-fw"></i> Products
-                                {% if request.user.is_staff %}<span class="glyphicon arrow"></span>{% endif %}</a>
                             {% if request.user.is_staff %}
-                                <ul class="nav nav-second-level">
-                                    <li>
-                                        <a href="{% url 'product' %}"> All Products</a>
-                                    </li>
-                                    <li>
-                                        <a href="{% url 'product_type' %}">View Product Types</a>
-                                    </li>
-
-                                </ul>
+                                <li>
+                                    <a href="{% url 'dashboard' %}"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
+                                </li>
                             {% endif %}
-                            <!-- /.nav-second-level -->
-                        </li>
-                        {% if request.user.is_staff %}
                             <li>
-                                <a href="#"><i class="fa fa-inbox fa-fw"></i> Engagements<span
-                                        class="glyphicon arrow"></span></a>
-                                <ul class="nav nav-second-level">
-                                    <li>
-                                        <a href="{% url 'engagement' %}">All Engagements</a>
-                                    </li>
-                                    <li>
-                                        <a href="{% url 'test_type' %}">Test Types</a>
-                                    </li>
-                                    <li>
-                                        <a href="{% url 'dev_env' %}">Development Environments</a>
-                                    </li>
-                                </ul>
-                                <!-- /.nav-second-level -->
-                            </li>
-                            <li>
-                                <a href="#"><i class="fa fa-sitemap fa-fw"></i> Endpoints<span
-                                        class="glyphicon arrow"></span></a>
-                                <ul class="nav nav-second-level">
-                                    <li>
-                                        <a href="{% url 'endpoints' %}">All Endpoints</a>
-                                    </li>
-                                    <li>
-                                        <a href="{% url 'vulnerable_endpoints' %}">
-                                            Vulnerable Endpoints
-                                        </a>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li>
-                                <a href="#"><i class="fa fa-bug fa-fw"></i>
-                                    Findings<span
-                                            class="glyphicon arrow"></span></a>
-                                <ul class="nav nav-second-level">
-                                    <li>
-                                        <a href="{% url 'open_findings' %}">Open Findings</a>
-                                    </li>
-                                    <li>
-                                        <a href="{% url 'accepted_findings' %}">Accepted Findings</a>
-                                    </li>
-                                    <li>
-                                        <a href="{% url 'closed_findings' %}">Closed Findings</a>
-                                    </li>
-                                </ul>
-                                <!-- /.nav-second-level -->
-                            </li>
-                        {% endif %}
-                        <li>
-                            <a href="#"><i class="fa fa-bar-chart fa-fw"></i> Metrics<span
-                                    class="glyphicon arrow"></span></a>
-                            <ul class="nav nav-second-level">
-                                <li><a href="{% url 'metrics_all' %}"> All </a></li>
-                                {% pt_metric_nav %}
-                                <li><a href="{% url 'metrics' %}?date=5&view=dashboard"> Dashboard </a></li>
-                                {% if user.is_staff %}
+                                <a href="#"><i class="fa fa-list fa-fw"></i> Products
+                                    {% if request.user.is_staff %}<span class="glyphicon arrow"></span>{% endif %}</a>
+                                {% if request.user.is_staff %}
+                                    <ul class="nav nav-second-level">
+                                        <li>
+                                            <a href="{% url 'product' %}"> All Products</a>
+                                        </li>
+                                        <li>
+                                            <a href="{% url 'product_type' %}">View Product Types</a>
+                                        </li>
 
-
-                                    <li>
-                                        <a href="#">Additional Metrics <span class="glyphicon arrow"></span></a>
-                                        <ul class="nav nav-third-level">
-                                            <li><a href="{% url 'simple_metrics' %}"> Simple Metrics </a></li>
-                                            <li><a href="{% url 'engineer_metrics' %}"> Engineer Metrics </a></li>
-                                            <li><a href="{% url 'research_metrics' %}"> Security Research Metrics </a>
-                                            </li>
-                                        </ul>
-                                        <!-- /.nav-third-level -->
-                                    </li>
-
-
-
-
-
+                                    </ul>
                                 {% endif %}
-
-                            </ul>
-                            <!-- /.nav-second-level -->
-                        </li>
-                        {% if request.user.is_staff %}
-                            <li>
-                                <a href="{% url 'users' %}"><i class="fa fa-user fa-fw"></i> Users</a>
+                                <!-- /.nav-second-level -->
                             </li>
-                        {% endif %}
-                        {% if request.user.is_staff %}
+                            {% if request.user.is_staff %}
+                                <li>
+                                    <a href="#"><i class="fa fa-inbox fa-fw"></i> Engagements<span
+                                            class="glyphicon arrow"></span></a>
+                                    <ul class="nav nav-second-level">
+                                        <li>
+                                            <a href="{% url 'engagement' %}">All Engagements</a>
+                                        </li>
+                                        <li>
+                                            <a href="{% url 'test_type' %}">Test Types</a>
+                                        </li>
+                                        <li>
+                                            <a href="{% url 'dev_env' %}">Development Environments</a>
+                                        </li>
+                                    </ul>
+                                    <!-- /.nav-second-level -->
+                                </li>
+                                <li>
+                                    <a href="#"><i class="fa fa-sitemap fa-fw"></i> Endpoints<span
+                                            class="glyphicon arrow"></span></a>
+                                    <ul class="nav nav-second-level">
+                                        <li>
+                                            <a href="{% url 'endpoints' %}">All Endpoints</a>
+                                        </li>
+                                        <li>
+                                            <a href="{% url 'vulnerable_endpoints' %}">
+                                                Vulnerable Endpoints
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <a href="#"><i class="fa fa-bug fa-fw"></i>
+                                        Findings<span
+                                                class="glyphicon arrow"></span></a>
+                                    <ul class="nav nav-second-level">
+                                        <li>
+                                            <a href="{% url 'open_findings' %}">Open Findings</a>
+                                        </li>
+                                        <li>
+                                            <a href="{% url 'accepted_findings' %}">Accepted Findings</a>
+                                        </li>
+                                        <li>
+                                            <a href="{% url 'closed_findings' %}">Closed Findings</a>
+                                        </li>
+                                    </ul>
+                                    <!-- /.nav-second-level -->
+                                </li>
+                            {% endif %}
                             <li>
-                                <a href="{% url 'calendar' %}"><i class="fa fa-calendar fa-fw"></i> Calendar</a>
-                            </li>
-                        {% endif %}
+                                <a href="#"><i class="fa fa-bar-chart fa-fw"></i> Metrics<span
+                                        class="glyphicon arrow"></span></a>
+                                <ul class="nav nav-second-level">
+                                    <li><a href="{% url 'metrics_all' %}"> All </a></li>
+                                    {% pt_metric_nav %}
+                                    <li><a href="{% url 'metrics' %}?date=5&view=dashboard"> Dashboard </a></li>
+                                    {% if user.is_staff %}
 
+
+                                        <li>
+                                            <a href="#">Additional Metrics <span class="glyphicon arrow"></span></a>
+                                            <ul class="nav nav-third-level">
+                                                <li><a href="{% url 'simple_metrics' %}"> Simple Metrics </a></li>
+                                                <li><a href="{% url 'engineer_metrics' %}"> Engineer Metrics </a></li>
+                                                <li><a href="{% url 'research_metrics' %}"> Security Research
+                                                    Metrics </a>
+                                                </li>
+                                            </ul>
+                                            <!-- /.nav-third-level -->
+                                        </li>
+
+
+
+
+
+                                    {% endif %}
+
+                                </ul>
+                                <!-- /.nav-second-level -->
+                            </li>
+                            {% if request.user.is_staff %}
+                                <li>
+                                    <a href="{% url 'users' %}"><i class="fa fa-user fa-fw"></i> Users</a>
+                                </li>
+                            {% endif %}
+                            {% if request.user.is_staff %}
+                                <li>
+                                    <a href="{% url 'calendar' %}"><i class="fa fa-calendar fa-fw"></i> Calendar</a>
+                                </li>
+                            {% endif %}
+                        {% endblock %}
                     </ul>
                 </div>
                 <!-- /.sidebar-collapse -->

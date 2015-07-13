@@ -85,6 +85,9 @@
                         <li role="presentation">
                             <a href="{% url 'engagement_report' eng.id %}">Generate Report</a>
                         </li>
+                        <li role="presentation">
+                            <a href="{% url 'action_history' eng|content_type eng.id %}">View History</a>
+                        </li>
                     </ul>
                 </div>
             </div>

@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load humanize %}
+{% load display_tags %}
 {% block add_styles %}
     .graph {min-height: 158px;}
     h3 { margin-top: 5px; margin-bottom: 5px; font-size: 20px; line-height: 22px;}
@@ -46,6 +47,9 @@
                                     <a href="{% url 'product_endpoint_report' prod.id %}">Generate Endpoint Report</a>
                                 </li>
                             {% endif %}
+                            <li role="presentation">
+                                <a href="{% url 'action_history' prod|content_type prod.id %}">View History</a>
+                            </li>
                         </ul>
                     </div>
                 </div>

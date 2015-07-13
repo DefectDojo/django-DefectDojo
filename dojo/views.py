@@ -53,7 +53,7 @@ from dojo.filters import ProductFilter, OpenFindingFilter, \
     OpenFingingSuperFilter, AcceptedFingingSuperFilter, \
     ProductFindingFilter, EngagementFilter, \
     ClosedFingingSuperFilter, MetricsFindingFilter, ReportFindingFilter, EndpointFilter, \
-    ReportAuthedFindingFilter, EndpointReportFilter, UserFilter
+    ReportAuthedFindingFilter, EndpointReportFilter, UserFilter, LogEntryFilter
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -4325,3 +4325,22 @@ def delete_user(request, uid):
                    'rels': rels,
                    'breadcrumbs': get_breadcrumbs(title="Delete User", obj=user, user=request.user)})
 
+
+def action_history(request, cid, oid):
+    from django.contrib.contenttypes.models import ContentType
+    from auditlog.models import LogEntry
+    try:
+        ct = ContentType.objects.get_for_id(cid)
+        obj = ct.get_object_for_this_type(pk=oid)
+    except KeyError:
+        raise Http404()
+
+    history = LogEntry.objects.filter(content_type=ct, object_pk=obj.id).order_by('-timestamp')
+    history = LogEntryFilter(request.GET, queryset=history)
+    paged_history = get_page_items(request, history, 15)
+
+    return render(request, 'dojo/action_history.html',
+                  {"history": paged_history,
+                   "filtered": history,
+                   "obj": obj,
+                   'breadcrumbs': get_breadcrumbs(title="Action History", obj=obj, user=request.user)})

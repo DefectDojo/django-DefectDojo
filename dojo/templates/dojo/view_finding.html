@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load display_tags %}
 {% block content %}
     <div class="panel panel-default">
         <div class="panel-heading">
@@ -24,6 +25,9 @@
                             <li role="presentation"><a href="{% url 'delete_finding' finding.id %}"
                                                        onclick="return confirm('Are you sure you want to delete this finding?')">
                                 Delete Finding </a></li>
+                            </li>
+                            <li role="presentation">
+                                <a href="{% url 'action_history' finding|content_type finding.id %}">View History</a>
                             </li>
                         </ul>
                     </div>
@@ -58,7 +62,7 @@
         <div class="col-md-7">
             <div class="panel panel-default endpoints">
                 <div class="panel-heading">Endpoints / Systems</div>
-                <div id="vuln_endpoints" class="panel-body">
+                <div id="vuln_endpoints" class="panel-body endpoint-panel">
                     {%  if finding.endpoints.all %}
                         <ul>
                         {% for endpoint in finding.endpoints.all %}

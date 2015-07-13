@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load display_tags %}
+
+{% block content %}
+    <h4>{{ obj }} History</h4>
+    <br/>
+    <div class="row">
+        <div class="col-md-10">
+            {% if history %}
+                <div class="table-responsive panel panel-default">
+                    <table id="endpoints"
+                           class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
+                        <tr>
+                            <th>Action</th>
+                            <th>Actor</th>
+                            <th>Date/Time</th>
+                            <th>Changes</th>
+                        </tr>
+
+                        {% for h in history %}
+                            <tr>
+                                <td>{{ h }}</td>
+                                <td>{{ h.actor }}</td>
+                                <td>{{ h.timestamp }}</td>
+                                <td>
+                                    {{ h.changes|action_log_entry }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+                {% include "dojo/paging_snippet.html" with page=history %}
+            {% else %}
+                <h5> No update history found for this object </h5>
+            {% endif %}
+        </div>
+        <div class="col-md-2">
+            <div class="filters panel panel-default">
+                <div class="panel-heading">Filters</div>
+                <form method="get" class="panel-body">
+                    {{ filtered.form.as_p }}
+                    <div class="centered">
+                        <input type="submit" class="btn btn-primary" value="Apply"/><br/><br/>
+                        <a href="{% url 'endpoints' %}"> [Clear Filters] </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load humanize %}
+{% load display_tags %}
 {% block add_styles %}
     .graph {min-height: 158px;}
     h3 { margin-top: 5px; margin-bottom: 5px; font-size: 20px; line-height: 22px;}
@@ -34,6 +35,9 @@
                                 </li>
                                 <li role="presentation"><a href="{% url 'delete_endpoint' endpoint.id %}">
                                     Delete Endpoint </a></li>
+                                </li>
+                                <li role="presentation">
+                                    <a href="{% url 'action_history' endpoint|content_type endpoint.id %}">View History</a>
                                 </li>
                             </ul>
                         {% endif %}
