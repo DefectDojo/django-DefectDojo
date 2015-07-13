@@ -183,6 +183,7 @@ INSTALLED_APPS = (
     'tastypie_swagger',
     'djangobower',
     'easy_pdf',
+    'auditlog',
 )
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
