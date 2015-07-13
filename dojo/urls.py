@@ -216,6 +216,10 @@ urlpatterns = patterns(
     url(r'^launch_va/(?P<pid>\d+)$', 'dojo.views.launch_va',
         name='launch_va'),
 
+    # action history
+    url(r'^history/(?P<cid>\d+)/(?P<oid>\d+)$', 'dojo.views.action_history',
+        name='action_history'),
+
     # api doc urls
     url(r'api/v1/doc/',
         include('tastypie_swagger.urls', namespace='tastypie_swagger'),

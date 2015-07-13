@@ -1,9 +1,11 @@
 from django import template
+from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import stringfilter
 from django.utils.safestring import mark_safe, SafeData
 from django.utils.text import normalize_newlines
 from django.utils.html import escape
 from dojo.models import Check_List
+
 
 register = template.Library()
 
@@ -39,3 +41,30 @@ def linebreaksasciidocbr(value, autoescape=None):
 def dojo_version():
     from dojo.settings import VERSION
     return 'v. ' + VERSION
+
+@register.filter
+def content_type(obj):
+    if not obj:
+        return False
+    return ContentType.objects.get_for_model(obj).id
+
+
+@register.filter
+def content_type_str(obj):
+    if not obj:
+        return False
+    return ContentType.objects.get_for_model(obj)
+
+
+@register.filter(is_safe=True, needs_autoescape=False)
+@stringfilter
+def action_log_entry(value, autoescape=None):
+    import json
+    history = json.loads(value)
+    text = ''
+    for k in history.iterkeys():
+        text += k.capitalize() + ' changed from "' + history[k][0] + '" to "' + history[k][1] + '"<br/>'
+
+    return mark_safe(text)
+
+

@@ -628,3 +628,8 @@ span.endpoint_product {
     padding-left: 5px;
     width: 100%;
 }
+
+.endpoint-panel {
+    overflow-x: scroll;
+    max-height: 205px;
+}
