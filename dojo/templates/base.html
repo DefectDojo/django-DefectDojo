@@ -136,8 +136,12 @@
                                 </li>
                             {% endif %}
                             <li>
-                                <a href="#"><i class="fa fa-list fa-fw"></i> Products
-                                    {% if request.user.is_staff %}<span class="glyphicon arrow"></span>{% endif %}</a>
+                                {% if request.user.is_staff %}
+                                    <a href="#"><i class="fa fa-list fa-fw"></i> Products
+                                    <span class="glyphicon arrow"></span></a>
+                                {% else %}
+                                    <a href="{% url 'product' %}"><i class="fa fa-list fa-fw"></i> Products</a>
+                                {% endif %}
                                 {% if request.user.is_staff %}
                                     <ul class="nav nav-second-level">
                                         <li>

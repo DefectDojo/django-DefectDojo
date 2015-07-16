@@ -916,10 +916,12 @@ def get_period_counts(findings, findings_closed, period_interval, start_date, re
                              'S3', 'Total', 'Closed'])
     accepted_in_period.append(['Timestamp', 'Date', 'S0', 'S1', 'S2',
                                'S3', 'Total', 'Closed'])
+
     for x in range(-1, period_interval):
         if relative_delta == 'months':
-            new_date = start_date + relativedelta(months=x)
-            end_date = new_date + relativedelta(months=1)
+            # make interval the first through last of month
+            end_date = (start_date + relativedelta(months=x)) + relativedelta(day=1, months=+1, days=-1)
+            new_date = (start_date + relativedelta(months=x)) + relativedelta(day=1)
         else:
             # week starts the monday before
             new_date = start_date + relativedelta(weeks=x, weekday=MO(1))
