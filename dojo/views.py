@@ -2933,9 +2933,7 @@ def add_findings(request, tid):
                 new_finding.mitigated = datetime.now(tz=localtz)
 
             new_finding.save()
-
             new_finding.endpoints = form.cleaned_data['endpoints']
-
             new_finding.save()
 
             messages.add_message(request,
@@ -2946,11 +2944,18 @@ def add_findings(request, tid):
                 return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
             else:
                 return HttpResponseRedirect(reverse('add_findings', args=(test.id,)))
+        else:
+            messages.add_message(request,
+                                 messages.ERROR,
+                                 'The form has errors, please correct them below.',
+                                 extra_tags='alert-danger')
 
     return render(request, 'dojo/add_findings.html',
-                  {'form': form, 'findings': findings,
+                  {'form': form,
+                   'findings': findings,
                    'test': test,
-                   'temp': False, 'tid': tid,
+                   'temp': False,
+                   'tid': tid,
                    'breadcrumbs': get_breadcrumbs(title="Add finding",
                                                   obj=test,
                                                   user=request.user)})
@@ -2963,28 +2968,41 @@ def add_temp_finding(request, tid, fid):
     findings = Finding.objects.all()
     if request.method == 'POST':
         form = FindingForm(request.POST)
-        new_finding = form.save(commit=False)
-        new_finding.test = test
-        new_finding.reporter = request.user
-        new_finding.numerical_severity = get_numerical_severity(
-            new_finding.severity)
-        new_finding.date = datetime.today()
-        if new_finding.false_p or new_finding.active is False:
-            new_finding.mitigated = datetime.now(tz=localtz)
-        # new_finding.pk = None
-        new_finding.save()
-        messages.add_message(request,
-                             messages.SUCCESS,
-                             'Temp finding added successfully.',
-                             extra_tags='alert-success')
-        return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
+        if form.is_valid():
+            new_finding = form.save(commit=False)
+            new_finding.test = test
+            new_finding.reporter = request.user
+            new_finding.numerical_severity = get_numerical_severity(
+                new_finding.severity)
+            new_finding.date = datetime.today()
+            if new_finding.false_p or new_finding.active is False:
+                new_finding.mitigated = datetime.now(tz=localtz)
+
+            new_finding.save()
+            new_finding.endpoints = form.cleaned_data['endpoints']
+            new_finding.save()
+
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Temp finding added successfully.',
+                                 extra_tags='alert-success')
+            return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
+        else:
+            messages.add_message(request,
+                                 messages.ERROR,
+                                 'The form has errors, please correct them below.',
+                                 extra_tags='alert-danger')
 
     else:
-        form = FindingForm(instance=finding)
+        form = FindingForm(instance=finding, initial={'is_template': False, 'active': False, 'verified': False,
+                                                      'false_p': False, 'duplicate': False, 'out_of_scope': False})
     return render(request, 'dojo/add_findings.html',
-                  {'form': form, 'findings': findings,
-                   'temp': True, 'fid': finding.id,
+                  {'form': form,
+                   'findings': findings,
+                   'temp': True,
+                   'fid': finding.id,
                    'tid': test.id,
+                   'test': test,
                    'breadcrumbs': get_breadcrumbs(title="Add finding",
                                                   obj=test,
                                                   user=request.user)})
@@ -4233,7 +4251,7 @@ def add_user(request):
             user.is_superuser = False
             user.active = True
             user.save()
-            if 'authorized_products' in form.cleaned_data and len(form.cleaned_data['authorized_products'])>0:
+            if 'authorized_products' in form.cleaned_data and len(form.cleaned_data['authorized_products']) > 0:
                 for p in form.cleaned_data['authorized_products']:
                     p.authorized_users.add(user)
                     p.save()
@@ -4267,7 +4285,7 @@ def edit_user(request, uid):
         form = AddDojoUserForm(request.POST, instance=user, initial={'authorized_products': authed_products})
         if form.is_valid():
             form.save()
-            if 'authorized_products' in form.cleaned_data and len(form.cleaned_data['authorized_products'])>0:
+            if 'authorized_products' in form.cleaned_data and len(form.cleaned_data['authorized_products']) > 0:
                 for p in form.cleaned_data['authorized_products']:
                     p.authorized_users.add(user)
                     p.save()
@@ -4331,6 +4349,7 @@ def delete_user(request, uid):
 def action_history(request, cid, oid):
     from django.contrib.contenttypes.models import ContentType
     from auditlog.models import LogEntry
+
     try:
         ct = ContentType.objects.get_for_id(cid)
         obj = ct.get_object_for_this_type(pk=oid)
