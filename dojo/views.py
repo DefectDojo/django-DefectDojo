@@ -53,7 +53,7 @@ from dojo.filters import ProductFilter, OpenFindingFilter, \
     OpenFingingSuperFilter, AcceptedFingingSuperFilter, \
     ProductFindingFilter, EngagementFilter, \
     ClosedFingingSuperFilter, MetricsFindingFilter, ReportFindingFilter, EndpointFilter, \
-    ReportAuthedFindingFilter, EndpointReportFilter, UserFilter, LogEntryFilter
+    ReportAuthedFindingFilter, EndpointReportFilter, UserFilter, LogEntryFilter, ProductTypeFilter, TestTypeFilter
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -463,8 +463,7 @@ engineer
 def open_findings(request):
     findings = Finding.objects.filter(active=True,
                                       verified=True,
-                                      mitigated__isnull=True,
-                                      is_template=False)
+                                      mitigated__isnull=True)
     if request.user.is_staff:
         findings = OpenFingingSuperFilter(request.GET, queryset=findings, user=request.user)
     else:
@@ -477,12 +476,20 @@ def open_findings(request):
 
     title_words = sorted(set(title_words))
     paged_findings = get_page_items(request, findings, 25)
+
+    product_type = None
+    if 'test__engagement__product__prod_type' in request.GET:
+        p = request.GET.getlist('test__engagement__product__prod_type', [])
+        if len(p) == 1:
+            product_type = get_object_or_404(Product_Type, id=p[0])
+
     return render(request,
                   'dojo/open_findings.html',
                   {"findings": paged_findings,
                    "filtered": findings,
                    "title_words": title_words,
-                   'breadcrumbs': get_breadcrumbs(title="Open findings",
+                   'breadcrumbs': get_breadcrumbs(obj=product_type,
+                                                  title="Open findings",
                                                   user=request.user)})
 
 
@@ -523,8 +530,7 @@ def accepted_findings(request):
 
 @user_passes_test(lambda u: u.is_staff)
 def closed_findings(request):
-    findings = Finding.objects.filter(mitigated__isnull=False,
-                                      is_template=False)
+    findings = Finding.objects.filter(mitigated__isnull=False)
     findings = ClosedFingingSuperFilter(request.GET, queryset=findings)
     title_words = [word
                    for finding in findings
@@ -553,16 +559,15 @@ def all_product_findings(request, pid):
         request.GET,
         queryset=Finding.objects.filter(test__engagement__product=p,
                                         active=True,
-                                        verified=True,
-                                        is_template=False))
-    page = get_page_items(request, result, 20)
+                                        verified=True))
+    page = get_page_items(request, result, 25)
     return render(request,
                   "dojo/all_product_findings.html",
                   {"findings": page,
                    "pid": pid,
                    "filtered": result,
                    "user": request.user,
-                   "breadcrumbs": get_breadcrumbs(obj=p, user=request.user)})
+                   "breadcrumbs": get_breadcrumbs(obj=p, title="Findings", user=request.user)})
 
 
 """
@@ -909,7 +914,8 @@ def get_punchcard_data(findings, weeks_between, start_date):
     return punchcard, ticks, highest_count
 
 
-def get_period_counts(findings, findings_closed, period_interval, start_date, relative_delta='months'):
+def get_period_counts(findings, findings_closed, accepted_findings, period_interval, start_date,
+                      relative_delta='months'):
     opened_in_period = list()
     accepted_in_period = list()
     opened_in_period.append(['Timestamp', 'Date', 'S0', 'S1', 'S2',
@@ -928,15 +934,18 @@ def get_period_counts(findings, findings_closed, period_interval, start_date, re
             end_date = new_date + relativedelta(weeks=1, weekday=MO(1))
 
         closed_in_range = findings_closed.filter(mitigated__range=[new_date, end_date])
-        risks_a = Risk_Acceptance.objects.filter(
-            created__range=[datetime(new_date.year,
-                                     new_date.month, 1,
-                                     tzinfo=localtz),
-                            datetime(new_date.year,
-                                     new_date.month,
-                                     monthrange(new_date.year,
-                                                new_date.month)[1],
-                                     tzinfo=localtz)])
+        if accepted_findings:
+            risks_a = accepted_findings.filter(
+                risk_acceptance__created__range=[datetime(new_date.year,
+                                                          new_date.month, 1,
+                                                          tzinfo=localtz),
+                                                 datetime(new_date.year,
+                                                          new_date.month,
+                                                          monthrange(new_date.year,
+                                                                     new_date.month)[1],
+                                                          tzinfo=localtz)])
+        else:
+            risks_a = None
 
         crit_count, high_count, med_count, low_count, closed_count = [0, 0, 0, 0, 0]
         for finding in findings:
@@ -955,8 +964,8 @@ def get_period_counts(findings, findings_closed, period_interval, start_date, re
             [(tcalendar.timegm(new_date.timetuple()) * 1000), new_date, crit_count, high_count, med_count, low_count,
              total, closed_in_range.count()])
         crit_count, high_count, med_count, low_count, closed_count = [0, 0, 0, 0, 0]
-        for ra in risks_a.all():
-            for finding in ra.accepted_findings.all():
+        if risks_a is not None:
+            for finding in risks_a:
                 if finding.severity == 'Critical':
                     crit_count += 1
                 elif finding.severity == 'High':
@@ -987,11 +996,10 @@ def metrics(request, mtype):
     if mtype == 'All' or mtype == 'wiki':
         pt = Product_Type.objects.all()
         findings = Finding.objects.filter(test__engagement__product__prod_type__in=pt,
-                                          verified=True,
-                                          is_template=False).prefetch_related('test__engagement__product',
-                                                                              'test__engagement__product__prod_type',
-                                                                              'test__engagement__risk_acceptance',
-                                                                              'reporter')
+                                          verified=True).prefetch_related('test__engagement__product',
+                                                                          'test__engagement__product__prod_type',
+                                                                          'test__engagement__risk_acceptance',
+                                                                          'reporter')
         page_name = "Metrics"
         if 'view' in request.GET and 'dashboard' == request.GET['view']:
             template = 'dojo/dashboard-metrics.html'
@@ -1003,8 +1011,10 @@ def metrics(request, mtype):
         request.GET._mutable = False
         mtype = pt[0].name
         findings = Finding.objects.filter(test__engagement__product__prod_type=pt,
-                                          verified=True,
-                                          is_template=False)
+                                          verified=True).prefetch_related('test__engagement__product',
+                                                                          'test__engagement__product__prod_type',
+                                                                          'test__engagement__risk_acceptance',
+                                                                          'reporter')
         page_name = '%s Metrics' % mtype
 
     findings = MetricsFindingFilter(request.GET, queryset=findings)
@@ -1013,19 +1023,25 @@ def metrics(request, mtype):
     start_date = findings.filters['date'].start_date
     end_date = findings.filters['date'].end_date
 
-    # capture the accepted findings in period
-    accepted_findings = [finding for ra in Risk_Acceptance.objects.filter(
-        created__range=[start_date, end_date]).prefetch_related(
-        'accepted_findings__test__engagement__product')
-                         for finding in ra.accepted_findings.all()]
     prod_type = findings.form.cleaned_data['test__engagement__product__prod_type']
     if len(prod_type) > 0:
         findings_closed = Finding.objects.filter(mitigated__range=[start_date, end_date],
-                                                 test__engagement__product__prod_type__in=prod_type,
-                                                 is_template=False)
+                                                 test__engagement__product__prod_type__in=prod_type)
+        # capture the accepted findings in period
+        accepted_findings = [finding for ra in Risk_Acceptance.objects.filter(
+            created__range=[start_date, end_date],
+            accepted_findings__test__engagement__product__prod_type__in=prod_type).prefetch_related(
+            'accepted_findings__test__engagement__product')
+                             for finding in ra.accepted_findings.all()]
     else:
-        findings_closed = Finding.objects.filter(mitigated__range=[start_date, end_date],
-                                                 is_template=False)
+        findings_closed = Finding.objects.filter(mitigated__range=[start_date, end_date])
+        accepted_findings = [finding for ra in Risk_Acceptance.objects.filter(
+            created__range=[start_date, end_date]).prefetch_related(
+            'accepted_findings__test__engagement__product')
+                             for finding in ra.accepted_findings.all()]
+
+    afi = set(f.id for f in accepted_findings)
+    accepted_findings = Finding.objects.filter(id__in=afi)
 
     r = relativedelta(end_date, start_date)
     months_between = (r.years * 12) + r.months
@@ -1036,8 +1052,10 @@ def metrics(request, mtype):
     if weeks_between <= 0:
         weeks_between += 2
 
-    monthly_counts = get_period_counts(findings, findings_closed, months_between, start_date, relative_delta='months')
-    weekly_counts = get_period_counts(findings, findings_closed, weeks_between, start_date, relative_delta='weeks')
+    monthly_counts = get_period_counts(findings, findings_closed, accepted_findings, months_between, start_date,
+                                       relative_delta='months')
+    weekly_counts = get_period_counts(findings, findings_closed, accepted_findings, weeks_between, start_date,
+                                      relative_delta='weeks')
 
     top_ten_products = sorted(
         Product.objects.filter(
@@ -1135,7 +1153,8 @@ def metrics(request, mtype):
         accepted_in_period_counts['Total'] += 1
         if finding.test.engagement.product.name not in accepted_in_period_details:
             accepted_in_period_details[finding.test.engagement.product.name] = {
-                'path': reverse('view_product_findings', args=(finding.test.engagement.product.id,)),
+                'path': reverse('accepted_findings') + '?test__engagement__product=' + str(
+                    finding.test.engagement.product.id),
                 'Critical': 0, 'High': 0, 'Medium': 0, 'Low': 0, 'Info': 0, 'Total': 0}
         accepted_in_period_details[
             finding.test.engagement.product.name
@@ -1148,7 +1167,8 @@ def metrics(request, mtype):
 
         if f.test.engagement.product.name not in closed_in_period_details:
             closed_in_period_details[f.test.engagement.product.name] = {
-                'path': reverse('view_product_findings', args=(f.test.engagement.product.id,)),
+                'path': reverse('closed_findings') + '?test__engagement__product=' + str(
+                    f.test.engagement.product.id),
                 'Critical': 0, 'High': 0, 'Medium': 0, 'Low': 0, 'Info': 0, 'Total': 0}
         closed_in_period_details[
             f.test.engagement.product.name
@@ -2106,8 +2126,14 @@ def product(request):
                           authorized_users__in=[request.user])
                       for word in product.name.split() if len(word) > 2]
 
+    product_type = None
+    if 'prod_type' in request.GET:
+        p = request.GET.getlist('prod_type', [])
+        if len(p) == 1:
+            product_type = get_object_or_404(Product_Type, id=p[0])
+
     prods = ProductFilter(request.GET, queryset=initial_queryset, user=request.user)
-    prod_list = get_page_items(request, prods, 15)
+    prod_list = get_page_items(request, prods, 25)
 
     return render(request,
                   'dojo/product.html',
@@ -2115,6 +2141,7 @@ def product(request):
                    'prods': prods,
                    'name_words': sorted(set(name_words)),
                    'breadcrumbs': get_breadcrumbs(
+                       obj=product_type,
                        title="Product list",
                        user=request.user),
                    'user': request.user})
@@ -2145,7 +2172,6 @@ def view_product(request, pid):
     verified_findings = Finding.objects.filter(test__engagement__product=prod,
                                                date__range=[start_date, end_date],
                                                false_p=False,
-                                               is_template=False,
                                                verified=True,
                                                duplicate=False,
                                                out_of_scope=False)
@@ -2153,7 +2179,6 @@ def view_product(request, pid):
     open_findings = Finding.objects.filter(test__engagement__product=prod,
                                            date__range=[start_date, end_date],
                                            false_p=False,
-                                           is_template=False,
                                            verified=True,
                                            duplicate=False,
                                            out_of_scope=False,
@@ -2163,7 +2188,6 @@ def view_product(request, pid):
     closed_findings = Finding.objects.filter(test__engagement__product=prod,
                                              date__range=[start_date, end_date],
                                              false_p=False,
-                                             is_template=False,
                                              verified=True,
                                              duplicate=False,
                                              out_of_scope=False,
@@ -2223,7 +2247,7 @@ def view_test(request, tid):
     else:
         form = NoteForm()
 
-    fpage = get_page_items(request, findings, 20)
+    fpage = get_page_items(request, findings, 25)
     return render(request, 'dojo/view_test.html',
                   {'test': test, 'findings': fpage,
                    'form': form, 'notes': notes,
@@ -2732,7 +2756,7 @@ def engagement(request):
     filtered = EngagementFilter(request.GET, queryset=Product.objects.filter(
         ~Q(engagement=None),
         engagement__active=True, ).distinct())
-    prods = get_page_items(request, filtered, 15)
+    prods = get_page_items(request, filtered, 25)
     name_words = [product.name for product in
                   Product.objects.filter(
                       ~Q(engagement=None),
@@ -3060,10 +3084,9 @@ def product_report(request, pid):
 
 def product_findings_report(request):
     if request.user.is_staff:
-        findings = Finding.objects.filter(is_template=False).distinct()
+        findings = Finding.objects.filter().distinct()
     else:
-        findings = Finding.objects.filter(is_template=False,
-                                          test__engagement__product__authorized_users__in=[request.user]).distinct()
+        findings = Finding.objects.filter(test__engagement__product__authorized_users__in=[request.user]).distinct()
 
     return generate_report(request, findings)
 
@@ -3097,8 +3120,7 @@ def product_endpoint_report(request, pid):
                                         finding__verified=True,
                                         finding__false_p=False,
                                         finding__duplicate=False,
-                                        finding__out_of_scope=False,
-                                        finding__is_template=False)
+                                        finding__out_of_scope=False)
 
     if request.user.is_staff or request.user in product.authorized_users.all():
         pass  # user is authorized for this product
@@ -3106,7 +3128,7 @@ def product_endpoint_report(request, pid):
         raise PermissionDenied
     breadcrumbs = get_breadcrumbs(obj=product, title="Vulnerable Product Endpoints Report", user=request.user)
     endpoints = EndpointReportFilter(request.GET, queryset=endpoints)
-    paged_endpoints = get_page_items(request, endpoints, 30)
+    paged_endpoints = get_page_items(request, endpoints, 25)
     report_format = request.GET.get('report_type', 'AsciiDoc')
     include_finding_notes = int(request.GET.get('include_finding_notes', 0))
     include_executive_summary = int(request.GET.get('include_executive_summary', 0))
@@ -3198,27 +3220,26 @@ def generate_report(request, obj):
     if type(obj).__name__ == "Product_Type":
         product_type = obj
         findings = ReportFindingFilter(request.GET, queryset=Finding.objects.filter(
-            test__engagement__product__prod_type=product_type, is_template=False).distinct())
+            test__engagement__product__prod_type=product_type).distinct())
         filename = "product_type_finding_report.pdf"
     elif type(obj).__name__ == "Product":
         product = obj
         findings = ReportFindingFilter(request.GET, queryset=Finding.objects.filter(test__engagement__product=product,
-                                                                                    is_template=False).distinct())
+                                                                                    ).distinct())
         filename = "product_finding_report.pdf"
     elif type(obj).__name__ == "Engagement":
         engagement = obj
         findings = ReportFindingFilter(request.GET, queryset=Finding.objects.filter(test__engagement=engagement,
-                                                                                    is_template=False).distinct())
+                                                                                    ).distinct())
         filename = "engagement_finding_report.pdf"
     elif type(obj).__name__ == "Test":
         test = obj
-        findings = ReportFindingFilter(request.GET, queryset=Finding.objects.filter(test=test,
-                                                                                    is_template=False).distinct())
+        findings = ReportFindingFilter(request.GET, queryset=Finding.objects.filter(test=test).distinct())
         filename = "test_finding_report.pdf"
     elif type(obj).__name__ == "Endpoint":
         endpoint = obj
         findings = ReportFindingFilter(request.GET, queryset=Finding.objects.filter(endpoints__in=[endpoint],
-                                                                                    is_template=False).distinct())
+                                                                                    ).distinct())
         filename = "endpoint_finding_report.pdf"
     elif type(obj).__name__ == "QuerySet":
         findings = ReportAuthedFindingFilter(request.GET, queryset=obj.distinct(), user=request.user)
@@ -3267,7 +3288,7 @@ def generate_report(request, obj):
                                      extra_tags='alert-danger')
         else:
             raise Http404()
-    paged_findings = get_page_items(request, findings, 30)
+    paged_findings = get_page_items(request, findings, 25)
     return render(request, 'dojo/request_report.html',
                   {'product_type': product_type,
                    'product': product,
@@ -3622,14 +3643,15 @@ Product Type views
 
 
 def product_type(request):
-    ptl = Product_Type.objects.all().order_by('name')
-    pts = get_page_items(request, ptl, 15)
+    ptl = ProductTypeFilter(request.GET, queryset=Product_Type.objects.all().order_by('name'))
+    pts = get_page_items(request, ptl, 25)
     return render(request, 'dojo/product_type.html', {
         'name': 'Product Type List',
         'breadcrumbs': get_breadcrumbs(title="Product Type List", user=request.user),
         'metric': False,
         'user': request.user,
-        'pts': pts})
+        'pts': pts,
+        'ptl': ptl})
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -3697,14 +3719,16 @@ Test Type views
 
 @user_passes_test(lambda u: u.is_staff)
 def test_type(request):
-    test_types = Test_Type.objects.all().order_by('name')
-    tts = get_page_items(request, test_types, 15)
+    test_types = TestTypeFilter(request.GET, queryset=Test_Type.objects.all().order_by('name'))
+    tts = get_page_items(request, test_types, 25)
+
     return render(request, 'dojo/test_type.html', {
         'name': 'Test Type List',
         'breadcrumbs': get_breadcrumbs(title="Test Type List", user=request.user),
         'metric': False,
         'user': request.user,
-        'tts': tts})
+        'tts': tts,
+        'test_types': test_types})
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -3754,8 +3778,9 @@ def edit_test_type(request, ptid):
 
 @user_passes_test(lambda u: u.is_staff)
 def dev_env(request):
-    devs = Development_Environment.objects.all().order_by('name')
-    dev_page = get_page_items(request, devs, 15)
+    devs = DevelopmentEnvironmentFilter(request.GET, queryset=Development_Environment.objects.all().order_by('name'))
+    dev_page = get_page_items(request, devs, 25)
+
     return render(request, 'dojo/dev_env.html', {
         'name': 'Development Environment List',
         'breadcrumbs': get_breadcrumbs(title="Development Environment List", user=request.user),
@@ -3938,7 +3963,8 @@ def alerts(request):
 
 
 def get_page_items(request, items, page_size, param_name='page'):
-    paginator = Paginator(items, page_size)
+    size = request.GET.get('page_size', page_size)
+    paginator = Paginator(items, size)
     page = request.GET.get(param_name)
     try:
         page = paginator.page(page)
@@ -4053,6 +4079,12 @@ def vulnerable_endpoints(request):
     endpoints = Endpoint.objects.filter(finding__active=True,
                                         finding__verified=True,
                                         finding__mitigated__isnull=True).distinct()
+    product = None
+    if 'product' in request.GET:
+        p = request.GET.getlist('product', [])
+        if len(p) == 1:
+            product = get_object_or_404(Product, id=p[0])
+
     endpoints = EndpointFilter(request.GET, queryset=endpoints)
 
     paged_endpoints = get_page_items(request, endpoints, 25)
@@ -4062,7 +4094,7 @@ def vulnerable_endpoints(request):
                   {"endpoints": paged_endpoints,
                    "filtered": endpoints,
                    "name": "Vulnerable Endpoints",
-                   'breadcrumbs': get_breadcrumbs(title="Vulnerable Endpoints", user=request.user)})
+                   'breadcrumbs': get_breadcrumbs(obj=product, title="Vulnerable Endpoints", user=request.user)})
 
 
 def all_endpoints(request):
@@ -4076,6 +4108,13 @@ def all_endpoints(request):
             endpoints = endpoints.filter(product__in=products.all())
         else:
             raise PermissionDenied
+
+    product = None
+    if 'product' in request.GET:
+        p = request.GET.getlist('product', [])
+        if len(p) == 1:
+            product = get_object_or_404(Product, id=p[0])
+
     endpoints = EndpointFilter(request.GET, queryset=endpoints, user=request.user)
     paged_endpoints = get_page_items(request, endpoints, 25)
 
@@ -4084,7 +4123,7 @@ def all_endpoints(request):
                   {"endpoints": paged_endpoints,
                    "filtered": endpoints,
                    "name": "All Endpoints",
-                   'breadcrumbs': get_breadcrumbs(title="All Endpoints", user=request.user)})
+                   'breadcrumbs': get_breadcrumbs(obj=product, title="All Endpoints", user=request.user)})
 
 
 def view_endpoint(request, eid):
@@ -4107,7 +4146,7 @@ def view_endpoint(request, eid):
     # include current month
     months_between += 1
 
-    monthly_counts = get_period_counts(findings, findings, months_between, start_date, relative_delta='months')
+    monthly_counts = get_period_counts(findings, findings, None, months_between, start_date, relative_delta='months')
     paged_findings = get_page_items(request, findings, 25)
     return render(request,
                   "dojo/view_endpoint.html",
@@ -4358,7 +4397,7 @@ def action_history(request, cid, oid):
 
     history = LogEntry.objects.filter(content_type=ct, object_pk=obj.id).order_by('-timestamp')
     history = LogEntryFilter(request.GET, queryset=history)
-    paged_history = get_page_items(request, history, 15)
+    paged_history = get_page_items(request, history, 25)
 
     return render(request, 'dojo/action_history.html',
                   {"history": paged_history,

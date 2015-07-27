@@ -12,10 +12,10 @@
 {% block content %}
     <div class="row">
         <div class="col-md-12">
-            <p>Copy your authorization header value from <a href="{% url 'api_key' %}">here</a> and paste into this
-                form. Click
-                explore to apply the key, you should now be able to test each call.</p>
-
+            <div class="well">
+                <p>Copy your authorization header value from <a href="{% url 'api_key' %}">here</a> and paste into this
+                    form. Click explore to apply the key, you should now be able to test each call.</p>
+            </div>
             <div id='header'>
                 <div class="swagger-ui-wrap">
                     <form id='api_selector'>

@@ -1,23 +1,21 @@
-from auditlog.models import LogEntry
-
 __author__ = 'Jay Paz'
+from auditlog.models import LogEntry
 from datetime import timedelta, datetime
 import collections
 
 from django.conf import settings
+from django import forms
 
 from django_filters.filters import ChoiceFilter, _truncate
 from django.utils.translation import ugettext_lazy as _
 from django.utils import six
 from django_filters import FilterSet, CharFilter, \
-    ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter, \
-    TypedChoiceFilter, BooleanFilter
+    ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter
 from django.contrib.auth.models import User
 from pytz import timezone
-from distutils.util import strtobool
 
 from dojo.models import Dojo_User, Product_Type, Finding, \
-    Product, Test_Type, Endpoint
+    Product, Test_Type, Endpoint, Development_Environment
 
 local_tz = timezone(settings.TIME_ZONE)
 SEVERITY_CHOICES = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
@@ -27,6 +25,15 @@ BOOLEAN_CHOICES = (('false', 'No'), ('true', 'Yes'),)
 
 def now():
     return local_tz.localize(datetime.today())
+
+
+class DojoFilter(FilterSet):
+    def __init__(self, *args, **kwargs):
+        super(DojoFilter, self).__init__(*args, **kwargs)
+        page_size = forms.ChoiceField(
+            choices=((25, 25), (50, 50), (75, 75), (100, 100), (150, 150),),
+            required=False)
+        self.form.fields['page_size'] = page_size
 
 
 class DateRangeFilter(ChoiceFilter):
@@ -206,7 +213,7 @@ class MetricsDateRangeFilter(ChoiceFilter):
         return self.options[value][1](self, qs, self.name)
 
 
-class EngagementFilter(FilterSet):
+class EngagementFilter(DojoFilter):
     engagement__name = CharFilter(lookup_type='icontains')
     engagement__lead = ModelChoiceFilter(
         queryset=User.objects.filter(
@@ -224,7 +231,7 @@ class EngagementFilter(FilterSet):
                     ('prod_type', 'Product Type'),)
 
 
-class ProductFilter(FilterSet):
+class ProductFilter(DojoFilter):
     name = CharFilter(lookup_type='icontains', label="Product Name")
     prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all().order_by('name'),
@@ -247,7 +254,7 @@ class ProductFilter(FilterSet):
                     ('prod_type', 'Product Type'),)
 
 
-class OpenFindingFilter(FilterSet):
+class OpenFindingFilter(DojoFilter):
     title = CharFilter(lookup_type='icontains')
     date = DateRangeFilter()
     cwe = MultipleChoiceFilter(choices=[])
@@ -302,7 +309,7 @@ class OpenFingingSuperFilter(OpenFindingFilter):
         label="Product Type")
 
 
-class ClosedFindingFilter(FilterSet):
+class ClosedFindingFilter(DojoFilter):
     title = CharFilter(lookup_type='icontains')
     mitigated = DateRangeFilter(label="Mitigated Date")
     cwe = MultipleChoiceFilter(choices=[])
@@ -351,7 +358,7 @@ class ClosedFingingSuperFilter(ClosedFindingFilter):
         queryset=Dojo_User.objects.all())
 
 
-class AcceptedFindingFilter(FilterSet):
+class AcceptedFindingFilter(DojoFilter):
     title = CharFilter(lookup_type='icontains')
     test__engagement__risk_acceptance__created = \
         DateRangeFilter(label="Acceptance Date")
@@ -407,7 +414,7 @@ class AcceptedFingingSuperFilter(AcceptedFindingFilter):
             label="Risk Acceptance Reporter")
 
 
-class ProductFindingFilter(FilterSet):
+class ProductFindingFilter(DojoFilter):
     title = CharFilter(lookup_type='icontains')
     date = DateRangeFilter()
     cwe = MultipleChoiceFilter(choices=[])
@@ -482,7 +489,7 @@ class FindingStatusFilter(ChoiceFilter):
         return self.options[value][1](self, qs, self.name)
 
 
-class MetricsFindingFilter(FilterSet):
+class MetricsFindingFilter(DojoFilter):
     date = MetricsDateRangeFilter()
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all().order_by('name'),
@@ -499,7 +506,7 @@ class MetricsFindingFilter(FilterSet):
         self.form.fields['severity'].choices = sevs.items()
 
 
-class EndpointFilter(FilterSet):
+class EndpointFilter(DojoFilter):
     product = ModelMultipleChoiceFilter(
         queryset=Product.objects.all().order_by('name'),
         label="Product")
@@ -521,7 +528,7 @@ class EndpointFilter(FilterSet):
         model = Endpoint
 
 
-class EndpointReportFilter(FilterSet):
+class EndpointReportFilter(DojoFilter):
     host = CharFilter(lookup_type='icontains')
     path = CharFilter(lookup_type='icontains')
     query = CharFilter(lookup_type='icontains')
@@ -534,7 +541,7 @@ class EndpointReportFilter(FilterSet):
         exclude = ['product']
 
 
-class ReportFindingFilter(FilterSet):
+class ReportFindingFilter(DojoFilter):
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     active = ReportBooleanFilter()
     mitigated = MitigatedDateRangeFilter()
@@ -551,7 +558,7 @@ class ReportFindingFilter(FilterSet):
                    'numerical_severity', 'reporter']
 
 
-class ReportAuthedFindingFilter(FilterSet):
+class ReportAuthedFindingFilter(DojoFilter):
     test__engagement__product = ModelMultipleChoiceFilter(queryset=Product.objects.all(), label="Product")
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     active = ReportBooleanFilter()
@@ -578,7 +585,7 @@ class ReportAuthedFindingFilter(FilterSet):
                    'numerical_severity', 'reporter']
 
 
-class UserFilter(FilterSet):
+class UserFilter(DojoFilter):
     first_name = CharFilter(lookup_type='icontains')
     last_name = CharFilter(lookup_type='icontains')
     username = CharFilter(lookup_type='icontains')
@@ -592,8 +599,9 @@ class UserFilter(FilterSet):
                     ('first_name', 'First Name'),)
 
 
-class LogEntryFilter(FilterSet):
+class LogEntryFilter(DojoFilter):
     from auditlog.models import LogEntry
+
     action = MultipleChoiceFilter(choices=LogEntry.Action.choices)
     actor = ModelMultipleChoiceFilter(queryset=Dojo_User.objects.all())
     timestamp = DateRangeFilter()
@@ -601,3 +609,27 @@ class LogEntryFilter(FilterSet):
     class Meta:
         model = LogEntry
         exclude = ['content_type', 'object_pk', 'object_id', 'object_repr', 'changes']
+
+
+class ProductTypeFilter(DojoFilter):
+    name = CharFilter(lookup_type='icontains')
+
+    class Meta:
+        model = Product_Type
+        include = ('name',)
+
+
+class TestTypeFilter(DojoFilter):
+    name = CharFilter(lookup_type='icontains')
+
+    class Meta:
+        model = Test_Type
+        include = ('name',)
+
+
+class DevelopmentEnvironmentFilter(DojoFilter):
+    name = CharFilter(lookup_type='icontains')
+
+    class Meta:
+        model = Development_Environment
+        include = ('name',)

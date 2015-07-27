@@ -15,19 +15,33 @@
                             <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                            <li role="presentation"><a href="{% url 'edit_finding' finding.id %}"> Edit Finding </a>
-                            </li>
-                            <li role="presentation"><a href="{% url 'mktemplate' finding.id %}"> Make Finding a
-                                Template</a>
-                            </li>
-                            <li role="presentation"><a href="{% url 'close_finding' finding.id %}"> Close Finding</a>
-                            </li>
-                            <li role="presentation"><a href="{% url 'delete_finding' finding.id %}"
-                                                       onclick="return confirm('Are you sure you want to delete this finding?')">
-                                Delete Finding </a></li>
+                            <li role="presentation">
+                                <a href="{% url 'edit_finding' finding.id %}">
+                                    <i class="fa fa-pencil-square-o"></i> Edit Finding
+                                </a>
                             </li>
                             <li role="presentation">
-                                <a href="{% url 'action_history' finding|content_type finding.id %}">View History</a>
+                                <a href="{% url 'mktemplate' finding.id %}">
+                                    <i class="fa fa-copy"></i> Make Finding a Template
+                                </a>
+                            </li>
+                            <li role="presentation">
+                                <a href="{% url 'close_finding' finding.id %}">
+                                    <i class="fa fa-close"></i> Close Finding
+                                </a>
+                            </li>
+                            <li role="presentation">
+                                <a href="{% url 'action_history' finding|content_type finding.id %}">
+                                    <i class="fa fa-history"></i> View History
+                                </a>
+                            </li>
+                            <li role="separator" class="divider"></li>
+                            <li role="presentation">
+                                <a class="text-danger" href="{% url 'delete_finding' finding.id %}"
+                                                       onclick="return confirm('Are you sure you want to delete this finding?')">
+                                    <i class="fa fa-trash"></i> Delete Finding
+                                </a>
+                            </li>
                             </li>
                         </ul>
                     </div>

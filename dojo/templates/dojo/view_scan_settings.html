@@ -32,16 +32,19 @@
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                                <li role="presentation"><a
-                                        href='{% url 'edit_scan_settings' scan_settings.product.id scan_settings.id %}'>
-                                    Edit Settings</a>
+                                <li role="presentation">
+                                    <a href='{% url 'edit_scan_settings' scan_settings.product.id scan_settings.id %}'>
+                                        <i class="fa fa-pencil-square-o"></i> Edit Settings
+                                    </a>
                                 </li>
                                 <li role="presentation">
                                     <form id="start-scan-now" class="form-inline" method="post">
                                         {% csrf_token %}
                                         <input type="hidden" name="scan_now" value="Scan Now"/>
                                     </form>
-                                    <a href="#" onclick="$('#start-scan-now').submit()">Scan Now</a>
+                                    <a href="#" onclick="$('#start-scan-now').submit()">
+                                        <i class="fa fa-rocket"></i> Launch Scan Now
+                                    </a>
                                 </li>
 
                             </ul>

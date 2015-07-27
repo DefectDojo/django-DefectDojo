@@ -391,7 +391,7 @@
                                 </tr>
                                 {% for key, value in closed_in_period_details.items %}
                                     <tr>
-                                        <td>{{ key }}</td>
+                                        <td><a href="{{ value.path }}">{{ key }}</a></td>
                                         <td>{{ value.Critical }}</td>
                                         <td>{{ value.High }}</td>
                                         <td>{{ value.Medium }}</td>
