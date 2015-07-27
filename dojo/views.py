@@ -53,7 +53,8 @@ from dojo.filters import ProductFilter, OpenFindingFilter, \
     OpenFingingSuperFilter, AcceptedFingingSuperFilter, \
     ProductFindingFilter, EngagementFilter, \
     ClosedFingingSuperFilter, MetricsFindingFilter, ReportFindingFilter, EndpointFilter, \
-    ReportAuthedFindingFilter, EndpointReportFilter, UserFilter, LogEntryFilter, ProductTypeFilter, TestTypeFilter
+    ReportAuthedFindingFilter, EndpointReportFilter, UserFilter, LogEntryFilter, ProductTypeFilter, \
+    TestTypeFilter, DevelopmentEnvironmentFilter
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -3786,7 +3787,8 @@ def dev_env(request):
         'breadcrumbs': get_breadcrumbs(title="Development Environment List", user=request.user),
         'metric': False,
         'user': request.user,
-        'devs': dev_page})
+        'devs': dev_page,
+        'dts': devs})
 
 
 @user_passes_test(lambda u: u.is_staff)
