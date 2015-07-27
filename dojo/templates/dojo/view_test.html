@@ -13,15 +13,30 @@
                         <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                        <li role="presentation"><a
-                                href="{% url 'test_report' test.id %}"> Generate Report</a></li>
-                        <li role="presentation"><a
-                                href="{% url 'add_findings' test.id %}"> Add Findings </a></li>
-                        <li role="presentation"><a href="#add_notes"> Add Notes </a></li>
-                        <li role="presentation" class="divider"></li>
-                        <li role="presentation"><a href="{% url 'edit_test' test.id %}"> Edit Test </a></li>
                         <li role="presentation">
-                            <a href="{% url 'action_history' test|content_type test.id %}">View History</a>
+                            <a href="{% url 'edit_test' test.id %}">
+                                <i class="fa fa-pencil-square-o" ></i> Edit Test
+                            </a>
+                        </li>
+                        <li role="presentation">
+                            <a href="{% url 'add_findings' test.id %}">
+                                <i class="fa fa-bug" ></i> Add Findings
+                            </a>
+                        </li>
+                        <li role="presentation">
+                            <a href="#add_notes">
+                                <i class="fa fa-comments" ></i> Add Notes
+                            </a>
+                        </li>
+                        <li role="presentation">
+                            <a href="{% url 'test_report' test.id %}">
+                                <i class="fa fa-file-text-o" ></i> Generate Report
+                            </a>
+                        </li>
+                        <li role="presentation">
+                            <a href="{% url 'action_history' test|content_type test.id %}">
+                                <i class="fa fa-history" ></i> View History
+                            </a>
                         </li>
                     </ul>
                 </div>

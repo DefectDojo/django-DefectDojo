@@ -1,18 +1,5 @@
 $(function () {
-    $(".datepicker").datepicker();
-
-    $.tablesorter.addParser({
-        id: 'severity',
-        is: function (s) {
-            return false;
-        },
-        format: function (s) {
-            return s.toLowerCase().replace(/critical/, 0).replace(/high/, 1).replace(/medium/, 2).replace(/low/, 3).replace(/info/, 4);
-        },
-        type: 'numeric'
-    });
-
-    $('#tabs').tabs();
+    $(".datepicker").datepicker({"dateFormat": "yy-mm-dd"});
 
     $('form#replace_risk_file input[type="file"], div.controls.file input').change(function () {
         $(this).closest("form").submit()
@@ -22,20 +9,13 @@ $(function () {
         $("ul#id_accepted_findings input").attr('checked', true);
     })
 
-
     setTimeout(function () {
         $('.alert-dismissible').slideUp('slow')
     }, 20000);
 
-
-});
-
-$(function () {
-
     $('#side-menu').metisMenu(
         {doubleTapToGo: false}
     );
-
 });
 
 function dismissAddAnotherPopupDojo(win, newId, newRepr) {
@@ -127,7 +107,7 @@ function punchcard(element, data, ticks) {
             content: function (label, xval, yval, flotItem) {
                 for (var x = 0; x < flotItem.series.data.length; x++) {
                     if (xval == flotItem.series.data[x][0] && yval == flotItem.series.data[x][1]) {
-                        yeah = Math.ceil(flotItem.series.data[x][2]*highest_count);
+                        yeah = Math.ceil(flotItem.series.data[x][2] * highest_count);
                         break;
                     }
                 }

@@ -1,49 +1,94 @@
 {% extends "base.html" %}
 {% block content %}
-    {% if user.is_staff %}
-        <a class="btn btn-primary" href="{% url 'add_product_type' %}"> New Product Type </a>
-        <br/>
-        <br/>
-    {% endif %}
-    {% if pts %}
-        <div class="panel panel-default table-responsive">
-            <table id="product_types"
-                   class="tablesorter-bootstrap table table-bordered table-condensed table-striped">
-                <thead>
-                <tr>
-                    <th> Product Type</th>
-                    <th> # of Products</th>
-                    <th> # of active findings</th>
-                    {% if user.is_staff %}
-                        <th> Actions</th>{% endif %}
-                </tr>
-                </thead>
-                <tbody>
-                {% for pt in pts %}
-                    <tr>
-                        <td><a href="{% url 'edit_product_type' pt.id %}"> {{ pt.name }} </a></td>
-                        <td> {{ pt.products_count }}</td>
-                        <td> {{ pt.findings_count }}</td>
-                        {% if user.is_staff %}
-                            <td>
-                                <div class="btn-group">
-                                    <a class="btn btn-sm btn-primary" href="{% url 'add_product_to_product_type' pt.id %}">
-                                        Add Product
+    <div class="row">
+        <div class="col-md-10">
+            {% if pts %}
+                <div class="panel panel-default table-responsive">
+                    <table id="product_types"
+                           class="tablesorter-bootstrap table table-bordered table-condensed table-striped">
+                        <thead>
+                        <tr>
+                            <th> Product Type</th>
+                            <th> # of Products</th>
+                            <th> # of active findings</th>
+                            {% if user.is_staff %}
+                                <th> Actions</th>{% endif %}
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for pt in pts %}
+                            <tr>
+                                <td><a href="{% url 'edit_product_type' pt.id %}"> {{ pt.name }} </a></td>
+                                <td><a href="{% url 'product' %}?prod_type={{ pt.id }}">{{ pt.products_count }}</a></td>
+                                <td>
+                                    <a href="{% url 'open_findings' %}?test__engagement__product__prod_type={{ pt.id }}">
+                                        {{ pt.findings_count }}
                                     </a>
-                                    <a class="btn btn-sm btn-warning" href="{% url 'product_type_report' pt.id %}">
-                                        Generate Report
-                                    </a>
-                                </div>
-                            </td>
-                        {% endif %}
+                                </td>
+                                {% if user.is_staff %}
+                                    <td>
+                                        <div class="btn-group">
+                                            <a class="btn btn-sm btn-primary"
+                                               href="{% url 'add_product_to_product_type' pt.id %}">
+                                                Add Product
+                                            </a>
+                                            <a class="btn btn-sm btn-warning"
+                                               href="{% url 'product_type_report' pt.id %}">
+                                                Generate Report
+                                            </a>
+                                        </div>
+                                    </td>
+                                {% endif %}
 
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% include "dojo/paging_snippet.html" with page=prod_list %}
+            {% else %}
+                <p>No product types found.</p>
+            {% endif %}
         </div>
-    {% else %}
-        No product types found.
-    {% endif %}
-    {% include "dojo/paging_snippet.html" with page=pts %}
+        <div class="col-md-2">
+            <div class="panel panel-default filters">
+
+                <div class="panel-heading">Actions</div>
+                <div class="panel-body centered">
+                    {% if request.user.is_staff %}
+                        <a class="btn btn-primary" href="/product/type/add"> New Product Type </a>
+                    {% endif %}
+                </div>
+
+                <div class="panel-heading">Filters</div>
+                <form method="get" class="panel-body">
+                    {{ ptl.form.as_p }}
+                    <div class="centered">
+                        <input type="submit" class="btn btn-sm btn-primary" value="Apply"/><br/><br/>
+                        <a href="{% url 'product_type' %}" class="clear"> [Clear Filters] </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 {% endblock %}
+{% block postscript %}
+    <script>
+        $(function () {
+            var availableTags = [
+                {% for word in name_words %}
+                    "{{word}}",
+                {% endfor %}
+            ];
+            $("#id_name").autocomplete({
+                source: availableTags
+            });
+        });
+    </script>
+{% endblock %}
+
+
+
+
+
+

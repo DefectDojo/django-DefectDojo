@@ -1,35 +1,75 @@
 {% extends "base.html" %}
 {% block content %}
-    {% if user.is_staff %}
-        <a class="btn btn-primary" href="{%  url 'add_dev_env' %}"> New Development Environment </a>
-        <br/>
-        <br/>
-    {% endif %}
-    {% if devs %}
-        <div class="table-responsive panel panel-default">
-            <table id="test_types"
-                   class="tablesorter-bootstrap table table-bordered table-condensed table-striped">
-                <thead>
-                <tr>
-                    <th> Development Environment</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for de in devs %}
-                    <tr>
-                        {% if user.is_staff %}
-                            <td><a href="{% url 'edit_dev_env' de.id %}"> {{ de.name }} </a></td>
-                        {% else %}
-                            <td> {{ de.name }} </a> </td>
-                        {% endif %}
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+    <div class="row">
+        <div class="col-md-10">
+            {% if devs %}
+                <div class="panel panel-default table-responsive">
+                    <table id="test_types"
+                           class="tablesorter-bootstrap table table-bordered table-condensed table-striped">
+                        <thead>
+                        <tr>
+                            <th> Development Environment</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for de in devs %}
+                            <tr>
+                                {% if user.is_staff %}
+                                    <td><a href="{% url 'edit_dev_env' de.id %}"> {{ de.name }} </a></td>
+                                {% else %}
+                                    <td> {{ de.name }} </a> </td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% include "dojo/paging_snippet.html" with page=prod_list %}
+            {% else %}
+                <p>No development environments found.</p>
+            {% endif %}
         </div>
-    {% else %}
-        No development environments found.
-    {% endif %}
+        <div class="col-md-2">
+            <div class="panel panel-default filters">
 
-    {% include "dojo/paging_snippet.html" with page=devs %}
+                <div class="panel-heading">Actions</div>
+                <div class="panel-body centered">
+                    {% if request.user.is_staff %}
+                        <a class="btn btn-primary btn-sm" href="{%  url 'add_dev_env' %}"> New Dev Environment </a>
+                    {% endif %}
+                </div>
+
+                <div class="panel-heading">Filters</div>
+                <form method="get" class="panel-body">
+                    {{ df.form.as_p }}
+                    <div class="centered">
+                        <input type="submit" class="btn btn-sm btn-primary" value="Apply"/><br/><br/>
+                        <a href="{% url 'dev_env' %}" class="clear"> [Clear Filters] </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 {% endblock %}
+{% block postscript %}
+    <script>
+        $(function () {
+            var availableTags = [
+                {% for word in name_words %}
+                    "{{word}}",
+                {% endfor %}
+            ];
+            $("#id_name").autocomplete({
+                source: availableTags
+            });
+        });
+    </script>
+{% endblock %}
+
+
+
+
+
+
+
+

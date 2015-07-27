@@ -67,26 +67,38 @@
                         <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                        <li role="presentation"><a class="" href="{% url 'edit_engagement' eng.id %}"> Edit
-                            Engagement </a>
+                        <li role="presentation">
+                            <a class="" href="{% url 'edit_engagement' eng.id %}">
+                                <i class="fa fa-pencil-square-o"></i> Edit Engagement
+                            </a>
                         </li>
-                        <li role="presentation"><a class="" href="{% url 'delete_engagement' eng.id %}"> Delete
-                            Engagement </a>
-                        </li>
+
                         <li role="presentation">
                             {% if eng.active %}
-                                <a class="" href="{% url 'close_engagement' eng.id %}"> Close
-                                    Engagement</a>
+                                <a class="" href="{% url 'close_engagement' eng.id %}">
+                                    <i class="fa fa-close"></i> Close Engagement
+                                </a>
                             {% else %}
-                                <a class="" href="{% url 'reopen_engagement' eng.id %}"> Reopen
-                                    Engagement</a>
+                                <a class="" href="{% url 'reopen_engagement' eng.id %}">
+                                    <i class="fa fa-undo"></i> Reopen Engagement
+                                </a>
                             {% endif %}
                         </li>
                         <li role="presentation">
-                            <a href="{% url 'engagement_report' eng.id %}">Generate Report</a>
+                            <a href="{% url 'engagement_report' eng.id %}">
+                                <i class="fa fa-file-text-o"></i> Generate Report
+                            </a>
                         </li>
                         <li role="presentation">
-                            <a href="{% url 'action_history' eng|content_type eng.id %}">View History</a>
+                            <a href="{% url 'action_history' eng|content_type eng.id %}">
+                                <i class="fa fa-history"></i> View History
+                            </a>
+                        </li>
+                        <li role="separator" class="divider"></li>
+                        <li role="presentation">
+                            <a class="text-danger" href="{% url 'delete_engagement' eng.id %}">
+                                <i class="fa fa-trash-o"></i> Delete Engagement
+                            </a>
                         </li>
                     </ul>
                 </div>
@@ -180,19 +192,24 @@
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                                 <li role="presentation">
-                                    <a class="" href="{% url 'add_tests' eng.id %}"> Add Tests</a>
+                                    <a class="" href="{% url 'add_tests' eng.id %}">
+                                        <i class="fa fa-plus"></i> Add Tests
+                                    </a>
                                 </li>
                                 <li role="presentation">
-                                    <a class="" href="{% url 'add_burp_scan' eng.id %}">Upload Burp Scan</a>
+                                    <a class="" href="{% url 'add_burp_scan' eng.id %}">
+                                        <i class="fa fa-upload"></i> Upload Burp Scan
+                                    </a>
                                 </li>
                                 <li role="presentation">
-                                    <a class="" href="{% url 'add_nessus_scan' eng.id %}">Upload Nessus Scan</a>
+                                    <a class="" href="{% url 'add_nessus_scan' eng.id %}">
+                                        <i class="fa fa-upload"></i> Upload Nessus Scan
+                                    </a>
                                 </li>
                                 <li role="presentation">
-                                    <a class="" href="{% url 'add_veracode_scan' eng.id %}">Upload Veracode Scan</a>
-                                </li>
-                                <li role="presentation">
-                                    <a class="" href="{% url 'view_product' eng.product.id %}">Done Testing</a>
+                                    <a class="" href="{% url 'add_veracode_scan' eng.id %}">
+                                        <i class="fa fa-upload"></i> Upload Veracode Scan
+                                    </a>
                                 </li>
                             </ul>
                         </div>

@@ -405,11 +405,6 @@ br {
     margin: 0px 0 5px 0 !important;
 }
 
-.filters a.clear {
-    clear: both;
-    float: right;
-}
-
 .filters .helptext {
     display: none;
 }
@@ -632,4 +627,8 @@ span.endpoint_product {
 .endpoint-panel {
     overflow-x: scroll;
     max-height: 205px;
+}
+
+.dropdown-menu>li>a.text-danger{
+    color: #a94442;
 }

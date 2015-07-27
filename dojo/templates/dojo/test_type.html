@@ -1,35 +1,74 @@
 {% extends "base.html" %}
 {% block content %}
-
-    {% if user.is_staff %}
-        <a class="btn btn-primary" href="{%  url 'add_test_type' %}"> New Test Type </a>
-        <br/>
-        <br/>
-    {% endif %}
-    {% if tts %}
-        <div class="table-responsive panel panel-default">
-            <table id="test_types"
-                   class="tablesorter-bootstrap table table-bordered table-condensed table-striped">
-                <thead>
-                <tr>
-                    <th> Test Type</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for tt in tts %}
-                    <tr>
-                        {% if user.is_staff %}
-                            <td><a href="{% url 'edit_test_type' tt.id %}"> {{ tt.name }} </a></td>
-                        {% else %}
-                            <td> {{ tt.name }} </a> </td>
-                        {% endif %}
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+    <div class="row">
+        <div class="col-md-10">
+            {% if tts %}
+                <div class="panel panel-default table-responsive">
+                    <table id="test_types"
+                           class="tablesorter-bootstrap table table-bordered table-condensed table-striped">
+                        <thead>
+                        <tr>
+                            <th> Test Type</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for tt in tts %}
+                            <tr>
+                                {% if user.is_staff %}
+                                    <td><a href="{% url 'edit_test_type' tt.id %}"> {{ tt.name }} </a></td>
+                                {% else %}
+                                    <td> {{ tt.name }} </a> </td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% include "dojo/paging_snippet.html" with page=prod_list %}
+            {% else %}
+                <p>No test types found.</p>
+            {% endif %}
         </div>
-    {% else %}
-        No test types found.
-    {% endif %}
-    {% include "dojo/paging_snippet.html" with page=tts %}
+        <div class="col-md-2">
+            <div class="panel panel-default filters">
+
+                <div class="panel-heading">Actions</div>
+                <div class="panel-body centered">
+                    {% if request.user.is_staff %}
+                        <a class="btn btn-primary" href="{%  url 'add_test_type' %}"> New Test Type </a>
+                    {% endif %}
+                </div>
+
+                <div class="panel-heading">Filters</div>
+                <form method="get" class="panel-body">
+                    {{ test_types.form.as_p }}
+                    <div class="centered">
+                        <input type="submit" class="btn btn-sm btn-primary" value="Apply"/><br/><br/>
+                        <a href="{% url 'test_type' %}" class="clear"> [Clear Filters] </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 {% endblock %}
+{% block postscript %}
+    <script>
+        $(function () {
+            var availableTags = [
+                {% for word in name_words %}
+                    "{{word}}",
+                {% endfor %}
+            ];
+            $("#id_name").autocomplete({
+                source: availableTags
+            });
+        });
+    </script>
+{% endblock %}
+
+
+
+
+
+
+

@@ -10,7 +10,7 @@
                         <tr>
                             <th> Product</th>
                             <th> Active<br/>findings</th>
-                            <th> Product<br/>endpoints</th>
+                            <th> Vulnerable<br/>endpoints</th>
                             <th> Product Type</th>
                             {% if user.is_staff %}
                                 <th> Engagement</th>
@@ -31,7 +31,7 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <a href="{% url 'endpoints' %}?product={{ prod.id }}"><b>{{ prod.endpoint_count }}</b></a>
+                                    <a href="{% url 'vulnerable_endpoints' %}?product={{ prod.id }}"><b>{{ prod.endpoint_count }}</b></a>
                                 </td>
                                 <td> {{ prod.prod_type.name }}</td>
                                 {% if user.is_staff %}

@@ -27,17 +27,26 @@
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                                <li role="presentation"><a href="{% url 'edit_endpoint' endpoint.id %}"> Edit
-                                    Endpoint </a>
-                                </li>
-                                <li role="presentation"><a href="{% url 'endpoint_report' endpoint.id %}"> Generate
-                                    Report</a>
-                                </li>
-                                <li role="presentation"><a href="{% url 'delete_endpoint' endpoint.id %}">
-                                    Delete Endpoint </a></li>
+                                <li role="presentation">
+                                    <a href="{% url 'edit_endpoint' endpoint.id %}">
+                                        <i class="fa fa-pencil-square-o"></i> Edit Endpoint
+                                    </a>
                                 </li>
                                 <li role="presentation">
-                                    <a href="{% url 'action_history' endpoint|content_type endpoint.id %}">View History</a>
+                                    <a href="{% url 'endpoint_report' endpoint.id %}">
+                                        <i class="fa fa-file-text-o"></i>  Generate Report
+                                    </a>
+                                </li>
+                                <li role="presentation">
+                                    <a href="{% url 'action_history' endpoint|content_type endpoint.id %}">
+                                        <i class="fa fa-history"></i> View History
+                                    </a>
+                                </li>
+                                <li role="separator" class="divider"></li>
+                                <li role="presentation" class="text-danger">
+                                    <a class="text-danger" href="{% url 'delete_endpoint' endpoint.id %}">
+                                        <i class="fa fa-trash-o"></i> Delete Endpoint
+                                    </a>
                                 </li>
                             </ul>
                         {% endif %}
@@ -166,6 +175,7 @@
     <script src="{{ STATIC_URL }}flot/jquery.flot.js"></script>
     <script src="{{ STATIC_URL }}flot/jquery.flot.resize.js"></script>
     <script src="{{ STATIC_URL }}flot/jquery.flot.time.js"></script>
+    <script src="{{ STATIC_URL }}flot/jquery.flot.stack.js"></script>
     <script src="{{ STATIC_URL }}flot-axislabels/jquery.flot.axislabels.js"></script>
     <script type="text/javascript">
         $(function () {
@@ -414,6 +424,7 @@
                         min: 0
                     }],
                     series: {
+                        stack: true,
                         lines: {
                             show: true
                         },

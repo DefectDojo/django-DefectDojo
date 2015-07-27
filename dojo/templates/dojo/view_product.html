@@ -31,25 +31,42 @@
                         </button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                             {% if user.is_staff %}
-                                <li role="presentation"><a class="" href="{% url 'edit_product' prod.id %}">Edit</a>
-                                </li>
-                                <li role="presentation"><a class="" href="{% url 'delete_product' prod.id %}">Delete</a>
+                                <li role="presentation">
+                                    <a class="" href="{% url 'edit_product' prod.id %}">
+                                        <i class="fa fa-pencil-square-o"></i> Edit
+                                    </a>
                                 </li>
                             {% endif %}
                             <li role="presentation">
-                                <a href="{% url 'view_product_findings' prod.id %}">View Open Findings</a>
+                                <a href="{% url 'view_product_findings' prod.id %}">
+                                    <i class="fa fa-bug"></i> View Open Findings
+                                </a>
                             </li>
                             <li role="presentation">
-                                <a href="{% url 'product_report' prod.id %}">Generate Report</a>
+                                <a href="{% url 'product_report' prod.id %}">
+                                    <i class="fa fa-file-text-o"></i> Generate Report
+                                </a>
                             </li>
                             {% if prod.endpoint_count > 0 %}
                                 <li role="presentation">
-                                    <a href="{% url 'product_endpoint_report' prod.id %}">Generate Endpoint Report</a>
+                                    <a href="{% url 'product_endpoint_report' prod.id %}">
+                                        <i class="fa fa-file-text-o"></i> Generate Endpoint Report
+                                    </a>
                                 </li>
                             {% endif %}
                             <li role="presentation">
-                                <a href="{% url 'action_history' prod|content_type prod.id %}">View History</a>
+                                <a href="{% url 'action_history' prod|content_type prod.id %}">
+                                    <i class="fa fa-history"></i> View History
+                                </a>
                             </li>
+                            {% if user.is_staff %}
+                                <li role="separator" class="divider"></li>
+                                <li role="presentation">
+                                    <a class="text-danger" href="{% url 'delete_product' prod.id %}">
+                                        <i class="fa fa-trash"></i> Delete
+                                    </a>
+                                </li>
+                            {% endif %}
                         </ul>
                     </div>
                 </div>
