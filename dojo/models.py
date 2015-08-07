@@ -9,6 +9,7 @@ from django.db.models import Q
 from django.utils.timezone import now
 from pytz import timezone
 from auditlog.registry import auditlog
+
 localtz = timezone(settings.TIME_ZONE)
 
 
@@ -51,19 +52,18 @@ class Product_Type(models.Model):
     name = models.CharField(max_length=300)
 
     def findings_count(self):
-        findings = Finding.objects.filter(active=True, mitigated__isnull=True,
-                                          false_p=False, verified=True,
-                                          is_template=False)
-        findings = findings.filter(Q(severity="Critical") |
-                                   Q(severity="High") |
-                                   Q(severity="Medium") |
-                                   Q(severity="Low"))
-        findings = findings.filter(test__engagement__product__prod_type=self)
-        return len(findings)
+        return Finding.objects.filter(mitigated__isnull=True,
+                                      verified=True,
+                                      false_p=False,
+                                      duplicate=False,
+                                      out_of_scope=False,
+                                      test__engagement__product__prod_type=self).filter(Q(severity="Critical") |
+                                                                                        Q(severity="High") |
+                                                                                        Q(severity="Medium") |
+                                                                                        Q(severity="Low")).count()
 
     def products_count(self):
-        products = Product.objects.filter(prod_type=self)
-        return len(products)
+        return Product.objects.filter(prod_type=self).count()
 
     def __unicode__(self):
         return self.name
@@ -109,15 +109,12 @@ class Product(models.Model):
 
     @property
     def findings_count(self):
-        findings = Finding.objects.filter(active=True, mitigated__isnull=True,
-                                          false_p=False, verified=True)
-        e = Engagement.objects.filter(product=self)
-        f_count = 0
-        for engagement in e:
-            t = Test.objects.filter(engagement=engagement)
-            for test in t:
-                f_count += findings.filter(test=test).count()
-        return f_count
+        return Finding.objects.filter(mitigated__isnull=True,
+                                      verified=True,
+                                      false_p=False,
+                                      duplicate=False,
+                                      out_of_scope=False,
+                                      test__engagement__product=self).count()
 
     @property
     def endpoint_count(self):
@@ -131,28 +128,38 @@ class Product(models.Model):
             return {}
         else:
             critical = Finding.objects.filter(test__engagement__product=self,
-                                              active=True,
                                               mitigated__isnull=True,
-                                              false_p=False, verified=True,
+                                              verified=True,
+                                              false_p=False,
+                                              duplicate=False,
+                                              out_of_scope=False,
                                               severity="Critical",
                                               date__range=[start_date,
                                                            end_date]).count()
             high = Finding.objects.filter(test__engagement__product=self,
-                                          active=True, mitigated__isnull=True,
-                                          false_p=False, verified=True,
+                                          mitigated__isnull=True,
+                                          verified=True,
+                                          false_p=False,
+                                          duplicate=False,
+                                          out_of_scope=False,
                                           severity="High",
                                           date__range=[start_date,
                                                        end_date]).count()
             medium = Finding.objects.filter(test__engagement__product=self,
-                                            active=True,
                                             mitigated__isnull=True,
-                                            false_p=False, verified=True,
+                                            verified=True,
+                                            false_p=False,
+                                            duplicate=False,
+                                            out_of_scope=False,
                                             severity="Medium",
                                             date__range=[start_date,
                                                          end_date]).count()
             low = Finding.objects.filter(test__engagement__product=self,
-                                         active=True, mitigated__isnull=True,
-                                         false_p=False, verified=True,
+                                         mitigated__isnull=True,
+                                         verified=True,
+                                         false_p=False,
+                                         duplicate=False,
+                                         out_of_scope=False,
                                          severity="Low",
                                          date__range=[start_date,
                                                       end_date]).count()
@@ -161,40 +168,6 @@ class Product(models.Model):
                     'Medium': medium,
                     'Low': low,
                     'Total': (critical + high + medium + low)}
-
-    def reported_findings(self, start_date=None, end_date=None):
-        if start_date is None or end_date is None:
-            return {}
-        else:
-            critical = Finding.objects.filter(test__engagement__product=self,
-                                              false_p=False, verified=True,
-                                              severity="Critical",
-                                              date__range=[start_date,
-                                                           end_date])
-            high = Finding.objects.filter(test__engagement__product=self,
-                                          active=True, mitigated__isnull=True,
-                                          false_p=False, verified=True,
-                                          severity="High",
-                                          date__range=[start_date,
-                                                       end_date])
-            medium = Finding.objects.filter(test__engagement__product=self,
-                                            active=True,
-                                            mitigated__isnull=True,
-                                            false_p=False, verified=True,
-                                            severity="Medium",
-                                            date__range=[start_date,
-                                                         end_date])
-            low = Finding.objects.filter(test__engagement__product=self,
-                                         active=True, mitigated__isnull=True,
-                                         false_p=False, verified=True,
-                                         severity="Low",
-                                         date__range=[start_date,
-                                                      end_date])
-            return ((len(critical) + len(high) + len(medium) + len(low)),
-                    [critical,
-                     high,
-                     medium,
-                     low])
 
 
 class ScanSettings(models.Model):
