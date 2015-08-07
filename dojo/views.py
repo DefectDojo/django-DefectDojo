@@ -16,7 +16,6 @@ from xml.dom import NamespaceErr
 import time
 import calendar as tcalendar
 from urlparse import urlsplit
-
 from xml.etree.ElementTree import ParseError
 
 from easy_pdf.rendering import render_to_pdf_response
@@ -28,6 +27,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.validators import validate_ipv46_address
+from django.views.decorators.cache import cache_page
 from django.utils.html import escape
 from django.db.models import Q
 from django.http import HttpResponseRedirect, StreamingHttpResponse, HttpResponseForbidden, Http404, HttpResponse
@@ -103,6 +103,7 @@ view others metrics
 
 
 @user_passes_test(lambda u: u.is_staff)
+@cache_page(60 * 5)  # cache for 5 minutes
 def engineer_metrics(request):
     # checking if user is super_user
     if request.user.is_superuser:
@@ -126,6 +127,7 @@ and root can view others metrics
 
 # noinspection DjangoOrm
 @user_passes_test(lambda u: u.is_staff)
+@cache_page(60 * 5)  # cache for 5 minutes
 def view_engineer(request, eid):
     user = get_object_or_404(Dojo_User, pk=eid)
     if not (request.user.is_superuser
@@ -153,7 +155,7 @@ def view_engineer(request, eid):
     for f in findings:
         if (f.mitigated
             and f.mitigated.year == now.year
-            and f.mitigated.month == now.month):
+                and f.mitigated.month == now.month):
             closed_month.append(f)
 
     o_dict, open_count = count_findings(open_month)
@@ -462,9 +464,11 @@ engineer
 
 
 def open_findings(request):
-    findings = Finding.objects.filter(active=True,
+    findings = Finding.objects.filter(mitigated__isnull=True,
                                       verified=True,
-                                      mitigated__isnull=True)
+                                      false_p=False,
+                                      duplicate=False,
+                                      out_of_scope=False)
     if request.user.is_staff:
         findings = OpenFingingSuperFilter(request.GET, queryset=findings, user=request.user)
     else:
@@ -781,6 +785,7 @@ simple metrics for easy reporting
 """
 
 
+@cache_page(60 * 5)  # cache for 5 minutes
 def simple_metrics(request):
     now = localtz.localize(datetime.today())
 
@@ -797,71 +802,49 @@ def simple_metrics(request):
     # for each product type find each product with open findings and
     # count the S0, S1, S2 and S3
     for pt in Product_Type.objects.order_by('name'):
+        total_critical = []
+        total_high = []
+        total_medium = []
+        total_low = []
+        total_info = []
+        total_closed = []
+        total_opened = []
         findings_broken_out = {}
 
         total = Finding.objects.filter(test__engagement__product__prod_type=pt,
                                        verified=True,
                                        false_p=False,
                                        duplicate=False,
-                                       out_of_scope=False
-                                       ).exclude(
-            mitigated__isnull=False
-        ).filter(
-            Q(severity="Critical") |
-            Q(severity="High") |
-            Q(severity="Medium") |
-            Q(severity="Low"))
-        total_critical = Finding.objects.filter(
-            test__engagement__product__prod_type=pt,
-            verified=True,
-            false_p=False,
-            duplicate=False,
-            out_of_scope=False
-        ).exclude(mitigated__isnull=False).filter(Q(severity="Critical"))
-        total_high = Finding.objects.filter(
-            test__engagement__product__prod_type=pt,
-            verified=True,
-            false_p=False,
-            duplicate=False,
-            out_of_scope=False
-        ).exclude(mitigated__isnull=False).filter(Q(severity="High"))
-        total_medium = Finding.objects.filter(
-            test__engagement__product__prod_type=pt,
-            verified=True,
-            false_p=False,
-            duplicate=False,
-            out_of_scope=False
-        ).exclude(mitigated__isnull=False).filter(Q(severity="Medium"))
-        total_low = Finding.objects.filter(
-            test__engagement__product__prod_type=pt,
-            verified=True,
-            false_p=False,
-            duplicate=False,
-            out_of_scope=False
-        ).exclude(mitigated__isnull=False).filter(Q(severity="Low"))
+                                       out_of_scope=False,
+                                       ).distinct()
 
-        total_month = Finding.objects.filter(
-            test__engagement__product__prod_type=pt,
-            verified=True,
-            false_p=False,
-            duplicate=False,
-            out_of_scope=False
-        ).exclude(
-            mitigated__isnull=False).filter(Q(severity="Critical") |
-                                            Q(severity="High") |
-                                            Q(severity="Medium") |
-                                            Q(severity="Low")
-                                            ).filter(date__year=now.year,
-                                                     date__month=now.month)
+        for f in total.all():
+            if f.severity == "Critical":
+                total_critical.append(f)
+            elif f.severity == 'High':
+                total_high.append(f)
+            elif f.severity == 'Medium':
+                total_medium.append(f)
+            elif f.severity == 'Low':
+                total_low.append(f)
+            else:
+                total_info.append(f)
 
-        findings_broken_out['Total'] = total
-        findings_broken_out['S0'] = total_critical
-        findings_broken_out['S1'] = total_high
-        findings_broken_out['S2'] = total_medium
-        findings_broken_out['S3'] = total_low
+            if f.mitigated and f.mitigated.year == now.year and f.mitigated.month == now.month:
+                total_closed.append(f)
 
-        findings_broken_out['Opened'] = total_month
-        findings_broken_out['Closed'] = total_month
+            if f.date.year == now.year and f.date.month == now.month:
+                total_opened.append(f)
+
+        findings_broken_out['Total'] = total.count()
+        findings_broken_out['S0'] = len(total_critical)
+        findings_broken_out['S1'] = len(total_high)
+        findings_broken_out['S2'] = len(total_medium)
+        findings_broken_out['S3'] = len(total_low)
+        findings_broken_out['S4'] = len(total_info)
+
+        findings_broken_out['Opened'] = len(total_opened)
+        findings_broken_out['Closed'] = len(total_closed)
 
         findings_by_product_type[pt] = findings_broken_out
 
@@ -934,7 +917,8 @@ def get_period_counts(findings, findings_closed, accepted_findings, period_inter
             new_date = start_date + relativedelta(weeks=x, weekday=MO(1))
             end_date = new_date + relativedelta(weeks=1, weekday=MO(1))
 
-        closed_in_range = findings_closed.filter(mitigated__range=[new_date, end_date])
+        closed_in_range_count = findings_closed.filter(mitigated__range=[new_date, end_date]).count()
+
         if accepted_findings:
             risks_a = accepted_findings.filter(
                 risk_acceptance__created__range=[datetime(new_date.year,
@@ -963,7 +947,7 @@ def get_period_counts(findings, findings_closed, accepted_findings, period_inter
         total = crit_count + high_count + med_count + low_count
         opened_in_period.append(
             [(tcalendar.timegm(new_date.timetuple()) * 1000), new_date, crit_count, high_count, med_count, low_count,
-             total, closed_in_range.count()])
+             total, closed_in_range_count])
         crit_count, high_count, med_count, low_count, closed_count = [0, 0, 0, 0, 0]
         if risks_a is not None:
             for finding in risks_a:
@@ -992,6 +976,7 @@ generic metrics method
 """
 
 
+@cache_page(60 * 5)  # cache for 5 minutes
 def metrics(request, mtype):
     template = 'dojo/metrics.html'
     if mtype == 'All' or mtype == 'wiki':
@@ -1000,7 +985,14 @@ def metrics(request, mtype):
                                           verified=True).prefetch_related('test__engagement__product',
                                                                           'test__engagement__product__prod_type',
                                                                           'test__engagement__risk_acceptance',
-                                                                          'reporter')
+                                                                          'reporter').extra(
+            select={
+                'ra_count': 'SELECT COUNT(*) FROM dojo_risk_acceptance INNER JOIN '
+                            'dojo_risk_acceptance_accepted_findings ON '
+                            '( dojo_risk_acceptance.id = dojo_risk_acceptance_accepted_findings.risk_acceptance_id ) '
+                            'WHERE dojo_risk_acceptance_accepted_findings.finding_id = dojo_finding.id'
+            },
+        )
         page_name = "Metrics"
         if 'view' in request.GET and 'dashboard' == request.GET['view']:
             template = 'dojo/dashboard-metrics.html'
@@ -1015,7 +1007,14 @@ def metrics(request, mtype):
                                           verified=True).prefetch_related('test__engagement__product',
                                                                           'test__engagement__product__prod_type',
                                                                           'test__engagement__risk_acceptance',
-                                                                          'reporter')
+                                                                          'reporter').extra(
+            select={
+                'ra_count': 'SELECT COUNT(*) FROM dojo_risk_acceptance INNER JOIN '
+                            'dojo_risk_acceptance_accepted_findings ON '
+                            '( dojo_risk_acceptance.id = dojo_risk_acceptance_accepted_findings.risk_acceptance_id ) '
+                            'WHERE dojo_risk_acceptance_accepted_findings.finding_id = dojo_finding.id'
+            },
+        )
         page_name = '%s Metrics' % mtype
 
     findings = MetricsFindingFilter(request.GET, queryset=findings)
@@ -1027,7 +1026,8 @@ def metrics(request, mtype):
     prod_type = findings.form.cleaned_data['test__engagement__product__prod_type']
     if len(prod_type) > 0:
         findings_closed = Finding.objects.filter(mitigated__range=[start_date, end_date],
-                                                 test__engagement__product__prod_type__in=prod_type)
+                                                 test__engagement__product__prod_type__in=prod_type).prefetch_related(
+            'test__engagement__product')
         # capture the accepted findings in period
         accepted_findings = [finding for ra in Risk_Acceptance.objects.filter(
             created__range=[start_date, end_date],
@@ -1035,14 +1035,15 @@ def metrics(request, mtype):
             'accepted_findings__test__engagement__product')
                              for finding in ra.accepted_findings.all()]
     else:
-        findings_closed = Finding.objects.filter(mitigated__range=[start_date, end_date])
+        findings_closed = Finding.objects.filter(mitigated__range=[start_date, end_date]).prefetch_related(
+            'test__engagement__product')
         accepted_findings = [finding for ra in Risk_Acceptance.objects.filter(
             created__range=[start_date, end_date]).prefetch_related(
             'accepted_findings__test__engagement__product')
                              for finding in ra.accepted_findings.all()]
 
     afi = set(f.id for f in accepted_findings)
-    accepted_findings = Finding.objects.filter(id__in=afi)
+    accepted_findings = Finding.objects.filter(id__in=afi).prefetch_related('test__engagement__product')
 
     r = relativedelta(end_date, start_date)
     months_between = (r.years * 12) + r.months
@@ -1098,11 +1099,11 @@ def metrics(request, mtype):
             age = (finding.mitigated.date() - finding.date).days
         else:
             age = (datetime.now().date() - finding.date).days
-        if age >= 0 and age <= 30:
+        if 0 <= age <= 30:
             age_detail[0] += 1
-        elif age > 30 and age <= 60:
+        elif 30 < age <= 60:
             age_detail[1] += 1
-        elif age > 60 and age <= 90:
+        elif 60 < age <= 90:
             age_detail[2] += 1
         elif age > 90:
             age_detail[3] += 1
@@ -1134,7 +1135,7 @@ def metrics(request, mtype):
         life = date.today() - finding.date
         life = life.days
         status = 'Accepted'
-        if len(finding.risk_acceptance_set.all()) == 0:
+        if finding.ra_count == 0:
             status = 'Active'
         if finding.mitigated is not None:
             status = 'Closed'
@@ -1363,7 +1364,7 @@ status: completed in use
 def view_scan_settings(request, pid, sid):
     scan_settings = get_object_or_404(ScanSettings, id=sid)
     user = request.user
-    if (user.is_staff or user in scan_settings.product.authorized_users.all()):
+    if user.is_staff or user in scan_settings.product.authorized_users.all():
         pass
     else:
         raise PermissionDenied
@@ -3321,6 +3322,7 @@ def named_month(month_number):
 
 
 @user_passes_test(lambda u: u.is_staff)
+@cache_page(60 * 5)  # cache for 5 minutes
 def calendar(request):
     engagements = Engagement.objects.all()
     return render(request, 'dojo/calendar.html', {
@@ -4106,7 +4108,7 @@ def all_endpoints(request):
         pass
     else:
         products = Product.objects.filter(authorized_users__in=[request.user])
-        if len(products) > 0:
+        if products.exists():
             endpoints = endpoints.filter(product__in=products.all())
         else:
             raise PermissionDenied

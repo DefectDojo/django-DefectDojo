@@ -132,11 +132,14 @@ class ReportBooleanFilter(ChoiceFilter):
 
 class MetricsDateRangeFilter(ChoiceFilter):
     def any(self, qs, name):
-        findings = Finding.objects.all()
-        if findings:
-            first_date = findings.order_by('date')[:1][0].date
+        try:
+            earliest_finding = Finding.objects.earliest('date')
+        except Finding.DoesNotExist:
+            earliest_finding = None
+
+        if earliest_finding:
             start_date = local_tz.localize(datetime.combine(
-                first_date, datetime.min.time())
+                earliest_finding.date, datetime.min.time())
             )
             self.start_date = _truncate(start_date - timedelta(days=1))
             self.end_date = _truncate(now() + timedelta(days=1))
@@ -196,11 +199,14 @@ class MetricsDateRangeFilter(ChoiceFilter):
             (key, value[0]) for key, value in six.iteritems(self.options)]
         super(MetricsDateRangeFilter, self).__init__(*args, **kwargs)
 
-        findings = Finding.objects.all()
-        if findings:
-            first_date = findings.order_by('date')[:1][0].date
+        try:
+            earliest_finding = Finding.objects.earliest('date')
+        except Finding.DoesNotExist:
+            earliest_finding = None
+
+        if earliest_finding:
             start_date = local_tz.localize(datetime.combine(
-                first_date, datetime.min.time())
+                earliest_finding.date, datetime.min.time())
             )
             self.start_date = _truncate(start_date - timedelta(days=1))
             self.end_date = _truncate(now() + timedelta(days=1))
@@ -449,17 +455,24 @@ class ProductFindingFilter(DojoFilter):
 
 class FindingStatusFilter(ChoiceFilter):
     def any(self, qs, name):
-        return qs.all()
+        return qs.filter(verified=True,
+                         false_p=False,
+                         duplicate=False,
+                         out_of_scope=False)
 
     def open(self, qs, name):
         return qs.filter(mitigated__isnull=True,
                          verified=True,
                          false_p=False,
                          duplicate=False,
-                         out_of_scope=False)
+                         out_of_scope=False,)
 
     def closed(self, qs, name):
-        return qs.filter(mitigated__isnull=False)
+        return qs.filter(mitigated__isnull=False,
+                         verified=True,
+                         false_p=False,
+                         duplicate=False,
+                         out_of_scope=False,)
 
     options = {
         '': (_('Any'), any),
@@ -472,11 +485,14 @@ class FindingStatusFilter(ChoiceFilter):
             (key, value[0]) for key, value in six.iteritems(self.options)]
         super(FindingStatusFilter, self).__init__(*args, **kwargs)
 
-        findings = Finding.objects.all()
-        if findings:
-            first_date = findings.order_by('date')[:1][0].date
+        try:
+            earliest_finding = Finding.objects.earliest('date')
+        except Finding.DoesNotExist:
+            earliest_finding = None
+
+        if earliest_finding:
             start_date = local_tz.localize(datetime.combine(
-                first_date, datetime.min.time())
+                earliest_finding.date, datetime.min.time())
             )
             self.start_date = _truncate(start_date - timedelta(days=1))
             self.end_date = _truncate(now() + timedelta(days=1))
@@ -489,7 +505,7 @@ class FindingStatusFilter(ChoiceFilter):
         return self.options[value][1](self, qs, self.name)
 
 
-class MetricsFindingFilter(DojoFilter):
+class MetricsFindingFilter(FilterSet):
     date = MetricsDateRangeFilter()
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all().order_by('name'),
