@@ -12,7 +12,7 @@ setup(
         'MySQL-python==1.2.3',
         'Pillow>=2.3.0',
         'django-secure==1.0',
-        'django-tastypie==0.12.1',
+        'django-tastypie==0.12.2',
         'django-tastypie-swagger',
         'gunicorn==19.1.1',
         'python-nmap==0.3.4',
