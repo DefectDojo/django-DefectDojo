@@ -54,7 +54,7 @@
   sudo_user: '{{ dd_user }}'
 
 - name: Install django-tastypie
-  pip: name=django-tastypie version=0.12.1 virtualenv={{ venv_dir }}
+  pip: name=django-tastypie version=0.12.2 virtualenv={{ venv_dir }}
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
