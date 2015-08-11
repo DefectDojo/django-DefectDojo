@@ -49,7 +49,9 @@
                     <form method="get" class="panel-body">
                         {{ filtered.form.as_p }}
                         <div class="centered">
-                            <input type="submit" class="btn btn-primary inline top" value="Apply"/><br/><br/>
+                            <button class="btn btn-sm btn-primary">
+                                <i class="fa fa-filter"></i> Apply
+                            </button><br/><br/>
                             <a href="{% url 'accepted_findings' %}"> [Clear Filters] </a>
                         </div>
                     </form>

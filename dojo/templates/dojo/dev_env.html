@@ -35,7 +35,8 @@
                 <div class="panel-heading">Actions</div>
                 <div class="panel-body centered">
                     {% if request.user.is_staff %}
-                        <a class="btn btn-primary btn-sm" href="{%  url 'add_dev_env' %}"> New Dev Environment </a>
+                        <a class="btn btn-success btn-sm" href="{%  url 'add_dev_env' %}">
+                            <i class="fa fa-plus"></i> New Dev Environment </a>
                     {% endif %}
                 </div>
 
@@ -43,7 +44,9 @@
                 <form method="get" class="panel-body">
                     {{ dts.form.as_p }}
                     <div class="centered">
-                        <input type="submit" class="btn btn-sm btn-primary" value="Apply"/><br/><br/>
+                        <button class="btn btn-sm btn-primary">
+                            <i class="fa fa-filter"></i> Apply
+                        </button><br/><br/>
                         <a href="{% url 'dev_env' %}" class="clear"> [Clear Filters] </a>
                     </div>
                 </form>

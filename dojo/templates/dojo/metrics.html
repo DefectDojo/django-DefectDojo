@@ -184,8 +184,9 @@
                         {{ findings.form.as_p }}
                     </ul>
                     <div class="centered">
-                        <input type="submit" class="btn btn-sm btn-primary" name="filters"
-                               value="Apply Filters"/>
+                        <button class="btn btn-sm btn-primary">
+                            <i class="fa fa-filter"></i> Apply Filters
+                        </button>
                         <br/><br/>
                         <a href="{% url 'metrics' %}">[Clear Filters]</a>
                     </div>
