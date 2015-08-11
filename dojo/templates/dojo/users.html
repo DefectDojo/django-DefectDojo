@@ -52,8 +52,8 @@
                 {% if request.user.is_staff %}
                     <div class="panel-heading">Actions</div>
                     <div class="panel-body centered">
-                        <a class="btn btn-sm btn-primary" href="{% url 'add_user' %}">
-                            New User
+                        <a class="btn btn-sm btn-success" href="{% url 'add_user' %}">
+                            <i class="fa fa-plus"></i> New User
                         </a>
                     </div>
                 {% endif %}
@@ -61,7 +61,9 @@
                 <form method="get" class="panel-body">
                     {{ filtered.form.as_p }}
                     <div class="centered">
-                        <input type="submit" class="btn btn-primary" value="Apply"/><br/><br/>
+                        <button class="btn btn-sm btn-primary">
+                            <i class="fa fa-filter"></i> Apply
+                        </button><br/><br/>
                         <a href="{% url 'endpoints' %}"> [Clear Filters] </a>
                     </div>
                 </form>

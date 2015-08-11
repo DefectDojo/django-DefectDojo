@@ -37,15 +37,17 @@
             <div class="filters panel panel-default">
                 <div class="panel-heading">Actions</div>
                 <div class="panel-body centered">
-                    <a class="btn btn-sm btn-primary" href="{% url 'new_eng' %}">
-                        New Engagement
+                    <a class="btn btn-sm btn-success" href="{% url 'new_eng' %}">
+                        <i class="fa fa-plus"></i> New Engagement
                     </a>
                 </div>
                 <div class="panel-heading">Filters</div>
                 <form method="get" class="panel-body">
                     {{ filtered.form.as_p }}
                     <div class="centered">
-                        <input type="submit" class="btn btn-primary" value="Apply"/><br/><br/>
+                        <button class="btn btn-sm btn-primary">
+                            <i class="fa fa-filter"></i> Apply
+                        </button><br/><br/>
                         <a href="{% url 'engagement' %}"> [Clear Filters] </a>
                     </div>
                 </form>

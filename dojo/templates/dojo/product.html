@@ -36,8 +36,8 @@
                                 <td> {{ prod.prod_type.name }}</td>
                                 {% if user.is_staff %}
                                     <td>
-                                        <a class="btn btn-sm btn-primary" href="{% url 'new_eng_for_prod' prod.id %}">
-                                            Add Engagement
+                                        <a class="btn btn-sm btn-success" href="{% url 'new_eng_for_prod' prod.id %}">
+                                            <i class="fa fa-plus"></i> Add Engagement
                                         </a>
                                     </td>
                                 {% endif %}
@@ -57,12 +57,12 @@
                 <div class="panel-heading">Actions</div>
                 <div class="panel-body centered">
                     {% if request.user.is_staff %}
-                        <a class="btn btn-sm btn-primary" href="{% url 'new_product' %}">
-                            Add Product
+                        <a class="btn btn-sm btn-success" href="{% url 'new_product' %}">
+                            <i class="fa fa-plus"></i> Add Product
                         </a><hr>
                     {% endif %}
                     <a class="btn btn-sm btn-primary" href="{% url 'product_findings_report' %}">
-                        Generate Report
+                        <i class="fa fa-file-text-o"></i> Generate Report
                     </a>
                 </div>
 
@@ -70,7 +70,9 @@
                 <form method="get" class="panel-body">
                     {{ prods.form.as_p }}
                     <div class="centered">
-                        <input type="submit" class="btn btn-sm btn-primary" value="Apply"/><br/><br/>
+                        <button class="btn btn-sm btn-primary">
+                            <i class="fa fa-filter"></i> Apply
+                        </button><br/><br/>
                         <a href="{% url 'product' %}" class="clear"> [Clear Filters] </a>
                     </div>
                 </form>

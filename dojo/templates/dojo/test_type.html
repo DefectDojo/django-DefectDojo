@@ -35,7 +35,8 @@
                 <div class="panel-heading">Actions</div>
                 <div class="panel-body centered">
                     {% if request.user.is_staff %}
-                        <a class="btn btn-primary" href="{%  url 'add_test_type' %}"> New Test Type </a>
+                        <a class="btn btn-success btn-sm" href="{%  url 'add_test_type' %}">
+                            <i class="fa fa-plus"></i> New Test Type </a>
                     {% endif %}
                 </div>
 
@@ -43,7 +44,9 @@
                 <form method="get" class="panel-body">
                     {{ test_types.form.as_p }}
                     <div class="centered">
-                        <input type="submit" class="btn btn-sm btn-primary" value="Apply"/><br/><br/>
+                        <button class="btn btn-sm btn-primary">
+                            <i class="fa fa-filter"></i> Apply
+                        </button><br/><br/>
                         <a href="{% url 'test_type' %}" class="clear"> [Clear Filters] </a>
                     </div>
                 </form>
