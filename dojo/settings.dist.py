@@ -175,7 +175,6 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'dojo',
     'django.contrib.admin',
     'django.contrib.humanize',
     'gunicorn',
@@ -184,6 +183,7 @@ INSTALLED_APPS = (
     'djangobower',
     'easy_pdf',
     'auditlog',
+    'dojo',
 )
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

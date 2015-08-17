@@ -99,7 +99,7 @@ class Product(models.Model):
                                   null=True, blank=True)
     updated = models.DateTimeField(editable=False, null=True, blank=True)
     tid = models.IntegerField(default=0, editable=False)
-    authorized_users = models.ManyToManyField(User, null=True, blank=True)
+    authorized_users = models.ManyToManyField(User, blank=True)
 
     def __unicode__(self):
         return self.name
@@ -252,8 +252,9 @@ class Engagement(models.Model):
     risk_path = models.CharField(max_length=1000, default='none',
                                  editable=False, blank=True, null=True)
     risk_acceptance = models.ManyToManyField("Risk_Acceptance",
-                                             default=None, null=True,
-                                             editable=False, blank=True)
+                                             default=None,
+                                             editable=False,
+                                             blank=True)
     done_testing = models.BooleanField(default=False, editable=False)
 
     class Meta:
@@ -359,7 +360,7 @@ class Test(models.Model):
     actual_time = models.TimeField(null=True, blank=True, editable=False, )
     percent_complete = models.IntegerField(null=True, blank=True,
                                            editable=True)
-    notes = models.ManyToManyField(Notes, null=True, blank=True,
+    notes = models.ManyToManyField(Notes, blank=True,
                                    editable=False)
     environment = models.ForeignKey(Development_Environment, null=True,
                                     blank=False)
@@ -388,7 +389,7 @@ class Finding(models.Model):
     impact = models.TextField()
     # will deprecate in version 1.0.3
     endpoint = models.TextField()
-    endpoints = models.ManyToManyField(Endpoint, null=True, blank=True, )
+    endpoints = models.ManyToManyField(Endpoint, blank=True, )
     references = models.TextField(null=True, blank=True, db_column="refs")
     test = models.ForeignKey(Test, editable=False)
     is_template = models.BooleanField(default=False)
@@ -400,7 +401,7 @@ class Finding(models.Model):
     thread_id = models.IntegerField(default=0, editable=False)
     mitigated = models.DateTimeField(editable=False, null=True, blank=True)
     reporter = models.ForeignKey(User, editable=False)
-    notes = models.ManyToManyField(Notes, null=True, blank=True,
+    notes = models.ManyToManyField(Notes, blank=True,
                                    editable=False)
     numerical_severity = models.CharField(max_length=4)
 
@@ -469,35 +470,35 @@ class Check_List(models.Model):
     session_management = models.CharField(max_length=50, default='none')
     session_issues = models.ManyToManyField(Finding,
                                             related_name='session_issues',
-                                            blank=True, null=True)
+                                            blank=True)
     encryption_crypto = models.CharField(max_length=50, default='none')
     crypto_issues = models.ManyToManyField(Finding,
                                            related_name='crypto_issues',
-                                           blank=True, null=True)
+                                           blank=True)
     configuration_management = models.CharField(max_length=50, default='')
     config_issues = models.ManyToManyField(Finding,
                                            related_name='config_issues',
-                                           blank=True, null=True)
+                                           blank=True)
     authentication = models.CharField(max_length=50, default='none')
     auth_issues = models.ManyToManyField(Finding,
                                          related_name='auth_issues',
-                                         blank=True, null=True)
+                                         blank=True)
     authorization_and_access_control = models.CharField(max_length=50,
                                                         default='none')
     author_issues = models.ManyToManyField(Finding,
                                            related_name='author_issues',
-                                           blank=True, null=True)
+                                           blank=True)
     data_input_sanitization_validation = models.CharField(max_length=50,
                                                           default='none')
     data_issues = models.ManyToManyField(Finding, related_name='data_issues',
-                                         blank=True, null=True)
+                                         blank=True)
     sensitive_data = models.CharField(max_length=50, default='none')
     sensitive_issues = models.ManyToManyField(Finding,
                                               related_name='sensitive_issues',
-                                              blank=True, null=True)
+                                              blank=True)
     other = models.CharField(max_length=50, default='none')
     other_issues = models.ManyToManyField(Finding, related_name='other_issues',
-                                          blank=True, null=True)
+                                          blank=True)
     engagement = models.ForeignKey(Engagement, editable=False,
                                    related_name='eng_for_check')
 
