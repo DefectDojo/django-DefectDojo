@@ -990,7 +990,7 @@ def metrics(request, mtype):
                 'ra_count': 'SELECT COUNT(*) FROM dojo_risk_acceptance INNER JOIN '
                             'dojo_risk_acceptance_accepted_findings ON '
                             '( dojo_risk_acceptance.id = dojo_risk_acceptance_accepted_findings.risk_acceptance_id ) '
-                            'WHERE dojo_risk_acceptance_accepted_findings.finding_id = dojo_finding.id'
+                            'WHERE dojo_risk_acceptance_accepted_findings.finding_id = dojo_finding.id',
             },
         )
         page_name = "Metrics"
@@ -1061,7 +1061,7 @@ def metrics(request, mtype):
 
     top_ten_products = sorted(
         Product.objects.filter(
-            engagement__test__finding__in=findings
+            engagement__test__finding__in=findings.queryset
         ).distinct().all(),
         key=lambda t: t.findings_count, reverse=True)[: 10]
 
