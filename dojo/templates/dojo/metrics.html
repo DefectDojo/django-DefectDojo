@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load event_tags %}
+{% load static from staticfiles %}
 {% block add_styles %}
     .tabs-below > .nav-tabs,
     .tabs-right > .nav-tabs,
@@ -232,12 +233,12 @@
                                 </tr>
                                 {% for t in top_ten_products %}
                                     <tr>
-                                        <td>{{ t.0|safe }}</td>
-                                        <td>{{ t.1 }}</td>
-                                        <td>{{ t.2 }}</td>
-                                        <td>{{ t.3 }}</td>
-                                        <td>{{ t.4 }}</td>
-                                        <td>{{ t.5 }}</td>
+                                        <td><a href="{% url 'view_product' t.id %}">{{ t.name }}</a></td>
+                                        <td>{{ t.critical|default_if_none:0 }}</td>
+                                        <td>{{ t.high|default_if_none:0 }}</td>
+                                        <td>{{ t.medium|default_if_none:0 }}</td>
+                                        <td>{{ t.low|default_if_none:0 }}</td>
+                                        <td>{{ t.total|default_if_none:0 }}</td>
                                     </tr>
                                 {% endfor %}
                             </table>
@@ -255,16 +256,20 @@
                                 <th class="nowrap">Engineer</th>
 
                             </tr>
-                            {% for detail in detailed_breakdown %}
+                            {% for finding in findings %}
                                 <tr>
-                                    <td>{{ detail.0 }}</td>
-                                    <td><span title="{{ detail.1 }}">{{ detail.1|truncatechars:20 }}</span></td>
-                                    <td>{{ detail.2 }}</td>
-                                    <td><a href="{% url 'view_finding' detail.7 %}"
-                                           title="{{ detail.3 }}">{{ detail.3|truncatechars:20 }}</a></td>
-                                    <td>{{ detail.4 }}</td>
-                                    <td>{{ detail.5 }}</td>
-                                    <td>{{ detail.6 }}</td>
+                                    <td>{{ finding.test.engagement.product.prod_type.name }}</td>
+                                    <td>
+                                        <span title="{{ finding.test.engagement.product.name }}">
+                                            {{ finding.test.engagement.product.name|truncatechars:20 }}
+                                        </span>
+                                    </td>
+                                    <td>{{ finding.numerical_severity }}</td>
+                                    <td><a href="{% url 'view_finding' finding.id %}"
+                                           title="{{ finding.title }}">{{ finding.title|truncatechars:20 }}</a></td>
+                                    <td>{{ finding.sql_age }}</td>
+                                    <td>{{ finding.status }}</td>
+                                    <td>{{ finding.reporter }}</td>
                                 </tr>
                             {% endfor %}
                         </table>
@@ -279,6 +284,7 @@
                                     <th>S1</th>
                                     <th>S2</th>
                                     <th>S3</th>
+                                    <th>S4</th>
                                     <th>Total</th>
                                 </tr>
                                 <tr>
@@ -286,6 +292,7 @@
                                     <td>{{ in_period_counts.High }}</td>
                                     <td>{{ in_period_counts.Medium }}</td>
                                     <td>{{ in_period_counts.Low }}</td>
+                                    <td>{{ in_period_counts.Info }}</td>
                                     <td>{{ in_period_counts.Total }}</td>
                                 </tr>
                             </table>
@@ -297,6 +304,7 @@
                                     <th>S1</th>
                                     <th>S2</th>
                                     <th>S3</th>
+                                    <th>S4</th>
                                     <th>Total</th>
 
                                 </tr>
@@ -307,6 +315,7 @@
                                         <td>{{ value.High }}</td>
                                         <td>{{ value.Medium }}</td>
                                         <td>{{ value.Low }}</td>
+                                        <td>{{ value.Info }}</td>
                                         <td>{{ value.Total }}</td>
                                     </tr>
                                 {% endfor %}
@@ -323,14 +332,16 @@
                                     <th>S1</th>
                                     <th>S2</th>
                                     <th>S3</th>
+                                    <th>S4</th>
                                     <th>Total</th>
                                 </tr>
                                 <tr>
-                                    <td>{{ accepted_in_period_counts.Critical }}</td>
-                                    <td>{{ accepted_in_period_counts.High }}</td>
-                                    <td>{{ accepted_in_period_counts.Medium }}</td>
-                                    <td>{{ accepted_in_period_counts.Low }}</td>
-                                    <td>{{ accepted_in_period_counts.Total }}</td>
+                                    <td>{{ accepted_in_period_counts.critical|default_if_none:0 }}</td>
+                                    <td>{{ accepted_in_period_counts.high|default_if_none:0 }}</td>
+                                    <td>{{ accepted_in_period_counts.medium|default_if_none:0 }}</td>
+                                    <td>{{ accepted_in_period_counts.low|default_if_none:0 }}</td>
+                                    <td>{{ accepted_in_period_counts.info|default_if_none:0 }}</td>
+                                    <td>{{ accepted_in_period_counts.total|default_if_none:0 }}</td>
                                 </tr>
                             </table>
                             <table
@@ -341,6 +352,7 @@
                                     <th>S1</th>
                                     <th>S2</th>
                                     <th>S3</th>
+                                    <th>S4</th>
                                     <th>Total</th>
 
                                 </tr>
@@ -351,6 +363,7 @@
                                         <td>{{ value.High }}</td>
                                         <td>{{ value.Medium }}</td>
                                         <td>{{ value.Low }}</td>
+                                        <td>{{ value.Info }}</td>
                                         <td>{{ value.Total }}</td>
                                     </tr>
                                 {% endfor %}
@@ -369,6 +382,7 @@
                                     <th>S1</th>
                                     <th>S2</th>
                                     <th>S3</th>
+                                    <th>S4</th>
                                     <th>Total</th>
                                 </tr>
                                 <tr>
@@ -376,6 +390,7 @@
                                     <td>{{ closed_in_period_counts.High }}</td>
                                     <td>{{ closed_in_period_counts.Medium }}</td>
                                     <td>{{ closed_in_period_counts.Low }}</td>
+                                    <td>{{ closed_in_period_counts.Info }}</td>
                                     <td>{{ closed_in_period_counts.Total }}</td>
                                 </tr>
                             </table>
@@ -387,6 +402,7 @@
                                     <th>S1</th>
                                     <th>S2</th>
                                     <th>S3</th>
+                                    <th>S4</th>
                                     <th>Total</th>
 
                                 </tr>
@@ -397,6 +413,7 @@
                                         <td>{{ value.High }}</td>
                                         <td>{{ value.Medium }}</td>
                                         <td>{{ value.Low }}</td>
+                                        <td>{{ value.Info }}</td>
                                         <td>{{ value.Total }}</td>
                                     </tr>
                                 {% endfor %}
@@ -535,13 +552,13 @@
 {% endblock %}
 {% block postscript %}
     <!-- Flot Charts JavaScript -->
-    <script src="{{ STATIC_URL }}flot/excanvas.min.js"></script>
-    <script src="{{ STATIC_URL }}flot/jquery.flot.js"></script>
-    <script src="{{ STATIC_URL }}flot/jquery.flot.pie.js"></script>
-    <script src="{{ STATIC_URL }}flot/jquery.flot.resize.js"></script>
-    <script src="{{ STATIC_URL }}flot/jquery.flot.time.js"></script>
-    <script src="{{ STATIC_URL }}flot.tooltip/js/jquery.flot.tooltip.min.js"></script>
-    <script src="{{ STATIC_URL }}flot/jquery.flot.stack.js"></script>
+    <script src="{% static "flot/excanvas.min.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.pie.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.resize.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.time.js" %}"></script>
+    <script src="{% static "flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.stack.js" %}"></script>
     <script>
         $(function () {
 

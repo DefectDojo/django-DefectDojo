@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load humanize %}
 {% load display_tags %}
+{% load static from staticfiles %}
 {% block add_styles %}
     .graph {min-height: 158px;}
     h3 { margin-top: 5px; margin-bottom: 5px; font-size: 20px; line-height: 22px;}
@@ -326,18 +327,18 @@
 
 {% endblock %}
 {% block postscript %}
-    <script type="text/javascript" src="{{ STATIC_URL }}jquery-cookie/jquery.cookie.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}text-highlighter/build/TextHighlighter.min.js"></script>
+    <script type="text/javascript" src="{% static "jquery-cookie/jquery.cookie.js" %}"></script>
+    <script type="text/javascript" src="{% static "text-highlighter/build/TextHighlighter.min.js" %}"></script>
     <!-- Flot Charts JavaScript -->
-    <script src="{{ STATIC_URL }}flot/excanvas.min.js"></script>
-    <script src="{{ STATIC_URL }}flot/jquery.flot.js"></script>
-    <script src="{{ STATIC_URL }}flot/jquery.flot.resize.js"></script>
-    <script src="{{ STATIC_URL }}flot-axislabels/jquery.flot.axislabels.js"></script>
+    <script src="{% static "flot/excanvas.min.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.resize.js" %}"></script>
+    <script src="{% static "flot-axislabels/jquery.flot.axislabels.js" %}"></script>
     {% if punchcard %}
-        <script src="{{ STATIC_URL }}flot.tooltip/js/jquery.flot.tooltip.min.js"></script>
-        <script src="{{ STATIC_URL }}JUMFlot/JUMFlot.min.js"></script>
-        <script src="{{ STATIC_URL }}JUMFlot/jquery.flot.mouse.js"></script>
-        <script src="{{ STATIC_URL }}JUMFlot/jquery.flot.bubbles.js"></script>
+        <script src="{% static "flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
+        <script src="{% static "JUMFlot/JUMFlot.min.js" %}"></script>
+        <script src="{% static "JUMFlot/jquery.flot.mouse.js" %}"></script>
+        <script src="{% static "JUMFlot/jquery.flot.bubbles.js" %}"></script>
     {% endif %}
     <script type="text/javascript">
         var highest_count = {{ highest_count }};

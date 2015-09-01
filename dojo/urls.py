@@ -148,6 +148,8 @@ urlpatterns = [
         name='metrics'),
     url(r'^metrics/all$', views.metrics, {'mtype': 'All'},
         name='metrics_all'),
+    url(r'^metrics/product/type$', views.metrics, {'mtype': 'All'},
+        name='metrics_product_type'),
     url(r'^metrics/simple$', views.simple_metrics,
         name='simple_metrics'),
     url(r'^metrics/product/type/(?P<mtype>\d+)$',
@@ -246,6 +248,14 @@ urlpatterns = [
         name='add_product_endpoint'),
 
 ]
+
+from biweekly_dojo_metrics.urls import urlpatterns as bwmp
+
+urlpatterns += bwmp
+
+from defectDojo_engagement_survey.urls import urlpatterns as su
+
+urlpatterns += su
 
 urlpatterns += staticfiles_urlpatterns()
 

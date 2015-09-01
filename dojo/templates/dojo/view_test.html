@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load display_tags %}
+{% load static from staticfiles %}
 {% block content %}
     <div class="panel panel-default">
         <div class="panel-heading">
@@ -107,7 +108,7 @@
                 </thead>
                 <tbody>
                 {% for finding in findings %}
-                    <tr class={% if finding.active %} "active_finding" {% else %} "inactive_finding" {% endif %}>
+                    <tr class="{% if finding.active %}active_finding{% else %}inactive_finding" {% endif %}>
                     <td><a href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a></td>
                     <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
                         <span class="text-error">
@@ -185,8 +186,8 @@
     </div>
 {% endblock %}
 {% block postscript %}
-    <script type="text/javascript" src="{{ STATIC_URL }}jquery-cookie/jquery.cookie.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}text-highlighter/build/TextHighlighter.min.js"></script>
+    <script type="text/javascript" src="{% static "jquery-cookie/jquery.cookie.js" %}"></script>
+    <script type="text/javascript" src="{% static "text-highlighter/build/TextHighlighter.min.js" %}"></script>
     <script type="text/javascript">
         $(function () {
             if (document.referrer.indexOf('simple_search') > 0) {

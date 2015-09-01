@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load event_tags %}
+{% load static from staticfiles %}
 {% block content %}
     <div>
         <h3> Add findings to a test
@@ -83,9 +84,9 @@
         });
     </script>
     <script type="application/javascript">
-        $('#add_id_endpoints').attr('href', '/endpoints/{{ test.engagement.product.id }}/add');
+        $('#add_id_endpoints').attr('href', '/endpoints/{{ test.engagement.product.id }}/add?_popup');
         $('#id_endpoints').find('option').remove();
     </script>
-    <script type="application/javascript" src="{{ STATIC_URL }}admin/js/admin/RelatedObjectLookups.js"></script>
+    <script type="application/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>
 
 {% endblock %}
