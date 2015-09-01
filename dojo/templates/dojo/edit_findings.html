@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load event_tags %}
+{% load static from staticfiles %}
 {% block content %}
     <h3> Edit a Finding</h3>
     {% if temp %}
@@ -29,7 +30,7 @@
 {% endblock %}
 {% block postscript %}
     <script type="application/javascript">
-        $('#add_id_endpoints').attr('href', '/endpoints/{{ finding.test.engagement.product.id }}/add');
+        $('#add_id_endpoints').attr('href', '/endpoints/{{ finding.test.engagement.product.id }}/add?_popup');
     </script>
-    <script type="application/javascript" src="{{ STATIC_URL }}admin/js/admin/RelatedObjectLookups.js"></script>
+    <script type="application/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>
 {% endblock %}

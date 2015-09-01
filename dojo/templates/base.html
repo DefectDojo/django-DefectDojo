@@ -1,5 +1,6 @@
 {% load navigation_tags %}
 {% load display_tags %}
+{% load static from staticfiles %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -24,19 +25,19 @@
     {% block add_css_before %}
     {% endblock %}
     <!-- Bootstrap Core CSS -->
-    <link href="{{ STATIC_URL }}bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{% static "bootstrap/dist/css/bootstrap.min.css" %}" rel="stylesheet">
 
     <!-- MetisMenu CSS -->
-    <link href="{{ STATIC_URL }}metisMenu/dist/metisMenu.min.css" rel="stylesheet">
+    <link href="{% static "metisMenu/dist/metisMenu.min.css" %}" rel="stylesheet">
 
     <!-- Timeline CSS -->
-    <link href="{{ STATIC_URL }}startbootstrap-sb-admin-2/dist/css/timeline.css" rel="stylesheet">
+    <link href="{% static "startbootstrap-sb-admin-2/dist/css/timeline.css" %}" rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link href="{{ STATIC_URL }}startbootstrap-sb-admin-2/dist/css/sb-admin-2.css" rel="stylesheet">
+    <link href="{% static "startbootstrap-sb-admin-2/dist/css/sb-admin-2.css" %}" rel="stylesheet">
 
     <!-- Custom Fonts -->
-    <link href="{{ STATIC_URL }}fontawesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="{% static "fontawesome/css/font-awesome.min.css" %}" rel="stylesheet" type="text/css">
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -46,10 +47,10 @@
     <![endif]-->
     {% block add_css %}
     {% endblock %}
-    <link rel="stylesheet" href="{{ STATIC_URL }}jquery-ui/themes/flick/jquery-ui.min.css">
-    <link rel="shortcut icon" href="{{ STATIC_URL }}dojo/img/favicon.ico"/>
-    <link rel="stylesheet" href="{{ STATIC_URL }}fullcalendar/dist/fullcalendar.min.css">
-    <link rel="stylesheet" href="{{ STATIC_URL }}dojo/css/dojo.css">
+    <link rel="stylesheet" href="{% static "jquery-ui/themes/flick/jquery-ui.min.css" %}">
+    <link rel="shortcut icon" href="{% static "dojo/img/favicon.ico" %}"/>
+    <link rel="stylesheet" href="{% static "fullcalendar/dist/fullcalendar.min.css" %}">
+    <link rel="stylesheet" href="{% static "dojo/css/dojo.css" %}">
     <style>
         {% block add_styles %}
         {% endblock %}
@@ -68,7 +69,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="{% url 'home' %}"><img src="{{ STATIC_URL }}dojo/img/logo.png"
+                <a class="navbar-brand" href="{% url 'home' %}"><img src="{% static "dojo/img/logo.png" %}"
                                                                      alt="DefectDojo Logo"
                                                                      width="240"/></a>
             </div>
@@ -138,7 +139,7 @@
                             <li>
                                 {% if request.user.is_staff %}
                                     <a href="#"><i class="fa fa-list fa-fw"></i> Products
-                                    <span class="glyphicon arrow"></span></a>
+                                        <span class="glyphicon arrow"></span></a>
                                 {% else %}
                                     <a href="{% url 'product' %}"><i class="fa fa-list fa-fw"></i> Products</a>
                                 {% endif %}
@@ -205,30 +206,20 @@
                                 </li>
                             {% endif %}
                             <li>
-                                <a href="#"><i class="fa fa-bar-chart fa-fw"></i> Metrics<span
+                                <a href="/metrics"><i class="fa fa-bar-chart fa-fw"></i> Metrics<span
                                         class="glyphicon arrow"></span></a>
                                 <ul class="nav nav-second-level">
-                                    <li><a href="{% url 'metrics_all' %}"> All </a></li>
-                                    {% pt_metric_nav %}
-                                    <li><a href="{% url 'metrics' %}?date=5&view=dashboard"> Dashboard </a></li>
+                                    <li><a href="{% url 'metrics_product_type' %}"> Product Type Metrics </a></li>
+
+                                    <li><a href="{% url 'metrics' %}?date=5&view=dashboard"> Metrics Dashboard </a></li>
                                     {% if user.is_staff %}
 
 
-                                        <li>
-                                            <a href="#">Additional Metrics <span class="glyphicon arrow"></span></a>
-                                            <ul class="nav nav-third-level">
-                                                <li><a href="{% url 'simple_metrics' %}"> Simple Metrics </a></li>
-                                                <li><a href="{% url 'engineer_metrics' %}"> Engineer Metrics </a></li>
-                                                <li><a href="{% url 'research_metrics' %}"> Security Research
-                                                    Metrics </a>
-                                                </li>
-                                            </ul>
-                                            <!-- /.nav-third-level -->
+                                        <li><a href="{% url 'simple_metrics' %}"> Simple Metrics </a></li>
+                                        <li><a href="{% url 'engineer_metrics' %}"> Engineer Metrics </a></li>
+                                        <li><a href="{% url 'research_metrics' %}"> Security Research
+                                            Metrics </a>
                                         </li>
-
-
-
-
 
                                     {% endif %}
 
@@ -306,7 +297,7 @@
             <div class="row">
                 <div class="col-md-12 text-center text-">
                     <p>
-                        <a href="{% url 'home' %}"><img class="logo" src="{{ STATIC_URL }}dojo/img/chop.png"
+                        <a href="{% url 'home' %}"><img class="logo" src="{% static "dojo/img/chop.png" %}"
                                                         alt="DefectDojo Chop" height="45"/></a><br/>
                         {% dojo_version %}
                     </p>
@@ -324,24 +315,22 @@
 <!-- /#wrapper -->
 
 <!-- jQuery -->
-<script src="{{ STATIC_URL }}jquery/dist/jquery.js"></script>
+<script src="{% static "jquery/dist/jquery.js" %}"></script>
 <!--  jQuery UI -->
-<script src="{{ STATIC_URL }}jquery-ui/jquery-ui.min.js"></script>
+<script src="{% static "jquery-ui/jquery-ui.min.js" %}"></script>
 <!-- Bootstrap Core JavaScript -->
-<script src="{{ STATIC_URL }}bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="{% static "bootstrap/dist/js/bootstrap.min.js" %}"></script>
 
 <!-- Metis Menu Plugin JavaScript -->
-<script src="{{ STATIC_URL }}metisMenu/dist/metisMenu.min.js"></script>
+<script src="{% static "metisMenu/dist/metisMenu.min.js" %}"></script>
 
 <!-- Custom Theme JavaScript -->
-<script src="{{ STATIC_URL }}startbootstrap-sb-admin-2/dist/js/sb-admin-2.js"></script>
+<script src="{% static "startbootstrap-sb-admin-2/dist/js/sb-admin-2.js" %}"></script>
 <!-- Calendar JavaScript -->
-<script src="{{ STATIC_URL }}moment/min/moment.min.js"></script>
-<script src="{{ STATIC_URL }}fullcalendar/dist/fullcalendar.min.js"></script>
-<!-- Table sorter JavaScript -->
-<script src="{{ STATIC_URL }}jquery.tablesorter/dist/js/jquery.tablesorter.min.js"></script>
+<script src="{% static "moment/min/moment.min.js" %}"></script>
+<script src="{% static "fullcalendar/dist/fullcalendar.min.js" %}"></script>
 <!-- our JS -->
-<script src="{{ STATIC_URL }}dojo/js/index.js"></script>
+<script src="{% static "dojo/js/index.js" %}"></script>
 {% block postscript %}
 {% endblock %}
 </body>
