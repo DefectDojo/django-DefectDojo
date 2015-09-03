@@ -210,19 +210,13 @@
                                         class="glyphicon arrow"></span></a>
                                 <ul class="nav nav-second-level">
                                     <li><a href="{% url 'metrics_product_type' %}"> Product Type Metrics </a></li>
-
-                                    <li><a href="{% url 'metrics' %}?date=5&view=dashboard"> Metrics Dashboard </a></li>
+                                    <li><a href="{% url 'product_type_counts' %}"> Product Type Counts </a></li>
                                     {% if user.is_staff %}
-
-
                                         <li><a href="{% url 'simple_metrics' %}"> Simple Metrics </a></li>
                                         <li><a href="{% url 'engineer_metrics' %}"> Engineer Metrics </a></li>
-                                        <li><a href="{% url 'research_metrics' %}"> Security Research
-                                            Metrics </a>
-                                        </li>
-
+                                        <li><a href="{% url 'research_metrics' %}"> Security Research Metrics </a></li>
                                     {% endif %}
-
+                                    <li><a href="{% url 'metrics' %}?date=5&view=dashboard"> Metrics Dashboard </a></li>
                                 </ul>
                                 <!-- /.nav-second-level -->
                             </li>

@@ -29,7 +29,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.validators import validate_ipv46_address
 from django.views.decorators.cache import cache_page
 from django.utils.html import escape
-from django.db.models import Q, Sum, Case, When, IntegerField, Value
+from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
 from django.http import HttpResponseRedirect, StreamingHttpResponse, HttpResponseForbidden, Http404, HttpResponse
 from django.core.urlresolvers import reverse
 from django.shortcuts import render, get_object_or_404
@@ -44,7 +44,7 @@ from dojo.forms import VaForm, SimpleMetricsForm, CheckForm, \
     Test_TypeForm, ReplaceRiskAcceptanceForm, AddFindingsRiskAcceptanceForm, Development_EnvironmentForm, \
     DojoUserForm, DeleteIPScanForm, DeleteTestForm, UploadVeracodeForm, UploadBurpForm, EditEndpointForm, \
     DeleteEndpointForm, AddEndpointForm, DeleteProductForm, DeleteEngagementForm, AddFindingForm, \
-    AddDojoUserForm, DeleteUserForm
+    AddDojoUserForm, DeleteUserForm, ProductTypeCountsForm
 from dojo.management.commands.run_scan import run_on_deman_scan
 from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
     Check_List, Scan, IPScan, ScanSettings, Test_Type, Notes, \
@@ -976,7 +976,7 @@ generic metrics method
 """
 
 
-# @cache_page(60 * 5)  # cache for 5 minutes
+@cache_page(60 * 5)  # cache for 5 minutes
 def metrics(request, mtype):
     template = 'dojo/metrics.html'
     page_name = 'Product Type Metrics'
@@ -1215,6 +1215,207 @@ def metrics(request, mtype):
         'highest_count': highest_count,
         'show_pt_filter': show_pt_filter,
     })
+
+
+def opened_in_period(start_date, end_date, pt):
+    opened_in_period = Finding.objects.filter(date__range=[start_date, end_date],
+                                              test__engagement__product__prod_type=pt,
+                                              verified=True,
+                                              false_p=False,
+                                              duplicate=False,
+                                              out_of_scope=False,
+                                              mitigated__isnull=True,
+                                              severity__in=('Critical', 'High', 'Medium', 'Low')).values(
+        'numerical_severity').annotate(Count('numerical_severity')).order_by('numerical_severity')
+    total_opened_in_period = Finding.objects.filter(date__range=[start_date, end_date],
+                                                    test__engagement__product__prod_type=pt,
+                                                    verified=True,
+                                                    false_p=False,
+                                                    duplicate=False,
+                                                    out_of_scope=False,
+                                                    mitigated__isnull=True,
+                                                    severity__in=(
+                                                        'Critical', 'High', 'Medium', 'Low')).aggregate(
+        total=Sum(
+            Case(When(severity__in=('Critical', 'High', 'Medium', 'Low'),
+                      then=Value(1)),
+                 output_field=IntegerField())))['total']
+
+    oip = {'S0': 0,
+           'S1': 0,
+           'S2': 0,
+           'S3': 0,
+           'Total': total_opened_in_period,
+           'start_date': start_date,
+           'end_date': end_date,
+           'closed': Finding.objects.filter(mitigated__range=[start_date, end_date],
+                                            test__engagement__product__prod_type=pt,
+                                            severity__in=(
+                                                'Critical', 'High', 'Medium', 'Low')).aggregate(total=Sum(
+               Case(When(severity__in=('Critical', 'High', 'Medium', 'Low'), then=Value(1)),
+                    output_field=IntegerField())))['total']}
+
+    for o in opened_in_period:
+        oip[o['numerical_severity']] = o['numerical_severity__count']
+
+    return oip
+
+
+@cache_page(60 * 5)  # cache for 5 minutes
+def product_type_counts(request):
+    form = ProductTypeCountsForm()
+    oip = None
+    oip_1 = None
+    oip_2 = None
+    oip_3 = None
+    cip = None
+    aip = None
+    all_current_in_pt = None
+    top_ten = None
+    pt = None
+    today = datetime.now(tz=localtz)
+    first_of_month = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    mid_month = first_of_month.replace(day=15, hour=23, minute=59, second=59, microsecond=999999)
+    end_of_month = mid_month.replace(day=monthrange(today.year, today.month)[1], hour=23, minute=59, second=59,
+                                     microsecond=999999)
+    start_date = first_of_month
+    end_date = end_of_month
+
+    if request.method == 'GET' and 'month' in request.GET and 'year' in request.GET and 'product_type' in request.GET:
+        form = ProductTypeCountsForm(request.GET)
+        if form.is_valid():
+            pt = form.cleaned_data['product_type']
+            month = int(form.cleaned_data['month'])
+            year = int(form.cleaned_data['year'])
+            first_of_month = first_of_month.replace(month=month, year=year)
+            mid_month = mid_month.replace(month=month, year=year)
+            end_of_month = end_of_month.replace(month=month, year=year)
+
+            start_date = first_of_month
+            end_date = end_of_month
+
+            print start_date, end_date, end_of_month
+
+            oip = opened_in_period(start_date, end_date, pt)
+
+            # trending data
+            oip_1 = opened_in_period(start_date + relativedelta(months=-1), end_of_month + relativedelta(months=-1), pt)
+            oip_2 = opened_in_period(start_date + relativedelta(months=-2), end_of_month + relativedelta(months=-2), pt)
+            oip_3 = opened_in_period(start_date + relativedelta(months=-3), end_of_month + relativedelta(months=-3), pt)
+
+            closed_in_period = Finding.objects.filter(mitigated__range=[start_date, end_date],
+                                                      test__engagement__product__prod_type=pt,
+                                                      severity__in=('Critical', 'High', 'Medium', 'Low')).values(
+                'numerical_severity').annotate(Count('numerical_severity')).order_by('numerical_severity')
+
+            total_closed_in_period = Finding.objects.filter(mitigated__range=[start_date, end_date],
+                                                            test__engagement__product__prod_type=pt,
+                                                            severity__in=(
+                                                                'Critical', 'High', 'Medium', 'Low')).aggregate(
+                total=Sum(
+                    Case(When(severity__in=('Critical', 'High', 'Medium', 'Low'),
+                              then=Value(1)),
+                         output_field=IntegerField())))['total']
+
+            overall_in_pt = Finding.objects.filter(verified=True,
+                                                   false_p=False,
+                                                   duplicate=False,
+                                                   out_of_scope=False,
+                                                   mitigated__isnull=True,
+                                                   test__engagement__product__prod_type=pt,
+                                                   severity__in=('Critical', 'High', 'Medium', 'Low')).values(
+                'numerical_severity').annotate(Count('numerical_severity')).order_by('numerical_severity')
+
+            total_overall_in_pt = Finding.objects.filter(verified=True,
+                                                         false_p=False,
+                                                         duplicate=False,
+                                                         out_of_scope=False,
+                                                         mitigated__isnull=True,
+                                                         test__engagement__product__prod_type=pt,
+                                                         severity__in=('Critical', 'High', 'Medium', 'Low')).aggregate(
+                total=Sum(
+                    Case(When(severity__in=('Critical', 'High', 'Medium', 'Low'),
+                              then=Value(1)),
+                         output_field=IntegerField())))['total']
+
+            all_current_in_pt = Finding.objects.filter(verified=True,
+                                                       false_p=False,
+                                                       duplicate=False,
+                                                       out_of_scope=False,
+                                                       mitigated__isnull=True,
+                                                       test__engagement__product__prod_type=pt,
+                                                       severity__in=(
+                                                           'Critical', 'High', 'Medium', 'Low')).prefetch_related(
+                'test__engagement__product',
+                'test__engagement__product__prod_type',
+                'test__engagement__risk_acceptance',
+                'reporter').order_by(
+                'numerical_severity')
+
+            top_ten = Product.objects.filter(engagement__test__finding__verified=True,
+                                             engagement__test__finding__false_p=False,
+                                             engagement__test__finding__duplicate=False,
+                                             engagement__test__finding__out_of_scope=False,
+                                             engagement__test__finding__mitigated__isnull=True,
+                                             engagement__test__finding__severity__in=(
+                                                 'Critical', 'High', 'Medium', 'Low'),
+                                             prod_type=pt).annotate(
+                critical=Sum(
+                    Case(When(engagement__test__finding__severity='Critical', then=Value(1)),
+                         output_field=IntegerField())
+                ),
+                high=Sum(
+                    Case(When(engagement__test__finding__severity='High', then=Value(1)),
+                         output_field=IntegerField())
+                ),
+                medium=Sum(
+                    Case(When(engagement__test__finding__severity='Medium', then=Value(1)),
+                         output_field=IntegerField())
+                ),
+                low=Sum(
+                    Case(When(engagement__test__finding__severity='Low', then=Value(1)),
+                         output_field=IntegerField())
+                ),
+                total=Sum(
+                    Case(When(engagement__test__finding__severity__in=(
+                        'Critical', 'High', 'Medium', 'Low'), then=Value(1)),
+                        output_field=IntegerField()))
+            ).order_by('-critical', '-high', '-medium', '-low')[:10]
+
+            cip = {'S0': 0,
+                   'S1': 0,
+                   'S2': 0,
+                   'S3': 0,
+                   'Total': total_closed_in_period}
+
+            aip = {'S0': 0,
+                   'S1': 0,
+                   'S2': 0,
+                   'S3': 0,
+                   'Total': total_overall_in_pt}
+
+            for o in closed_in_period:
+                cip[o['numerical_severity']] = o['numerical_severity__count']
+
+            for o in overall_in_pt:
+                aip[o['numerical_severity']] = o['numerical_severity__count']
+        else:
+            messages.add_message(request, messages.ERROR, "Please choose month and year and the Product Type.",
+                                 extra_tags='alert-danger')
+
+    return render(request,
+                  'dojo/pt_counts.html',
+                  {'form': form,
+                   'start_date': start_date,
+                   'end_date': end_date,
+                   'opened_in_period': oip,
+                   'trending_opened': [oip_3, oip_2, oip_1, oip],
+                   'closed_in_period': cip,
+                   'overall_in_pt': aip,
+                   'all_current_in_pt': all_current_in_pt,
+                   'top_ten': top_ten,
+                   'pt': pt,
+                   'breadcrumbs': get_breadcrumbs(title="Bi-Weekly Metrics", user=request.user)})
 
 
 def home(request):
