@@ -561,6 +561,9 @@
     <script src="{% static "flot/jquery.flot.stack.js" %}"></script>
     <script>
         $(function () {
+            {% if not show_pt_filter %}
+                $('#id_test__engagement__product__prod_type').parents('p').remove();
+            {% endif %}
 
             {% if opened_per_month %}
                 chart_div();

@@ -514,8 +514,6 @@ class MetricsFindingFilter(FilterSet):
     status = FindingStatusFilter()
 
     def __init__(self, *args, **kwargs):
-        if 'show_pt_filter' in kwargs:
-            self.show_pt_filter = kwargs.pop('show_pt_filter')
         super(MetricsFindingFilter, self).__init__(*args, **kwargs)
         self.form.fields['severity'].choices = self.queryset.order_by('numerical_severity') \
             .values_list('severity', 'severity').distinct()
