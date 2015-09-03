@@ -249,16 +249,6 @@ urlpatterns = [
 
 ]
 
-from biweekly_dojo_metrics.urls import urlpatterns as bwmp
-
-urlpatterns += bwmp
-
-from defectDojo_engagement_survey.urls import urlpatterns as su
-
-urlpatterns += su
-
-urlpatterns += staticfiles_urlpatterns()
-
 if settings.DEBUG:
     urlpatterns += patterns('django.views.static',
                             (r'media/(?P<path>.*)', 'serve', {

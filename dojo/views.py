@@ -976,9 +976,11 @@ generic metrics method
 """
 
 
-@cache_page(60 * 5)  # cache for 5 minutes
+# @cache_page(60 * 5)  # cache for 5 minutes
 def metrics(request, mtype):
     template = 'dojo/metrics.html'
+    page_name = 'Product Type Metrics'
+    show_pt_filter = True
 
     findings = Finding.objects.filter(verified=True).prefetch_related('test__engagement__product',
                                                                       'test__engagement__product__prod_type',
@@ -995,18 +997,25 @@ def metrics(request, mtype):
         },
     )
 
-    page_name = 'Product Type Metrics'
+    if mtype != 'All':
+        pt = Product_Type.objects.filter(id=mtype)
+        request.GET._mutable = True
+        request.GET.appendlist('test__engagement__product__prod_type', mtype)
+        request.GET._mutable = False
+        mtype = pt[0].name
+        show_pt_filter = False
+        page_name = '%s Metrics' % mtype
+        prod_type = pt
+    else:
+        prod_type = Product_Type.objects.all()
 
-    show_pt_filter = 'test__engagement__product__prod_type' in request.GET
-
-    findings = MetricsFindingFilter(request.GET, queryset=findings, show_pt_filter=show_pt_filter)
+    findings = MetricsFindingFilter(request.GET, queryset=findings)
 
     findings.qs  # this is needed to load details from filter since it is lazy
 
     start_date = findings.filters['date'].start_date
     end_date = findings.filters['date'].end_date
 
-    prod_type = findings.form.cleaned_data['test__engagement__product__prod_type']
     if len(prod_type) > 0:
         findings_closed = Finding.objects.filter(mitigated__range=[start_date, end_date],
                                                  test__engagement__product__prod_type__in=prod_type).prefetch_related(
@@ -1090,7 +1099,8 @@ def metrics(request, mtype):
     weekly_counts = get_period_counts(findings, findings_closed, accepted_findings, weeks_between, start_date,
                                       relative_delta='weeks')
 
-    top_ten = Product.objects.filter(engagement__test__finding__in=findings.qs,
+    top_ten = Product.objects.filter(engagement__test__finding__test__engagement__product__prod_type__in=prod_type,
+                                     engagement__test__finding__in=findings.queryset,
                                      engagement__test__finding__severity__in=(
                                          'Critical', 'High', 'Medium', 'Low'), ).annotate(
         critical=Sum(
@@ -1202,7 +1212,8 @@ def metrics(request, mtype):
         'closed_in_period_details': closed_in_period_details,
         'punchcard': punchcard,
         'ticks': ticks,
-        'highest_count': highest_count
+        'highest_count': highest_count,
+        'show_pt_filter': show_pt_filter,
     })
 
 
