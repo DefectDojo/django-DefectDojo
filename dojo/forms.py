@@ -883,3 +883,19 @@ class DeleteUserForm(forms.ModelForm):
         exclude = ['username', 'first_name', 'last_name', 'email', 'is_active',
                    'is_staff', 'is_superuser', 'password', 'last_login', 'groups',
                    'date_joined', 'user_permissions']
+
+
+def get_years():
+    now = datetime.now(tz=localtz)
+    return [(now.year, now.year), (now.year - 1, now.year - 1), (now.year - 2, now.year - 2)]
+
+
+class ProductTypeCountsForm(forms.Form):
+    month = forms.ChoiceField(choices=MONTHS.items(), required=True, error_messages={
+        'required': '*'})
+    year = forms.ChoiceField(choices=get_years, required=True, error_messages={
+        'required': '*'})
+    product_type = forms.ModelChoiceField(required=True,
+                                          queryset=Product_Type.objects.all(),
+                                          error_messages={
+                                              'required': '*'})

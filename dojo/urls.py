@@ -154,6 +154,8 @@ urlpatterns = [
         name='simple_metrics'),
     url(r'^metrics/product/type/(?P<mtype>\d+)$',
         views.metrics, name='product_type_metrics'),
+    url(r'^metrics/product/type/counts$',
+        views.product_type_counts, name='product_type_counts'),
     url(r'^metrics/engineer$', views.engineer_metrics,
         name='engineer_metrics'),
     url(r'^metrics/research$', views.research_metrics,
