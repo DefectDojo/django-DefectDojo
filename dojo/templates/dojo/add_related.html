@@ -1,3 +1,4 @@
+{% load static from staticfiles %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -13,13 +14,13 @@
 
 
     <!-- Bootstrap Core CSS -->
-    <link href="{{ STATIC_URL }}bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{% static "bootstrap/dist/css/bootstrap.min.css" %}" rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link href="{{ STATIC_URL }}startbootstrap-sb-admin-2/dist/css/sb-admin-2.css" rel="stylesheet">
+    <link href="{% static "startbootstrap-sb-admin-2/dist/css/sb-admin-2.css" %}" rel="stylesheet">
 
     <!-- Custom Fonts -->
-    <link href="{{ STATIC_URL }}fontawesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="{% static "fontawesome/css/font-awesome.min.css" %}" rel="stylesheet" type="text/css">
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -27,10 +28,10 @@
         <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
         <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
-    <link rel="stylesheet" href="{{ STATIC_URL }}jquery-ui/themes/base/jquery-ui.min.css">
-    <link rel="shortcut icon" href="{{ STATIC_URL }}dojo/img/favicon.ico"/>
-    <link rel="stylesheet" href="{{ STATIC_URL }}fullcalendar/dist/fullcalendar.min.css">
-    <link rel="stylesheet" href="{{ STATIC_URL }}dojo/css/dojo.css">
+    <link rel="stylesheet" href="{% static "jquery-ui/themes/base/jquery-ui.min.css" %}">
+    <link rel="shortcut icon" href="{% static "dojo/img/favicon.ico" %}"/>
+    <link rel="stylesheet" href="{% static "fullcalendar/dist/fullcalendar.min.css" %}">
+    <link rel="stylesheet" href="{% static "dojo/css/dojo.css" %}">
 </head>
 <body>
 <!-- Page Content -->
@@ -55,25 +56,23 @@
 <!-- /#wrapper -->
 
 <!-- jQuery -->
-<script src="{{ STATIC_URL }}jquery/dist/jquery.min.js"></script>
+<script src="{% static "jquery/dist/jquery.min.js" %}"></script>
 <!--  jQuery UI -->
-<script src="{{ STATIC_URL }}jquery-ui/jquery-ui.min.js"></script>
+<script src="{% static "jquery-ui/jquery-ui.min.js" %}"></script>
 <!-- Bootstrap Core JavaScript -->
-<script src="{{ STATIC_URL }}bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="{% static "bootstrap/dist/js/bootstrap.min.js" %}"></script>
 
 <!-- Metis Menu Plugin JavaScript -->
-<script src="{{ STATIC_URL }}metisMenu/dist/metisMenu.min.js"></script>
+<script src="{% static "metisMenu/dist/metisMenu.min.js" %}"></script>
 
 <!-- Custom Theme JavaScript -->
-<script src="{{ STATIC_URL }}startbootstrap-sb-admin-2/dist/js/sb-admin-2.js"></script>
+<script src="{% static "startbootstrap-sb-admin-2/dist/js/sb-admin-2.js" %}"></script>
 <!-- Calendar JavaScript -->
-<script src="{{ STATIC_URL }}moment/min/moment.min.js"></script>
-<script src="{{ STATIC_URL }}fullcalendar/dist/fullcalendar.min.js"></script>
-<!-- Table sorter JavaScript -->
-<script src="{{ STATIC_URL }}jquery.tablesorter/dist/js/jquery.tablesorter.min.js"></script>
+<script src="{% static "moment/min/moment.min.js" %}"></script>
+<script src="{% static "fullcalendar/dist/fullcalendar.min.js" %}"></script>
 <!-- our JS -->
-<script src="{{ STATIC_URL }}dojo/js/index.js"></script>
-<script type="application/javascript" src="{{ STATIC_URL }}admin/js/admin/RelatedObjectLookups.js"></script>
+<script src="{% static "dojo/js/index.js" %}"></script>
+<script type="application/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>
 </body>
 
 </html>

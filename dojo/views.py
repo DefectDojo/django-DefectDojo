@@ -29,7 +29,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.validators import validate_ipv46_address
 from django.views.decorators.cache import cache_page
 from django.utils.html import escape
-from django.db.models import Q
+from django.db.models import Q, Sum, Case, When, IntegerField, Value
 from django.http import HttpResponseRedirect, StreamingHttpResponse, HttpResponseForbidden, Http404, HttpResponse
 from django.core.urlresolvers import reverse
 from django.shortcuts import render, get_object_or_404
@@ -155,7 +155,7 @@ def view_engineer(request, eid):
     for f in findings:
         if (f.mitigated
             and f.mitigated.year == now.year
-                and f.mitigated.month == now.month):
+            and f.mitigated.month == now.month):
             closed_month.append(f)
 
     o_dict, open_count = count_findings(open_month)
@@ -976,74 +976,114 @@ generic metrics method
 """
 
 
-@cache_page(60 * 5)  # cache for 5 minutes
+# @cache_page(60 * 5)  # cache for 5 minutes
 def metrics(request, mtype):
     template = 'dojo/metrics.html'
-    if mtype == 'All' or mtype == 'wiki':
-        pt = Product_Type.objects.all()
-        findings = Finding.objects.filter(test__engagement__product__prod_type__in=pt,
-                                          verified=True).prefetch_related('test__engagement__product',
-                                                                          'test__engagement__product__prod_type',
-                                                                          'test__engagement__risk_acceptance',
-                                                                          'reporter').extra(
-            select={
-                'ra_count': 'SELECT COUNT(*) FROM dojo_risk_acceptance INNER JOIN '
-                            'dojo_risk_acceptance_accepted_findings ON '
-                            '( dojo_risk_acceptance.id = dojo_risk_acceptance_accepted_findings.risk_acceptance_id ) '
-                            'WHERE dojo_risk_acceptance_accepted_findings.finding_id = dojo_finding.id',
-            },
-        )
-        page_name = "Metrics"
-        if 'view' in request.GET and 'dashboard' == request.GET['view']:
-            template = 'dojo/dashboard-metrics.html'
-            page_name = getattr(settings, 'TEAM_NAME', '') + ' Metrics'
-    else:
+    page_name = 'Product Type Metrics'
+    show_pt_filter = True
+
+    findings = Finding.objects.filter(verified=True).prefetch_related('test__engagement__product',
+                                                                      'test__engagement__product__prod_type',
+                                                                      'test__engagement__risk_acceptance',
+                                                                      'risk_acceptance_set',
+                                                                      'reporter').extra(
+        select={
+            'ra_count': 'SELECT COUNT(*) FROM dojo_risk_acceptance INNER JOIN '
+                        'dojo_risk_acceptance_accepted_findings ON '
+                        '( dojo_risk_acceptance.id = dojo_risk_acceptance_accepted_findings.risk_acceptance_id ) '
+                        'WHERE dojo_risk_acceptance_accepted_findings.finding_id = dojo_finding.id',
+            "sql_age": 'SELECT IF(dojo_finding.mitigated IS NULL, DATEDIFF(CURDATE(), dojo_finding.date), '
+                       'DATEDIFF(dojo_finding.mitigated, dojo_finding.date))'
+        },
+    )
+
+    if mtype != 'All':
         pt = Product_Type.objects.filter(id=mtype)
         request.GET._mutable = True
         request.GET.appendlist('test__engagement__product__prod_type', mtype)
         request.GET._mutable = False
         mtype = pt[0].name
-        findings = Finding.objects.filter(test__engagement__product__prod_type=pt,
-                                          verified=True).prefetch_related('test__engagement__product',
-                                                                          'test__engagement__product__prod_type',
-                                                                          'test__engagement__risk_acceptance',
-                                                                          'reporter').extra(
-            select={
-                'ra_count': 'SELECT COUNT(*) FROM dojo_risk_acceptance INNER JOIN '
-                            'dojo_risk_acceptance_accepted_findings ON '
-                            '( dojo_risk_acceptance.id = dojo_risk_acceptance_accepted_findings.risk_acceptance_id ) '
-                            'WHERE dojo_risk_acceptance_accepted_findings.finding_id = dojo_finding.id'
-            },
-        )
+        show_pt_filter = False
         page_name = '%s Metrics' % mtype
+        prod_type = pt
+    else:
+        prod_type = Product_Type.objects.all()
 
     findings = MetricsFindingFilter(request.GET, queryset=findings)
+
     findings.qs  # this is needed to load details from filter since it is lazy
 
     start_date = findings.filters['date'].start_date
     end_date = findings.filters['date'].end_date
 
-    prod_type = findings.form.cleaned_data['test__engagement__product__prod_type']
     if len(prod_type) > 0:
         findings_closed = Finding.objects.filter(mitigated__range=[start_date, end_date],
                                                  test__engagement__product__prod_type__in=prod_type).prefetch_related(
             'test__engagement__product')
         # capture the accepted findings in period
-        accepted_findings = [finding for ra in Risk_Acceptance.objects.filter(
-            created__range=[start_date, end_date],
-            accepted_findings__test__engagement__product__prod_type__in=prod_type).prefetch_related(
-            'accepted_findings__test__engagement__product')
-                             for finding in ra.accepted_findings.all()]
+        accepted_findings = Finding.objects.filter(risk_acceptance__created__range=[start_date, end_date],
+                                                   test__engagement__product__prod_type__in=prod_type). \
+            prefetch_related('test__engagement__product')
+        accepted_findings_counts = Finding.objects.filter(risk_acceptance__created__range=[start_date, end_date],
+                                                          test__engagement__product__prod_type__in=prod_type). \
+            prefetch_related('test__engagement__product').aggregate(
+            total=Sum(
+                Case(When(severity__in=('Critical', 'High', 'Medium', 'Low'),
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            critical=Sum(
+                Case(When(severity='Critical',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            high=Sum(
+                Case(When(severity='High',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            medium=Sum(
+                Case(When(severity='Medium',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            low=Sum(
+                Case(When(severity='Low',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            info=Sum(
+                Case(When(severity='Info',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+        )
     else:
         findings_closed = Finding.objects.filter(mitigated__range=[start_date, end_date]).prefetch_related(
             'test__engagement__product')
-        accepted_findings = [finding for ra in Risk_Acceptance.objects.filter(
-            created__range=[start_date, end_date]).prefetch_related(
-            'accepted_findings__test__engagement__product')
-                             for finding in ra.accepted_findings.all()]
-
-    afi = set(f.id for f in accepted_findings)
-    accepted_findings = Finding.objects.filter(id__in=afi).prefetch_related('test__engagement__product')
+        accepted_findings = Finding.objects.filter(risk_acceptance__created__range=[start_date, end_date]). \
+            prefetch_related('test__engagement__product')
+        accepted_findings_counts = Finding.objects.filter(risk_acceptance__created__range=[start_date, end_date]). \
+            prefetch_related('test__engagement__product').aggregate(
+            total=Sum(
+                Case(When(severity__in=('Critical', 'High', 'Medium', 'Low'),
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            critical=Sum(
+                Case(When(severity='Critical',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            high=Sum(
+                Case(When(severity='High',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            medium=Sum(
+                Case(When(severity='Medium',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            low=Sum(
+                Case(When(severity='Low',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            info=Sum(
+                Case(When(severity='Info',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+        )
 
     r = relativedelta(end_date, start_date)
     months_between = (r.years * 12) + r.months
@@ -1059,26 +1099,31 @@ def metrics(request, mtype):
     weekly_counts = get_period_counts(findings, findings_closed, accepted_findings, weeks_between, start_date,
                                       relative_delta='weeks')
 
-    top_ten_products = sorted(
-        Product.objects.filter(
-            engagement__test__finding__in=findings.queryset
-        ).distinct().all(),
-        key=lambda t: t.findings_count, reverse=True)[: 10]
-
-    update = []
-    for p in top_ten_products:
-        open_finds = p.open_findings(start_date, end_date)
-        update.append(
-            ["<a href='%s'>%s</a>" % (reverse('view_product_findings', args=(p.id,)), escape(p.name)),
-             open_finds['Critical'],
-             open_finds['High'],
-             open_finds['Medium'],
-             open_finds['Low'],
-             open_finds['Total']])
-
-    update = sorted(update, key=lambda s: s[5], reverse=True)
-
-    details = []
+    top_ten = Product.objects.filter(engagement__test__finding__test__engagement__product__prod_type__in=prod_type,
+                                     engagement__test__finding__in=findings.queryset,
+                                     engagement__test__finding__severity__in=(
+                                         'Critical', 'High', 'Medium', 'Low'), ).annotate(
+        critical=Sum(
+            Case(When(engagement__test__finding__severity='Critical', then=Value(1)),
+                 output_field=IntegerField())
+        ),
+        high=Sum(
+            Case(When(engagement__test__finding__severity='High', then=Value(1)),
+                 output_field=IntegerField())
+        ),
+        medium=Sum(
+            Case(When(engagement__test__finding__severity='Medium', then=Value(1)),
+                 output_field=IntegerField())
+        ),
+        low=Sum(
+            Case(When(engagement__test__finding__severity='Low', then=Value(1)),
+                 output_field=IntegerField())
+        ),
+        total=Sum(
+            Case(When(engagement__test__finding__severity__in=(
+                'Critical', 'High', 'Medium', 'Low'), then=Value(1)),
+                output_field=IntegerField()))
+    ).order_by('-critical', '-high', '-medium', '-low')[:10]
 
     age_detail = [0, 0, 0, 0]
 
@@ -1090,22 +1135,16 @@ def metrics(request, mtype):
                                "Low": 0, "Info": 0, "Total": 0}
     closed_in_period_details = {}
 
-    accepted_in_period_counts = {"Critical": 0, "High": 0, "Medium": 0,
-                                 "Low": 0, "Info": 0, "Total": 0}
     accepted_in_period_details = {}
 
     for finding in findings:
-        if finding.mitigated:
-            age = (finding.mitigated.date() - finding.date).days
-        else:
-            age = (datetime.now().date() - finding.date).days
-        if 0 <= age <= 30:
+        if 0 <= finding.sql_age <= 30:
             age_detail[0] += 1
-        elif 30 < age <= 60:
+        elif 30 < finding.sql_age <= 60:
             age_detail[1] += 1
-        elif 60 < age <= 90:
+        elif 60 < finding.sql_age <= 90:
             age_detail[2] += 1
-        elif age > 90:
+        elif finding.sql_age > 90:
             age_detail[3] += 1
 
         in_period_counts[finding.severity] += 1
@@ -1120,39 +1159,7 @@ def metrics(request, mtype):
         ][finding.severity] += 1
         in_period_details[finding.test.engagement.product.name]['Total'] += 1
 
-        team = finding.test.engagement.product.prod_type.name
-        name = finding.test.engagement.product.name
-        severity = finding.severity
-        if severity == 'Critical':
-            severity = 'S0'
-        elif severity == 'High':
-            severity = 'S1'
-        elif severity == 'Medium':
-            severity = 'S2'
-        else:
-            severity = 'S3'
-        description = finding.title
-        life = date.today() - finding.date
-        life = life.days
-        status = 'Accepted'
-        if finding.ra_count == 0:
-            status = 'Active'
-        if finding.mitigated is not None:
-            status = 'Closed'
-        detail = list()
-        detail.append(team)
-        detail.append(name)
-        detail.append(severity)
-        detail.append(description)
-        detail.append(life)
-        detail.append(status)
-        detail.append(finding.reporter)
-        detail.append(finding.id)
-        details.append(detail)
-
     for finding in accepted_findings:
-        accepted_in_period_counts[finding.severity] += 1
-        accepted_in_period_counts['Total'] += 1
         if finding.test.engagement.product.name not in accepted_in_period_details:
             accepted_in_period_details[finding.test.engagement.product.name] = {
                 'path': reverse('accepted_findings') + '?test__engagement__product=' + str(
@@ -1183,29 +1190,30 @@ def metrics(request, mtype):
 
     if 'view' in request.GET and 'dashboard' == request.GET['view']:
         punchcard, ticks, highest_count = get_punchcard_data(findings, weeks_between, start_date)
+        template = 'dojo/dashboard-metrics.html'
 
     return render(request, template, {
         'name': page_name,
-        'breadcrumbs': get_breadcrumbs(title="%s Metrics" % mtype, user=request.user),
+        'breadcrumbs': get_breadcrumbs(title=page_name, user=request.user),
         'start_date': start_date,
         'end_date': end_date,
         'findings': findings,
-        'detailed_breakdown': sorted(details, key=lambda x: x[2]),
         'opened_per_month': monthly_counts['opened_per_period'],
         'opened_per_week': weekly_counts['opened_per_period'],
         'accepted_per_month': monthly_counts['accepted_per_period'],
         'accepted_per_week': weekly_counts['accepted_per_period'],
-        'top_ten_products': update,
+        'top_ten_products': top_ten,
         'age_detail': age_detail,
         'in_period_counts': in_period_counts,
         'in_period_details': in_period_details,
-        'accepted_in_period_counts': accepted_in_period_counts,
+        'accepted_in_period_counts': accepted_findings_counts,
         'accepted_in_period_details': accepted_in_period_details,
         'closed_in_period_counts': closed_in_period_counts,
         'closed_in_period_details': closed_in_period_details,
         'punchcard': punchcard,
         'ticks': ticks,
-        'highest_count': highest_count
+        'highest_count': highest_count,
+        'show_pt_filter': show_pt_filter,
     })
 
 

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static from staticfiles %}
 {% block add_styles %}
     .chart {height: 300px}
     .status .panel {min-height: 185px;background-color: #f5f5f5;}
@@ -151,16 +152,16 @@
 {% endblock %}
 {% block postscript %}
     <!-- Flot Charts JavaScript -->
-    <script src="{{ STATIC_URL }}flot/excanvas.min.js"></script>
-    <script src="{{ STATIC_URL }}flot/jquery.flot.js"></script>
-    <script src="{{ STATIC_URL }}flot/jquery.flot.pie.js"></script>
-    <script src="{{ STATIC_URL }}flot/jquery.flot.time.js"></script>
-    <script src="{{ STATIC_URL }}flot.tooltip/js/jquery.flot.tooltip.min.js"></script>
-    <script src="{{ STATIC_URL }}flot/jquery.flot.stack.js"></script>
+    <script src="{% static "flot/excanvas.min.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.pie.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.time.js" %}"></script>
+    <script src="{% static "flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.stack.js" %}"></script>
     {% if punchcard %}
-        <script src="{{ STATIC_URL }}JUMFlot/JUMFlot.min.js"></script>
-        <script src="{{ STATIC_URL }}JUMFlot/jquery.flot.mouse.js"></script>
-        <script src="{{ STATIC_URL }}JUMFlot/jquery.flot.bubbles.js"></script>
+        <script src="{% static "JUMFlot/JUMFlot.min.js" %}"></script>
+        <script src="{% static "JUMFlot/jquery.flot.mouse.js" %}"></script>
+        <script src="{% static "JUMFlot/jquery.flot.bubbles.js" %}"></script>
     {% endif %}
     <script>
         var highest_count = {{ highest_count }};

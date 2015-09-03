@@ -83,26 +83,22 @@ sed -i  "s#DOJO_STATIC_ROOT#$PWD/static/#g" dojo/settings.py
 # Detect Python version
 PYV=`python -c "import sys;t='{v[0]}.{v[1]}'.format(v=list(sys.version_info[:2]));sys.stdout.write(t)";`
 if [[ "$PYV"<"2.7" ]]; then
-    echo "Reverting to Django 1.6"
-    sed -i  "s/Django==1.7.7/Django==1.6.11/g" setup.py
+    echo "ERROR: DefectDojo requires Python 2.7+"
+    exit 1;
 else
-    echo "Leaving Django 1.7.7 requirement"
+    echo "Leaving Django 1.8.4 requirement"
 fi  
 
 # Detect if we're in a a virtualenv
 if python -c 'import sys; print sys.real_prefix' 2>/dev/null; then
     pip install .
-    if [[ "$PYV">="2.7" ]]; then
-        python manage.py makemigrations dojo
-        python manage.py migrate
-    fi
+    python manage.py makemigrations dojo
+    python manage.py migrate
     python manage.py syncdb
 else
     sudo pip install .
-    if [[ "$PYV">="2.7" ]]; then    
-        sudo python manage.py makemigrations dojo
-        sudo python manage.py migrate
-    fi
+    sudo python manage.py makemigrations dojo
+    sudo python manage.py migrate
     sudo python manage.py syncdb
 fi
 

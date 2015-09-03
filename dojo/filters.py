@@ -465,14 +465,14 @@ class FindingStatusFilter(ChoiceFilter):
                          verified=True,
                          false_p=False,
                          duplicate=False,
-                         out_of_scope=False,)
+                         out_of_scope=False, )
 
     def closed(self, qs, name):
         return qs.filter(mitigated__isnull=False,
                          verified=True,
                          false_p=False,
                          duplicate=False,
-                         out_of_scope=False,)
+                         out_of_scope=False, )
 
     options = {
         '': (_('Any'), any),
@@ -515,11 +515,8 @@ class MetricsFindingFilter(FilterSet):
 
     def __init__(self, *args, **kwargs):
         super(MetricsFindingFilter, self).__init__(*args, **kwargs)
-        sevs = dict()
-        sevs = dict([finding.severity, finding.severity]
-                    for finding in self.queryset.distinct()
-                    if finding.severity not in sevs)
-        self.form.fields['severity'].choices = sevs.items()
+        self.form.fields['severity'].choices = self.queryset.order_by('numerical_severity') \
+            .values_list('severity', 'severity').distinct()
 
 
 class EndpointFilter(DojoFilter):

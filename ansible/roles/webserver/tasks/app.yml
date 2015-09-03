@@ -34,7 +34,7 @@
   sudo_user: '{{ dd_user }}'
 
 - name: Install Django
-  pip: name=Django version=1.7.7 virtualenv={{ venv_dir }}
+  pip: name=Django version=1.8.4 virtualenv={{ venv_dir }}
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
@@ -49,32 +49,32 @@
   sudo_user: '{{ dd_user }}'
 
 - name: Install django-secure
-  pip: name=django-secure version=1.0 virtualenv={{ venv_dir }}
+  pip: name=django-secure virtualenv={{ venv_dir }}
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
 - name: Install django-tastypie
-  pip: name=django-tastypie version=0.12.2 virtualenv={{ venv_dir }}
+  pip: name=django-tastypie virtualenv={{ venv_dir }}
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
 - name: Install gunicorn
-  pip: name=gunicorn version=19.1.1 virtualenv={{ venv_dir }}
+  pip: name=gunicorn virtualenv={{ venv_dir }}
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
 - name: Install Python-nmap
-  pip: name=python-nmap version=0.3.4 virtualenv={{ venv_dir }}
+  pip: name=python-nmap virtualenv={{ venv_dir }}
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
 - name: Install pytz
-  pip: name=pytz version=2013.9 virtualenv={{ venv_dir }}
+  pip: name=pytz virtualenv={{ venv_dir }}
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
 - name: Install requests
-  pip: name=requests version=2.2.1 virtualenv={{ venv_dir }}
+  pip: name=requests virtualenv={{ venv_dir }}
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
@@ -114,7 +114,7 @@
   sudo_user: '{{ dd_user }}'
 
 - name: Install xhtml2pdf
-  pip: name=xhtml2pdf version=0.0.6 virtualenv={{ venv_dir }}
+  pip: name=xhtml2pdf virtualenv={{ venv_dir }}
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
@@ -124,7 +124,7 @@
   sudo_user: '{{ dd_user }}'
 
 - name: Install django-auditlog
-  pip: name=django-auditlog version=0.2.1 virtualenv={{ venv_dir }}
+  pip: name=django-auditlog virtualenv={{ venv_dir }}
   sudo: yes
   sudo_user: '{{ dd_user }}'
 

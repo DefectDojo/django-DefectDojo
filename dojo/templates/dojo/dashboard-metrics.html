@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load event_tags %}
+{% load static from staticfiles %}
 {% block add_styles %}
     nav.navbar {display: none;}
     #page-wrapper {
@@ -157,16 +158,16 @@
 {% endblock %}
 {% block postscript %}
     <!-- Flot Charts JavaScript -->
-    <script src="{{ STATIC_URL }}flot/excanvas.min.js"></script>
-    <script src="{{ STATIC_URL }}flot/jquery.flot.js"></script>
-    <script src="{{ STATIC_URL }}flot/jquery.flot.pie.js"></script>
-    <script src="{{ STATIC_URL }}flot/jquery.flot.time.js"></script>
-    <script src="{{ STATIC_URL }}flot.tooltip/js/jquery.flot.tooltip.min.js"></script>
-    <script src="{{ STATIC_URL }}flot/jquery.flot.stack.js"></script>
+    <script src="{% static "flot/excanvas.min.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.pie.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.time.js" %}"></script>
+    <script src="{% static "flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.stack.js" %}"></script>
     {% if punchcard %}
-        <script src="{{ STATIC_URL }}JUMFlot/JUMFlot.min.js"></script>
-        <script src="{{ STATIC_URL }}JUMFlot/jquery.flot.mouse.js"></script>
-        <script src="{{ STATIC_URL }}JUMFlot/jquery.flot.bubbles.js"></script>
+        <script src="{% static "JUMFlot/JUMFlot.min.js" %}"></script>
+        <script src="{% static "JUMFlot/jquery.flot.mouse.js" %}"></script>
+        <script src="{% static "JUMFlot/jquery.flot.bubbles.js" %}"></script>
     {% endif %}
     <script>
         var highest_count = {{ highest_count }};
@@ -416,11 +417,11 @@
                 var ticks = []
                 {% for t in top_ten_products %}
                     ttp = {{forloop.counter}};
-                    ticks.push([ttp, $("{{t.0|safe}}").text()]);
-                    critical.push([ttp, {{t.1}}]);
-                    high.push([ttp, {{t.2}}]);
-                    medium.push([ttp, {{t.3}}]);
-                    low.push([ttp, {{t.4}}]);
+                    ticks.push([ttp, "{{t.name|safe}}"]);
+                    critical.push([ttp, {{t.critical|default_if_none:0}}]);
+                    high.push([ttp, {{t.high|default_if_none:0}}]);
+                    medium.push([ttp, {{t.medium|default_if_none:0}}]);
+                    low.push([ttp, {{t.low|default_if_none:0}}]);
                 {% endfor %}
 
                 data1 = [
@@ -481,19 +482,19 @@
                 var data = [{
                     label: "Critical",
                     color: "#d9534f",
-                    data: {{in_period_counts.Critical}}
+                    data: {{in_period_counts.Critical|default_if_none:0}}
                 }, {
                     label: "High",
                     color: "#f0ad4e",
-                    data: {{in_period_counts.High}}
+                    data: {{in_period_counts.High|default_if_none:0}}
                 }, {
                     label: "Medium",
                     color: "#f0de28",
-                    data: {{in_period_counts.Medium}}
+                    data: {{in_period_counts.Medium|default_if_none:0}}
                 }, {
                     label: "Low",
                     color: "#337ab7",
-                    data: {{in_period_counts.Low}}
+                    data: {{in_period_counts.Low|default_if_none:0}}
                 }];
 
                 var plotObj = $.plot($("#opened_in_period"), data, {
@@ -522,19 +523,19 @@
                 var data = [{
                     label: "Critical",
                     color: "#d9534f",
-                    data: {{accepted_in_period_counts.Critical}}
+                    data: {{accepted_in_period_counts.critical|default_if_none:0}}
                 }, {
                     label: "High",
                     color: "#f0ad4e",
-                    data: {{accepted_in_period_counts.High}}
+                    data: {{accepted_in_period_counts.high|default_if_none:0}}
                 }, {
                     label: "Medium",
                     color: "#f0de28",
-                    data: {{accepted_in_period_counts.Medium}}
+                    data: {{accepted_in_period_counts.medium|default_if_none:0}}
                 }, {
                     label: "Low",
                     color: "#337ab7",
-                    data: {{accepted_in_period_counts.Low}}
+                    data: {{accepted_in_period_counts.low|default_if_none:0}}
                 }];
 
                 var plotObj = $.plot($("#total_accepted_in_period"), data, {

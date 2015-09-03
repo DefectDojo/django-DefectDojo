@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load event_tags %}
+{% load static from staticfiles %}
 {% block add_styles %}
     #chart_div3 .flot-x-axis .tickLabel, #chart_div4 .flot-x-axis .tickLabel
     {   top: 290px !important;
@@ -569,13 +570,13 @@
 {% endblock %}
 {% block postscript %}
     <!-- Flot Charts JavaScript -->
-    <script src="{{ STATIC_URL }}flot/excanvas.min.js"></script>
-    <script src="{{ STATIC_URL }}flot/jquery.flot.js"></script>
-    <script src="{{ STATIC_URL }}flot/jquery.flot.pie.js"></script>
-    <script src="{{ STATIC_URL }}flot/jquery.flot.resize.js"></script>
-    <script src="{{ STATIC_URL }}flot/jquery.flot.time.js"></script>
-    <script src="{{ STATIC_URL }}flot.tooltip/js/jquery.flot.tooltip.min.js"></script>
-    <script src="{{ STATIC_URL }}flot/jquery.flot.stack.js"></script>
+    <script src="{% static "flot/excanvas.min.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.pie.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.resize.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.time.js" %}"></script>
+    <script src="{% static "flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.stack.js" %}"></script>
     <script>
         $(function () {
 
