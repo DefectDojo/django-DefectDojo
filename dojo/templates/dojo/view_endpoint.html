@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load humanize %}
 {% load display_tags %}
+{% load static from staticfiles %}
 {% block add_styles %}
     .graph {min-height: 158px;}
     h3 { margin-top: 5px; margin-bottom: 5px; font-size: 20px; line-height: 22px;}
@@ -171,12 +172,12 @@
 {% endblock %}
 {% block postscript %}
     <!-- Flot Charts JavaScript -->
-    <script src="{{ STATIC_URL }}flot/excanvas.min.js"></script>
-    <script src="{{ STATIC_URL }}flot/jquery.flot.js"></script>
-    <script src="{{ STATIC_URL }}flot/jquery.flot.resize.js"></script>
-    <script src="{{ STATIC_URL }}flot/jquery.flot.time.js"></script>
-    <script src="{{ STATIC_URL }}flot/jquery.flot.stack.js"></script>
-    <script src="{{ STATIC_URL }}flot-axislabels/jquery.flot.axislabels.js"></script>
+    <script src="{% static "flot/excanvas.min.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.resize.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.time.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.stack.js" %}"></script>
+    <script src="{% static "flot-axislabels/jquery.flot.axislabels.js" %}"></script>
     <script type="text/javascript">
         $(function () {
             $(document).on('click', '.panel-heading button.clickable', function (e) {

@@ -8,7 +8,7 @@ SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
-VERSION = '1.0.3'
+VERSION = '1.0.4'
 
 # Uncomment this line if you enable SSL
 # SESSION_COOKIE_SECURE = True
@@ -179,11 +179,11 @@ INSTALLED_APPS = (
     'django.contrib.humanize',
     'gunicorn',
     'tastypie',
-    'tastypie_swagger',
     'djangobower',
     'easy_pdf',
     'auditlog',
     'dojo',
+    'tastypie_swagger',
 )
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load display_tags %}
+{% load static from staticfiles %}
 {% block content %}
     <div class="panel panel-default">
         <div class="panel-heading">
@@ -195,8 +196,8 @@
     </div>
 {% endblock %}
 {% block postscript %}
-    <script type="text/javascript" src="{{ STATIC_URL }}jquery-cookie/jquery.cookie.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}text-highlighter/build/TextHighlighter.min.js"></script>
+    <script type="text/javascript" src="{% static "jquery-cookie/jquery.cookie.js" %}"></script>
+    <script type="text/javascript" src="{% static "text-highlighter/build/TextHighlighter.min.js" %}"></script>
     <script type="text/javascript">
         $(function () {
             if (document.referrer.indexOf('simple_search') > 0) {
