@@ -27,7 +27,11 @@ class Command(BaseCommand):
     help = "Details:\n\tRuns nmap scans\n\nArguments:" +\
            "\n\tWeekly\n\tMonthly\n\tQuarterly"
 
+    def add_arguments(self, parser):
+        parser.add_argument('type')
+
     def handle(self, *args, **options):
+        type = options['type']
 
         # Scan the host and add the results of the scan to the host informaiton
         def runScan(prod_id, p_dict):
@@ -195,12 +199,12 @@ class Command(BaseCommand):
             Scans are performed on a Weekly, Monthly, or Quarterly bases. The
             target frequency is specified by the cron job scheduler.
         """
-        if not args:
+        if not options:
             print "Must specify an argument: Weekly, Monthly, Quarterly, or ID",\
                 " of Scan Settings to use."
             sys.exit(0)
-        if (args[0] in ["Weekly", "Monthly", "Quarterly"]
-                or args[0].isdigit()):
+        if (type in ["Weekly", "Monthly", "Quarterly"]
+                or type.isdigit()):
             pass
         else:
             print("Unexpected parameter: " + str(args[0]))
@@ -208,10 +212,10 @@ class Command(BaseCommand):
                   " or ID of Scan Settings to use."
             sys.exit(0)
 
-        if args[0].isdigit():
-            scSettings = ScanSettings.objects.filter(id=args[0])
+        if type.isdigit():
+            scSettings = ScanSettings.objects.filter(id=type)
         else:
-            scSettings = ScanSettings.objects.filter(frequency=args[0])
+            scSettings = ScanSettings.objects.filter(frequency=type)
 
         if len(scSettings) <= 0:
             print("No scan settings found with parameter specified.")
