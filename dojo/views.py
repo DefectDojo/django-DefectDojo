@@ -1294,8 +1294,6 @@ def product_type_counts(request):
             start_date = first_of_month
             end_date = end_of_month
 
-            print start_date, end_date, end_of_month
-
             oip = opened_in_period(start_date, end_date, pt)
 
             # trending data
