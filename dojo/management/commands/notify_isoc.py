@@ -20,17 +20,21 @@ A script that notifies external unit about the scans.
 class Command(BaseCommand):
     help = "Details: Spams External Unit\nArgs: Weekly, Monthly, Quarterly"
 
-    def handle(self, *args, **options):
+    def add_arguments(self, parser):
+        parser.add_argument('type')
 
-        if not args:
+    def handle(self, *args, **options):
+        type = options['type']
+
+        if not options:
             print "Must specify an argument: Weekly, Monthly, or Quarterly"
             sys.exit(0)
-        if args[0] not in ["Weekly", "Monthly", "Quarterly"]:
-            print("Unexpected frequency: " + str(args[0]) +
+        if type not in ["Weekly", "Monthly", "Quarterly"]:
+            print("Unexpected frequency: " + str(type) +
                   "\nMust specify an argument: Weekly, Monthly, or Quarterly.")
             sys.exit(0)
 
-        scSettings = ScanSettings.objects.filter(frequency=args[0])
+        scSettings = ScanSettings.objects.filter(frequency=type)
 
         scan_start_time = datetime.datetime.today() + datetime.timedelta(
             hours=12)
