@@ -1006,6 +1006,8 @@ def metrics(request, mtype):
         show_pt_filter = False
         page_name = '%s Metrics' % mtype
         prod_type = pt
+    elif 'test__engagement__product__prod_type' in request.GET:
+        prod_type = Product_Type.objects.filter(id__in=request.GET.getlist('test__engagement__product__prod_type', []))
     else:
         prod_type = Product_Type.objects.all()
 
@@ -1099,10 +1101,14 @@ def metrics(request, mtype):
     weekly_counts = get_period_counts(findings, findings_closed, accepted_findings, weeks_between, start_date,
                                       relative_delta='weeks')
 
-    top_ten = Product.objects.filter(engagement__test__finding__test__engagement__product__prod_type__in=prod_type,
-                                     engagement__test__finding__in=findings.queryset,
+    top_ten = Product.objects.filter(engagement__test__finding__verified=True,
+                                     engagement__test__finding__false_p=False,
+                                     engagement__test__finding__duplicate=False,
+                                     engagement__test__finding__out_of_scope=False,
+                                     engagement__test__finding__mitigated__isnull=True,
                                      engagement__test__finding__severity__in=(
-                                         'Critical', 'High', 'Medium', 'Low'), ).annotate(
+                                         'Critical', 'High', 'Medium', 'Low'),
+                                     prod_type__in=prod_type).annotate(
         critical=Sum(
             Case(When(engagement__test__finding__severity='Critical', then=Value(1)),
                  output_field=IntegerField())
