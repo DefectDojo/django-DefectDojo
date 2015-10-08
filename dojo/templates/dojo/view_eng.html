@@ -63,7 +63,7 @@
                 <div class="dropdown pull-right">
                     <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
                             data-toggle="dropdown" aria-expanded="true">
-                        <span class="fa fa-gear"></span>
+                        <span class="fa fa-bars"></span>
                         <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
@@ -87,6 +87,11 @@
                         <li role="presentation">
                             <a href="{% url 'engagement_report' eng.id %}">
                                 <i class="fa fa-file-text-o"></i> Generate Report
+                            </a>
+                        </li>
+                        <li role="presentation">
+                            <a href="{% url 'engagement_ics' eng.id %}">
+                                <i class="fa fa-calendar-plus-o" ></i> Add To Calendar
                             </a>
                         </li>
                         <li role="presentation">
@@ -187,7 +192,7 @@
                         <div class="dropdown pull-right">
                             <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
-                                <span class="fa fa-gear"></span>
+                                <span class="fa fa-bars"></span>
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">

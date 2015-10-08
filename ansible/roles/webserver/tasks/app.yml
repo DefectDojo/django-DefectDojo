@@ -128,6 +128,11 @@
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
+- name: Install vobject
+  pip: name=vobject virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ dd_user }}'
+
 - name: Run Django 'makemigrations' command
   django_manage: command='makemigrations dojo' app_path={{ dd_install_dir }} virtualenv={{ venv_dir }}
   sudo: yes

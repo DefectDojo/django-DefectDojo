@@ -10,6 +10,7 @@ from operator import itemgetter
 import operator
 import os
 import re
+import vobject
 from threading import Thread
 from xml.etree import ElementTree
 from xml.dom import NamespaceErr
@@ -1294,9 +1295,11 @@ def product_type_counts(request):
             month = int(form.cleaned_data['month'])
             year = int(form.cleaned_data['year'])
             first_of_month = first_of_month.replace(month=month, year=year)
-            mid_month = mid_month.replace(month=month, year=year)
-            end_of_month = end_of_month.replace(month=month, year=year)
 
+            month_requested = datetime(year, month, 1)
+
+            end_of_month = month_requested.replace(day=monthrange(month_requested.year, month_requested.month)[1],
+                                                   hour=23, minute=59, second=59, microsecond=999999)
             start_date = first_of_month
             end_date = end_of_month
 
@@ -2892,6 +2895,60 @@ def view_engagement(request, eid):
                    'risks_accepted': risks_accepted,
                    'can_add_risk': len(eng_findings),
                    'breadcrumbs': get_breadcrumbs(obj=eng, user=request.user)})
+
+
+def get_cal_event(start_date, end_date, summary, description, uid):
+    cal = vobject.iCalendar()
+    cal.add('vevent')
+    cal.vevent.add('summary').value = summary
+    cal.vevent.add(
+        'description').value = description
+    start = cal.vevent.add('dtstart')
+    start.value = start_date
+    end = cal.vevent.add('dtend')
+    end.value = end_date
+    cal.vevent.add('uid').value = uid
+    return cal
+
+
+@user_passes_test(lambda u: u.is_staff)
+def engagement_ics(request, eid):
+    eng = get_object_or_404(Engagement, id=eid)
+    start_date = datetime.combine(eng.target_start, datetime.min.time())
+    end_date = datetime.combine(eng.target_end, datetime.max.time())
+    uid = "dojo_eng_%d_%d" % (eng.id, eng.product.id)
+    cal = get_cal_event(start_date,
+                        end_date,
+                        "Engagement: %s (%s)" % (eng.name, eng.product.name),
+                        "Set aside for engagement %s, on product %s.  Additional detail can be found at %s" % (
+                            eng.name, eng.product.name,
+                            request.build_absolute_uri((reverse("view_engagement", args=(eng.id,))))),
+                        uid)
+    output = cal.serialize()
+    response = HttpResponse(content=output)
+    response['Content-Type'] = 'text/calendar'
+    response['Content-Disposition'] = 'attachment; filename=%s.ics' % eng.name
+    return response
+
+
+@user_passes_test(lambda u: u.is_staff)
+def test_ics(request, tid):
+    test = get_object_or_404(Test, id=tid)
+    start_date = datetime.combine(test.target_start, datetime.min.time())
+    end_date = datetime.combine(test.target_end, datetime.max.time())
+    uid = "dojo_test_%d_%d_%d" % (test.id, test.engagement.id, test.engagement.product.id)
+    cal = get_cal_event(start_date,
+                        end_date,
+                        "Test: %s (%s)" % (test.test_type.name, test.engagement.product.name),
+                        "Set aside for test %s, on product %s.  Additional detail can be found at %s" % (
+                            test.test_type.name, test.engagement.product.name,
+                            request.build_absolute_uri((reverse("view_test", args=(test.id,))))),
+                        uid)
+    output = cal.serialize()
+    response = HttpResponse(content=output)
+    response['Content-Type'] = 'text/calendar'
+    response['Content-Disposition'] = 'attachment; filename=%s.ics' % test.test_type.name
+    return response
 
 
 @user_passes_test(lambda u: u.is_staff)
