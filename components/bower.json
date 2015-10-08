@@ -34,7 +34,8 @@
     "JUMFlot": "https://github.com/jumjum123/JUMFlot.git",
     "flot-axis": "https://github.com/markrcote/flot-axislabels.git",
     "chosen": null,
-    "chosen-bootstrap": null
+    "chosen-bootstrap": null,
+    "font-awesome": "4.4.0"
   },
   "timeout": 20000
 }
