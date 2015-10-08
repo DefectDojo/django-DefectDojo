@@ -26,6 +26,7 @@ setup(
         'django-easy-pdf',
         'xhtml2pdf>=0.0.6',
         'reportlab',
-        'django-auditlog>=0.2.1'],
+        'django-auditlog',
+        'vobject'],
     url='https://github.com/rackerlabs/django-DefectDojo'
 )

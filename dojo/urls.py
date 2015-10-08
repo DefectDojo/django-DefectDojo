@@ -89,6 +89,8 @@ urlpatterns = [
     url(r'^engagement/new$', views.new_engagement, name='new_eng'),
     url(r'^engagement/(?P<eid>\d+)$', views.view_engagement,
         name='view_engagement'),
+    url(r'^engagement/(?P<eid>\d+)/ics$', views.engagement_ics,
+        name='engagement_ics'),
     url(r'^engagement/(?P<eid>\d+)/edit$', views.edit_engagement,
         name='edit_engagement'),
     url(r'^engagement/(?P<eid>\d+)/delete$', views.delete_engagement,
@@ -180,6 +182,8 @@ urlpatterns = [
     #  tests
     url(r'^test/(?P<tid>\d+)$', views.view_test,
         name='view_test'),
+    url(r'^test/(?P<tid>\d+)/ics$', views.test_ics,
+        name='test_ics'),
     url(r'^test/(?P<tid>\d+)/edit$', views.edit_test,
         name='edit_test'),
     url(r'^test/(?P<tid>\d+)/delete$', views.delete_test,
