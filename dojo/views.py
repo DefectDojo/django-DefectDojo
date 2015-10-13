@@ -3215,8 +3215,8 @@ def get_numerical_severity(s):
 def add_findings(request, tid):
     test = Test.objects.get(id=tid)
     findings = Finding.objects.filter(is_template=True).distinct()
+    form_error = False
     form = AddFindingForm()
-
     if request.method == 'POST':
         form = AddFindingForm(request.POST)
         if form.is_valid():
@@ -3241,6 +3241,8 @@ def add_findings(request, tid):
             else:
                 return HttpResponseRedirect(reverse('add_findings', args=(test.id,)))
         else:
+            form.fields['endpoints'].queryset = form.cleaned_data['endpoints']
+            form_error = True
             messages.add_message(request,
                                  messages.ERROR,
                                  'The form has errors, please correct them below.',
@@ -3252,6 +3254,7 @@ def add_findings(request, tid):
                    'test': test,
                    'temp': False,
                    'tid': tid,
+                   'form_error': form_error,
                    'breadcrumbs': get_breadcrumbs(title="Add finding",
                                                   obj=test,
                                                   user=request.user)})
@@ -3308,6 +3311,7 @@ def add_temp_finding(request, tid, fid):
 def edit_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     form = FindingForm(instance=finding)
+    form_error = False
     if request.method == 'POST':
         form = FindingForm(request.POST, instance=finding)
         if form.is_valid():
@@ -3328,8 +3332,13 @@ def edit_finding(request, fid):
                                  'Finding saved successfully.',
                                  extra_tags='alert-success')
             return HttpResponseRedirect(reverse('view_test', args=(new_finding.test.id,)))
+        else:
+            form_error = True
 
-    form.fields['endpoints'].queryset = finding.endpoints.all()
+    if form_error:
+        form.fields['endpoints'].queryset = form.cleaned_data['endpoints']
+    else:
+        form.fields['endpoints'].queryset = finding.endpoints.all()
 
     return render(request, 'dojo/edit_findings.html',
                   {'form': form,
