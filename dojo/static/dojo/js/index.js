@@ -18,6 +18,12 @@ $(function () {
     );
 });
 
+function emptyEndpoints(win){
+    var name = windowname_to_id(win.name);
+    var elem = document.getElementById(name);
+    $(elem).empty();
+}
+
 function dismissAddAnotherPopupDojo(win, newId, newRepr) {
     // newId and newRepr are expected to have previously been escaped by
     // django.utils.html.escape.
@@ -29,10 +35,16 @@ function dismissAddAnotherPopupDojo(win, newId, newRepr) {
     if (elem) {
         var elemName = elem.nodeName.toUpperCase();
         if (elemName == 'SELECT') {
-            o = new Option(newRepr, newId);
-            elem.options[elem.options.length] = o;
-            o.selected = true
-            $(o).attr('selected', 'selected');
+            var s = "#"+elem.id+" option[value='"+newId+"']";
+            if ($(s).length <= 0) {
+                o = new Option(newRepr, newId);
+                elem.options[elem.options.length] = o;
+                o.selected = true
+                $(o).attr('selected', 'selected');
+            }
+            else{
+                $(s).attr('selected', 'selected');
+            }
         } else if (elemName == 'INPUT') {
             if (elem.className.indexOf('vManyToManyRawIdAdminField') != -1 && elem.value) {
                 elem.value += ',' + newId;

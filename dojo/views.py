@@ -3241,7 +3241,10 @@ def add_findings(request, tid):
             else:
                 return HttpResponseRedirect(reverse('add_findings', args=(test.id,)))
         else:
-            form.fields['endpoints'].queryset = form.cleaned_data['endpoints']
+            if 'endpoints' in form.cleaned_data:
+                form.fields['endpoints'].queryset = form.cleaned_data['endpoints']
+            else:
+                form.fields['endpoints'].queryset = Endpoint.objects.none()
             form_error = True
             messages.add_message(request,
                                  messages.ERROR,
@@ -3335,7 +3338,7 @@ def edit_finding(request, fid):
         else:
             form_error = True
 
-    if form_error:
+    if form_error and 'endpoints' in form.cleaned_data:
         form.fields['endpoints'].queryset = form.cleaned_data['endpoints']
     else:
         form.fields['endpoints'].queryset = finding.endpoints.all()
@@ -4494,7 +4497,6 @@ def delete_endpoint(request, eid):
 @user_passes_test(lambda u: u.is_staff)
 def add_endpoint(request, pid):
     product = get_object_or_404(Product, id=pid)
-    error = False
     template = 'dojo/add_endpoint.html'
     if '_popup' in request.GET:
         template = 'dojo/add_related.html'
@@ -4510,7 +4512,7 @@ def add_endpoint(request, pid):
                                  'Endpoint added successfully.',
                                  extra_tags='alert-success')
             if '_popup' in request.GET:
-                resp = ''
+                resp = '<script type="text/javascript">opener.emptyEndpoints(window);</script>'
                 for endpoint in endpoints:
                     resp += '<script type="text/javascript">opener.dismissAddAnotherPopupDojo(window, "%s", "%s");</script>' \
                             % (escape(endpoint._get_pk_val()), escape(endpoint))

@@ -73,6 +73,16 @@
 <!-- our JS -->
 <script src="{% static "dojo/js/index.js" %}"></script>
 <script type="application/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>
+<script type="application/javascript">
+    $(function () {
+        var endpoints = '';
+        $(window.opener.document.getElementById('id_endpoints')).children('option').each(function() {
+            endpoints += $(this).text();
+            endpoints += "\n";
+        });
+        $('textarea#id_endpoint').text(endpoints);
+    });
+</script>
 </body>
 
 </html>
