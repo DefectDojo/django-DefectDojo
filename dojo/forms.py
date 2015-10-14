@@ -45,6 +45,14 @@ class MultipleSelectWithPop(forms.SelectMultiple):
         return mark_safe(popup_plus)
 
 
+class MultipleSelectWithPopPlusMinus(forms.SelectMultiple):
+    def render(self, name, *args, **kwargs):
+        html = super(MultipleSelectWithPopPlusMinus, self).render(name, *args, **kwargs)
+        popup_plus = '<div class="input-group">' + html + '<span class="input-group-btn"><a href="/' + name + '/add" class="btn btn-primary" class="add-another" id="add_id_' + name + '" onclick="return showAddAnotherPopup(this);"><span class="icon-plusminus"></span></a></span></div>'
+
+        return mark_safe(popup_plus)
+
+
 class MonthYearWidget(Widget):
     """
     A Widget that splits date input into two <select> boxes for month and year,
@@ -508,7 +516,7 @@ class AddFindingForm(forms.ModelForm):
     mitigation = forms.CharField(widget=forms.Textarea)
     impact = forms.CharField(widget=forms.Textarea)
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, label='Systems / Endpoints',
-                                               widget=MultipleSelectWithPop(attrs={'size': '11'}))
+                                               widget=MultipleSelectWithPopPlusMinus(attrs={'size': '11'}))
     references = forms.CharField(widget=forms.Textarea, required=False)
 
     def clean(self):
@@ -546,7 +554,7 @@ class FindingForm(forms.ModelForm):
     mitigation = forms.CharField(widget=forms.Textarea)
     impact = forms.CharField(widget=forms.Textarea)
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, label='Systems / Endpoints',
-                                               widget=MultipleSelectWithPop(attrs={'size': '11'}))
+                                               widget=MultipleSelectWithPopPlusMinus(attrs={'size': '11'}))
     references = forms.CharField(widget=forms.Textarea, required=False)
 
     def clean(self):
@@ -636,14 +644,14 @@ class EditEndpointForm(forms.ModelForm):
                                            product=self.product)
         if endpoint.count() > 0:
             raise forms.ValidationError(
-                'It does not appear as though an endpoint wiht this data already exists for this product.',
+                'It appears as though an endpoint with this data already exists for this product.',
                 code='invalid')
 
         return cleaned_data
 
 
 class AddEndpointForm(forms.Form):
-    endpoint = forms.CharField(max_length=5000, required=True,
+    endpoint = forms.CharField(max_length=5000, required=True, label="Endpoint(s)",
                                help_text="The IP address, host name or full URL. You may enter one endpoint per line. "
                                          "Each must be valid.",
                                widget=forms.widgets.Textarea(attrs={'rows': '15', 'cols': '400'}))
