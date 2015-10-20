@@ -124,7 +124,7 @@
   sudo_user: '{{ dd_user }}'
 
 - name: Install django-auditlog
-  pip: name=django-auditlog virtualenv={{ venv_dir }}
+  pip: name=django-auditlog version=0.3.1 virtualenv={{ venv_dir }}
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
