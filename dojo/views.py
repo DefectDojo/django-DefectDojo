@@ -140,7 +140,7 @@ def view_engineer(request, eid):
     now = localtz.localize(datetime.today())
 
     findings = Finding.objects.filter(reporter=user, verified=True)
-
+    closed_findings = Finding.objects.filter(mitigated_by=user)
     open_findings = findings.exclude(mitigated__isnull=False)
     open_month = findings.filter(date__year=now.year, date__month=now.month)
     accepted_month = [finding for ra in Risk_Acceptance.objects.filter(
@@ -155,10 +155,8 @@ def view_engineer(request, eid):
         reporter=user)
                       for finding in ra.accepted_findings.all()]
     closed_month = []
-    for f in findings:
-        if (f.mitigated
-            and f.mitigated.year == now.year
-            and f.mitigated.month == now.month):
+    for f in closed_findings:
+        if f.mitigated and f.mitigated.year == now.year and f.mitigated.month == now.month:
             closed_month.append(f)
 
     o_dict, open_count = count_findings(open_month)
@@ -182,7 +180,7 @@ def view_engineer(request, eid):
 
     q_objects = (Q(mitigated=d) for d in day_list)
     # closed_week= findings.filter(reduce(operator.or_, q_objects))
-    for f in findings:
+    for f in closed_findings:
         if f.mitigated and f.mitigated >= day_list[0]:
             closed_week.append(f)
 
@@ -2576,6 +2574,9 @@ def view_finding(request, fid):
             new_note.date = datetime.now(tz=localtz)
             new_note.save()
             finding.notes.add(new_note)
+            finding.last_reviewed = new_note.date
+            finding.last_reviewed_by = user
+            finding.save()
             form = NoteForm()
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -2618,6 +2619,9 @@ def close_finding(request, fid):
             finding.notes.add(new_note)
             finding.active = False
             finding.mitigated = now
+            finding.mitigated_by = request.user
+            finding.last_reviewed = finding.mitigated
+            finding.last_reviewed_by = request.user
             finding.save()
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -3229,6 +3233,7 @@ def add_findings(request, tid):
                 new_finding.severity)
             if new_finding.false_p or new_finding.active is False:
                 new_finding.mitigated = datetime.now(tz=localtz)
+                new_finding.mitigated_by = request.user
 
             new_finding.save()
             new_finding.endpoints = form.cleaned_data['endpoints']
@@ -3281,6 +3286,7 @@ def add_temp_finding(request, tid, fid):
             new_finding.date = datetime.today()
             if new_finding.false_p or new_finding.active is False:
                 new_finding.mitigated = datetime.now(tz=localtz)
+                new_finding.mitigated_by = request.user
 
             new_finding.save()
             new_finding.endpoints = form.cleaned_data['endpoints']
@@ -3326,18 +3332,26 @@ def edit_finding(request, fid):
                 new_finding.severity)
             if new_finding.false_p or new_finding.active is False:
                 new_finding.mitigated = datetime.now(tz=localtz)
+                new_finding.mitigated_by = request.user
             if new_finding.active is True:
                 new_finding.false_p = False
                 new_finding.mitigated = None
+                new_finding.mitigated_by = None
 
             new_finding.endpoints = form.cleaned_data['endpoints']
+            new_finding.last_reviewed = datetime.now(tz=localtz)
+            new_finding.last_reviewed_by = request.user
             new_finding.save()
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Finding saved successfully.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('view_test', args=(new_finding.test.id,)))
+            return HttpResponseRedirect(reverse('view_finding', args=(new_finding.id,)))
         else:
+            messages.add_message(request,
+                                 messages.ERROR,
+                                 'There appears to be errors on the form, please correct below.',
+                                 extra_tags='alert-danger')
             form_error = True
 
     if form_error and 'endpoints' in form.cleaned_data:
@@ -3351,6 +3365,15 @@ def edit_finding(request, fid):
                    'breadcrumbs': get_breadcrumbs(title="Edit finding",
                                                   obj=finding,
                                                   user=request.user)})
+
+
+@user_passes_test(lambda u: u.is_staff)
+def touch_finding(request, fid):
+    finding = get_object_or_404(Finding, id=fid)
+    finding.last_reviewed = datetime.now(tz=localtz)
+    finding.last_reviewed_by = request.user
+    finding.save()
+    return HttpResponseRedirect(reverse('view_finding', args=(finding.id,)))
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -4147,7 +4170,7 @@ def view_profile(request):
 @user_passes_test(lambda u: u.is_staff)
 def dashboard(request):
     now = localtz.localize(datetime.today())
-    seven_days_ago = now - timedelta(days=7)
+    seven_days_ago = now - timedelta(days=8)
     engagement_count = Engagement.objects.filter(lead=request.user,
                                                  active=True).count()
     finding_count = Finding.objects.filter(reporter=request.user,
@@ -4155,13 +4178,12 @@ def dashboard(request):
                                            mitigated=None,
                                            date__range=[seven_days_ago,
                                                         now]).count()
-    mitigated_count = Finding.objects.filter(reporter=request.user,
+    mitigated_count = Finding.objects.filter(mitigated_by=request.user,
                                              mitigated__range=[seven_days_ago,
                                                                now]).count()
 
     accepted_count = len([finding for ra in Risk_Acceptance.objects.filter(
-        reporter=request.user, created__range=[seven_days_ago, now])
-                          for finding in ra.accepted_findings.all()])
+        reporter=request.user, created__range=[seven_days_ago, now]) for finding in ra.accepted_findings.all()])
 
     # forever counts
     findings = Finding.objects.filter(reporter=request.user,
@@ -4319,12 +4341,12 @@ def get_alerts(user):
         mitigated=None,
         verified=True,
         false_p=False,
-        date__lt=twenty_four_hours_ago).order_by('-date')
+        last_reviewed__lt=twenty_four_hours_ago).order_by('-date')
     for finding in outstanding_s0_findings:
         alerts.append([
             'S0 Finding: ' + (
                 finding.title if finding.title is not None else 'Finding'),
-            'Reported On ' + finding.date.strftime("%b. %d, %Y"),
+            'Reviewed On ' + finding.last_reviewed.strftime("%b. %d, %Y"),
             'bug',
             reverse('view_finding', args=(finding.id,))])
 
@@ -4335,12 +4357,12 @@ def get_alerts(user):
         mitigated=None,
         verified=True,
         false_p=False,
-        date__lt=seven_days_ago).order_by('-date')
+        last_reviewed__lt=seven_days_ago).order_by('-date')
     for finding in outstanding_s1_findings:
         alerts.append([
             'S1 Finding: ' + (
                 finding.title if finding.title is not None else 'Finding'),
-            'Reported On ' + finding.date.strftime("%b. %d, %Y"),
+            'Reviewed On ' + finding.last_reviewed.strftime("%b. %d, %Y"),
             'bug',
             reverse('view_finding', args=(finding.id,))])
 
@@ -4351,12 +4373,12 @@ def get_alerts(user):
         mitigated=None,
         verified=True,
         false_p=False,
-        date__lt=fourteen_days_ago).order_by('-date')
+        last_reviewed__lt=fourteen_days_ago).order_by('-date')
     for finding in outstanding_s2_findings:
         alerts.append([
             'S2 Finding: ' + (
                 finding.title if finding.title is not None else 'Finding'),
-            'Reported On ' + finding.date.strftime("%b. %d, %Y"),
+            'Reviewed On ' + finding.last_reviewed.strftime("%b. %d, %Y"),
             'bug',
             reverse('view_finding', args=(finding.id,))])
     return alerts

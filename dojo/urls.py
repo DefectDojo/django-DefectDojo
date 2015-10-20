@@ -136,6 +136,8 @@ urlpatterns = [
         name='view_finding'),
     url(r'^finding/(?P<fid>\d+)/edit$',
         views.edit_finding, name='edit_finding'),
+    url(r'^finding/(?P<fid>\d+)/touch',
+        views.touch_finding, name='touch_finding'),
     url(r'^finding/(?P<fid>\d+)/delete$',
         views.delete_finding, name='delete_finding'),
     url(r'^finding/(?P<fid>\d+)/mktemplate$', views.mktemplate,
