@@ -30,6 +30,39 @@ def url_replace(request, field='page', value=1):
     return dict_.urlencode()
 
 
+@register.simple_tag
+def dojo_sort(request, display='Name', value='title', default=None):
+    field = 'o'
+    icon = '<i class="fa fa-sort'
+    title = 'Click to sort '
+    if field in request.GET:
+        if value in request.GET[field]:
+            if request.GET[field].startswith('-'):
+                icon += '-desc'
+                title += 'ascending'
+            else:
+                value = '-' + value
+                icon += '-asc'
+                title += 'descending'
+        else:
+            title += 'ascending'
+    elif default:
+        icon += '-' + default
+        if default == 'asc':
+            value = '-' + value
+            title += 'descending'
+        else:
+            title += 'ascending'
+    else:
+        title += 'ascending'
+
+    icon += ' dd-sort"></i>'
+    dict_ = request.GET.copy()
+    dict_[field] = value
+    link = '<a title="' + title + '" href="?' + dict_.urlencode() + '">' + display + '&nbsp;' + icon + '</a>'
+    return link
+
+
 class PaginationNav(object):
     def __init__(self, page_number=None, display=None, is_current=False):
         self.page_number = page_number
@@ -92,3 +125,5 @@ def paginate(page, adjacent=2):
                      safe('Next')))
 
     return pages
+
+

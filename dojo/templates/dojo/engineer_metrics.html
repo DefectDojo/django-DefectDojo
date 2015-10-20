@@ -1,23 +1,30 @@
 {% extends "base.html" %}
+{% load navigation_tags %}
 {% block content %}
-    <h3> Engineers </h3>
+    <div class="clearfix">
+        <h3 class="pull-left">Engineers</h3>{% include "dojo/paging_snippet.html" with page=users page_size=True%}
+    </div>
     <div class="table-responsive panel panel-default">
         <table id="engineers"
                class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
             <thead>
             <tr>
-                <th>Name (username)</th>
-                <th>Email</th>
-                <th>Last Login</th>
-                <th>Active</th>
-                <th>Staff</th>
-                <th>Superuser</th>
+                <th>{% dojo_sort request 'First Name' 'first_name' %}</th>
+                <th>{% dojo_sort request 'Last Name' 'last_name' %}</th>
+                <th>{% dojo_sort request 'User Name' 'username' 'asc' %}</th>
+                <th>{% dojo_sort request 'Email' 'email'%}</th>
+                <th>{% dojo_sort request 'Last Login' 'last_login'%}</th>
+                <th>{% dojo_sort request 'Active' 'is_active'%}</th>
+                <th>{% dojo_sort request 'Staff' 'is_staff'%}</th>
+                <th>{% dojo_sort request 'SuperUser' 'is_superuser'%}</th>
             </tr>
             </thead>
             <tbody>
             {% for user in users %}
                 <tr>
-                    <td><a href="{% url 'view_engineer' user.id %}">{{ user.get_full_name }}</a></td>
+                    <td><a href="{% url 'view_engineer' user.id %}">{{ user.first_name }}</a></td>
+                    <td><a href="{% url 'view_engineer' user.id %}">{{ user.last_name }}</a></td>
+                    <td><a href="{% url 'view_engineer' user.id %}">{{ user.username }}</a></td>
                     <td>{{ user.email }}</td>
                     <td>{{ user.last_login }}</td>
                     <td>{{ user.is_active }}</td>
@@ -28,4 +35,5 @@
             </tbody>
         </table>
     </div>
+    {% include "dojo/paging_snippet.html" with page=users page_size=True%}
 {% endblock %}

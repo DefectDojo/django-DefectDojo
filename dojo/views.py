@@ -55,7 +55,7 @@ from dojo.filters import ProductFilter, OpenFindingFilter, \
     ProductFindingFilter, EngagementFilter, \
     ClosedFingingSuperFilter, MetricsFindingFilter, ReportFindingFilter, EndpointFilter, \
     ReportAuthedFindingFilter, EndpointReportFilter, UserFilter, LogEntryFilter, ProductTypeFilter, \
-    TestTypeFilter, DevelopmentEnvironmentFilter
+    TestTypeFilter, DevelopmentEnvironmentFilter, EngineerFilter
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -104,7 +104,6 @@ view others metrics
 
 
 @user_passes_test(lambda u: u.is_staff)
-@cache_page(60 * 5)  # cache for 5 minutes
 def engineer_metrics(request):
     # checking if user is super_user
     if request.user.is_superuser:
@@ -112,9 +111,12 @@ def engineer_metrics(request):
     else:
         return HttpResponseRedirect(reverse('view_engineer', args=(request.user.id,)))
 
+    users = EngineerFilter(request.GET,
+                           queryset=users)
+    paged_users = get_page_items(request, users, 15)
     return render(request,
                   'dojo/engineer_metrics.html',
-                  {'users': users,
+                  {'users': paged_users,
                    'breadcrumbs': get_breadcrumbs(title="Engineer Metrics", user=request.user)})
 
 

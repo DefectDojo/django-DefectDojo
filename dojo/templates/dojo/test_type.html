@@ -1,14 +1,18 @@
 {% extends "base.html" %}
+{% load navigation_tags %}
 {% block content %}
     <div class="row">
         <div class="col-md-10">
             {% if tts %}
+                <div class="clearfix">
+                    <h3 class="pull-left">Test Types</h3>{% include "dojo/paging_snippet.html" with page=tts page_size=True %}
+                </div>
                 <div class="panel panel-default table-responsive">
                     <table id="test_types"
                            class="tablesorter-bootstrap table table-bordered table-condensed table-striped">
                         <thead>
                         <tr>
-                            <th> Test Type</th>
+                            <th>{% dojo_sort request 'Test Type' 'name' 'asc' %}</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -24,7 +28,7 @@
                         </tbody>
                     </table>
                 </div>
-                {% include "dojo/paging_snippet.html" with page=prod_list %}
+                {% include "dojo/paging_snippet.html" with page=tts page_size=True %}
             {% else %}
                 <p>No test types found.</p>
             {% endif %}

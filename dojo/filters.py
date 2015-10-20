@@ -234,7 +234,9 @@ class EngagementFilter(DojoFilter):
         model = Product
         fields = ['name', 'prod_type']
         order_by = (('name', 'Product Name'),
-                    ('prod_type', 'Product Type'),)
+                    ('-name', 'Product Name Desc'),
+                    ('prod_type__name', 'Product Type'),
+                    ('-prod_type__name', 'Product Type Desc'),)
 
 
 class ProductFilter(DojoFilter):
@@ -257,7 +259,9 @@ class ProductFilter(DojoFilter):
         model = Product
         fields = ['name', 'prod_type']
         order_by = (('name', 'Product Name'),
-                    ('prod_type', 'Product Type'),)
+                    ('-name', 'Product Name Desc'),
+                    ('prod_type__name', 'Product Type'),
+                    ('-prod_type__name', 'Product Type Desc'))
 
 
 class OpenFindingFilter(DojoFilter):
@@ -273,11 +277,14 @@ class OpenFindingFilter(DojoFilter):
 
     class Meta:
         model = Finding
-        order_by = (('numerical_severity', 'Severity'),
-                    ('date', 'Date Ascending'),
-                    ('-date', 'Date Descending'),
-                    ('title', 'Finding Name'),
-                    ('test__engagement__product__name', 'Product Name'))
+        order_by = (('numerical_severity', 'Severity Asc'),
+                    ('-numerical_severity', 'Severity Desc'),
+                    ('date', 'Date Asc'),
+                    ('-date', 'Date Desc'),
+                    ('title', 'Finding Name Asc'),
+                    ('-title', 'Finding Name Desc'),
+                    ('test__engagement__product__name', 'Product Name Asc'),
+                    ('-test__engagement__product__name', 'Product Name Desc'))
         exclude = ['url', 'description', 'mitigation', 'impact',
                    'endpoint', 'references', 'test', 'is_template',
                    'active', 'verified', 'out_of_scope', 'false_p',
@@ -332,12 +339,15 @@ class ClosedFindingFilter(DojoFilter):
     class Meta:
         model = Finding
         order_by = (('numerical_severity', 'Severity'),
+                    ('-numerical_severity', 'Severity Desc'),
                     ('date', 'Date Ascending'),
                     ('-date', 'Date Descending'),
                     ('mitigated', 'Mitigated Date Asc'),
                     ('-mitigated', 'Mitigated Date Desc'),
                     ('title', 'Finding Name'),
-                    ('test__engagement__product__name', 'Product Name'))
+                    ('-title', 'Finding Name Desc'),
+                    ('test__engagement__product__name', 'Product Name'),
+                    ('-test__engagement__product__name', 'Product Name Desc'))
         exclude = ['url', 'description', 'mitigation', 'impact',
                    'endpoint', 'references', 'test', 'is_template',
                    'active', 'verified', 'out_of_scope', 'false_p',
@@ -383,6 +393,7 @@ class AcceptedFindingFilter(DojoFilter):
     class Meta:
         model = Finding
         order_by = (('numerical_severity', 'Severity'),
+                    ('-numerical_severity', 'Severity Desc'),
                     ('date', 'Finding Date Asc'),
                     ('-date', 'Finding Date Desc'),
                     ('test__engagement__risk_acceptance__created',
@@ -390,7 +401,9 @@ class AcceptedFindingFilter(DojoFilter):
                     ('-test__engagement__risk_acceptance__created',
                      'Acceptance Date Desc'),
                     ('title', 'Finding Name'),
-                    ('test__engagement__product__name', 'Product Name'))
+                    ('-title', 'Finding Name Desc'),
+                    ('test__engagement__product__name', 'Product Name'),
+                    ('-test__engagement__product__name', 'Product Name Dec'))
         fields = ['title', 'test__engagement__risk_acceptance__created']
         exclude = ['url', 'description', 'mitigation', 'impact',
                    'endpoint', 'references', 'test', 'is_template',
@@ -430,8 +443,12 @@ class ProductFindingFilter(DojoFilter):
 
     class Meta:
         model = Finding
-        order_by = (('numerical_severity', 'Severity'),
-                    ('test__engagement__risk_acceptance__created', 'Date'),)
+        order_by = (('title', 'Name'),
+                    ('-title', 'Name Desc'),
+                    ('numerical_severity', 'Severity'),
+                    ('-numerical_severity', 'Severity Desc'),
+                    ('test__engagement__risk_acceptance__created', 'Date'),
+                    ('-test__engagement__risk_acceptance__created', 'Date Desc'))
         exclude = ['url', 'description', 'mitigation', 'impact',
                    'endpoint', 'references', 'test', 'is_template',
                    'active', 'verified', 'out_of_scope', 'false_p',
@@ -539,6 +556,11 @@ class EndpointFilter(DojoFilter):
 
     class Meta:
         model = Endpoint
+        order_by = (('product', 'Product'),
+                    ('-product', 'Product Desc'),
+                    ('host', 'Host'),
+                    ('-host', 'Host Desc'))
+
 
 
 class EndpointReportFilter(DojoFilter):
@@ -608,8 +630,44 @@ class UserFilter(DojoFilter):
         fields = ['is_staff', 'is_superuser', 'is_active', 'first_name', 'last_name', 'username']
         exclude = ['password', 'last_login', 'groups', 'user_permissions', 'date_joined']
         order_by = (('username', 'User Name'),
+                    ('-username', 'User Name Desc'),
                     ('last_name', 'Last Name'),
-                    ('first_name', 'First Name'),)
+                    ('-last_name', 'Last Name Desc'),
+                    ('first_name', 'First Name'),
+                    ('-first_name', 'First Name Desc'),
+                    ('email', 'Email'),
+                    ('-email', 'Email Desc'),
+                    ('is_active', 'Active'),
+                    ('-is_active', 'Active Desc'),
+                    ('is_staff', 'Staff'),
+                    ('-is_staff', 'Staff Desc'),
+                    ('is_superuser', 'SuperUser'),
+                    ('-is_superuser', 'SuperUser Desc'),)
+
+
+class EngineerFilter(DojoFilter):
+
+    class Meta:
+        model = Dojo_User
+        fields = ['is_staff', 'is_superuser', 'is_active', 'username', 'email', 'last_name', 'first_name']
+        exclude = ['password', 'last_login', 'groups', 'user_permissions', 'date_joined']
+        order_by = (('username', 'User Name'),
+                    ('-username', 'User Name Desc'),
+                    ('last_name', 'Last Name'),
+                    ('-last_name', 'Last Name Desc'),
+                    ('first_name', 'First Name'),
+                    ('-first_name', 'First Name Desc'),
+                    ('email', 'Email'),
+                    ('-email', 'Email Desc'),
+                    ('last_login', 'Last Login'),
+                    ('-last_login', 'Last Login Desc'),
+                    ('is_active', 'Active'),
+                    ('-is_active', 'Active Desc'),
+                    ('is_staff', 'Staff'),
+                    ('-is_staff', 'Staff Desc'),
+                    ('is_superuser', 'SuperUser'),
+                    ('-is_superuser', 'SuperUser Desc'),
+                    )
 
 
 class LogEntryFilter(DojoFilter):
@@ -630,6 +688,8 @@ class ProductTypeFilter(DojoFilter):
     class Meta:
         model = Product_Type
         include = ('name',)
+        order_by = (('name', ' Name'),
+                    ('-name', 'Name Desc'))
 
 
 class TestTypeFilter(DojoFilter):
@@ -638,6 +698,8 @@ class TestTypeFilter(DojoFilter):
     class Meta:
         model = Test_Type
         include = ('name',)
+        order_by = (('name', ' Name'),
+                    ('-name', 'Name Desc'))
 
 
 class DevelopmentEnvironmentFilter(DojoFilter):
@@ -646,3 +708,6 @@ class DevelopmentEnvironmentFilter(DojoFilter):
     class Meta:
         model = Development_Environment
         include = ('name',)
+        order_by = (('name', ' Name'),
+                    ('-name', 'Name Desc'))
+

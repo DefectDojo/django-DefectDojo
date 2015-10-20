@@ -1,6 +1,6 @@
 {% load navigation_tags %}
 {% if page.has_other_pages %}
-    <div class="clearfix"></div>
+
     <nav class="pull-right">
         <ul class="pagination pagination-sm">
             {% for num in page|paginate:3 %}
@@ -12,8 +12,30 @@
                     {% endif %}
                 </li>
             {% endfor %}
+            {% if page_size %}
+                <li>
+                    <!-- Split button -->
+                    &nbsp;
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-default">Page Size</button>
+                        <button type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="caret"></span>
+                            <span class="sr-only">Toggle Dropdown</span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a href="?{% url_replace request 'page_size' 25 %}">25</a></li>
+                            <li><a href="?{% url_replace request 'page_size' 50 %}">50</a></li>
+                            <li><a href="?{% url_replace request 'page_size' 75 %}">75</a></li>
+                            <li><a href="?{% url_replace request 'page_size' 100 %}">100</a></li>
+                            <li><a href="?{% url_replace request 'page_size' 150 %}">150</a></li>
+                        </ul>
+                    </div>
+                </li>
+            {% endif %}
         </ul>
+
     </nav>
+
 {% endif %}
 
 
