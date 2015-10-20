@@ -1,28 +1,31 @@
 {% extends "base.html" %}
+{% load navigation_tags %}
 {% block content %}
     {% load display_tags %}
-    <h4>{{ name }}</h4>
-    <br/>
     <div class="row">
         <div class="col-md-10">
             {% if users %}
+                <div class="clearfix">
+                    <h3 class="pull-left">{{ name }}</h3>{% include "dojo/paging_snippet.html" with page=users page_size=True%}
+                </div>
                 <div class="table-responsive panel panel-default">
                     <table id="users"
                            class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
                         <tr>
-                            <th>Username</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Active</th>
-                            <th>Staff</th>
-                            <th>Super User</th>
-                            <th>Actions</th>
+                            <th class="nowrap">{% dojo_sort request 'First Name' 'first_name' %}</th>
+                            <th class="nowrap">{% dojo_sort request 'Last Name' 'last_name' %}</th>
+                            <th class="nowrap">{% dojo_sort request 'User Name' 'username' 'asc' %}</th>
+                            <th class="nowrap">{% dojo_sort request 'Email' 'email'%}</th>
+                            <th class="nowrap">{% dojo_sort request 'Active' 'is_active'%}</th>
+                            <th class="nowrap">{% dojo_sort request 'Staff' 'is_staff'%}</th>
+                            <th class="nowrap">{% dojo_sort request 'SuperUser' 'is_superuser'%}</th>
+                            <th class="nowrap">Actions</th>
                         </tr>
-
                         {% for u in users %}
                             <tr>
+                                <td>{{ u.first_name }}</td>
+                                <td>{{ u.last_name }}</td>
                                 <td>{{ u.username }}</td>
-                                <td>{{ u.get_full_name }}</td>
                                 <td>{{ u.email }}</td>
                                 <td class="text-center">{% if u.is_active %}
                                     <i class="text-success fa fa-check"></i>{% else %}
@@ -34,15 +37,15 @@
                                     <i class="text-success fa fa-check"></i>{% else %}
                                     <i class="text-danger fa fa-times"></i>{% endif %}</td>
                                 <td class="text-center">
-                                    <a class="btn btn-sm btn-primary" href="{% url 'edit_user' u.id %}">Edit</a>
-                                    <a class="btn btn-sm btn-primary"
+                                    <a class="btn btn-xs btn-primary" href="{% url 'edit_user' u.id %}">Edit</a>
+                                    <a class="btn btn-xs btn-primary"
                                        href="{% url 'action_history' u|content_type u.id %}">View History</a>
                                 </td>
                             </tr>
                         {% endfor %}
                     </table>
                 </div>
-                {% include "dojo/paging_snippet.html" with page=users %}
+                {% include "dojo/paging_snippet.html" with page=users page_size=True%}
             {% else %}
                 <h5> No Users </h5>
             {% endif %}
@@ -64,7 +67,7 @@
                         <button class="btn btn-sm btn-primary">
                             <i class="fa fa-filter"></i> Apply
                         </button><br/><br/>
-                        <a href="{% url 'endpoints' %}"> [Clear Filters] </a>
+                        <a href="{% url 'users' %}"> [Clear Filters] </a>
                     </div>
                 </form>
             </div>

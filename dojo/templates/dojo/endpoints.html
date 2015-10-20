@@ -1,16 +1,19 @@
 {% extends "base.html" %}
+{% load navigation_tags %}
 {% block content %}
-    <h4>{{ name }}</h4>
-    <br/>
     <div class="row">
         <div class="col-md-10">
             {% if endpoints %}
+                <div class="clearfix">
+                    <h3 class="pull-left">{{ name }}</h3>{% include "dojo/paging_snippet.html" with page=endpoints page_size=True%}
+                </div>
+
                 <div class="table-responsive panel panel-default">
                     <table id="endpoints"
                            class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
                         <tr>
-                            <th>Endpoint</th>
-                            <th>Product</th>
+                            <th>{%  dojo_sort request 'Endpoint' 'host' %}</th>
+                            <th>{%  dojo_sort request 'Product' 'product' 'asc' %}</th>
                             <th nowrap="nowrap">Number of <br/> Open Findings</th>
                         </tr>
 
@@ -25,7 +28,7 @@
                         {% endfor %}
                     </table>
                 </div>
-                {% include "dojo/paging_snippet.html" with page=endpoints %}
+                {% include "dojo/paging_snippet.html" with page=endpoints page_size=True%}
             {% else %}
                 <h5> No endpoints </h5>
             {% endif %}
