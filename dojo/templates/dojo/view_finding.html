@@ -7,6 +7,7 @@
             <div class="clearfix">
                 <h4 class="pull-left to_highlight finding-title">
                     {{ finding.title }}
+                    <small>Last reviewed on {{ finding.last_reviewed }} by {{ finding.last_reviewed_by }}</small>
                 </h4>
                 {% if user.is_staff %}
                     <div class="dropdown pull-right">
@@ -22,15 +23,22 @@
                                 </a>
                             </li>
                             <li role="presentation">
+                                <a href="{% url 'touch_finding' finding.id %}">
+                                    <i class="fa fa-clock-o"></i> Touch Finding
+                                </a>
+                            </li>
+                            <li role="presentation">
                                 <a href="{% url 'mktemplate' finding.id %}">
                                     <i class="fa fa-copy"></i> Make Finding a Template
                                 </a>
                             </li>
-                            <li role="presentation">
-                                <a href="{% url 'close_finding' finding.id %}">
-                                    <i class="fa fa-close"></i> Close Finding
-                                </a>
-                            </li>
+                            {% if finding.active %}
+                                <li role="presentation">
+                                    <a href="{% url 'close_finding' finding.id %}">
+                                        <i class="fa fa-close"></i> Close Finding
+                                    </a>
+                                </li>
+                            {% endif %}
                             <li role="presentation">
                                 <a href="{% url 'action_history' finding|content_type finding.id %}">
                                     <i class="fa fa-history"></i> View History
@@ -39,7 +47,7 @@
                             <li role="separator" class="divider"></li>
                             <li role="presentation">
                                 <a class="text-danger" href="{% url 'delete_finding' finding.id %}"
-                                                       onclick="return confirm('Are you sure you want to delete this finding?')">
+                                   onclick="return confirm('Are you sure you want to delete this finding?')">
                                     <i class="fa fa-trash"></i> Delete Finding
                                 </a>
                             </li>
@@ -70,6 +78,9 @@
                     {% endif %}
                     <li class="list-group-item"><b> Date discovered: </b> {{ finding.date }} </li>
                     <li class="list-group-item"><b> Date Mitigated: </b>{{ finding.mitigated }} </li>
+                    {% if finding.mitigated %}
+                        <li class="list-group-item"><b> Mitigated By: </b>{{ finding.mitigated_by }} </li>
+                    {% endif %}
                     <li class="list-group-item"><b> Reporter: </b>{{ finding.reporter }} </li>
                 </ul>
             </div>
@@ -78,11 +89,12 @@
             <div class="panel panel-default endpoints">
                 <div class="panel-heading">Endpoints / Systems</div>
                 <div id="vuln_endpoints" class="panel-body endpoint-panel">
-                    {%  if finding.endpoints.all %}
+                    {% if finding.endpoints.all %}
                         <ul>
-                        {% for endpoint in finding.endpoints.all %}
-                            <li><a title="View endpoint details" href="{% url 'view_endpoint' endpoint.id %}">{{ endpoint }}</a></li>
-                        {% endfor %}
+                            {% for endpoint in finding.endpoints.all %}
+                                <li><a title="View endpoint details"
+                                       href="{% url 'view_endpoint' endpoint.id %}">{{ endpoint }}</a></li>
+                            {% endfor %}
                         </ul>
                     {% else %}
                         No endpoints.

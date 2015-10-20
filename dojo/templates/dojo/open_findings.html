@@ -14,6 +14,7 @@
                         <tr>
                             <th class="nowrap">{% dojo_sort request 'Name' 'title' %}</th>
                             <th class="nowrap">{% dojo_sort request 'Date' 'date'%}</th>
+                            <th class="nowrap">{% dojo_sort request 'Reviewed' 'last_reviewed'%}</th>
                             <th class="nowrap">{% dojo_sort request 'Severity' 'numerical_severity' 'asc' %}</th>
                             <th class="nowrap">Age</th>
                             <th class="nowrap">{% dojo_sort request 'Product' 'test__engagement__product__name'%}</th>
@@ -26,6 +27,7 @@
                                                       href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a>
                                 </td>
                                 <td class="nowrap">{{ finding.date }}</td>
+                                <td class="nowrap">{{ finding.last_reviewed }}</td>
                                 <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
                                     <p class="text-error">
                                 {% else %}<p>{% endif %}{{ finding.severity }}</p></td>

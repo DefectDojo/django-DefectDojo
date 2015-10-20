@@ -267,6 +267,7 @@ class ProductFilter(DojoFilter):
 class OpenFindingFilter(DojoFilter):
     title = CharFilter(lookup_type='icontains')
     date = DateRangeFilter()
+    last_reviewed = DateRangeFilter()
     cwe = MultipleChoiceFilter(choices=[])
     severity = MultipleChoiceFilter(choices=[])
     test__test_type = ModelMultipleChoiceFilter(
@@ -281,6 +282,8 @@ class OpenFindingFilter(DojoFilter):
                     ('-numerical_severity', 'Severity Desc'),
                     ('date', 'Date Asc'),
                     ('-date', 'Date Desc'),
+                    ('last_reviewed', 'Review Date Asc'),
+                    ('-last_reviewed', 'Review Date Desc'),
                     ('title', 'Finding Name Asc'),
                     ('-title', 'Finding Name Desc'),
                     ('test__engagement__product__name', 'Product Name Asc'),
@@ -289,7 +292,7 @@ class OpenFindingFilter(DojoFilter):
                    'endpoint', 'references', 'test', 'is_template',
                    'active', 'verified', 'out_of_scope', 'false_p',
                    'duplicate', 'thread_id', 'mitigated', 'notes',
-                   'numerical_severity', 'reporter']
+                   'numerical_severity', 'reporter', 'last_reviewed']
 
     def __init__(self, *args, **kwargs):
         self.user = None
@@ -352,7 +355,7 @@ class ClosedFindingFilter(DojoFilter):
                    'endpoint', 'references', 'test', 'is_template',
                    'active', 'verified', 'out_of_scope', 'false_p',
                    'duplicate', 'thread_id', 'date', 'notes',
-                   'numerical_severity', 'reporter', 'endpoints']
+                   'numerical_severity', 'reporter', 'endpoints', 'last_reviewed']
 
     def __init__(self, *args, **kwargs):
         super(ClosedFindingFilter, self).__init__(*args, **kwargs)
@@ -409,7 +412,7 @@ class AcceptedFindingFilter(DojoFilter):
                    'endpoint', 'references', 'test', 'is_template',
                    'active', 'verified', 'out_of_scope', 'false_p',
                    'duplicate', 'thread_id', 'mitigated', 'notes',
-                   'numerical_severity', 'reporter', 'endpoints']
+                   'numerical_severity', 'reporter', 'endpoints', 'last_reviewed']
 
     def __init__(self, *args, **kwargs):
         super(AcceptedFindingFilter, self).__init__(*args, **kwargs)
@@ -453,7 +456,7 @@ class ProductFindingFilter(DojoFilter):
                    'endpoint', 'references', 'test', 'is_template',
                    'active', 'verified', 'out_of_scope', 'false_p',
                    'duplicate', 'thread_id', 'mitigated', 'notes',
-                   'numerical_severity', 'reporter', 'endpoints']
+                   'numerical_severity', 'reporter', 'endpoints', 'last_reviewed']
 
     def __init__(self, *args, **kwargs):
         super(ProductFindingFilter, self).__init__(*args, **kwargs)
@@ -590,7 +593,7 @@ class ReportFindingFilter(DojoFilter):
         exclude = ['title', 'date', 'cwe', 'url', 'description', 'mitigation', 'impact',
                    'endpoint', 'references', 'test', 'is_template',
                    'thread_id', 'notes', 'endpoints',
-                   'numerical_severity', 'reporter']
+                   'numerical_severity', 'reporter', 'last_reviewed']
 
 
 class ReportAuthedFindingFilter(DojoFilter):
@@ -617,7 +620,7 @@ class ReportAuthedFindingFilter(DojoFilter):
         exclude = ['title', 'date', 'cwe', 'url', 'description', 'mitigation', 'impact',
                    'endpoint', 'references', 'test', 'is_template',
                    'thread_id', 'notes', 'endpoints',
-                   'numerical_severity', 'reporter']
+                   'numerical_severity', 'reporter', 'last_reviewed']
 
 
 class UserFilter(DojoFilter):
