@@ -103,6 +103,8 @@ urlpatterns = [
         views.add_veracode_scan, name='add_veracode_scan'),
     url(r'^engagement/(?P<eid>\d+)/add_burp_scan$',
         views.add_burp_scan, name='add_burp_scan'),
+    url(r'^engagement/(?P<eid>\d+)/add_nexpose_scan$',
+        views.add_nexpose_scan, name='add_nexpose_scan'),
     url(r'^engagement/(?P<eid>\d+)/close$', views.close_eng,
         name='close_engagement'),
     url(r'^engagement/(?P<eid>\d+)/reopen$', views.reopen_eng,
