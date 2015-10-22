@@ -24,7 +24,7 @@
                         </tbody>
                     </table>
                 </div>
-                {% include "dojo/paging_snippet.html" with page=alerts %}
+                {% include "dojo/paging_snippet.html" with page=alerts page_size=False%}
             {% else %}
                 No alerts found.
             {% endif %}

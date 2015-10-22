@@ -274,6 +274,27 @@ class UploadBurpForm(forms.Form):
         return date
 
 
+class UploadNexposeForm(forms.Form):
+    scan_date = forms.DateTimeField(
+        required=True,
+        label="Nexpose Scan Date",
+        help_text="Scan completion date will be used on all findings.",
+        initial=datetime.now().strftime("%m/%d/%Y"),
+        widget=forms.TextInput(attrs={'class': 'datepicker'}))
+    minimum_severity = forms.ChoiceField(help_text='Minimum severity level to be imported',
+                                         choices=SEVERITY_CHOICES[0:4])
+    file = forms.FileField(widget=forms.widgets.FileInput(
+        attrs={"accept": ".xml"}),
+        label="Nexpose XML 2.0")
+
+    # date can only be today or in the past, not the future
+    def clean_scan_date(self):
+        date = self.cleaned_data['scan_date']
+        if date.date() > datetime.today().date():
+            raise forms.ValidationError("The date cannot be in the future!")
+        return date
+
+
 class DoneForm(forms.Form):
     done = forms.BooleanField()
 

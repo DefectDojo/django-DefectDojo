@@ -1,21 +1,25 @@
 {% extends "base.html" %}
+{% load navigation_tags %}
 {% block content %}
-    <h4> Active Engagements</h4>
-    <br/>
     <div class="row">
         <div class="col-md-10">
             {% if products %}
+                <div class="clearfix">
+                    <h3 class="pull-left">Active Engagements</h3>{% include "dojo/paging_snippet.html" with page=products page_size=True %}
+                </div>
                 <div class="table-responsive panel panel-default">
                     <table id="engagements"
                            class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
                         <tr>
-                            <th class="prod_name">Product</th>
+                            <th class="prod_name">{% dojo_sort request 'Product' 'name' 'asc'%}</th>
+                            <th class="prod_name">{% dojo_sort request 'Product Type' 'prod_type__name'%}</th>
                             <th>Active Engagements</th>
                         </tr>
 
                         {% for p in products %}
                             <tr>
                                 <td class="prod_name"><a href="{% url 'view_product' p.id %}">{{ p.name }}</a></td>
+                                <td class="prod_name"><a href="{% url 'product_type_metrics' p.prod_type.id %}">{{ p.prod_type.name }}</a></td>
                                 <td>
                                     {% for e in p.engagement_set.all %}
                                         {%  if e.active %}
@@ -28,7 +32,7 @@
                         {% endfor %}
                     </table>
                 </div>
-                {% include "dojo/paging_snippet.html" with page=products %}
+                {% include "dojo/paging_snippet.html" with page=products page_size=True %}
             {% else %}
                 <h5> No active engagements </h5>
             {% endif %}

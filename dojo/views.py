@@ -10,15 +10,13 @@ from operator import itemgetter
 import operator
 import os
 import re
-import vobject
 from threading import Thread
 from xml.etree import ElementTree
 from xml.dom import NamespaceErr
 import time
 import calendar as tcalendar
-from urlparse import urlsplit
-from xml.etree.ElementTree import ParseError
 
+import vobject
 from easy_pdf.rendering import render_to_pdf_response
 from dateutil.relativedelta import relativedelta, MO
 from django.conf import settings
@@ -45,7 +43,7 @@ from dojo.forms import VaForm, SimpleMetricsForm, CheckForm, \
     Test_TypeForm, ReplaceRiskAcceptanceForm, AddFindingsRiskAcceptanceForm, Development_EnvironmentForm, \
     DojoUserForm, DeleteIPScanForm, DeleteTestForm, UploadVeracodeForm, UploadBurpForm, EditEndpointForm, \
     DeleteEndpointForm, AddEndpointForm, DeleteProductForm, DeleteEngagementForm, AddFindingForm, \
-    AddDojoUserForm, DeleteUserForm, ProductTypeCountsForm
+    AddDojoUserForm, DeleteUserForm, ProductTypeCountsForm, UploadNexposeForm
 from dojo.management.commands.run_scan import run_on_deman_scan
 from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
     Check_List, Scan, IPScan, ScanSettings, Test_Type, Notes, \
@@ -55,7 +53,9 @@ from dojo.filters import ProductFilter, OpenFindingFilter, \
     ProductFindingFilter, EngagementFilter, \
     ClosedFingingSuperFilter, MetricsFindingFilter, ReportFindingFilter, EndpointFilter, \
     ReportAuthedFindingFilter, EndpointReportFilter, UserFilter, LogEntryFilter, ProductTypeFilter, \
-    TestTypeFilter, DevelopmentEnvironmentFilter
+    TestTypeFilter, DevelopmentEnvironmentFilter, EngineerFilter
+from tools.nexpose.xml_parser import NexposeFullXmlParser
+from tools.burp.xml_parser import BurpXmlParser
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -104,7 +104,6 @@ view others metrics
 
 
 @user_passes_test(lambda u: u.is_staff)
-@cache_page(60 * 5)  # cache for 5 minutes
 def engineer_metrics(request):
     # checking if user is super_user
     if request.user.is_superuser:
@@ -112,9 +111,12 @@ def engineer_metrics(request):
     else:
         return HttpResponseRedirect(reverse('view_engineer', args=(request.user.id,)))
 
+    users = EngineerFilter(request.GET,
+                           queryset=users)
+    paged_users = get_page_items(request, users, 15)
     return render(request,
                   'dojo/engineer_metrics.html',
-                  {'users': users,
+                  {'users': paged_users,
                    'breadcrumbs': get_breadcrumbs(title="Engineer Metrics", user=request.user)})
 
 
@@ -138,7 +140,7 @@ def view_engineer(request, eid):
     now = localtz.localize(datetime.today())
 
     findings = Finding.objects.filter(reporter=user, verified=True)
-
+    closed_findings = Finding.objects.filter(mitigated_by=user)
     open_findings = findings.exclude(mitigated__isnull=False)
     open_month = findings.filter(date__year=now.year, date__month=now.month)
     accepted_month = [finding for ra in Risk_Acceptance.objects.filter(
@@ -153,10 +155,8 @@ def view_engineer(request, eid):
         reporter=user)
                       for finding in ra.accepted_findings.all()]
     closed_month = []
-    for f in findings:
-        if (f.mitigated
-            and f.mitigated.year == now.year
-            and f.mitigated.month == now.month):
+    for f in closed_findings:
+        if f.mitigated and f.mitigated.year == now.year and f.mitigated.month == now.month:
             closed_month.append(f)
 
     o_dict, open_count = count_findings(open_month)
@@ -180,7 +180,7 @@ def view_engineer(request, eid):
 
     q_objects = (Q(mitigated=d) for d in day_list)
     # closed_week= findings.filter(reduce(operator.or_, q_objects))
-    for f in findings:
+    for f in closed_findings:
         if f.mitigated and f.mitigated >= day_list[0]:
             closed_week.append(f)
 
@@ -1752,38 +1752,208 @@ def add_veracode_scan(request, eid):
 
 
 @user_passes_test(lambda u: u.is_staff)
+def add_nexpose_scan(request, eid):
+    eng = get_object_or_404(Engagement, id=eid)
+    finding_count = 0
+    form = UploadNexposeForm()
+    if request.method == 'POST':
+        form = UploadNexposeForm(request.POST, request.FILES)
+        if form.is_valid():
+            scan_date = form.cleaned_data['scan_date']
+            min_sev = form.cleaned_data['minimum_severity']
+            try:
+                parser = NexposeFullXmlParser(request.FILES['file'])
+                items = parser.get_items(parser.tree, parser.vulns)
+
+                tt, t_created = Test_Type.objects.get_or_create(name="Nexpose Scan")
+                # will save in development environment
+                environment, env_created = Development_Environment.objects.get_or_create(name="Development")
+
+                t = Test(engagement=eng, test_type=tt, target_start=scan_date,
+                         target_end=scan_date, environment=environment, percent_complete=100)
+                t.full_clean()
+                t.save()
+                dupes = {}
+                for item in items:
+
+                    hosts = []
+                    host, created = Endpoint.objects.get_or_create(host=item['name'],
+                                                                   product=eng.product)
+                    if host:
+                        hosts.append(host)
+                    for hostname in item['hostnames']:
+                        host, created = Endpoint.objects.get_or_create(host=hostname,
+                                                                       product=eng.product)
+                        if host:
+                            hosts.append(host)
+
+                    for vuln in item['vulns']:
+                        for sev, num_sev in SEVERITIES.iteritems():
+                            if num_sev == vuln['severity']:
+                                break
+
+                        if SEVERITIES[sev] > SEVERITIES[min_sev]:
+                            continue
+
+                        dupe_key = sev + vuln['name'] + vuln['refs'][1]
+
+                        if dupe_key in dupes:
+                            orig_find = Finding.objects.get(id=dupes[dupe_key])
+                            for host in hosts:
+                                orig_find.endpoints.add(host)
+                            orig_find.save()
+                            continue
+                        else:
+                            dupes[dupe_key] = True
+
+                        refs = ''
+                        for ref in vuln['refs'][2:]:
+                            if ref.startswith('CA'):
+                                ref = "https://www.cert.org/advisories/" + ref + ".html"
+                            elif ref.startswith('CVE'):
+                                ref = "https://cve.mitre.org/cgi-bin/cvename.cgi?name=" + ref
+                            refs += ref
+                            refs += "\n"
+
+                        find = Finding(title=vuln['name'],
+                                       test=t,
+                                       active=False,
+                                       verified=False,
+                                       description=vuln['desc'],
+                                       severity=sev,
+                                       numerical_severity=get_numerical_severity(sev),
+                                       mitigation=vuln['resolution'],
+                                       impact=vuln['refs'][0],
+                                       references=refs,
+                                       date=scan_date,
+                                       reporter=request.user,
+                                       last_reviewed=datetime.now(tz=localtz),
+                                       last_reviewed_by=request.user)
+
+                        find.clean()
+                        find.save()
+                        dupes[dupe_key] = find.id
+
+                        for host in hosts:
+                            find.endpoints.add(host)
+
+                        finding_count += 1
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'Nexpose scan processed, a total of %d findings were imported.' % finding_count,
+                                     extra_tags='alert-success')
+                return HttpResponseRedirect(reverse('view_engagement', args=(eid,)))
+            except SyntaxError:
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     'There appears to be an error in the XML report, please check and try again.',
+                                     extra_tags='alert-danger')
+
+    return render(request,
+                  'dojo/add_nexpose_scan.html',
+                  {'form': form,
+                   'eid': eng.id,
+                   'breadcrumbs': get_breadcrumbs(title="Upload a Nexpose scan",
+                                                  obj=eng,
+                                                  user=request.user)})
+
+
+@user_passes_test(lambda u: u.is_staff)
 def add_burp_scan(request, eid):
     eng = get_object_or_404(Engagement, id=eid)
-
+    finding_count = 0
+    form = UploadBurpForm()
     if request.method == 'POST':
         form = UploadBurpForm(request.POST, request.FILES)
         if form.is_valid():
             scan_date = form.cleaned_data['scan_date']
             min_sev = form.cleaned_data['minimum_severity']
             try:
-                count = handle_burp_file(request.FILES['file'],
-                                         eid,
-                                         request.user,
-                                         scan_date,
-                                         min_sev)
+                parser = BurpXmlParser(request.FILES['file'])
+                items = parser.items
+
+                tt, t_created = Test_Type.objects.get_or_create(name="Burp Scan")
+                # will save in development environment
+                environment, env_created = Development_Environment.objects.get_or_create(name="Development")
+
+                t = Test(engagement=eng, test_type=tt, target_start=scan_date,
+                         target_end=scan_date, environment=environment, percent_complete=100)
+                t.full_clean()
+                t.save()
+                dupes = {}
+                for item in items:
+
+                    if item.host is not None:
+                        host = item.host + (":" + item.port) if item.port is not None else ""
+                        endpoint, created = Endpoint.objects.get_or_create(protocol=item.protocol,
+                                                                           host=host,
+                                                                           path=item.path,
+                                                                           product=eng.product)
+
+                    sev = item.severity
+                    if sev == 'Information':
+                        sev = 'Info'
+
+                    if SEVERITIES[sev] > SEVERITIES[min_sev]:
+                        continue
+
+                    dupe_key = item.name + item.severity
+
+                    if dupe_key in dupes:
+                        orig_find = Finding.objects.get(id=dupes[dupe_key])
+                        if endpoint:
+                            orig_find.endpoints.add(endpoint)
+                        orig_find.save()
+                        continue
+                    else:
+                        dupes[dupe_key] = True
+
+                    find = Finding(title=item.name,
+                                   test=t,
+                                   active=False,
+                                   verified=False,
+                                   description=item.background + '\n\n' + item.detail,
+                                   severity=sev,
+                                   numerical_severity=get_numerical_severity(sev),
+                                   mitigation=item.remediation,
+                                   impact='N/A',
+                                   references='N/A',
+                                   date=scan_date,
+                                   reporter=request.user,
+                                   last_reviewed=datetime.now(tz=localtz),
+                                   last_reviewed_by=request.user)
+
+                    find.clean()
+                    find.save()
+                    dupes[dupe_key] = find.id
+
+                    if item.request is not None and item.response is not None:
+                        burp_rr = BurpRawRequestResponse(finding=find,
+                                                         burpRequestBase64=item.request,
+                                                         burpResponseBase64=item.response,
+                                                         )
+                        burp_rr.clean()
+                        burp_rr.save()
+                    if endpoint:
+                        find.endpoints.add(endpoint)
+
+                    finding_count += 1
                 messages.add_message(request,
                                      messages.SUCCESS,
-                                     'Burp scan processed, a total of %d findings were imported.' % count,
+                                     'Nexpose scan processed, a total of %d findings were imported.' % finding_count,
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('view_engagement', args=(eid,)))
-            except NamespaceErr as nse:
+            except SyntaxError:
                 messages.add_message(request,
                                      messages.ERROR,
-                                     nse.message,
+                                     'There appears to be an error in the XML report, please check and try again.',
                                      extra_tags='alert-danger')
-    else:
-        form = UploadBurpForm()
 
     return render(request,
                   'dojo/add_burp_scan.html',
                   {'form': form,
                    'eid': eng.id,
-                   'breadcrumbs': get_breadcrumbs(title="Upload a Burp scan",
+                   'breadcrumbs': get_breadcrumbs(title="Upload a Burp XML Report",
                                                   obj=eng,
                                                   user=request.user)})
 
@@ -2080,117 +2250,6 @@ def process_veracode_file(filename, eid, user, scan_date, min_sev):
     return finding_count
 
 
-def process_burp_file(filename, eid, user, scan_date, min_sev):
-    finding_count = 0
-    try:
-        vscan = ElementTree.parse(filename)
-    except ParseError as pe:
-        raise NamespaceErr('The XML report is not valid.  Please make sure the request and response values '
-                           'have been Base 64 encoded.')
-
-    root = vscan.getroot()
-
-    issues = root.iter('issue')
-
-    if not sum(1 for e in issues):
-        # no issues to import
-        os.unlink(filename)
-        raise NamespaceErr('There appears to be no issues to import.  Verify report and try again.')
-
-    e = Engagement.objects.get(id=eid)
-
-    time = scan_date
-
-    tt, t_created = Test_Type.objects.get_or_create(name="Burp Scan")
-    # will save in development environment
-    environment, env_created = Development_Environment.objects.get_or_create(name="Development")
-
-    t = Test(engagement=e, test_type=tt, target_start=time,
-             target_end=time, environment=environment)
-    t.full_clean()
-    t.save()
-
-    dupes = {}
-
-    for issue in root.iter('issue'):
-        sev = issue.find('severity').text
-        if issue.find('severity').text == 'Information':
-            sev = 'Info'
-
-        if SEVERITIES[sev] > SEVERITIES[min_sev]:
-            continue
-
-        dupe_key = sev + issue.find('name').text + issue.find('path').text
-
-        if dupe_key in dupes:
-            pass
-        else:
-            dupes[dupe_key] = True
-            description = issue.find('issueBackground').text + '\n\n' + issue.find('issueDetail').text if issue.find(
-                'issueDetail') is not None else ''
-            find_date = scan_date
-            mitigation = issue.find('remediationBackground').text if issue.find(
-                'remediationBackground') is not None else 'N/A'
-            url = issue.find('host').text if issue.find('host') is not None else '' + issue.find(
-                'location').text if issue.find('location') is not None else ''
-
-            if issue.find('requestresponse') is not None and issue.find('requestresponse').find(
-                    'request[@base64="true"]') is not None:
-                req = issue.find('requestresponse').find('request[@base64="true"]').text
-            else:
-                req = None
-
-            if issue.find('requestresponse') is not None and issue.find('requestresponse').find(
-                    'response[@base64="true"]') is not None:
-                res = issue.find('requestresponse').find('response[@base64="true"]').text
-            else:
-                res = None
-
-            if issue.find('host') is not None:
-                protocol, host, path, query, fragment = urlsplit(issue.find('host').text)
-                path = issue.find('path').text if issue.find('path') is not None else None
-                endpoint, created = Endpoint.objects.get_or_create(protocol=protocol,
-                                                                   host=host,
-                                                                   path=path,
-                                                                   query=query,
-                                                                   fragment=fragment,
-                                                                   product=e.product)
-
-            find = Finding(title=issue.find('name').text,
-                           test=t,
-                           active=False,
-                           verified=False,
-                           description=description,
-                           severity=sev,
-                           numerical_severity=get_numerical_severity(sev),
-                           mitigation=mitigation,
-                           impact='N/A',
-                           references='N/A',
-                           url=url,
-                           endpoint=issue.find('host').text if issue.find('host') is not None else 'N/A',
-                           date=find_date,
-                           reporter=user)
-
-            find.clean()
-            find.save()
-
-            if req is not None and res is not None:
-                burp_rr = BurpRawRequestResponse(finding=find,
-                                                 burpRequestBase64=req,
-                                                 burpResponseBase64=res,
-                                                 )
-                burp_rr.clean()
-                burp_rr.save()
-
-            if endpoint:
-                find.endpoints.add(endpoint)
-
-        finding_count += 1
-
-    os.unlink(filename)
-    return finding_count
-
-
 """
 Greg
 status: in produciton
@@ -2271,16 +2330,6 @@ def handle_veracode_file(f, eid, user, scan_date, min_sev):
             destination.write(chunk)
         destination.close()
     return process_veracode_file(fname, eid, user, scan_date, min_sev)
-
-
-def handle_burp_file(f, eid, user, scan_date, min_sev):
-    t = int(time.time())
-    fname = settings.DOJO_ROOT + '/scans/scan-%s-%d' % (eid, t)
-    with open(fname, 'wb+') as destination:
-        for chunk in f.chunks():
-            destination.write(chunk)
-        destination.close()
-    return process_burp_file(fname, eid, user, scan_date, min_sev)
 
 
 def handle_uploaded_threat(f, eng):
@@ -2574,6 +2623,9 @@ def view_finding(request, fid):
             new_note.date = datetime.now(tz=localtz)
             new_note.save()
             finding.notes.add(new_note)
+            finding.last_reviewed = new_note.date
+            finding.last_reviewed_by = user
+            finding.save()
             form = NoteForm()
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -2616,6 +2668,9 @@ def close_finding(request, fid):
             finding.notes.add(new_note)
             finding.active = False
             finding.mitigated = now
+            finding.mitigated_by = request.user
+            finding.last_reviewed = finding.mitigated
+            finding.last_reviewed_by = request.user
             finding.save()
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -3227,6 +3282,7 @@ def add_findings(request, tid):
                 new_finding.severity)
             if new_finding.false_p or new_finding.active is False:
                 new_finding.mitigated = datetime.now(tz=localtz)
+                new_finding.mitigated_by = request.user
 
             new_finding.save()
             new_finding.endpoints = form.cleaned_data['endpoints']
@@ -3279,6 +3335,7 @@ def add_temp_finding(request, tid, fid):
             new_finding.date = datetime.today()
             if new_finding.false_p or new_finding.active is False:
                 new_finding.mitigated = datetime.now(tz=localtz)
+                new_finding.mitigated_by = request.user
 
             new_finding.save()
             new_finding.endpoints = form.cleaned_data['endpoints']
@@ -3324,18 +3381,26 @@ def edit_finding(request, fid):
                 new_finding.severity)
             if new_finding.false_p or new_finding.active is False:
                 new_finding.mitigated = datetime.now(tz=localtz)
+                new_finding.mitigated_by = request.user
             if new_finding.active is True:
                 new_finding.false_p = False
                 new_finding.mitigated = None
+                new_finding.mitigated_by = None
 
             new_finding.endpoints = form.cleaned_data['endpoints']
+            new_finding.last_reviewed = datetime.now(tz=localtz)
+            new_finding.last_reviewed_by = request.user
             new_finding.save()
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Finding saved successfully.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('view_test', args=(new_finding.test.id,)))
+            return HttpResponseRedirect(reverse('view_finding', args=(new_finding.id,)))
         else:
+            messages.add_message(request,
+                                 messages.ERROR,
+                                 'There appears to be errors on the form, please correct below.',
+                                 extra_tags='alert-danger')
             form_error = True
 
     if form_error and 'endpoints' in form.cleaned_data:
@@ -3349,6 +3414,15 @@ def edit_finding(request, fid):
                    'breadcrumbs': get_breadcrumbs(title="Edit finding",
                                                   obj=finding,
                                                   user=request.user)})
+
+
+@user_passes_test(lambda u: u.is_staff)
+def touch_finding(request, fid):
+    finding = get_object_or_404(Finding, id=fid)
+    finding.last_reviewed = datetime.now(tz=localtz)
+    finding.last_reviewed_by = request.user
+    finding.save()
+    return HttpResponseRedirect(reverse('view_finding', args=(finding.id,)))
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -4145,7 +4219,7 @@ def view_profile(request):
 @user_passes_test(lambda u: u.is_staff)
 def dashboard(request):
     now = localtz.localize(datetime.today())
-    seven_days_ago = now - timedelta(days=7)
+    seven_days_ago = now - timedelta(days=8)
     engagement_count = Engagement.objects.filter(lead=request.user,
                                                  active=True).count()
     finding_count = Finding.objects.filter(reporter=request.user,
@@ -4153,13 +4227,12 @@ def dashboard(request):
                                            mitigated=None,
                                            date__range=[seven_days_ago,
                                                         now]).count()
-    mitigated_count = Finding.objects.filter(reporter=request.user,
+    mitigated_count = Finding.objects.filter(mitigated_by=request.user,
                                              mitigated__range=[seven_days_ago,
                                                                now]).count()
 
     accepted_count = len([finding for ra in Risk_Acceptance.objects.filter(
-        reporter=request.user, created__range=[seven_days_ago, now])
-                          for finding in ra.accepted_findings.all()])
+        reporter=request.user, created__range=[seven_days_ago, now]) for finding in ra.accepted_findings.all()])
 
     # forever counts
     findings = Finding.objects.filter(reporter=request.user,
@@ -4317,12 +4390,12 @@ def get_alerts(user):
         mitigated=None,
         verified=True,
         false_p=False,
-        date__lt=twenty_four_hours_ago).order_by('-date')
+        last_reviewed__lt=twenty_four_hours_ago).order_by('-date')
     for finding in outstanding_s0_findings:
         alerts.append([
             'S0 Finding: ' + (
                 finding.title if finding.title is not None else 'Finding'),
-            'Reported On ' + finding.date.strftime("%b. %d, %Y"),
+            'Reviewed On ' + finding.last_reviewed.strftime("%b. %d, %Y"),
             'bug',
             reverse('view_finding', args=(finding.id,))])
 
@@ -4333,12 +4406,12 @@ def get_alerts(user):
         mitigated=None,
         verified=True,
         false_p=False,
-        date__lt=seven_days_ago).order_by('-date')
+        last_reviewed__lt=seven_days_ago).order_by('-date')
     for finding in outstanding_s1_findings:
         alerts.append([
             'S1 Finding: ' + (
                 finding.title if finding.title is not None else 'Finding'),
-            'Reported On ' + finding.date.strftime("%b. %d, %Y"),
+            'Reviewed On ' + finding.last_reviewed.strftime("%b. %d, %Y"),
             'bug',
             reverse('view_finding', args=(finding.id,))])
 
@@ -4349,12 +4422,12 @@ def get_alerts(user):
         mitigated=None,
         verified=True,
         false_p=False,
-        date__lt=fourteen_days_ago).order_by('-date')
+        last_reviewed__lt=fourteen_days_ago).order_by('-date')
     for finding in outstanding_s2_findings:
         alerts.append([
             'S2 Finding: ' + (
                 finding.title if finding.title is not None else 'Finding'),
-            'Reported On ' + finding.date.strftime("%b. %d, %Y"),
+            'Reviewed On ' + finding.last_reviewed.strftime("%b. %d, %Y"),
             'bug',
             reverse('view_finding', args=(finding.id,))])
     return alerts
