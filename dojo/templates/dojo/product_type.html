@@ -1,14 +1,18 @@
 {% extends "base.html" %}
+{% load navigation_tags %}
 {% block content %}
     <div class="row">
         <div class="col-md-10">
             {% if pts %}
+                <div class="clearfix">
+                    <h3 class="pull-left">Product Types</h3>{% include "dojo/paging_snippet.html" with page=pts page_size=True%}
+                </div>
                 <div class="panel panel-default table-responsive">
                     <table id="product_types"
                            class="tablesorter-bootstrap table table-bordered table-condensed table-striped">
                         <thead>
                         <tr>
-                            <th> Product Type</th>
+                            <th>{% dojo_sort request 'Product Type' 'name' 'asc' %}</th>
                             <th> # of Products</th>
                             <th> # of active findings</th>
                             {% if user.is_staff %}
@@ -47,7 +51,7 @@
                         </tbody>
                     </table>
                 </div>
-                {% include "dojo/paging_snippet.html" with page=prod_list %}
+                {% include "dojo/paging_snippet.html" with page=pts page_size=True%}
             {% else %}
                 <p>No product types found.</p>
             {% endif %}

@@ -1,19 +1,24 @@
 {% extends "base.html" %}
+{% load navigation_tags %}
 {% block content %}
     <div class="row">
         <div class="col-md-10">
             {% if findings %}
+                <div class="clearfix">
+                    <h3 class="pull-left">Accepted Findings</h3>{% include "dojo/paging_snippet.html" with page=findings page_size=True%}
+                </div>
                 <div class="panel panel-default table-responsive">
                     <table id="open_findings"
                            class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
                         <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Date</th>
-                            <th>Accepted On</th>
+
+                            <th>{% dojo_sort request 'Name' 'title' %}</th>
+                            <th>{% dojo_sort request 'Date' 'date' %}</th>
+                            <th>{% dojo_sort request 'Accepted On' 'test__engagement__risk_acceptance__created' %}</th>
                             <th>Age</th>
-                            <th>Severity</th>
-                            <th>Product</th>
+                            <th>{% dojo_sort request 'Severity' 'numerical_severity' 'asc' %}</th>
+                            <th>{% dojo_sort request 'Product' 'test__engagement__product__name' %}</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -37,7 +42,7 @@
                         </tbody>
                     </table>
                 </div>
-                {% include "dojo/paging_snippet.html" with page=findings %}
+                {% include "dojo/paging_snippet.html" with page=findings page_size=True%}
             {% else %}
                 No findings found.
             {% endif %}

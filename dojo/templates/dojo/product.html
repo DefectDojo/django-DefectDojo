@@ -1,17 +1,21 @@
 {% extends "base.html" %}
+{% load navigation_tags%}
 {% block content %}
     <div class="row">
         <div class="col-md-10">
             {% if prod_list %}
+                <div class="clearfix">
+                    <h3 class="pull-left">Products</h3>{% include "dojo/paging_snippet.html" with page=prod_list page_size=True %}
+                </div>
                 <div class="panel panel-default table-responsive">
                     <table id="products"
                            class="tablesorter-bootstrap table table-bordered table-condensed table-striped">
                         <thead>
                         <tr>
-                            <th> Product</th>
+                            <th>{% dojo_sort request 'Product' 'name' 'asc' %}</th>
                             <th> Active<br/>findings</th>
                             <th> Vulnerable<br/>endpoints</th>
-                            <th> Product Type</th>
+                            <th>{% dojo_sort request 'Product Type' 'prod_type__name' %}</th>
                             {% if user.is_staff %}
                                 <th> Engagement</th>
                             {% endif %}
@@ -46,7 +50,7 @@
                         </tbody>
                     </table>
                 </div>
-                {% include "dojo/paging_snippet.html" with page=prod_list %}
+                {% include "dojo/paging_snippet.html" with page=prod_list page_size=True %}
             {% else %}
                 No products found.
             {% endif %}

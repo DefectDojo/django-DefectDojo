@@ -67,7 +67,7 @@
                         </div>
                     </div>
                 </div>
-                <a href="{% url 'closed_findings' %}?mitigated=2&reporter={{ request.user.id }}&o=numerical_severity">
+                <a href="{% url 'closed_findings' %}?mitigated=2&mitigated_by={{ request.user.id }}&o=numerical_severity">
                     <div class="panel-footer">
                         <span class="pull-left">View Details</span>
                         <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>

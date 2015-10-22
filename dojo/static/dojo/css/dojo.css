@@ -629,6 +629,20 @@ span.endpoint_product {
     color: #a94442;
 }
 
+th .fa-sort-asc{
+    vertical-align: -3px
+}
+
+th .fa-sort-desc{
+    vertical-align: 3px
+}
+
+th a {
+    color: #333;
+    width: 100%;
+    display: inline-block;
+}
+
 @font-face {
     font-family: 'icomoon';
     src:url('../fonts/icomoon.eot?2eclin');

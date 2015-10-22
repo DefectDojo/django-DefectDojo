@@ -400,10 +400,13 @@ class Finding(models.Model):
     out_of_scope = models.BooleanField(default=False)
     thread_id = models.IntegerField(default=0, editable=False)
     mitigated = models.DateTimeField(editable=False, null=True, blank=True)
-    reporter = models.ForeignKey(User, editable=False)
+    mitigated_by = models.ForeignKey(User, null=True, editable=False, related_name="mitigated_by")
+    reporter = models.ForeignKey(User, editable=False, related_name='reporter')
     notes = models.ManyToManyField(Notes, blank=True,
                                    editable=False)
     numerical_severity = models.CharField(max_length=4)
+    last_reviewed = models.DateTimeField(null=True, editable=False)
+    last_reviewed_by = models.ForeignKey(User, null=True, editable=False, related_name='last_reviewed_by')
 
     class Meta:
         ordering = ('numerical_severity', '-date')
