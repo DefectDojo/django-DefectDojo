@@ -111,22 +111,14 @@
                 Description
             </div>
             <div class="panel-body">
-                {% ifequal finding.test.test_type.name 'Burp Scan'%}
-                    <div>{{ finding.description|safe }}</div>
-                {% else %}
-                    <pre>{{ finding.description }}</pre>
-                {% endifequal %}
+                <pre>{{ finding.description }}</pre>
             </div>
         </div>
 
         <div class="panel panel-default">
             <div class="panel-heading">Mitigation</div>
             <div class="panel-body">
-                {% ifequal finding.test.test_type.name 'Burp Scan'%}
-                    <div>{{ finding.mitigation|safe }}</div>
-                {% else %}
-                    <pre>{{ finding.mitigation }}</pre>
-                {% endifequal %}
+                <pre>{{ finding.mitigation }}</pre>
             </div>
         </div>
         {% if burp_request %}

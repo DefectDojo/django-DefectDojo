@@ -5,6 +5,7 @@ TEMPLATE_DEBUG = DEBUG
 LOGIN_REDIRECT_URL = '/'
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTOCOL', 'https')
 SECURE_SSL_REDIRECT = True
+SECURE_BROWSER_XSS_FILTER = True
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
@@ -98,6 +99,8 @@ STATICFILES_FINDERS = (
     'djangobower.finders.BowerFinder',
 )
 
+FILE_UPLOAD_HANDLERS = ("django.core.files.uploadhandler.TemporaryFileUploadHandler",)
+
 # where should bower install components
 # collect static will move them to the static root
 BOWER_COMPONENTS_ROOT = '{{ dd_install_dir }}/components'
@@ -141,6 +144,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',

@@ -329,6 +329,9 @@ class Endpoint(models.Model):
                                       false_p=False,
                                       duplicate=False,
                                       is_template=False).order_by('numerical_severity')
+    @staticmethod
+    def from_uri(uri):
+        return Endpoint()
 
 
 class Notes(models.Model):
@@ -390,6 +393,9 @@ class Finding(models.Model):
     # will deprecate in version 1.0.3
     endpoint = models.TextField()
     endpoints = models.ManyToManyField(Endpoint, blank=True, )
+    unsaved_endpoints = []
+    unsaved_request = None
+    unsaved_response = None
     references = models.TextField(null=True, blank=True, db_column="refs")
     test = models.ForeignKey(Test, editable=False)
     is_template = models.BooleanField(default=False)
@@ -408,8 +414,24 @@ class Finding(models.Model):
     last_reviewed = models.DateTimeField(null=True, editable=False)
     last_reviewed_by = models.ForeignKey(User, null=True, editable=False, related_name='last_reviewed_by')
 
+    SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
+                  'High': 1, 'Critical': 0}
+
     class Meta:
-        ordering = ('numerical_severity', '-date')
+        ordering = ('numerical_severity', '-date', 'title')
+
+    @staticmethod
+    def get_numerical_severity(severity):
+        if severity == 'Critical':
+            return 'S0'
+        elif severity == 'High':
+            return 'S1'
+        elif severity == 'Medium':
+            return 'S2'
+        elif severity == 'Low':
+            return 'S3'
+        else:
+            return 'S4'
 
     def __unicode__(self):
         return self.title
@@ -432,7 +454,7 @@ class Finding(models.Model):
             status += ['Accepted']
 
         if not len(status):
-            status += ['Unknown']
+            status += ['Initial']
 
         return ", ".join([str(s) for s in status])
 
@@ -558,3 +580,4 @@ admin.site.register(Test_Type)
 admin.site.register(Endpoint)
 admin.site.register(Product)
 admin.site.register(Dojo_User)
+admin.site.register(Notes)

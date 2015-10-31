@@ -211,81 +211,46 @@ class Product_TypeProductForm(forms.ModelForm):
         fields = ['name', 'description', 'prod_manager', 'tech_contact', 'manager', 'prod_type', 'authorized_users']
 
 
-class UploadFileForm(forms.Form):
+class ImportScanForm(forms.Form):
+    SCAN_TYPE_CHOICES = (("Burp Scan", "Burp Scan"), ("Nessus Scan", "Nessus Scan"), ("Nexpose Scan", "Nexpose Scan"),
+                         ("Veracode Scan", "Veracode Scan"), ("ZAP Scan", "ZAP Scan"))
     scan_date = forms.DateTimeField(
         required=True,
-        label="Nessus Scan Date",
-        help_text="Scan completion date will be used on all findings.",
-        initial=datetime.now().strftime("%m/%d/%Y"),
-        widget=forms.TextInput(attrs={'class': 'datepicker'}))
-    minimum_severity = forms.ChoiceField(help_text='Select the minimum severity level to be imported',
-                                         choices=SEVERITY_CHOICES)
-    file = forms.FileField(widget=forms.widgets.FileInput(
-        attrs={"accept": ".txt,.csv"}),
-        label="Select Nessus Export")
-
-    # date can only be today or in the past, not the future
-    def clean_scan_date(self):
-        date = self.cleaned_data['scan_date']
-        if date.date() > datetime.today().date():
-            raise forms.ValidationError("The date cannot be in the future!")
-        return date
-
-
-class UploadVeracodeForm(forms.Form):
-    scan_date = forms.DateTimeField(
-        required=True,
-        label="Veracode Scan Date",
-        help_text="Scan date will be used on findings without specific date.",
-        initial=datetime.now().strftime("%m/%d/%Y"),
-        widget=forms.TextInput(attrs={'class': 'datepicker'}))
-    minimum_severity = forms.ChoiceField(help_text='Select the minimum severity level to be imported',
-                                         choices=SEVERITY_CHOICES)
-    file = forms.FileField(widget=forms.widgets.FileInput(
-        attrs={"accept": ".xml"}),
-        label="Select Veracode Export")
-
-    # date can only be today or in the past, not the future
-    def clean_scan_date(self):
-        date = self.cleaned_data['scan_date']
-        if date.date() > datetime.today().date():
-            raise forms.ValidationError("The date cannot be in the future!")
-        return date
-
-
-class UploadBurpForm(forms.Form):
-    scan_date = forms.DateTimeField(
-        required=True,
-        label="Burp Scan Date",
-        help_text="Scan completion date will be used on all findings.",
-        initial=datetime.now().strftime("%m/%d/%Y"),
-        widget=forms.TextInput(attrs={'class': 'datepicker'}))
-    minimum_severity = forms.ChoiceField(help_text='Select the minimum severity level to be imported',
-                                         choices=SEVERITY_CHOICES[0:4])
-    file = forms.FileField(widget=forms.widgets.FileInput(
-        attrs={"accept": ".xml"}),
-        label="Select Burp XML Export")
-
-    # date can only be today or in the past, not the future
-    def clean_scan_date(self):
-        date = self.cleaned_data['scan_date']
-        if date.date() > datetime.today().date():
-            raise forms.ValidationError("The date cannot be in the future!")
-        return date
-
-
-class UploadNexposeForm(forms.Form):
-    scan_date = forms.DateTimeField(
-        required=True,
-        label="Nexpose Scan Date",
+        label="Scan Completion Date",
         help_text="Scan completion date will be used on all findings.",
         initial=datetime.now().strftime("%m/%d/%Y"),
         widget=forms.TextInput(attrs={'class': 'datepicker'}))
     minimum_severity = forms.ChoiceField(help_text='Minimum severity level to be imported',
+                                         required=True,
+                                         choices=SEVERITY_CHOICES[0:4])
+    scan_type = forms.ChoiceField(required=True, choices=SCAN_TYPE_CHOICES)
+    file = forms.FileField(widget=forms.widgets.FileInput(
+        attrs={"accept": ".xml, .csv, .nessus"}),
+        label="Choose report file",
+        required=True)
+
+    # date can only be today or in the past, not the future
+    def clean_scan_date(self):
+        date = self.cleaned_data['scan_date']
+        if date.date() > datetime.today().date():
+            raise forms.ValidationError("The date cannot be in the future!")
+        return date
+
+
+class ReImportScanForm(forms.Form):
+    scan_date = forms.DateTimeField(
+        required=True,
+        label="Scan Completion Date",
+        help_text="Scan completion date will be used on all findings.",
+        initial=datetime.now().strftime("%m/%d/%Y"),
+        widget=forms.TextInput(attrs={'class': 'datepicker'}))
+    minimum_severity = forms.ChoiceField(help_text='Minimum severity level to be imported',
+                                         required=True,
                                          choices=SEVERITY_CHOICES[0:4])
     file = forms.FileField(widget=forms.widgets.FileInput(
-        attrs={"accept": ".xml"}),
-        label="Nexpose XML 2.0")
+        attrs={"accept": ".xml, .csv, .nessus"}),
+        label="Choose report file",
+        required=True)
 
     # date can only be today or in the past, not the future
     def clean_scan_date(self):

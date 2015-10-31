@@ -7,8 +7,13 @@
         <p>When the Burp report is generated, we recommend selecting the option to Base64 encode both the request and
             response fields. These fields will be processed and made available in the Finding view page.
         </p>
+        {% if additional_message %}
+            <p class="text-info">
+                <b>Note:</b> {{ additional_message }}
+            </p>
+        {% endif %}
     </div>
-    <form class="form-horizontal" action="{% url 'add_burp_scan' eid %}" enctype="multipart/form-data" method="post">
+    <form class="form-horizontal" action="" enctype="multipart/form-data" method="post">
         {% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
         <div class="form-group">

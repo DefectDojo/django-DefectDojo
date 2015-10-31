@@ -2,7 +2,6 @@ from calendar import monthrange
 from collections import OrderedDict
 import base64
 import collections
-import csv
 from datetime import date, datetime, timedelta
 import logging
 from math import ceil, pi, sqrt
@@ -11,9 +10,6 @@ import operator
 import os
 import re
 from threading import Thread
-from xml.etree import ElementTree
-from xml.dom import NamespaceErr
-import time
 import calendar as tcalendar
 
 import vobject
@@ -34,16 +30,16 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import render, get_object_or_404
 from pytz import timezone
 from tastypie.models import ApiKey
+from django.template.defaultfilters import pluralize
 
 from dojo.forms import VaForm, SimpleMetricsForm, CheckForm, \
-    ScanSettingsForm, UploadThreatForm, UploadFileForm, \
-    UploadRiskForm, NoteForm, CloseFindingForm, DoneForm, \
+    ScanSettingsForm, UploadThreatForm, UploadRiskForm, NoteForm, CloseFindingForm, DoneForm, \
     ProductForm, EngForm2, EngForm, TestForm, FindingForm, \
     SimpleSearchForm, Product_TypeForm, Product_TypeProductForm, \
     Test_TypeForm, ReplaceRiskAcceptanceForm, AddFindingsRiskAcceptanceForm, Development_EnvironmentForm, \
-    DojoUserForm, DeleteIPScanForm, DeleteTestForm, UploadVeracodeForm, UploadBurpForm, EditEndpointForm, \
+    DojoUserForm, DeleteIPScanForm, DeleteTestForm, EditEndpointForm, \
     DeleteEndpointForm, AddEndpointForm, DeleteProductForm, DeleteEngagementForm, AddFindingForm, \
-    AddDojoUserForm, DeleteUserForm, ProductTypeCountsForm, UploadNexposeForm
+    AddDojoUserForm, DeleteUserForm, ProductTypeCountsForm, ImportScanForm, ReImportScanForm
 from dojo.management.commands.run_scan import run_on_deman_scan
 from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
     Check_List, Scan, IPScan, ScanSettings, Test_Type, Notes, \
@@ -54,8 +50,12 @@ from dojo.filters import ProductFilter, OpenFindingFilter, \
     ClosedFingingSuperFilter, MetricsFindingFilter, ReportFindingFilter, EndpointFilter, \
     ReportAuthedFindingFilter, EndpointReportFilter, UserFilter, LogEntryFilter, ProductTypeFilter, \
     TestTypeFilter, DevelopmentEnvironmentFilter, EngineerFilter
-from tools.nexpose.xml_parser import NexposeFullXmlParser
-from tools.burp.xml_parser import BurpXmlParser
+from tools.factory import import_parser_factory
+from tools.nessus.parser import NessusCSVParser
+from tools.nexpose.parser import NexposeFullXmlParser
+from tools.burp.parser import BurpXmlParser
+from tools.veracode.parser import VeracodeXMLParser
+from tools.zap.parser import ZapXmlParser
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -67,8 +67,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
-              'High': 1, 'Critical': 0}
 
 """
 Greg
@@ -351,24 +349,20 @@ def view_engineer(request, eid):
             more_nine += 1
 
     # Data for the monthly charts
-    chart_data = []
-    chart_data.append(['Date', 'S0', 'S1', 'S2', 'S3', 'Total'])
+    chart_data = [['Date', 'S0', 'S1', 'S2', 'S3', 'Total']]
     for thing in o_stuff:
         chart_data.insert(1, thing)
 
-    a_chart_data = []
-    a_chart_data.append(['Date', 'S0', 'S1', 'S2', 'S3', 'Total'])
+    a_chart_data = [['Date', 'S0', 'S1', 'S2', 'S3', 'Total']]
     for thing in a_stuff:
         a_chart_data.insert(1, thing)
 
     # Data for the weekly charts
-    week_chart_data = []
-    week_chart_data.append(['Date', 'S0', 'S1', 'S2', 'S3', 'Total'])
+    week_chart_data = [['Date', 'S0', 'S1', 'S2', 'S3', 'Total']]
     for thing in week_o_stuff:
         week_chart_data.insert(1, thing)
 
-    week_a_chart_data = []
-    week_a_chart_data.append(['Date', 'S0', 'S1', 'S2', 'S3', 'Total'])
+    week_a_chart_data = [['Date', 'S0', 'S1', 'S2', 'S3', 'Total']]
     for thing in week_a_stuff:
         week_a_chart_data.insert(1, thing)
 
@@ -391,14 +385,7 @@ def view_engineer(request, eid):
         status = 'Active'
         if len(find.risk_acceptance_set.all()) > 0:
             status = 'Accepted'
-        detail = []
-        detail.append(team)
-        detail.append(name)
-        detail.append(severity)
-        detail.append(description)
-        detail.append(life)
-        detail.append(status)
-        detail.append(find.reporter)
+        detail = [team, name, severity, description, life, status, find.reporter]
         details.append(detail)
 
     details = sorted(details, key=lambda x: x[2])
@@ -589,36 +576,36 @@ def count_findings(findings):
     finding_count = {'low': 0, 'med': 0, 'high': 0, 'crit': 0}
     for f in findings:
         product = f.test.engagement.product
-        if (product in product_count):
-            product_count[product][4] = product_count[product][4] + 1
+        if product in product_count:
+            product_count[product][4] += 1
             if f.severity == 'Low':
-                product_count[product][3] = product_count[product][3] + 1
+                product_count[product][3] += 1
                 finding_count['low'] += 1
             if f.severity == 'Medium':
-                product_count[product][2] = product_count[product][2] + 1
+                product_count[product][2] += 1
                 finding_count['med'] += 1
             if f.severity == 'High':
-                product_count[product][1] = product_count[product][1] + 1
+                product_count[product][1] += 1
                 finding_count['high'] += 1
             if f.severity == 'Critical':
-                product_count[product][0] = product_count[product][0] + 1
+                product_count[product][0] += 1
                 finding_count['crit'] += 1
         else:
             product_count[product] = [0, 0, 0, 0, 0]
-            product_count[product][4] = product_count[product][4] + 1
+            product_count[product][4] += 1
             if f.severity == 'Low':
-                product_count[product][3] = product_count[product][3] + 1
+                product_count[product][3] += 1
                 finding_count['low'] += 1
             if f.severity == 'Medium':
-                product_count[product][2] = product_count[product][2] + 1
+                product_count[product][2] += 1
                 finding_count['med'] += 1
             if f.severity == 'High':
-                product_count[product][1] = product_count[product][1] + 1
+                product_count[product][1] += 1
                 finding_count['high'] += 1
             if f.severity == 'Critical':
-                product_count[product][0] = product_count[product][0] + 1
+                product_count[product][0] += 1
                 finding_count['crit'] += 1
-    return (product_count, finding_count)
+    return product_count, finding_count
 
 
 def findings_this_period(findings, periodType, stuff, o_stuff, a_stuff):
@@ -646,9 +633,7 @@ def findings_this_period(findings, periodType, stuff, o_stuff, a_stuff):
         a_count = {'closed': 0, 'zero': 0, 'one': 0, 'two': 0,
                    'three': 0, 'total': 0}
         for f in findings:
-            if (f.mitigated is not None
-                and f.mitigated <= end_of_period
-                and f.mitigated >= start_of_period):
+            if f.mitigated is not None and end_of_period >= f.mitigated >= start_of_period:
                 o_count['closed'] += 1
             elif (f.mitigated is not None
                   and f.mitigated > end_of_period
@@ -752,11 +737,10 @@ def research_metrics(request):
     closed_findings = Finding.objects.filter(
         mitigated__isnull=False,
         test__test_type__name='Security Research')
-    closed_findings_dict = {}
-    closed_findings_dict['S0'] = closed_findings.filter(severity='Critical')
-    closed_findings_dict['S1'] = closed_findings.filter(severity='High')
-    closed_findings_dict['S2'] = closed_findings.filter(severity='Medium')
-    closed_findings_dict['S3'] = closed_findings.filter(severity='Low')
+    closed_findings_dict = {'S0': closed_findings.filter(severity='Critical'),
+                            'S1': closed_findings.filter(severity='High'),
+                            'S2': closed_findings.filter(severity='Medium'),
+                            'S3': closed_findings.filter(severity='Low')}
 
     time_to_close = {}
     for sev, finds in closed_findings_dict.items():
@@ -1447,7 +1431,7 @@ def complete_checklist(request, eid):
         tests = Test.objects.filter(engagement=eng)
         findings = Finding.objects.filter(test__in=tests).all()
         form = CheckForm(request.POST, findings=findings)
-        if (form.is_valid()):
+        if form.is_valid():
             cl = form.save(commit=False)
             try:
                 check_l = Check_List.objects.get(engagement=eng)
@@ -1635,7 +1619,7 @@ def edit_scan_settings(request, pid, sid):
     old_scan = ScanSettings.objects.get(id=sid)
     pid = old_scan.product.id
     user = request.user
-    if (user.is_staff or user in old_scan.product.authorized_users.all()):
+    if user.is_staff or user in old_scan.product.authorized_users.all():
         pass
     else:
         raise PermissionDenied
@@ -1715,234 +1699,78 @@ def upload_threatmodel(request, eid):
 
 
 @user_passes_test(lambda u: u.is_staff)
-def add_veracode_scan(request, eid):
-    eng = get_object_or_404(Engagement, id=eid)
-
-    if request.method == 'POST':
-        form = UploadVeracodeForm(request.POST, request.FILES)
-        if form.is_valid():
-            scan_date = form.cleaned_data['scan_date']
-            min_sev = form.cleaned_data['minimum_severity']
-            try:
-                count = handle_veracode_file(request.FILES['file'],
-                                             eid,
-                                             request.user,
-                                             scan_date,
-                                             min_sev)
-                messages.add_message(request,
-                                     messages.SUCCESS,
-                                     'Veracode scan processed, a total of %d findings were imported.' % count,
-                                     extra_tags='alert-success')
-                return HttpResponseRedirect(reverse('view_engagement', args=(eid,)))
-            except NamespaceErr as nse:
-                messages.add_message(request,
-                                     messages.ERROR,
-                                     nse.message,
-                                     extra_tags='alert-danger')
-    else:
-        form = UploadVeracodeForm()
-
-    return render(request,
-                  'dojo/add_veracode_scan.html',
-                  {'form': form,
-                   'eid': eng.id,
-                   'breadcrumbs': get_breadcrumbs(title="Upload a Veracode scan",
-                                                  obj=eng,
-                                                  user=request.user)})
-
-
-@user_passes_test(lambda u: u.is_staff)
-def add_nexpose_scan(request, eid):
-    eng = get_object_or_404(Engagement, id=eid)
+def import_scan_results(request, eid):
+    engagement = get_object_or_404(Engagement, id=eid)
     finding_count = 0
-    form = UploadNexposeForm()
-    if request.method == 'POST':
-        form = UploadNexposeForm(request.POST, request.FILES)
+    form = ImportScanForm()
+    if request.method == "POST":
+        form = ImportScanForm(request.POST, request.FILES)
         if form.is_valid():
+            file = request.FILES['file']
             scan_date = form.cleaned_data['scan_date']
             min_sev = form.cleaned_data['minimum_severity']
+
+            scan_type = request.POST['scan_type']
+            if not any(scan_type in code for code in ImportScanForm.SCAN_TYPE_CHOICES):
+                raise Http404()
+
+            tt, t_created = Test_Type.objects.get_or_create(name=scan_type)
+            # will save in development environment
+            environment, env_created = Development_Environment.objects.get_or_create(name="Development")
+            t = Test(engagement=engagement, test_type=tt, target_start=scan_date,
+                     target_end=scan_date, environment=environment, percent_complete=100)
+            t.full_clean()
+            t.save()
+
             try:
-                parser = NexposeFullXmlParser(request.FILES['file'])
-                items = parser.get_items(parser.tree, parser.vulns)
+                parser = import_parser_factory(file, t)
+            except ValueError:
+                raise Http404()
 
-                tt, t_created = Test_Type.objects.get_or_create(name="Nexpose Scan")
-                # will save in development environment
-                environment, env_created = Development_Environment.objects.get_or_create(name="Development")
-
-                t = Test(engagement=eng, test_type=tt, target_start=scan_date,
-                         target_end=scan_date, environment=environment, percent_complete=100)
-                t.full_clean()
-                t.save()
-                dupes = {}
-                for item in items:
-
-                    hosts = []
-                    host, created = Endpoint.objects.get_or_create(host=item['name'],
-                                                                   product=eng.product)
-                    if host:
-                        hosts.append(host)
-                    for hostname in item['hostnames']:
-                        host, created = Endpoint.objects.get_or_create(host=hostname,
-                                                                       product=eng.product)
-                        if host:
-                            hosts.append(host)
-
-                    for vuln in item['vulns']:
-                        for sev, num_sev in SEVERITIES.iteritems():
-                            if num_sev == vuln['severity']:
-                                break
-
-                        if SEVERITIES[sev] > SEVERITIES[min_sev]:
-                            continue
-
-                        dupe_key = sev + vuln['name'] + vuln['refs'][1]
-
-                        if dupe_key in dupes:
-                            orig_find = Finding.objects.get(id=dupes[dupe_key])
-                            for host in hosts:
-                                orig_find.endpoints.add(host)
-                            orig_find.save()
-                            continue
-                        else:
-                            dupes[dupe_key] = True
-
-                        refs = ''
-                        for ref in vuln['refs'][2:]:
-                            if ref.startswith('CA'):
-                                ref = "https://www.cert.org/advisories/" + ref + ".html"
-                            elif ref.startswith('CVE'):
-                                ref = "https://cve.mitre.org/cgi-bin/cvename.cgi?name=" + ref
-                            refs += ref
-                            refs += "\n"
-
-                        find = Finding(title=vuln['name'],
-                                       test=t,
-                                       active=False,
-                                       verified=False,
-                                       description=vuln['desc'],
-                                       severity=sev,
-                                       numerical_severity=get_numerical_severity(sev),
-                                       mitigation=vuln['resolution'],
-                                       impact=vuln['refs'][0],
-                                       references=refs,
-                                       date=scan_date,
-                                       reporter=request.user,
-                                       last_reviewed=datetime.now(tz=localtz),
-                                       last_reviewed_by=request.user)
-
-                        find.clean()
-                        find.save()
-                        dupes[dupe_key] = find.id
-
-                        for host in hosts:
-                            find.endpoints.add(host)
-
-                        finding_count += 1
-                messages.add_message(request,
-                                     messages.SUCCESS,
-                                     'Nexpose scan processed, a total of %d findings were imported.' % finding_count,
-                                     extra_tags='alert-success')
-                return HttpResponseRedirect(reverse('view_engagement', args=(eid,)))
-            except SyntaxError:
-                messages.add_message(request,
-                                     messages.ERROR,
-                                     'There appears to be an error in the XML report, please check and try again.',
-                                     extra_tags='alert-danger')
-
-    return render(request,
-                  'dojo/add_nexpose_scan.html',
-                  {'form': form,
-                   'eid': eng.id,
-                   'breadcrumbs': get_breadcrumbs(title="Upload a Nexpose scan",
-                                                  obj=eng,
-                                                  user=request.user)})
-
-
-@user_passes_test(lambda u: u.is_staff)
-def add_burp_scan(request, eid):
-    eng = get_object_or_404(Engagement, id=eid)
-    finding_count = 0
-    form = UploadBurpForm()
-    if request.method == 'POST':
-        form = UploadBurpForm(request.POST, request.FILES)
-        if form.is_valid():
-            scan_date = form.cleaned_data['scan_date']
-            min_sev = form.cleaned_data['minimum_severity']
             try:
-                parser = BurpXmlParser(request.FILES['file'])
-                items = parser.items
-
-                tt, t_created = Test_Type.objects.get_or_create(name="Burp Scan")
-                # will save in development environment
-                environment, env_created = Development_Environment.objects.get_or_create(name="Development")
-
-                t = Test(engagement=eng, test_type=tt, target_start=scan_date,
-                         target_end=scan_date, environment=environment, percent_complete=100)
-                t.full_clean()
-                t.save()
-                dupes = {}
-                for item in items:
-
-                    if item.host is not None:
-                        host = item.host + (":" + item.port) if item.port is not None else ""
-                        endpoint, created = Endpoint.objects.get_or_create(protocol=item.protocol,
-                                                                           host=host,
-                                                                           path=item.path,
-                                                                           product=eng.product)
-
+                for item in parser.items:
                     sev = item.severity
                     if sev == 'Information':
                         sev = 'Info'
 
-                    if SEVERITIES[sev] > SEVERITIES[min_sev]:
+                    item.severity = sev
+
+                    if Finding.SEVERITIES[sev] > Finding.SEVERITIES[min_sev]:
                         continue
 
-                    dupe_key = item.name + item.severity
+                    item.test = t
+                    item.date = t.target_start
+                    item.reporter = request.user
+                    item.last_reviewed = datetime.now(tz=localtz)
+                    item.last_reviewed_by = request.user
+                    item.save()
 
-                    if dupe_key in dupes:
-                        orig_find = Finding.objects.get(id=dupes[dupe_key])
-                        if endpoint:
-                            orig_find.endpoints.add(endpoint)
-                        orig_find.save()
-                        continue
-                    else:
-                        dupes[dupe_key] = True
-
-                    find = Finding(title=item.name,
-                                   test=t,
-                                   active=False,
-                                   verified=False,
-                                   description=item.background + '\n\n' + item.detail,
-                                   severity=sev,
-                                   numerical_severity=get_numerical_severity(sev),
-                                   mitigation=item.remediation,
-                                   impact='N/A',
-                                   references='N/A',
-                                   date=scan_date,
-                                   reporter=request.user,
-                                   last_reviewed=datetime.now(tz=localtz),
-                                   last_reviewed_by=request.user)
-
-                    find.clean()
-                    find.save()
-                    dupes[dupe_key] = find.id
-
-                    if item.request is not None and item.response is not None:
-                        burp_rr = BurpRawRequestResponse(finding=find,
-                                                         burpRequestBase64=item.request,
-                                                         burpResponseBase64=item.response,
+                    if item.unsaved_request is not None and item.unsaved_response is not None:
+                        burp_rr = BurpRawRequestResponse(finding=item,
+                                                         burpRequestBase64=item.unsaved_request,
+                                                         burpResponseBase64=item.unsaved_response,
                                                          )
                         burp_rr.clean()
                         burp_rr.save()
-                    if endpoint:
-                        find.endpoints.add(endpoint)
+
+                    for endpoint in item.unsaved_endpoints:
+                        ep, created = Endpoint.objects.get_or_create(protocol=endpoint.protocol,
+                                                                     host=endpoint.host,
+                                                                     path=endpoint.path,
+                                                                     query=endpoint.query,
+                                                                     fragment=endpoint.fragment,
+                                                                     product=t.engagement.product)
+
+                        item.endpoints.add(ep)
 
                     finding_count += 1
+
                 messages.add_message(request,
                                      messages.SUCCESS,
-                                     'Nexpose scan processed, a total of %d findings were imported.' % finding_count,
+                                     scan_type + ' processed, a total of ' + message(finding_count, 'finding',
+                                                                                     'processed'),
                                      extra_tags='alert-success')
-                return HttpResponseRedirect(reverse('view_engagement', args=(eid,)))
+                return HttpResponseRedirect(reverse('view_test', args=(t.id,)))
             except SyntaxError:
                 messages.add_message(request,
                                      messages.ERROR,
@@ -1950,304 +1778,161 @@ def add_burp_scan(request, eid):
                                      extra_tags='alert-danger')
 
     return render(request,
-                  'dojo/add_burp_scan.html',
+                  'dojo/import_scan_results.html',
                   {'form': form,
-                   'eid': eng.id,
-                   'breadcrumbs': get_breadcrumbs(title="Upload a Burp XML Report",
-                                                  obj=eng,
+                   'eid': engagement.id,
+                   'breadcrumbs': get_breadcrumbs(title="Import Scan Results",
+                                                  obj=engagement,
                                                   user=request.user)})
-
-
-"""
-Greg
-status: in production
-Upload a nessus scan at the engagement level
-"""
 
 
 @user_passes_test(lambda u: u.is_staff)
-def add_nessus_scan(request, eid):
-    eng = Engagement.objects.get(id=eid)
-
-    if request.method == 'POST':
-        form = UploadFileForm(request.POST, request.FILES)
+def re_import_scan_results(request, tid):
+    additional_message = "When re-uploading a scan, any findings not found in original scan will be updated as " \
+                         "mitigated.  The process attempts to identify the differences, however manual verification " \
+                         "is highly recommended."
+    t = get_object_or_404(Test, id=tid)
+    scan_type = t.test_type.name
+    engagement = t.engagement
+    form = ReImportScanForm()
+    if request.method == "POST":
+        form = ReImportScanForm(request.POST, request.FILES)
         if form.is_valid():
             scan_date = form.cleaned_data['scan_date']
             min_sev = form.cleaned_data['minimum_severity']
-            handle_uploaded_file(request.FILES['file'],
-                                 eid,
-                                 request.user,
-                                 scan_date,
-                                 min_sev)
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 'Nessus scan saved.',
-                                 extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('view_engagement', args=(eid,)))
-    else:
-        form = UploadFileForm()
+            file = request.FILES['file']
+            scan_type = t.test_type.name
+            try:
+                parser = import_parser_factory(file, t)
+            except ValueError:
+                raise Http404()
+
+            try:
+                items = parser.items
+                original_items = t.finding_set.all().values_list("id", flat=True)
+                new_items = []
+                mitigated_count = 0
+                finding_count = 0
+                finding_added_count = 0
+                reactivated_count = 0
+                for item in items:
+                    endpoints = item.unsaved_endpoints
+                    sev = item.severity
+                    if sev == 'Information':
+                        sev = 'Info'
+
+                    if Finding.SEVERITIES[sev] > Finding.SEVERITIES[min_sev]:
+                        continue
+
+                    if scan_type == 'Veracode Scan':
+                        find = Finding.objects.filter(title=item.title,
+                                                      test__id=t.id,
+                                                      severity=sev,
+                                                      numerical_severity=Finding.get_numerical_severity(sev),
+                                                      description=item.description
+                                                      )
+                    else:
+                        find = Finding.objects.filter(title=item.title,
+                                                      test__id=t.id,
+                                                      severity=sev,
+                                                      numerical_severity=Finding.get_numerical_severity(sev),
+                                                      )
+
+                    if len(find) == 1:
+                        if find[0].mitigated:
+                            # it was once fixed, but now back
+                            find[0].mitigated = None
+                            find[0].mitigated_by = None
+                            find[0].active = True
+                            find[0].save()
+                            note = Notes(entry="Re-activated by %s re-upload." % scan_type,
+                                         author=request.user)
+                            note.save()
+                            find[0].notes.add(note)
+                            reactivated_count += 1
+                        new_items.append(find[0].id)
+                    else:
+                        item.test = t
+                        item.date = t.target_start
+                        item.reporter = request.user
+                        item.last_reviewed = datetime.now(tz=localtz)
+                        item.last_reviewed_by = request.user
+                        item.save()
+                        finding_added_count += 1
+                        new_items.append(item.id)
+                        find = item
+                        if item.unsaved_request is not None and item.unsaved_response is not None:
+                            burp_rr = BurpRawRequestResponse(finding=find,
+                                                             burpRequestBase64=item.unsaved_request,
+                                                             burpResponseBase64=item.unsaved_response,
+                                                             )
+                            burp_rr.clean()
+                            burp_rr.save()
+                    if find:
+                        finding_count += 1
+                        for endpoint in item.unsaved_endpoints:
+                            ep, created = Endpoint.objects.get_or_create(protocol=endpoint.protocol,
+                                                                         host=endpoint.host,
+                                                                         path=endpoint.path,
+                                                                         query=endpoint.query,
+                                                                         fragment=endpoint.fragment,
+                                                                         product=t.engagement.product)
+
+                # calculate the difference
+                to_mitigate = set(original_items) - set(new_items)
+                for finding_id in to_mitigate:
+                    finding = Finding.objects.get(id=finding_id)
+                    finding.mitigated = datetime.combine(scan_date, datetime.now(tz=localtz).time())
+                    finding.mitigated_by = request.user
+                    finding.active = False
+                    finding.save()
+                    note = Notes(entry="Mitigated by %s re-upload." % scan_type,
+                                 author=request.user)
+                    note.save()
+                    finding.notes.add(note)
+                    mitigated_count += 1
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     '%s processed, a total of ' % scan_type + message(finding_count, 'finding',
+                                                                                       'processed'),
+                                     extra_tags='alert-success')
+                if finding_added_count > 0:
+                    messages.add_message(request,
+                                         messages.SUCCESS,
+                                         'A total of ' + message(finding_added_count, 'finding',
+                                                                 'added') + ', that are new to scan.',
+                                         extra_tags='alert-success')
+                if reactivated_count > 0:
+                    messages.add_message(request,
+                                         messages.SUCCESS,
+                                         'A total of ' + message(reactivated_count, 'finding',
+                                                                 'reactivated') + ', that are back in scan results.',
+                                         extra_tags='alert-success')
+                if mitigated_count > 0:
+                    messages.add_message(request,
+                                         messages.SUCCESS,
+                                         'A total of ' + message(mitigated_count, 'finding',
+                                                                 'mitigated') + '. Please manually verify each one.',
+                                         extra_tags='alert-success')
+                return HttpResponseRedirect(reverse('view_test', args=(t.id,)))
+            except SyntaxError:
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     'There appears to be an error in the XML report, please check and try again.',
+                                     extra_tags='alert-danger')
 
     return render(request,
-                  'dojo/add_nessus_scan.html',
+                  'dojo/import_scan_results.html',
                   {'form': form,
-                   'eid': eng.id,
-                   'breadcrumbs': get_breadcrumbs(title="Upload a Nessus scan",
-                                                  obj=eng,
+                   'eid': engagement.id,
+                   'additional_message': additional_message,
+                   'breadcrumbs': get_breadcrumbs(title="Re-upload a %s" % scan_type,
+                                                  obj=t,
                                                   user=request.user)})
 
 
-"""
-Greg
-status: in production
-Charles magic.
-"""
-
-
-def process_nessus_scan_file(filename, eid, user, scan_date, min_sev):
-    first = True
-    dat = {}
-
-    e = Engagement.objects.get(id=eid)
-    time = scan_date
-
-    try:
-        tt = Test_Type.objects.get(name="Nessus Scan")
-    except Test_Type.DoesNotExist, e:
-        tt = Test_Type(name="Nessus Scan")
-        tt.full_clean()
-        tt.save()
-    # will save in development environment
-    try:
-        environment = Development_Environment.objects.get(name="Development")
-    except Development_Environment.DoesNotExist, e:
-        environment = Development_Environment(name="Development")
-        environment.full_clean()
-        environment.save()
-    t = Test(engagement=e, test_type=tt, target_start=time,
-             target_end=time, environment=environment)
-    t.full_clean()
-    t.save()
-
-    content = open(filename, "rb").read().replace("\r", "\n")
-    # content = re.sub("\"(.*?)\n(.*?)\"", "\"\1\2\"", content)
-    # content = re.sub("(?<=\")\n", "\\\\n", content)
-    with open("%s-filtered" % filename, "wb") as out:
-        out.write(content)
-        out.close()
-
-    with open("%s-filtered" % filename, "rb") as scan_file:
-        reader = csv.reader(scan_file,
-                            lineterminator="\n",
-                            quoting=csv.QUOTE_ALL)
-        for row in reader:
-            if first:
-                heading = row
-                first = False
-                continue
-
-            dat = {}
-            for h in ["severity", "endpoint",
-                      "title", "description",
-                      "mitigation", "references",
-                      "impact", "plugin_output", "port"]:
-                dat[h] = None
-
-            for i, var in enumerate(row):
-                if not var:
-                    continue
-
-                var = re.sub("(\A(\\n)+|(\\n)+\Z|\\r)", "", var)
-                var = re.sub("(\\n)+", "\n", var)
-
-                if heading[i] == "CVE":
-                    if re.search("(CVE|CWE)", var) is None:
-                        var = "CVE-%s" % str(var)
-                    if dat['references'] is not None:
-                        dat['references'] = var + "\n" + dat['references']
-                    else:
-                        dat['references'] = var + "\n"
-                elif heading[i] == "Risk":
-                    if re.match("None", var) or not var:
-                        dat['severity'] = "Info"
-                    else:
-                        dat['severity'] = var
-                elif heading[i] == "Host":
-                    dat['endpoint'] = var
-                    endpoint, created = Endpoint.objects.get_or_create(host=var,
-                                                                       product=e.product,
-                                                                       protocol=None,
-                                                                       path=None,
-                                                                       query=None,
-                                                                       fragment=None)
-                elif heading[i] == "Port":
-                    if var is not "None":
-                        if dat['description'] is not None:
-                            dat['description'] = "Ports:"
-                            + var + "\n" + dat['description']
-                        else:
-                            dat['description'] = "Ports:" + var + "\n"
-
-                        dat['port'] = var
-                    else:
-                        dat['port'] = 'n/a'
-
-                elif heading[i] == "Name":
-                    dat['title'] = var
-                elif heading[i] == "Synopsis":
-                    dat['description'] = var
-                elif heading[i] == "Description":
-                    dat['impact'] = var
-                elif heading[i] == "Solution":
-                    dat['mitigation'] = var
-                elif heading[i] == "See Also":
-                    if dat['references'] is not None:
-                        dat['references'] += var
-                    else:
-                        dat['references'] = var
-                elif heading[i] == "Plugin Output":
-                    dat['plugin_output'] = "\nPlugin output(" + \
-                                           dat['endpoint'] + "):" + str(var) + "\n"
-
-            if not dat['severity']:
-                dat['severity'] = "Info"
-            if not dat['title']:
-                continue
-
-            if SEVERITIES[dat['severity']] > SEVERITIES[min_sev]:
-                continue
-
-            dup_find = Finding.objects.filter(test=t, title=dat['title'])
-            if dup_find:
-                find = dup_find[0]
-                if not re.search(dat['endpoint'], find.endpoint):
-                    find.endpoint += "\n" + dat['endpoint'] + ":" + dat['port']
-                if (dat['plugin_output'] is not None
-                    and find.description.find(dat['plugin_output']) == -1):
-                    find.description += "\n" + dat['plugin_output']
-
-            else:
-                if dat['plugin_output'] is not None:
-                    dat['description'] = dat['description'] + \
-                                         dat['plugin_output']
-                find = Finding(title=dat['title'],
-                               test=t,
-                               active=False,
-                               verified=False, description=dat['description'],
-                               severity=dat['severity'],
-                               numerical_severity=get_numerical_severity(dat[
-                                                                             'severity']),
-                               mitigation=dat['mitigation'],
-                               impact=dat['impact'],
-                               references=dat['references'],
-                               url=dat['endpoint'], endpoint=dat['endpoint'],
-                               date=time, reporter=user)
-
-            find.clean()
-            find.save()
-            if endpoint:
-                find.endpoints.add(endpoint)
-    os.unlink(filename)
-    os.unlink("%s-filtered" % filename)
-
-
-def process_veracode_file(filename, eid, user, scan_date, min_sev):
-    vscan = ElementTree.parse(filename)
-    root = vscan.getroot()
-
-    if 'https://www.veracode.com/schema/reports/export/1.0' not in str(root):
-        # version not supported
-        os.unlink(filename)
-        raise NamespaceErr('This version of Veracode report is not supported.  '
-                           'Please make sure the export is formatted using the '
-                           'https://www.veracode.com/schema/reports/export/1.0 schema.')
-
-    e = Engagement.objects.get(id=eid)
-
-    time = scan_date
-
-    tt, t_created = Test_Type.objects.get_or_create(name="Veracode Scan")
-    # will save in development environment
-    environment, env_created = Development_Environment.objects.get_or_create(name="Development")
-
-    t = Test(engagement=e, test_type=tt, target_start=time,
-             target_end=time, environment=environment)
-    t.full_clean()
-    t.save()
-
-    dupes = {}
-    finding_count = 0
-
-    for severity in root.iter('{https://www.veracode.com/schema/reports/export/1.0}severity'):
-        if severity.attrib['level'] == '5':
-            sev = 'Critical'
-            if SEVERITIES[min_sev] < 0:
-                continue
-        elif severity.attrib['level'] == '4':
-            sev = 'High'
-            if SEVERITIES[min_sev] < 1:
-                continue
-        elif severity.attrib['level'] == '3':
-            sev = 'Medium'
-            if SEVERITIES[min_sev] < 2:
-                continue
-        elif severity.attrib['level'] == '2':
-            sev = 'Low'
-            if SEVERITIES[min_sev] < 3:
-                continue
-        else:
-            sev = 'Info'
-            if SEVERITIES[min_sev] < 4:
-                continue
-
-        for category in severity.iter('{https://www.veracode.com/schema/reports/export/1.0}category'):
-            recommendations = category.find('{https://www.veracode.com/schema/reports/export/1.0}recommendations')
-            mitigation = ''
-            for para in recommendations.iter('{https://www.veracode.com/schema/reports/export/1.0}para'):
-                mitigation += para.attrib['text'] + '\n\n'
-                for bullet in para.iter('{https://www.veracode.com/schema/reports/export/1.0}bulletitem'):
-                    mitigation += "    - " + bullet.attrib['text'] + '\n'
-
-                for flaw in category.iter('{https://www.veracode.com/schema/reports/export/1.0}flaw'):
-                    dupe_key = sev + flaw.attrib['cweid'] + flaw.attrib['module'] + flaw.attrib['type']
-
-                    if dupe_key in dupes:
-                        pass
-                    else:
-                        dupes[dupe_key] = True
-                        description = flaw.attrib['description'].replace('. ', '.\n')
-                        if 'References:' in description:
-                            references = description[description.index('References:') + 13:].replace(')  ', ')\n')
-                        else:
-                            references = 'None'
-
-                        if 'date_first_occurrence' in flaw.attrib:
-                            find_date = datetime.strptime(flaw.attrib['date_first_occurrence'], '%Y-%m-%d %H:%M:%S %Z')
-                        else:
-                            find_date = scan_date
-
-                        find = Finding(title=flaw.attrib['categoryname'],
-                                       cwe=int(flaw.attrib['cweid']),
-                                       test=t,
-                                       active=False,
-                                       verified=False,
-                                       description=description + "\n\nVulnerable Module: " + flaw.attrib[
-                                           'module'] + ' Type: ' + flaw.attrib['type'],
-                                       severity=sev,
-                                       numerical_severity=get_numerical_severity(sev),
-                                       mitigation=mitigation,
-                                       impact='CIA Impact: ' + flaw.attrib['cia_impact'].upper(),
-                                       references=references,
-                                       url='N/A',
-                                       endpoint=None,
-                                       date=find_date,
-                                       reporter=user)
-
-                        find.clean()
-                        find.save()
-                        finding_count += 1
-
-    os.unlink(filename)
-    return finding_count
+def message(count, noun, verb):
+    return ('{} ' + noun + '{} {} ' + verb).format(count, pluralize(count), pluralize(count, 'was,were'))
 
 
 """
@@ -2303,33 +1988,6 @@ def upload_risk(request, eid):
                        title="Upload Risk Acceptance",
                        obj=eng,
                        user=request.user)})
-
-
-"""
-Greg
-status: in produciton
-file upload
-"""
-
-
-def handle_uploaded_file(f, eid, user, scan_date, min_sev):
-    t = int(time.time())
-    fname = settings.DOJO_ROOT + '/scans/scan-%s-%d' % (eid, t)
-    with open(fname, 'wb+') as destination:
-        for chunk in f.chunks():
-            destination.write(chunk)
-        destination.close()
-    process_nessus_scan_file(fname, eid, user, scan_date, min_sev)
-
-
-def handle_veracode_file(f, eid, user, scan_date, min_sev):
-    t = int(time.time())
-    fname = settings.DOJO_ROOT + '/scans/scan-%s-%d' % (eid, t)
-    with open(fname, 'wb+') as destination:
-        for chunk in f.chunks():
-            destination.write(chunk)
-        destination.close()
-    return process_veracode_file(fname, eid, user, scan_date, min_sev)
 
 
 def handle_uploaded_threat(f, eng):
@@ -2497,10 +2155,10 @@ def view_test(request, tid):
         Q(severity="High") |
         Q(severity="Medium") |
         Q(severity="Low") |
-        Q(severity="Info")).order_by("numerical_severity", "-active")
+        Q(severity="Info")).order_by("numerical_severity", "-active", "title")
     if request.method == 'POST':
         form = NoteForm(request.POST)
-        if (form.is_valid()):
+        if form.is_valid():
             new_note = form.save(commit=False)
             new_note.author = request.user
             new_note.date = datetime.now(tz=localtz)
@@ -2515,10 +2173,11 @@ def view_test(request, tid):
         form = NoteForm()
 
     fpage = get_page_items(request, findings, 25)
+    show_re_upload = any(test.test_type.name in code for code in ImportScanForm.SCAN_TYPE_CHOICES)
     return render(request, 'dojo/view_test.html',
                   {'test': test, 'findings': fpage,
                    'form': form, 'notes': notes,
-                   'person': person, 'request': request,
+                   'person': person, 'request': request, "show_re_upload": show_re_upload,
                    'breadcrumbs': get_breadcrumbs(obj=test, user=request.user)})
 
 
@@ -2754,7 +2413,7 @@ def view_risk(request, eid, raid):
 
     if request.method == 'POST':
         note_form = NoteForm(request.POST)
-        if (note_form.is_valid()):
+        if note_form.is_valid():
             new_note = note_form.save(commit=False)
             new_note.author = request.user
             new_note.date = datetime.now(tz=localtz)
@@ -3029,7 +2688,7 @@ def edit_product(request, pid):
     prod = Product.objects.get(pk=pid)
     if request.method == 'POST':
         form = ProductForm(request.POST, instance=prod)
-        if (form.is_valid()):
+        if form.is_valid():
             form.save()
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -3105,7 +2764,7 @@ def engagement(request):
 def new_engagement(request):
     if request.method == 'POST':
         form = EngForm2(request.POST)
-        if (form.is_valid()):
+        if form.is_valid():
             new_eng = form.save()
             new_eng.lead = request.user
             new_eng.save()
@@ -3130,7 +2789,7 @@ def edit_engagement(request, eid):
     eng = Engagement.objects.get(pk=eid)
     if request.method == 'POST':
         form = EngForm2(request.POST, instance=eng)
-        if (form.is_valid()):
+        if form.is_valid():
             form.save()
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -3185,7 +2844,7 @@ def new_eng_for_app(request, pid):
     prod = Product.objects.get(id=pid)
     if request.method == 'POST':
         form = EngForm(request.POST)
-        if (form.is_valid()):
+        if form.is_valid():
             new_eng = form.save(commit=False)
             new_eng.product = prod
             if new_eng.threat_model:
@@ -3215,7 +2874,7 @@ def add_tests(request, eid):
     eng = Engagement.objects.get(id=eid)
     if request.method == 'POST':
         form = TestForm(request.POST)
-        if (form.is_valid()):
+        if form.is_valid():
             new_test = form.save(commit=False)
             new_test.engagement = eng
             new_test.save()
@@ -3246,24 +2905,11 @@ def calc(request, last_month):
                                | Q(severity="Low"))
     count = 0
     for find in findings:
-        count = count + 1
+        count += 1
         if count >= last_month:
             find.date = datetime.now(tz=localtz).date()
             find.save()
     return HttpResponseRedirect(reverse('login'))
-
-
-def get_numerical_severity(s):
-    if s == 'Critical':
-        return 'S0'
-    elif s == 'High':
-        return 'S1'
-    elif s == 'Medium':
-        return 'S2'
-    elif s == 'Low':
-        return 'S3'
-    else:
-        return 'S4'
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -3278,7 +2924,7 @@ def add_findings(request, tid):
             new_finding = form.save(commit=False)
             new_finding.test = test
             new_finding.reporter = request.user
-            new_finding.numerical_severity = get_numerical_severity(
+            new_finding.numerical_severity = Finding.get_numerical_severity(
                 new_finding.severity)
             if new_finding.false_p or new_finding.active is False:
                 new_finding.mitigated = datetime.now(tz=localtz)
@@ -3330,7 +2976,7 @@ def add_temp_finding(request, tid, fid):
             new_finding = form.save(commit=False)
             new_finding.test = test
             new_finding.reporter = request.user
-            new_finding.numerical_severity = get_numerical_severity(
+            new_finding.numerical_severity = Finding.get_numerical_severity(
                 new_finding.severity)
             new_finding.date = datetime.today()
             if new_finding.false_p or new_finding.active is False:
@@ -3377,7 +3023,7 @@ def edit_finding(request, fid):
         if form.is_valid():
             new_finding = form.save(commit=False)
             new_finding.test = finding.test
-            new_finding.numerical_severity = get_numerical_severity(
+            new_finding.numerical_severity = Finding.get_numerical_severity(
                 new_finding.severity)
             if new_finding.false_p or new_finding.active is False:
                 new_finding.mitigated = datetime.now(tz=localtz)
@@ -3694,10 +3340,10 @@ def normalize_query(query_string,
 
 
 def build_query(query_string, search_fields):
-    ''' Returns a query, that is a combination of Q objects. That combination
+    """ Returns a query, that is a combination of Q objects. That combination
     aims to search keywords within a model by testing the given search fields.
 
-    '''
+    """
     query = None  # Query to search for every search term
     terms = normalize_query(query_string)
     for term in terms:
@@ -3717,8 +3363,9 @@ def build_query(query_string, search_fields):
     return query
 
 
-def template_search_helper(
-        fields=['title', 'description', ], query_string=None):
+def template_search_helper(fields=None, query_string=None):
+    if not fields:
+        fields = ['title', 'description', ]
     findings = Finding.objects.filter(is_template=True).distinct()
 
     if not query_string:
@@ -3911,7 +3558,6 @@ def simple_search(request):
                 q.add(Q(endpoint__icontains=ip) | Q(references__icontains=ip),
                       Q.OR)
 
-            dash_query = ''
             for dash in dashes:
                 dash_query = dash
                 q.add(Q(title__icontains=dash_query) |
@@ -4065,7 +3711,7 @@ def add_product_to_product_type(request, ptid):
     return render(request, 'dojo/new_product.html',
                   {'form': form,
                    'breadcrumbs': get_breadcrumbs(
-                       title="New %s Product" % (pt.name),
+                       title="New %s Product" % pt.name,
                        user=request.user)})
 
 
