@@ -27,6 +27,7 @@ setup(
         'xhtml2pdf>=0.0.6',
         'reportlab',
         'django-auditlog==0.3.1',
-        'vobject'],
+        'vobject',
+        'html2text'],
     url='https://github.com/rackerlabs/django-DefectDojo'
 )

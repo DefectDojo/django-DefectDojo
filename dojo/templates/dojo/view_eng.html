@@ -202,23 +202,8 @@
                                     </a>
                                 </li>
                                 <li role="presentation">
-                                    <a class="" href="{% url 'add_burp_scan' eng.id %}">
-                                        <i class="fa fa-upload"></i> Upload Burp Scan
-                                    </a>
-                                </li>
-                                <li role="presentation">
-                                    <a class="" href="{% url 'add_nessus_scan' eng.id %}">
-                                        <i class="fa fa-upload"></i> Upload Nessus Scan
-                                    </a>
-                                </li>
-                                <li role="presentation">
-                                    <a class="" href="{% url 'add_nexpose_scan' eng.id %}">
-                                        <i class="fa fa-upload"></i> Upload Nexpose Scan
-                                    </a>
-                                </li>
-                                <li role="presentation">
-                                    <a class="" href="{% url 'add_veracode_scan' eng.id %}">
-                                        <i class="fa fa-upload"></i> Upload Veracode Scan
+                                    <a class="" href="{% url 'import_scan_results' eng.id %}">
+                                        <i class="fa fa-upload"></i> Import Scan Results
                                     </a>
                                 </li>
                             </ul>

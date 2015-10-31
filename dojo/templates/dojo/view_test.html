@@ -16,34 +16,48 @@
                     <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                         <li role="presentation">
                             <a href="{% url 'edit_test' test.id %}">
-                                <i class="fa fa-pencil-square-o" ></i> Edit Test
+                                <i class="fa fa-pencil-square-o"></i> Edit Test
                             </a>
                         </li>
+                        {% if show_re_upload %}
+                            <li role="presentation">
+                                <a href="{% url 're_import_scan_results' test.id %}">
+                                    <i class="fa fa-upload"></i> Re-Upload Scan
+                                </a>
+                            </li>
+                        {% endif %}
                         <li role="presentation">
                             <a href="{% url 'add_findings' test.id %}">
-                                <i class="fa fa-bug" ></i> Add Findings
+                                <i class="fa fa-bug"></i> Add Findings
                             </a>
                         </li>
                         <li role="presentation">
                             <a href="#add_notes">
-                                <i class="fa fa-comments" ></i> Add Notes
+                                <i class="fa fa-comments"></i> Add Notes
                             </a>
                         </li>
                         <li role="presentation">
                             <a href="{% url 'test_report' test.id %}">
-                                <i class="fa fa-file-text-o" ></i> Generate Report
+                                <i class="fa fa-file-text-o"></i> Generate Report
                             </a>
                         </li>
                         <li role="presentation">
                             <a href="{% url 'test_ics' test.id %}">
-                                <i class="fa fa-calendar-plus-o" ></i> Add To Calendar
+                                <i class="fa fa-calendar-plus-o"></i> Add To Calendar
                             </a>
                         </li>
                         <li role="presentation">
                             <a href="{% url 'action_history' test|content_type test.id %}">
-                                <i class="fa fa-history" ></i> View History
+                                <i class="fa fa-history"></i> View History
                             </a>
                         </li>
+                        <li role="separator" class="divider"></li>
+                        <li role="presentation">
+                            <a class="text-danger" href="{% url 'delete_test' test.id %}">
+                                <i class="fa fa-trash"></i> Delete Test
+                            </a>
+                        </li>
+
                     </ul>
                 </div>
             </div>
@@ -114,14 +128,14 @@
                 <tbody>
                 {% for finding in findings %}
                     <tr class="{% if finding.active %}active_finding{% else %}inactive_finding{% endif %}">
-                    <td><a href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a></td>
-                    <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
-                        <span class="text-error">
-                    {% else %}<span>{% endif %}{{ finding.severity }}</span></td>
-                    <td>{{ finding.reporter.username }}</td>
-                    <td>{{ finding.mitigated }}</td>
-                    <td>{{ finding.verified }}</td>
-                    <td>{{ finding.active }}</td>
+                        <td><a href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a></td>
+                        <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
+                            <span class="text-error">
+                        {% else %}<span>{% endif %}{{ finding.severity }}</span></td>
+                        <td>{{ finding.reporter.username }}</td>
+                        <td>{{ finding.mitigated }}</td>
+                        <td>{{ finding.verified }}</td>
+                        <td>{{ finding.active }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>
