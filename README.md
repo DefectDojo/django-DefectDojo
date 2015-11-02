@@ -22,6 +22,10 @@ You can also log in as a product owner / non-staff user:
 
 ![Product owner](https://inventropy.us/dd/owner.png)
 
+# Additional Documentation
+
+For additional documentation you can visit our [Read the Docs site](http://defectdojo.readthedocs.org/).
+
 # Installation
 
 ### [Debian or RHEL-based Install Script](./doc/install_bash.md)
