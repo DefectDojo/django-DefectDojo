@@ -1181,6 +1181,7 @@ def metrics(request, mtype):
 
     if 'view' in request.GET and 'dashboard' == request.GET['view']:
         punchcard, ticks, highest_count = get_punchcard_data(findings, weeks_between, start_date)
+        page_name = (settings.TEAM_NAME if settings.TEAM_NAME else "") + " Metrics"
         template = 'dojo/dashboard-metrics.html'
 
     return render(request, template, {

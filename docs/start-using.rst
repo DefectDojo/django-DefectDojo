@@ -4,21 +4,6 @@ Usage Examples
 DefectDojo is designed to make tracking testing engagements simple and intuitive. The :doc:`models` page will help you
 understand the terminology we use below, so we recommend taking a look at that first.
 
-.. _toc:
-
-Table of Contents
------------------
-
-* :ref:`create-new-product-type`.
-* :ref:`Create a new Test Type`.
-* :ref:`Create a new Development Environment`.
-* :ref:`Create a new Engagement`.
-* :ref:`Adding Tests to an Engagement`.
-* :ref:`Adding Findings to a Test`.
-* :ref:`Viewing an Engagement`.
-* :ref:`Tracking your Engagements in the calendar`.
-* :ref:`Tracking metrics for your Products`.
-
 .. _create-new-product-type:
 
 Create a new Product Type
