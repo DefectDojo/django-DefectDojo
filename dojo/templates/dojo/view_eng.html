@@ -57,7 +57,12 @@
         <div class="panel-heading">
             <div class="clearfix">
                 <h3 class="pull-left">
-                    {{ eng.product }} <span class="text-muted">{{ eng.status }}</span>
+                    {% if eng.name %}
+                        {{ eng.name }}
+                    {% else %}
+                        Engagement for {{ end.product }}
+                    {% endif %}
+                    <span class="text-muted">{{ eng.status }}</span>
                 </h3>
 
                 <div class="dropdown pull-right">
