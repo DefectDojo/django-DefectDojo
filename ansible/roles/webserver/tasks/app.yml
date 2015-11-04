@@ -148,6 +148,21 @@
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
+- name: Run Django 'loaddata' command
+  django_manage: command='loaddata product_type' app_path={{ dd_install_dir }} virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ dd_user }}'
+
+- name: Run Django 'loaddata' command
+  django_manage: command='loaddata test_type' app_path={{ dd_install_dir }} virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ dd_user }}'
+
+- name: Run Django 'loaddata' command
+  django_manage: command='loaddata development_environment' app_path={{ dd_install_dir }} virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ dd_user }}'
+
 - name: Create Django superuser
   shell: echo "from django.contrib.auth.models import User; User.objects.create_superuser('{{ dd_super_user }}', '{{ dd_super_user_email }}', '{{ dd_super_user_pass }}')" | {{ venv_dir }}/bin/python {{ dd_install_dir }}/manage.py shell && touch /home/{{ dd_user }}/.supercreated
   args:

@@ -95,11 +95,17 @@ if python -c 'import sys; print sys.real_prefix' 2>/dev/null; then
     python manage.py makemigrations dojo
     python manage.py migrate
     python manage.py syncdb
+    python manage.py loaddata product_type
+    python manage.py loaddata test_type
+    python manage.py loaddata development_environment
 else
     sudo pip install .
     sudo python manage.py makemigrations dojo
     sudo python manage.py migrate
     sudo python manage.py syncdb
+    sudo python manage.py loaddata product_type
+    sudo python manage.py loaddata test_type
+    sudo python manage.py loaddata development_environment
 fi
 
 if [[ "$USER" == "root" ]]; then
