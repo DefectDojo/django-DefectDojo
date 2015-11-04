@@ -16,9 +16,14 @@ $(function () {
     $('#side-menu').metisMenu(
         {doubleTapToGo: false}
     );
+
+    // auto focus on first form field
+    $('#base-content form:first *:input[type!=hidden]:first').not('.filters :input, textarea#id_entry').focus();
+
+
 });
 
-function emptyEndpoints(win){
+function emptyEndpoints(win) {
     var name = windowname_to_id(win.name);
     var elem = document.getElementById(name);
     $(elem).empty();
@@ -35,14 +40,14 @@ function dismissAddAnotherPopupDojo(win, newId, newRepr) {
     if (elem) {
         var elemName = elem.nodeName.toUpperCase();
         if (elemName == 'SELECT') {
-            var s = "#"+elem.id+" option[value='"+newId+"']";
+            var s = "#" + elem.id + " option[value='" + newId + "']";
             if ($(s).length <= 0) {
                 o = new Option(newRepr, newId);
                 elem.options[elem.options.length] = o;
                 o.selected = true
                 $(o).attr('selected', 'selected');
             }
-            else{
+            else {
                 $(s).attr('selected', 'selected');
             }
         } else if (elemName == 'INPUT') {
