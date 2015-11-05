@@ -134,7 +134,9 @@ class NessusXMLParser(object):
         for report in root.iter("Report"):
             for host in report.iter("ReportHost"):
                 ip = host.attrib['name']
-                fqdn = host.find(".//HostProperties/tag[@name='host-fqdn']").text
+                fqdn = host.find(".//HostProperties/tag[@name='host-fqdn']").text if host.find(
+                    ".//HostProperties/tag[@name='host-fqdn']") is not None else ""
+
                 for item in host.iter("ReportItem"):
                     # if item.attrib["svc_name"] == "general":
                     #     continue
@@ -152,7 +154,6 @@ class NessusXMLParser(object):
                     severity = item.find("risk_factor").text
                     if severity == "None":
                         severity = "Info"
-
 
                     impact = item.find("description").text + "\n\n"
                     if item.find("cvss_vector") is not None:
@@ -195,11 +196,8 @@ class NessusXMLParser(object):
                         find.unsaved_endpoints = list()
                         dupes[dupe_key] = find
                     if port:
-                        find.unsaved_endpoints.append(Endpoint(host=ip+":"+port))
+                        find.unsaved_endpoints.append(Endpoint(host=ip + ":" + port))
                     else:
                         find.unsaved_endpoints.append(Endpoint(host=ip))
                     find.unsaved_endpoints.append(Endpoint(host=fqdn))
         self.items = dupes.values()
-
-
-
