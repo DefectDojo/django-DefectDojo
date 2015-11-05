@@ -135,7 +135,7 @@ class NessusXMLParser(object):
             for host in report.iter("ReportHost"):
                 ip = host.attrib['name']
                 fqdn = host.find(".//HostProperties/tag[@name='host-fqdn']").text if host.find(
-                    ".//HostProperties/tag[@name='host-fqdn']") is not None else ""
+                    ".//HostProperties/tag[@name='host-fqdn']") is not None else None
 
                 for item in host.iter("ReportItem"):
                     # if item.attrib["svc_name"] == "general":
@@ -199,5 +199,6 @@ class NessusXMLParser(object):
                         find.unsaved_endpoints.append(Endpoint(host=ip + ":" + port))
                     else:
                         find.unsaved_endpoints.append(Endpoint(host=ip))
-                    find.unsaved_endpoints.append(Endpoint(host=fqdn))
+                    if fqdn is not None:
+                        find.unsaved_endpoints.append(Endpoint(host=fqdn))
         self.items = dupes.values()
