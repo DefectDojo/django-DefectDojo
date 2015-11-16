@@ -2,10 +2,21 @@
 {% load navigation_tags %}
 {% block content %}
     <div class="row">
-        <div class="col-md-10">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading tight">
+                    <h3 class="has-filters">
+                        Closed Findings
+                        <div class="dropdown pull-right"></div>
+                    </h3>
+                </div>
+                <div id="the-filters" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
+                    {% include "dojo/filter_snippet.html" with form=filtered.form %}
+                </div>
+            </div>
             {% if findings %}
                 <div class="clearfix">
-                    <h3 class="pull-left">Closed Findings</h3>{% include "dojo/paging_snippet.html" with page=findings page_size=True%}
+                    {% include "dojo/paging_snippet.html" with page=findings page_size=True%}
                 </div>
                 <div class="table-responsive panel panel-default">
                     <table id="open_findings"
@@ -24,7 +35,7 @@
                         {% for finding in findings %}
                             <tr>
                                 <td><a title="{{ finding.title }}"
-                                                      href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars:50 }}</a>
+                                                      href="{% url 'view_finding' finding.id %}">{{ finding.title}}</a>
                                 </td>
                                 <td class="nowrap">{{ finding.date }}</td>
                                 <td class="">{{ finding.mitigated.date }}</td>
@@ -34,33 +45,19 @@
                                 {% else %}<p>{% endif %}{{ finding.severity }}</p></td>
                                 <td><a
                                         href="{% url 'view_product' finding.test.engagement.product.id %}"
-                                        title="{{ finding.test.engagement.product }}">{{ finding.test.engagement.product|truncatechars:15 }}</a>
+                                        title="{{ finding.test.engagement.product }}">{{ finding.test.engagement.product}}</a>
                                 </td>
                             </tr>
                         {% endfor %}
                         </tbody>
                     </table>
                 </div>
-                {% include "dojo/paging_snippet.html" with page=findings page_size=True%}
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=findings page_size=True%}
+                </div>
             {% else %}
                 No findings found.
             {% endif %}
-        </div>
-        <div class="col-md-2">
-            <div class="panel panel-default filters">
-                {% if filtered.form %}
-                    <div class="panel-heading">Filters</div>
-                    <form method="get" class="panel-body">
-                        {{ filtered.form.as_p }}
-                        <div class="centered">
-                            <button class="btn btn-sm btn-primary">
-                                <i class="fa fa-filter"></i> Apply
-                            </button><br/><br/>
-                            <a href="{% url 'closed_findings' %}"> [Clear Filters] </a>
-                        </div>
-                    </form>
-                {% endif %}
-            </div>
         </div>
     </div>
 
@@ -79,4 +76,5 @@
             });
         });
     </script>
+    {% include "dojo/filter_js_snippet.html" %}
 {% endblock %}

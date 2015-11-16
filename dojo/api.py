@@ -1,9 +1,8 @@
 # see tastypie documentation at http://django-tastypie.readthedocs.org/en
 import logging
-
 from django.conf import settings
 from tastypie import fields
-from tastypie.authentication import ApiKeyAuthentication
+from tastypie.authentication import ApiKeyAuthentication, MultiAuthentication, SessionAuthentication
 from tastypie.authorization import DjangoAuthorization
 from tastypie.authorization import Authorization
 from tastypie.exceptions import Unauthorized
@@ -11,9 +10,8 @@ from tastypie.constants import ALL
 from tastypie.resources import ModelResource
 from tastypie.serializers import Serializer
 from tastypie.validation import CleanedDataFormValidation
-
 from forms import ProductForm, EngForm2, TestForm, \
-    FindingForm, ScanSettingsForm
+    FindingForm, ScanSettingsForm, IncompleteFindingForm
 from dojo.models import Product, Engagement, Test, Finding, \
     User, ScanSettings, IPScan, Scan
 
@@ -28,6 +26,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 """
+
 
 class BaseModelResource(ModelResource):
     @classmethod
@@ -368,7 +367,7 @@ class TestResource(BaseModelResource):
         # disabled delete. Should not be allowed without fine authorization.
         detail_allowed_methods = ['get', 'post', 'put']
         queryset = Test.objects.all().order_by('target_end')
-        include_resource_uri = False
+        include_resource_uri = True
         filtering = {
             'id': ALL,
             'test_type': ALL,
@@ -431,10 +430,10 @@ class FindingResource(BaseModelResource):
             'reporter': ALL,
             'url': ALL,
         }
-        authentication = DojoApiKeyAuthentication()
+        authentication = MultiAuthentication(SessionAuthentication(), DojoApiKeyAuthentication())
         authorization = DjangoAuthorization()
         serializer = Serializer(formats=['json'])
-        validation = CleanedDataFormValidation(form_class=FindingForm)
+        validation = CleanedDataFormValidation(form_class=IncompleteFindingForm)
 
     def dehydrate(self, bundle):
         engagement = Engagement.objects.select_related('product'). \

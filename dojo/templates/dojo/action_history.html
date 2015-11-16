@@ -29,7 +29,9 @@
                         {% endfor %}
                     </table>
                 </div>
-                {% include "dojo/paging_snippet.html" with page=history %}
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=history %}
+                </div>
             {% else %}
                 <h5> No update history found for this object </h5>
             {% endif %}

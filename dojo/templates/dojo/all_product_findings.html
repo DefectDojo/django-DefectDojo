@@ -6,7 +6,8 @@
         <div class="col-md-10">
             {% if findings %}
                 <div class="clearfix">
-                    <h3 class="pull-left">Product Findings</h3>{% include "dojo/paging_snippet.html" with page=findings page_size=True%}
+                    <h3 class="pull-left">Product
+                        Findings</h3>{% include "dojo/paging_snippet.html" with page=findings page_size=True %}
                 </div>
                 <div class="table-responsive panel panel-default">
                     <table id="findings"
@@ -24,7 +25,7 @@
                         {% for finding in findings %}
                             <tr>
                                 <td><a title="{{ finding.title }}"
-                                                      href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars:60 }}</a>
+                                       href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars:60 }}</a>
                                 </td>
                                 <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
                                     <p class="text-error">
@@ -37,7 +38,9 @@
                         </tbody>
                     </table>
                 </div>
-                {% include "dojo/paging_snippet.html" with page=findings page_size=True%}
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=findings page_size=True %}
+                </div>
             {% else %}
                 No findings found for this product.
             {% endif %}
@@ -46,8 +49,10 @@
             <div class="filters panel panel-default">
                 <div class="panel-heading">Actions</div>
                 <div class="panel-body centered">
-                    {{ test.test_type }} <a class="btn btn-sm btn-primary" href="{% url 'product_report' pid %}?{{ request.GET.urlencode }}">
-                    Generate Report</a>
+                    {{ test.test_type }} <a class="btn btn-sm btn-primary"
+                                            href="{% url 'product_report' pid %}?{{ request.GET.urlencode }}">
+                    <i class="fa fa-file-text-o"></i> Report
+                </a>
                 </div>
                 {% if filtered.form %}
                     <div class="panel-heading">Filters</div>
@@ -56,7 +61,8 @@
                         <div class="centered">
                             <button class="btn btn-sm btn-primary">
                                 <i class="fa fa-filter"></i> Apply
-                            </button><br/><br/>
+                            </button>
+                            <br/><br/>
                             <a href="?" class=""> [Clear Filters] </a>
                         </div>
                     </form>

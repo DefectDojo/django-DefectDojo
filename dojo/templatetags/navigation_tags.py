@@ -2,17 +2,21 @@ from django import template
 from django.utils.safestring import mark_safe as safe
 
 from dojo.models import Product_Type
-
+from dojo.views import get_alerts
 
 register = template.Library()
 
 
 @register.inclusion_tag('alert_nav_items.html')
 def alert_nav_items(user):
-    from dojo.views import get_alerts
-
     alerts = get_alerts(user)
     return {'alerts': alerts[:12]}
+
+
+@register.simple_tag(takes_context=True)
+def alert_count(context):
+    count = len(get_alerts(context['request'].user))
+    return count if count > 0 else ''
 
 
 @register.inclusion_tag('pt_nav_items.html')

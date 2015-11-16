@@ -3,10 +3,37 @@
 {% block content %}
     {% load display_tags %}
     <div class="row">
-        <div class="col-md-10">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading tight">
+                    <h3 class="has-filters">
+                        {{ name }}
+                        <div class="dropdown pull-right">
+                            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                                    data-toggle="dropdown" aria-expanded="true">
+                                <span class="fa fa-wrench"></span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu"
+                                aria-labelledby="dropdownMenu1">
+                                {% if request.user.is_staff %}
+                                    <li role="presentation">
+                                        <a href="{% url 'add_user' %}">
+                                            <i class="fa fa-plus"></i> New User
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </h3>
+                </div>
+                <div id="the-filters" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
+                    {% include "dojo/filter_snippet.html" with form=filtered.form %}
+                </div>
+            </div>
             {% if users %}
                 <div class="clearfix">
-                    <h3 class="pull-left">{{ name }}</h3>{% include "dojo/paging_snippet.html" with page=users page_size=True%}
+                    {% include "dojo/paging_snippet.html" with page=users page_size=True%}
                 </div>
                 <div class="table-responsive panel panel-default">
                     <table id="users"
@@ -45,33 +72,16 @@
                         {% endfor %}
                     </table>
                 </div>
-                {% include "dojo/paging_snippet.html" with page=users page_size=True%}
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=users page_size=True%}
+                </div>
             {% else %}
                 <h5> No Users </h5>
             {% endif %}
         </div>
-        <div class="col-md-2">
-            <div class="filters panel panel-default">
-                {% if request.user.is_staff %}
-                    <div class="panel-heading">Actions</div>
-                    <div class="panel-body centered">
-                        <a class="btn btn-sm btn-success" href="{% url 'add_user' %}">
-                            <i class="fa fa-plus"></i> New User
-                        </a>
-                    </div>
-                {% endif %}
-                <div class="panel-heading">Filters</div>
-                <form method="get" class="panel-body">
-                    {{ filtered.form.as_p }}
-                    <div class="centered">
-                        <button class="btn btn-sm btn-primary">
-                            <i class="fa fa-filter"></i> Apply
-                        </button><br/><br/>
-                        <a href="{% url 'users' %}"> [Clear Filters] </a>
-                    </div>
-                </form>
-            </div>
-        </div>
     </div>
 
+{% endblock %}
+{% block postscript %}
+    {% include "dojo/filter_js_snippet.html" %}
 {% endblock %}

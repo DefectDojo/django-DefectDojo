@@ -412,7 +412,7 @@ class AcceptedFindingFilter(DojoFilter):
                    'endpoint', 'references', 'test', 'is_template',
                    'active', 'verified', 'out_of_scope', 'false_p',
                    'duplicate', 'thread_id', 'mitigated', 'notes',
-                   'numerical_severity', 'reporter', 'endpoints', 'last_reviewed']
+                   'numerical_severity', 'reporter', 'endpoints', 'last_reviewed', 'o']
 
     def __init__(self, *args, **kwargs):
         super(AcceptedFindingFilter, self).__init__(*args, **kwargs)
