@@ -3,7 +3,6 @@ from xml.etree import ElementTree
 import os
 import csv
 import re
-
 from dojo.models import Endpoint, Finding
 
 __author__ = 'jay7958'
@@ -31,6 +30,7 @@ class NessusCSVParser(object):
                     continue
 
                 dat = {}
+                endpoint = None
                 for h in ["severity", "endpoint",
                           "title", "description",
                           "mitigation", "references",
@@ -68,6 +68,7 @@ class NessusCSVParser(object):
                                 dat['description'] = "Ports:" + var + "\n"
 
                             dat['port'] = var
+                            endpoint.host += ":" + var
                         else:
                             dat['port'] = 'n/a'
 
@@ -97,6 +98,8 @@ class NessusCSVParser(object):
 
                 if dupe_key in dupes:
                     find = dupes[dupe_key]
+                    if dat['plugin_output'] is not None:
+                        find.description += dat['plugin_output']
                 else:
                     if dat['plugin_output'] is not None:
                         dat['description'] = dat['description'] + \
@@ -144,12 +147,14 @@ class NessusXMLParser(object):
                     port = None
                     if float(item.attrib["port"]) > 0:
                         port = item.attrib["port"]
-
                     description = ""
+                    plugin_output = None
                     if item.find("synopsis") is not None:
                         description = item.find("synopsis").text + "\n\n"
                     if item.find("plugin_output") is not None:
-                        description += "Plugin Output: " + item.find("plugin_output").text + "\n\n"
+                        plugin_output = "Plugin Output: " + ip + (
+                            (":" + port) if port is not None else "") + " " + item.find("plugin_output").text + "\n\n"
+                        description += plugin_output
 
                     severity = item.find("risk_factor").text
                     if severity == "None":
@@ -181,6 +186,8 @@ class NessusXMLParser(object):
 
                     if dupe_key in dupes:
                         find = dupes[dupe_key]
+                        if plugin_output is not None:
+                            find.description += plugin_output
                     else:
                         find = Finding(title=title,
                                        test=test,
@@ -195,10 +202,9 @@ class NessusXMLParser(object):
                                        cwe=cwe)
                         find.unsaved_endpoints = list()
                         dupes[dupe_key] = find
-                    if port:
-                        find.unsaved_endpoints.append(Endpoint(host=ip + ":" + port))
-                    else:
-                        find.unsaved_endpoints.append(Endpoint(host=ip))
+
+                    find.unsaved_endpoints.append(Endpoint(host=ip + (":" + port) if port is not None else ""))
+
                     if fqdn is not None:
                         find.unsaved_endpoints.append(Endpoint(host=fqdn))
         self.items = dupes.values()

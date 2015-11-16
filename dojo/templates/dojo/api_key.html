@@ -3,13 +3,13 @@
 
 {% block content %}
     <h2> {{ name }}</h2>
-    <p>Below is your current API Key, to regenerate click the button below.</p>
     <hr/>
     <p>Your current API key is <code>{{ key.key }}</code></p>
     <p>Your current API Authorization Header value is <code>ApiKey {{ user.username }}:{{ key.key }}</code></p>
     <p>Has your key been exposed? Are you ready for a new one?</p>
     <form action="{% url 'api_key' %}" method="post" class="inline-form">
         {% csrf_token %}
+        {{ form.as_p }}
         <input class="btn btn-primary" type="submit" value="Generate New Key"/>
     </form>
     <hr/>

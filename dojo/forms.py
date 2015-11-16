@@ -2,7 +2,6 @@ import collections
 from datetime import datetime, date
 import re
 from urlparse import urlsplit, urlunsplit
-
 from dateutil.relativedelta import relativedelta
 from django import forms
 from django.core import validators
@@ -11,7 +10,6 @@ from django.forms.widgets import Widget, Select
 from django.utils.dates import MONTHS
 from django.utils.safestring import mark_safe
 from pytz import timezone
-
 from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Scan, Endpoint
@@ -501,7 +499,7 @@ class AddFindingForm(forms.ModelForm):
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
     mitigation = forms.CharField(widget=forms.Textarea)
     impact = forms.CharField(widget=forms.Textarea)
-    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, label='Systems / Endpoints',
+    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
                                                widget=MultipleSelectWithPopPlusMinus(attrs={'size': '11'}))
     references = forms.CharField(widget=forms.Textarea, required=False)
 
@@ -539,7 +537,7 @@ class FindingForm(forms.ModelForm):
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
     mitigation = forms.CharField(widget=forms.Textarea)
     impact = forms.CharField(widget=forms.Textarea)
-    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, label='Systems / Endpoints',
+    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
                                                widget=MultipleSelectWithPopPlusMinus(attrs={'size': '11'}))
     references = forms.CharField(widget=forms.Textarea, required=False)
 
@@ -558,6 +556,27 @@ class FindingForm(forms.ModelForm):
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint')
+
+
+class IncompleteFindingForm(forms.ModelForm):
+    title = forms.CharField(required=True, max_length=1000)
+
+    class Meta:
+        model = Finding
+        order = ('title',)
+        exclude = (
+            'date', 'description', 'severity', 'reporter', 'mitigation',
+            'impact', 'endpoints', 'url', 'numerical_severity', 'endpoint')
+
+    def clean(self):
+        cleaned_data = super(IncompleteFindingForm, self).clean()
+        if 'title' in cleaned_data:
+            if len(cleaned_data['title']) <= 0:
+                raise forms.ValidationError("The title is required.")
+        else:
+            raise forms.ValidationError("The title is required.")
+
+        return cleaned_data
 
 
 class EditEndpointForm(forms.ModelForm):
@@ -893,3 +912,14 @@ class ProductTypeCountsForm(forms.Form):
                                           queryset=Product_Type.objects.all(),
                                           error_messages={
                                               'required': '*'})
+
+
+class APIKeyForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = User
+        exclude = ['username', 'first_name', 'last_name', 'email', 'is_active',
+                   'is_staff', 'is_superuser', 'password', 'last_login', 'groups',
+                   'date_joined', 'user_permissions']

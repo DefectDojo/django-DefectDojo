@@ -2,11 +2,41 @@
 {% load navigation_tags %}
 {% block content %}
     <div class="row">
-        <div class="col-md-10">
-            {% if pts %}
-                <div class="clearfix">
-                    <h3 class="pull-left">Product Types</h3>{% include "dojo/paging_snippet.html" with page=pts page_size=True%}
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading tight">
+                    <h3 class="has-filters">
+                        Product Type List
+                        <div class="dropdown pull-right">
+                            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                                    data-toggle="dropdown" aria-expanded="true">
+                                <span class="fa fa-wrench"></span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu"
+                                aria-labelledby="dropdownMenu1">
+                                {% if request.user.is_staff %}
+                                    <li role="presentation">
+                                        <a href="/product/type/add">
+                                            <i class="fa fa-plus"></i> Add Product Type
+                                        </a>
+                                    </li>
+                                {% endif %}
+
+                            </ul>
+                        </div>
+                    </h3>
                 </div>
+                <div id="the-filters" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
+                    {% include "dojo/filter_snippet.html" with form=ptl.form %}
+                </div>
+            </div>
+            {% if pts %}
+
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=pts page_size=True %}
+                </div>
+
                 <div class="panel panel-default table-responsive">
                     <table id="product_types"
                            class="tablesorter-bootstrap table table-bordered table-condensed table-striped">
@@ -31,18 +61,22 @@
                                 </td>
                                 {% if user.is_staff %}
                                     <td>
-                                        <a class="btn btn-sm btn-success"
-                                           href="{% url 'add_product_to_product_type' pt.id %}">
-                                            <i class="fa fa-plus"></i> Add Product
-                                        </a>
-                                        <a class="btn btn-sm btn-warning"
-                                           href="{% url 'edit_product_type' pt.id %}">
-                                            <i class="fa fa-pencil"></i> Edit Product Type
-                                        </a>
-                                        <a class="btn btn-sm btn-primary"
-                                           href="{% url 'product_type_report' pt.id %}">
-                                            <i class="fa fa-file-text-o"></i> Generate Report
-                                        </a>
+                                        <div class="centered">
+                                            <div class="btn-group" role="group">
+                                                <a class="btn btn-sm btn-success"
+                                                   href="{% url 'add_product_to_product_type' pt.id %}">
+                                                    <i class="fa fa-plus"></i> Add Product
+                                                </a>
+                                                <a class="btn btn-sm btn-warning"
+                                                   href="{% url 'edit_product_type' pt.id %}">
+                                                    <i class="fa fa-pencil"></i> Edit Product Type
+                                                </a>
+                                                <a class="btn btn-sm btn-primary"
+                                                   href="{% url 'product_type_report' pt.id %}">
+                                                    <i class="fa fa-file-text-o"></i> Report
+                                                </a>
+                                            </div>
+                                        </div>
                                     </td>
                                 {% endif %}
 
@@ -51,33 +85,12 @@
                         </tbody>
                     </table>
                 </div>
-                {% include "dojo/paging_snippet.html" with page=pts page_size=True%}
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=pts page_size=True %}
+                </div>
             {% else %}
                 <p>No product types found.</p>
             {% endif %}
-        </div>
-        <div class="col-md-2">
-            <div class="panel panel-default filters">
-                {% if request.user.is_staff %}
-                    <div class="panel-heading">Actions</div>
-                    <div class="panel-body centered">
-                            <a class="btn btn-sm btn-success" href="/product/type/add">
-                                <i class="fa fa-plus"></i> Add Product Type
-                            </a>
-                    </div>
-                {% endif %}
-                <div class="panel-heading">Filters</div>
-                <form method="get" class="panel-body">
-                    {{ ptl.form.as_p }}
-                    <div class="centered">
-                        <button class="btn btn-sm btn-primary">
-                            <i class="fa fa-filter"></i> Apply
-                        </button>
-                        <br/><br/>
-                        <a href="{% url 'product_type' %}" class="clear"> [Clear Filters] </a>
-                    </div>
-                </form>
-            </div>
         </div>
     </div>
 {% endblock %}
@@ -94,6 +107,7 @@
             });
         });
     </script>
+    {% include "dojo/filter_js_snippet.html" %}
 {% endblock %}
 
 

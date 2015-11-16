@@ -58,7 +58,9 @@
                         </tbody>
                     </table>
                 </div>
-                {% include "dojo/paging_snippet.html" with page=paged_findings %}
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=paged_findings %}
+                </div>
             {% else %}
                 No findings found.
             {% endif %}

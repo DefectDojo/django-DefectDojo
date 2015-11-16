@@ -3,7 +3,7 @@
 
     <nav class="pull-right">
         <ul class="pagination pagination-sm">
-            {% for num in page|paginate:3 %}
+            {% for num in page|paginate:5 %}
                 <li {% if num.is_current %}class="active"{% endif %}>
                     {% if num.page_number %}
                         <a href="?{% url_replace request parm_name num.page_number %}"> {{ num.display }}</a>
@@ -17,8 +17,8 @@
                     <!-- Split button -->
                     &nbsp;
                     <div class="btn-group">
-                        <button type="button" class="btn btn-sm btn-default">Page Size</button>
-                        <button type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <button type="button" class="btn btn-sm btn-primary">Page Size</button>
+                        <button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <span class="caret"></span>
                             <span class="sr-only">Toggle Dropdown</span>
                         </button>

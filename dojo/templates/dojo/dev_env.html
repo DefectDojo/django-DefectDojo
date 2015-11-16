@@ -2,10 +2,36 @@
 {% load navigation_tags %}
 {% block content %}
     <div class="row">
-        <div class="col-md-9">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading tight">
+                    <h3 class="has-filters">
+                        Development Environment List
+                        <div class="dropdown pull-right">
+                            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                                    data-toggle="dropdown" aria-expanded="true">
+                                <span class="fa fa-wrench"></span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu"
+                                aria-labelledby="dropdownMenu1">
+                                {% if request.user.is_staff %}
+                                    <li role="presentation">
+                                        <a href="{%  url 'add_dev_env' %}">
+                                            <i class="fa fa-plus"></i> New Dev Environment </a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </h3>
+                </div>
+                <div id="the-filters" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
+                    {% include "dojo/filter_snippet.html" with form=dts.form %}
+                </div>
+            </div>
             {% if devs %}
                 <div class="clearfix">
-                    <h3 class="pull-left">Development Environments</h3>{% include "dojo/paging_snippet.html" with page=devs page_size=True%}
+                    {% include "dojo/paging_snippet.html" with page=devs page_size=True%}
                 </div>
                 <div class="panel panel-default table-responsive">
                     <table id="test_types"
@@ -28,34 +54,14 @@
                         </tbody>
                     </table>
                 </div>
-                {% include "dojo/paging_snippet.html" with page=devs page_size=True%}
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=devs page_size=True%}
+                </div>
             {% else %}
                 <p>No development environments found.</p>
             {% endif %}
         </div>
-        <div class="col-md-3">
-            <div class="panel panel-default filters">
 
-                <div class="panel-heading">Actions</div>
-                <div class="panel-body centered">
-                    {% if request.user.is_staff %}
-                        <a class="btn btn-success btn-sm" href="{%  url 'add_dev_env' %}">
-                            <i class="fa fa-plus"></i> New Dev Environment </a>
-                    {% endif %}
-                </div>
-
-                <div class="panel-heading">Filters</div>
-                <form method="get" class="panel-body">
-                    {{ dts.form.as_p }}
-                    <div class="centered">
-                        <button class="btn btn-sm btn-primary">
-                            <i class="fa fa-filter"></i> Apply
-                        </button><br/><br/>
-                        <a href="{% url 'dev_env' %}" class="clear"> [Clear Filters] </a>
-                    </div>
-                </form>
-            </div>
-        </div>
     </div>
 {% endblock %}
 {% block postscript %}
@@ -71,6 +77,7 @@
             });
         });
     </script>
+    {% include "dojo/filter_js_snippet.html" %}
 {% endblock %}
 
 

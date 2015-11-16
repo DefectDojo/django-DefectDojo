@@ -40,7 +40,9 @@
                         {% endfor %}
                     </table>
                 </div>
-                {% include "dojo/paging_snippet.html" with page=paged_endpoints %}
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=paged_endpoints %}
+                </div>
             {% else %}
                 No endpoints found.
             {% endif %}

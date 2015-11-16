@@ -22,10 +22,10 @@
 
                 <div class="dropdown pull-right">
                     <div class="btn-group">
-                        <button class="btn btn-default clickable panel-collapsed">
+                        <button class="btn btn-primary clickable panel-collapsed">
                             <span><i class="fa fa-bar-chart"></i></span>
                         </button>
-                        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                 data-toggle="dropdown" aria-expanded="true">
                             <span class="fa fa-bars"></span>
                             <span class="caret"></span>
@@ -45,7 +45,7 @@
                             </li>
                             <li role="presentation">
                                 <a href="{% url 'product_report' prod.id %}">
-                                    <i class="fa fa-file-text-o"></i> Generate Report
+                                    <i class="fa fa-file-text-o"></i> Report
                                 </a>
                             </li>
                             {% if prod.endpoint_count > 0 %}
@@ -166,39 +166,48 @@
         </div>
     </div>
 
-    <div class="row">
-
-    </div>
 
 
     <div class="row">
-        <div class="col-md-4">
-            <div class="panel panel-default">
+        <div class="col-md-12">
+            <div class="panel panel-default table-responsive">
                 <div class="panel-heading">
-                    <b>Details</b>
+                    <h4>Details</h4>
                 </div>
-                <ul class="list-group">
-                    <li class="list-group-item"><b> Product Type: </b>{{ prod.prod_type }} </li>
-                    <li class="list-group-item"><b> Team Manager: </b> {{ prod.manager }} </li>
-                    <li class="list-group-item"><b> Product Manager: </b>{{ prod.prod_manager }} </li>
-                    <li class="list-group-item"><b> Tech Contact: </b> {{ prod.tech_contact }}</li>
-                    {% if prod.authorized_users.all %}
-                        <li class="list-group-item">
-                            <b>Authorized Users</b>
-                            <ul class="">
-                                {% for au in prod.authorized_users.all %}
-                                    <li class="">{{ au }}</li>
-                                {% endfor %}
-                            </ul>
-                        </li>
-                    {% endif %}
-                </ul>
+
+                <table class="table-striped table table-condensed table-hover centered">
+                    <tr>
+                        <th>Product Type</th>
+                        <th>Team Manager</th>
+                        <th>Product Manager</th>
+                        <th>Technical Contact</th>
+                        <th>Authorized Users</th>
+                    </tr>
+                    <tr>
+                        <td>{{ prod.prod_type }}</td>
+                        <td>{{ prod.manager | default:"Unknown" }}</td>
+                        <td>{{ prod.prod_manager | default:"Unknown" }}</td>
+                        <td>{{ prod.tech_contact | default:"Unknown" }}</td>
+                        <td>
+                            {% if prod.authorized_users.all %}
+                                <ul class="no-bullets">
+                                    {% for au in prod.authorized_users.all %}
+                                        <li class="">{{ au }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+
             </div>
         </div>
-        <div class="col-md-8">
+    </div>
+    <div class="row">
+        <div class="col-md-12">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <b>Description</b>
+                    <h4>Description</h4>
                 </div>
                 <div class="panel-body">
                     {{ prod.description }}
@@ -211,7 +220,7 @@
             <div class="col-md-12">
                 <div class="panel panel-default table-responsive">
                     <div class="panel-heading">
-                        <h4> Active Engagements <a title="Add New Engagement" class="pull-right btn btn-sm btn-default"
+                        <h4> Active Engagements <a title="Add New Engagement" class="pull-right btn btn-sm btn-primary"
                                                    href="{% url 'new_eng_for_prod' prod.id %}"><span
                                 class="fa fa-plus"></span> </a></h4>
                     </div>
@@ -229,7 +238,7 @@
                             <tbody>
                             {% for eng in engs %}
                                 <tr>
-                                <td>{% if eng.name %}{{ eng.name }}{% else %} N/A {% endif %}</td>
+                                <td>{{ eng.name | default:"N/A" }}</td>
                                 <td>{{ eng.lead }}</td>
                                 <td>{{ eng.target_start }}</td>
                                 <td>{{ eng.target_end }}</td>
@@ -253,7 +262,7 @@
                 <div class="panel panel-default table-responsive">
                     <div class="panel-heading">
                         <h4>Scans
-                            <a title="Add New Scan" class="pull-right btn btn-default btn-sm"
+                            <a title="Add New Scan" class="pull-right btn btn-primary btn-sm"
                                href="{% url 'gmap' prod.id %}"><span class="fa fa-plus"></span></a>
                         </h4>
                     </div>
