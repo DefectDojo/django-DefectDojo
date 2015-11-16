@@ -185,12 +185,13 @@ def add_breadcrumb(parent=None, title=None, top_level=True, url=None, request=No
 
                 if crumb_view.view_name == obj_crumb_view.view_name:
                     if crumb_view.kwargs == obj_crumb_view.kwargs:
-                        if len(obj_crumbs) == 1:
+                        if len(obj_crumbs) == 1 and crumb in crumbs:
                             crumbs = crumbs[:crumbs.index(crumb)]
                         else:
                             obj_crumbs.remove(obj_crumb)
                     else:
-                        crumbs = crumbs[:crumbs.index(crumb)]
+                        if crumb in crumbs:
+                            crumbs = crumbs[:crumbs.index(crumb)]
 
         crumbs += obj_crumbs
 

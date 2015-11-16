@@ -1,7 +1,7 @@
-import collections
-from datetime import datetime, date
 import re
+from datetime import datetime, date
 from urlparse import urlsplit, urlunsplit
+
 from dateutil.relativedelta import relativedelta
 from django import forms
 from django.core import validators
@@ -10,10 +10,11 @@ from django.forms.widgets import Widget, Select
 from django.utils.dates import MONTHS
 from django.utils.safestring import mark_safe
 from pytz import timezone
+
+from dojo import settings
 from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Scan, Endpoint
-from dojo import settings
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
 localtz = timezone(settings.TIME_ZONE)

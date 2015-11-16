@@ -17,7 +17,7 @@
                 events: [
                     {% for e in engagements %}
                         {
-                            title: '{{e.product.name}}',
+                            title: '{{e.product.name}}: {{ e.name|default:"Unknown" }}',
                             start: '{{e.target_start|date:"c"}}',
                             end: '{{e.target_end|date:"c"}}',
                             url: '{% url 'view_engagement' e.id %}',
