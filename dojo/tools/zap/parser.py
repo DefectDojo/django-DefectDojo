@@ -9,10 +9,9 @@ See the file 'doc/LICENSE' for the license information
 """
 import re
 import socket
-import sys
 import urlparse
-
 from xml.etree import ElementTree as ET
+
 from dojo.models import Finding, Endpoint
 
 
