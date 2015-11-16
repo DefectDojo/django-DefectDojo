@@ -261,7 +261,7 @@
                 $.ajax({
                     type: "POST",
                     data: JSON.stringify($(this).serializeObject()),
-                    url: 'http://127.0.0.1:8000/api/v1/findings/',
+                    url: '/api/v1/findings/',
                     contentType: 'application/json',
                     // The ``X-CSRFToken`` evidently can't be set in the
                     // ``headers`` option, so force it here.
