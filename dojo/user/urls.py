@@ -1,0 +1,22 @@
+from django.conf.urls import url
+from django.contrib.auth.views import login
+
+from dojo.user import views
+
+urlpatterns = [
+    #  user specific
+    url(r'^login$', login,
+        {'template_name': 'dojo/login.html'}, name='login'),
+    url(r'^logout$', views.logout_view, name='logout'),
+    url(r'^alerts$', views.alerts, name='alerts'),
+    url(r'^profile$', views.view_profile, name='view_profile'),
+    url(r'^change_password$', views.change_password,
+        name='change_password'),
+    url(r'^user$', views.user, name='users'),
+    url(r'^user/add$', views.add_user, name='add_user'),
+    url(r'^user/(?P<uid>\d+)/edit$', views.edit_user,
+        name='edit_user'),
+    url(r'^user/(?P<uid>\d+)/delete', views.delete_user,
+        name='delete_user'),
+    url(r'^api/key$', views.api_key, name='api_key'),
+]

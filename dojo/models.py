@@ -224,7 +224,7 @@ class Scan(models.Model):
                                    verbose_name="Current Baseline")
 
     def __unicode__(self):
-        return self.scan_settings.protocol + "Scan" + str(self.date)
+        return self.scan_settings.protocol + " Scan " + str(self.date)
 
     def get_breadcrumbs(self):
         bc = self.scan_settings.get_breadcrumbs()

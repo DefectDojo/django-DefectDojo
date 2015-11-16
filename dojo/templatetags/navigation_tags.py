@@ -2,7 +2,7 @@ from django import template
 from django.utils.safestring import mark_safe as safe
 
 from dojo.models import Product_Type
-from dojo.views import get_alerts
+from dojo.utils import get_alerts
 
 register = template.Library()
 

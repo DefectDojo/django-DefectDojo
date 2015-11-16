@@ -908,6 +908,27 @@ table.finding-endpoints{
     font-size: 13px;
 }
 
+.finding-description{
+    max-height: 500px;
+    overflow-y: scroll;
+}
 
+.finding-description::-webkit-scrollbar{
+    -webkit-appearance: none;
+}
 
+.finding-description::-webkit-scrollbar:vertical {
+    width: 13px;
+}
+
+.finding-description::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    border: 2px solid white; /* should match background, can't be transparent */
+    background-color: rgba(0, 0, 0, .5);
+}
+
+.finding-description::-webkit-scrollbar-track {
+    background-color: #fff;
+    border-radius: 8px;
+}
 

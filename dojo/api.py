@@ -1,19 +1,18 @@
 # see tastypie documentation at http://django-tastypie.readthedocs.org/en
-import logging
-from django.conf import settings
 from tastypie import fields
 from tastypie.authentication import ApiKeyAuthentication, MultiAuthentication, SessionAuthentication
-from tastypie.authorization import DjangoAuthorization
 from tastypie.authorization import Authorization
-from tastypie.exceptions import Unauthorized
+from tastypie.authorization import DjangoAuthorization
 from tastypie.constants import ALL
+from tastypie.exceptions import Unauthorized
 from tastypie.resources import ModelResource
 from tastypie.serializers import Serializer
 from tastypie.validation import CleanedDataFormValidation
-from forms import ProductForm, EngForm2, TestForm, \
-    FindingForm, ScanSettingsForm, IncompleteFindingForm
+
 from dojo.models import Product, Engagement, Test, Finding, \
     User, ScanSettings, IPScan, Scan
+from forms import ProductForm, EngForm2, TestForm, \
+    ScanSettingsForm, IncompleteFindingForm
 
 """
     Setup logging for the api
