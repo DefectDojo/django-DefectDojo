@@ -12,17 +12,19 @@
             <div class="clearfix">
                 <h4 class="pull-left to_highlight finding-title">
                     {{ endpoint|truncatechars:115 }}
-                    <span class="text-muted endpoint_product">{{ endpoint.product }}</span>
+                    <span class="text-muted endpoint_product">
+                        <a href="{% url 'view_product' endpoint.product.id %}">{{ endpoint.product }}</a>
+                    </span>
                 </h4>
 
 
                 <div class="dropdown pull-right">
                     <div class="btn-group">
-                        <button class="btn btn-default clickable panel-collapsed">
+                        <button class="btn btn-primary clickable panel-collapsed">
                             <span><i class="fa fa-bar-chart"></i></span>
                         </button>
                         {% if user.is_staff %}
-                            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
+                            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
                                 <span class="fa fa-bars"></span>
                                 <span class="caret"></span>
@@ -35,7 +37,7 @@
                                 </li>
                                 <li role="presentation">
                                     <a href="{% url 'endpoint_report' endpoint.id %}">
-                                        <i class="fa fa-file-text-o"></i>  Generate Report
+                                        <i class="fa fa-file-text-o"></i> Report
                                     </a>
                                 </li>
                                 <li role="presentation">
@@ -161,7 +163,9 @@
                 </tbody>
             </table>
             </div>
-            {% include "dojo/paging_snippet.html" with page=findings %}
+            <div class="clearfix">
+                {% include "dojo/paging_snippet.html" with page=findings %}
+            </div>
         {% else %}
             <p class="text-center">No findings found.</p>
             </div>

@@ -35,5 +35,7 @@
             </tbody>
         </table>
     </div>
-    {% include "dojo/paging_snippet.html" with page=users page_size=True%}
+    <div class="clearfix">
+        {% include "dojo/paging_snippet.html" with page=users page_size=True%}
+    </div>
 {% endblock %}

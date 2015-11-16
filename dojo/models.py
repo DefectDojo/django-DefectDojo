@@ -1,9 +1,9 @@
 from datetime import datetime
 import os
-
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Q
 from django.utils.timezone import now
@@ -68,6 +68,11 @@ class Product_Type(models.Model):
     def __unicode__(self):
         return self.name
 
+    def get_breadcrumbs(self):
+        bc = [{'title': self.__unicode__(),
+               'url': reverse('edit_product_type', args=(self.id,))}]
+        return bc
+
 
 class Product_Line(models.Model):
     name = models.CharField(max_length=300)
@@ -86,6 +91,11 @@ class Test_Type(models.Model):
 
     def __unicode__(self):
         return self.name
+
+    def get_breadcrumbs(self):
+        bc = [{'title': self.__unicode__(),
+               'url': None}]
+        return bc
 
 
 class Product(models.Model):
@@ -169,6 +179,11 @@ class Product(models.Model):
                     'Low': low,
                     'Total': (critical + high + medium + low)}
 
+    def get_breadcrumbs(self):
+        bc = [{'title': self.__unicode__(),
+               'url': reverse('view_product', args=(self.id,))}]
+        return bc
+
 
 class ScanSettings(models.Model):
     product = models.ForeignKey(Product, default=1, editable=False)
@@ -186,6 +201,12 @@ class ScanSettings(models.Model):
             return [a.strip() for a in self.addresses.split(',')]
         return []
 
+    def get_breadcrumbs(self):
+        bc = self.product.get_breadcrumbs()
+        bc += [{'title': "Scan Settings",
+                'url': reverse('view_scan_settings', args=(self.product.id, self.id,))}]
+        return bc
+
 
 """
 Modified by Fatimah and Micheal
@@ -201,6 +222,15 @@ class Scan(models.Model):
     status = models.CharField(max_length=10, default='Pending', editable=False)
     baseline = models.BooleanField(default=False,
                                    verbose_name="Current Baseline")
+
+    def __unicode__(self):
+        return self.scan_settings.protocol + "Scan" + str(self.date)
+
+    def get_breadcrumbs(self):
+        bc = self.scan_settings.get_breadcrumbs()
+        bc += [{'title': self.__unicode__(),
+                'url': reverse('view_scan', args=(self.id,))}]
+        return bc
 
 
 """
@@ -264,6 +294,12 @@ class Engagement(models.Model):
         return "Engagement: %s (%s)" % (self.name if self.name else '',
                                         self.target_start.strftime(
                                             "%b %d, %Y"))
+
+    def get_breadcrumbs(self):
+        bc = self.product.get_breadcrumbs()
+        bc += [{'title': self.__unicode__(),
+                'url': reverse('view_engagement', args=(self.id,))}]
+        return bc
 
 
 class CWE(models.Model):
@@ -329,6 +365,13 @@ class Endpoint(models.Model):
                                       false_p=False,
                                       duplicate=False,
                                       is_template=False).order_by('numerical_severity')
+
+    def get_breadcrumbs(self):
+        bc = self.product.get_breadcrumbs()
+        bc += [{'title': self.__unicode__(),
+                'url': reverse('view_endpoint', args=(self.id,))}]
+        return bc
+
     @staticmethod
     def from_uri(uri):
         return Endpoint()
@@ -353,6 +396,9 @@ class Development_Environment(models.Model):
     def __unicode__(self):
         return self.name
 
+    def get_breadcrumbs(self):
+        return [{"title": self.__unicode__(), "url": reverse("edit_dev_env", args=(self.id,))}]
+
 
 class Test(models.Model):
     engagement = models.ForeignKey(Engagement, editable=False)
@@ -372,6 +418,12 @@ class Test(models.Model):
         return "%s (%s)" % (self.test_type,
                             self.target_start.strftime("%b %d, %Y"))
 
+    def get_breadcrumbs(self):
+        bc = self.engagement.get_breadcrumbs()
+        bc += [{'title': self.__unicode__(),
+                'url': reverse('view_test', args=(self.id,))}]
+        return bc
+
 
 class VA(models.Model):
     address = models.TextField(editable=False, default="none")
@@ -390,8 +442,6 @@ class Finding(models.Model):
     description = models.TextField()
     mitigation = models.TextField()
     impact = models.TextField()
-    # will deprecate in version 1.0.3
-    endpoint = models.TextField()
     endpoints = models.ManyToManyField(Endpoint, blank=True, )
     unsaved_endpoints = []
     unsaved_request = None
@@ -440,6 +490,8 @@ class Finding(models.Model):
         status = []
         if self.active:
             status += ['Active']
+        else:
+            status += ['Inactive']
         if self.verified:
             status += ['Verified']
         if self.mitigated:
@@ -471,7 +523,9 @@ class Finding(models.Model):
         long_desc = ''
         long_desc += '=== ' + self.title + ' ===\n\n'
         long_desc += '*Severity:* ' + self.severity + '\n\n'
-        long_desc += '*Systems*: \n' + self.endpoint + '\n\n'
+        long_desc += '*Systems*: \n'
+        for e in self.endpoints.all():
+            long_desc += str(e) + '\n\n'
         long_desc += '*Description*: \n' + self.description + '\n\n'
         long_desc += '*Impact*: \n' + self.impact + '\n\n'
         long_desc += '*References*:' + self.references
@@ -489,6 +543,12 @@ class Finding(models.Model):
                     setattr(self, field, "No title given")
                 if not val and field in bigfields:
                     setattr(self, field, "No %s given" % field)
+
+    def get_breadcrumbs(self):
+        bc = self.test.get_breadcrumbs()
+        bc += [{'title': self.__unicode__(),
+                'url': reverse('view_finding', args=(self.id,))}]
+        return bc
 
 
 class Check_List(models.Model):
@@ -536,6 +596,12 @@ class Check_List(models.Model):
         else:
             return 'warning'
 
+    def get_breadcrumb(self):
+        bc = self.engagement.get_breadcrumb()
+        bc += [{'title': "Check List",
+                'url': reverse('complete_checklist', args=(self.engagement.id,))}]
+        return bc
+
 
 class BurpRawRequestResponse(models.Model):
     finding = models.ForeignKey(Finding, blank=True, null=True)
@@ -561,6 +627,12 @@ class Risk_Acceptance(models.Model):
         return os.path.basename(self.path.name) \
             if self.path is not None else ''
 
+    def get_breadcrumbs(self):
+        bc = self.engagement_set.first().get_breadcrumbs()
+        bc += [{'title': self.__unicode__(),
+                'url': reverse('view_risk', args=(self.engagement_set.first().product.id, self.id,))}]
+        return bc
+
 
 # Register for automatic logging to database
 auditlog.register(Dojo_User)
@@ -581,3 +653,5 @@ admin.site.register(Endpoint)
 admin.site.register(Product)
 admin.site.register(Dojo_User)
 admin.site.register(Notes)
+admin.site.register(Scan)
+admin.site.register(ScanSettings)

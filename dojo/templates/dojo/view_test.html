@@ -8,7 +8,7 @@
                 <h3 class="pull-left"> {{ test.test_type }}</h3>
 
                 <div class="dropdown pull-right">
-                    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
+                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                             data-toggle="dropdown" aria-expanded="true">
                         <span class="fa fa-bars"></span>
                         <span class="caret"></span>
@@ -38,7 +38,7 @@
                         </li>
                         <li role="presentation">
                             <a href="{% url 'test_report' test.id %}">
-                                <i class="fa fa-file-text-o"></i> Generate Report
+                                <i class="fa fa-file-text-o"></i> Report
                             </a>
                         </li>
                         <li role="presentation">
@@ -62,49 +62,43 @@
                 </div>
             </div>
         </div>
-        <div class="panel-body">
-            <dl class="dl-horizontal">
-                <dt>Development Environment</dt>
-                <dd>
-                    {% if test.environment %}
-                        {{ test.environment }}
-                    {% else %}
-                        <b><i>Unknown</i></b>
+        <div class="table-responsive">
+            <table class="table-striped table table-condensed table-hover centered">
+                <tr>
+                    <th>Environment</th>
+                    <th>Engagement</th>
+                    <th>Target Start Date</th>
+                    <th>Target End Date</th>
+                    {% if test.percent_complete > 0 %}
+                        <th>Progress</th>
                     {% endif %}
-                </dd>
-                <dt>
-                    Engagement
-                </dt>
-                <dd>
-                    <a href="{% url 'view_engagement' test.engagement.id %}">{{ test.engagement }}</a>
-                </dd>
-                <dt>
-                    Target Start Date
-                </dt>
-                <dd>
-                    {{ test.target_start.date }}
-                </dd>
-                <dt>
-                    Target End Date
-                </dt>
-                <dd>
-                    {{ test.target_end.date }}
-                </dd>
-                {% if test.percent_complete > 0 %}
-                    <dt>
-                        Progress
-                    </dt>
-                    <dd>
-                        <div class="progress">
-                            <div class="progress-bar" role="progressbar" aria-valuenow="{{ test.percent_complete }}"
-                                 aria-valuemin="0"
-                                 aria-valuemax="100" style="width: {{ test.percent_complete }}%;">
-                                {{ test.percent_complete }}%
+
+                </tr>
+                <tr>
+                    <td>
+                        {% if test.environment %}
+                            {{ test.environment }}
+                        {% else %}
+                            <b><i>Unknown</i></b>
+                        {% endif %}
+                    </td>
+                    <td><a href="{% url 'view_engagement' test.engagement.id %}">{{ test.engagement }}</a></td>
+                    <td>{{ test.target_start.date }}</td>
+                    <td>{{ test.target_end.date }}</td>
+                    {% if test.percent_complete > 0 %}
+                        <td>
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" aria-valuenow="{{ test.percent_complete }}"
+                                     aria-valuemin="0"
+                                     aria-valuemax="100" style="width: {{ test.percent_complete }}%;">
+                                    {{ test.percent_complete }}%
+                                </div>
                             </div>
-                        </div>
-                    </dd>
-                {% endif %}
-            </dl>
+                        </td>
+                    {% endif %}
+
+                </tr>
+            </table>
         </div>
     </div>
     <div class="panel panel-default to_highlight table-responsive">
@@ -123,6 +117,7 @@
                     <th>Mitigation Date</th>
                     <th>Verified</th>
                     <th>Active</th>
+                    <th>Actions</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -136,10 +131,43 @@
                         <td>{{ finding.mitigated }}</td>
                         <td>{{ finding.verified }}</td>
                         <td>{{ finding.active }}</td>
+                        <td>
+                            <div class="btn-group">
+                                <a class="btn btn-sm btn-primary"
+                                   href="{% url 'view_finding' finding.id %}">View</a>
+                                <a class="btn btn-sm btn-warning"
+                                   href="{% url 'edit_finding' finding.id %}">Edit</a>
+                                <a class="btn btn-sm btn-danger"
+                                   href="{% url 'delete_finding' finding.id %}">Delete</a>
+                            </div>
+                        </td>
                     </tr>
                 {% endfor %}
                 </tbody>
+                <tfoot>
+                <tr>
+                    <td colspan="7">
+                        {% csrf_token %}
+                        <form id="quick-add-form" method="post">
 
+                            <div class="input-group" style="width: 40%;">
+                                <input id="quick_add_finding" name="title" type="text" placeholder="Add a finding..."
+                                       class="form-control"/>
+                                <input type="hidden" value="/api/v1/users/{{ request.user.id }}/" name="reporter"/>
+                                <input type="hidden" value="/api/v1/tests/{{ test.id }}/" name="test"/>
+                                <input type="hidden" value="true" name="verified"/>
+                                <input type="hidden" value="false" name="active"/>
+                                <span class="input-group-btn">
+                                    <button id="the_button" class="btn btn-success" type="submit"><i id="fa-icon"
+                                                                                                     class="fa fa-fw fa-plus"></i>
+                                        Add
+                                    </button>
+                                </span>
+                            </div>
+                        </form>
+                    </td>
+                </tr>
+                </tfoot>
 
             </table>
             <div class="panel-body">
@@ -196,7 +224,8 @@
             {% include "dojo/form_fields.html" with form=form %}
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
-                    <input class="btn btn-default" type="submit" value="Add Note"/>
+                    <input class="btn btn-primary" type="submit" value="Add Note"/>
+
                 </div>
             </div>
         </form>
@@ -223,6 +252,64 @@
 
                 $('input#simple_search').val(terms);
             }
+
+            $('form#quick-add-form').on("submit", function () {
+                $('form#quick-add-form').removeClass("has-error");
+                $('button#the_button').attr('disabled', true).removeClass("btn-success btn-danger").addClass('btn-warning');
+                $('i#fa-icon').removeClass("fa-plus").addClass("fa-spinner fa-pulse");
+
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify($(this).serializeObject()),
+                    url: 'http://127.0.0.1:8000/api/v1/findings/',
+                    contentType: 'application/json',
+                    // The ``X-CSRFToken`` evidently can't be set in the
+                    // ``headers`` option, so force it here.
+                    // This method requires jQuery 1.5+.
+                    beforeSend: function (jqXHR, settings) {
+                        // Pull the token out of the DOM.
+                        jqXHR.setRequestHeader('X-CSRFToken', $('input[name=csrfmiddlewaretoken]').val());
+                    },
+                    success: function (data, textStatus, jqXHR) {
+                        // Your processing of the data here. <a href='" + jqXHR.getResponseHeader('Location') + "'>" +  + "</a>
+                        //
+                        var fid = jqXHR.getResponseHeader('Location').split('/');
+                        fid = fid[fid.length - 2];
+                        var row = $("<tr id='added-" + fid + "' class='success'></tr>");
+                        var link = $('<a></a>');
+
+                        link.attr('href', "/finding/" + fid);
+                        link.text($("input#quick_add_finding").val());
+                        var title = $("<td></td>").append(link);
+                        var severity = $("<td> </td>");
+                        var reporter = $("<td>{{ request.user.username }}</td>");
+                        var mitigation_date = $("<td>None</td>");
+                        var verified = $("<td>True</td>");
+                        var active = $("<td>False</td>");
+                        var actions = $('<td><div class="btn-group"> <a class="btn btn-sm btn-primary" href="/finding/[id]">View</a> <a class="btn btn-sm btn-warning" href="/finding/[id]/edit">Edit</a> <a class="btn btn-sm btn-danger" href="/finding/[id]/delete">Delete</a></div></td>'.replace(/\[id\]/g, fid));
+
+                        row.append(title, severity, reporter, mitigation_date, verified, active, actions).appendTo("#test_findings tbody");
+                        $("input#quick_add_finding").val("")
+                        $('button#the_button').removeClass("btn-warning btn-danger").addClass('btn-success');
+                        setTimeout(function () {
+                            $("tr#added-" + fid + " td").animate({
+                                backgroundColor: "#fff",})
+                        }, 2000)
+                    },
+                    error: function () {
+                        $('form#quick-add-form').addClass("has-error");
+                        $('button#the_button').removeClass("btn-warning").addClass('btn-danger');
+                    },
+                    complete: function () {
+                        $('i#fa-icon').addClass("fa-plus").removeClass("fa-spinner fa-pulse");
+                        $('button#the_button').attr('disabled', false);
+
+                    }
+                });
+                return false;
+            });
+
         });
+
     </script>
 {% endblock %}

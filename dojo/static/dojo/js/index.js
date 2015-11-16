@@ -1,4 +1,19 @@
 $(function () {
+    $('body').append('<a id="toTop" title="Back to Top" class="btn btn-primary btn-circle"><i class="fa fa-fw fa-arrow-up"></i></a>');
+    $(window).scroll(function () {
+        if ($(this).scrollTop() > 300) {
+            $('#toTop').fadeIn();
+        } else {
+            $('#toTop').fadeOut();
+        }
+    });
+
+    $('#toTop').click(function(){
+        $("html, body").animate({ scrollTop: 0 }, 600);
+        return false;
+    });
+
+
     $(".datepicker").datepicker({"dateFormat": "yy-mm-dd"});
 
     $('form#replace_risk_file input[type="file"], div.controls.file input').change(function () {
@@ -13,15 +28,68 @@ $(function () {
         $('.alert-dismissible').slideUp('slow')
     }, 20000);
 
-    $('#side-menu').metisMenu(
-        {doubleTapToGo: false}
-    );
+    $('#side-menu').metisMenu();
 
     // auto focus on first form field
-    $('#base-content form:first *:input[type!=hidden]:first').not('.filters :input, textarea#id_entry').focus();
+    $('#base-content form:first *:input[type!=hidden]:first').not('button, input[type=submit]').not('.filters :input, textarea#id_entry, input#quick_add_finding').focus();
 
+    $('a#minimize-menu').on('click', sidebar);
+
+    $("ul#progress-crumbs a").on('click', function() {
+        var href = $(this).attr('href');
+        $('html, body').animate({
+            scrollTop: $(href).offset().top - 55
+        }, 500);
+        return false;
+    });
 
 });
+
+$.fn.serializeObject = function()
+{
+    var o = {};
+    var a = this.serializeArray();
+    $.each(a, function() {
+        if (o[this.name] !== undefined && o[this.name] != 'csrfmiddlewaretoken') {
+            if (!o[this.name].push) {
+                o[this.name] = [o[this.name]];
+            }
+            o[this.name].push(this.value || '');
+        } else {
+            o[this.name] = this.value || '';
+        }
+    });
+    return o;
+};
+
+
+function sidebar() {  // minimize side nav bar
+    var action = 'min';
+    var remove = 'max';
+    var speed = 250;
+    var width = '50';
+    var fontSize = '18';
+
+    if (($.cookie('dojo-sidebar') == 'min') || ($('body').hasClass('min'))) {
+        action = 'max';
+        remove = 'min';
+        $.cookie('dojo-sidebar', 'max', {expires: 10000, path: '/'});
+        width = '175px';
+        fontSize = '14px';
+        speed = 100;
+        $('a#minimize-menu').attr('title', 'Collapse Menu');
+    }
+    else {
+        action = 'min';
+        remove = 'max';
+        $.cookie('dojo-sidebar', 'min', {expires: 10000, path: '/'});
+        $('a#minimize-menu').attr('title', 'Expand Menu')
+    }
+
+    $('body').switchClass(remove, action);
+
+    return false;
+}
 
 function emptyEndpoints(win) {
     var name = windowname_to_id(win.name);

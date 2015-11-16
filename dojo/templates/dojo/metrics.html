@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load event_tags %}
+{% load display_tags %}
 {% load static from staticfiles %}
 {% block add_styles %}
     .tabs-below > .nav-tabs,
@@ -110,12 +111,21 @@
     #chart_div, #chart_div2, #chart_div3, #chart_div4 {height: 300px}
 {% endblock %}
 {% block content %}
-
-
-    <h2>{{ name }}</h2>
+    <div class="col-md-12">
+    <div class="panel panel-default">
+        <div class="panel-heading tight">
+            <h3 class="has-filters">
+                {{ name }}
+                <div class="dropdown pull-right"></div>
+            </h3>
+        </div>
+        <div id="the-filters" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
+            {% include "dojo/filter_snippet.html" with form=findings.form clear_link="/metrics" %}
+        </div>
+    </div>
 
     <div class="row metric-data">
-        <div class="col-md-10">
+        <div class="col-md-12">
             <div class="row">
                 {% if opened_per_month %}
                     <div class="col-lg-6">
@@ -173,25 +183,6 @@
                     </div>
                     <!-- /.panel -->
                 </div>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="filters panel panel-default">
-                <div class="panel-heading">
-                    Filter
-                </div>
-                <form class="metric_form panel-body" method="get">
-                    <ul class="filter_form">
-                        {{ findings.form.as_p }}
-                    </ul>
-                    <div class="centered">
-                        <button class="btn btn-sm btn-primary">
-                            <i class="fa fa-filter"></i> Apply Filters
-                        </button>
-                        <br/><br/>
-                        <a href="{% url 'metrics' %}">[Clear Filters]</a>
-                    </div>
-                </form>
             </div>
         </div>
     </div>
@@ -559,6 +550,7 @@
     <script src="{% static "flot/jquery.flot.time.js" %}"></script>
     <script src="{% static "flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
     <script src="{% static "flot/jquery.flot.stack.js" %}"></script>
+    {% include "dojo/filter_js_snippet.html" %}
     <script>
         $(function () {
             {% if not show_pt_filter %}

@@ -2,29 +2,60 @@
 {% load navigation_tags %}
 {% block content %}
     <div class="row">
-        <div class="col-md-10">
-            {% if products %}
-                <div class="clearfix">
-                    <h3 class="pull-left">Active Engagements</h3>{% include "dojo/paging_snippet.html" with page=products page_size=True %}
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading tight">
+                    <h3 class="has-filters">
+                        Active Engagements
+                        <div class="dropdown pull-right">
+                            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                                    data-toggle="dropdown" aria-expanded="true">
+                                <span class="fa fa-wrench"></span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu"
+                                aria-labelledby="dropdownMenu1">
+                                {% if request.user.is_staff %}
+                                    <li role="presentation">
+                                        <a href="{% url 'new_eng' %}">
+                                            <i class="fa fa-plus"></i> New Engagement
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </h3>
                 </div>
+                <div id="the-filters" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
+                    {% include "dojo/filter_snippet.html" with form=filtered.form %}
+                </div>
+            </div>
+            {% if products %}
+
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=products page_size=True %}
+                </div>
+
                 <div class="table-responsive panel panel-default">
                     <table id="engagements"
                            class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
                         <tr>
-                            <th class="prod_name">{% dojo_sort request 'Product' 'name' 'asc'%}</th>
-                            <th class="prod_name">{% dojo_sort request 'Product Type' 'prod_type__name'%}</th>
+                            <th class="prod_name">{% dojo_sort request 'Product' 'name' 'asc' %}</th>
+                            <th class="prod_name">{% dojo_sort request 'Product Type' 'prod_type__name' %}</th>
                             <th>Active Engagements</th>
                         </tr>
 
                         {% for p in products %}
                             <tr>
                                 <td class="prod_name"><a href="{% url 'view_product' p.id %}">{{ p.name }}</a></td>
-                                <td class="prod_name"><a href="{% url 'product_type_metrics' p.prod_type.id %}">{{ p.prod_type.name }}</a></td>
+                                <td class="prod_name"><a
+                                        href="{% url 'product_type_metrics' p.prod_type.id %}">{{ p.prod_type.name }}</a>
+                                </td>
                                 <td>
                                     {% for e in p.engagement_set.all %}
-                                        {%  if e.active %}
-                                        <a class="eng_link" href="{% url 'view_engagement' e.id %}">
-                                            {% if e.name %}{{ e.name }} {% endif %}{{ e.target_start }}</a>
+                                        {% if e.active %}
+                                            <a class="eng_link" href="{% url 'view_engagement' e.id %}">
+                                                {% if e.name %}{{ e.name }} {% endif %}{{ e.target_start }}</a>
                                         {% endif %}
                                     {% endfor %}
                                 </td>
@@ -32,30 +63,12 @@
                         {% endfor %}
                     </table>
                 </div>
-                {% include "dojo/paging_snippet.html" with page=products page_size=True %}
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=products page_size=True %}
+                </div>
             {% else %}
                 <h5> No active engagements </h5>
             {% endif %}
-        </div>
-        <div class="col-md-2">
-            <div class="filters panel panel-default">
-                <div class="panel-heading">Actions</div>
-                <div class="panel-body centered">
-                    <a class="btn btn-sm btn-success" href="{% url 'new_eng' %}">
-                        <i class="fa fa-plus"></i> New Engagement
-                    </a>
-                </div>
-                <div class="panel-heading">Filters</div>
-                <form method="get" class="panel-body">
-                    {{ filtered.form.as_p }}
-                    <div class="centered">
-                        <button class="btn btn-sm btn-primary">
-                            <i class="fa fa-filter"></i> Apply
-                        </button><br/><br/>
-                        <a href="{% url 'engagement' %}"> [Clear Filters] </a>
-                    </div>
-                </form>
-            </div>
         </div>
     </div>
 
@@ -81,4 +94,5 @@
             });
         });
     </script>
+    {% include "dojo/filter_js_snippet.html" %}
 {% endblock %}

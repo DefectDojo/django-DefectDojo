@@ -1,3 +1,5 @@
+from itertools import izip, chain
+
 from django import template
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import stringfilter
@@ -66,5 +68,61 @@ def action_log_entry(value, autoescape=None):
         text += k.capitalize() + ' changed from "' + history[k][0] + '" to "' + history[k][1] + '"<br/>'
 
     return mark_safe(text)
+
+
+@register.simple_tag(takes_context=True)
+def dojo_body_class(context):
+    request = context['request']
+    return request.COOKIES.get('dojo-sidebar', 'min')
+
+
+@register.simple_tag
+def random_value():
+    import string
+    import random
+    return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(12))
+
+
+@register.tag
+def colgroup(parser, token):
+    """
+    Usage:: {% colgroup items into 3 cols as grouped_items %}
+
+    <table border="0">
+        {% for row in grouped_items %}
+        <tr>
+            {% for item in row %}
+            <td>{% if item %}{{ forloop.parentloop.counter }}. {{ item }}{% endif %}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+
+    Outputs::
+    ============================================
+    | 1. One   | 1. Eleven   | 1. Twenty One   |
+    | 2. Two   | 2. Twelve   | 2. Twenty Two   |
+    | 3. Three | 3. Thirteen | 3. Twenty Three |
+    | 4. Four  | 4. Fourteen |                 |
+    ============================================
+    """
+    class Node(template.Node):
+        def __init__(self, iterable, num_cols, varname):
+            self.iterable = iterable
+            self.num_cols = num_cols
+            self.varname = varname
+
+        def render(self, context):
+            iterable = template.Variable(self.iterable).resolve(context)
+            num_cols = self.num_cols
+            context[self.varname] = izip(*[chain(iterable, [None]*(num_cols-1))] * num_cols)
+            return u''
+
+    try:
+        _, iterable, _, num_cols, _, _, varname = token.split_contents()
+        num_cols = int(num_cols)
+    except ValueError:
+        raise template.TemplateSyntaxError("Invalid arguments passed to %r." % token.contents.split()[0])
+    return Node(iterable, num_cols, varname)
 
 
