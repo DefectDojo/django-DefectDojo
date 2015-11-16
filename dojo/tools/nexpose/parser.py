@@ -5,7 +5,6 @@ See the file 'doc/LICENSE' for the license information
 
 '''
 from __future__ import with_statement
-
 from xml.etree import ElementTree as ET
 
 __author__ = "Micaela Ranea Sanchez"
@@ -128,7 +127,10 @@ class NexposeFullXmlParser(object):
                 if test.get('id').lower() in vulnsDefinitions:
                     vuln = vulnsDefinitions[test.get('id').lower()]
                     for desc in list(test):
-                        vuln['desc'] += self.parse_html_type(desc)
+                        if 'pluginOutput' in vuln:
+                            vuln['pluginOutput'] += "\n\n" + self.parse_html_type(desc)
+                        else:
+                            vuln['pluginOutput'] = self.parse_html_type(desc)
                     vulns.append(vuln)
 
         return vulns
@@ -182,7 +184,7 @@ class NexposeFullXmlParser(object):
         """
         @return hosts A list of Host instances
         """
-        from dojo.views import Endpoint, Finding
+        from dojo.models import Endpoint, Finding
         import html2text
 
         x = list()
@@ -195,7 +197,7 @@ class NexposeFullXmlParser(object):
                 host['hostnames'] = set()
                 host['os'] = ""
                 host['services'] = list()
-                host['vulns'] = self.parse_tests_type(node, vulns)
+                # host['vulns'] = self.parse_tests_type(node, vulns)
 
                 for names in node.iter('names'):
                     for name in list(names):
@@ -212,6 +214,7 @@ class NexposeFullXmlParser(object):
                             for service in list(services):
                                 svc['name'] = service.get('name')
                                 svc['vulns'] = self.parse_tests_type(service, vulns)
+
                                 for configs in service.iter('configurations'):
                                     for config in list(configs):
                                         if "banner" in config.get('name'):
@@ -224,46 +227,53 @@ class NexposeFullXmlParser(object):
         dupes = {}
 
         for item in x:
-            for vuln in item['vulns']:
-                for sev, num_sev in Finding.SEVERITIES.iteritems():
-                    if num_sev == vuln['severity']:
-                        break
+            for service in item['services']:
+                for vuln in service['vulns']:
+                    for sev, num_sev in Finding.SEVERITIES.iteritems():
+                        if num_sev == vuln['severity']:
+                            break
 
-                dupe_key = sev + vuln['name']
+                    dupe_key = sev + vuln['name']
 
-                if dupe_key in dupes:
-                    find = dupes[dupe_key]
-                else:
-                    refs = ''
-                    for ref in vuln['refs'][2:]:
-                        if ref.startswith('CA'):
-                            ref = "https://www.cert.org/advisories/" + ref + ".html"
-                        elif ref.startswith('CVE'):
-                            ref = "https://cve.mitre.org/cgi-bin/cvename.cgi?name=" + ref
-                        refs += ref
-                        refs += "\n"
+                    if dupe_key in dupes:
+                        find = dupes[dupe_key]
+                        find.description += "\n\n" + html2text.html2text(vuln['pluginOutput'])
+                    else:
+                        refs = ''
+                        for ref in vuln['refs'][2:]:
+                            if ref.startswith('CA'):
+                                ref = "https://www.cert.org/advisories/" + ref + ".html"
+                            elif ref.startswith('CVE'):
+                                ref = "https://cve.mitre.org/cgi-bin/cvename.cgi?name=" + ref
+                            refs += ref
+                            refs += "\n"
 
-                    find = Finding(title=vuln['name'],
-                                   description=html2text.html2text(vuln['desc']),
-                                   severity=sev,
-                                   numerical_severity=Finding.get_numerical_severity(sev),
-                                   mitigation=html2text.html2text(vuln['resolution']),
-                                   impact=vuln['refs'][0],
-                                   references=refs,
-                                   test=test,
-                                   is_template=False,
-                                   active=False,
-                                   verified=False,
-                                   false_p=False,
-                                   duplicate=False,
-                                   out_of_scope=False,
-                                   mitigated=None)
-                    find.unsaved_endpoints = list()
-                    dupes[dupe_key] = find
+                        find = Finding(title=vuln['name'],
+                                       description=html2text.html2text(
+                                           vuln['desc']) + "\n\n" + html2text.html2text(vuln['pluginOutput']),
+                                       severity=sev,
+                                       numerical_severity=Finding.get_numerical_severity(sev),
+                                       mitigation=html2text.html2text(vuln['resolution']),
+                                       impact=vuln['refs'][0],
+                                       references=refs,
+                                       test=test,
+                                       is_template=False,
+                                       active=False,
+                                       verified=False,
+                                       false_p=False,
+                                       duplicate=False,
+                                       out_of_scope=False,
+                                       mitigated=None)
+                        find.unsaved_endpoints = list()
+                        dupes[dupe_key] = find
 
-                find.unsaved_endpoints.append(Endpoint(host=item['name'], product=test.engagement.product))
+                    find.unsaved_endpoints.append(Endpoint(host=item['name'], product=test.engagement.product))
 
-                for hostname in item['hostnames']:
-                    find.unsaved_endpoints.append(Endpoint(host=hostname, product=test.engagement.product))
-
+                    for hostname in item['hostnames']:
+                        find.unsaved_endpoints.append(Endpoint(host=hostname, product=test.engagement.product))
+                    for service in item['services']:
+                        if len(service['vulns']) > 0:
+                            find.unsaved_endpoints.append(
+                                Endpoint(host=item['name'] + (":" + service['port']) if service['port'] is not None else "",
+                                         product=test.engagement.product))
         return dupes.values()
