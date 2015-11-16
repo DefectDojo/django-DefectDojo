@@ -2,18 +2,45 @@
 {% load navigation_tags %}
 {% block content %}
     <div class="row">
-        <div class="col-md-10">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading tight">
+                    <h3 class="has-filters">
+                        {{ name }}
+                        <div class="dropdown pull-right">
+                            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                                    data-toggle="dropdown" aria-expanded="true">
+                                <span class="fa fa-wrench"></span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu"
+                                aria-labelledby="dropdownMenu1">
+                                {% if request.user.is_staff %}
+                                    <li role="presentation">
+                                        <a href="{% url 'add_product_endpoint' %}">
+                                            <i class="fa fa-plus"></i> New Endpoint
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </h3>
+                </div>
+                <div id="the-filters" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
+                    {% include "dojo/filter_snippet.html" with form=filtered.form %}
+                </div>
+            </div>
             {% if endpoints %}
                 <div class="clearfix">
-                    <h3 class="pull-left">{{ name }}</h3>{% include "dojo/paging_snippet.html" with page=endpoints page_size=True%}
+                    {% include "dojo/paging_snippet.html" with page=endpoints page_size=True %}
                 </div>
 
                 <div class="table-responsive panel panel-default">
                     <table id="endpoints"
                            class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
                         <tr>
-                            <th>{%  dojo_sort request 'Endpoint' 'host' %}</th>
-                            <th>{%  dojo_sort request 'Product' 'product' 'asc' %}</th>
+                            <th>{% dojo_sort request 'Endpoint' 'host' %}</th>
+                            <th>{% dojo_sort request 'Product' 'product' 'asc' %}</th>
                             <th nowrap="nowrap">Number of <br/> Open Findings</th>
                         </tr>
 
@@ -22,39 +49,22 @@
                                 <td><a href="{% url 'view_endpoint' e.id %}">{{ e|truncatechars:70 }}</a></td>
                                 <td><a href="{% url 'view_product' e.product.id %}">{{ e.product }}</a></td>
                                 <td class="text-center">
-                                    <a href="{% url 'open_findings' %}?endpoints={{ e.id}}">{{ e.finding_count }}</a>
+                                    <a href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.finding_count }}</a>
                                 </td>
                             </tr>
                         {% endfor %}
                     </table>
                 </div>
-                {% include "dojo/paging_snippet.html" with page=endpoints page_size=True%}
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=endpoints page_size=True %}
+                </div>
             {% else %}
                 <h5> No endpoints </h5>
             {% endif %}
         </div>
-        <div class="col-md-2">
-            <div class="filters panel panel-default">
-                {% if request.user.is_staff %}
-                    <div class="panel-heading">Actions</div>
-                    <div class="panel-body centered">
-                        <a class="btn btn-sm btn-success" href="{% url 'add_product_endpoint' %}">
-                            <i class="fa fa-plus"></i> New Endpoint
-                        </a>
-                    </div>
-                {% endif %}
-                <div class="panel-heading">Filters</div>
-                <form method="get" class="panel-body">
-                    {{ filtered.form.as_p }}
-                    <div class="centered">
-                        <button class="btn btn-sm btn-primary">
-                            <i class="fa fa-filter"></i> Apply
-                        </button><br/><br/>
-                        <a href="{% url 'endpoints' %}"> [Clear Filters] </a>
-                    </div>
-                </form>
-            </div>
-        </div>
     </div>
 
+{% endblock %}
+{% block postscript %}
+    {% include "dojo/filter_js_snippet.html" %}
 {% endblock %}

@@ -1,37 +1,38 @@
-from calendar import monthrange
-from collections import OrderedDict
 import base64
 import collections
-from datetime import date, datetime, timedelta
 import logging
-from math import ceil, pi, sqrt
-from operator import itemgetter
 import operator
 import os
-import re
+from calendar import monthrange
+from collections import OrderedDict
+from datetime import date, datetime, timedelta
+from math import ceil
+from operator import itemgetter
 from threading import Thread
-import calendar as tcalendar
 
-import vobject
-from easy_pdf.rendering import render_to_pdf_response
-from dateutil.relativedelta import relativedelta, MO
+from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, logout
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.urlresolvers import reverse
 from django.core.validators import validate_ipv46_address
-from django.views.decorators.cache import cache_page
-from django.utils.html import escape
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
 from django.http import HttpResponseRedirect, StreamingHttpResponse, HttpResponseForbidden, Http404, HttpResponse
-from django.core.urlresolvers import reverse
 from django.shortcuts import render, get_object_or_404
+from django.utils.html import escape
+from django.views.decorators.cache import cache_page
+from easy_pdf.rendering import render_to_pdf_response
 from pytz import timezone
 from tastypie.models import ApiKey
-from django.template.defaultfilters import pluralize
 
+from dojo.filters import ProductFilter, OpenFindingFilter, \
+    OpenFingingSuperFilter, AcceptedFingingSuperFilter, \
+    ProductFindingFilter, EngagementFilter, \
+    ClosedFingingSuperFilter, MetricsFindingFilter, ReportFindingFilter, EndpointFilter, \
+    ReportAuthedFindingFilter, EndpointReportFilter, UserFilter, LogEntryFilter, ProductTypeFilter, \
+    TestTypeFilter, DevelopmentEnvironmentFilter, EngineerFilter
 from dojo.forms import VaForm, SimpleMetricsForm, CheckForm, \
     ScanSettingsForm, UploadThreatForm, UploadRiskForm, NoteForm, CloseFindingForm, DoneForm, \
     ProductForm, EngForm2, EngForm, TestForm, FindingForm, \
@@ -39,23 +40,15 @@ from dojo.forms import VaForm, SimpleMetricsForm, CheckForm, \
     Test_TypeForm, ReplaceRiskAcceptanceForm, AddFindingsRiskAcceptanceForm, Development_EnvironmentForm, \
     DojoUserForm, DeleteIPScanForm, DeleteTestForm, EditEndpointForm, \
     DeleteEndpointForm, AddEndpointForm, DeleteProductForm, DeleteEngagementForm, AddFindingForm, \
-    AddDojoUserForm, DeleteUserForm, ProductTypeCountsForm, ImportScanForm, ReImportScanForm
+    AddDojoUserForm, DeleteUserForm, ProductTypeCountsForm, ImportScanForm, ReImportScanForm, APIKeyForm
 from dojo.management.commands.run_scan import run_on_deman_scan
 from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
     Check_List, Scan, IPScan, ScanSettings, Test_Type, Notes, \
     Risk_Acceptance, Dojo_User, Development_Environment, BurpRawRequestResponse, Endpoint
-from dojo.filters import ProductFilter, OpenFindingFilter, \
-    OpenFingingSuperFilter, AcceptedFingingSuperFilter, \
-    ProductFindingFilter, EngagementFilter, \
-    ClosedFingingSuperFilter, MetricsFindingFilter, ReportFindingFilter, EndpointFilter, \
-    ReportAuthedFindingFilter, EndpointReportFilter, UserFilter, LogEntryFilter, ProductTypeFilter, \
-    TestTypeFilter, DevelopmentEnvironmentFilter, EngineerFilter
-from tools.factory import import_parser_factory
-from tools.nessus.parser import NessusCSVParser
-from tools.nexpose.parser import NexposeFullXmlParser
-from tools.burp.parser import BurpXmlParser
-from tools.veracode.parser import VeracodeXMLParser
-from tools.zap.parser import ZapXmlParser
+from dojo.tools.factory import import_parser_factory
+from dojo.utils import get_page_items, add_breadcrumb, findings_this_period, opened_in_period, handle_uploaded_threat, \
+    FileIterWrapper, get_cal_event, template_search_helper, count_findings, get_period_counts, get_punchcard_data, \
+    message, get_alerts
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -66,7 +59,6 @@ logging.basicConfig(
     filename=settings.DOJO_ROOT + '/../django_app.log',
 )
 logger = logging.getLogger(__name__)
-
 
 """
 Greg
@@ -112,10 +104,12 @@ def engineer_metrics(request):
     users = EngineerFilter(request.GET,
                            queryset=users)
     paged_users = get_page_items(request, users, 15)
+
+    add_breadcrumb(title="Engineer Metrics", top_level=True, request=request)
+
     return render(request,
                   'dojo/engineer_metrics.html',
-                  {'users': paged_users,
-                   'breadcrumbs': get_breadcrumbs(title="Engineer Metrics", user=request.user)})
+                  {'users': paged_users})
 
 
 """
@@ -390,6 +384,8 @@ def view_engineer(request, eid):
 
     details = sorted(details, key=lambda x: x[2])
 
+    add_breadcrumb(title="%s Metrics" % user.get_full_name(), top_level=False, request=request)
+
     return render(request, 'dojo/view_engineer.html', {
         'open_month': open_month,
         'a_month': accepted_month,
@@ -421,9 +417,6 @@ def view_engineer(request, eid):
         'week_chart_data': week_chart_data,
         'week_a_chart_data': week_a_chart_data,
         'name': '%s Metrics' % user.get_full_name(),
-        'breadcrumbs': get_breadcrumbs(
-            title="%s Metrics" % user.get_full_name(),
-            user=request.user),
         'metric': True,
         'total_update': total_update,
         'details': details,
@@ -476,14 +469,14 @@ def open_findings(request):
         if len(p) == 1:
             product_type = get_object_or_404(Product_Type, id=p[0])
 
+    add_breadcrumb(title="Open findings", top_level='all' in request.GET, request=request)
+
     return render(request,
                   'dojo/open_findings.html',
                   {"findings": paged_findings,
                    "filtered": findings,
                    "title_words": title_words,
-                   'breadcrumbs': get_breadcrumbs(obj=product_type,
-                                                  title="Open findings",
-                                                  user=request.user)})
+                   })
 
 
 """
@@ -512,13 +505,14 @@ def accepted_findings(request):
     title_words = sorted(set(title_words))
     paged_findings = get_page_items(request, findings, 25)
 
+    add_breadcrumb(title="Accepted findings", top_level='all' in request.GET, request=request)
+
     return render(request,
                   'dojo/accepted_findings.html',
                   {"findings": paged_findings,
                    "filtered": findings,
                    "title_words": title_words,
-                   'breadcrumbs': get_breadcrumbs(title="Accepted findings",
-                                                  user=request.user)})
+                   })
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -531,13 +525,13 @@ def closed_findings(request):
 
     title_words = sorted(set(title_words))
     paged_findings = get_page_items(request, findings, 25)
+    add_breadcrumb(title="Closed findings", top_level='all' in request.GET, request=request)
     return render(request,
                   'dojo/closed_findings.html',
                   {"findings": paged_findings,
                    "filtered": findings,
                    "title_words": title_words,
-                   'breadcrumbs': get_breadcrumbs(title="Closed findings",
-                                                  user=request.user)})
+                   })
 
 
 """
@@ -554,149 +548,16 @@ def all_product_findings(request, pid):
                                         active=True,
                                         verified=True))
     page = get_page_items(request, result, 25)
+
+    add_breadcrumb(title="Open findings", top_level=False, request=request)
+
     return render(request,
                   "dojo/all_product_findings.html",
                   {"findings": page,
                    "pid": pid,
                    "filtered": result,
                    "user": request.user,
-                   "breadcrumbs": get_breadcrumbs(obj=p, title="Findings", user=request.user)})
-
-
-"""
-Michael & Fatima:
-Helper function for metrics
-Counts the number of findings and the count for the products for each level of
-severity for a given finding querySet
-"""
-
-
-def count_findings(findings):
-    product_count = {}
-    finding_count = {'low': 0, 'med': 0, 'high': 0, 'crit': 0}
-    for f in findings:
-        product = f.test.engagement.product
-        if product in product_count:
-            product_count[product][4] += 1
-            if f.severity == 'Low':
-                product_count[product][3] += 1
-                finding_count['low'] += 1
-            if f.severity == 'Medium':
-                product_count[product][2] += 1
-                finding_count['med'] += 1
-            if f.severity == 'High':
-                product_count[product][1] += 1
-                finding_count['high'] += 1
-            if f.severity == 'Critical':
-                product_count[product][0] += 1
-                finding_count['crit'] += 1
-        else:
-            product_count[product] = [0, 0, 0, 0, 0]
-            product_count[product][4] += 1
-            if f.severity == 'Low':
-                product_count[product][3] += 1
-                finding_count['low'] += 1
-            if f.severity == 'Medium':
-                product_count[product][2] += 1
-                finding_count['med'] += 1
-            if f.severity == 'High':
-                product_count[product][1] += 1
-                finding_count['high'] += 1
-            if f.severity == 'Critical':
-                product_count[product][0] += 1
-                finding_count['crit'] += 1
-    return product_count, finding_count
-
-
-def findings_this_period(findings, periodType, stuff, o_stuff, a_stuff):
-    # periodType: 0 - weeks
-    # 1 - months
-    now = localtz.localize(datetime.today())
-    for i in range(6):
-        counts = []
-        # Weeks start on Monday
-        if periodType == 0:
-            curr = now - relativedelta(weeks=i)
-            start_of_period = curr - relativedelta(weeks=1, weekday=0,
-                                                   hour=0, minute=0, second=0)
-            end_of_period = curr + relativedelta(weeks=0, weekday=0, hour=0,
-                                                 minute=0, second=0)
-        else:
-            curr = now - relativedelta(months=i)
-            start_of_period = curr - relativedelta(day=1, hour=0,
-                                                   minute=0, second=0)
-            end_of_period = curr + relativedelta(day=31, hour=23,
-                                                 minute=59, second=59)
-
-        o_count = {'closed': 0, 'zero': 0, 'one': 0, 'two': 0,
-                   'three': 0, 'total': 0}
-        a_count = {'closed': 0, 'zero': 0, 'one': 0, 'two': 0,
-                   'three': 0, 'total': 0}
-        for f in findings:
-            if f.mitigated is not None and end_of_period >= f.mitigated >= start_of_period:
-                o_count['closed'] += 1
-            elif (f.mitigated is not None
-                  and f.mitigated > end_of_period
-                  and f.date <= end_of_period.date()):
-                if f.severity == 'Critical':
-                    o_count['zero'] += 1
-                elif f.severity == 'High':
-                    o_count['one'] += 1
-                elif f.severity == 'Medium':
-                    o_count['two'] += 1
-                elif f.severity == 'Low':
-                    o_count['three'] += 1
-            elif (f.mitigated is None
-                  and f.date <= end_of_period.date()):
-                if f.severity == 'Critical':
-                    o_count['zero'] += 1
-                elif f.severity == 'High':
-                    o_count['one'] += 1
-                elif f.severity == 'Medium':
-                    o_count['two'] += 1
-                elif f.severity == 'Low':
-                    o_count['three'] += 1
-            elif (f.mitigated is None
-                  and f.date <= end_of_period.date()):
-                if f.severity == 'Critical':
-                    a_count['zero'] += 1
-                elif f.severity == 'High':
-                    a_count['one'] += 1
-                elif f.severity == 'Medium':
-                    a_count['two'] += 1
-                elif f.severity == 'Low':
-                    a_count['three'] += 1
-
-        total = sum(o_count.values()) - o_count['closed']
-        if periodType == 0:
-            counts.append(
-                start_of_period.strftime("%b %d") + " - " +
-                end_of_period.strftime("%b %d"))
-        else:
-            counts.append(start_of_period.strftime("%b %Y"))
-        counts.append(o_count['zero'])
-        counts.append(o_count['one'])
-        counts.append(o_count['two'])
-        counts.append(o_count['three'])
-        counts.append(total)
-        counts.append(o_count['closed'])
-
-        stuff.append(counts)
-        o_stuff.append(counts[:-1])
-
-        a_counts = []
-        a_total = sum(a_count.values())
-        if periodType == 0:
-            a_counts.append(start_of_period.strftime("%b %d") + " - "
-                            + end_of_period.strftime("%b %d"))
-        else:
-            a_counts.append(start_of_period.strftime("%b %Y"))
-        a_counts.append(a_count['zero'])
-        a_counts.append(a_count['one'])
-        a_counts.append(a_count['two'])
-        a_counts.append(a_count['three'])
-        a_counts.append(a_total)
-        a_stuff.append(a_counts)
+                   })
 
 
 """
@@ -752,9 +613,10 @@ def research_metrics(request):
         else:
             time_to_close[sev] = 'N/A'
 
+    add_breadcrumb(title="Security Research Metrics", top_level=True, request=request)
+
     return render(request, 'dojo/research_metrics.html', {
         'user': request.user,
-        'breadcrumbs': get_breadcrumbs(title="Security Research Metrics", user=request.user),
         'month_all_by_product': month_all_by_product,
         'month_verified_by_product': month_verified_by_product,
         'remaining_by_product': remaining_by_product,
@@ -833,125 +695,15 @@ def simple_metrics(request):
 
         findings_by_product_type[pt] = findings_broken_out
 
+    add_breadcrumb(title="Simple Metrics", top_level=True, request=request)
+
     return render(request, 'dojo/simple_metrics.html', {
         'findings': findings_by_product_type,
         'name': 'Simple Metrics',
-        'breadcrumbs': get_breadcrumbs(title="Simple Metrics", user=request.user),
         'metric': True,
         'user': request.user,
         'form': form,
     })
-
-
-def get_punchcard_data(findings, weeks_between, start_date):
-    punchcard = list()
-    ticks = list()
-    highest_count = 0
-    tick = 0
-    week_count = 1
-
-    # mon 0, tues 1, wed 2, thurs 3, fri 4, sat 5, sun 6
-    # sat 0, sun 6, mon 5, tue 4, wed 3, thur 2, fri 1
-    day_offset = {0: 5, 1: 4, 2: 3, 3: 2, 4: 1, 5: 0, 6: 6}
-    for x in range(-1, weeks_between):
-        # week starts the monday before
-        new_date = start_date + relativedelta(weeks=x, weekday=MO(1))
-        end_date = new_date + relativedelta(weeks=1)
-        append_tick = True
-        days = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0}
-        for finding in findings:
-            if new_date.date() < finding.date <= end_date.date():
-                # [0,0,(20*.02)]
-                # [week, day, weight]
-                days[day_offset[finding.date.weekday()]] += 1
-                if days[day_offset[finding.date.weekday()]] > highest_count:
-                    highest_count = days[day_offset[finding.date.weekday()]]
-
-        if sum(days.values()) > 0:
-            for day, count in days.items():
-                punchcard.append([tick, day, count])
-                if append_tick:
-                    ticks.append([tick, new_date.strftime("<span class='small'>%m/%d<br/>%Y</span>")])
-                    append_tick = False
-            tick += 1
-        week_count += 1
-    # adjust the size
-    ratio = (sqrt(highest_count / pi))
-    for punch in punchcard:
-        punch[2] = (sqrt(punch[2] / pi)) / ratio
-
-    return punchcard, ticks, highest_count
-
-
-def get_period_counts(findings, findings_closed, accepted_findings, period_interval, start_date,
-                      relative_delta='months'):
-    opened_in_period = list()
-    accepted_in_period = list()
-    opened_in_period.append(['Timestamp', 'Date', 'S0', 'S1', 'S2',
-                             'S3', 'Total', 'Closed'])
-    accepted_in_period.append(['Timestamp', 'Date', 'S0', 'S1', 'S2',
-                               'S3', 'Total', 'Closed'])
-
-    for x in range(-1, period_interval):
-        if relative_delta == 'months':
-            # make interval the first through last of month
-            end_date = (start_date + relativedelta(months=x)) + relativedelta(day=1, months=+1, days=-1)
-            new_date = (start_date + relativedelta(months=x)) + relativedelta(day=1)
-        else:
-            # week starts the monday before
-            new_date = start_date + relativedelta(weeks=x, weekday=MO(1))
-            end_date = new_date + relativedelta(weeks=1, weekday=MO(1))
-
-        closed_in_range_count = findings_closed.filter(mitigated__range=[new_date, end_date]).count()
-
-        if accepted_findings:
-            risks_a = accepted_findings.filter(
-                risk_acceptance__created__range=[datetime(new_date.year,
-                                                          new_date.month, 1,
-                                                          tzinfo=localtz),
-                                                 datetime(new_date.year,
-                                                          new_date.month,
-                                                          monthrange(new_date.year,
-                                                                     new_date.month)[1],
-                                                          tzinfo=localtz)])
-        else:
-            risks_a = None
-
-        crit_count, high_count, med_count, low_count, closed_count = [0, 0, 0, 0, 0]
-        for finding in findings:
-            if new_date.date() <= finding.date <= end_date.date():
-                if finding.severity == 'Critical':
-                    crit_count += 1
-                elif finding.severity == 'High':
-                    high_count += 1
-                elif finding.severity == 'Medium':
-                    med_count += 1
-                elif finding.severity == 'Low':
-                    low_count += 1
-
-        total = crit_count + high_count + med_count + low_count
-        opened_in_period.append(
-            [(tcalendar.timegm(new_date.timetuple()) * 1000), new_date, crit_count, high_count, med_count, low_count,
-             total, closed_in_range_count])
-        crit_count, high_count, med_count, low_count, closed_count = [0, 0, 0, 0, 0]
-        if risks_a is not None:
-            for finding in risks_a:
-                if finding.severity == 'Critical':
-                    crit_count += 1
-                elif finding.severity == 'High':
-                    high_count += 1
-                elif finding.severity == 'Medium':
-                    med_count += 1
-                elif finding.severity == 'Low':
-                    low_count += 1
-
-        total = crit_count + high_count + med_count + low_count
-        accepted_in_period.append(
-            [(tcalendar.timegm(new_date.timetuple()) * 1000), new_date, crit_count, high_count, med_count, low_count,
-             total])
-
-    return {'opened_per_period': opened_in_period,
-            'accepted_per_period': accepted_in_period}
 
 
 """
@@ -967,11 +719,13 @@ def metrics(request, mtype):
     page_name = 'Product Type Metrics'
     show_pt_filter = True
 
-    findings = Finding.objects.filter(verified=True).prefetch_related('test__engagement__product',
-                                                                      'test__engagement__product__prod_type',
-                                                                      'test__engagement__risk_acceptance',
-                                                                      'risk_acceptance_set',
-                                                                      'reporter').extra(
+    findings = Finding.objects.filter(verified=True,
+                                      severity__in=('Critical', 'High', 'Medium', 'Low', 'Info')).prefetch_related(
+        'test__engagement__product',
+        'test__engagement__product__prod_type',
+        'test__engagement__risk_acceptance',
+        'risk_acceptance_set',
+        'reporter').extra(
         select={
             'ra_count': 'SELECT COUNT(*) FROM dojo_risk_acceptance INNER JOIN '
                         'dojo_risk_acceptance_accepted_findings ON '
@@ -1184,9 +938,10 @@ def metrics(request, mtype):
         page_name = (settings.TEAM_NAME if settings.TEAM_NAME else "") + " Metrics"
         template = 'dojo/dashboard-metrics.html'
 
+    add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
+
     return render(request, template, {
         'name': page_name,
-        'breadcrumbs': get_breadcrumbs(title=page_name, user=request.user),
         'start_date': start_date,
         'end_date': end_date,
         'findings': findings,
@@ -1207,50 +962,6 @@ def metrics(request, mtype):
         'highest_count': highest_count,
         'show_pt_filter': show_pt_filter,
     })
-
-
-def opened_in_period(start_date, end_date, pt):
-    opened_in_period = Finding.objects.filter(date__range=[start_date, end_date],
-                                              test__engagement__product__prod_type=pt,
-                                              verified=True,
-                                              false_p=False,
-                                              duplicate=False,
-                                              out_of_scope=False,
-                                              mitigated__isnull=True,
-                                              severity__in=('Critical', 'High', 'Medium', 'Low')).values(
-        'numerical_severity').annotate(Count('numerical_severity')).order_by('numerical_severity')
-    total_opened_in_period = Finding.objects.filter(date__range=[start_date, end_date],
-                                                    test__engagement__product__prod_type=pt,
-                                                    verified=True,
-                                                    false_p=False,
-                                                    duplicate=False,
-                                                    out_of_scope=False,
-                                                    mitigated__isnull=True,
-                                                    severity__in=(
-                                                        'Critical', 'High', 'Medium', 'Low')).aggregate(
-        total=Sum(
-            Case(When(severity__in=('Critical', 'High', 'Medium', 'Low'),
-                      then=Value(1)),
-                 output_field=IntegerField())))['total']
-
-    oip = {'S0': 0,
-           'S1': 0,
-           'S2': 0,
-           'S3': 0,
-           'Total': total_opened_in_period,
-           'start_date': start_date,
-           'end_date': end_date,
-           'closed': Finding.objects.filter(mitigated__range=[start_date, end_date],
-                                            test__engagement__product__prod_type=pt,
-                                            severity__in=(
-                                                'Critical', 'High', 'Medium', 'Low')).aggregate(total=Sum(
-               Case(When(severity__in=('Critical', 'High', 'Medium', 'Low'), then=Value(1)),
-                    output_field=IntegerField())))['total']}
-
-    for o in opened_in_period:
-        oip[o['numerical_severity']] = o['numerical_severity__count']
-
-    return oip
 
 
 @cache_page(60 * 5)  # cache for 5 minutes
@@ -1395,6 +1106,8 @@ def product_type_counts(request):
             messages.add_message(request, messages.ERROR, "Please choose month and year and the Product Type.",
                                  extra_tags='alert-danger')
 
+    add_breadcrumb(title="Bi-Weekly Metrics", top_level=True, request=request)
+
     return render(request,
                   'dojo/pt_counts.html',
                   {'form': form,
@@ -1406,14 +1119,13 @@ def product_type_counts(request):
                    'overall_in_pt': aip,
                    'all_current_in_pt': all_current_in_pt,
                    'top_ten': top_ten,
-                   'pt': pt,
-                   'breadcrumbs': get_breadcrumbs(title="Bi-Weekly Metrics", user=request.user)})
+                   'pt': pt}
+                  )
 
 
 def home(request):
     if request.user.is_authenticated() and request.user.is_staff:
         return HttpResponseRedirect(reverse('dashboard'))
-
     return HttpResponseRedirect(reverse('metrics'))
 
 
@@ -1427,7 +1139,7 @@ method to complete checklists from the engagement view
 @user_passes_test(lambda u: u.is_staff)
 def complete_checklist(request, eid):
     eng = get_object_or_404(Engagement, id=eid)
-    breadcrumbs = get_breadcrumbs(title="Complete checklist", obj=eng, user=request.user)
+    add_breadcrumb(parent=eng, title="Complete checklist", top_level=False, request=request)
     if request.method == 'POST':
         tests = Test.objects.filter(engagement=eng)
         findings = Finding.objects.filter(test__in=tests).all()
@@ -1460,7 +1172,7 @@ def complete_checklist(request, eid):
                   {'form': form,
                    'eid': eng.id,
                    'findings': findings,
-                   'breadcrumbs': breadcrumbs})
+                   })
 
 
 """
@@ -1495,10 +1207,12 @@ def gmap(request, pid):
                                  messages.ERROR,
                                  'Scan settings not saved.',
                                  extra_tags='alert-danger')
+
+    add_breadcrumb(title="Scan", top_level=False, request=request)
+
     return render(request,
                   'dojo/gmap.html',
                   {'form': form,
-                   'breadcrumbs': get_breadcrumbs(title="Scan", user=request.user),
                    'pid': pid})
 
 
@@ -1547,13 +1261,16 @@ def view_scan(request, sid):
             row = [""]
 
     form = DeleteIPScanForm(instance=scan)
+
+    add_breadcrumb(parent=scan.get_breadcrumbs(), top_level=False, request=request)
+
     return render(
         request,
         'dojo/view_scan.html',
         {'scan': scan,
          'ipScans': ipScans,
-         'form': form,
-         'breadcrumbs': get_breadcrumbs(obj=scan, user=request.user)})
+         'form': form}
+    )
 
 
 """
@@ -1600,13 +1317,15 @@ def view_scan_settings(request, pid, sid):
         if scan.status in ["Running", "Pending"]:
             scan_is_running = True
 
+    add_breadcrumb(parent=scan_settings, top_level=False, request=request)
+
     return render(
         request,
         'dojo/view_scan_settings.html',
         {'scan_settings': scan_settings,
          'scans': scan_settings.scan_set.order_by('id'),
          'scan_is_running': scan_is_running,
-         'breadcrumbs': get_breadcrumbs(obj=scan_settings, user=request.user)})
+         })
 
 
 """
@@ -1640,10 +1359,10 @@ def edit_scan_settings(request, pid, sid):
                                      messages.ERROR,
                                      'Scan settings not saved.',
                                      extra_tags='alert-danger')
+                add_breadcrumb(parent=old_scan, top_level=False, request=request)
                 return render(request,
                               'dojo/edit_scan_settings.html',
                               {'form': form,
-                               'breadcrumbs': get_breadcrumbs(title="Scan", user=request.user),
                                'sid': sid,
                                'pid': pid})
         elif request.POST.get('delete'):
@@ -1658,10 +1377,10 @@ def edit_scan_settings(request, pid, sid):
         form = ScanSettingsForm(instance=old_scan)
     except:
         form = ScanSettingsForm()
+    add_breadcrumb(parent=old_scan, top_level=False, request=request)
     return render(request,
                   'dojo/edit_scan_settings.html',
                   {'form': form,
-                   'breadcrumbs': get_breadcrumbs(obj=old_scan, user=request.user),
                    'sid': sid,
                    'pid': pid})
 
@@ -1677,7 +1396,8 @@ under media folder
 @user_passes_test(lambda u: u.is_staff)
 def upload_threatmodel(request, eid):
     eng = Engagement.objects.get(id=eid)
-    breadcrumbs = get_breadcrumbs(title="Upload a threat model", obj=eng, user=request.user)
+    add_breadcrumb(parent=eng, title="Upload a threat model", top_level=False, request=request)
+
     if request.method == 'POST':
         form = UploadThreatForm(request.POST, request.FILES)
         if form.is_valid():
@@ -1696,7 +1416,7 @@ def upload_threatmodel(request, eid):
                   'dojo/up_threat.html',
                   {'form': form,
                    'eng': eng,
-                   'breadcrumbs': breadcrumbs})
+                   })
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -1777,14 +1497,12 @@ def import_scan_results(request, eid):
                                      messages.ERROR,
                                      'There appears to be an error in the XML report, please check and try again.',
                                      extra_tags='alert-danger')
-
+    add_breadcrumb(parent=engagement, title="Import Scan Results", top_level=False, request=request)
     return render(request,
                   'dojo/import_scan_results.html',
                   {'form': form,
                    'eid': engagement.id,
-                   'breadcrumbs': get_breadcrumbs(title="Import Scan Results",
-                                                  obj=engagement,
-                                                  user=request.user)})
+                   })
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -1922,18 +1640,13 @@ def re_import_scan_results(request, tid):
                                      'There appears to be an error in the XML report, please check and try again.',
                                      extra_tags='alert-danger')
 
+    add_breadcrumb(parent=t, title="Re-upload a %s" % scan_type, top_level=False, request=request)
     return render(request,
                   'dojo/import_scan_results.html',
                   {'form': form,
                    'eid': engagement.id,
                    'additional_message': additional_message,
-                   'breadcrumbs': get_breadcrumbs(title="Re-upload a %s" % scan_type,
-                                                  obj=t,
-                                                  user=request.user)})
-
-
-def message(count, noun, verb):
-    return ('{} ' + noun + '{} {} ' + verb).format(count, pluralize(count), pluralize(count, 'was,were'))
+                   })
 
 
 """
@@ -1983,22 +1696,9 @@ def upload_risk(request, eid):
         form = UploadRiskForm(initial={'reporter': request.user})
 
     form.fields["accepted_findings"].queryset = eng_findings
+    add_breadcrumb(parent=eng, title="Upload Risk Acceptance", top_level=False, request=request)
     return render(request, 'dojo/up_risk.html',
-                  {'eng': eng, 'form': form,
-                   'breadcrumbs': get_breadcrumbs(
-                       title="Upload Risk Acceptance",
-                       obj=eng,
-                       user=request.user)})
-
-
-def handle_uploaded_threat(f, eng):
-    name, extension = os.path.splitext(f.name)
-    with open(settings.MEDIA_ROOT + '/threat/%s%s' % (eng.id, extension),
-              'wb+') as destination:
-        for chunk in f.chunks():
-            destination.write(chunk)
-    eng.tmodel_path = settings.MEDIA_ROOT + '/threat/%s%s' % (eng.id, extension)
-    eng.save()
+                  {'eng': eng, 'form': form})
 
 
 def change_password(request):
@@ -2021,7 +1721,7 @@ def change_password(request):
                              messages.ERROR,
                              'Your password has not been changed.',
                              extra_tags='alert-danger')
-
+    add_breadcrumb(title="Change Password", top_level=False, request=request)
     return render(request, 'dojo/change_pwd.html',
                   {'error': ''})
 
@@ -2060,16 +1760,12 @@ def product(request):
 
     prods = ProductFilter(request.GET, queryset=initial_queryset, user=request.user)
     prod_list = get_page_items(request, prods, 25)
-
+    add_breadcrumb(title="Product List", top_level=not len(request.GET), request=request)
     return render(request,
                   'dojo/product.html',
                   {'prod_list': prod_list,
                    'prods': prods,
                    'name_words': sorted(set(name_words)),
-                   'breadcrumbs': get_breadcrumbs(
-                       obj=product_type,
-                       title="Product list",
-                       user=request.user),
                    'user': request.user})
 
 
@@ -2127,7 +1823,7 @@ def view_product(request, pid):
         weeks_between += 2
 
     punchcard, ticks, highest_count = get_punchcard_data(verified_findings, weeks_between, start_date)
-
+    add_breadcrumb(parent=prod, top_level=False, request=request)
     return render(request,
                   'dojo/view_product.html',
                   {'prod': prod,
@@ -2141,7 +1837,6 @@ def view_product(request, pid):
                    'punchcard': punchcard,
                    'ticks': ticks,
                    'highest_count': highest_count,
-                   'breadcrumbs': get_breadcrumbs(obj=prod, user=request.user),
                    'user': request.user,
                    'authorized': auth})
 
@@ -2151,12 +1846,7 @@ def view_test(request, tid):
     test = Test.objects.get(id=tid)
     notes = test.notes.all()
     person = request.user.username
-    findings = Finding.objects.filter(test=test).filter(
-        Q(severity="Critical") |
-        Q(severity="High") |
-        Q(severity="Medium") |
-        Q(severity="Low") |
-        Q(severity="Info")).order_by("numerical_severity", "-active", "title")
+    findings = Finding.objects.filter(test=test)
     if request.method == 'POST':
         form = NoteForm(request.POST)
         if form.is_valid():
@@ -2175,11 +1865,13 @@ def view_test(request, tid):
 
     fpage = get_page_items(request, findings, 25)
     show_re_upload = any(test.test_type.name in code for code in ImportScanForm.SCAN_TYPE_CHOICES)
+
+    add_breadcrumb(parent=test, top_level=False, request=request)
     return render(request, 'dojo/view_test.html',
                   {'test': test, 'findings': fpage,
                    'form': form, 'notes': notes,
                    'person': person, 'request': request, "show_re_upload": show_re_upload,
-                   'breadcrumbs': get_breadcrumbs(obj=test, user=request.user)})
+                   })
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -2197,10 +1889,12 @@ def edit_test(request, tid):
 
     form.initial['target_start'] = test.target_start.date()
     form.initial['target_end'] = test.target_end.date()
+
+    add_breadcrumb(parent=test, title="Edit", top_level=False, request=request)
     return render(request, 'dojo/edit_test.html',
                   {'test': test,
                    'form': form,
-                   'breadcrumbs': get_breadcrumbs(obj=test, user=request.user)})
+                   })
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -2227,11 +1921,12 @@ def delete_test(request, tid):
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('view_engagement', args=(eng.id,)))
 
+    add_breadcrumb(parent=test, title="Delete", top_level=False, request=request)
     return render(request, 'dojo/delete_test.html',
                   {'test': test,
                    'form': form,
                    'rels': rels,
-                   'breadcrumbs': get_breadcrumbs(obj=test, user=request.user)})
+                   })
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -2303,11 +1998,11 @@ def view_finding(request, fid):
         burp_request = None
         burp_response = None
 
+    add_breadcrumb(parent=finding, top_level=False, request=request)
     return render(request, 'dojo/view_finding.html',
                   {'finding': finding,
                    'burp_request': burp_request,
                    'burp_response': burp_response,
-                   'breadcrumbs': get_breadcrumbs(obj=finding, user=request.user),
                    'user': user, 'notes': notes, 'form': form})
 
 
@@ -2331,7 +2026,9 @@ def close_finding(request, fid):
             finding.mitigated_by = request.user
             finding.last_reviewed = finding.mitigated
             finding.last_reviewed_by = request.user
+            finding.endpoints.clear()
             finding.save()
+
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Finding closed.',
@@ -2341,10 +2038,27 @@ def close_finding(request, fid):
     else:
         form = CloseFindingForm()
 
+    add_breadcrumb(parent=finding, title="Close", top_level=False, request=request)
     return render(request, 'dojo/close_finding.html',
                   {'finding': finding,
-                   'breadcrumbs': get_breadcrumbs(obj=finding, user=request.user),
                    'user': request.user, 'form': form})
+
+
+@user_passes_test(lambda u: u.is_staff)
+def reopen_finding(request, fid):
+    finding = get_object_or_404(Finding, id=fid)
+    finding.active = True
+    finding.mitigated = None
+    finding.mitigated_by = request.user
+    finding.last_reviewed = finding.mitigated
+    finding.last_reviewed_by = request.user
+    finding.save()
+
+    messages.add_message(request,
+                         messages.SUCCESS,
+                         'Finding closed.',
+                         extra_tags='alert-success')
+    return HttpResponseRedirect(reverse('view_finding', args=(finding.id,)))
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -2392,8 +2106,7 @@ def view_threatmodel(request, eid):
     mimetypes.init()
     eng = get_object_or_404(Engagement, pk=eid)
     mimetype, encoding = mimetypes.guess_type(eng.tmodel_path)
-    response = StreamingHttpResponse(
-        FileIterWrapper(open(eng.tmodel_path)))
+    response = StreamingHttpResponse(FileIterWrapper(open(eng.tmodel_path)))
     fileName, fileExtension = os.path.splitext(eng.tmodel_path)
     response['Content-Disposition'] = 'attachment; filename=threatmodel' + fileExtension
     response['Content-Type'] = mimetype
@@ -2501,6 +2214,9 @@ def view_risk(request, eid, raid):
 
     authorized = (request.user == risk_approval.reporter.username
                   or request.user.is_staff)
+
+    add_breadcrumb(parent=risk_approval, top_level=False, request=request)
+
     return render(request, 'dojo/view_risk.html',
                   {'risk_approval': risk_approval,
                    'accepted_findings': fpage,
@@ -2514,9 +2230,7 @@ def view_risk(request, eid, raid):
                    'request': request,
                    'add_findings': add_fpage,
                    'authorized': authorized,
-                   'breadcrumbs': get_breadcrumbs(title="View Risk Acceptance",
-                                                  obj=eng,
-                                                  user=request.user)})
+                   })
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -2542,22 +2256,6 @@ def delete_risk(request, eid, raid):
                          'Risk acceptance deleted successfully.',
                          extra_tags='alert-success')
     return HttpResponseRedirect(reverse("view_engagement", args=(eng.id,)))
-
-
-class FileIterWrapper(object):
-    def __init__(self, flo, chunk_size=1024 ** 2):
-        self.flo = flo
-        self.chunk_size = chunk_size
-
-    def next(self):
-        data = self.flo.read(self.chunk_size)
-        if data:
-            return data
-        else:
-            raise StopIteration
-
-    def __iter__(self):
-        return self
 
 
 def download_risk(request, eid, raid):
@@ -2603,27 +2301,16 @@ def view_engagement(request, eid):
     if request.method == 'POST':
         eng.progress = 'check_list'
         eng.save()
+
+    add_breadcrumb(parent=eng, top_level=False, request=request)
+
     return render(request, 'dojo/view_eng.html',
                   {'eng': eng, 'tests': tests,
                    'check': check, 'threat': eng.tmodel_path,
                    'risk': eng.risk_path, 'form': form,
                    'risks_accepted': risks_accepted,
                    'can_add_risk': len(eng_findings),
-                   'breadcrumbs': get_breadcrumbs(obj=eng, user=request.user)})
-
-
-def get_cal_event(start_date, end_date, summary, description, uid):
-    cal = vobject.iCalendar()
-    cal.add('vevent')
-    cal.vevent.add('summary').value = summary
-    cal.vevent.add(
-        'description').value = description
-    start = cal.vevent.add('dtstart')
-    start.value = start_date
-    end = cal.vevent.add('dtend')
-    end.value = end_date
-    cal.vevent.add('uid').value = uid
-    return cal
+                   })
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -2679,9 +2366,9 @@ def new_product(request):
             return HttpResponseRedirect(reverse('view_product', args=(product.id,)))
     else:
         form = ProductForm()
+    add_breadcrumb(title="New Product", top_level=False, request=request)
     return render(request, 'dojo/new_product.html',
-                  {'form': form,
-                   'breadcrumbs': get_breadcrumbs(title="New Product", user=request.user)})
+                  {'form': form})
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -2699,13 +2386,14 @@ def edit_product(request, pid):
     else:
         form = ProductForm(instance=prod,
                            initial={'auth_users': prod.authorized_users.all()})
+
+    add_breadcrumb(parent=prod, title="Edit", top_level=False, request=request)
+
     return render(request,
                   'dojo/edit_product.html',
                   {'form': form,
                    'product': prod,
-                   'breadcrumbs': get_breadcrumbs(title="Edit product",
-                                                  obj=prod,
-                                                  user=request.user)})
+                   })
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -2731,11 +2419,13 @@ def delete_product(request, pid):
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('product'))
 
+    add_breadcrumb(parent=product, title="Delete", top_level=False, request=request)
+
     return render(request, 'dojo/delete_product.html',
                   {'product': product,
                    'form': form,
                    'rels': rels,
-                   'breadcrumbs': get_breadcrumbs(title="Delete Product", obj=product, user=request.user)})
+                   })
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -2753,12 +2443,15 @@ def engagement(request):
                      ~Q(engagement=None),
                      engagement__active=True, ).distinct()
                  for engagement in product.engagement_set.all()]
+
+    add_breadcrumb(title="Active Engagements", top_level=not len(request.GET), request=request)
+
     return render(request, 'dojo/engagement.html',
                   {'products': prods,
                    'filtered': filtered,
                    'name_words': sorted(set(name_words)),
                    'eng_words': sorted(set(eng_words)),
-                   'breadcrumbs': get_breadcrumbs(title="Active engagements", user=request.user)})
+                   })
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -2780,9 +2473,10 @@ def new_engagement(request):
     else:
         form = EngForm2()
 
+    add_breadcrumb(title="New Engagement", top_level=False, request=request)
     return render(request, 'dojo/new_eng.html',
                   {'form': form,
-                   'breadcrumbs': get_breadcrumbs(title="New Engagement", user=request.user)})
+                   })
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -2802,11 +2496,10 @@ def edit_engagement(request, eid):
                 return HttpResponseRedirect(reverse('view_engagement', args=(eng.id,)))
     else:
         form = EngForm2(instance=eng)
+    add_breadcrumb(parent=eng, title="Edit Engagement", top_level=False, request=request)
     return render(request, 'dojo/new_eng.html',
                   {'form': form, 'edit': True,
-                   'breadcrumbs': get_breadcrumbs(title="Edit Engagement",
-                                                  obj=eng,
-                                                  user=request.user)})
+                   })
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -2833,11 +2526,13 @@ def delete_engagement(request, eid):
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('view_product', args=(product.id,)))
 
+    add_breadcrumb(parent=engagement, title="Delete", top_level=False, request=request)
+
     return render(request, 'dojo/delete_engagement.html',
                   {'engagement': engagement,
                    'form': form,
                    'rels': rels,
-                   'breadcrumbs': get_breadcrumbs(title="Delete Engagement", obj=engagement, user=request.user)})
+                   })
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -2863,11 +2558,12 @@ def new_eng_for_app(request, pid):
                 return HttpResponseRedirect(reverse('view_engagement', args=(new_eng.id,)))
     else:
         form = EngForm(initial={})
+
+    add_breadcrumb(parent=prod, title="New Engagement", top_level=False, request=request)
+
     return render(request, 'dojo/new_eng.html',
                   {'form': form, 'pid': pid,
-                   'breadcrumbs': get_breadcrumbs(title="New Engagement",
-                                                  obj=prod,
-                                                  user=request.user)})
+                   })
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -2891,26 +2587,9 @@ def add_tests(request, eid):
                 return HttpResponseRedirect(reverse('view_engagement', args=(eng.id,)))
     else:
         form = TestForm()
+    add_breadcrumb(parent=eng, title="Add Tests", top_level=False, request=request)
     return render(request, 'dojo/add_tests.html',
-                  {'form': form, 'eid': eid,
-                   'breadcrumbs': get_breadcrumbs(title="Add Tests", obj=eng, user=request.user)})
-
-
-def calc(request, last_month):
-    last_month = int(last_month)
-    findings = Finding.objects.filter(
-        active=True, verified=True, mitigated__isnull=True)
-    findings = findings.filter(Q(severity="Critical")
-                               | Q(severity="High")
-                               | Q(severity="Medium")
-                               | Q(severity="Low"))
-    count = 0
-    for find in findings:
-        count += 1
-        if count >= last_month:
-            find.date = datetime.now(tz=localtz).date()
-            find.save()
-    return HttpResponseRedirect(reverse('login'))
+                  {'form': form, 'eid': eid})
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -2953,7 +2632,7 @@ def add_findings(request, tid):
                                  messages.ERROR,
                                  'The form has errors, please correct them below.',
                                  extra_tags='alert-danger')
-
+    add_breadcrumb(parent=test, title="Add Finding", top_level=False, request=request)
     return render(request, 'dojo/add_findings.html',
                   {'form': form,
                    'findings': findings,
@@ -2961,9 +2640,7 @@ def add_findings(request, tid):
                    'temp': False,
                    'tid': tid,
                    'form_error': form_error,
-                   'breadcrumbs': get_breadcrumbs(title="Add finding",
-                                                  obj=test,
-                                                  user=request.user)})
+                   })
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -3002,6 +2679,8 @@ def add_temp_finding(request, tid, fid):
     else:
         form = FindingForm(instance=finding, initial={'is_template': False, 'active': False, 'verified': False,
                                                       'false_p': False, 'duplicate': False, 'out_of_scope': False})
+
+    add_breadcrumb(parent=test, title="Add Finding", top_level=False, request=request)
     return render(request, 'dojo/add_findings.html',
                   {'form': form,
                    'findings': findings,
@@ -3009,9 +2688,7 @@ def add_temp_finding(request, tid, fid):
                    'fid': finding.id,
                    'tid': test.id,
                    'test': test,
-                   'breadcrumbs': get_breadcrumbs(title="Add finding",
-                                                  obj=test,
-                                                  user=request.user)})
+                   })
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -3055,12 +2732,11 @@ def edit_finding(request, fid):
     else:
         form.fields['endpoints'].queryset = finding.endpoints.all()
 
+    add_breadcrumb(parent=finding, title="Edit", top_level=False, request=request)
     return render(request, 'dojo/edit_findings.html',
                   {'form': form,
                    'finding': finding,
-                   'breadcrumbs': get_breadcrumbs(title="Edit finding",
-                                                  obj=finding,
-                                                  user=request.user)})
+                   })
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -3131,7 +2807,7 @@ def product_endpoint_report(request, pid):
         pass  # user is authorized for this product
     else:
         raise PermissionDenied
-    breadcrumbs = get_breadcrumbs(obj=product, title="Vulnerable Product Endpoints Report", user=request.user)
+    add_breadcrumb(parent=product, title="Vulnerable Product Endpoints Report", top_level=False, request=request)
     endpoints = EndpointReportFilter(request.GET, queryset=endpoints)
     paged_endpoints = get_page_items(request, endpoints, 25)
     report_format = request.GET.get('report_type', 'AsciiDoc')
@@ -3156,7 +2832,7 @@ def product_endpoint_report(request, pid):
                            'include_table_of_contents': include_table_of_contents,
                            'user': request.user,
                            'title': 'Generate Report',
-                           'breadcrumbs': breadcrumbs})
+                           })
         elif report_format == 'PDF':
             if len(endpoints) <= 50:
                 return render_to_pdf_response(request,
@@ -3188,7 +2864,7 @@ def product_endpoint_report(request, pid):
                   {"endpoints": paged_endpoints,
                    "filtered": endpoints,
                    "name": "Vulnerable Product Endpoints",
-                   'breadcrumbs': breadcrumbs})
+                   })
 
 
 def generate_report(request, obj):
@@ -3221,7 +2897,7 @@ def generate_report(request, obj):
     include_table_of_contents = int(request.GET.get('include_table_of_contents', 0))
     generate = "_generate" in request.GET
 
-    breadcrumbs = get_breadcrumbs(obj=obj, title="Generate Report", user=request.user)
+    add_breadcrumb(title="Generate Report", top_level=False, request=request)
     if type(obj).__name__ == "Product_Type":
         product_type = obj
         findings = ReportFindingFilter(request.GET, queryset=Finding.objects.filter(
@@ -3249,7 +2925,6 @@ def generate_report(request, obj):
     elif type(obj).__name__ == "QuerySet":
         findings = ReportAuthedFindingFilter(request.GET, queryset=obj.distinct(), user=request.user)
         filename = "finding_report.pdf"
-        breadcrumbs = get_breadcrumbs(title="Generate Report", user=request.user)
     else:
         raise Http404()
 
@@ -3268,7 +2943,7 @@ def generate_report(request, obj):
                            'include_table_of_contents': include_table_of_contents,
                            'user': user,
                            'title': 'Generate Report',
-                           'breadcrumbs': breadcrumbs})
+                           })
         elif report_format == 'PDF':
             if len(findings) <= 150:
                 return render_to_pdf_response(request,
@@ -3302,7 +2977,7 @@ def generate_report(request, obj):
                    'endpoint': endpoint,
                    'findings': findings,
                    'paged_findings': paged_findings,
-                   'breadcrumbs': breadcrumbs})
+                   })
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -3317,65 +2992,13 @@ def mktemplate(request, fid):
     return HttpResponseRedirect(reverse('view_finding', args=(finding.id,)))
 
 
-def named_month(month_number):
-    """
-    Return the name of the month, given the number.
-    """
-    return date(1900, month_number, 1).strftime("%B")
-
-
 @user_passes_test(lambda u: u.is_staff)
 @cache_page(60 * 5)  # cache for 5 minutes
 def calendar(request):
     engagements = Engagement.objects.all()
+    add_breadcrumb(title="Calendar", top_level=True, request=request)
     return render(request, 'dojo/calendar.html', {
-        'engagements': engagements,
-        'breadcrumbs': get_breadcrumbs(title="Calendar", user=request.user)})
-
-
-def normalize_query(query_string,
-                    findterms=re.compile(r'"([^"]+)"|(\S+)').findall,
-                    normspace=re.compile(r'\s{2,}').sub):
-    return [normspace(' ',
-                      (t[0] or t[1]).strip()) for t in findterms(query_string)]
-
-
-def build_query(query_string, search_fields):
-    """ Returns a query, that is a combination of Q objects. That combination
-    aims to search keywords within a model by testing the given search fields.
-
-    """
-    query = None  # Query to search for every search term
-    terms = normalize_query(query_string)
-    for term in terms:
-        or_query = None  # Query to search for a given term in each field
-        for field_name in search_fields:
-            q = Q(**{"%s__icontains" % field_name: term})
-
-            if or_query:
-                or_query = or_query | q
-            else:
-                or_query = q
-
-        if query:
-            query = query & or_query
-        else:
-            query = or_query
-    return query
-
-
-def template_search_helper(fields=None, query_string=None):
-    if not fields:
-        fields = ['title', 'description', ]
-    findings = Finding.objects.filter(is_template=True).distinct()
-
-    if not query_string:
-        return findings
-
-    entry_query = build_query(query_string, fields)
-    found_entries = findings.filter(entry_query)
-
-    return found_entries
+        'engagements': engagements})
 
 
 def search(request, tid):
@@ -3395,93 +3018,6 @@ def search(request, tid):
                   {'query_string': query_string,
                    'found_entries': found_entries,
                    'tid': tid})
-
-
-def get_breadcrumbs(obj=None, active=True, title=None, user=None):
-    """Breadcrumb structure
-    active: T/F
-    title
-    link
-    """
-    result = [{"active": False,
-               "title": "Home",
-               "link": reverse('home')}]
-
-    if title is None:
-        if type(obj).__name__ == "Product_Type":
-            p = Product_Type.objects.get(id=obj.id)
-            result.append({"active": False,
-                           "title": p.name,
-                           "link": reverse('product_type') if user and user.is_staff else None})
-        elif type(obj).__name__ == "Product":
-            p = Product.objects.get(id=obj.id)
-            result = get_breadcrumbs(p.prod_type, True, user=user)
-            result.append({"active": False,
-                           "title": "Product",
-                           "link": reverse('product')})
-            result.append({"active": active,
-                           "title": obj.name,
-                           "link": reverse("view_product", args=(obj.id,))})
-
-        elif type(obj).__name__ == "Engagement":
-            p = Product.objects.get(id=obj.product_id)
-            result = get_breadcrumbs(p, False, user=user)
-            result.append({"active": active,
-                           "title": obj,
-                           "link": reverse('view_engagement', args=(obj.id,)) if user and user.is_staff else None})
-        elif type(obj).__name__ == "Endpoint":
-            p = Product.objects.get(id=obj.product.id)
-            result = get_breadcrumbs(p, False, user=user)
-            result.append({"active": False,
-                           "title": "Endpoint",
-                           "link": reverse('endpoints') + "?product=" + str(p.id)})
-            result.append({"active": active,
-                           "title": str(obj)[:70],
-                           "link": reverse('view_endpoint', args=(obj.id,))})
-        elif type(obj).__name__ == "Test":
-            e = Engagement.objects.get(id=obj.engagement_id)
-            result = get_breadcrumbs(e, False, user=user)
-            result.append({"active": active,
-                           "title": obj,
-                           "link": reverse('view_test', args=(obj.id,)) if user and user.is_staff else None})
-
-        elif type(obj).__name__ == "Finding":
-            t = Test.objects.get(id=obj.test_id)
-            result = get_breadcrumbs(t, False, user=user)
-            result.append({"active": True,
-                           "title": obj.title,
-                           "link": reverse('view_finding', args=(obj.id,))})
-        elif type(obj).__name__ == "ScanSettings":
-            result = get_breadcrumbs(obj.product, False, user=user)
-            result.append({"active": active,
-                           "title": "%s Scan Settings" % obj.frequency,
-                           "link": reverse('view_scan_settings', args=(obj.product.id, obj.id,))})
-        elif type(obj).__name__ == "Scan":
-            result = get_breadcrumbs(obj.scan_settings, False, user=user)
-            result.append({"active": active,
-                           "title": "%s Scan on %s" % (
-                               obj.protocol,
-                               obj.date.astimezone(localtz).strftime(
-                                   "%b. %d, %Y, %I:%M %p")),
-                           "link": reverse('view_scan', args=(obj.id,))})
-        elif type(obj).__name__ == "User" or type(obj).__name__ == "Dojo_User":
-            result.append({"active": False,
-                           "title": "Users",
-                           "link": reverse('users')})
-            result.append({"active": active,
-                           "title": obj.username,
-                           "link": ""})
-        else:
-            result.append({"active": True,
-                           "title": title,
-                           "link": ""})
-    else:
-        if obj:
-            result = get_breadcrumbs(obj, False, user=user)
-        result.append({"active": True,
-                       "title": title,
-                       "link": ""})
-    return result
 
 
 """
@@ -3526,8 +3062,7 @@ def simple_search(request):
                            Q(finding__description__icontains=qy) |
                            Q(finding__references__icontains=qy) |
                            Q(finding__mitigation__icontains=qy) |
-                           Q(finding__impact__icontains=qy) |
-                           Q(finding__endpoint__icontains=qy)), Q.OR)
+                           Q(finding__impact__icontains=qy)), Q.OR)
 
                 for ip in ip_addresses:
                     q.add(Q(finding__endpoint__icontains=ip), Q.OR)
@@ -3537,7 +3072,6 @@ def simple_search(request):
                     q.add(Q(finding__title__icontains=dash_query) |
                           Q(finding__url__icontains=dash_query) |
                           Q(finding__description__icontains=dash_query) |
-                          Q(finding__endpoint__icontains=dash_query) |
                           Q(finding__references__icontains=dash_query) |
                           Q(finding__mitigation__icontains=dash_query) |
                           Q(finding__impact__icontains=dash_query) |
@@ -3553,8 +3087,7 @@ def simple_search(request):
                        Q(description__icontains=qy) |
                        Q(references__icontains=qy) |
                        Q(mitigation__icontains=qy) |
-                       Q(impact__icontains=qy) |
-                       Q(endpoint__icontains=qy)), Q.OR)
+                       Q(impact__icontains=qy)), Q.OR)
             for ip in ip_addresses:
                 q.add(Q(endpoint__icontains=ip) | Q(references__icontains=ip),
                       Q.OR)
@@ -3564,7 +3097,6 @@ def simple_search(request):
                 q.add(Q(title__icontains=dash_query) |
                       Q(url__icontains=dash_query) |
                       Q(description__icontains=dash_query) |
-                      Q(endpoint__icontains=dash_query) |
                       Q(references__icontains=dash_query) |
                       Q(mitigation__icontains=dash_query) |
                       Q(impact__icontains=dash_query) |
@@ -3593,14 +3125,13 @@ def simple_search(request):
                         request.user])
         else:
             form = SimpleSearchForm()
-
+        add_breadcrumb(title="Simple Search", top_level=True, request=request)
         response = render(request, 'dojo/simple_search.html', {
             'clean_query': clean_query,
             'tests': tests,
             'findings': findings,
             'products': products,
             'name': 'Simple Search',
-            'breadcrumbs': get_breadcrumbs(title="Simple Search", user=request.user),
             'metric': False,
             'user': request.user,
             'form': form})
@@ -3616,28 +3147,36 @@ def simple_search(request):
 
 def api_key(request):
     api_key = ''
+    form = APIKeyForm(instance=request.user)
     if request.method == 'POST':  # new key requested
-        try:
-            api_key = ApiKey.objects.get(user=request.user)
-            api_key.key = None
-            api_key.save()
-        except ApiKey.DoesNotExist:
-            api_key = ApiKey.objects.create(user=request.user)
-        messages.add_message(request,
-                             messages.SUCCESS,
-                             'API Key generated successfully.',
-                             extra_tags='alert-success')
+        form = APIKeyForm(request.POST, instance=request.user)
+        if form.is_valid() and form.cleaned_data['id'] == request.user.id:
+            try:
+                api_key = ApiKey.objects.get(user=request.user)
+                api_key.key = None
+                api_key.save()
+            except ApiKey.DoesNotExist:
+                api_key = ApiKey.objects.create(user=request.user)
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'API Key generated successfully.',
+                                 extra_tags='alert-success')
+        else:
+            raise PermissionDenied
     else:
         try:
             api_key = ApiKey.objects.get(user=request.user)
         except ApiKey.DoesNotExist:
             api_key = ApiKey.objects.create(user=request.user)
+
+    add_breadcrumb(title="API Key", top_level=True, request=request)
+
     return render(request, 'dojo/api_key.html',
                   {'name': 'API Key',
-                   'breadcrumbs': get_breadcrumbs(title="API Key", user=request.user),
                    'metric': False,
                    'user': request.user,
                    'key': api_key,
+                   'form': form,
                    })
 
 
@@ -3649,15 +3188,20 @@ Product Type views
 
 
 def product_type(request):
-    ptl = ProductTypeFilter(request.GET, queryset=Product_Type.objects.all().order_by('name'))
+    initial_queryset = Product_Type.objects.all().order_by('name')
+    name_words = [product.name for product in
+                  initial_queryset]
+
+    ptl = ProductTypeFilter(request.GET, queryset=initial_queryset)
     pts = get_page_items(request, ptl, 25)
+    add_breadcrumb(title="Product Type List", top_level=True, request=request)
     return render(request, 'dojo/product_type.html', {
         'name': 'Product Type List',
-        'breadcrumbs': get_breadcrumbs(title="Product Type List", user=request.user),
         'metric': False,
         'user': request.user,
         'pts': pts,
-        'ptl': ptl})
+        'ptl': ptl,
+        'name_words': name_words})
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -3672,10 +3216,9 @@ def add_product_type(request):
                                  'Product type added successfully.',
                                  extra_tags='alert-success')
             return HttpResponseRedirect(reverse('product_type'))
-
+    add_breadcrumb(title="Add Product Type", top_level=False, request=request)
     return render(request, 'dojo/new_product_type.html', {
         'name': 'Add Product Type',
-        'breadcrumbs': get_breadcrumbs(title="Add Product Type", user=request.user),
         'metric': False,
         'user': request.user,
         'form': form,
@@ -3695,10 +3238,9 @@ def edit_product_type(request, ptid):
                                  'Product type updated successfully.',
                                  extra_tags='alert-success')
             return HttpResponseRedirect(reverse('product_type'))
-
+    add_breadcrumb(title="Edit Product Type", top_level=False, request=request)
     return render(request, 'dojo/edit_product_type.html', {
         'name': 'Edit Product Type',
-        'breadcrumbs': get_breadcrumbs(title="Edit Product Type", user=request.user),
         'metric': False,
         'user': request.user,
         'form': form,
@@ -3709,11 +3251,10 @@ def edit_product_type(request, ptid):
 def add_product_to_product_type(request, ptid):
     pt = get_object_or_404(Product_Type, pk=ptid)
     form = Product_TypeProductForm(initial={'prod_type': pt})
+    add_breadcrumb(title="New %s Product" % pt.name, top_level=False, request=request)
     return render(request, 'dojo/new_product.html',
                   {'form': form,
-                   'breadcrumbs': get_breadcrumbs(
-                       title="New %s Product" % pt.name,
-                       user=request.user)})
+                   })
 
 
 """
@@ -3725,16 +3266,19 @@ Test Type views
 
 @user_passes_test(lambda u: u.is_staff)
 def test_type(request):
-    test_types = TestTypeFilter(request.GET, queryset=Test_Type.objects.all().order_by('name'))
+    initial_queryset = Test_Type.objects.all().order_by('name')
+    name_words = [tt.name for tt in
+                  initial_queryset]
+    test_types = TestTypeFilter(request.GET, queryset=initial_queryset)
     tts = get_page_items(request, test_types, 25)
-
+    add_breadcrumb(title="Test Type List", top_level=True, request=request)
     return render(request, 'dojo/test_type.html', {
         'name': 'Test Type List',
-        'breadcrumbs': get_breadcrumbs(title="Test Type List", user=request.user),
         'metric': False,
         'user': request.user,
         'tts': tts,
-        'test_types': test_types})
+        'test_types': test_types,
+        'name_words': name_words})
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -3749,10 +3293,9 @@ def add_test_type(request):
                                  'Test type added successfully.',
                                  extra_tags='alert-success')
             return HttpResponseRedirect(reverse('test_type'))
-
+    add_breadcrumb(title="Add Test Type", top_level=False, request=request)
     return render(request, 'dojo/new_test_type.html', {
         'name': 'Add Test Type',
-        'breadcrumbs': get_breadcrumbs(title="Add Test Type", user=request.user),
         'metric': False,
         'user': request.user,
         'form': form,
@@ -3773,9 +3316,9 @@ def edit_test_type(request, ptid):
                                  extra_tags='alert-success')
             return HttpResponseRedirect(reverse('test_type'))
 
+    add_breadcrumb(title="Edit Test Type", top_level=False, request=request)
     return render(request, 'dojo/edit_test_type.html', {
         'name': 'Edit Test Type',
-        'breadcrumbs': get_breadcrumbs(title="Edit Test Type", user=request.user),
         'metric': False,
         'user': request.user,
         'form': form,
@@ -3784,16 +3327,19 @@ def edit_test_type(request, ptid):
 
 @user_passes_test(lambda u: u.is_staff)
 def dev_env(request):
-    devs = DevelopmentEnvironmentFilter(request.GET, queryset=Development_Environment.objects.all().order_by('name'))
+    initial_queryset = Development_Environment.objects.all().order_by('name')
+    name_words = [de.name for de in
+                  initial_queryset]
+    devs = DevelopmentEnvironmentFilter(request.GET, queryset=initial_queryset)
     dev_page = get_page_items(request, devs, 25)
-
+    add_breadcrumb(title="Development Environment List", top_level=True, request=request)
     return render(request, 'dojo/dev_env.html', {
         'name': 'Development Environment List',
-        'breadcrumbs': get_breadcrumbs(title="Development Environment List", user=request.user),
         'metric': False,
         'user': request.user,
         'devs': dev_page,
-        'dts': devs})
+        'dts': devs,
+        'name_words': name_words})
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -3808,10 +3354,9 @@ def add_dev_env(request):
                                  'Development environment added successfully.',
                                  extra_tags='alert-success')
             return HttpResponseRedirect(reverse('dev_env'))
-
+    add_breadcrumb(title="Add Development Environment", top_level=False, request=request)
     return render(request, 'dojo/new_dev_env.html', {
         'name': 'Add Development Environment',
-        'breadcrumbs': get_breadcrumbs(title="Add Development Environment", user=request.user),
         'metric': False,
         'user': request.user,
         'form': form,
@@ -3832,10 +3377,9 @@ def edit_dev_env(request, deid):
                 'Development environment updated successfully.',
                 extra_tags='alert-success')
             return HttpResponseRedirect(reverse('dev_env'))
-
+    add_breadcrumb(title="Edit Development Environment", top_level=False, request=request)
     return render(request, 'dojo/edit_dev_env.html', {
         'name': 'Edit Development Environment',
-        'breadcrumbs': get_breadcrumbs(title="Edit Development Environment", user=request.user),
         'metric': False,
         'user': request.user,
         'form': form,
@@ -3853,11 +3397,9 @@ def view_profile(request):
                                  messages.SUCCESS,
                                  'Profile updated successfully.',
                                  extra_tags='alert-success')
-
+    add_breadcrumb(title="Engineer Profile - " + user.get_full_name(), top_level=True, request=request)
     return render(request, 'dojo/profile.html', {
         'name': 'Engineer Profile',
-        'breadcrumbs': get_breadcrumbs(
-            title="Engineer Profile - " + user.get_full_name(), user=request.user),
         'metric': False,
         'user': user,
         'form': form})
@@ -3892,7 +3434,8 @@ def dashboard(request):
                   'Info': 0}
 
     for finding in findings:
-        sev_counts[finding.severity] += 1
+        if finding.severity:
+            sev_counts[finding.severity] += 1
 
     by_month = list()
 
@@ -3939,7 +3482,7 @@ def dashboard(request):
         weeks_between += 2
 
     punchcard, ticks, highest_count = get_punchcard_data(findings, weeks_between, start_date)
-
+    add_breadcrumb(request=request, clear=True)
     return render(request,
                   'dojo/dashboard.html',
                   {'engagement_count': engagement_count,
@@ -3961,123 +3504,10 @@ def dashboard(request):
 def alerts(request):
     alerts = get_alerts(request.user)
     paged_alerts = get_page_items(request, alerts, 25)
+    add_breadcrumb(title="Alerts for " + request.user.get_full_name(), top_level=True, request=request)
     return render(request,
                   'dojo/alerts.html',
-                  {'alerts': paged_alerts,
-                   'breadcrumbs': get_breadcrumbs(
-                       title="Alerts for " + request.user.get_full_name(), user=request.user)})
-
-
-def get_page_items(request, items, page_size, param_name='page'):
-    size = request.GET.get('page_size', page_size)
-    paginator = Paginator(items, size)
-    page = request.GET.get(param_name)
-    try:
-        page = paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        page = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-        page = paginator.page(paginator.num_pages)
-
-    return page
-
-
-def get_alerts(user):
-    import humanize
-
-    alerts = []
-    now = localtz.localize(datetime.today())
-    start = now - timedelta(days=7)
-    # scans completed in last 7 days
-    completed_scans = Scan.objects.filter(
-        date__range=[start, now],
-        scan_settings__user=user).order_by('-date')
-    running_scans = Scan.objects.filter(date__range=[start, now],
-                                        status='Running').order_by('-date')
-    for scan in completed_scans:
-        alerts.append(['Scan Completed',
-                       humanize.naturaltime(localtz.normalize(now) - localtz.normalize(scan.date)),
-                       'crosshairs',
-                       reverse('view_scan', args=(scan.id,))])
-    for scan in running_scans:
-        alerts.append(['Scan Running',
-                       humanize.naturaltime(localtz.normalize(now) - localtz.normalize(scan.date)),
-                       'crosshairs',
-                       reverse('view_scan_settings', args=(scan.scan_settings.product.id, scan.scan_settings.id,))])
-
-    upcoming_tests = Test.objects.filter(
-        target_start__gt=now,
-        engagement__lead=user).order_by('target_start')
-    for test in upcoming_tests:
-        alerts.append([
-            'Upcomming ' + (
-                test.test_type.name if test.test_type is not None else 'Test'),
-            'Target Start ' + test.target_start.strftime("%b. %d, %Y"),
-            'user-secret',
-            reverse('view_test', args=(test.id,))])
-
-    outstanding_engagements = Engagement.objects.filter(
-        target_end__lt=now,
-        status='In Progress',
-        lead=user).order_by('-target_end')
-    for eng in outstanding_engagements:
-        alerts.append([
-            'Stale Engagement: ' + (
-                eng.name if eng.name is not None else 'Engagement'),
-            'Target End ' + eng.target_end.strftime("%b. %d, %Y"),
-            'bullseye',
-            reverse('view_engagement', args=(eng.id,))])
-
-    twenty_four_hours_ago = now - timedelta(hours=24)
-    outstanding_s0_findings = Finding.objects.filter(
-        severity='Critical',
-        reporter=user,
-        mitigated=None,
-        verified=True,
-        false_p=False,
-        last_reviewed__lt=twenty_four_hours_ago).order_by('-date')
-    for finding in outstanding_s0_findings:
-        alerts.append([
-            'S0 Finding: ' + (
-                finding.title if finding.title is not None else 'Finding'),
-            'Reviewed On ' + finding.last_reviewed.strftime("%b. %d, %Y"),
-            'bug',
-            reverse('view_finding', args=(finding.id,))])
-
-    seven_days_ago = now - timedelta(days=7)
-    outstanding_s1_findings = Finding.objects.filter(
-        severity='High',
-        reporter=user,
-        mitigated=None,
-        verified=True,
-        false_p=False,
-        last_reviewed__lt=seven_days_ago).order_by('-date')
-    for finding in outstanding_s1_findings:
-        alerts.append([
-            'S1 Finding: ' + (
-                finding.title if finding.title is not None else 'Finding'),
-            'Reviewed On ' + finding.last_reviewed.strftime("%b. %d, %Y"),
-            'bug',
-            reverse('view_finding', args=(finding.id,))])
-
-    fourteen_days_ago = now - timedelta(days=14)
-    outstanding_s2_findings = Finding.objects.filter(
-        severity='Medium',
-        reporter=user,
-        mitigated=None,
-        verified=True,
-        false_p=False,
-        last_reviewed__lt=fourteen_days_ago).order_by('-date')
-    for finding in outstanding_s2_findings:
-        alerts.append([
-            'S2 Finding: ' + (
-                finding.title if finding.title is not None else 'Finding'),
-            'Reviewed On ' + finding.last_reviewed.strftime("%b. %d, %Y"),
-            'bug',
-            reverse('view_finding', args=(finding.id,))])
-    return alerts
+                  {'alerts': paged_alerts})
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -4094,13 +3524,13 @@ def vulnerable_endpoints(request):
     endpoints = EndpointFilter(request.GET, queryset=endpoints)
 
     paged_endpoints = get_page_items(request, endpoints, 25)
-
+    add_breadcrumb(title="Vulnerable Endpoints", top_level=not len(request.GET), request=request)
     return render(request,
                   'dojo/endpoints.html',
                   {"endpoints": paged_endpoints,
                    "filtered": endpoints,
                    "name": "Vulnerable Endpoints",
-                   'breadcrumbs': get_breadcrumbs(obj=product, title="Vulnerable Endpoints", user=request.user)})
+                   })
 
 
 def all_endpoints(request):
@@ -4123,13 +3553,13 @@ def all_endpoints(request):
 
     endpoints = EndpointFilter(request.GET, queryset=endpoints, user=request.user)
     paged_endpoints = get_page_items(request, endpoints, 25)
-
+    add_breadcrumb(title="All Endpoints", top_level=not len(request.GET), request=request)
     return render(request,
                   'dojo/endpoints.html',
                   {"endpoints": paged_endpoints,
                    "filtered": endpoints,
                    "name": "All Endpoints",
-                   'breadcrumbs': get_breadcrumbs(obj=product, title="All Endpoints", user=request.user)})
+                   })
 
 
 def view_endpoint(request, eid):
@@ -4154,13 +3584,15 @@ def view_endpoint(request, eid):
 
     monthly_counts = get_period_counts(findings, findings, None, months_between, start_date, relative_delta='months')
     paged_findings = get_page_items(request, findings, 25)
+
+    add_breadcrumb(parent=endpoint, top_level=False, request=request)
     return render(request,
                   "dojo/view_endpoint.html",
                   {"endpoint": endpoint,
                    "findings": paged_findings,
                    'all_findings': findings,
                    'opened_per_month': monthly_counts['opened_per_period'],
-                   'breadcrumbs': get_breadcrumbs(obj=endpoint, title="View Endpoint", user=request.user)})
+                   })
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -4175,12 +3607,12 @@ def edit_endpoint(request, eid):
                                  messages.SUCCESS,
                                  'Endpoint updated successfully.',
                                  extra_tags='alert-success')
-
+    add_breadcrumb(parent=endpoint, title="Edit", top_level=False, request=request)
     return render(request,
                   "dojo/edit_endpoint.html",
                   {"endpoint": endpoint,
                    "form": form,
-                   'breadcrumbs': get_breadcrumbs(obj=endpoint, title="Edit Endpoint", user=request.user)})
+                   })
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -4206,12 +3638,12 @@ def delete_endpoint(request, eid):
                                      'Endpoint and relationships removed.',
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('view_product', args=(product.id,)))
-
+    add_breadcrumb(parent=endpoint, title="Delete", top_level=False, request=request)
     return render(request, 'dojo/delete_endpoint.html',
                   {'endpoint': endpoint,
                    'form': form,
                    'rels': rels,
-                   'breadcrumbs': get_breadcrumbs(obj=endpoint, title="Delete Endpoint", user=request.user)})
+                   })
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -4220,6 +3652,8 @@ def add_endpoint(request, pid):
     template = 'dojo/add_endpoint.html'
     if '_popup' in request.GET:
         template = 'dojo/add_related.html'
+    else:
+        add_breadcrumb(parent=product, title="Add Endpoint", top_level=False, request=request)
 
     form = AddEndpointForm(product=product)
 
@@ -4241,9 +3675,6 @@ def add_endpoint(request, pid):
 
     return render(request, template, {
         'name': 'Add Endpoint',
-        'breadcrumbs': get_breadcrumbs(obj=product,
-                                       title="Add Endpoint",
-                                       user=request.user),
         'form': form})
 
 
@@ -4259,12 +3690,12 @@ def add_product_endpoint(request):
                                  'Endpoint added successfully.',
                                  extra_tags='alert-success')
             return HttpResponseRedirect(reverse('endpoints'))
-
+    add_breadcrumb(title="Add Endpoint", top_level=False, request=request)
     return render(request,
                   'dojo/add_endpoint.html',
                   {'name': 'Add Endpoint',
                    'form': form,
-                   'breadcrumbs': get_breadcrumbs(title="Add Endpoint", user=request.user)})
+                   })
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -4272,13 +3703,13 @@ def user(request):
     users = Dojo_User.objects.all().order_by('username', 'last_name', 'first_name')
     users = UserFilter(request.GET, queryset=users)
     paged_users = get_page_items(request, users, 25)
-
+    add_breadcrumb(title="All Users", top_level=True, request=request)
     return render(request,
                   'dojo/users.html',
                   {"users": paged_users,
                    "filtered": users,
                    "name": "All Users",
-                   'breadcrumbs': get_breadcrumbs(title="All Users", user=request.user)})
+                   })
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -4309,12 +3740,9 @@ def add_user(request):
                                  messages.ERROR,
                                  'User was not added successfully.',
                                  extra_tags='alert-danger')
-
+    add_breadcrumb(title="Add User", top_level=False, request=request)
     return render(request, "dojo/add_user.html", {
         'name': 'Add User',
-        'breadcrumbs': get_breadcrumbs(obj=user,
-                                       title="Add User",
-                                       user=request.user),
         'form': form,
         'to_add': True})
 
@@ -4343,12 +3771,9 @@ def edit_user(request, uid):
                                  messages.ERROR,
                                  'User was not saved successfully.',
                                  extra_tags='alert-danger')
-
+    add_breadcrumb(title="Edit User", top_level=False, request=request)
     return render(request, "dojo/add_user.html", {
         'name': 'Edit User',
-        'breadcrumbs': get_breadcrumbs(obj=user,
-                                       title="Edit User",
-                                       user=request.user),
         'form': form,
         'to_edit': user})
 
@@ -4382,12 +3807,12 @@ def delete_user(request, uid):
                                      'User and relationships removed.',
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('users'))
-
+    add_breadcrumb(title="Delete User", top_level=False, request=request)
     return render(request, 'dojo/delete_user.html',
                   {'to_delete': user,
                    'form': form,
                    'rels': rels,
-                   'breadcrumbs': get_breadcrumbs(title="Delete User", obj=user, user=request.user)})
+                   })
 
 
 def action_history(request, cid, oid):
@@ -4403,9 +3828,9 @@ def action_history(request, cid, oid):
     history = LogEntry.objects.filter(content_type=ct, object_pk=obj.id).order_by('-timestamp')
     history = LogEntryFilter(request.GET, queryset=history)
     paged_history = get_page_items(request, history, 25)
-
+    add_breadcrumb(parent=obj, title="Action History", top_level=False, request=request)
     return render(request, 'dojo/action_history.html',
                   {"history": paged_history,
                    "filtered": history,
                    "obj": obj,
-                   'breadcrumbs': get_breadcrumbs(title="Action History", obj=obj, user=request.user)})
+                   })

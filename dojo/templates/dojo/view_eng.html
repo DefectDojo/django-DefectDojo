@@ -2,55 +2,23 @@
 {% load display_tags %}
 {% block content %}
     <!-- start status bread crums -->
-    <ul class="breadcrumb">
-        {% if eng.progress == "threat_model" %}
-            {% if eng.threat_model %}
-                <li><a class="btn btn-sm btn-primary" href="#threat-model"> Threat Model</a></li>
-            {% endif %}
-            {% if eng.api_test %}
-                <li><a class="btn btn-sm " href="#tests"> API Test</a></li>
-            {% endif %}
-            {% if eng.pen_test %}
-                <li><a class="btn btn-sm " href="#tests"> Pen Test</a></li>
-            {% endif %}
-            {% if eng.check_list %}
-                <li><a class="btn btn-sm " href="#checklist"> Check List</a></li>
-            {% endif %}
-            <li>Status: {{ eng.status }}</li>
+    <ul id="progress-crumbs" class="breadcrumb">
+        {% if eng.threat_model %}
+            <li><a href="#threat-model">Threat Model</a></li>
         {% endif %}
-
-        {% if eng.progress == "other" %}
-            {% if eng.threat_model %}
-                <li><a class="btn btn-sm " href="#threat-model"> Threat Model</a></li>
-            {% endif %}
-            {% if eng.api_test %}
-                <li><a class="btn btn-sm btn-primary" href="#tests"> API Test</a></li>
-            {% endif %}
-            {% if eng.pen_test %}
-                <li><a class="btn btn-sm btn-primary" href="#tests"> Pen Test</a></li>
-            {% endif %}
-            {% if eng.check_list %}
-                <li><a class="btn btn-sm " href="#checklist"> Check List</a></li>
-            {% endif %}
-            <li>Status: {{ eng.status }}</li>
+        {% if eng.test_strategy %}
+            <li><a href="#test-strategy">Test Strategy</a></li>
         {% endif %}
-
-        {% if eng.progress == "check_list" %}
-            {% if eng.threat_model %}
-                <li><a class="btn btn-sm " href="#threat-model"> Threat Model</a></li>
-            {% endif %}
-            {% if eng.api_test %}
-                <li><a class="btn btn-sm " href="#tests"> API Test</a></li>
-            {% endif %}
-            {% if eng.pen_test %}
-                <li><a class="btn btn-sm " href="#tests"> Pen Test</a></li>
-            {% endif %}
-
-            {% if eng.check_list %}
-                <li><a class="btn btn-sm btn-primary" href="#checklist"> Check List</a></li>
-            {% endif %}
-            <li>Status: {{ eng.status }}</li>
+        {% if eng.test_set.count %}
+            <li><a href="#tests">Tests</a></li>
         {% endif %}
+        {% if eng.eng_for_check.count %}
+            <li><a href="#checklist">Check List</a></li>
+        {% endif %}
+        {% if eng.risk_acceptance.count %}
+            <li><a href="#risk">Risk Acceptace</a></li>
+        {% endif %}
+        <li class="active">{{ eng.status }}</li>
     </ul>
     <!-- end breadcrums //-->
     <div class="panel panel-default">
@@ -60,13 +28,13 @@
                     {% if eng.name %}
                         {{ eng.name }}
                     {% else %}
-                        Engagement for {{ end.product }}
+                        Engagement for <a href="{% url 'view_product' eng.product.id %}">{{ eng.product }}</a>
                     {% endif %}
                     <span class="text-muted">{{ eng.status }}</span>
                 </h3>
 
                 <div class="dropdown pull-right">
-                    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
+                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                             data-toggle="dropdown" aria-expanded="true">
                         <span class="fa fa-bars"></span>
                         <span class="caret"></span>
@@ -91,12 +59,12 @@
                         </li>
                         <li role="presentation">
                             <a href="{% url 'engagement_report' eng.id %}">
-                                <i class="fa fa-file-text-o"></i> Generate Report
+                                <i class="fa fa-file-text-o"></i> Report
                             </a>
                         </li>
                         <li role="presentation">
                             <a href="{% url 'engagement_ics' eng.id %}">
-                                <i class="fa fa-calendar-plus-o" ></i> Add To Calendar
+                                <i class="fa fa-calendar-plus-o"></i> Add To Calendar
                             </a>
                         </li>
                         <li role="presentation">
@@ -145,7 +113,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div id="test-strategy" class="col-md-4">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h4> Test Strategy </h4>
@@ -186,16 +154,16 @@
     </div>
 
     <div class="row">
-        <div class="col-md-12">
+        <div id="tests" class="col-md-12">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <div class="clearfix">
-                        <h3 class="pull-left">
+                        <h4 class="pull-left">
                             Tests
-                        </h3>
+                        </h4>
 
                         <div class="dropdown pull-right">
-                            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
+                            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
                                 <span class="fa fa-bars"></span>
                                 <span class="caret"></span>
@@ -263,16 +231,16 @@
     </div>
 
     <div class="row">
-        <div class="col-md-12">
+        <div id="checklist" class="col-md-12">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h4 id="checklist"> Check List
+                    <h4 > Check List
                         {% if check %}
-                            <a title="Edit Checklist" class="btn btn-default pull-right"
+                            <a title="Edit Checklist" class="btn btn-primary pull-right"
                                href="{% url 'complete_checklist' eng.id %}">
                                 <span class="fa fa-edit"></span></a>
                         {% else %}
-                            <a title="Complete Check List" class="btn btn-sm btn-default pull-right"
+                            <a title="Complete Check List" class="btn btn-sm btn-primary pull-right"
                                href="{% url 'complete_checklist' eng.id %}">
                                 <span class="fa fa-edit"></span></a></a>
                         {% endif %}
@@ -338,12 +306,12 @@
     </div>
 
     <div class="row">
-        <div class="col-md-12">
+        <div id="risk" class="col-md-12">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h4> Risk Acceptance
+                    <h4 > Risk Acceptance
                         {% if can_add_risk %}
-                            <a title="Add Risk Acceptance" class="pull-right btn btn-sm btn-default"
+                            <a title="Add Risk Acceptance" class="pull-right btn btn-sm btn-primary"
                                href="{% url 'upload_risk_acceptance$' eng.id %}"><span class="fa fa-plus"></span></a>
                             </a>
                         {% endif %}

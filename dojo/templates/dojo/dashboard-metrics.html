@@ -2,10 +2,13 @@
 {% load event_tags %}
 {% load static from staticfiles %}
 {% block add_styles %}
+    body{
+        padding-top: 0px !important;
+    }
     nav.navbar {display: none;}
     #page-wrapper {
-    margin: 0 0 0 0;
-    padding: 0 0;
+    margin: 0 0 0 0 !important;
+    padding: 0 0 0 0 !important;
     }
     br {margin: 0;}
     h2 {margin: -5px 0px 0px;background-color: white;padding: 5px 15px 8px;border-bottom: 1px solid #e8e8e8;}
@@ -164,6 +167,7 @@
     <script src="{% static "flot/jquery.flot.time.js" %}"></script>
     <script src="{% static "flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
     <script src="{% static "flot/jquery.flot.stack.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.resize.js" %}"></script>
     {% if punchcard %}
         <script src="{% static "JUMFlot/JUMFlot.min.js" %}"></script>
         <script src="{% static "JUMFlot/jquery.flot.mouse.js" %}"></script>
