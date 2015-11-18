@@ -113,7 +113,7 @@ BOWER_INSTALLED_APPS = (
     'jquery-cookie',
     'jquery.tablesorter',
     'jquery-ui',
-    'text-highlighter',
+    'jquery-highlight',
     # directly from github since no bower comp available
     'https://github.com/jumjum123/JUMFlot.git',
     'https://github.com/markrcote/flot-axislabels.git',
