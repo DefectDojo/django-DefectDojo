@@ -2,22 +2,21 @@
 
 import logging
 from datetime import datetime
-
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
+from django.db.models import Count
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils.html import escape
 from pytz import timezone
-
 from dojo.filters import EndpointFilter
 from dojo.forms import EditEndpointForm, \
     DeleteEndpointForm, AddEndpointForm
-from dojo.models import Product, Endpoint
+from dojo.models import Product, Endpoint, Finding
 from dojo.utils import get_page_items, add_breadcrumb, get_period_counts
 
 localtz = timezone(settings.TIME_ZONE)
@@ -35,15 +34,16 @@ logger = logging.getLogger(__name__)
 def vulnerable_endpoints(request):
     endpoints = Endpoint.objects.filter(finding__active=True,
                                         finding__verified=True,
-                                        finding__mitigated__isnull=True).distinct()
+                                        finding__mitigated__isnull=True,
+                                        finding__out_of_scope=False)
     product = None
     if 'product' in request.GET:
         p = request.GET.getlist('product', [])
         if len(p) == 1:
             product = get_object_or_404(Product, id=p[0])
 
-    endpoints = EndpointFilter(request.GET, queryset=endpoints)
-
+    ids = get_endpoint_ids(EndpointFilter(request.GET, queryset=endpoints, user=request.user))
+    endpoints = EndpointFilter(request.GET, queryset=endpoints.filter(id__in=ids), user=request.user)
     paged_endpoints = get_page_items(request, endpoints, 25)
     add_breadcrumb(title="Vulnerable Endpoints", top_level=not len(request.GET), request=request)
     return render(request,
@@ -72,7 +72,8 @@ def all_endpoints(request):
         if len(p) == 1:
             product = get_object_or_404(Product, id=p[0])
 
-    endpoints = EndpointFilter(request.GET, queryset=endpoints, user=request.user)
+    ids = get_endpoint_ids(EndpointFilter(request.GET, queryset=endpoints, user=request.user))
+    endpoints = EndpointFilter(request.GET, queryset=endpoints.filter(id__in=ids), user=request.user)
     paged_endpoints = get_page_items(request, endpoints, 25)
     add_breadcrumb(title="All Endpoints", top_level=not len(request.GET), request=request)
     return render(request,
@@ -83,17 +84,41 @@ def all_endpoints(request):
                    })
 
 
+def get_endpoint_ids(endpoints):
+    hosts = []
+    ids = []
+    for e in endpoints:
+        if ":" in e.host:
+            host_no_port = e.host[:e.host.index(':')]
+        else:
+            host_no_port = e.host
+
+        if host_no_port in hosts:
+            continue
+        else:
+            hosts.append(host_no_port)
+            ids.append(e.id)
+    return ids
+
+
 def view_endpoint(request, eid):
     endpoint = get_object_or_404(Endpoint, id=eid)
-    product = endpoint.product
-    if (request.user in product.authorized_users.all()) or request.user.is_staff:
+    host = endpoint.host_no_port
+    endpoints = Endpoint.objects.filter(host__regex="^" + host + ":?",
+                                        product=endpoint.product).distinct()
+
+    if (request.user in endpoint.product.authorized_users.all()) or request.user.is_staff:
         pass
     else:
         raise PermissionDenied
 
-    findings = endpoint.finding_set.order_by('-date')
-    if findings:
-        start_date = localtz.localize(datetime.combine(findings.last().date, datetime.min.time()))
+    all_findings = Finding.objects.filter(endpoints__in=endpoints).distinct()
+
+    active_findings = Finding.objects.filter(endpoints__in=endpoints,
+                                             active=True,
+                                             verified=True).distinct()
+    if all_findings:
+        start_date = localtz.localize(datetime.combine(all_findings.last().date, datetime.min.time()))
     else:
         start_date = localtz.localize(datetime.today())
     end_date = localtz.localize(datetime.today())
@@ -103,15 +128,17 @@ def view_endpoint(request, eid):
     # include current month
     months_between += 1
 
-    monthly_counts = get_period_counts(findings, findings, None, months_between, start_date, relative_delta='months')
-    paged_findings = get_page_items(request, findings, 25)
+    monthly_counts = get_period_counts(all_findings, all_findings, None, months_between, start_date,
+                                       relative_delta='months')
+    paged_findings = get_page_items(request, active_findings, 25)
 
     add_breadcrumb(parent=endpoint, top_level=False, request=request)
     return render(request,
                   "dojo/view_endpoint.html",
                   {"endpoint": endpoint,
+                   "endpoints": endpoints,
                    "findings": paged_findings,
-                   'all_findings': findings,
+                   'all_findings': all_findings,
                    'opened_per_month': monthly_counts['opened_per_period'],
                    })
 
