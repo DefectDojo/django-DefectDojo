@@ -188,6 +188,7 @@ INSTALLED_APPS = (
     'auditlog',
     'dojo',
     'tastypie_swagger',
+    'django-watson',
 )
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

@@ -144,7 +144,7 @@
                                     <a href="#"><i class="fa fa-list fa-fw"></i> <span>Products</span>
                                         <span class="glyphicon arrow"></span></a>
                                 {% else %}
-                                    <a href="{% url 'product' %}"><i class="fa fa-list fa-fw"></i> <span>Products</span></a>
+                                    <a href="{% url 'product' %}" title="Product Listing"><i class="fa fa-list fa-fw"></i> <span>Products</span></a>
                                 {% endif %}
                                 {% if request.user.is_staff %}
                                     <ul class="nav nav-second-level">
