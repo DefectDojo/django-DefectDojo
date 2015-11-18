@@ -268,24 +268,20 @@
 {% endblock %}
 {% block postscript %}
     <script type="text/javascript" src="{% static "jquery-cookie/jquery.cookie.js" %}"></script>
-    <script type="text/javascript" src="{% static "text-highlighter/build/TextHighlighter.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
     <script type="text/javascript">
-        $(function () {
-            if (document.referrer.indexOf('simple_search') > 0) {
-                terms = '';
-                if ($.cookie('highlight')) {
-                    terms = $.cookie('highlight').split(' ');
+        if (document.referrer.indexOf('simple_search') > 0) {
+            var terms = '';
+            if ($.cookie('highlight')) {
+                terms = $.cookie('highlight').split(' ');
 
-                    var hltr = new TextHighlighter(document.body);
-
-                    for (var i = 0; i < terms.length; i++) {
-                        hltr.find(terms[i], false);
-                    }
+                for (var i = 0; i < terms.length; i++) {
+                    $('body').highlight(terms[i]);
                 }
-
-                $('input#simple_search').val(terms);
             }
-        });
+
+            $('input#simple_search').val(terms);
+        }
 
         $(document).on('click', '.panel-heading span.clickable', function (e) {
             var $this = $(this);

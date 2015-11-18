@@ -932,3 +932,7 @@ table.finding-endpoints{
     border-radius: 8px;
 }
 
+.highlight{
+    background-color: rgb(255, 255, 123);
+}
+
