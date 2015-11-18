@@ -1,14 +1,13 @@
 import logging
-
 from django.conf import settings
 from django.core.validators import validate_ipv46_address
 from django.db.models import Q
 from django.shortcuts import render
 from pytz import timezone
-
 from dojo.forms import SimpleSearchForm
 from dojo.models import Finding, Product, Test
 from dojo.utils import add_breadcrumb
+import watson
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -42,88 +41,20 @@ def simple_search(request):
         form = SimpleSearchForm(request.GET)
         if form.is_valid():
             cookie = True
-            clean_query = request.GET['query']
-            terms = form.cleaned_data['query'].split()
+            clean_query = form.cleaned_data['query']
             if request.user.is_staff:
-                q = Q()
-                for term in terms:
-                    try:
-                        validate_ipv46_address(term)
-                        ip_addresses.append(term)
-                    except:
-                        if "-" in term:
-                            dashes.append(term)
-                        else:
-                            query.append(term)
-
-                for qy in query:
-                    q.add((Q(notes__entry__icontains=qy) |
-                           Q(finding__title__icontains=qy) |
-                           Q(finding__url__icontains=qy) |
-                           Q(finding__description__icontains=qy) |
-                           Q(finding__references__icontains=qy) |
-                           Q(finding__mitigation__icontains=qy) |
-                           Q(finding__impact__icontains=qy)), Q.OR)
-
-                for ip in ip_addresses:
-                    q.add(Q(finding__endpoint__icontains=ip), Q.OR)
-                dash_query = ''
-                for dash in dashes:
-                    dash_query = dash
-                    q.add(Q(finding__title__icontains=dash_query) |
-                          Q(finding__url__icontains=dash_query) |
-                          Q(finding__description__icontains=dash_query) |
-                          Q(finding__references__icontains=dash_query) |
-                          Q(finding__mitigation__icontains=dash_query) |
-                          Q(finding__impact__icontains=dash_query) |
-                          Q(notes__entry__icontains=dash_query), Q.OR)
-
-                tests = Test.objects.filter(q).order_by("-target_start")
-
-            q = Q()
-            for qy in query:
-                q.add((Q(notes__entry__icontains=qy) |
-                       Q(title__icontains=qy) |
-                       Q(url__icontains=qy) |
-                       Q(description__icontains=qy) |
-                       Q(references__icontains=qy) |
-                       Q(mitigation__icontains=qy) |
-                       Q(impact__icontains=qy)), Q.OR)
-            for ip in ip_addresses:
-                q.add(Q(endpoint__icontains=ip) | Q(references__icontains=ip),
-                      Q.OR)
-
-            for dash in dashes:
-                dash_query = dash
-                q.add(Q(title__icontains=dash_query) |
-                      Q(url__icontains=dash_query) |
-                      Q(description__icontains=dash_query) |
-                      Q(references__icontains=dash_query) |
-                      Q(mitigation__icontains=dash_query) |
-                      Q(impact__icontains=dash_query) |
-                      Q(notes__entry__icontains=dash_query), Q.OR)
-
-            findings = Finding.objects.filter(q).order_by("-date")
-
-            if not request.user.is_staff:
-                findings = findings.filter(
-                    test__engagement__product__authorized_users__in=[
-                        request.user])
-
-            q = Q()
-            for qy in query:
-                q.add((Q(name__icontains=qy) |
-                       Q(description__icontains=qy)), Q.OR)
-            dash_query = ''
-            for dash in dashes:
-                dash_query = dash
-                q.add(Q(name=dash_query) |
-                      Q(description=dash_query), Q.OR)
-            products = Product.objects.filter(q).order_by('name')
-            if not request.user.is_staff:
-                products = products.filter(
-                    authorized_users__in=[
-                        request.user])
+                findings = watson.search(clean_query, models=(Finding,))
+                tests = watson.search(clean_query, models=(Test,))
+                products = watson.search(clean_query, models=(Product,))
+            else:
+                findings = watson.search(clean_query, models=(
+                Finding.objects.filter(test__engagement__product__authorized_users__in=[
+                    request.user]),))
+                tests = watson.search(clean_query,
+                                      models=(Test.objects.filter(engagement__product__authorized_users__in=[
+                                          request.user]),))
+                products = watson.search(clean_query, models=(Product.objects.filter(authorized_users__in=[
+                    request.user]),))
         else:
             form = SimpleSearchForm()
         add_breadcrumb(title="Simple Search", top_level=True, request=request)

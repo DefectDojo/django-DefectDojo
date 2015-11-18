@@ -549,7 +549,7 @@ def get_alerts(user):
             'bug',
             reverse('view_finding', args=(finding.id,))])
 
-    incomplete_findings = Finding.objects.filter(severity="")
+    incomplete_findings = Finding.objects.filter(severity="", reporter=user)
     for incomplete_finding in incomplete_findings:
         alerts.append([
             'Incomplete Finding: ' + (

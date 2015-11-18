@@ -28,7 +28,7 @@
         <!-- Tab panes -->
         <div class="tab-content">
             {% if products %}
-                <div role="tabpanel" class="table-responsive tab-pane active" id="tabs">
+                <div role="tabpanel" class="table-responsive tab-pane active fade in" id="tabs">
                     <table class="table table-bordered table-striped">
                         <thead>
                         <tr>
@@ -40,8 +40,8 @@
                         {% for product in products %}
                             <tr>
                                 <td><a class="search-finding"
-                                       href="{%  url 'view_product' product.id %}">{{ product.name }}</a></td>
-                                <td>{{ product.description|truncatechars:20 }}</td>
+                                       href="{%  url 'view_product' product.object.id %}">{{ product.object.name }}</a></td>
+                                <td>{{ product.object.description|truncatechars:150 }}</td>
                             </tr>
                         {% endfor %}
                         </tbody>
@@ -49,7 +49,7 @@
                 </div>
             {% endif %}
             {% if findings %}
-                <div role="tabpanel" class="table-responsive tab-pane {% if not products %}active{% endif %}" id="tabs-1">
+                <div role="tabpanel" class="table-responsive tab-pane fade {% if not products %}active in{% endif %}" id="tabs-1">
                     <table class="table table-bordered table-striped">
                         <thead>
                         <tr>
@@ -61,8 +61,8 @@
                         {% for finding in findings %}
                             <tr>
                                 <td><a class="search-finding"
-                                       href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a></td>
-                                <td>{{ finding.date }}</td>
+                                       href="{% url 'view_finding' finding.object.id %}">{{ finding.object.title }}</a></td>
+                                <td>{{ finding.object.date }}</td>
                             </tr>
                         {% endfor %}
                         </tbody>
@@ -70,7 +70,7 @@
                 </div>
             {% endif %}
             {% if tests %}
-                <div role="tabpanel" class="table-responsive tab-pane" id="tabs-2">
+                <div role="tabpanel" class="table-responsive tab-pane fade {% if not findings and not products %}in active {% endif %}" id="tabs-2">
                     <table class="table table-bordered table-striped">
                         <thead>
                         <tr>
@@ -81,9 +81,9 @@
                         <tbody>
                         {% for test in tests %}
                             <tr>
-                                <td><a class="search-finding" href="{% url 'view_test' test.id %}">{{ test.test_type }}</a>
+                                <td><a class="search-finding" href="{% url 'view_test' test.object.id %}">{{ test.object.test_type }}</a>
                                 </td>
-                                <td>{{ test.target_start }}</td>
+                                <td>{{ test.object.target_start }} {{ test.url }}</td>
                             </tr>
                         {% endfor %}
                         </tbody>

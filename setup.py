@@ -28,6 +28,7 @@ setup(
         'reportlab',
         'django-auditlog==0.3.1',
         'vobject',
-        'html2text'],
+        'html2text',
+        'django-watson==1.1.9'],
     url='https://github.com/rackerlabs/django-DefectDojo'
 )

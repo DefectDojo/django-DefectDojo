@@ -9,6 +9,7 @@ from django.db.models import Q
 from django.utils.timezone import now
 from pytz import timezone
 from auditlog.registry import auditlog
+import watson
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -685,3 +686,7 @@ admin.site.register(Dojo_User)
 admin.site.register(Notes)
 admin.site.register(Scan)
 admin.site.register(ScanSettings)
+
+watson.register(Product)
+watson.register(Test)
+watson.register(Finding)
