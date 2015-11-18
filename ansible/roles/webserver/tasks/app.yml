@@ -168,6 +168,16 @@
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
+- name: Run Django 'installwatson' command
+  django_manage: command='installwatson' app_path={{ dd_install_dir }} virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ dd_user }}'
+
+- name: Run Django 'buildwatson' command
+  django_manage: command='buildwatson' app_path={{ dd_install_dir }} virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ dd_user }}'
+
 - name: Create Django superuser
   shell: echo "from django.contrib.auth.models import User; User.objects.create_superuser('{{ dd_super_user }}', '{{ dd_super_user_email }}', '{{ dd_super_user_pass }}')" | {{ venv_dir }}/bin/python {{ dd_install_dir }}/manage.py shell && touch /home/{{ dd_user }}/.supercreated
   args:
