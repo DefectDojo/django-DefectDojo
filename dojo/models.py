@@ -128,10 +128,26 @@ class Product(models.Model):
 
     @property
     def endpoint_count(self):
-        return Endpoint.objects.filter(finding__test__engagement__product=self,
-                                       finding__active=True,
-                                       finding__verified=True,
-                                       finding__mitigated__isnull=True).distinct().count()
+        endpoints = Endpoint.objects.filter(finding__test__engagement__product=self,
+                                            finding__active=True,
+                                            finding__verified=True,
+                                            finding__mitigated__isnull=True)
+
+        hosts = []
+        ids = []
+        for e in endpoints:
+            if ":" in e.host:
+                host_no_port = e.host[:e.host.index(':')]
+            else:
+                host_no_port = e.host
+
+            if host_no_port in hosts:
+                continue
+            else:
+                hosts.append(host_no_port)
+                ids.append(e.id)
+
+        return len(hosts)
 
     def open_findings(self, start_date=None, end_date=None):
         if start_date is None or end_date is None:
@@ -352,9 +368,16 @@ class Endpoint(models.Model):
         return url
 
     def finding_count(self):
-        findings = Finding.objects.filter(endpoints__in=[self],
+        host = self.host_no_port
+
+        endpoints = Endpoint.objects.filter(host__regex="^" + host + ":?",
+                                            product=self.product).distinct()
+
+        findings = Finding.objects.filter(endpoints__in=endpoints,
                                           active=True,
-                                          verified=True)
+                                          verified=True,
+                                          out_of_scope=False).distinct()
+
         return findings.count()
 
     def active_findings(self):
@@ -368,13 +391,20 @@ class Endpoint(models.Model):
 
     def get_breadcrumbs(self):
         bc = self.product.get_breadcrumbs()
-        bc += [{'title': self.__unicode__(),
+        bc += [{'title': self.host_no_port,
                 'url': reverse('view_endpoint', args=(self.id,))}]
         return bc
 
     @staticmethod
     def from_uri(uri):
         return Endpoint()
+
+    @property
+    def host_no_port(self):
+        if ":" in self.host:
+            return self.host[:self.host.index(":")]
+        else:
+            return self.host
 
 
 class Notes(models.Model):

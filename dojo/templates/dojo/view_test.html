@@ -144,31 +144,6 @@
                     </tr>
                 {% endfor %}
                 </tbody>
-                <tfoot>
-                <tr>
-                    <td colspan="7">
-                        {% csrf_token %}
-                        <form id="quick-add-form" method="post">
-
-                            <div class="input-group" style="width: 40%;">
-                                <input id="quick_add_finding" name="title" type="text" placeholder="Add a finding..."
-                                       class="form-control"/>
-                                <input type="hidden" value="/api/v1/users/{{ request.user.id }}/" name="reporter"/>
-                                <input type="hidden" value="/api/v1/tests/{{ test.id }}/" name="test"/>
-                                <input type="hidden" value="true" name="verified"/>
-                                <input type="hidden" value="false" name="active"/>
-                                <span class="input-group-btn">
-                                    <button id="the_button" class="btn btn-success" type="submit"><i id="fa-icon"
-                                                                                                     class="fa fa-fw fa-plus"></i>
-                                        Add
-                                    </button>
-                                </span>
-                            </div>
-                        </form>
-                    </td>
-                </tr>
-                </tfoot>
-
             </table>
             <div class="panel-body">
                 {% include "dojo/paging_snippet.html" with page=findings %}
@@ -252,63 +227,6 @@
 
                 $('input#simple_search').val(terms);
             }
-
-            $('form#quick-add-form').on("submit", function () {
-                $('form#quick-add-form').removeClass("has-error");
-                $('button#the_button').attr('disabled', true).removeClass("btn-success btn-danger").addClass('btn-warning');
-                $('i#fa-icon').removeClass("fa-plus").addClass("fa-spinner fa-pulse");
-
-                $.ajax({
-                    type: "POST",
-                    data: JSON.stringify($(this).serializeObject()),
-                    url: '/api/v1/findings/',
-                    contentType: 'application/json',
-                    // The ``X-CSRFToken`` evidently can't be set in the
-                    // ``headers`` option, so force it here.
-                    // This method requires jQuery 1.5+.
-                    beforeSend: function (jqXHR, settings) {
-                        // Pull the token out of the DOM.
-                        jqXHR.setRequestHeader('X-CSRFToken', $('input[name=csrfmiddlewaretoken]').val());
-                    },
-                    success: function (data, textStatus, jqXHR) {
-                        // Your processing of the data here. <a href='" + jqXHR.getResponseHeader('Location') + "'>" +  + "</a>
-                        //
-                        var fid = jqXHR.getResponseHeader('Location').split('/');
-                        fid = fid[fid.length - 2];
-                        var row = $("<tr id='added-" + fid + "' class='success'></tr>");
-                        var link = $('<a></a>');
-
-                        link.attr('href', "/finding/" + fid);
-                        link.text($("input#quick_add_finding").val());
-                        var title = $("<td></td>").append(link);
-                        var severity = $("<td> </td>");
-                        var reporter = $("<td>{{ request.user.username }}</td>");
-                        var mitigation_date = $("<td>None</td>");
-                        var verified = $("<td>True</td>");
-                        var active = $("<td>False</td>");
-                        var actions = $('<td><div class="btn-group"> <a class="btn btn-sm btn-primary" href="/finding/[id]">View</a> <a class="btn btn-sm btn-warning" href="/finding/[id]/edit">Edit</a> <a class="btn btn-sm btn-danger" href="/finding/[id]/delete">Delete</a></div></td>'.replace(/\[id\]/g, fid));
-
-                        row.append(title, severity, reporter, mitigation_date, verified, active, actions).appendTo("#test_findings tbody");
-                        $("input#quick_add_finding").val("")
-                        $('button#the_button').removeClass("btn-warning btn-danger").addClass('btn-success');
-                        setTimeout(function () {
-                            $("tr#added-" + fid + " td").animate({
-                                backgroundColor: "#fff",})
-                        }, 2000)
-                    },
-                    error: function () {
-                        $('form#quick-add-form').addClass("has-error");
-                        $('button#the_button').removeClass("btn-warning").addClass('btn-danger');
-                    },
-                    complete: function () {
-                        $('i#fa-icon').addClass("fa-plus").removeClass("fa-spinner fa-pulse");
-                        $('button#the_button').attr('disabled', false);
-
-                    }
-                });
-                return false;
-            });
-
         });
 
     </script>

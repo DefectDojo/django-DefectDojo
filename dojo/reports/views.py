@@ -1,6 +1,5 @@
 # #  reports
 import logging
-
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
@@ -9,7 +8,6 @@ from django.http import Http404
 from django.shortcuts import render, get_object_or_404
 from easy_pdf.rendering import render_to_pdf_response
 from pytz import timezone
-
 from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter, EndpointReportFilter
 from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
     Dojo_User, Endpoint
@@ -73,27 +71,34 @@ def endpoint_report(request, eid):
 
 
 def product_endpoint_report(request, pid):
+    from dojo.endpoint.views import get_endpoint_ids
     product = get_object_or_404(Product, id=pid)
     endpoints = Endpoint.objects.filter(product=product,
                                         finding__active=True,
                                         finding__verified=True,
-                                        finding__false_p=False,
-                                        finding__duplicate=False,
-                                        finding__out_of_scope=False)
+                                        )
 
     if request.user.is_staff or request.user in product.authorized_users.all():
         pass  # user is authorized for this product
     else:
         raise PermissionDenied
-    add_breadcrumb(parent=product, title="Vulnerable Product Endpoints Report", top_level=False, request=request)
+
     endpoints = EndpointReportFilter(request.GET, queryset=endpoints)
+    ids = get_endpoint_ids(endpoints)
+    endpoints = EndpointReportFilter(request.GET, queryset=Endpoint.objects.filter(product=product,
+                                                                                   finding__active=True,
+                                                                                   finding__verified=True,
+                                                                                   finding__false_p=False,
+                                                                                   finding__duplicate=False,
+                                                                                   finding__out_of_scope=False,
+                                                                                   id__in=ids).distinct())
     paged_endpoints = get_page_items(request, endpoints, 25)
     report_format = request.GET.get('report_type', 'AsciiDoc')
     include_finding_notes = int(request.GET.get('include_finding_notes', 0))
     include_executive_summary = int(request.GET.get('include_executive_summary', 0))
     include_table_of_contents = int(request.GET.get('include_table_of_contents', 0))
     generate = "_generate" in request.GET
-
+    add_breadcrumb(parent=product, title="Vulnerable Product Endpoints Report", top_level=False, request=request)
     if generate:
         if report_format == 'AsciiDoc':
             return render(request,
@@ -197,7 +202,11 @@ def generate_report(request, obj):
         filename = "test_finding_report.pdf"
     elif type(obj).__name__ == "Endpoint":
         endpoint = obj
-        findings = ReportFindingFilter(request.GET, queryset=Finding.objects.filter(endpoints__in=[endpoint],
+        host = endpoint.host_no_port
+        endpoints = Endpoint.objects.filter(host__regex="^" + host + ":?",
+                                            product=endpoint.product).distinct()
+
+        findings = ReportFindingFilter(request.GET, queryset=Finding.objects.filter(endpoints__in=endpoints,
                                                                                     ).distinct())
         filename = "endpoint_finding_report.pdf"
     elif type(obj).__name__ == "QuerySet":
@@ -205,7 +214,6 @@ def generate_report(request, obj):
         filename = "finding_report.pdf"
     else:
         raise Http404()
-
     if generate:
         if report_format == 'AsciiDoc':
             return render(request,
