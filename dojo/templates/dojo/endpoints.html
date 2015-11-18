@@ -46,7 +46,7 @@
 
                         {% for e in endpoints %}
                             <tr>
-                                <td><a href="{% url 'view_endpoint' e.id %}">{{ e|truncatechars:70 }}</a></td>
+                                <td><a href="{% url 'view_endpoint' e.id %}">{{ e.host_no_port }}</a></td>
                                 <td><a href="{% url 'view_product' e.product.id %}">{{ e.product }}</a></td>
                                 <td class="text-center">
                                     <a href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.finding_count }}</a>
