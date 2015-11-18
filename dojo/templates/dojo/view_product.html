@@ -337,7 +337,7 @@
 {% endblock %}
 {% block postscript %}
     <script type="text/javascript" src="{% static "jquery-cookie/jquery.cookie.js" %}"></script>
-    <script type="text/javascript" src="{% static "text-highlighter/build/TextHighlighter.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
     <!-- Flot Charts JavaScript -->
     <script src="{% static "flot/excanvas.min.js" %}"></script>
     <script src="{% static "flot/jquery.flot.js" %}"></script>
@@ -353,20 +353,17 @@
         var highest_count = {{ highest_count }};
         $(function () {
             if (document.referrer.indexOf('simple_search') > 0) {
-                terms = '';
+                var terms = '';
                 if ($.cookie('highlight')) {
                     terms = $.cookie('highlight').split(' ');
 
-                    var hltr = new TextHighlighter(document.body);
-
                     for (var i = 0; i < terms.length; i++) {
-                        hltr.find(terms[i], false);
+                        $('body').highlight(terms[i]);
                     }
                 }
 
                 $('input#simple_search').val(terms);
             }
-            ;
 
             $(document).on('click', '.panel-heading button.clickable', function (e) {
                 var $this = $(this);
