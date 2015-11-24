@@ -1,22 +1,54 @@
 {% extends "base.html" %}
 {% load humanize %}
 {% block content %}
-    <h3 xmlns="http://www.w3.org/1999/html">Generate
-        Product Endpoint Report</h3>
-    <br/>
-    {% if filtered %}
-        <div class="row">
-            <div class="col-md-12">
-                <div class="well">
-                    <p>
-                        The {{ endpoints|length|apnumber }} endpoint{{ endpoints|length|pluralize }} listed below will
-                        be
-                        included in the report. Use the filters to fine tune the endpoints to be used.
-                    </p>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading tight">
+                    <h3 class="has-filters">
+                        Generate Product Endpoint Report
+                        <div class="dropdown pull-right">
+
+                        </div>
+                    </h3>
+                </div>
+                <div id="the-filters" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
+                    <div class="dojo-filter-heading">Filters</div>
+                    <div class="filter-set">
+
+                        {% include "dojo/filter_snippet.html" with form=filtered.form %}
+
+                    </div>
+                    <br/>
+
+                    <div class="alert alert-info" role="alert">
+                        <span class="fa fa-lightbulb-o" aria-hidden="true"></span>
+                        <span class=""><b>Hint:</b></span>
+                        To generate a report of all mitigated findings in endpoints select: Active: Either,
+                        Verified: Either, Mitigated: Yes
+                    </div>
+                    <div class="dojo-report-heading">Report Options</div>
+                    <div class="filter-set">
+                        {% include "dojo/filter_snippet.html" with form=report_form submit='report' %}
+
+                        {% if findings|length <= 150 %}
+                            <div class="alert alert-warning" role="alert">
+                                <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                <span class=""><b>Warning:</b></span>
+                                PDF reports can take some time to generate depending on the number of findings included.
+                            </div>
+                            <div class="alert alert-info" role="alert">
+                                <span class="fa fa-info-circle" aria-hidden="true"></span>
+                                <span class=""><b>Note:</b></span>
+                                For PDF reports, the finding description will be truncated at 500 characters to aid in
+                                redering speed.
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
-    {% endif %}
+    </div>
     <div class="row">
         <div class="col-md-9">
             {% if filtered %}
@@ -56,13 +88,15 @@
                         <div class="alert alert-info" role="alert">
                             <span class="fa fa-lightbulb-o" aria-hidden="true"></span>
                             <span class=""><b>Hint:</b></span>
-                            To generate a report of all mitigated findings in endpoints select: Active: Either, Verified: Either,
+                            To generate a report of all mitigated findings in endpoints select: Active: Either,
+                            Verified: Either,
                             Mitigated: Yes
                         </div>
                         <div class="centered">
                             <button class="btn btn-sm btn-primary">
                                 <i class="fa fa-filter"></i> Apply Filters
-                            </button><br/>
+                            </button>
+                            <br/>
                             <a href="?"> [Clear Filters] </a><br/><br/>
                         </div>
 
@@ -128,6 +162,10 @@
     </div>
 
 
+{% endblock %}
+
+{% block postscript %}
+    {% include "dojo/filter_js_snippet.html" %}
 {% endblock %}
 
 

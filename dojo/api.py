@@ -10,9 +10,9 @@ from tastypie.serializers import Serializer
 from tastypie.validation import CleanedDataFormValidation
 
 from dojo.models import Product, Engagement, Test, Finding, \
-    User, ScanSettings, IPScan, Scan
-from forms import ProductForm, EngForm2, TestForm, \
-    ScanSettingsForm, IncompleteFindingForm
+    User, ScanSettings, IPScan, Scan, Stub_Finding
+from dojo.forms import ProductForm, EngForm2, TestForm, \
+    ScanSettingsForm, FindingForm, StubFindingForm
 
 """
     Setup logging for the api
@@ -429,14 +429,48 @@ class FindingResource(BaseModelResource):
             'reporter': ALL,
             'url': ALL,
         }
-        authentication = MultiAuthentication(SessionAuthentication(), DojoApiKeyAuthentication())
+        authentication = DojoApiKeyAuthentication()
         authorization = DjangoAuthorization()
         serializer = Serializer(formats=['json'])
-        validation = CleanedDataFormValidation(form_class=IncompleteFindingForm)
+        validation = CleanedDataFormValidation(form_class=FindingForm)
 
     def dehydrate(self, bundle):
         engagement = Engagement.objects.select_related('product'). \
             filter(test__finding__id=bundle.obj.id)
+        bundle.data['engagemet'] = "/api/v1/engagements/%s/" % engagement[0].id
+        bundle.data['product'] = \
+            "/api/v1/products/%s/" % engagement[0].product.id
+        return bundle
+
+
+class StubFindingResource(BaseModelResource):
+    reporter = fields.ForeignKey(UserResource, 'reporter', null=False)
+    test = fields.ForeignKey(TestResource, 'test', null=False)
+
+    class Meta:
+        resource_name = 'stub_findings'
+        queryset = Stub_Finding.objects.select_related("test")
+        # deleting of findings is not allowed via UI or API.
+        # Admin interface can be used for this.
+        list_allowed_methods = ['get', 'post']
+        detail_allowed_methods = ['get', 'post', 'put']
+        include_resource_uri = True
+        filtering = {
+            'id': ALL,
+            'title': ALL,
+            'date': ALL,
+            'severity': ALL,
+            'description': ALL,
+        }
+
+        authentication = DojoApiKeyAuthentication()
+        authorization = DjangoAuthorization()
+        serializer = Serializer(formats=['json'])
+        validation = CleanedDataFormValidation(form_class=StubFindingForm)
+
+    def dehydrate(self, bundle):
+        engagement = Engagement.objects.select_related('product'). \
+            filter(test__stub_finding__id=bundle.obj.id)
         bundle.data['engagemet'] = "/api/v1/engagements/%s/" % engagement[0].id
         bundle.data['product'] = \
             "/api/v1/products/%s/" % engagement[0].product.id

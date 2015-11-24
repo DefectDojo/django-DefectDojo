@@ -1,32 +1,80 @@
 {% extends "base.html" %}
 {% load humanize %}
 {% block content %}
-    <h3>Generate
-        {% if product_type %}
-            Product Type
-        {% elif product %}
-            Product
-        {% elif engagement %}
-            Engagement
-        {% elif test %}
-            Test
-        {% endif %}
-        Report</h3>
-    <br/>
     <div class="row">
         <div class="col-md-12">
-            <div class="well">
-                <p>
-                    The {{ findings|length|apnumber }} finding{{ findings|length|pluralize }} listed below will be
-                    included in the report. Use the filters to fine
-                    tune the findings to be used.
-                </p>
+            <div class="panel panel-default">
+                <div class="panel-heading tight">
+                    <h3 class="has-filters">
+                        Generate
+                        {% if product_type %}
+                            Product Type
+                        {% elif product %}
+                            Product
+                        {% elif engagement %}
+                            Engagement
+                        {% elif test %}
+                            Test
+                        {% endif %}
+                        Report
+                        <div class="dropdown pull-right">
+
+                        </div>
+
+                    </h3>
+                </div>
+
+                <div id="the-filters" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
+                    <div class="dojo-filter-heading">Filters</div>
+                    <div class="filter-set">
+
+                        {% include "dojo/filter_snippet.html" with form=findings.form %}
+
+                    </div>
+                    <br/>
+
+                    <div class="alert alert-info" role="alert">
+                        <span class="fa fa-lightbulb-o" aria-hidden="true"></span>
+                        <span class=""><b>Hint:</b></span>
+                        To generate a report of all mitigated findings select: Active: Either, Verified: Either,
+                        Mitigated: Yes
+                    </div>
+                    <div class="dojo-report-heading">Report Options</div>
+                    <div class="filter-set">
+                        {% include "dojo/filter_snippet.html" with form=report_form submit='report' %}
+
+                        {% if findings|length <= 150 %}
+                            <div class="alert alert-warning" role="alert">
+                                <span class="fa fa-exclamation-triangle" aria-hidden="true"></span>
+                                <span class=""><b>Warning:</b></span>
+                                PDF reports can take some time to generate depending on the number of findings included.
+                            </div>
+                            <div class="alert alert-info" role="alert">
+                                <span class="fa fa-info-circle" aria-hidden="true"></span>
+                                <span class=""><b>Note:</b></span>
+                                For PDF reports, the finding description will be truncated at 500 characters to aid in
+                                redering speed.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
     <div class="row">
-        <div class="col-md-9">
+        <div class="col-md-12">
             {% if findings %}
+                <div class="well">
+                    <p>
+                        The {{ findings|length|apnumber }} finding{{ findings|length|pluralize }} listed below will be
+                        included in the report. Use filters above to fine
+                        tune the findings to be used.
+                    </p>
+                </div>
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=paged_findings %}
+                </div>
                 <div class="panel panel-default table-responsive">
                     <table id="open_findings"
                            class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
@@ -62,104 +110,12 @@
                     {% include "dojo/paging_snippet.html" with page=paged_findings %}
                 </div>
             {% else %}
-                No findings found.
+                <p>No findings found.</p>
             {% endif %}
-        </div>
-        <div class="col-md-3">
-            <form class="panel-body filters" action="
-                        {% if product_type %}
-                            {% url 'product_type_report' product_type.id %}
-                        {% elif product %}
-                            {% url 'product_report' product.id %}
-                        {% elif engagement %}
-                            {% url 'engagement_report' engagement.id %}
-                        {% elif test %}
-                            {% url 'test_report' test.id %}
-                        {% endif %}
-                        " method="get">
-                <div class="panel panel-default filters">
-                    <div class="panel-heading">Filters</div>
-                    <div class="panel-body">
-                        {{ findings.form.as_p }}
-                        <div class="alert alert-info" role="alert">
-                            <span class="fa fa-lightbulb-o" aria-hidden="true"></span>
-                            <span class=""><b>Hint:</b></span>
-                            To generate a report of all mitigated findings select: Active: Either, Verified: Either,
-                            Mitigated: Yes
-                        </div>
-                        <div class="centered">
-                            <button class="btn btn-sm btn-primary">
-                                <i class="fa fa-filter"></i> Apply Filters
-                            </button><br/>
-                            <a href="?"> [Clear Filters] </a><br/><br/>
-                        </div>
-
-                    </div>
-                    <div class="panel-heading">Report Options</div>
-                    <div class="panel-body">
-                        <p>
-                            <label for=" id_include_finding_notes">Include finding notes</label>
-                            <select class="form-control" id="id_include_finding_notes" name="include_finding_notes">
-                                <option value="0">No</option>
-                                <option value="1">Yes</option>
-                            </select>
-                        </p>
-                        <p>
-                            <label for="id_include_executive_summary">Include executive summary</label>
-                            <select class="form-control" id="id_include_executive_summary"
-                                    name="include_executive_summary">
-                                <option value="0">No</option>
-                                <option value="1">Yes</option>
-                            </select>
-                        </p>
-                        <p>
-                            <label for="id_include_executive_summary">Include table of contents</label>
-                            <select class="form-control" id="id_include_table_of_contents"
-                                    name="include_table_of_contents">
-                                <option value="0">No</option>
-                                <option value="1">Yes</option>
-                            </select>
-                        </p>
-                        <p style="text-align: left">
-                            <label for="id_report_type">Report type</label>
-
-
-                            <select class="form-control" id="id_report_type" name="report_type">
-                                <option value="AsciiDoc">AsciiDoc</option>
-                                {% if findings|length <= 150 %}
-                                    <option value="PDF">PDF</option>
-                                {% endif %}
-                            </select>
-                        </p>
-                        {% if findings|length <= 150 %}
-                            <div class="alert alert-warning" role="alert">
-                                <span class="fa fa-cogs" aria-hidden="true"></span>
-                                <span class=""><b>Warning:</b></span>
-                                PDF reports can take some time to generate depending on the number of findings included.
-                            </div>
-                            <div class="alert alert-info" role="alert">
-                                <span class="fa fa-info-circle" aria-hidden="true"></span>
-                                <span class=""><b>Note:</b></span>
-                                For PDF reports, the finding description will be truncated at 500 characters to aid in
-                                redering speed.
-                            </div>
-                        {% endif %}
-                        <div class="centered">
-                            <input class="btn btn-primary" name="_generate" type="submit"
-                                   value="Generate Report"/><br/><br/>
-                        </div>
-                    </div>
-                </div>
-            </form>
-
         </div>
     </div>
 
-
 {% endblock %}
-
-
-
-
-
-
+{% block postscript %}
+    {% include "dojo/filter_js_snippet.html" %}
+{% endblock %}

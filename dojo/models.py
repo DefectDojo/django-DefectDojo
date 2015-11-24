@@ -582,6 +582,24 @@ class Finding(models.Model):
         return bc
 
 
+class Stub_Finding(models.Model):
+    title = models.TextField(max_length=1000, blank=False, null=False)
+    date = models.DateField(default=get_current_date, blank=False, null=False)
+    severity = models.CharField(max_length=200, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    test = models.ForeignKey(Test, editable=False)
+    reporter = models.ForeignKey(User, editable=False)
+
+    def __unicode__(self):
+        return self.title
+
+    def get_breadcrumbs(self):
+        bc = self.test.get_breadcrumbs()
+        bc += [{'title': "Potential Finding: " + self.__unicode__(),
+                'url': reverse('view_potential_finding', args=(self.id,))}]
+        return bc
+
+
 class Check_List(models.Model):
     session_management = models.CharField(max_length=50, default='none')
     session_issues = models.ManyToManyField(Finding,
@@ -676,6 +694,7 @@ auditlog.register(Risk_Acceptance)
 
 admin.site.register(Test)
 admin.site.register(Finding)
+admin.site.register(Stub_Finding)
 admin.site.register(Engagement)
 admin.site.register(Risk_Acceptance)
 admin.site.register(Check_List)

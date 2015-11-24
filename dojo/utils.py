@@ -14,7 +14,7 @@ from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
 from django.template.defaultfilters import pluralize
 from pytz import timezone
 
-from dojo.models import Finding, Scan, Test, Engagement
+from dojo.models import Finding, Scan, Test, Engagement, Stub_Finding
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -150,6 +150,7 @@ def findings_this_period(findings, period_type, stuff, o_stuff, a_stuff):
 
 
 def add_breadcrumb(parent=None, title=None, top_level=True, url=None, request=None, clear=False):
+    title_done = False
     if clear:
         request.session['dojo_breadcrumbs'] = None
         return
@@ -162,13 +163,18 @@ def add_breadcrumb(parent=None, title=None, top_level=True, url=None, request=No
         if parent is not None and getattr(parent, "get_breadcrumbs", None):
             crumbs += parent.get_breadcrumbs()
         else:
+            title_done = True
             crumbs += [{'title': title,
                         'url': request.get_full_path() if url is None else url}]
     else:
         resolver = get_resolver(None).resolve
         if parent is not None and getattr(parent, "get_breadcrumbs", None):
             obj_crumbs = parent.get_breadcrumbs()
+            if title is not None:
+                obj_crumbs += [{'title': title,
+                                'url': request.get_full_path() if url is None else url}]
         else:
+            title_done = True
             obj_crumbs = [{'title': title,
                            'url': request.get_full_path() if url is None else url}]
 
@@ -549,14 +555,14 @@ def get_alerts(user):
             'bug',
             reverse('view_finding', args=(finding.id,))])
 
-    incomplete_findings = Finding.objects.filter(severity="", reporter=user)
+    incomplete_findings = Stub_Finding.objects.filter(reporter=user)
     for incomplete_finding in incomplete_findings:
         alerts.append([
             'Incomplete Finding: ' + (
                 incomplete_finding.title if incomplete_finding.title is not None else 'Finding'),
             'Started On ' + incomplete_finding.date.strftime("%b. %d, %Y"),
             'bug',
-            reverse('edit_finding', args=(incomplete_finding.id,))])
+            reverse('promote_to_finding', args=(incomplete_finding.id,))])
     return alerts
 
 

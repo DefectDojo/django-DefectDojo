@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load event_tags %}
+{% load static from staticfiles %}
+{% block content %}
+    <div>
+        <h3>Promote Potential Finding</h3>
+    </div>
+    <div class="alert alert-info" role="alert">
+        In order to promote a Potential Finding to a Verified Finding you must provide the following information.
+    </div>
+
+    <form class="form-horizontal" action="{% url 'promote_to_finding' stub_finding.id %}" method="post">
+        {% csrf_token %}
+        {% include "dojo/form_fields.html" with form=form %}
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <input class="btn btn-primary" type="submit" value="Promote Finding"/>&nbsp;&nbsp;
+                <a href="{% url 'delete_stub_finding' stub_finding.id %}" class="btn btn-danger">Delete Potential Finding</a>
+            </div>
+        </div>
+    </form>
+{% endblock %}
+{% block postscript %}
+    <script type="application/javascript">
+        $('#add_id_endpoints').attr('href', '/endpoints/{{ test.engagement.product.id }}/add?_popup');
+        {% if not form_error %}
+            $('#id_endpoints').find('option').remove();
+        {% endif %}
+    </script>
+    <script type="application/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>
+{% endblock %}

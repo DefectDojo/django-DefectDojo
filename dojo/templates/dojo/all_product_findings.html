@@ -2,12 +2,27 @@
 {% load navigation_tags %}
 {% block content %}
     <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading tight">
+                    <h3 class="has-filters">
+                        {{ product }} Open Findings
+                        <div class="dropdown pull-right">
+                            <a class="btn btn-primary"
+                               href="{% url 'product_report' product.id %}?{{ request.GET.urlencode }}">
+                                <i class="fa fa-file-text-o"></i> Report
+                            </a>
+                        </div>
+                    </h3>
+                </div>
+                <div id="the-filters" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
+                    {% include "dojo/filter_snippet.html" with form=filtered.form %}
+                </div>
+            </div>
 
-        <div class="col-md-10">
             {% if findings %}
                 <div class="clearfix">
-                    <h3 class="pull-left">Product
-                        Findings</h3>{% include "dojo/paging_snippet.html" with page=findings page_size=True %}
+                    {% include "dojo/paging_snippet.html" with page=findings page_size=True %}
                 </div>
                 <div class="table-responsive panel panel-default">
                     <table id="findings"
@@ -45,30 +60,9 @@
                 No findings found for this product.
             {% endif %}
         </div>
-        <div class="col-md-2">
-            <div class="filters panel panel-default">
-                <div class="panel-heading">Actions</div>
-                <div class="panel-body centered">
-                    {{ test.test_type }} <a class="btn btn-sm btn-primary"
-                                            href="{% url 'product_report' pid %}?{{ request.GET.urlencode }}">
-                    <i class="fa fa-file-text-o"></i> Report
-                </a>
-                </div>
-                {% if filtered.form %}
-                    <div class="panel-heading">Filters</div>
-                    <form method="get" class="panel-body">
-                        {{ filtered.form.as_p }}
-                        <div class="centered">
-                            <button class="btn btn-sm btn-primary">
-                                <i class="fa fa-filter"></i> Apply
-                            </button>
-                            <br/><br/>
-                            <a href="?" class=""> [Clear Filters] </a>
-                        </div>
-                    </form>
-                {% endif %}
-            </div>
-        </div>
     </div>
 
+{% endblock %}
+{% block postscript %}
+    {% include "dojo/filter_js_snippet.html" %}
 {% endblock %}

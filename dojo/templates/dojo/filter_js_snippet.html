@@ -2,10 +2,10 @@
 <script type="application/javascript" src="{% static "chosen/chosen.jquery.min.js" %}"></script>
 <script type="application/javascript">
     $(function () {
-        $("#{{ request.path|slugify }}-filters :input").not("button").addClass("form-control input-sm");
-        $("#{{ request.path|slugify }}-filters label").css("display", "block");
+        $(".{{ request.path|slugify }}-filters :input").not("button").addClass("form-control input-sm");
+        $(".{{ request.path|slugify }}-filters label").css("display", "block");
 
-        $("#{{ request.path|slugify }}-filters input[type=text]").each(function () {
+        $(".{{ request.path|slugify }}-filters input[type=text]").each(function () {
             var id = this.id;
             var label = $("label[for=" + id + "]");
             $(this).attr("placeholder", label.html().replace(':', "..."));
@@ -17,7 +17,7 @@
             $(this).toggleClass("dropup");
         })
 
-        $('#{{ request.path|slugify }}-filters select[multiple=multiple]').each(function () {
+        $('.{{ request.path|slugify }}-filters select[multiple=multiple]').each(function () {
             var id = this.id
             var label = $("label[for=" + id + "]");
             $(this).chosen({

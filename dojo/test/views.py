@@ -16,7 +16,7 @@ from dojo.forms import NoteForm, TestForm, FindingForm, \
     ImportScanForm, ReImportScanForm
 from dojo.models import Finding, Test, \
     Notes, \
-    BurpRawRequestResponse, Endpoint
+    BurpRawRequestResponse, Endpoint, Stub_Finding
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, template_search_helper, message
 
@@ -37,6 +37,8 @@ def view_test(request, tid):
     notes = test.notes.all()
     person = request.user.username
     findings = Finding.objects.filter(test=test)
+    stub_findings = Stub_Finding.objects.filter(test=test)
+
     if request.method == 'POST':
         form = NoteForm(request.POST)
         if form.is_valid():
@@ -54,13 +56,21 @@ def view_test(request, tid):
         form = NoteForm()
 
     fpage = get_page_items(request, findings, 25)
+    sfpage = get_page_items(request, stub_findings, 25)
     show_re_upload = any(test.test_type.name in code for code in ImportScanForm.SCAN_TYPE_CHOICES)
+    ajax_url = reverse('api_dispatch_list', kwargs={'resource_name': 'stub_findings', 'api_name': 'v1_a'})
 
     add_breadcrumb(parent=test, top_level=False, request=request)
     return render(request, 'dojo/view_test.html',
-                  {'test': test, 'findings': fpage,
-                   'form': form, 'notes': notes,
-                   'person': person, 'request': request, "show_re_upload": show_re_upload,
+                  {'test': test,
+                   'findings': fpage,
+                   'stub_findings': sfpage,
+                   'form': form,
+                   'notes': notes,
+                   'person': person,
+                   'request': request,
+                   'show_re_upload': show_re_upload,
+                   'ajax_url': ajax_url,
                    })
 
 
@@ -159,7 +169,7 @@ def add_findings(request, tid):
     test = Test.objects.get(id=tid)
     findings = Finding.objects.filter(is_template=True).distinct()
     form_error = False
-    form = AddFindingForm()
+    form = AddFindingForm(initial={'date': datetime.now(tz=localtz).date()})
     if request.method == 'POST':
         form = AddFindingForm(request.POST)
         if form.is_valid():

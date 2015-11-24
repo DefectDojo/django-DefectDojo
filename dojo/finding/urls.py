@@ -28,4 +28,11 @@ urlpatterns = [
         name='reopen_finding'),
     url(r'^finding/(?P<tid>\d+)/note/(?P<nid>\d+)/delete$',
         views.delete_finding_note, name='delete_finding_note'),
+
+    # stub findings
+
+    url(r'^stub_finding/(?P<fid>\d+)/promote',
+        views.promote_to_finding, name='promote_to_finding'),
+    url(r'^stub_finding/(?P<fid>\d+)/delete$',
+        views.delete_stub_finding, name='delete_stub_finding'),
 ]
