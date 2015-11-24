@@ -15,9 +15,9 @@ from pytz import timezone
 from dojo.filters import OpenFindingFilter, \
     OpenFingingSuperFilter, AcceptedFingingSuperFilter, \
     ClosedFingingSuperFilter
-from dojo.forms import NoteForm, CloseFindingForm, FindingForm
+from dojo.forms import NoteForm, CloseFindingForm, FindingForm, PromoteFindingForm
 from dojo.models import Product_Type, Finding, Notes, \
-    Risk_Acceptance, BurpRawRequestResponse
+    Risk_Acceptance, BurpRawRequestResponse, Stub_Finding, Endpoint
 from dojo.utils import get_page_items, add_breadcrumb
 
 localtz = timezone(settings.TIME_ZONE)
@@ -63,7 +63,7 @@ def open_findings(request):
         if len(p) == 1:
             product_type = get_object_or_404(Product_Type, id=p[0])
 
-    add_breadcrumb(title="Open findings", top_level='all' in request.GET, request=request)
+    add_breadcrumb(title="Open findings", top_level=not len(request.GET), request=request)
 
     return render(request,
                   'dojo/open_findings.html',
@@ -99,7 +99,7 @@ def accepted_findings(request):
     title_words = sorted(set(title_words))
     paged_findings = get_page_items(request, findings, 25)
 
-    add_breadcrumb(title="Accepted findings", top_level='all' in request.GET, request=request)
+    add_breadcrumb(title="Accepted findings", top_level=not len(request.GET), request=request)
 
     return render(request,
                   'dojo/accepted_findings.html',
@@ -119,7 +119,7 @@ def closed_findings(request):
 
     title_words = sorted(set(title_words))
     paged_findings = get_page_items(request, findings, 25)
-    add_breadcrumb(title="Closed findings", top_level='all' in request.GET, request=request)
+    add_breadcrumb(title="Closed findings", top_level=not len(request.GET), request=request)
     return render(request,
                   'dojo/closed_findings.html',
                   {"findings": paged_findings,
@@ -324,3 +324,74 @@ def delete_finding_note(request, tid, nid):
                              extra_tags='alert-success')
         return view_finding(request, tid)
     return HttpResponseForbidden()
+
+
+@user_passes_test(lambda u: u.is_staff)
+def delete_stub_finding(request, fid):
+    finding = get_object_or_404(Stub_Finding, id=fid)
+    tid = finding.test.id
+    finding.delete()
+    messages.add_message(request,
+                         messages.SUCCESS,
+                         'Potential Finding deleted successfully.',
+                         extra_tags='alert-success')
+    return HttpResponseRedirect(reverse('view_test', args=(tid,)))
+
+
+@user_passes_test(lambda u: u.is_staff)
+def promote_to_finding(request, fid):
+    finding = get_object_or_404(Stub_Finding, id=fid)
+    test = finding.test
+    form_error = False
+    form = PromoteFindingForm(initial={'title': finding.title,
+                                       'date': finding.date,
+                                       'severity': finding.severity,
+                                       'description': finding.description,
+                                       'test': finding.test,
+                                       'reporter': finding.reporter})
+    if request.method == 'POST':
+        form = PromoteFindingForm(request.POST)
+        if form.is_valid():
+            new_finding = form.save(commit=False)
+            new_finding.test = test
+            new_finding.reporter = request.user
+            new_finding.numerical_severity = Finding.get_numerical_severity(
+                new_finding.severity)
+
+            new_finding.active = True
+            new_finding.false_p = False
+            new_finding.duplicate = False
+            new_finding.is_template = False
+            new_finding.mitigated = None
+            new_finding.verified = True
+            new_finding.out_of_scope = False
+
+            new_finding.save()
+            new_finding.endpoints = form.cleaned_data['endpoints']
+            new_finding.save()
+
+            finding.delete()
+
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Finding promoted successfully.',
+                                 extra_tags='alert-success')
+
+            return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
+        else:
+            if 'endpoints' in form.cleaned_data:
+                form.fields['endpoints'].queryset = form.cleaned_data['endpoints']
+            else:
+                form.fields['endpoints'].queryset = Endpoint.objects.none()
+            form_error = True
+            messages.add_message(request,
+                                 messages.ERROR,
+                                 'The form has errors, please correct them below.',
+                                 extra_tags='alert-danger')
+    add_breadcrumb(parent=test, title="Promote Finding", top_level=False, request=request)
+    return render(request, 'dojo/promote_to_finding.html',
+                  {'form': form,
+                   'test': test,
+                   'stub_finding': finding,
+                   'form_error': form_error,
+                   })

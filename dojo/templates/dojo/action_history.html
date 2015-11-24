@@ -1,12 +1,22 @@
 {% extends "base.html" %}
 {% load display_tags %}
-
 {% block content %}
-    <h4>{{ obj }} History</h4>
-    <br/>
     <div class="row">
-        <div class="col-md-10">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading tight">
+                    <h3 class="has-filters">
+                        {{ obj }} History
+                    </h3>
+                </div>
+                <div id="the-filters" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
+                    {% include "dojo/filter_snippet.html" with form=filtered.form %}
+                </div>
+            </div>
             {% if history %}
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=history %}
+                </div>
                 <div class="table-responsive panel panel-default">
                     <table id="endpoints"
                            class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
@@ -36,20 +46,9 @@
                 <h5> No update history found for this object </h5>
             {% endif %}
         </div>
-        <div class="col-md-2">
-            <div class="filters panel panel-default">
-                <div class="panel-heading">Filters</div>
-                <form method="get" class="panel-body">
-                    {{ filtered.form.as_p }}
-                    <div class="centered">
-                        <button class="btn btn-sm btn-primary">
-                            <i class="fa fa-filter"></i> Apply
-                        </button><br/><br/>
-                        <a href="{% url 'endpoints' %}"> [Clear Filters] </a>
-                    </div>
-                </form>
-            </div>
-        </div>
     </div>
 
+{% endblock %}
+{% block postscript %}
+    {% include "dojo/filter_js_snippet.html" %}
 {% endblock %}

@@ -19,6 +19,22 @@ def alert_count(context):
     return count if count > 0 else ''
 
 
+@register.simple_tag(takes_context=True)
+def query_string_as_hidden(context):
+    request = context['request']
+    query_string = request.META['QUERY_STRING']
+    inputs = ''
+    if query_string:
+        parameters = query_string.split('&')
+        for param in parameters:
+            parts = param.split('=')
+            if len(parts) == 2:
+                inputs += "<input type='hidden' name='" + parts[0] + "' value='" + parts[1] + "'/>"
+            else:
+                inputs += "<input type='hidden' name='" + parts[0] + "' value=''/>"
+    return inputs
+
+
 @register.inclusion_tag('pt_nav_items.html')
 def pt_metric_nav():
     pt = Product_Type.objects.all().order_by('name')

@@ -7,7 +7,7 @@
             <div class="clearfix">
                 <h3 class="pull-left"> {{ test.test_type }}</h3>
 
-                <div class="dropdown pull-right">
+                <div id="test-pulldown" class="dropdown pull-right">
                     <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                             data-toggle="dropdown" aria-expanded="true">
                         <span class="fa fa-bars"></span>
@@ -27,12 +27,7 @@
                             </li>
                         {% endif %}
                         <li role="presentation">
-                            <a href="{% url 'add_findings' test.id %}">
-                                <i class="fa fa-bug"></i> Add Findings
-                            </a>
-                        </li>
-                        <li role="presentation">
-                            <a href="#add_notes">
+                            <a id="add_notes_link" href="#add_notes">
                                 <i class="fa fa-comments"></i> Add Notes
                             </a>
                         </li>
@@ -103,7 +98,12 @@
     </div>
     <div class="panel panel-default to_highlight table-responsive">
         <div class="panel-heading">
-            <h4>Findings</h4>
+            <h4>
+                Findings
+                <a title="Add Finding" class="pull-right btn btn-sm btn-primary"
+                   href="{% url 'add_findings' test.id %}"><span class="fa fa-plus"></span></a>
+                </a>
+            </h4>
         </div>
         {% if findings %}
             <table id="test_findings" class="table-bordered table table-condensed table-hover">
@@ -137,7 +137,7 @@
                                    href="{% url 'view_finding' finding.id %}">View</a>
                                 <a class="btn btn-sm btn-warning"
                                    href="{% url 'edit_finding' finding.id %}">Edit</a>
-                                <a class="btn btn-sm btn-danger"
+                                <a class="btn btn-sm btn-danger delete-finding"
                                    href="{% url 'delete_finding' finding.id %}">Delete</a>
                             </div>
                         </td>
@@ -145,7 +145,7 @@
                 {% endfor %}
                 </tbody>
             </table>
-            <div class="panel-body">
+            <div class="panel-body borderless">
                 {% include "dojo/paging_snippet.html" with page=findings %}
             </div>
         {% else %}
@@ -153,6 +153,72 @@
                 <p>No findings found.</p>
             </div>
         {% endif %}
+
+        <div class="panel panel-default to_highlight table-responsive potential-finding">
+            <div class="panel-heading">
+                <div class="clearfix">
+                    <h4 class="pull-left">Potential Findings</h4>
+
+                    <form id="quick-add-form" method="post" class="pull-right">
+                        {% csrf_token %}
+
+                        <div class="input-group">
+                            <input id="quick_add_finding" name="title" type="text"
+                                   placeholder="Add a potential finding..."
+                                   class="form-control"/>
+                            <input type="hidden" value="/api/v1/users/{{ request.user.id }}/"
+                                   name="reporter"/>
+                            <input type="hidden" value="/api/v1/tests/{{ test.id }}/" name="test"/>
+                                <span class="input-group-btn">
+                                    <button id="the_button" class="btn btn-success" type="submit"><i id="fa-icon"
+                                                                                                     class="fa fa-fw fa-plus"></i>
+                                        Add Potential Finding
+                                    </button>
+                                </span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <table id="stub_findings"
+                   class="table-bordered table table-condensed table-hover {% if not stub_findings %}hidden{% endif %}">
+
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Severity</th>
+                    <th>Reporter</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for finding in stub_findings %}
+                    <tr>
+                        <td><a href="{% url 'promote_to_finding' finding.id %}">{{ finding.title }}</a></td>
+                        <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
+                            <span class="text-error">
+                        {% else %}<span>{% endif %}{{ finding.severity }}</span></td>
+                        <td>{{ finding.reporter.username }}</td>
+                        <td>{{ finding.date }}</td>
+                        <td>
+                            <div class="btn-group">
+                                <a class="btn btn-sm btn-warning"
+                                   href="{% url 'promote_to_finding' finding.id %}">Promote To Finding</a>
+                                <a class="btn btn-sm btn-danger"
+                                   href="{% url 'delete_stub_finding' finding.id %}">Delete</a>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <div class="panel-body {% if stub_findings %}show{% else %}hidden{% endif %}">
+                {% include "dojo/paging_snippet.html" with page=stub_findings %}
+            </div>
+
+
+        </div>
     </div>
 
     <div class="panel panel-default to_highlight table-responsive">
@@ -213,6 +279,17 @@
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
     <script type="text/javascript">
         $(function () {
+            $('a.delete-finding').on('click', function(e){
+                return confirm('Are you sure you want to delete this finding?');
+            });
+
+            $('a#add_notes_link').on('click', function(e){
+                $("html, body").animate({ scrollTop: $("#id_entry").offset().top }, 600);
+                $("#id_entry").focus();
+                $("#test-pulldown").dropdown('toggle')
+                return false;
+            });
+
             if (document.referrer.indexOf('simple_search') > 0) {
                 var terms = '';
                 if ($.cookie('highlight')) {
@@ -225,6 +302,68 @@
 
                 $('input#simple_search').val(terms);
             }
+            ;
+
+
+            $('form#quick-add-form').on("submit", function () {
+                $('form#quick-add-form').removeClass("has-error");
+                $('button#the_button').attr('disabled', true).removeClass("btn-success btn-danger").addClass('btn-warning');
+                $('i#fa-icon').removeClass("fa-plus").addClass("fa-spinner fa-pulse");
+
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify($(this).serializeObject()),
+                    url: '{{ ajax_url }}',
+                    contentType: 'application/json',
+                    // The ``X-CSRFToken`` evidently can't be set in the
+                    // ``headers`` option, so force it here.
+                    // This method requires jQuery 1.5+.
+                    beforeSend: function (jqXHR, settings) {
+                        // Pull the token out of the DOM.
+                        jqXHR.setRequestHeader('X-CSRFToken', $('input[name=csrfmiddlewaretoken]').val());
+                    },
+                    success: function (data, textStatus, jqXHR) {
+                        // Your processing of the data here. <a href='" + jqXHR.getResponseHeader('Location') + "'>" +  + "</a>
+                        //
+                        $('table#stub_findings').removeClass('hidden');
+                        var fid = jqXHR.getResponseHeader('Location').split('/');
+                        fid = fid[fid.length - 2];
+                        var row = $("<tr id='added-" + fid + "' class='success'></tr>");
+                        var link = $('<a></a>');
+
+                        link.attr('href', "/finding/" + fid);
+                        link.text($("input#quick_add_finding").val());
+                        var title = $("<td></td>").append(link);
+                        var severity = $("<td> </td>");
+                        var reporter = $("<td>{{ request.user.username }}</td>");
+                        var date = $("<td>None</td>");
+                        var actions = $('<td><div class="btn-group"><a class="btn btn-sm btn-warning" href="/stub_finding/[id]/promote">Promote To Finding</a> <a class="btn btn-sm btn-danger" href="/stub_finding/[id]/delete">Delete</a></div></td>'.replace(/\[id\]/g, fid));
+
+                        row.append(title, severity, reporter, date, actions).appendTo("#stub_findings tbody");
+                        $("input#quick_add_finding").val("")
+                        $('button#the_button').removeClass("btn-warning btn-danger").addClass('btn-success');
+
+                        $("input#quick_add_finding").focus()
+
+                        setTimeout(function () {
+                            $("tr#added-" + fid + " td").animate({
+                                backgroundColor: "#fff",
+                            })
+                        }, 2000)
+                    },
+                    error: function () {
+                        $('form#quick-add-form').addClass("has-error");
+                        $('button#the_button').removeClass("btn-warning").addClass('btn-danger');
+                    },
+                    complete: function () {
+                        $('i#fa-icon').addClass("fa-plus").removeClass("fa-spinner fa-pulse");
+                        $('button#the_button').attr('disabled', false);
+
+                    }
+                });
+                return false;
+            });
+
         });
 
     </script>

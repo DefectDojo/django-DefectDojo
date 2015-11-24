@@ -1,7 +1,6 @@
 import re
 from datetime import datetime, date
 from urlparse import urlsplit, urlunsplit
-
 from dateutil.relativedelta import relativedelta
 from django import forms
 from django.core import validators
@@ -10,11 +9,10 @@ from django.forms.widgets import Widget, Select
 from django.utils.dates import MONTHS
 from django.utils.safestring import mark_safe
 from pytz import timezone
-
 from dojo import settings
 from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
-    Development_Environment, Dojo_User, Scan, Endpoint
+    Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
 localtz = timezone(settings.TIME_ZONE)
@@ -31,7 +29,7 @@ SEVERITY_CHOICES = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
 class SelectWithPop(forms.Select):
     def render(self, name, *args, **kwargs):
         html = super(SelectWithPop, self).render(name, *args, **kwargs)
-        popup_plus = '<div class="input-group">' + html + '<span class="input-group-btn"><a href="/' + name + '/add" class="btn btn-primary" class="add-another" id="add_id_' + name + '" onclick="return showAddAnotherPopup(this);"><span class="glyphicon glyphicon-plus"></span></a></span></div>'
+        popup_plus = '<div class="input-group dojo-input-group">' + html + '<span class="input-group-btn"><a href="/' + name + '/add" class="btn btn-primary" class="add-another" id="add_id_' + name + '" onclick="return showAddAnotherPopup(this);"><span class="glyphicon glyphicon-plus"></span></a></span></div>'
 
         return mark_safe(popup_plus)
 
@@ -39,7 +37,7 @@ class SelectWithPop(forms.Select):
 class MultipleSelectWithPop(forms.SelectMultiple):
     def render(self, name, *args, **kwargs):
         html = super(MultipleSelectWithPop, self).render(name, *args, **kwargs)
-        popup_plus = '<div class="input-group">' + html + '<span class="input-group-btn"><a href="/' + name + '/add" class="btn btn-primary" class="add-another" id="add_id_' + name + '" onclick="return showAddAnotherPopup(this);"><span class="glyphicon glyphicon-plus"></span></a></span></div>'
+        popup_plus = '<div class="input-group dojo-input-group">' + html + '<span class="input-group-btn"><a href="/' + name + '/add" class="btn btn-primary" class="add-another" id="add_id_' + name + '" onclick="return showAddAnotherPopup(this);"><span class="glyphicon glyphicon-plus"></span></a></span></div>'
 
         return mark_safe(popup_plus)
 
@@ -47,7 +45,7 @@ class MultipleSelectWithPop(forms.SelectMultiple):
 class MultipleSelectWithPopPlusMinus(forms.SelectMultiple):
     def render(self, name, *args, **kwargs):
         html = super(MultipleSelectWithPopPlusMinus, self).render(name, *args, **kwargs)
-        popup_plus = '<div class="input-group">' + html + '<span class="input-group-btn"><a href="/' + name + '/add" class="btn btn-primary" class="add-another" id="add_id_' + name + '" onclick="return showAddAnotherPopup(this);"><span class="icon-plusminus"></span></a></span></div>'
+        popup_plus = '<div class="input-group dojo-input-group">' + html + '<span class="input-group-btn"><a href="/' + name + '/add" class="btn btn-primary" class="add-another" id="add_id_' + name + '" onclick="return showAddAnotherPopup(this);"><span class="icon-plusminus"></span></a></span></div>'
 
         return mark_safe(popup_plus)
 
@@ -522,6 +520,33 @@ class AddFindingForm(forms.ModelForm):
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint')
 
 
+class PromoteFindingForm(forms.ModelForm):
+    title = forms.CharField(max_length=1000)
+    date = forms.DateField(required=True,
+                           widget=forms.TextInput(attrs={'class':
+                                                             'datepicker'}))
+    cwe = forms.IntegerField(required=False)
+    severity_options = (('Low', 'Low'), ('Medium', 'Medium'),
+                        ('High', 'High'), ('Critical', 'Critical'))
+    description = forms.CharField(widget=forms.Textarea)
+    severity = forms.ChoiceField(
+        choices=severity_options,
+        error_messages={
+            'required': 'Select valid choice: In Progress, On Hold, Completed',
+            'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
+    mitigation = forms.CharField(widget=forms.Textarea)
+    impact = forms.CharField(widget=forms.Textarea)
+    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
+                                               widget=MultipleSelectWithPopPlusMinus(attrs={'size': '11'}))
+    references = forms.CharField(widget=forms.Textarea, required=False)
+
+    class Meta:
+        model = Finding
+        order = ('title', 'severity', 'endpoints', 'description', 'impact')
+        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'active', 'false_p', 'verified', 'is_template',
+                   'duplicate', 'out_of_scope')
+
+
 class FindingForm(forms.ModelForm):
     title = forms.CharField(max_length=1000)
     date = forms.DateField(required=True,
@@ -559,18 +584,17 @@ class FindingForm(forms.ModelForm):
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint')
 
 
-class IncompleteFindingForm(forms.ModelForm):
+class StubFindingForm(forms.ModelForm):
     title = forms.CharField(required=True, max_length=1000)
 
     class Meta:
-        model = Finding
+        model = Stub_Finding
         order = ('title',)
         exclude = (
-            'date', 'description', 'severity', 'reporter', 'mitigation',
-            'impact', 'endpoints', 'url', 'numerical_severity', 'endpoint')
+            'date', 'description', 'severity', 'reporter', 'test')
 
     def clean(self):
-        cleaned_data = super(IncompleteFindingForm, self).clean()
+        cleaned_data = super(StubFindingForm, self).clean()
         if 'title' in cleaned_data:
             if len(cleaned_data['title']) <= 0:
                 raise forms.ValidationError("The title is required.")
@@ -924,3 +948,11 @@ class APIKeyForm(forms.ModelForm):
         exclude = ['username', 'first_name', 'last_name', 'email', 'is_active',
                    'is_staff', 'is_superuser', 'password', 'last_login', 'groups',
                    'date_joined', 'user_permissions']
+
+
+class ReportOptionsForm(forms.Form):
+    yes_no = (('0', 'No'), ('1', 'Yes'))
+    include_finding_notes = forms.ChoiceField(choices=yes_no, label="Finding Notes")
+    include_executive_summary = forms.ChoiceField(choices=yes_no, label="Executive Summary")
+    include_table_of_contents = forms.ChoiceField(choices=yes_no, label="Table of Contents")
+    report_type = forms.ChoiceField(choices=(('AsciiDoc', 'AsciiDoc'), ('PDF', 'PDF')))

@@ -44,8 +44,12 @@ input[type="file"] {
     width: auto;
 }
 
-textarea {
-    width: 70% !important;
+.form-control {
+    width: 70%;
+}
+
+.dojo-input-group {
+    width: 73%;
 }
 
 .home-icon a {
@@ -109,20 +113,19 @@ body #header form#api_selector .input input#input_apiKey {
     width: 1px;
 }
 
-.breadcrumb a.active{
+.breadcrumb a.active {
     color: #777 !important;
 }
 
-.badge.badge-count{
+.badge.badge-count {
     background-color: #d9534f;
 }
 
-
-.badge.badge-count.badge-count0{
+.badge.badge-count.badge-count0 {
     background-color: #5cb85c;
 }
 
-.dropdown-toggle-h{
+.dropdown-toggle-h {
     display: none;
     visibility: hidden;
 }
@@ -377,23 +380,24 @@ form ul#id_accepted_findings input {
 .severity {
     font-size: 100%;
 }
-.severity-Info{
+
+.severity-Info {
     background-color: #888888;
 }
 
-.severity-Low{
+.severity-Low {
     background-color: #337ab7;
 }
 
-.severity-Medium{
+.severity-Medium {
     background-color: #FBE413;
 }
 
-.severity-High{
+.severity-High {
     background-color: #f09835;
 }
 
-.severity-Critical{
+.severity-Critical {
     background-color: #d9534f;
 }
 
@@ -522,7 +526,7 @@ body {
     padding-top: 50px;
 }
 
-body.popup{
+body.popup {
     padding-top: 0;
 }
 
@@ -580,7 +584,7 @@ ul.left {
     text-align: left;
 }
 
-table.centered th{
+table.centered th {
     text-align: center;
 }
 
@@ -678,7 +682,7 @@ span.endpoint_product {
     max-height: 300px;
 }
 
-.endpoints i.fa-circle{
+.endpoints i.fa-circle {
     font-size: 7px;
     vertical-align: middle;
 }
@@ -745,8 +749,6 @@ div.custom-search-form {
     width: 265px;
 }
 
-
-
 @media (min-width: 795px) {
     div.custom-search-form {
         height: 21px;
@@ -761,8 +763,6 @@ div.custom-search-form {
     }
 }
 
-
-
 @media (min-width: 320px) {
     #page-wrapper {
         margin: 75px 0 0 0;
@@ -775,7 +775,7 @@ div.custom-search-form {
     }
 }
 
-@media (min-width: 600px){
+@media (min-width: 600px) {
     #page-wrapper {
         margin: 50px 0 0 0;
     }
@@ -786,7 +786,7 @@ div.custom-search-form {
         width: 175px
     }
 
-    #page-wrapper{
+    #page-wrapper {
         margin: 0 0 0 175px;
     }
 
@@ -849,17 +849,17 @@ div.custom-search-form {
         font-size: 18px;
     }
 
-    body.min #min-menu i:before{
+    body.min #min-menu i:before {
         content: "\f0a9" !important;
     }
 
-    body.max #min-menu i:before{
+    body.max #min-menu i:before {
         content: "\f0a8" !important;
     }
 
 }
 
-#toTop{
+#toTop {
     position: fixed;
     bottom: 95px;
     right: 40px;
@@ -868,9 +868,11 @@ div.custom-search-form {
     width: 40px;
     height: 30px;
 }
-.dojo-filter-set *{
+
+.dojo-filter-set * {
     font-size: 11px;
 }
+
 .dojo-filter-set.form-inline .form-group {
     display: inline-block;
     margin-bottom: 10px;
@@ -878,11 +880,11 @@ div.custom-search-form {
     margin-right: 25px;
 }
 
-.dojo-filter-set.form-inline select[multiple=multiple]{
+.dojo-filter-set.form-inline select[multiple=multiple] {
     width: 200px;
 }
 
-#the-filters{
+#the-filters {
     background-color: #f9f9f9;
 }
 
@@ -890,7 +892,7 @@ div.custom-search-form {
     border-color: #A1C0D7;
 }
 
-.panel-default>.panel-heading {
+.panel-default > .panel-heading {
     color: #333;
     background-color: #EBF4FB;
     border-color: #A1C0D7;
@@ -900,20 +902,20 @@ div.custom-search-form {
     border-radius: inherit;
 }
 
-span.pull-right.clickable.panel-collapse i.glyphicon-chevron-up, span.pull-right.clickable.panel-collapse i.glyphicon-chevron-down{
+span.pull-right.clickable.panel-collapse i.glyphicon-chevron-up, span.pull-right.clickable.panel-collapse i.glyphicon-chevron-down {
     color: #337ab7;
 }
 
-table.finding-endpoints{
+table.finding-endpoints {
     font-size: 13px;
 }
 
-.finding-description{
+.finding-description {
     max-height: 500px;
     overflow-y: scroll;
 }
 
-.finding-description::-webkit-scrollbar{
+.finding-description::-webkit-scrollbar {
     -webkit-appearance: none;
 }
 
@@ -932,7 +934,41 @@ table.finding-endpoints{
     border-radius: 8px;
 }
 
-.highlight{
+.highlight {
     background-color: rgb(255, 255, 123);
 }
 
+form#quick-add-form {
+    display: inline-block;
+    width: 40%;
+}
+
+.dojo-filter-heading {
+    background-color: #EBF4FB;
+    margin: 0px;
+    padding: 5px 10px;
+    border-radius: 0px;
+    border: 1px solid #A1C0D7;
+    margin-left: -16px;
+    margin-right: -16px;
+    margin-top: -16px;
+    font-size: 15px;
+    margin-bottom: 15px;
+}
+
+.dojo-report-heading {
+    margin-top: 15px;
+    margin-left: -16px;
+    margin-right: -16px;
+    background-color: #EBF4FB;
+    border-radius: 0px;
+    border: 1px solid #A1C0D7;
+    font-size: 15px;
+    padding: 5px 10px;
+    margin-bottom: 15px;
+}
+
+div.potential-finding, div.potential-finding div.panel-heading {
+    border-top-right-radius: 0px;
+    border-top-left-radius: 0px;
+}

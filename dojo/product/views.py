@@ -226,7 +226,7 @@ def all_product_findings(request, pid):
     return render(request,
                   "dojo/all_product_findings.html",
                   {"findings": page,
-                   "pid": pid,
+                   "product": p,
                    "filtered": result,
                    "user": request.user,
                    })

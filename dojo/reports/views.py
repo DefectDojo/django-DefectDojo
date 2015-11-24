@@ -1,5 +1,6 @@
 # #  reports
 import logging
+
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
@@ -8,7 +9,9 @@ from django.http import Http404
 from django.shortcuts import render, get_object_or_404
 from easy_pdf.rendering import render_to_pdf_response
 from pytz import timezone
+
 from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter, EndpointReportFilter
+from dojo.forms import ReportOptionsForm
 from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
     Dojo_User, Endpoint
 from dojo.utils import get_page_items, add_breadcrumb
@@ -99,7 +102,12 @@ def product_endpoint_report(request, pid):
     include_table_of_contents = int(request.GET.get('include_table_of_contents', 0))
     generate = "_generate" in request.GET
     add_breadcrumb(parent=product, title="Vulnerable Product Endpoints Report", top_level=False, request=request)
+    report_form = ReportOptionsForm()
+    if len(endpoints) > 50:
+        report_form.fields['report_type'].choices = (('AsciiDoc', 'AsciiDoc'),)
+
     if generate:
+        report_form = ReportOptionsForm(request.GET)
         if report_format == 'AsciiDoc':
             return render(request,
                           'dojo/asciidoc_report.html',
@@ -146,6 +154,7 @@ def product_endpoint_report(request, pid):
                   'dojo/request_endpoint_report.html',
                   {"endpoints": paged_endpoints,
                    "filtered": endpoints,
+                   'report_form': report_form,
                    "name": "Vulnerable Product Endpoints",
                    })
 
@@ -157,6 +166,7 @@ def generate_report(request, obj):
     test = None
     endpoint = None
     user = Dojo_User.objects.get(id=request.user.id)
+
     if type(obj).__name__ == "Product":
         if request.user.is_staff or request.user in obj.authorized_users.all():
             pass  # user is authorized for this product
@@ -214,7 +224,13 @@ def generate_report(request, obj):
         filename = "finding_report.pdf"
     else:
         raise Http404()
+
+    report_form = ReportOptionsForm()
+    if len(findings) > 150:
+        report_form.fields['report_type'].choices = (('AsciiDoc', 'AsciiDoc'),)
+
     if generate:
+        report_form = ReportOptionsForm(request.GET)
         if report_format == 'AsciiDoc':
             return render(request,
                           'dojo/asciidoc_report.html',
@@ -263,4 +279,5 @@ def generate_report(request, obj):
                    'endpoint': endpoint,
                    'findings': findings,
                    'paged_findings': paged_findings,
+                   'report_form': report_form,
                    })

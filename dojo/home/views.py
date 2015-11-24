@@ -35,7 +35,7 @@ def home(request):
 @user_passes_test(lambda u: u.is_staff)
 def dashboard(request):
     now = localtz.localize(datetime.today())
-    seven_days_ago = now - timedelta(days=8)
+    seven_days_ago = now - timedelta(days=7)
     engagement_count = Engagement.objects.filter(lead=request.user,
                                                  active=True).count()
     finding_count = Finding.objects.filter(reporter=request.user,
