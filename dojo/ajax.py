@@ -1,19 +1,16 @@
 # see tastypie documentation at http://django-tastypie.readthedocs.org/en
 from tastypie import fields
-from tastypie.authentication import ApiKeyAuthentication, MultiAuthentication, SessionAuthentication
-from tastypie.authorization import Authorization
-from tastypie.authorization import DjangoAuthorization
+from tastypie.authentication import SessionAuthentication
 from tastypie.constants import ALL
-from tastypie.exceptions import Unauthorized
 from tastypie.resources import ModelResource
 from tastypie.serializers import Serializer
 from tastypie.validation import CleanedDataFormValidation
 
 from api import UserResource, TestResource
-from dojo.models import Product, Engagement, Test, Finding, \
-    User, ScanSettings, IPScan, Scan, Stub_Finding
-from dojo.forms import ProductForm, EngForm2, TestForm, \
-    ScanSettingsForm, FindingForm, StubFindingForm
+from dojo.api import UserProductsOnlyAuthorization
+from dojo.forms import StubFindingForm
+from dojo.models import Engagement, Stub_Finding
+
 
 class BaseModelResource(ModelResource):
     @classmethod
@@ -62,7 +59,7 @@ class StubFindingResource(BaseModelResource):
         }
 
         authentication = SessionAuthentication()
-        authorization = DjangoAuthorization()
+        authorization = UserProductsOnlyAuthorization()
         serializer = Serializer(formats=['json'])
         validation = CleanedDataFormValidation(form_class=StubFindingForm)
 
