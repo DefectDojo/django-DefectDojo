@@ -35,4 +35,15 @@ urlpatterns = [
         views.promote_to_finding, name='promote_to_finding'),
     url(r'^stub_finding/(?P<fid>\d+)/delete$',
         views.delete_stub_finding, name='delete_stub_finding'),
+
+    # template findings
+
+    url(r'^template$', views.templates,
+        name='templates'),
+    url(r'^template/add$', views.add_template,
+        name='add_template'),
+    url(r'^template/(?P<tid>\d+)/edit$',
+        views.edit_template, name='edit_template'),
+    url(r'^template/(?P<tid>\d+)/delete',
+        views.delete_template, name='delete_template'),
 ]

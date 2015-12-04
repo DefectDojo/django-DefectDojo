@@ -71,7 +71,6 @@ class ZapXmlParser(object):
                                severity=severity,
                                mitigation=item.resolution,
                                references=references,
-                               is_template=False,
                                active=False,
                                verified=False,
                                false_p=False,

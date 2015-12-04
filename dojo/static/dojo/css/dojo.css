@@ -730,9 +730,13 @@ th a {
     -moz-osx-font-smoothing: grayscale;
 }
 
+.icon-add-template:before {
+    content: "\e900";
+}
 .icon-plusminus:before {
     content: "\e800";
 }
+
 
 #side-menu ul a {
     /*border-top: 1px solid #ddd;*/
@@ -971,4 +975,17 @@ form#quick-add-form {
 div.potential-finding, div.potential-finding div.panel-heading {
     border-top-right-radius: 0px;
     border-top-left-radius: 0px;
+}
+
+a.template-popover:hover{
+    cursor: zoom-in;
+}
+
+#template_findings div.popover{
+    width: 50% !important;
+    max-width: 50% !important;
+}
+
+#template_findings div.popover .popover-content {
+    overflow: hidden;
 }

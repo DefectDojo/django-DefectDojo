@@ -257,7 +257,6 @@ class NexposeFullXmlParser(object):
                                        impact=vuln['refs'][0],
                                        references=refs,
                                        test=test,
-                                       is_template=False,
                                        active=False,
                                        verified=False,
                                        false_p=False,

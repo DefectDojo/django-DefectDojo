@@ -14,7 +14,7 @@ from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
 from django.template.defaultfilters import pluralize
 from pytz import timezone
 
-from dojo.models import Finding, Scan, Test, Engagement, Stub_Finding
+from dojo.models import Finding, Scan, Test, Engagement, Stub_Finding, Finding_Template
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -434,7 +434,7 @@ def build_query(query_string, search_fields):
 def template_search_helper(fields=None, query_string=None):
     if not fields:
         fields = ['title', 'description', ]
-    findings = Finding.objects.filter(is_template=True).distinct()
+    findings = Finding_Template.objects.all()
 
     if not query_string:
         return findings

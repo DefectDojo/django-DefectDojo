@@ -98,12 +98,34 @@
     </div>
     <div class="panel panel-default to_highlight table-responsive">
         <div class="panel-heading">
-            <h4>
-                Findings
-                <a title="Add Finding" class="pull-right btn btn-sm btn-primary"
-                   href="{% url 'add_findings' test.id %}"><span class="fa fa-plus"></span></a>
-                </a>
-            </h4>
+            <div class="clearfix">
+                <h4 class="pull-left"> Findings</h4>
+
+                <div id="test-pulldown" class="dropdown pull-right">
+                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                            data-toggle="dropdown" aria-expanded="true">
+                        <span class="fa fa-plus"></span>
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+
+                        <li role="presentation">
+                            <a title="Add Finding" href="{% url 'add_findings' test.id %}">
+                                <span class="fa fa-bug"></span> New Finding
+                            </a>
+
+                        </li>
+                        <li role="presentation">
+                            <a title="Add Finding from Template" href="{% url 'search' test.id %}">
+                                <span class="icon-add-template"></span> Finding From Template
+                            </a>
+                        </li>
+
+
+                    </ul>
+                </div>
+            </div>
+
         </div>
         {% if findings %}
             <table id="test_findings" class="table-bordered table table-condensed table-hover">
@@ -279,12 +301,12 @@
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
     <script type="text/javascript">
         $(function () {
-            $('a.delete-finding').on('click', function(e){
+            $('a.delete-finding').on('click', function (e) {
                 return confirm('Are you sure you want to delete this finding?');
             });
 
-            $('a#add_notes_link').on('click', function(e){
-                $("html, body").animate({ scrollTop: $("#id_entry").offset().top }, 600);
+            $('a#add_notes_link').on('click', function (e) {
+                $("html, body").animate({scrollTop: $("#id_entry").offset().top}, 600);
                 $("#id_entry").focus();
                 $("#test-pulldown").dropdown('toggle')
                 return false;

@@ -387,8 +387,7 @@ class Endpoint(models.Model):
                                       verified=True,
                                       mitigated__isnull=True,
                                       false_p=False,
-                                      duplicate=False,
-                                      is_template=False).order_by('numerical_severity')
+                                      duplicate=False).order_by('numerical_severity')
 
     def get_breadcrumbs(self):
         bc = self.product.get_breadcrumbs()
@@ -479,6 +478,7 @@ class Finding(models.Model):
     unsaved_response = None
     references = models.TextField(null=True, blank=True, db_column="refs")
     test = models.ForeignKey(Test, editable=False)
+    # TODO: Will be deprecated soon
     is_template = models.BooleanField(default=False)
     active = models.BooleanField(default=True)
     verified = models.BooleanField(default=True)
@@ -564,8 +564,7 @@ class Finding(models.Model):
 
     def clean(self):
         no_check = ["test", "reporter"]
-        bigfields = ["description", "mitigation", "references", "impact",
-                     "endpoint", "url"]
+        bigfields = ["description", "mitigation", "references", "impact", "url"]
         for field_obj in self._meta.fields:
             field = field_obj.name
             if field not in no_check:
@@ -597,6 +596,31 @@ class Stub_Finding(models.Model):
         bc = self.test.get_breadcrumbs()
         bc += [{'title': "Potential Finding: " + self.__unicode__(),
                 'url': reverse('view_potential_finding', args=(self.id,))}]
+        return bc
+
+
+class Finding_Template(models.Model):
+    title = models.TextField(max_length=1000)
+    cwe = models.IntegerField(default=None, null=True, blank=True)
+    severity = models.CharField(max_length=200, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    mitigation = models.TextField(null=True, blank=True)
+    impact = models.TextField(null=True, blank=True)
+    references = models.TextField(null=True, blank=True, db_column="refs")
+    numerical_severity = models.CharField(max_length=4, null=True, blank=True)
+
+    SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
+                  'High': 1, 'Critical': 0}
+
+    class Meta:
+        ordering = ['-cwe']
+
+    def __unicode__(self):
+        return self.title
+
+    def get_breadcrumbs(self):
+        bc = [{'title': self.__unicode__(),
+               'url': reverse('view_template', args=(self.id,))}]
         return bc
 
 
