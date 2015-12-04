@@ -2,7 +2,6 @@
 import base64
 import logging
 from datetime import datetime
-
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
@@ -11,14 +10,15 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404
 from pytz import timezone
-
 from dojo.filters import OpenFindingFilter, \
     OpenFingingSuperFilter, AcceptedFingingSuperFilter, \
-    ClosedFingingSuperFilter
-from dojo.forms import NoteForm, CloseFindingForm, FindingForm, PromoteFindingForm
+    ClosedFingingSuperFilter, TemplateFindingFilter
+from dojo.forms import NoteForm, CloseFindingForm, FindingForm, PromoteFindingForm, FindingTemplateForm, \
+    DeleteFindingTemplateForm
 from dojo.models import Product_Type, Finding, Notes, \
-    Risk_Acceptance, BurpRawRequestResponse, Stub_Finding, Endpoint
+    Risk_Acceptance, BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template
 from dojo.utils import get_page_items, add_breadcrumb
+from django.utils.safestring import mark_safe
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -262,14 +262,40 @@ def edit_finding(request, fid):
                 new_finding.mitigated = None
                 new_finding.mitigated_by = None
 
+            create_template = new_finding.is_template
+            # always false now since this will be deprecated soon in favor of new Finding_Template model
+            new_finding.is_template = False
             new_finding.endpoints = form.cleaned_data['endpoints']
             new_finding.last_reviewed = datetime.now(tz=localtz)
             new_finding.last_reviewed_by = request.user
             new_finding.save()
+
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Finding saved successfully.',
                                  extra_tags='alert-success')
+            if create_template:
+                templates = Finding_Template.objects.filter(title=new_finding.title)
+                if len(templates) > 0:
+                    messages.add_message(request,
+                                         messages.ERROR,
+                                         'A finding template was not created.  A template with this title already '
+                                         'exists.',
+                                         extra_tags='alert-danger')
+                else:
+                    template = Finding_Template(title=new_finding.title,
+                                                cwe=new_finding.cwe,
+                                                severity=new_finding.severity,
+                                                description=new_finding.description,
+                                                mitigation=new_finding.mitigation,
+                                                impact=new_finding.impact,
+                                                references=new_finding.references,
+                                                numerical_severity=new_finding.numerical_severity)
+                    template.save()
+                    messages.add_message(request,
+                                         messages.SUCCESS,
+                                         'A finding template was also created.',
+                                         extra_tags='alert-success')
             return HttpResponseRedirect(reverse('view_finding', args=(new_finding.id,)))
         else:
             messages.add_message(request,
@@ -302,12 +328,28 @@ def touch_finding(request, fid):
 @user_passes_test(lambda u: u.is_staff)
 def mktemplate(request, fid):
     finding = get_object_or_404(Finding, id=fid)
-    finding.is_template = True
-    finding.save()
-    messages.add_message(request,
-                         messages.SUCCESS,
-                         'Finding template added successfully.',
-                         extra_tags='alert-success')
+    templates = Finding_Template.objects.filter(title=finding.title)
+    if len(templates) > 0:
+        messages.add_message(request,
+                             messages.ERROR,
+                             'A finding with that title already exists.',
+                             extra_tags='alert-danger')
+    else:
+        template = Finding_Template(title=finding.title,
+                                    cwe=finding.cwe,
+                                    severity=finding.severity,
+                                    description=finding.description,
+                                    mitigation=finding.mitigation,
+                                    impact=finding.impact,
+                                    references=finding.references,
+                                    numerical_severity=finding.numerical_severity)
+        template.save()
+        messages.add_message(request,
+                             messages.SUCCESS,
+                             mark_safe('Finding template added successfully. You may edit it <a href="%s">here</a>.' %
+                                       reverse('edit_template',
+                                               args=(template.id,))),
+                             extra_tags='alert-success')
     return HttpResponseRedirect(reverse('view_finding', args=(finding.id,)))
 
 
@@ -361,7 +403,6 @@ def promote_to_finding(request, fid):
             new_finding.active = True
             new_finding.false_p = False
             new_finding.duplicate = False
-            new_finding.is_template = False
             new_finding.mitigated = None
             new_finding.verified = True
             new_finding.out_of_scope = False
@@ -395,3 +436,104 @@ def promote_to_finding(request, fid):
                    'stub_finding': finding,
                    'form_error': form_error,
                    })
+
+
+@user_passes_test(lambda u: u.is_staff)
+def templates(request):
+    templates = Finding_Template.objects.all()
+    templates = TemplateFindingFilter(request.GET, queryset=templates)
+    paged_templates = get_page_items(request, templates, 25)
+    title_words = [word
+                   for finding in templates
+                   for word in finding.title.split() if len(word) > 2]
+
+    title_words = sorted(set(title_words))
+    add_breadcrumb(title="Template Listing", top_level=True, request=request)
+    return render(request, 'dojo/templates.html',
+                  {'templates': paged_templates,
+                   'filtered': templates,
+                   'title_words': title_words,
+                   })
+
+
+@user_passes_test(lambda u: u.is_staff)
+def add_template(request):
+    form = FindingTemplateForm()
+    if request.method == 'POST':
+        form = FindingTemplateForm(request.POST)
+        if form.is_valid():
+            template = form.save(commit=False)
+            template.numerical_severity = Finding.get_numerical_severity(template.severity)
+            template.save()
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Template created successfully.',
+                                 extra_tags='alert-success')
+            return HttpResponseRedirect(reverse('templates'))
+        else:
+            messages.add_message(request,
+                                 messages.ERROR,
+                                 'Template form has error, please revise and try again.',
+                                 extra_tags='alert-danger')
+    add_breadcrumb(title="Add Template", top_level=False, request=request)
+    return render(request, 'dojo/add_template.html',
+                  {'form': form,
+                   'name': 'Add Template'
+                   })
+
+
+@user_passes_test(lambda u: u.is_staff)
+def edit_template(request, tid):
+    template = get_object_or_404(Finding_Template, id=tid)
+    form = FindingTemplateForm(instance=template)
+    if request.method == 'POST':
+        form = FindingTemplateForm(request.POST, instance=template)
+        if form.is_valid():
+            template = form.save(commit=False)
+            template.numerical_severity = Finding.get_numerical_severity(template.severity)
+            template.save()
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Template updated successfully.',
+                                 extra_tags='alert-success')
+            return HttpResponseRedirect(reverse('templates'))
+        else:
+            messages.add_message(request,
+                                 messages.ERROR,
+                                 'Template form has error, please revise and try again.',
+                                 extra_tags='alert-danger')
+    add_breadcrumb(title="Edit Template", top_level=False, request=request)
+    return render(request, 'dojo/add_template.html',
+                  {'form': form,
+                   'name': 'Edit Template',
+                   'template': template,
+                   })
+
+
+@user_passes_test(lambda u: u.is_staff)
+def delete_template(request, tid):
+    template = get_object_or_404(Finding_Template, id=tid)
+
+    form = DeleteFindingTemplateForm(instance=template)
+
+    if request.method == 'POST':
+        form = DeleteFindingTemplateForm(request.POST, instance=template)
+        if form.is_valid():
+            template.delete()
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Finding Template deleted successfully.',
+                                 extra_tags='alert-success')
+            return HttpResponseRedirect(reverse('templates'))
+        else:
+            messages.add_message(request,
+                                 messages.ERROR,
+                                 'Unable to delete Template, please revise and try again.',
+                                 extra_tags='alert-danger')
+    else:
+        return HttpResponseForbidden()
+
+
+@user_passes_test(lambda u: u.is_staff)
+def finding_from_template(request, tid):
+    template = get_object_or_404(Finding_Template, id=tid)

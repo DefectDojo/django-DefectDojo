@@ -12,7 +12,7 @@ from pytz import timezone
 from dojo import settings
 from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
-    Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding
+    Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
 localtz = timezone(settings.TIME_ZONE)
@@ -501,6 +501,8 @@ class AddFindingForm(forms.ModelForm):
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
                                                widget=MultipleSelectWithPopPlusMinus(attrs={'size': '11'}))
     references = forms.CharField(widget=forms.Textarea, required=False)
+    is_template = forms.BooleanField(label="Create Template?", required=False,
+                                     help_text="A new finding template will be created from this finding.")
 
     def clean(self):
         # self.fields['endpoints'].queryset = Endpoint.objects.all()
@@ -566,11 +568,13 @@ class FindingForm(forms.ModelForm):
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
                                                widget=MultipleSelectWithPopPlusMinus(attrs={'size': '11'}))
     references = forms.CharField(widget=forms.Textarea, required=False)
+    is_template = forms.BooleanField(label="Create Template?", required=False,
+                                     help_text="A new finding template will be created from this finding.")
+
 
     def clean(self):
         cleaned_data = super(FindingForm, self).clean()
-        if ((cleaned_data['active'] or cleaned_data['verified'])
-            and cleaned_data['duplicate']):
+        if (cleaned_data['active'] or cleaned_data['verified']) and cleaned_data['duplicate']:
             raise forms.ValidationError('Duplicate findings cannot be'
                                         ' verified or active')
         if cleaned_data['false_p'] and cleaned_data['verified']:
@@ -602,6 +606,33 @@ class StubFindingForm(forms.ModelForm):
             raise forms.ValidationError("The title is required.")
 
         return cleaned_data
+
+
+class FindingTemplateForm(forms.ModelForm):
+    title = forms.CharField(max_length=1000, required=True)
+    cwe = forms.IntegerField(label="CWE", required=False)
+    severity_options = (('Low', 'Low'), ('Medium', 'Medium'),
+                        ('High', 'High'), ('Critical', 'Critical'))
+    severity = forms.ChoiceField(
+        required=False,
+        choices=severity_options,
+        error_messages={
+            'required': 'Select valid choice: In Progress, On Hold, Completed',
+            'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
+
+    class Meta:
+        model = Finding_Template
+        order = ('title', 'cwe', 'severity', 'description', 'impact')
+        exclude = ('numerical_severity',)
+
+
+class DeleteFindingTemplateForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = Finding_Template
+        fields = ('id',)
 
 
 class EditEndpointForm(forms.ModelForm):

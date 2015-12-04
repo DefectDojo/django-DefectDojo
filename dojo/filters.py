@@ -2,10 +2,8 @@ __author__ = 'Jay Paz'
 from auditlog.models import LogEntry
 from datetime import timedelta, datetime
 import collections
-
 from django.conf import settings
 from django import forms
-
 from django_filters.filters import ChoiceFilter, _truncate
 from django.utils.translation import ugettext_lazy as _
 from django.utils import six
@@ -13,9 +11,8 @@ from django_filters import FilterSet, CharFilter, \
     ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter
 from django.contrib.auth.models import User
 from pytz import timezone
-
 from dojo.models import Dojo_User, Product_Type, Finding, \
-    Product, Test_Type, Endpoint, Development_Environment
+    Product, Test_Type, Endpoint, Development_Environment, Finding_Template
 
 local_tz = timezone(settings.TIME_ZONE)
 SEVERITY_CHOICES = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
@@ -473,6 +470,45 @@ class ProductFindingFilter(DojoFilter):
         self.form.fields['severity'].choices = sevs.items()
 
 
+class TemplateFindingFilter(DojoFilter):
+    title = CharFilter(lookup_type='icontains')
+    cwe = MultipleChoiceFilter(choices=[])
+    severity = MultipleChoiceFilter(choices=[])
+    numerical_severity = MultipleChoiceFilter(choices=[])
+
+    class Meta:
+        model = Finding_Template
+        order_by = (('cwe', 'CWE Asc'),
+                    ('-cwe', 'CWE Desc'),
+                    ('title', 'Title Asc'),
+                    ('-title', 'Title Desc'),
+                    ('-numerical_severity', 'Severity Asc'),
+                    ('numerical_severity', 'Severity Desc'),)
+        exclude = ['description', 'mitigation', 'impact',
+                   'references', 'numerical_severity']
+
+    def __init__(self, *args, **kwargs):
+        super(TemplateFindingFilter, self).__init__(*args, **kwargs)
+        cwe = dict()
+        cwe = dict([finding.cwe, finding.cwe]
+                   for finding in self.queryset.distinct()
+                   if finding.cwe > 0 and finding.cwe not in cwe)
+        cwe = collections.OrderedDict(sorted(cwe.items()))
+        self.form.fields['cwe'].choices = cwe.items()
+
+        self.form.fields['severity'].choices = ((u'Critical', u'Critical'),
+                                                (u'High', u'High'),
+                                                (u'Medium', u'Medium'),
+                                                (u'Low', u'Low'),
+                                                (u'Info', u'Info'))
+
+        self.form.fields['numerical_severity'].choices = ((u'S0', u'S0'),
+                                                          (u'S1', u'S1'),
+                                                          (u'S2', u'S2'),
+                                                          (u'S3', u'S3'),
+                                                          (u'S4', u'S4'))
+
+
 class FindingStatusFilter(ChoiceFilter):
     def any(self, qs, name):
         return qs.filter(verified=True,
@@ -565,7 +601,6 @@ class EndpointFilter(DojoFilter):
                     ('-host', 'Host Desc'))
 
 
-
 class EndpointReportFilter(DojoFilter):
     host = CharFilter(lookup_type='icontains')
     path = CharFilter(lookup_type='icontains')
@@ -649,7 +684,6 @@ class UserFilter(DojoFilter):
 
 
 class EngineerFilter(DojoFilter):
-
     class Meta:
         model = Dojo_User
         fields = ['is_staff', 'is_superuser', 'is_active', 'username', 'email', 'last_name', 'first_name']
@@ -713,4 +747,3 @@ class DevelopmentEnvironmentFilter(DojoFilter):
         include = ('name',)
         order_by = (('name', ' Name'),
                     ('-name', 'Name Desc'))
-

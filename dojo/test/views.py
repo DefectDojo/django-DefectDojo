@@ -11,14 +11,14 @@ from django.http import HttpResponseRedirect, HttpResponseForbidden, Http404, Ht
 from django.shortcuts import render, get_object_or_404
 from pytz import timezone
 
+from dojo.filters import TemplateFindingFilter
 from dojo.forms import NoteForm, TestForm, FindingForm, \
     DeleteTestForm, AddFindingForm, \
     ImportScanForm, ReImportScanForm
-from dojo.models import Finding, Test, \
-    Notes, \
-    BurpRawRequestResponse, Endpoint, Stub_Finding
+from dojo.models import Finding, Test, Notes, \
+    BurpRawRequestResponse, Endpoint, Stub_Finding, Finding_Template
 from dojo.tools.factory import import_parser_factory
-from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, template_search_helper, message
+from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, message
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -167,7 +167,6 @@ def test_ics(request, tid):
 @user_passes_test(lambda u: u.is_staff)
 def add_findings(request, tid):
     test = Test.objects.get(id=tid)
-    findings = Finding.objects.filter(is_template=True).distinct()
     form_error = False
     form = AddFindingForm(initial={'date': datetime.now(tz=localtz).date()})
     if request.method == 'POST':
@@ -181,7 +180,9 @@ def add_findings(request, tid):
             if new_finding.false_p or new_finding.active is False:
                 new_finding.mitigated = datetime.now(tz=localtz)
                 new_finding.mitigated_by = request.user
-
+            create_template = new_finding.is_template
+            # always false now since this will be deprecated soon in favor of new Finding_Template model
+            new_finding.is_template = False
             new_finding.save()
             new_finding.endpoints = form.cleaned_data['endpoints']
             new_finding.save()
@@ -190,6 +191,28 @@ def add_findings(request, tid):
                                  messages.SUCCESS,
                                  'Finding added successfully.',
                                  extra_tags='alert-success')
+            if create_template:
+                templates = Finding_Template.objects.filter(title=new_finding.title)
+                if len(templates) > 0:
+                    messages.add_message(request,
+                                         messages.ERROR,
+                                         'A finding template was not created.  A template with this title already '
+                                         'exists.',
+                                         extra_tags='alert-danger')
+                else:
+                    template = Finding_Template(title=new_finding.title,
+                                                cwe=new_finding.cwe,
+                                                severity=new_finding.severity,
+                                                description=new_finding.description,
+                                                mitigation=new_finding.mitigation,
+                                                impact=new_finding.impact,
+                                                references=new_finding.references,
+                                                numerical_severity=new_finding.numerical_severity)
+                    template.save()
+                    messages.add_message(request,
+                                         messages.SUCCESS,
+                                         'A finding template was also created.',
+                                         extra_tags='alert-success')
             if '_Finished' in request.POST:
                 return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
             else:
@@ -207,7 +230,6 @@ def add_findings(request, tid):
     add_breadcrumb(parent=test, title="Add Finding", top_level=False, request=request)
     return render(request, 'dojo/add_findings.html',
                   {'form': form,
-                   'findings': findings,
                    'test': test,
                    'temp': False,
                    'tid': tid,
@@ -218,8 +240,8 @@ def add_findings(request, tid):
 @user_passes_test(lambda u: u.is_staff)
 def add_temp_finding(request, tid, fid):
     test = get_object_or_404(Test, id=tid)
-    finding = get_object_or_404(Finding, id=fid)
-    findings = Finding.objects.all()
+    finding = get_object_or_404(Finding_Template, id=fid)
+    findings = Finding_Template.objects.all()
     if request.method == 'POST':
         form = FindingForm(request.POST)
         if form.is_valid():
@@ -233,14 +255,43 @@ def add_temp_finding(request, tid, fid):
                 new_finding.mitigated = datetime.now(tz=localtz)
                 new_finding.mitigated_by = request.user
 
+            create_template = new_finding.is_template
+            # is template always False now in favor of new model Finding_Template
+            # no further action needed here since this is already adding from template.
+            new_finding.is_template = False
             new_finding.save()
             new_finding.endpoints = form.cleaned_data['endpoints']
             new_finding.save()
-
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 'Temp finding added successfully.',
+                                 'Finding from template added successfully.',
                                  extra_tags='alert-success')
+
+            if create_template:
+                templates = Finding_Template.objects.filter(title=new_finding.title)
+                if len(templates) > 0:
+                    messages.add_message(request,
+                                         messages.ERROR,
+                                         'A finding template was not created.  A template with this title already '
+                                         'exists.',
+                                         extra_tags='alert-danger')
+                else:
+                    template = Finding_Template(title=new_finding.title,
+                                                cwe=new_finding.cwe,
+                                                severity=new_finding.severity,
+                                                description=new_finding.description,
+                                                mitigation=new_finding.mitigation,
+                                                impact=new_finding.impact,
+                                                references=new_finding.references,
+                                                numerical_severity=new_finding.numerical_severity)
+                    template.save()
+                    messages.add_message(request,
+                                         messages.SUCCESS,
+                                         'A finding template was also created.',
+                                         extra_tags='alert-success')
+
+
+
             return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
         else:
             messages.add_message(request,
@@ -249,8 +300,20 @@ def add_temp_finding(request, tid, fid):
                                  extra_tags='alert-danger')
 
     else:
-        form = FindingForm(instance=finding, initial={'is_template': False, 'active': False, 'verified': False,
-                                                      'false_p': False, 'duplicate': False, 'out_of_scope': False})
+        form = FindingForm(initial={'active': False,
+                                    'date': datetime.now(tz=localtz).date(),
+                                    'verified': False,
+                                    'false_p': False,
+                                    'duplicate': False,
+                                    'out_of_scope': False,
+                                    'title': finding.title,
+                                    'description': finding.description,
+                                    'cwe': finding.cwe,
+                                    'severity': finding.severity,
+                                    'mitigation': finding.mitigation,
+                                    'impact': finding.impact,
+                                    'references': finding.references,
+                                    'numerical_severity': finding.numerical_severity})
 
     add_breadcrumb(parent=test, title="Add Finding", top_level=False, request=request)
     return render(request, 'dojo/add_findings.html',
@@ -264,22 +327,23 @@ def add_temp_finding(request, tid, fid):
 
 
 def search(request, tid):
-    query_string = ''
-    found_entries = Finding.objects.filter(is_template=True).distinct()
-    if ('q' in request.GET) and request.GET['q'].strip():
-        query_string = request.GET['q']
-        found_entries = template_search_helper(
-            fields=['title', 'description', ],
-            query_string=query_string)
-    else:
-        found_entries = template_search_helper(
-            fields=['title', 'description', ])
+    test = get_object_or_404(Test, id=tid)
+    templates = Finding_Template.objects.all()
+    templates = TemplateFindingFilter(request.GET, queryset=templates)
+    paged_templates = get_page_items(request, templates, 25)
+    title_words = [word
+                   for finding in templates
+                   for word in finding.title.split() if len(word) > 2]
 
-    return render(request,
-                  'dojo/search_results.html',
-                  {'query_string': query_string,
-                   'found_entries': found_entries,
-                   'tid': tid})
+    title_words = sorted(set(title_words))
+    add_breadcrumb(parent=test, title="Add From Template", top_level=False, request=request)
+    return render(request, 'dojo/templates.html',
+                  {'templates': paged_templates,
+                   'filtered': templates,
+                   'title_words': title_words,
+                   'tid': tid,
+                   'add_from_template': True,
+                   })
 
 
 @user_passes_test(lambda u: u.is_staff)

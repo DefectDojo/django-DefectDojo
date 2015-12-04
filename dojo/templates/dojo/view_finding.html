@@ -44,7 +44,7 @@
                                         <i class="fa fa-fire-extinguisher"></i> Close Finding
                                     </a>
                                 </li>
-                            {%  else %}
+                            {% else %}
                                 <li role="presentation">
                                     <a href="{% url 'reopen_finding' finding.id %}">
                                         <i class="fa fa-bug"></i> Open Finding
@@ -84,7 +84,9 @@
                         <th>Date Mitigated</th>
                         <th>Mitigated By</th>
                     {% endif %}
-
+                    {% if finding.cwe > 0 %}
+                        <th>CWE</th>
+                    {% endif %}
                 </tr>
                 <tr>
                     <td>
@@ -109,6 +111,13 @@
                     {% if finding.mitigated %}
                         <td>{{ finding.mitigated }}</td>
                         <td>{{ finding.mitigated_by }}</td>
+                    {% endif %}
+                    {% if finding.cwe > 0 %}
+                        <td>
+                            <a target="_blank"  href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
+                                <i class="fa fa-external-link"></i> {{ finding.cwe }}
+                            </a>
+                        </td>
                     {% endif %}
 
                 </tr>

@@ -1,4 +1,0 @@
-Results for: {{ query_string }}
-{% for finding in found_entries %}
-    <p><a href="{% url 'add_temp_finding' tid finding.id %}">{{ finding }}  </a></p>
-{% endfor %}

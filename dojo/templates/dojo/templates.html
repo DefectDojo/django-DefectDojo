@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% load navigation_tags %}
+{% block content %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading tight">
+                    <h3 class="has-filters">
+                        {% if add_from_template %}
+                            Add From Finding Templates
+                        {% else %}
+                            Finding Templates
+                        {% endif %}
+                        <div class="dropdown pull-right">
+                            {% if request.user.is_staff and not add_from_template %}
+                                <a href="{% url 'add_template' %}" class="btn btn-primary"
+                                   title="Add Finding Template">
+                                    <i class="fa fa-plus"></i>
+                                </a>
+                            {% endif %}
+                            {% if add_from_template %}
+                                <a href="{% url 'view_test' tid %}" class="btn btn-danger"
+                                   title="Cancel add from template">
+                                    <i class="fa fa-ban"></i> Cancel
+                                </a>
+                            {% endif %}
+                        </div>
+                    </h3>
+                </div>
+                <div id="the-filters" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
+                    {% include "dojo/filter_snippet.html" with form=filtered.form %}
+                </div>
+            </div>
+            {% if templates %}
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=templates page_size=True %}
+                </div>
+                <div class="panel panel-default table-responsive">
+                    <table id="template_findings"
+                           class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
+                        <thead>
+                        <tr>
+                            <th nowrap="nowrap">{% dojo_sort request 'CWE' 'cwe' 'asc' %}</th>
+                            <th nowrap="nowrap">{% dojo_sort request 'Name' 'title' %}</th>
+                            <th nowrap="nowrap">{% dojo_sort request 'Severity' 'numerical_severity' %}</th>
+                            <th nowrap="nowrap">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for finding in templates %}
+                            <tr>
+                                <td>
+                                    {% if finding.cwe > 0 %}
+                                        <a target="_blank"
+                                           href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
+                                            <i class="fa fa-external-link"></i> {{ finding.cwe }}
+                                        </a>
+                                    {% else %}
+                                        {{ finding.cwe }}
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if add_from_template %}
+                                        <a href="{% url 'add_temp_finding' tid finding.id %}"
+                                           class="template-popover" data-placement="auto bottom" data-toggle="popover"
+                                           data-trigger="hover" title="{{ finding.title|truncatechars:100 }}"
+                                           data-content="{{ finding.description|truncatechars:500 }}">
+                                            {{ finding.title }}
+                                        </a>
+                                    {% else %}
+                                        <a title="{{ finding.title }}" href="{% url 'edit_template' finding.id %}">
+                                            {{ finding.title }}
+                                        </a>
+                                    {% endif %}
+                                </td>
+                                <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
+                                    <p class="text-error">
+                                {% else %}<p>{% endif %}{{ finding.severity }}</p></td>
+                                {% if add_from_template %}
+                                    <td nowrap="nowrap">
+                                        <a href="{% url 'add_temp_finding' tid finding.id %}"
+                                           class="btn btn-success btn-sm">
+                                            Use This Template
+                                        </a>
+                                    </td>
+                                {% else %}
+                                    <td nowrap="nowrap">
+                                        <a href="{% url 'edit_template' finding.id %}"
+                                           class="btn btn-sm btn-primary">Edit</a>
+
+                                        <form method="post" action="{% url 'delete_template' finding.id %}"
+                                              style="display: inline" class="form-inline form">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="id" value="{{ finding.id }}"/>
+                                            <button type="submit" class="btn btn-danger btn-sm template-delete">Delete
+                                            </button>
+                                        </form>
+                                    </td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=templates page_size=True %}
+                </div>
+            {% else %}
+                No finding templates found.
+            {% endif %}
+        </div>
+    </div>
+
+
+{% endblock %}
+{% block postscript %}
+    <script>
+        $(function () {
+            var availableTags = [
+                {% for word in title_words %}
+                    "{{word}}",
+                {% endfor %}
+            ];
+            $("#id_title").autocomplete({
+                source: availableTags
+            });
+
+            $('button.template-delete').on('click', function (e) {
+                return confirm('Are you sure you want to delete this template?')
+            });
+
+            $('[data-toggle="popover"]').popover();
+
+        });
+    </script>
+    {% include "dojo/filter_js_snippet.html" %}
+{% endblock %}

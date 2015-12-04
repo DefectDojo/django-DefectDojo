@@ -395,7 +395,7 @@ class TestResource(BaseModelResource):
 
     POST, PUT [/id/]
     Expects *title, *date, *severity, *description, *mitigation, *impact,
-    *endpoint, *test, cwe, is_template, active, false_p, verified,
+    *endpoint, *test, cwe, active, false_p, verified,
     mitigated, *reporter
 
 """
@@ -422,7 +422,6 @@ class FindingResource(BaseModelResource):
             'mitigated': ALL,
             'endpoint': ALL,
             'test': ALL,
-            'is_template': ALL,
             'active': ALL,
             'verified': ALL,
             'false_p': ALL,
