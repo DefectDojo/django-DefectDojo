@@ -110,7 +110,7 @@ class NessusCSVParser(object):
                                    verified=False, description=dat['description'],
                                    severity=dat['severity'],
                                    numerical_severity=Finding.get_numerical_severity(dat['severity']),
-                                   mitigation=dat['mitigation'],
+                                   mitigation=dat['mitigation'] if dat['mitigation'] is not None else 'N/A',
                                    impact=dat['impact'],
                                    references=dat['references'],
                                    url=dat['endpoint'])
