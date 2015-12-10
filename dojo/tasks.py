@@ -39,10 +39,10 @@ def async_pdf_report(self, report=None, filename='report.pdf', context={}, uri=N
             report.file.save(filename, f)
         report.status = 'success'
         report.save()
-        # email_requester(report, uri)
+        email_requester(report, uri)
     except Exception as e:
         report.status = 'error'
         report.save()
-        # email_requester(report, uri, error=e)
+        email_requester(report, uri, error=e)
         raise e
     return True
