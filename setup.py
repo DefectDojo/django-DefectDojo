@@ -30,6 +30,7 @@ setup(
         'vobject',
         'html2text',
         'django-watson==1.1.9',
-        'celery'],
+        'celery',
+        'sqlalchemy'],
     url='https://github.com/rackerlabs/django-DefectDojo'
 )
