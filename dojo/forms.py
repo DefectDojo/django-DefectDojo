@@ -12,7 +12,7 @@ from pytz import timezone
 from dojo import settings
 from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
-    Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template
+    Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
 localtz = timezone(settings.TIME_ZONE)
@@ -987,3 +987,13 @@ class ReportOptionsForm(forms.Form):
     include_executive_summary = forms.ChoiceField(choices=yes_no, label="Executive Summary")
     include_table_of_contents = forms.ChoiceField(choices=yes_no, label="Table of Contents")
     report_type = forms.ChoiceField(choices=(('AsciiDoc', 'AsciiDoc'), ('PDF', 'PDF')))
+
+
+class DeleteReportForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = Report
+        fields = ('id',)
+

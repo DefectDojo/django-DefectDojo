@@ -1,18 +1,20 @@
 __author__ = 'Jay Paz'
-from auditlog.models import LogEntry
-from datetime import timedelta, datetime
 import collections
-from django.conf import settings
+from datetime import timedelta, datetime
+
+from auditlog.models import LogEntry
 from django import forms
-from django_filters.filters import ChoiceFilter, _truncate
-from django.utils.translation import ugettext_lazy as _
+from django.conf import settings
+from django.contrib.auth.models import User
 from django.utils import six
+from django.utils.translation import ugettext_lazy as _
 from django_filters import FilterSet, CharFilter, \
     ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter
-from django.contrib.auth.models import User
+from django_filters.filters import ChoiceFilter, _truncate, DateTimeFilter
 from pytz import timezone
+
 from dojo.models import Dojo_User, Product_Type, Finding, \
-    Product, Test_Type, Endpoint, Development_Environment, Finding_Template
+    Product, Test_Type, Endpoint, Development_Environment, Finding_Template, Report
 
 local_tz = timezone(settings.TIME_ZONE)
 SEVERITY_CHOICES = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
@@ -681,6 +683,41 @@ class UserFilter(DojoFilter):
                     ('-is_staff', 'Staff Desc'),
                     ('is_superuser', 'SuperUser'),
                     ('-is_superuser', 'SuperUser Desc'),)
+
+
+class ReportFilter(DojoFilter):
+    name = CharFilter(lookup_type='icontains')
+    type = MultipleChoiceFilter(choices=[])
+    format = MultipleChoiceFilter(choices=[])
+    requester = ModelMultipleChoiceFilter(queryset=Dojo_User.objects.all())
+    datetime = DateTimeFilter()
+    status = MultipleChoiceFilter(choices=[])
+
+    class Meta:
+        model = Report
+        exclude = ['task_id', 'file']
+        order_by = (('-datetime', 'Date Desc'),
+                    ('datetime', 'Date Asc'),
+                    ('name', 'Name'),
+                    ('-name', 'Name Desc'),
+                    ('type', 'Type'),
+                    ('-type', 'Type Desc'),
+                    ('format', 'Format'),
+                    ('-format', 'Format Desc'),
+                    ('requester', 'Requester'),
+                    ('-requester', 'Requester Desc'))
+
+    def __init__(self, *args, **kwargs):
+        super(ReportFilter, self).__init__(*args, **kwargs)
+        type = dict()
+        type = dict([report.type, report.type] for report in self.queryset.distinct() if report.type is not None)
+        type = collections.OrderedDict(sorted(type.items()))
+        self.form.fields['type'].choices = type.items()
+
+        status = dict()
+        status = dict([report.status, report.status] for report in self.queryset.distinct() if report.status is not None)
+        status = collections.OrderedDict(sorted(status.items()))
+        self.form.fields['status'].choices = status.items()
 
 
 class EngineerFilter(DojoFilter):
