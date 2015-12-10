@@ -14,7 +14,7 @@ from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
 from django.template.defaultfilters import pluralize
 from pytz import timezone
 
-from dojo.models import Finding, Scan, Test, Engagement, Stub_Finding, Finding_Template
+from dojo.models import Finding, Scan, Test, Engagement, Stub_Finding, Finding_Template, Report
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -467,6 +467,21 @@ def get_alerts(user):
     alerts = []
     now = localtz.localize(datetime.today())
     start = now - timedelta(days=7)
+    # reports requested in the last 7 days
+    completed_reports = Report.objects.filter(requester=user, datetime__range=[start, now], status='success')
+    running_reports = Report.objects.filter(requester=user, datetime__range=[start, now], status='requested')
+    for report in completed_reports:
+        alerts.append(['Report Ready: ' + report.name,
+                       humanize.naturaltime(localtz.normalize(now) - localtz.normalize(report.datetime)),
+                       'file-text-o',
+                       reverse('reports')])
+
+    for report in running_reports:
+        alerts.append(['Report Running: ' + report.name,
+                       humanize.naturaltime(localtz.normalize(now) - localtz.normalize(report.datetime)),
+                       'spinner fa-pulse',
+                       reverse('reports')])
+
     # scans completed in last 7 days
     completed_scans = Scan.objects.filter(
         date__range=[start, now],
@@ -574,3 +589,4 @@ def handle_uploaded_threat(f, eng):
             destination.write(chunk)
     eng.tmodel_path = settings.MEDIA_ROOT + '/threat/%s%s' % (eng.id, extension)
     eng.save()
+

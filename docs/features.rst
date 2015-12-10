@@ -361,9 +361,44 @@ These scans call also be kicked off on demand by selecting the Launch Scan Now o
 Reports
 -------
 
+.. image:: /_static/report_1.png
+    :alt: Report Listing
+
 DefectDojo's reports can be generated in AsciiDoc and PDF.  AsciiDoc is recommended for reports with a large number of
-findings.  The PDF report is limited to 150 findings and due to performance restrictions the finding description will be
-truncated at 500 characters to aid in rendering speed.
+findings.
+
+The PDF report is generated via `Celery`_ and sane defaults are included in the `settings.py` file.  This allows report
+generation to be asynchronous and improves the user experience.  Celery is included with DefectDojo and needs to be
+kicked off in order for reports to generate/work.  In development you can run the celery process like: ::
+
+    celery -A dojo worker -l info --concurrency 3
+
+In production it is recommended that the celery process be daemonized.  Supervisor is also included with
+DefectDojo and can be set up by following the `Celery documentation`_.  A sample `celeryd.conf` `can be found at`_.
+
+.. _can be found at: https://github.com/celery/celery/blob/3.1/extra/supervisord/celeryd.conf
+
+Celery beat should also be running, this will allow for celery to clean up after itself and keep your task database from
+getting too large.  In development you can run the process like: ::
+
+    celery beat -A dojo -l info
+
+In production it is recommended that the celery beat process also be daemonized. A sample `celerybeatd.conf`
+`can be found here`_.
+
+.. _can be found here: https://github.com/celery/celery/blob/3.1/extra/supervisord/celerybeat.conf
+
+If you are upgrading from an older version of DefectDojo, you will have to install Celery on your own.  To do this you
+you can run: ::
+
+    pip install celery
+
+If you are using virtual environments make sure your environment is activated.  You can also follow the `installation
+instructions`_ from the Celery documentation.
+
+.. _Celery: http://docs.celeryproject.org/en/latest/index.html
+.. _Celery documentation: http://docs.celeryproject.org/en/latest/tutorials/daemonizing.html
+.. _installation instructions: http://docs.celeryproject.org/en/latest/getting-started/introduction.html#installation
 
 Reports can be generated for:
 
@@ -371,6 +406,9 @@ Reports can be generated for:
 2.  Individual Products
 3.  Endpoints
 4.  Product Types
+
+.. image:: /_static/report_2.png
+    :alt: Report Generation
 
 Filtering is available on all Report Generation views to aid in focusing the report for the appropriate need.
 
