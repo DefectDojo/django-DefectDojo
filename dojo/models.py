@@ -707,6 +707,26 @@ class Risk_Acceptance(models.Model):
         return bc
 
 
+class Report(models.Model):
+    name = models.CharField(max_length=200)
+    type = models.CharField(max_length=100, default='Finding')
+    format = models.CharField(max_length=15, default='AsciiDoc')
+    requester = models.ForeignKey(User)
+    task_id = models.CharField(max_length=50)
+    file = models.FileField(upload_to='reports/%Y/%m/%d', verbose_name='Report File', null=True)
+    status = models.CharField(max_length=10, default='requested')
+    options = models.CharField(max_length=1000)
+    datetime = models.DateTimeField(auto_now_add=True)
+
+    def __unicode__(self):
+        return self.name
+
+    def get_url(self):
+        return reverse('download_report', args=(self.id,))
+
+    class Meta:
+        ordering = ['-datetime']
+
 # Register for automatic logging to database
 auditlog.register(Dojo_User)
 auditlog.register(Endpoint)
@@ -727,6 +747,7 @@ admin.site.register(Endpoint)
 admin.site.register(Product)
 admin.site.register(Dojo_User)
 admin.site.register(Notes)
+admin.site.register(Report)
 admin.site.register(Scan)
 admin.site.register(ScanSettings)
 

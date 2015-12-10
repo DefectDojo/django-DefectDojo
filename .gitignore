@@ -65,9 +65,13 @@ docs/_build/
 dojo/migrations
 dojo/static/img/threat/*
 dojo/uploads/risk/*
+dojo/uploads/reports/*
 dojo/scans/scan*
 dojo/uploads/threat/*
 .idea
+*.sqlite
+dojo.celery.beat.db
+celerybeat.pid
 
 weekly.txt
 Monthly.txt
