@@ -188,7 +188,7 @@ INSTALLED_APPS = (
     'auditlog',
     'dojo',
     'tastypie_swagger',
-    'django-watson',
+    'watson',
 )
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -204,6 +204,14 @@ PORT_SCAN_SOURCE_IP = '127.0.0.1'
 # Used in a few places to prefix page headings and in email
 # salutations
 TEAM_NAME = 'Security Engineering'
+
+# Celery settings
+BROKER_URL = 'sqla+sqlite:///dojo.celerydb.sqlite'
+CELERY_SEND_TASK_ERROR_EMAILS = True
+CELERY_IGNORE_RESULT = True
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_TASK_RESULT_EXPIRES = 86400
+CELERYBEAT_SCHEDULE_FILENAME = DOJO_ROOT + '/dojo.celery.beat.db'
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to

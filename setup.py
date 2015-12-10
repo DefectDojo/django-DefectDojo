@@ -29,6 +29,7 @@ setup(
         'django-auditlog==0.3.1',
         'vobject',
         'html2text',
-        'django-watson==1.1.9'],
+        'django-watson==1.1.9',
+        'celery'],
     url='https://github.com/rackerlabs/django-DefectDojo'
 )
