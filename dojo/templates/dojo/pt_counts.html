@@ -19,7 +19,7 @@
         <a href="{% url 'product_type_metrics' pt.id %}" class="inline-block">View Details</a>]
         <div class="panel panel-default table-responsive">
             <div class="panel-heading">
-                <h4>Total Current Security Bug Count</h4>
+                <h4>Total Security Bug Count In Period</h4>
             </div>
             <table class="table table-bordered table-condensed table-striped">
                 <thead>
@@ -180,16 +180,19 @@
                         S3
                     </th>
                     <th>
-                        Total
+                        Opened in Month
                     </th>
                     <th>
-                        Closed<sup>*</sup>
+                        Open to Date
+                    </th>
+                    <th>
+                        Total Closed<sup>*</sup>
                     </th>
                 </tr>
                 </thead>
                 <tfoot style="font-size: 12px;" class="text-info">
                 <tr>
-                    <td colspan="7"><sup>*</sup>Closed findings may have been opened outside of requested period.</td>
+                    <td colspan="8"><sup>*</sup>Closed findings may have been opened outside of requested period.</td>
                 </tr>
                 </tfoot>
                 <tbody>
@@ -210,6 +213,9 @@
                         </td>
                         <td>
                             {{ to.Total|default_if_none:0 }}
+                        </td>
+                        <td>
+                            {{ to.to_date_total|default_if_none:0 }}
                         </td>
                         <td>
                             {{ to.closed|default_if_none:0 }}

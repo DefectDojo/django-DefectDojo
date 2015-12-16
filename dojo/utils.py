@@ -351,7 +351,15 @@ def opened_in_period(start_date, end_date, pt):
                                             severity__in=(
                                                 'Critical', 'High', 'Medium', 'Low')).aggregate(total=Sum(
                Case(When(severity__in=('Critical', 'High', 'Medium', 'Low'), then=Value(1)),
-                    output_field=IntegerField())))['total']}
+                    output_field=IntegerField())))['total'],
+           'to_date_total': Finding.objects.filter(date__lte=end_date.date(),
+                                                   verified=True,
+                                                   false_p=False,
+                                                   duplicate=False,
+                                                   out_of_scope=False,
+                                                   mitigated__isnull=True,
+                                                   test__engagement__product__prod_type=pt,
+                                                   severity__in=('Critical', 'High', 'Medium', 'Low')).count()}
 
     for o in opened_in_period:
         oip[o['numerical_severity']] = o['numerical_severity__count']
