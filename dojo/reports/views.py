@@ -285,7 +285,7 @@ def product_endpoint_report(request, pid):
         report_form = ReportOptionsForm(request.GET)
         if report_format == 'AsciiDoc':
             return render(request,
-                          'dojo/asciidoc_report.html.html',
+                          'dojo/asciidoc_report.html',
                           {'product_type': None,
                            'product': product,
                            'accepted_findings': accepted_findings,
