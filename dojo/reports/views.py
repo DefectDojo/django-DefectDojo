@@ -285,38 +285,24 @@ def product_endpoint_report(request, pid):
         report_form = ReportOptionsForm(request.GET)
         if report_format == 'AsciiDoc':
             return render(request,
-                          'dojo/product_endpoint_pdf_report.html',
-                          # {'product_type': None,
-                          #  'product': product,
-                          #  'accepted_findings': accepted_findings,
-                          #  'open_findings': open_findings,
-                          #  'closed_findings': closed_findings,
-                          #  'verified_findings': verified_findings,
-                          #  'engagement': None,
-                          #  'test': None,
-                          #  'endpoints': endpoints,
-                          #  'endpoint': None,
-                          #  'findings': None,
-                          #  'include_finding_notes': include_finding_notes,
-                          #  'include_executive_summary': include_executive_summary,
-                          #  'include_table_of_contents': include_table_of_contents,
-                          #  'user': request.user,
-                          #  'title': 'Generate Report',
-                          #  }
-                          {'product': product,
-                           'endpoints': endpoints,
+                          'dojo/asciidoc_report.html.html',
+                          {'product_type': None,
+                           'product': product,
                            'accepted_findings': accepted_findings,
                            'open_findings': open_findings,
                            'closed_findings': closed_findings,
                            'verified_findings': verified_findings,
-                           'report_name': report_name,
+                           'engagement': None,
+                           'test': None,
+                           'endpoints': endpoints,
+                           'endpoint': None,
+                           'findings': None,
                            'include_finding_notes': include_finding_notes,
                            'include_executive_summary': include_executive_summary,
                            'include_table_of_contents': include_table_of_contents,
-                           'user': user,
-                           'team_name': settings.TEAM_NAME,
+                           'user': request.user,
                            'title': 'Generate Report',
-                           'host': request.scheme + "://" + request.META['HTTP_HOST']})
+                           })
         elif report_format == 'PDF':
             # lets create the report object and send it in to celery task
             if 'regen' in request.GET:
