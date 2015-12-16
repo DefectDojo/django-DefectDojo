@@ -160,6 +160,7 @@ LOGIN_EXEMPT_URLS = (
     r'^metrics/product/type/(?P<mtype>\d+)$',
     r'^metrics/simple$',
     r'^api/v1/',
+    r'^reports/cover$',
 )
 
 # Python dotted path to the WSGI application used by Django's runserver.
