@@ -396,6 +396,13 @@ It is easily installed by running: ::
 
     pip install pdfkit
 
+It will also be necessary to add the path of `wkhtmltopdf` to your `settings.py` file.  By default the following entry
+ships with DefectDojp: ::
+
+    WKHTMLTOPDF_PATH = '/usr/local/bin/wkhtmltopdf'
+
+However you make have to update that entry to suite your installation.
+
 Celery is included with DefectDojo and needs to be kicked off in order for reports to generate/work.
 In development you can run the celery process like: ::
 
