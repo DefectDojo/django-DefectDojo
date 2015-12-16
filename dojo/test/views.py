@@ -126,6 +126,7 @@ def delete_test(request, tid):
                   {'test': test,
                    'form': form,
                    'rels': rels,
+                   'deletable_objects': rels,
                    })
 
 

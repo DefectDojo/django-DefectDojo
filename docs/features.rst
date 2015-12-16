@@ -367,9 +367,37 @@ Reports
 DefectDojo's reports can be generated in AsciiDoc and PDF.  AsciiDoc is recommended for reports with a large number of
 findings.
 
-The PDF report is generated via `Celery`_ and sane defaults are included in the `settings.py` file.  This allows report
-generation to be asynchronous and improves the user experience.  Celery is included with DefectDojo and needs to be
-kicked off in order for reports to generate/work.  In development you can run the celery process like: ::
+The PDF report is generated using `wkhtmltopdf`_ via `Celery`_ and sane defaults are included in the `settings.py` file.
+This allows report generation to be asynchronous and improves the user experience.
+
+If you are updating from an older version of DefectDojo, you will need to install `wkhtmltopdf` on your own.  Please
+follow the directions for your specific OS in the `wkhtmltopdf documentation`_.
+
+Some operating systems are capable of installing `wkhtmltopdf` from their package managers:
+
+Mac: ::
+
+    brew install Caskroom/cask/wkhtmltopdf
+
+Debian/Ubuntu: ::
+
+    sudo apt-get install wkhtmltopdf
+
+Fedora/Centos: ::
+
+    sudo yum install wkhtmltopdf
+
+Warning! Version in debian/ubuntu repos have reduced functionality (because it compiled without the wkhtmltopdf QT
+patches), such as adding outlines, headers, footers, TOC etc. To use this options you should install static binary from
+`wkhtmltopdf`_ site or you can use this `script`_.
+
+Additionally, DefectDojo takes advantage of `python-PDFKit`_ to interact with the `wkhtmltopdf` commandline interface.
+It is easily installed by running: ::
+
+    pip install pdfkit
+
+Celery is included with DefectDojo and needs to be kicked off in order for reports to generate/work.
+In development you can run the celery process like: ::
 
     celery -A dojo worker -l info --concurrency 3
 
@@ -400,6 +428,10 @@ You will also need to install `sqlalchemy`: ::
 If you are using virtual environments make sure your environment is activated.  You can also follow the `installation
 instructions`_ from the Celery documentation.
 
+.. _wkhtmltopdf: http://wkhtmltopdf.org/
+.. _wkhtmltopdf documentation: https://github.com/pdfkit/pdfkit/wiki/Installing-WKHTMLTOPDF
+.. _script: https://github.com/JazzCore/python-pdfkit/blob/master/travis/before-script.sh
+.. _python-PDFKit: https://github.com/JazzCore/python-pdfkit
 .. _Celery: http://docs.celeryproject.org/en/latest/index.html
 .. _Celery documentation: http://docs.celeryproject.org/en/latest/tutorials/daemonizing.html
 .. _installation instructions: http://docs.celeryproject.org/en/latest/getting-started/introduction.html#installation

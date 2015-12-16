@@ -1,5 +1,8 @@
+import base64
 from datetime import datetime
 import os
+
+import re
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth.models import User
@@ -310,7 +313,7 @@ class Engagement(models.Model):
     def __unicode__(self):
         return "Engagement: %s (%s)" % (self.name if self.name else '',
                                         self.target_start.strftime(
-                                            "%b %d, %Y"))
+                                                "%b %d, %Y"))
 
     def get_breadcrumbs(self):
         bc = self.product.get_breadcrumbs()
@@ -382,7 +385,11 @@ class Endpoint(models.Model):
         return findings.count()
 
     def active_findings(self):
-        return Finding.objects.filter(endpoints__in=[self],
+        host = self.host_no_port
+
+        endpoints = Endpoint.objects.filter(host__regex="^" + host + ":?",
+                                            product=self.product).distinct()
+        return Finding.objects.filter(endpoints__in=endpoints,
                                       active=True,
                                       verified=True,
                                       mitigated__isnull=True,
@@ -580,6 +587,22 @@ class Finding(models.Model):
                 'url': reverse('view_finding', args=(self.id,))}]
         return bc
 
+    def get_request(self):
+        if self.burprawrequestresponse_set.count() > 0:
+            reqres = BurpRawRequestResponse.objects.get(finding=self)
+            return base64.b64decode(reqres.burpRequestBase64)
+
+    def get_response(self):
+        if self.burprawrequestresponse_set.count() > 0:
+            reqres = BurpRawRequestResponse.objects.get(finding=self)
+            res = base64.b64decode(reqres.burpResponseBase64)
+            # Removes all blank lines
+            res = re.sub(r'\n\s*\n', '\n', res)
+            return res
+
+
+Finding.endpoints.through.__unicode__ = lambda x: "Endpoint: " + x.endpoint.host
+
 
 class Stub_Finding(models.Model):
     title = models.TextField(max_length=1000, blank=False, null=False)
@@ -694,7 +717,7 @@ class Risk_Acceptance(models.Model):
 
     def __unicode__(self):
         return "Risk Acceptance added on %s" % self.created.strftime(
-            "%b %d, %Y")
+                "%b %d, %Y")
 
     def filename(self):
         return os.path.basename(self.path.name) \
@@ -717,6 +740,7 @@ class Report(models.Model):
     status = models.CharField(max_length=10, default='requested')
     options = models.CharField(max_length=1000)
     datetime = models.DateTimeField(auto_now_add=True)
+    done_datetime = models.DateTimeField(null=True)
 
     def __unicode__(self):
         return self.name
@@ -726,6 +750,7 @@ class Report(models.Model):
 
     class Meta:
         ordering = ['-datetime']
+
 
 # Register for automatic logging to database
 auditlog.register(Dojo_User)

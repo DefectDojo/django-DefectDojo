@@ -1,0 +1,642 @@
+{% extends "report_base.html" %}
+{% load static from staticfiles %}
+{% load display_tags %}
+{% load humanize %}
+{% load event_tags %}
+{% block content %}
+    <div class="container">
+        {% if include_executive_summary %}
+            <div class="row pretty-graphs">
+                <div class="col-lg-12">
+                    <h3 id="executive">Executive Summary</h3>
+                    <p>
+                        This report represents a security audit performed by the {{ team_name }} team.
+                        It contains confidential information about the state of your network and applications.
+                        Access to this information by unauthorized personnel may allow them to compromise your network.
+                    </p>
+                </div>
+                <div class="col-lg-12">
+                    {% if product %}
+                        {% if product.engagement_set.all %}
+                            {% for eng in product.engagement_set.all %}
+                                {% if eng in engagements %}
+                                    <p>
+                                        {% if eng.name  and eng.name|length > 0 %}
+                                            The {{ eng.name }}
+                                        {% else %}
+                                            An
+                                        {% endif %}
+                                        engagement ran from {{ eng.target_start|date:"SHORT_DATE_FORMAT" }}
+                                        {% if eng.target_end %}
+                                            to {{ eng.target_end|date:"SHORT_DATE_FORMAT" }}.
+                                        {% else %}
+                                            and is ongoing.
+                                        {% endif %}
+                                    </p>
+                                    {% if eng.test_set %}
+                                        <p>
+                                            The engagement also included the following tests which may be reported here:
+                                        </p>
+                                        <ul>
+                                            {% for t in eng.test_set.all %}
+                                                {% if t in tests %}
+                                                    <li>{{ t.test_type.name }}
+                                                        ({{ t.environment.name|default:"unknown" }}): {{ t.target_start|date:"SHORT_DATE_FORMAT" }}</li>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                    {% if eng.test_strategy %}
+                                        <p>
+                                            The test strategy for this engagement can be viewed at
+                                            <a href="{{ eng.test_strategy }}">{{ eng.test_strategy }}</a><br/><br/>
+                                        </p>
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <p>No engagements found for {{ product.name }}</p>
+                        {% endif %}
+                        <h4>Product Metrics</h4>
+
+                    {% endif %}
+                </div>
+                <div class="col-lg-12">
+                    <p>
+                        A total of {{ findings|length|apnumber }} finding{{ findings|length|pluralize }} of varying
+                        severity are
+                        represented in this report.
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h5>Findings</h5>
+                        </div>
+                        <div class="panel-body">
+                            <div id="open_findings" class="graph"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h5>Finding Age</h5>
+                        </div>
+                        <div class="panel-body">
+                            <div id="finding_age" class="graph"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        {% endif %}
+        <div class="row">
+            <div class="col-lg-12">
+                {% if engagement.test_set.all %}
+                    <h3>Test Notes</h3>
+                    <p>
+                        {% for test in engagement.test_set.all %}
+                            {% if test.notes.all %}
+                                {% for note in test.notes.all %}
+                                    {{ note.author }} - {{ note.date }} - {{ note }} <br>
+                                {% endfor %}
+                            {% endif %}
+                        {% endfor %}
+                    </p>
+                {% endif %}
+                {% if engagement.risk_acceptance.count > 0 %}
+                    <h3 id="risk_acceptance">Accepted Findings</h3>
+                    <table style="width: 100%;max-width: 100%;margin-bottom: 20px;margin-top:0;border: 1px solid #DDDDDD;">
+                        <tr>
+                            <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
+                                Name
+                            </th>
+                            <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
+                                Date
+                            </th>
+                            <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
+                                Severity
+                            </th>
+                        </tr>
+                        {% for risk in engagement.risk_acceptance.all %}
+                            {% for finding in risk.accepted_findings.all %}
+                                <tr>
+                                    <td style="padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.title }}</td>
+                                    <td style="padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.date }}</td>
+                                    <td style="padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.severity }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% endfor %}
+                    </table>
+                {% endif %}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                {% if findings %}
+                    <h3 id="findings">Findings</h3>
+                {% endif %}
+                {% for finding in findings %}
+                    {% ifchanged finding.severity %}
+                        <h4>{{ finding.severity|capfirst }}</h4>
+                    {% endifchanged %}
+                    <div class="panel panel-default">
+                        <div class="panel-heading finding-title">
+                            <div class="clearfix">
+                                <h5>
+                                    Finding {{ finding.id }}: {{ finding.title }}
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="notes" class="table-striped table table-condensed table-hover centered">
+                                <tr>
+                                    <th>Severity</th>
+                                    <th>Status</th>
+                                    {% if finding.risk_acceptance_set.all %}
+                                        <th>Acceptance</th>
+                                    {% endif %}
+                                    <th>Date discovered</th>
+                                    <th>Age</th>
+                                    <th>Reporter</th>
+                                    {% if finding.mitigated %}
+                                        <th>Date Mitigated</th>
+                                        <th>Mitigated By</th>
+                                    {% endif %}
+                                    {% if finding.cwe > 0 %}
+                                        <th>CWE</th>
+                                    {% endif %}
+                                </tr>
+                                <tr>
+                                    <td>
+                                    <span class="label severity severity-{{ finding.severity }}">
+                                        {% if finding.severity %}
+                                            {{ finding.severity }}
+                                        {% else %}
+                                            Unknown
+                                        {% endif %}
+                                    </span>
+                                    </td>
+                                    <td>{{ finding.status }}</td>
+                                    {% if finding.risk_acceptance_set.all %}
+                                        <td>
+                                            <a href="{% url 'view_risk' finding.test.engagement.id finding.risk_acceptance_set.all.0.id %}">
+                                                View Risk Acceptance</a>
+                                        </td>
+                                    {% endif %}
+                                    <td>{{ finding.date }}</td>
+                                    <td>{{ finding.age }} days</td>
+                                    <td>{{ finding.reporter }}</td>
+                                    {% if finding.mitigated %}
+                                        <td>{{ finding.mitigated }}</td>
+                                        <td>{{ finding.mitigated_by }}</td>
+                                    {% endif %}
+                                    {% if finding.cwe > 0 %}
+                                        <td>
+                                            <a target="_blank"
+                                               href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
+                                                <i class="fa fa-external-link"></i> {{ finding.cwe }}
+                                            </a>
+                                        </td>
+                                    {% endif %}
+
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="panel panel-info endpoints table-responsive">
+                                <div class="panel-heading">
+                                    <h6>Vulnerable Endpoints / Systems</h6>
+                                </div>
+
+                                {% if  finding.endpoints.all %}
+                                    {% colgroup finding.endpoints.all into 2 cols as grouped_items %}
+                                    <table class="table-striped table table table-condensed table-hover finding-endpoints">
+                                        {% for row in grouped_items %}
+                                            <tr>
+                                                {% for item in row %}
+                                                    <td>{% if item %}<i class="fa fa-circle"></i>
+                                                        {{ item }}{% endif %}
+                                                    </td>
+                                                {% endfor %}
+                                            </tr>
+                                        {% endfor %}
+                                    </table>
+                                {% else %}
+                                    <div id="vuln_endpoints" class="panel-body endpoint-panel table-responsive">
+                                        No endpoints.
+                                    </div>
+                                {% endif %}
+
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <h6>Description</h6>
+                    <pre>{{ finding.description }}</pre>
+
+                    <h6>Mitigation</h6>
+                    <pre>{{ finding.mitigation }}</pre>
+                    {% if finding.get_request %}
+                        <h6>Request</h6>
+                        <pre>{{ finding.get_request }}</pre>
+                    {% endif %}
+                    {% if finding.get_response %}
+                        <h6>Response</h6>
+                        <pre>{{ finding.get_response|truncatechars:800 }}</pre>
+                    {% endif %}
+                    <h6>Impact</h6>
+                    <pre>{{ finding.impact }}</pre>
+                    <h6>References</h6>
+                    <pre>{{ finding.references }}</pre>
+                    {% if include_finding_notes %}
+                        <h6>Notes</h6>
+                        {% if notes %}
+                            <table id="notes" class="tablesorter-bootstrap table table-condensed table-striped">
+                                <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Date</th>
+                                    <th>Note</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for note in notes %}
+                                    <tr>
+                                        <td>
+                                            {{ note.author.username }}
+                                        </td>
+                                        <td>
+                                            {{ note.date }}
+                                        </td>
+                                        <td>
+                                            {{ note }}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <p class="text-center">No notes saved.</p>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div> <!-- /container -->
+{% endblock %}
+{% block js %}
+    <!-- jQuery -->
+    <script src="{{ host }}{% static "jquery/dist/jquery.js" %}"></script>
+    <!-- Flot Charts JavaScript -->
+    <script src="{{ host }}{% static "flot/excanvas.min.js" %}"></script>
+    <script src="{{ host }}{% static "flot/jquery.flot.js" %}"></script>
+    <script src="{{ host }}{% static "flot/jquery.flot.resize.js" %}"></script>
+    <script src="{{ host }}{% static "flot-axislabels/jquery.flot.axislabels.js" %}"></script>
+    {% if punchcard %}
+        <script src="{{ host }}{% static "flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
+        <script src="{{ host }}{% static "JUMFlot/JUMFlot.min.js" %}"></script>
+        <script src="{{ host }}{% static "JUMFlot/jquery.flot.mouse.js" %}"></script>
+        <script src="{{ host }}{% static "JUMFlot/jquery.flot.bubbles.js" %}"></script>
+    {% endif %}
+    <script type="text/javascript">
+        $(function () {
+            open_findings();
+            finding_age();
+        });
+
+        function open_findings() {
+            var critical = 0;
+            var high = 0;
+            var medium = 0;
+            var low = 0;
+            var info = 0;
+            var ticks = [
+                [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
+            ];
+
+            {% for f in findings %}
+                {% if f.severity == 'Critical' %}
+                    critical += 1;
+                {% elif f.severity == 'High' %}
+                    high += 1;
+                {% elif f.severity == 'Medium' %}
+                    medium += 1;
+                {% elif f.severity == 'Low' %}
+                    low += 1;
+                {% elif f.severity == 'Info' %}
+                    info += 1;
+                {% endif %}
+            {% endfor %}
+
+            var d1 = [
+                [0, critical],
+            ];
+            var d2 = [
+                [1, high],
+            ];
+            var d3 = [
+                [2, medium],
+            ];
+            var d4 = [
+                [3, low],
+            ];
+            var d5 = [
+                [4, info],
+            ];
+
+            var data = [
+                {
+                    label: "Critical",
+                    data: d1,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 1,
+                        fillColor: "#d9534f"
+                    },
+                    color: "#d9534f"
+                },
+                {
+                    label: "High",
+                    data: d2,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 2,
+                        fillColor: "#f0ad4e"
+                    },
+                    color: "#f0ad4e"
+                },
+                {
+                    label: "Medium",
+                    data: d3,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 3,
+                        fillColor: "#f0de28"
+                    },
+                    color: "#f0de28"
+                },
+                {
+                    label: "Low",
+                    data: d4,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 4,
+                        fillColor: "#337ab7"
+                    },
+                    color: "#337ab7"
+                },
+                {
+                    label: "info",
+                    data: d5,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 4,
+                        fillColor: "#80699B"
+                    },
+                    color: "#80699B"
+                }
+            ];
+
+            $.plot("#open_findings", data, {
+                series: {
+                    stack: true,
+                    bars: {
+                        show: true,
+                        barWidth: .9,
+                        'align': "center",
+                    },
+
+                },
+                grid: {
+                    hoverable: false,
+                    borderWidth: 1,
+                    borderColor: '#e7e7e7',
+
+                },
+                tooltip: false,
+                legend: {
+                    show: false,
+                    position: "ne"
+                },
+                xaxis: {
+                    ticks: ticks,
+                },
+
+            });
+        }
+        ;
+        function closed_findings() {
+            var critical = 0;
+            var high = 0;
+            var medium = 0;
+            var low = 0;
+            var info = 0;
+            var ticks = [
+                [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
+            ];
+
+            {% for f in closed_findings %}
+                {% if f.severity == 'Critical' %}
+                    critical += 1;
+                {% elif f.severity == 'High' %}
+                    high += 1;
+                {% elif f.severity == 'Medium' %}
+                    medium += 1;
+                {% elif f.severity == 'Low' %}
+                    low += 1;
+                {% elif f.severity == 'Info' %}
+                    info += 1;
+                {% endif %}
+            {% endfor %}
+
+            var d1 = [
+                [0, critical],
+            ];
+            var d2 = [
+                [1, high],
+            ];
+            var d3 = [
+                [2, medium],
+            ];
+            var d4 = [
+                [3, low],
+            ];
+            var d5 = [
+                [4, info],
+            ];
+
+            var data = [
+                {
+                    label: "Critical",
+                    data: d1,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 1,
+                        fillColor: "#d9534f"
+                    },
+                    color: "#d9534f"
+                },
+                {
+                    label: "High",
+                    data: d2,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 2,
+                        fillColor: "#f0ad4e"
+                    },
+                    color: "#f0ad4e"
+                },
+                {
+                    label: "Medium",
+                    data: d3,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 3,
+                        fillColor: "#f0de28"
+                    },
+                    color: "#f0de28"
+                },
+                {
+                    label: "Low",
+                    data: d4,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 4,
+                        fillColor: "#337ab7"
+                    },
+                    color: "#337ab7"
+                },
+                {
+                    label: "info",
+                    data: d5,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 4,
+                        fillColor: "#80699B"
+                    },
+                    color: "#80699B"
+                }
+            ];
+
+            $.plot("#closed_findings", data, {
+                series: {
+                    stack: true,
+                    bars: {
+                        show: true,
+                        barWidth: .9,
+                        'align': "center",
+                    },
+
+                },
+                grid: {
+                    hoverable: false,
+                    borderWidth: 1,
+                    borderColor: '#e7e7e7',
+
+                },
+                tooltip: false,
+                legend: {
+                    show: false,
+                    position: "ne"
+                },
+                xaxis: {
+                    ticks: ticks,
+                },
+
+            });
+        }
+        ;
+
+        function finding_age() {
+            var data = {};
+            var data_1 = []
+            var ticks = []
+            {% for f in verified_findings %}
+                if (data[{{ f.age }}]) {
+                    data[{{ f.age }}] += 1
+                }
+                else {
+                    data[{{ f.age }}] = 1
+                }
+            {% endfor %}
+            var i = 0;
+            $.each(data, function (index, value) {
+                if (value > 0) {
+                    data_1.push([i, value]);
+                    ticks.push([i, index])
+                }
+                i++;
+            });
+
+
+            var dataset = [
+                {data: data_1, color: "#337ab7", fillColor: "#337ab7"}
+            ];
+
+            var options = {
+                series: {
+                    bars: {
+                        show: true,
+                        fill: true,
+                        fillColor: "#337ab7"
+                    }
+                },
+                bars: {
+                    align: "center",
+                    barWidth: 0.5
+                },
+                xaxis: {
+                    axisLabel: "Days Open",
+                    axisLabelUseCanvas: true,
+                    axisLabelFontSizePixels: 12,
+                    axisLabelFontFamily: 'Verdana, Arial',
+                    axisLabelPadding: 10,
+                    ticks: ticks,
+                },
+                yaxis: {
+                    axisLabel: "Number of Findings",
+                    axisLabelUseCanvas: true,
+                    axisLabelFontSizePixels: 12,
+                    axisLabelFontFamily: 'Verdana, Arial',
+                    axisLabelPadding: 3,
+                },
+                legend: {
+                    show: false,
+                },
+                grid: {
+                    borderWidth: 1,
+                    borderColor: '#e7e7e7',
+                }
+            };
+
+
+            $.plot("#finding_age", dataset, options);
+        }
+    </script>
+{% endblock %}

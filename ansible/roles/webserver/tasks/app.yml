@@ -78,6 +78,11 @@
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
+- name: Install django-polymorphic
+  pip: name=django-polymorphic virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ dd_user }}'
+
 - name: Install wsgiref
   pip: name=wsgiref version=0.1.2 virtualenv={{ venv_dir }}
   sudo: yes
@@ -108,21 +113,6 @@
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
-- name: Install django-ez-pdf
-  pip: name=django-easy-pdf state=present virtualenv={{ venv_dir }}
-  sudo: yes
-  sudo_user: '{{ dd_user }}'
-
-- name: Install xhtml2pdf
-  pip: name=xhtml2pdf virtualenv={{ venv_dir }}
-  sudo: yes
-  sudo_user: '{{ dd_user }}'
-
-- name: Install reportlab
-  pip: name=reportlab version=2.7 virtualenv={{ venv_dir }}
-  sudo: yes
-  sudo_user: '{{ dd_user }}'
-
 - name: Install django-auditlog
   pip: name=django-auditlog version=0.3.1 virtualenv={{ venv_dir }}
   sudo: yes
@@ -150,6 +140,11 @@
 
 - name: Install sqlalchemy
   pip: name=sqlalchemy virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ dd_user }}'
+
+- name: Install pdfkit
+  pip: name=pdfkit virtualenv={{ venv_dir }}
   sudo: yes
   sudo_user: '{{ dd_user }}'
 

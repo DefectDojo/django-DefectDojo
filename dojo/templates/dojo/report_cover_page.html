@@ -1,0 +1,19 @@
+{% extends "report_base.html" %}
+{% load static from staticfiles %}
+{% block content %}
+    <div class="container">
+        <div class="page-cover-spacer">&nbsp;</div>
+        <div class="text-center page-cover">
+            <p>
+                <img src="{% static "dojo/img/logo.png" %}"/>
+            </p>
+
+            <h1>{{ report_title }}</h1>
+
+            <h2>{{ report_subtitle }}</h2>
+            <p>
+                {{ report_info }}
+            </p>
+        </div>
+    </div>
+{% endblock %}

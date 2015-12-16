@@ -12,7 +12,7 @@
         {% if rels|length > 1 %}
             <ul class="left">{{ rels|unordered_list }}</ul>
         {% else %}
-            <p>No relationships found.</p>
+            <p class="text-center">No relationships found.</p>
         {% endif %}
         <form class="form-horizontal" method="post">
             {% csrf_token %}
