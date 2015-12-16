@@ -236,7 +236,7 @@
                         <pre>{{ finding.references }}</pre>
                         {% if include_finding_notes %}
                             <h6>Notes</h6>
-                            {% if notes %}
+                            {% if finding.notes.all.count > 0 %}
                                 <table id="notes" class="tablesorter-bootstrap table table-condensed table-striped">
                                     <thead>
                                     <tr>
@@ -246,7 +246,7 @@
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    {% for note in notes %}
+                                    {% for note in finding.notes.all %}
                                         <tr>
                                             <td>
                                                 {{ note.author.username }}
@@ -256,10 +256,6 @@
                                             </td>
                                             <td>
                                                 {{ note }}
-                                                {% ifequal user.username note.author.username %}
-                                                    <a href="{% url 'delete_finding_note' finding.id note.id %}">
-                                                        [X] </a>
-                                                {% endifequal %}
                                             </td>
                                         </tr>
                                     {% endfor %}
