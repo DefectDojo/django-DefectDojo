@@ -36,7 +36,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-md-9">
+        <div class="col-md-12">
             {% if filtered %}
                 <div class="panel panel-default table-responsive">
                     <table id="open_findings"
@@ -62,88 +62,8 @@
                     {% include "dojo/paging_snippet.html" with page=paged_endpoints %}
                 </div>
             {% else %}
-                No endpoints found.
+                <p class="text-center"> No endpoints found.</p>
             {% endif %}
-        </div>
-        <div class="col-md-3">
-            <form class="panel-body filters" method="get">
-                <div class="panel panel-default filters">
-                    <div class="panel-heading">Filters</div>
-                    <div class="panel-body">
-                        {{ filtered.form.as_p }}
-                        <div class="alert alert-info" role="alert">
-                            <span class="fa fa-lightbulb-o" aria-hidden="true"></span>
-                            <span class=""><b>Hint:</b></span>
-                            To generate a report of all mitigated findings in endpoints select: Active: Either,
-                            Verified: Either,
-                            Mitigated: Yes
-                        </div>
-                        <div class="centered">
-                            <button class="btn btn-sm btn-primary">
-                                <i class="fa fa-filter"></i> Apply Filters
-                            </button>
-                            <br/>
-                            <a href="?"> [Clear Filters] </a><br/><br/>
-                        </div>
-
-                    </div>
-                    <div class="panel-heading">Report Options</div>
-                    <div class="panel-body">
-                        <p>
-                            <label for=" id_include_finding_notes">Include finding notes</label>
-                            <select class="form-control" id="id_include_finding_notes" name="include_finding_notes">
-                                <option value="0">No</option>
-                                <option value="1">Yes</option>
-                            </select>
-                        </p>
-                        <p>
-                            <label for="id_include_executive_summary">Include executive summary</label>
-                            <select class="form-control" id="id_include_executive_summary"
-                                    name="include_executive_summary">
-                                <option value="0">No</option>
-                                <option value="1">Yes</option>
-                            </select>
-                        </p>
-                        <p>
-                            <label for="id_include_executive_summary">Include table of contents</label>
-                            <select class="form-control" id="id_include_table_of_contents"
-                                    name="include_table_of_contents">
-                                <option value="0">No</option>
-                                <option value="1">Yes</option>
-                            </select>
-                        </p>
-                        <p style="text-align: left">
-                            <label for="id_report_type">Report type</label>
-
-
-                            <select class="form-control" id="id_report_type" name="report_type">
-                                <option value="AsciiDoc">AsciiDoc</option>
-                                {% if endpoints|length <= 50 %}
-                                    <option value="PDF">PDF</option>
-                                {% endif %}
-                            </select>
-                        </p>
-                        {% if endpoints|length <= 50 %}
-                            <div class="alert alert-warning" role="alert">
-                                <span class="fa fa-cogs" aria-hidden="true"></span>
-                                <span class=""><b>Warning:</b></span>
-                                PDF reports can take some time to generate depending on the number of findings included.
-                            </div>
-                            <div class="alert alert-info" role="alert">
-                                <span class="fa fa-info-circle" aria-hidden="true"></span>
-                                <span class=""><b>Note:</b></span>
-                                For PDF reports, the finding description will be truncated at 500 characters to aid in
-                                redering speed.
-                            </div>
-                        {% endif %}
-                        <div class="centered">
-                            <input class="btn btn-primary" name="_generate" type="submit"
-                                   value="Generate Report"/><br/><br/>
-                        </div>
-                    </div>
-                </div>
-            </form>
-
         </div>
     </div>
 

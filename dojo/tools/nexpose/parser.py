@@ -5,7 +5,12 @@ See the file 'doc/LICENSE' for the license information
 
 '''
 from __future__ import with_statement
+
 from xml.etree import ElementTree as ET
+
+import html2text
+
+from dojo.models import Endpoint, Finding
 
 __author__ = "Micaela Ranea Sanchez"
 __copyright__ = "Copyright (c) 2013, Infobyte LLC"
@@ -163,7 +168,7 @@ class NexposeFullXmlParser(object):
                     if item.tag == 'exploits':
                         for exploit in list(item):
                             vuln['refs'].append(
-                                str(exploit.get('title')).strip() + ' ' + str(exploit.get('link')).strip())
+                                    str(exploit.get('title')).strip() + ' ' + str(exploit.get('link')).strip())
                     if item.tag == 'references':
                         for ref in list(item):
                             vuln['refs'].append(str(ref.text).strip())
@@ -184,8 +189,6 @@ class NexposeFullXmlParser(object):
         """
         @return hosts A list of Host instances
         """
-        from dojo.models import Endpoint, Finding
-        import html2text
 
         x = list()
         if tree is None:
@@ -250,7 +253,7 @@ class NexposeFullXmlParser(object):
 
                         find = Finding(title=vuln['name'],
                                        description=html2text.html2text(
-                                           vuln['desc']) + "\n\n" + html2text.html2text(vuln['pluginOutput']),
+                                               vuln['desc']) + "\n\n" + html2text.html2text(vuln['pluginOutput']),
                                        severity=sev,
                                        numerical_severity=Finding.get_numerical_severity(sev),
                                        mitigation=html2text.html2text(vuln['resolution']),
@@ -273,6 +276,7 @@ class NexposeFullXmlParser(object):
                     for service in item['services']:
                         if len(service['vulns']) > 0:
                             find.unsaved_endpoints.append(
-                                Endpoint(host=item['name'] + (":" + service['port']) if service['port'] is not None else "",
-                                         product=test.engagement.product))
+                                    Endpoint(host=item['name'] + (":" + service['port']) if service[
+                                                                                                'port'] is not None else "",
+                                             product=test.engagement.product))
         return dupes.values()

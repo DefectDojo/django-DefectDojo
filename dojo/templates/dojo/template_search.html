@@ -9,7 +9,7 @@
     </div>
     <div class="modal-body" id="result">
         {% if not findings %}
-            No templates found
+            <p class="text-center">No templates found</p>
         {% endif %}
         {% for finding in findings %}
             <p><a href="{% url 'add_findings' tid finding.id %}">{{ finding }}  </a></p>

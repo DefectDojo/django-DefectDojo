@@ -114,7 +114,7 @@
                     {% endif %}
                     {% if finding.cwe > 0 %}
                         <td>
-                            <a target="_blank"  href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
+                            <a target="_blank" href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
                                 <i class="fa fa-external-link"></i> {{ finding.cwe }}
                             </a>
                         </td>
@@ -180,26 +180,26 @@
                 <pre>{{ finding.mitigation }}</pre>
             </div>
         </div>
-        {% if burp_request %}
+        {% if finding.get_request %}
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h4>Request <span class="pull-right clickable  panel-collapse in"><i
-                            class="glyphicon glyphicon-chevron-up"></i></span></h4>
+                    <h4>Request <span class="pull-right clickable"><i
+                            class="glyphicon glyphicon-chevron-down"></i></span></h4>
                 </div>
                 <div class="panel-body" style="display: none">
-                    <pre>{{ burp_request }}</pre>
+                    <pre>{{ finding.get_request }}</pre>
                 </div>
             </div>
         {% endif %}
-        {% if burp_response %}
+        {% if finding.get_response %}
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h4>Response <span class="pull-right clickable  panel-collapse in"><i
-                            class="glyphicon glyphicon-chevron-up"></i></span></h4>
+                    <h4>Response <span class="pull-right clickable"><i
+                            class="glyphicon glyphicon-chevron-down"></i></span></h4>
                 </div>
 
                 <div class="panel-body" style="display: none">
-                    <pre>{{ burp_response }}</pre>
+                    <pre>{{ finding.get_response }}</pre>
                 </div>
             </div>
         {% endif %}
@@ -294,14 +294,14 @@
 
         $(document).on('click', '.panel-heading span.clickable', function (e) {
             var $this = $(this);
-            if (!$this.hasClass('panel-collapsed')) {
-                $this.parents('.panel').find('.panel-body, table.finding-endpoints').slideUp();
-                $this.addClass('panel-collapsed');
-                $this.find('i').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
-            } else {
+            if (!$this.hasClass('panel-collapse')) {
                 $this.parents('.panel').find('.panel-body, table.finding-endpoints').slideDown();
-                $this.removeClass('panel-collapsed');
+                $this.addClass('panel-collapse');
                 $this.find('i').removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
+            } else {
+                $this.parents('.panel').find('.panel-body, table.finding-endpoints').slideUp();
+                $this.removeClass('panel-collapse');
+                $this.find('i').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
             }
         })
 

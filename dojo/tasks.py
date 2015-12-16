@@ -1,12 +1,20 @@
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
+from datetime import datetime
+
+import pdfkit
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.mail import send_mail
-from easy_pdf.rendering import render_to_pdf
+from django.core.urlresolvers import reverse
+from django.template.loader import render_to_string
+from django.utils.http import urlencode
+from pytz import timezone
 
 from dojo.celery import app
+
+localtz = timezone(settings.TIME_ZONE)
 
 
 def email_requester(report, uri, error=None):
@@ -25,19 +33,47 @@ def email_requester(report, uri, error=None):
 
 
 @app.task(bind=True)
-def async_pdf_report(self, report=None, filename='report.pdf', context={}, uri=None):
+def async_pdf_report(self,
+                     report=None,
+                     template="None",
+                     filename='report.pdf',
+                     report_title=None,
+                     report_subtitle=None,
+                     report_info=None,
+                     context={},
+                     uri=None):
+    xsl_style_sheet = settings.DOJO_ROOT + "/static/dojo/xsl/pdf_toc.xsl"
+    x = urlencode({'title': report_title,
+                   'subtitle': report_subtitle,
+                   'info': report_info})
+    cover = context['host'] + reverse(
+        'report_cover_page') + "?" + x
     try:
         report.task_id = async_pdf_report.request.id
         report.save()
-        bytes = render_to_pdf('dojo/pdf_report.html', context)
+
+        bytes = render_to_string(template, context)
+
+        itoc = context['include_table_of_contents']
+        if itoc:
+            toc = {'xsl-style-sheet': xsl_style_sheet}
+        else:
+            toc = None
+
+        pdf = pdfkit.from_string(bytes,
+                                 False,
+                                 cover=cover,
+                                 toc=toc)
+
         if report.file.name:
             with open(report.file.path, 'w') as f:
-                f.write(bytes)
+                f.write(pdf)
             f.close()
         else:
-            f = ContentFile(bytes)
+            f = ContentFile(pdf)
             report.file.save(filename, f)
         report.status = 'success'
+        report.done_datetime = datetime.now(tz=localtz)
         report.save()
         email_requester(report, uri)
     except Exception as e:

@@ -30,4 +30,6 @@ urlpatterns = [
         name='regen_report'),
     url(r'^reports/(?P<rid>\d+)/revoke', views.revoke_report,
         name='revoke_report'),
+    url(r'^reports/cover$',
+        views.report_cover_page, name='report_cover_page'),
 ]

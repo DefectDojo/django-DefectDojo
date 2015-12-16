@@ -177,20 +177,6 @@
                                     <!-- /.nav-second-level -->
                                 </li>
                                 <li>
-                                    <a href="#"><i class="fa fa-sitemap fa-fw"></i> <span>Endpoints</span><span
-                                            class="glyphicon arrow"></span></a>
-                                    <ul class="nav nav-second-level">
-                                        <li>
-                                            <a href="{% url 'endpoints' %}">All Endpoints</a>
-                                        </li>
-                                        <li>
-                                            <a href="{% url 'vulnerable_endpoints' %}">
-                                                Vulnerable Endpoints
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <li>
                                     <a href="#"><i class="fa fa-bug fa-fw"></i> <span>Findings</span><span
                                             class="glyphicon arrow"></span></a>
                                     <ul class="nav nav-second-level">
@@ -208,6 +194,20 @@
                                         </li>
                                     </ul>
                                     <!-- /.nav-second-level -->
+                                </li>
+                                <li>
+                                    <a href="#"><i class="fa fa-sitemap fa-fw"></i> <span>Endpoints</span><span
+                                            class="glyphicon arrow"></span></a>
+                                    <ul class="nav nav-second-level">
+                                        <li>
+                                            <a href="{% url 'endpoints' %}">All Endpoints</a>
+                                        </li>
+                                        <li>
+                                            <a href="{% url 'vulnerable_endpoints' %}">
+                                                Vulnerable Endpoints
+                                            </a>
+                                        </li>
+                                    </ul>
                                 </li>
                             {% endif %}
                             <li>

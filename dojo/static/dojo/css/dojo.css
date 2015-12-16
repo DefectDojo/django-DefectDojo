@@ -906,7 +906,7 @@ div.custom-search-form {
     border-radius: inherit;
 }
 
-span.pull-right.clickable.panel-collapse i.glyphicon-chevron-up, span.pull-right.clickable.panel-collapse i.glyphicon-chevron-down {
+span.pull-right.clickable i.glyphicon-chevron-up, span.pull-right.clickable i.glyphicon-chevron-down {
     color: #337ab7;
 }
 

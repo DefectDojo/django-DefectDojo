@@ -23,6 +23,9 @@
 - name: Install npm
   apt: name=npm state=latest
 
+- name: Install wkhtmltopdf
+  apt: name=wkhtmltopdf state=latest
+
 - name: Create www-data group
   group: name=www-data state=present
 

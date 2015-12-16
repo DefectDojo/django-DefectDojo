@@ -1,13 +1,15 @@
+import base64
 from itertools import izip, chain
 
+import re
 from django import template
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import stringfilter
+from django.utils.html import escape
 from django.utils.safestring import mark_safe, SafeData
 from django.utils.text import normalize_newlines
-from django.utils.html import escape
-from dojo.models import Check_List
 
+from dojo.models import Check_List, BurpRawRequestResponse
 
 register = template.Library()
 
@@ -124,5 +126,3 @@ def colgroup(parser, token):
     except ValueError:
         raise template.TemplateSyntaxError("Invalid arguments passed to %r." % token.contents.split()[0])
     return Node(iterable, num_cols, varname)
-
-

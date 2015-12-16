@@ -35,7 +35,8 @@
     "flot-axis": "https://github.com/markrcote/flot-axislabels.git",
     "chosen": null,
     "chosen-bootstrap": null,
-    "font-awesome": "4.4.0"
+    "font-awesome": "4.4.0",
+    "bootswatch-dist": "readable"
   },
   "timeout": 20000
 }

@@ -131,8 +131,7 @@ def closed_findings(request):
 def view_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     user = request.user
-    if (user.is_staff
-        or user in finding.test.engagement.product.authorized_users.all()):
+    if user.is_staff or user in finding.test.engagement.product.authorized_users.all():
         pass  # user is authorized for this product
     else:
         raise PermissionDenied

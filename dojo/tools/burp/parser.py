@@ -5,9 +5,13 @@ See the file 'doc/LICENSE' for the license information
 
 """
 from __future__ import with_statement
-import re
 
+import re
 from xml.etree import ElementTree as ET
+
+import html2text
+
+from dojo.models import Finding, Endpoint
 
 __author__ = "Francisco Amato"
 __copyright__ = "Copyright (c) 2013, Infobyte LLC"
@@ -129,15 +133,12 @@ def do_clean(value):
 
 
 def get_item(item_node, test):
-    from dojo.models import Finding, Endpoint
-    import html2text
-
     host_node = item_node.findall('host')[0]
 
     url = host_node.text
     rhost = re.search(
-        "(http|https|ftp)\://([a-zA-Z0-9\.\-]+(\:[a-zA-Z0-9\.&amp;%\$\-]+)*@)*((25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])|localhost|([a-zA-Z0-9\-]+\.)*[a-zA-Z0-9\-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))[\:]*([0-9]+)*([/]*($|[a-zA-Z0-9\.\,\?\'\\\+&amp;%\$#\=~_\-]+)).*?$",
-        url)
+            "(http|https|ftp)\://([a-zA-Z0-9\.\-]+(\:[a-zA-Z0-9\.&amp;%\$\-]+)*@)*((25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])|localhost|([a-zA-Z0-9\-]+\.)*[a-zA-Z0-9\-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))[\:]*([0-9]+)*([/]*($|[a-zA-Z0-9\.\,\?\'\\\+&amp;%\$#\=~_\-]+)).*?$",
+            url)
     protocol = rhost.group(1)
     host = rhost.group(4)
 
@@ -154,9 +155,9 @@ def get_item(item_node, test):
     location = item_node.findall('location')[0].text
 
     request = item_node.findall('./requestresponse/request')[0].text if len(
-        item_node.findall('./requestresponse/request')) > 0 else ""
+            item_node.findall('./requestresponse/request')) > 0 else ""
     response = item_node.findall('./requestresponse/response')[0].text if len(
-        item_node.findall('./requestresponse/response')) > 0 else ""
+            item_node.findall('./requestresponse/response')) > 0 else ""
 
     try:
         dupe_endpoint = Endpoint.objects.get(protocol=protocol,
