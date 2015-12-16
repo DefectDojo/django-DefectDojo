@@ -48,6 +48,9 @@ def async_pdf_report(self,
                    'info': report_info})
     cover = context['host'] + reverse(
         'report_cover_page') + "?" + x
+
+    config = pdfkit.configuration(wkhtmltopdf=settings.WKHTMLTOPDF_PATH)
+
     try:
         report.task_id = async_pdf_report.request.id
         report.save()
@@ -62,6 +65,7 @@ def async_pdf_report(self,
 
         pdf = pdfkit.from_string(bytes,
                                  False,
+                                 configuration=config,
                                  cover=cover,
                                  toc=toc)
 
