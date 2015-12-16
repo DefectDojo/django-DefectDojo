@@ -229,8 +229,6 @@ def product_endpoint_report(request, pid):
 
     endpoints = EndpointReportFilter(request.GET, queryset=endpoints)
 
-    endpoints = endpoints.qs.order_by('finding__numerical_severity')
-
     paged_endpoints = get_page_items(request, endpoints, 25)
     report_format = request.GET.get('report_type', 'AsciiDoc')
     include_finding_notes = int(request.GET.get('include_finding_notes', 0))
@@ -249,25 +247,25 @@ def product_endpoint_report(request, pid):
         user.get_full_name(), (datetime.now(tz=localtz).strftime("%m/%d/%Y %I:%M%p %Z")))
 
     try:
-        start_date = Finding.objects.filter(endpoints__in=endpoints).order_by('date')[:1][0].date
+        start_date = Finding.objects.filter(endpoints__in=endpoints.qs).order_by('date')[:1][0].date
     except:
         start_date = localtz.localize(datetime.today())
 
     end_date = localtz.localize(datetime.today())
 
-    risk_acceptances = Risk_Acceptance.objects.filter(engagement__test__finding__endpoints__in=endpoints)
+    risk_acceptances = Risk_Acceptance.objects.filter(engagement__test__finding__endpoints__in=endpoints.qs)
 
     accepted_findings = [finding for ra in risk_acceptances
-                         for finding in ra.accepted_findings.filter(endpoints__in=endpoints)]
+                         for finding in ra.accepted_findings.filter(endpoints__in=endpoints.qs)]
 
-    verified_findings = Finding.objects.filter(endpoints__in=endpoints,
+    verified_findings = Finding.objects.filter(endpoints__in=endpoints.qs,
                                                date__range=[start_date, end_date],
                                                false_p=False,
                                                verified=True,
                                                duplicate=False,
                                                out_of_scope=False)
 
-    open_findings = Finding.objects.filter(endpoints__in=endpoints,
+    open_findings = Finding.objects.filter(endpoints__in=endpoints.qs,
                                            false_p=False,
                                            verified=True,
                                            duplicate=False,
@@ -275,7 +273,7 @@ def product_endpoint_report(request, pid):
                                            active=True,
                                            mitigated__isnull=True)
 
-    closed_findings = Finding.objects.filter(endpoints__in=endpoints,
+    closed_findings = Finding.objects.filter(endpoints__in=endpoints.qs,
                                              false_p=False,
                                              verified=True,
                                              duplicate=False,
@@ -304,6 +302,7 @@ def product_endpoint_report(request, pid):
                            'title': 'Generate Report',
                            })
         elif report_format == 'PDF':
+            endpoints = endpoints.qs.order_by('finding__numerical_severity')
             # lets create the report object and send it in to celery task
             if 'regen' in request.GET:
                 # we should already have a report object, lets get and use it
