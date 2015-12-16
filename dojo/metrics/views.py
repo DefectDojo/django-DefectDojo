@@ -376,7 +376,7 @@ def simple_metrics(request):
     })
 
 
-@cache_page(60 * 5)  # cache for 5 minutes
+# @cache_page(60 * 5)  # cache for 5 minutes
 def product_type_counts(request):
     form = ProductTypeCountsForm()
     oip = None
@@ -432,7 +432,8 @@ def product_type_counts(request):
                               then=Value(1)),
                          output_field=IntegerField())))['total']
 
-            overall_in_pt = Finding.objects.filter(verified=True,
+            overall_in_pt = Finding.objects.filter(date__lt=end_date,
+                                                   verified=True,
                                                    false_p=False,
                                                    duplicate=False,
                                                    out_of_scope=False,
@@ -441,7 +442,8 @@ def product_type_counts(request):
                                                    severity__in=('Critical', 'High', 'Medium', 'Low')).values(
                 'numerical_severity').annotate(Count('numerical_severity')).order_by('numerical_severity')
 
-            total_overall_in_pt = Finding.objects.filter(verified=True,
+            total_overall_in_pt = Finding.objects.filter(date__lte=end_date,
+                                                         verified=True,
                                                          false_p=False,
                                                          duplicate=False,
                                                          out_of_scope=False,
@@ -453,7 +455,8 @@ def product_type_counts(request):
                               then=Value(1)),
                          output_field=IntegerField())))['total']
 
-            all_current_in_pt = Finding.objects.filter(verified=True,
+            all_current_in_pt = Finding.objects.filter(date__lte=end_date,
+                                                       verified=True,
                                                        false_p=False,
                                                        duplicate=False,
                                                        out_of_scope=False,
@@ -467,7 +470,8 @@ def product_type_counts(request):
                 'reporter').order_by(
                 'numerical_severity')
 
-            top_ten = Product.objects.filter(engagement__test__finding__verified=True,
+            top_ten = Product.objects.filter(engagement__test__finding__date__lte=end_date,
+                                             engagement__test__finding__verified=True,
                                              engagement__test__finding__false_p=False,
                                              engagement__test__finding__duplicate=False,
                                              engagement__test__finding__out_of_scope=False,
