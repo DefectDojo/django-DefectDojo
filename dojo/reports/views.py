@@ -310,6 +310,8 @@ def product_endpoint_report(request, pid):
                 report = get_object_or_404(Report, id=request.GET['regen'])
                 report.datetime = datetime.now(tz=localtz)
                 report.status = 'requested'
+                if report.requester.username != request.user.username:
+                    report.requester = request.user
             else:
                 report = Report(name="Product Endpoints " + str(product),
                                 type="Product Endpoint",
@@ -608,6 +610,8 @@ def generate_report(request, obj):
                 report = get_object_or_404(Report, id=request.GET['regen'])
                 report.datetime = datetime.now(tz=localtz)
                 report.status = 'requested'
+                if report.requester.username != request.user.username:
+                    report.requester = request.user
             else:
                 # lets create the report object and send it in to celery task
                 report = Report(name=report_name,
