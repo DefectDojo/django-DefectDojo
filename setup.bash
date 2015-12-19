@@ -93,6 +93,7 @@ fi
 if python -c 'import sys; print sys.real_prefix' 2>/dev/null; then
     pip install .
     python manage.py makemigrations dojo
+    python manage.py makemigrations
     python manage.py migrate
     python manage.py syncdb
     python manage.py loaddata product_type
@@ -103,6 +104,7 @@ if python -c 'import sys; print sys.real_prefix' 2>/dev/null; then
 else
     sudo pip install .
     sudo python manage.py makemigrations dojo
+    sudo python manage.py makemigrations
     sudo python manage.py migrate
     sudo python manage.py syncdb
     sudo python manage.py loaddata product_type
