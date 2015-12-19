@@ -185,7 +185,6 @@ INSTALLED_APPS = (
     'gunicorn',
     'tastypie',
     'djangobower',
-    'easy_pdf',
     'auditlog',
     'dojo',
     'tastypie_swagger',

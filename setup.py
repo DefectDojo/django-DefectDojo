@@ -29,9 +29,10 @@ setup(
             'django-watson==1.1.9',
             'celery',
             'sqlalchemy',
-            'django-polymorphic'],
+            'django-polymorphic',
+            'pdfkit==0.5.0'],
         dependency_links=[
-            "https://github.com/grendel513/python-pdfkit.git",
+            "https://github.com/grendel513/python-pdfkit/tarball/master#egg=pdfkit-0.5.0",
         ],
         url='https://github.com/rackerlabs/django-DefectDojo'
 )
