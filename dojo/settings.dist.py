@@ -111,7 +111,6 @@ BOWER_INSTALLED_APPS = (
     'startbootstrap-sb-admin-2',
     'fullcalendar',
     'jquery-cookie',
-    'jquery.tablesorter',
     'jquery-ui',
     'jquery-highlight',
     # directly from github since no bower comp available
@@ -119,6 +118,7 @@ BOWER_INSTALLED_APPS = (
     'https://github.com/markrcote/flot-axislabels.git',
     'chosen',
     'chosen-bootstrap',
+    'bootswatch-dist#readable',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -155,11 +155,12 @@ ROOT_URLCONF = 'dojo.urls'
 LOGIN_URL = '/login'
 LOGIN_EXEMPT_URLS = (
     r'^static/',
-    r'^metrics/all$'
+    r'^metrics/all$',
     r'^metrics$',
     r'^metrics/product/type/(?P<mtype>\d+)$',
     r'^metrics/simple$',
     r'^api/v1/',
+    r'^ajax/v1/',
     r'^reports/cover$',
 )
 
@@ -180,6 +181,8 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'polymorphic',  # provides admin templates
+    'overextends',
     'django.contrib.admin',
     'django.contrib.humanize',
     'gunicorn',
