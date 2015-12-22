@@ -143,13 +143,23 @@
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
-- name: Install pdfkit
+- name: install pdfkit
   pip: name=pdfkit virtualenv={{ venv_dir }}
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
-- name: Run Django 'makemigrations' command
+- name: install django-overextends
+  pip: name=django-overextends virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ dd_user }}'
+
+- name: Run Django 'makemigrations dojo' command
   django_manage: command='makemigrations dojo' app_path={{ dd_install_dir }} virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ dd_user }}'
+
+- name: Run Django 'makemigrations' command
+  django_manage: command='makemigrations' app_path={{ dd_install_dir }} virtualenv={{ venv_dir }}
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
@@ -158,17 +168,22 @@
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
-- name: Run Django 'loaddata' command
+- name: Run Django 'syncdb' command
+  django_manage: command=syncdb app_path={{ dd_install_dir }} virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ dd_user }}'
+
+- name: Run Django 'loaddata' command for product_type
   django_manage: command='loaddata product_type' app_path={{ dd_install_dir }} virtualenv={{ venv_dir }}
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
-- name: Run Django 'loaddata' command
+- name: Run Django 'loaddata' command for test_type
   django_manage: command='loaddata test_type' app_path={{ dd_install_dir }} virtualenv={{ venv_dir }}
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
-- name: Run Django 'loaddata' command
+- name: Run Django 'loaddata' command for development_environment
   django_manage: command='loaddata development_environment' app_path={{ dd_install_dir }} virtualenv={{ venv_dir }}
   sudo: yes
   sudo_user: '{{ dd_user }}'
@@ -191,7 +206,7 @@
     sudo_user: '{{ dd_user }}'
 
 - name: Run 'bower install' command
-  command: bower install
+  command: bower install 
   sudo: yes
   sudo_user: '{{ dd_user }}'
   register: bower_install
@@ -205,22 +220,23 @@
   sudo_user: '{{ dd_user }}'
   when: "bower_install.changed and bower_install.stderr and 'unable to connect to github.com' in bower_install.stderr"
 
-- name: Reinstall Bower
-  command: bower install
+- name: Try installing Bower again, forcing latest versions to try to get compatability..
+  command: bower install --force-latest
   sudo: yes
   sudo_user: '{{ dd_user }}'
   register: bower_install2
   ignore_errors: True
   args: 
     chdir: '{{ dd_install_dir }}/components/'
-  when: "bower_install.changed and bower_install.stderr and 'unable to connect to github.com' in bower_install.stderr"
+  when: "bower_install.changed and bower_install.stderr"
 
-- name: Bower Failure
-  fail: msg="It looks like the 'bower install' command has failed. Usually executing `git config --global url.'https://'.insteadOf 'git://'` fixes this issue, but it appears that has not fixed it in this case. Please ensure that you have network connectivity while running the provisioning process."
-  when: "bower_install2.changed and bower_install2.stderr and 'unable to connect to github.com' in bower_install2.stderr"
+# - name: Bower Failure
+#   fail: msg="It looks like the 'bower install' command has failed. Usually executing `git config --global url.'https://'.insteadOf 'git://'` fixes this issue, but it appears that has not fixed it in this case. Please ensure that you have network connectivity while running the provisioning process."
+#   # when: "bower_install2.changed and bower_install2.stderr and 'unable to connect to github.com' in bower_install2.stderr"
+#   when: "bower_install2.changed and bower_install2.stderr"
 
 - name: Run Django 'collectstatic' command
-  django_manage: command=collectstatic app_path={{ dd_install_dir }} virtualenv={{ venv_dir }}
+  django_manage: command='collectstatic --noinput' app_path={{ dd_install_dir }} virtualenv={{ venv_dir }}
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
