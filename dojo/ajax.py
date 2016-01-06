@@ -66,7 +66,7 @@ class StubFindingResource(BaseModelResource):
     def dehydrate(self, bundle):
         engagement = Engagement.objects.select_related('product'). \
             filter(test__stub_finding__id=bundle.obj.id)
-        bundle.data['engagemet'] = "/api/v1/engagements/%s/" % engagement[0].id
+        bundle.data['engagement'] = "/api/v1/engagements/%s/" % engagement[0].id
         bundle.data['product'] = \
             "/api/v1/products/%s/" % engagement[0].product.id
         return bundle
