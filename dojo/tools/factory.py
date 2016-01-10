@@ -3,6 +3,7 @@ from dojo.tools.nessus.parser import NessusCSVParser, NessusXMLParser
 from dojo.tools.nexpose.parser import NexposeFullXmlParser
 from dojo.tools.veracode.parser import VeracodeXMLParser
 from dojo.tools.zap.parser import ZapXmlParser
+from dojo.tools.checkmarx.parser import CheckmarxXMLParser
 
 __author__ = 'Jay Paz'
 
@@ -21,6 +22,8 @@ def import_parser_factory(file, test):
         parser = NexposeFullXmlParser(file, test)
     elif scan_type == "Veracode Scan":
         parser = VeracodeXMLParser(file, test)
+    elif scan_type == "Checkmarx Scan":
+        parser = CheckmarxXMLParser(file, test)
     elif scan_type == "ZAP Scan":
         parser = ZapXmlParser(file, test)
     else:
