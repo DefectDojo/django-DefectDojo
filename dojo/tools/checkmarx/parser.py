@@ -15,32 +15,47 @@ class CheckmarxXMLParser(object):
         dupes = dict()
 
         for query in root.findall('Query'):
-            cwe = query.get('cweId')
+            categories = ''
+            language = ''
             mitigation = ''
             impact = ''
             references = ''
             findingdetail = ''
             title = ''
+            group = ''
+            status = ''
+
             find_date = root.get("ScanStart")
+            name = query.get('name')
+            cwe = query.get('cweId')
+
+            if query.get('categories') is not None:
+                categories = query.get('categories')
+
+            if query.get('Language') is not None:
+                language = query.get('Language')
+
+            if query.get('group') is not None:
+                group = query.get('group').replace('_', ' ')
 
             for result in query.findall('Result'):
-                dupe_key = result.get('NodeId')
-
                 deeplink = result.get('DeepLink')
 
-                if query.get('categories') is not None:
-                    findingdetail = 'Category: ' +  query.get('categories') + '\n'
+                if categories is not None:
+                    findingdetail = 'Category: ' +  categories + '\n'
 
-                if query.get('Language') is not None:
-                    findingdetail += 'Language: ' +  query.get('Language') + '\n'
+                if language is not None:
+                    findingdetail += 'Language: ' +  language + '\n'
 
-                if query.get('group') is not None:
-                    findingdetail += 'Group: ' +  query.get('group').replace('_', ' ') + '\n'
+                if group is not None:
+                    findingdetail += 'Group: ' +  group + '\n'
 
                 if result.get('Status') is not None:
                     findingdetail += 'Status: ' +  result.get('Status') + '\n'
 
                 findingdetail += 'Finding Link: ' +  deeplink + '\n\n'
+
+                dupe_key = categories + cwe + name + result.get('FileName') + result.get('Line')
 
                 if dupe_key in dupes:
                     find = dupes[dupe_key]
