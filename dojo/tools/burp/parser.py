@@ -171,7 +171,7 @@ def get_item(item_node, test):
 
     if not dupe_endpoint:
         endpoint = Endpoint(protocol=protocol,
-                            host=host + (":" + port) if port is not None else "",
+                            host=host + (":" + str(port)) if port is not None else "",
                             path=path,
                             query=None,
                             fragment=None,
