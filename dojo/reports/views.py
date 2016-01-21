@@ -18,13 +18,15 @@ from django.shortcuts import render, get_object_or_404
 from pytz import timezone
 
 from dojo.celery import app
-from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter, EndpointReportFilter, ReportFilter
+from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter, EndpointReportFilter, ReportFilter, EndpointFilter
 from dojo.forms import ReportOptionsForm, DeleteReportForm
 from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
     Dojo_User, Endpoint, Report, Risk_Acceptance
 from dojo.tasks import async_pdf_report
 from dojo.utils import get_page_items, add_breadcrumb, get_period_counts
 from dojo.endpoint.views import get_endpoint_ids
+from dojo.reports.widgets import CoverPage, PageBreak, TableOfContents, ExecutiveSummary, FindingList, EndpointList, \
+    CustomReportJsonForm, ReportOptions, report_widget_factory
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -35,6 +37,101 @@ logging.basicConfig(
         filename=settings.DOJO_ROOT + '/../django_app.log',
 )
 logger = logging.getLogger(__name__)
+
+
+def report_builder(request):
+    add_breadcrumb(title="Report Builder", top_level=True, request=request)
+    findings = Finding.objects.all()
+    findings = ReportAuthedFindingFilter(request.GET, queryset=findings, user=request.user)
+    endpoints = EndpointFilter(request.GET, queryset=Endpoint.objects.filter(finding__active=True,
+                                                                             finding__verified=True,
+                                                                             finding__false_p=False,
+                                                                             finding__duplicate=False,
+                                                                             finding__out_of_scope=False,
+                                                                             ))
+    available_widgets = [ReportOptions(request=request),
+                         CoverPage(request=request),
+                         TableOfContents(request=request),
+                         ExecutiveSummary(request=request),
+                         FindingList(request=request, findings=findings),
+                         EndpointList(request=request, endpoints=endpoints),
+                         PageBreak()]
+    return render(request,
+                  'dojo/report_builder.html',
+                  {"available_widgets": available_widgets})
+
+
+def custom_report(request):
+    # saving the report
+    form = CustomReportJsonForm(request.POST)
+
+    if form.is_valid():
+
+        report_name = "Custom: "
+        report = Report(name=report_name,
+                        type="Custom",
+                        format='PDF',
+                        requester=request.user,
+                        task_id='tbd',
+                        options=request.POST['json'])
+        report.save()
+        report_widget_factory(json_data=report.options, request=request)
+        return HttpResponseRedirect(reverse('reports'))
+    else:
+        return HttpResponseForbidden()
+
+
+
+def report_findings(request):
+    findings = Finding.objects.filter()
+
+    findings = ReportAuthedFindingFilter(request.GET, queryset=findings, user=request.user)
+
+    title_words = [word
+                   for finding in findings
+                   for word in finding.title.split() if len(word) > 2]
+
+    title_words = sorted(set(title_words))
+    paged_findings = get_page_items(request, findings, 25)
+
+    product_type = None
+    if 'test__engagement__product__prod_type' in request.GET:
+        p = request.GET.getlist('test__engagement__product__prod_type', [])
+        if len(p) == 1:
+            product_type = get_object_or_404(Product_Type, id=p[0])
+
+    return render(request,
+                  'dojo/report_findings.html',
+                  {"findings": paged_findings,
+                   "filtered": findings,
+                   "title_words": title_words,
+                   "title": "finding-list",
+                   })
+
+def report_endpoints(request):
+    user = Dojo_User.objects.get(id=request.user.id)
+    endpoints = Endpoint.objects.filter(finding__active=True,
+                                        finding__verified=True,
+                                        finding__false_p=False,
+                                        finding__duplicate=False,
+                                        finding__out_of_scope=False,
+                                        )
+
+    ids = get_endpoint_ids(endpoints)
+
+    endpoints = Endpoint.objects.filter(id__in=ids)
+    print request.GET
+    endpoints = EndpointFilter(request.GET, queryset=endpoints)
+
+    paged_endpoints = get_page_items(request, endpoints, 25)
+
+    return render(request,
+                  'dojo/report_endpoints.html',
+                  {"endpoints": paged_endpoints,
+                   "filtered": endpoints,
+                   "title": "endpoint-list",
+                   })
+
 
 
 def download_report(request, rid):

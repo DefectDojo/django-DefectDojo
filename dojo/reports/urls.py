@@ -32,4 +32,13 @@ urlpatterns = [
         name='revoke_report'),
     url(r'^reports/cover$',
         views.report_cover_page, name='report_cover_page'),
+    url(r'^reports/builder$',
+        views.report_builder, name='report_builder'),
+    url(r'^reports/findings$',
+        views.report_findings, name='report_findings'),
+    url(r'^reports/endpoints$',
+        views.report_endpoints, name='report_endpoints'),
+    url(r'^reports/custom$',
+        views.custom_report, name='custom_report'),
+
 ]

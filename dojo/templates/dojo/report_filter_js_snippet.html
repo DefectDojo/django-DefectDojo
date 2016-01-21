@@ -1,0 +1,31 @@
+{% load static from staticfiles %}
+<script type="application/javascript" src="{% static "chosen/chosen.jquery.min.js" %}"></script>
+<script type="application/javascript">
+    $(function () {
+        $(".{{ request.path|slugify }}-filters :input").not("button").addClass("form-control input-sm");
+        $(".{{ request.path|slugify }}-filters label").css("display", "block");
+
+        $(".{{ request.path|slugify }}-filters input[type=text]").each(function () {
+            var id = this.id;
+            var label = $("label[for=" + id + "]");
+            $(this).attr("placeholder", label.html().replace(':', "..."));
+        });
+
+        var toggle = $(' <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-sm btn-primary"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>')
+        $(".has-filters .dropdown.pull-right").prepend(toggle);
+        toggle.on('click', function () {
+            $(this).toggleClass("dropup");
+        })
+
+        $('.{{ request.path|slugify }}-filters select[multiple=multiple]').each(function () {
+            var id = this.id
+            var label = $("label[for=" + id + "]");
+            $(this).chosen({
+                'placeholder_text_multiple': label.html().replace(':', "..."),
+                'width': '200px !important'
+            });
+        })
+
+
+    })
+</script>
