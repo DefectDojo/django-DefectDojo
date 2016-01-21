@@ -36,7 +36,8 @@
     "chosen": null,
     "chosen-bootstrap": null,
     "font-awesome": "4.4.0",
-    "bootswatch-dist": "readable"
+    "bootswatch-dist": "readable",
+    "bootstrap-wysiwyg-steveathon": null
   },
   "timeout": 20000
 }

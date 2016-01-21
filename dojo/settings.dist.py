@@ -119,6 +119,7 @@ BOWER_INSTALLED_APPS = (
     'chosen',
     'chosen-bootstrap',
     'bootswatch-dist#readable',
+    'bootstrap-wysiwyg-steveathon',
 )
 
 # Make this unique, and don't share it with anybody.

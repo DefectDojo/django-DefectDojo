@@ -738,7 +738,7 @@ class Report(models.Model):
     task_id = models.CharField(max_length=50)
     file = models.FileField(upload_to='reports/%Y/%m/%d', verbose_name='Report File', null=True)
     status = models.CharField(max_length=10, default='requested')
-    options = models.CharField(max_length=1000)
+    options = models.TextField()
     datetime = models.DateTimeField(auto_now_add=True)
     done_datetime = models.DateTimeField(null=True)
 

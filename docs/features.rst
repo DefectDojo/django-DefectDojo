@@ -319,6 +319,9 @@ DefectDojo has the ability to import reports from other security tools.  Current
 2. Nessus (CSV, XML)
 3. Nexpose XML 2.0
 4. ZAP XML
+5. Veracode Detailed XML Report
+6. Checkmarx Detailed XML Report
+
 
 The importers analyze each report and create new Findings for each item reported.  DefectDojo collapses duplicate
 Findings by capturing the individual hosts vulnerable.

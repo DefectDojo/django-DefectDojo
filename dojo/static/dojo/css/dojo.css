@@ -730,13 +730,29 @@ th a {
     -moz-osx-font-smoothing: grayscale;
 }
 
+.icon-grab-reorder-down:before {
+    content: "\e902";
+}
+
+.icon-grab-reorder-up:before {
+    content: "\e903";
+}
+
+.icon-grab-reorder:before {
+    content: "\e904";
+}
+
 .icon-add-template:before {
     content: "\e900";
 }
+
 .icon-plusminus:before {
     content: "\e800";
 }
 
+.icon-page-break:before {
+    content: "\e901";
+}
 
 #side-menu ul a {
     /*border-top: 1px solid #ddd;*/
@@ -884,7 +900,21 @@ div.custom-search-form {
     margin-right: 25px;
 }
 
-.dojo-filter-set.form-inline select[multiple=multiple] {
+.report-filter-set{
+    padding-left: 10px;
+}
+.report-filter-set .form-group{
+    display: inline-block;
+    margin-bottom: 10px;
+    vertical-align: middle;
+    margin-right: 25px;
+}
+
+.finding-list .panel-body, .finding-list table{
+    font-size: .95em !important;
+}
+
+  .dojo-filter-set.form-inline select[multiple=multiple] {
     width: 200px;
 }
 
@@ -977,11 +1007,11 @@ div.potential-finding, div.potential-finding div.panel-heading {
     border-top-left-radius: 0px;
 }
 
-a.template-popover:hover{
+a.template-popover:hover {
     cursor: zoom-in;
 }
 
-#template_findings div.popover{
+#template_findings div.popover {
     width: 50% !important;
     max-width: 50% !important;
 }
@@ -989,3 +1019,94 @@ a.template-popover:hover{
 #template_findings div.popover .popover-content {
     overflow: hidden;
 }
+
+.panel-available-widget {
+    border-color: #ddd;
+}
+
+.panel-available-widget .panel-heading {
+    background-color: #f5f5f5;
+    border-color: #ddd;
+}
+
+.panel-available-widget .form-group * {
+
+}
+
+.panel-available-widget .form-control {
+    width: 100%;
+    height: auto;
+}
+
+.panel-available-widget .panel-heading h5 {
+    margin: 0;
+}
+
+.panel-available-widget .panel-heading hr {
+    margin: 7px 0;
+}
+
+.available-widgets .panel-available-widget .panel-body {
+    display: none;
+}
+
+ul#sortable1, ul#sortable2 {
+    padding: 10px 0 0;
+    list-style-type: none;
+}
+
+ul#sortable1 li div.panel-heading:hover, ul#sortable2 li div.panel-heading:hover {
+    cursor: url(../img/openhand.cur), default;
+}
+
+.available-widgets .ui-state-highlight, .in-use-widgets .ui-state-highlight {
+    height: 35px;
+    line-height: 1.2em;
+    border: 2px dotted #d0d0d0;
+    margin-top: 3px;
+    margin-bottom: 20px;
+}
+
+.available-widgets .ui-state-highlight:first-child, .in-use-widgets .ui-state-highlight:first-child {
+    margin-top: 0px;
+    margin-bottom: 10px;
+}
+
+hr.report-page-break {
+    padding: 0;
+    border: none;
+    border-top: thin dashed #333;
+    color: #505050;
+    text-align: center;
+    font-weight: 500;
+    line-height: 1.1;
+    font-size: 14px;
+}
+
+hr.report-page-break:before {
+    content: "Page Break";
+    display: inline-block;
+    position: relative;
+    top: -10px;
+    padding: 0 0.25em;
+    background: #F5F5F5;
+}
+
+.editor * {
+    font-size: 1em !important;
+}
+
+.editor ul {
+    list-style-type: disc;
+    padding: 0 40px;
+}
+
+.editor {
+    overflow: scroll;
+    max-height: 250px
+}
+
+.in-use-widgets .report-filter-set .btn-sm {
+    padding: 2px 10px;
+}
+

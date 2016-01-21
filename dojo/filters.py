@@ -635,6 +635,7 @@ class ReportFindingFilter(DojoFilter):
 
 class ReportAuthedFindingFilter(DojoFilter):
     test__engagement__product = ModelMultipleChoiceFilter(queryset=Product.objects.all(), label="Product")
+    test__engagement__product__prod_type = ModelMultipleChoiceFilter(queryset=Product_Type.objects.all(), label="Product Type")
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     active = ReportBooleanFilter()
     mitigated = MitigatedDateRangeFilter()
