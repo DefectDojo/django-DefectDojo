@@ -242,7 +242,7 @@ def import_scan_results(request, eid):
             try:
                 for item in parser.items:
                     sev = item.severity
-                    if sev == 'Information':
+                    if sev == 'Information' or sev == 'Informational':
                         sev = 'Info'
 
                     item.severity = sev
