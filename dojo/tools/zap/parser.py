@@ -66,6 +66,7 @@ class ZapXmlParser(object):
                     references += ref + "\n"
 
                 find = Finding(title=item.name,
+                               cwe=item.cwe,
                                description=item.desc,
                                test=test,
                                severity=severity,
@@ -178,6 +179,10 @@ class Item(object):
         self.ref = []
         if self.get_text_from_subnode('cweid'):
             self.ref.append("CWE-" + self.get_text_from_subnode('cweid'))
+            self.cwe = self.get_text_from_subnode('cweid')
+        else: self.cwe = 0
+
+            
         if self.get_text_from_subnode('wascid'):
             self.ref.append("WASC-" + self.get_text_from_subnode('wascid'))
 
