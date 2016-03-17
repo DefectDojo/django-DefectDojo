@@ -1,0 +1,20 @@
+{
+  "name": "chosen-bootstrap",
+  "version": "1.1.0",
+  "homepage": "https://github.com/dbtek/chosen-bootstrap",
+  "authors": [
+    "İsmail Demirbilek <ce.demirbilek@gmail.com>"
+  ],
+  "description": "Bootstrap look & feel for chosen",
+  "main": "chosen.bootstrap.css",
+  "keywords": [
+    "chosen",
+    "bootstrap",
+    "theme"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "bootstrap": ">=3.0.0",
+    "chosen": "~1.4.0"
+  }
+}

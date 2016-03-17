@@ -1,0 +1,27 @@
+{
+  "name": "jquery-highlight",
+  "version": "3.3.0",
+  "description": "Text highlighting plugin for jQuery",
+  "main": "jquery.highlight.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/knownasilya/jquery-highlight.git"
+  },
+  "keywords": [
+    "jquery",
+    "highlight",
+    "keywords"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/knownasilya/jquery-highlight/issues"
+  },
+  "homepage": "https://github.com/knownasilya/jquery-highlight",
+  "dependencies": {
+    "jquery": ">= 1.0.0"
+  }
+}

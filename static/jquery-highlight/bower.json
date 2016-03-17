@@ -1,0 +1,8 @@
+{
+  "name": "jquery-highlight",
+  "version": "3.2.2",
+  "main": "./jquery.highlight.js",
+  "dependencies": {
+    "jquery": "*"
+  }
+}
