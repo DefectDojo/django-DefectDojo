@@ -202,8 +202,8 @@
   shell: echo "from django.contrib.auth.models import User; User.objects.create_superuser('{{ dd_super_user }}', '{{ dd_super_user_email }}', '{{ dd_super_user_pass }}')" | {{ venv_dir }}/bin/python {{ dd_install_dir }}/manage.py shell && touch /home/{{ dd_user }}/.supercreated
   args:
     creates: /home/{{ dd_user }}/.supercreated
-    sudo: yes
-    sudo_user: '{{ dd_user }}'
+  sudo: yes
+  sudo_user: '{{ dd_user }}'
 
 - name: Run 'bower install' command
   command: bower install 
