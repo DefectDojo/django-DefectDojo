@@ -634,6 +634,7 @@ class ReportFindingFilter(DojoFilter):
 
 
 class ReportAuthedFindingFilter(DojoFilter):
+    title = CharFilter(lookup_type='icontains', label='Name')
     test__engagement__product = ModelMultipleChoiceFilter(queryset=Product.objects.all(), label="Product")
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(queryset=Product_Type.objects.all(), label="Product Type")
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
@@ -655,7 +656,7 @@ class ReportAuthedFindingFilter(DojoFilter):
 
     class Meta:
         model = Finding
-        exclude = ['title', 'date', 'cwe', 'url', 'description', 'mitigation', 'impact',
+        exclude = ['date', 'cwe', 'url', 'description', 'mitigation', 'impact',
                    'endpoint', 'references', 'test', 'is_template',
                    'thread_id', 'notes', 'endpoints',
                    'numerical_severity', 'reporter', 'last_reviewed']

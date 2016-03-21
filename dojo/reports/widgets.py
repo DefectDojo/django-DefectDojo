@@ -64,9 +64,9 @@ class Div(form_widget):
             value = ''
         final_attrs = self.build_attrs(attrs, name=name)
         return format_html(
-                '<div class="btn-toolbar" data-role="editor-toolbar" data-target="#editor"><div class="btn-group"><a class="btn btn-default" data-edit="bold" title="Bold (Ctrl/Cmd+B)"><i class="fa fa-bold"></i></a><a class="btn btn-default" data-edit="italic" title="Italic (Ctrl/Cmd+I)"><i class="fa fa-italic"></i></a><a class="btn btn-default" data-edit="strikethrough" title="Strikethrough"><i class="fa fa-strikethrough"></i></a><a class="btn btn-default" data-edit="underline" title="Underline (Ctrl/Cmd+U)"><i class="fa fa-underline"></i></a></div><div class="btn-group"><a class="btn btn-default" data-edit="insertunorderedlist" title="Bullet list"><i class="fa fa-list-ul"></i></a><a class="btn btn-default" data-edit="insertorderedlist" title="Number list"><i class="fa fa-list-ol"></i></a><a class="btn btn-default" data-edit="outdent" title="Reduce indent (Shift+Tab)"><i class="fa fa-outdent"></i></a><a class="btn btn-default" data-edit="indent" title="Indent (Tab)"><i class="fa fa-indent"></i></a></div><div class="btn-group"><a class="btn btn-default" data-edit="justifyleft" title="Align Left (Ctrl/Cmd+L)"><i class="fa fa-align-left"></i></a><a class="btn btn-default" data-edit="justifycenter" title="Center (Ctrl/Cmd+E)"><i class="fa fa-align-center"></i></a><a class="btn btn-default" data-edit="justifyright" title="Align Right (Ctrl/Cmd+R)"><i class="fa fa-align-right"></i></a><a class="btn btn-default" data-edit="justifyfull" title="Justify (Ctrl/Cmd+J)"><i class="fa fa-align-justify"></i></a></div><div class="btn-group"><a class="btn btn-default dropdown-toggle" data-toggle="dropdown" title="Hyperlink"><i class="fa fa-link"></i></a><div class="dropdown-menu input-append"><input placeholder="URL" type="text" data-edit="createLink" /><button class="btn" type="button">Add</button></div></div><div class="btn-group"><a class="btn btn-default" data-edit="unlink" title="Remove Hyperlink"><i class="fa fa-unlink"></i></a></div><div class="btn-group"><a class="btn btn-default" data-edit="undo" title="Undo (Ctrl/Cmd+Z)"><i class="fa fa-undo"></i></a><a class="btn btn-default" data-edit="redo" title="Redo (Ctrl/Cmd+Y)"><i class="fa fa-repeat"></i></a></div><br/><br/></div><div{}>\r\n{}</div>',
-                flatatt(final_attrs),
-                force_text(value))
+            '<div class="btn-toolbar" data-role="editor-toolbar" data-target="#editor"><div class="btn-group"><a class="btn btn-default" data-edit="bold" title="Bold (Ctrl/Cmd+B)"><i class="fa fa-bold"></i></a><a class="btn btn-default" data-edit="italic" title="Italic (Ctrl/Cmd+I)"><i class="fa fa-italic"></i></a><a class="btn btn-default" data-edit="strikethrough" title="Strikethrough"><i class="fa fa-strikethrough"></i></a><a class="btn btn-default" data-edit="underline" title="Underline (Ctrl/Cmd+U)"><i class="fa fa-underline"></i></a></div><div class="btn-group"><a class="btn btn-default" data-edit="insertunorderedlist" title="Bullet list"><i class="fa fa-list-ul"></i></a><a class="btn btn-default" data-edit="insertorderedlist" title="Number list"><i class="fa fa-list-ol"></i></a><a class="btn btn-default" data-edit="outdent" title="Reduce indent (Shift+Tab)"><i class="fa fa-outdent"></i></a><a class="btn btn-default" data-edit="indent" title="Indent (Tab)"><i class="fa fa-indent"></i></a></div><div class="btn-group"><a class="btn btn-default" data-edit="justifyleft" title="Align Left (Ctrl/Cmd+L)"><i class="fa fa-align-left"></i></a><a class="btn btn-default" data-edit="justifycenter" title="Center (Ctrl/Cmd+E)"><i class="fa fa-align-center"></i></a><a class="btn btn-default" data-edit="justifyright" title="Align Right (Ctrl/Cmd+R)"><i class="fa fa-align-right"></i></a><a class="btn btn-default" data-edit="justifyfull" title="Justify (Ctrl/Cmd+J)"><i class="fa fa-align-justify"></i></a></div><div class="btn-group"><a class="btn btn-default dropdown-toggle" data-toggle="dropdown" title="Hyperlink"><i class="fa fa-link"></i></a><div class="dropdown-menu input-append"><input placeholder="URL" type="text" data-edit="createLink" /><button class="btn" type="button">Add</button></div></div><div class="btn-group"><a class="btn btn-default" data-edit="unlink" title="Remove Hyperlink"><i class="fa fa-unlink"></i></a></div><div class="btn-group"><a class="btn btn-default" data-edit="undo" title="Undo (Ctrl/Cmd+Z)"><i class="fa fa-undo"></i></a><a class="btn btn-default" data-edit="redo" title="Redo (Ctrl/Cmd+Y)"><i class="fa fa-repeat"></i></a></div><br/><br/></div><div{}>\r\n{}</div>',
+            flatatt(final_attrs),
+            force_text(value))
 
 
 class ExecutiveSummaryForm(forms.Form):
@@ -106,16 +106,11 @@ class PageBreak(Widget):
 
     def get_option_form(self):
         return mark_safe(
-                "<div data-multiple='true'  class='panel panel-available-widget'><div class='panel-heading' title='Click and drag to move' data-toggle='tooltip'><div class='clearfix'><h5 style='width: 90%' class='pull-left'>" + self.get_html() + "</h5><span class='fa fa-arrows pull-right icon'></span></div></div><form id='page-break'><input type='hidden' name='page-break'/></form></div>")
+            "<div data-multiple='true'  class='panel panel-available-widget'><div class='panel-heading' title='Click and drag to move' data-toggle='tooltip'><div class='clearfix'><h5 style='width: 90%' class='pull-left'>" + self.get_html() + "</h5><span class='fa fa-arrows pull-right icon'></span></div></div><form id='page-break'><input type='hidden' name='page-break'/></form></div>")
 
 
 class ReportOptions(Widget):
     def __init__(self, *args, **kwargs):
-        if 'request' in kwargs:
-            self.request = kwargs.get('request')
-        else:
-            raise Exception("Need to instantiate with request object.")
-
         super(ReportOptions, self).__init__(*args, **kwargs)
         self.title = 'Report Options'
         self.form = CustomReportOptionsForm()
@@ -134,22 +129,12 @@ class ReportOptions(Widget):
 
 class CoverPage(Widget):
     def __init__(self, *args, **kwargs):
-        if 'request' in kwargs:
-            self.request = kwargs.get('request')
-        else:
-            raise Exception("Need to instantiate with request object.")
-
         super(CoverPage, self).__init__(*args, **kwargs)
         self.title = 'Cover Page'
         self.form = CoverPageForm()
 
     def get_html(self):
-        html = render_to_string("dojo/custom_pdf_report_cover_page.html",
-                                {"report_title": self.title,
-                                 "report_subtitle" : self.sub_heading,
-                                 "report_info" : self.meta_info
-                                 })
-        return mark_safe(html)
+        return mark_safe('')
 
     def get_option_form(self):
         html = render_to_string("dojo/report_widget.html", {"form": self.form,
@@ -160,16 +145,12 @@ class CoverPage(Widget):
 
 class TableOfContents(Widget):
     def __init__(self, *args, **kwargs):
-        if 'request' in kwargs:
-            self.request = kwargs.get('request')
-        else:
-            raise Exception("Need to instantiate with request object.")
         super(TableOfContents, self).__init__(*args, **kwargs)
         self.title = 'Table Of Contents'
         self.form = TableOfContentsForm()
 
-    def get_html(self, request):
-        pass
+    def get_html(self):
+        return mark_safe('')
 
     def get_option_form(self):
         html = render_to_string("dojo/report_widget.html", {"form": self.form,
@@ -180,17 +161,15 @@ class TableOfContents(Widget):
 
 class ExecutiveSummary(Widget):
     def __init__(self, *args, **kwargs):
-        if 'request' in kwargs:
-            self.request = kwargs.get('request')
-        else:
-            raise Exception("Need to instantiate with request object.")
         super(ExecutiveSummary, self).__init__(*args, **kwargs)
         self.title = 'Executive Summary'
         self.form = ExecutiveSummaryForm()
         self.multiple = 'false'
 
-    def get_html(self, request):
-        return None
+    def get_html(self):
+        html = render_to_string("dojo/custom_pdf_report_exec_summary.html", {"title": self.title,
+                                                                             "content": self.content})
+        return mark_safe(html)
 
     def get_option_form(self):
         html = render_to_string("dojo/report_widget.html", {"form": self.form,
@@ -203,8 +182,7 @@ class FindingList(Widget):
     def __init__(self, *args, **kwargs):
         if 'request' in kwargs:
             self.request = kwargs.get('request')
-        else:
-            raise Exception("Need to instantiate with request object.")
+
         if 'findings' in kwargs:
             self.findings = kwargs.get('findings')
         else:
@@ -212,18 +190,27 @@ class FindingList(Widget):
 
         super(FindingList, self).__init__(*args, **kwargs)
         self.title = 'Finding List'
-        self.form = self.findings.form
-        self.multiple = 'false'
+        if 'form' in self.findings:
+            self.form = self.findings.form
+        else:
+            self.form = None
+        self.multiple = 'true'
         self.extra_help = "You can use this form to filter findings and select only the ones to be included in the report."
         title_words = [word
                        for finding in self.findings
                        for word in finding.title.split() if len(word) > 2]
 
         self.title_words = sorted(set(title_words))
-        self.paged_findings = get_page_items(self.request, self.findings, 25)
 
-    def get_html(self, request):
-        return None
+        if self.request is not None:
+            self.paged_findings = get_page_items(self.request, self.findings, 25)
+        else:
+            self.paged_findings = self.findings
+
+    def get_html(self):
+        html = render_to_string("dojo/custom_pdf_report_finding_list.html", {"title": self.title,
+                                                                             "findings": self.findings})
+        return mark_safe(html)
 
     def get_option_form(self):
         html = render_to_string('dojo/report_findings.html',
@@ -241,8 +228,7 @@ class EndpointList(Widget):
     def __init__(self, *args, **kwargs):
         if 'request' in kwargs:
             self.request = kwargs.get('request')
-        else:
-            raise Exception("Need to instantiate with request object.")
+
         if 'endpoints' in kwargs:
             self.endpoints = kwargs.get('endpoints')
         else:
@@ -252,10 +238,13 @@ class EndpointList(Widget):
         self.title = 'Endpoint List'
         self.form = self.endpoints.form
         self.multiple = 'false'
-        self.paged_endpoints = get_page_items(self.request, self.endpoints, 25)
+        if self.request is not None:
+            self.paged_endpoints = get_page_items(self.request, self.endpoints, 25)
+        else:
+            self.paged_endpoints = self.endpoints
         self.extra_help = "You can use this form to filter endpoints and select only the ones to be included in the report."
 
-    def get_html(self, request):
+    def get_html(self):
         return None
 
     def get_option_form(self):
@@ -269,11 +258,10 @@ class EndpointList(Widget):
         return mark_safe(html)
 
 
-def report_widget_factory(json_data=None, request=None):
+def report_widget_factory(json_data=None, request=None, user=None):
     selected_widgets = OrderedDict()
     widgets = json.loads(json_data)
     for idx, widget in enumerate(widgets):
-        print widget.keys()[0]
         if widget.keys()[0] == 'page-break':
             selected_widgets[widget.keys()[0] + '-' + str(idx)] = PageBreak()
         if widget.keys()[0] == 'endpoint-list':
@@ -285,20 +273,30 @@ def report_widget_factory(json_data=None, request=None):
                                                 )
             d = QueryDict(mutable=True)
             for item in widget.get(widget.keys()[0]):
-                d[item['name']] = item['value']
+                if item['name'] in d:
+                    d.getlist(item['name']).append(item['value'])
+                else:
+                    d[item['name']] = item['value']
 
             endpoints = EndpointFilter(d, queryset=endpoints)
-            selected_widgets[widget.keys()[0]] = EndpointList(request=request, endpoints=endpoints)
+            if request is not None:
+                endpoints = EndpointList(request=request, endpoints=endpoints)
+
+            selected_widgets[widget.keys()[0]] = endpoints
+
         if widget.keys()[0] == 'finding-list':
             findings = Finding.objects.all()
             d = QueryDict(mutable=True)
             for item in widget.get(widget.keys()[0]):
-                d[item['name']] = item['value']
+                if item['name'] in d:
+                    d.getlist(item['name']).append(item['value'])
+                else:
+                    d[item['name']] = item['value']
 
-            findings = ReportAuthedFindingFilter(d, queryset=findings, user=request.user)
-            for e in findings:
-                print e
+            findings = ReportAuthedFindingFilter(d, queryset=findings, user=user)
+
             selected_widgets[widget.keys()[0]] = FindingList(request=request, findings=findings)
+
         if widget.keys()[0] == 'executive-summary':
             exec_summary = ExecutiveSummary(request=request)
             exec_summary.title = \
@@ -309,10 +307,10 @@ def report_widget_factory(json_data=None, request=None):
         if widget.keys()[0] == 'report-options':
             options = ReportOptions(request=request)
             options.include_finding_notes = \
-            next((item for item in widget.get(widget.keys()[0]) if item["name"] == 'include_finding_notes'), None)[
-                'value']
+                next((item for item in widget.get(widget.keys()[0]) if item["name"] == 'include_finding_notes'), None)[
+                    'value']
             options.report_type = \
-            next((item for item in widget.get(widget.keys()[0]) if item["name"] == 'report_type'), None)['value']
+                next((item for item in widget.get(widget.keys()[0]) if item["name"] == 'report_type'), None)['value']
 
         if widget.keys()[0] == 'table-of-contents':
             toc = TableOfContents(request=request)
@@ -328,5 +326,6 @@ def report_widget_factory(json_data=None, request=None):
                 next((item for item in widget.get(widget.keys()[0]) if item["name"] == 'sub_heading'), None)['value']
             cover_page.meta_info = \
                 next((item for item in widget.get(widget.keys()[0]) if item["name"] == 'meta_info'), None)['value']
+            selected_widgets[widget.keys()[0]] = cover_page
 
     return selected_widgets
