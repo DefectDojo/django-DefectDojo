@@ -379,10 +379,8 @@ def simple_metrics(request):
 # @cache_page(60 * 5)  # cache for 5 minutes
 def product_type_counts(request):
     form = ProductTypeCountsForm()
+    opened_in_period_list = []
     oip = None
-    oip_1 = None
-    oip_2 = None
-    oip_3 = None
     cip = None
     aip = None
     all_current_in_pt = None
@@ -413,10 +411,14 @@ def product_type_counts(request):
 
             oip = opened_in_period(start_date, end_date, pt)
 
-            # trending data
-            oip_1 = opened_in_period(start_date + relativedelta(months=-1), end_of_month + relativedelta(months=-1), pt)
-            oip_2 = opened_in_period(start_date + relativedelta(months=-2), end_of_month + relativedelta(months=-2), pt)
-            oip_3 = opened_in_period(start_date + relativedelta(months=-3), end_of_month + relativedelta(months=-3), pt)
+
+            # trending data - 12 months
+            for x in range(12, 0, -1):
+                opened_in_period_list.append(
+                    opened_in_period(start_date + relativedelta(months=-x), end_of_month + relativedelta(months=-x),
+                                     pt))
+
+            opened_in_period_list.append(oip)
 
             closed_in_period = Finding.objects.filter(mitigated__range=[start_date, end_date],
                                                       test__engagement__product__prod_type=pt,
@@ -530,7 +532,7 @@ def product_type_counts(request):
                    'start_date': start_date,
                    'end_date': end_date,
                    'opened_in_period': oip,
-                   'trending_opened': [oip_3, oip_2, oip_1, oip],
+                   'trending_opened': opened_in_period_list,
                    'closed_in_period': cip,
                    'overall_in_pt': aip,
                    'all_current_in_pt': all_current_in_pt,
