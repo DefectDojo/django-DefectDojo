@@ -8,7 +8,7 @@ setup(
         author='Greg Anderson',
         description="Tool for managing vulnerability engagements",
         install_requires=[
-            'Django==1.8.4',
+            'Django==1.8.10',
             'MySQL-python',
             'Pillow==2.3.0',
             'django-secure>1.0',

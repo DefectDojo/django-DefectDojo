@@ -18,11 +18,12 @@ from django.shortcuts import render, get_object_or_404
 from pytz import timezone
 
 from dojo.celery import app
-from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter, EndpointReportFilter, ReportFilter, EndpointFilter
+from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter, EndpointReportFilter, ReportFilter, \
+    EndpointFilter
 from dojo.forms import ReportOptionsForm, DeleteReportForm
 from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
     Dojo_User, Endpoint, Report, Risk_Acceptance
-from dojo.tasks import async_pdf_report
+from dojo.tasks import async_pdf_report, async_custom_pdf_report
 from dojo.utils import get_page_items, add_breadcrumb, get_period_counts
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.widgets import CoverPage, PageBreak, TableOfContents, ExecutiveSummary, FindingList, EndpointList, \
@@ -31,10 +32,10 @@ from dojo.reports.widgets import CoverPage, PageBreak, TableOfContents, Executiv
 localtz = timezone(settings.TIME_ZONE)
 
 logging.basicConfig(
-        level=logging.DEBUG,
-        format='[%(asctime)s] %(levelname)s [%(name)s:%(lineno)d] %(message)s',
-        datefmt='%d/%b/%Y %H:%M:%S',
-        filename=settings.DOJO_ROOT + '/../django_app.log',
+    level=logging.DEBUG,
+    format='[%(asctime)s] %(levelname)s [%(name)s:%(lineno)d] %(message)s',
+    datefmt='%d/%b/%Y %H:%M:%S',
+    filename=settings.DOJO_ROOT + '/../django_app.log',
 )
 logger = logging.getLogger(__name__)
 
@@ -66,7 +67,6 @@ def custom_report(request):
     form = CustomReportJsonForm(request.POST)
 
     if form.is_valid():
-
         report_name = "Custom: "
         report = Report(name=report_name,
                         type="Custom",
@@ -75,11 +75,21 @@ def custom_report(request):
                         task_id='tbd',
                         options=request.POST['json'])
         report.save()
-        report_widget_factory(json_data=report.options, request=request)
+
+        async_custom_pdf_report.delay(report=report,
+                                      template="dojo/custom_pdf_report.html",
+                                      filename="custom_pdf_report.pdf",
+                                      host=request.scheme + "://" + request.META['HTTP_HOST'],
+                                      user=request.user,
+                                      uri=request.build_absolute_uri(report.get_url()))
+        messages.add_message(request, messages.SUCCESS,
+                             'Your report is building, you will receive an email when it is ready.',
+                             extra_tags='alert-success')
+
         return HttpResponseRedirect(reverse('reports'))
+
     else:
         return HttpResponseForbidden()
-
 
 
 def report_findings(request):
@@ -108,6 +118,7 @@ def report_findings(request):
                    "title": "finding-list",
                    })
 
+
 def report_endpoints(request):
     user = Dojo_User.objects.get(id=request.user.id)
     endpoints = Endpoint.objects.filter(finding__active=True,
@@ -120,7 +131,6 @@ def report_endpoints(request):
     ids = get_endpoint_ids(endpoints)
 
     endpoints = Endpoint.objects.filter(id__in=ids)
-    print request.GET
     endpoints = EndpointFilter(request.GET, queryset=endpoints)
 
     paged_endpoints = get_page_items(request, endpoints, 25)
@@ -131,7 +141,6 @@ def report_endpoints(request):
                    "filtered": endpoints,
                    "title": "endpoint-list",
                    })
-
 
 
 def download_report(request, rid):
@@ -506,9 +515,9 @@ def generate_report(request, obj):
         report_subtitle = str(product_type)
 
         findings = ReportFindingFilter(request.GET, queryset=Finding.objects.filter(
-                test__engagement__product__prod_type=product_type).distinct().prefetch_related('test',
-                                                                                               'test__engagement__product',
-                                                                                               'test__engagement__product__prod_type'))
+            test__engagement__product__prod_type=product_type).distinct().prefetch_related('test',
+                                                                                           'test__engagement__product',
+                                                                                           'test__engagement__product__prod_type'))
         products = Product.objects.filter(prod_type=product_type,
                                           engagement__test__finding__in=findings.qs).distinct()
         engagements = Engagement.objects.filter(product__prod_type=product_type,
@@ -555,9 +564,9 @@ def generate_report(request, obj):
         report_title = "Product Report"
         report_subtitle = str(product)
         findings = ReportFindingFilter(request.GET, queryset=Finding.objects.filter(
-                test__engagement__product=product).distinct().prefetch_related('test',
-                                                                               'test__engagement__product',
-                                                                               'test__engagement__product__prod_type'))
+            test__engagement__product=product).distinct().prefetch_related('test',
+                                                                           'test__engagement__product',
+                                                                           'test__engagement__product__prod_type'))
         ids = set(finding.id for finding in findings)
         engagements = Engagement.objects.filter(test__finding__id__in=ids).distinct()
         tests = Test.objects.filter(finding__id__in=ids).distinct()

@@ -155,16 +155,18 @@
 
             setUpFindingFilters();
 
-            $(document).on('submit', 'form#finding-list', function (event) {
+            $(document).on('submit', 'form.finding-list', function (event) {
+                var form = this;
                 $.get('/reports/findings?' + $(this).serialize()).done(function (data) {
-                    $('div.in-use-widgets li.finding-list').html(data);
+                    console.log($(form).closest('li.finding-list'))
+                    $(form).closest('li.finding-list').html(data);
                     setUpFindingFilters();
                 });
 
                 event.preventDefault();
             });
 
-            $(document).on('click', 'form#finding-list a.clear.centered', function (event) {
+            $(document).on('click', 'form.finding-list a.clear.centered', function (event) {
                 $.get('/reports/findings').done(function (data) {
                     $('div.in-use-widgets li.finding-list').html(data);
                     setUpFindingFilters();
