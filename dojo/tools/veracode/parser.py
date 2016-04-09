@@ -1,7 +1,7 @@
 __author__ = 'jay7958'
 
-from defusedxml.dom import NamespaceErr
-from defusedxml.etree import ElementTree
+from xml.dom import NamespaceErr
+from defusedxml import ElementTree
 from datetime import datetime
 
 from dojo.models import Finding

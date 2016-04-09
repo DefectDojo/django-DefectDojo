@@ -6,7 +6,7 @@ See the file 'doc/LICENSE' for the license information
 '''
 from __future__ import with_statement
 
-from defusedxml.etree import ElementTree as ET
+from defusedxml import ElementTree as ET
 
 import html2text
 
