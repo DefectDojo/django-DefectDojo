@@ -23,7 +23,7 @@ setup(
             'supervisor',
             'humanize',
             'django-bower',
-            'django-auditlog==0.3.1',
+            'django-auditlog==0.3.3',
             'vobject',
             'html2text',
             'django-watson==1.1.9',
