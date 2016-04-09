@@ -30,8 +30,9 @@ setup(
             'celery',
             'sqlalchemy',
             'django-polymorphic',
-            'pdfkit==0.5.0'
-            'django-overextends'],
+            'pdfkit==0.5.0',
+            'django-overextends',
+	    'defusedxml'],
         dependency_links=[
             "https://github.com/grendel513/python-pdfkit/tarball/master#egg=pdfkit-0.5.0",
         ],
