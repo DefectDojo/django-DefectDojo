@@ -13,6 +13,11 @@
                 </div>
                 <div class="panel-body in-use-widgets">
                     <ul id="sortable2">
+                        {% for widget in in_use_widgets %}
+                            <li class="{{ widget.title|slugify }}">
+                                {{ widget.get_option_form }}
+                            </li>
+                        {% endfor %}
                     </ul>
                 </div>
                 <div class="panel-footer">
@@ -175,16 +180,18 @@
                 event.preventDefault();
             });
 
-            $(document).on('submit', 'form#endpoint-list', function (event) {
+            $(document).on('submit', 'form.endpoint-list', function (event) {
+                var form = this;
                 $.get('/reports/endpoints?' + $(this).serialize()).done(function (data) {
-                    $('div.in-use-widgets li.endpoint-list').html(data);
+                    console.log($(form).closest('li.endpoint-list'))
+                    $(form).closest('li.endpoint-list').html(data);
                     setUpFindingFilters();
                 });
 
                 event.preventDefault();
             });
 
-            $(document).on('click', 'form#endpoint-list a.clear.centered', function (event) {
+            $(document).on('click', 'form.endpoint-list a.clear.centered', function (event) {
                 $.get('/reports/endpoints').done(function (data) {
                     $('div.in-use-widgets li.endpoint-list').html(data);
                     setUpFindingFilters();

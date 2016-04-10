@@ -1,10 +1,8 @@
-# #  reports
 import logging
 import mimetypes
 import os
 import urllib
 from datetime import datetime
-from math import ceil
 
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
@@ -18,16 +16,16 @@ from django.shortcuts import render, get_object_or_404
 from pytz import timezone
 
 from dojo.celery import app
+from dojo.endpoint.views import get_endpoint_ids
 from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter, EndpointReportFilter, ReportFilter, \
     EndpointFilter
 from dojo.forms import ReportOptionsForm, DeleteReportForm
 from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
     Dojo_User, Endpoint, Report, Risk_Acceptance
+from dojo.reports.widgets import CoverPage, PageBreak, TableOfContents, WYSIWYGContent, FindingList, EndpointList, \
+    CustomReportJsonForm, ReportOptions, report_widget_factory
 from dojo.tasks import async_pdf_report, async_custom_pdf_report
 from dojo.utils import get_page_items, add_breadcrumb, get_period_counts
-from dojo.endpoint.views import get_endpoint_ids
-from dojo.reports.widgets import CoverPage, PageBreak, TableOfContents, ExecutiveSummary, FindingList, EndpointList, \
-    CustomReportJsonForm, ReportOptions, report_widget_factory
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -50,16 +48,18 @@ def report_builder(request):
                                                                              finding__duplicate=False,
                                                                              finding__out_of_scope=False,
                                                                              ))
-    available_widgets = [ReportOptions(request=request),
-                         CoverPage(request=request),
+
+    in_use_widgets = [ReportOptions(request=request)]
+    available_widgets = [CoverPage(request=request),
                          TableOfContents(request=request),
-                         ExecutiveSummary(request=request),
+                         WYSIWYGContent(request=request),
                          FindingList(request=request, findings=findings),
                          EndpointList(request=request, endpoints=endpoints),
                          PageBreak()]
     return render(request,
                   'dojo/report_builder.html',
-                  {"available_widgets": available_widgets})
+                  {"available_widgets": available_widgets,
+                   "in_use_widgets": in_use_widgets})
 
 
 def custom_report(request):
@@ -67,27 +67,49 @@ def custom_report(request):
     form = CustomReportJsonForm(request.POST)
 
     if form.is_valid():
-        report_name = "Custom: "
-        report = Report(name=report_name,
-                        type="Custom",
-                        format='PDF',
-                        requester=request.user,
-                        task_id='tbd',
-                        options=request.POST['json'])
-        report.save()
+        selected_widgets = report_widget_factory(json_data=request.POST['json'], request=request, user=request.user,
+                                                 finding_notes=False)
+        report_name = 'Custom PDF Report: ' + request.user.username
+        report_format = 'AsciiDoc'
+        finding_notes = True
 
-        async_custom_pdf_report.delay(report=report,
-                                      template="dojo/custom_pdf_report.html",
-                                      filename="custom_pdf_report.pdf",
-                                      host=request.scheme + "://" + request.META['HTTP_HOST'],
-                                      user=request.user,
-                                      uri=request.build_absolute_uri(report.get_url()))
-        messages.add_message(request, messages.SUCCESS,
-                             'Your report is building, you will receive an email when it is ready.',
-                             extra_tags='alert-success')
+        if 'report-options' in selected_widgets:
+            options = selected_widgets['report-options']
+            report_name = 'Custom PDF Report: ' + options.report_name
+            report_format = options.report_type
+            finding_notes = (options.include_finding_notes == '1')
 
-        return HttpResponseRedirect(reverse('reports'))
+        selected_widgets = report_widget_factory(json_data=request.POST['json'], request=request, user=request.user,
+                                                 finding_notes=finding_notes)
 
+        if report_format == 'PDF':
+            report = Report(name=report_name,
+                            type="Custom",
+                            format=report_format,
+                            requester=request.user,
+                            task_id='tbd',
+                            options=request.POST['json'])
+            report.save()
+            async_custom_pdf_report.delay(report=report,
+                                          template="dojo/custom_pdf_report.html",
+                                          filename="custom_pdf_report.pdf",
+                                          host=request.scheme + "://" + request.META['HTTP_HOST'],
+                                          user=request.user,
+                                          uri=request.build_absolute_uri(report.get_url()),
+                                          finding_notes=finding_notes)
+            messages.add_message(request, messages.SUCCESS,
+                                 'Your report is building, you will receive an email when it is ready.',
+                                 extra_tags='alert-success')
+
+            return HttpResponseRedirect(reverse('reports'))
+        elif report_format == 'AsciiDoc':
+            widgets = selected_widgets.values()
+            return render(request,
+                          'dojo/custom_asciidoc_report.html',
+                          {"widgets": widgets,
+                           "finding_notes": finding_notes})
+        else:
+            return HttpResponseForbidden()
     else:
         return HttpResponseForbidden()
 
@@ -264,7 +286,25 @@ def reports(request):
 
 def regen_report(request, rid):
     report = get_object_or_404(Report, id=rid)
-    return HttpResponseRedirect(report.options + "&regen=" + rid)
+    if report.type != 'Custom':
+        return HttpResponseRedirect(report.options + "&regen=" + rid)
+    else:
+        report.datetime = datetime.now(tz=localtz)
+        report.status = 'requested'
+        if report.requester.username != request.user.username:
+            report.requester = request.user
+        report.save()
+        async_custom_pdf_report.delay(report=report,
+                                      template="dojo/custom_pdf_report.html",
+                                      filename="custom_pdf_report.pdf",
+                                      host=request.scheme + "://" + request.META['HTTP_HOST'],
+                                      user=request.user,
+                                      uri=request.build_absolute_uri(report.get_url()))
+        messages.add_message(request, messages.SUCCESS,
+                             'Your report is building, you will receive an email when it is ready.',
+                             extra_tags='alert-success')
+
+        return HttpResponseRedirect(reverse('reports'))
 
 
 @user_passes_test(lambda u: u.is_staff)

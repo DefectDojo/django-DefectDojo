@@ -35,7 +35,7 @@ class CustomReportJsonForm(forms.Form):
 
 
 class CoverPageForm(forms.Form):
-    heading = forms.CharField(max_length=200, required=True, help_text="The main report heading.")
+    heading = forms.CharField(max_length=200, required=False, help_text="The main report heading.")
     sub_heading = forms.CharField(max_length=200, required=False, help_text="The report sub heading.")
     meta_info = forms.CharField(max_length=200, required=False, help_text="Additional metadata for this report.")
 
@@ -44,8 +44,8 @@ class CoverPageForm(forms.Form):
 
 
 class TableOfContentsForm(forms.Form):
-    heading = forms.CharField(max_length=200, required=True, initial="Table of Contents")
-    depth = forms.IntegerField(min_value=1, max_value=6, initial=4)
+    heading = forms.CharField(max_length=200, required=False, initial="Table of Contents")
+    depth = forms.IntegerField(min_value=1, required=False, max_value=6, initial=4)
 
     class Meta:
         exclude = []
@@ -64,14 +64,44 @@ class Div(form_widget):
             value = ''
         final_attrs = self.build_attrs(attrs, name=name)
         return format_html(
-            '<div class="btn-toolbar" data-role="editor-toolbar" data-target="#editor"><div class="btn-group"><a class="btn btn-default" data-edit="bold" title="Bold (Ctrl/Cmd+B)"><i class="fa fa-bold"></i></a><a class="btn btn-default" data-edit="italic" title="Italic (Ctrl/Cmd+I)"><i class="fa fa-italic"></i></a><a class="btn btn-default" data-edit="strikethrough" title="Strikethrough"><i class="fa fa-strikethrough"></i></a><a class="btn btn-default" data-edit="underline" title="Underline (Ctrl/Cmd+U)"><i class="fa fa-underline"></i></a></div><div class="btn-group"><a class="btn btn-default" data-edit="insertunorderedlist" title="Bullet list"><i class="fa fa-list-ul"></i></a><a class="btn btn-default" data-edit="insertorderedlist" title="Number list"><i class="fa fa-list-ol"></i></a><a class="btn btn-default" data-edit="outdent" title="Reduce indent (Shift+Tab)"><i class="fa fa-outdent"></i></a><a class="btn btn-default" data-edit="indent" title="Indent (Tab)"><i class="fa fa-indent"></i></a></div><div class="btn-group"><a class="btn btn-default" data-edit="justifyleft" title="Align Left (Ctrl/Cmd+L)"><i class="fa fa-align-left"></i></a><a class="btn btn-default" data-edit="justifycenter" title="Center (Ctrl/Cmd+E)"><i class="fa fa-align-center"></i></a><a class="btn btn-default" data-edit="justifyright" title="Align Right (Ctrl/Cmd+R)"><i class="fa fa-align-right"></i></a><a class="btn btn-default" data-edit="justifyfull" title="Justify (Ctrl/Cmd+J)"><i class="fa fa-align-justify"></i></a></div><div class="btn-group"><a class="btn btn-default dropdown-toggle" data-toggle="dropdown" title="Hyperlink"><i class="fa fa-link"></i></a><div class="dropdown-menu input-append"><input placeholder="URL" type="text" data-edit="createLink" /><button class="btn" type="button">Add</button></div></div><div class="btn-group"><a class="btn btn-default" data-edit="unlink" title="Remove Hyperlink"><i class="fa fa-unlink"></i></a></div><div class="btn-group"><a class="btn btn-default" data-edit="undo" title="Undo (Ctrl/Cmd+Z)"><i class="fa fa-undo"></i></a><a class="btn btn-default" data-edit="redo" title="Redo (Ctrl/Cmd+Y)"><i class="fa fa-repeat"></i></a></div><br/><br/></div><div{}>\r\n{}</div>',
+            '<div class="btn-toolbar" data-role="editor-toolbar" data-target="#editor"><div class="btn-group">'
+            '<a class="btn btn-default" data-edit="bold" title="Bold (Ctrl/Cmd+B)"><i class="fa fa-bold"></i></a>'
+            '<a class="btn btn-default" data-edit="italic" title="Italic (Ctrl/Cmd+I)"><i class="fa fa-italic"></i></a>'
+            '<a class="btn btn-default" data-edit="strikethrough" title="Strikethrough">'
+            '<i class="fa fa-strikethrough"></i></a>'
+            '<a class="btn btn-default" data-edit="underline" title="Underline (Ctrl/Cmd+U)">'
+            '<i class="fa fa-underline"></i></a></div><div class="btn-group">'
+            '<a class="btn btn-default" data-edit="insertunorderedlist" title="Bullet list">'
+            '<i class="fa fa-list-ul"></i></a>'
+            '<a class="btn btn-default" data-edit="insertorderedlist" title="Number list">'
+            '<i class="fa fa-list-ol"></i></a>'
+            '<a class="btn btn-default" data-edit="outdent" title="Reduce indent (Shift+Tab)"><i class="fa fa-outdent">'
+            '</i></a><a class="btn btn-default" data-edit="indent" title="Indent (Tab)"><i class="fa fa-indent"></i>'
+            '</a></div><div class="btn-group">'
+            '<a class="btn btn-default" data-edit="justifyleft" title="Align Left (Ctrl/Cmd+L)">'
+            '<i class="fa fa-align-left"></i></a>'
+            '<a class="btn btn-default" data-edit="justifycenter" title="Center (Ctrl/Cmd+E)">'
+            '<i class="fa fa-align-center"></i></a>'
+            '<a class="btn btn-default" data-edit="justifyright" title="Align Right (Ctrl/Cmd+R)">'
+            '<i class="fa fa-align-right"></i></a>'
+            '<a class="btn btn-default" data-edit="justifyfull" title="Justify (Ctrl/Cmd+J)">'
+            '<i class="fa fa-align-justify"></i></a></div><div class="btn-group">'
+            '<a class="btn btn-default dropdown-toggle" data-toggle="dropdown" title="Hyperlink">'
+            '<i class="fa fa-link"></i></a><div class="dropdown-menu input-append">'
+            '<input placeholder="URL" type="text" data-edit="createLink" />'
+            '<button class="btn" type="button">Add</button></div></div><div class="btn-group">'
+            '<a class="btn btn-default" data-edit="unlink" title="Remove Hyperlink">'
+            '<i class="fa fa-unlink"></i></a></div><div class="btn-group">'
+            '<a class="btn btn-default" data-edit="undo" title="Undo (Ctrl/Cmd+Z)">'
+            '<i class="fa fa-undo"></i></a><a class="btn btn-default" data-edit="redo" title="Redo (Ctrl/Cmd+Y)">'
+            '<i class="fa fa-repeat"></i></a></div><br/><br/></div><div{}>\r\n{}</div>',
             flatatt(final_attrs),
             force_text(value))
 
 
-class ExecutiveSummaryForm(forms.Form):
-    heading = forms.CharField(max_length=200, required=True, initial="Executive Summary")
-    content = forms.CharField(widget=Div(attrs={'class': 'editor'}))
+class WYSIWYGContentForm(forms.Form):
+    heading = forms.CharField(max_length=200, required=False, initial="WYSIWYG Content")
+    content = forms.CharField(required=False, widget=Div(attrs={'class': 'editor'}))
     hidden_content = forms.CharField(widget=forms.HiddenInput(), required=True)
 
     class Meta:
@@ -90,6 +120,10 @@ class Widget(object):
         return
 
     @abc.abstractmethod
+    def get_asciidoc(self):
+        return
+
+    @abc.abstractmethod
     def get_option_form(self):
         return
 
@@ -104,9 +138,15 @@ class PageBreak(Widget):
     def get_html(self):
         return mark_safe('<hr title="Page Break" class="report-page-break"/>')
 
+    def get_asciidoc(self):
+        return mark_safe('<br/><<<<br/>')
+
     def get_option_form(self):
         return mark_safe(
-            "<div data-multiple='true'  class='panel panel-available-widget'><div class='panel-heading' title='Click and drag to move' data-toggle='tooltip'><div class='clearfix'><h5 style='width: 90%' class='pull-left'>" + self.get_html() + "</h5><span class='fa fa-arrows pull-right icon'></span></div></div><form id='page-break'><input type='hidden' name='page-break'/></form></div>")
+            "<div data-multiple='true'  class='panel panel-available-widget'><div class='panel-heading' title='Click "
+            "and drag to move' data-toggle='tooltip'><div class='clearfix'><h5 style='width: 90%' class='pull-left'>" +
+            self.get_html() + "</h5><span class='fa fa-arrows pull-right icon'></span></div></div>"
+                              "<form id='page-break'><input type='hidden' name='page-break'/></form></div>")
 
 
 class ReportOptions(Widget):
@@ -115,6 +155,9 @@ class ReportOptions(Widget):
         self.title = 'Report Options'
         self.form = CustomReportOptionsForm()
         self.extra_help = "Choose additional report options.  These will apply to the overall report."
+
+    def get_asciidoc(self):
+        return mark_safe('')
 
     def get_html(self):
         return mark_safe('')
@@ -132,14 +175,21 @@ class CoverPage(Widget):
         super(CoverPage, self).__init__(*args, **kwargs)
         self.title = 'Cover Page'
         self.form = CoverPageForm()
+        self.help_text = "The cover page includes a page break after its content."
 
     def get_html(self):
         return mark_safe('')
 
+    def get_asciidoc(self):
+        return render_to_string("dojo/custom_asciidoc_report_cover_page.html", {"heading": self.title,
+                                                                                "sub_heading": self.sub_heading,
+                                                                                "meta_info": self.meta_info})
+
     def get_option_form(self):
         html = render_to_string("dojo/report_widget.html", {"form": self.form,
                                                             "multiple": self.multiple,
-                                                            "title": self.title})
+                                                            "title": self.title,
+                                                            'extra_help': self.help_text})
         return mark_safe(html)
 
 
@@ -148,28 +198,39 @@ class TableOfContents(Widget):
         super(TableOfContents, self).__init__(*args, **kwargs)
         self.title = 'Table Of Contents'
         self.form = TableOfContentsForm()
+        self.help_text = "The table of contents includes a page break after its content."
 
     def get_html(self):
         return mark_safe('')
 
+    def get_asciidoc(self):
+        return render_to_string("dojo/custom_asciidoc_toc.html", {"title": self.title,
+                                                                  "depth": self.depth})
+
     def get_option_form(self):
         html = render_to_string("dojo/report_widget.html", {"form": self.form,
                                                             "multiple": self.multiple,
-                                                            "title": self.title})
+                                                            "title": self.title,
+                                                            'extra_help': self.help_text})
         return mark_safe(html)
 
 
-class ExecutiveSummary(Widget):
+class WYSIWYGContent(Widget):
     def __init__(self, *args, **kwargs):
-        super(ExecutiveSummary, self).__init__(*args, **kwargs)
-        self.title = 'Executive Summary'
-        self.form = ExecutiveSummaryForm()
-        self.multiple = 'false'
+        super(WYSIWYGContent, self).__init__(*args, **kwargs)
+        self.title = 'WYSIWYG Content'
+        self.form = WYSIWYGContentForm()
+        self.multiple = 'true'
 
     def get_html(self):
-        html = render_to_string("dojo/custom_pdf_report_exec_summary.html", {"title": self.title,
-                                                                             "content": self.content})
+        html = render_to_string("dojo/custom_pdf_report_wysiwyg_content.html", {"title": self.title,
+                                                                                "content": self.content})
         return mark_safe(html)
+
+    def get_asciidoc(self):
+        asciidoc = render_to_string("dojo/custom_asciidoc_report_wysiwyg_content.html", {"title": self.title,
+                                                                                         "content": self.content})
+        return mark_safe(asciidoc)
 
     def get_option_form(self):
         html = render_to_string("dojo/report_widget.html", {"form": self.form,
@@ -188,6 +249,11 @@ class FindingList(Widget):
         else:
             raise Exception("Need to instantiate with finding queryset.")
 
+        if 'finding_notes' in kwargs:
+            self.finding_notes = kwargs.get('finding_notes')
+        else:
+            self.finding_notes = False
+
         super(FindingList, self).__init__(*args, **kwargs)
         self.title = 'Finding List'
         if 'form' in self.findings:
@@ -195,7 +261,8 @@ class FindingList(Widget):
         else:
             self.form = None
         self.multiple = 'true'
-        self.extra_help = "You can use this form to filter findings and select only the ones to be included in the report."
+        self.extra_help = "You can use this form to filter findings and select only the ones to be included in the " \
+                          "report."
         title_words = [word
                        for finding in self.findings
                        for word in finding.title.split() if len(word) > 2]
@@ -207,9 +274,17 @@ class FindingList(Widget):
         else:
             self.paged_findings = self.findings
 
+    def get_asciidoc(self):
+        asciidoc = render_to_string("dojo/custom_asciidoc_report_findings.html",
+                                    {"findings": self.findings,
+                                     "include_finding_notes": self.finding_notes})
+        return mark_safe(asciidoc)
+
     def get_html(self):
-        html = render_to_string("dojo/custom_pdf_report_finding_list.html", {"title": self.title,
-                                                                             "findings": self.findings})
+        html = render_to_string("dojo/custom_pdf_report_finding_list.html",
+                                {"title": self.title,
+                                 "findings": self.findings,
+                                 "include_finding_notes": self.finding_notes})
         return mark_safe(html)
 
     def get_option_form(self):
@@ -234,6 +309,11 @@ class EndpointList(Widget):
         else:
             raise Exception("Need to instantiate with endpoint queryset.")
 
+        if 'finding_notes' in kwargs:
+            self.finding_notes = kwargs.get('finding_notes')
+        else:
+            self.finding_notes = False
+
         super(EndpointList, self).__init__(*args, **kwargs)
         self.title = 'Endpoint List'
         self.form = self.endpoints.form
@@ -242,10 +322,22 @@ class EndpointList(Widget):
             self.paged_endpoints = get_page_items(self.request, self.endpoints, 25)
         else:
             self.paged_endpoints = self.endpoints
-        self.extra_help = "You can use this form to filter endpoints and select only the ones to be included in the report."
+        self.multiple = 'true'
+        self.extra_help = "You can use this form to filter endpoints and select only the ones to be included in the " \
+                          "report."
 
     def get_html(self):
-        return None
+        html = render_to_string("dojo/custom_pdf_report_endpoint_list.html",
+                                {"title": self.title,
+                                 "endpoints": self.endpoints,
+                                 "include_finding_notes": self.finding_notes})
+        return mark_safe(html)
+
+    def get_asciidoc(self):
+        asciidoc = render_to_string("dojo/custom_asciidoc_report_endpoints.html",
+                                    {"endpoints": self.endpoints,
+                                     "include_finding_notes": self.finding_notes})
+        return mark_safe(asciidoc)
 
     def get_option_form(self):
         html = render_to_string('dojo/report_endpoints.html',
@@ -258,7 +350,7 @@ class EndpointList(Widget):
         return mark_safe(html)
 
 
-def report_widget_factory(json_data=None, request=None, user=None):
+def report_widget_factory(json_data=None, request=None, user=None, finding_notes=False):
     selected_widgets = OrderedDict()
     widgets = json.loads(json_data)
     for idx, widget in enumerate(widgets):
@@ -279,9 +371,7 @@ def report_widget_factory(json_data=None, request=None, user=None):
                     d[item['name']] = item['value']
 
             endpoints = EndpointFilter(d, queryset=endpoints)
-            if request is not None:
-                endpoints = EndpointList(request=request, endpoints=endpoints)
-
+            endpoints = EndpointList(request=request, endpoints=endpoints, finding_notes=finding_notes)
             selected_widgets[widget.keys()[0]] = endpoints
 
         if widget.keys()[0] == 'finding-list':
@@ -295,15 +385,16 @@ def report_widget_factory(json_data=None, request=None, user=None):
 
             findings = ReportAuthedFindingFilter(d, queryset=findings, user=user)
 
-            selected_widgets[widget.keys()[0]] = FindingList(request=request, findings=findings)
+            selected_widgets[widget.keys()[0]] = FindingList(request=request, findings=findings,
+                                                             finding_notes=finding_notes)
 
-        if widget.keys()[0] == 'executive-summary':
-            exec_summary = ExecutiveSummary(request=request)
-            exec_summary.title = \
+        if widget.keys()[0] == 'wysiwyg-content':
+            wysiwyg_content = WYSIWYGContent(request=request)
+            wysiwyg_content.title = \
                 next((item for item in widget.get(widget.keys()[0]) if item["name"] == 'heading'), None)['value']
-            exec_summary.content = \
+            wysiwyg_content.content = \
                 next((item for item in widget.get(widget.keys()[0]) if item["name"] == 'hidden_content'), None)['value']
-            selected_widgets[widget.keys()[0]] = exec_summary
+            selected_widgets[widget.keys()[0]] = wysiwyg_content
         if widget.keys()[0] == 'report-options':
             options = ReportOptions(request=request)
             options.include_finding_notes = \
@@ -311,12 +402,15 @@ def report_widget_factory(json_data=None, request=None, user=None):
                     'value']
             options.report_type = \
                 next((item for item in widget.get(widget.keys()[0]) if item["name"] == 'report_type'), None)['value']
-
+            options.report_name = \
+                next((item for item in widget.get(widget.keys()[0]) if item["name"] == 'report_name'), None)['value']
+            selected_widgets[widget.keys()[0]] = options
         if widget.keys()[0] == 'table-of-contents':
             toc = TableOfContents(request=request)
             toc.title = next((item for item in widget.get(widget.keys()[0]) if item["name"] == 'heading'), None)[
                 'value']
             toc.depth = next((item for item in widget.get(widget.keys()[0]) if item["name"] == 'depth'), None)['value']
+            toc.depth = int(toc.depth) + 1
             selected_widgets[widget.keys()[0]] = toc
         if widget.keys()[0] == 'cover-page':
             cover_page = CoverPage(request=request)

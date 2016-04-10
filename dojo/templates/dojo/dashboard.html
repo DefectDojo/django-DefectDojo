@@ -6,7 +6,11 @@
     #punchcard {height: 350px}
 {% endblock %}
 {% block content %}
-    <h3>Dashboard for {{ request.user.get_full_name }}</h3>
+    {% if request.user.is_superuser %}
+        <h3>Team Dashboard</h3>
+    {% else %}
+        <h3>Dashboard for {{ request.user.get_full_name }}</h3>
+    {% endif %}
     <div class="row status">
         <div class="col-lg-3 col-md-6">
             <div class="panel panel-primary">
@@ -21,13 +25,17 @@
                         </div>
                     </div>
                 </div>
-                <a href="{% url 'engagement' %}?engagement__lead={{ request.user.id }}">
-                    <div class="panel-footer">
-                        <span class="pull-left">View Details</span>
-                        <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                {% if request.user.is_superuser %}
+                    <a href="{% url 'engagement' %}">
+                {% else %}
+                    <a href="{% url 'engagement' %}?engagement__lead={{ request.user.id }}">
+                {% endif %}
+                <div class="panel-footer">
+                    <span class="pull-left">View Details</span>
+                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
 
-                        <div class="clearfix"></div>
-                    </div>
+                    <div class="clearfix"></div>
+                </div>
                 </a>
             </div>
         </div>
@@ -44,7 +52,11 @@
                         </div>
                     </div>
                 </div>
-                <a href="{% url 'open_findings' %}?date=2&reporter={{ request.user.id }}&o=numerical_severity">
+                {% if request.user.is_superuser %}
+                    <a href="{% url 'open_findings' %}?date=2&o=numerical_severity">
+                {% else %}
+                    <a href="{% url 'open_findings' %}?date=2&reporter={{ request.user.id }}&o=numerical_severity">
+                {% endif %}
                     <div class="panel-footer">
                         <span class="pull-left">View Details</span>
                         <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
@@ -67,7 +79,11 @@
                         </div>
                     </div>
                 </div>
-                <a href="{% url 'closed_findings' %}?mitigated=2&mitigated_by={{ request.user.id }}&o=numerical_severity">
+                {% if request.user.is_superuser %}
+                    <a href="{% url 'closed_findings' %}?mitigated=2&o=numerical_severity">
+                {% else %}
+                    <a href="{% url 'closed_findings' %}?mitigated=2&mitigated_by={{ request.user.id }}&o=numerical_severity">
+                {% endif %}
                     <div class="panel-footer">
                         <span class="pull-left">View Details</span>
                         <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
@@ -90,7 +106,11 @@
                         </div>
                     </div>
                 </div>
-                <a href="{% url 'accepted_findings' %}?test__engagement__risk_acceptance__created=2&test__engagement__risk_acceptance__reporter={{ request.user.id }}">
+                {% if request.user.is_superuser %}
+                    <a href="{% url 'accepted_findings' %}?test__engagement__risk_acceptance__created=2">
+                {% else %}
+                    <a href="{% url 'accepted_findings' %}?test__engagement__risk_acceptance__created=2&test__engagement__risk_acceptance__reporter={{ request.user.id }}">
+                {% endif %}
                     <div class="panel-footer">
                         <span class="pull-left">View Details</span>
                         <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
