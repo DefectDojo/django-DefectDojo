@@ -9,7 +9,7 @@
     <xsl:template match="outline:outline">
         <html>
             <head>
-                <title>Table of Contents</title>
+                <title>{{ title }}</title>
                 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
                 <style>
                     @import url("https://fonts.googleapis.com/css?family=Raleway:400,700");
@@ -43,7 +43,7 @@
                 </style>
             </head>
             <body>
-                <h1>Table of Contents</h1>
+                <h1>{{ title }}</h1>
                 <ul class="leaders">
                     <xsl:apply-templates select="outline:item/outline:item"/>
                 </ul>
@@ -51,31 +51,34 @@
         </html>
     </xsl:template>
     <xsl:template match="outline:item">
-        <li>
-            <xsl:if test="@title!=''">
-                <div>
-                    <a>
-                        <xsl:if test="@link">
-                            <xsl:attribute name="href">
-                                <xsl:value-of select="@link"/>
-                            </xsl:attribute>
-                        </xsl:if>
-                        <xsl:if test="@backLink">
-                            <xsl:attribute name="name">
-                                <xsl:value-of select="@backLink"/>
-                            </xsl:attribute>
-                        </xsl:if>
-                        <xsl:value-of select="@title"/>
-                    </a>
-                    <span>
-                        <xsl:value-of select="@page"/>
-                    </span>
-                </div>
-            </xsl:if>
-            <ul class="leaders">
-                <xsl:comment>added to prevent self-closing tags in QtXmlPatterns</xsl:comment>
-                <xsl:apply-templates select="outline:item"/>
-            </ul>
-        </li>
+        <xsl:variable name="depth" select="count(ancestor::*)"/>
+        <xsl:if test="$depth &lt;= {{ depth }}">
+            <li>
+                <xsl:if test="@title!=''">
+                    <div>
+                        <a>
+                            <xsl:if test="@link">
+                                <xsl:attribute name="href">
+                                    <xsl:value-of select="@link"/>
+                                </xsl:attribute>
+                            </xsl:if>
+                            <xsl:if test="@backLink">
+                                <xsl:attribute name="name">
+                                    <xsl:value-of select="@backLink"/>
+                                </xsl:attribute>
+                            </xsl:if>
+                            <xsl:value-of select="@title"/>
+                        </a>
+                        <span>
+                            <xsl:value-of select="@page"/>
+                        </span>
+                    </div>
+                </xsl:if>
+                <ul class="leaders">
+                    <xsl:comment>added to prevent self-closing tags in QtXmlPatterns</xsl:comment>
+                    <xsl:apply-templates select="outline:item"/>
+                </ul>
+            </li>
+        </xsl:if>
     </xsl:template>
 </xsl:stylesheet>

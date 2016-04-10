@@ -1,0 +1,75 @@
+{% load display_tags %}
+{% load humanize %}
+{% load event_tags %}
+{% if endpoints %}
+    <h3>== Endpoints ==</h3>
+    {% for endpoint in endpoints %}
+        <h4>=== {{ endpoint }} ===</h4>
+        {% for find in endpoint.active_findings %}
+            <h5>==== Finding {{ find.id }}: {{ find.title | nice_title }} {% if find.mitigated %}
+                Mitigated on: {{ find.mitigated }} {% endif %}====</h5>
+            <br>
+            <p><b>==== Product: ====</b>
+                <br>
+                {{ find.test.engagement.product.name }}
+            </p>
+            <br>
+            <p><b>==== Status: ====</b>
+                <br>
+                {{ find.status }}
+            </p>
+            <br>
+            <p><b>==== Severity: ====</b>
+                <br>
+<span style="color:
+        {% if find.severity == 'Critical' %} Red
+        {% elif find.severity == 'High' %} Magenta
+        {% elif find.severity == 'Medium' %} Orange
+        {% elif find.severity == 'Low' %} #00CC00
+        {% elif find.severity == 'Info' %} Blue {% endif %}">
+{{ find.severity }} ({{ find.numerical_severity }})
+</span>
+            </p>
+            <p><b>==== Description / Exploit: ====</b>
+                <br>
+                {{ find.description|linebreaksbr }}
+            </p>
+            <br>
+            <p><b>==== Impact: ====</b>
+                <br>
+                {{ find.impact|linebreaksasciidocbr }}
+            </p>
+            <br>
+            <p><b>==== Systems Vulnerable: ====</b><br>
+                {% for endpoint in  find.endpoints.all %}
+                    {{ endpoint }} +<br/>
+                {% endfor %}
+            </p>
+            <br>
+            <p><b>==== Suggested Mitigation: ====</b>
+                <br>
+                {{ find.mitigation|linebreaksasciidocbr }}
+            </p>
+            <br>
+            <p><b>==== Further References: ====</b>
+                <br>
+                {{ find.references|linebreaksasciidocbr }}
+            </p>
+            <br>
+            {% if include_finding_notes %}
+                <p><b>==== Finding Notes: ====</b>
+                    <br>
+                    {% if find.notes.all %}
+                        {% for note in find.notes.all %}
+                            {{ note.author }} - {{ note.date }} - {{ note }} +<br>
+                        {% endfor %}
+                    {% else %}
+                        No notes found.
+                    {% endif %}
+                </p><br>
+            {% else %}
+                <br>
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+{% endif %}

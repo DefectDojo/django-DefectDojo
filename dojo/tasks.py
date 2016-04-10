@@ -1,9 +1,9 @@
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
+import tempfile
 from datetime import datetime
 
-import pdfkit
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.mail import send_mail
@@ -12,6 +12,7 @@ from django.template.loader import render_to_string
 from django.utils.http import urlencode
 from pytz import timezone
 
+import pdfkit
 from dojo.celery import app
 from dojo.reports.widgets import report_widget_factory
 
@@ -80,11 +81,11 @@ def async_pdf_report(self,
         report.status = 'success'
         report.done_datetime = datetime.now(tz=localtz)
         report.save()
-        # email_requester(report, uri)
+        email_requester(report, uri)
     except Exception as e:
         report.status = 'error'
         report.save()
-        # email_requester(report, uri, error=e)
+        email_requester(report, uri, error=e)
         raise e
     return True
 
@@ -96,27 +97,41 @@ def async_custom_pdf_report(self,
                             filename='report.pdf',
                             host=None,
                             user=None,
-                            uri=None):
-    xsl_style_sheet = settings.DOJO_ROOT + "/static/dojo/xsl/pdf_toc.xsl"
+                            uri=None,
+                            finding_notes=False):
 
     config = pdfkit.configuration(wkhtmltopdf=settings.WKHTMLTOPDF_PATH)
 
-    selected_widgets = report_widget_factory(json_data=report.options, request=None, user=user)
+    selected_widgets = report_widget_factory(json_data=report.options, request=None, user=user,
+                                             finding_notes=finding_notes)
 
     widgets = selected_widgets.values()
+    temp = None
 
     try:
         report.task_id = async_custom_pdf_report.request.id
         report.save()
 
         toc = None
-        toc_header_text = "Table of Contents"
         toc_depth = 4
+
         if 'table-of-contents' in selected_widgets:
+            xsl_style_sheet_tempalte = "dojo/pdf_toc.xsl"
+            temp = tempfile.NamedTemporaryFile()
+
             toc_settings = selected_widgets['table-of-contents']
-            toc = {'toc-header-text': toc_settings.title,
-                   'xsl-style-sheet': xsl_style_sheet}
+
             toc_depth = toc_settings.depth
+
+            toc_bytes = render_to_string(xsl_style_sheet_tempalte, {'widgets': widgets,
+                                                                    'depth': toc_depth,
+                                                                    'title': toc_settings.title})
+
+            temp.write(toc_bytes)
+            temp.seek(0)
+
+            toc = {'toc-header-text': toc_settings.title,
+                   'xsl-style-sheet': temp.name}
 
         cover = None
         if 'cover-page' in selected_widgets:
@@ -131,8 +146,6 @@ def async_custom_pdf_report(self,
                                             'toc_depth': toc_depth,
                                             'host': host,
                                             'report_name': report.name})
-
-        # input, output_path, options=None, toc=None, cover=None, css=None, configuration=None
 
         pdf = pdfkit.from_string(bytes,
                                  False,
@@ -151,10 +164,15 @@ def async_custom_pdf_report(self,
         report.status = 'success'
         report.done_datetime = datetime.now(tz=localtz)
         report.save()
-        # email_requester(report, uri)
+        email_requester(report, uri)
     except Exception as e:
         report.status = 'error'
         report.save()
-        # email_requester(report, uri, error=e)
+        email_requester(report, uri, error=e)
         raise e
+    finally:
+        if temp is not None:
+            # deleting temp xsl file
+            temp.close()
+
     return True

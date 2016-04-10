@@ -36,23 +36,38 @@ def home(request):
 def dashboard(request):
     now = localtz.localize(datetime.today())
     seven_days_ago = now - timedelta(days=7)
-    engagement_count = Engagement.objects.filter(lead=request.user,
-                                                 active=True).count()
-    finding_count = Finding.objects.filter(reporter=request.user,
-                                           verified=True,
-                                           mitigated=None,
-                                           date__range=[seven_days_ago,
-                                                        now]).count()
-    mitigated_count = Finding.objects.filter(mitigated_by=request.user,
-                                             mitigated__range=[seven_days_ago,
-                                                               now]).count()
+    if request.user.is_superuser:
+        engagement_count = Engagement.objects.filter(active=True).count()
+        finding_count = Finding.objects.filter(verified=True,
+                                               mitigated=None,
+                                               date__range=[seven_days_ago,
+                                                            now]).count()
+        mitigated_count = Finding.objects.filter(mitigated__range=[seven_days_ago,
+                                                                   now]).count()
 
-    accepted_count = len([finding for ra in Risk_Acceptance.objects.filter(
-        reporter=request.user, created__range=[seven_days_ago, now]) for finding in ra.accepted_findings.all()])
+        accepted_count = len([finding for ra in Risk_Acceptance.objects.filter(
+            reporter=request.user, created__range=[seven_days_ago, now]) for finding in ra.accepted_findings.all()])
 
-    # forever counts
-    findings = Finding.objects.filter(reporter=request.user,
-                                      verified=True)
+        # forever counts
+        findings = Finding.objects.filter(verified=True)
+    else:
+        engagement_count = Engagement.objects.filter(lead=request.user,
+                                                     active=True).count()
+        finding_count = Finding.objects.filter(reporter=request.user,
+                                               verified=True,
+                                               mitigated=None,
+                                               date__range=[seven_days_ago,
+                                                            now]).count()
+        mitigated_count = Finding.objects.filter(mitigated_by=request.user,
+                                                 mitigated__range=[seven_days_ago,
+                                                                   now]).count()
+
+        accepted_count = len([finding for ra in Risk_Acceptance.objects.filter(
+            reporter=request.user, created__range=[seven_days_ago, now]) for finding in ra.accepted_findings.all()])
+
+        # forever counts
+        findings = Finding.objects.filter(reporter=request.user,
+                                          verified=True)
 
     sev_counts = {'Critical': 0,
                   'High': 0,
