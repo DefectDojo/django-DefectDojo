@@ -1,5 +1,5 @@
 from xml.dom import NamespaceErr
-from xml.etree import ElementTree
+from defusedxml import ElementTree
 import os
 import csv
 import re
