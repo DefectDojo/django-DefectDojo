@@ -243,12 +243,15 @@
             {{ find.impact|linebreaksasciidocbr }}
         </p>
         <br>
-        <p><b>==== Systems Vulnerable: ====</b><br>
-            {% for endpoint in  find.endpoints.all %}
-                {{ endpoint }} +<br/>
-            {% endfor %}
-        </p>
-        <br>
+        {% if find.endpoints.all %}
+            <p><b>==== Systems Vulnerable: ====</b><br>
+                {% for endpoint in  find.endpoints.all %}
+                    {{ endpoint }} +<br/>
+                {% endfor %}
+            </p>
+            <br>
+        {% endif %}
+
         <p><b>==== Suggested Mitigation: ====</b>
             <br>
             {{ find.mitigation|linebreaksasciidocbr }}

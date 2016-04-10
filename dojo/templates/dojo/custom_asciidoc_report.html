@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load static from staticfiles %}
+{% load event_tags %}
+{% load display_tags %}
+{% load humanize %}
+
+{% block content %}
+    {% for widget in widgets %}
+        {{ widget.get_asciidoc }}
+    {% endfor %}
+{% endblock %}

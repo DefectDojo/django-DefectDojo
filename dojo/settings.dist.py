@@ -119,6 +119,7 @@ BOWER_INSTALLED_APPS = (
     'chosen',
     'chosen-bootstrap',
     'bootswatch-dist#readable',
+    'bootstrap-wysiwyg-steveathon',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -215,6 +216,7 @@ CELERY_IGNORE_RESULT = True
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_RESULT_EXPIRES = 86400
 CELERYBEAT_SCHEDULE_FILENAME = DOJO_ROOT + '/dojo.celery.beat.db'
+CELERY_ACCEPT_CONTENT = ['pickle', 'json', 'msgpack', 'yaml']
 
 # wkhtmltopdf settings
 WKHTMLTOPDF_PATH = '/usr/local/bin/wkhtmltopdf'

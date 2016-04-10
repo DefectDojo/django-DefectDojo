@@ -86,7 +86,7 @@ if [[ "$PYV"<"2.7" ]]; then
     echo "ERROR: DefectDojo requires Python 2.7+"
     exit 1;
 else
-    echo "Leaving Django 1.8.4 requirement"
+    echo "Leaving Django 1.8.10 requirement"
 fi  
 
 # Detect if we're in a a virtualenv

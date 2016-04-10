@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from django.utils import six
 from django.utils.translation import ugettext_lazy as _
 from django_filters import FilterSet, CharFilter, \
-    ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter
+    ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter, MethodFilter
 from django_filters.filters import ChoiceFilter, _truncate, DateTimeFilter
 from pytz import timezone
 
@@ -127,6 +127,36 @@ class ReportBooleanFilter(ChoiceFilter):
         except (ValueError, TypeError):
             value = ''
         return self.options[value][1](qs, self.name)
+
+
+class ReportRiskAcceptanceFilter(ChoiceFilter):
+
+    def any(self, qs, name):
+        return qs.all()
+
+    def accpeted(self, qs, name):
+        return qs.filter(risk_acceptance__isnull=False)
+
+    def not_accpeted(self, qs, name):
+        return qs.filter(risk_acceptance__isnull=True)
+
+    options = {
+        '': (_('Either'), any),
+        1: (_('Yes'), accpeted),
+        2: (_('No'), not_accpeted),
+    }
+
+    def __init__(self, *args, **kwargs):
+        kwargs['choices'] = [
+            (key, value[0]) for key, value in six.iteritems(self.options)]
+        super(ReportRiskAcceptanceFilter, self).__init__(*args, **kwargs)
+
+    def filter(self, qs, value):
+        try:
+            value = int(value)
+        except (ValueError, TypeError):
+            value = ''
+        return self.options[value][1](self, qs, self.name)
 
 
 class MetricsDateRangeFilter(ChoiceFilter):
@@ -622,6 +652,7 @@ class ReportFindingFilter(DojoFilter):
     mitigated = MitigatedDateRangeFilter()
     verified = ReportBooleanFilter()
     false_p = ReportBooleanFilter(label="False Positive")
+    test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(label="Risk Accepted")
     duplicate = ReportBooleanFilter()
     out_of_scope = ReportBooleanFilter()
 
@@ -634,12 +665,15 @@ class ReportFindingFilter(DojoFilter):
 
 
 class ReportAuthedFindingFilter(DojoFilter):
+    title = CharFilter(lookup_type='icontains', label='Name')
     test__engagement__product = ModelMultipleChoiceFilter(queryset=Product.objects.all(), label="Product")
+    test__engagement__product__prod_type = ModelMultipleChoiceFilter(queryset=Product_Type.objects.all(), label="Product Type")
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     active = ReportBooleanFilter()
     mitigated = MitigatedDateRangeFilter()
     verified = ReportBooleanFilter()
     false_p = ReportBooleanFilter(label="False Positive")
+    test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(label="Risk Accepted")
     duplicate = ReportBooleanFilter()
     out_of_scope = ReportBooleanFilter()
 
@@ -654,7 +688,7 @@ class ReportAuthedFindingFilter(DojoFilter):
 
     class Meta:
         model = Finding
-        exclude = ['title', 'date', 'cwe', 'url', 'description', 'mitigation', 'impact',
+        exclude = ['date', 'cwe', 'url', 'description', 'mitigation', 'impact',
                    'endpoint', 'references', 'test', 'is_template',
                    'thread_id', 'notes', 'endpoints',
                    'numerical_severity', 'reporter', 'last_reviewed']
