@@ -211,7 +211,13 @@
                                 </li>
                             {% endif %}
                             <li>
-                                <a href="{% url 'reports' %}"><i class="fa fa-file-text-o fa-fw"></i> <span>Reports</span></a>
+                                <a href="{% url 'reports' %}"><i class="fa fa-file-text-o fa-fw"></i> <span>Reports</span><span
+                                        class="glyphicon arrow"></span></a>
+                                <ul class="nav nav-second-level">
+                                    <li><a href="{% url 'reports' %}"> All Reports </a></li>
+                                    <li><a href="{% url 'report_builder' %}"> Report Builder </a></li>
+                                </ul>
+                                <!-- /.nav-second-level -->
                             </li>
                             <li>
                                 <a href="/metrics"><i class="fa fa-bar-chart fa-fw"></i> <span>Metrics</span><span

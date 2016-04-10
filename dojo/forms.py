@@ -989,6 +989,13 @@ class ReportOptionsForm(forms.Form):
     report_type = forms.ChoiceField(choices=(('AsciiDoc', 'AsciiDoc'), ('PDF', 'PDF')))
 
 
+class CustomReportOptionsForm(forms.Form):
+    yes_no = (('0', 'No'), ('1', 'Yes'))
+    report_name = forms.CharField(required=False, max_length=100)
+    include_finding_notes = forms.ChoiceField(required=False, choices=yes_no)
+    report_type = forms.ChoiceField(required=False, choices=(('AsciiDoc', 'AsciiDoc'), ('PDF', 'PDF')))
+
+
 class DeleteReportForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())

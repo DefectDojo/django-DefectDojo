@@ -34,7 +34,7 @@
   sudo_user: '{{ dd_user }}'
 
 - name: Install Django
-  pip: name=Django version=1.8.4 virtualenv={{ venv_dir }}
+  pip: name=Django version=1.8.10 virtualenv={{ venv_dir }}
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
