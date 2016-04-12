@@ -149,14 +149,21 @@
                         $('a.run_report').addClass('disabled');
                     }
 
+                    if (ui.item.attr('class') === 'wysiwyg-content'){
+                        console.log(ui.item.attr('class'));
+                        $(ui.item.find(".editor").get(0)).removeAttr('id');
+                        $(ui.item.find(".editor").get(0)).uniqueId();
+                        console.log(ui.item.find(".editor").get(0).id);
+                        $('#'+ui.item.find(".editor").get(0).id).wysiwyg();
+
+                    }
+
                 },
                 start: function (event, ui) {
                     ui.item.find('[data-toggle="tooltip"]').tooltip('destroy');
                 }
 
             });
-
-            $('.editor').wysiwyg();
 
             setUpFindingFilters();
 

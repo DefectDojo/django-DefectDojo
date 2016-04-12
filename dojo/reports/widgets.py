@@ -64,7 +64,7 @@ class Div(form_widget):
             value = ''
         final_attrs = self.build_attrs(attrs, name=name)
         return format_html(
-            '<div class="btn-toolbar" data-role="editor-toolbar" data-target="#editor"><div class="btn-group">'
+            '<div class="btn-toolbar" data-role="editor-toolbar" data-target=""><div class="btn-group">'
             '<a class="btn btn-default" data-edit="bold" title="Bold (Ctrl/Cmd+B)"><i class="fa fa-bold"></i></a>'
             '<a class="btn btn-default" data-edit="italic" title="Italic (Ctrl/Cmd+I)"><i class="fa fa-italic"></i></a>'
             '<a class="btn btn-default" data-edit="strikethrough" title="Strikethrough">'
@@ -372,7 +372,7 @@ def report_widget_factory(json_data=None, request=None, user=None, finding_notes
 
             endpoints = EndpointFilter(d, queryset=endpoints)
             endpoints = EndpointList(request=request, endpoints=endpoints, finding_notes=finding_notes)
-            selected_widgets[widget.keys()[0]] = endpoints
+            selected_widgets[widget.keys()[0] + '-' + str(idx)] = endpoints
 
         if widget.keys()[0] == 'finding-list':
             findings = Finding.objects.all()
@@ -385,8 +385,8 @@ def report_widget_factory(json_data=None, request=None, user=None, finding_notes
 
             findings = ReportAuthedFindingFilter(d, queryset=findings, user=user)
 
-            selected_widgets[widget.keys()[0]] = FindingList(request=request, findings=findings,
-                                                             finding_notes=finding_notes)
+            selected_widgets[widget.keys()[0] + '-' + str(idx)] = FindingList(request=request, findings=findings,
+                                                                              finding_notes=finding_notes)
 
         if widget.keys()[0] == 'wysiwyg-content':
             wysiwyg_content = WYSIWYGContent(request=request)
@@ -394,7 +394,7 @@ def report_widget_factory(json_data=None, request=None, user=None, finding_notes
                 next((item for item in widget.get(widget.keys()[0]) if item["name"] == 'heading'), None)['value']
             wysiwyg_content.content = \
                 next((item for item in widget.get(widget.keys()[0]) if item["name"] == 'hidden_content'), None)['value']
-            selected_widgets[widget.keys()[0]] = wysiwyg_content
+            selected_widgets[widget.keys()[0] + '-' + str(idx)] = wysiwyg_content
         if widget.keys()[0] == 'report-options':
             options = ReportOptions(request=request)
             options.include_finding_notes = \
