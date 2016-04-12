@@ -131,10 +131,7 @@
         function get_report_status() {
             $('span.report_status.requested').each(function () {
                 $.get("/reports/" + this.id + "/status", function (data, status) {
-                    console.log(data);
                     if (data.status == 'success') {
-                        console.log('adding actions');
-                        console.log(data.id);
                         $('span#'+data.id).removeClass('requested').addClass('alert-success');
                         $('span#'+data.id).html("<a class='btn btn-primary btn-sm' href='/reports/[id]/download'>Download <span class='fa fa-download'></span></a> <a class='btn btn-sm btn-info' href='/reports/[id]/regen'>Regenerate <span class='fa fa-refresh'></span></a> <form method='post' action='/reports/[id]/delete' style='display: inline' class='form-inline form'>{% csrf_token %}<input type='hidden' name='id' value='[id]'/><button type='submit' class='btn btn-danger btn-sm report-delete'>Delete <span class='fa fa-trash'></span></button></form>".replace(/\[id\]/g, data.id));
                     }
