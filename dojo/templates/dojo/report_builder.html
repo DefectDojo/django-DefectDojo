@@ -80,7 +80,7 @@
                 }
             });
 
-            if ($('.in-use-widgets ul#sortable2 li').length > 0){
+            if ($('.in-use-widgets ul#sortable2 li').length > 0) {
                 $('a.run_report').removeClass('disabled');
             }
         }
@@ -125,10 +125,10 @@
                     }
                     ui.item.find('[data-toggle="tooltip"]').tooltip('hide');
 
-                    if ($('.in-use-widgets ul#sortable2 li').length > 0){
+                    if ($('.in-use-widgets ul#sortable2 li').length > 0) {
                         $('a.run_report').removeClass('disabled');
                     }
-                    else{
+                    else {
                         $('a.run_report').addClass('disabled');
                     }
                 },
@@ -142,19 +142,17 @@
                     ui.item.find('[data-toggle="tooltip"]').tooltip();
                     ui.item.find('[data-toggle="tooltip"]').tooltip('hide');
 
-                    if ($('.in-use-widgets ul#sortable2 li').length > 0){
+                    if ($('.in-use-widgets ul#sortable2 li').length > 0) {
                         $('a.run_report').removeClass('disabled');
                     }
-                    else{
+                    else {
                         $('a.run_report').addClass('disabled');
                     }
 
-                    if (ui.item.attr('class') === 'wysiwyg-content'){
-                        console.log(ui.item.attr('class'));
+                    if (ui.item.attr('class') === 'wysiwyg-content') {
                         $(ui.item.find(".editor").get(0)).removeAttr('id');
                         $(ui.item.find(".editor").get(0)).uniqueId();
-                        console.log(ui.item.find(".editor").get(0).id);
-                        $('#'+ui.item.find(".editor").get(0).id).wysiwyg();
+                        $('#' + ui.item.find(".editor").get(0).id).wysiwyg();
 
                     }
 
@@ -170,7 +168,6 @@
             $(document).on('submit', 'form.finding-list', function (event) {
                 var form = this;
                 $.get('/reports/findings?' + $(this).serialize()).done(function (data) {
-                    console.log($(form).closest('li.finding-list'))
                     $(form).closest('li.finding-list').html(data);
                     setUpFindingFilters();
                 });
@@ -190,7 +187,6 @@
             $(document).on('submit', 'form.endpoint-list', function (event) {
                 var form = this;
                 $.get('/reports/endpoints?' + $(this).serialize()).done(function (data) {
-                    console.log($(form).closest('li.endpoint-list'))
                     $(form).closest('li.endpoint-list').html(data);
                     setUpFindingFilters();
                 });
@@ -213,30 +209,43 @@
                 $(this).siblings('.panel-body').slideToggle();
             });
 
-            $('a.run_report').on('click', function(event){
-                result = [];
-                $('.in-use-widgets form').each(function() {  // loop start for each form
+            $('a.run_report').on('click', function (event) {
 
-                    var _form = $(this);
+                var valid = true;
 
-                    $(this).find('.editor').each(function (){
-                        _form.find('input[name="hidden_content"]').attr('value', $(this).cleanHtml());
-                    });
-
-                    sr = $(this).serializeArray();
-
-                    var y = {};
-                    y[this.id] = sr;
-                    result.push(y);
+                $('.in-use-widgets .form-control').not('#finding-list .form-control')
+                        .not('#endpoint-list .form-control').not('#wysiwyg-content .form-control').each(function () {
+                    if ($(this).val() === '')
+                        valid = false;
                 });
 
-                var json_content = JSON.stringify(result);
+                if (valid) {
 
-                console.log(json_content);
+                    var result = [];
+                    $('.in-use-widgets form').each(function () {  // loop start for each form
 
-                $('form#custom_report textarea#json').val(json_content);
+                        var _form = $(this);
 
-                $('form#custom_report').removeClass('hidden').submit();
+                        $(this).find('.editor').each(function () {
+                            _form.find('input[name="hidden_content"]').attr('value', $(this).cleanHtml());
+                        });
+
+                        sr = $(this).serializeArray();
+
+                        var y = {};
+                        y[this.id] = sr;
+                        result.push(y);
+                    });
+
+                    var json_content = JSON.stringify(result);
+
+                    $('form#custom_report textarea#json').val(json_content);
+
+                    $('form#custom_report').removeClass('hidden').submit();
+                }
+                else {
+                    alert('Please complete all forms.')
+                }
 
                 event.preventDefault();
             })
