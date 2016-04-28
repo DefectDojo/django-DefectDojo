@@ -24,7 +24,7 @@ You can also log in as a product owner / non-staff user:
 
 # Additional Documentation
 
-For additional documentation you can visit our [Read the Docs site](http://defectdojo.readthedocs.org/).
+For additional documentation you can visit our [Read the Docs site](http://defectdojo.readthedocs.io/).
 
 # Installation
 
