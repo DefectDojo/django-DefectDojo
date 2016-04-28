@@ -321,6 +321,7 @@ DefectDojo has the ability to import reports from other security tools.  Current
 4. ZAP XML
 5. Veracode Detailed XML Report
 6. Checkmarx Detailed XML Report
+7. AppSpider Vulnerabilities Summary XML Report (VulnerabilitiesSummary.xml)
 
 
 The importers analyze each report and create new Findings for each item reported.  DefectDojo collapses duplicate
@@ -452,9 +453,20 @@ Reports can be generated for:
 2.  Individual Products
 3.  Endpoints
 4.  Product Types
+5.  Custom Reports
 
 .. image:: /_static/report_2.png
     :alt: Report Generation
 
 Filtering is available on all Report Generation views to aid in focusing the report for the appropriate need.
 
+Custom reports allow you to select specific components to be added to the report.  These include:
+
+1.  Cover Page
+2.  Table of Contents
+3.  WYSIWYG Content
+4.  Findings List
+5.  Endpoint List
+6.  Page Breaks
+
+The custom report workflow takes advantage of the same asynchronous process described above.
