@@ -131,14 +131,14 @@
             <div class="panel panel-default endpoints table-responsive">
                 <div class="panel-heading">
                     <h4>Vulnerable Endpoints / Systems
-                        <span class="pull-right clickable  panel-collapse in"><i
-                                class="glyphicon glyphicon-chevron-up"></i></span>
+                        <span class="pull-right"><a data-toggle="collapse" href="#vuln_endpoints"><i
+                                class="glyphicon glyphicon-chevron-up"></i></a></span>
                     </h4>
                 </div>
 
                 {% if  finding.endpoints.all %}
                     {% colgroup finding.endpoints.all into 3 cols as grouped_items %}
-                    <table class="table-striped table table table-condensed table-hover finding-endpoints">
+                    <table id="vuln_endpoints" class="collapse in table-striped table table table-condensed table-hover finding-endpoints">
                         {% for row in grouped_items %}
                             <tr>
                                 {% for item in row %}
@@ -150,7 +150,7 @@
                         {% endfor %}
                     </table>
                 {% else %}
-                    <div id="vuln_endpoints" class="panel-body endpoint-panel table-responsive">
+                    <div id="vuln_endpoints" class="panel-body endpoint-panel table-responsive collapse in">
                         No endpoints.
                     </div>
                 {% endif %}
@@ -163,61 +163,71 @@
     <div class="view-finding to_highlight">
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h4>Description <span class="pull-right clickable  panel-collapse in"><i
-                        class="glyphicon glyphicon-chevron-up"></i></span></h4>
+                <h4>Description <span class="pull-right"><a data-toggle="collapse" href="#vuln_desc"><i
+                                class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
             </div>
-            <div class="panel-body finding-description">
+            <div id="vuln_desc" class="panel-body finding-description collapse in">
                 <pre>{{ finding.description }}</pre>
             </div>
         </div>
 
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h4>Mitigation <span class="pull-right clickable  panel-collapse in"><i
-                        class="glyphicon glyphicon-chevron-up"></i></span></h4>
+                <h4>Mitigation <span class="pull-right"><a data-toggle="collapse" href="#vuln_mitigation"><i
+                                class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
             </div>
-            <div class="panel-body">
+            <div id="vuln_mitigation" class="panel-body collapse in">
                 <pre>{{ finding.mitigation }}</pre>
             </div>
         </div>
-        {% if finding.get_request %}
+        {% if finding.burprawrequestresponse_set.all %}
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h4>Request <span class="pull-right clickable"><i
-                            class="glyphicon glyphicon-chevron-down"></i></span></h4>
+                    <h4>Request Response Pairs <span class="pull-right"><a data-toggle="collapse" href="#vuln_req_res">
+                        <i class="glyphicon glyphicon-chevron-down"></i></a></span></h4>
                 </div>
-                <div class="panel-body" style="display: none">
-                    <pre>{{ finding.get_request }}</pre>
-                </div>
-            </div>
-        {% endif %}
-        {% if finding.get_response %}
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4>Response <span class="pull-right clickable"><i
-                            class="glyphicon glyphicon-chevron-down"></i></span></h4>
-                </div>
+                <div id="vuln_req_res" class="panel-body collapse">
+                    {% for req_resp in finding.burprawrequestresponse_set.all %}
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h4>Request #{{ forloop.counter }}<span class="pull-right">
+                                    <a data-toggle="collapse"  href="#vuln_req_{{ forloop.counter }}">
+                                        <i class="glyphicon glyphicon-chevron-down"></i></a></span></h4>
+                            </div>
+                            <div id="vuln_req_{{ forloop.counter }}" class="panel-body collapse">
+                                <pre>{{ req_resp.get_request }}</pre>
+                            </div>
+                        </div>
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h4>Response #{{ forloop.counter }}<span class="pull-right">
+                                    <a data-toggle="collapse"  href="#vuln_res_{{ forloop.counter }}">
+                                        <i class="glyphicon glyphicon-chevron-down"></i></a></span></h4>
+                            </div>
 
-                <div class="panel-body" style="display: none">
-                    <pre>{{ finding.get_response }}</pre>
+                            <div id="vuln_res_{{ forloop.counter }}" class="panel-body collapse">
+                                <pre>{{ req_resp.get_response }}</pre>
+                            </div>
+                        </div>
+                    {% endfor %}
                 </div>
             </div>
         {% endif %}
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h4>Impact <span class="pull-right clickable  panel-collapse in"><i
-                        class="glyphicon glyphicon-chevron-up"></i></span></h4>
+                <h4>Impact <span class="pull-right"><a data-toggle="collapse" href="#vuln_impact"><i
+                                class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
             </div>
-            <div class="panel-body">
+            <div id="vuln_impact" class="panel-body collapse in">
                 <pre>{{ finding.impact }}</pre>
             </div>
         </div>
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h4>References <span class="pull-right clickable  panel-collapse in"><i
-                        class="glyphicon glyphicon-chevron-up"></i></span></h4>
+                <h4>References <span class="pull-right"><a data-toggle="collapse" href="#vuln_refs"><i
+                                class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
             </div>
-            <div class="panel-body">
+            <div id="vuln_refs" class="panel-body collapse in">
                 <pre>{{ finding.references }}</pre>
             </div>
         </div>
@@ -227,10 +237,10 @@
 
     <div class="panel panel-default to_highlight table-responsive">
         <div class="panel-heading">
-            <h4>Notes <span class="pull-right clickable  panel-collapse in"><i
-                    class="glyphicon glyphicon-chevron-up"></i></span></h4>
+            <h4>Notes <span class="pull-right"><a data-toggle="collapse" href="#vuln_notes"><i
+                                class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
         </div>
-        <div class="panel-body">
+        <div id="vuln_notes" class="panel-body collapse in">
             {% if notes %}
                 <table id="notes" class="tablesorter-bootstrap table table-condensed table-striped">
                     <thead>
@@ -292,18 +302,12 @@
             $('input#simple_search').val(terms);
         }
 
-        $(document).on('click', '.panel-heading span.clickable', function (e) {
-            var $this = $(this);
-            if (!$this.hasClass('panel-collapse')) {
-                $this.parents('.panel').find('.panel-body, table.finding-endpoints').slideDown();
-                $this.addClass('panel-collapse');
-                $this.find('i').removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
-            } else {
-                $this.parents('.panel').find('.panel-body, table.finding-endpoints').slideUp();
-                $this.removeClass('panel-collapse');
-                $this.find('i').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
-            }
-        })
+        $(document).ready(function(){
+            $("a[data-toggle='collapse']").on('click', function(){
+                var i = $($(this).find('i').get(0));
+                i.toggleClass('glyphicon-chevron-up').toggleClass('glyphicon-chevron-down');
+            })
+        });
 
 
     </script>

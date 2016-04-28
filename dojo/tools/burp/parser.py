@@ -74,6 +74,7 @@ class BurpXmlParser(object):
             dupe_key = str(item.url) + item.severity + item.title
             if dupe_key in items:
                 items[dupe_key].unsaved_endpoints = items[dupe_key].unsaved_endpoints + item.unsaved_endpoints
+                items[dupe_key].unsaved_req_resp = items[dupe_key].unsaved_req_resp + item.unsaved_req_resp
 
                 # make sure only unique endpoints are retained
                 unique_objs = []
@@ -155,9 +156,14 @@ def get_item(item_node, test):
     location = item_node.findall('location')[0].text
 
     request = item_node.findall('./requestresponse/request')[0].text if len(
-            item_node.findall('./requestresponse/request')) > 0 else ""
+            item_node.findall('./requestresponse/request')) > 0 else None
     response = item_node.findall('./requestresponse/response')[0].text if len(
-            item_node.findall('./requestresponse/response')) > 0 else ""
+            item_node.findall('./requestresponse/response')) > 0 else None
+
+    unsaved_req_resp = list()
+
+    if request is not None and response is not None:
+        unsaved_req_resp.append({"req": request, "resp": response})
 
     try:
         dupe_endpoint = Endpoint.objects.get(protocol=protocol,
@@ -230,7 +236,6 @@ def get_item(item_node, test):
                       impact="No impact provided",
                       numerical_severity=Finding.get_numerical_severity(severity))
     finding.unsaved_endpoints = endpoints
-    finding.unsaved_request = request
-    finding.unsaved_response = response
+    finding.unsaved_req_resp = unsaved_req_resp
 
     return finding

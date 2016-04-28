@@ -37,6 +37,7 @@ def simple_search(request):
     clean_query = ''
     cookie = False
     terms = ''
+    form = SimpleSearchForm()
     if request.method == 'GET' and "query" in request.GET:
         form = SimpleSearchForm(request.GET)
         if form.is_valid():
@@ -58,15 +59,15 @@ def simple_search(request):
         else:
             form = SimpleSearchForm()
         add_breadcrumb(title="Simple Search", top_level=True, request=request)
-        response = render(request, 'dojo/simple_search.html', {
-            'clean_query': clean_query,
-            'tests': tests,
-            'findings': findings,
-            'products': products,
-            'name': 'Simple Search',
-            'metric': False,
-            'user': request.user,
-            'form': form})
+    response = render(request, 'dojo/simple_search.html', {
+        'clean_query': clean_query,
+        'tests': tests,
+        'findings': findings,
+        'products': products,
+        'name': 'Simple Search',
+        'metric': False,
+        'user': request.user,
+        'form': form})
 
     if cookie:
         response.set_cookie("highlight", value=clean_query,

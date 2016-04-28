@@ -587,18 +587,18 @@ class Finding(models.Model):
                 'url': reverse('view_finding', args=(self.id,))}]
         return bc
 
-    def get_request(self):
-        if self.burprawrequestresponse_set.count() > 0:
-            reqres = BurpRawRequestResponse.objects.get(finding=self)
-            return base64.b64decode(reqres.burpRequestBase64)
-
-    def get_response(self):
-        if self.burprawrequestresponse_set.count() > 0:
-            reqres = BurpRawRequestResponse.objects.get(finding=self)
-            res = base64.b64decode(reqres.burpResponseBase64)
-            # Removes all blank lines
-            res = re.sub(r'\n\s*\n', '\n', res)
-            return res
+    # def get_request(self):
+    #     if self.burprawrequestresponse_set.count() > 0:
+    #         reqres = BurpRawRequestResponse.objects.get(finding=self)
+    #         return base64.b64decode(reqres.burpRequestBase64)
+    #
+    # def get_response(self):
+    #     if self.burprawrequestresponse_set.count() > 0:
+    #         reqres = BurpRawRequestResponse.objects.get(finding=self)
+    #         res = base64.b64decode(reqres.burpResponseBase64)
+    #         # Removes all blank lines
+    #         res = re.sub(r'\n\s*\n', '\n', res)
+    #         return res
 
 
 Finding.endpoints.through.__unicode__ = lambda x: "Endpoint: " + x.endpoint.host
@@ -704,6 +704,15 @@ class BurpRawRequestResponse(models.Model):
     burpRequestBase64 = models.BinaryField()
     burpResponseBase64 = models.BinaryField()
 
+    def get_request(self):
+        return base64.b64decode(self.burpRequestBase64)
+
+    def get_response(self):
+        res = base64.b64decode(self.burpResponseBase64)
+        # Removes all blank lines
+        res = re.sub(r'\n\s*\n', '\n', res)
+        return res
+
 
 class Risk_Acceptance(models.Model):
     path = models.FileField(upload_to='risk/%Y/%m/%d',
@@ -775,6 +784,7 @@ admin.site.register(Notes)
 admin.site.register(Report)
 admin.site.register(Scan)
 admin.site.register(ScanSettings)
+admin.site.register(IPScan)
 
 watson.register(Product)
 watson.register(Test)
