@@ -4,6 +4,7 @@ from dojo.tools.nexpose.parser import NexposeFullXmlParser
 from dojo.tools.veracode.parser import VeracodeXMLParser
 from dojo.tools.zap.parser import ZapXmlParser
 from dojo.tools.checkmarx.parser import CheckmarxXMLParser
+from dojo.tools.appspider.parser import AppSpiderXMLParser
 
 __author__ = 'Jay Paz'
 
@@ -26,6 +27,8 @@ def import_parser_factory(file, test):
         parser = CheckmarxXMLParser(file, test)
     elif scan_type == "ZAP Scan":
         parser = ZapXmlParser(file, test)
+    elif scan_type == "AppSpider Scan":
+        parser = AppSpiderXMLParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 
