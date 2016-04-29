@@ -7,6 +7,7 @@ from defusedxml import ElementTree
 
 from dojo.models import Endpoint, Finding
 import html2text
+import urlparse
 
 __author__ = "Jay Paz"
 
@@ -46,6 +47,9 @@ class AppSpiderXMLParser(object):
             title = finding.find("VulnType").text
             description = finding.find("Description").text
             mitigation = finding.find("Recommendation").text
+            vuln_url = finding.find("VulnUrl").text
+
+            parts = urlparse.urlparse(vuln_url)
 
             cwe = int(finding.find("CweId").text)
 
@@ -75,10 +79,17 @@ class AppSpiderXMLParser(object):
                 find.unsaved_req_resp = unsaved_req_resp
                 dupes[dupe_key] = find
 
-            for attack in finding.iter("AttackRequest"):
-                req = attack.find("Request").text
-                resp = attack.find("Response").text
+                for attack in finding.iter("AttackRequest"):
+                    req = attack.find("Request").text
+                    resp = attack.find("Response").text
 
-                find.unsaved_req_resp.append({"req": req, "resp": resp})
+                    find.unsaved_req_resp.append({"req": req, "resp": resp})
+
+                find.unsaved_endpoints.append(Endpoint(protocol=parts.scheme,
+                                                       host=parts.netloc,
+                                                       path=parts.path,
+                                                       query=parts.query,
+                                                       fragment=parts.fragment,
+                                                       product=test.engagement.product))
 
         self.items = dupes.values()
