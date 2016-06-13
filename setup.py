@@ -29,7 +29,7 @@ setup(
             'django-watson==1.1.9',
             'celery',
             'sqlalchemy',
-            'django-polymorphic',
+            'django-polymorphic==0.7',
             'pdfkit==0.5.0',
             'django-overextends',
 	        'defusedxml'],
