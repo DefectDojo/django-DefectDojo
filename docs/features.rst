@@ -379,6 +379,11 @@ follow the directions for your specific OS in the `wkhtmltopdf documentation`_.
 
 Some operating systems are capable of installing `wkhtmltopdf` from their package managers:
 
+.. Note::
+    Report email notifications are commented out by default.  In order to enable them please uncomment the
+    `email_requester(report, uri, error=None)` function and its references in the `tasks.py` file in the main `dojo`
+    directory.
+
 Mac: ::
 
     brew install Caskroom/cask/wkhtmltopdf
@@ -391,9 +396,10 @@ Fedora/Centos: ::
 
     sudo yum install wkhtmltopdf
 
-Warning! Version in debian/ubuntu repos have reduced functionality (because it compiled without the wkhtmltopdf QT
-patches), such as adding outlines, headers, footers, TOC etc. To use this options you should install static binary from
-`wkhtmltopdf`_ site or you can use this `script`_.
+.. Warning::
+    Version in debian/ubuntu repos have reduced functionality (because it compiled without the wkhtmltopdf QT
+    patches), such as adding outlines, headers, footers, TOC etc. To use this options you should install static binary
+    from `wkhtmltopdf`_ site or you can use this :download:`script <../reports.sh>`.
 
 Additionally, DefectDojo takes advantage of `python-PDFKit`_ to interact with the `wkhtmltopdf` commandline interface.
 It is easily installed by running: ::
@@ -441,7 +447,6 @@ instructions`_ from the Celery documentation.
 
 .. _wkhtmltopdf: http://wkhtmltopdf.org/
 .. _wkhtmltopdf documentation: https://github.com/pdfkit/pdfkit/wiki/Installing-WKHTMLTOPDF
-.. _script: https://github.com/JazzCore/python-pdfkit/blob/master/travis/before-script.sh
 .. _python-PDFKit: https://github.com/JazzCore/python-pdfkit
 .. _Celery: http://docs.celeryproject.org/en/latest/index.html
 .. _Celery documentation: http://docs.celeryproject.org/en/latest/tutorials/daemonizing.html
