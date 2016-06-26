@@ -18,7 +18,7 @@ from dojo.reports.widgets import report_widget_factory
 
 localtz = timezone(settings.TIME_ZONE)
 
-
+"""
 def email_requester(report, uri, error=None):
     if error is None:
         subject = 'Report requested is ready'
@@ -32,7 +32,7 @@ def email_requester(report, uri, error=None):
                       report.requester.first_name, error.message, settings.TEAM_NAME)
     send_mail(subject, message, settings.PORT_SCAN_RESULT_EMAIL_FROM, [report.requester.email],
               fail_silently=True)
-
+"""
 
 @app.task(bind=True)
 def async_pdf_report(self,
@@ -81,11 +81,11 @@ def async_pdf_report(self,
         report.status = 'success'
         report.done_datetime = datetime.now(tz=localtz)
         report.save()
-        email_requester(report, uri)
+        #email_requester(report, uri)
     except Exception as e:
         report.status = 'error'
         report.save()
-        email_requester(report, uri, error=e)
+        #email_requester(report, uri, error=e)
         raise e
     return True
 
@@ -164,11 +164,11 @@ def async_custom_pdf_report(self,
         report.status = 'success'
         report.done_datetime = datetime.now(tz=localtz)
         report.save()
-        email_requester(report, uri)
+        #email_requester(report, uri)
     except Exception as e:
         report.status = 'error'
         report.save()
-        email_requester(report, uri, error=e)
+        #email_requester(report, uri, error=e)
         raise e
     finally:
         if temp is not None:
