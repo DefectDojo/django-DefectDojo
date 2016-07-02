@@ -257,7 +257,7 @@ def import_scan_results(request, eid):
                     item.last_reviewed_by = request.user
                     item.save()
 
-                    if len(item.unsaved_req_resp) > 0:
+                    if hasattr(item, 'unsaved_req_resp') and len(item.unsaved_req_resp) > 0:
                         for req_resp in item.unsaved_req_resp:
                             burp_rr = BurpRawRequestResponse(finding=item,
                                                              burpRequestBase64=req_resp["req"],
