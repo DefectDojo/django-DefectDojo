@@ -1,6 +1,8 @@
 # #  product
+import calendar as tcalendar
 import logging
-from datetime import datetime
+from collections import OrderedDict
+from datetime import datetime, date, timedelta
 from math import ceil
 
 from dateutil.relativedelta import relativedelta
@@ -15,7 +17,7 @@ from pytz import timezone
 
 from dojo.filters import ProductFilter, ProductFindingFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm
-from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance
+from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test
 from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data
 
 localtz = timezone(settings.TIME_ZONE)
@@ -59,6 +61,12 @@ def product(request):
                    'user': request.user})
 
 
+def iso_to_gregorian(iso_year, iso_week, iso_day):
+    jan4 = date(iso_year, 1, 4)
+    start = jan4 - timedelta(days=jan4.isoweekday() - 1)
+    return start + timedelta(weeks=iso_week - 1, days=iso_day - 1)
+
+
 def view_product(request, pid):
     prod = get_object_or_404(Product, id=pid)
     engs = Engagement.objects.filter(product=prod, active=True)
@@ -76,6 +84,8 @@ def view_product(request, pid):
 
     end_date = localtz.localize(datetime.today())
 
+    tests = Test.objects.filter(engagement__product=prod)
+
     risk_acceptances = Risk_Acceptance.objects.filter(engagement__in=Engagement.objects.filter(product=prod))
 
     accepted_findings = [finding for ra in risk_acceptances
@@ -86,7 +96,7 @@ def view_product(request, pid):
                                                false_p=False,
                                                verified=True,
                                                duplicate=False,
-                                               out_of_scope=False)
+                                               out_of_scope=False).order_by("date")
 
     open_findings = Finding.objects.filter(test__engagement__product=prod,
                                            date__range=[start_date, end_date],
@@ -114,6 +124,84 @@ def view_product(request, pid):
 
     punchcard, ticks, highest_count = get_punchcard_data(verified_findings, weeks_between, start_date)
     add_breadcrumb(parent=prod, top_level=False, request=request)
+
+    open_close_weekly = OrderedDict()
+    severity_weekly = OrderedDict()
+    critical_weekly = OrderedDict()
+    high_weekly = OrderedDict()
+    medium_weekly = OrderedDict()
+
+    for v in verified_findings:
+        iso_cal = v.date.isocalendar()
+        x = iso_to_gregorian(iso_cal[0], iso_cal[1], 1)
+        y = x.strftime("<span class='small'>%m/%d<br/>%Y</span>")
+        x = (tcalendar.timegm(x.timetuple()) * 1000)
+        if x not in critical_weekly:
+            critical_weekly[x] = {'count': 0, 'week': y}
+        if x not in high_weekly:
+            high_weekly[x] = {'count': 0, 'week': y}
+        if x not in medium_weekly:
+            medium_weekly[x] = {'count': 0, 'week': y}
+
+        if x in open_close_weekly:
+            if v.mitigated:
+                open_close_weekly[x]['closed'] += 1
+            else:
+                open_close_weekly[x]['open'] += 1
+        else:
+
+            if v.mitigated:
+                open_close_weekly[x] = {'closed': 1, 'open': 0, 'accepted': 0}
+            else:
+                open_close_weekly[x] = {'closed': 0, 'open': 1, 'accepted': 0}
+            open_close_weekly[x]['week'] = y
+
+        if x in severity_weekly:
+            if v.severity in severity_weekly[x]:
+                severity_weekly[x][v.severity] += 1
+            else:
+                severity_weekly[x][v.severity] = 1
+        else:
+            severity_weekly[x] = {'Critical': 0, 'High': 0,
+                                  'Medium': 0, 'Low': 0, 'Info': 0}
+            severity_weekly[x][v.severity] = 1
+            severity_weekly[x]['week'] = y
+
+        if v.severity == 'Critical':
+            if x in critical_weekly:
+                critical_weekly[x]['count'] += 1
+            else:
+                critical_weekly[x] = {'count': 1, 'week': y}
+        elif v.severity == 'High':
+            if x in high_weekly:
+                high_weekly[x]['count'] += 1
+            else:
+                high_weekly[x] = {'count': 1, 'week': y}
+        elif v.severity == 'Medium':
+            if x in medium_weekly:
+                medium_weekly[x]['count'] += 1
+            else:
+                medium_weekly[x] = {'count': 1, 'week': y}
+
+    for a in accepted_findings:
+        iso_cal = a.date.isocalendar()
+        x = iso_to_gregorian(iso_cal[0], iso_cal[1], 1)
+        y = x.strftime("<span class='small'>%m/%d<br/>%Y</span>")
+        x = (tcalendar.timegm(x.timetuple()) * 1000)
+
+        if x in open_close_weekly:
+            open_close_weekly[x]['accepted'] += 1
+        else:
+            open_close_weekly[x] = {'closed': 0, 'open': 0, 'accepted': 1}
+            open_close_weekly[x]['week'] = y
+
+    test_data = {}
+    for t in tests:
+        if t.test_type.name in test_data:
+            test_data[t.test_type.name] += t.verified_finding_count()
+        else:
+            test_data[t.test_type.name] = t.verified_finding_count()
+
     return render(request,
                   'dojo/view_product.html',
                   {'prod': prod,
@@ -127,6 +215,12 @@ def view_product(request, pid):
                    'punchcard': punchcard,
                    'ticks': ticks,
                    'highest_count': highest_count,
+                   'open_close_weekly': open_close_weekly,
+                   'severity_weekly': severity_weekly,
+                   'critical_weekly': critical_weekly,
+                   'high_weekly': high_weekly,
+                   'medium_weekly': medium_weekly,
+                   'test_data': test_data,
                    'user': request.user,
                    'authorized': auth})
 

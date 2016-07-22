@@ -139,19 +139,108 @@
                     </div>
                 </div>
             </div>
-
             <div class="col-md-6">
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        Finding Age ({{ verified_findings|length|apnumber }} verified
-                        finding{{ verified_findings|length|pluralize }})
+                        Open, Closed, and Accepted Week to Week
+                        <i title="Weeks are only displayed if findings are available."
+                           class="text-info fa fa-info-circle"></i>
                     </div>
                     <div class="panel-body">
-                        <div id="finding_age" class="graph"></div>
+                        <div id="open_close_weekly" class="graph"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i title="Weeks are only displayed if findings are available."
+                           class="text-info fa fa-info-circle"></i>
+                        <small>Weeks are only displayed if findings are available.</small>
                     </div>
                 </div>
             </div>
             <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Week to Week by Severity
+                        <i title="Weeks are only displayed if findings are available."
+                           class="text-info fa fa-info-circle"></i>
+                    </div>
+                    <div class="panel-body">
+                        <div id="severity_weekly" class="graph"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i title="Weeks are only displayed if findings are available."
+                           class="text-info fa fa-info-circle"></i>
+                        <small>Weeks are only displayed if findings are available.</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Critical Week to Week
+                        <i title="Weeks are only displayed if findings are available."
+                           class="text-info fa fa-info-circle"></i>
+                    </div>
+                    <div class="panel-body">
+                        <div id="severity_critical" class="graph"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i title="Weeks are only displayed if findings are available."
+                           class="text-info fa fa-info-circle"></i>
+                        <small>Weeks are only displayed if findings are available.</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        High Week to Week
+                        <i title="Weeks are only displayed if findings are available."
+                           class="text-info fa fa-info-circle"></i>
+                    </div>
+                    <div class="panel-body">
+                        <div id="severity_high" class="graph"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i title="Weeks are only displayed if findings are available."
+                           class="text-info fa fa-info-circle"></i>
+                        <small>Weeks are only displayed if findings are available.</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Medium Week to Week
+                        <i title="Weeks are only displayed if findings are available."
+                           class="text-info fa fa-info-circle"></i>
+                    </div>
+                    <div class="panel-body">
+                        <div id="severity_medium" class="graph"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i title="Weeks are only displayed if findings are available."
+                           class="text-info fa fa-info-circle"></i>
+                        <small>Weeks are only displayed if findings are available.</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Finding Age
+                    </div>
+                    <div class="panel-body">
+                        <div id="finding_age" class="graph"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i title="Weeks are only displayed if findings are available."
+                           class="text-info fa fa-info-circle"></i>
+                        <small>Finding age of {{ verified_findings|length|apnumber }} verified
+                            finding{{ verified_findings|length|pluralize }}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-7">
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         Weekly activity, displayed by day, of findings reported.<i
@@ -160,6 +249,28 @@
                     </div>
                     <div class="panel-body">
                         <div class="graph" id="punchcard"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i title="Weeks are only displayed if findings are available."
+                           class="text-info fa fa-info-circle"></i>
+                        <small>Weeks are only displayed if findings are available.</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Findings by Test Type
+                        <i title="Test Types shown only if available."
+                           class="text-info fa fa-info-circle"></i>
+                    </div>
+                    <div class="panel-body">
+                        <div class="graph" id="test_type"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i title="Weeks are only displayed if findings are available."
+                           class="text-info fa fa-info-circle"></i>
+                        <small>Test Types shown only if available.</small>
                     </div>
                 </div>
             </div>
@@ -341,14 +452,18 @@
     <!-- Flot Charts JavaScript -->
     <script src="{% static "flot/excanvas.min.js" %}"></script>
     <script src="{% static "flot/jquery.flot.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.pie.js" %}"></script>
     <script src="{% static "flot/jquery.flot.resize.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.categories.js" %}"></script>
     <script src="{% static "flot-axis/jquery.flot.axislabels.js" %}"></script>
+
     {% if punchcard %}
-        <script src="{% static "flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
         <script src="{% static "JUMFlot/JUMFlot.min.js" %}"></script>
         <script src="{% static "JUMFlot/jquery.flot.mouse.js" %}"></script>
         <script src="{% static "JUMFlot/jquery.flot.bubbles.js" %}"></script>
     {% endif %}
+    <script src="{% static "flot/jquery.flot.time.js" %}"></script>
+    <script src="{% static "flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
     <script type="text/javascript">
         var highest_count = {{ highest_count }};
         $(function () {
@@ -381,6 +496,10 @@
             accepted_findings();
             open_findings();
             closed_findings();
+            open_close_weekly();
+            severity_weekly();
+            severity_counts_weekly();
+            test_type();
             finding_age();
             $(".product-graphs").hide();
 
@@ -779,6 +898,230 @@
             });
         }
         ;
+
+        function open_close_weekly() {
+            var opened = []
+            var closed = []
+            var accepted = []
+            var ticks = []
+
+            {% for week, values in open_close_weekly.items %}
+                ticks.push([{{ forloop.counter0 }}, "{{ values.week|safe }}"])
+                opened.push([{{ forloop.counter0 }}, {{ values.open }}])
+                closed.push([{{ forloop.counter0 }}, {{ values.closed }}])
+                accepted.push([{{ forloop.counter0 }}, {{ values.accepted }}])
+            {% endfor %}
+
+            var options = {
+                xaxes: [{
+                    ticks: ticks,
+                }],
+                yaxes: [{
+                    min: 0
+                }],
+                series: {
+                    lines: {
+                        show: true
+                    },
+                    points: {
+                        show: true
+                    }
+                },
+                grid: {
+                    hoverable: true,
+                    borderWidth: 1,
+                    borderColor: '#e7e7e7'
+
+                },
+                tooltip: true
+            };
+
+            var plotObj = $.plot($("#open_close_weekly"), [{
+                        data: opened,
+                        label: " Opened",
+                        color: "#d9534f"
+                    }, {
+                        data: closed,
+                        label: " Closed",
+                        color: '#f0ad4e'
+                    }, {
+                        data: accepted,
+                        label: " Accepted",
+                        color: '#80699B'
+                    }],
+                    options);
+        }
+        ;
+
+        function severity_weekly() {
+            var critical = []
+            var high = []
+            var medium = []
+            var low = []
+            var info = []
+            var ticks = []
+
+            {% for week, values in severity_weekly.items %}
+                ticks.push([{{ forloop.counter0 }}, "{{ values.week|safe }}"]);
+                critical.push([{{ forloop.counter0 }}, {{ values.Critical }}]);
+                high.push([{{ forloop.counter0 }}, {{ values.High }}]);
+                medium.push([{{ forloop.counter0 }}, {{ values.Medium }}]);
+                low.push([{{ forloop.counter0 }}, {{ values.Low }}]);
+                info.push([{{ forloop.counter0 }}, {{ values.Info }}]);
+            {% endfor %}
+
+            var options = {
+                xaxes: [{
+                    ticks: ticks,
+                }],
+                yaxes: [{
+                    min: 0
+                }],
+                series: {
+                    lines: {
+                        show: true
+                    },
+                    points: {
+                        show: true
+                    }
+                },
+                grid: {
+                    hoverable: true,
+                    borderWidth: 1,
+                    borderColor: '#e7e7e7'
+
+                },
+                tooltip: true
+            };
+
+            var plotObj = $.plot($("#severity_weekly"), [{
+                        data: critical,
+                        label: " Critical",
+                        color: "#d9534f"
+                    }, {
+                        data: high,
+                        label: " High",
+                        color: '#f0ad4e'
+                    }, {
+                        data: medium,
+                        label: " Medium",
+                        color: '#f0de28'
+                    }, {
+                        data: low,
+                        label: " Low",
+                        color: '#337ab7'
+                    }, {
+                        data: info,
+                        label: " Info",
+                        color: '#80699B'
+                    }],
+                    options);
+
+        }
+        ;
+
+        function severity_counts_weekly() {
+            var critical = []
+            var high = []
+            var medium = []
+            var ticks = []
+
+            {% for week, values in critical_weekly.items %}
+                ticks.push([{{ forloop.counter0 }}, "{{ values.week|safe }}"]);
+                critical.push([{{ forloop.counter0 }}, {{ values.count }}]);
+            {% endfor %}
+            {% for week, values in high_weekly.items %}
+                ticks.push([{{ forloop.counter0 }}, "{{ values.week|safe }}"]);
+                high.push([{{ forloop.counter0 }}, {{ values.count }}]);
+            {% endfor %}
+            {% for week, values in medium_weekly.items %}
+                ticks.push([{{ forloop.counter0 }}, "{{ values.week|safe }}"]);
+                medium.push([{{ forloop.counter0 }}, {{ values.count }}]);
+            {% endfor %}
+
+            var options = {
+                xaxes: [{
+                    ticks: ticks,
+                }],
+                yaxes: [{
+                    min: 0
+                }],
+                series: {
+                    lines: {
+                        show: true
+                    },
+                    points: {
+                        show: true
+                    }
+                },
+                grid: {
+                    hoverable: true,
+                    borderWidth: 1,
+                    borderColor: '#e7e7e7'
+
+                },
+                tooltip: true
+            };
+
+            var plotObj = $.plot($("#severity_critical"), [{
+                        data: critical,
+                        label: " Critical",
+                        color: "#d9534f"
+                    }],
+                    options);
+            var plotObj = $.plot($("#severity_high"), [{
+                        data: high,
+                        label: " High",
+                        color: "#f0ad4e"
+                    }],
+                    options);
+            var plotObj = $.plot($("#severity_medium"), [{
+                        data: medium,
+                        label: " Medium",
+                        color: "#f0de28"
+                    }],
+                    options);
+
+        }
+        ;
+
+        function test_type() {
+
+            var data = []
+            {% for x, y in test_data.items %}
+                {% if y > 0 %}
+                    data.push(['{{x}}', {{ y }}]);
+                {%  endif %}
+            {% endfor %}
+
+            $.plot('#test_type', [data], {
+                series: {
+                    stack: true,
+                    bars: {
+                        show: true,
+                        barWidth: .7,
+                        'align': "center",
+                    },
+
+                },
+                grid: {
+                    hoverable: false,
+                    borderWidth: 1,
+                    borderColor: '#e7e7e7',
+
+                },
+                tooltip: false,
+                legend: {
+                    show: false,
+                    position: "ne"
+                },
+                xaxis: {
+                    mode: "categories",
+                    tickLength: 4
+                },
+
+            });
+        }
 
         function finding_age() {
             var data = {};

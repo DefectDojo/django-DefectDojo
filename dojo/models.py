@@ -461,6 +461,9 @@ class Test(models.Model):
                 'url': reverse('view_test', args=(self.id,))}]
         return bc
 
+    def verified_finding_count(self):
+        return Finding.objects.filter(test=self, verified=True).count()
+
 
 class VA(models.Model):
     address = models.TextField(editable=False, default="none")
