@@ -44,11 +44,11 @@ that should give you an idea of how to use DefectDojo for your own team.
 
 # Getting Invovled
 
-We discuss updates and changes on the [DefectDojo OWASP Mailing List](https://lists.owasp.org/mailman/listinfo/owasp_defectdojo_project)
+We discuss updates and changes on the [DefectDojo OWASP Mailing List](https://lists.owasp.org/mailman/listinfo/owasp_defectdojo_project).
 
 # Available Plugins
 
-[Engagement Surveys](https://github.com/grendel513/defectDojo-engagement-survey) - A plugin that adds answerable surveys to engagements
+[Engagement Surveys](https://github.com/grendel513/defectDojo-engagement-survey) - A plugin that adds answerable surveys to engagements.
 
 # About Us
 
