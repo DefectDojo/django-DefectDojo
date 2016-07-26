@@ -3,7 +3,7 @@ from tastypie import fields
 from tastypie.authentication import ApiKeyAuthentication, MultiAuthentication, SessionAuthentication
 from tastypie.authorization import Authorization
 from tastypie.authorization import DjangoAuthorization
-from tastypie.constants import ALL
+from tastypie.constants import ALL, ALL_WITH_RELATIONS
 from tastypie.exceptions import Unauthorized
 from tastypie.resources import ModelResource
 from tastypie.serializers import Serializer
@@ -374,7 +374,8 @@ class TestResource(BaseModelResource):
             'target_end': ALL,
             'notes': ALL,
             'percent_complete': ALL,
-            'actual_time': ALL
+            'actual_time': ALL,
+            'engagement': ALL,
         }
         authentication = DojoApiKeyAuthentication()
         authorization = DjangoAuthorization()
@@ -413,6 +414,8 @@ class FindingResource(BaseModelResource):
     reporter = fields.ForeignKey(UserResource, 'reporter', null=False)
     test = fields.ForeignKey(TestResource, 'test', null=False)
     risk_acceptance = fields.ManyToManyField(RiskAcceptanceResource, 'risk_acceptance', null=True)
+    product = fields.ForeignKey(ProductResource, 'test__engagement__product', full=False, null=False)
+    engagement = fields.ForeignKey(EngagementResource, 'test__engagement', full=False, null=False)
 
     class Meta:
         resource_name = 'findings'
@@ -430,7 +433,7 @@ class FindingResource(BaseModelResource):
             'description': ALL,
             'mitigated': ALL,
             'endpoint': ALL,
-            'test': ALL,
+            'test': ALL_WITH_RELATIONS,
             'active': ALL,
             'verified': ALL,
             'false_p': ALL,
@@ -438,7 +441,9 @@ class FindingResource(BaseModelResource):
             'url': ALL,
             'out_of_scope': ALL,
             'duplicate': ALL,
-            'risk_acceptance': ALL
+            'risk_acceptance': ALL,
+            'engagement': ALL_WITH_RELATIONS,
+            'product': ALL_WITH_RELATIONS
         }
         authentication = DojoApiKeyAuthentication()
         authorization = DjangoAuthorization()
