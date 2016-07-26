@@ -98,6 +98,15 @@ def view_product(request, pid):
                                                duplicate=False,
                                                out_of_scope=False).order_by("date")
 
+    week_date = end_date - timedelta(days=7)  # seven days and newer are considered "new"
+
+    new_verified_findings = Finding.objects.filter(test__engagement__product=prod,
+                                                   date__range=[week_date, end_date],
+                                                   false_p=False,
+                                                   verified=True,
+                                                   duplicate=False,
+                                                   out_of_scope=False).order_by("date")
+
     open_findings = Finding.objects.filter(test__engagement__product=prod,
                                            date__range=[start_date, end_date],
                                            false_p=False,
@@ -126,6 +135,7 @@ def view_product(request, pid):
     add_breadcrumb(parent=prod, top_level=False, request=request)
 
     open_close_weekly = OrderedDict()
+    new_weekly = OrderedDict()
     severity_weekly = OrderedDict()
     critical_weekly = OrderedDict()
     high_weekly = OrderedDict()
@@ -212,6 +222,8 @@ def view_product(request, pid):
                    'open_findings': open_findings,
                    'closed_findings': closed_findings,
                    'accepted_findings': accepted_findings,
+                   'new_findings': new_verified_findings,
+                   'start_date': start_date,
                    'punchcard': punchcard,
                    'ticks': ticks,
                    'highest_count': highest_count,
