@@ -10,7 +10,7 @@ from tastypie.serializers import Serializer
 from tastypie.validation import CleanedDataFormValidation
 
 from dojo.models import Product, Engagement, Test, Finding, \
-    User, ScanSettings, IPScan, Scan, Stub_Finding
+    User, ScanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance
 from dojo.forms import ProductForm, EngForm2, TestForm, \
     ScanSettingsForm, FindingForm, StubFindingForm
 
@@ -386,6 +386,14 @@ class TestResource(BaseModelResource):
         return bundle
 
 
+class RiskAcceptanceResource(BaseModelResource):
+    class Meta:
+        resource_name = 'risk_acceptances'
+        list_allowed_methods = ['get']
+        detail_allowed_methods = ['get']
+        queryset = Risk_Acceptance.objects.all().order_by('created')
+
+
 """
     /api/v1/findings/
     GET [/id/], DELETE [/id/]
@@ -404,6 +412,7 @@ class TestResource(BaseModelResource):
 class FindingResource(BaseModelResource):
     reporter = fields.ForeignKey(UserResource, 'reporter', null=False)
     test = fields.ForeignKey(TestResource, 'test', null=False)
+    risk_acceptance = fields.ManyToManyField(RiskAcceptanceResource, 'risk_acceptance', null=True)
 
     class Meta:
         resource_name = 'findings'
@@ -427,6 +436,9 @@ class FindingResource(BaseModelResource):
             'false_p': ALL,
             'reporter': ALL,
             'url': ALL,
+            'out_of_scope': ALL,
+            'duplicate': ALL,
+            'risk_acceptance': ALL
         }
         authentication = DojoApiKeyAuthentication()
         authorization = DjangoAuthorization()

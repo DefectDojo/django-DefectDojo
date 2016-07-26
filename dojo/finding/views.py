@@ -44,6 +44,7 @@ def open_findings(request):
                                       false_p=False,
                                       duplicate=False,
                                       out_of_scope=False)
+
     if request.user.is_staff:
         findings = OpenFingingSuperFilter(request.GET, queryset=findings, user=request.user)
     else:
@@ -85,10 +86,7 @@ engineer
 def accepted_findings(request):
     user = request.user
 
-    fids = [finding.id for ra in
-            Risk_Acceptance.objects.all()
-            for finding in ra.accepted_findings.all()]
-    findings = Finding.objects.filter(id__in=fids)
+    findings = Finding.objects.filter(risk_acceptance__isnull=False)
     findings = AcceptedFingingSuperFilter(request.GET, queryset=findings)
     title_words = [word for ra in
                    Risk_Acceptance.objects.all()
