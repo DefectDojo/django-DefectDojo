@@ -435,7 +435,7 @@ class EngForm2(forms.ModelForm):
     lead = forms.ModelChoiceField(
         queryset=User.objects.exclude(is_staff=False),
         required=True, label="Testing Lead")
-    test_strategy = forms.URLField(required=True, label="Test Strategy URL")
+    test_strategy = forms.URLField(required=False, label="Test Strategy URL")
 
     class Meta:
         model = Engagement
