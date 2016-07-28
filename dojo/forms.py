@@ -221,6 +221,8 @@ class ImportScanForm(forms.Form):
     minimum_severity = forms.ChoiceField(help_text='Minimum severity level to be imported',
                                          required=True,
                                          choices=SEVERITY_CHOICES[0:4])
+    active = forms.BooleanField(help_text="Select if these findings are currently active.", required=False)
+    verified = forms.BooleanField(help_text="Select if these findings have been verified.", required=False)
     scan_type = forms.ChoiceField(required=True, choices=SCAN_TYPE_CHOICES)
     file = forms.FileField(widget=forms.widgets.FileInput(
         attrs={"accept": ".xml, .csv, .nessus"}),
