@@ -1,6 +1,7 @@
 import re
 from datetime import datetime, date
 from urlparse import urlsplit, urlunsplit
+
 from dateutil.relativedelta import relativedelta
 from django import forms
 from django.core import validators
@@ -9,6 +10,9 @@ from django.forms.widgets import Widget, Select
 from django.utils.dates import MONTHS
 from django.utils.safestring import mark_safe
 from pytz import timezone
+from tagging.forms import TagField
+from custom_field.models import CustomField
+
 from dojo import settings
 from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
@@ -150,6 +154,8 @@ class ProductForm(forms.ModelForm):
     name = forms.CharField(max_length=50, required=True)
     description = forms.CharField(widget=forms.Textarea(attrs={}),
                                   required=True)
+    tags = TagField(required=False,
+                    help_text="Add tags that help describe this product.  Separeate each tag with a comma.")
     prod_type = forms.ModelChoiceField(label='Product Type',
                                        queryset=Product_Type.objects.all(),
                                        required=True)
@@ -171,7 +177,8 @@ class ProductForm(forms.ModelForm):
 
     class Meta:
         model = Product
-        fields = ['name', 'description', 'prod_manager', 'tech_contact', 'manager', 'prod_type', 'authorized_users']
+        fields = ['name', 'description', 'tags', 'prod_manager', 'tech_contact', 'manager', 'prod_type',
+                  'authorized_users']
 
 
 class DeleteProductForm(forms.ModelForm):
@@ -182,6 +189,15 @@ class DeleteProductForm(forms.ModelForm):
         model = Product
         exclude = ['name', 'description', 'prod_manager', 'tech_contact', 'manager', 'created',
                    'prod_type', 'updated', 'tid', 'authorized_users']
+
+
+class ProductMetaDataForm(forms.ModelForm):
+    value = forms.CharField(widget=forms.Textarea(attrs={}),
+                            required=True)
+
+    class Meta:
+        model = CustomField
+        exclude = ['field_type', 'content_type', 'default_value', 'is_required', 'field_choices']
 
 
 class Product_TypeProductForm(forms.ModelForm):
@@ -224,6 +240,7 @@ class ImportScanForm(forms.Form):
     active = forms.BooleanField(help_text="Select if these findings are currently active.", required=False)
     verified = forms.BooleanField(help_text="Select if these findings have been verified.", required=False)
     scan_type = forms.ChoiceField(required=True, choices=SCAN_TYPE_CHOICES)
+    tags = TagField(required=False, help_text="Add tags to help describe this test.  Separate tags with a comma.")
     file = forms.FileField(widget=forms.widgets.FileInput(
         attrs={"accept": ".xml, .csv, .nessus"}),
         label="Choose report file",
@@ -427,6 +444,8 @@ class EngForm2(forms.ModelForm):
                            help_text="Add a descriptive name to identify " +
                                      "this engagement. Without a name the target " +
                                      "start date will be used in listings.")
+    tags = TagField(required=False,
+                    help_text="Add tags that help describe this engagement.  Separeate each tag with a comma.")
     product = forms.ModelChoiceField(queryset=Product.objects.all())
     target_start = forms.DateField(widget=forms.TextInput(
         attrs={'class': 'datepicker'}))
@@ -465,10 +484,11 @@ class TestForm(forms.ModelForm):
         attrs={'class': 'datepicker'}))
     target_end = forms.DateTimeField(widget=forms.TextInput(
         attrs={'class': 'datepicker'}))
+    tags = TagField(required=False, help_text="Add tags to help describe Test.  Separate tags with commas.")
 
     class Meta:
         model = Test
-        fields = ['test_type', 'target_start', 'target_end', 'environment', 'percent_complete']
+        fields = ['test_type', 'target_start', 'target_end', 'environment', 'percent_complete', 'tags']
 
 
 class DeleteTestForm(forms.ModelForm):
@@ -571,9 +591,9 @@ class FindingForm(forms.ModelForm):
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
                                                widget=MultipleSelectWithPopPlusMinus(attrs={'size': '11'}))
     references = forms.CharField(widget=forms.Textarea, required=False)
+    tags = TagField(required=False, help_text="Add tags that help describe this Finding.  Separate each with a comma.")
     is_template = forms.BooleanField(label="Create Template?", required=False,
                                      help_text="A new finding template will be created from this finding.")
-
 
     def clean(self):
         cleaned_data = super(FindingForm, self).clean()
@@ -613,6 +633,7 @@ class StubFindingForm(forms.ModelForm):
 
 class FindingTemplateForm(forms.ModelForm):
     title = forms.CharField(max_length=1000, required=True)
+    tags = TagField(required=False, help_text="Add tags to help describe this template.  Separate tags with commas.")
     cwe = forms.IntegerField(label="CWE", required=False)
     severity_options = (('Low', 'Low'), ('Medium', 'Medium'),
                         ('High', 'High'), ('Critical', 'Critical'))
@@ -639,6 +660,9 @@ class DeleteFindingTemplateForm(forms.ModelForm):
 
 
 class EditEndpointForm(forms.ModelForm):
+    tags = TagField(required=False,
+                    help_text="Add tags that help describe this product.  Separeate each tag with a comma.")
+
     class Meta:
         model = Endpoint
         exclude = ['product']
@@ -706,7 +730,7 @@ class EditEndpointForm(forms.ModelForm):
                                            query=query,
                                            fragment=fragment,
                                            product=self.product)
-        if endpoint.count() > 0:
+        if endpoint.count() > 0 and not self.instance:
             raise forms.ValidationError(
                 'It appears as though an endpoint with this data already exists for this product.',
                 code='invalid')
@@ -722,6 +746,8 @@ class AddEndpointForm(forms.Form):
     product = forms.CharField(required=True,
                               widget=forms.widgets.HiddenInput(), help_text="The product this endpoint should be "
                                                                             "associated with.")
+    tags = TagField(required=False,
+                    help_text="Add tags that help describe this endpoint.  Separeate each tag with a comma.")
 
     def __init__(self, *args, **kwargs):
         product = None
@@ -1006,3 +1032,7 @@ class DeleteReportForm(forms.ModelForm):
     class Meta:
         model = Report
         fields = ('id',)
+
+
+class TagForm(forms.Form):
+    tags = TagField(required=False, help_text="Add comma delimited tags")

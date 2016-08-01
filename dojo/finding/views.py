@@ -231,6 +231,7 @@ def reopen_finding(request, fid):
 def delete_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     tid = finding.test.id
+    del finding.tags
     finding.delete()
     messages.add_message(request,
                          messages.SUCCESS,
@@ -243,6 +244,7 @@ def delete_finding(request, fid):
 def edit_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     form = FindingForm(instance=finding)
+    form.initial['tags'] = ", ".join([tag.name for tag in finding.tags])
     form_error = False
     if request.method == 'POST':
         form = FindingForm(request.POST, instance=finding)
@@ -265,7 +267,12 @@ def edit_finding(request, fid):
             new_finding.endpoints = form.cleaned_data['endpoints']
             new_finding.last_reviewed = datetime.now(tz=localtz)
             new_finding.last_reviewed_by = request.user
+            tags = form.cleaned_data['tags']
+            new_finding.tags = tags
             new_finding.save()
+
+            tags = form.cleaned_data['tags']
+            new_finding.tags = tags
 
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -329,7 +336,7 @@ def mktemplate(request, fid):
     if len(templates) > 0:
         messages.add_message(request,
                              messages.ERROR,
-                             'A finding with that title already exists.',
+                             'A finding template with that title already exists.',
                              extra_tags='alert-danger')
     else:
         template = Finding_Template(title=finding.title,
@@ -341,6 +348,7 @@ def mktemplate(request, fid):
                                     references=finding.references,
                                     numerical_severity=finding.numerical_severity)
         template.save()
+        template.tags = finding.tags
         messages.add_message(request,
                              messages.SUCCESS,
                              mark_safe('Finding template added successfully. You may edit it <a href="%s">here</a>.' %
@@ -369,6 +377,7 @@ def delete_finding_note(request, tid, nid):
 def delete_stub_finding(request, fid):
     finding = get_object_or_404(Stub_Finding, id=fid)
     tid = finding.test.id
+    del finding.tags
     finding.delete()
     messages.add_message(request,
                          messages.SUCCESS,
@@ -462,6 +471,7 @@ def add_template(request):
             template = form.save(commit=False)
             template.numerical_severity = Finding.get_numerical_severity(template.severity)
             template.save()
+            template.tags = form.cleaned_data['tags']
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Template created successfully.',
@@ -488,6 +498,7 @@ def edit_template(request, tid):
         if form.is_valid():
             template = form.save(commit=False)
             template.numerical_severity = Finding.get_numerical_severity(template.severity)
+            template.tags = form.cleaned_data['tags']
             template.save()
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -516,6 +527,7 @@ def delete_template(request, tid):
     if request.method == 'POST':
         form = DeleteFindingTemplateForm(request.POST, instance=template)
         if form.is_valid():
+            del template.tags
             template.delete()
             messages.add_message(request,
                                  messages.SUCCESS,

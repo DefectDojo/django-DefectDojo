@@ -151,11 +151,14 @@ def edit_endpoint(request, eid):
         form = EditEndpointForm(request.POST, instance=endpoint)
         if form.is_valid():
             form.save()
+            tags = form.cleaned_data['tags']
+            endpoint.tags = tags
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Endpoint updated successfully.',
                                  extra_tags='alert-success')
     add_breadcrumb(parent=endpoint, title="Edit", top_level=False, request=request)
+    form.initial['tags'] = ", ".join([tag.name for tag in endpoint.tags])
     return render(request,
                   "dojo/edit_endpoint.html",
                   {"endpoint": endpoint,
@@ -180,6 +183,7 @@ def delete_endpoint(request, eid):
         if 'id' in request.POST and str(endpoint.id) == request.POST['id']:
             form = DeleteEndpointForm(request.POST, instance=endpoint)
             if form.is_valid():
+                del endpoint.tags
                 endpoint.delete()
                 messages.add_message(request,
                                      messages.SUCCESS,
@@ -209,6 +213,9 @@ def add_endpoint(request, pid):
         form = AddEndpointForm(request.POST, product=product)
         if form.is_valid():
             endpoints = form.save()
+            tags = form.cleaned_data['tags']
+            for e in endpoints:
+                e.tags = tags
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Endpoint added successfully.',
@@ -232,7 +239,10 @@ def add_product_endpoint(request):
     if request.method == 'POST':
         form = AddEndpointForm(request.POST)
         if form.is_valid():
-            form.save()
+            endpoints = form.save()
+            tags = form.cleaned_data['tags']
+            for e in endpoints:
+                e.tags = tags
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Endpoint added successfully.',

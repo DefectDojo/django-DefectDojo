@@ -12,16 +12,25 @@
         <ul class="nav nav-tabs" role="tablist">
             {% if products %}
                 <li class="active" role="presentation"><a role="tab" data-toggle="tab"
-                                                                                         href="#tabs">Product Results</a>
+                                                          href="#tabs">Product Results</a>
                 </li>
             {% endif %}
             {% if findings %}
-                <li role="presentation" {% if not products %}class="active"{% endif %}><a href="#tabs-1" role="tab" data-toggle="tab">Finding
+                <li role="presentation" {% if not products %}class="active"{% endif %}><a href="#tabs-1" role="tab"
+                                                                                          data-toggle="tab">Finding
                     Results</a></li>
             {% endif %}
             {% if tests %}
-                <li {% if not findings and not products %}class="active"{% endif %} role="presentation"><a role="tab" data-toggle="tab"
-                                                                                         href="#tabs-2">Test Results</a>
+                <li {% if not findings and not products %}class="active"{% endif %} role="presentation"><a role="tab"
+                                                                                                           data-toggle="tab"
+                                                                                                           href="#tabs-2">Test
+                    Results</a>
+                </li>
+            {% endif %}
+            {% if tagged_findings or tagged_products or tagged_tests or tagged_endpoints or tagged_engagements %}
+                <li {% if not findings and not products and not tests %}class="active"{% endif %} role="presentation"><a
+                        role="tab" data-toggle="tab"
+                        href="#tabs-3">Tagged Results</a>
                 </li>
             {% endif %}
         </ul>
@@ -40,7 +49,8 @@
                         {% for product in products %}
                             <tr>
                                 <td><a class="search-finding"
-                                       href="{%  url 'view_product' product.object.id %}">{{ product.object.name }}</a></td>
+                                       href="{% url 'view_product' product.object.id %}">{{ product.object.name }}</a>
+                                </td>
                                 <td>{{ product.object.description|truncatechars:150 }}</td>
                             </tr>
                         {% endfor %}
@@ -49,7 +59,8 @@
                 </div>
             {% endif %}
             {% if findings %}
-                <div role="tabpanel" class="table-responsive tab-pane fade {% if not products %}active in{% endif %}" id="tabs-1">
+                <div role="tabpanel" class="table-responsive tab-pane fade {% if not products %}active in{% endif %}"
+                     id="tabs-1">
                     <table class="table table-bordered table-striped">
                         <thead>
                         <tr>
@@ -61,7 +72,8 @@
                         {% for finding in findings %}
                             <tr>
                                 <td><a class="search-finding"
-                                       href="{% url 'view_finding' finding.object.id %}">{{ finding.object.title }}</a></td>
+                                       href="{% url 'view_finding' finding.object.id %}">{{ finding.object.title }}</a>
+                                </td>
                                 <td>{{ finding.object.date }}</td>
                             </tr>
                         {% endfor %}
@@ -70,7 +82,9 @@
                 </div>
             {% endif %}
             {% if tests %}
-                <div role="tabpanel" class="table-responsive tab-pane fade {% if not findings and not products %}in active {% endif %}" id="tabs-2">
+                <div role="tabpanel"
+                     class="table-responsive tab-pane fade {% if not findings and not products %}in active {% endif %}"
+                     id="tabs-2">
                     <table class="table table-bordered table-striped">
                         <thead>
                         <tr>
@@ -81,9 +95,92 @@
                         <tbody>
                         {% for test in tests %}
                             <tr>
-                                <td><a class="search-finding" href="{% url 'view_test' test.object.id %}">{{ test.object.test_type }}</a>
+                                <td><a class="search-finding"
+                                       href="{% url 'view_test' test.object.id %}">{{ test.object.test_type }}</a>
                                 </td>
-                                <td>{{ test.object.target_start }} {{ test.url }}</td>
+                                <td>{{ test.object.target_start }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+            {% if tagged_findings or tagged_products or tagged_tests or tagged_endpoints or tagged_engagements %}
+                <div role="tabpanel"
+                     class="table-responsive tab-pane fade {% if not findings and not products and not tests %}in active {% endif %}"
+                     id="tabs-3">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Type</th>
+                            <th>Tags</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for test in tagged_tests %}
+                            <tr>
+                                <td><a class="search-finding"
+                                       href="{% url 'view_test' test.id %}">{{ test.test_type }}</a>
+                                </td>
+                                <td>Test</td>
+                                <td>
+                                    {% for tag in test.tags %}
+                                        <span class="label label-primary">{{ tag }}</span>
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        {% for finding in tagged_findings %}
+                            <tr>
+                                <td><a class="search-finding"
+                                       href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a>
+                                </td>
+                                <td>Finding</td>
+                                <td>
+                                    {% for tag in finding.tags %}
+                                        <span class="label label-primary">{{ tag }}</span>
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        {% for product in tagged_products %}
+                            <tr>
+                                <td><a class="search-finding"
+                                       href="{% url 'view_product' product.id %}">{{ product.name }}</a>
+                                </td>
+                                <td>Product</td>
+                                <td>
+                                    {% for tag in product.tags %}
+                                        <span class="label label-primary">{{ tag }}</span>
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        {% for endpoint in tagged_endpoints %}
+                            <tr>
+                                <td><a class="search-finding"
+                                       href="{% url 'view_endpoint' endpoint.id %}">{{ endpoint }}</a>
+                                </td>
+                                <td>Endpoint</td>
+                                <td>
+                                    {% for tag in endpoint.tags %}
+                                        <span class="label label-primary">{{ tag }}</span>
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        {% for eng in tagged_engagements %}
+                            <tr>
+                                <td><a class="search-finding"
+                                       href="{% url 'view_engagement' eng.id %}">{{ eng }}</a>
+                                </td>
+                                <td>Engagement</td>
+                                <td>
+                                    {% for tag in eng.tags %}
+                                        <span class="label label-primary">{{ tag }}</span>
+                                    {% endfor %}
+                                </td>
                             </tr>
                         {% endfor %}
                         </tbody>

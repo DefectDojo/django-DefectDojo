@@ -9,7 +9,6 @@ LOGIN_REDIRECT_URL = '/'
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
-VERSION = '1.0.5'
 
 # Uncomment this line if you enable SSL
 # SESSION_COOKIE_SECURE = True
@@ -193,6 +192,8 @@ INSTALLED_APPS = (
     'dojo',
     'tastypie_swagger',
     'watson',
+    'tagging',
+    'custom_field',
 )
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -220,6 +221,11 @@ CELERY_ACCEPT_CONTENT = ['pickle', 'json', 'msgpack', 'yaml']
 
 # wkhtmltopdf settings
 WKHTMLTOPDF_PATH = '/usr/local/bin/wkhtmltopdf'
+
+# django-tagging settings
+FORCE_LOWERCASE_TAGS = True
+MAX_TAG_LENGTH = 25
+
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to

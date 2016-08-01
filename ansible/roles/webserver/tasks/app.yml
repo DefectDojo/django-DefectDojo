@@ -138,6 +138,16 @@
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
+- name: Install django-tagging
+  pip: name=django-tagging version=0.4.3 virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ dd_user }}'
+
+- name: Install django-custom-field
+  pip: name=django-custom-field version=2.9 virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ dd_user }}'
+
 - name: Install celery
   pip: name=celery virtualenv={{ venv_dir }}
   sudo: yes

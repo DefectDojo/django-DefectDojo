@@ -192,6 +192,8 @@ INSTALLED_APPS = (
     'dojo',
     'tastypie_swagger',
     'watson',
+    'tagging',
+    'custom_field',
 )
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -218,6 +220,11 @@ CELERYBEAT_SCHEDULE_FILENAME = DOJO_ROOT + '/dojo.celery.beat.db'
 
 # wkhtmltopdf settings
 WKHTMLTOPDF_PATH = '/usr/local/bin/wkhtmltopdf'
+
+# django-tagging settings
+FORCE_LOWERCASE_TAGS = True
+MAX_TAG_LENGTH = 25
+
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to

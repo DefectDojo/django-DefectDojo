@@ -43,8 +43,13 @@ def linebreaksasciidocbr(value, autoescape=None):
 
 @register.simple_tag
 def dojo_version():
-    from dojo.settings import VERSION
-    return 'v. ' + VERSION
+    from dojo import __version__
+    return 'v. ' + __version__
+
+@register.simple_tag
+def dojo_docs_url():
+    from dojo import __docs__
+    return mark_safe(__docs__)
 
 @register.filter
 def content_type(obj):
