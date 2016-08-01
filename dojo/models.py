@@ -1,18 +1,20 @@
 import base64
-from datetime import datetime
 import os
-
 import re
+from datetime import datetime
+
+import watson
+from auditlog.registry import auditlog
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Q
 from django.utils.timezone import now
 from pytz import timezone
-from auditlog.registry import auditlog
-import watson
+from tagging.registry import register as tag_register
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -772,6 +774,14 @@ auditlog.register(Finding)
 auditlog.register(Product)
 auditlog.register(Test)
 auditlog.register(Risk_Acceptance)
+
+# Register tagging for models
+tag_register(Product)
+tag_register(Test)
+tag_register(Finding)
+tag_register(Engagement)
+tag_register(Endpoint)
+tag_register(Finding_Template)
 
 admin.site.register(Test)
 admin.site.register(Finding)

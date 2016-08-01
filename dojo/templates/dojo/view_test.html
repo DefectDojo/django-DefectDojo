@@ -96,6 +96,18 @@
             </table>
         </div>
     </div>
+    {% if test.tags %}
+        <div class="panel panel-default to_highlight">
+            <div class="panel-heading">
+                <h4>Tags</h4>
+            </div>
+            <div class="tags panel-body">
+                {% for tag in test.tags %}
+                    <span class="label label-primary">{{ tag }}</span>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
     <div class="panel panel-default to_highlight table-responsive">
         <div class="panel-heading">
             <div class="clearfix">
@@ -191,7 +203,7 @@
                             <input type="hidden" value="/api/v1/users/{{ request.user.id }}/"
                                    name="reporter"/>
                             <input type="hidden" value="/api/v1/tests/{{ test.id }}/" name="test"/>
-                                <span class="input-group-btn">
+                            <span class="input-group-btn">
                                     <button id="the_button" class="btn btn-success" type="submit"><i id="fa-icon"
                                                                                                      class="fa fa-fw fa-plus"></i>
                                         Add Potential Finding

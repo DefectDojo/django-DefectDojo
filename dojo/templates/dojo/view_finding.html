@@ -125,6 +125,24 @@
         </div>
     </div>
 
+    {% if finding.tags %}
+        <div class="row to_highlight">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4>
+                            Tags
+                        </h4>
+                    </div>
+                    <div class="tags panel-body">
+                        {% for tag in finding.tags %}
+                            <span class="label label-primary">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
 
     <div class="row to_highlight">
         <div class="col-md-12">
@@ -138,7 +156,8 @@
 
                 {% if  finding.endpoints.all %}
                     {% colgroup finding.endpoints.all into 3 cols as grouped_items %}
-                    <table id="vuln_endpoints" class="collapse in table-striped table table table-condensed table-hover finding-endpoints">
+                    <table id="vuln_endpoints"
+                           class="collapse in table-striped table table table-condensed table-hover finding-endpoints">
                         {% for row in grouped_items %}
                             <tr>
                                 {% for item in row %}
@@ -164,7 +183,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h4>Description <span class="pull-right"><a data-toggle="collapse" href="#vuln_desc"><i
-                                class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
+                        class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
             </div>
             <div id="vuln_desc" class="panel-body finding-description collapse in">
                 <pre>{{ finding.description }}</pre>
@@ -174,7 +193,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h4>Mitigation <span class="pull-right"><a data-toggle="collapse" href="#vuln_mitigation"><i
-                                class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
+                        class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
             </div>
             <div id="vuln_mitigation" class="panel-body collapse in">
                 <pre>{{ finding.mitigation }}</pre>
@@ -191,7 +210,7 @@
                         <div class="panel panel-default">
                             <div class="panel-heading">
                                 <h4>Request #{{ forloop.counter }}<span class="pull-right">
-                                    <a data-toggle="collapse"  href="#vuln_req_{{ forloop.counter }}">
+                                    <a data-toggle="collapse" href="#vuln_req_{{ forloop.counter }}">
                                         <i class="glyphicon glyphicon-chevron-down"></i></a></span></h4>
                             </div>
                             <div id="vuln_req_{{ forloop.counter }}" class="panel-body collapse">
@@ -201,7 +220,7 @@
                         <div class="panel panel-default">
                             <div class="panel-heading">
                                 <h4>Response #{{ forloop.counter }}<span class="pull-right">
-                                    <a data-toggle="collapse"  href="#vuln_res_{{ forloop.counter }}">
+                                    <a data-toggle="collapse" href="#vuln_res_{{ forloop.counter }}">
                                         <i class="glyphicon glyphicon-chevron-down"></i></a></span></h4>
                             </div>
 
@@ -216,7 +235,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h4>Impact <span class="pull-right"><a data-toggle="collapse" href="#vuln_impact"><i
-                                class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
+                        class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
             </div>
             <div id="vuln_impact" class="panel-body collapse in">
                 <pre>{{ finding.impact }}</pre>
@@ -225,7 +244,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h4>References <span class="pull-right"><a data-toggle="collapse" href="#vuln_refs"><i
-                                class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
+                        class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
             </div>
             <div id="vuln_refs" class="panel-body collapse in">
                 <pre>{{ finding.references }}</pre>
@@ -238,7 +257,7 @@
     <div class="panel panel-default to_highlight table-responsive">
         <div class="panel-heading">
             <h4>Notes <span class="pull-right"><a data-toggle="collapse" href="#vuln_notes"><i
-                                class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
+                    class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
         </div>
         <div id="vuln_notes" class="panel-body collapse in">
             {% if notes %}
@@ -302,8 +321,8 @@
             $('input#simple_search').val(terms);
         }
 
-        $(document).ready(function(){
-            $("a[data-toggle='collapse']").on('click', function(){
+        $(document).ready(function () {
+            $("a[data-toggle='collapse']").on('click', function () {
                 var i = $($(this).find('i').get(0));
                 i.toggleClass('glyphicon-chevron-up').toggleClass('glyphicon-chevron-down');
             })

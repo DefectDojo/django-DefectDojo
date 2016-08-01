@@ -85,7 +85,7 @@
     </div>
 
     <div class="row same-height-panel-row">
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h4>Testing Lead:
@@ -113,7 +113,7 @@
                 </div>
             </div>
         </div>
-        <div id="test-strategy" class="col-md-4">
+        <div id="test-strategy" class="col-md-3">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h4> Test Strategy </h4>
@@ -132,7 +132,7 @@
                 </div>
             </div>
         </div>
-        <div id="threat-model" class="col-md-4">
+        <div id="threat-model" class="col-md-3">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h4> Threat Model </h4>
@@ -151,6 +151,20 @@
                 </div>
             </div>
         </div>
+        {% if eng.tags %}
+            <div class="col-md-3">
+                <div class="panel panel-default tags">
+                    <div class="panel-heading">
+                        <h4>Tags</h4>
+                    </div>
+                    <div class="tags panel-body">
+                        {% for tag in eng.tags %}
+                            <span class="label label-primary">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
     </div>
 
     <div class="row">
@@ -234,7 +248,7 @@
         <div id="checklist" class="col-md-12">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h4 > Check List
+                    <h4> Check List
                         {% if check %}
                             <a title="Edit Checklist" class="btn btn-primary pull-right"
                                href="{% url 'complete_checklist' eng.id %}">
@@ -309,7 +323,7 @@
         <div id="risk" class="col-md-12">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h4 > Risk Acceptance
+                    <h4> Risk Acceptance
                         {% if can_add_risk %}
                             <a title="Add Risk Acceptance" class="pull-right btn btn-sm btn-primary"
                                href="{% url 'upload_risk_acceptance$' eng.id %}"><span class="fa fa-plus"></span></a>

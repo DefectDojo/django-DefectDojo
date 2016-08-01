@@ -150,6 +150,19 @@
 
     </div>
 
+    {% if endpoint.tags %}
+        <div class="panel panel-default tags">
+            <div class="panel-heading">
+                <h4>Tags</h4>
+            </div>
+            <div class="tags panel-body">
+                {% for tag in endpoint.tags %}
+                    <span class="label label-primary">{{ tag }}</span>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
     <div class="panel panel-default table-responsive">
         <div class="panel-heading">
             <h4>Active Findings</h4>

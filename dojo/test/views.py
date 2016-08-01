@@ -81,7 +81,8 @@ def edit_test(request, tid):
     if request.method == 'POST':
         form = TestForm(request.POST, instance=test)
         if form.is_valid():
-            form.save()
+            new_test = form.save()
+            new_test.tags = form.cleaned_data['tags']
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Test saved.',
@@ -89,6 +90,7 @@ def edit_test(request, tid):
 
     form.initial['target_start'] = test.target_start.date()
     form.initial['target_end'] = test.target_end.date()
+    form.initial['tags'] = ", ".join([tag.name for tag in test.tags])
 
     add_breadcrumb(parent=test, title="Edit", top_level=False, request=request)
     return render(request, 'dojo/edit_test.html',
@@ -114,6 +116,7 @@ def delete_test(request, tid):
         if 'id' in request.POST and str(test.id) == request.POST['id']:
             form = DeleteTestForm(request.POST, instance=test)
             if form.is_valid():
+                del test.tags
                 test.delete()
                 messages.add_message(request,
                                      messages.SUCCESS,
