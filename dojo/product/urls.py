@@ -18,4 +18,6 @@ urlpatterns = [
         name='new_eng_for_prod'),
     url(r'^product/(?P<pid>\d+)/add_meta_data', views.add_meta_data,
         name='add_meta_data'),
+    url(r'^product/(?P<pid>\d+)/edit_meta_data', views.edit_meta_data,
+        name='edit_meta_data'),
 ]

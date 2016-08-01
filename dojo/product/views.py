@@ -84,7 +84,9 @@ def view_product(request, pid):
     product_metadata = {}
 
     for cf in product_cf:
-        product_metadata[cf.name] = cf.get_value_for_object(prod).value
+        cfv = CustomFieldValue.objects.filter(field=cf, object_id=prod.id)
+        if len(cfv):
+            product_metadata[cf.name] = cfv[0].value
 
     try:
         start_date = Finding.objects.filter(test__engagement__product=prod).order_by('date')[:1][0].date
@@ -392,18 +394,18 @@ def add_meta_data(request, pid):
     if request.method == 'POST':
         form = ProductMetaDataForm(request.POST)
         if form.is_valid():
-            cf = form.save(commit=False)
-            cf.content_type = ct
-            cf.field_type = 'a'  # large text area
+            cf, created = CustomField.objects.get_or_create(name=form.cleaned_data['name'],
+                                                   content_type=ct,
+                                                   field_type='a')
             cf.save()
-            cfv = CustomFieldValue.objects.create(field=cf,
-                                                  value=form.cleaned_data['value'],
-                                                  object_id=prod.id)
+            cfv, created = CustomFieldValue.objects.get_or_create(field=cf,
+                                                         object_id=prod.id)
+            cfv.value = form.cleaned_data['value']
             cfv.clean()
             cfv.save()
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 'Meta data added successfully.',
+                                 'Metadata added successfully.',
                                  extra_tags='alert-success')
             if 'add_another' in request.POST:
                 return HttpResponseRedirect(reverse('add_meta_data', args=(pid,)))
@@ -412,10 +414,50 @@ def add_meta_data(request, pid):
     else:
         form = ProductMetaDataForm(initial={'content_type': prod})
 
-    add_breadcrumb(parent=prod, title="Add Meta Data", top_level=False, request=request)
+    add_breadcrumb(parent=prod, title="Add Metadata", top_level=False, request=request)
 
     return render(request,
                   'dojo/add_product_meta_data.html',
                   {'form': form,
                    'product': prod,
+                   })
+
+
+@user_passes_test(lambda u: u.is_staff)
+def edit_meta_data(request, pid):
+    prod = Product.objects.get(id=pid)
+    ct = ContentType.objects.get_for_model(prod)
+
+    product_cf = CustomField.objects.filter(content_type=ct)
+    product_metadata = {}
+
+    for cf in product_cf:
+        cfv = CustomFieldValue.objects.filter(field=cf, object_id=prod.id)
+        if len(cfv):
+            product_metadata[cf] = cfv[0]
+
+    if request.method == 'POST':
+        for key, value in request.POST.iteritems():
+            if key.startswith('cfv_'):
+                cfv_id = int(key.split('_')[1])
+                cfv = get_object_or_404(CustomFieldValue, id=cfv_id)
+
+                value = value.strip()
+                if value:
+                    cfv.value = value
+                    cfv.save()
+                else:
+                    cfv.delete()
+        messages.add_message(request,
+                             messages.SUCCESS,
+                             'Metadata edited successfully.',
+                             extra_tags='alert-success')
+        return HttpResponseRedirect(reverse('view_product', args=(pid,)))
+
+    add_breadcrumb(parent=prod, title="Edit Metadata", top_level=False, request=request)
+
+    return render(request,
+                  'dojo/edit_product_meta_data.html',
+                  {'product': prod,
+                   'product_metadata': product_metadata,
                    })

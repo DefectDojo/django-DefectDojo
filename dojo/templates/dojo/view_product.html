@@ -365,25 +365,38 @@
             </div>
         </div>
     </div>
-    <div class="row">
-        <div class="col-md-12">
-            <div class="panel panel-default table-responsive">
-                <div class="panel-heading">
-                    <h4>Additional Information</h4>
-                </div>
+    {% if product_metadata %}
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default table-responsive">
+                    <div class="panel-heading">
+                        <h4>Additional Information
+                            <div class="btn-group pull-right">
+                                <a title="Edit Information" class="btn btn-sm btn-primary"
+                                   href="{% url 'edit_meta_data' prod.id %}">
+                                    <span class="fa fa-pencil-square-o"></span>
+                                </a>
+                                <a title="Add Information" class="btn btn-sm btn-primary"
+                                   href="{% url 'add_meta_data' prod.id %}">
+                                    <span class="fa fa-plus"></span>
+                                </a>
+                            </div>
+                        </h4>
+                    </div>
 
-                <div class="panel-body">
-                    {% for key, value in product_metadata.items %}
-                        <div class="col-md-2 centered">
-                            <b>{{ key }}</b><br/>
-                            {{ value }}
-                            <br/>&nbsp;
-                        </div>
-                    {% endfor %}
+                    <div class="panel-body">
+                        {% for key, value in product_metadata.items %}
+                            <div class="col-md-2 centered">
+                                <b>{{ key }}</b><br/>
+                                {{ value }}
+                                <br/>&nbsp;
+                            </div>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    {% endif %}
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
