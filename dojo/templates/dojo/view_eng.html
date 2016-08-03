@@ -371,4 +371,64 @@
         </div>
 
     </div>
+ <div class="row">
+        <div id="finding" class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4> Findings</h4>
+                </div>
+{% if findings %}
+            <table id="test_findings" class="table-bordered table table-condensed table-hover">
+
+
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Severity</th>
+                    <th>Reporter</th>
+                    <th>Mitigation Date</th>
+                    <th>Verified</th>
+                    <th>Active</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for finding in findings %}
+                    <tr class="{% if finding.active %}active_finding{% else %}inactive_finding{% endif %}">
+                        <td><a href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a></td>
+                        <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
+                            <span class="text-error">
+                        {% else %}<span>{% endif %}{{ finding.severity }}</span></td>
+                        <td>{{ finding.reporter.username }}</td>
+                        <td>{{ finding.mitigated }}</td>
+                        <td>{{ finding.verified }}</td>
+                        <td>{{ finding.active }}</td>
+                        <td>
+                            <div class="btn-group">
+                                <a class="btn btn-sm btn-primary"
+                                   href="{% url 'view_finding' finding.id %}">View</a>
+                                <a class="btn btn-sm btn-warning"
+                                   href="{% url 'edit_finding' finding.id %}">Edit</a>
+                                <a class="btn btn-sm btn-danger delete-finding"
+                                   href="{% url 'delete_finding' finding.id %}">Delete</a>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <div class="panel-body borderless">
+                {% include "dojo/paging_snippet.html" with page=findings %}
+            </div>
+        {% else %}
+            <div class="panel-body">
+                <p class="text-center">No findings found.</p>
+            </div>
+        {% endif %}
+            </div>
+
+        </div>
+
+    </div>
+
 {% endblock %}
