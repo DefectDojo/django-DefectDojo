@@ -180,9 +180,10 @@ def view_engagement(request, eid):
         eng.save()
 
     add_breadcrumb(parent=eng, top_level=False, request=request)
-
+    findings = Finding.objects.filter(test__engagement=eng, duplicate=False)
     return render(request, 'dojo/view_eng.html',
                   {'eng': eng, 'tests': tests,
+                   'findings': findings,
                    'check': check, 'threat': eng.tmodel_path,
                    'risk': eng.risk_path, 'form': form,
                    'risks_accepted': risks_accepted,
