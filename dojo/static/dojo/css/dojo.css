@@ -1116,3 +1116,9 @@ div.tags .label {
     display: inline-block;
     padding: .6em .3em;
 }
+
+@media (min-width: 768px) {
+    #findingImageModal .modal-dialog {
+        width: 50%;
+    }
+}
