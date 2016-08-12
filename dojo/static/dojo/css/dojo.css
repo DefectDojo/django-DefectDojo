@@ -1122,3 +1122,7 @@ div.tags .label {
         width: 50%;
     }
 }
+
+#finding_pic:hover {
+    cursor: zoom-in;
+}

@@ -72,9 +72,9 @@ def action_log_entry(value, autoescape=None):
     history = json.loads(value)
     text = ''
     for k in history.iterkeys():
-        text += k.capitalize() + ' changed from "' + history[k][0] + '" to "' + history[k][1] + '"<br/>'
+        text += k.capitalize() + ' changed from "' + history[k][0] + '" to "' + history[k][1] + '"'
 
-    return mark_safe(text)
+    return text
 
 
 @register.simple_tag(takes_context=True)

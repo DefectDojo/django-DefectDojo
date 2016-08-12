@@ -107,7 +107,7 @@ BOWER_COMPONENTS_ROOT = 'BOWERDIR'
 # what components should be installed
 BOWER_INSTALLED_APPS = (
     'fontawesome',
-    'startbootstrap-sb-admin-2',
+    'https://github.com/BlackrockDigital/startbootstrap-sb-admin-2.git',
     'fullcalendar',
     'jquery-cookie',
     'jquery-ui',
@@ -155,6 +155,7 @@ ROOT_URLCONF = 'dojo.urls'
 LOGIN_URL = '/login'
 LOGIN_EXEMPT_URLS = (
     r'^static/',
+    r'^media/',
     r'^metrics/all$',
     r'^metrics$',
     r'^metrics/product/type/(?P<mtype>\d+)$',
@@ -194,6 +195,7 @@ INSTALLED_APPS = (
     'watson',
     'tagging',
     'custom_field',
+    'imagekit',
 )
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

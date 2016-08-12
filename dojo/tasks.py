@@ -98,12 +98,13 @@ def async_custom_pdf_report(self,
                             host=None,
                             user=None,
                             uri=None,
-                            finding_notes=False):
+                            finding_notes=False,
+                            finding_images=False):
 
     config = pdfkit.configuration(wkhtmltopdf=settings.WKHTMLTOPDF_PATH)
 
     selected_widgets = report_widget_factory(json_data=report.options, request=None, user=user,
-                                             finding_notes=finding_notes)
+                                             finding_notes=finding_notes, finding_images=finding_images)
 
     widgets = selected_widgets.values()
     temp = None

@@ -647,6 +647,7 @@ class EndpointReportFilter(DojoFilter):
 
 
 class ReportFindingFilter(DojoFilter):
+    title = CharFilter(lookup_type='icontains', label='Name')
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     active = ReportBooleanFilter()
     mitigated = MitigatedDateRangeFilter()
@@ -658,10 +659,10 @@ class ReportFindingFilter(DojoFilter):
 
     class Meta:
         model = Finding
-        exclude = ['title', 'date', 'cwe', 'url', 'description', 'mitigation', 'impact',
+        exclude = ['date', 'cwe', 'url', 'description', 'mitigation', 'impact',
                    'endpoint', 'references', 'test', 'is_template',
                    'thread_id', 'notes', 'endpoints',
-                   'numerical_severity', 'reporter', 'last_reviewed']
+                   'numerical_severity', 'reporter', 'last_reviewed', 'images']
 
 
 class ReportAuthedFindingFilter(DojoFilter):

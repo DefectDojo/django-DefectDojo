@@ -10,7 +10,7 @@ from django.contrib import admin
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from imagekit.models import ImageSpecField
-from imagekit.processors import SmartResize
+from imagekit.processors import ResizeToCover
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Q
@@ -772,15 +772,19 @@ class Report(models.Model):
 class FindingImage(models.Model):
     image = models.ImageField(upload_to='finding_images', null=True)
     image_thumbnail = ImageSpecField(source='image',
-                                     processors=[SmartResize(100, 100)],
+                                     processors=[ResizeToCover(100, 100)],
                                      format='JPEG',
                                      options={'quality': 70})
+    image_small = ImageSpecField(source='image',
+                                 processors=[ResizeToCover(640, 480)],
+                                 format='JPEG',
+                                 options={'quality': 100})
     image_medium = ImageSpecField(source='image',
-                                  processors=[SmartResize(800, 600)],
+                                  processors=[ResizeToCover(800, 600)],
                                   format='JPEG',
                                   options={'quality': 100})
     image_large = ImageSpecField(source='image',
-                                 processors=[SmartResize(1024, 768)],
+                                 processors=[ResizeToCover(1024, 768)],
                                  format='JPEG',
                                  options={'quality': 100})
 

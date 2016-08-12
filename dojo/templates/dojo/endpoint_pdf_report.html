@@ -185,39 +185,46 @@
                     <pre>{{ finding.impact }}</pre>
                     <h6>References</h6>
                     <pre>{{ finding.references }}</pre>
+                    {% if include_finding_images %}
+                        <h6>Images</h6>
+                        {% if finding.images.all.count > 0 %}
+                            {% for pic in finding.images.all %}
+                                <p><img src="{{ pic.image.url }}" style="max-width: 85%"></p>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-center">No images found.</p>
+                        {% endif %}
+                    {% endif %}
                     {% if include_finding_notes %}
                         <h6>Notes</h6>
-                        {% if include_finding_notes %}
-                            <h6>Notes</h6>
-                            {% if finding.notes.all.count > 0 %}
-                                <table id="notes" class="tablesorter-bootstrap table table-condensed table-striped">
-                                    <thead>
+                        {% if finding.notes.all.count > 0 %}
+                            <table id="notes" class="tablesorter-bootstrap table table-condensed table-striped">
+                                <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Date</th>
+                                    <th>Note</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for note in finding.notes.all %}
                                     <tr>
-                                        <th>User</th>
-                                        <th>Date</th>
-                                        <th>Note</th>
+                                        <td>
+                                            {{ note.author.username }}
+                                        </td>
+                                        <td>
+                                            {{ note.date }}
+                                        </td>
+                                        <td>
+                                            {{ note }}
+                                        </td>
                                     </tr>
-                                    </thead>
-                                    <tbody>
-                                    {% for note in finding.notes.all %}
-                                        <tr>
-                                            <td>
-                                                {{ note.author.username }}
-                                            </td>
-                                            <td>
-                                                {{ note.date }}
-                                            </td>
-                                            <td>
-                                                {{ note }}
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
+                                {% endfor %}
 
-                                    </tbody>
-                                </table>
-                            {% else %}
-                                <p class="text-center">No notes saved.</p>
-                            {% endif %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <p class="text-center">No notes saved.</p>
                         {% endif %}
                     {% endif %}
                 {% endfor %}

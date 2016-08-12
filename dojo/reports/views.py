@@ -68,19 +68,21 @@ def custom_report(request):
 
     if form.is_valid():
         selected_widgets = report_widget_factory(json_data=request.POST['json'], request=request, user=request.user,
-                                                 finding_notes=False)
+                                                 finding_notes=False, finding_images=False)
         report_name = 'Custom PDF Report: ' + request.user.username
         report_format = 'AsciiDoc'
         finding_notes = True
+        finding_images = True
 
         if 'report-options' in selected_widgets:
             options = selected_widgets['report-options']
             report_name = 'Custom PDF Report: ' + options.report_name
             report_format = options.report_type
             finding_notes = (options.include_finding_notes == '1')
+            finding_images = (options.include_finding_images == '1')
 
         selected_widgets = report_widget_factory(json_data=request.POST['json'], request=request, user=request.user,
-                                                 finding_notes=finding_notes)
+                                                 finding_notes=finding_notes, finding_images=finding_images)
 
         if report_format == 'PDF':
             report = Report(name=report_name,
@@ -96,7 +98,8 @@ def custom_report(request):
                                           host=request.scheme + "://" + request.META['HTTP_HOST'],
                                           user=request.user,
                                           uri=request.build_absolute_uri(report.get_url()),
-                                          finding_notes=finding_notes)
+                                          finding_notes=finding_notes,
+                                          finding_images=finding_images)
             messages.add_message(request, messages.SUCCESS,
                                  'Your report is building, you will receive an email when it is ready.',
                                  extra_tags='alert-success')
@@ -107,7 +110,8 @@ def custom_report(request):
             return render(request,
                           'dojo/custom_asciidoc_report.html',
                           {"widgets": widgets,
-                           "finding_notes": finding_notes})
+                           "finding_notes": finding_notes,
+                           "finding_images": finding_images})
         else:
             return HttpResponseForbidden()
     else:
@@ -378,6 +382,7 @@ def product_endpoint_report(request, pid):
     paged_endpoints = get_page_items(request, endpoints, 25)
     report_format = request.GET.get('report_type', 'AsciiDoc')
     include_finding_notes = int(request.GET.get('include_finding_notes', 0))
+    include_finding_images = int(request.GET.get('include_finding_images', 0))
     include_executive_summary = int(request.GET.get('include_executive_summary', 0))
     include_table_of_contents = int(request.GET.get('include_table_of_contents', 0))
     generate = "_generate" in request.GET
@@ -442,6 +447,7 @@ def product_endpoint_report(request, pid):
                            'endpoint': None,
                            'findings': None,
                            'include_finding_notes': include_finding_notes,
+                           'include_finding_images': include_finding_images,
                            'include_executive_summary': include_executive_summary,
                            'include_table_of_contents': include_table_of_contents,
                            'user': request.user,
@@ -479,6 +485,7 @@ def product_endpoint_report(request, pid):
                                             'verified_findings': verified_findings,
                                             'report_name': report_name,
                                             'include_finding_notes': include_finding_notes,
+                                            'include_finding_images': include_finding_images,
                                             'include_executive_summary': include_executive_summary,
                                             'include_table_of_contents': include_table_of_contents,
                                             'user': user,
@@ -540,6 +547,7 @@ def generate_report(request, obj):
 
     report_format = request.GET.get('report_type', 'AsciiDoc')
     include_finding_notes = int(request.GET.get('include_finding_notes', 0))
+    include_finding_images = int(request.GET.get('include_finding_images', 0))
     include_executive_summary = int(request.GET.get('include_executive_summary', 0))
     include_table_of_contents = int(request.GET.get('include_table_of_contents', 0))
     generate = "_generate" in request.GET
@@ -589,6 +597,7 @@ def generate_report(request, obj):
                    'endpoint_active_findings': findings.qs,
                    'findings': findings.qs,
                    'include_finding_notes': include_finding_notes,
+                   'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
                    'include_table_of_contents': include_table_of_contents,
                    'user': user,
@@ -617,6 +626,7 @@ def generate_report(request, obj):
                    'report_name': report_name,
                    'findings': findings.qs,
                    'include_finding_notes': include_finding_notes,
+                   'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
                    'include_table_of_contents': include_table_of_contents,
                    'user': user,
@@ -645,6 +655,7 @@ def generate_report(request, obj):
                    'report_name': report_name,
                    'findings': findings.qs,
                    'include_finding_notes': include_finding_notes,
+                   'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
                    'include_table_of_contents': include_table_of_contents,
                    'user': user,
@@ -668,6 +679,7 @@ def generate_report(request, obj):
                    'report_name': report_name,
                    'findings': findings.qs,
                    'include_finding_notes': include_finding_notes,
+                   'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
                    'include_table_of_contents': include_table_of_contents,
                    'user': user,
@@ -697,6 +709,7 @@ def generate_report(request, obj):
                    'report_name': report_name,
                    'findings': findings.qs,
                    'include_finding_notes': include_finding_notes,
+                   'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
                    'include_table_of_contents': include_table_of_contents,
                    'user': user,
@@ -719,6 +732,7 @@ def generate_report(request, obj):
         context = {'findings': findings.qs,
                    'report_name': report_name,
                    'include_finding_notes': include_finding_notes,
+                   'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
                    'include_table_of_contents': include_table_of_contents,
                    'user': user,
@@ -742,6 +756,7 @@ def generate_report(request, obj):
                            'endpoint': endpoint,
                            'findings': findings.qs,
                            'include_finding_notes': include_finding_notes,
+                           'include_finding_images': include_finding_images,
                            'include_executive_summary': include_executive_summary,
                            'include_table_of_contents': include_table_of_contents,
                            'user': user,

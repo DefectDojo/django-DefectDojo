@@ -599,7 +599,6 @@ def manage_images(request, fid):
                     if len(pic) == 0:
                         os.remove(with_media_root)
                         cache_to_remove = settings.MEDIA_ROOT + '/CACHE/images/finding_images/' + os.path.splitext(file)[0]
-                        print cache_to_remove
                         if os.path.isdir(cache_to_remove):
                             shutil.rmtree(cache_to_remove)
                     else:

@@ -56,6 +56,21 @@
                 {{ find.references|linebreaksasciidocbr }}
             </p>
             <br>
+            {% if include_finding_images %}
+                <p><b>==== Finding Images: ====</b>
+                    <br>
+                    {% if find.images.all %}
+                        {% for pic in find.images.all %}
+                            image::{{ request.scheme }}://{{ request.get_host }}{{ pic.image_small.url }}[] +<br>
+                        {% endfor %}
+                    {% else %}
+                        No images found.
+                    {% endif %}
+                </p><br>
+            {% else %}
+                <br>
+            {% endif %}
+            <br>
             {% if include_finding_notes %}
                 <p><b>==== Finding Notes: ====</b>
                     <br>

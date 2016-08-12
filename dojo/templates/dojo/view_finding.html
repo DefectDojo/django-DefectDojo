@@ -200,18 +200,25 @@
                 <div class="panel-heading">
                     <h4>
                         Images
-                        <a title="Edit Images" class="btn btn-sm btn-primary pull-right"
-                           href="{% url 'manage_images' finding.id %}">
-                            <span class="fa fa-pencil-square-o"></span>
-                        </a>
+                        <div class="pull-right btn-group" role="group">
+                            <a title="Edit Images" class="btn btn-sm btn-primary"
+                               href="{% url 'manage_images' finding.id %}">
+                                <span class="fa fa-pencil-square-o"></span>
+                            </a>
+                            <a data-toggle="collapse" href="#vuln_pics" class="btn btn-sm btn-primary">
+                                <i class="glyphicon glyphicon-chevron-up"></i>
+                            </a>
+                        </div>
                     </h4>
                 </div>
-                <div class="panel-body">
+                <div class="panel-body  collapse in" id="vuln_pics">
                     {% for pic in finding.images.all %}
                         <div class="col-md-1">
-                            <a href="#" data-imageurl="{{ pic.image_large.url }}" class="thumbnail" data-toggle="modal"
-                               data-target="#findingImageModal">
-                                <img src="{{ pic.image_thumbnail.url }}">
+                            <a href="#"
+                               data-imageurl="{{ request.scheme }}://{{ request.get_host }}{{ pic.image_large.url }}"
+                               class="thumbnail" data-toggle="modal"
+                               data-target="#findingImageModal" id="finding_pic">
+                                <img src="{{ request.scheme }}://{{ request.get_host }}{{ pic.image_thumbnail.url }}">
                             </a>
                         </div>
                     {% endfor %}
@@ -334,7 +341,10 @@
                             <td>
                                 {{ note }}
                                 {% ifequal user.username note.author.username %}
-                                    <a href="{% url 'delete_finding_note' finding.id note.id %}"> [X] </a>
+                                    <a href="{% url 'delete_finding_note' finding.id note.id %}"
+                                       class="btn btn-danger btn-xs" title="Delete">
+                                        <i class="fa fa-trash" aria-hidden="true"></i>
+                                    </a>
                                 {% endifequal %}
                             </td>
                         </tr>
