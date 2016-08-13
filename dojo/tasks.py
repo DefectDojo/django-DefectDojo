@@ -34,6 +34,7 @@ def email_requester(report, uri, error=None):
               fail_silently=True)
 """
 
+
 @app.task(bind=True)
 def async_pdf_report(self,
                      report=None,
@@ -81,11 +82,11 @@ def async_pdf_report(self,
         report.status = 'success'
         report.done_datetime = datetime.now(tz=localtz)
         report.save()
-        #email_requester(report, uri)
+        # email_requester(report, uri)
     except Exception as e:
         report.status = 'error'
         report.save()
-        #email_requester(report, uri, error=e)
+        # email_requester(report, uri, error=e)
         raise e
     return True
 
@@ -100,11 +101,10 @@ def async_custom_pdf_report(self,
                             uri=None,
                             finding_notes=False,
                             finding_images=False):
-
     config = pdfkit.configuration(wkhtmltopdf=settings.WKHTMLTOPDF_PATH)
 
     selected_widgets = report_widget_factory(json_data=report.options, request=None, user=user,
-                                             finding_notes=finding_notes, finding_images=finding_images)
+                                             finding_notes=finding_notes, finding_images=finding_images, host=host)
 
     widgets = selected_widgets.values()
     temp = None
@@ -165,11 +165,11 @@ def async_custom_pdf_report(self,
         report.status = 'success'
         report.done_datetime = datetime.now(tz=localtz)
         report.save()
-        #email_requester(report, uri)
+        # email_requester(report, uri)
     except Exception as e:
         report.status = 'error'
         report.save()
-        #email_requester(report, uri, error=e)
+        # email_requester(report, uri, error=e)
         raise e
     finally:
         if temp is not None:

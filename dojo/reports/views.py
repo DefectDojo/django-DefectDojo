@@ -65,10 +65,10 @@ def report_builder(request):
 def custom_report(request):
     # saving the report
     form = CustomReportJsonForm(request.POST)
-
+    host = request.scheme + "://" + request.META['HTTP_HOST']
     if form.is_valid():
         selected_widgets = report_widget_factory(json_data=request.POST['json'], request=request, user=request.user,
-                                                 finding_notes=False, finding_images=False)
+                                                 finding_notes=False, finding_images=False, host=host)
         report_name = 'Custom PDF Report: ' + request.user.username
         report_format = 'AsciiDoc'
         finding_notes = True
@@ -82,7 +82,7 @@ def custom_report(request):
             finding_images = (options.include_finding_images == '1')
 
         selected_widgets = report_widget_factory(json_data=request.POST['json'], request=request, user=request.user,
-                                                 finding_notes=finding_notes, finding_images=finding_images)
+                                                 finding_notes=finding_notes, finding_images=finding_images, host=host)
 
         if report_format == 'PDF':
             report = Report(name=report_name,
@@ -95,7 +95,7 @@ def custom_report(request):
             async_custom_pdf_report.delay(report=report,
                                           template="dojo/custom_pdf_report.html",
                                           filename="custom_pdf_report.pdf",
-                                          host=request.scheme + "://" + request.META['HTTP_HOST'],
+                                          host=host,
                                           user=request.user,
                                           uri=request.build_absolute_uri(report.get_url()),
                                           finding_notes=finding_notes,

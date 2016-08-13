@@ -87,7 +87,8 @@
                             {% for t in test.engagement.test_set.all %}
                                 {% if test.id != t.id %}
                                     <li>{{ t.test_type.name }}
-                                        ({{ t.environment.name|default:"unknown" }}): {{ t.target_start|date:"SHORT_DATE_FORMAT" }}</li>
+                                        ({{ t.environment.name|default:"unknown" }}):
+                                        {{ t.target_start|date:"SHORT_DATE_FORMAT" }}</li>
                                 {% endif %}
                             {% endfor %}
                         </ul>
@@ -281,7 +282,7 @@
                         <h6>Images</h6>
                         {% if finding.images.all.count > 0 %}
                             {% for pic in finding.images.all %}
-                                <p><img src="{{ pic.image.url }}" style="max-width: 85%"></p>
+                                <p><img src="{{ host }}{{ pic.image.url }}" style="max-width: 85%"></p>
                             {% endfor %}
                         {% else %}
                             <p class="text-center">No images found.</p>
@@ -325,287 +326,289 @@
     </div> <!-- /container -->
 {% endblock %}
 {% block js %}
-    <script src="{{ host }}{% static "jquery/dist/jquery.min.js" %}"></script>
-    <!-- Flot Charts JavaScript -->
-    <script src="{{ host }}{% static "flot/excanvas.min.js" %}"></script>
-    <script src="{{ host }}{% static "flot/jquery.flot.js" %}"></script>
-    <script src="{{ host }}{% static "flot/jquery.flot.resize.js" %}"></script>
-    <script src="{{ host }}{% static "flot/jquery.flot.time.js" %}"></script>
-    <script src="{{ host }}{% static "flot/jquery.flot.stack.js" %}"></script>
-    <script src="{{ host }}{% static "flot-axis/jquery.flot.axislabels.js" %}"></script>
-    <script type="text/javascript">
-        $(function () {
+    {% if include_executive_summary %}
+        <script src="{{ host }}{% static "jquery/dist/jquery.min.js" %}"></script>
+        <!-- Flot Charts JavaScript -->
+        <script src="{{ host }}{% static "flot/excanvas.min.js" %}"></script>
+        <script src="{{ host }}{% static "flot/jquery.flot.js" %}"></script>
+        <script src="{{ host }}{% static "flot/jquery.flot.resize.js" %}"></script>
+        <script src="{{ host }}{% static "flot/jquery.flot.time.js" %}"></script>
+        <script src="{{ host }}{% static "flot/jquery.flot.stack.js" %}"></script>
+        <script src="{{ host }}{% static "flot-axis/jquery.flot.axislabels.js" %}"></script>
+        <script type="text/javascript">
+            $(function () {
 
 
-            finding_age();
-            open_findings();
+                finding_age();
+                open_findings();
 
-        });
-
-        function finding_age() {
-            var data = {};
-            var data_1 = []
-            var ticks = []
-            {% for f in findings %}
-                if (data[{{ f.age }}]) {
-                    data[{{ f.age }}] += 1
-                }
-                else {
-                    data[{{ f.age }}] = 1
-                }
-            {% endfor %}
-            var i = 0;
-            $.each(data, function (index, value) {
-                if (value > 0) {
-                    data_1.push([i, value]);
-                    ticks.push([i, index])
-                }
-                i++;
             });
 
-
-            var dataset = [
-                {data: data_1, color: "#337ab7", fillColor: "#337ab7"}
-            ];
-
-            var options = {
-                series: {
-                    bars: {
-                        show: true,
-                        fill: true,
-                        fillColor: "#337ab7"
+            function finding_age() {
+                var data = {};
+                var data_1 = []
+                var ticks = []
+                {% for f in findings %}
+                    if (data[{{ f.age }}]) {
+                        data[{{ f.age }}] += 1
                     }
-                },
-                bars: {
-                    align: "center",
-                    barWidth: 0.5
-                },
-                xaxis: {
-                    axisLabel: "Days Open",
-                    axisLabelUseCanvas: true,
-                    axisLabelFontSizePixels: 12,
-                    axisLabelFontFamily: 'Verdana, Arial',
-                    axisLabelPadding: 10,
-                    ticks: ticks,
-                },
-                yaxis: {
-                    axisLabel: "Number of Findings",
-                    axisLabelUseCanvas: true,
-                    axisLabelFontSizePixels: 12,
-                    axisLabelFontFamily: 'Verdana, Arial',
-                    axisLabelPadding: 3,
-                },
-                legend: {
-                    show: false,
-                },
-                grid: {
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
-                }
-            };
-
-
-            $.plot("#finding_age", dataset, options);
-        }
-        ;
-        function open_findings() {
-            var critical = 0;
-            var high = 0;
-            var medium = 0;
-            var low = 0;
-            var info = 0;
-            var ticks = [
-                [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
-            ];
-
-            {% for f in findings %}
-                {% if f.severity == 'Critical' %}
-                    critical += 1;
-                {% elif f.severity == 'High' %}
-                    high += 1;
-                {% elif f.severity == 'Medium' %}
-                    medium += 1;
-                {% elif f.severity == 'Low' %}
-                    low += 1;
-                {% elif f.severity == 'Info' %}
-                    info += 1;
-                {% endif %}
-            {% endfor %}
-
-            var d1 = [
-                [0, critical],
-            ];
-            var d2 = [
-                [1, high],
-            ];
-            var d3 = [
-                [2, medium],
-            ];
-            var d4 = [
-                [3, low],
-            ];
-            var d5 = [
-                [4, info],
-            ];
-
-            var data = [
-                {
-                    label: "Critical",
-                    data: d1,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 1,
-                        fillColor: "#d9534f"
-                    },
-                    color: "#d9534f"
-                },
-                {
-                    label: "High",
-                    data: d2,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 2,
-                        fillColor: "#f0ad4e"
-                    },
-                    color: "#f0ad4e"
-                },
-                {
-                    label: "Medium",
-                    data: d3,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 3,
-                        fillColor: "#f0de28"
-                    },
-                    color: "#f0de28"
-                },
-                {
-                    label: "Low",
-                    data: d4,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#337ab7"
-                    },
-                    color: "#337ab7"
-                },
-                {
-                    label: "info",
-                    data: d5,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#80699B"
-                    },
-                    color: "#80699B"
-                }
-            ];
-
-            $.plot("#open_findings", data, {
-                series: {
-                    stack: true,
-                    bars: {
-                        show: true,
-                        barWidth: .9,
-                        'align': "center",
-                    },
-
-                },
-                grid: {
-                    hoverable: false,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
-
-                },
-                tooltip: false,
-                legend: {
-                    show: false,
-                    position: "ne"
-                },
-                xaxis: {
-                    ticks: ticks,
-                },
-
-            });
-        }
-        ;
-        {% if endpoint_opened_per_month %}
-            function opened_per_month() {
-                var critical = [],
-                        high = [],
-                        medium = [],
-                        low = [];
-
-                {% for month in endpoint_opened_per_month|slice:'1:' %}
-                    critical.push([{{ month.0 }}, {{ month.2 }}]);
-                    high.push([{{ month.0 }}, {{ month.3 }}]);
-                    medium.push([{{ month.0 }}, {{ month.4 }}]);
-                    low.push([{{ month.0 }}, {{ month.5 }}]);
+                    else {
+                        data[{{ f.age }}] = 1
+                    }
                 {% endfor %}
+                var i = 0;
+                $.each(data, function (index, value) {
+                    if (value > 0) {
+                        data_1.push([i, value]);
+                        ticks.push([i, index])
+                    }
+                    i++;
+                });
 
-                var tick_count = critical.length < 7 ? critical.length : 7;
+
+                var dataset = [
+                    {data: data_1, color: "#337ab7", fillColor: "#337ab7"}
+                ];
+
                 var options = {
-                    xaxis: {
-                        mode: "time",
-                        timeformat: "%m-%d-%Y",
-                        timezone: 'browser'
-                    },
-                    xaxes: [{
-                        ticks: tick_count
-                    }],
-                    yaxes: [{
-                        min: 0
-                    }],
                     series: {
-                        stack: true,
-                        lines: {
-                            show: true
-                        },
-                        points: {
-                            show: true
+                        bars: {
+                            show: true,
+                            fill: true,
+                            fillColor: "#337ab7"
                         }
                     },
+                    bars: {
+                        align: "center",
+                        barWidth: 0.5
+                    },
+                    xaxis: {
+                        axisLabel: "Days Open",
+                        axisLabelUseCanvas: true,
+                        axisLabelFontSizePixels: 12,
+                        axisLabelFontFamily: 'Verdana, Arial',
+                        axisLabelPadding: 10,
+                        ticks: ticks,
+                    },
+                    yaxis: {
+                        axisLabel: "Number of Findings",
+                        axisLabelUseCanvas: true,
+                        axisLabelFontSizePixels: 12,
+                        axisLabelFontFamily: 'Verdana, Arial',
+                        axisLabelPadding: 3,
+                    },
+                    legend: {
+                        show: false,
+                    },
                     grid: {
-                        hoverable: true,
                         borderWidth: 1,
-                        borderColor: '#e7e7e7'
+                        borderColor: '#e7e7e7',
+                    }
+                };
+
+
+                $.plot("#finding_age", dataset, options);
+            }
+            ;
+            function open_findings() {
+                var critical = 0;
+                var high = 0;
+                var medium = 0;
+                var low = 0;
+                var info = 0;
+                var ticks = [
+                    [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
+                ];
+
+                {% for f in findings %}
+                    {% if f.severity == 'Critical' %}
+                        critical += 1;
+                    {% elif f.severity == 'High' %}
+                        high += 1;
+                    {% elif f.severity == 'Medium' %}
+                        medium += 1;
+                    {% elif f.severity == 'Low' %}
+                        low += 1;
+                    {% elif f.severity == 'Info' %}
+                        info += 1;
+                    {% endif %}
+                {% endfor %}
+
+                var d1 = [
+                    [0, critical],
+                ];
+                var d2 = [
+                    [1, high],
+                ];
+                var d3 = [
+                    [2, medium],
+                ];
+                var d4 = [
+                    [3, low],
+                ];
+                var d5 = [
+                    [4, info],
+                ];
+
+                var data = [
+                    {
+                        label: "Critical",
+                        data: d1,
+                        bars: {
+                            show: true,
+                            fill: true,
+                            lineWidth: 1,
+                            order: 1,
+                            fillColor: "#d9534f"
+                        },
+                        color: "#d9534f"
+                    },
+                    {
+                        label: "High",
+                        data: d2,
+                        bars: {
+                            show: true,
+                            fill: true,
+                            lineWidth: 1,
+                            order: 2,
+                            fillColor: "#f0ad4e"
+                        },
+                        color: "#f0ad4e"
+                    },
+                    {
+                        label: "Medium",
+                        data: d3,
+                        bars: {
+                            show: true,
+                            fill: true,
+                            lineWidth: 1,
+                            order: 3,
+                            fillColor: "#f0de28"
+                        },
+                        color: "#f0de28"
+                    },
+                    {
+                        label: "Low",
+                        data: d4,
+                        bars: {
+                            show: true,
+                            fill: true,
+                            lineWidth: 1,
+                            order: 4,
+                            fillColor: "#337ab7"
+                        },
+                        color: "#337ab7"
+                    },
+                    {
+                        label: "info",
+                        data: d5,
+                        bars: {
+                            show: true,
+                            fill: true,
+                            lineWidth: 1,
+                            order: 4,
+                            fillColor: "#80699B"
+                        },
+                        color: "#80699B"
+                    }
+                ];
+
+                $.plot("#open_findings", data, {
+                    series: {
+                        stack: true,
+                        bars: {
+                            show: true,
+                            barWidth: .9,
+                            'align': "center",
+                        },
 
                     },
-                    tooltip: true
-                };
-                var plotObj = $.plot($("#opened_per_month"), [{
-                            data: critical,
-                            label: " Critical",
-                            color: "#d9534f",
+                    grid: {
+                        hoverable: false,
+                        borderWidth: 1,
+                        borderColor: '#e7e7e7',
 
-                        }, {
-                            data: high,
-                            label: " High",
-                            color: '#f0ad4e',
+                    },
+                    tooltip: false,
+                    legend: {
+                        show: false,
+                        position: "ne"
+                    },
+                    xaxis: {
+                        ticks: ticks,
+                    },
 
-                        }, {
-                            data: medium,
-                            label: " Medium",
-                            color: '#f0de28',
-
-                        }, {
-                            data: low,
-                            label: " Low",
-                            color: '#337ab7',
-
-                        }],
-                        options);
+                });
             }
-        {%  endif %}
-    </script>
+            ;
+            {% if endpoint_opened_per_month %}
+                function opened_per_month() {
+                    var critical = [],
+                            high = [],
+                            medium = [],
+                            low = [];
+
+                    {% for month in endpoint_opened_per_month|slice:'1:' %}
+                        critical.push([{{ month.0 }}, {{ month.2 }}]);
+                        high.push([{{ month.0 }}, {{ month.3 }}]);
+                        medium.push([{{ month.0 }}, {{ month.4 }}]);
+                        low.push([{{ month.0 }}, {{ month.5 }}]);
+                    {% endfor %}
+
+                    var tick_count = critical.length < 7 ? critical.length : 7;
+                    var options = {
+                        xaxis: {
+                            mode: "time",
+                            timeformat: "%m-%d-%Y",
+                            timezone: 'browser'
+                        },
+                        xaxes: [{
+                            ticks: tick_count
+                        }],
+                        yaxes: [{
+                            min: 0
+                        }],
+                        series: {
+                            stack: true,
+                            lines: {
+                                show: true
+                            },
+                            points: {
+                                show: true
+                            }
+                        },
+                        grid: {
+                            hoverable: true,
+                            borderWidth: 1,
+                            borderColor: '#e7e7e7'
+
+                        },
+                        tooltip: true
+                    };
+                    var plotObj = $.plot($("#opened_per_month"), [{
+                                data: critical,
+                                label: " Critical",
+                                color: "#d9534f",
+
+                            }, {
+                                data: high,
+                                label: " High",
+                                color: '#f0ad4e',
+
+                            }, {
+                                data: medium,
+                                label: " Medium",
+                                color: '#f0de28',
+
+                            }, {
+                                data: low,
+                                label: " Low",
+                                color: '#337ab7',
+
+                            }],
+                            options);
+                }
+            {%  endif %}
+        </script>
+    {% endif %}
 {% endblock %}
