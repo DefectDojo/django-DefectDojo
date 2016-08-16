@@ -1,6 +1,7 @@
 # #  findings
 import base64
 import logging
+import mimetypes
 import os
 import shutil
 from datetime import datetime
@@ -10,7 +11,10 @@ from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
+from django.http import Http404
+from django.http import HttpResponseNotFound
 from django.http import HttpResponseRedirect, HttpResponseForbidden
+from django.http import StreamingHttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils.safestring import mark_safe
 from pytz import timezone
@@ -21,8 +25,9 @@ from dojo.filters import OpenFindingFilter, \
 from dojo.forms import NoteForm, CloseFindingForm, FindingForm, PromoteFindingForm, FindingTemplateForm, \
     DeleteFindingTemplateForm, FindingImageFormSet
 from dojo.models import Product_Type, Finding, Notes, \
-    Risk_Acceptance, BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage
-from dojo.utils import get_page_items, add_breadcrumb
+    Risk_Acceptance, BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, \
+    FindingImageAccessToken
+from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -598,7 +603,8 @@ def manage_images(request, fid):
 
                     if len(pic) == 0:
                         os.remove(with_media_root)
-                        cache_to_remove = settings.MEDIA_ROOT + '/CACHE/images/finding_images/' + os.path.splitext(file)[0]
+                        cache_to_remove = settings.MEDIA_ROOT + '/CACHE/images/finding_images/' + \
+                                          os.path.splitext(file)[0]
                         if os.path.isdir(cache_to_remove):
                             shutil.rmtree(cache_to_remove)
                     else:
@@ -625,3 +631,34 @@ def manage_images(request, fid):
                    'name': 'Manage Finding Images',
                    'finding': finding,
                    })
+
+
+def download_finding_pic(request, token):
+    mimetypes.init()
+
+    try:
+        access_token = FindingImageAccessToken.objects.get(token=token)
+        sizes = {'thumbnail': access_token.image.image_thumbnail,
+                 'small': access_token.image.image_small,
+                 'medium': access_token.image.image_medium,
+                 'large': access_token.image.image_large,
+                 'original': access_token.image.image,
+                 }
+        if access_token.size not in sizes.keys():
+            raise Http404
+        size = access_token.size
+        # we know there is a token - is it for this image
+        if access_token.size == size:
+            ''' all is good, one time token used, delete it '''
+            access_token.delete()
+        else:
+            raise PermissionDenied
+    except:
+        raise PermissionDenied
+
+    response = StreamingHttpResponse(
+        FileIterWrapper(open(sizes[size].path)))
+    response['Content-Disposition'] = 'inline'
+    mimetype, encoding = mimetypes.guess_type(sizes[size].name)
+    response['Content-Type'] = mimetype
+    return response

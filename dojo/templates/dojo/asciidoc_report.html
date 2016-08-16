@@ -267,7 +267,7 @@
                 <br>
                 {% if find.images.all %}
                     {% for pic in find.images.all %}
-                        image::{{ request.scheme }}://{{ request.get_host }}{{ pic.image_small.url }}[] +<br>
+                        image::{{ request.scheme }}://{{ request.get_host }}{% pic_token pic 'small' %}[] +<br>
                     {% endfor %}
                 {% else %}
                     No images found.
@@ -317,7 +317,7 @@
                     <br>
                     {% if find.images.all %}
                         {% for pic in find.images.all %}
-                            image::{{ request.scheme }}://{{ request.get_host }}{{ pic.image_small.url }}[] +<br>
+                            image::{{ request.scheme }}://{{ request.get_host }}{% pic_token pic 'small' %}[] +<br>
                         {% endfor %}
                     {% else %}
                         No images found.
@@ -403,7 +403,7 @@
                         <br>
                         {% if find.images.all %}
                             {% for pic in find.images.all %}
-                                image::{{ request.scheme }}://{{ request.get_host }}{{ pic.image_small.url }}[] +<br>
+                                image::{{ request.scheme }}://{{ request.get_host }}{% pic_token pic 'small' %}[] +<br>
                             {% endfor %}
                         {% else %}
                             No images found.

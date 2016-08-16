@@ -286,6 +286,7 @@ class FindingList(Widget):
     def get_asciidoc(self):
         asciidoc = render_to_string("dojo/custom_asciidoc_report_findings.html",
                                     {"findings": self.findings,
+                                     "host": self.host,
                                      "include_finding_notes": self.finding_notes,
                                      "include_finding_images": self.finding_images})
         return mark_safe(asciidoc)
@@ -359,6 +360,7 @@ class EndpointList(Widget):
     def get_asciidoc(self):
         asciidoc = render_to_string("dojo/custom_asciidoc_report_endpoints.html",
                                     {"endpoints": self.endpoints,
+                                     "host": self.host,
                                      "include_finding_notes": self.finding_notes,
                                      "include_finding_images": self.finding_images})
         return mark_safe(asciidoc)
@@ -387,17 +389,22 @@ def report_widget_factory(json_data=None, request=None, user=None, finding_notes
                                                 finding__false_p=False,
                                                 finding__duplicate=False,
                                                 finding__out_of_scope=False,
-                                                )
+                                                ).distinct()
             d = QueryDict(mutable=True)
             for item in widget.get(widget.keys()[0]):
                 if item['name'] in d:
                     d.getlist(item['name']).append(item['value'])
                 else:
                     d[item['name']] = item['value']
+            from dojo.endpoint.views import get_endpoint_ids
+            ids = get_endpoint_ids(endpoints)
 
+            endpoints = Endpoint.objects.filter(id__in=ids)
             endpoints = EndpointFilter(d, queryset=endpoints)
+
             endpoints = EndpointList(request=request, endpoints=endpoints, finding_notes=finding_notes,
                                      finding_images=finding_images, host=host)
+
             selected_widgets[widget.keys()[0] + '-' + str(idx)] = endpoints
 
         if widget.keys()[0] == 'finding-list':

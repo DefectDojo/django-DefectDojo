@@ -4,7 +4,7 @@
 {% if endpoints %}
     <h3>== Endpoints ==</h3>
     {% for endpoint in endpoints %}
-        <h4>=== {{ endpoint }} ===</h4>
+        <h4>=== {{ endpoint }} with {{ endpoint.active_findings|length|apnumber }} active findings ===</h4>
         {% for find in endpoint.active_findings %}
             <h5>==== Finding {{ find.id }}: {{ find.title | nice_title }} {% if find.mitigated %}
                 Mitigated on: {{ find.mitigated }} {% endif %}====</h5>
@@ -61,7 +61,7 @@
                     <br>
                     {% if find.images.all %}
                         {% for pic in find.images.all %}
-                            image::{{ request.scheme }}://{{ request.get_host }}{{ pic.image_small.url }}[] +<br>
+                            image::{{ host }}{% pic_token pic 'small' %}[] +<br>
                         {% endfor %}
                     {% else %}
                         No images found.

@@ -9,7 +9,7 @@
             {% if endpoints %}
                 <h3 id="findings">Endpoint Findings</h3>
                 <p>
-                    A total of {{ endpoints|length|apnumber }} endpoint{{ endpoints|length|pluralize }} with findngs
+                    A total of {{ endpoints|length|apnumber }} endpoint{{ endpoints|length|pluralize }} with findings
                     of varying severity are represented in this report.
                 </p>
             {% endif %}
@@ -17,7 +17,8 @@
                 <div class="panel panel-warning">
                     <div class="panel-heading">
                         <h4>
-                            Endpoint: {{ endpoint.host_no_port }}
+                            Endpoint: {{ endpoint.host_no_port }} with {{ endpoint.active_findings|length|apnumber }}
+                            active findings
                         </h4>
                     </div>
                 </div>
@@ -139,7 +140,7 @@
                         <h6>Images</h6>
                         {% if finding.images.all.count > 0 %}
                             {% for pic in finding.images.all %}
-                                <p><img src="{{ host }}{{ pic.image.url }}" style="max-width: 85%"></p>
+                                <p><img src="{{ host }}{% pic_token pic 'original' %}" style="max-width: 85%"></p>
                             {% endfor %}
                         {% else %}
                             <p class="text-center">No images found.</p>

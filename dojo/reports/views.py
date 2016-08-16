@@ -42,12 +42,17 @@ def report_builder(request):
     add_breadcrumb(title="Report Builder", top_level=True, request=request)
     findings = Finding.objects.all()
     findings = ReportAuthedFindingFilter(request.GET, queryset=findings, user=request.user)
-    endpoints = EndpointFilter(request.GET, queryset=Endpoint.objects.filter(finding__active=True,
-                                                                             finding__verified=True,
-                                                                             finding__false_p=False,
-                                                                             finding__duplicate=False,
-                                                                             finding__out_of_scope=False,
-                                                                             ))
+    endpoints = Endpoint.objects.filter(finding__active=True,
+                                        finding__verified=True,
+                                        finding__false_p=False,
+                                        finding__duplicate=False,
+                                        finding__out_of_scope=False,
+                                        ).distinct()
+    ids = get_endpoint_ids(endpoints)
+
+    endpoints = Endpoint.objects.filter(id__in=ids)
+
+    endpoints = EndpointFilter(request.GET, queryset=endpoints)
 
     in_use_widgets = [ReportOptions(request=request)]
     available_widgets = [CoverPage(request=request),
@@ -110,6 +115,7 @@ def custom_report(request):
             return render(request,
                           'dojo/custom_asciidoc_report.html',
                           {"widgets": widgets,
+                           "host": host,
                            "finding_notes": finding_notes,
                            "finding_images": finding_images})
         else:
@@ -152,7 +158,7 @@ def report_endpoints(request):
                                         finding__false_p=False,
                                         finding__duplicate=False,
                                         finding__out_of_scope=False,
-                                        )
+                                        ).distinct()
 
     ids = get_endpoint_ids(endpoints)
 
@@ -491,7 +497,8 @@ def product_endpoint_report(request, pid):
                                             'user': user,
                                             'team_name': settings.TEAM_NAME,
                                             'title': 'Generate Report',
-                                            'host': request.scheme + "://" + request.META['HTTP_HOST']},
+                                            'host': request.scheme + "://" + request.META['HTTP_HOST'],
+                                            'user_id': request.user.id},
                                    uri=request.build_absolute_uri(report.get_url()))
             messages.add_message(request, messages.SUCCESS,
                                  'Your report is building, you will receive an email when it is ready.',
@@ -603,7 +610,8 @@ def generate_report(request, obj):
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': 'Generate Report',
-                   'host': request.scheme + "://" + request.META['HTTP_HOST']}
+                   'host': request.scheme + "://" + request.META['HTTP_HOST'],
+                   'user_id': request.user.id}
 
     elif type(obj).__name__ == "Product":
         product = obj
@@ -632,7 +640,8 @@ def generate_report(request, obj):
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': 'Generate Report',
-                   'host': request.scheme + "://" + request.META['HTTP_HOST']}
+                   'host': request.scheme + "://" + request.META['HTTP_HOST'],
+                   'user_id': request.user.id}
 
     elif type(obj).__name__ == "Engagement":
         engagement = obj
@@ -661,7 +670,8 @@ def generate_report(request, obj):
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': 'Generate Report',
-                   'host': request.scheme + "://" + request.META['HTTP_HOST']}
+                   'host': request.scheme + "://" + request.META['HTTP_HOST'],
+                   'user_id': request.user.id}
 
     elif type(obj).__name__ == "Test":
         test = obj
@@ -685,7 +695,8 @@ def generate_report(request, obj):
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': 'Generate Report',
-                   'host': request.scheme + "://" + request.META['HTTP_HOST']}
+                   'host': request.scheme + "://" + request.META['HTTP_HOST'],
+                   'user_id': request.user.id}
 
     elif type(obj).__name__ == "Endpoint":
         endpoint = obj
@@ -715,7 +726,8 @@ def generate_report(request, obj):
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': 'Generate Report',
-                   'host': request.scheme + "://" + request.META['HTTP_HOST']}
+                   'host': request.scheme + "://" + request.META['HTTP_HOST'],
+                   'user_id': request.user.id}
     elif type(obj).__name__ == "QuerySet":
         findings = ReportAuthedFindingFilter(request.GET,
                                              queryset=obj.prefetch_related('test',
@@ -738,7 +750,8 @@ def generate_report(request, obj):
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': 'Generate Report',
-                   'host': request.scheme + "://" + request.META['HTTP_HOST']}
+                   'host': request.scheme + "://" + request.META['HTTP_HOST'],
+                   'user_id': request.user.id}
     else:
         raise Http404()
 
@@ -748,7 +761,7 @@ def generate_report(request, obj):
         report_form = ReportOptionsForm(request.GET)
         if report_format == 'AsciiDoc':
             return render(request,
-                          'dojo/asciidoc_report.html',
+                          template,
                           {'product_type': product_type,
                            'product': product,
                            'engagement': engagement,
@@ -762,6 +775,8 @@ def generate_report(request, obj):
                            'user': user,
                            'team_name': settings.TEAM_NAME,
                            'title': 'Generate Report',
+                           'user_id': request.user.id,
+                           'host': request.scheme + "://" + request.META['HTTP_HOST'],
                            })
 
         elif report_format == 'PDF':

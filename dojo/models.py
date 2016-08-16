@@ -2,6 +2,7 @@ import base64
 import os
 import re
 from datetime import datetime
+from uuid import uuid4
 
 import watson
 from auditlog.registry import auditlog
@@ -9,12 +10,12 @@ from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
-from imagekit.models import ImageSpecField
-from imagekit.processors import ResizeToCover
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Q
 from django.utils.timezone import now
+from imagekit.models import ImageSpecField
+from imagekit.processors import ResizeToCover
 from pytz import timezone
 from tagging.registry import register as tag_register
 
@@ -398,7 +399,7 @@ class Endpoint(models.Model):
                                       verified=True,
                                       mitigated__isnull=True,
                                       false_p=False,
-                                      duplicate=False).order_by('numerical_severity')
+                                      duplicate=False).distinct().order_by('numerical_severity')
 
     def get_breadcrumbs(self):
         bc = self.product.get_breadcrumbs()
@@ -792,6 +793,27 @@ class FindingImage(models.Model):
         return self.image.name
 
 
+class FindingImageAccessToken(models.Model):
+    """This will allow reports to request the images without exposin the media root to the world without
+    authentication"""
+    user = models.ForeignKey(User, null=False, blank=False)
+    image = models.ForeignKey(FindingImage, null=False, blank=False)
+    token = models.CharField(max_length=255)
+    size = models.CharField(max_length=9,
+                            choices=(
+                                ('small', 'Small'),
+                                ('medium', 'Medium'),
+                                ('large', 'Large'),
+                                ('thumbnail', 'Thumbnail'),
+                                ('original', 'Original')),
+                            default='medium')
+
+    def save(self, *args, **kwargs):
+        if not self.token:
+            self.token = uuid4()
+        return super(FindingImageAccessToken, self).save(*args, **kwargs)
+
+
 # Register for automatic logging to database
 auditlog.register(Dojo_User)
 auditlog.register(Endpoint)
@@ -812,6 +834,7 @@ tag_register(Finding_Template)
 admin.site.register(Test)
 admin.site.register(Finding)
 admin.site.register(FindingImage)
+admin.site.register(FindingImageAccessToken)
 admin.site.register(Stub_Finding)
 admin.site.register(Engagement)
 admin.site.register(Risk_Acceptance)

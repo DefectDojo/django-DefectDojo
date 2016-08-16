@@ -216,6 +216,7 @@
                         <div class="col-md-1">
                             <a href="#"
                                data-imageurl="{{ request.scheme }}://{{ request.get_host }}{{ pic.image_large.url }}"
+                               data-origurl="{{ request.scheme }}://{{ request.get_host }}{{ pic.image.url }}"
                                class="thumbnail" data-toggle="modal"
                                data-target="#findingImageModal" id="finding_pic">
                                 <img src="{{ request.scheme }}://{{ request.get_host }}{{ pic.image_thumbnail.url }}">
@@ -240,7 +241,9 @@
                                 class="fa fa-close"></span></button>
                     </div>
                     <div class="modal-body">
-                        <img id="to_replace" src="{{ pic.image_large.url }}" class="img-responsive"/>
+                        <a id="a_to_replace" class="modal_finding_pic" href="{{ pic.image.url }}" target="_blank" title="View original image.">
+                            <img id="to_replace" src="{{ pic.image_large.url }}" class="img-responsive"/>
+                        </a>
                     </div>
                     <div class="modal-footer">
                         <a href="#" id="next" class="btn btn-default bnt-xs pull-right"><span
@@ -393,10 +396,12 @@
         $('#findingImageModal').on('show.bs.modal', function (event) {
             var link = $(event.relatedTarget);
             var loc = link.data('imageurl')
+            var loco = link.data('origurl')
             console.log(link);
             console.log(loc);
             var modal = $(this);
             modal.find('#to_replace').attr('src', loc);
+            modal.find('#a_to_replace').attr('href', loco);
         });
         $("a#next").on('click', function (e) {
             e.preventDefault();

@@ -49,29 +49,25 @@ def async_pdf_report(self,
     x = urlencode({'title': report_title,
                    'subtitle': report_subtitle,
                    'info': report_info})
+
     cover = context['host'] + reverse(
         'report_cover_page') + "?" + x
 
     config = pdfkit.configuration(wkhtmltopdf=settings.WKHTMLTOPDF_PATH)
-
     try:
         report.task_id = async_pdf_report.request.id
         report.save()
-
         bytes = render_to_string(template, context)
-
         itoc = context['include_table_of_contents']
         if itoc:
             toc = {'xsl-style-sheet': xsl_style_sheet}
         else:
             toc = None
-
         pdf = pdfkit.from_string(bytes,
                                  False,
                                  configuration=config,
                                  cover=cover,
                                  toc=toc)
-
         if report.file.name:
             with open(report.file.path, 'w') as f:
                 f.write(pdf)

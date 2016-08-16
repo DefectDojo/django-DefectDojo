@@ -30,6 +30,9 @@ urlpatterns = [
         views.delete_finding_note, name='delete_finding_note'),
     url(r'^finding/(?P<fid>\d+)/manage_images', views.manage_images,
         name='manage_images'),
+    url(r'^finding/image/(?P<token>[^/]+)$', views.download_finding_pic,
+        name='download_finding_pic'),
+
     # stub findings
 
     url(r'^stub_finding/(?P<fid>\d+)/promote',

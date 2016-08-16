@@ -1009,7 +1009,7 @@ div.potential-finding, div.potential-finding div.panel-heading {
 }
 
 a.template-popover:hover {
-    cursor: zoom-in;
+    cursor: url(../img/zoom-in.cur), zoom-in;
 }
 
 #template_findings div.popover {
@@ -1123,6 +1123,6 @@ div.tags .label {
     }
 }
 
-#finding_pic:hover {
-    cursor: zoom-in;
+#finding_pic, .modal_finding_pic:hover {
+    cursor: url(../img/zoom-in.cur), zoom-in;
 }
