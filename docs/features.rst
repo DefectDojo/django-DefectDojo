@@ -217,6 +217,63 @@ Last Reviewed By
 Notes
     Stores information pertinent to the flaw or the mitigation.
 
+.. _finding_pics:
+Images
+    Finding images can now be uploaded to help with documentation and proof of vulnerability.
+
+If you are upgrading from an older version of DefectDojo, you will have to complete the following and make sure
+`MEDIA_ROOT` and `MEDIA_URL` are properly configured:
+
+Add imagekit to INSTALLED_APPS::
+
+    INSTALLED_APPS = (
+        'django.contrib.auth',
+        'django.contrib.contenttypes',
+        'django.contrib.sessions',
+        'django.contrib.sites',
+        'django.contrib.messages',
+        'django.contrib.staticfiles',
+        'polymorphic',  # provides admin templates
+        'overextends',
+        'django.contrib.admin',
+        'django.contrib.humanize',
+        'gunicorn',
+        'tastypie',
+        'djangobower',
+        'auditlog',
+        'dojo',
+        'tastypie_swagger',
+        'watson',
+        'tagging',
+        'custom_field',
+        'imagekit',
+    )
+
+Add `r'^media/'` to `LOGIN_EXEMPT_URLS`::
+
+    LOGIN_EXEMPT_URLS = (
+        r'^static/',
+        r'^metrics/all$',
+        r'^metrics$',
+        r'^metrics/product/type/(?P<mtype>\d+)$',
+        r'^metrics/simple$',
+        r'^api/v1/',
+        r'^ajax/v1/',
+        r'^reports/cover$',
+        r'^finding/image/(?P<token>[^/]+)$'
+    )
+
+
+Then run the following commands (make sure your virtual environment is activated)::
+
+    pip install django-imagekit
+    pip install pillow --upgrade
+    ./manage.py makemigrations dojo
+    ./manage.py makemigrations
+    ./manage.py migrate
+
+New installations will already have finding images configured.
+
 Findings are listed on the ``/finding/open``, ``/finding/closed``, and ``/finding/accepted`` pages. They can be filtered
 by their attributes as well as sorted by their Name, Date, Reviewed Date, Severity and Product.
 
@@ -238,6 +295,12 @@ by their attributes as well as sorted by their Name, Date, Reviewed Date, Severi
 Visual representation of a Finding:
 
 .. image:: /_static/find_4.png
+    :alt: Finding View
+
+.. image:: /_static/find_5.png
+    :alt: Finding View
+
+.. image:: /_static/find_6.png
     :alt: Finding View
 
 Metrics

@@ -32,6 +32,7 @@ User Documentation
    models
    start-using
    workflows
+   upgrading
 
 .. _feature-docs:
 

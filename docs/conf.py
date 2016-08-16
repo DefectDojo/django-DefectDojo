@@ -49,7 +49,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'DefectDojo'
-copyright = u'2015, Greg Anderson (@_GRRegg), Charles Neill (@ccneill), Jay Paz (@jjpaz)'
+copyright = u'2015-2016, Greg Anderson (@_GRRegg), Charles Neill (@ccneill), Jay Paz (@jjpaz)'
 author = u'Greg Anderson (@_GRRegg), Charles Neill (@ccneill), Jay Paz (@jjpaz)'
 
 # The version info for the project you're documenting, acts as replacement for

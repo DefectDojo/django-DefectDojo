@@ -34,6 +34,7 @@ def email_requester(report, uri, error=None):
               fail_silently=True)
 """
 
+
 @app.task(bind=True)
 def async_pdf_report(self,
                      report=None,
@@ -48,29 +49,25 @@ def async_pdf_report(self,
     x = urlencode({'title': report_title,
                    'subtitle': report_subtitle,
                    'info': report_info})
+
     cover = context['host'] + reverse(
         'report_cover_page') + "?" + x
 
     config = pdfkit.configuration(wkhtmltopdf=settings.WKHTMLTOPDF_PATH)
-
     try:
         report.task_id = async_pdf_report.request.id
         report.save()
-
         bytes = render_to_string(template, context)
-
         itoc = context['include_table_of_contents']
         if itoc:
             toc = {'xsl-style-sheet': xsl_style_sheet}
         else:
             toc = None
-
         pdf = pdfkit.from_string(bytes,
                                  False,
                                  configuration=config,
                                  cover=cover,
                                  toc=toc)
-
         if report.file.name:
             with open(report.file.path, 'w') as f:
                 f.write(pdf)
@@ -81,11 +78,11 @@ def async_pdf_report(self,
         report.status = 'success'
         report.done_datetime = datetime.now(tz=localtz)
         report.save()
-        #email_requester(report, uri)
+        # email_requester(report, uri)
     except Exception as e:
         report.status = 'error'
         report.save()
-        #email_requester(report, uri, error=e)
+        # email_requester(report, uri, error=e)
         raise e
     return True
 
@@ -98,12 +95,12 @@ def async_custom_pdf_report(self,
                             host=None,
                             user=None,
                             uri=None,
-                            finding_notes=False):
-
+                            finding_notes=False,
+                            finding_images=False):
     config = pdfkit.configuration(wkhtmltopdf=settings.WKHTMLTOPDF_PATH)
 
     selected_widgets = report_widget_factory(json_data=report.options, request=None, user=user,
-                                             finding_notes=finding_notes)
+                                             finding_notes=finding_notes, finding_images=finding_images, host=host)
 
     widgets = selected_widgets.values()
     temp = None
@@ -164,11 +161,11 @@ def async_custom_pdf_report(self,
         report.status = 'success'
         report.done_datetime = datetime.now(tz=localtz)
         report.save()
-        #email_requester(report, uri)
+        # email_requester(report, uri)
     except Exception as e:
         report.status = 'error'
         report.save()
-        #email_requester(report, uri, error=e)
+        # email_requester(report, uri, error=e)
         raise e
     finally:
         if temp is not None:

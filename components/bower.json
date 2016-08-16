@@ -26,7 +26,7 @@
     "tests"
   ],
   "dependencies": {
-    "startbootstrap-sb-admin-2": null,
+    "startbootstrap-sb-admin-2": "https://github.com/BlackrockDigital/startbootstrap-sb-admin-2.git",
     "fullcalendar": null,
     "jquery-cookie": null,
     "jquery-ui": null,

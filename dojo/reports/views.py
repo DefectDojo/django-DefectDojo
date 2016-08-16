@@ -42,12 +42,17 @@ def report_builder(request):
     add_breadcrumb(title="Report Builder", top_level=True, request=request)
     findings = Finding.objects.all()
     findings = ReportAuthedFindingFilter(request.GET, queryset=findings, user=request.user)
-    endpoints = EndpointFilter(request.GET, queryset=Endpoint.objects.filter(finding__active=True,
-                                                                             finding__verified=True,
-                                                                             finding__false_p=False,
-                                                                             finding__duplicate=False,
-                                                                             finding__out_of_scope=False,
-                                                                             ))
+    endpoints = Endpoint.objects.filter(finding__active=True,
+                                        finding__verified=True,
+                                        finding__false_p=False,
+                                        finding__duplicate=False,
+                                        finding__out_of_scope=False,
+                                        ).distinct()
+    ids = get_endpoint_ids(endpoints)
+
+    endpoints = Endpoint.objects.filter(id__in=ids)
+
+    endpoints = EndpointFilter(request.GET, queryset=endpoints)
 
     in_use_widgets = [ReportOptions(request=request)]
     available_widgets = [CoverPage(request=request),
@@ -65,22 +70,24 @@ def report_builder(request):
 def custom_report(request):
     # saving the report
     form = CustomReportJsonForm(request.POST)
-
+    host = request.scheme + "://" + request.META['HTTP_HOST']
     if form.is_valid():
         selected_widgets = report_widget_factory(json_data=request.POST['json'], request=request, user=request.user,
-                                                 finding_notes=False)
+                                                 finding_notes=False, finding_images=False, host=host)
         report_name = 'Custom PDF Report: ' + request.user.username
         report_format = 'AsciiDoc'
         finding_notes = True
+        finding_images = True
 
         if 'report-options' in selected_widgets:
             options = selected_widgets['report-options']
             report_name = 'Custom PDF Report: ' + options.report_name
             report_format = options.report_type
             finding_notes = (options.include_finding_notes == '1')
+            finding_images = (options.include_finding_images == '1')
 
         selected_widgets = report_widget_factory(json_data=request.POST['json'], request=request, user=request.user,
-                                                 finding_notes=finding_notes)
+                                                 finding_notes=finding_notes, finding_images=finding_images, host=host)
 
         if report_format == 'PDF':
             report = Report(name=report_name,
@@ -93,10 +100,11 @@ def custom_report(request):
             async_custom_pdf_report.delay(report=report,
                                           template="dojo/custom_pdf_report.html",
                                           filename="custom_pdf_report.pdf",
-                                          host=request.scheme + "://" + request.META['HTTP_HOST'],
+                                          host=host,
                                           user=request.user,
                                           uri=request.build_absolute_uri(report.get_url()),
-                                          finding_notes=finding_notes)
+                                          finding_notes=finding_notes,
+                                          finding_images=finding_images)
             messages.add_message(request, messages.SUCCESS,
                                  'Your report is building, you will receive an email when it is ready.',
                                  extra_tags='alert-success')
@@ -107,7 +115,9 @@ def custom_report(request):
             return render(request,
                           'dojo/custom_asciidoc_report.html',
                           {"widgets": widgets,
-                           "finding_notes": finding_notes})
+                           "host": host,
+                           "finding_notes": finding_notes,
+                           "finding_images": finding_images})
         else:
             return HttpResponseForbidden()
     else:
@@ -148,7 +158,7 @@ def report_endpoints(request):
                                         finding__false_p=False,
                                         finding__duplicate=False,
                                         finding__out_of_scope=False,
-                                        )
+                                        ).distinct()
 
     ids = get_endpoint_ids(endpoints)
 
@@ -378,6 +388,7 @@ def product_endpoint_report(request, pid):
     paged_endpoints = get_page_items(request, endpoints, 25)
     report_format = request.GET.get('report_type', 'AsciiDoc')
     include_finding_notes = int(request.GET.get('include_finding_notes', 0))
+    include_finding_images = int(request.GET.get('include_finding_images', 0))
     include_executive_summary = int(request.GET.get('include_executive_summary', 0))
     include_table_of_contents = int(request.GET.get('include_table_of_contents', 0))
     generate = "_generate" in request.GET
@@ -442,6 +453,7 @@ def product_endpoint_report(request, pid):
                            'endpoint': None,
                            'findings': None,
                            'include_finding_notes': include_finding_notes,
+                           'include_finding_images': include_finding_images,
                            'include_executive_summary': include_executive_summary,
                            'include_table_of_contents': include_table_of_contents,
                            'user': request.user,
@@ -479,12 +491,14 @@ def product_endpoint_report(request, pid):
                                             'verified_findings': verified_findings,
                                             'report_name': report_name,
                                             'include_finding_notes': include_finding_notes,
+                                            'include_finding_images': include_finding_images,
                                             'include_executive_summary': include_executive_summary,
                                             'include_table_of_contents': include_table_of_contents,
                                             'user': user,
                                             'team_name': settings.TEAM_NAME,
                                             'title': 'Generate Report',
-                                            'host': request.scheme + "://" + request.META['HTTP_HOST']},
+                                            'host': request.scheme + "://" + request.META['HTTP_HOST'],
+                                            'user_id': request.user.id},
                                    uri=request.build_absolute_uri(report.get_url()))
             messages.add_message(request, messages.SUCCESS,
                                  'Your report is building, you will receive an email when it is ready.',
@@ -540,6 +554,7 @@ def generate_report(request, obj):
 
     report_format = request.GET.get('report_type', 'AsciiDoc')
     include_finding_notes = int(request.GET.get('include_finding_notes', 0))
+    include_finding_images = int(request.GET.get('include_finding_images', 0))
     include_executive_summary = int(request.GET.get('include_executive_summary', 0))
     include_table_of_contents = int(request.GET.get('include_table_of_contents', 0))
     generate = "_generate" in request.GET
@@ -589,12 +604,14 @@ def generate_report(request, obj):
                    'endpoint_active_findings': findings.qs,
                    'findings': findings.qs,
                    'include_finding_notes': include_finding_notes,
+                   'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
                    'include_table_of_contents': include_table_of_contents,
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': 'Generate Report',
-                   'host': request.scheme + "://" + request.META['HTTP_HOST']}
+                   'host': request.scheme + "://" + request.META['HTTP_HOST'],
+                   'user_id': request.user.id}
 
     elif type(obj).__name__ == "Product":
         product = obj
@@ -617,12 +634,14 @@ def generate_report(request, obj):
                    'report_name': report_name,
                    'findings': findings.qs,
                    'include_finding_notes': include_finding_notes,
+                   'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
                    'include_table_of_contents': include_table_of_contents,
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': 'Generate Report',
-                   'host': request.scheme + "://" + request.META['HTTP_HOST']}
+                   'host': request.scheme + "://" + request.META['HTTP_HOST'],
+                   'user_id': request.user.id}
 
     elif type(obj).__name__ == "Engagement":
         engagement = obj
@@ -645,12 +664,14 @@ def generate_report(request, obj):
                    'report_name': report_name,
                    'findings': findings.qs,
                    'include_finding_notes': include_finding_notes,
+                   'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
                    'include_table_of_contents': include_table_of_contents,
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': 'Generate Report',
-                   'host': request.scheme + "://" + request.META['HTTP_HOST']}
+                   'host': request.scheme + "://" + request.META['HTTP_HOST'],
+                   'user_id': request.user.id}
 
     elif type(obj).__name__ == "Test":
         test = obj
@@ -668,12 +689,14 @@ def generate_report(request, obj):
                    'report_name': report_name,
                    'findings': findings.qs,
                    'include_finding_notes': include_finding_notes,
+                   'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
                    'include_table_of_contents': include_table_of_contents,
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': 'Generate Report',
-                   'host': request.scheme + "://" + request.META['HTTP_HOST']}
+                   'host': request.scheme + "://" + request.META['HTTP_HOST'],
+                   'user_id': request.user.id}
 
     elif type(obj).__name__ == "Endpoint":
         endpoint = obj
@@ -697,12 +720,14 @@ def generate_report(request, obj):
                    'report_name': report_name,
                    'findings': findings.qs,
                    'include_finding_notes': include_finding_notes,
+                   'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
                    'include_table_of_contents': include_table_of_contents,
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': 'Generate Report',
-                   'host': request.scheme + "://" + request.META['HTTP_HOST']}
+                   'host': request.scheme + "://" + request.META['HTTP_HOST'],
+                   'user_id': request.user.id}
     elif type(obj).__name__ == "QuerySet":
         findings = ReportAuthedFindingFilter(request.GET,
                                              queryset=obj.prefetch_related('test',
@@ -719,12 +744,14 @@ def generate_report(request, obj):
         context = {'findings': findings.qs,
                    'report_name': report_name,
                    'include_finding_notes': include_finding_notes,
+                   'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
                    'include_table_of_contents': include_table_of_contents,
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': 'Generate Report',
-                   'host': request.scheme + "://" + request.META['HTTP_HOST']}
+                   'host': request.scheme + "://" + request.META['HTTP_HOST'],
+                   'user_id': request.user.id}
     else:
         raise Http404()
 
@@ -734,7 +761,7 @@ def generate_report(request, obj):
         report_form = ReportOptionsForm(request.GET)
         if report_format == 'AsciiDoc':
             return render(request,
-                          'dojo/asciidoc_report.html',
+                          template,
                           {'product_type': product_type,
                            'product': product,
                            'engagement': engagement,
@@ -742,11 +769,14 @@ def generate_report(request, obj):
                            'endpoint': endpoint,
                            'findings': findings.qs,
                            'include_finding_notes': include_finding_notes,
+                           'include_finding_images': include_finding_images,
                            'include_executive_summary': include_executive_summary,
                            'include_table_of_contents': include_table_of_contents,
                            'user': user,
                            'team_name': settings.TEAM_NAME,
                            'title': 'Generate Report',
+                           'user_id': request.user.id,
+                           'host': request.scheme + "://" + request.META['HTTP_HOST'],
                            })
 
         elif report_format == 'PDF':

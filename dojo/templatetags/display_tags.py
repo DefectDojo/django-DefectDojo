@@ -8,8 +8,10 @@ from django.template.defaultfilters import stringfilter
 from django.utils.html import escape
 from django.utils.safestring import mark_safe, SafeData
 from django.utils.text import normalize_newlines
+from django.core.urlresolvers import reverse
+from django.contrib.auth.models import User
 
-from dojo.models import Check_List, BurpRawRequestResponse
+from dojo.models import Check_List, FindingImage, FindingImageAccessToken
 
 register = template.Library()
 
@@ -41,15 +43,18 @@ def linebreaksasciidocbr(value, autoescape=None):
 
     return mark_safe(value.replace('\n', '&nbsp;+<br />'))
 
+
 @register.simple_tag
 def dojo_version():
     from dojo import __version__
     return 'v. ' + __version__
 
+
 @register.simple_tag
 def dojo_docs_url():
     from dojo import __docs__
     return mark_safe(__docs__)
+
 
 @register.filter
 def content_type(obj):
@@ -72,9 +77,9 @@ def action_log_entry(value, autoescape=None):
     history = json.loads(value)
     text = ''
     for k in history.iterkeys():
-        text += k.capitalize() + ' changed from "' + history[k][0] + '" to "' + history[k][1] + '"<br/>'
+        text += k.capitalize() + ' changed from "' + history[k][0] + '" to "' + history[k][1] + '"'
 
-    return mark_safe(text)
+    return text
 
 
 @register.simple_tag(takes_context=True)
@@ -113,6 +118,7 @@ def colgroup(parser, token):
     | 4. Four  | 4. Fourteen |                 |
     ============================================
     """
+
     class Node(template.Node):
         def __init__(self, iterable, num_cols, varname):
             self.iterable = iterable
@@ -122,7 +128,7 @@ def colgroup(parser, token):
         def render(self, context):
             iterable = template.Variable(self.iterable).resolve(context)
             num_cols = self.num_cols
-            context[self.varname] = izip(*[chain(iterable, [None]*(num_cols-1))] * num_cols)
+            context[self.varname] = izip(*[chain(iterable, [None] * (num_cols - 1))] * num_cols)
             return u''
 
     try:
@@ -131,3 +137,12 @@ def colgroup(parser, token):
     except ValueError:
         raise template.TemplateSyntaxError("Invalid arguments passed to %r." % token.contents.split()[0])
     return Node(iterable, num_cols, varname)
+
+
+@register.simple_tag(takes_context=True)
+def pic_token(context, image, size):
+    user_id = context['user_id']
+    user = User.objects.get(id=user_id)
+    token = FindingImageAccessToken(user=user, image=image, size=size)
+    token.save()
+    return reverse('download_finding_pic', args=[token.token])

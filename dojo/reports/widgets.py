@@ -244,6 +244,9 @@ class FindingList(Widget):
         if 'request' in kwargs:
             self.request = kwargs.get('request')
 
+        if 'host' in kwargs:
+            self.host = kwargs.get('host')
+
         if 'findings' in kwargs:
             self.findings = kwargs.get('findings')
         else:
@@ -254,7 +257,13 @@ class FindingList(Widget):
         else:
             self.finding_notes = False
 
+        if 'finding_images' in kwargs:
+            self.finding_images = kwargs.get('finding_images')
+        else:
+            self.finding_images = False
+
         super(FindingList, self).__init__(*args, **kwargs)
+
         self.title = 'Finding List'
         if 'form' in self.findings:
             self.form = self.findings.form
@@ -277,14 +286,18 @@ class FindingList(Widget):
     def get_asciidoc(self):
         asciidoc = render_to_string("dojo/custom_asciidoc_report_findings.html",
                                     {"findings": self.findings,
-                                     "include_finding_notes": self.finding_notes})
+                                     "host": self.host,
+                                     "include_finding_notes": self.finding_notes,
+                                     "include_finding_images": self.finding_images})
         return mark_safe(asciidoc)
 
     def get_html(self):
         html = render_to_string("dojo/custom_pdf_report_finding_list.html",
                                 {"title": self.title,
                                  "findings": self.findings,
-                                 "include_finding_notes": self.finding_notes})
+                                 "include_finding_notes": self.finding_notes,
+                                 "include_finding_images": self.finding_images,
+                                 "host": self.host})
         return mark_safe(html)
 
     def get_option_form(self):
@@ -304,6 +317,9 @@ class EndpointList(Widget):
         if 'request' in kwargs:
             self.request = kwargs.get('request')
 
+        if 'host' in kwargs:
+            self.host = kwargs.get('host')
+
         if 'endpoints' in kwargs:
             self.endpoints = kwargs.get('endpoints')
         else:
@@ -314,7 +330,13 @@ class EndpointList(Widget):
         else:
             self.finding_notes = False
 
+        if 'finding_images' in kwargs:
+            self.finding_images = kwargs.get('finding_images')
+        else:
+            self.finding_images = False
+
         super(EndpointList, self).__init__(*args, **kwargs)
+
         self.title = 'Endpoint List'
         self.form = self.endpoints.form
         self.multiple = 'false'
@@ -330,13 +352,17 @@ class EndpointList(Widget):
         html = render_to_string("dojo/custom_pdf_report_endpoint_list.html",
                                 {"title": self.title,
                                  "endpoints": self.endpoints,
-                                 "include_finding_notes": self.finding_notes})
+                                 "include_finding_notes": self.finding_notes,
+                                 "include_finding_images": self.finding_images,
+                                 "host": self.host})
         return mark_safe(html)
 
     def get_asciidoc(self):
         asciidoc = render_to_string("dojo/custom_asciidoc_report_endpoints.html",
                                     {"endpoints": self.endpoints,
-                                     "include_finding_notes": self.finding_notes})
+                                     "host": self.host,
+                                     "include_finding_notes": self.finding_notes,
+                                     "include_finding_images": self.finding_images})
         return mark_safe(asciidoc)
 
     def get_option_form(self):
@@ -350,7 +376,8 @@ class EndpointList(Widget):
         return mark_safe(html)
 
 
-def report_widget_factory(json_data=None, request=None, user=None, finding_notes=False):
+def report_widget_factory(json_data=None, request=None, user=None, finding_notes=False, finding_images=False,
+                          host=None):
     selected_widgets = OrderedDict()
     widgets = json.loads(json_data)
     for idx, widget in enumerate(widgets):
@@ -362,16 +389,22 @@ def report_widget_factory(json_data=None, request=None, user=None, finding_notes
                                                 finding__false_p=False,
                                                 finding__duplicate=False,
                                                 finding__out_of_scope=False,
-                                                )
+                                                ).distinct()
             d = QueryDict(mutable=True)
             for item in widget.get(widget.keys()[0]):
                 if item['name'] in d:
                     d.getlist(item['name']).append(item['value'])
                 else:
                     d[item['name']] = item['value']
+            from dojo.endpoint.views import get_endpoint_ids
+            ids = get_endpoint_ids(endpoints)
 
+            endpoints = Endpoint.objects.filter(id__in=ids)
             endpoints = EndpointFilter(d, queryset=endpoints)
-            endpoints = EndpointList(request=request, endpoints=endpoints, finding_notes=finding_notes)
+
+            endpoints = EndpointList(request=request, endpoints=endpoints, finding_notes=finding_notes,
+                                     finding_images=finding_images, host=host)
+
             selected_widgets[widget.keys()[0] + '-' + str(idx)] = endpoints
 
         if widget.keys()[0] == 'finding-list':
@@ -386,7 +419,9 @@ def report_widget_factory(json_data=None, request=None, user=None, finding_notes
             findings = ReportAuthedFindingFilter(d, queryset=findings, user=user)
 
             selected_widgets[widget.keys()[0] + '-' + str(idx)] = FindingList(request=request, findings=findings,
-                                                                              finding_notes=finding_notes)
+                                                                              finding_notes=finding_notes,
+                                                                              finding_images=finding_images,
+                                                                              host=host)
 
         if widget.keys()[0] == 'wysiwyg-content':
             wysiwyg_content = WYSIWYGContent(request=request)
@@ -399,6 +434,9 @@ def report_widget_factory(json_data=None, request=None, user=None, finding_notes
             options = ReportOptions(request=request)
             options.include_finding_notes = \
                 next((item for item in widget.get(widget.keys()[0]) if item["name"] == 'include_finding_notes'), None)[
+                    'value']
+            options.include_finding_images = \
+                next((item for item in widget.get(widget.keys()[0]) if item["name"] == 'include_finding_images'), None)[
                     'value']
             options.report_type = \
                 next((item for item in widget.get(widget.keys()[0]) if item["name"] == 'report_type'), None)['value']

@@ -107,7 +107,7 @@ BOWER_COMPONENTS_ROOT = 'BOWERDIR'
 # what components should be installed
 BOWER_INSTALLED_APPS = (
     'fontawesome',
-    'startbootstrap-sb-admin-2',
+    'https://github.com/BlackrockDigital/startbootstrap-sb-admin-2.git',
     'fullcalendar',
     'jquery-cookie',
     'jquery-ui',
@@ -162,6 +162,7 @@ LOGIN_EXEMPT_URLS = (
     r'^api/v1/',
     r'^ajax/v1/',
     r'^reports/cover$',
+    r'^finding/image/(?P<token>[^/]+)$'
 )
 
 # Python dotted path to the WSGI application used by Django's runserver.
@@ -194,6 +195,7 @@ INSTALLED_APPS = (
     'watson',
     'tagging',
     'custom_field',
+    'imagekit',
 )
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
