@@ -10,7 +10,7 @@ setup(
     install_requires=[
         'Django==1.8.10',
         'MySQL-python',
-        'Pillow==2.3.0',
+        'Pillow==3.3.0',
         'django-secure>1.0',
         'django-tastypie>=0.12.2',
         'django-tastypie-swagger',
@@ -34,7 +34,8 @@ setup(
         'django-overextends',
         'defusedxml',
         'django-tagging',
-        'django-custom-field'],
+        'django-custom-field',
+        'django-imagekit'],
     dependency_links=[
         "https://github.com/grendel513/python-pdfkit/tarball/master#egg=pdfkit-0.5.0",
     ],

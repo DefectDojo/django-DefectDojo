@@ -9,6 +9,7 @@ from django.core.validators import RegexValidator
 from django.forms.widgets import Widget, Select
 from django.utils.dates import MONTHS
 from django.utils.safestring import mark_safe
+from django.forms import modelformset_factory
 from pytz import timezone
 from tagging.forms import TagField
 from custom_field.models import CustomField
@@ -16,7 +17,7 @@ from custom_field.models import CustomField
 from dojo import settings
 from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
-    Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report
+    Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
 localtz = timezone(settings.TIME_ZONE)
@@ -1013,6 +1014,7 @@ class APIKeyForm(forms.ModelForm):
 class ReportOptionsForm(forms.Form):
     yes_no = (('0', 'No'), ('1', 'Yes'))
     include_finding_notes = forms.ChoiceField(choices=yes_no, label="Finding Notes")
+    include_finding_images = forms.ChoiceField(choices=yes_no, label="Finding Images")
     include_executive_summary = forms.ChoiceField(choices=yes_no, label="Executive Summary")
     include_table_of_contents = forms.ChoiceField(choices=yes_no, label="Table of Contents")
     report_type = forms.ChoiceField(choices=(('AsciiDoc', 'AsciiDoc'), ('PDF', 'PDF')))
@@ -1022,6 +1024,7 @@ class CustomReportOptionsForm(forms.Form):
     yes_no = (('0', 'No'), ('1', 'Yes'))
     report_name = forms.CharField(required=False, max_length=100)
     include_finding_notes = forms.ChoiceField(required=False, choices=yes_no)
+    include_finding_images = forms.ChoiceField(choices=yes_no, label="Finding Images")
     report_type = forms.ChoiceField(required=False, choices=(('AsciiDoc', 'AsciiDoc'), ('PDF', 'PDF')))
 
 
@@ -1036,3 +1039,12 @@ class DeleteReportForm(forms.ModelForm):
 
 class TagForm(forms.Form):
     tags = TagField(required=False, help_text="Add comma delimited tags")
+
+
+class AddFindingImageForm(forms.ModelForm):
+    class Meta:
+        model = FindingImage
+        exclude = ['']
+
+
+FindingImageFormSet = modelformset_factory(FindingImage, extra=3, max_num=10, exclude=[''], can_delete=True)

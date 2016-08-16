@@ -1,24 +1,33 @@
 # #  findings
 import base64
 import logging
+import mimetypes
+import os
+import shutil
 from datetime import datetime
+
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
+from django.http import Http404
+from django.http import HttpResponseNotFound
 from django.http import HttpResponseRedirect, HttpResponseForbidden
+from django.http import StreamingHttpResponse
 from django.shortcuts import render, get_object_or_404
+from django.utils.safestring import mark_safe
 from pytz import timezone
+
 from dojo.filters import OpenFindingFilter, \
     OpenFingingSuperFilter, AcceptedFingingSuperFilter, \
     ClosedFingingSuperFilter, TemplateFindingFilter
 from dojo.forms import NoteForm, CloseFindingForm, FindingForm, PromoteFindingForm, FindingTemplateForm, \
-    DeleteFindingTemplateForm
+    DeleteFindingTemplateForm, FindingImageFormSet
 from dojo.models import Product_Type, Finding, Notes, \
-    Risk_Acceptance, BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template
-from dojo.utils import get_page_items, add_breadcrumb
-from django.utils.safestring import mark_safe
+    Risk_Acceptance, BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, \
+    FindingImageAccessToken
+from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -546,3 +555,110 @@ def delete_template(request, tid):
 @user_passes_test(lambda u: u.is_staff)
 def finding_from_template(request, tid):
     template = get_object_or_404(Finding_Template, id=tid)
+
+
+@user_passes_test(lambda u: u.is_staff)
+def manage_images(request, fid):
+    finding = get_object_or_404(Finding, id=fid)
+    images_formset = FindingImageFormSet(queryset=finding.images.all())
+    error = False
+
+    if request.method == 'POST':
+        images_formset = FindingImageFormSet(request.POST, request.FILES, queryset=finding.images.all())
+        if images_formset.is_valid():
+            # remove all from database and disk
+
+            images_formset.save()
+
+            for obj in images_formset.deleted_objects:
+                os.remove(settings.MEDIA_ROOT + obj.image.name)
+                if obj.image_thumbnail is not None and os.path.isfile(settings.MEDIA_ROOT + obj.image_thumbnail.name):
+                    os.remove(settings.MEDIA_ROOT + obj.image_thumbnail.name)
+                if obj.image_medium is not None and os.path.isfile(settings.MEDIA_ROOT + obj.image_medium.name):
+                    os.remove(settings.MEDIA_ROOT + obj.image_medium.name)
+                if obj.image_large is not None and os.path.isfile(settings.MEDIA_ROOT + obj.image_large.name):
+                    os.remove(settings.MEDIA_ROOT + obj.image_large.name)
+
+            for obj in images_formset.new_objects:
+                finding.images.add(obj)
+
+            orphan_images = FindingImage.objects.filter(finding__isnull=True)
+            for obj in orphan_images:
+                os.remove(settings.MEDIA_ROOT + obj.image.name)
+                if obj.image_thumbnail is not None and os.path.isfile(settings.MEDIA_ROOT + obj.image_thumbnail.name):
+                    os.remove(settings.MEDIA_ROOT + obj.image_thumbnail.name)
+                if obj.image_medium is not None and os.path.isfile(settings.MEDIA_ROOT + obj.image_medium.name):
+                    os.remove(settings.MEDIA_ROOT + obj.image_medium.name)
+                if obj.image_large is not None and os.path.isfile(settings.MEDIA_ROOT + obj.image_large.name):
+                    os.remove(settings.MEDIA_ROOT + obj.image_large.name)
+                obj.delete()
+
+            files = os.listdir(settings.MEDIA_ROOT + 'finding_images')
+
+            for file in files:
+                with_media_root = settings.MEDIA_ROOT + 'finding_images/' + file
+                with_part_root_only = 'finding_images/' + file
+                if os.path.isfile(with_media_root):
+                    pic = FindingImage.objects.filter(image=with_part_root_only)
+
+                    if len(pic) == 0:
+                        os.remove(with_media_root)
+                        cache_to_remove = settings.MEDIA_ROOT + '/CACHE/images/finding_images/' + \
+                                          os.path.splitext(file)[0]
+                        if os.path.isdir(cache_to_remove):
+                            shutil.rmtree(cache_to_remove)
+                    else:
+                        for p in pic:
+                            if p.finding_set is None:
+                                p.delete()
+
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Images updated successfully.',
+                                 extra_tags='alert-success')
+        else:
+            error = True
+            messages.add_message(request,
+                                 messages.ERROR,
+                                 'Please check form data and try again.',
+                                 extra_tags='alert-danger')
+
+        if not error:
+            return HttpResponseRedirect(reverse('view_finding', args=(fid,)))
+
+    return render(request, 'dojo/manage_images.html',
+                  {'images_formset': images_formset,
+                   'name': 'Manage Finding Images',
+                   'finding': finding,
+                   })
+
+
+def download_finding_pic(request, token):
+    mimetypes.init()
+
+    try:
+        access_token = FindingImageAccessToken.objects.get(token=token)
+        sizes = {'thumbnail': access_token.image.image_thumbnail,
+                 'small': access_token.image.image_small,
+                 'medium': access_token.image.image_medium,
+                 'large': access_token.image.image_large,
+                 'original': access_token.image.image,
+                 }
+        if access_token.size not in sizes.keys():
+            raise Http404
+        size = access_token.size
+        # we know there is a token - is it for this image
+        if access_token.size == size:
+            ''' all is good, one time token used, delete it '''
+            access_token.delete()
+        else:
+            raise PermissionDenied
+    except:
+        raise PermissionDenied
+
+    response = StreamingHttpResponse(
+        FileIterWrapper(open(sizes[size].path)))
+    response['Content-Disposition'] = 'inline'
+    mimetype, encoding = mimetypes.guess_type(sizes[size].name)
+    response['Content-Type'] = mimetype
+    return response

@@ -32,10 +32,9 @@ logger = logging.getLogger(__name__)
 
 @user_passes_test(lambda u: u.is_staff)
 def vulnerable_endpoints(request):
-    endpoints = Endpoint.objects.filter(finding__active=True,
-                                        finding__verified=True,
-                                        finding__mitigated__isnull=True,
-                                        finding__out_of_scope=False)
+    endpoints = Endpoint.objects.filter(finding__active=True, finding__verified=True, finding__false_p=False,
+                                        finding__duplicate=False, finding__out_of_scope=False).distinct()
+
     product = None
     if 'product' in request.GET:
         p = request.GET.getlist('product', [])

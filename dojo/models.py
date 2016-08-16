@@ -2,6 +2,7 @@ import base64
 import os
 import re
 from datetime import datetime
+from uuid import uuid4
 
 import watson
 from auditlog.registry import auditlog
@@ -13,6 +14,8 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Q
 from django.utils.timezone import now
+from imagekit.models import ImageSpecField
+from imagekit.processors import ResizeToCover
 from pytz import timezone
 from tagging.registry import register as tag_register
 
@@ -315,7 +318,7 @@ class Engagement(models.Model):
     def __unicode__(self):
         return "Engagement: %s (%s)" % (self.name if self.name else '',
                                         self.target_start.strftime(
-                                                "%b %d, %Y"))
+                                            "%b %d, %Y"))
 
     def get_breadcrumbs(self):
         bc = self.product.get_breadcrumbs()
@@ -396,7 +399,7 @@ class Endpoint(models.Model):
                                       verified=True,
                                       mitigated__isnull=True,
                                       false_p=False,
-                                      duplicate=False).order_by('numerical_severity')
+                                      duplicate=False).distinct().order_by('numerical_severity')
 
     def get_breadcrumbs(self):
         bc = self.product.get_breadcrumbs()
@@ -506,6 +509,7 @@ class Finding(models.Model):
     numerical_severity = models.CharField(max_length=4)
     last_reviewed = models.DateTimeField(null=True, editable=False)
     last_reviewed_by = models.ForeignKey(User, null=True, editable=False, related_name='last_reviewed_by')
+    images = models.ManyToManyField('FindingImage')
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
@@ -592,18 +596,18 @@ class Finding(models.Model):
                 'url': reverse('view_finding', args=(self.id,))}]
         return bc
 
-    # def get_request(self):
-    #     if self.burprawrequestresponse_set.count() > 0:
-    #         reqres = BurpRawRequestResponse.objects.get(finding=self)
-    #         return base64.b64decode(reqres.burpRequestBase64)
-    #
-    # def get_response(self):
-    #     if self.burprawrequestresponse_set.count() > 0:
-    #         reqres = BurpRawRequestResponse.objects.get(finding=self)
-    #         res = base64.b64decode(reqres.burpResponseBase64)
-    #         # Removes all blank lines
-    #         res = re.sub(r'\n\s*\n', '\n', res)
-    #         return res
+        # def get_request(self):
+        #     if self.burprawrequestresponse_set.count() > 0:
+        #         reqres = BurpRawRequestResponse.objects.get(finding=self)
+        #         return base64.b64decode(reqres.burpRequestBase64)
+        #
+        # def get_response(self):
+        #     if self.burprawrequestresponse_set.count() > 0:
+        #         reqres = BurpRawRequestResponse.objects.get(finding=self)
+        #         res = base64.b64decode(reqres.burpResponseBase64)
+        #         # Removes all blank lines
+        #         res = re.sub(r'\n\s*\n', '\n', res)
+        #         return res
 
 
 Finding.endpoints.through.__unicode__ = lambda x: "Endpoint: " + x.endpoint.host
@@ -731,7 +735,7 @@ class Risk_Acceptance(models.Model):
 
     def __unicode__(self):
         return "Risk Acceptance added on %s" % self.created.strftime(
-                "%b %d, %Y")
+            "%b %d, %Y")
 
     def filename(self):
         return os.path.basename(self.path.name) \
@@ -766,6 +770,50 @@ class Report(models.Model):
         ordering = ['-datetime']
 
 
+class FindingImage(models.Model):
+    image = models.ImageField(upload_to='finding_images', null=True)
+    image_thumbnail = ImageSpecField(source='image',
+                                     processors=[ResizeToCover(100, 100)],
+                                     format='JPEG',
+                                     options={'quality': 70})
+    image_small = ImageSpecField(source='image',
+                                 processors=[ResizeToCover(640, 480)],
+                                 format='JPEG',
+                                 options={'quality': 100})
+    image_medium = ImageSpecField(source='image',
+                                  processors=[ResizeToCover(800, 600)],
+                                  format='JPEG',
+                                  options={'quality': 100})
+    image_large = ImageSpecField(source='image',
+                                 processors=[ResizeToCover(1024, 768)],
+                                 format='JPEG',
+                                 options={'quality': 100})
+
+    def __unicode__(self):
+        return self.image.name
+
+
+class FindingImageAccessToken(models.Model):
+    """This will allow reports to request the images without exposin the media root to the world without
+    authentication"""
+    user = models.ForeignKey(User, null=False, blank=False)
+    image = models.ForeignKey(FindingImage, null=False, blank=False)
+    token = models.CharField(max_length=255)
+    size = models.CharField(max_length=9,
+                            choices=(
+                                ('small', 'Small'),
+                                ('medium', 'Medium'),
+                                ('large', 'Large'),
+                                ('thumbnail', 'Thumbnail'),
+                                ('original', 'Original')),
+                            default='medium')
+
+    def save(self, *args, **kwargs):
+        if not self.token:
+            self.token = uuid4()
+        return super(FindingImageAccessToken, self).save(*args, **kwargs)
+
+
 # Register for automatic logging to database
 auditlog.register(Dojo_User)
 auditlog.register(Endpoint)
@@ -785,6 +833,8 @@ tag_register(Finding_Template)
 
 admin.site.register(Test)
 admin.site.register(Finding)
+admin.site.register(FindingImage)
+admin.site.register(FindingImageAccessToken)
 admin.site.register(Stub_Finding)
 admin.site.register(Engagement)
 admin.site.register(Risk_Acceptance)
