@@ -509,7 +509,7 @@ class Finding(models.Model):
     numerical_severity = models.CharField(max_length=4)
     last_reviewed = models.DateTimeField(null=True, editable=False)
     last_reviewed_by = models.ForeignKey(User, null=True, editable=False, related_name='last_reviewed_by')
-    images = models.ManyToManyField('FindingImage')
+    images = models.ManyToManyField('FindingImage', null=True, blank=True)
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
@@ -577,6 +577,18 @@ class Finding(models.Model):
         long_desc += '*Impact*: \n' + self.impact + '\n\n'
         long_desc += '*References*:' + self.references
         return long_desc
+
+    def save(self, *args, **kwargs):
+        super(Finding, self).save(*args, **kwargs)
+        if hasattr(settings,'ENABLE_DEDUPLICATION'):
+            if settings.ENABLE_DEDUPLICATION:
+                eng_findings_cwe = Finding.objects.filter(test__engagement=self.test.engagement, cwe=self.cwe).exclude(id=self.id).exclude(cwe=None)
+                eng_findings_title = Finding.objects.filter(test__engagement=self.test.engagement, title=self.title).exclude(id=self.id)
+                total_findings = eng_findings_cwe | eng_findings_title
+                for find in total_findings:
+                    if set(find.endpoints.all()) == set(self.endpoints.all()):
+                        find.duplicate = True
+                        super(Finding, find).save(*args, **kwargs)
 
     def clean(self):
         no_check = ["test", "reporter"]

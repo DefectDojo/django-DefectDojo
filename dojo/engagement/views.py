@@ -180,9 +180,19 @@ def view_engagement(request, eid):
         eng.save()
 
     add_breadcrumb(parent=eng, top_level=False, request=request)
-
+    if hasattr(settings, 'ENABLE_DEDUPLICATION'):
+        if settings.ENABLE_DEDUPLICATION:
+            enabled = True
+            findings = Finding.objects.filter(test__engagement=eng, duplicate=False)
+        else:
+            enabled = False
+            findings = None
+    else:
+        enabled = False
+        findings = None
     return render(request, 'dojo/view_eng.html',
                   {'eng': eng, 'tests': tests,
+                   'findings': findings, 'enabled': enabled,
                    'check': check, 'threat': eng.tmodel_path,
                    'risk': eng.risk_path, 'form': form,
                    'risks_accepted': risks_accepted,
