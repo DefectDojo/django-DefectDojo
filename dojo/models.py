@@ -1,5 +1,6 @@
 import base64
 import os
+import sys
 import re
 from datetime import datetime
 from uuid import uuid4
@@ -529,6 +530,20 @@ class Finding(models.Model):
             return 'S3'
         else:
             return 'S4'
+
+    def legacy_save(self, *args, **kwargs):
+        super(Finding, self).save(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        super(Finding, self).save(*args, **kwargs)
+        if settings.ENABLE_DEDUPLICATION:
+            eng_findings_cwe = Finding.objects.filter(test__engagement=self.test.engagement, cwe=self.cwe).exclude(id=self.id).exclude(cwe=None)
+            eng_findings_title = Finding.objects.filter(test__engagement=self.test.engagement, title=self.title).exclude(id=self.id)
+            total_findings = eng_findings_cwe | eng_findings_title
+            for find in total_findings:
+               if set(find.endpoints.all()) == set(self.endpoints.all()):
+                        find.duplicate = True
+                        find.legacy_save()
 
     def __unicode__(self):
         return self.title
