@@ -303,6 +303,15 @@ Visual representation of a Finding:
 .. image:: /_static/find_6.png
     :alt: Finding View
 
+Automatically Removing Duplicate Findings
+    'Deduplication' is a feature that when enabled will compare findings to automatically identify duplicates.
+    To enable deduplcation change 'ENABLE_DEDUPLICATION = False' to 'ENABLE_DEDUPLICATION = True' in your
+    settings.py file. If you are upgrading from an older version of Dojo simply add 'ENABLE_DEDUPLICATION = True'.
+
+    Dojo deduplicates findings by comparing endpoints, cwe fields, and titles. If a two findings share a URL
+    and have the same CWE or title, Dojo marks the less recent finding as a duplicate. When deduplication is enabled, a
+    list of deduplicated findings is added to the engagement view.
+
 Metrics
 -------
 
