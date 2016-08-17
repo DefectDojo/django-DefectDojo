@@ -190,9 +190,13 @@ def view_engagement(request, eid):
     else:
         enabled = False
         findings = None
+
+    if findings is not None:
+        fpage = get_page_items(request, findings, 15)
+
     return render(request, 'dojo/view_eng.html',
                   {'eng': eng, 'tests': tests,
-                   'findings': findings, 'enabled': enabled,
+                   'findings': fpage, 'enabled': enabled,
                    'check': check, 'threat': eng.tmodel_path,
                    'risk': eng.risk_path, 'form': form,
                    'risks_accepted': risks_accepted,

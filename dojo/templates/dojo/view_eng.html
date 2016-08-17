@@ -418,7 +418,7 @@
                 {% endfor %}
                 </tbody>
             </table>
-            <div class="panel-body borderless">
+            <div class="panel-body {% if findings %}show{% else %}hidden{% endif %}">
                 {% include "dojo/paging_snippet.html" with page=findings %}
             </div>
         {% else %}
