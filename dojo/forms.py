@@ -543,7 +543,7 @@ class AddFindingForm(forms.ModelForm):
     class Meta:
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
-        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint')
+        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images')
 
 
 class PromoteFindingForm(forms.ModelForm):
@@ -570,7 +570,7 @@ class PromoteFindingForm(forms.ModelForm):
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'active', 'false_p', 'verified', 'is_template',
-                   'duplicate', 'out_of_scope')
+                   'duplicate', 'out_of_scope', 'images')
 
 
 class FindingForm(forms.ModelForm):
@@ -609,7 +609,7 @@ class FindingForm(forms.ModelForm):
     class Meta:
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
-        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint')
+        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images')
 
 
 class StubFindingForm(forms.ModelForm):
