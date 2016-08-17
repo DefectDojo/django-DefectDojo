@@ -9,7 +9,7 @@ LOGIN_REDIRECT_URL = '/'
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
-ENABLE_DEDUPLICATION = True
+ENABLE_DEDUPLICATION = False
 
 # Uncomment this line if you enable SSL
 # SESSION_COOKIE_SECURE = True

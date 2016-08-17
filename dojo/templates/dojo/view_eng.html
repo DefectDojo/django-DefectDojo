@@ -371,13 +371,14 @@
         </div>
 
     </div>
+{% if enabled %}
  <div class="row">
         <div id="finding" class="col-md-12">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h4> Findings</h4>
                 </div>
-{% if findings %}
+        {% if findings %}
             <table id="test_findings" class="table-bordered table table-condensed table-hover">
 
 
@@ -430,5 +431,5 @@
         </div>
 
     </div>
-
+{% endif %}
 {% endblock %}
