@@ -243,6 +243,8 @@ class FindingList(Widget):
     def __init__(self, *args, **kwargs):
         if 'request' in kwargs:
             self.request = kwargs.get('request')
+        if 'user_id' in kwargs:
+            self.user_id = kwargs.get('user_id')
 
         if 'host' in kwargs:
             self.host = kwargs.get('host')
@@ -288,7 +290,8 @@ class FindingList(Widget):
                                     {"findings": self.findings,
                                      "host": self.host,
                                      "include_finding_notes": self.finding_notes,
-                                     "include_finding_images": self.finding_images})
+                                     "include_finding_images": self.finding_images,
+                                     "user_id": self.user_id})
         return mark_safe(asciidoc)
 
     def get_html(self):
@@ -297,7 +300,8 @@ class FindingList(Widget):
                                  "findings": self.findings,
                                  "include_finding_notes": self.finding_notes,
                                  "include_finding_images": self.finding_images,
-                                 "host": self.host})
+                                 "host": self.host,
+                                 "user_id": self.user_id})
         return mark_safe(html)
 
     def get_option_form(self):
@@ -316,6 +320,8 @@ class EndpointList(Widget):
     def __init__(self, *args, **kwargs):
         if 'request' in kwargs:
             self.request = kwargs.get('request')
+        if 'user_id' in kwargs:
+            self.user_id = kwargs.get('user_id')
 
         if 'host' in kwargs:
             self.host = kwargs.get('host')
@@ -354,7 +360,8 @@ class EndpointList(Widget):
                                  "endpoints": self.endpoints,
                                  "include_finding_notes": self.finding_notes,
                                  "include_finding_images": self.finding_images,
-                                 "host": self.host})
+                                 "host": self.host,
+                                 "user_id": self.user_id})
         return mark_safe(html)
 
     def get_asciidoc(self):
@@ -362,7 +369,8 @@ class EndpointList(Widget):
                                     {"endpoints": self.endpoints,
                                      "host": self.host,
                                      "include_finding_notes": self.finding_notes,
-                                     "include_finding_images": self.finding_images})
+                                     "include_finding_images": self.finding_images,
+                                     "user_id": self.user_id})
         return mark_safe(asciidoc)
 
     def get_option_form(self):
@@ -401,9 +409,9 @@ def report_widget_factory(json_data=None, request=None, user=None, finding_notes
 
             endpoints = Endpoint.objects.filter(id__in=ids)
             endpoints = EndpointFilter(d, queryset=endpoints)
-
+            user_id = user.id if user is not None else None
             endpoints = EndpointList(request=request, endpoints=endpoints, finding_notes=finding_notes,
-                                     finding_images=finding_images, host=host)
+                                     finding_images=finding_images, host=host, user_id=user_id)
 
             selected_widgets[widget.keys()[0] + '-' + str(idx)] = endpoints
 
@@ -417,11 +425,11 @@ def report_widget_factory(json_data=None, request=None, user=None, finding_notes
                     d[item['name']] = item['value']
 
             findings = ReportAuthedFindingFilter(d, queryset=findings, user=user)
-
+            user_id = user.id if user is not None else None
             selected_widgets[widget.keys()[0] + '-' + str(idx)] = FindingList(request=request, findings=findings,
                                                                               finding_notes=finding_notes,
                                                                               finding_images=finding_images,
-                                                                              host=host)
+                                                                              host=host, user_id=user_id)
 
         if widget.keys()[0] == 'wysiwyg-content':
             wysiwyg_content = WYSIWYGContent(request=request)

@@ -117,7 +117,8 @@ def custom_report(request):
                           {"widgets": widgets,
                            "host": host,
                            "finding_notes": finding_notes,
-                           "finding_images": finding_images})
+                           "finding_images": finding_images,
+                           "user_id": request.user.id})
         else:
             return HttpResponseForbidden()
     else:
@@ -761,7 +762,7 @@ def generate_report(request, obj):
         report_form = ReportOptionsForm(request.GET)
         if report_format == 'AsciiDoc':
             return render(request,
-                          template,
+                          'dojo/asciidoc_report.html',
                           {'product_type': product_type,
                            'product': product,
                            'engagement': engagement,
