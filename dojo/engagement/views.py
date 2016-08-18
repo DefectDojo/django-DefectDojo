@@ -193,6 +193,8 @@ def view_engagement(request, eid):
 
     if findings is not None:
         fpage = get_page_items(request, findings, 15)
+    else:
+        fpage = None
 
     return render(request, 'dojo/view_eng.html',
                   {'eng': eng, 'tests': tests,
