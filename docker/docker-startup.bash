@@ -7,7 +7,7 @@ echo
 #Set the SQL variables from the .env file
 SQLUSER=$MYSQL_USER
 SQLPWD=$MYSQL_PASSWORD
-SQLHOST=$MYSQL_HOST
+SQLHOST=$DOJO_MYSQL_HOST
 DBNAME=$MYSQL_DATABASE
 
 cd /django-DefectDojo/
@@ -28,8 +28,8 @@ then
   sed -i  "s/MYSQLUSER/$SQLUSER/g" dojo/settings.py
   sed -i  "s/MYSQLPWD/$SQLPWD/g" dojo/settings.py
   sed -i  "s/MYSQLDB/$DBNAME/g" dojo/settings.py
-  sed -i  "s/MYSQLHOST/$MYSQL_HOST/g" dojo/settings.py
-  sed -i  "s/MYSQLPORT/$MYSQL_PORT/g" dojo/settings.py
+  sed -i  "s/MYSQLHOST/$DOJO_MYSQL_HOST/g" dojo/settings.py
+  sed -i  "s/MYSQLPORT/$DOJO_MYSQL_PORT/g" dojo/settings.py
   sed -i  "s#DOJODIR#$PWD/dojo#g" dojo/settings.py
   sed -i  "s/DOJOSECRET/$SECRET/g" dojo/settings.py
   sed -i  "s#DOJOURLPREFIX#$DOJO_URL_PREFIX#g" dojo/settings.py
@@ -44,12 +44,12 @@ echo "==========================================================================
 echo
 #Make sure MySQL is up and running, run the mysql script to check the port and report back
 chmod +x /django-DefectDojo/docker/wait-for-it.sh
-bash /django-DefectDojo/docker/wait-for-it.sh $MYSQL_HOST:$MYSQL_PORT
+bash /django-DefectDojo/docker/wait-for-it.sh $DOJO_MYSQL_HOST:$DOJO_MYSQL_PORT
 
 if [ $? -eq 0 ]; then
   echo "Database server is up and running."
   echo
-  if [ $(mysql -N -s -u$MYSQL_USER -p$MYSQL_PASSWORD $MYSQL_DATABASE --host $MYSQL_HOST -e \
+  if [ $(mysql -N -s -u$MYSQL_USER -p$MYSQL_PASSWORD $MYSQL_DATABASE --host $DOJO_MYSQL_HOST -e \
       "select count(*) from information_schema.tables where table_schema='$MYSQL_DATABASE' and table_name='dojo_product';") -eq 1 ]; then
       echo "DB Exists."
   else
