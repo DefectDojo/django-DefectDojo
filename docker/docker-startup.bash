@@ -11,6 +11,8 @@ SQLHOST=$DOJO_MYSQL_HOST
 DBNAME=$MYSQL_DATABASE
 
 cd /django-DefectDojo/
+source venv/bin/activate
+
 #Check to see if Dojo has been setup by checking the settings.py file
 if [ ! -f dojo/settings.py ];
 then

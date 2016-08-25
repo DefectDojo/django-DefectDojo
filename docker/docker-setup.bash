@@ -21,6 +21,8 @@ echo
 cd /django-DefectDojo
 # bower install
 npm install -g bower
+virtualenv venv
+source venv/bin/activate
 
 # Detect Python version
 PYV=`python -c "import sys;t='{v[0]}.{v[1]}'.format(v=list(sys.version_info[:2]));sys.stdout.write(t)";`
