@@ -71,7 +71,7 @@ MEDIA_ROOT = 'DOJO_MEDIA_ROOT'
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
 # Examples: "http://example.com/media/", "http://media.example.com/"
-MEDIA_URL = '/DOJOURLPREFIXmedia/'
+MEDIA_URL = '/media/'
 
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
@@ -81,10 +81,10 @@ STATIC_ROOT = "DOJO_STATIC_ROOT"
 
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
-STATIC_URL = '/DOJOURLPREFIXstatic/'
+STATIC_URL = '/static/'
 
-# Move DOJO into a subdirectory
-URL_PREFIX = 'DOJOURLPREFIX'
+# Move DOJO into a subdirectory (optional)
+URL_PREFIX = ''
 
 # Additional locations of static files
 STATICFILES_DIRS = (

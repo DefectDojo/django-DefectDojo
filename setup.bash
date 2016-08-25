@@ -12,14 +12,14 @@ function get_db_details() {
 
     if mysql -fs -u$SQLUSER -p$SQLPWD $DBNAME >/dev/null 2>&1 </dev/null; then
         echo "Database $DBNAME already exists!"
-        echo 
+        echo
         read -p "Drop database $DBNAME? [Y/n] " DELETE
         if [[ ! $DELETE =~ ^[nN]$ ]]; then
-            mysqladmin -f --user=$SQLUSER --password=$SQLPWD drop $DBNAME 
-            mysqladmin --user=$SQLUSER --password=$SQLPWD create $DBNAME 
+            mysqladmin -f --user=$SQLUSER --password=$SQLPWD drop $DBNAME
+            mysqladmin --user=$SQLUSER --password=$SQLPWD create $DBNAME
         else
             echo "Error! Must supply an empty database to proceed."
-            echo 
+            echo
             get_db_details
         fi
     else
@@ -63,7 +63,7 @@ fi
 # bower install
 sudo npm install -g bower
 
-echo 
+echo
 
 get_db_details
 
@@ -79,6 +79,8 @@ cp dojo/settings.dist.py dojo/settings.py
 
 # Save MySQL details in settings file
 if [[ ! -z $BREW_CMD ]]; then
+  sed -i ''  "s/MYSQLHOST/localhost/g" dojo/settings.py
+  sed -i ''  "s/MYSQLPORT/3306/g" dojo/settings.py
 	sed -i ''  "s/MYSQLUSER/$SQLUSER/g" dojo/settings.py
 	sed -i ''  "s/MYSQLPWD/$SQLPWD/g" dojo/settings.py
 	sed -i ''  "s/MYSQLDB/$DBNAME/g" dojo/settings.py
@@ -88,6 +90,8 @@ if [[ ! -z $BREW_CMD ]]; then
 	sed -i ''  "s#DOJO_MEDIA_ROOT#$PWD/media/#g" dojo/settings.py
 	sed -i ''  "s#DOJO_STATIC_ROOT#$PWD/static/#g" dojo/settings.py
 else
+  sed -i  "s/MYSQLHOST/localhost/g" dojo/settings.py
+	sed -i  "s/MYSQLPORT/3306/g" dojo/settings.py
 	sed -i  "s/MYSQLUSER/$SQLUSER/g" dojo/settings.py
 	sed -i  "s/MYSQLPWD/$SQLPWD/g" dojo/settings.py
 	sed -i  "s/MYSQLDB/$DBNAME/g" dojo/settings.py
@@ -105,7 +109,7 @@ if [[ "$PYV"<"2.7" ]]; then
     exit 1;
 else
     echo "Leaving Django 1.8.10 requirement"
-fi  
+fi
 
 # Detect if we're in a a virtualenv
 if python -c 'import sys; print sys.real_prefix' 2>/dev/null; then
