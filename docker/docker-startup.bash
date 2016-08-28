@@ -98,7 +98,7 @@ then
     echo "Setting dojo settings for tiered docker-compose."
     sed -i  "s/TEMPLATE_DEBUG = DEBUG/TEMPLATE_DEBUG = False/g" dojo/settings.py
     sed -i  "s/DEBUG = True/DEBUG = False/g" dojo/settings.py
-    sed -i  "s/ALLOWED_HOSTS = []/ALLOWED_HOSTS = ['localhost', '127.0.0.1']/g" dojo/settings.py
+    sed -i  "s/ALLOWED_HOSTS = \[]/ALLOWED_HOSTS = ['localhost', '127.0.0.1']/g" dojo/settings.py
   else
     echo "Setting dojo settings for SQLLITEDB."
     SQLLITEDB="'NAME': os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'db.sqlite3')"
