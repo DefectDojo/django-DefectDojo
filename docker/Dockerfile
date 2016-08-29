@@ -7,7 +7,7 @@ RUN useradd -m dojo
 USER dojo
 
 #Add DefectDojo
-ADD . /django-DefectDojo
+ADD . ../django-DefectDojo
 
 #Change to the root user
 USER root
@@ -16,9 +16,9 @@ USER root
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install build-essential libjpeg-dev gcc xorg nmap python-virtualenv wget npm build-essential nodejs-legacy python-dev python-pip nvi git libffi-dev libssl-dev libmysqlclient-dev mysql-client
 
 #Run the setup script
-RUN docker-setup.bash
+RUN bash docker-setup.bash
 
-#RUN chown -R dojo:dojo /django-DefectDojo
+#RUN chown -R dojo:dojo ../django-DefectDojo
 
 #Change back to the dojo user
 USER dojo
