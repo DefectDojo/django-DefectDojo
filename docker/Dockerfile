@@ -16,7 +16,7 @@ USER root
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install build-essential libjpeg-dev gcc xorg nmap python-virtualenv wget npm build-essential nodejs-legacy python-dev python-pip nvi git libffi-dev libssl-dev libmysqlclient-dev mysql-client
 
 #Run the setup script
-RUN bash docker-setup.bash
+RUN bash django-DefectDojo/docker-setup.bash
 
 #RUN chown -R dojo:dojo ../django-DefectDojo
 
