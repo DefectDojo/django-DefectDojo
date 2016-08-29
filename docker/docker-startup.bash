@@ -114,7 +114,6 @@ if [ "$RUN_TIERED" = True ]; then
   echo "=============================================================================="
   echo
   #Make sure MySQL is up and running, run the mysql script to check the port and report back
-  chmod +x /django-DefectDojo/docker/wait-for-it.sh
   bash /django-DefectDojo/docker/wait-for-it.sh $DOJO_MYSQL_HOST:$DOJO_MYSQL_PORT
 
   if [ $? -eq 0 ]; then
@@ -150,7 +149,10 @@ else
   echo "Starting Python  Server"
   echo "=============================================================================="
   echo
+  echo "=============================================================================="
   echo "Login with $DOJO_ADMIN_USER/$DOJO_ADMIN_PASSWORD"
+  echo "URL: http://localhost:8000"
+  echo "=============================================================================="
   echo
   cd /django-DefectDojo/
   python manage.py runserver 0.0.0.0:8000
