@@ -5,7 +5,7 @@
 ## How to use this image
 
 ```
-docker run -it -p 8000:8000 aweaver/defectdojo  bash /django-DefectDojo/docker/docker-startup.bash
+docker run -it -p 8000:8000 aweaver/django-defectdojo bash -c "export LOAD_SAMPLE_DATA=True && bash /django-DefectDojo/docker/docker-startup.bash"
 ```
 
 ## Production Environment
