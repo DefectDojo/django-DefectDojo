@@ -51,7 +51,9 @@ The [DefectDojo Twitter Account](https://twitter.com/defect_dojo) tweets project
 # Available Plugins
 
 [Engagement Surveys](https://github.com/grendel513/defectDojo-engagement-survey) - A plugin that adds answerable surveys to engagements.
+
 [LDAP Integration](https://pythonhosted.org/django-auth-ldap/)
+
 [SAML Integration](https://pypi.python.org/pypi/djangosaml2/)
 
 # About Us
