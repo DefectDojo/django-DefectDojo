@@ -34,6 +34,8 @@ Jay has also created a detailed guide for setting up DefectDojo on
 
 ### [Vagrant](./doc/install_vagrant.md)
 
+### [Docker](http://defectdojo.readthedocs.io/en/latest/getting-started.html#docker-local-install)
+
 # Getting Started
 
 We recommend checking out the [about](./doc/about.md) document to learn the 
