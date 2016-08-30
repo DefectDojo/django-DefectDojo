@@ -31,9 +31,9 @@ DATABASES = {
         # The following settings are not used with sqlite3:
         'USER': 'MYSQLUSER',
         'PASSWORD': 'MYSQLPWD',
-        'HOST': 'localhost',       # Empty for localhost through domain sockets
+        'HOST': 'MYSQLHOST',       # Empty for localhost through domain sockets
                                    # or '127.0.0.1' for localhost through TCP.
-        'PORT': '3306',           # Set to empty string for default.
+        'PORT': 'MYSQLPORT',           # Set to empty string for default.
     }
 }
 
@@ -82,6 +82,9 @@ STATIC_ROOT = "DOJO_STATIC_ROOT"
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
 STATIC_URL = '/static/'
+
+# Move DOJO into a subdirectory (optional)
+URL_PREFIX = ''
 
 # Additional locations of static files
 STATICFILES_DIRS = (

@@ -39,5 +39,8 @@
     "bootswatch-dist": "readable",
     "bootstrap-wysiwyg-steveathon": null
   },
+    "resolutions": {
+      "font-awesome": "4.4.0"
+  },
   "timeout": 20000
 }

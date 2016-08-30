@@ -38,6 +38,13 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+def report_url_resolver(request):
+    if request.META['HTTP_X_FORWARDED_PROTO']:
+        url_resolver = request.META['HTTP_X_FORWARDED_PROTO'] + "://" +  request.META['HTTP_X_FORWARDED_FOR']
+    else:
+        url_resolver = report_url_resolver(request)
+    return url_resolver
+
 def report_builder(request):
     add_breadcrumb(title="Report Builder", top_level=True, request=request)
     findings = Finding.objects.all()
@@ -70,7 +77,7 @@ def report_builder(request):
 def custom_report(request):
     # saving the report
     form = CustomReportJsonForm(request.POST)
-    host = request.scheme + "://" + request.META['HTTP_HOST']
+    host = report_url_resolver(request)
     if form.is_valid():
         selected_widgets = report_widget_factory(json_data=request.POST['json'], request=request, user=request.user,
                                                  finding_notes=False, finding_images=False, host=host)
@@ -308,7 +315,7 @@ def regen_report(request, rid):
         async_custom_pdf_report.delay(report=report,
                                       template="dojo/custom_pdf_report.html",
                                       filename="custom_pdf_report.pdf",
-                                      host=request.scheme + "://" + request.META['HTTP_HOST'],
+                                      host=report_url_resolver(request),
                                       user=request.user,
                                       uri=request.build_absolute_uri(report.get_url()))
         messages.add_message(request, messages.SUCCESS,
@@ -498,7 +505,7 @@ def product_endpoint_report(request, pid):
                                             'user': user,
                                             'team_name': settings.TEAM_NAME,
                                             'title': 'Generate Report',
-                                            'host': request.scheme + "://" + request.META['HTTP_HOST'],
+                                            'host': report_url_resolver(request),
                                             'user_id': request.user.id},
                                    uri=request.build_absolute_uri(report.get_url()))
             messages.add_message(request, messages.SUCCESS,
@@ -611,7 +618,7 @@ def generate_report(request, obj):
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': 'Generate Report',
-                   'host': request.scheme + "://" + request.META['HTTP_HOST'],
+                   'host': report_url_resolver(request),
                    'user_id': request.user.id}
 
     elif type(obj).__name__ == "Product":
@@ -641,7 +648,7 @@ def generate_report(request, obj):
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': 'Generate Report',
-                   'host': request.scheme + "://" + request.META['HTTP_HOST'],
+                   'host': report_url_resolver(request),
                    'user_id': request.user.id}
 
     elif type(obj).__name__ == "Engagement":
@@ -671,7 +678,7 @@ def generate_report(request, obj):
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': 'Generate Report',
-                   'host': request.scheme + "://" + request.META['HTTP_HOST'],
+                   'host': report_url_resolver(request),
                    'user_id': request.user.id}
 
     elif type(obj).__name__ == "Test":
@@ -696,7 +703,7 @@ def generate_report(request, obj):
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': 'Generate Report',
-                   'host': request.scheme + "://" + request.META['HTTP_HOST'],
+                   'host': report_url_resolver(request),
                    'user_id': request.user.id}
 
     elif type(obj).__name__ == "Endpoint":
@@ -727,7 +734,7 @@ def generate_report(request, obj):
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': 'Generate Report',
-                   'host': request.scheme + "://" + request.META['HTTP_HOST'],
+                   'host': report_url_resolver(request),
                    'user_id': request.user.id}
     elif type(obj).__name__ == "QuerySet":
         findings = ReportAuthedFindingFilter(request.GET,
@@ -751,7 +758,7 @@ def generate_report(request, obj):
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': 'Generate Report',
-                   'host': request.scheme + "://" + request.META['HTTP_HOST'],
+                   'host': report_url_resolver(request),
                    'user_id': request.user.id}
     else:
         raise Http404()
@@ -777,7 +784,7 @@ def generate_report(request, obj):
                            'team_name': settings.TEAM_NAME,
                            'title': 'Generate Report',
                            'user_id': request.user.id,
-                           'host': request.scheme + "://" + request.META['HTTP_HOST'],
+                           'host': report_url_resolver(request),
                            })
 
         elif report_format == 'PDF':
