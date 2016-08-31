@@ -67,11 +67,11 @@ class CheckmarxXMLParser(object):
                     for path in result.findall('Path'):
                         title = query.get('name').replace('_', ' ') + ' (' + path.get('PathId') + ')'
                         for pathnode in path.findall('PathNode'):
-                            findingdetail += 'Source Object: ' + pathnode.find('Name').text + '\n'
-                            findingdetail += 'Filename: ' + pathnode.find('FileName').text + '\n'
-                            findingdetail += 'Line Number: ' + pathnode.find('Line').text + '\n'
+                            findingdetail += 'Source Object: %s\n' % (pathnode.find('Name').text)
+                            findingdetail += 'Filename: %s\n' % (pathnode.find('FileName').text)
+                            findingdetail += 'Line Number: %s\n' % (pathnode.find('Line').text)
                             for codefragment in pathnode.findall('Snippet/Line'):
-                                findingdetail += 'Code: ' + codefragment.find('Code').text.strip() + '\n'
+                                findingdetail += 'Code: %s\n' % (codefragment.find('Code').text.strip())
 
                             findingdetail += '\n'
 

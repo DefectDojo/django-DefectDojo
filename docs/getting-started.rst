@@ -102,7 +102,7 @@ There are three versions of Docker Dojo. The first version is a development / te
 compose file with Nginx, MySQL and DefectDojo and the third is a Docker Cloud file for Docker Cloud.
 
 Docker Local Install
-----
+*************
 
 *You will need:*
 
@@ -115,7 +115,7 @@ Docker Local Install
 #. Navigate to: http://localhost:8000 and login with the credentials shown in the terminal.
 
 Docker Compose Install
-----
+*************
 
 *You will need:*
 
@@ -123,8 +123,8 @@ Docker Compose Install
 * Latest version Docker Compose
 
 *Instructions:*
-
-#. Clone the [Docker Cloud DefectDojo](https://github.com/aaronweaver/docker-DefectDojo) Repo
+`Tastypie`_
+#. Clone the `Docker Cloud DefectDojo`_ Repo
         ``git clone https://github.com/aaronweaver/docker-DefectDojo``
 #. Change directories into the newly created folder.
         ``cd docker-DefectDojo``
@@ -138,16 +138,21 @@ Docker Compose Install
         ``docker-compose up -d``
 #. Navigate to https://localhost and login with the username and password specified in the setup.bash script.
 
+.. _Docker Cloud DefectDojo: https://github.com/aaronweaver/docker-DefectDojo
+
 Docker Cloud Install
-----
+*************
 
 *Instructions:*
 
-#. Log into [DockerCloud](https://cloud.docker.com)
+#. Log into `DockerCloud`_.
 #. Click on Stacks and then Create Stack.
 #. Name the Stack, DefectDojo for example.
-#. Copy the Docker Compose file from the [Docker DefectDojo repo](https://raw.githubusercontent.com/aaronweaver/docker-DefectDojo/master/docker-cloud.yml).
-#. Edit the DOJO_ADMIN_PASSWORD, MYSQL_PASSWORD and MYSQL_ROOT_PASSWORD. Each of these is labeled as: ####ChangeMe####. Note: Make sure the passwords
+#. Copy the Docker Compose file from the `Docker DefectDojo Repo`_.
+#. Edit the DOJO_ADMIN_PASSWORD, MYSQL_PASSWORD and MYSQL_ROOT_PASSWORD. Each of these is labeled as: ChangeMe. Note: Make sure the passwords
 both match for dojo:MYSQL_PASSWORD and mysql:MYSQL_PASSWORD.
 #. Click 'Create and Deploy'
 #. Once the services are running then login with the username and password specified in the YAML file.
+
+.. DockerCloud: https://cloud.docker.com
+.. Docker DefectDojo Repo: https://raw.githubusercontent.com/aaronweaver/docker-DefectDojo/master/docker-cloud.yml
