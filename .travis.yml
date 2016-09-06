@@ -7,5 +7,5 @@ services:
 
 before_install:
   - docker build -t owasp/defectdojo .
-  - docker run -d -p 127.0.0.1:8000 owasp/defectdojo bash /django-DefectDojo/docker/docker-startup.bash
+  - docker run -d -p 127.0.0.1:8000:8000 owasp/defectdojo bash /django-DefectDojo/docker/docker-startup.bash
   - docker ps -a
