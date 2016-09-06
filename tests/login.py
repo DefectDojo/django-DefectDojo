@@ -16,7 +16,7 @@ class Login(unittest.TestCase):
         self.verificationErrors = []
         self.accept_next_alert = True
 
-    def test_login(self):
+    def login_page(self):
         driver = self.driver
         driver.get(self.base_url + "login")
         driver.find_element_by_id("id_username").clear()
@@ -25,7 +25,12 @@ class Login(unittest.TestCase):
         print "\nDojo Admin: " + os.environ['DOJO_ADMIN_USER']
         print "Dojo Password: " + os.environ['DOJO_ADMIN_PASSWORD']
         driver.find_element_by_css_selector("button.btn.btn-success").click()
+        return driver
+
+    def test_login(self):
+        driver = self.login_page()
         loginTxt = driver.find_element_by_tag_name("BODY").text
+        print loginTxt
         self.assertTrue(re.search(r'Team Dashboard', loginTxt))
 
     def is_element_present(self, how, what):
