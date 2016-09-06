@@ -6,6 +6,7 @@ from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import NoAlertPresentException
 import unittest, time, re
+import os
 
 class Login(unittest.TestCase):
     def setUp(self):
@@ -19,13 +20,8 @@ class Login(unittest.TestCase):
         driver = self.driver
         driver.get(self.base_url + "login")
         driver.find_element_by_id("id_username").clear()
-        driver.find_element_by_id("id_username").send_keys("admin")
-        driver.find_element_by_id("id_username").clear()
-        driver.find_element_by_id("id_username").send_keys("admin")
-        driver.find_element_by_id("id_password").clear()
-        driver.find_element_by_id("id_password").send_keys("TEMP-PWD!!@@")
-        driver.find_element_by_id("id_password").clear()
-        driver.find_element_by_id("id_password").send_keys("TEMP-PWD!!@@")
+        driver.find_element_by_id("id_username").send_keys(os.environ['DOJO_ADMIN_USER'])
+        driver.find_element_by_id("id_password").send_keys(os.environ['DOJO_ADMIN_PASSWORD'])
         driver.find_element_by_css_selector("button.btn.btn-success").click()
         loginTxt = driver.find_element_by_tag_name("BODY").text
         self.assertTrue(re.search(r'Team Dashboard', loginTxt))

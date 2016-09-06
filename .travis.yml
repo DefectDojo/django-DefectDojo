@@ -20,4 +20,4 @@ before_install:
   - pip install selenium
 
 script:
-  - python "tests/login.py"
+  - python tests/login.py -v
