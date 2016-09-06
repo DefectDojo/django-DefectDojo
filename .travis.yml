@@ -1,0 +1,11 @@
+sudo: required
+
+language: python
+
+services:
+  - docker
+
+before_install:
+  - docker build -t owasp/defectDojo .
+  - docker run -d -p 127.0.0.1:8000 owasp/defectDojo bash /django-DefectDojo/docker/docker-startup.bash
+  - docker ps -a
