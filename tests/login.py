@@ -22,6 +22,8 @@ class Login(unittest.TestCase):
         driver.find_element_by_id("id_username").clear()
         driver.find_element_by_id("id_username").send_keys(os.environ['DOJO_ADMIN_USER'])
         driver.find_element_by_id("id_password").send_keys(os.environ['DOJO_ADMIN_PASSWORD'])
+        print "\nDojo Admin: " + os.environ['DOJO_ADMIN_USER']
+        print "Dojo Password: " + os.environ['DOJO_ADMIN_PASSWORD']
         driver.find_element_by_css_selector("button.btn.btn-success").click()
         loginTxt = driver.find_element_by_tag_name("BODY").text
         self.assertTrue(re.search(r'Team Dashboard', loginTxt))
