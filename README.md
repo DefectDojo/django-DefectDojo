@@ -28,6 +28,8 @@ For additional documentation you can visit our [Read the Docs site](http://defec
 
 # Installation
 
+[![Build Status](https://travis-ci.org/OWASP/django-DefectDojo.svg?branch=master)](https://travis-ci.org/OWASP/django-DefectDojo)
+
 ### [Debian or RHEL-based Install Script](./doc/install_bash.md)
 Jay has also created a detailed guide for setting up DefectDojo on 
 [Ubuntu 14.04](https://github.com/rackerlabs/django-DefectDojo/wiki/DefectDojo-Installation-Guide---Ubuntu-Desktop-14.04).
