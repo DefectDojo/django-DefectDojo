@@ -13,11 +13,10 @@ before_script:
 
 before_install:
   - docker build -t owasp/defectdojo .
-  - docker run -d -p 127.0.0.1:8000:8000 owasp/defectdojo  bash -c "export DOJO_ADMIN_USER=$DOJO_ADMIN_USER; export DOJO_ADMIN_PASSWORD=$DOJO_ADMIN_PASSWORD;  && bash /django-DefectDojo/docker/docker-startup.bash" 
+  - docker run -d -p 127.0.0.1:8000:8000 owasp/defectdojo  bash -c "export DOJO_ADMIN_USER=$DOJO_ADMIN_USER; export DOJO_ADMIN_PASSWORD=$DOJO_ADMIN_PASSWORD;  && bash /django-DefectDojo/docker/docker-startup.bash"
   - docker run -d -p 127.0.0.1:8080:8080 -i owasp/zap2docker-stable zap.sh -daemon -host 0.0.0.0 -port 8080
   - docker ps -a
   - pip install selenium
-  DOJO_ADMIN_USER
-
+  
 script:
   - python tests/login.py -v
