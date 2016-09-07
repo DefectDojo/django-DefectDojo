@@ -51,8 +51,6 @@ function setupdb {
     DOJO_ADMIN_PASSWORD=`LC_CTYPE=C tr -dc A-Za-z0-9_\!\@\#\$\%\^\&\*\(\)-+ < /dev/urandom | head -c 32 | xargs`
   fi
   #creating default admin user
-  echo "DOJO ADMIN: $DOJO_ADMIN_USER"
-  echo "DOJO PWD: $DOJO_ADMIN_PASSWORD"
   echo "from django.contrib.auth.models import User; User.objects.create_superuser('$DOJO_ADMIN_USER', '$DOJO_ADMIN_EMAIL', '$DOJO_ADMIN_PASSWORD')" | ./manage.py shell
 
   echo "=============================================================================="
