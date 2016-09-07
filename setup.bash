@@ -52,7 +52,7 @@ if [[ ! -z $YUM_CMD ]]; then
 	sudo yum install gcc libmysqlclient-dev python-devel mysql-server mysql-devel MySQL-python python-setuptools python-pip nodejs wkhtmltopdf npm -y
 	sudo yum groupinstall 'Development Tools'
 elif [[ ! -z $APT_GET_CMD ]]; then
-    sudo apt-get install gcc libssl-dev python-dev libmysqlclient-dev python-pip mysql-server nodejs-legacy wkhtmltopdf npm -y
+    sudo apt-get install gcc libssl-dev python-dev libmysqlclient-dev python-pip mysql-server nodejs-legacy wkhtmltopdf npm libtiff5-dev libjpeg8-dev zlib1g-dev libfreetype6-dev liblcms2-dev libwebp-dev tcl8.6-dev tk8.6-dev python-tk git -y
 elif [[ ! -z $BREW_CMD ]]; then
     brew install gcc openssl python mysql node npm Caskroom/cask/wkhtmltopdf
 else
