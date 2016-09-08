@@ -43,6 +43,7 @@ def report_url_resolver(request):
         url_resolver = request.META['HTTP_X_FORWARDED_PROTO'] + "://" +  request.META['HTTP_X_FORWARDED_FOR']
     except:
         url_resolver = request.scheme + "://" + request.META['HTTP_HOST']
+	pass 
     return url_resolver
 
 def report_builder(request):
