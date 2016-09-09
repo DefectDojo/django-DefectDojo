@@ -17,6 +17,8 @@ before_install:
   - docker run -d -p 127.0.0.1:8080:8080 -i owasp/zap2docker-stable zap.sh -daemon -host 0.0.0.0 -port 8080
   - docker ps -a
   - pip install selenium
+  - pip install requests
 
 script:
   - python tests/login.py -v
+  - python tests/check_status.py -v
