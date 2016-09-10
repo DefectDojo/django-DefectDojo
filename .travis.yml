@@ -4,6 +4,10 @@ language: python
 
 install: true
 
+env:
+  - DOJO_ADMIN_USER=test_user
+  - DOJO_ADMIN_PASSWORD=test_password
+
 services:
   - docker
 
