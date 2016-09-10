@@ -148,6 +148,11 @@
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
+- name: Install django-imagekit
+  pip: name=django-imagekit  virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ dd_user }}'
+
 - name: Install celery
   pip: name=celery virtualenv={{ venv_dir }}
   sudo: yes
