@@ -20,7 +20,6 @@ before_install:
   - docker ps -a
   - pip install selenium
   - pip install requests
-  - pip install selenium-requests
 script:
   - python tests/login.py -v
   - python tests/check_status.py -v
