@@ -36,50 +36,128 @@ class Login(unittest.TestCase):
         r = s.get(url)
         self.assertEqual(r.status_code, 200)
 
-    """
     def test_product_status(self):
         driver = self.login_page()
+        cookies = driver.get_cookies()
         url = self.base_url+ "product"
-        r = driver.request('GET', url)
+        s = requests.Session()
+        for cookie in cookies:
+            s.cookies.set(cookie['name'], cookie['value'])
+        r = s.get(url)
         self.assertEqual(r.status_code, 200)
 
     def test_finding_status(self):
         driver = self.login_page()
+        cookies = driver.get_cookies()
         url = self.base_url+ "finding/open"
-        r = driver.request('GET', url)
+        s = requests.Session()
+        for cookie in cookies:
+            s.cookies.set(cookie['name'], cookie['value'])
+        r = s.get(url)
         self.assertEqual(r.status_code, 200)
 
 
     def test_endpoint_status(self):
         driver = self.login_page()
+        cookies = driver.get_cookies()
         url = self.base_url+ "endpoint"
-        r = driver.request('GET', url)
+        s = requests.Session()
+        for cookie in cookies:
+            s.cookies.set(cookie['name'], cookie['value'])
+        r = s.get(url)
         self.assertEqual(r.status_code, 200)
 
     def test_user_status(self):
         driver = self.login_page()
+        cookies = driver.get_cookies()
         url = self.base_url+ "user"
-        r = driver.request('GET', url)
+        s = requests.Session()
+        for cookie in cookies:
+            s.cookies.set(cookie['name'], cookie['value'])
+        r = s.get(url)
         self.assertEqual(r.status_code, 200)
 
     def test_calendar_status(self):
         driver = self.login_page()
+        cookies = driver.get_cookies()
         url = self.base_url+ "calendar"
-        r = driver.request('GET', url)
+        s = requests.Session()
+        for cookie in cookies:
+            s.cookies.set(cookie['name'], cookie['value'])
+        r = s.get(url)
         self.assertEqual(r.status_code, 200)
 
     def test_metric_product_type_status(self):
         driver = self.login_page()
+        cookies = driver.get_cookies()
         url = self.base_url+ "metrics/product/type"
-        r = driver.request('GET', url)
+        s = requests.Session()
+        for cookie in cookies:
+            s.cookies.set(cookie['name'], cookie['value'])
+        r = s.get(url)
         self.assertEqual(r.status_code, 200)
 
     def test_metric_type_count_status(self):
         driver = self.login_page()
+        cookies = driver.get_cookies()
         url = self.base_url+ "metrics/product/type/counts"
-        r = driver.request('GET', url)
+        s = requests.Session()
+        for cookie in cookies:
+            s.cookies.set(cookie['name'], cookie['value'])
+        r = s.get(url)
         self.assertEqual(r.status_code, 200)
-    """
+
+    def test_metric_simple_status(self):
+        driver = self.login_page()
+        cookies = driver.get_cookies()
+        url = self.base_url+ "metrics/simple"
+        s = requests.Session()
+        for cookie in cookies:
+            s.cookies.set(cookie['name'], cookie['value'])
+        r = s.get(url)
+        self.assertEqual(r.status_code, 200)
+
+    def test_metric_engineer_status(self):
+        driver = self.login_page()
+        cookies = driver.get_cookies()
+        url = self.base_url+ "metrics/engineer"
+        s = requests.Session()
+        for cookie in cookies:
+            s.cookies.set(cookie['name'], cookie['value'])
+        r = s.get(url)
+        self.assertEqual(r.status_code, 200)
+
+    def test_metric_research_status(self):
+        driver = self.login_page()
+        cookies = driver.get_cookies()
+        url = self.base_url+ "metrics/research"
+        s = requests.Session()
+        for cookie in cookies:
+            s.cookies.set(cookie['name'], cookie['value'])
+        r = s.get(url)
+        self.assertEqual(r.status_code, 200)
+
+    def test_metric_research_status(self):
+        driver = self.login_page()
+        cookies = driver.get_cookies()
+        url = self.base_url+ "metrics/research"
+        s = requests.Session()
+        for cookie in cookies:
+            s.cookies.set(cookie['name'], cookie['value'])
+        r = s.get(url)
+        self.assertEqual(r.status_code, 200)
+
+    def test_metric_dashboard_status(self):
+        driver = self.login_page()
+        cookies = driver.get_cookies()
+        url = self.base_url+ "metrics?date=5&view=dashboard"
+        s = requests.Session()
+        for cookie in cookies:
+            s.cookies.set(cookie['name'], cookie['value'])
+        r = s.get(url)
+        self.assertEqual(r.status_code, 200)
+
+
     def is_element_present(self, how, what):
         try: self.driver.find_element(by=how, value=what)
         except NoSuchElementException as e: return False
