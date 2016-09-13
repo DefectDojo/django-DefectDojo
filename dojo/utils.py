@@ -221,12 +221,21 @@ def get_punchcard_data(findings, weeks_between, start_date):
         append_tick = True
         days = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0}
         for finding in findings:
-            if new_date.date() < finding.date <= end_date.date():
-                # [0,0,(20*.02)]
-                # [week, day, weight]
-                days[day_offset[finding.date.weekday()]] += 1
-                if days[day_offset[finding.date.weekday()]] > highest_count:
-                    highest_count = days[day_offset[finding.date.weekday()]]
+	    try:
+		    if new_date < datetime.combine(finding.date, datetime.min.time()).replace(tzinfo=localtz) <= end_date:
+			# [0,0,(20*.02)]
+			# [week, day, weight]
+			days[day_offset[finding.date.weekday()]] += 1
+			if days[day_offset[finding.date.weekday()]] > highest_count:
+			    highest_count = days[day_offset[finding.date.weekday()]]
+	    except:	
+		if new_date < finding.date <= end_date:
+			# [0,0,(20*.02)]
+			# [week, day, weight]
+			days[day_offset[finding.date.weekday()]] += 1
+			if days[day_offset[finding.date.weekday()]] > highest_count:
+			    highest_count = days[day_offset[finding.date.weekday()]]
+		pass
 
         if sum(days.values()) > 0:
             for day, count in days.items():
@@ -244,11 +253,14 @@ def get_punchcard_data(findings, weeks_between, start_date):
     return punchcard, ticks, highest_count
 
 
-def get_period_counts(findings, findings_closed, accepted_findings, period_interval, start_date,
+def get_period_counts(active_findings, findings, findings_closed, accepted_findings, period_interval, start_date,
                       relative_delta='months'):
     opened_in_period = list()
+    active_in_period = list()
     accepted_in_period = list()
     opened_in_period.append(['Timestamp', 'Date', 'S0', 'S1', 'S2',
+                             'S3', 'Total', 'Closed'])
+    active_in_period.append(['Timestamp', 'Date', 'S0', 'S1', 'S2',
                              'S3', 'Total', 'Closed'])
     accepted_in_period.append(['Timestamp', 'Date', 'S0', 'S1', 'S2',
                                'S3', 'Total', 'Closed'])
@@ -310,9 +322,26 @@ def get_period_counts(findings, findings_closed, accepted_findings, period_inter
         accepted_in_period.append(
             [(tcalendar.timegm(new_date.timetuple()) * 1000), new_date, crit_count, high_count, med_count, low_count,
              total])
+        crit_count, high_count, med_count, low_count, closed_count = [0, 0, 0, 0, 0]
+        for finding in active_findings:
+            if  finding.date <= end_date:
+                if finding.severity == 'Critical':
+                    crit_count += 1
+                elif finding.severity == 'High':
+                    high_count += 1
+                elif finding.severity == 'Medium':
+                    med_count += 1
+                elif finding.severity == 'Low':
+                    low_count += 1
 
+        total = crit_count + high_count + med_count + low_count
+        active_in_period.append(
+            [(tcalendar.timegm(new_date.timetuple()) * 1000), new_date, crit_count, high_count, med_count, low_count,
+             total])
+ 
     return {'opened_per_period': opened_in_period,
-            'accepted_per_period': accepted_in_period}
+            'accepted_per_period': accepted_in_period,
+            'active_per_period': active_in_period}
 
 
 def opened_in_period(start_date, end_date, pt):
