@@ -34,9 +34,9 @@ For additional documentation you can visit our [Read the Docs site](http://defec
 Jay has also created a detailed guide for setting up DefectDojo on 
 [Ubuntu 14.04](https://github.com/rackerlabs/django-DefectDojo/wiki/DefectDojo-Installation-Guide---Ubuntu-Desktop-14.04).
 
-### [Vagrant](./doc/install_vagrant.md)
-
 ### [Docker](http://defectdojo.readthedocs.io/en/latest/getting-started.html#docker-local-install)
+
+### [Vagrant (deprecated)](./doc/install_vagrant.md)
 
 # Getting Started
 
