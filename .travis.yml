@@ -12,11 +12,15 @@ before_script:
   - "sh -e /etc/init.d/xvfb start"
 
 before_install:
+  - export DOJO_ADMIN_USER=test_user
+  - export DOJO_ADMIN_PASSWORD=test_password
   - docker build -t owasp/defectdojo .
   - docker run -e DOJO_ADMIN_USER=$DOJO_ADMIN_USER -e DOJO_ADMIN_PASSWORD=$DOJO_ADMIN_PASSWORD -d -p 127.0.0.1:8000:8000 owasp/defectdojo bash /django-DefectDojo/docker/docker-startup.bash
   - docker run -d -p 127.0.0.1:8080:8080 -i owasp/zap2docker-stable zap.sh -daemon -host 0.0.0.0 -port 8080
   - docker ps -a
   - pip install selenium
+  - pip install requests
 
 script:
   - python tests/login.py -v
+  - python tests/check_status.py -v

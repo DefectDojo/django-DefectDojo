@@ -280,7 +280,7 @@ def get_period_counts(findings, findings_closed, accepted_findings, period_inter
 
         crit_count, high_count, med_count, low_count, closed_count = [0, 0, 0, 0, 0]
         for finding in findings:
-            if new_date.date() <= finding.date <= end_date.date():
+            if new_date <= finding.date <= end_date:
                 if finding.severity == 'Critical':
                     crit_count += 1
                 elif finding.severity == 'High':
