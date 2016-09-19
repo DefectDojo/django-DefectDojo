@@ -28,8 +28,7 @@ before_install:
   - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys DF7DD7A50B746DD4
   - sudo add-apt-repository "deb https://download.srcclr.com/ubuntu stable/"
   - sudo apt-get update
-  - sudo apt-get install srcclr
-  - echo -ne "$SRCCLR_ACTIVATE\n" | srcclr activate
+  - sudo apt-get install srcclr -y
   ## Create an agent.yml configuration file and change the permissions (required for the agent to work)
   - mkdir ~/.srcclr && touch ~/.srcclr/agent.yml
   - chmod 0600 ~/.srcclr/agent.yml
