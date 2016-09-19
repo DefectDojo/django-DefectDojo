@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -35,8 +34,7 @@ class DojoTests(unittest.TestCase):
         driver.get(self.base_url + "login")
         driver.find_element_by_id("id_username").clear()
         driver.find_element_by_id("id_username").send_keys(os.environ['DOJO_ADMIN_USER'])
-        #driver.find_element_by_id("id_username").send_keys("test")
-
+        driver.find_element_by_id("id_password").clear()
         driver.find_element_by_id("id_password").send_keys(os.environ['DOJO_ADMIN_PASSWORD'])
         driver.find_element_by_css_selector("button.btn.btn-success").click()
         return driver
@@ -140,12 +138,11 @@ class DojoTests(unittest.TestCase):
 
 def suite():
     suite = unittest.TestSuite()
-    #suite.addTest(DojoTests('test_login'))
-    #suite.addTest(DojoTests('test_create_product'))
+    suite.addTest(DojoTests('test_login'))
+    suite.addTest(DojoTests('test_create_product'))
     suite.addTest(DojoTests('test_engagement'))
     return suite
 
 if __name__ == "__main__":
     runner = unittest.TextTestRunner(descriptions=True, failfast=True)
     runner.run(suite())
-    #unittest.main()
