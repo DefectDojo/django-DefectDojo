@@ -22,6 +22,11 @@ before_install:
   - pip install requests
   - pip install python-owasp-zap-v2.4
   - pip install prettytable
+  - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys DF7DD7A50B746DD4
+  - sudo add-apt-repository "deb https://download.srcclr.com/ubuntu stable/"
+  - sudo apt-get update
+  - sudo apt-get install srcclr
+  - echo -ne "$SRCCLR_ACTIVATE\n" | srcclr activate
 
 script:
   - python tests/check_status.py -v
