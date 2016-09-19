@@ -26,10 +26,10 @@ class Main:
             sys.exit(0)
 
         zap = ZAPv2(proxies={'http': 'http://127.0.0.1:8080', 'https': 'http://127.0.0.1:8080'})
-        apikey = "" 
+        apikey = ""
 
         #user_input_obj = User_Input() #Creating object for class User_Input
-        targetURL = "http://localhost:8000"
+        targetURL = "http://dojo:8000"
 
         targetURLregex = "\Q"+targetURL+"\E.*" #Regular expression to be considered within our context.
 
