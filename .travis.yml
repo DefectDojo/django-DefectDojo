@@ -12,22 +12,30 @@ before_script:
   - "sh -e /etc/init.d/xvfb start"
 
 before_install:
+  ## Docker Build
   - export DOJO_ADMIN_USER=test_user
   - export DOJO_ADMIN_PASSWORD=test_password
   - docker build -t owasp/defectdojo .
   - docker run -e DOJO_ADMIN_USER=$DOJO_ADMIN_USER -e DOJO_ADMIN_PASSWORD=$DOJO_ADMIN_PASSWORD --name dojo -d -p 127.0.0.1:8000:8000 owasp/defectdojo bash /django-DefectDojo/docker/docker-startup.bash
   - docker run -d --name zap --link dojo -p 127.0.0.1:8080:8080 -i owasp/zap2docker-stable zap.sh -daemon -host 0.0.0.0 -port 8080 -config api.disablekey=true
   - docker ps -a
+  ## Selenium and ZAP requirements
   - pip install selenium
   - pip install requests
   - pip install python-owasp-zap-v2.4
   - pip install prettytable
+  ## Download the SourceClear agent deb package and install
   - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys DF7DD7A50B746DD4
   - sudo add-apt-repository "deb https://download.srcclr.com/ubuntu stable/"
   - sudo apt-get update
   - sudo apt-get install srcclr
   - echo -ne "$SRCCLR_ACTIVATE\n" | srcclr activate
+  ## Create an agent.yml configuration file and change the permissions (required for the agent to work)
+  - mkdir ~/.srcclr && touch ~/.srcclr/agent.yml
+  - chmod 0600 ~/.srcclr/agent.yml
 
+after_success:
+  - srcclr scan
 script:
   - python tests/check_status.py -v
   - python tests/smoke_test.py -v
