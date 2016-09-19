@@ -24,7 +24,7 @@ class DojoTests(unittest.TestCase):
         'noProxy':''})
 
         self.driver = webdriver.Firefox(proxy=proxy)
-        self.driver.implicitly_wait(10)
+        self.driver.implicitly_wait(30)
         self.base_url = "http://localhost:8000/"
         self.verificationErrors = []
         self.accept_next_alert = True
