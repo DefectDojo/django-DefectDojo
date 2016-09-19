@@ -24,9 +24,9 @@ before_install:
   - pip install prettytable
 
 script:
-  - python tests/smoke_test.py -v
   - python tests/check_status.py -v
-  - python tests/zapy.py
+  - python tests/smoke_test.py -v
+  - python tests/zap.py
 
 addons:
   firefox: "45.0"
