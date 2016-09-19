@@ -20,7 +20,13 @@ before_install:
   - docker ps -a
   - pip install selenium
   - pip install requests
+  - pip install python-owasp-zap-v2.4
+  - pip install prettytable
 
 script:
-  - python tests/login.py -v
+  - python tests/smoke_test.py -v
   - python tests/check_status.py -v
+  - python tests/zapy.py
+
+addons:
+  firefox: "45.0"
