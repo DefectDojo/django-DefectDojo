@@ -90,3 +90,7 @@ dojo/media
 /static
 /media
 
+# virtualenv
+.venv/
+venv/
+ENV/
