@@ -140,7 +140,7 @@ def suite():
     suite = unittest.TestSuite()
     suite.addTest(DojoTests('test_login'))
     suite.addTest(DojoTests('test_create_product'))
-    suite.addTest(DojoTests('test_engagement'))
+    #suite.addTest(DojoTests('test_engagement'))
     return suite
 
 if __name__ == "__main__":
