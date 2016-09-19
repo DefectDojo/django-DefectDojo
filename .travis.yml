@@ -36,9 +36,10 @@ before_install:
 
 after_success:
   - srcclr scan
-  - bandit -r * -x venv,tests, ansible
+  - bandit -r * -x venv,tests,ansible
+
 script:
-  - python tests/check_status.py -v && python tests/smoke_test.py && python tests/zap.py && bandit -r * -x venv,tests
+  - python tests/check_status.py -v && python tests/smoke_test.py && python tests/zap.py
 
 addons:
   firefox: "45.0"
