@@ -38,6 +38,7 @@ after_success:
   ## Run DryDock
   - git clone https://github.com/zuBux/drydock.git
   - pip install -r requirements.txt
+  - cd drydock
   - python drydock.py
 
 script:
