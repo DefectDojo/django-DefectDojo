@@ -35,8 +35,14 @@ before_install:
   - chmod 0600 ~/.srcclr/agent.yml
 
 after_success:
+  ## Run the SRC:CLR Scan
   - srcclr scan
+  ## Run Bandit python static code
   - bandit -r * -x venv,tests,ansible
+  ## Run Docker Bench for Security
+  - git clone https://github.com/docker/docker-bench-security.git
+  - cd docker-bench-security
+  - sh docker-bench-security.sh
 
 script:
   - python tests/check_status.py -v && python tests/smoke_test.py && python tests/zap.py
