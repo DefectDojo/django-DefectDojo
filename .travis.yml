@@ -28,7 +28,7 @@ before_install:
 
 after_success:
   ## Run the SRC:CLR Scan
-  curl -sSL https://download.sourceclear.com/ci.sh | bash
+  - curl -sSL https://download.sourceclear.com/ci.sh | bash
   ## Run Bandit python static code
   - bandit -r * -x venv,tests,ansible
   ## Run Docker Bench for Security
