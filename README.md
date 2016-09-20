@@ -67,6 +67,7 @@ DefectDojo is maintained by:
 - Greg Anderson ([@\_GRRegg](https://twitter.com/_GRRegg))
 - Charles Neill ([@ccneill](https://twitter.com/ccneill))
 - Jay Paz ([@jjpaz](https://twitter.com/jjpaz))
+- Aaron Weaver ([@weavera] (https://twitter.com/weavera))
 
 With past contributions from:
 
