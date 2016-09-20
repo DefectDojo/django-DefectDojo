@@ -37,8 +37,8 @@ after_success:
   - sh docker-bench-security.sh
   ## Run DryDock
   - git clone https://github.com/zuBux/drydock.git
-  - pip install -r requirements.txt
   - cd drydock
+  - pip install -r requirements.txt
   - python drydock.py
 
 script:
