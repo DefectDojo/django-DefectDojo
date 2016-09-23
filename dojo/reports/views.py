@@ -40,11 +40,12 @@ logger = logging.getLogger(__name__)
 
 def report_url_resolver(request):
     try:
-        url_resolver = request.META['HTTP_X_FORWARDED_PROTO'] + "://" +  request.META['HTTP_X_FORWARDED_FOR']
+        url_resolver = request.META['HTTP_X_FORWARDED_PROTO'] + "://" + request.META['HTTP_X_FORWARDED_FOR']
     except:
         url_resolver = request.scheme + "://" + request.META['HTTP_HOST']
-	pass 
+        pass
     return url_resolver
+
 
 def report_builder(request):
     add_breadcrumb(title="Report Builder", top_level=True, request=request)

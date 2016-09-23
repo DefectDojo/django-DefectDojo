@@ -12,7 +12,6 @@ from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.http import Http404
-from django.http import HttpResponseNotFound
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.http import StreamingHttpResponse
 from django.shortcuts import render, get_object_or_404
@@ -93,8 +92,6 @@ engineer
 
 @user_passes_test(lambda u: u.is_staff)
 def accepted_findings(request):
-    user = request.user
-
     findings = Finding.objects.filter(risk_acceptance__isnull=False)
     findings = AcceptedFingingSuperFilter(request.GET, queryset=findings)
     title_words = [word for ra in
@@ -603,8 +600,9 @@ def manage_images(request, fid):
 
                     if len(pic) == 0:
                         os.remove(with_media_root)
-                        cache_to_remove = settings.MEDIA_ROOT + '/CACHE/images/finding_images/' + \
-                                          os.path.splitext(file)[0]
+                        cache_to_remove = "{0}/CACHE/images/finding_images/{1}"
+                        cache_to_remove = cache_to_remove.format(
+                            settings.MEDIA_ROOT, os.path.splitext(file)[0])
                         if os.path.isdir(cache_to_remove):
                             shutil.rmtree(cache_to_remove)
                     else:

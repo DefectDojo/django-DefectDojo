@@ -1,7 +1,5 @@
-import base64
 from itertools import izip, chain
 
-import re
 from django import template
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import stringfilter
@@ -11,7 +9,7 @@ from django.utils.text import normalize_newlines
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 
-from dojo.models import Check_List, FindingImage, FindingImageAccessToken
+from dojo.models import Check_List, FindingImageAccessToken
 
 register = template.Library()
 

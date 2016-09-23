@@ -461,7 +461,7 @@ def view_risk(request, eid, raid):
     risk_approval = get_object_or_404(Risk_Acceptance, pk=raid)
     eng = get_object_or_404(Engagement, pk=eid)
     if (request.user.is_staff or
-                request.user in eng.product.authorized_users.all()):
+            request.user in eng.product.authorized_users.all()):
         pass
     else:
         raise PermissionDenied
@@ -555,8 +555,8 @@ def view_risk(request, eid, raid):
     fpage = get_page_items(request, risk_approval.accepted_findings.order_by(
         'numerical_severity'), 15)
 
-    authorized = (request.user == risk_approval.reporter.username
-                  or request.user.is_staff)
+    authorized = (request.user == risk_approval.reporter.username or
+                  request.user.is_staff)
 
     add_breadcrumb(parent=risk_approval, top_level=False, request=request)
 
@@ -608,8 +608,8 @@ def download_risk(request, eid, raid):
 
     risk_approval = get_object_or_404(Risk_Acceptance, pk=raid)
     en = get_object_or_404(Engagement, pk=eid)
-    if (request.user.is_staff
-        or request.user in en.product.authorized_users.all()):
+    if (request.user.is_staff or
+            request.user in en.product.authorized_users.all()):
         pass
     else:
         raise PermissionDenied

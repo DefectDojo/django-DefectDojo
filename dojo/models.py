@@ -9,7 +9,6 @@ from auditlog.registry import auditlog
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth.models import User
-from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Q
@@ -363,7 +362,8 @@ class Endpoint(models.Model):
         fragment = self.fragment
 
         if netloc or (scheme and scheme in uses_netloc and url[:2] != '//'):
-            if url and url[:1] != '/': url = '/' + url
+            if url and url[:1] != '/':
+                url = '/' + url
             if scheme:
                 url = '//' + (netloc or '') + url
             else:
@@ -580,7 +580,7 @@ class Finding(models.Model):
 
     def save(self, *args, **kwargs):
         super(Finding, self).save(*args, **kwargs)
-        if hasattr(settings,'ENABLE_DEDUPLICATION'):
+        if hasattr(settings, 'ENABLE_DEDUPLICATION'):
             if settings.ENABLE_DEDUPLICATION:
                 eng_findings_cwe = Finding.objects.filter(test__engagement=self.test.engagement, cwe=self.cwe).exclude(id=self.id).exclude(cwe=None)
                 eng_findings_title = Finding.objects.filter(test__engagement=self.test.engagement, title=self.title).exclude(id=self.id)

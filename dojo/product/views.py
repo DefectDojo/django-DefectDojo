@@ -394,12 +394,12 @@ def add_meta_data(request, pid):
     if request.method == 'POST':
         form = ProductMetaDataForm(request.POST)
         if form.is_valid():
-            cf, created = CustomField.objects.get_or_create(name=form.cleaned_data['name'],
-                                                   content_type=ct,
-                                                   field_type='a')
+            cf, created = CustomField.objects.get_or_create(
+                name=form.cleaned_data['name'], content_type=ct,
+                field_type='a')
             cf.save()
-            cfv, created = CustomFieldValue.objects.get_or_create(field=cf,
-                                                         object_id=prod.id)
+            cfv, created = CustomFieldValue.objects.get_or_create(
+                field=cf, object_id=prod.id)
             cfv.value = form.cleaned_data['value']
             cfv.clean()
             cfv.save()

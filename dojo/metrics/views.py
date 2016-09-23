@@ -411,7 +411,6 @@ def product_type_counts(request):
 
             oip = opened_in_period(start_date, end_date, pt)
 
-
             # trending data - 12 months
             for x in range(12, 0, -1):
                 opened_in_period_list.append(
@@ -581,9 +580,9 @@ and root can view others metrics
 @cache_page(60 * 5)  # cache for 5 minutes
 def view_engineer(request, eid):
     user = get_object_or_404(Dojo_User, pk=eid)
-    if not (request.user.is_superuser
-            or request.user.username == 'root'
-            or request.user.username == user.username):
+    if not (request.user.is_superuser or
+            request.user.username == 'root' or
+            request.user.username == user.username):
         return HttpResponseRedirect(reverse('engineer_metrics'))
     now = localtz.localize(datetime.today())
 

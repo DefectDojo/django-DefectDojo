@@ -508,9 +508,8 @@ class DeleteTestForm(forms.ModelForm):
 
 class AddFindingForm(forms.ModelForm):
     title = forms.CharField(max_length=1000)
-    date = forms.DateField(required=True,
-                           widget=forms.TextInput(attrs={'class':
-                                                             'datepicker'}))
+    date = forms.DateField(
+        required=True, widget=forms.TextInput(attrs={'class': 'datepicker'}))
     cwe = forms.IntegerField(required=False)
     severity_options = (('Low', 'Low'), ('Medium', 'Medium'),
                         ('High', 'High'), ('Critical', 'Critical'))
@@ -531,8 +530,8 @@ class AddFindingForm(forms.ModelForm):
     def clean(self):
         # self.fields['endpoints'].queryset = Endpoint.objects.all()
         cleaned_data = super(AddFindingForm, self).clean()
-        if ((cleaned_data['active'] or cleaned_data['verified'])
-            and cleaned_data['duplicate']):
+        if ((cleaned_data['active'] or cleaned_data['verified']) and
+                cleaned_data['duplicate']):
             raise forms.ValidationError('Duplicate findings cannot be'
                                         ' verified or active')
         if cleaned_data['false_p'] and cleaned_data['verified']:
@@ -548,9 +547,8 @@ class AddFindingForm(forms.ModelForm):
 
 class PromoteFindingForm(forms.ModelForm):
     title = forms.CharField(max_length=1000)
-    date = forms.DateField(required=True,
-                           widget=forms.TextInput(attrs={'class':
-                                                             'datepicker'}))
+    date = forms.DateField(
+        required=True, widget=forms.TextInput(attrs={'class': 'datepicker'}))
     cwe = forms.IntegerField(required=False)
     severity_options = (('Low', 'Low'), ('Medium', 'Medium'),
                         ('High', 'High'), ('Critical', 'Critical'))
@@ -575,9 +573,8 @@ class PromoteFindingForm(forms.ModelForm):
 
 class FindingForm(forms.ModelForm):
     title = forms.CharField(max_length=1000)
-    date = forms.DateField(required=True,
-                           widget=forms.TextInput(attrs={'class':
-                                                             'datepicker'}))
+    date = forms.DateField(
+        required=True, widget=forms.TextInput(attrs={'class': 'datepicker'}))
     cwe = forms.IntegerField(required=False)
     severity_options = (('Low', 'Low'), ('Medium', 'Medium'),
                         ('High', 'High'), ('Critical', 'Critical'))
@@ -793,8 +790,6 @@ class AddEndpointForm(forms.Form):
                                         code='invalid')
 
         endpoints = endpoint.split()
-        count = 0
-        error = False
         for endpoint in endpoints:
             try:
                 url_validator = URLValidator()
@@ -908,24 +903,21 @@ class SimpleSearchForm(forms.Form):
 
 
 class DateRangeMetrics(forms.Form):
-    start_date = forms.DateField(required=True, label="To",
-                                 widget=forms.TextInput(attrs={'class':
-                                                                   'datepicker'}))
-    end_date = forms.DateField(required=True,
-                               label="From",
-                               widget=forms.TextInput(attrs={'class':
-                                                                 'datepicker'}))
+    start_date = forms.DateField(
+        required=True, label="To",
+        widget=forms.TextInput(attrs={'class': 'datepicker'}))
+    end_date = forms.DateField(
+        required=True, label="From",
+        widget=forms.TextInput(attrs={'class': 'datepicker'}))
 
 
 class MetricsFilterForm(forms.Form):
-    start_date = forms.DateField(required=False,
-                                 label="To",
-                                 widget=forms.TextInput(attrs={'class':
-                                                                   'datepicker'}))
-    end_date = forms.DateField(required=False,
-                               label="From",
-                               widget=forms.TextInput(attrs={'class':
-                                                                 'datepicker'}))
+    start_date = forms.DateField(
+        required=False, label="To",
+        widget=forms.TextInput(attrs={'class': 'datepicker'}))
+    end_date = forms.DateField(
+        required=False, label="From",
+        widget=forms.TextInput(attrs={'class': 'datepicker'}))
     finding_status = forms.MultipleChoiceField(
         required=False,
         widget=forms.CheckboxSelectMultiple,

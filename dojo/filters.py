@@ -1,4 +1,3 @@
-__author__ = 'Jay Paz'
 import collections
 from datetime import timedelta, datetime
 
@@ -9,13 +8,14 @@ from django.contrib.auth.models import User
 from django.utils import six
 from django.utils.translation import ugettext_lazy as _
 from django_filters import FilterSet, CharFilter, \
-    ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter, MethodFilter
+    ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter
 from django_filters.filters import ChoiceFilter, _truncate, DateTimeFilter
 from pytz import timezone
 
 from dojo.models import Dojo_User, Product_Type, Finding, \
     Product, Test_Type, Endpoint, Development_Environment, Finding_Template, Report
 
+__author__ = 'Jay Paz'
 local_tz = timezone(settings.TIME_ZONE)
 SEVERITY_CHOICES = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
                     ('High', 'High'), ('Critical', 'Critical'))
