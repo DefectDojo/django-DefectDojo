@@ -294,8 +294,6 @@ def add_temp_finding(request, tid, fid):
                                          'A finding template was also created.',
                                          extra_tags='alert-success')
 
-
-
             return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
         else:
             messages.add_message(request,

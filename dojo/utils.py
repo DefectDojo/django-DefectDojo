@@ -150,7 +150,6 @@ def findings_this_period(findings, period_type, stuff, o_stuff, a_stuff):
 
 
 def add_breadcrumb(parent=None, title=None, top_level=True, url=None, request=None, clear=False):
-    title_done = False
     if clear:
         request.session['dojo_breadcrumbs'] = None
         return
@@ -163,7 +162,6 @@ def add_breadcrumb(parent=None, title=None, top_level=True, url=None, request=No
         if parent is not None and getattr(parent, "get_breadcrumbs", None):
             crumbs += parent.get_breadcrumbs()
         else:
-            title_done = True
             crumbs += [{'title': title,
                         'url': request.get_full_path() if url is None else url}]
     else:
@@ -174,19 +172,18 @@ def add_breadcrumb(parent=None, title=None, top_level=True, url=None, request=No
                 obj_crumbs += [{'title': title,
                                 'url': request.get_full_path() if url is None else url}]
         else:
-            title_done = True
             obj_crumbs = [{'title': title,
                            'url': request.get_full_path() if url is None else url}]
 
         for crumb in crumbs:
-            crumb_to_resolve = crumb['url'] if '?' not in crumb['url'] else crumb['url'][
-                                                                            :crumb['url'].index('?')]
+            crumb_to_resolve = crumb['url']
+            if '?' in crumb_to_resolve:
+                crumb_to_resolve = crumb_to_resolve.split("?")[0]
             crumb_view = resolver(crumb_to_resolve)
             for obj_crumb in obj_crumbs:
-                obj_crumb_to_resolve = obj_crumb['url'] if '?' not in obj_crumb['url'] else obj_crumb['url'][
-                                                                                            :obj_crumb[
-                                                                                                'url'].index(
-                                                                                                '?')]
+                obj_crumb_to_resolve = obj_crumb['url']
+                if '?' in obj_crumb_to_resolve:
+                    obj_crumb_to_resolve = obj_crumb_to_resolve.split("?")[0]
                 obj_crumb_view = resolver(obj_crumb_to_resolve)
 
                 if crumb_view.view_name == obj_crumb_view.view_name:
@@ -597,4 +594,3 @@ def handle_uploaded_threat(f, eng):
             destination.write(chunk)
     eng.tmodel_path = settings.MEDIA_ROOT + '/threat/%s%s' % (eng.id, extension)
     eng.save()
-

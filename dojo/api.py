@@ -1,6 +1,6 @@
 # see tastypie documentation at http://django-tastypie.readthedocs.org/en
 from tastypie import fields
-from tastypie.authentication import ApiKeyAuthentication, MultiAuthentication, SessionAuthentication
+from tastypie.authentication import ApiKeyAuthentication
 from tastypie.authorization import Authorization
 from tastypie.authorization import DjangoAuthorization
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
@@ -100,7 +100,7 @@ class UserProductsOnlyAuthorization(Authorization):
         # Since they may not all be saved, iterate over them.
         for obj in object_list:
             if (bundle.request.user.is_staff or
-                        bundle.request.user in bundle.obj.authorized_users):
+                    bundle.request.user in bundle.obj.authorized_users):
                 allowed.append(obj)
 
         return allowed
@@ -150,8 +150,8 @@ class UserScanSettingsAuthorization(Authorization):
         # Since they may not all be saved, iterate over them.
         for obj in object_list:
             if (bundle.request.user.is_staff or
-                        bundle.request.user in
-                        bundle.obj.product.authorized_users):
+                    bundle.request.user in
+                    bundle.obj.product.authorized_users):
                 allowed.append(obj)
 
         return allowed
@@ -206,8 +206,8 @@ class UserScanAuthorization(Authorization):
         # Since they may not all be saved, iterate over them.
         for obj in object_list:
             if (bundle.request.user.is_staff or
-                        bundle.request.user in
-                        bundle.obj.scan_settings.product.authorized_users):
+                    bundle.request.user in
+                    bundle.obj.scan_settings.product.authorized_users):
                 allowed.append(obj)
 
         return allowed

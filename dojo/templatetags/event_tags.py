@@ -65,7 +65,7 @@ def is_radio(field):
 @register.filter
 def is_file(field):
     return isinstance(field.field.widget, forms.FileInput) or \
-           isinstance(field, forms.ClearableFileInput)
+        isinstance(field, forms.ClearableFileInput)
 
 
 @register.filter
