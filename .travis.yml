@@ -18,9 +18,11 @@ before_install:
   - docker build -t owasp/defectdojo .
   - docker run -e DOJO_ADMIN_USER=$DOJO_ADMIN_USER -e DOJO_ADMIN_PASSWORD=$DOJO_ADMIN_PASSWORD --name dojo -d -p 127.0.0.1:8000:8000 owasp/defectdojo bash /django-DefectDojo/docker/docker-startup.bash
   - docker logs dojo
-  - curl http://localhost:8000
   - docker run -d --name zap --link dojo -p 127.0.0.1:8080:8080 -i owasp/zap2docker-stable zap.sh -daemon -host 0.0.0.0 -port 8080 -config api.disablekey=true
   - docker ps -a
+  - docker logs dojo
+  - echo "Checking to see if dojo is running"
+  - curl http://localhost:8000
   ## Selenium and ZAP requirements
   - pip install selenium
   - pip install requests
