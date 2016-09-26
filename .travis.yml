@@ -17,26 +17,28 @@ before_install:
   - export DOJO_ADMIN_PASSWORD=test_password
   - docker build -t owasp/defectdojo .
   - docker run -e DOJO_ADMIN_USER=$DOJO_ADMIN_USER -e DOJO_ADMIN_PASSWORD=$DOJO_ADMIN_PASSWORD --name dojo -d -p 127.0.0.1:8000:8000 owasp/defectdojo bash /django-DefectDojo/docker/docker-startup.bash
+  - docker logs dojo
   - docker run -d --name zap --link dojo -p 127.0.0.1:8080:8080 -i owasp/zap2docker-stable zap.sh -daemon -host 0.0.0.0 -port 8080 -config api.disablekey=true
   - docker ps -a
+  - docker logs dojo
+  - echo "Checking to see if dojo is running"
+  - curl http://localhost:8000/login?next=/
   ## Selenium and ZAP requirements
   - pip install selenium
   - pip install requests
   - pip install python-owasp-zap-v2.4
   - pip install prettytable
   - pip install bandit
-  ## Download the SourceClear agent deb package and install
-  - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys DF7DD7A50B746DD4
-  - sudo add-apt-repository "deb https://download.srcclr.com/ubuntu stable/"
-  - sudo apt-get update
-  - sudo apt-get install srcclr -y
-  ## Create an agent.yml configuration file and change the permissions (required for the agent to work)
-  - mkdir ~/.srcclr && touch ~/.srcclr/agent.yml
-  - chmod 0600 ~/.srcclr/agent.yml
 
 after_success:
-  - srcclr scan
+  ## Run the SRC:CLR Scan
+  - curl -sSL https://download.sourceclear.com/ci.sh | bash
+  ## Run Bandit python static code
   - bandit -r * -x venv,tests,ansible
+  ## Run Docker Bench for Security
+  - git clone https://github.com/docker/docker-bench-security.git
+  - cd docker-bench-security
+  - sh docker-bench-security.sh
 
 script:
   - python tests/check_status.py -v && python tests/smoke_test.py && python tests/zap.py
