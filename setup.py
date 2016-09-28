@@ -19,7 +19,7 @@ setup(
         'pytz>=2013.9',
         'requests>=2.2.1',
         'wsgiref>=0.1.2',
-        'django-filter',
+        'django-filter==0.14.0',
         'supervisor',
         'humanize',
         'django-bower',

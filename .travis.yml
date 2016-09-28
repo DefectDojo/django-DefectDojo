@@ -12,15 +12,36 @@ before_script:
   - "sh -e /etc/init.d/xvfb start"
 
 before_install:
+  ## Docker Build
   - export DOJO_ADMIN_USER=test_user
   - export DOJO_ADMIN_PASSWORD=test_password
   - docker build -t owasp/defectdojo .
-  - docker run -e DOJO_ADMIN_USER=$DOJO_ADMIN_USER -e DOJO_ADMIN_PASSWORD=$DOJO_ADMIN_PASSWORD -d -p 127.0.0.1:8000:8000 owasp/defectdojo bash /django-DefectDojo/docker/docker-startup.bash
-  - docker run -d -p 127.0.0.1:8080:8080 -i owasp/zap2docker-stable zap.sh -daemon -host 0.0.0.0 -port 8080
+  - docker run -e DOJO_ADMIN_USER=$DOJO_ADMIN_USER -e DOJO_ADMIN_PASSWORD=$DOJO_ADMIN_PASSWORD --name dojo -d -p 127.0.0.1:8000:8000 owasp/defectdojo bash /django-DefectDojo/docker/docker-startup.bash
+  - docker logs dojo
+  - docker run -d --name zap --link dojo -p 127.0.0.1:8080:8080 -i owasp/zap2docker-stable zap.sh -daemon -host 0.0.0.0 -port 8080 -config api.disablekey=true
   - docker ps -a
+  - docker logs dojo
+  - echo "Checking to see if dojo is running"
+  - curl http://localhost:8000/login?next=/
+  ## Selenium and ZAP requirements
   - pip install selenium
   - pip install requests
+  - pip install python-owasp-zap-v2.4
+  - pip install prettytable
+  - pip install bandit
+
+after_success:
+  ## Run the SRC:CLR Scan
+  - curl -sSL https://download.sourceclear.com/ci.sh | bash
+  ## Run Bandit python static code
+  - bandit -r * -x venv,tests,ansible
+  ## Run Docker Bench for Security
+  - git clone https://github.com/docker/docker-bench-security.git
+  - cd docker-bench-security
+  - sh docker-bench-security.sh
+
 script:
-  - python tests/login.py -v
-  - python tests/check_status.py -v
-  - python tests/check_status_ui.py -v
+  - python tests/check_status.py -v && python tests/smoke_test.py && python tests/zap.py
+
+addons:
+  firefox: "45.0"
