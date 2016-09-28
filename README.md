@@ -60,6 +60,12 @@ The [DefectDojo Twitter Account](https://twitter.com/defect_dojo) tweets project
 
 [SAML Integration](https://pypi.python.org/pypi/djangosaml2/)
 
+# Support
+
+Proceeds are used for testing infrastrucutre, etc.
+
+[Stickers](https://www.stickermule.com/en/marketplace/tags/defectdojo)
+
 # About Us
 
 DefectDojo is maintained by:
