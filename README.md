@@ -60,13 +60,6 @@ The [DefectDojo Twitter Account](https://twitter.com/defect_dojo) tweets project
 
 [SAML Integration](https://pypi.python.org/pypi/djangosaml2/)
 
-# Support
-
-Proceeds are used for testing infrastrucutre, etc.
-
-[Stickers](https://www.stickermule.com/en/marketplace/tags/defectdojo)
-
-[![PayPal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=paypal%40owasp%2eorg&lc=US&item_name=OWASP%20DefectDojo&no_note=0&currency_code=USD&bn=PP%2dDonationsBF)
 
 # About Us
 
@@ -81,6 +74,18 @@ With past contributions from:
 
 - Fatimah Zohra
 - Michael Dong
+
+# Support
+
+Proceeds are used for testing infrastrucutre, etc.
+
+[Stickers](https://www.stickermule.com/en/marketplace/tags/defectdojo)
+
+[![PayPal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=paypal%40owasp%2eorg&lc=US&item_name=OWASP%20DefectDojo&no_note=0&currency_code=USD&bn=PP%2dDonationsBF)
+
+# Sponsors
+
+We accept and feature sponsors here via the [OWASP Project Sponor Guidlines](https://www.owasp.org/index.php/Project_Sponsorship_Operational_Guidelines).
 
 # License
 
