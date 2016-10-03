@@ -10,6 +10,7 @@ SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 ENABLE_DEDUPLICATION = False
+URL_PREFIX = ''
 
 # Uncomment this line if you enable SSL
 # SESSION_COOKIE_SECURE = True
@@ -158,15 +159,15 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'dojo.urls'
 LOGIN_URL = '/login'
 LOGIN_EXEMPT_URLS = (
-    r'^static/',
-    r'^metrics/all$',
-    r'^metrics$',
-    r'^metrics/product/type/(?P<mtype>\d+)$',
-    r'^metrics/simple$',
-    r'^api/v1/',
-    r'^ajax/v1/',
-    r'^reports/cover$',
-    r'^finding/image/(?P<token>[^/]+)$'
+    r'^' + URL_PREFIX + 'static/',
+    r'^' + URL_PREFIX + 'metrics/all$',
+    r'^' + URL_PREFIX + 'metrics$',
+    r'^' + URL_PREFIX + 'metrics/product/type/(?P<mtype>\d+)$',
+    r'^' + URL_PREFIX + 'metrics/simple$',
+    r'^' + URL_PREFIX + 'api/v1/',
+    r'^' + URL_PREFIX + 'ajax/v1/',
+    r'^' + URL_PREFIX + 'reports/cover$',
+    r'^' + URL_PREFIX + 'finding/image/(?P<token>[^/]+)$'
 )
 
 # Python dotted path to the WSGI application used by Django's runserver.

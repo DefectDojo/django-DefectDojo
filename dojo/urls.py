@@ -21,6 +21,7 @@ from dojo.search.urls import urlpatterns as search_urls
 from dojo.test.urls import urlpatterns as test_urls
 from dojo.test_type.urls import urlpatterns as test_type_urls
 from dojo.user.urls import urlpatterns as user_urls
+from dojo import settings as ds
 
 admin.autodiscover()
 
@@ -40,6 +41,21 @@ v1_api.register(StubFindingResource())
 
 ajax_api = Api(api_name='v1_a')
 ajax_api.register(ajax_stub_finding_resource())
+ur = []
+ur+= dev_env_urls
+ur+= endpoint_urls
+ur+= eng_urls
+ur+= finding_urls
+ur+= home_urls
+ur+= metrics_urls
+ur+= prod_urls
+ur+= pt_urls
+ur+= reports_urls
+ur+= scan_urls
+ur+= search_urls
+ur+= test_type_urls
+ur+= test_urls
+ur+= user_urls
 
 urlpatterns = [
     #  django admin
@@ -58,22 +74,8 @@ urlpatterns = [
     # action history
     url(r'^history/(?P<cid>\d+)/(?P<oid>\d+)$', views.action_history,
         name='action_history'),
+    url(r('^' + ds), include(ur)),
 ]
-
-urlpatterns += dev_env_urls
-urlpatterns += endpoint_urls
-urlpatterns += eng_urls
-urlpatterns += finding_urls
-urlpatterns += home_urls
-urlpatterns += metrics_urls
-urlpatterns += prod_urls
-urlpatterns += pt_urls
-urlpatterns += reports_urls
-urlpatterns += scan_urls
-urlpatterns += search_urls
-urlpatterns += test_type_urls
-urlpatterns += test_urls
-urlpatterns += user_urls
 
 
 if settings.DEBUG:
