@@ -253,7 +253,7 @@ def get_punchcard_data(findings, weeks_between, start_date):
     return punchcard, ticks, highest_count
 
 #5 params
-def get_period_counts(findings, findings_closed, accepted_findings, period_interval, start_date,
+def get_period_counts_legacy(findings, findings_closed, accepted_findings, period_interval, start_date,
                       relative_delta='months'):
     opened_in_period = list()
     accepted_in_period = list()
@@ -289,7 +289,7 @@ def get_period_counts(findings, findings_closed, accepted_findings, period_inter
 
         crit_count, high_count, med_count, low_count, closed_count = [0, 0, 0, 0, 0]
         for finding in findings:
-            if new_date <= finding.date <= end_date:
+            if new_date <= datetime.combine(finding.date, datetime.min.time()).replace(tzinfo=localtz) <= end_date:
                 if finding.severity == 'Critical':
                     crit_count += 1
                 elif finding.severity == 'High':

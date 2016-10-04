@@ -84,8 +84,6 @@ STATIC_ROOT = "DOJO_STATIC_ROOT"
 # Example: "http://example.com/static/", "http://static.example.com/"
 STATIC_URL = '/static/'
 
-# Move DOJO into a subdirectory (optional)
-URL_PREFIX = ''
 
 # Additional locations of static files
 STATICFILES_DIRS = (
@@ -159,15 +157,15 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'dojo.urls'
 LOGIN_URL = '/login'
 LOGIN_EXEMPT_URLS = (
-    r'^' + URL_PREFIX + 'static/',
-    r'^' + URL_PREFIX + 'metrics/all$',
-    r'^' + URL_PREFIX + 'metrics$',
-    r'^' + URL_PREFIX + 'metrics/product/type/(?P<mtype>\d+)$',
-    r'^' + URL_PREFIX + 'metrics/simple$',
-    r'^' + URL_PREFIX + 'api/v1/',
-    r'^' + URL_PREFIX + 'ajax/v1/',
-    r'^' + URL_PREFIX + 'reports/cover$',
-    r'^' + URL_PREFIX + 'finding/image/(?P<token>[^/]+)$'
+    r'^%sstatic/' % URL_PREFIX,
+    r'^%smetrics/all$' % URL_PREFIX,
+    r'^%smetrics$' % URL_PREFIX,
+    r'^%smetrics/product/type/(?P<mtype>\d+)$' % URL_PREFIX,
+    r'^%smetrics/simple$' % URL_PREFIX,
+    r'^%sapi/v1/' % URL_PREFIX,
+    r'^%sajax/v1/' % URL_PREFIX,
+    r'^%sreports/cover$' % URL_PREFIX,
+    r'^%sfinding/image/(?P<token>[^/]+)$' % URL_PREFIX
 )
 
 # Python dotted path to the WSGI application used by Django's runserver.
