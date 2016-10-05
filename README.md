@@ -28,11 +28,15 @@ For additional documentation you can visit our [Read the Docs site](http://defec
 
 # Installation
 
+[![Build Status](https://travis-ci.org/OWASP/django-DefectDojo.svg?branch=master)](https://travis-ci.org/OWASP/django-DefectDojo)
+
 ### [Debian or RHEL-based Install Script](./doc/install_bash.md)
 Jay has also created a detailed guide for setting up DefectDojo on 
 [Ubuntu 14.04](https://github.com/rackerlabs/django-DefectDojo/wiki/DefectDojo-Installation-Guide---Ubuntu-Desktop-14.04).
 
-### [Vagrant](./doc/install_vagrant.md)
+### [Docker](http://defectdojo.readthedocs.io/en/latest/getting-started.html#docker-local-install)
+
+### [Vagrant (deprecated)](./doc/install_vagrant.md)
 
 # Getting Started
 
@@ -52,6 +56,11 @@ The [DefectDojo Twitter Account](https://twitter.com/defect_dojo) tweets project
 
 [Engagement Surveys](https://github.com/grendel513/defectDojo-engagement-survey) - A plugin that adds answerable surveys to engagements.
 
+[LDAP Integration](https://pythonhosted.org/django-auth-ldap/)
+
+[SAML Integration](https://pypi.python.org/pypi/djangosaml2/)
+
+
 # About Us
 
 DefectDojo is maintained by:
@@ -59,11 +68,20 @@ DefectDojo is maintained by:
 - Greg Anderson ([@\_GRRegg](https://twitter.com/_GRRegg))
 - Charles Neill ([@ccneill](https://twitter.com/ccneill))
 - Jay Paz ([@jjpaz](https://twitter.com/jjpaz))
+- Aaron Weaver ([@weavera] (https://twitter.com/weavera))
 
 With past contributions from:
 
 - Fatimah Zohra
 - Michael Dong
+
+# Support
+
+Proceeds are used for testing infrastrucutre, etc.
+
+[Stickers](https://www.stickermule.com/en/marketplace/tags/defectdojo)
+
+[![PayPal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=paypal%40owasp%2eorg&lc=US&item_name=OWASP%20DefectDojo&no_note=0&currency_code=USD&bn=PP%2dDonationsBF)
 
 # License
 

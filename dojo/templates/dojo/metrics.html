@@ -108,7 +108,7 @@
     *border-left-color: #ffffff;
     }
 
-    #chart_div, #chart_div2, #chart_div3, #chart_div4 {height: 300px}
+    #chart_div, #chart_div5, #chart_div2, #chart_div3, #chart_div4 {height: 300px}
 {% endblock %}
 {% block content %}
     <div class="col-md-12">
@@ -142,6 +142,22 @@
                         <!-- /.panel -->
                     </div>
                 {% endif %}
+                {% if active_per_month %}
+                    <div class="col-lg-6">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                Active Bug Count by Month
+                            </div>
+                            <!-- /.panel-heading -->
+                            <div class="panel-body">
+                                <div id="chart_div5"></div>
+                            </div>
+                            <!-- /.panel-body -->
+                        </div>
+                        <!-- /.panel -->
+                    </div>
+                {% endif %}
+ 
                 {% if accepted_per_month %}
                     <div class="col-lg-6">
                         <div class="panel panel-default">
@@ -560,6 +576,9 @@
             {% if opened_per_month %}
                 chart_div();
             {% endif %}
+            {% if active_per_month %}
+                chart_div5();
+            {% endif %}
             {%  if accepted_per_month %}
                 chart_div2();
             {%  endif %}
@@ -633,6 +652,74 @@
                             options);
                 }
             {%  endif %}
+            {% if active_per_month %}
+                function chart_div5() {
+                    var critical = [],
+                            high = [],
+                            medium = [],
+                            low = [];
+
+                    {% for month in active_per_month|slice:'1:' %}
+                        critical.push([{{ month.0 }}, {{ month.2 }}]);
+                        high.push([{{ month.0 }}, {{ month.3 }}]);
+                        medium.push([{{ month.0 }}, {{ month.4 }}]);
+                        low.push([{{ month.0 }}, {{ month.5 }}]);
+                    {% endfor %}
+
+                    var tick_count = critical.length < 7?critical.length:7;
+                    var options = {
+                        xaxis: {
+                            mode: "time",
+                            timeformat: "%m-%d-%Y",
+                            timezone: 'browser'
+                        },
+                        xaxes: [{
+                            ticks: tick_count
+                        }],
+                        yaxes: [{
+                            min: 0
+                        }],
+                        series: {
+                            lines: {
+                                show: true
+                            },
+                            points: {
+                                show: true
+                            }
+                        },
+                        grid: {
+                            hoverable: true,
+                            borderWidth: 1,
+                            borderColor: '#e7e7e7'
+
+                        },
+                        tooltip: true
+                    };
+                    var plotObj = $.plot($("#chart_div5"), [{
+                                data: critical,
+                                label: " Critical",
+                                color: "#d9534f",
+
+                            }, {
+                                data: high,
+                                label: " High",
+                                color: '#f0ad4e',
+
+                            }, {
+                                data: medium,
+                                label: " Medium",
+                                color: '#f0de28',
+
+                            }, {
+                                data: low,
+                                label: " Low",
+                                color: '#337ab7',
+
+                            }],
+                            options);
+                }
+            {%  endif %}
+ 
             {%  if accepted_per_month %}
                 function chart_div2() {
                     var critical = [],

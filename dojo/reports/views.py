@@ -26,6 +26,7 @@ from dojo.reports.widgets import CoverPage, PageBreak, TableOfContents, WYSIWYGC
     CustomReportJsonForm, ReportOptions, report_widget_factory
 from dojo.tasks import async_pdf_report, async_custom_pdf_report
 from dojo.utils import get_page_items, add_breadcrumb, get_period_counts
+from dojo.utils import get_period_counts_legacy
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -37,6 +38,14 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
+def report_url_resolver(request):
+    try:
+        url_resolver = request.META['HTTP_X_FORWARDED_PROTO'] + "://" +  request.META['HTTP_X_FORWARDED_FOR']
+    except:
+        url_resolver = request.scheme + "://" + request.META['HTTP_HOST']
+	pass 
+    return url_resolver
 
 def report_builder(request):
     add_breadcrumb(title="Report Builder", top_level=True, request=request)
@@ -70,7 +79,7 @@ def report_builder(request):
 def custom_report(request):
     # saving the report
     form = CustomReportJsonForm(request.POST)
-    host = request.scheme + "://" + request.META['HTTP_HOST']
+    host = report_url_resolver(request)
     if form.is_valid():
         selected_widgets = report_widget_factory(json_data=request.POST['json'], request=request, user=request.user,
                                                  finding_notes=False, finding_images=False, host=host)
@@ -308,7 +317,7 @@ def regen_report(request, rid):
         async_custom_pdf_report.delay(report=report,
                                       template="dojo/custom_pdf_report.html",
                                       filename="custom_pdf_report.pdf",
-                                      host=request.scheme + "://" + request.META['HTTP_HOST'],
+                                      host=report_url_resolver(request),
                                       user=request.user,
                                       uri=request.build_absolute_uri(report.get_url()))
         messages.add_message(request, messages.SUCCESS,
@@ -498,7 +507,7 @@ def product_endpoint_report(request, pid):
                                             'user': user,
                                             'team_name': settings.TEAM_NAME,
                                             'title': 'Generate Report',
-                                            'host': request.scheme + "://" + request.META['HTTP_HOST'],
+                                            'host': report_url_resolver(request),
                                             'user_id': request.user.id},
                                    uri=request.build_absolute_uri(report.get_url()))
             messages.add_message(request, messages.SUCCESS,
@@ -591,7 +600,7 @@ def generate_report(request, obj):
         # include current month
         months_between += 1
 
-        endpoint_monthly_counts = get_period_counts(findings.qs, findings.qs, None,
+        endpoint_monthly_counts = get_period_counts_legacy(findings.qs, findings.qs, None,
                                                     months_between, start_date,
                                                     relative_delta='months')
 
@@ -611,7 +620,7 @@ def generate_report(request, obj):
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': 'Generate Report',
-                   'host': request.scheme + "://" + request.META['HTTP_HOST'],
+                   'host': report_url_resolver(request),
                    'user_id': request.user.id}
 
     elif type(obj).__name__ == "Product":
@@ -641,7 +650,7 @@ def generate_report(request, obj):
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': 'Generate Report',
-                   'host': request.scheme + "://" + request.META['HTTP_HOST'],
+                   'host': report_url_resolver(request),
                    'user_id': request.user.id}
 
     elif type(obj).__name__ == "Engagement":
@@ -671,7 +680,7 @@ def generate_report(request, obj):
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': 'Generate Report',
-                   'host': request.scheme + "://" + request.META['HTTP_HOST'],
+                   'host': report_url_resolver(request),
                    'user_id': request.user.id}
 
     elif type(obj).__name__ == "Test":
@@ -696,7 +705,7 @@ def generate_report(request, obj):
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': 'Generate Report',
-                   'host': request.scheme + "://" + request.META['HTTP_HOST'],
+                   'host': report_url_resolver(request),
                    'user_id': request.user.id}
 
     elif type(obj).__name__ == "Endpoint":
@@ -727,7 +736,7 @@ def generate_report(request, obj):
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': 'Generate Report',
-                   'host': request.scheme + "://" + request.META['HTTP_HOST'],
+                   'host': report_url_resolver(request),
                    'user_id': request.user.id}
     elif type(obj).__name__ == "QuerySet":
         findings = ReportAuthedFindingFilter(request.GET,
@@ -751,7 +760,7 @@ def generate_report(request, obj):
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': 'Generate Report',
-                   'host': request.scheme + "://" + request.META['HTTP_HOST'],
+                   'host': report_url_resolver(request),
                    'user_id': request.user.id}
     else:
         raise Http404()
@@ -777,7 +786,7 @@ def generate_report(request, obj):
                            'team_name': settings.TEAM_NAME,
                            'title': 'Generate Report',
                            'user_id': request.user.id,
-                           'host': request.scheme + "://" + request.META['HTTP_HOST'],
+                           'host': report_url_resolver(request),
                            })
 
         elif report_format == 'PDF':

@@ -95,3 +95,64 @@ Vagrant Install
 
 By default, the server will run on port 9999, but you can configure this in the ``vars.yaml`` file.
 
+Docker Install
+~~~~~~~~~~~~~~~
+
+There are three versions of Docker Dojo. The first version is a development / testing version, the second is a docker
+compose file with Nginx, MySQL and DefectDojo and the third is a Docker Cloud file for Docker Cloud.
+
+Docker Local Install
+*************
+
+*You will need:*
+
+* Latest version of Docker
+
+*Instructions:*
+
+#. Run the docker command to pull the latest version of DefectDojo.
+        ``docker run -it -p 8000:8000 aweaver/django-defectdojo bash -c "export LOAD_SAMPLE_DATA=True && bash /django-DefectDojo/docker/docker-startup.bash"``
+#. Navigate to: http://localhost:8000 and login with the credentials shown in the terminal.
+
+Docker Compose Install
+*************
+
+*You will need:*
+
+* Latest version of Docker
+* Latest version Docker Compose
+
+*Instructions:*
+`Tastypie`_
+#. Clone the `Docker Cloud DefectDojo`_ Repo
+        ``git clone https://github.com/aaronweaver/docker-DefectDojo``
+#. Change directories into the newly created folder.
+        ``cd docker-DefectDojo``
+#. Run the setup.bash script which will create a random password for MySQL and Dojo and other setup tasks.
+        ``bash setup.bash``
+#. Run Docker Compose.
+        To run docker-DefectDojo and see the Dojo logs in the terminal, use:
+        ``docker-compose up``
+
+        To run docker-DefectDojo and get your terminal prompt back, use:
+        ``docker-compose up -d``
+#. Navigate to https://localhost and login with the username and password specified in the setup.bash script.
+
+.. _Docker Cloud DefectDojo: https://github.com/aaronweaver/docker-DefectDojo
+
+Docker Cloud Install
+*************
+
+*Instructions:*
+
+#. Log into `DockerCloud`_.
+#. Click on Stacks and then Create Stack.
+#. Name the Stack, DefectDojo for example.
+#. Copy the Docker Compose file from the `Docker DefectDojo Repo`_.
+#. Edit the DOJO_ADMIN_PASSWORD, MYSQL_PASSWORD and MYSQL_ROOT_PASSWORD. Each of these is labeled as: ChangeMe. Note: Make sure the passwords
+both match for dojo:MYSQL_PASSWORD and mysql:MYSQL_PASSWORD.
+#. Click 'Create and Deploy'
+#. Once the services are running then login with the username and password specified in the YAML file.
+
+.. DockerCloud: https://cloud.docker.com
+.. Docker DefectDojo Repo: https://raw.githubusercontent.com/aaronweaver/docker-DefectDojo/master/docker-cloud.yml

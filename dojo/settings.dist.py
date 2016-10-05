@@ -10,6 +10,7 @@ SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 ENABLE_DEDUPLICATION = False
+URL_PREFIX = ''
 
 # Uncomment this line if you enable SSL
 # SESSION_COOKIE_SECURE = True
@@ -31,9 +32,9 @@ DATABASES = {
         # The following settings are not used with sqlite3:
         'USER': 'MYSQLUSER',
         'PASSWORD': 'MYSQLPWD',
-        'HOST': 'localhost',       # Empty for localhost through domain sockets
+        'HOST': 'MYSQLHOST',       # Empty for localhost through domain sockets
                                    # or '127.0.0.1' for localhost through TCP.
-        'PORT': '3306',           # Set to empty string for default.
+        'PORT': 'MYSQLPORT',           # Set to empty string for default.
     }
 }
 
@@ -82,6 +83,7 @@ STATIC_ROOT = "DOJO_STATIC_ROOT"
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
 STATIC_URL = '/static/'
+
 
 # Additional locations of static files
 STATICFILES_DIRS = (
@@ -155,15 +157,15 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'dojo.urls'
 LOGIN_URL = '/login'
 LOGIN_EXEMPT_URLS = (
-    r'^static/',
-    r'^metrics/all$',
-    r'^metrics$',
-    r'^metrics/product/type/(?P<mtype>\d+)$',
-    r'^metrics/simple$',
-    r'^api/v1/',
-    r'^ajax/v1/',
-    r'^reports/cover$',
-    r'^finding/image/(?P<token>[^/]+)$'
+    r'^%sstatic/' % URL_PREFIX,
+    r'^%smetrics/all$' % URL_PREFIX,
+    r'^%smetrics$' % URL_PREFIX,
+    r'^%smetrics/product/type/(?P<mtype>\d+)$' % URL_PREFIX,
+    r'^%smetrics/simple$' % URL_PREFIX,
+    r'^%sapi/v1/' % URL_PREFIX,
+    r'^%sajax/v1/' % URL_PREFIX,
+    r'^%sreports/cover$' % URL_PREFIX,
+    r'^%sfinding/image/(?P<token>[^/]+)$' % URL_PREFIX
 )
 
 # Python dotted path to the WSGI application used by Django's runserver.

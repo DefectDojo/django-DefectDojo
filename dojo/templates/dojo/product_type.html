@@ -17,7 +17,7 @@
                                 aria-labelledby="dropdownMenu1">
                                 {% if request.user.is_staff %}
                                     <li role="presentation">
-                                        <a href="/product/type/add">
+                                        <a href="{% url 'add_product_type' %}">
                                             <i class="fa fa-plus"></i> Add Product Type
                                         </a>
                                     </li>

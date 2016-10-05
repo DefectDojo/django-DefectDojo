@@ -43,7 +43,7 @@
                 </div>
             </div>
         </div>
-        <form id="custom_report" class="hidden" action="/reports/custom" method="post">
+        <form id="custom_report" class="hidden" action="{% url 'custom_report' %}" method="post">
             {% csrf_token %}
             <textarea name="json" id="json">
 
@@ -167,7 +167,7 @@
 
             $(document).on('submit', 'form.finding-list', function (event) {
                 var form = this;
-                $.get('/reports/findings?' + $(this).serialize()).done(function (data) {
+                $.get("{% url 'report_findings' %}?" + $(this).serialize()).done(function (data) {
                     $(form).closest('li.finding-list').html(data);
                     setUpFindingFilters();
                 });
@@ -178,7 +178,7 @@
             $(document).on('click', 'form.finding-list a.clear.centered, div.finding-pagination a', function (event) {
                 var link_href = $(this).attr('href')
                 console.log(link_href);
-                $.get('/reports/findings'+link_href).done(function (data) {
+                $.get("{% url 'report_findings' %}"+link_href).done(function (data) {
                     $('div.in-use-widgets li.finding-list').html(data);
                     setUpFindingFilters();
                 });
@@ -188,7 +188,7 @@
 
             $(document).on('submit', 'form.endpoint-list', function (event) {
                 var form = this;
-                $.get('/reports/endpoints?' + $(this).serialize()).done(function (data) {
+                $.get("{% url 'report_endpoints' %}?" + $(this).serialize()).done(function (data) {
                     $(form).closest('li.endpoint-list').html(data);
                     setUpFindingFilters();
                 });
@@ -197,7 +197,7 @@
             });
 
             $(document).on('click', 'form.endpoint-list a.clear.centered, div.endpoint-pagination a', function (event) {
-                $.get('/reports/endpoints').done(function (data) {
+                $.get("{% url 'report_endpoints' %}").done(function (data) {
                     $('div.in-use-widgets li.endpoint-list').html(data);
                     setUpFindingFilters();
                 });
