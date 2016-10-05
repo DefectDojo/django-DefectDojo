@@ -582,8 +582,8 @@ class Finding(models.Model):
         super(Finding, self).save(*args, **kwargs)
         if hasattr(settings,'ENABLE_DEDUPLICATION'):
             if settings.ENABLE_DEDUPLICATION:
-                eng_findings_cwe = Finding.objects.filter(test__engagement=self.test.engagement, cwe=self.cwe).exclude(id=self.id).exclude(cwe=None)
-                eng_findings_title = Finding.objects.filter(test__engagement=self.test.engagement, title=self.title).exclude(id=self.id)
+                eng_findings_cwe = Finding.objects.filter(test__engagement__product=self.test.engagement.product, cwe=self.cwe).exclude(id=self.id).exclude(cwe=None)
+                eng_findings_title = Finding.objects.filter(test__engagement__product=self.test.engagement.product, title=self.title).exclude(id=self.id)
                 total_findings = eng_findings_cwe | eng_findings_title
                 for find in total_findings:
                     if set(find.endpoints.all()) == set(self.endpoints.all()):
