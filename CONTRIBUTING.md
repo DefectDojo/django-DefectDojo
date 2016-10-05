@@ -23,6 +23,8 @@ DefectDojo.
 
 0. All submitted code should conform to [__PEP8 standards__][pep8].
 
+0. Pull requests should be submitted to the 'develop' branch.
+
 [dojo_settings]: /dojo/settings.dist.py "DefectDojo settings file"
 [setup_py]: /setup.py "Python setup script"
 [setup_bash]: /setup.bash "Bash setup script"
