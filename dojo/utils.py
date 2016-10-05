@@ -221,12 +221,21 @@ def get_punchcard_data(findings, weeks_between, start_date):
         append_tick = True
         days = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0}
         for finding in findings:
-            if new_date.date() < finding.date <= end_date.date():
-                # [0,0,(20*.02)]
-                # [week, day, weight]
-                days[day_offset[finding.date.weekday()]] += 1
-                if days[day_offset[finding.date.weekday()]] > highest_count:
-                    highest_count = days[day_offset[finding.date.weekday()]]
+	    try:
+		    if new_date < datetime.combine(finding.date, datetime.min.time()).replace(tzinfo=localtz) <= end_date:
+			# [0,0,(20*.02)]
+			# [week, day, weight]
+			days[day_offset[finding.date.weekday()]] += 1
+			if days[day_offset[finding.date.weekday()]] > highest_count:
+			    highest_count = days[day_offset[finding.date.weekday()]]
+	    except:	
+		if new_date < finding.date <= end_date:
+			# [0,0,(20*.02)]
+			# [week, day, weight]
+			days[day_offset[finding.date.weekday()]] += 1
+			if days[day_offset[finding.date.weekday()]] > highest_count:
+			    highest_count = days[day_offset[finding.date.weekday()]]
+		pass
 
         if sum(days.values()) > 0:
             for day, count in days.items():
@@ -243,12 +252,86 @@ def get_punchcard_data(findings, weeks_between, start_date):
 
     return punchcard, ticks, highest_count
 
-
-def get_period_counts(findings, findings_closed, accepted_findings, period_interval, start_date,
+#5 params
+def get_period_counts_legacy(findings, findings_closed, accepted_findings, period_interval, start_date,
                       relative_delta='months'):
     opened_in_period = list()
     accepted_in_period = list()
     opened_in_period.append(['Timestamp', 'Date', 'S0', 'S1', 'S2',
+                             'S3', 'Total', 'Closed'])
+    accepted_in_period.append(['Timestamp', 'Date', 'S0', 'S1', 'S2',
+                               'S3', 'Total', 'Closed'])
+
+    for x in range(-1, period_interval):
+        if relative_delta == 'months':
+            # make interval the first through last of month
+            end_date = (start_date + relativedelta(months=x)) + relativedelta(day=1, months=+1, days=-1)
+            new_date = (start_date + relativedelta(months=x)) + relativedelta(day=1)
+        else:
+            # week starts the monday before
+            new_date = start_date + relativedelta(weeks=x, weekday=MO(1))
+            end_date = new_date + relativedelta(weeks=1, weekday=MO(1))
+
+        closed_in_range_count = findings_closed.filter(mitigated__range=[new_date, end_date]).count()
+
+        if accepted_findings:
+            risks_a = accepted_findings.filter(
+                risk_acceptance__created__range=[datetime(new_date.year,
+                                                          new_date.month, 1,
+                                                          tzinfo=localtz),
+                                                 datetime(new_date.year,
+                                                          new_date.month,
+                                                          monthrange(new_date.year,
+                                                                     new_date.month)[1],
+                                                          tzinfo=localtz)])
+        else:
+            risks_a = None
+
+        crit_count, high_count, med_count, low_count, closed_count = [0, 0, 0, 0, 0]
+        for finding in findings:
+            if new_date <= datetime.combine(finding.date, datetime.min.time()).replace(tzinfo=localtz) <= end_date:
+                if finding.severity == 'Critical':
+                    crit_count += 1
+                elif finding.severity == 'High':
+                    high_count += 1
+                elif finding.severity == 'Medium':
+                    med_count += 1
+                elif finding.severity == 'Low':
+                    low_count += 1
+
+        total = crit_count + high_count + med_count + low_count
+        opened_in_period.append(
+            [(tcalendar.timegm(new_date.timetuple()) * 1000), new_date, crit_count, high_count, med_count, low_count,
+             total, closed_in_range_count])
+        crit_count, high_count, med_count, low_count, closed_count = [0, 0, 0, 0, 0]
+        if risks_a is not None:
+            for finding in risks_a:
+                if finding.severity == 'Critical':
+                    crit_count += 1
+                elif finding.severity == 'High':
+                    high_count += 1
+                elif finding.severity == 'Medium':
+                    med_count += 1
+                elif finding.severity == 'Low':
+                    low_count += 1
+
+        total = crit_count + high_count + med_count + low_count
+        accepted_in_period.append(
+            [(tcalendar.timegm(new_date.timetuple()) * 1000), new_date, crit_count, high_count, med_count, low_count,
+             total])
+
+    return {'opened_per_period': opened_in_period,
+            'accepted_per_period': accepted_in_period}
+
+
+def get_period_counts(active_findings, findings, findings_closed, accepted_findings, period_interval, start_date,
+                      relative_delta='months'):
+    opened_in_period = list()
+    active_in_period = list()
+    accepted_in_period = list()
+    opened_in_period.append(['Timestamp', 'Date', 'S0', 'S1', 'S2',
+                             'S3', 'Total', 'Closed'])
+    active_in_period.append(['Timestamp', 'Date', 'S0', 'S1', 'S2',
                              'S3', 'Total', 'Closed'])
     accepted_in_period.append(['Timestamp', 'Date', 'S0', 'S1', 'S2',
                                'S3', 'Total', 'Closed'])
@@ -310,9 +393,26 @@ def get_period_counts(findings, findings_closed, accepted_findings, period_inter
         accepted_in_period.append(
             [(tcalendar.timegm(new_date.timetuple()) * 1000), new_date, crit_count, high_count, med_count, low_count,
              total])
+        crit_count, high_count, med_count, low_count, closed_count = [0, 0, 0, 0, 0]
+        for finding in active_findings:
+            if  finding.date <= end_date:
+                if finding.severity == 'Critical':
+                    crit_count += 1
+                elif finding.severity == 'High':
+                    high_count += 1
+                elif finding.severity == 'Medium':
+                    med_count += 1
+                elif finding.severity == 'Low':
+                    low_count += 1
 
+        total = crit_count + high_count + med_count + low_count
+        active_in_period.append(
+            [(tcalendar.timegm(new_date.timetuple()) * 1000), new_date, crit_count, high_count, med_count, low_count,
+             total])
+ 
     return {'opened_per_period': opened_in_period,
-            'accepted_per_period': accepted_in_period}
+            'accepted_per_period': accepted_in_period,
+            'active_per_period': active_in_period}
 
 
 def opened_in_period(start_date, end_date, pt):

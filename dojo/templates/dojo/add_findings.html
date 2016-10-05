@@ -33,7 +33,7 @@
 {% endblock %}
 {% block postscript %}
     <script type="application/javascript">
-        $('#add_id_endpoints').attr('href', '/endpoints/{{ test.engagement.product.id }}/add?_popup');
+        $('#add_id_endpoints').attr('href', "{% url 'add_endpoint' test.engagement.product.id %}?_popup");
         {% if not form_error %}
             $('#id_endpoints').find('option').remove();
         {% endif %}

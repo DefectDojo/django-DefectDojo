@@ -66,6 +66,22 @@ def metrics(request, mtype):
                        'DATEDIFF(dojo_finding.mitigated, dojo_finding.date))'
         },
     )
+    active_findings = Finding.objects.filter(verified=True, active=True,
+                                      severity__in=('Critical', 'High', 'Medium', 'Low', 'Info')).prefetch_related(
+        'test__engagement__product',
+        'test__engagement__product__prod_type',
+        'test__engagement__risk_acceptance',
+        'risk_acceptance_set',
+        'reporter').extra(
+        select={
+            'ra_count': 'SELECT COUNT(*) FROM dojo_risk_acceptance INNER JOIN '
+                        'dojo_risk_acceptance_accepted_findings ON '
+                        '( dojo_risk_acceptance.id = dojo_risk_acceptance_accepted_findings.risk_acceptance_id ) '
+                        'WHERE dojo_risk_acceptance_accepted_findings.finding_id = dojo_finding.id',
+            "sql_age": 'SELECT IF(dojo_finding.mitigated IS NULL, DATEDIFF(CURDATE(), dojo_finding.date), '
+                       'DATEDIFF(dojo_finding.mitigated, dojo_finding.date))'
+        },
+    )
 
     if mtype != 'All':
         pt = Product_Type.objects.filter(id=mtype)
@@ -82,8 +98,10 @@ def metrics(request, mtype):
         prod_type = Product_Type.objects.all()
 
     findings = MetricsFindingFilter(request.GET, queryset=findings)
+    active_findings = MetricsFindingFilter(request.GET, queryset=active_findings)
 
     findings.qs  # this is needed to load details from filter since it is lazy
+    active_findings.qs  # this is needed to load details from filter since it is lazy
 
     start_date = findings.filters['date'].start_date
     end_date = findings.filters['date'].end_date
@@ -166,9 +184,9 @@ def metrics(request, mtype):
     if weeks_between <= 0:
         weeks_between += 2
 
-    monthly_counts = get_period_counts(findings, findings_closed, accepted_findings, months_between, start_date,
+    monthly_counts = get_period_counts(active_findings, findings, findings_closed, accepted_findings, months_between, start_date,
                                        relative_delta='months')
-    weekly_counts = get_period_counts(findings, findings_closed, accepted_findings, weeks_between, start_date,
+    weekly_counts = get_period_counts(active_findings, findings, findings_closed, accepted_findings, weeks_between, start_date,
                                       relative_delta='weeks')
 
     top_ten = Product.objects.filter(engagement__test__finding__verified=True,
@@ -277,6 +295,7 @@ def metrics(request, mtype):
         'end_date': end_date,
         'findings': findings,
         'opened_per_month': monthly_counts['opened_per_period'],
+        'active_per_month': monthly_counts['active_per_period'],
         'opened_per_week': weekly_counts['opened_per_period'],
         'accepted_per_month': monthly_counts['accepted_per_period'],
         'accepted_per_week': weekly_counts['accepted_per_period'],

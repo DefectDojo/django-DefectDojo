@@ -43,7 +43,7 @@
                 </div>
             </div>
         </div>
-        <form id="custom_report" class="hidden" action="/reports/custom" method="post">
+        <form id="custom_report" class="hidden" action="{% url 'custom_report' %}" method="post">
             {% csrf_token %}
             <textarea name="json" id="json">
 

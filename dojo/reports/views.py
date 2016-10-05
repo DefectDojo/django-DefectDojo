@@ -26,6 +26,7 @@ from dojo.reports.widgets import CoverPage, PageBreak, TableOfContents, WYSIWYGC
     CustomReportJsonForm, ReportOptions, report_widget_factory
 from dojo.tasks import async_pdf_report, async_custom_pdf_report
 from dojo.utils import get_page_items, add_breadcrumb, get_period_counts
+from dojo.utils import get_period_counts_legacy
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -599,7 +600,7 @@ def generate_report(request, obj):
         # include current month
         months_between += 1
 
-        endpoint_monthly_counts = get_period_counts(findings.qs, findings.qs, None,
+        endpoint_monthly_counts = get_period_counts_legacy(findings.qs, findings.qs, None,
                                                     months_between, start_date,
                                                     relative_delta='months')
 
