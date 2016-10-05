@@ -60,10 +60,8 @@ ur+= test_type_urls
 ur+= test_urls
 ur+= user_urls
 
-print >>sys.stderr, 'this is ur'
-print >>sys.stderr, ur
-
-
+if not hasattr(settings, 'URL_PREFIX'):
+    settings.URL_PREFIX = ''
 
 urlpatterns = [
     #  django admin
