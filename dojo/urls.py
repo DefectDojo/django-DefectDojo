@@ -23,8 +23,6 @@ from dojo.test_type.urls import urlpatterns as test_type_urls
 from dojo.user.urls import urlpatterns as user_urls
 import sys
 
-print >>sys.stderr, 'this is prefix'
-print >>sys.stderr, settings.URL_PREFIX
 admin.autodiscover()
 
 """
