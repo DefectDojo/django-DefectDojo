@@ -363,16 +363,28 @@ def get_period_counts(active_findings, findings, findings_closed, accepted_findi
 
         crit_count, high_count, med_count, low_count, closed_count = [0, 0, 0, 0, 0]
         for finding in findings:
-            if new_date <= finding.date <= end_date:
-                if finding.severity == 'Critical':
-                    crit_count += 1
-                elif finding.severity == 'High':
-                    high_count += 1
-                elif finding.severity == 'Medium':
-                    med_count += 1
-                elif finding.severity == 'Low':
-                    low_count += 1
-
+            try:
+                if new_date <= datetime.combine(finding.date, datetime.min.time()).replace(tzinfo=localtz) <= end_date:
+                    if finding.severity == 'Critical':
+                        crit_count += 1
+                    elif finding.severity == 'High':
+                        high_count += 1
+                    elif finding.severity == 'Medium':
+                        med_count += 1
+                    elif finding.severity == 'Low':
+                        low_count += 1
+            except:
+                if new_date <= finding.date <= end_date:
+                    if finding.severity == 'Critical':
+                        crit_count += 1
+                    elif finding.severity == 'High':
+                        high_count += 1
+                    elif finding.severity == 'Medium':
+                        med_count += 1
+                    elif finding.severity == 'Low':
+                        low_count += 1
+                pass
+ 
         total = crit_count + high_count + med_count + low_count
         opened_in_period.append(
             [(tcalendar.timegm(new_date.timetuple()) * 1000), new_date, crit_count, high_count, med_count, low_count,
@@ -395,7 +407,7 @@ def get_period_counts(active_findings, findings, findings_closed, accepted_findi
              total])
         crit_count, high_count, med_count, low_count, closed_count = [0, 0, 0, 0, 0]
         for finding in active_findings:
-            if  finding.date <= end_date:
+            if datetime.combine(finding.date, datetime.min.time()).replace(tzinfo=localtz) <= end_date:
                 if finding.severity == 'Critical':
                     crit_count += 1
                 elif finding.severity == 'High':
