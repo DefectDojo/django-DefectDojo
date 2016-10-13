@@ -48,7 +48,7 @@ that should give you an idea of how to use DefectDojo for your own team.
 
 # Getting Involved
 
-Realtime discussion is done in the OWASP Slack Channel, #defectdojo. ![slack](./doc/img/slack_rgb.png) [Get Access.](https://owasp.herokuapp.com/)
+Realtime discussion is done in the OWASP Slack Channel, #defectdojo. [Get Access.](https://owasp.herokuapp.com/)
 
 We discuss updates and changes on the [DefectDojo OWASP Mailing List](https://lists.owasp.org/mailman/listinfo/owasp_defectdojo_project).
 
