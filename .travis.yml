@@ -45,6 +45,7 @@ after_success:
   - cd docker-bench-security
   - sh docker-bench-security.sh
   #Push to docker repo
+  - cd ../
   - sh docker/dojo-container-build-push.bash
 
 script:
