@@ -22,7 +22,7 @@ before_install:
   ## Docker Build
   - export DOJO_ADMIN_USER=test_user
   - export DOJO_ADMIN_PASSWORD=test_password
-  - export REPO=appsecpipeline/django-DefectDojo
+  - export REPO=appsecpipeline/django-defectdojo
   - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH ; fi`
   - docker build -t $REPO:$COMMIT .
   - docker run -e DOJO_ADMIN_USER=$DOJO_ADMIN_USER -e DOJO_ADMIN_PASSWORD=$DOJO_ADMIN_PASSWORD --name dojo -d -p 127.0.0.1:8000:8000 $REPO bash /django-DefectDojo/docker/docker-startup.bash
