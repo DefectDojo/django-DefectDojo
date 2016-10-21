@@ -45,11 +45,7 @@ after_success:
   - cd docker-bench-security
   - sh docker-bench-security.sh
   #Push to docker repo
-  - echo $DOCKER_USER
-  - docker login -u $DOCKER_USER -p $DOCKER_PASS
-  - docker tag $REPO:$COMMIT $REPO:$TAG
-  - docker tag $REPO:$COMMIT $REPO:travis-$TRAVIS_BUILD_NUMBER
-  - docker push $REPO
+  - sh docker/dojo-container-build-push.bash
 
 script:
   - python tests/check_status.py -v && python tests/smoke_test.py && python tests/zap.py
