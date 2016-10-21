@@ -33,7 +33,7 @@ before_install:
   - echo "Checking to see if dojo is running"
   - curl http://localhost:8000/login?next=/
   ## Selenium and ZAP requirements
-  - pip install selenium==2.9.0
+  - pip install selenium==2.53.6
   - pip install requests
   - pip install python-owasp-zap-v2.4
   - pip install prettytable
