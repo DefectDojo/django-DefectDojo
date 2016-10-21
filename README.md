@@ -25,7 +25,7 @@ You can also log in as a product owner / non-staff user:
 
 For additional documentation you can visit our [Read the Docs site](http://defectdojo.readthedocs.io/).
 
-# Installation
+# Once Click Installations
 
 [![Build Status](https://travis-ci.org/OWASP/django-DefectDojo.svg?branch=master)](https://travis-ci.org/OWASP/django-DefectDojo)
 
