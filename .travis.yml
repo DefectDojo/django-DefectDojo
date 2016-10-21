@@ -24,7 +24,7 @@ before_install:
   - export DOJO_ADMIN_PASSWORD=test_password
   - export REPO=appsecpipeline/django-DefectDojo
   - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH ; fi`
-  - docker build -f Dockerfile -t $REPO:$COMMIT .
+  - docker build -t $REPO:$COMMIT .
   - docker run -e DOJO_ADMIN_USER=$DOJO_ADMIN_USER -e DOJO_ADMIN_PASSWORD=$DOJO_ADMIN_PASSWORD --name dojo -d -p 127.0.0.1:8000:8000 $REPO bash /django-DefectDojo/docker/docker-startup.bash
   - docker logs dojo
   - docker run -d --name zap --link dojo -p 127.0.0.1:8080:8080 -i owasp/zap2docker-stable zap.sh -daemon -host 0.0.0.0 -port 8080 -config api.disablekey=true
