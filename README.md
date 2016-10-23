@@ -2,12 +2,7 @@
 
 ![Screenshot of DefectDojo](./doc/img/screenshot1.png)
 
-DefectDojo is a tool created by the Security Engineering team at Rackspace to
-track testing efforts. It attempts to streamline the testing process by
-offering features such as templating, report generation, metrics, and baseline
-self-service tools. Though it was designed with security folks in mind, there
-is nothing keeping QA/QE testers, or any other testers for that matter, from
-using it productively.
+DefectDojo is a security program and vulnerability management tool. DefectDojo allows you to manage your application security program, maintain product and application information, schedule scans, triage vulnerabilities and push findings into defect trackers. Consolidate your findings into one source of truth with DefectDojo.
 
 # Demo
 
@@ -22,16 +17,20 @@ You can also log in as a product owner / non-staff user:
 
 ![Product owner](https://inventropy.us/dd/owner.png)
 
+# Deployment options
+
+[![Deploy to Docker Cloud](https://files.cloud.docker.com/images/deploy-to-dockercloud.svg)](https://cloud.docker.com/stack/deploy/?repo=https://github.com/aaronweaver/docker-DefectDojo)
+
 # Additional Documentation
 
 For additional documentation you can visit our [Read the Docs site](http://defectdojo.readthedocs.io/).
 
-# Installation
+# Once Click Installations
 
 [![Build Status](https://travis-ci.org/OWASP/django-DefectDojo.svg?branch=master)](https://travis-ci.org/OWASP/django-DefectDojo)
 
 ### [Debian or RHEL-based Install Script](./doc/install_bash.md)
-Jay has also created a detailed guide for setting up DefectDojo on 
+Jay has also created a detailed guide for setting up DefectDojo on
 [Ubuntu 14.04](https://github.com/rackerlabs/django-DefectDojo/wiki/DefectDojo-Installation-Guide---Ubuntu-Desktop-14.04).
 
 ### [Docker](http://defectdojo.readthedocs.io/en/latest/getting-started.html#docker-local-install)
@@ -40,13 +39,15 @@ Jay has also created a detailed guide for setting up DefectDojo on
 
 # Getting Started
 
-We recommend checking out the [about](./doc/about.md) document to learn the 
+We recommend checking out the [about](./doc/about.md) document to learn the
 terminology of DefectDojo, and the
 [getting started guide](./doc/getting_started.md) for setting up a new
 installation. We've also created some example [workflows](./doc/workflows.md)
 that should give you an idea of how to use DefectDojo for your own team.
 
 # Getting Involved
+
+Realtime discussion is done in the OWASP Slack Channel, #defectdojo. [Get Access.](https://owasp.herokuapp.com/)
 
 We discuss updates and changes on the [DefectDojo OWASP Mailing List](https://lists.owasp.org/mailman/listinfo/owasp_defectdojo_project).
 
