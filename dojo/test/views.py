@@ -14,11 +14,12 @@ from pytz import timezone
 from dojo.filters import TemplateFindingFilter
 from dojo.forms import NoteForm, TestForm, FindingForm, \
     DeleteTestForm, AddFindingForm, \
-    ImportScanForm, ReImportScanForm
+    ImportScanForm, ReImportScanForm, JIRAFindingForm
 from dojo.models import Finding, Test, Notes, \
-    BurpRawRequestResponse, Endpoint, Stub_Finding, Finding_Template
+    BurpRawRequestResponse, Endpoint, Stub_Finding, Finding_Template, JIRA_PKey
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, message
+from dojo.tasks import add_issue_task
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -173,6 +174,13 @@ def add_findings(request, tid):
     test = Test.objects.get(id=tid)
     form_error = False
     form = AddFindingForm(initial={'date': datetime.now(tz=localtz).date()})
+    if hasattr(settings, 'ENABLE_JIRA'):
+        if settings.ENABLE_JIRA:
+            if JIRA_PKey.objects.filter(product=test.engagement.product).count() != 0:
+                enabled = JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues
+                jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
+        else:
+            jform = None
     if request.method == 'POST':
         form = AddFindingForm(request.POST)
         if form.is_valid():
@@ -190,6 +198,10 @@ def add_findings(request, tid):
             new_finding.save()
             new_finding.endpoints = form.cleaned_data['endpoints']
             new_finding.save()
+            if 'jiraform' in request.POST:
+                jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=enabled)
+                if jform.is_valid():
+                    add_issue_task.delay(new_finding, jform.cleaned_data.get('push_to_jira'))
 
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -238,6 +250,7 @@ def add_findings(request, tid):
                    'temp': False,
                    'tid': tid,
                    'form_error': form_error,
+                   'jform': jform,
                    })
 
 
@@ -246,6 +259,7 @@ def add_temp_finding(request, tid, fid):
     test = get_object_or_404(Test, id=tid)
     finding = get_object_or_404(Finding_Template, id=fid)
     findings = Finding_Template.objects.all()
+
     if request.method == 'POST':
         form = FindingForm(request.POST)
         if form.is_valid():
@@ -266,6 +280,9 @@ def add_temp_finding(request, tid, fid):
             new_finding.save()
             new_finding.endpoints = form.cleaned_data['endpoints']
             new_finding.save()
+            if 'jiraform' in request.POST:
+                    jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=True)
+                    add_issue_task.delay(new_finding, jform.cleaned_data.get('push_to_jira'))
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Finding from template added successfully.',
@@ -318,10 +335,17 @@ def add_temp_finding(request, tid, fid):
                                     'impact': finding.impact,
                                     'references': finding.references,
                                     'numerical_severity': finding.numerical_severity})
+        if hasattr(settings, 'ENABLE_JIRA'):
+            if settings.ENABLE_JIRA:
+                enabled = JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues
+                jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
+        else:
+            jform = None
 
     add_breadcrumb(parent=test, title="Add Finding", top_level=False, request=request)
     return render(request, 'dojo/add_findings.html',
                   {'form': form,
+                   'jform': jform,
                    'findings': findings,
                    'temp': True,
                    'fid': finding.id,

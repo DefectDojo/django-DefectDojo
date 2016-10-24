@@ -10,6 +10,7 @@ SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 ENABLE_DEDUPLICATION = False
+ENABLE_JIRA = False
 URL_PREFIX = ''
 
 # Uncomment this line if you enable SSL
