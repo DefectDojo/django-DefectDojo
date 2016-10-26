@@ -265,6 +265,9 @@ class ReImportScanForm(forms.Form):
     minimum_severity = forms.ChoiceField(help_text='Minimum severity level to be imported',
                                          required=True,
                                          choices=SEVERITY_CHOICES[0:4])
+    active = forms.BooleanField(help_text="Select if these findings are currently active.", required=False)
+    verified = forms.BooleanField(help_text="Select if these findings have been verified.", required=False)
+    tags = TagField(required=False, help_text="Add tags to help describe this test.  Separate tags with a comma.")
     file = forms.FileField(widget=forms.widgets.FileInput(
         attrs={"accept": ".xml, .csv, .nessus"}),
         label="Choose report file",
