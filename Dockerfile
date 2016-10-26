@@ -12,7 +12,11 @@ ADD . /django-DefectDojo
 #Set working directory
 WORKDIR /django-DefectDojo
 
+USER root
+
 #Run the setup script
 RUN bash docker/docker-startup.bash setup
+
+USER dojo
 
 CMD bash docker/docker-startup.bash
