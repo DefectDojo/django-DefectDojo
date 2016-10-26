@@ -51,5 +51,12 @@ after_success:
 script:
   - python tests/check_status.py -v && python tests/smoke_test.py && python tests/zap.py
 
+notifications:
+  slack:
+    rooms:
+      secure: nPXwHnPcf37yGkCkLimx5UmY9LTtOHL0lw88cAQeXCNNjeZuhS2jS5xGUOwwp3SrsYE4tZhD0WuVEHGDcyIhmBZh9Qqk3NHKz+tQDD/e0GE/8uTTfR1Eh+pq1YOIcLYzzKA2khmJSeHqqDriVZZoWpn67oHtrui9FYesapZ8AX0=
+    on_success: change
+    on_failure: always
+    on_start: never
 addons:
   firefox: "45.0"
