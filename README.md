@@ -4,6 +4,8 @@
 
 DefectDojo is a security program and vulnerability management tool. DefectDojo allows you to manage your application security program, maintain product and application information, schedule scans, triage vulnerabilities and push findings into defect trackers. Consolidate your findings into one source of truth with DefectDojo.
 
+[![Build Status](https://travis-ci.org/OWASP/django-DefectDojo.svg?branch=master)](https://travis-ci.org/OWASP/django-DefectDojo)
+
 # Demo
 
 If you'd like to check out a demo of DefectDojo before installing it, you can
@@ -17,20 +19,20 @@ You can also log in as a product owner / non-staff user:
 
 ![Product owner](https://inventropy.us/dd/owner.png)
 
-# Deployment options
-
-[![Deploy to Docker Cloud](https://files.cloud.docker.com/images/deploy-to-dockercloud.svg)](https://cloud.docker.com/stack/deploy/?repo=https://github.com/aaronweaver/docker-DefectDojo)
-
 # Additional Documentation
 
 For additional documentation you can visit our [Read the Docs site](http://defectdojo.readthedocs.io/).
 
 # Once Click Installations
 
-[![Build Status](https://travis-ci.org/OWASP/django-DefectDojo.svg?branch=master)](https://travis-ci.org/OWASP/django-DefectDojo)
+Deploy to Docker Cloud. (Login first to Docker Cloud before clicking the install button.)
+
+[![Deploy to Docker Cloud](https://files.cloud.docker.com/images/deploy-to-dockercloud.svg)](https://cloud.docker.com/stack/deploy/?repo=https://github.com/aaronweaver/docker-DefectDojo)
+
+# Installation Options
 
 ### [Debian or RHEL-based Install Script](./doc/install_bash.md)
-Jay has also created a detailed guide for setting up DefectDojo on
+Detailed guide for setting up DefectDojo on
 [Ubuntu 14.04](https://github.com/rackerlabs/django-DefectDojo/wiki/DefectDojo-Installation-Guide---Ubuntu-Desktop-14.04).
 
 ### [Docker](http://defectdojo.readthedocs.io/en/latest/getting-started.html#docker-local-install)
@@ -78,7 +80,7 @@ With past contributions from:
 
 # Support
 
-Proceeds are used for testing infrastrucutre, etc.
+Proceeds are used for testing, infrastructure, etc.
 
 [Stickers](https://www.stickermule.com/en/marketplace/tags/defectdojo)
 
