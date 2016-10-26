@@ -10,6 +10,7 @@ source /django-DefectDojo/scripts/dojo-shared-functions.bash
 ########### Setup and Run Entry #############
 if [ "$1" == "setup" ]; then
     setupdojo
+    chown -R dojo:dojo /django-DefectDojo
 else
   echo "=============================================================================="
   echo "Starting DefectDojo"
