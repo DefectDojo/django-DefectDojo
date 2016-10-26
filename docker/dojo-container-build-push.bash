@@ -1,6 +1,6 @@
 #!/bin/bash
-#Script to manually create and push an image to docker
-
+#Script to to push an image to docker from travis
+#Don't push images from pull requests
 if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
   if [ -z "$DOCKER_PASS" ]; then
     echo "Docker password not specified"

@@ -1,0 +1,18 @@
+FROM ubuntu:wily
+
+#Install requirements
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive \
+  apt-get -y install build-essential \
+  libjpeg-dev gcc xorg nmap python-virtualenv \
+  wget npm build-essential nodejs-legacy \
+  python-dev python-pip nvi \
+  libffi-dev libssl-dev \
+  libmysqlclient-dev mysql-client git \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+  && npm install -g bower \
+  && cd /tmp \
+  && wget -q http://download.gna.org/wkhtmltopdf/0.12/0.12.3/wkhtmltox-0.12.3_linux-generic-amd64.tar.xz \
+  && tar xvfJ /tmp/wkhtmltox-0.12.3_linux-generic-amd64.tar.xz \
+  && cp /tmp/wkhtmltox/bin/wkhtmltopdf /usr/local/bin/wkhtmltopdf \
+  && rm /tmp/*.xz
