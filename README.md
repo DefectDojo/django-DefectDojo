@@ -29,6 +29,8 @@ Deploy to Docker Cloud. (Login first to Docker Cloud before clicking the install
 
 [![Deploy to Docker Cloud](https://files.cloud.docker.com/images/deploy-to-dockercloud.svg)](https://cloud.docker.com/stack/deploy/?repo=https://github.com/aaronweaver/docker-DefectDojo)
 
+# Installation Options
+
 ### [Debian or RHEL-based Install Script](./doc/install_bash.md)
 Detailed guide for setting up DefectDojo on
 [Ubuntu 14.04](https://github.com/rackerlabs/django-DefectDojo/wiki/DefectDojo-Installation-Guide---Ubuntu-Desktop-14.04).
@@ -78,7 +80,7 @@ With past contributions from:
 
 # Support
 
-Proceeds are used for testing infrastrucutre, etc.
+Proceeds are used for testing, infrastructure, etc.
 
 [Stickers](https://www.stickermule.com/en/marketplace/tags/defectdojo)
 
