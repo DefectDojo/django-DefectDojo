@@ -81,7 +81,10 @@ setupdojo() {
   #Create virtual environment
   cd /django-DefectDojo
   #Remove any previous virtual environments
-  rm -r venv
+  if [ -d venv ];
+  then
+    rm -r venv
+  fi
   virtualenv venv
   source venv/bin/activate
 
