@@ -359,6 +359,8 @@ def re_import_scan_results(request, tid):
     scan_type = t.test_type.name
     engagement = t.engagement
     form = ReImportScanForm()
+
+    form.initial['tags'] = ', '.join(tag.name for tag in t.tags)
     if request.method == "POST":
         form = ReImportScanForm(request.POST, request.FILES)
         if form.is_valid():
@@ -366,6 +368,9 @@ def re_import_scan_results(request, tid):
             min_sev = form.cleaned_data['minimum_severity']
             file = request.FILES['file']
             scan_type = t.test_type.name
+            active = form.cleaned_data['active']
+            verified = form.cleaned_data['verified']
+            t.tags = form.cleaned_data['tags']
             try:
                 parser = import_parser_factory(file, t)
             except ValueError:
@@ -408,6 +413,7 @@ def re_import_scan_results(request, tid):
                             find[0].mitigated = None
                             find[0].mitigated_by = None
                             find[0].active = True
+                            find[0].verified = verified
                             find[0].save()
                             note = Notes(entry="Re-activated by %s re-upload." % scan_type,
                                          author=request.user)
@@ -421,6 +427,8 @@ def re_import_scan_results(request, tid):
                         item.reporter = request.user
                         item.last_reviewed = datetime.now(tz=localtz)
                         item.last_reviewed_by = request.user
+                        item.verified = verified
+                        item.active = active
                         item.save()
                         finding_added_count += 1
                         new_items.append(item.id)
