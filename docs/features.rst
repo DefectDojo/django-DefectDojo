@@ -394,6 +394,7 @@ DefectDojo has the ability to import reports from other security tools.  Current
 5. Veracode Detailed XML Report
 6. Checkmarx Detailed XML Report
 7. AppSpider Vulnerabilities Summary XML Report (VulnerabilitiesSummary.xml)
+8. Arachni Scanner JSON Report
 
 
 The importers analyze each report and create new Findings for each item reported.  DefectDojo collapses duplicate

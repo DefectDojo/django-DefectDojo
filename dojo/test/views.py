@@ -385,15 +385,14 @@ def re_import_scan_results(request, tid):
                 finding_added_count = 0
                 reactivated_count = 0
                 for item in items:
-                    endpoints = item.unsaved_endpoints
                     sev = item.severity
-                    if sev == 'Information':
+                    if sev == 'Information' or sev == 'Informational':
                         sev = 'Info'
 
                     if Finding.SEVERITIES[sev] > Finding.SEVERITIES[min_sev]:
                         continue
 
-                    if scan_type == 'Veracode Scan':
+                    if scan_type == 'Veracode Scan' or scan_type == 'Arachni Scan':
                         find = Finding.objects.filter(title=item.title,
                                                       test__id=t.id,
                                                       severity=sev,
@@ -449,6 +448,9 @@ def re_import_scan_results(request, tid):
                                                                          query=endpoint.query,
                                                                          fragment=endpoint.fragment,
                                                                          product=t.engagement.product)
+
+                        if item.unsaved_tags is not None:
+                            find.tags = item.unsaved_tags
 
                 # calculate the difference
                 to_mitigate = set(original_items) - set(new_items)

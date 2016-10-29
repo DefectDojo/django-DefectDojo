@@ -491,6 +491,7 @@ class Finding(models.Model):
     unsaved_endpoints = []
     unsaved_request = None
     unsaved_response = None
+    unsaved_tags = None
     references = models.TextField(null=True, blank=True, db_column="refs")
     test = models.ForeignKey(Test, editable=False)
     # TODO: Will be deprecated soon
