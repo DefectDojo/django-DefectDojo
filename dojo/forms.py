@@ -228,7 +228,7 @@ class Product_TypeProductForm(forms.ModelForm):
 class ImportScanForm(forms.Form):
     SCAN_TYPE_CHOICES = (("Burp Scan", "Burp Scan"), ("Nessus Scan", "Nessus Scan"), ("Nexpose Scan", "Nexpose Scan"),
                          ("AppSpider Scan", "AppSpider Scan"), ("Veracode Scan", "Veracode Scan"),
-                         ("Checkmarx Scan", "Checkmarx Scan"), ("ZAP Scan", "ZAP Scan"))
+                         ("Checkmarx Scan", "Checkmarx Scan"), ("ZAP Scan", "ZAP Scan"), ("Arachni Scan", "Arachni Scan"))
     scan_date = forms.DateTimeField(
         required=True,
         label="Scan Completion Date",
@@ -243,7 +243,7 @@ class ImportScanForm(forms.Form):
     scan_type = forms.ChoiceField(required=True, choices=SCAN_TYPE_CHOICES)
     tags = TagField(required=False, help_text="Add tags to help describe this test.  Separate tags with a comma.")
     file = forms.FileField(widget=forms.widgets.FileInput(
-        attrs={"accept": ".xml, .csv, .nessus"}),
+        attrs={"accept": ".xml, .csv, .nessus, .json"}),
         label="Choose report file",
         required=True)
 
@@ -269,7 +269,7 @@ class ReImportScanForm(forms.Form):
     verified = forms.BooleanField(help_text="Select if these findings have been verified.", required=False)
     tags = TagField(required=False, help_text="Add tags to help describe this test.  Separate tags with a comma.")
     file = forms.FileField(widget=forms.widgets.FileInput(
-        attrs={"accept": ".xml, .csv, .nessus"}),
+        attrs={"accept": ".xml, .csv, .nessus, .json"}),
         label="Choose report file",
         required=True)
 

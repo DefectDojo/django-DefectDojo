@@ -116,6 +116,9 @@ def view_endpoint(request, eid):
     active_findings = Finding.objects.filter(endpoints__in=endpoints,
                                              active=True,
                                              verified=True).distinct()
+
+    closed_findings = Finding.objects.filter(endpoints__in=endpoints,
+                                             mitigated__isnull=False).distinct()
     if all_findings:
         start_date = localtz.localize(datetime.combine(all_findings.last().date, datetime.min.time()))
     else:
@@ -127,8 +130,9 @@ def view_endpoint(request, eid):
     # include current month
     months_between += 1
 
-    monthly_counts = get_period_counts(all_findings, all_findings, None, months_between, start_date,
+    monthly_counts = get_period_counts(active_findings, all_findings, closed_findings, None, months_between, start_date,
                                        relative_delta='months')
+
     paged_findings = get_page_items(request, active_findings, 25)
 
     add_breadcrumb(parent=endpoint, top_level=False, request=request)

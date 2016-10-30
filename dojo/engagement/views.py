@@ -312,6 +312,9 @@ def import_scan_results(request, eid):
 
                         item.endpoints.add(ep)
 
+                    if item.unsaved_tags is not None:
+                        item.tags = item.unsaved_tags
+
                     finding_count += 1
 
                 messages.add_message(request,
