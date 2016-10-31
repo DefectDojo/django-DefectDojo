@@ -253,7 +253,7 @@ def delete_finding(request, fid):
 def edit_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     form = FindingForm(instance=finding)
-    form.initial['tags'] = ", ".join([tag.name for tag in finding.tags])
+    form.initial['tags'] = [tag.name for tag in finding.tags]
     form_error = False
     if request.method == 'POST':
         form = FindingForm(request.POST, instance=finding)
@@ -276,12 +276,14 @@ def edit_finding(request, fid):
             new_finding.endpoints = form.cleaned_data['endpoints']
             new_finding.last_reviewed = datetime.now(tz=localtz)
             new_finding.last_reviewed_by = request.user
-            tags = form.cleaned_data['tags']
-            new_finding.tags = tags
+            tags = request.POST.getlist('tags')
+            t = ", ".join(tags)
+            new_finding.tags = t
             new_finding.save()
 
-            tags = form.cleaned_data['tags']
-            new_finding.tags = tags
+            tags = request.POST.getlist('tags')
+            t = ", ".join(tags)
+            new_finding.tags = t
 
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -321,7 +323,7 @@ def edit_finding(request, fid):
         form.fields['endpoints'].queryset = form.cleaned_data['endpoints']
     else:
         form.fields['endpoints'].queryset = finding.endpoints.all()
-
+    form.initial['tags'] = [tag.name for tag in finding.tags]
     add_breadcrumb(parent=finding, title="Edit", top_level=False, request=request)
     return render(request, 'dojo/edit_findings.html',
                   {'form': form,
@@ -480,7 +482,9 @@ def add_template(request):
             template = form.save(commit=False)
             template.numerical_severity = Finding.get_numerical_severity(template.severity)
             template.save()
-            template.tags = form.cleaned_data['tags']
+            tags = request.POST.getlist('tags')
+            t = ", ".join(tags)
+            template.tags = t
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Template created successfully.',
@@ -507,8 +511,10 @@ def edit_template(request, tid):
         if form.is_valid():
             template = form.save(commit=False)
             template.numerical_severity = Finding.get_numerical_severity(template.severity)
-            template.tags = form.cleaned_data['tags']
             template.save()
+            tags = request.POST.getlist('tags')
+            t = ", ".join(tags)
+            template.tags = t
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Template updated successfully.',
@@ -519,6 +525,7 @@ def edit_template(request, tid):
                                  messages.ERROR,
                                  'Template form has error, please revise and try again.',
                                  extra_tags='alert-danger')
+    form.initial['tags'] = [tag.name for tag in template.tags]
     add_breadcrumb(title="Edit Template", top_level=False, request=request)
     return render(request, 'dojo/add_template.html',
                   {'form': form,
