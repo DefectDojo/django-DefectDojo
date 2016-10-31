@@ -79,8 +79,9 @@ def new_engagement(request):
             new_eng = form.save()
             new_eng.lead = request.user
             new_eng.save()
-            tags = form.cleaned_data['tags']
-            new_eng.tags = tags
+            tags = request.POST.getlist('tags')
+            t = ", ".join(tags)
+            new_eng.tags = t
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Engagement added successfully.',
@@ -105,8 +106,9 @@ def edit_engagement(request, eid):
         form = EngForm2(request.POST, instance=eng)
         if form.is_valid():
             form.save()
-            tags = form.cleaned_data['tags']
-            eng.tags = tags
+            tags = request.POST.getlist('tags')
+            t = ", ".join(tags)
+            eng.tags = t
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Engagement updated successfully.',
@@ -117,7 +119,7 @@ def edit_engagement(request, eid):
                 return HttpResponseRedirect(reverse('view_engagement', args=(eng.id,)))
     else:
         form = EngForm2(instance=eng)
-    form.initial['tags'] = ", ".join([tag.name for tag in eng.tags])
+    form.initial['tags'] = [tag.name for tag in eng.tags]
     add_breadcrumb(parent=eng, title="Edit Engagement", top_level=False, request=request)
     return render(request, 'dojo/new_eng.html',
                   {'form': form, 'edit': True,
@@ -215,7 +217,9 @@ def add_tests(request, eid):
             new_test = form.save(commit=False)
             new_test.engagement = eng
             new_test.save()
-            new_test.tags = form.cleaned_data['tags']
+            tags = request.POST.getlist('tags')
+            t = ", ".join(tags)
+            new_test.tags = t
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Test added successfully.',
@@ -258,7 +262,9 @@ def import_scan_results(request, eid):
                      target_end=scan_date, environment=environment, percent_complete=100)
             t.full_clean()
             t.save()
-            t.tags = form.cleaned_data['tags']
+            tags = request.POST.getlist('tags')
+            ts = ", ".join(tags)
+            t.tags = ts
 
             try:
                 parser = import_parser_factory(file, t)

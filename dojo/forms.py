@@ -2,17 +2,18 @@ import re
 from datetime import datetime, date
 from urlparse import urlsplit, urlunsplit
 
+from custom_field.models import CustomField
 from dateutil.relativedelta import relativedelta
 from django import forms
 from django.core import validators
 from django.core.validators import RegexValidator
+from django.forms import modelformset_factory
 from django.forms.widgets import Widget, Select
 from django.utils.dates import MONTHS
 from django.utils.safestring import mark_safe
-from django.forms import modelformset_factory
 from pytz import timezone
 from tagging.forms import TagField
-from custom_field.models import CustomField
+from tagging.models import Tag
 
 from dojo import settings
 from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
@@ -155,8 +156,10 @@ class ProductForm(forms.ModelForm):
     name = forms.CharField(max_length=50, required=True)
     description = forms.CharField(widget=forms.Textarea(attrs={}),
                                   required=True)
-    tags = TagField(required=False,
-                    help_text="Add tags that help describe this product.  Separeate each tag with a comma.")
+    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
+                           required=False,
+                           help_text="Add tags that help describe this product.  "
+                                     "Choose from the list or add new tags.  Press TAB key to add.")
     prod_type = forms.ModelChoiceField(label='Product Type',
                                        queryset=Product_Type.objects.all(),
                                        required=True)
@@ -173,8 +176,12 @@ class ProductForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         non_staff = User.objects.exclude(is_staff=True) \
             .exclude(is_active=False)
+        tags = Tag.objects.usage_for_model(Product)
+        t = [(tag.name, tag.name) for tag in tags]
         super(ProductForm, self).__init__(*args, **kwargs)
         self.fields['authorized_users'].queryset = non_staff
+        self.fields['tags'].widget.choices = t
+
 
     class Meta:
         model = Product
@@ -228,7 +235,8 @@ class Product_TypeProductForm(forms.ModelForm):
 class ImportScanForm(forms.Form):
     SCAN_TYPE_CHOICES = (("Burp Scan", "Burp Scan"), ("Nessus Scan", "Nessus Scan"), ("Nexpose Scan", "Nexpose Scan"),
                          ("AppSpider Scan", "AppSpider Scan"), ("Veracode Scan", "Veracode Scan"),
-                         ("Checkmarx Scan", "Checkmarx Scan"), ("ZAP Scan", "ZAP Scan"), ("Arachni Scan", "Arachni Scan"))
+                         ("Checkmarx Scan", "Checkmarx Scan"), ("ZAP Scan", "ZAP Scan"),
+                         ("Arachni Scan", "Arachni Scan"))
     scan_date = forms.DateTimeField(
         required=True,
         label="Scan Completion Date",
@@ -241,11 +249,21 @@ class ImportScanForm(forms.Form):
     active = forms.BooleanField(help_text="Select if these findings are currently active.", required=False)
     verified = forms.BooleanField(help_text="Select if these findings have been verified.", required=False)
     scan_type = forms.ChoiceField(required=True, choices=SCAN_TYPE_CHOICES)
-    tags = TagField(required=False, help_text="Add tags to help describe this test.  Separate tags with a comma.")
+
+    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
+                           required=False,
+                           help_text="Add tags that help describe this product.  "
+                                     "Choose from the list or add new tags.  Press TAB key to add.")
     file = forms.FileField(widget=forms.widgets.FileInput(
         attrs={"accept": ".xml, .csv, .nessus, .json"}),
         label="Choose report file",
         required=True)
+
+    def __init__(self, *args, **kwargs):
+        tags = Tag.objects.usage_for_model(Test)
+        t = [(tag.name, tag.name) for tag in tags]
+        super(ImportScanForm, self).__init__(*args, **kwargs)
+        self.fields['tags'].widget.choices = t
 
     # date can only be today or in the past, not the future
     def clean_scan_date(self):
@@ -267,11 +285,20 @@ class ReImportScanForm(forms.Form):
                                          choices=SEVERITY_CHOICES[0:4])
     active = forms.BooleanField(help_text="Select if these findings are currently active.", required=False)
     verified = forms.BooleanField(help_text="Select if these findings have been verified.", required=False)
-    tags = TagField(required=False, help_text="Add tags to help describe this test.  Separate tags with a comma.")
+    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
+                           required=False,
+                           help_text="Add tags that help describe this product.  "
+                                     "Choose from the list or add new tags.  Press TAB key to add.")
     file = forms.FileField(widget=forms.widgets.FileInput(
         attrs={"accept": ".xml, .csv, .nessus, .json"}),
         label="Choose report file",
         required=True)
+
+    def __init__(self, *args, **kwargs):
+        tags = Tag.objects.usage_for_model(Test)
+        t = [(tag.name, tag.name) for tag in tags]
+        super(ReImportScanForm, self).__init__(*args, **kwargs)
+        self.fields['tags'].widget.choices = t
 
     # date can only be today or in the past, not the future
     def clean_scan_date(self):
@@ -448,8 +475,11 @@ class EngForm2(forms.ModelForm):
                            help_text="Add a descriptive name to identify " +
                                      "this engagement. Without a name the target " +
                                      "start date will be used in listings.")
-    tags = TagField(required=False,
-                    help_text="Add tags that help describe this engagement.  Separeate each tag with a comma.")
+
+    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
+                           required=False,
+                           help_text="Add tags that help describe this product.  "
+                                     "Choose from the list or add new tags.  Press TAB key to add.")
     product = forms.ModelChoiceField(queryset=Product.objects.all())
     target_start = forms.DateField(widget=forms.TextInput(
         attrs={'class': 'datepicker'}))
@@ -461,6 +491,12 @@ class EngForm2(forms.ModelForm):
         queryset=User.objects.exclude(is_staff=False),
         required=True, label="Testing Lead")
     test_strategy = forms.URLField(required=False, label="Test Strategy URL")
+
+    def __init__(self, *args, **kwargs):
+        tags = Tag.objects.usage_for_model(Engagement)
+        t = [(tag.name, tag.name) for tag in tags]
+        super(EngForm2, self).__init__(*args, **kwargs)
+        self.fields['tags'].widget.choices = t
 
     class Meta:
         model = Engagement
@@ -488,7 +524,16 @@ class TestForm(forms.ModelForm):
         attrs={'class': 'datepicker'}))
     target_end = forms.DateTimeField(widget=forms.TextInput(
         attrs={'class': 'datepicker'}))
-    tags = TagField(required=False, help_text="Add tags to help describe Test.  Separate tags with commas.")
+    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
+                           required=False,
+                           help_text="Add tags that help describe this product.  "
+                                     "Choose from the list or add new tags.  Press TAB key to add.")
+
+    def __init__(self, *args, **kwargs):
+        tags = Tag.objects.usage_for_model(Test)
+        t = [(tag.name, tag.name) for tag in tags]
+        super(TestForm, self).__init__(*args, **kwargs)
+        self.fields['tags'].widget.choices = t
 
     class Meta:
         model = Test
@@ -595,9 +640,18 @@ class FindingForm(forms.ModelForm):
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
                                                widget=MultipleSelectWithPopPlusMinus(attrs={'size': '11'}))
     references = forms.CharField(widget=forms.Textarea, required=False)
-    tags = TagField(required=False, help_text="Add tags that help describe this Finding.  Separate each with a comma.")
+    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
+                           required=False,
+                           help_text="Add tags that help describe this product.  "
+                                     "Choose from the list or add new tags.  Press TAB key to add.")
     is_template = forms.BooleanField(label="Create Template?", required=False,
                                      help_text="A new finding template will be created from this finding.")
+
+    def __init__(self, *args, **kwargs):
+        tags = Tag.objects.usage_for_model(Finding)
+        t = [(tag.name, tag.name) for tag in tags]
+        super(FindingForm, self).__init__(*args, **kwargs)
+        self.fields['tags'].widget.choices = t
 
     def clean(self):
         cleaned_data = super(FindingForm, self).clean()
@@ -637,7 +691,10 @@ class StubFindingForm(forms.ModelForm):
 
 class FindingTemplateForm(forms.ModelForm):
     title = forms.CharField(max_length=1000, required=True)
-    tags = TagField(required=False, help_text="Add tags to help describe this template.  Separate tags with commas.")
+    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
+                           required=False,
+                           help_text="Add tags that help describe this product.  "
+                                     "Choose from the list or add new tags.  Press TAB key to add.")
     cwe = forms.IntegerField(label="CWE", required=False)
     severity_options = (('Low', 'Low'), ('Medium', 'Medium'),
                         ('High', 'High'), ('Critical', 'Critical'))
@@ -647,6 +704,12 @@ class FindingTemplateForm(forms.ModelForm):
         error_messages={
             'required': 'Select valid choice: In Progress, On Hold, Completed',
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
+
+    def __init__(self, *args, **kwargs):
+        tags = Tag.objects.usage_for_model(Finding)
+        t = [(tag.name, tag.name) for tag in tags]
+        super(FindingTemplateForm, self).__init__(*args, **kwargs)
+        self.fields['tags'].widget.choices = t
 
     class Meta:
         model = Finding_Template
@@ -664,8 +727,10 @@ class DeleteFindingTemplateForm(forms.ModelForm):
 
 
 class EditEndpointForm(forms.ModelForm):
-    tags = TagField(required=False,
-                    help_text="Add tags that help describe this product.  Separeate each tag with a comma.")
+    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
+                           required=False,
+                           help_text="Add tags that help describe this product.  "
+                                     "Choose from the list or add new tags.  Press TAB key to add.")
 
     class Meta:
         model = Endpoint
@@ -674,10 +739,13 @@ class EditEndpointForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.product = None
         self.endpoint_instance = None
+        tags = Tag.objects.usage_for_model(Endpoint)
+        t = [(tag.name, tag.name) for tag in tags]
         super(EditEndpointForm, self).__init__(*args, **kwargs)
         if 'instance' in kwargs:
             self.endpoint_instance = kwargs.pop('instance')
             self.product = self.endpoint_instance.product
+            self.fields['tags'].widget.choices = t
 
     def clean(self):
         from django.core.validators import URLValidator, validate_ipv46_address
@@ -750,11 +818,15 @@ class AddEndpointForm(forms.Form):
     product = forms.CharField(required=True,
                               widget=forms.widgets.HiddenInput(), help_text="The product this endpoint should be "
                                                                             "associated with.")
-    tags = TagField(required=False,
-                    help_text="Add tags that help describe this endpoint.  Separeate each tag with a comma.")
+    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
+                           required=False,
+                           help_text="Add tags that help describe this product.  "
+                                     "Choose from the list or add new tags.  Press TAB key to add.")
 
     def __init__(self, *args, **kwargs):
         product = None
+        tags = Tag.objects.usage_for_model(Endpoint)
+        t = [(tag.name, tag.name) for tag in tags]
         if 'product' in kwargs:
             product = kwargs.pop('product')
         super(AddEndpointForm, self).__init__(*args, **kwargs)
@@ -765,6 +837,7 @@ class AddEndpointForm(forms.Form):
 
         self.product = product
         self.endpoints_to_process = []
+        self.fields['tags'].widget.choices = t
 
     def save(self):
         processed_endpoints = []
@@ -1038,10 +1111,6 @@ class DeleteReportForm(forms.ModelForm):
     class Meta:
         model = Report
         fields = ('id',)
-
-
-class TagForm(forms.Form):
-    tags = TagField(required=False, help_text="Add comma delimited tags")
 
 
 class AddFindingImageForm(forms.ModelForm):

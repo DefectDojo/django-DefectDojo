@@ -82,7 +82,9 @@ def edit_test(request, tid):
         form = TestForm(request.POST, instance=test)
         if form.is_valid():
             new_test = form.save()
-            new_test.tags = form.cleaned_data['tags']
+            tags = request.POST.getlist('tags')
+            t = ", ".join(tags)
+            new_test.tags = t
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Test saved.',
@@ -90,7 +92,7 @@ def edit_test(request, tid):
 
     form.initial['target_start'] = test.target_start.date()
     form.initial['target_end'] = test.target_end.date()
-    form.initial['tags'] = ", ".join([tag.name for tag in test.tags])
+    form.initial['tags'] = [tag.name for tag in test.tags]
 
     add_breadcrumb(parent=test, title="Edit", top_level=False, request=request)
     return render(request, 'dojo/edit_test.html',
@@ -294,8 +296,6 @@ def add_temp_finding(request, tid, fid):
                                          'A finding template was also created.',
                                          extra_tags='alert-success')
 
-
-
             return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
         else:
             messages.add_message(request,
@@ -360,7 +360,7 @@ def re_import_scan_results(request, tid):
     engagement = t.engagement
     form = ReImportScanForm()
 
-    form.initial['tags'] = ', '.join(tag.name for tag in t.tags)
+    form.initial['tags'] = [tag.name for tag in t.tags]
     if request.method == "POST":
         form = ReImportScanForm(request.POST, request.FILES)
         if form.is_valid():
@@ -370,7 +370,9 @@ def re_import_scan_results(request, tid):
             scan_type = t.test_type.name
             active = form.cleaned_data['active']
             verified = form.cleaned_data['verified']
-            t.tags = form.cleaned_data['tags']
+            tags = request.POST.getlist('tags')
+            ts = ", ".join(tags)
+            t.tags = ts
             try:
                 parser = import_parser_factory(file, t)
             except ValueError:

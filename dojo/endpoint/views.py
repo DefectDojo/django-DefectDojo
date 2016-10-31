@@ -149,19 +149,22 @@ def view_endpoint(request, eid):
 @user_passes_test(lambda u: u.is_staff)
 def edit_endpoint(request, eid):
     endpoint = get_object_or_404(Endpoint, id=eid)
-    form = EditEndpointForm(instance=endpoint)
+
     if request.method == 'POST':
         form = EditEndpointForm(request.POST, instance=endpoint)
         if form.is_valid():
-            form.save()
-            tags = form.cleaned_data['tags']
-            endpoint.tags = tags
+            endpoint = form.save()
+            tags = request.POST.getlist('tags')
+            t = ", ".join(tags)
+            endpoint.tags = t
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Endpoint updated successfully.',
                                  extra_tags='alert-success')
+            return HttpResponseRedirect(reverse('view_endpoint', args=(endpoint.id,)))
     add_breadcrumb(parent=endpoint, title="Edit", top_level=False, request=request)
-    form.initial['tags'] = ", ".join([tag.name for tag in endpoint.tags])
+    form = EditEndpointForm(instance=endpoint)
+    form.initial['tags'] = [tag.name for tag in endpoint.tags]
     return render(request,
                   "dojo/edit_endpoint.html",
                   {"endpoint": endpoint,
@@ -211,14 +214,14 @@ def add_endpoint(request, pid):
         add_breadcrumb(parent=product, title="Add Endpoint", top_level=False, request=request)
 
     form = AddEndpointForm(product=product)
-
     if request.method == 'POST':
         form = AddEndpointForm(request.POST, product=product)
         if form.is_valid():
             endpoints = form.save()
-            tags = form.cleaned_data['tags']
+            tags = request.POST.getlist('tags')
+            t = ", ".join(tags)
             for e in endpoints:
-                e.tags = tags
+                e.tags = t
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Endpoint added successfully.',
@@ -243,9 +246,10 @@ def add_product_endpoint(request):
         form = AddEndpointForm(request.POST)
         if form.is_valid():
             endpoints = form.save()
-            tags = form.cleaned_data['tags']
+            tags = request.POST.getlist('tags')
+            t = ", ".join(tags)
             for e in endpoints:
-                e.tags = tags
+                e.tags = t
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Endpoint added successfully.',
