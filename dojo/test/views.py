@@ -14,7 +14,7 @@ from pytz import timezone
 from dojo.filters import TemplateFindingFilter
 from dojo.forms import NoteForm, TestForm, FindingForm, \
     DeleteTestForm, AddFindingForm, \
-    ImportScanForm, ReImportScanForm
+    ImportScanForm, ReImportScanForm, FindingBulkUpdateForm
 from dojo.models import Finding, Test, Notes, \
     BurpRawRequestResponse, Endpoint, Stub_Finding, Finding_Template
 from dojo.tools.factory import import_parser_factory
@@ -348,6 +348,35 @@ def search(request, tid):
                    'tid': tid,
                    'add_from_template': True,
                    })
+
+
+@user_passes_test(lambda u: u.is_staff)
+def finding_bulk_update(request, tid):
+    test = get_object_or_404(Test, id=tid)
+    finding = test.finding_set.all()[0]
+    form = FindingBulkUpdateForm(request.POST)
+    if request.method == "POST":
+        if form.is_valid():
+            finding_to_update = request.POST.getlist('finding_to_update')
+            finds = Finding.objects.filter(test=test, id__in=finding_to_update)
+            finds.update(severity=form.cleaned_data['severity'],
+                         active=form.cleaned_data['active'],
+                         verified=form.cleaned_data['verified'],
+                         false_p=form.cleaned_data['false_p'],
+                         duplicate=form.cleaned_data['duplicate'],
+                         out_of_scope=form.cleaned_data['out_of_scope'])
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Bulk edit of findings was successful.  Check to make sure it is what you intended.',
+                                 extra_tags='alert-success')
+        else:
+            messages.add_message(request,
+                                 messages.ERROR,
+                                 'Unable to process bulk update.  The Severity field is required, '
+                                 'all others are optional.',
+                                 extra_tags='alert-danger')
+
+    return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
 
 
 @user_passes_test(lambda u: u.is_staff)

@@ -726,6 +726,22 @@ class DeleteFindingTemplateForm(forms.ModelForm):
         fields = ('id',)
 
 
+class FindingBulkUpdateForm(forms.ModelForm):
+    def clean(self):
+        cleaned_data = super(FindingBulkUpdateForm, self).clean()
+        if (cleaned_data['active'] or cleaned_data['verified']) and cleaned_data['duplicate']:
+            raise forms.ValidationError('Duplicate findings cannot be'
+                                        ' verified or active')
+        if cleaned_data['false_p'] and cleaned_data['verified']:
+            raise forms.ValidationError('False positive findings cannot '
+                                        'be verified.')
+        return cleaned_data
+
+    class Meta:
+        model = Finding
+        fields = ('severity', 'active', 'verified', 'false_p','duplicate','out_of_scope')
+
+
 class EditEndpointForm(forms.ModelForm):
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False,
