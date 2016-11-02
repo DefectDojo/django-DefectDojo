@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
-    <h3> Engineer Profile - {{ user.get_full_name }}</h3>
+    <h3> User Profile - {{ user.get_full_name }}</h3>
     <div class="row">
         <div class="col-md-7">
             <form class="form-horizontal" method="post">{% csrf_token %}
                 {% include "dojo/form_fields.html" with form=form %}
+                {% include "dojo/form_fields.html" with form=contact_form %}
                 <div class="form-group">
                     <div class="col-sm-offset-2 col-sm-10">
                         <input class="btn btn-primary" type="submit" value="Submit"/>
