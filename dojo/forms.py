@@ -18,7 +18,8 @@ from tagging.models import Tag
 from dojo import settings
 from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
-    Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage
+    Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
+    UserContactInfo
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
 localtz = timezone(settings.TIME_ZONE)
@@ -163,12 +164,7 @@ class ProductForm(forms.ModelForm):
     prod_type = forms.ModelChoiceField(label='Product Type',
                                        queryset=Product_Type.objects.all(),
                                        required=True)
-    prod_manager = forms.CharField(max_length=30, label="Product Manager",
-                                   required=False)
-    tech_contact = forms.CharField(max_length=30, label="Technical Contact",
-                                   required=False)
-    manager = forms.CharField(max_length=30, label="Team Manager",
-                              required=False)
+
     authorized_users = forms.ModelMultipleChoiceField(
         queryset=None,
         required=False, label="Authorized Users")
@@ -185,7 +181,7 @@ class ProductForm(forms.ModelForm):
 
     class Meta:
         model = Product
-        fields = ['name', 'description', 'tags', 'prod_manager', 'tech_contact', 'manager', 'prod_type',
+        fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type',
                   'authorized_users']
 
 
@@ -212,12 +208,7 @@ class Product_TypeProductForm(forms.ModelForm):
     name = forms.CharField(max_length=50, required=True)
     description = forms.CharField(widget=forms.Textarea(attrs={}),
                                   required=True)
-    prod_manager = forms.CharField(max_length=30, label="Product Manager",
-                                   required=False)
-    tech_contact = forms.CharField(max_length=30, label="Technical Contact",
-                                   required=False)
-    manager = forms.CharField(max_length=30, label="Team Manager",
-                              required=False)
+
     authorized_users = forms.ModelMultipleChoiceField(
         queryset=None,
         required=False, label="Authorized Users")
@@ -229,7 +220,7 @@ class Product_TypeProductForm(forms.ModelForm):
 
     class Meta:
         model = Product
-        fields = ['name', 'description', 'prod_manager', 'tech_contact', 'manager', 'prod_type', 'authorized_users']
+        fields = ['name', 'description', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'authorized_users']
 
 
 class ImportScanForm(forms.Form):
@@ -1074,6 +1065,12 @@ class DeleteUserForm(forms.ModelForm):
         exclude = ['username', 'first_name', 'last_name', 'email', 'is_active',
                    'is_staff', 'is_superuser', 'password', 'last_login', 'groups',
                    'date_joined', 'user_permissions']
+
+
+class UserContactInfoForm(forms.ModelForm):
+    class Meta:
+        model = UserContactInfo
+        exclude = ['user']
 
 
 def get_years():

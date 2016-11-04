@@ -11,6 +11,7 @@ from django.contrib import admin
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
+from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import Q
 from django.utils.timezone import now
@@ -46,6 +47,22 @@ class Dojo_User(User):
 
     def __unicode__(self):
         return self.get_full_name()
+
+
+class UserContactInfo(models.Model):
+    user = models.OneToOneField(User)
+    title = models.CharField(blank=True, null=True, max_length=150)
+    phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$',
+                                 message="Phone number must be entered in the format: '+999999999'. "
+                                         "Up to 15 digits allowed.")
+    phone_number = models.CharField(validators=[phone_regex], blank=True, max_length=15,
+                                    help_text="Phone number must be entered in the format: '+999999999'. "
+                                              "Up to 15 digits allowed.")
+    cell_number = models.CharField(validators=[phone_regex], blank=True, max_length=15,
+                                   help_text="Phone number must be entered in the format: '+999999999'. "
+                                             "Up to 15 digits allowed.")
+    twitter_username = models.CharField(blank=True, null=True, max_length=150)
+    github_username = models.CharField(blank=True, null=True, max_length=150)
 
 
 class Contact(models.Model):
@@ -110,9 +127,22 @@ class Test_Type(models.Model):
 class Product(models.Model):
     name = models.CharField(max_length=300)
     description = models.CharField(max_length=2000)
-    prod_manager = models.CharField(default=0, max_length=200)
-    tech_contact = models.CharField(default=0, max_length=200)
-    manager = models.CharField(default=0, max_length=200)
+    '''
+        The following three fields are deprecated and no longer in use.
+        They remain in model for backwards compatibility and will be removed
+        in a future release.  prod_manager, tech_contact, manager
+
+        The admin script migrate_product_contacts should be used to migrate data from
+        these fields to their replacements.  ./manage.py migrate_product_contacts
+    '''
+    prod_manager = models.CharField(default=0, max_length=200)  # unused
+    tech_contact = models.CharField(default=0, max_length=200)  # unused
+    manager = models.CharField(default=0, max_length=200)  # unused
+
+    product_manager = models.ForeignKey(Dojo_User, null=True, blank=True, related_name='product_manager')
+    technical_contact = models.ForeignKey(Dojo_User, null=True, blank=True, related_name='technical_contact')
+    team_manager = models.ForeignKey(Dojo_User, null=True, blank=True, related_name='team_manager')
+
     created = models.DateTimeField(editable=False, null=True, blank=True)
     prod_type = models.ForeignKey(Product_Type, related_name='prod_type',
                                   null=True, blank=True)
@@ -581,10 +611,12 @@ class Finding(models.Model):
 
     def save(self, *args, **kwargs):
         super(Finding, self).save(*args, **kwargs)
-        if hasattr(settings,'ENABLE_DEDUPLICATION'):
+        if hasattr(settings, 'ENABLE_DEDUPLICATION'):
             if settings.ENABLE_DEDUPLICATION:
-                eng_findings_cwe = Finding.objects.filter(test__engagement__product=self.test.engagement.product, cwe=self.cwe).exclude(id=self.id).exclude(cwe=None)
-                eng_findings_title = Finding.objects.filter(test__engagement__product=self.test.engagement.product, title=self.title).exclude(id=self.id)
+                eng_findings_cwe = Finding.objects.filter(test__engagement__product=self.test.engagement.product,
+                                                          cwe=self.cwe).exclude(id=self.id).exclude(cwe=None)
+                eng_findings_title = Finding.objects.filter(test__engagement__product=self.test.engagement.product,
+                                                            title=self.title).exclude(id=self.id)
                 total_findings = eng_findings_cwe | eng_findings_title
                 for find in total_findings:
                     if set(find.endpoints.all()) == set(self.endpoints.all()):
@@ -856,6 +888,7 @@ admin.site.register(Test_Type)
 admin.site.register(Endpoint)
 admin.site.register(Product)
 admin.site.register(Dojo_User)
+admin.site.register(UserContactInfo)
 admin.site.register(Notes)
 admin.site.register(Report)
 admin.site.register(Scan)
