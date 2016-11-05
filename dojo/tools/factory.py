@@ -6,6 +6,7 @@ from dojo.tools.zap.parser import ZapXmlParser
 from dojo.tools.checkmarx.parser import CheckmarxXMLParser
 from dojo.tools.appspider.parser import AppSpiderXMLParser
 from dojo.tools.arachni.parser import ArachniJSONParser
+from dojo.tools.vcg.parser import VCGParser
 
 __author__ = 'Jay Paz'
 
@@ -32,6 +33,8 @@ def import_parser_factory(file, test):
         parser = AppSpiderXMLParser(file, test)
     elif scan_type == "Arachni Scan":
         parser = ArachniJSONParser(file, test)
+    elif scan_type == 'VCG Scan':
+        parser = VCGParser(file, test)		
     else:
         raise ValueError('Unknown Test Type')
 
