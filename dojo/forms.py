@@ -178,7 +178,6 @@ class ProductForm(forms.ModelForm):
         self.fields['authorized_users'].queryset = non_staff
         self.fields['tags'].widget.choices = t
 
-
     class Meta:
         model = Product
         fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type',
@@ -220,7 +219,8 @@ class Product_TypeProductForm(forms.ModelForm):
 
     class Meta:
         model = Product
-        fields = ['name', 'description', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'authorized_users']
+        fields = ['name', 'description', 'product_manager', 'technical_contact', 'team_manager', 'prod_type',
+                  'authorized_users']
 
 
 class ImportScanForm(forms.Form):
@@ -582,7 +582,8 @@ class AddFindingForm(forms.ModelForm):
     class Meta:
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
-        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images')
+        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
+                   'review_requested_by')
 
 
 class PromoteFindingForm(forms.ModelForm):
@@ -609,7 +610,7 @@ class PromoteFindingForm(forms.ModelForm):
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'active', 'false_p', 'verified', 'is_template',
-                   'duplicate', 'out_of_scope', 'images')
+                   'duplicate', 'out_of_scope', 'images', 'under_review', 'reviewers', 'review_requested_by')
 
 
 class FindingForm(forms.ModelForm):
@@ -657,7 +658,8 @@ class FindingForm(forms.ModelForm):
     class Meta:
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
-        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images')
+        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
+                   'review_requested_by')
 
 
 class StubFindingForm(forms.ModelForm):
@@ -730,7 +732,7 @@ class FindingBulkUpdateForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        fields = ('severity', 'active', 'verified', 'false_p','duplicate','out_of_scope')
+        fields = ('severity', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope')
 
 
 class EditEndpointForm(forms.ModelForm):
@@ -954,6 +956,35 @@ class CloseFindingForm(forms.ModelForm):
     class Meta:
         model = Notes
         fields = ['entry']
+
+
+class ClearFindingReviewForm(forms.ModelForm):
+    entry = forms.CharField(
+        required=True, max_length=2400,
+        help_text='Please provide a message.',
+        widget=forms.Textarea, label='Notes:',
+        error_messages={'required': ('The reason for clearing a review is '
+                                     'required, please use the text area '
+                                     'below to provide documentation.')})
+
+    class Meta:
+        model = Finding
+        fields = ['active', 'verified', 'false_p', 'out_of_scope', 'duplicate']
+
+
+class ReviewFindingForm(forms.Form):
+    reviewers = forms.ModelMultipleChoiceField(queryset=Dojo_User.objects.filter(is_staff=True, is_active=True),
+                                               help_text="Select all users who can review Finding.")
+    entry = forms.CharField(
+        required=True, max_length=2400,
+        help_text='Please provide a message for reviewers.',
+        widget=forms.Textarea, label='Notes:',
+        error_messages={'required': ('The reason for requesting a review is '
+                                     'required, please use the text area '
+                                     'below to provide documentation.')})
+
+    class Meta:
+        fields = ['reviewers', 'entry']
 
 
 class WeeklyMetricsForm(forms.Form):

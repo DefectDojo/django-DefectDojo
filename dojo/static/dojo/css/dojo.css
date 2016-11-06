@@ -754,6 +754,10 @@ th a {
     content: "\e901";
 }
 
+.icon-user-check:before {
+    content: "\e975";
+}
+
 #side-menu ul a {
     /*border-top: 1px solid #ddd;*/
     border-radius: 4px;

@@ -8,13 +8,14 @@ from math import pi, sqrt
 import vobject
 from dateutil.relativedelta import relativedelta, MO
 from django.conf import settings
+from django.core.mail import send_mail
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import get_resolver, reverse
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
 from django.template.defaultfilters import pluralize
 from pytz import timezone
 
-from dojo.models import Finding, Scan, Test, Engagement, Stub_Finding, Finding_Template, Report
+from dojo.models import Finding, Scan, Test, Engagement, Stub_Finding, Finding_Template, Report, Dojo_User
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -594,10 +595,19 @@ def get_page_items(request, items, page_size, param_name='page'):
 
 def get_alerts(user):
     import humanize
-
-    alerts = []
     now = localtz.localize(datetime.today())
     start = now - timedelta(days=7)
+    dojo_user = Dojo_User.objects.get(id=user.id)
+    alerts = []
+    # findings under review
+    under_review = Finding.objects.filter(under_review=True, reviewers__in=[dojo_user])
+
+    for fur in under_review:
+        alerts.append(['Finding Review: ' + fur.title,
+                       'Reviewed On ' + fur.last_reviewed.strftime("%b. %d, %Y"),
+                       ' icon-user-check',
+                       reverse('view_finding', args=(fur.id,))])
+
     # reports requested in the last 7 days
     completed_reports = Report.objects.filter(requester=user, datetime__range=[start, now], status='success')
     running_reports = Report.objects.filter(requester=user, datetime__range=[start, now], status='requested')
@@ -720,4 +730,24 @@ def handle_uploaded_threat(f, eng):
             destination.write(chunk)
     eng.tmodel_path = settings.MEDIA_ROOT + '/threat/%s%s' % (eng.id, extension)
     eng.save()
+
+
+def send_review_email(request, user, finding, users, new_note):
+    recipients = [u.email for u in users]
+    msg = "\nGreetings, \n\n"
+    msg += "{0} has requested that you please review ".format(str(user))
+    msg += "the following finding for accuracy:"
+    msg += "\n\n" + finding.title
+    msg += "\n\nIt can be reviewed at " + request.build_absolute_uri(reverse("view_finding", args=(finding.id,)))
+    msg += "\n\n{0} provided the following details:".format(str(user))
+    msg += "\n\n" + new_note.entry
+    msg += "\n\nThanks\n"
+
+    send_mail('DefectDojo Finding Review Request',
+              msg,
+              user.email,
+              recipients,
+              fail_silently=False)
+    pass
+
 
