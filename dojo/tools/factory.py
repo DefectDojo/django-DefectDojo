@@ -7,6 +7,7 @@ from dojo.tools.checkmarx.parser import CheckmarxXMLParser
 from dojo.tools.appspider.parser import AppSpiderXMLParser
 from dojo.tools.arachni.parser import ArachniJSONParser
 from dojo.tools.vcg.parser import VCGParser
+from dojo.tools.dependencycheck.parser import DependencyCheckParser
 
 __author__ = 'Jay Paz'
 
@@ -34,7 +35,9 @@ def import_parser_factory(file, test):
     elif scan_type == "Arachni Scan":
         parser = ArachniJSONParser(file, test)
     elif scan_type == 'VCG Scan':
-        parser = VCGParser(file, test)		
+        parser = VCGParser(file, test)
+    elif scan_type == 'Dependency Check Scan':
+        parser = DependencyCheckParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 
