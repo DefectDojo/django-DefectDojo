@@ -337,3 +337,46 @@ class TestDependencyCheckParser(unittest.TestCase):
         testfile = TestFile("dependency-check-report.xml", content)
         parser = DependencyCheckParser(testfile, Test())
         self.assertEqual(2, len(parser.items))
+
+    def test_parse_finding(self):
+        finding_xml = """<vulnerability xmlns="https://jeremylong.github.io/DependencyCheck/dependency-check.1.3.xsd">
+<name>CVE-0000-0001</name>
+<cvssScore>7.5</cvssScore>
+<cvssAccessVector>NETWORK</cvssAccessVector>
+<cvssAccessComplexity>LOW</cvssAccessComplexity>
+<cvssAuthenticationr>NONE</cvssAuthenticationr>
+<cvssConfidentialImpact>PARTIAL</cvssConfidentialImpact>
+<cvssIntegrityImpact>PARTIAL</cvssIntegrityImpact>
+<cvssAvailabilityImpact>PARTIAL</cvssAvailabilityImpact>
+<severity>High</severity>
+<cwe>CWE-00 Bad Vulnerability</cwe>
+<description>Description of a bad vulnerability.</description>
+<references>
+<reference>
+<source>Reference1</source>
+<url>http://localhost/badvulnerability.htm</url>
+<name>Reference Name</name>
+</reference>
+<reference>
+<source>MISC</source>
+<url>http://localhost2/reference_for_badvulnerability.pdf</url>
+<name>Reference for a bad vulnerability</name>
+</reference>
+</references>
+<vulnerableSoftware>
+<software>cpe:/a:component2:component2:1.0</software>
+</vulnerableSoftware>
+</vulnerability>"""
+
+        vulnerability = ElementTree.fromstring(finding_xml)
+
+        expected_references = 'name: Reference Name\nsource: Reference1\nurl: http://localhost/badvulnerability.htm\n\n'
+        expected_references += 'name: Reference for a bad vulnerability\nsource: MISC\n'
+        expected_references += 'url: http://localhost2/reference_for_badvulnerability.pdf\n\n'
+
+        parser = DependencyCheckParser(None, Test())
+        finding = parser.get_finding_from_vulnerability(vulnerability, 'testfile.jar', Test())
+        self.assertEqual('testfile.jar | CVE-0000-0001', finding.title)
+        self.assertEqual('High', finding.severity)
+        self.assertEqual('CWE-00 Bad Vulnerability\n\nDescription of a bad vulnerability.', finding.description)
+        self.assertEqual(expected_references, finding.references)
