@@ -531,6 +531,9 @@ class Finding(models.Model):
     false_p = models.BooleanField(default=False, verbose_name="False Positive")
     duplicate = models.BooleanField(default=False)
     out_of_scope = models.BooleanField(default=False)
+    under_review = models.BooleanField(default=False)
+    review_requested_by = models.ForeignKey(Dojo_User, null=True, blank=True, related_name='review_requested_by')
+    reviewers = models.ManyToManyField(Dojo_User, blank=True)
     thread_id = models.IntegerField(default=0, editable=False)
     mitigated = models.DateTimeField(editable=False, null=True, blank=True)
     mitigated_by = models.ForeignKey(User, null=True, editable=False, related_name="mitigated_by")
@@ -684,7 +687,7 @@ class Finding_Template(models.Model):
     mitigation = models.TextField(null=True, blank=True)
     impact = models.TextField(null=True, blank=True)
     references = models.TextField(null=True, blank=True, db_column="refs")
-    numerical_severity = models.CharField(max_length=4, null=True, blank=True)
+    numerical_severity = models.CharField(max_length=4, null=True, blank=True, editable=False)
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
@@ -867,6 +870,7 @@ auditlog.register(Finding)
 auditlog.register(Product)
 auditlog.register(Test)
 auditlog.register(Risk_Acceptance)
+auditlog.register(Finding_Template)
 
 # Register tagging for models
 tag_register(Product)

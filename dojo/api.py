@@ -10,9 +10,9 @@ from tastypie.serializers import Serializer
 from tastypie.validation import CleanedDataFormValidation
 
 from dojo.models import Product, Engagement, Test, Finding, \
-    User, ScanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance
+    User, ScanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance, Finding_Template
 from dojo.forms import ProductForm, EngForm2, TestForm, \
-    ScanSettingsForm, FindingForm, StubFindingForm
+    ScanSettingsForm, FindingForm, StubFindingForm, FindingTemplateForm
 
 """
     Setup logging for the api
@@ -420,7 +420,7 @@ class FindingResource(BaseModelResource):
     class Meta:
         resource_name = 'findings'
         queryset = Finding.objects.select_related("test")
-        # deleting of findings is not allowed via UI or API.
+        # deleting of findings is not allowed via API.
         # Admin interface can be used for this.
         list_allowed_methods = ['get', 'post']
         detail_allowed_methods = ['get', 'post', 'put']
@@ -457,6 +457,55 @@ class FindingResource(BaseModelResource):
         bundle.data['product'] = \
             "/api/v1/products/%s/" % engagement[0].product.id
         return bundle
+
+"""
+    /api/v1/finding_templates/
+    GET [/id/], DELETE [/id/]
+    Expects: no params or test_id
+    Returns test: ALL or by test_id
+    Relevant apply filter ?active=True, ?id=?, ?severity=?
+
+    POST, PUT [/id/]
+    Expects *title, *severity, *description, *mitigation, *impact,
+    *endpoint, *test, cwe, active, false_p, verified,
+    mitigated, *reporter
+
+"""
+
+
+class FindingTemplateResource(BaseModelResource):
+
+    class Meta:
+        resource_name = 'finding_templates'
+        queryset = Finding_Template.objects.all()
+        excludes= ['numerical_severity']
+        # deleting of Finding_Template is not allowed via API.
+        # Admin interface can be used for this.
+        list_allowed_methods = ['get', 'post']
+        detail_allowed_methods = ['get', 'post', 'put']
+        include_resource_uri = True
+        """
+        title = models.TextField(max_length=1000)
+    cwe = models.IntegerField(default=None, null=True, blank=True)
+    severity = models.CharField(max_length=200, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    mitigation = models.TextField(null=True, blank=True)
+    impact = models.TextField(null=True, blank=True)
+    references = models.TextField(null=True, blank=True, db_column="refs")
+    numerical_severity
+    """
+        filtering = {
+            'id': ALL,
+            'title': ALL,
+            'cwe': ALL,
+            'severity': ALL,
+            'description': ALL,
+            'mitigated': ALL,
+        }
+        authentication = DojoApiKeyAuthentication()
+        authorization = DjangoAuthorization()
+        serializer = Serializer(formats=['json'])
+        validation = CleanedDataFormValidation(form_class=FindingTemplateForm)
 
 
 class StubFindingResource(BaseModelResource):
