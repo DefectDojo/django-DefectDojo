@@ -128,6 +128,30 @@ class VerifiedColumnMappingStrategy(ColumnMappingStrategy):
             self.successor.process_column(column_name, column_value, finding)
 
 
+class FalsePositiveColumnMappingStrategy(ColumnMappingStrategy):
+
+    def process_column(self, column_name, column_value, finding):
+        if column_name.lower() == 'falsepositive' and column_value is not None:
+            if column_value.lower() == 'true':
+                finding.false_p = True
+            elif column_value.lower() == 'false':
+                finding.false_p = False
+        elif self.successor is not None:
+            self.successor.process_column(column_name, column_value, finding)
+
+
+class DuplicateColumnMappingStrategy(ColumnMappingStrategy):
+
+    def process_column(self, column_name, column_value, finding):
+        if column_name.lower() == 'duplicate' and column_value is not None:
+            if column_value.lower() == 'true':
+                finding.duplicate = True
+            elif column_value.lower() == 'false':
+                finding.duplicate = False
+        elif self.successor is not None:
+            self.successor.process_column(column_name, column_value, finding)
+
+
 class GenericFindingUploadCsvParser(object):
 
     def create_chain(self):
@@ -142,7 +166,11 @@ class GenericFindingUploadCsvParser(object):
         references_column_strategy = ReferencesColumnMappingStrategy()
         active_column_strategy = ActiveColumnMappingStrategy()
         verified_column_strategy = VerifiedColumnMappingStrategy()
+        false_positive_strategy = FalsePositiveColumnMappingStrategy()
+        duplicate_strategy = DuplicateColumnMappingStrategy()
 
+        false_positive_strategy.successor = duplicate_strategy
+        verified_column_strategy.successor = false_positive_strategy
         active_column_strategy.successor = verified_column_strategy
         references_column_strategy.successor = active_column_strategy
         impact_column_strategy.successor = references_column_strategy

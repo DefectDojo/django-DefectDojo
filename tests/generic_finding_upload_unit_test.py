@@ -18,6 +18,7 @@ class TestFile(object):
         self.name = name
         self.content = content
 
+
 class TestGenericFindingUploadCsvParser(unittest.TestCase):
 
     def setUp(self):
@@ -165,7 +166,6 @@ Code Line: Response.Write(output);","None Currently Available",,,TRUE,FALSE
         self.parser = GenericFindingUploadCsvParser(file, Test())
         self.assertEqual('None Currently Available', self.parser.items[0].mitigation)
 
-
     def test_parsed_finding_has_impact(self):
         content = """Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified
 11/7/2015,Potential XSS Vulnerability,79,"http://localhost/default.aspx",High,"FileName: default.aspx.cs
@@ -231,3 +231,47 @@ Code Line: Response.Write(output);","None Currently Available","Impact is curren
         file = TestFile("findings.csv", content)
         self.parser = GenericFindingUploadCsvParser(file, Test())
         self.assertEqual(False, self.parser.items[0].verified)
+
+    def test_parsed_finding_has_positive_false_positive_status(self):
+        content = """Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified,FalsePositive
+11/7/2015,Potential XSS Vulnerability,79,"http://localhost/default.aspx",High,"FileName: default.aspx.cs
+Description: Potential XSS Vulnerability
+Line:18
+Code Line: Response.Write(output);","None Currently Available","Impact is currently unknown","Finding has references.",FALSE,FALSE,TRUE
+"""
+        file = TestFile("findings.csv", content)
+        self.parser = GenericFindingUploadCsvParser(file, Test())
+        self.assertEqual(True, self.parser.items[0].false_p)
+
+    def test_parsed_finding_has_negative_false_positive_status(self):
+        content = """Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified,FalsePositive
+11/7/2015,Potential XSS Vulnerability,79,"http://localhost/default.aspx",High,"FileName: default.aspx.cs
+Description: Potential XSS Vulnerability
+Line:18
+Code Line: Response.Write(output);","None Currently Available","Impact is currently unknown","Finding has references.",FALSE,FALSE,FALSE
+"""
+        file = TestFile("findings.csv", content)
+        self.parser = GenericFindingUploadCsvParser(file, Test())
+        self.assertEqual(False, self.parser.items[0].false_p)
+
+    def test_parsed_finding_is_duplicate_has_positive_value(self):
+        content = """Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified,FalsePositive,Duplicate
+11/7/2015,Potential XSS Vulnerability,79,"http://localhost/default.aspx",High,"FileName: default.aspx.cs
+Description: Potential XSS Vulnerability
+Line:18
+Code Line: Response.Write(output);","None Currently Available","Impact is currently unknown","Finding has references.",FALSE,FALSE,FALSE,TRUE
+"""
+        file = TestFile("findings.csv", content)
+        self.parser = GenericFindingUploadCsvParser(file, Test())
+        self.assertEqual(True, self.parser.items[0].duplicate)
+
+    def test_parsed_finding_is_duplicate_has_negative_value(self):
+        content = """Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified,FalsePositive,Duplicate
+11/7/2015,Potential XSS Vulnerability,79,"http://localhost/default.aspx",High,"FileName: default.aspx.cs
+Description: Potential XSS Vulnerability
+Line:18
+Code Line: Response.Write(output);","None Currently Available","Impact is currently unknown","Finding has references.",FALSE,FALSE,FALSE,FALSE
+"""
+        file = TestFile("findings.csv", content)
+        self.parser = GenericFindingUploadCsvParser(file, Test())
+        self.assertEqual(False, self.parser.items[0].duplicate)
