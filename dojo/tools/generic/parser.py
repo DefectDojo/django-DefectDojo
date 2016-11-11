@@ -6,49 +6,71 @@ from dateutil.parser import parse
 
 
 class ColumnMappingStrategy(object):
+
+    mapped_column = None
+
     def __init__(self):
         self.successor = None
 
-    def process_column(self, column_name, column_value, finding):
+    def map_column_value(self, finding, column_value):
         pass
+
+    @staticmethod
+    def evaluate_bool_value(column_value):
+        if column_value.lower() == 'true':
+            return True
+        elif column_value.lower() == 'false':
+            return False
+        else:
+            return None
+
+    def process_column(self, column_name, column_value, finding):
+
+        if column_name.lower() == self.mapped_column and column_value is not None:
+            self.map_column_value(finding, column_value)
+        elif self.successor is not None:
+            self.successor.process_column(column_name, column_value, finding)
 
 
 class DateColumnMappingStrategy(ColumnMappingStrategy):
 
-    def process_column(self, column_name, column_value, finding):
+    def __init__(self):
+        self.mapped_column = 'date'
+        super(DateColumnMappingStrategy, self).__init__()
 
-        if column_name.lower() == 'date' and column_value is not None:
-            finding.date = parse(column_value).date()
-        elif self.successor is not None:
-            self.successor.process_column(column_name, column_value, finding)
+    def map_column_value(self, finding, column_value):
+        finding.date = parse(column_value).date()
 
 
 class TitleColumnMappingStrategy(ColumnMappingStrategy):
 
-    def process_column(self, column_name, column_value, finding):
-        if column_name.lower() == 'title' and column_value is not None:
-            finding.title = column_value
-        elif self.successor is not None:
-            self.successor.process_column(column_name, column_value, finding)
+    def __init__(self):
+        self.mapped_column = 'title'
+        super(TitleColumnMappingStrategy, self).__init__()
+
+    def map_column_value(self, finding, column_value):
+        finding.title = column_value
 
 
 class CweColumnMappingStrategy(ColumnMappingStrategy):
 
-    def process_column(self, column_name, column_value, finding):
-        if column_name.lower() == 'cweid' and column_value is not None:
-            if column_value.isdigit():
-                finding.cwe = int(column_value)
-        elif self.successor is not None:
-            self.successor.process_column(column_name, column_value, finding)
+    def __init__(self):
+        self.mapped_column = 'cweid'
+        super(CweColumnMappingStrategy, self).__init__()
+
+    def map_column_value(self, finding, column_value):
+        if column_value.isdigit():
+            finding.cwe = int(column_value)
 
 
 class UrlColumnMappingStrategy(ColumnMappingStrategy):
 
-    def process_column(self, column_name, column_value, finding):
-        if column_name.lower() == 'url' and column_value is not None:
-            finding.url = column_value
-        elif self.successor is not None:
-            self.successor.process_column(column_name, column_value, finding)
+    def __init__(self):
+        self.mapped_column = 'url'
+        super(UrlColumnMappingStrategy, self).__init__()
+
+    def map_column_value(self, finding, column_value):
+        finding.url = column_value
 
 
 class SeverityColumnMappingStrategy(ColumnMappingStrategy):
@@ -58,98 +80,95 @@ class SeverityColumnMappingStrategy(ColumnMappingStrategy):
         valid_severity = ('Info', 'Low', 'Medium', 'High', 'Critical')
         return severity in valid_severity
 
-    def process_column(self, column_name, column_value, finding):
-        if column_name.lower() == 'severity' and column_value is not None:
-            if self.is_valid_severity(column_value):
-                finding.severity = column_value
-            else:
-                finding.severity = 'Info'
-        elif self.successor is not None:
-            self.successor.process_column(column_name, column_value, finding)
+    def __init__(self):
+        self.mapped_column = 'severity'
+        super(SeverityColumnMappingStrategy, self).__init__()
+
+    def map_column_value(self, finding, column_value):
+        if self.is_valid_severity(column_value):
+            finding.severity = column_value
+        else:
+            finding.severity = 'Info'
 
 
 class DescriptionColumnMappingStrategy(ColumnMappingStrategy):
 
-    def process_column(self, column_name, column_value, finding):
-        if column_name.lower() == 'description' and column_value is not None:
-            finding.description = column_value
-        elif self.successor is not None:
-            self.successor.process_column(column_name, column_value, finding)
+    def __init__(self):
+        self.mapped_column = 'description'
+        super(DescriptionColumnMappingStrategy, self).__init__()
+
+    def map_column_value(self, finding, column_value):
+        finding.description = column_value
 
 
 class MitigationColumnMappingStrategy(ColumnMappingStrategy):
 
-    def process_column(self, column_name, column_value, finding):
-        if column_name.lower() == 'mitigation' and column_value is not None:
-            finding.mitigation = column_value
-        elif self.successor is not None:
-            self.successor.process_column(column_name, column_value, finding)
+    def __init__(self):
+        self.mapped_column = 'mitigation'
+        super(MitigationColumnMappingStrategy, self).__init__()
+
+    def map_column_value(self, finding, column_value):
+        finding.mitigation = column_value
 
 
 class ImpactColumnMappingStrategy(ColumnMappingStrategy):
 
-    def process_column(self, column_name, column_value, finding):
-        if column_name.lower() == 'impact' and column_value is not None:
-            finding.impact = column_value
-        elif self.successor is not None:
-            self.successor.process_column(column_name, column_value, finding)
+    def __init__(self):
+        self.mapped_column = 'impact'
+        super(ImpactColumnMappingStrategy, self).__init__()
+
+    def map_column_value(self, finding, column_value):
+        finding.impact = column_value
 
 
 class ReferencesColumnMappingStrategy(ColumnMappingStrategy):
 
-    def process_column(self, column_name, column_value, finding):
-        if column_name.lower() == 'references' and column_value is not None:
-            finding.references = column_value
-        elif self.successor is not None:
-            self.successor.process_column(column_name, column_value, finding)
+    def __init__(self):
+        self.mapped_column = 'references'
+        super(ReferencesColumnMappingStrategy, self).__init__()
+
+    def map_column_value(self, finding, column_value):
+        finding.references = column_value
 
 
 class ActiveColumnMappingStrategy(ColumnMappingStrategy):
 
-    def process_column(self, column_name, column_value, finding):
-        if column_name.lower() == 'active' and column_value is not None:
-            if column_value.lower() == 'true':
-                finding.active = True
-            elif column_value.lower() == 'false':
-                finding.active = False
-        elif self.successor is not None:
-            self.successor.process_column(column_name, column_value, finding)
+    def __init__(self):
+        self.mapped_column = 'active'
+        super(ActiveColumnMappingStrategy, self).__init__()
+
+    def map_column_value(self, finding, column_value):
+        finding.active = self.evaluate_bool_value(column_value)
 
 
 class VerifiedColumnMappingStrategy(ColumnMappingStrategy):
 
-    def process_column(self, column_name, column_value, finding):
-        if column_name.lower() == 'verified' and column_value is not None:
-            if column_value.lower() == 'true':
-                finding.verified = True
-            elif column_value.lower() == 'false':
-                finding.verified = False
-        elif self.successor is not None:
-            self.successor.process_column(column_name, column_value, finding)
+    def __init__(self):
+        self.mapped_column = 'verified'
+        super(VerifiedColumnMappingStrategy, self).__init__()
+
+    def map_column_value(self, finding, column_value):
+        finding.verified = self.evaluate_bool_value(column_value)
 
 
 class FalsePositiveColumnMappingStrategy(ColumnMappingStrategy):
 
-    def process_column(self, column_name, column_value, finding):
-        if column_name.lower() == 'falsepositive' and column_value is not None:
-            if column_value.lower() == 'true':
-                finding.false_p = True
-            elif column_value.lower() == 'false':
-                finding.false_p = False
-        elif self.successor is not None:
-            self.successor.process_column(column_name, column_value, finding)
+    def __init__(self):
+        self.mapped_column = 'falsepositive'
+        super(FalsePositiveColumnMappingStrategy, self).__init__()
+
+    def map_column_value(self, finding, column_value):
+        finding.false_p = self.evaluate_bool_value(column_value)
 
 
 class DuplicateColumnMappingStrategy(ColumnMappingStrategy):
 
-    def process_column(self, column_name, column_value, finding):
-        if column_name.lower() == 'duplicate' and column_value is not None:
-            if column_value.lower() == 'true':
-                finding.duplicate = True
-            elif column_value.lower() == 'false':
-                finding.duplicate = False
-        elif self.successor is not None:
-            self.successor.process_column(column_name, column_value, finding)
+    def __init__(self):
+        self.mapped_column = 'duplicate'
+        super(DuplicateColumnMappingStrategy, self).__init__()
+
+    def map_column_value(self, finding, column_value):
+        finding.duplicate = self.evaluate_bool_value(column_value)
 
 
 class GenericFindingUploadCsvParser(object):
