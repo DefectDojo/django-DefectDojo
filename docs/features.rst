@@ -395,6 +395,9 @@ DefectDojo has the ability to import reports from other security tools.  Current
 6. Checkmarx Detailed XML Report
 7. AppSpider Vulnerabilities Summary XML Report (VulnerabilitiesSummary.xml)
 8. Arachni Scanner JSON Report
+9. Visual Code Grepper XML or CSV
+10. OWASP Dependency Check XML
+11. Generic Findings in CSV format
 
 
 The importers analyze each report and create new Findings for each item reported.  DefectDojo collapses duplicate
@@ -408,6 +411,48 @@ deltas between the original and new import and automatically add or mitigate fin
 
 .. image:: /_static/imp_2.png
     :alt: Re-Import Form
+
+Bulk import of findings can be done using a CSV file with the following column headers:
+
+Date: ::
+    Date of the finding in mm/dd/yyyy format.
+
+Title: ::
+    Title of the finding
+
+CweId: ::
+    Cwe identifier, must be an integer value.
+
+Url: ::
+    Url associated with the finding.
+
+Severity: ::
+    Severity of the finding.  Must be one of Info, Low, Medium, High, or Critical.
+
+Description: ::
+    Description of the finding.  Can be multiple lines if enclosed in double quotes.
+
+Mitigation: ::
+    Possible Mitigations for the finding.  Can be multiple lines if enclosed in double quotes.
+
+Impact: ::
+    Detailed impact of the finding.  Can be multiple lines if enclosed in double quotes.
+
+References: ::
+    References associated with the finding.  Can be multiple lines if enclosed in double quotes.
+
+Active: ::
+    Indicator if the finding is active.  Must be empty, True or False
+
+Verified: ::
+    Indicator if the finding has been verified.  Must be empty, True, or False
+
+FalsePositive: ::
+    Indicator if the finding is a false positive.  Must be empty, True, or False
+
+Duplicate: ::
+    Indicator if the finding is a duplicate.  Must be empty, True, or False
+
 
 Port Scans
 ----------
