@@ -936,6 +936,15 @@ class DeleteEndpointForm(forms.ModelForm):
                    'product')
 
 
+class EndpointMetaDataForm(forms.ModelForm):
+    value = forms.CharField(widget=forms.Textarea(attrs={}),
+                            required=True)
+
+    class Meta:
+        model = CustomField
+        exclude = ['field_type', 'content_type', 'default_value', 'is_required', 'field_choices']
+
+
 class NoteForm(forms.ModelForm):
     entry = forms.CharField(max_length=2400, widget=forms.Textarea,
                             label='Notes:')
