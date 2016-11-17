@@ -96,7 +96,7 @@ class EndpointMetaDataTestUtil:
 
 class TestAddEndpointMetaData(TestCase):
 
-    add_meta_data_url = 'endpoint/1/add_endpoint_meta_data'
+    add_meta_data_url = 'endpoint/1/add_meta_data'
 
     def setUp(self):
         p = Product()
@@ -177,7 +177,7 @@ class TestAddEndpointMetaData(TestCase):
 
 class TestEditEndpointMetaData(TestCase):
 
-    edit_meta_data_url = 'endpoint/1/edit_endpoint_meta_data'
+    edit_meta_data_url = 'endpoint/1/edit_meta_data'
 
     def setUp(self):
         p = Product()
