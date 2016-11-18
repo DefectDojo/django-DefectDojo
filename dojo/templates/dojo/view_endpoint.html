@@ -36,6 +36,11 @@
                                     </a>
                                 </li>
                                 <li role="presentation">
+                                    <a href="{% url 'add_endpoint_meta_data' endpoint.id %}">
+                                        <i class="fa fa-list-alt"></i> Add Metadata
+                                    </a>
+                                </li>
+                                <li role="presentation">
                                     <a href="{% url 'endpoint_report' endpoint.id %}">
                                         <i class="fa fa-file-text-o"></i> Report
                                     </a>
@@ -159,6 +164,39 @@
                 {% for tag in endpoint.tags %}
                     <span class="label label-primary">{{ tag }}</span>
                 {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    {% if endpoint_metadata %}
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default table-responsive">
+                    <div class="panel-heading">
+                        <h4>Additional Information
+                            <div class="btn-group pull-right">
+                                <a title="Edit Information" class="btn btn-sm btn-primary"
+                                   href="{% url 'edit_endpoint_meta_data' endpoint.id %}">
+                                    <span class="fa fa-pencil-square-o"></span>
+                                </a>
+                                <a title="Add Information" class="btn btn-sm btn-primary"
+                                   href="{% url 'add_endpoint_meta_data' endpoint.id %}">
+                                    <span class="fa fa-plus"></span>
+                                </a>
+                            </div>
+                        </h4>
+                    </div>
+
+                    <div class="panel-body">
+                        {% for key, value in endpoint_metadata.items %}
+                            <div class="col-md-2 centered">
+                                <b>{{ key }}</b><br/>
+                                {{ value }}
+                                <br/>&nbsp;
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
         </div>
     {% endif %}
