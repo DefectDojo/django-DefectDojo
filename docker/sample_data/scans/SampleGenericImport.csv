@@ -1,0 +1,4 @@
+Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified,FalsePositive,Duplicate
+11/7/16,Potential XSS Vulnerability,79,,High,"FileName: default.aspx.csDescription: Potential XSS VulnerabilityLine:18Code Line: Response.Write(output);",None,,,TRUE,FALSE,FALSE,FALSE
+11/7/16,Potential SQL Injection,112,,High,"FileName: UserData.csDescription: Potential SQL Injection VulnerabilityLine:42Code Line: strSQL=""SELECT * FROM users WHERE user_id="" + request_user_id",None,,Test Reference,TRUE,FALSE,TRUE,FALSE
+11/7/16,Weak Cryptography,327,https://myserver.mycompany.com/Login.aspx,Low,"Url:https://myserver.mycompany.com/Login.aspxDescription: Using weak crypto algorithm",None,Potential impact,,TRUE,FALSE,FALSE,TRUE
