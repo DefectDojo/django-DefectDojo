@@ -113,6 +113,7 @@ else
     echo
     cd /django-DefectDojo/
     source venv/bin/activate
+    pip freeze
     python manage.py runserver 0.0.0.0:$PORT & celery -A dojo worker -l info --concurrency 3
     echo
   fi

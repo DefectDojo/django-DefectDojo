@@ -1,0 +1,202 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--XML Export of VCG Results for directory: C:\Projects\WebGoat.Net. Scanned for C# security issues.-->
+<CodeIssueCollection>
+  <CodeIssue>
+    <Priority>6</Priority>
+    <Severity>Suspicious Comment</Severity>
+    <Title>Comment Indicates Potentially Unfinished Code</Title>
+    <Description>The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.</Description>
+    <FileName>C:\Projects\WebGoat.Net\Core\Cart.cs</FileName>
+    <Line>16</Line>
+    <CodeLine>TODO: Refactor this. Use LINQ with aggregation to get SUM.</CodeLine>
+    <Checked>False</Checked>
+    <CheckColour>LawnGreen</CheckColour>
+  </CodeIssue>
+  <CodeIssue>
+    <Priority>6</Priority>
+    <Severity>Suspicious Comment</Severity>
+    <Title>Comment Indicates Potentially Unfinished Code</Title>
+    <Description>The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.</Description>
+    <FileName>C:\Projects\WebGoat.Net\Core\Cart.cs</FileName>
+    <Line>41</Line>
+    <CodeLine>TODO: Add ability to delete an orderDetail and to change quantities.</CodeLine>
+    <Checked>False</Checked>
+    <CheckColour>LawnGreen</CheckColour>
+  </CodeIssue>
+  <CodeIssue>
+    <Priority>6</Priority>
+    <Severity>Suspicious Comment</Severity>
+    <Title>Comment Indicates Potentially Unfinished Code</Title>
+    <Description>The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.</Description>
+    <FileName>C:\Projects\WebGoat.Net\Core\Order.cs</FileName>
+    <Line>27</Line>
+    <CodeLine>TODO: Shipments and Payments should be singular.  Like customer.</CodeLine>
+    <Checked>False</Checked>
+    <CheckColour>LawnGreen</CheckColour>
+  </CodeIssue>
+  <CodeIssue>
+    <Priority>6</Priority>
+    <Severity>Suspicious Comment</Severity>
+    <Title>Comment Indicates Potentially Unfinished Code</Title>
+    <Description>The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.</Description>
+    <FileName>C:\Projects\WebGoat.Net\Infrastructure\BlogEntryRepository.cs</FileName>
+    <Line>18</Line>
+    <CodeLine>TODO: should put this in a try/catch</CodeLine>
+    <Checked>False</Checked>
+    <CheckColour>LawnGreen</CheckColour>
+  </CodeIssue>
+  <CodeIssue>
+    <Priority>6</Priority>
+    <Severity>Suspicious Comment</Severity>
+    <Title>Comment Indicates Potentially Unfinished Code</Title>
+    <Description>The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.</Description>
+    <FileName>C:\Projects\WebGoat.Net\Infrastructure\BlogResponseRepository.cs</FileName>
+    <Line>18</Line>
+    <CodeLine>TODO: should put this in a try/catch</CodeLine>
+    <Checked>False</Checked>
+    <CheckColour>LawnGreen</CheckColour>
+  </CodeIssue>
+  <CodeIssue>
+    <Priority>6</Priority>
+    <Severity>Suspicious Comment</Severity>
+    <Title>Comment Indicates Potentially Unfinished Code</Title>
+    <Description>The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.</Description>
+    <FileName>C:\Projects\WebGoat.Net\Infrastructure\CustomerRepository.cs</FileName>
+    <Line>41</Line>
+    <CodeLine>TODO: Add try/catch logic</CodeLine>
+    <Checked>False</Checked>
+    <CheckColour>LawnGreen</CheckColour>
+  </CodeIssue>
+  <CodeIssue>
+    <Priority>6</Priority>
+    <Severity>Suspicious Comment</Severity>
+    <Title>Comment Indicates Potentially Unfinished Code</Title>
+    <Description>The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.</Description>
+    <FileName>C:\Projects\WebGoat.Net\Infrastructure\ShipperRepository.cs</FileName>
+    <Line>37</Line>
+    <CodeLine>/ TODO: Use the check digit algorithms to make it realistic.</CodeLine>
+    <Checked>False</Checked>
+    <CheckColour>LawnGreen</CheckColour>
+  </CodeIssue>
+  <CodeIssue>
+    <Priority>4</Priority>
+    <Severity>Standard</Severity>
+    <Title>URL Request Gets Path from Variable</Title>
+    <Description>The URL used in the HTTP request appears to be loaded from a variable. Check the code manually to ensure that malicious URLs cannot be submitted by an attacker.</Description>
+    <FileName>C:\Projects\WebGoat.Net\WebSite\PackageTracking.aspx.cs</FileName>
+    <Line>25</Line>
+    <CodeLine>                    Response.Redirect(Order.GetPackageTrackingUrl(_carrier, _trackingNumber));</CodeLine>
+    <Checked>False</Checked>
+    <CheckColour>LawnGreen</CheckColour>
+  </CodeIssue>
+  <CodeIssue>
+    <Priority>4</Priority>
+    <Severity>Standard</Severity>
+    <Title>URL Request Gets Path from Variable</Title>
+    <Description>The URL used in the HTTP request appears to be loaded from a variable. Check the code manually to ensure that malicious URLs cannot be submitted by an attacker.</Description>
+    <FileName>C:\Projects\WebGoat.Net\WebSite\PackageTracking.aspx.cs</FileName>
+    <Line>72</Line>
+    <CodeLine>            Response.Redirect(Order.GetPackageTrackingUrl(_carrier, _trackingNumber));</CodeLine>
+    <Checked>False</Checked>
+    <CheckColour>LawnGreen</CheckColour>
+  </CodeIssue>
+  <CodeIssue>
+    <Priority>6</Priority>
+    <Severity>Suspicious Comment</Severity>
+    <Title>Comment Indicates Potentially Unfinished Code</Title>
+    <Description>The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.</Description>
+    <FileName>C:\Projects\WebGoat.Net\WebSite\Product.aspx.cs</FileName>
+    <Line>58</Line>
+    <CodeLine>TODO: Put this in try/catch as well</CodeLine>
+    <Checked>False</Checked>
+    <CheckColour>LawnGreen</CheckColour>
+  </CodeIssue>
+  <CodeIssue>
+    <Priority>6</Priority>
+    <Severity>Suspicious Comment</Severity>
+    <Title>Comment Indicates Potentially Unfinished Code</Title>
+    <Description>The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.</Description>
+    <FileName>C:\Projects\WebGoat.Net\WebSite\Product.aspx.cs</FileName>
+    <Line>59</Line>
+    <CodeLine>TODO: Feels like this is too much business logic.  Should be moved to OrderDetail constructor?</CodeLine>
+    <Checked>False</Checked>
+    <CheckColour>LawnGreen</CheckColour>
+  </CodeIssue>
+  <CodeIssue>
+    <Priority>3</Priority>
+    <Severity>Medium</Severity>
+    <Title>.NET Debugging Enabled</Title>
+    <Description>The application is configured to return .NET debug information. This can provide an attacker with useful information and should not be used in a live application.</Description>
+    <FileName>C:\Projects\WebGoat.Net\WebSite\Web.config</FileName>
+    <Line>25</Line>
+    <CodeLine/>
+    <Checked>False</Checked>
+    <CheckColour>LawnGreen</CheckColour>
+  </CodeIssue>
+  <CodeIssue>
+    <Priority>4</Priority>
+    <Severity>Standard</Severity>
+    <Title>URL Request Gets Path from Variable</Title>
+    <Description>The URL used in the HTTP request appears to be loaded from a variable. Check the code manually to ensure that malicious URLs cannot be submitted by an attacker.</Description>
+    <FileName>C:\Projects\WebGoat.Net\WebSite\Account\Register.aspx.cs</FileName>
+    <Line>35</Line>
+    <CodeLine>            Response.Redirect(continueUrl);</CodeLine>
+    <Checked>False</Checked>
+    <CheckColour>LawnGreen</CheckColour>
+  </CodeIssue>
+  <CodeIssue>
+    <Priority>6</Priority>
+    <Severity>Suspicious Comment</Severity>
+    <Title>Comment Indicates Potentially Unfinished Code</Title>
+    <Description>The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.</Description>
+    <FileName>C:\Projects\WebGoat.Net\WebSite\Account\ViewAccountInfo.aspx.cs</FileName>
+    <Line>22</Line>
+    <CodeLine>ContactName is being repurposed as the foreign key to the user table.  Kludgey, I know.</CodeLine>
+    <Checked>False</Checked>
+    <CheckColour>LawnGreen</CheckColour>
+  </CodeIssue>
+  <CodeIssue>
+    <Priority>6</Priority>
+    <Severity>Suspicious Comment</Severity>
+    <Title>Comment Indicates Potentially Unfinished Code</Title>
+    <Description>The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.</Description>
+    <FileName>C:\Projects\WebGoat.Net\WebSite\Checkout\Checkout.aspx.cs</FileName>
+    <Line>102</Line>
+    <CodeLine>TODO: Throws an error if we don't set the date. Try to set it to null or something.</CodeLine>
+    <Checked>False</Checked>
+    <CheckColour>LawnGreen</CheckColour>
+  </CodeIssue>
+  <CodeIssue>
+    <Priority>6</Priority>
+    <Severity>Suspicious Comment</Severity>
+    <Title>Comment Indicates Potentially Unfinished Code</Title>
+    <Description>The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.</Description>
+    <FileName>C:\Projects\WebGoat.Net\WebSite\Checkout\Checkout.aspx.cs</FileName>
+    <Line>145</Line>
+    <CodeLine>TODO: Uncommenting this line causes EF to throw exception when creating the order.</CodeLine>
+    <Checked>False</Checked>
+    <CheckColour>LawnGreen</CheckColour>
+  </CodeIssue>
+  <CodeIssue>
+    <Priority>6</Priority>
+    <Severity>Suspicious Comment</Severity>
+    <Title>Comment Indicates Potentially Unfinished Code</Title>
+    <Description>The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.</Description>
+    <FileName>C:\Projects\WebGoat.Net\XtremelyEvilWebApp\StealCookies.aspx.cs</FileName>
+    <Line>19</Line>
+    <CodeLine>TODO: Mail the cookie in real time.</CodeLine>
+    <Checked>False</Checked>
+    <CheckColour>LawnGreen</CheckColour>
+  </CodeIssue>
+  <CodeIssue>
+    <Priority>3</Priority>
+    <Severity>Medium</Severity>
+    <Title>.NET Debugging Enabled</Title>
+    <Description>The application is configured to return .NET debug information. This can provide an attacker with useful information and should not be used in a live application.</Description>
+    <FileName>C:\Projects\WebGoat.Net\XtremelyEvilWebApp\Web.config</FileName>
+    <Line>6</Line>
+    <CodeLine/>
+    <Checked>False</Checked>
+    <CheckColour>LawnGreen</CheckColour>
+  </CodeIssue>
+</CodeIssueCollection>

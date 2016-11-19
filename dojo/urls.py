@@ -6,7 +6,7 @@ from tastypie.api import Api
 from dojo import views
 from dojo.ajax import StubFindingResource as ajax_stub_finding_resource
 from dojo.api import UserResource, ProductResource, EngagementResource, \
-    TestResource, FindingResource, ScanSettingsResource, ScanResource, StubFindingResource
+    TestResource, FindingResource, ScanSettingsResource, ScanResource, StubFindingResource, FindingTemplateResource
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
 from dojo.endpoint.urls import urlpatterns as endpoint_urls
 from dojo.engagement.urls import urlpatterns as eng_urls
@@ -34,6 +34,7 @@ v1_api.register(ProductResource())
 v1_api.register(EngagementResource())
 v1_api.register(TestResource())
 v1_api.register(FindingResource())
+v1_api.register(FindingTemplateResource())
 v1_api.register(ScanSettingsResource())
 v1_api.register(ScanResource())
 v1_api.register(StubFindingResource())

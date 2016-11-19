@@ -21,6 +21,8 @@ from dojo.forms import ProductForm, EngForm, DeleteProductForm, ProductMetaDataF
 from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test
 from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data
 from custom_field.models import CustomFieldValue, CustomField
+from tagging.models import Tag
+from tagging.utils import get_tag_list
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -255,8 +257,9 @@ def new_product(request):
         form = ProductForm(request.POST)
         if form.is_valid():
             product = form.save()
-            tags = form.cleaned_data['tags']
-            product.tags = tags
+            tags = request.POST.getlist('tags')
+            t = ", ".join(tags)
+            product.tags = t
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Product added successfully.',
@@ -276,8 +279,9 @@ def edit_product(request, pid):
         form = ProductForm(request.POST, instance=prod)
         if form.is_valid():
             form.save()
-            tags = form.cleaned_data['tags']
-            prod.tags = tags
+            tags = request.POST.getlist('tags')
+            t = ", ".join(tags)
+            prod.tags = t
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Product updated successfully.',
@@ -285,8 +289,8 @@ def edit_product(request, pid):
             return HttpResponseRedirect(reverse('view_product', args=(pid,)))
     else:
         form = ProductForm(instance=prod,
-                           initial={'auth_users': prod.authorized_users.all()})
-        form.initial['tags'] = ", ".join([tag.name for tag in prod.tags])
+                           initial={'auth_users': prod.authorized_users.all(),
+                                    'tags': get_tag_list(Tag.objects.get_for_object(prod))})
     add_breadcrumb(parent=prod, title="Edit", top_level=False, request=request)
 
     return render(request,

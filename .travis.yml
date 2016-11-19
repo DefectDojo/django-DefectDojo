@@ -22,6 +22,7 @@ before_install:
   - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH ; fi`
   - docker build -t $REPO:${TRAVIS_COMMIT::8} .
   - docker run -e DOJO_ADMIN_USER=$DOJO_ADMIN_USER -e DOJO_ADMIN_PASSWORD=$DOJO_ADMIN_PASSWORD --name dojo -d -p 127.0.0.1:8000:8000 $REPO:${TRAVIS_COMMIT::8} bash /django-DefectDojo/docker/docker-startup.bash
+  - sleep 15 #allow dojo time to startup
   - docker logs dojo
   - docker run -d --name zap --link dojo -p 127.0.0.1:8080:8080 -i owasp/zap2docker-stable zap.sh -daemon -host 0.0.0.0 -port 8080 -config api.disablekey=true
   - docker ps -a
@@ -54,7 +55,7 @@ script:
 notifications:
   slack:
     rooms:
-      secure: OTk8Gda8xbQiDD5EEsOUmCbb4zmJvN1WXO2M00QHtTVQgxpLEVHF6cm3Z3bRNtD4H+GLlM8/Lmz8EU13ehOsdppmU1yY5To+GKES350YjMWWyEOcX0mhQ2C4SbuDPTFqfadANKS6+CQM62PLMGDGWcDI/ofF0G7VARw4rM3F/E4=
+      secure: nPXwHnPcf37yGkCkLimx5UmY9LTtOHL0lw88cAQeXCNNjeZuhS2jS5xGUOwwp3SrsYE4tZhD0WuVEHGDcyIhmBZh9Qqk3NHKz+tQDD/e0GE/8uTTfR1Eh+pq1YOIcLYzzKA2khmJSeHqqDriVZZoWpn67oHtrui9FYesapZ8AX0=
     on_success: change
     on_failure: always
     on_start: never
