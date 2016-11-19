@@ -1,18 +1,21 @@
 # see tastypie documentation at http://django-tastypie.readthedocs.org/en
+from django.core.exceptions import ImproperlyConfigured
 from tastypie import fields
-from tastypie.authentication import ApiKeyAuthentication, MultiAuthentication, SessionAuthentication
+from tastypie.authentication import ApiKeyAuthentication
 from tastypie.authorization import Authorization
 from tastypie.authorization import DjangoAuthorization
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
 from tastypie.exceptions import Unauthorized
+from tastypie.fields import RelatedField
 from tastypie.resources import ModelResource
 from tastypie.serializers import Serializer
 from tastypie.validation import CleanedDataFormValidation
+from tastypie.validation import FormValidation
 
-from dojo.models import Product, Engagement, Test, Finding, \
-    User, ScanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance, Finding_Template
 from dojo.forms import ProductForm, EngForm2, TestForm, \
     ScanSettingsForm, FindingForm, StubFindingForm, FindingTemplateForm
+from dojo.models import Product, Engagement, Test, Finding, \
+    User, ScanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance, Finding_Template
 
 """
     Setup logging for the api
@@ -25,6 +28,48 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 """
+
+
+class ModelFormValidation(FormValidation):
+    """
+    Override tastypie's standard ``FormValidation`` since this does not care
+    about URI to PK conversion for ``ToOneField`` or ``ToManyField``.
+    """
+
+    resource = ModelResource
+
+    def __init__(self, **kwargs):
+        if not 'resource' in kwargs:
+            raise ImproperlyConfigured("You must provide a 'resource' to 'ModelFormValidation' classes.")
+
+        self.resource = kwargs.pop('resource')
+
+        super(ModelFormValidation, self).__init__(**kwargs)
+
+    def _get_pk_from_resource_uri(self, resource_field, resource_uri):
+        """ Return the pk of a resource URI """
+        base_resource_uri = resource_field.to().get_resource_uri()
+        if not resource_uri.startswith(base_resource_uri):
+            raise Exception("Couldn't match resource_uri {0} with {1}".format(
+                                        resource_uri, base_resource_uri))
+        before, after = resource_uri.split(base_resource_uri)
+        return after[:-1] if after.endswith('/') else after
+
+    def form_args(self, bundle):
+        rsc = self.resource()
+        kwargs = super(ModelFormValidation, self).form_args(bundle)
+
+        for name, rel_field in rsc.fields.items():
+            data = kwargs['data']
+            if not issubclass(rel_field.__class__, RelatedField):
+                continue # Not a resource field
+            if name in data and data[name] is not None:
+                resource_uri = (data[name] if rel_field.full is False
+                                            else data[name]['resource_uri'])
+                pk = self._get_pk_from_resource_uri(rel_field, resource_uri)
+                kwargs['data'][name] = pk
+
+        return kwargs
 
 
 class BaseModelResource(ModelResource):
@@ -281,7 +326,10 @@ class ProductResource(BaseModelResource):
         authentication = DojoApiKeyAuthentication()
         authorization = UserProductsOnlyAuthorization()
         serializer = Serializer(formats=['json'])
-        validation = CleanedDataFormValidation(form_class=ProductForm)
+
+        @property
+        def validation(self):
+            return ModelFormValidation(form_class=ProductForm, resource=ProductResource)
 
     def dehydrate(self, bundle):
         try:
@@ -330,7 +378,10 @@ class EngagementResource(BaseModelResource):
         authentication = DojoApiKeyAuthentication()
         authorization = DjangoAuthorization()
         serializer = Serializer(formats=['json'])
-        validation = CleanedDataFormValidation(form_class=EngForm2)
+
+        @property
+        def validation(self):
+            return ModelFormValidation(form_class=EngForm2, resource=EngagementResource)
 
     def dehydrate(self, bundle):
         if bundle.obj.eng_type is not None:
@@ -380,7 +431,10 @@ class TestResource(BaseModelResource):
         authentication = DojoApiKeyAuthentication()
         authorization = DjangoAuthorization()
         serializer = Serializer(formats=['json'])
-        validation = CleanedDataFormValidation(form_class=TestForm)
+
+        @property
+        def validation(self):
+            return ModelFormValidation(form_class=TestForm, resource=TestResource)
 
     def dehydrate(self, bundle):
         bundle.data['test_type'] = bundle.obj.test_type
@@ -448,7 +502,10 @@ class FindingResource(BaseModelResource):
         authentication = DojoApiKeyAuthentication()
         authorization = DjangoAuthorization()
         serializer = Serializer(formats=['json'])
-        validation = CleanedDataFormValidation(form_class=FindingForm)
+
+        @property
+        def validation(self):
+            return ModelFormValidation(form_class=FindingForm, resource=FindingResource)
 
     def dehydrate(self, bundle):
         engagement = Engagement.objects.select_related('product'). \
@@ -505,7 +562,10 @@ class FindingTemplateResource(BaseModelResource):
         authentication = DojoApiKeyAuthentication()
         authorization = DjangoAuthorization()
         serializer = Serializer(formats=['json'])
-        validation = CleanedDataFormValidation(form_class=FindingTemplateForm)
+
+        @property
+        def validation(self):
+            return ModelFormValidation(form_class=FindingTemplateForm, resource=FindingTemplateResource)
 
 
 class StubFindingResource(BaseModelResource):
@@ -531,7 +591,10 @@ class StubFindingResource(BaseModelResource):
         authentication = DojoApiKeyAuthentication()
         authorization = DjangoAuthorization()
         serializer = Serializer(formats=['json'])
-        validation = CleanedDataFormValidation(form_class=StubFindingForm)
+
+        @property
+        def validation(self):
+            return ModelFormValidation(form_class=StubFindingForm, resource=StubFindingResource)
 
     def dehydrate(self, bundle):
         engagement = Engagement.objects.select_related('product'). \
@@ -576,7 +639,10 @@ class ScanSettingsResource(BaseModelResource):
         authentication = DojoApiKeyAuthentication()
         authorization = UserScanSettingsAuthorization()
         serializer = Serializer(formats=['json'])
-        validation = CleanedDataFormValidation(form_class=ScanSettingsForm)
+
+        @property
+        def validation(self):
+            return ModelFormValidation(form_class=ScanSettingsForm, resource=ScanSettingsResource)
 
 
 """
