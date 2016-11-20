@@ -622,7 +622,9 @@ class Finding(models.Model):
                                                             title=self.title).exclude(id=self.id)
                 total_findings = eng_findings_cwe | eng_findings_title
                 for find in total_findings:
-                    if set(find.endpoints.all()) == set(self.endpoints.all()):
+                    list1 = self.endpoints.all()
+                    list2 = find.endpoints.all()
+                    if all(x in list2 for x in list1):
                         find.duplicate = True
                         super(Finding, find).save(*args, **kwargs)
 
