@@ -554,24 +554,24 @@ JIRA Integration
 DefectDojo's JIRA integration is bidirectional. You may push findings to JIRA and share comments. If an issue is closed in JIRA it will automatically be closed in Dojo. 
 
 
-.. Preparing Jira
+Preparing Jira
  Enabling the Webhook
-1. Visit https://<**YOUR JIRA URL**>/plugins/servlet/webhooks
-2. Click 'Create a Webhook'
-3. For the field labeled 'URL' enter: https://<**YOUR DOJO DOMAIN**>/webhook
-4. Under 'Comments' enable 'Created'. Under Issue enable 'Updated'.
+ 1. Visit https://<**YOUR JIRA URL**>/plugins/servlet/webhooks
+ 2. Click 'Create a Webhook'
+ 3. For the field labeled 'URL' enter: https://<**YOUR DOJO DOMAIN**>/webhook
+ 4. Under 'Comments' enable 'Created'. Under Issue enable 'Updated'.
 
-.. Configurations in Dojo
-1. In dojo/settings.py set ENABLE_JIRA = True.
+Configurations in Dojo
+ 1. In dojo/settings.py set ENABLE_JIRA = True.
 
-.. Adding JIRA to Dojo
-1. Click 'JIRA' from the left hand menu.
-2. Select 'Add Configuration' from the drop-down.
-3. To obtain the 'open status key' and 'closed status key' visit https://<**YOUR JIRA URL**>/rest/api/latest/issue/<**ANY VALID ISSUE KEY**>/transitions?expand=transitions.fields
-4. The 'id' for 'Todo' should be filled in as the 'open status key'
-5. The 'id' for 'Done' should be filled in as the 'closed status key'
-6. To obtain 'epic name id' visit: https://<**YOUR JIRA URL**>/secure/admin/ViewCustomFields.jspa
-7. Click on the cog next to 'Epic Name' and select view.
-8. The numeric value for 'epic name id' will be displayed in the URL
-9. **Note**: dojojira uses the same celery functionality as reports. Make sure the celery runner is setup correclty as described: http://defectdojo.readthedocs.io/en/latest/features.html#reports
+Adding JIRA to Dojo
+ 1. Click 'JIRA' from the left hand menu.
+ 2. Select 'Add Configuration' from the drop-down.
+ 3. To obtain the 'open status key' and 'closed status key' visit https://<**YOUR JIRA URL**>/rest/api/latest/issue/<**ANY VALID ISSUE KEY**>/transitions?expand=transitions.fields
+ 4. The 'id' for 'Todo' should be filled in as the 'open status key'
+ 5. The 'id' for 'Done' should be filled in as the 'closed status key'
+ 6. To obtain 'epic name id' visit: https://<**YOUR JIRA URL**>/secure/admin/ViewCustomFields.jspa
+ 7. Click on the cog next to 'Epic Name' and select view.
+ 8. The numeric value for 'epic name id' will be displayed in the URL
+ 9. **Note**: dojojira uses the same celery functionality as reports. Make sure the celery runner is setup correclty as described: http://defectdojo.readthedocs.io/en/latest/features.html#reports
 
