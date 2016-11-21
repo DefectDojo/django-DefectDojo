@@ -151,7 +151,8 @@ def pic_token(context, image, size):
 
 @register.simple_tag
 def severity_value(value):
-    if settings.S_FINDING_SEVERITY_NAMING:
-        return Finding.get_numerical_severity(value)
+    if hasattr(settings, 'S_FINDING_SEVERITY_NAMING'):
+        if settings.S_FINDING_SEVERITY_NAMING:
+            return Finding.get_numerical_severity(value)
 
     return value
