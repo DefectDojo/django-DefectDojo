@@ -555,7 +555,7 @@ DefectDojo's JIRA integration is bidirectional. You may push findings to JIRA an
 
 
 Preparing Jira
- Enabling the Webhook
+Enabling the Webhook
  1. Visit https://<**YOUR JIRA URL**>/plugins/servlet/webhooks
  2. Click 'Create a Webhook'
  3. For the field labeled 'URL' enter: https://<**YOUR DOJO DOMAIN**>/webhook
