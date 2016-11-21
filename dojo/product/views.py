@@ -1,6 +1,7 @@
 # #  product
 import calendar as tcalendar
 import logging
+import sys
 from collections import OrderedDict
 from datetime import datetime, date, timedelta
 from math import ceil
@@ -17,10 +18,11 @@ from django.contrib.contenttypes.models import ContentType
 from pytz import timezone
 
 from dojo.filters import ProductFilter, ProductFindingFilter
-from dojo.forms import ProductForm, EngForm, DeleteProductForm, ProductMetaDataForm
-from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test
+from dojo.forms import ProductForm, EngForm, DeleteProductForm, ProductMetaDataForm, JIRAPKeyForm, JIRAFindingForm
+from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey
 from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data
 from custom_field.models import CustomFieldValue, CustomField
+from  dojo.tasks import add_epic_task
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -109,7 +111,7 @@ def view_product(request, pid):
                                                duplicate=False,
                                                out_of_scope=False).order_by("date")
 
-    week_date = end_date - timedelta(days=7)  # seven days and newer are considered "new"
+    week_date = end_date - timedelta(days=7)  # seven days and /newnewer are considered "new"
 
     new_verified_findings = Finding.objects.filter(test__engagement__product=prod,
                                                    date__range=[week_date, end_date],
@@ -252,7 +254,10 @@ def view_product(request, pid):
 @user_passes_test(lambda u: u.is_staff)
 def new_product(request):
     if request.method == 'POST':
-        form = ProductForm(request.POST)
+        form = ProductForm(request.POST, instance=Product())
+        if hasattr(settings, 'ENABLE_JIRA'):
+            if settings.ENABLE_JIRA:
+                jform = JIRAPKeyForm(request.POST, instance=JIRA_PKey())
         if form.is_valid():
             product = form.save()
             tags = form.cleaned_data['tags']
@@ -261,17 +266,42 @@ def new_product(request):
                                  messages.SUCCESS,
                                  'Product added successfully.',
                                  extra_tags='alert-success')
+            if hasattr(settings, 'ENABLE_JIRA'):
+                if settings.ENABLE_JIRA:
+                    if jform.is_valid():
+                        jira_pkey = jform.save(commit=False)
+                        if jira_pkey.conf is not None:
+                            jira_pkey.product = product
+                            jira_pkey.save()
+                            messages.add_message(request,
+                                                 messages.SUCCESS,
+                                                 'JIRA information added successfully.',
+                                                 extra_tags='alert-success')
+
             return HttpResponseRedirect(reverse('view_product', args=(product.id,)))
     else:
         form = ProductForm()
+        if hasattr(settings, 'ENABLE_JIRA'):
+            if settings.ENABLE_JIRA:
+                jform = JIRAPKeyForm()
+        else:
+            jform = None
     add_breadcrumb(title="New Product", top_level=False, request=request)
     return render(request, 'dojo/new_product.html',
-                  {'form': form})
+                  {'form': form,
+                   'jform': jform})
 
 
 @user_passes_test(lambda u: u.is_staff)
 def edit_product(request, pid):
     prod = Product.objects.get(pk=pid)
+    jira_enabled = True
+    jira_inst = None
+    try:
+        jira_inst = JIRA_PKey.objects.get(product=prod)
+    except:
+        jira_enabled = False
+        pass
     if request.method == 'POST':
         form = ProductForm(request.POST, instance=prod)
         if form.is_valid():
@@ -282,16 +312,39 @@ def edit_product(request, pid):
                                  messages.SUCCESS,
                                  'Product updated successfully.',
                                  extra_tags='alert-success')
+            if hasattr(settings, 'ENABLE_JIRA'):
+                if settings.ENABLE_JIRA:
+                    if jira_enabled:
+                        jform = JIRAPKeyForm(request.POST, instance=jira_inst)
+                    else:
+                        jform = JIRAPKeyForm(request.POST)
+                        new_conf = jform.save(commit=False)
+                        new_conf.product_id = pid
+                        new_conf.save()
+                        messages.add_message(request,
+                                             messages.SUCCESS,
+                                             'JIRA information updated successfully.',
+                                             extra_tags='alert-success')
+
             return HttpResponseRedirect(reverse('view_product', args=(pid,)))
     else:
         form = ProductForm(instance=prod,
                            initial={'auth_users': prod.authorized_users.all()})
         form.initial['tags'] = ", ".join([tag.name for tag in prod.tags])
+        if hasattr(settings, 'ENABLE_JIRA'):
+            if settings.ENABLE_JIRA:
+                if jira_enabled:
+                    jform = JIRAPKeyForm(instance=jira_inst)
+                else:
+                    jform = JIRAPKeyForm()
+        else:
+            jform = None
     add_breadcrumb(parent=prod, title="Edit", top_level=False, request=request)
 
     return render(request,
                   'dojo/edit_product.html',
                   {'form': form,
+                   'jform': jform,
                    'product': prod,
                    })
 
@@ -369,6 +422,17 @@ def new_eng_for_app(request, pid):
             else:
                 new_eng.progress = 'other'
             new_eng.save()
+            #if 'jiraform' in request.POST:
+            jform = JIRAFindingForm(request.POST, prefix='jiraform',
+                                    enabled=JIRA_PKey.objects.get(product=prod).push_all_issues)
+            if jform.is_valid():
+                print >>sys.stderr, 'jira form is valid'
+                add_epic_task.delay(new_eng, jform.cleaned_data.get('push_to_jira'))
+            else:
+                print >>sys.stderr, 'jira form is NOT valid'
+            #else:
+            #    print >>sys.stderr, 'no prefix is found'
+
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Engagement added successfully.',
@@ -379,11 +443,16 @@ def new_eng_for_app(request, pid):
                 return HttpResponseRedirect(reverse('view_engagement', args=(new_eng.id,)))
     else:
         form = EngForm(initial={})
+        if hasattr(settings, 'ENABLE_JIRA'):
+            if settings.ENABLE_JIRA:
+                if JIRA_PKey.objects.filter(product=prod).count() != 0:
+                    jform = JIRAFindingForm(prefix='jiraform', enabled=JIRA_PKey.objects.get(product=prod).push_all_issues)
 
     add_breadcrumb(parent=prod, title="New Engagement", top_level=False, request=request)
 
     return render(request, 'dojo/new_eng.html',
                   {'form': form, 'pid': pid,
+                   'jform': jform
                    })
 
 

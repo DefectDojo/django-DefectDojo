@@ -9,6 +9,11 @@
     {% endif %}
     <form class="form-horizontal" method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
+        {%  if jform %}
+                <h4> JIRA </h4>
+                <hr>
+                {% include "dojo/form_fields.html" with form=jform %}
+            {% endif %}
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
                 <input class="btn btn-primary" type="submit" name="_Add Tests" value="Add Tests"/>

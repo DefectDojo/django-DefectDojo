@@ -23,11 +23,12 @@ from dojo.filters import OpenFindingFilter, \
     OpenFingingSuperFilter, AcceptedFingingSuperFilter, \
     ClosedFingingSuperFilter, TemplateFindingFilter
 from dojo.forms import NoteForm, CloseFindingForm, FindingForm, PromoteFindingForm, FindingTemplateForm, \
-    DeleteFindingTemplateForm, FindingImageFormSet
+    DeleteFindingTemplateForm, FindingImageFormSet, JIRAFindingForm
 from dojo.models import Product_Type, Finding, Notes, \
     Risk_Acceptance, BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, \
-    FindingImageAccessToken
+    FindingImageAccessToken, JIRA_Issue, JIRA_PKey, JIRA_Conf
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper
+from dojo.tasks import add_issue_task, update_issue_task, add_comment_task
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -138,6 +139,17 @@ def closed_findings(request):
 def view_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     user = request.user
+    try:
+        jissue = JIRA_Issue.objects.get(finding=finding)
+    except:
+        jissue = None
+        pass
+    try:
+        jpkey = JIRA_PKey.objects.get(product=finding.test.engagement.product)
+        jconf = jpkey.conf
+    except:
+        jconf = None
+        pass
     if user.is_staff or user in finding.test.engagement.product.authorized_users.all():
         pass  # user is authorized for this product
     else:
@@ -156,6 +168,7 @@ def view_finding(request, fid):
             finding.last_reviewed = new_note.date
             finding.last_reviewed_by = user
             finding.save()
+            add_comment_task(finding, new_note)
             form = NoteForm()
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -177,6 +190,8 @@ def view_finding(request, fid):
     return render(request, 'dojo/view_finding.html',
                   {'finding': finding,
                    'burp_request': burp_request,
+                   'jissue': jissue,
+                   'jconf': jconf,
                    'burp_response': burp_response,
                    'user': user, 'notes': notes, 'form': form})
 
@@ -252,9 +267,20 @@ def delete_finding(request, fid):
 @user_passes_test(lambda u: u.is_staff)
 def edit_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
+    old_status = finding.status()
     form = FindingForm(instance=finding)
     form.initial['tags'] = ", ".join([tag.name for tag in finding.tags])
     form_error = False
+    try:
+        jissue = JIRA_Issue.objects.get(finding=finding)
+        enabled = True
+    except:
+        enabled = False
+    pass
+    if hasattr(settings, 'ENABLE_JIRA'):
+        if settings.ENABLE_JIRA:
+            if JIRA_PKey.objects.filter(product=finding.test.engagement.product) != 0:
+                jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
     if request.method == 'POST':
         form = FindingForm(request.POST, instance=finding)
         if form.is_valid():
@@ -279,7 +305,15 @@ def edit_finding(request, fid):
             tags = form.cleaned_data['tags']
             new_finding.tags = tags
             new_finding.save()
-
+            if 'jiraform' in request.POST:
+               jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=enabled)
+               if jform.is_valid():
+                    try:
+                        jissue = JIRA_Issue.objects.get(finding=new_finding)
+                        update_issue_task.delay(new_finding, old_status, jform.cleaned_data.get('push_to_jira'))
+                    except:
+                        add_issue_task.delay(new_finding, jform.cleaned_data.get('push_to_jira'))
+                        pass
             tags = form.cleaned_data['tags']
             new_finding.tags = tags
 
@@ -400,6 +434,15 @@ def promote_to_finding(request, fid):
     finding = get_object_or_404(Stub_Finding, id=fid)
     test = finding.test
     form_error = False
+    jira_available = False
+    if hasattr(settings, 'ENABLE_JIRA'):
+         if settings.ENABLE_JIRA:
+             if JIRA_PKey.objects.filter(product=test.engagement.product) != 0:
+                jform = JIRAFindingForm(request.POST, prefix='jiraform',
+                                         enabled=JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues)
+                jira_available = True
+    else:
+         jform = None
     form = PromoteFindingForm(initial={'title': finding.title,
                                        'date': finding.date,
                                        'severity': finding.severity,
@@ -427,6 +470,11 @@ def promote_to_finding(request, fid):
             new_finding.save()
 
             finding.delete()
+            if 'jiraform' in request.POST:
+                jform = JIRAFindingForm(request.POST, prefix='jiraform',
+                                        enabled=JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues)
+                if jform.is_valid():
+                    add_issue_task.delay(new_finding, jform.cleaned_data.get('push_to_jira'))
 
             messages.add_message(request,
                                  messages.SUCCESS,

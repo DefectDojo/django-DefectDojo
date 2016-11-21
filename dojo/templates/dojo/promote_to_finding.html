@@ -12,6 +12,9 @@
     <form class="form-horizontal" action="{% url 'promote_to_finding' stub_finding.id %}" method="post">
         {% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
+        {%  if jform %}
+                {% include "dojo/form_fields.html" with form=jform %}
+            {% endif %}
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
                 <input class="btn btn-primary" type="submit" value="Promote Finding"/>&nbsp;&nbsp;
