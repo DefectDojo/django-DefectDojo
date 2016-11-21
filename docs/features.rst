@@ -553,19 +553,18 @@ JIRA Integration
 
 DefectDojo's JIRA integration is bidirectional. You may push findings to JIRA and share comments. If an issue is closed in JIRA it will automatically be closed in Dojo. 
 
-## Installation
 
-### Preparing Jira
-#### Enabling the Webhook
+.. Preparing Jira
+ Enabling the Webhook
 1. Visit https://<**YOUR JIRA URL**>/plugins/servlet/webhooks
 2. Click 'Create a Webhook'
 3. For the field labeled 'URL' enter: https://<**YOUR DOJO DOMAIN**>/webhook
 4. Under 'Comments' enable 'Created'. Under Issue enable 'Updated'.
 
-###Configurations in Dojo
+.. Configurations in Dojo
 1. In dojo/settings.py set ENABLE_JIRA = True.
 
-###Adding JIRA to DOJO
+.. Adding JIRA to Dojo
 1. Click 'JIRA' from the left hand menu.
 2. Select 'Add Configuration' from the drop-down.
 3. To obtain the 'open status key' and 'closed status key' visit https://<**YOUR JIRA URL**>/rest/api/latest/issue/<**ANY VALID ISSUE KEY**>/transitions?expand=transitions.fields
