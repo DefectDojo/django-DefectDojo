@@ -861,12 +861,12 @@ class JIRA_Issue(models.Model):
     engagement = models.ForeignKey(Engagement, null=True, blank=True)
 
 class JIRA_PKey(models.Model):
-    project_key = models.CharField(max_length=200)
+    project_key = models.CharField(max_length=200, blank=True)
     product = models.ForeignKey(Product)
     conf = models.ForeignKey(JIRA_Conf, verbose_name="JIRA Configuration", null=True, blank=True)
-    push_all_issues = models.BooleanField(default=True)
-    enable_engagement_epic_mapping = models.BooleanField(default=True)
-    push_notes = models.BooleanField(default=True)
+    push_all_issues = models.BooleanField(default=True, blank=True)
+    enable_engagement_epic_mapping = models.BooleanField(default=True, blank=True)
+    push_notes = models.BooleanField(default=True, blank=True)
 
 
 # Register for automatic logging to database

@@ -16,7 +16,7 @@ from django.template.defaultfilters import pluralize
 from pytz import timezone
 from jira import JIRA
 
-from dojo.models import Finding, Scan, Test, Engagement, Stub_Finding, Finding_Template, Report, Product, JIRA_PKey, JIRA_Issue,
+from dojo.models import Finding, Scan, Test, Engagement, Stub_Finding, Finding_Template, Report, Product, JIRA_PKey, JIRA_Issue
 
 localtz = timezone(settings.TIME_ZONE)
 

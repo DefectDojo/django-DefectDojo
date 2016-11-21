@@ -9,6 +9,8 @@
             {% csrf_token %}
             {% include "dojo/form_fields.html" with form=form %}
             {%  if jform %}
+                <h3> JIRA </h3>
+                <hr>
                 {% include "dojo/form_fields.html" with form=jform %}
             {% endif %}
             <div class="form-group">

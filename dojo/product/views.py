@@ -1,6 +1,7 @@
 # #  product
 import calendar as tcalendar
 import logging
+import sys
 from collections import OrderedDict
 from datetime import datetime, date, timedelta
 from math import ceil
@@ -282,7 +283,7 @@ def new_product(request):
         form = ProductForm()
         if hasattr(settings, 'ENABLE_JIRA'):
             if settings.ENABLE_JIRA:
-                jform = ProductForm()
+                jform = JIRAPKeyForm()
         else:
             jform = None
     add_breadcrumb(title="New Product", top_level=False, request=request)
@@ -414,11 +415,6 @@ def new_eng_for_app(request, pid):
     if request.method == 'POST':
         form = EngForm(request.POST)
         if form.is_valid():
-            if 'jiraform' in request.POST:
-                jform = JIRAFindingForm(request.POST, prefix='jiraform',
-                                        enabled=JIRA_PKey.objects.get(product=prod).push_all_issues)
-                if jform.is_valid():
-                    add_epic_task.delay(new_eng, jform.cleaned_data.get('push_to_jira'))
             new_eng = form.save(commit=False)
             new_eng.product = prod
             if new_eng.threat_model:
@@ -426,6 +422,17 @@ def new_eng_for_app(request, pid):
             else:
                 new_eng.progress = 'other'
             new_eng.save()
+            #if 'jiraform' in request.POST:
+            jform = JIRAFindingForm(request.POST, prefix='jiraform',
+                                    enabled=JIRA_PKey.objects.get(product=prod).push_all_issues)
+            if jform.is_valid():
+                print >>sys.stderr, 'jira form is valid'
+                add_epic_task.delay(new_eng, jform.cleaned_data.get('push_to_jira'))
+            else:
+                print >>sys.stderr, 'jira form is NOT valid'
+            #else:
+            #    print >>sys.stderr, 'no prefix is found'
+
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Engagement added successfully.',
@@ -438,13 +445,14 @@ def new_eng_for_app(request, pid):
         form = EngForm(initial={})
         if hasattr(settings, 'ENABLE_JIRA'):
             if settings.ENABLE_JIRA:
-                if JIRA_PKey.objects.filter(product=prod) != 0:
+                if JIRA_PKey.objects.filter(product=prod).count() != 0:
                     jform = JIRAFindingForm(prefix='jiraform', enabled=JIRA_PKey.objects.get(product=prod).push_all_issues)
 
     add_breadcrumb(parent=prod, title="New Engagement", top_level=False, request=request)
 
     return render(request, 'dojo/new_eng.html',
                   {'form': form, 'pid': pid,
+                   'jform': jform
                    })
 
 

@@ -1059,7 +1059,6 @@ class JIRAForm(forms.ModelForm):
 
 class JIRAPKeyForm(forms.ModelForm):
     conf = forms.ModelChoiceField(queryset=JIRA_Conf.objects.all(), label='JIRA Configuration')
-
     class Meta:
         model = JIRA_PKey
         exclude = ['product']
@@ -1070,5 +1069,6 @@ class JIRAFindingForm(forms.Form):
         self.enabled = kwargs.pop('enabled')
         super(JIRAFindingForm, self).__init__(*args, **kwargs)
         self.fields['push_to_jira'] = forms.BooleanField(initial=self.enabled)
+        self.fields['push_to_jira'].required=False
 
     push_to_jira = forms.BooleanField(required=False)

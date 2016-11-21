@@ -1,6 +1,7 @@
 # #  tests
 
 import logging
+import sys
 from datetime import datetime
 
 from django.conf import settings
@@ -198,11 +199,10 @@ def add_findings(request, tid):
             new_finding.save()
             new_finding.endpoints = form.cleaned_data['endpoints']
             new_finding.save()
-            if 'jiraform' in request.POST:
-                jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=enabled)
-                if jform.is_valid():
-                    add_issue_task.delay(new_finding, jform.cleaned_data.get('push_to_jira'))
-
+            jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=enabled)
+            if jform.is_valid():
+                print >>sys.stderr, 'jform is valid'
+                add_issue_task.delay(new_finding, jform.cleaned_data.get('push_to_jira'))
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Finding added successfully.',

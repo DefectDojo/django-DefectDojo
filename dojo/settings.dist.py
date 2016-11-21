@@ -159,6 +159,7 @@ ROOT_URLCONF = 'dojo.urls'
 LOGIN_URL = '/login'
 LOGIN_EXEMPT_URLS = (
     r'^%sstatic/' % URL_PREFIX,
+    r'^%swebhook/' % URL_PREFIX,
     r'^%smetrics/all$' % URL_PREFIX,
     r'^%smetrics$' % URL_PREFIX,
     r'^%smetrics/product/type/(?P<mtype>\d+)$' % URL_PREFIX,
