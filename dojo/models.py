@@ -640,6 +640,15 @@ class Finding(models.Model):
                 if not val and field in bigfields:
                     setattr(self, field, "No %s given" % field)
 
+    def severity_display(self):
+        if hasattr(settings, 'S_FINDING_SEVERITY_NAMING'):
+            if settings.S_FINDING_SEVERITY_NAMING:
+                return self.numerical_severity
+            else:
+                return self.severity
+        else:
+            return self.numerical_severity
+
     def get_breadcrumbs(self):
         bc = self.test.get_breadcrumbs()
         bc += [{'title': self.__unicode__(),
