@@ -13,7 +13,7 @@ ENABLE_DEDUPLICATION = False
 
 # True will display S0, S1, S2, ect in most places
 # False will display Critical, High, Medium, etc
-S_FINDING_SEVERITY_NAMING = True
+S_FINDING_SEVERITY_NAMING = False
 
 URL_PREFIX = ''
 
