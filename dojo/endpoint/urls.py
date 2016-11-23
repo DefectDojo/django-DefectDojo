@@ -18,4 +18,8 @@ urlpatterns = [
         name='delete_endpoint'),
     url(r'^endpoints/add$', views.add_product_endpoint,
         name='add_product_endpoint'),
+    url(r'^endpoint/(?P<eid>\d+)/add_meta_data$', views.add_meta_data,
+        name='add_endpoint_meta_data'),
+    url(r'^endpoint/(?P<eid>\d+)/edit_meta_data$', views.edit_meta_data,
+        name='edit_endpoint_meta_data'),
 ]
