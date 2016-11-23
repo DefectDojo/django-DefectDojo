@@ -4,15 +4,27 @@ from tastypie.authentication import ApiKeyAuthentication, MultiAuthentication, S
 from tastypie.authorization import Authorization
 from tastypie.authorization import DjangoAuthorization
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
-from tastypie.exceptions import Unauthorized
-from tastypie.resources import ModelResource
+from tastypie.exceptions import Unauthorized, ImmediateHttpResponse, NotFound
+from tastypie.http import HttpCreated
+from tastypie.resources import ModelResource, Resource
 from tastypie.serializers import Serializer
-from tastypie.validation import CleanedDataFormValidation
+from tastypie.validation import CleanedDataFormValidation, Validation
+from django.core.exceptions import ObjectDoesNotExist
+from pytz import timezone
+from django.conf import settings
 
 from dojo.models import Product, Engagement, Test, Finding, \
-    User, ScanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance, Finding_Template
+    User, ScanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance, \
+    Finding_Template, Test_Type, Development_Environment, \
+    BurpRawRequestResponse, Endpoint
 from dojo.forms import ProductForm, EngForm2, TestForm, \
-    ScanSettingsForm, FindingForm, StubFindingForm, FindingTemplateForm
+    ScanSettingsForm, FindingForm, StubFindingForm, FindingTemplateForm, \
+    ImportScanForm, SEVERITY_CHOICES
+from dojo.tools.factory import import_parser_factory
+
+from datetime import datetime
+
+localtz = timezone(settings.TIME_ZONE)
 
 """
     Setup logging for the api
@@ -52,6 +64,19 @@ class BaseModelResource(ModelResource):
                     res_field.blank = True
         return fields
 
+
+class MultipartResource(object):
+    def deserialize(self, request, data, format=None):
+        if not format:
+            format = request.Meta.get('CONTENT_TYPE', 'application/json')
+        if format == 'application/x-www-form-urlencoded':
+            return request.POST
+        if format.startswith('multipart'):
+            data = request.POST.copy()
+            data.update(request.FILES)
+            return data
+
+        return super(MultiPartResource, self).deserialize(request, data, format)
 
 # Authentication class - this only allows for header auth, no url parms allowed
 # like parent class.
@@ -641,3 +666,207 @@ class ScanResource(BaseModelResource):
         authentication = DojoApiKeyAuthentication()
         authorization = UserScanAuthorization()
         serializer = Serializer(formats=['json'])
+
+
+"""
+    /api/v1/importscan/
+    POST
+    Expects
+"""
+class ImportScanObject(object):
+    def __init__(self, initial=None):
+        self.__dict__['_data'] = {}
+        if initial:
+            self.update(initial)
+
+    def __getattr__(self, name):
+        return self._data.get(name, None)
+
+    def __setattr__(self, name, value):
+        self.__dict__['_data'][name] = value
+
+    def update(self, other):
+        for k in other:
+            self.__setattr__(k, other[k])
+
+    def to_dict(self):
+        return self._data
+
+class ImportScanValidation(Validation):
+    def is_valid(self, bundle, request=None):
+        if not bundle.data:
+            return {'__all__': 'You didn\'t seem to pass anything in.'}
+
+        errors = {}
+
+        # Make sure file is present
+        if 'file' not in bundle.data:
+            errors.setdefault('file', []).append('You must pass a file in to be imported')
+
+        # Make sure scan_date matches required format
+        if 'scan_date' in bundle.data:
+            try:
+                datetime.strptime(bundle.data['scan_date'], '%m/%d/%Y')
+            except ValueError:
+                errors.setdefault('scan_date', []).append("Incorrect scan_date format, should be MM/DD/YYYY")
+
+        # Make sure scan_type and minimum_severity have valid options
+        if 'eid' not in bundle.data:
+            errors.setdefault('eid', []).append('eid must be given')
+        else:
+            # verify the eid is valid
+            try:
+                Engagement.objects.get(id=bundle.data['eid'])
+            except ObjectDoesNotExist:
+                errors.setdefault('eid', []).append('A valid eid must be supplied')
+        scan_type_list = list(map(lambda x: x[0], ImportScanForm.SCAN_TYPE_CHOICES))
+        if 'scan_type' in bundle.data:
+            if bundle.data['scan_type'] not in scan_type_list:
+                errors.setdefault('scan_type', []).append('scan_type must be one of the following: ' + ', '.join(scan_type_list))
+        else:
+            errors.setdefault('scan_type', []).append('A scan_type must be given so we know how to import the scan file.')
+        severity_list = list(map(lambda x: x[0], SEVERITY_CHOICES))
+        if 'minimum_severity' in bundle.data:
+            if bundle.data['minimum_severity'] not in severity_list:
+                errors.setdefault('minimum_severity', []).append('minimum_severity must be one of the following: ' + ', '.join(severity_list))
+
+        # Make sure active and verified are booleans
+        if 'active' in bundle.data:
+            if bundle.data['active'] in ['false', 'False', '0']:
+                bundle.data['active'] = False
+            elif bundle.data['active'] in ['true', 'True', '1']:
+                bundle.data['active'] = True
+
+            if not isinstance(bundle.data['active'], bool):
+                errors.setdefault('active', []).append('active must be a boolean')
+        if 'verified' in bundle.data:
+            if bundle.data['verified'] in ['false', 'False', '0']:
+                bundle.data['verified'] = False
+            elif bundle.data['verified'] in ['true', 'True', '1']:
+                bundle.data['verified'] = True
+
+            if not isinstance(bundle.data['verified'], bool):
+                errors.setdefault('verified', []).append('verified must be a boolean')
+
+        return errors
+
+class ImportScanResource(MultipartResource, Resource):
+    scan_date = fields.DateTimeField(attribute='scan_date')
+    minimum_severity = fields.CharField(attribute='minimum_severity')
+    active = fields.BooleanField(attribute='active')
+    verified = fields.BooleanField(attribute='verified')
+    scan_type = fields.CharField(attribute='scan_type')
+    tags = fields.CharField(attribute='tags')
+    file = fields.FileField(attribute='file')
+    eid = fields.IntegerField(attribute='eid')
+
+    class Meta:
+        resource_name = 'importscan'
+        fields = ['scan_date', 'minimum_severity', 'active', 'verified', 'scan_type', 'tags', 'file']
+        list_allowed_methods = ['post']
+        detail_allowed_methods = []
+        include_resource_uri = True
+
+        authentication = DojoApiKeyAuthentication()
+        authorization = DjangoAuthorization()
+        validation = ImportScanValidation()
+        object_class = ImportScanObject
+
+    def hydrate(self, bundle):
+        if 'scan_date' not in bundle.data:
+            bundle.data['scan_date'] = datetime.now().strftime("%m/%d/%Y")
+        if 'minimum_severity' not in bundle.data:
+            bundle.data['minimum_severity'] = "Info"
+        if 'active' not in bundle.data:
+            bundle.data['active'] = True
+        if 'verified' not in bundle.data:
+            bundle.data['verified'] = True
+
+        bundle.obj.__setattr__('engagement', Engagement.objects.get(id=bundle.data['eid']))
+
+        return bundle
+
+    def detail_uri_kwargs(self, bundle_or_obj):
+        kwargs = {}
+        return kwargs
+
+    def obj_create(self, bundle, **kwargs):
+        bundle.obj = ImportScanObject(initial=kwargs)
+        self.is_valid(bundle)
+        if bundle.errors:
+            raise ImmediateHttpResponse(response=self.error_response(bundle.request, bundle.errors))
+        bundle = self.full_hydrate(bundle)
+
+        print(bundle.obj.to_dict())
+
+        # We now have all the options we need and will just replicate the process in views.py
+        tt, t_created = Test_Type.objects.get_or_create(name=bundle.data['scan_type'])
+        # will save in development environment
+        environment, env_created = Development_Environment.objects.get_or_create(name="Development")
+        scan_date = datetime.strptime(bundle.data['scan_date'], '%m/%d/%Y')
+        t = Test(engagement=bundle.obj.__getattr__('engagement'), test_type=tt, target_start=scan_date,
+                 target_end=scan_date, environment=environment, percent_complete=100)
+        t.full_clean()
+        t.save()
+        t.tags = bundle.data['tags']
+
+        try:
+            parser = import_parser_factory(bundle.data['file'], t)
+        except ValueError:
+            raise NotFound("Parser ValueError")
+
+        try:
+            for item in parser.items:
+                sev = item.severity
+                if sev == 'Information' or sev == 'Informational':
+                    sev = 'Info'
+
+                item.severity = sev
+
+                if Finding.SEVERITIES[sev] > Finding.SEVERITIES[bundle.data['minimum_severity']]:
+                    continue
+
+                item.test = t
+                item.date = t.target_start
+                item.reporter = bundle.request.user
+                item.last_reviewed = datetime.now(tz=localtz)
+                item.last_reviewed_by = bundle.request.user
+                item.active = bundle.data['active']
+                item.verified = bundle.data['verified']
+                item.save()
+
+                if hasattr(item, 'unsaved_req_resp') and len(item.unsaved_req_resp) > 0:
+                    for req_resp in item.unsaved_req_resp:
+                        burp_rr = BurpRawRequestResponse(finding=item,
+                                                         burpRequestBase64=req_resp["req"],
+                                                         burpResponseBase64=req_resp["resp"],
+                                                         )
+                        burp_rr.clean()
+                        burp_rr.save()
+
+                if item.unsaved_request is not None and item.unsaved_response is not None:
+                    burp_rr = BurpRawRequestResponse(finding=item,
+                                                     burpRequestBase64=item.unsaved_request,
+                                                     burpResponseBase64=item.unsaved_response,
+                                                     )
+                    burp_rr.clean()
+                    burp_rr.save()
+
+                for endpoint in item.unsaved_endpoints:
+                    ep, created = Endpoint.objects.get_or_create(protocol=endpoint.protocol,
+                                                                 host=endpoint.host,
+                                                                 path=endpoint.path,
+                                                                 query=endpoint.query,
+                                                                 fragment=endpoint.fragment,
+                                                                 product=t.engagement.product)
+
+                    item.endpoints.add(ep)
+
+                if item.unsaved_tags is not None:
+                    item.tags = item.unsaved_tags
+
+        except SyntaxError:
+            raise NotFound("Parser SyntaxError")
+
+        # Everything executed fine. We successfully imported the scan.
+        raise ImmediateHttpResponse(self.create_response(bundle.request, bundle,response_class = HttpCreated))
