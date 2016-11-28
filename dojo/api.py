@@ -846,6 +846,8 @@ class ImportScanResource(MultipartResource, Resource):
             bundle.data['active'] = True
         if 'verified' not in bundle.data:
             bundle.data['verified'] = True
+        if 'tags' not in bundle.data:
+            bundle.data['tags'] = ""
 
         bundle.obj.__setattr__('engagement', Engagement.objects.get(id=bundle.data['eid']))
 
