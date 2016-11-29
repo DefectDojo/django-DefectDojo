@@ -1,5 +1,6 @@
 # see tastypie documentation at http://django-tastypie.readthedocs.org/en
 from django.core.exceptions import ImproperlyConfigured
+from django.core.urlresolvers import resolve, get_script_prefix
 from tastypie import fields
 from tastypie.fields import RelatedField
 from tastypie.authentication import ApiKeyAuthentication
@@ -736,8 +737,10 @@ class ScanResource(BaseModelResource):
 """
     /api/v1/importscan/
     POST
-    Expects
+    Expects file, scan_date, scan_type, tags, active, engagement
 """
+
+# Create an Object that will store all the information sent to the endpoint
 class ImportScanObject(object):
     def __init__(self, initial=None):
         self.__dict__['_data'] = {}
@@ -757,6 +760,7 @@ class ImportScanObject(object):
     def to_dict(self):
         return self._data
 
+# The default form validation was buggy so I implemented a custom validation class
 class ImportScanValidation(Validation):
     def is_valid(self, bundle, request=None):
         if not bundle.data:
@@ -771,19 +775,19 @@ class ImportScanValidation(Validation):
         # Make sure scan_date matches required format
         if 'scan_date' in bundle.data:
             try:
-                datetime.strptime(bundle.data['scan_date'], '%m/%d/%Y')
+                datetime.strptime(bundle.data['scan_date'], '%Y/%m/%d')
             except ValueError:
-                errors.setdefault('scan_date', []).append("Incorrect scan_date format, should be MM/DD/YYYY")
+                errors.setdefault('scan_date', []).append("Incorrect scan_date format, should be YYYY/MM/DD")
 
         # Make sure scan_type and minimum_severity have valid options
-        if 'eid' not in bundle.data:
-            errors.setdefault('eid', []).append('eid must be given')
+        if 'engagement' not in bundle.data:
+            errors.setdefault('engagement', []).append('engagement must be given')
         else:
-            # verify the eid is valid
+            # verify the engagement is valid
             try:
-                Engagement.objects.get(id=bundle.data['eid'])
-            except ObjectDoesNotExist:
-                errors.setdefault('eid', []).append('A valid eid must be supplied')
+                ImportScanResource.get_pk_from_uri(uri=bundle.data['engagement'])
+            except NotFound:
+                errors.setdefault('engagement', []).append('A valid engagement must be supplied. Ex. /api/v1/engagements/1/')
         scan_type_list = list(map(lambda x: x[0], ImportScanForm.SCAN_TYPE_CHOICES))
         if 'scan_type' in bundle.data:
             if bundle.data['scan_type'] not in scan_type_list:
@@ -823,7 +827,22 @@ class ImportScanResource(MultipartResource, Resource):
     scan_type = fields.CharField(attribute='scan_type')
     tags = fields.CharField(attribute='tags')
     file = fields.FileField(attribute='file')
-    eid = fields.IntegerField(attribute='eid')
+    engagement = fields.CharField(attribute='engagement')
+
+    @staticmethod
+    def get_pk_from_uri(uri):
+        prefix = get_script_prefix()
+        chomped_uri = uri
+
+        if prefix and chomped_uri.startswith(prefix):
+            chomped_uri = chomped_uri[len(prefix)-1:]
+
+        try:
+            view, args, kwargs = resolve(chomped_uri)
+        except Resolver404:
+            raise NotFound("The URL provided '%s' was not a link to a valid resource." % uri)
+
+        return kwargs['pk']
 
     class Meta:
         resource_name = 'importscan'
@@ -839,7 +858,7 @@ class ImportScanResource(MultipartResource, Resource):
 
     def hydrate(self, bundle):
         if 'scan_date' not in bundle.data:
-            bundle.data['scan_date'] = datetime.now().strftime("%m/%d/%Y")
+            bundle.data['scan_date'] = datetime.now().strftime("%Y/%m/%d")
         if 'minimum_severity' not in bundle.data:
             bundle.data['minimum_severity'] = "Info"
         if 'active' not in bundle.data:
@@ -849,7 +868,8 @@ class ImportScanResource(MultipartResource, Resource):
         if 'tags' not in bundle.data:
             bundle.data['tags'] = ""
 
-        bundle.obj.__setattr__('engagement', Engagement.objects.get(id=bundle.data['eid']))
+        bundle.obj.__setattr__('engagement_obj',
+                               Engagement.objects.get(id=self.get_pk_from_uri(bundle.data['engagement'])))
 
         return bundle
 
@@ -864,14 +884,12 @@ class ImportScanResource(MultipartResource, Resource):
             raise ImmediateHttpResponse(response=self.error_response(bundle.request, bundle.errors))
         bundle = self.full_hydrate(bundle)
 
-        print(bundle.obj.to_dict())
-
         # We now have all the options we need and will just replicate the process in views.py
         tt, t_created = Test_Type.objects.get_or_create(name=bundle.data['scan_type'])
         # will save in development environment
         environment, env_created = Development_Environment.objects.get_or_create(name="Development")
-        scan_date = datetime.strptime(bundle.data['scan_date'], '%m/%d/%Y')
-        t = Test(engagement=bundle.obj.__getattr__('engagement'), test_type=tt, target_start=scan_date,
+        scan_date = datetime.strptime(bundle.data['scan_date'], '%Y/%m/%d')
+        t = Test(engagement=bundle.obj.__getattr__('engagement_obj'), test_type=tt, target_start=scan_date,
                  target_end=scan_date, environment=environment, percent_complete=100)
         t.full_clean()
         t.save()
@@ -936,4 +954,6 @@ class ImportScanResource(MultipartResource, Resource):
             raise NotFound("Parser SyntaxError")
 
         # Everything executed fine. We successfully imported the scan.
-        raise ImmediateHttpResponse(self.create_response(bundle.request, bundle,response_class = HttpCreated))
+        res = TestResource()
+        uri = res.get_resource_uri(t)
+        raise ImmediateHttpResponse(HttpCreated(location = uri))
