@@ -49,7 +49,7 @@ that should give you an idea of how to use DefectDojo for your own team.
 
 # Defect Dojo Client API's
 
-- DefectDojo Python API: :code:`pip install defectdojo_api` or clone the repository: :code:`git clone https://github.com/aaronweaver/defectdojo_api`
+- DefectDojo Python API: `pip install defectdojo_api` or clone the [repository](https://github.com/aaronweaver/defectdojo_api).
 
 # Getting Involved
 
