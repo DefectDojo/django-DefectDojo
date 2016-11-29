@@ -47,6 +47,10 @@ terminology of DefectDojo, and the
 installation. We've also created some example [workflows](./doc/workflows.md)
 that should give you an idea of how to use DefectDojo for your own team.
 
+# Defect Dojo Client API's
+
+- DefectDojo Python API: :code:`pip install defectdojo_api` or clone the repository: :code:`git clone https://github.com/aaronweaver/defectdojo_api`
+
 # Getting Involved
 
 Realtime discussion is done in the OWASP Slack Channel, #defectdojo. [Get Access.](https://owasp.herokuapp.com/)
