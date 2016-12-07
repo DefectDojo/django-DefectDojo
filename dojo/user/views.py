@@ -12,8 +12,8 @@ from pytz import timezone
 from tastypie.models import ApiKey
 
 from dojo.filters import UserFilter
-from dojo.forms import DojoUserForm, AddDojoUserForm, DeleteUserForm, APIKeyForm
-from dojo.models import Product, Dojo_User
+from dojo.forms import DojoUserForm, AddDojoUserForm, DeleteUserForm, APIKeyForm, UserContactInfoForm
+from dojo.models import Product, Dojo_User, UserContactInfo
 from dojo.utils import get_page_items, add_breadcrumb, get_alerts
 
 localtz = timezone(settings.TIME_ZONE)
@@ -87,21 +87,36 @@ def alerts(request):
 
 def view_profile(request):
     user = get_object_or_404(Dojo_User, pk=request.user.id)
+    try:
+        user_contact = UserContactInfo.objects.get(user=user)
+    except UserContactInfo.DoesNotExist:
+        user_contact = None
+
     form = DojoUserForm(instance=user)
+    if user_contact is None:
+        contact_form = UserContactInfoForm()
+    else:
+        contact_form = UserContactInfoForm(instance=user_contact)
     if request.method == 'POST':
         form = DojoUserForm(request.POST, instance=user)
-        if form.is_valid():
+        contact_form = UserContactInfoForm(request.POST, instance=user_contact)
+        if form.is_valid() and contact_form.is_valid():
             form.save()
+            contact = contact_form.save(commit=False)
+            contact.user = user
+            contact.save()
+
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Profile updated successfully.',
                                  extra_tags='alert-success')
-    add_breadcrumb(title="Engineer Profile - " + user.get_full_name(), top_level=True, request=request)
+    add_breadcrumb(title="User Profile - " + user.get_full_name(), top_level=True, request=request)
     return render(request, 'dojo/profile.html', {
         'name': 'Engineer Profile',
         'metric': False,
         'user': user,
-        'form': form})
+        'form': form,
+        'contact_form': contact_form})
 
 
 def change_password(request):
@@ -146,17 +161,22 @@ def user(request):
 @user_passes_test(lambda u: u.is_staff)
 def add_user(request):
     form = AddDojoUserForm()
+    contact_form = UserContactInfoForm()
     user = None
 
     if request.method == 'POST':
         form = AddDojoUserForm(request.POST)
-        if form.is_valid():
+        contact_form = UserContactInfoForm(request.POST)
+        if form.is_valid() and contact_form.is_valid():
             user = form.save(commit=False)
             user.set_unusable_password()
             user.is_staff = False
             user.is_superuser = False
             user.active = True
             user.save()
+            contact = contact_form.save(commit=False)
+            contact.user = user
+            contact.save()
             if 'authorized_products' in form.cleaned_data and len(form.cleaned_data['authorized_products']) > 0:
                 for p in form.cleaned_data['authorized_products']:
                     p.authorized_users.add(user)
@@ -175,6 +195,7 @@ def add_user(request):
     return render(request, "dojo/add_user.html", {
         'name': 'Add User',
         'form': form,
+        'contact_form': contact_form,
         'to_add': True})
 
 
@@ -183,16 +204,31 @@ def edit_user(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     authed_products = Product.objects.filter(authorized_users__in=[user])
     form = AddDojoUserForm(instance=user, initial={'authorized_products': authed_products})
+    try:
+        user_contact = UserContactInfo.objects.get(user=user)
+    except UserContactInfo.DoesNotExist:
+        user_contact = None
+    if user_contact is None:
+        contact_form = UserContactInfoForm()
+    else:
+        contact_form = UserContactInfoForm(instance=user_contact)
 
     if request.method == 'POST':
         form = AddDojoUserForm(request.POST, instance=user, initial={'authorized_products': authed_products})
-        if form.is_valid():
+        if user_contact is None:
+            contact_form = UserContactInfoForm(request.POST)
+        else:
+            contact_form = UserContactInfoForm(request.POST, instance=user_contact)
+
+        if form.is_valid() and contact_form.is_valid():
             form.save()
             if 'authorized_products' in form.cleaned_data and len(form.cleaned_data['authorized_products']) > 0:
                 for p in form.cleaned_data['authorized_products']:
                     p.authorized_users.add(user)
                     p.save()
-
+            contact = contact_form.save(commit=False)
+            contact.user = user
+            contact.save()
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'User saved successfully.',
@@ -206,6 +242,7 @@ def edit_user(request, uid):
     return render(request, "dojo/add_user.html", {
         'name': 'Edit User',
         'form': form,
+        'contact_form': contact_form,
         'to_edit': user})
 
 

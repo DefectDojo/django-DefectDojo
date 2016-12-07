@@ -15,9 +15,11 @@ from django.utils.html import escape
 from pytz import timezone
 from dojo.filters import EndpointFilter
 from dojo.forms import EditEndpointForm, \
-    DeleteEndpointForm, AddEndpointForm
+    DeleteEndpointForm, AddEndpointForm, EndpointMetaDataForm
 from dojo.models import Product, Endpoint, Finding
 from dojo.utils import get_page_items, add_breadcrumb, get_period_counts
+from django.contrib.contenttypes.models import ContentType
+from custom_field.models import CustomFieldValue, CustomField
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -111,11 +113,24 @@ def view_endpoint(request, eid):
     else:
         raise PermissionDenied
 
+    ct = ContentType.objects.get_for_model(endpoint)
+    endpoint_cf = CustomField.objects.filter(content_type=ct)
+    endpoint_metadata = {}
+
+    for cf in endpoint_cf:
+        cfv = CustomFieldValue.objects.filter(field=cf, object_id=endpoint.id)
+        if len(cfv):
+            endpoint_metadata[cf] = cfv[0]
+
+
     all_findings = Finding.objects.filter(endpoints__in=endpoints).distinct()
 
     active_findings = Finding.objects.filter(endpoints__in=endpoints,
                                              active=True,
                                              verified=True).distinct()
+
+    closed_findings = Finding.objects.filter(endpoints__in=endpoints,
+                                             mitigated__isnull=False).distinct()
     if all_findings:
         start_date = localtz.localize(datetime.combine(all_findings.last().date, datetime.min.time()))
     else:
@@ -127,8 +142,9 @@ def view_endpoint(request, eid):
     # include current month
     months_between += 1
 
-    monthly_counts = get_period_counts(all_findings, all_findings, None, months_between, start_date,
+    monthly_counts = get_period_counts(active_findings, all_findings, closed_findings, None, months_between, start_date,
                                        relative_delta='months')
+
     paged_findings = get_page_items(request, active_findings, 25)
 
     add_breadcrumb(parent=endpoint, top_level=False, request=request)
@@ -139,25 +155,29 @@ def view_endpoint(request, eid):
                    "findings": paged_findings,
                    'all_findings': all_findings,
                    'opened_per_month': monthly_counts['opened_per_period'],
+                   'endpoint_metadata': endpoint_metadata,
                    })
 
 
 @user_passes_test(lambda u: u.is_staff)
 def edit_endpoint(request, eid):
     endpoint = get_object_or_404(Endpoint, id=eid)
-    form = EditEndpointForm(instance=endpoint)
+
     if request.method == 'POST':
         form = EditEndpointForm(request.POST, instance=endpoint)
         if form.is_valid():
-            form.save()
-            tags = form.cleaned_data['tags']
-            endpoint.tags = tags
+            endpoint = form.save()
+            tags = request.POST.getlist('tags')
+            t = ", ".join(tags)
+            endpoint.tags = t
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Endpoint updated successfully.',
                                  extra_tags='alert-success')
+            return HttpResponseRedirect(reverse('view_endpoint', args=(endpoint.id,)))
     add_breadcrumb(parent=endpoint, title="Edit", top_level=False, request=request)
-    form.initial['tags'] = ", ".join([tag.name for tag in endpoint.tags])
+    form = EditEndpointForm(instance=endpoint)
+    form.initial['tags'] = [tag.name for tag in endpoint.tags]
     return render(request,
                   "dojo/edit_endpoint.html",
                   {"endpoint": endpoint,
@@ -207,14 +227,14 @@ def add_endpoint(request, pid):
         add_breadcrumb(parent=product, title="Add Endpoint", top_level=False, request=request)
 
     form = AddEndpointForm(product=product)
-
     if request.method == 'POST':
         form = AddEndpointForm(request.POST, product=product)
         if form.is_valid():
             endpoints = form.save()
-            tags = form.cleaned_data['tags']
+            tags = request.POST.getlist('tags')
+            t = ", ".join(tags)
             for e in endpoints:
-                e.tags = tags
+                e.tags = t
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Endpoint added successfully.',
@@ -239,9 +259,10 @@ def add_product_endpoint(request):
         form = AddEndpointForm(request.POST)
         if form.is_valid():
             endpoints = form.save()
-            tags = form.cleaned_data['tags']
+            tags = request.POST.getlist('tags')
+            t = ", ".join(tags)
             for e in endpoints:
-                e.tags = tags
+                e.tags = t
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Endpoint added successfully.',
@@ -252,4 +273,82 @@ def add_product_endpoint(request):
                   'dojo/add_endpoint.html',
                   {'name': 'Add Endpoint',
                    'form': form,
+                   })
+
+
+@user_passes_test(lambda u: u.is_staff)
+def add_meta_data(request, eid):
+    endpoint = Endpoint.objects.get(id=eid)
+    ct = ContentType.objects.get_for_model(endpoint)
+
+    if request.method == 'POST':
+        form = EndpointMetaDataForm(request.POST)
+        if form.is_valid():
+            cf, created = CustomField.objects.get_or_create(name=form.cleaned_data['name'],
+                                                            content_type=ct,
+                                                            field_type='a')
+            cf.save()
+            cfv, created = CustomFieldValue.objects.get_or_create(field=cf,
+                                                                  object_id=endpoint.id)
+            cfv.value = form.cleaned_data['value']
+            cfv.clean()
+            cfv.save()
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Metadata added successfully.',
+                                 extra_tags='alert-success')
+            if 'add_another' in request.POST:
+                return HttpResponseRedirect(reverse('add_meta_data', args=(eid,)))
+            else:
+                return HttpResponseRedirect(reverse('view_endpoint', args=(eid,)))
+    else:
+        form = EndpointMetaDataForm(initial={'content_type': endpoint})
+
+    add_breadcrumb(parent=endpoint, title="Add Metadata", top_level=False, request=request)
+
+    return render(request,
+                  'dojo/add_endpoint_meta_data.html',
+                  {'form': form,
+                   'endpoint': endpoint,
+                   })
+
+
+@user_passes_test(lambda u: u.is_staff)
+def edit_meta_data(request, eid):
+
+    endpoint = Endpoint.objects.get(id=eid)
+    ct = ContentType.objects.get_for_model(endpoint)
+
+    endpoint_cf = CustomField.objects.filter(content_type=ct)
+    endpoint_metadata = {}
+
+    for cf in endpoint_cf:
+        cfv = CustomFieldValue.objects.filter(field=cf, object_id=endpoint.id)
+        if len(cfv):
+            endpoint_metadata[cf] = cfv[0]
+
+    if request.method == 'POST':
+        for key, value in request.POST.iteritems():
+            if key.startswith('cfv_'):
+                cfv_id = int(key.split('_')[1])
+                cfv = get_object_or_404(CustomFieldValue, id=cfv_id)
+
+                value = value.strip()
+                if value:
+                    cfv.value = value
+                    cfv.save()
+                else:
+                    cfv.delete()
+        messages.add_message(request,
+                             messages.SUCCESS,
+                             'Metadata edited successfully.',
+                             extra_tags='alert-success')
+        return HttpResponseRedirect(reverse('view_endpoint', args=(eid,)))
+
+    add_breadcrumb(parent=endpoint, title="Edit Metadata", top_level=False, request=request)
+
+    return render(request,
+                  'dojo/edit_endpoint_meta_data.html',
+                  {'endpoint': endpoint,
+                   'endpoint_metadata': endpoint_metadata,
                    })

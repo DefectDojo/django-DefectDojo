@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load event_tags %}
+{% load static from staticfiles %}
+{% block add_css %}
+    <link rel="stylesheet" href="{% static "chosen-bootstrap/chosen.bootstrap.min.css" %}">
+{% endblock %}
+{% block add_styles %}
+.chosen-container {
+    width: 70% !important;
+}
+{% endblock %}
+{% block content %}
+    <h3> Mark Finding for Review</h3>
+    <h4>{{ finding.title }}</h4>
+    <p>Please provide a reason why this finding needs to be reviewed.</p>
+    <form class="form-horizontal" action="{% url 'request_finding_review' finding.id %}" method="post">
+        {% csrf_token %}
+        {% include "dojo/form_fields.html" with form=form %}
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <input class="btn btn-primary" name="submit" type="submit" value="Mark for Review"/>
+            </div>
+        </div>
+    </form>
+{% endblock %}
+{% block postscript %}
+    <script type="application/javascript" src="{% static "chosen/chosen.jquery.min.js" %}"></script>
+    <script type="application/javascript">
+        $(function () {
+            $('#id_reviewers').chosen({'placeholder_text_multiple': 'Select some reviewers...'});
+        });
+    </script>
+{% endblock %}

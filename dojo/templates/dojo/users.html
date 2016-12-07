@@ -33,7 +33,7 @@
             </div>
             {% if users %}
                 <div class="clearfix">
-                    {% include "dojo/paging_snippet.html" with page=users page_size=True%}
+                    {% include "dojo/paging_snippet.html" with page=users page_size=True %}
                 </div>
                 <div class="table-responsive panel panel-default">
                     <table id="users"
@@ -42,10 +42,12 @@
                             <th class="nowrap">{% dojo_sort request 'First Name' 'first_name' %}</th>
                             <th class="nowrap">{% dojo_sort request 'Last Name' 'last_name' %}</th>
                             <th class="nowrap">{% dojo_sort request 'User Name' 'username' 'asc' %}</th>
-                            <th class="nowrap">{% dojo_sort request 'Email' 'email'%}</th>
-                            <th class="nowrap">{% dojo_sort request 'Active' 'is_active'%}</th>
-                            <th class="nowrap">{% dojo_sort request 'Staff' 'is_staff'%}</th>
-                            <th class="nowrap">{% dojo_sort request 'SuperUser' 'is_superuser'%}</th>
+                            <th class="nowrap">{% dojo_sort request 'Email' 'email' %}</th>
+                            <th class="nowrap">Title</th>
+                            <th class="nowrap">Phone Number(s)</th>
+                            <th class="nowrap">{% dojo_sort request 'Active' 'is_active' %}</th>
+                            <th class="nowrap">{% dojo_sort request 'Staff' 'is_staff' %}</th>
+                            <th class="nowrap">{% dojo_sort request 'SuperUser' 'is_superuser' %}</th>
                             <th class="nowrap">Actions</th>
                         </tr>
                         {% for u in users %}
@@ -54,6 +56,11 @@
                                 <td>{{ u.last_name }}</td>
                                 <td>{{ u.username }}</td>
                                 <td>{{ u.email }}</td>
+                                <td>{{ u.usercontactinfo.title }}</td>
+                                <td>
+                                    Phone: {{ u.usercontactinfo.phone_number }}<br/>
+                                    Cell: {{ u.usercontactinfo.cell_number }}
+                                </td>
                                 <td class="text-center">{% if u.is_active %}
                                     <i class="text-success fa fa-check"></i>{% else %}
                                     <i class="text-danger fa fa-times"></i>{% endif %}</td>
@@ -73,7 +80,7 @@
                     </table>
                 </div>
                 <div class="clearfix">
-                    {% include "dojo/paging_snippet.html" with page=users page_size=True%}
+                    {% include "dojo/paging_snippet.html" with page=users page_size=True %}
                 </div>
             {% else %}
                 <h5> No Users </h5>

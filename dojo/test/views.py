@@ -15,7 +15,7 @@ from pytz import timezone
 from dojo.filters import TemplateFindingFilter
 from dojo.forms import NoteForm, TestForm, FindingForm, \
     DeleteTestForm, AddFindingForm, \
-    ImportScanForm, ReImportScanForm, JIRAFindingForm
+    ImportScanForm, ReImportScanForm, FindingBulkUpdateForm, JIRAFindingForm
 from dojo.models import Finding, Test, Notes, \
     BurpRawRequestResponse, Endpoint, Stub_Finding, Finding_Template, JIRA_PKey
 from dojo.tools.factory import import_parser_factory
@@ -84,7 +84,9 @@ def edit_test(request, tid):
         form = TestForm(request.POST, instance=test)
         if form.is_valid():
             new_test = form.save()
-            new_test.tags = form.cleaned_data['tags']
+            tags = request.POST.getlist('tags')
+            t = ", ".join(tags)
+            new_test.tags = t
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Test saved.',
@@ -92,7 +94,7 @@ def edit_test(request, tid):
 
     form.initial['target_start'] = test.target_start.date()
     form.initial['target_end'] = test.target_end.date()
-    form.initial['tags'] = ", ".join([tag.name for tag in test.tags])
+    form.initial['tags'] = [tag.name for tag in test.tags]
 
     add_breadcrumb(parent=test, title="Edit", top_level=False, request=request)
     return render(request, 'dojo/edit_test.html',
@@ -311,8 +313,6 @@ def add_temp_finding(request, tid, fid):
                                          'A finding template was also created.',
                                          extra_tags='alert-success')
 
-
-
             return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
         else:
             messages.add_message(request,
@@ -375,6 +375,35 @@ def search(request, tid):
 
 
 @user_passes_test(lambda u: u.is_staff)
+def finding_bulk_update(request, tid):
+    test = get_object_or_404(Test, id=tid)
+    finding = test.finding_set.all()[0]
+    form = FindingBulkUpdateForm(request.POST)
+    if request.method == "POST":
+        if form.is_valid():
+            finding_to_update = request.POST.getlist('finding_to_update')
+            finds = Finding.objects.filter(test=test, id__in=finding_to_update)
+            finds.update(severity=form.cleaned_data['severity'],
+                         active=form.cleaned_data['active'],
+                         verified=form.cleaned_data['verified'],
+                         false_p=form.cleaned_data['false_p'],
+                         duplicate=form.cleaned_data['duplicate'],
+                         out_of_scope=form.cleaned_data['out_of_scope'])
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Bulk edit of findings was successful.  Check to make sure it is what you intended.',
+                                 extra_tags='alert-success')
+        else:
+            messages.add_message(request,
+                                 messages.ERROR,
+                                 'Unable to process bulk update.  The Severity field is required, '
+                                 'all others are optional.',
+                                 extra_tags='alert-danger')
+
+    return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
+
+
+@user_passes_test(lambda u: u.is_staff)
 def re_import_scan_results(request, tid):
     additional_message = "When re-uploading a scan, any findings not found in original scan will be updated as " \
                          "mitigated.  The process attempts to identify the differences, however manual verification " \
@@ -383,6 +412,8 @@ def re_import_scan_results(request, tid):
     scan_type = t.test_type.name
     engagement = t.engagement
     form = ReImportScanForm()
+
+    form.initial['tags'] = [tag.name for tag in t.tags]
     if request.method == "POST":
         form = ReImportScanForm(request.POST, request.FILES)
         if form.is_valid():
@@ -390,6 +421,11 @@ def re_import_scan_results(request, tid):
             min_sev = form.cleaned_data['minimum_severity']
             file = request.FILES['file']
             scan_type = t.test_type.name
+            active = form.cleaned_data['active']
+            verified = form.cleaned_data['verified']
+            tags = request.POST.getlist('tags')
+            ts = ", ".join(tags)
+            t.tags = ts
             try:
                 parser = import_parser_factory(file, t)
             except ValueError:
@@ -404,15 +440,14 @@ def re_import_scan_results(request, tid):
                 finding_added_count = 0
                 reactivated_count = 0
                 for item in items:
-                    endpoints = item.unsaved_endpoints
                     sev = item.severity
-                    if sev == 'Information':
+                    if sev == 'Information' or sev == 'Informational':
                         sev = 'Info'
 
                     if Finding.SEVERITIES[sev] > Finding.SEVERITIES[min_sev]:
                         continue
 
-                    if scan_type == 'Veracode Scan':
+                    if scan_type == 'Veracode Scan' or scan_type == 'Arachni Scan':
                         find = Finding.objects.filter(title=item.title,
                                                       test__id=t.id,
                                                       severity=sev,
@@ -432,6 +467,7 @@ def re_import_scan_results(request, tid):
                             find[0].mitigated = None
                             find[0].mitigated_by = None
                             find[0].active = True
+                            find[0].verified = verified
                             find[0].save()
                             note = Notes(entry="Re-activated by %s re-upload." % scan_type,
                                          author=request.user)
@@ -445,6 +481,8 @@ def re_import_scan_results(request, tid):
                         item.reporter = request.user
                         item.last_reviewed = datetime.now(tz=localtz)
                         item.last_reviewed_by = request.user
+                        item.verified = verified
+                        item.active = active
                         item.save()
                         finding_added_count += 1
                         new_items.append(item.id)
@@ -465,6 +503,9 @@ def re_import_scan_results(request, tid):
                                                                          query=endpoint.query,
                                                                          fragment=endpoint.fragment,
                                                                          product=t.engagement.product)
+
+                        if item.unsaved_tags is not None:
+                            find.tags = item.unsaved_tags
 
                 # calculate the difference
                 to_mitigate = set(original_items) - set(new_items)

@@ -10,8 +10,9 @@ from django.utils.safestring import mark_safe, SafeData
 from django.utils.text import normalize_newlines
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
+from django.conf import settings
 
-from dojo.models import Check_List, FindingImage, FindingImageAccessToken
+from dojo.models import Check_List, FindingImage, FindingImageAccessToken, Finding
 
 register = template.Library()
 
@@ -146,3 +147,12 @@ def pic_token(context, image, size):
     token = FindingImageAccessToken(user=user, image=image, size=size)
     token.save()
     return reverse('download_finding_pic', args=[token.token])
+
+
+@register.simple_tag
+def severity_value(value):
+    if hasattr(settings, 'S_FINDING_SEVERITY_NAMING'):
+        if settings.S_FINDING_SEVERITY_NAMING:
+            return Finding.get_numerical_severity(value)
+
+    return value

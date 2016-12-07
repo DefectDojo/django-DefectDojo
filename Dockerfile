@@ -1,24 +1,22 @@
-FROM ubuntu:wily
+FROM appsecpipeline/dojo-base
 
 #Create the dojo user
 RUN useradd -m dojo
 
-#Change to the dojo user, necessary so that the volume is set to dojo
+#Change to the dojo user
 USER dojo
 
 #Add DefectDojo
 ADD . /django-DefectDojo
 
-#Change to the root user
+#Set working directory
+WORKDIR /django-DefectDojo
+
 USER root
 
-#Install requirements
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install build-essential libjpeg-dev gcc xorg nmap python-virtualenv wget npm build-essential nodejs-legacy python-dev python-pip nvi git libffi-dev libssl-dev libmysqlclient-dev mysql-client
-
 #Run the setup script
-RUN /django-DefectDojo/docker/docker-setup.bash
+RUN bash docker/docker-startup.bash setup
 
-RUN chown -R dojo:dojo /django-DefectDojo
-
-#Change back to the dojo user
 USER dojo
+
+CMD bash docker/docker-startup.bash

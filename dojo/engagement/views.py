@@ -26,7 +26,7 @@ from dojo.models import Finding, Product, Engagement, Test, \
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, message
-from dojo.tasks import update_epic_task, add_epic_task
+from dojo.tasks import update_epic_task, add_epic_task, close_epic_task
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -82,8 +82,9 @@ def new_engagement(request):
             new_eng = form.save()
             new_eng.lead = request.user
             new_eng.save()
-            tags = form.cleaned_data['tags']
-            new_eng.tags = tags
+            tags = request.POST.getlist('tags')
+            t = ", ".join(tags)
+            new_eng.tags = t
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Engagement added successfully.',
@@ -119,8 +120,9 @@ def edit_engagement(request, eid):
                     add_epic_task.delay(eng, jform.cleaned_data.get('push_to_jira'))
                     pass
             form.save()
-            tags = form.cleaned_data['tags']
-            eng.tags = tags
+            tags = request.POST.getlist('tags')
+            t = ", ".join(tags)
+            eng.tags = t
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Engagement updated successfully.',
@@ -143,7 +145,7 @@ def edit_engagement(request, eid):
                     jform = JIRAFindingForm(prefix='jiraform', enabled=enabled)
                 else:
                     jform = None
-    form.initial['tags'] = ", ".join([tag.name for tag in eng.tags])
+    form.initial['tags'] = [tag.name for tag in eng.tags]
     add_breadcrumb(parent=eng, title="Edit Engagement", top_level=False, request=request)
     return render(request, 'dojo/new_eng.html',
                   {'form': form, 'edit': True, 'jform': jform
@@ -251,7 +253,9 @@ def add_tests(request, eid):
             new_test = form.save(commit=False)
             new_test.engagement = eng
             new_test.save()
-            new_test.tags = form.cleaned_data['tags']
+            tags = request.POST.getlist('tags')
+            t = ", ".join(tags)
+            new_test.tags = t
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Test added successfully.',
@@ -294,7 +298,9 @@ def import_scan_results(request, eid):
                      target_end=scan_date, environment=environment, percent_complete=100)
             t.full_clean()
             t.save()
-            t.tags = form.cleaned_data['tags']
+            tags = request.POST.getlist('tags')
+            ts = ", ".join(tags)
+            t.tags = ts
 
             try:
                 parser = import_parser_factory(file, t)
@@ -347,6 +353,9 @@ def import_scan_results(request, eid):
                                                                      product=t.engagement.product)
 
                         item.endpoints.add(ep)
+
+                    if item.unsaved_tags is not None:
+                        item.tags = item.unsaved_tags
 
                     finding_count += 1
 

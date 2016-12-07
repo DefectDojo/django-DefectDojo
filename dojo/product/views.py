@@ -23,6 +23,8 @@ from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings
 from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data
 from custom_field.models import CustomFieldValue, CustomField
 from  dojo.tasks import add_epic_task
+from tagging.models import Tag
+from tagging.utils import get_tag_list
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -260,8 +262,9 @@ def new_product(request):
                 jform = JIRAPKeyForm(request.POST, instance=JIRA_PKey())
         if form.is_valid():
             product = form.save()
-            tags = form.cleaned_data['tags']
-            product.tags = tags
+            tags = request.POST.getlist('tags')
+            t = ", ".join(tags)
+            product.tags = t
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Product added successfully.',
@@ -306,8 +309,9 @@ def edit_product(request, pid):
         form = ProductForm(request.POST, instance=prod)
         if form.is_valid():
             form.save()
-            tags = form.cleaned_data['tags']
-            prod.tags = tags
+            tags = request.POST.getlist('tags')
+            t = ", ".join(tags)
+            prod.tags = t
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Product updated successfully.',
@@ -329,8 +333,8 @@ def edit_product(request, pid):
             return HttpResponseRedirect(reverse('view_product', args=(pid,)))
     else:
         form = ProductForm(instance=prod,
-                           initial={'auth_users': prod.authorized_users.all()})
-        form.initial['tags'] = ", ".join([tag.name for tag in prod.tags])
+                           initial={'auth_users': prod.authorized_users.all(),
+                                    'tags': get_tag_list(Tag.objects.get_for_object(prod))})
         if hasattr(settings, 'ENABLE_JIRA'):
             if settings.ENABLE_JIRA:
                 if jira_enabled:

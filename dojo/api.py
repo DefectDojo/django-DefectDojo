@@ -1,18 +1,33 @@
 # see tastypie documentation at http://django-tastypie.readthedocs.org/en
+from django.core.exceptions import ImproperlyConfigured
+from django.core.urlresolvers import resolve, get_script_prefix
 from tastypie import fields
-from tastypie.authentication import ApiKeyAuthentication, MultiAuthentication, SessionAuthentication
+from tastypie.fields import RelatedField
+from tastypie.authentication import ApiKeyAuthentication
 from tastypie.authorization import Authorization
 from tastypie.authorization import DjangoAuthorization
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
-from tastypie.exceptions import Unauthorized
-from tastypie.resources import ModelResource
+from tastypie.exceptions import Unauthorized, ImmediateHttpResponse, NotFound
+from tastypie.http import HttpCreated
+from tastypie.resources import ModelResource, Resource
 from tastypie.serializers import Serializer
-from tastypie.validation import CleanedDataFormValidation
+from tastypie.validation import FormValidation, Validation
+from django.core.exceptions import ObjectDoesNotExist
+from pytz import timezone
+from django.conf import settings
 
 from dojo.models import Product, Engagement, Test, Finding, \
-    User, ScanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance
+    User, ScanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance, \
+    Finding_Template, Test_Type, Development_Environment, \
+    BurpRawRequestResponse, Endpoint
 from dojo.forms import ProductForm, EngForm2, TestForm, \
-    ScanSettingsForm, FindingForm, StubFindingForm
+    ScanSettingsForm, FindingForm, StubFindingForm, FindingTemplateForm, \
+    ImportScanForm, SEVERITY_CHOICES
+from dojo.tools.factory import import_parser_factory
+
+from datetime import datetime
+
+localtz = timezone(settings.TIME_ZONE)
 
 """
     Setup logging for the api
@@ -25,6 +40,48 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 """
+
+
+class ModelFormValidation(FormValidation):
+    """
+    Override tastypie's standard ``FormValidation`` since this does not care
+    about URI to PK conversion for ``ToOneField`` or ``ToManyField``.
+    """
+
+    resource = ModelResource
+
+    def __init__(self, **kwargs):
+        if not 'resource' in kwargs:
+            raise ImproperlyConfigured("You must provide a 'resource' to 'ModelFormValidation' classes.")
+
+        self.resource = kwargs.pop('resource')
+
+        super(ModelFormValidation, self).__init__(**kwargs)
+
+    def _get_pk_from_resource_uri(self, resource_field, resource_uri):
+        """ Return the pk of a resource URI """
+        base_resource_uri = resource_field.to().get_resource_uri()
+        if not resource_uri.startswith(base_resource_uri):
+            raise Exception("Couldn't match resource_uri {0} with {1}".format(
+                                        resource_uri, base_resource_uri))
+        before, after = resource_uri.split(base_resource_uri)
+        return after[:-1] if after.endswith('/') else after
+
+    def form_args(self, bundle):
+        rsc = self.resource()
+        kwargs = super(ModelFormValidation, self).form_args(bundle)
+
+        for name, rel_field in rsc.fields.items():
+            data = kwargs['data']
+            if not issubclass(rel_field.__class__, RelatedField):
+                continue # Not a resource field
+            if name in data and data[name] is not None:
+                resource_uri = (data[name] if rel_field.full is False
+                                            else data[name]['resource_uri'])
+                pk = self._get_pk_from_resource_uri(rel_field, resource_uri)
+                kwargs['data'][name] = pk
+
+        return kwargs
 
 
 class BaseModelResource(ModelResource):
@@ -52,6 +109,19 @@ class BaseModelResource(ModelResource):
                     res_field.blank = True
         return fields
 
+
+class MultipartResource(object):
+    def deserialize(self, request, data, format=None):
+        if not format:
+            format = request.Meta.get('CONTENT_TYPE', 'application/json')
+        if format == 'application/x-www-form-urlencoded':
+            return request.POST
+        if format.startswith('multipart'):
+            data = request.POST.copy()
+            data.update(request.FILES)
+            return data
+
+        return super(MultiPartResource, self).deserialize(request, data, format)
 
 # Authentication class - this only allows for header auth, no url parms allowed
 # like parent class.
@@ -281,7 +351,10 @@ class ProductResource(BaseModelResource):
         authentication = DojoApiKeyAuthentication()
         authorization = UserProductsOnlyAuthorization()
         serializer = Serializer(formats=['json'])
-        validation = CleanedDataFormValidation(form_class=ProductForm)
+
+        @property
+        def validation(self):
+            return ModelFormValidation(form_class=ProductForm, resource=ProductResource)
 
     def dehydrate(self, bundle):
         try:
@@ -330,7 +403,10 @@ class EngagementResource(BaseModelResource):
         authentication = DojoApiKeyAuthentication()
         authorization = DjangoAuthorization()
         serializer = Serializer(formats=['json'])
-        validation = CleanedDataFormValidation(form_class=EngForm2)
+
+        @property
+        def validation(self):
+            return ModelFormValidation(form_class=EngForm2, resource=EngagementResource)
 
     def dehydrate(self, bundle):
         if bundle.obj.eng_type is not None:
@@ -380,7 +456,10 @@ class TestResource(BaseModelResource):
         authentication = DojoApiKeyAuthentication()
         authorization = DjangoAuthorization()
         serializer = Serializer(formats=['json'])
-        validation = CleanedDataFormValidation(form_class=TestForm)
+
+        @property
+        def validation(self):
+            return ModelFormValidation(form_class=TestForm, resource=TestResource)
 
     def dehydrate(self, bundle):
         bundle.data['test_type'] = bundle.obj.test_type
@@ -420,7 +499,7 @@ class FindingResource(BaseModelResource):
     class Meta:
         resource_name = 'findings'
         queryset = Finding.objects.select_related("test")
-        # deleting of findings is not allowed via UI or API.
+        # deleting of findings is not allowed via API.
         # Admin interface can be used for this.
         list_allowed_methods = ['get', 'post']
         detail_allowed_methods = ['get', 'post', 'put']
@@ -448,7 +527,10 @@ class FindingResource(BaseModelResource):
         authentication = DojoApiKeyAuthentication()
         authorization = DjangoAuthorization()
         serializer = Serializer(formats=['json'])
-        validation = CleanedDataFormValidation(form_class=FindingForm)
+
+        @property
+        def validation(self):
+            return ModelFormValidation(form_class=FindingForm, resource=FindingResource)
 
     def dehydrate(self, bundle):
         engagement = Engagement.objects.select_related('product'). \
@@ -457,6 +539,58 @@ class FindingResource(BaseModelResource):
         bundle.data['product'] = \
             "/api/v1/products/%s/" % engagement[0].product.id
         return bundle
+
+"""
+    /api/v1/finding_templates/
+    GET [/id/], DELETE [/id/]
+    Expects: no params or test_id
+    Returns test: ALL or by test_id
+    Relevant apply filter ?active=True, ?id=?, ?severity=?
+
+    POST, PUT [/id/]
+    Expects *title, *severity, *description, *mitigation, *impact,
+    *endpoint, *test, cwe, active, false_p, verified,
+    mitigated, *reporter
+
+"""
+
+
+class FindingTemplateResource(BaseModelResource):
+
+    class Meta:
+        resource_name = 'finding_templates'
+        queryset = Finding_Template.objects.all()
+        excludes= ['numerical_severity']
+        # deleting of Finding_Template is not allowed via API.
+        # Admin interface can be used for this.
+        list_allowed_methods = ['get', 'post']
+        detail_allowed_methods = ['get', 'post', 'put']
+        include_resource_uri = True
+        """
+        title = models.TextField(max_length=1000)
+    cwe = models.IntegerField(default=None, null=True, blank=True)
+    severity = models.CharField(max_length=200, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    mitigation = models.TextField(null=True, blank=True)
+    impact = models.TextField(null=True, blank=True)
+    references = models.TextField(null=True, blank=True, db_column="refs")
+    numerical_severity
+    """
+        filtering = {
+            'id': ALL,
+            'title': ALL,
+            'cwe': ALL,
+            'severity': ALL,
+            'description': ALL,
+            'mitigated': ALL,
+        }
+        authentication = DojoApiKeyAuthentication()
+        authorization = DjangoAuthorization()
+        serializer = Serializer(formats=['json'])
+
+        @property
+        def validation(self):
+            return ModelFormValidation(form_class=FindingTemplateForm, resource=FindingTemplateResource)
 
 
 class StubFindingResource(BaseModelResource):
@@ -482,7 +616,10 @@ class StubFindingResource(BaseModelResource):
         authentication = DojoApiKeyAuthentication()
         authorization = DjangoAuthorization()
         serializer = Serializer(formats=['json'])
-        validation = CleanedDataFormValidation(form_class=StubFindingForm)
+
+        @property
+        def validation(self):
+            return ModelFormValidation(form_class=StubFindingForm, resource=StubFindingResource)
 
     def dehydrate(self, bundle):
         engagement = Engagement.objects.select_related('product'). \
@@ -527,7 +664,10 @@ class ScanSettingsResource(BaseModelResource):
         authentication = DojoApiKeyAuthentication()
         authorization = UserScanSettingsAuthorization()
         serializer = Serializer(formats=['json'])
-        validation = CleanedDataFormValidation(form_class=ScanSettingsForm)
+
+        @property
+        def validation(self):
+            return ModelFormValidation(form_class=ScanSettingsForm, resource=ScanSettingsResource)
 
 
 """
@@ -592,3 +732,228 @@ class ScanResource(BaseModelResource):
         authentication = DojoApiKeyAuthentication()
         authorization = UserScanAuthorization()
         serializer = Serializer(formats=['json'])
+
+
+"""
+    /api/v1/importscan/
+    POST
+    Expects file, scan_date, scan_type, tags, active, engagement
+"""
+
+# Create an Object that will store all the information sent to the endpoint
+class ImportScanObject(object):
+    def __init__(self, initial=None):
+        self.__dict__['_data'] = {}
+        if initial:
+            self.update(initial)
+
+    def __getattr__(self, name):
+        return self._data.get(name, None)
+
+    def __setattr__(self, name, value):
+        self.__dict__['_data'][name] = value
+
+    def update(self, other):
+        for k in other:
+            self.__setattr__(k, other[k])
+
+    def to_dict(self):
+        return self._data
+
+# The default form validation was buggy so I implemented a custom validation class
+class ImportScanValidation(Validation):
+    def is_valid(self, bundle, request=None):
+        if not bundle.data:
+            return {'__all__': 'You didn\'t seem to pass anything in.'}
+
+        errors = {}
+
+        # Make sure file is present
+        if 'file' not in bundle.data:
+            errors.setdefault('file', []).append('You must pass a file in to be imported')
+
+        # Make sure scan_date matches required format
+        if 'scan_date' in bundle.data:
+            try:
+                datetime.strptime(bundle.data['scan_date'], '%Y/%m/%d')
+            except ValueError:
+                errors.setdefault('scan_date', []).append("Incorrect scan_date format, should be YYYY/MM/DD")
+
+        # Make sure scan_type and minimum_severity have valid options
+        if 'engagement' not in bundle.data:
+            errors.setdefault('engagement', []).append('engagement must be given')
+        else:
+            # verify the engagement is valid
+            try:
+                ImportScanResource.get_pk_from_uri(uri=bundle.data['engagement'])
+            except NotFound:
+                errors.setdefault('engagement', []).append('A valid engagement must be supplied. Ex. /api/v1/engagements/1/')
+        scan_type_list = list(map(lambda x: x[0], ImportScanForm.SCAN_TYPE_CHOICES))
+        if 'scan_type' in bundle.data:
+            if bundle.data['scan_type'] not in scan_type_list:
+                errors.setdefault('scan_type', []).append('scan_type must be one of the following: ' + ', '.join(scan_type_list))
+        else:
+            errors.setdefault('scan_type', []).append('A scan_type must be given so we know how to import the scan file.')
+        severity_list = list(map(lambda x: x[0], SEVERITY_CHOICES))
+        if 'minimum_severity' in bundle.data:
+            if bundle.data['minimum_severity'] not in severity_list:
+                errors.setdefault('minimum_severity', []).append('minimum_severity must be one of the following: ' + ', '.join(severity_list))
+
+        # Make sure active and verified are booleans
+        if 'active' in bundle.data:
+            if bundle.data['active'] in ['false', 'False', '0']:
+                bundle.data['active'] = False
+            elif bundle.data['active'] in ['true', 'True', '1']:
+                bundle.data['active'] = True
+
+            if not isinstance(bundle.data['active'], bool):
+                errors.setdefault('active', []).append('active must be a boolean')
+        if 'verified' in bundle.data:
+            if bundle.data['verified'] in ['false', 'False', '0']:
+                bundle.data['verified'] = False
+            elif bundle.data['verified'] in ['true', 'True', '1']:
+                bundle.data['verified'] = True
+
+            if not isinstance(bundle.data['verified'], bool):
+                errors.setdefault('verified', []).append('verified must be a boolean')
+
+        return errors
+
+class ImportScanResource(MultipartResource, Resource):
+    scan_date = fields.DateTimeField(attribute='scan_date')
+    minimum_severity = fields.CharField(attribute='minimum_severity')
+    active = fields.BooleanField(attribute='active')
+    verified = fields.BooleanField(attribute='verified')
+    scan_type = fields.CharField(attribute='scan_type')
+    tags = fields.CharField(attribute='tags')
+    file = fields.FileField(attribute='file')
+    engagement = fields.CharField(attribute='engagement')
+
+    @staticmethod
+    def get_pk_from_uri(uri):
+        prefix = get_script_prefix()
+        chomped_uri = uri
+
+        if prefix and chomped_uri.startswith(prefix):
+            chomped_uri = chomped_uri[len(prefix)-1:]
+
+        try:
+            view, args, kwargs = resolve(chomped_uri)
+        except Resolver404:
+            raise NotFound("The URL provided '%s' was not a link to a valid resource." % uri)
+
+        return kwargs['pk']
+
+    class Meta:
+        resource_name = 'importscan'
+        fields = ['scan_date', 'minimum_severity', 'active', 'verified', 'scan_type', 'tags', 'file']
+        list_allowed_methods = ['post']
+        detail_allowed_methods = []
+        include_resource_uri = True
+
+        authentication = DojoApiKeyAuthentication()
+        authorization = DjangoAuthorization()
+        validation = ImportScanValidation()
+        object_class = ImportScanObject
+
+    def hydrate(self, bundle):
+        if 'scan_date' not in bundle.data:
+            bundle.data['scan_date'] = datetime.now().strftime("%Y/%m/%d")
+        if 'minimum_severity' not in bundle.data:
+            bundle.data['minimum_severity'] = "Info"
+        if 'active' not in bundle.data:
+            bundle.data['active'] = True
+        if 'verified' not in bundle.data:
+            bundle.data['verified'] = True
+        if 'tags' not in bundle.data:
+            bundle.data['tags'] = ""
+
+        bundle.obj.__setattr__('engagement_obj',
+                               Engagement.objects.get(id=self.get_pk_from_uri(bundle.data['engagement'])))
+
+        return bundle
+
+    def detail_uri_kwargs(self, bundle_or_obj):
+        kwargs = {}
+        return kwargs
+
+    def obj_create(self, bundle, **kwargs):
+        bundle.obj = ImportScanObject(initial=kwargs)
+        self.is_valid(bundle)
+        if bundle.errors:
+            raise ImmediateHttpResponse(response=self.error_response(bundle.request, bundle.errors))
+        bundle = self.full_hydrate(bundle)
+
+        # We now have all the options we need and will just replicate the process in views.py
+        tt, t_created = Test_Type.objects.get_or_create(name=bundle.data['scan_type'])
+        # will save in development environment
+        environment, env_created = Development_Environment.objects.get_or_create(name="Development")
+        scan_date = datetime.strptime(bundle.data['scan_date'], '%Y/%m/%d')
+        t = Test(engagement=bundle.obj.__getattr__('engagement_obj'), test_type=tt, target_start=scan_date,
+                 target_end=scan_date, environment=environment, percent_complete=100)
+        t.full_clean()
+        t.save()
+        t.tags = bundle.data['tags']
+
+        try:
+            parser = import_parser_factory(bundle.data['file'], t)
+        except ValueError:
+            raise NotFound("Parser ValueError")
+
+        try:
+            for item in parser.items:
+                sev = item.severity
+                if sev == 'Information' or sev == 'Informational':
+                    sev = 'Info'
+
+                item.severity = sev
+
+                if Finding.SEVERITIES[sev] > Finding.SEVERITIES[bundle.data['minimum_severity']]:
+                    continue
+
+                item.test = t
+                item.date = t.target_start
+                item.reporter = bundle.request.user
+                item.last_reviewed = datetime.now(tz=localtz)
+                item.last_reviewed_by = bundle.request.user
+                item.active = bundle.data['active']
+                item.verified = bundle.data['verified']
+                item.save()
+
+                if hasattr(item, 'unsaved_req_resp') and len(item.unsaved_req_resp) > 0:
+                    for req_resp in item.unsaved_req_resp:
+                        burp_rr = BurpRawRequestResponse(finding=item,
+                                                         burpRequestBase64=req_resp["req"],
+                                                         burpResponseBase64=req_resp["resp"],
+                                                         )
+                        burp_rr.clean()
+                        burp_rr.save()
+
+                if item.unsaved_request is not None and item.unsaved_response is not None:
+                    burp_rr = BurpRawRequestResponse(finding=item,
+                                                     burpRequestBase64=item.unsaved_request,
+                                                     burpResponseBase64=item.unsaved_response,
+                                                     )
+                    burp_rr.clean()
+                    burp_rr.save()
+
+                for endpoint in item.unsaved_endpoints:
+                    ep, created = Endpoint.objects.get_or_create(protocol=endpoint.protocol,
+                                                                 host=endpoint.host,
+                                                                 path=endpoint.path,
+                                                                 query=endpoint.query,
+                                                                 fragment=endpoint.fragment,
+                                                                 product=t.engagement.product)
+
+                    item.endpoints.add(ep)
+
+                if item.unsaved_tags is not None:
+                    item.tags = item.unsaved_tags
+
+        except SyntaxError:
+            raise NotFound("Parser SyntaxError")
+
+        # Everything executed fine. We successfully imported the scan.
+        res = TestResource()
+        uri = res.get_resource_uri(t)
+        raise ImmediateHttpResponse(HttpCreated(location = uri))

@@ -840,14 +840,6 @@ def view_engineer(request, eid):
         team = find.test.engagement.product.prod_type.name
         name = find.test.engagement.product.name
         severity = find.severity
-        if severity == 'Critical':
-            severity = 'S0'
-        elif severity == 'High':
-            severity = 'S1'
-        elif severity == 'Medium':
-            severity = 'S2'
-        else:
-            severity = 'S3'
         description = find.title
         life = date.today() - find.date
         life = life.days
