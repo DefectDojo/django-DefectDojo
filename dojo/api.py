@@ -19,7 +19,7 @@ from django.conf import settings
 from dojo.models import Product, Engagement, Test, Finding, \
     User, ScanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, \
-    BurpRawRequestResponse, Endpoint
+    BurpRawRequestResponse, Endpoint, Notes
 from dojo.forms import ProductForm, EngForm2, TestForm, \
     ScanSettingsForm, FindingForm, StubFindingForm, FindingTemplateForm, \
     ImportScanForm, SEVERITY_CHOICES
@@ -1072,6 +1072,7 @@ class ReImportScanResource(MultipartResource, Resource):
         test = bundle.obj.__getattr__('test_obj')
         scan_type = bundle.obj.__getattr__('scan_type')
         min_sev = bundle.obj.__getattr__('minimum_severity')
+        scan_date = bundle.obj.__getattr__('scan_date')
 
         try:
             parser = import_parser_factory(bundle.data['file'], test)
@@ -1117,7 +1118,7 @@ class ReImportScanResource(MultipartResource, Resource):
                         find[0].verified = verified
                         find[0].save()
                         note = Notes(entry="Re-activated by %s re-upload." % scan_type,
-                                     author=request.user)
+                                     author=bundle.request.user)
                         note.save()
                         find[0].notes.add(note)
                         reactivated_count += 1
@@ -1125,9 +1126,9 @@ class ReImportScanResource(MultipartResource, Resource):
                 else:
                     item.test = t
                     item.date = test.target_start
-                    item.reporter = request.user
+                    item.reporter = bundle.request.user
                     item.last_reviewed = datetime.now(tz=localtz)
-                    item.last_reviewed_by = request.user
+                    item.last_reviewed_by = bundle.request.user
                     item.verified = verified
                     item.active = active
                     item.save()
@@ -1158,11 +1159,11 @@ class ReImportScanResource(MultipartResource, Resource):
             for finding_id in to_mitigate:
                 finding = Finding.objects.get(id=finding_id)
                 finding.mitigated = datetime.combine(scan_date, datetime.now(tz=localtz).time())
-                finding.mitigated_by = request.user
+                finding.mitigated_by = bundle.request.user
                 finding.active = False
                 finding.save()
                 note = Notes(entry="Mitigated by %s re-upload." % scan_type,
-                             author=request.user)
+                             author=bundle.request.user)
                 note.save()
                 finding.notes.add(note)
                 mitigated_count += 1
