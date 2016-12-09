@@ -23,7 +23,7 @@ from dojo.filters import OpenFindingFilter, \
     OpenFingingSuperFilter, AcceptedFingingSuperFilter, \
     ClosedFingingSuperFilter, TemplateFindingFilter
 from dojo.forms import NoteForm, CloseFindingForm, FindingForm, PromoteFindingForm, FindingTemplateForm, \
-    DeleteFindingTemplateForm, FindingImageFormSet, JIRAFindingForm
+    DeleteFindingTemplateForm, FindingImageFormSet, JIRAFindingForm, ReviewFindingForm, ClearFindingReviewForm
 from dojo.models import Product_Type, Finding, Notes, \
     Risk_Acceptance, BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, \
     FindingImageAccessToken, JIRA_Issue, JIRA_PKey, JIRA_Conf, Dojo_User
@@ -140,7 +140,6 @@ def view_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
 
     user = request.user
-<<<<<<< HEAD
     try:
         jissue = JIRA_Issue.objects.get(finding=finding)
     except:
@@ -152,9 +151,7 @@ def view_finding(request, fid):
     except:
         jconf = None
         pass
-=======
     dojo_user = get_object_or_404(Dojo_User, id=user.id)
->>>>>>> upstream/master
     if user.is_staff or user in finding.test.engagement.product.authorized_users.all():
         pass  # user is authorized for this product
     else:
@@ -195,13 +192,9 @@ def view_finding(request, fid):
     return render(request, 'dojo/view_finding.html',
                   {'finding': finding,
                    'burp_request': burp_request,
-<<<<<<< HEAD
                    'jissue': jissue,
                    'jconf': jconf,
-                   'burp_response': burp_response,
-=======
                    'burp_response': burp_response, 'dojo_user': dojo_user,
->>>>>>> upstream/master
                    'user': user, 'notes': notes, 'form': form})
 
 
@@ -315,7 +308,6 @@ def edit_finding(request, fid):
             t = ", ".join(tags)
             new_finding.tags = t
             new_finding.save()
-<<<<<<< HEAD
             if 'jiraform' in request.POST:
                jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=enabled)
                if jform.is_valid():
@@ -325,14 +317,9 @@ def edit_finding(request, fid):
                     except:
                         add_issue_task.delay(new_finding, jform.cleaned_data.get('push_to_jira'))
                         pass
-            tags = form.cleaned_data['tags']
-            new_finding.tags = tags
-=======
-
             tags = request.POST.getlist('tags')
             t = ", ".join(tags)
             new_finding.tags = t
->>>>>>> upstream/master
 
             messages.add_message(request,
                                  messages.SUCCESS,
