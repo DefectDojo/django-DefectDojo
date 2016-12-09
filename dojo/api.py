@@ -1073,6 +1073,8 @@ class ReImportScanResource(MultipartResource, Resource):
         scan_type = bundle.obj.__getattr__('scan_type')
         min_sev = bundle.obj.__getattr__('minimum_severity')
         scan_date = bundle.obj.__getattr__('scan_date')
+        verified = bundle.obj.__getattr__('verified')
+        active = bundle.obj.__getattr__('active')
 
         try:
             parser = import_parser_factory(bundle.data['file'], test)
@@ -1124,7 +1126,7 @@ class ReImportScanResource(MultipartResource, Resource):
                         reactivated_count += 1
                     new_items.append(find[0].id)
                 else:
-                    item.test = t
+                    item.test = test
                     item.date = test.target_start
                     item.reporter = bundle.request.user
                     item.last_reviewed = datetime.now(tz=localtz)
