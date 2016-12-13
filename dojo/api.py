@@ -1109,19 +1109,20 @@ class ReImportScanResource(MultipartResource, Resource):
                                                   )
 
                 if len(find) == 1:
-                    if find[0].mitigated:
+                    find = find[0]
+                    if find.mitigated:
                         # it was once fixed, but now back
-                        find[0].mitigated = None
-                        find[0].mitigated_by = None
-                        find[0].active = True
-                        find[0].verified = verified
-                        find[0].save()
+                        find.mitigated = None
+                        find.mitigated_by = None
+                        find.active = True
+                        find.verified = verified
+                        find.save()
                         note = Notes(entry="Re-activated by %s re-upload." % scan_type,
                                      author=bundle.request.user)
                         note.save()
-                        find[0].notes.add(note)
+                        find.notes.add(note)
                         reactivated_count += 1
-                    new_items.append(find[0].id)
+                    new_items.append(find.id)
                 else:
                     item.test = test
                     item.date = test.target_start
@@ -1137,7 +1138,7 @@ class ReImportScanResource(MultipartResource, Resource):
 
                     if hasattr(item, 'unsaved_req_resp') and len(item.unsaved_req_resp) > 0:
                         for req_resp in item.unsaved_req_resp:
-                            burp_rr = BurpRawRequestResponse(finding=item,
+                            burp_rr = BurpRawRequestResponse(finding=find,
                                                              burpRequestBase64=req_resp["req"],
                                                              burpResponseBase64=req_resp["resp"],
                                                              )
@@ -1160,7 +1161,7 @@ class ReImportScanResource(MultipartResource, Resource):
                                                                      query=endpoint.query,
                                                                      fragment=endpoint.fragment,
                                                                      product=test.engagement.product)
-                        item.endpoints.add(ep)
+                        find.endpoints.add(ep)
 
                     if item.unsaved_tags is not None:
                         find.tags = item.unsaved_tags
