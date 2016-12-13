@@ -843,9 +843,6 @@ class ImportScanResource(MultipartResource, Resource):
     file = fields.FileField(attribute='file')
     engagement = fields.CharField(attribute='engagement')
 
-    @staticmethod
-
-
     class Meta:
         resource_name = 'importscan'
         fields = ['scan_date', 'minimum_severity', 'active', 'verified', 'scan_type', 'tags', 'file']
@@ -1137,6 +1134,16 @@ class ReImportScanResource(MultipartResource, Resource):
                     finding_added_count += 1
                     new_items.append(item.id)
                     find = item
+
+                    if hasattr(item, 'unsaved_req_resp') and len(item.unsaved_req_resp) > 0:
+                        for req_resp in item.unsaved_req_resp:
+                            burp_rr = BurpRawRequestResponse(finding=item,
+                                                             burpRequestBase64=req_resp["req"],
+                                                             burpResponseBase64=req_resp["resp"],
+                                                             )
+                            burp_rr.clean()
+                            burp_rr.save()
+
                     if item.unsaved_request is not None and item.unsaved_response is not None:
                         burp_rr = BurpRawRequestResponse(finding=find,
                                                          burpRequestBase64=item.unsaved_request,
@@ -1153,6 +1160,7 @@ class ReImportScanResource(MultipartResource, Resource):
                                                                      query=endpoint.query,
                                                                      fragment=endpoint.fragment,
                                                                      product=test.engagement.product)
+                        item.endpoints.add(ep)
 
                     if item.unsaved_tags is not None:
                         find.tags = item.unsaved_tags
