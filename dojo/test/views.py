@@ -176,6 +176,7 @@ def test_ics(request, tid):
 def add_findings(request, tid):
     test = Test.objects.get(id=tid)
     form_error = False
+    enabled = False
     form = AddFindingForm(initial={'date': datetime.now(tz=localtz).date()})
     if hasattr(settings, 'ENABLE_JIRA'):
         if settings.ENABLE_JIRA:
@@ -203,7 +204,6 @@ def add_findings(request, tid):
             new_finding.save()
             jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=enabled)
             if jform.is_valid():
-                print >>sys.stderr, 'jform is valid'
                 add_issue_task.delay(new_finding, jform.cleaned_data.get('push_to_jira'))
             messages.add_message(request,
                                  messages.SUCCESS,

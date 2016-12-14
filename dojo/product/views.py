@@ -415,6 +415,7 @@ def all_product_findings(request, pid):
 
 @user_passes_test(lambda u: u.is_staff)
 def new_eng_for_app(request, pid):
+    jform = None
     prod = Product.objects.get(id=pid)
     if request.method == 'POST':
         form = EngForm(request.POST)
@@ -427,13 +428,12 @@ def new_eng_for_app(request, pid):
                 new_eng.progress = 'other'
             new_eng.save()
             #if 'jiraform' in request.POST:
-            jform = JIRAFindingForm(request.POST, prefix='jiraform',
-                                    enabled=JIRA_PKey.objects.get(product=prod).push_all_issues)
-            if jform.is_valid():
-                print >>sys.stderr, 'jira form is valid'
-                add_epic_task.delay(new_eng, jform.cleaned_data.get('push_to_jira'))
-            else:
-                print >>sys.stderr, 'jira form is NOT valid'
+            if hasattr(settings, 'ENABLE_JIRA'):
+                 if settings.ENABLE_JIRA:
+                     jform = JIRAFindingForm(request.POST, prefix='jiraform',
+                                        enabled=JIRA_PKey.objects.get(product=prod).push_all_issues)
+                     if jform.is_valid():
+                        add_epic_task.delay(new_eng, jform.cleaned_data.get('push_to_jira'))
             #else:
             #    print >>sys.stderr, 'no prefix is found'
 
