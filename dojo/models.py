@@ -531,6 +531,9 @@ class Finding(models.Model):
     false_p = models.BooleanField(default=False, verbose_name="False Positive")
     duplicate = models.BooleanField(default=False)
     out_of_scope = models.BooleanField(default=False)
+    under_review = models.BooleanField(default=False)
+    review_requested_by = models.ForeignKey(Dojo_User, null=True, blank=True, related_name='review_requested_by')
+    reviewers = models.ManyToManyField(Dojo_User, blank=True)
     thread_id = models.IntegerField(default=0, editable=False)
     mitigated = models.DateTimeField(editable=False, null=True, blank=True)
     mitigated_by = models.ForeignKey(User, null=True, editable=False, related_name="mitigated_by")
@@ -619,7 +622,9 @@ class Finding(models.Model):
                                                             title=self.title).exclude(id=self.id)
                 total_findings = eng_findings_cwe | eng_findings_title
                 for find in total_findings:
-                    if set(find.endpoints.all()) == set(self.endpoints.all()):
+                    list1 = self.endpoints.all()
+                    list2 = find.endpoints.all()
+                    if all(x in list2 for x in list1):
                         find.duplicate = True
                         super(Finding, find).save(*args, **kwargs)
 
@@ -634,6 +639,15 @@ class Finding(models.Model):
                     setattr(self, field, "No title given")
                 if not val and field in bigfields:
                     setattr(self, field, "No %s given" % field)
+
+    def severity_display(self):
+        if hasattr(settings, 'S_FINDING_SEVERITY_NAMING'):
+            if settings.S_FINDING_SEVERITY_NAMING:
+                return self.numerical_severity
+            else:
+                return self.severity
+        else:
+            return self.numerical_severity
 
     def get_breadcrumbs(self):
         bc = self.test.get_breadcrumbs()
@@ -684,7 +698,7 @@ class Finding_Template(models.Model):
     mitigation = models.TextField(null=True, blank=True)
     impact = models.TextField(null=True, blank=True)
     references = models.TextField(null=True, blank=True, db_column="refs")
-    numerical_severity = models.CharField(max_length=4, null=True, blank=True)
+    numerical_severity = models.CharField(max_length=4, null=True, blank=True, editable=False)
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
@@ -867,6 +881,7 @@ auditlog.register(Finding)
 auditlog.register(Product)
 auditlog.register(Test)
 auditlog.register(Risk_Acceptance)
+auditlog.register(Finding_Template)
 
 # Register tagging for models
 tag_register(Product)

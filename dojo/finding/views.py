@@ -23,11 +23,11 @@ from dojo.filters import OpenFindingFilter, \
     OpenFingingSuperFilter, AcceptedFingingSuperFilter, \
     ClosedFingingSuperFilter, TemplateFindingFilter
 from dojo.forms import NoteForm, CloseFindingForm, FindingForm, PromoteFindingForm, FindingTemplateForm, \
-    DeleteFindingTemplateForm, FindingImageFormSet
+    DeleteFindingTemplateForm, FindingImageFormSet, ReviewFindingForm, ClearFindingReviewForm
 from dojo.models import Product_Type, Finding, Notes, \
     Risk_Acceptance, BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, \
-    FindingImageAccessToken
-from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper
+    FindingImageAccessToken, Dojo_User
+from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, send_review_email
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -137,7 +137,9 @@ def closed_findings(request):
 
 def view_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
+
     user = request.user
+    dojo_user = get_object_or_404(Dojo_User, id=user.id)
     if user.is_staff or user in finding.test.engagement.product.authorized_users.all():
         pass  # user is authorized for this product
     else:
@@ -177,7 +179,7 @@ def view_finding(request, fid):
     return render(request, 'dojo/view_finding.html',
                   {'finding': finding,
                    'burp_request': burp_request,
-                   'burp_response': burp_response,
+                   'burp_response': burp_response, 'dojo_user': dojo_user,
                    'user': user, 'notes': notes, 'form': form})
 
 
@@ -338,6 +340,101 @@ def touch_finding(request, fid):
     finding.last_reviewed_by = request.user
     finding.save()
     return HttpResponseRedirect(reverse('view_finding', args=(finding.id,)))
+
+
+@user_passes_test(lambda u: u.is_staff)
+def request_finding_review(request, fid):
+    finding = get_object_or_404(Finding, id=fid)
+    user = get_object_or_404(Dojo_User, id=request.user.id)
+    # in order to review a finding, we need to capture why a review is needed
+    # we can do this with a Note
+    if request.method == 'POST':
+        form = ReviewFindingForm(request.POST)
+
+        if form.is_valid():
+            now = datetime.now(tz=localtz)
+            new_note = Notes()
+
+            new_note.entry = "Review Request: " + form.cleaned_data['entry']
+            new_note.author = request.user
+            new_note.date = now
+            new_note.save()
+            finding.notes.add(new_note)
+            finding.active = False
+            finding.verified = False
+            finding.under_review = True
+            finding.review_requested_by = user
+            finding.last_reviewed = now
+            finding.last_reviewed_by = request.user
+
+            users = form.cleaned_data['reviewers']
+            finding.reviewers = users
+            finding.save()
+
+            send_review_email(request, user, finding, users, new_note)
+
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Finding marked for review and reviewers notified.',
+                                 extra_tags='alert-success')
+            return HttpResponseRedirect(reverse('view_finding', args=(finding.id,)))
+
+    else:
+        form = ReviewFindingForm()
+
+    add_breadcrumb(parent=finding, title="Review Finding", top_level=False, request=request)
+    return render(request, 'dojo/review_finding.html',
+                  {'finding': finding,
+                   'user': user, 'form': form})
+
+
+@user_passes_test(lambda u: u.is_staff)
+def clear_finding_review(request, fid):
+    finding = get_object_or_404(Finding, id=fid)
+    user = get_object_or_404(Dojo_User, id=request.user.id)
+    # in order to clear a review for a finding, we need to capture why and how it was reviewed
+    # we can do this with a Note
+
+    if user == finding.review_requested_by or user in finding.reviewers.all():
+        pass
+    else:
+        return HttpResponseForbidden()
+
+    if request.method == 'POST':
+        form = ClearFindingReviewForm(request.POST, instance=finding)
+
+        if form.is_valid():
+            now = datetime.now(tz=localtz)
+            new_note = Notes()
+            new_note.entry = "Review Cleared: " + form.cleaned_data['entry']
+            new_note.author = request.user
+            new_note.date = now
+            new_note.save()
+
+            finding = form.save(commit=False)
+
+            finding.under_review = False
+            finding.last_reviewed = now
+            finding.last_reviewed_by = request.user
+
+            finding.reviewers = []
+            finding.save()
+
+            finding.notes.add(new_note)
+
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Finding review has been updated successfully.',
+                                 extra_tags='alert-success')
+            return HttpResponseRedirect(reverse('view_finding', args=(finding.id,)))
+
+    else:
+        form = ClearFindingReviewForm(instance=finding)
+
+    add_breadcrumb(parent=finding, title="Clear Finding Review", top_level=False, request=request)
+    return render(request, 'dojo/clear_finding_review.html',
+                  {'finding': finding,
+                   'user': user, 'form': form})
 
 
 @user_passes_test(lambda u: u.is_staff)
