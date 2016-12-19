@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load display_tags %}
 {% block add_styles %}
     form.biweekly-metrics p { display: inline-block;}
     form.biweekly-metrics input {border: 1px solid #ccc;border-radius: 4px;padding: 3px 6px;}
@@ -24,18 +25,10 @@
             <table class="table table-bordered table-condensed table-striped">
                 <thead>
                 <tr>
-                    <th>
-                        S0
-                    </th>
-                    <th>
-                        S1
-                    </th>
-                    <th>
-                        S2
-                    </th>
-                    <th>
-                        S3
-                    </th>
+                    <th>{% severity_value 'Critical' %}</th>
+                    <th>{% severity_value 'High' %}</th>
+                    <th>{% severity_value 'Medium' %}</th>
+                    <th>{% severity_value 'Low' %}</th>
                     <th>
                         Total
                     </th>
@@ -71,18 +64,10 @@
             <table class="table table-bordered table-condensed table-striped">
                 <thead>
                 <tr>
-                    <th>
-                        S0
-                    </th>
-                    <th>
-                        S1
-                    </th>
-                    <th>
-                        S2
-                    </th>
-                    <th>
-                        S3
-                    </th>
+                    <th>{% severity_value 'Critical' %}</th>
+                    <th>{% severity_value 'High' %}</th>
+                    <th>{% severity_value 'Medium' %}</th>
+                    <th>{% severity_value 'Low' %}</th>
                     <th>
                         Total
                     </th>
@@ -117,18 +102,10 @@
             <table class="table table-bordered table-condensed table-striped">
                 <thead>
                 <tr>
-                    <th>
-                        S0
-                    </th>
-                    <th>
-                        S1
-                    </th>
-                    <th>
-                        S2
-                    </th>
-                    <th>
-                        S3
-                    </th>
+                    <th>{% severity_value 'Critical' %}</th>
+                    <th>{% severity_value 'High' %}</th>
+                    <th>{% severity_value 'Medium' %}</th>
+                    <th>{% severity_value 'Low' %}</th>
                     <th>
                         Total
                     </th>
@@ -167,18 +144,10 @@
                     <th>
                         Month
                     </th>
-                    <th>
-                        S0
-                    </th>
-                    <th>
-                        S1
-                    </th>
-                    <th>
-                        S2
-                    </th>
-                    <th>
-                        S3
-                    </th>
+                    <th>{% severity_value 'Critical' %}</th>
+                    <th>{% severity_value 'High' %}</th>
+                    <th>{% severity_value 'Medium' %}</th>
+                    <th>{% severity_value 'Low' %}</th>
                     <th>
                         Opened in Month
                     </th>
@@ -237,18 +206,10 @@
                     <th>
                         Product
                     </th>
-                    <th>
-                        S0
-                    </th>
-                    <th>
-                        S1
-                    </th>
-                    <th>
-                        S2
-                    </th>
-                    <th>
-                        S3
-                    </th>
+                    <th>{% severity_value 'Critical' %}</th>
+                    <th>{% severity_value 'High' %}</th>
+                    <th>{% severity_value 'Medium' %}</th>
+                    <th>{% severity_value 'Low' %}</th>
                     <th>
                         Total
                     </th>
@@ -307,7 +268,7 @@
                         <td class="nowrap">{{ finding.date }}</td>
                         <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
                             <p class="text-danger">
-                        {% else %}<p>{% endif %}{{ finding.numerical_severity }}</p></td>
+                        {% else %}<p>{% endif %}{{ finding.severity_display }}</p></td>
                         <td>{{ finding.age }}</td>
                         <td><a
                                 href="{% url 'view_product' finding.test.engagement.product.id %}"

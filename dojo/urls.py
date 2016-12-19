@@ -6,7 +6,8 @@ from tastypie.api import Api
 from dojo import views
 from dojo.ajax import StubFindingResource as ajax_stub_finding_resource
 from dojo.api import UserResource, ProductResource, EngagementResource, \
-    TestResource, FindingResource, ScanSettingsResource, ScanResource, StubFindingResource, FindingTemplateResource
+    TestResource, FindingResource, ScanSettingsResource, ScanResource, \
+    StubFindingResource, FindingTemplateResource, ImportScanResource
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
 from dojo.endpoint.urls import urlpatterns as endpoint_urls
 from dojo.engagement.urls import urlpatterns as eng_urls
@@ -21,6 +22,7 @@ from dojo.search.urls import urlpatterns as search_urls
 from dojo.test.urls import urlpatterns as test_urls
 from dojo.test_type.urls import urlpatterns as test_type_urls
 from dojo.user.urls import urlpatterns as user_urls
+from dojo.jira_link.urls import urlpatterns as jira_urls
 import sys
 
 admin.autodiscover()
@@ -38,6 +40,7 @@ v1_api.register(FindingTemplateResource())
 v1_api.register(ScanSettingsResource())
 v1_api.register(ScanResource())
 v1_api.register(StubFindingResource())
+v1_api.register(ImportScanResource())
 # v1_api.register(IPScanResource())
 
 ajax_api = Api(api_name='v1_a')
@@ -58,6 +61,7 @@ ur+= search_urls
 ur+= test_type_urls
 ur+= test_urls
 ur+= user_urls
+ur+= jira_urls
 
 if not hasattr(settings, 'URL_PREFIX'):
     settings.URL_PREFIX = ''

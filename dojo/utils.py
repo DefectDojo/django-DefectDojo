@@ -6,6 +6,7 @@ from datetime import date, datetime, timedelta
 from math import pi, sqrt
 
 import vobject
+import requests
 from dateutil.relativedelta import relativedelta, MO
 from django.conf import settings
 from django.core.mail import send_mail
@@ -14,8 +15,9 @@ from django.core.urlresolvers import get_resolver, reverse
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
 from django.template.defaultfilters import pluralize
 from pytz import timezone
-
-from dojo.models import Finding, Scan, Test, Engagement, Stub_Finding, Finding_Template, Report, Dojo_User
+from jira import JIRA
+from dojo.models import Finding, Scan, Test, Engagement, Stub_Finding, Finding_Template, Report, \
+    Product, JIRA_PKey, JIRA_Issue, Dojo_User
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -731,6 +733,90 @@ def handle_uploaded_threat(f, eng):
     eng.tmodel_path = settings.MEDIA_ROOT + '/threat/%s%s' % (eng.id, extension)
     eng.save()
 
+def add_issue(find, push_to_jira):
+    eng = Engagement.objects.get(test=find.test)
+    prod =  Product.objects.get(engagement= eng)
+    jpkey = JIRA_PKey.objects.get(product=prod)
+    jira_conf = jpkey.conf
+    if push_to_jira:
+        if 'Active' in find.status() and 'Verified' in find.status():
+                jira = JIRA(server=jira_conf.url, basic_auth=(jira_conf.username, jira_conf.password))
+                new_issue = jira.create_issue(project=jpkey.project_key, summary=find.title, description=find.long_desc(), issuetype={'name': 'Bug'}, priority={'name': jira_conf.get_priority(find.severity)})
+                j_issue = JIRA_Issue(jira_id=new_issue.id, jira_key=new_issue, finding = find)
+                j_issue.save()
+                if jpkey.enable_engagement_epic_mapping:
+                      epic = JIRA_Issue.objects.get(engagement=eng)
+                      issue_list = [j_issue.jira_id,]
+                      jira.add_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
+
+def update_issue( find, old_status, push_to_jira):
+    prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
+    jpkey = JIRA_PKey.objects.get(product=prod)
+    jira_conf = jpkey.conf
+    if push_to_jira:
+        j_issue = JIRA_Issue.objects.get(finding=find)
+        jira = JIRA(server=jira_conf.url, basic_auth=(jira_conf.username, jira_conf.password))
+        issue = jira.issue(j_issue.jira_id)
+        issue.update(summary=find.title, description=find.long_desc(), priority={'name': jira_conf.get_priority(find.severity)})
+        req_url =jira_conf.url+'/rest/api/latest/issue/'+ j_issue.jira_id+'/transitions'
+        if 'Inactive' in find.status() or 'Mitigated' in find.status() or 'False Positive' in find.status() or 'Out of Scope' in find.status() or 'Duplicate' in find.status():
+            if 'Active' in old_status:
+                json_data = {'transition':{'id':jira_conf.close_status_key}}
+                r = requests.post(url=req_url, auth=HTTPBasicAuth(jira_conf.username, jira_conf.password), json=json_data)
+        elif 'Active' in find.status() and 'Verified' in find.status():
+            if 'Inactive' in old_status:
+                    json_data = {'transition':{'id':jira_conf.open_status_key}}
+                    r = requests.post(url=req_url, auth=HTTPBasicAuth(jira_conf.username, jira_conf.password), json=json_data)
+
+def close_epic(eng, push_to_jira):
+    engagement = eng
+    prod = Product.objects.get(engagement=engagement)
+    jpkey = JIRA_PKey.objects.get(product=prod)
+    jira_conf = jpkey.conf
+    if jpkey.enable_engagement_epic_mapping and push_to_jira:
+        j_issue = JIRA_Issue.objects.get(engagement=eng)
+        req_url = jira_conf.url+'/rest/api/latest/issue/'+ j_issue.jira_id+'/transitions'
+        j_issue = JIRA_Issue.objects.get(engagement=eng)
+        json_data = {'transition':{'id':jira_conf.close_status_key}}
+        r = requests.post(url=req_url, auth=HTTPBasicAuth(jira_conf.username, jira_conf.password), json=json_data)
+
+def update_epic(eng, push_to_jira):
+    engagement = eng
+    prod = Product.objects.get(engagement=engagement)
+    jpkey = JIRA_PKey.objects.get(product=prod)
+    jira_conf = jpkey.conf
+    if jpkey.enable_engagement_epic_mapping and push_to_jira:
+        jira = JIRA(server=jira_conf.url, basic_auth=(jira_conf.username, jira_conf.password))
+        j_issue = JIRA_Issue.objects.get(engagement=eng)
+        issue = jira.issue(j_issue.jira_id)
+        issue.update(summary=eng.name, description=eng.name)
+
+def add_epic(eng, push_to_jira):
+    engagement = eng
+    prod = Product.objects.get(engagement=engagement)
+    jpkey = JIRA_PKey.objects.get(product=prod)
+    jira_conf = jpkey.conf
+    if jpkey.enable_engagement_epic_mapping and push_to_jira:
+        issue_dict = {
+            'project': {'key': jpkey.project_key},
+            'summary': engagement.name,
+            'description' : engagement.name,
+            'issuetype': {'name': 'Epic'},
+            'customfield_' + str(jira_conf.epic_name_id) : engagement.name,
+            }
+        jira = JIRA(server=jira_conf.url, basic_auth=(jira_conf.username, jira_conf.password))
+        new_issue = jira.create_issue(fields=issue_dict)
+        j_issue = JIRA_Issue(jira_id=new_issue.id, jira_key=new_issue, engagement=engagement)
+        j_issue.save()
+
+def add_comment(find, note):
+    prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
+    jpkey = JIRA_PKey.objects.get(product=prod)
+    jira_conf = jpkey.conf
+    if jpkey.push_notes:
+        jira = JIRA(server=jira_conf.url, basic_auth=(jira_conf.username, jira_conf.password))
+        j_issue = JIRA_Issue.objects.get(finding=find)
+        jira.add_comment(j_issue.jira_id, '(%s): %s' % (note.author.get_full_name(), note.entry))
 
 def send_review_email(request, user, finding, users, new_note):
     recipients = [u.email for u in users]
