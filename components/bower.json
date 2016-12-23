@@ -37,7 +37,8 @@
     "chosen-bootstrap": null,
     "font-awesome": "4.4.0",
     "bootswatch-dist": "readable",
-    "bootstrap-wysiwyg-steveathon": null
+    "bootstrap-wysiwyg-steveathon": null,
+    "justgage": "https://github.com/toorshia/justgage.git"
   },
     "resolutions": {
       "font-awesome": "4.4.0"

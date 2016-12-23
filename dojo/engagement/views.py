@@ -3,6 +3,7 @@ import logging
 import os
 from datetime import datetime
 
+from django.contrib.auth.models import User
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
@@ -216,6 +217,7 @@ def add_tests(request, eid):
         if form.is_valid():
             new_test = form.save(commit=False)
             new_test.engagement = eng
+            new_test.lead = User.objects.get(id=form['lead'].value())
             new_test.save()
             tags = request.POST.getlist('tags')
             t = ", ".join(tags)
@@ -260,6 +262,7 @@ def import_scan_results(request, eid):
             environment, env_created = Development_Environment.objects.get_or_create(name="Development")
             t = Test(engagement=engagement, test_type=tt, target_start=scan_date,
                      target_end=scan_date, environment=environment, percent_complete=100)
+            t.lead = request.user
             t.full_clean()
             t.save()
             tags = request.POST.getlist('tags')
