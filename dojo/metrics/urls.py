@@ -6,6 +6,8 @@ urlpatterns = [
     #  metrics
     url(r'^metrics$', views.metrics, {'mtype': 'All'},
         name='metrics'),
+    url(r'^critical_product_metrics$', views.critical_product_metrics, {'mtype': 'All'},
+        name='critical_product_metrics'),
     url(r'^metrics/all$', views.metrics, {'mtype': 'All'},
         name='metrics_all'),
     url(r'^metrics/product/type$', views.metrics, {'mtype': 'All'},
