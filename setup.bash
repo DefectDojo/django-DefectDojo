@@ -10,13 +10,13 @@ function get_db_details() {
 
     echo
 
-    if mysql -fs -u$SQLUSER -p$SQLPWD $DBNAME >/dev/null 2>&1 </dev/null; then
+    if mysql -fs -u"$SQLUSER" -p"$SQLPWD" "$DBNAME" >/dev/null 2>&1 </dev/null; then
         echo "Database $DBNAME already exists!"
         echo
         read -p "Drop database $DBNAME? [Y/n] " DELETE
         if [[ ! $DELETE =~ ^[nN]$ ]]; then
-            mysqladmin -f --user=$SQLUSER --password=$SQLPWD drop $DBNAME
-            mysqladmin --user=$SQLUSER --password=$SQLPWD create $DBNAME
+            mysqladmin -f --user="$SQLUSER" --password="$SQLPWD" drop "$DBNAME"
+            mysqladmin --user="$SQLUSER" --password="$SQLPWD" create "$DBNAME"
         else
             echo "Error! Must supply an empty database to proceed."
             echo
@@ -47,13 +47,13 @@ YUM_CMD=$(which yum)
 APT_GET_CMD=$(which apt-get)
 BREW_CMD=$(which brew)
 
-if [[ ! -z $YUM_CMD ]]; then
+if [[ ! -z "$YUM_CMD" ]]; then
     sudo curl -sL https://rpm.nodesource.com/setup | sudo bash -
 	sudo yum install gcc libmysqlclient-dev python-devel mysql-server mysql-devel MySQL-python python-setuptools python-pip nodejs wkhtmltopdf npm -y
 	sudo yum groupinstall 'Development Tools'
-elif [[ ! -z $APT_GET_CMD ]]; then
+elif [[ ! -z "$APT_GET_CMD" ]]; then
     sudo apt-get install libjpeg-dev gcc libssl-dev python-dev libmysqlclient-dev python-pip mysql-server nodejs-legacy wkhtmltopdf npm -y
-elif [[ ! -z $BREW_CMD ]]; then
+elif [[ ! -z "$BREW_CMD" ]]; then
     brew install gcc openssl python mysql node npm Caskroom/cask/wkhtmltopdf
 else
 	echo "ERROR! OS not supported. Try the Vagrant option."
@@ -69,7 +69,7 @@ get_db_details
 
 unset HISTFILE
 
-if [[ ! -z $BREW_CMD ]]; then
+if [[ ! -z "$BREW_CMD" ]]; then
 	LC_CTYPE=C
 fi
 
@@ -81,25 +81,25 @@ cp dojo/settings.dist.py dojo/settings.py
 if [[ ! -z $BREW_CMD ]]; then
   sed -i ''  "s/MYSQLHOST/localhost/g" dojo/settings.py
   sed -i ''  "s/MYSQLPORT/3306/g" dojo/settings.py
-	sed -i ''  "s/MYSQLUSER/$SQLUSER/g" dojo/settings.py
-	sed -i ''  "s/MYSQLPWD/$SQLPWD/g" dojo/settings.py
-	sed -i ''  "s/MYSQLDB/$DBNAME/g" dojo/settings.py
-	sed -i ''  "s#DOJODIR#$PWD/dojo#g" dojo/settings.py
-	sed -i ''  "s/DOJOSECRET/$SECRET/g" dojo/settings.py
-	sed -i ''  "s#BOWERDIR#$PWD/components#g" dojo/settings.py
-	sed -i ''  "s#DOJO_MEDIA_ROOT#$PWD/media/#g" dojo/settings.py
-	sed -i ''  "s#DOJO_STATIC_ROOT#$PWD/static/#g" dojo/settings.py
+  sed -i ''  "s/MYSQLUSER/$SQLUSER/g" dojo/settings.py
+  sed -i ''  "s/MYSQLPWD/$SQLPWD/g" dojo/settings.py
+  sed -i ''  "s/MYSQLDB/$DBNAME/g" dojo/settings.py
+  sed -i ''  "s#DOJODIR#$PWD/dojo#g" dojo/settings.py
+  sed -i ''  "s/DOJOSECRET/$SECRET/g" dojo/settings.py
+  sed -i ''  "s#BOWERDIR#$PWD/components#g" dojo/settings.py
+  sed -i ''  "s#DOJO_MEDIA_ROOT#$PWD/media/#g" dojo/settings.py
+  sed -i ''  "s#DOJO_STATIC_ROOT#$PWD/static/#g" dojo/settings.py
 else
   sed -i  "s/MYSQLHOST/localhost/g" dojo/settings.py
-	sed -i  "s/MYSQLPORT/3306/g" dojo/settings.py
-	sed -i  "s/MYSQLUSER/$SQLUSER/g" dojo/settings.py
-	sed -i  "s/MYSQLPWD/$SQLPWD/g" dojo/settings.py
-	sed -i  "s/MYSQLDB/$DBNAME/g" dojo/settings.py
-	sed -i  "s#DOJODIR#$PWD/dojo#g" dojo/settings.py
-	sed -i  "s/DOJOSECRET/$SECRET/g" dojo/settings.py
-	sed -i  "s#BOWERDIR#$PWD/components#g" dojo/settings.py
-	sed -i  "s#DOJO_MEDIA_ROOT#$PWD/media/#g" dojo/settings.py
-	sed -i  "s#DOJO_STATIC_ROOT#$PWD/static/#g" dojo/settings.py
+  sed -i  "s/MYSQLPORT/3306/g" dojo/settings.py
+  sed -i  "s/MYSQLUSER/$SQLUSER/g" dojo/settings.py
+  sed -i  "s/MYSQLPWD/$SQLPWD/g" dojo/settings.py
+  sed -i  "s/MYSQLDB/$DBNAME/g" dojo/settings.py
+  sed -i  "s#DOJODIR#$PWD/dojo#g" dojo/settings.py
+  sed -i  "s/DOJOSECRET/$SECRET/g" dojo/settings.py
+  sed -i  "s#BOWERDIR#$PWD/components#g" dojo/settings.py
+  sed -i  "s#DOJO_MEDIA_ROOT#$PWD/media/#g" dojo/settings.py
+  sed -i  "s#DOJO_STATIC_ROOT#$PWD/static/#g" dojo/settings.py
 fi
 
 # Detect Python version

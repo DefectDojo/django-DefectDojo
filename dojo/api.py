@@ -19,7 +19,7 @@ from django.conf import settings
 from dojo.models import Product, Engagement, Test, Finding, \
     User, ScanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, \
-    BurpRawRequestResponse, Endpoint
+    BurpRawRequestResponse, Endpoint, Notes
 from dojo.forms import ProductForm, EngForm2, TestForm, \
     ScanSettingsForm, FindingForm, StubFindingForm, FindingTemplateForm, \
     ImportScanForm, SEVERITY_CHOICES
@@ -733,6 +733,20 @@ class ScanResource(BaseModelResource):
         authorization = UserScanAuthorization()
         serializer = Serializer(formats=['json'])
 
+# Method used to get Private Key from uri, Used in the ImportScan and ReImportScan resources
+def get_pk_from_uri(uri):
+    prefix = get_script_prefix()
+    chomped_uri = uri
+
+    if prefix and chomped_uri.startswith(prefix):
+        chomped_uri = chomped_uri[len(prefix)-1:]
+
+    try:
+        view, args, kwargs = resolve(chomped_uri)
+    except Resolver404:
+        raise NotFound("The URL provided '%s' was not a link to a valid resource." % uri)
+
+    return kwargs['pk']
 
 """
     /api/v1/importscan/
@@ -785,7 +799,7 @@ class ImportScanValidation(Validation):
         else:
             # verify the engagement is valid
             try:
-                ImportScanResource.get_pk_from_uri(uri=bundle.data['engagement'])
+                get_pk_from_uri(uri=bundle.data['engagement'])
             except NotFound:
                 errors.setdefault('engagement', []).append('A valid engagement must be supplied. Ex. /api/v1/engagements/1/')
         scan_type_list = list(map(lambda x: x[0], ImportScanForm.SCAN_TYPE_CHOICES))
@@ -829,21 +843,6 @@ class ImportScanResource(MultipartResource, Resource):
     file = fields.FileField(attribute='file')
     engagement = fields.CharField(attribute='engagement')
 
-    @staticmethod
-    def get_pk_from_uri(uri):
-        prefix = get_script_prefix()
-        chomped_uri = uri
-
-        if prefix and chomped_uri.startswith(prefix):
-            chomped_uri = chomped_uri[len(prefix)-1:]
-
-        try:
-            view, args, kwargs = resolve(chomped_uri)
-        except Resolver404:
-            raise NotFound("The URL provided '%s' was not a link to a valid resource." % uri)
-
-        return kwargs['pk']
-
     class Meta:
         resource_name = 'importscan'
         fields = ['scan_date', 'minimum_severity', 'active', 'verified', 'scan_type', 'tags', 'file']
@@ -869,7 +868,7 @@ class ImportScanResource(MultipartResource, Resource):
             bundle.data['tags'] = ""
 
         bundle.obj.__setattr__('engagement_obj',
-                               Engagement.objects.get(id=self.get_pk_from_uri(bundle.data['engagement'])))
+                               Engagement.objects.get(id=get_pk_from_uri(bundle.data['engagement'])))
 
         return bundle
 
@@ -957,3 +956,231 @@ class ImportScanResource(MultipartResource, Resource):
         res = TestResource()
         uri = res.get_resource_uri(t)
         raise ImmediateHttpResponse(HttpCreated(location = uri))
+
+# The default form validation was buggy so I implemented a custom validation class
+class ReImportScanValidation(Validation):
+    def is_valid(self, bundle, request=None):
+        if not bundle.data:
+            return {'__all__': 'You didn\'t seem to pass anything in.'}
+
+        errors = {}
+
+        # Make sure file is present
+        if 'file' not in bundle.data:
+            errors.setdefault('file', []).append('You must pass a file in to be imported')
+
+        # Make sure scan_date matches required format
+        if 'scan_date' in bundle.data:
+            try:
+                datetime.strptime(bundle.data['scan_date'], '%Y/%m/%d')
+            except ValueError:
+                errors.setdefault('scan_date', []).append("Incorrect scan_date format, should be YYYY/MM/DD")
+
+        # Make sure scan_type and minimum_severity have valid options
+        if 'test' not in bundle.data:
+            errors.setdefault('test', []).append('test must be given')
+        else:
+            # verify the engagement is valid
+            try:
+                get_pk_from_uri(uri=bundle.data['test'])
+            except NotFound:
+                errors.setdefault('engagement', []).append('A valid engagement must be supplied. Ex. /api/v1/engagements/1/')
+        scan_type_list = list(map(lambda x: x[0], ImportScanForm.SCAN_TYPE_CHOICES))
+        if 'scan_type' in bundle.data:
+            if bundle.data['scan_type'] not in scan_type_list:
+                errors.setdefault('scan_type', []).append('scan_type must be one of the following: ' + ', '.join(scan_type_list))
+        else:
+            errors.setdefault('scan_type', []).append('A scan_type must be given so we know how to import the scan file.')
+        severity_list = list(map(lambda x: x[0], SEVERITY_CHOICES))
+        if 'minimum_severity' in bundle.data:
+            if bundle.data['minimum_severity'] not in severity_list:
+                errors.setdefault('minimum_severity', []).append('minimum_severity must be one of the following: ' + ', '.join(severity_list))
+
+        # Make sure active and verified are booleans
+        if 'active' in bundle.data:
+            if bundle.data['active'] in ['false', 'False', '0']:
+                bundle.data['active'] = False
+            elif bundle.data['active'] in ['true', 'True', '1']:
+                bundle.data['active'] = True
+
+            if not isinstance(bundle.data['active'], bool):
+                errors.setdefault('active', []).append('active must be a boolean')
+        if 'verified' in bundle.data:
+            if bundle.data['verified'] in ['false', 'False', '0']:
+                bundle.data['verified'] = False
+            elif bundle.data['verified'] in ['true', 'True', '1']:
+                bundle.data['verified'] = True
+
+            if not isinstance(bundle.data['verified'], bool):
+                errors.setdefault('verified', []).append('verified must be a boolean')
+
+        return errors
+
+class ReImportScanResource(MultipartResource, Resource):
+    scan_date = fields.DateTimeField(attribute='scan_date')
+    minimum_severity = fields.CharField(attribute='minimum_severity')
+    active = fields.BooleanField(attribute='active')
+    verified = fields.BooleanField(attribute='verified')
+    scan_type = fields.CharField(attribute='scan_type')
+    tags = fields.CharField(attribute='tags')
+    file = fields.FileField(attribute='file')
+    test = fields.CharField(attribute='test')
+
+    class Meta:
+        resource_name = 'reimportscan'
+        fields = ['scan_date', 'minimum_severity', 'active', 'verified', 'scan_type', 'tags', 'file']
+        list_allowed_methods = ['post']
+        detail_allowed_methods = []
+        include_resource_uri = True
+
+        authentication = DojoApiKeyAuthentication()
+        authorization = DjangoAuthorization()
+        validation = ReImportScanValidation()
+        object_class = ImportScanObject
+
+    def hydrate(self, bundle):
+        if 'scan_date' not in bundle.data:
+            bundle.data['scan_date'] = datetime.now().strftime("%Y/%m/%d")
+        if 'minimum_severity' not in bundle.data:
+            bundle.data['minimum_severity'] = "Info"
+        if 'active' not in bundle.data:
+            bundle.data['active'] = True
+        if 'verified' not in bundle.data:
+            bundle.data['verified'] = True
+        if 'tags' not in bundle.data:
+            bundle.data['tags'] = ""
+
+        bundle.obj.__setattr__('test_obj',
+                               Test.objects.get(id=get_pk_from_uri(bundle.data['test'])))
+
+        return bundle
+
+    def detail_uri_kwargs(self, bundle_or_obj):
+        kwargs = {}
+        return kwargs
+
+    def obj_create(self, bundle, **kwargs):
+        bundle.obj = ImportScanObject(initial=kwargs)
+        self.is_valid(bundle)
+        if bundle.errors:
+            raise ImmediateHttpResponse(response=self.error_response(bundle.request, bundle.errors))
+        bundle = self.full_hydrate(bundle)
+
+        test = bundle.obj.__getattr__('test_obj')
+        scan_type = bundle.obj.__getattr__('scan_type')
+        min_sev = bundle.obj.__getattr__('minimum_severity')
+        scan_date = bundle.obj.__getattr__('scan_date')
+        verified = bundle.obj.__getattr__('verified')
+        active = bundle.obj.__getattr__('active')
+
+        try:
+            parser = import_parser_factory(bundle.data['file'], test)
+        except ValueError:
+            raise NotFound("Parser ValueError")
+
+        try:
+            items = parser.items
+            original_items = test.finding_set.all().values_list("id", flat=True)
+            new_items = []
+            mitigated_count = 0
+            finding_count = 0
+            finding_added_count = 0
+            reactivated_count = 0
+            for item in items:
+                sev = item.severity
+                if sev == 'Information' or sev == 'Informational':
+                    sev = 'Info'
+
+                if Finding.SEVERITIES[sev] > Finding.SEVERITIES[min_sev]:
+                    continue
+
+                if scan_type == 'Veracode Scan' or scan_type == 'Arachni Scan':
+                    find = Finding.objects.filter(title=item.title,
+                                                  test__id=test.id,
+                                                  severity=sev,
+                                                  numerical_severity=Finding.get_numerical_severity(sev),
+                                                  description=item.description
+                                                  )
+                else:
+                    find = Finding.objects.filter(title=item.title,
+                                                  test__id=test.id,
+                                                  severity=sev,
+                                                  numerical_severity=Finding.get_numerical_severity(sev),
+                                                  )
+
+                if len(find) == 1:
+                    find = find[0]
+                    if find.mitigated:
+                        # it was once fixed, but now back
+                        find.mitigated = None
+                        find.mitigated_by = None
+                        find.active = True
+                        find.verified = verified
+                        find.save()
+                        note = Notes(entry="Re-activated by %s re-upload." % scan_type,
+                                     author=bundle.request.user)
+                        note.save()
+                        find.notes.add(note)
+                        reactivated_count += 1
+                    new_items.append(find.id)
+                else:
+                    item.test = test
+                    item.date = test.target_start
+                    item.reporter = bundle.request.user
+                    item.last_reviewed = datetime.now(tz=localtz)
+                    item.last_reviewed_by = bundle.request.user
+                    item.verified = verified
+                    item.active = active
+                    item.save()
+                    finding_added_count += 1
+                    new_items.append(item.id)
+                    find = item
+
+                    if hasattr(item, 'unsaved_req_resp') and len(item.unsaved_req_resp) > 0:
+                        for req_resp in item.unsaved_req_resp:
+                            burp_rr = BurpRawRequestResponse(finding=find,
+                                                             burpRequestBase64=req_resp["req"],
+                                                             burpResponseBase64=req_resp["resp"],
+                                                             )
+                            burp_rr.clean()
+                            burp_rr.save()
+
+                    if item.unsaved_request is not None and item.unsaved_response is not None:
+                        burp_rr = BurpRawRequestResponse(finding=find,
+                                                         burpRequestBase64=item.unsaved_request,
+                                                         burpResponseBase64=item.unsaved_response,
+                                                         )
+                        burp_rr.clean()
+                        burp_rr.save()
+                if find:
+                    finding_count += 1
+                    for endpoint in item.unsaved_endpoints:
+                        ep, created = Endpoint.objects.get_or_create(protocol=endpoint.protocol,
+                                                                     host=endpoint.host,
+                                                                     path=endpoint.path,
+                                                                     query=endpoint.query,
+                                                                     fragment=endpoint.fragment,
+                                                                     product=test.engagement.product)
+                        find.endpoints.add(ep)
+
+                    if item.unsaved_tags is not None:
+                        find.tags = item.unsaved_tags
+            # calculate the difference
+            to_mitigate = set(original_items) - set(new_items)
+            for finding_id in to_mitigate:
+                finding = Finding.objects.get(id=finding_id)
+                finding.mitigated = datetime.combine(scan_date, datetime.now(tz=localtz).time())
+                finding.mitigated_by = bundle.request.user
+                finding.active = False
+                finding.save()
+                note = Notes(entry="Mitigated by %s re-upload." % scan_type,
+                             author=bundle.request.user)
+                note.save()
+                finding.notes.add(note)
+                mitigated_count += 1
+
+        except SyntaxError:
+            raise NotFound("Parser SyntaxError")
+
+        # Everything executed fine. We successfully imported the scan.
+        raise ImmediateHttpResponse(HttpCreated(location = bundle.obj.__getattr__('test')))
