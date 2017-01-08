@@ -25,7 +25,7 @@ For additional documentation you can visit our [Read the Docs site](http://defec
 
 # Once Click Installations
 
-Deploy to Docker Cloud. (Login first to Docker Cloud before clicking the install button.)
+Deploy to Docker Cloud. (<b>Login first to Docker Cloud before clicking the install button.</b>)
 
 [![Deploy to Docker Cloud](https://files.cloud.docker.com/images/deploy-to-dockercloud.svg)](https://cloud.docker.com/stack/deploy/?repo=https://github.com/aaronweaver/docker-DefectDojo)
 
