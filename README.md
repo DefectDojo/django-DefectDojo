@@ -92,7 +92,7 @@ Proceeds are used for testing, infrastructure, etc.
 
 # Sponsors
 
-### Intersted in sponsoring DefectDojo? Please email greg.anderson@owasp.org
+Intersted in becoming and sponsor and having your logo displayed? Please email greg.anderson@owasp.org
 
 # License
 
