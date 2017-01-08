@@ -53,7 +53,7 @@ that should give you an idea of how to use DefectDojo for your own team.
 
 # Getting Involved
 
-<img src="http://cdn1.alphr.com/sites/alphr/files/styles/16x9_480/public/2015/07/slack_logo.jpg?itok=56Mr1cnT" width="200">Realtime discussion is done in the OWASP Slack Channel, #defectdojo. [Get Access.](https://owasp.herokuapp.com/)
+<img src="https://github.com/devGregA/django-DefectDojo/blob/master/doc/img/slack_rgb.png" width="100">Realtime discussion is done in the OWASP Slack Channel, #defectdojo. [Get Access.](https://owasp.herokuapp.com/)
 
 
 
