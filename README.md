@@ -91,7 +91,7 @@ Proceeds are used for testing, infrastructure, etc.
 
 # Sponsors
 
-Intersted in becoming and sponsor and having your logo displayed? Please email greg.anderson@owasp.org
+Interested in becoming and sponsor and having your logo displayed? Please email greg.anderson@owasp.org
 
 # License
 
