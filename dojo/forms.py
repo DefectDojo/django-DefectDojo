@@ -138,7 +138,7 @@ class MonthYearWidget(Widget):
 class Product_TypeForm(forms.ModelForm):
     class Meta:
         model = Product_Type
-        fields = ['name']
+        fields = ['name', 'critical_product', 'key_product']
 
 
 class Test_TypeForm(forms.ModelForm):

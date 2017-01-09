@@ -57,6 +57,13 @@ class AppSpiderXMLParser(object):
             unsaved_endpoints = list()
             unsaved_req_resp = list()
 
+            if title is None:
+                title = ''
+            if description is None:
+                description = ''
+            if mitigation is None:
+                mitigation = ''
+
             if dupe_key in dupes:
                 find = dupes[dupe_key]
 
