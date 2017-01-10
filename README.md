@@ -87,7 +87,7 @@ With past contributions from:
 
 Proceeds are used for testing, infrastructure, etc.
 
- [Stickers](https://www.stickermule.com/en/marketplace/tags/defectdojo)
+ <b>[Stickers](https://www.stickermule.com/en/marketplace/tags/defectdojo)</b>
 
 [![PayPal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=paypal%40owasp%2eorg&lc=US&item_name=OWASP%20DefectDojo&no_note=0&currency_code=USD&bn=PP%2dDonationsBF)
 
