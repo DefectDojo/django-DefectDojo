@@ -18,6 +18,7 @@ import pdfkit
 from dojo.celery import app
 from dojo.reports.widgets import report_widget_factory
 from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, close_epic
+from dojo.models import Finding
 
 logger = get_task_logger(__name__)
 localtz = timezone(settings.TIME_ZONE)
@@ -207,3 +208,19 @@ def close_epic_task(eng, push_to_jira):
 def add_comment_task(find, note):
     logger.info("add comment")
     add_comment(find, note)
+
+@app.task(name='async_dedupe')
+def async_dedupe(self,  new_finding, *args, **kwargs):
+    logger.info("running deduplication")
+    eng_findings_cwe = Finding.objects.filter(test__engagement__product=new_finding.test.engagement.product,
+                                              cwe=new_finding.cwe).exclude(id=new_finding.id).exclude(cwe=None).exclude(endpoints=[])
+    eng_findings_title = Finding.objects.filter(test__engagement__product=new_finding.test.engagement.product,
+                                                title=new_finding.title).exclude(id=new_finding.id).exlcude(endpoints=[])
+    total_findings = eng_findings_cwe | eng_findings_title
+    for find in total_findings:
+        list1 = new_finding.endpoints.all()
+        list2 = find.endpoints.all()
+        if all(x in list2 for x in list1):
+            find.duplicate = True
+            super(Finding, find).save(*args, **kwargs)
+
