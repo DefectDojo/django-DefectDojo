@@ -10,11 +10,10 @@ SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 ENABLE_DEDUPLICATION = False
-
+ENABLE_JIRA = False
 # True will display S0, S1, S2, ect in most places
 # False will display Critical, High, Medium, etc
 S_FINDING_SEVERITY_NAMING = False
-
 URL_PREFIX = ''
 
 # Uncomment this line if you enable SSL
@@ -164,6 +163,7 @@ ROOT_URLCONF = 'dojo.urls'
 LOGIN_URL = '/login'
 LOGIN_EXEMPT_URLS = (
     r'^%sstatic/' % URL_PREFIX,
+    r'^%swebhook/' % URL_PREFIX,
     r'^%smetrics/all$' % URL_PREFIX,
     r'^%smetrics$' % URL_PREFIX,
     r'^%smetrics/product/type/(?P<mtype>\d+)$' % URL_PREFIX,

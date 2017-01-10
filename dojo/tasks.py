@@ -11,11 +11,15 @@ from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
 from django.utils.http import urlencode
 from pytz import timezone
+from celery.utils.log import get_task_logger
+from celery.decorators import task
 
 import pdfkit
 from dojo.celery import app
 from dojo.reports.widgets import report_widget_factory
+from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, close_epic
 
+logger = get_task_logger(__name__)
 localtz = timezone(settings.TIME_ZONE)
 
 """
@@ -173,3 +177,33 @@ def async_custom_pdf_report(self,
             temp.close()
 
     return True
+
+@task(name='add_issue_task')
+def add_issue_task( find, push_to_jira):
+    logger.info("add issue task")
+    add_issue(find, push_to_jira)
+
+@task(name='update_issue_task')
+def update_issue_task(find, old_status, push_to_jira):
+    logger.info("add issue task")
+    update_issue(find, old_status, push_to_jira)
+
+@task(name='add_epic_task')
+def add_epic_task(eng, push_to_jira):
+    logger.info("add epic task")
+    add_epic(eng, push_to_jira)
+
+@task(name='update_epic_task')
+def update_epic_task(eng, push_to_jira):
+    logger.info("update epic task")
+    update_epic(eng, push_to_jira)
+
+@task(name='close_epic_task')
+def close_epic_task(eng, push_to_jira):
+    logger.info("close epic task")
+    close_epic(eng, push_to_jira)
+
+@task(name='add comment')
+def add_comment_task(find, note):
+    logger.info("add comment")
+    add_comment(find, note)

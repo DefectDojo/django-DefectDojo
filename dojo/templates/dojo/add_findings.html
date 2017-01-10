@@ -10,6 +10,11 @@
         <form class="form-horizontal" action="{% url 'add_temp_finding' tid fid %}" method="post">
             {% csrf_token %}
             {% include "dojo/form_fields.html" with form=form %}
+            {%  if jform %}
+                <h4> JIRA </h4>
+                <h4>
+                {% include "dojo/form_fields.html" with form=jform %}
+            {% endif %}
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
                     <input class="btn btn-primary" type="submit" value="Add Another Finding"/>
@@ -21,6 +26,11 @@
         <form class="form-horizontal" action="{% url 'add_findings' tid %}" method="post">
             {% csrf_token %}
             {% include "dojo/form_fields.html" with form=form %}
+            {%  if jform %}
+                <h4> JIRA </h4>
+                <hr>
+                {% include "dojo/form_fields.html" with form=jform %}
+            {% endif %}
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
                     <input class="btn btn-primary" type="submit" value="Add Another Finding"/>

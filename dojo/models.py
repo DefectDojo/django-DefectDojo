@@ -906,6 +906,49 @@ class FindingImageAccessToken(models.Model):
             self.token = uuid4()
         return super(FindingImageAccessToken, self).save(*args, **kwargs)
 
+class JIRA_Conf(models.Model):
+    url =  models.URLField(max_length=2000, verbose_name="JIRA URL")
+#    product = models.ForeignKey(Product)
+    username = models.CharField(max_length=2000 )
+    password = models.CharField(max_length=2000)
+#    project_key = models.CharField(max_length=200,null=True, blank=True)
+#    enabled = models.BooleanField(default=True)
+    epic_name_id = models.IntegerField()
+    open_status_key = models.IntegerField()
+    close_status_key = models.IntegerField()
+    low_mapping_severity = models.CharField(max_length=200)
+    medium_mapping_severity = models.CharField(max_length=200)
+    high_mapping_severity = models.CharField(max_length=200)
+    critical_mapping_severity = models.CharField(max_length=200)
+    def __unicode__(self):
+        return self.url + " | " + self.username
+
+    def get_priority(self, status):
+        if status == 'Low':
+            return self.low_mapping_severity
+        elif status == 'Medium':
+            return self.medium_mapping_severity
+        elif status == 'High':
+            return self.high_mapping_severity
+        elif status == 'Critical':
+            return self.critical_mapping_severity
+        else:
+            return 'N/A'
+
+class JIRA_Issue(models.Model):
+    jira_id =  models.CharField(max_length=200)
+    jira_key =  models.CharField(max_length=200)
+    finding = models.ForeignKey(Finding, null=True, blank=True)
+    engagement = models.ForeignKey(Engagement, null=True, blank=True)
+
+class JIRA_PKey(models.Model):
+    project_key = models.CharField(max_length=200, blank=True)
+    product = models.ForeignKey(Product)
+    conf = models.ForeignKey(JIRA_Conf, verbose_name="JIRA Configuration", null=True, blank=True)
+    push_all_issues = models.BooleanField(default=True, blank=True)
+    enable_engagement_epic_mapping = models.BooleanField(default=True, blank=True)
+    push_notes = models.BooleanField(default=True, blank=True)
+
 
 # Register for automatic logging to database
 auditlog.register(Dojo_User)

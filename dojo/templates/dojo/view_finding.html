@@ -176,7 +176,23 @@
             </div>
         </div>
     {% endif %}
-
+ {% if jissue and jconf %}
+    <div class="row to_highlight">
+        <div class="col-md-12">
+            <div class="panel panel-default endpoints table-responsive">
+                <div class="panel-heading">
+                    <h4>JIRA Link
+                        <span class="pull-right"><a data-toggle="collapse" href="#jira_link"><i
+                                class="glyphicon glyphicon-chevron-up"></i></a></span>
+                    </h4>
+                </div>
+                    <div id="jira_link" class="panel-body endpoint-panel table-responsive collapse in">
+                      <a href="{{jconf.url}}/browse/{{jissue.jira_key}}"> {{jconf.url}}/browse/{{jissue.jira_key}} </a>
+                    </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
     <div class="row to_highlight">
         <div class="col-md-12">
             <div class="panel panel-default endpoints table-responsive">

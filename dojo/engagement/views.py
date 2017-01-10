@@ -18,13 +18,16 @@ from pytz import timezone
 from dojo.filters import EngagementFilter
 from dojo.forms import CheckForm, \
     UploadThreatForm, UploadRiskForm, NoteForm, DoneForm, \
-    EngForm2, TestForm, ReplaceRiskAcceptanceForm, AddFindingsRiskAcceptanceForm, DeleteEngagementForm, ImportScanForm
+    EngForm2, TestForm, ReplaceRiskAcceptanceForm, AddFindingsRiskAcceptanceForm, DeleteEngagementForm, ImportScanForm, \
+    JIRAFindingForm
 from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Type, Notes, \
-    Risk_Acceptance, Development_Environment, BurpRawRequestResponse, Endpoint
+    Risk_Acceptance, Development_Environment, BurpRawRequestResponse, Endpoint, \
+    JIRA_PKey, JIRA_Conf, JIRA_Issue
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, message
+from dojo.tasks import update_epic_task, add_epic_task, close_epic_task
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -105,7 +108,18 @@ def edit_engagement(request, eid):
     eng = Engagement.objects.get(pk=eid)
     if request.method == 'POST':
         form = EngForm2(request.POST, instance=eng)
+        if 'jiraform' in request.POST:
+            jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=True)
         if form.is_valid():
+            if 'jiraform' in request.POST:
+                try:
+                    jissue = JIRA_Issue.objects.get(engagement=eng)
+                    update_epic_task.delay(eng, jform.cleaned_data.get('push_to_jira'))
+                    enabled = True
+                except:
+                    enabled = False
+                    add_epic_task.delay(eng, jform.cleaned_data.get('push_to_jira'))
+                    pass
             form.save()
             tags = request.POST.getlist('tags')
             t = ", ".join(tags)
@@ -120,10 +134,22 @@ def edit_engagement(request, eid):
                 return HttpResponseRedirect(reverse('view_engagement', args=(eng.id,)))
     else:
         form = EngForm2(instance=eng)
+        try:
+            jissue = JIRA_Issue.objects.get(engagement=eng)
+            enabled = True
+        except:
+            enabled = False
+            pass
+        if hasattr(settings, "ENABLE_JIRA"):
+            if settings.ENABLE_JIRA:
+                if JIRA_PKey.objects.filter(product= eng.product).count() != 0:
+                    jform = JIRAFindingForm(prefix='jiraform', enabled=enabled)
+                else:
+                    jform = None
     form.initial['tags'] = [tag.name for tag in eng.tags]
     add_breadcrumb(parent=eng, title="Edit Engagement", top_level=False, request=request)
     return render(request, 'dojo/new_eng.html',
-                  {'form': form, 'edit': True,
+                  {'form': form, 'edit': True, 'jform': jform
                    })
 
 
@@ -166,7 +192,16 @@ def view_engagement(request, eid):
     eng = Engagement.objects.get(id=eid)
     tests = Test.objects.filter(engagement=eng)
     risks_accepted = eng.risk_acceptance.all()
-
+    try:
+        jissue = JIRA_Issue.objects.get(engagement=eng)
+    except:
+            jissue = None
+            pass
+    try:
+        jconf = JIRA_PKey.objects.get(product=eng.product).conf
+    except:
+        jconf = None
+        pass
     exclude_findings = [finding.id for ra in eng.risk_acceptance.all()
                         for finding in ra.accepted_findings.all()]
     eng_findings = Finding.objects.filter(test__in=eng.test_set.all()) \
@@ -206,6 +241,7 @@ def view_engagement(request, eid):
                    'risk': eng.risk_path, 'form': form,
                    'risks_accepted': risks_accepted,
                    'can_add_risk': len(eng_findings),
+                   'jissue': jissue, 'jconf': jconf,
                    })
 
 
@@ -351,6 +387,7 @@ def close_eng(request, eid):
     eng.active = False
     eng.status = 'Completed'
     eng.save()
+    close_epic_task(eng, True)
     messages.add_message(request,
                          messages.SUCCESS,
                          'Engagement closed successfully.',
