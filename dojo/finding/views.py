@@ -519,7 +519,8 @@ def delete_finding_note(request, tid, nid):
 def delete_stub_finding(request, fid):
     finding = get_object_or_404(Stub_Finding, id=fid)
     tid = finding.test.id
-    del finding.tags
+    if hasattr(finding, 'tags'):
+        del finding.tags
     finding.delete()
     messages.add_message(request,
                          messages.SUCCESS,
