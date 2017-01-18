@@ -110,7 +110,7 @@
                     {% if finding.risk_acceptance_set.all %}
                         <th>Acceptance</th>
                     {% endif %}
-                    <th>Build ID</th>
+                    <!--<th>Build ID</th>-->
                     <th>Date discovered</th>
                     <th>Age</th>
                     <th>Reporter</th>
@@ -139,7 +139,6 @@
                                 View Risk Acceptance</a>
                         </td>
                     {% endif %}
-                    <td>{{ finding.build_id }}</td>
                     <td>{{ finding.date }}</td>
                     <td>{{ finding.age }} days</td>
                     <td>{{ finding.reporter }}</td>

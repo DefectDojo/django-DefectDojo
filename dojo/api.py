@@ -522,8 +522,8 @@ class FindingResource(BaseModelResource):
             'duplicate': ALL,
             'risk_acceptance': ALL,
             'engagement': ALL_WITH_RELATIONS,
-            'product': ALL_WITH_RELATIONS,
-            'build_id': ALL
+            'product': ALL_WITH_RELATIONS
+            #'build_id': ALL
         }
         authentication = DojoApiKeyAuthentication()
         authorization = DjangoAuthorization()
