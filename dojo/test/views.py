@@ -1,6 +1,7 @@
 # #  tests
 
 import logging
+import sys
 from datetime import datetime
 
 from django.conf import settings
@@ -14,11 +15,12 @@ from pytz import timezone
 from dojo.filters import TemplateFindingFilter
 from dojo.forms import NoteForm, TestForm, FindingForm, \
     DeleteTestForm, AddFindingForm, \
-    ImportScanForm, ReImportScanForm, FindingBulkUpdateForm
+    ImportScanForm, ReImportScanForm, FindingBulkUpdateForm, JIRAFindingForm
 from dojo.models import Finding, Test, Notes, \
-    BurpRawRequestResponse, Endpoint, Stub_Finding, Finding_Template
+    BurpRawRequestResponse, Endpoint, Stub_Finding, Finding_Template, JIRA_PKey
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, message
+from dojo.tasks import add_issue_task
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -174,7 +176,15 @@ def test_ics(request, tid):
 def add_findings(request, tid):
     test = Test.objects.get(id=tid)
     form_error = False
+    enabled = False
     form = AddFindingForm(initial={'date': datetime.now(tz=localtz).date()})
+    if hasattr(settings, 'ENABLE_JIRA'):
+        if settings.ENABLE_JIRA:
+            if JIRA_PKey.objects.filter(product=test.engagement.product).count() != 0:
+                enabled = JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues
+                jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
+        else:
+            jform = None
     if request.method == 'POST':
         form = AddFindingForm(request.POST)
         if form.is_valid():
@@ -192,7 +202,9 @@ def add_findings(request, tid):
             new_finding.save()
             new_finding.endpoints = form.cleaned_data['endpoints']
             new_finding.save()
-
+            jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=enabled)
+            if jform.is_valid():
+                add_issue_task.delay(new_finding, jform.cleaned_data.get('push_to_jira'))
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Finding added successfully.',
@@ -240,6 +252,7 @@ def add_findings(request, tid):
                    'temp': False,
                    'tid': tid,
                    'form_error': form_error,
+                   'jform': jform,
                    })
 
 
@@ -248,6 +261,7 @@ def add_temp_finding(request, tid, fid):
     test = get_object_or_404(Test, id=tid)
     finding = get_object_or_404(Finding_Template, id=fid)
     findings = Finding_Template.objects.all()
+
     if request.method == 'POST':
         form = FindingForm(request.POST)
         if form.is_valid():
@@ -268,6 +282,9 @@ def add_temp_finding(request, tid, fid):
             new_finding.save()
             new_finding.endpoints = form.cleaned_data['endpoints']
             new_finding.save()
+            if 'jiraform' in request.POST:
+                    jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=True)
+                    add_issue_task.delay(new_finding, jform.cleaned_data.get('push_to_jira'))
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Finding from template added successfully.',
@@ -318,10 +335,17 @@ def add_temp_finding(request, tid, fid):
                                     'impact': finding.impact,
                                     'references': finding.references,
                                     'numerical_severity': finding.numerical_severity})
+        if hasattr(settings, 'ENABLE_JIRA'):
+            if settings.ENABLE_JIRA:
+                enabled = JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues
+                jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
+        else:
+            jform = None
 
     add_breadcrumb(parent=test, title="Add Finding", top_level=False, request=request)
     return render(request, 'dojo/add_findings.html',
                   {'form': form,
+                   'jform': jform,
                    'findings': findings,
                    'temp': True,
                    'fid': finding.id,
@@ -438,19 +462,20 @@ def re_import_scan_results(request, tid):
                                                       )
 
                     if len(find) == 1:
-                        if find[0].mitigated:
+                        find = find[0]
+                        if find.mitigated:
                             # it was once fixed, but now back
-                            find[0].mitigated = None
-                            find[0].mitigated_by = None
-                            find[0].active = True
-                            find[0].verified = verified
-                            find[0].save()
+                            find.mitigated = None
+                            find.mitigated_by = None
+                            find.active = True
+                            find.verified = verified
+                            find.save()
                             note = Notes(entry="Re-activated by %s re-upload." % scan_type,
                                          author=request.user)
                             note.save()
-                            find[0].notes.add(note)
+                            find.notes.add(note)
                             reactivated_count += 1
-                        new_items.append(find[0].id)
+                        new_items.append(find.id)
                     else:
                         item.test = t
                         item.date = t.target_start
@@ -463,6 +488,16 @@ def re_import_scan_results(request, tid):
                         finding_added_count += 1
                         new_items.append(item.id)
                         find = item
+
+                        if hasattr(item, 'unsaved_req_resp') and len(item.unsaved_req_resp) > 0:
+                            for req_resp in item.unsaved_req_resp:
+                                burp_rr = BurpRawRequestResponse(finding=find,
+                                                                 burpRequestBase64=req_resp["req"],
+                                                                 burpResponseBase64=req_resp["resp"],
+                                                                 )
+                                burp_rr.clean()
+                                burp_rr.save()
+
                         if item.unsaved_request is not None and item.unsaved_response is not None:
                             burp_rr = BurpRawRequestResponse(finding=find,
                                                              burpRequestBase64=item.unsaved_request,
@@ -479,6 +514,7 @@ def re_import_scan_results(request, tid):
                                                                          query=endpoint.query,
                                                                          fragment=endpoint.fragment,
                                                                          product=t.engagement.product)
+                            find.endpoints.add(ep)
 
                         if item.unsaved_tags is not None:
                             find.tags = item.unsaved_tags

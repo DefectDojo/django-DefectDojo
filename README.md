@@ -25,7 +25,7 @@ For additional documentation you can visit our [Read the Docs site](http://defec
 
 # Once Click Installations
 
-Deploy to Docker Cloud. (Login first to Docker Cloud before clicking the install button.)
+Deploy to Docker Cloud. (<b>Login first to Docker Cloud before clicking the install button.</b>)
 
 [![Deploy to Docker Cloud](https://files.cloud.docker.com/images/deploy-to-dockercloud.svg)](https://cloud.docker.com/stack/deploy/?repo=https://github.com/aaronweaver/docker-DefectDojo)
 
@@ -47,16 +47,17 @@ terminology of DefectDojo, and the
 installation. We've also created some example [workflows](./doc/workflows.md)
 that should give you an idea of how to use DefectDojo for your own team.
 
-# Defect Dojo Client API's
+# DefectDojo Client API's
 
 - DefectDojo Python API: `pip install defectdojo_api` or clone the [repository](https://github.com/aaronweaver/defectdojo_api).
 
 # Getting Involved
 
-Realtime discussion is done in the OWASP Slack Channel, #defectdojo. [Get Access.](https://owasp.herokuapp.com/)
+<img src="https://github.com/devGregA/django-DefectDojo/blob/master/doc/img/slack_rgb.png" width="100">  
+<b>[Get Access.](https://owasp.herokuapp.com/)</b> Realtime discussion is done in the OWASP Slack Channel, #defectdojo.
 
-We discuss updates and changes on the [DefectDojo OWASP Mailing List](https://lists.owasp.org/mailman/listinfo/owasp_defectdojo_project).
-
+<br>
+<img src="https://github.com/devGregA/django-DefectDojo/blob/master/doc/img/Twitter_Logo.png" width="45">  
 The [DefectDojo Twitter Account](https://twitter.com/defect_dojo) tweets project updates and changes.
 
 # Available Plugins
@@ -86,9 +87,13 @@ With past contributions from:
 
 Proceeds are used for testing, infrastructure, etc.
 
-[Stickers](https://www.stickermule.com/en/marketplace/tags/defectdojo)
+ <b>[Stickers](https://www.stickermule.com/en/marketplace/tags/defectdojo)</b>
 
 [![PayPal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=paypal%40owasp%2eorg&lc=US&item_name=OWASP%20DefectDojo&no_note=0&currency_code=USD&bn=PP%2dDonationsBF)
+
+# Sponsors
+
+Interested in becoming and sponsor and having your logo displayed? Please email greg.anderson@owasp.org
 
 # License
 

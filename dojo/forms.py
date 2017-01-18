@@ -19,7 +19,7 @@ from dojo import settings
 from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
-    UserContactInfo
+    JIRA_Issue, JIRA_PKey, JIRA_Conf, UserContactInfo
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
 localtz = timezone(settings.TIME_ZONE)
@@ -138,7 +138,7 @@ class MonthYearWidget(Widget):
 class Product_TypeForm(forms.ModelForm):
     class Meta:
         model = Product_Type
-        fields = ['name']
+        fields = ['name', 'critical_product', 'key_product']
 
 
 class Test_TypeForm(forms.ModelForm):
@@ -1175,3 +1175,27 @@ class AddFindingImageForm(forms.ModelForm):
 
 
 FindingImageFormSet = modelformset_factory(FindingImage, extra=3, max_num=10, exclude=[''], can_delete=True)
+
+class JIRAForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput, required=True)
+
+    class Meta:
+        model = JIRA_Conf
+        exclude = ['product']
+
+
+class JIRAPKeyForm(forms.ModelForm):
+    conf = forms.ModelChoiceField(queryset=JIRA_Conf.objects.all(), label='JIRA Configuration')
+    class Meta:
+        model = JIRA_PKey
+        exclude = ['product']
+
+
+class JIRAFindingForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        self.enabled = kwargs.pop('enabled')
+        super(JIRAFindingForm, self).__init__(*args, **kwargs)
+        self.fields['push_to_jira'] = forms.BooleanField(initial=self.enabled)
+        self.fields['push_to_jira'].required=False
+
+    push_to_jira = forms.BooleanField(required=False)
