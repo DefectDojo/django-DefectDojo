@@ -1,0 +1,37 @@
+#!/bin/bash
+
+NAME="defect-dojo"                         # Name of the app
+DJANGODIR=/install_path/django-DefectDojo/ # Django project dir
+USER=defectdojo                                      # run as this user
+GROUP=defectdojo                                     # the group to run as
+NUM_WORKERS=3                                 # how many workers
+                                              # usually # of CPU + 1
+DJANGO_SETTINGS_MODULE=dojo.settings # which settings file
+
+DJANGO_WSGI_MODULE=dojo.wsgi              # WSGI module name
+GUNICORN_LOG_LEVEL=debug                      # Set log level
+             # possible values: debug, info, warning, error, critical
+
+echo "Starting $NAME as `whoami`"
+
+# Activate the virtual environment
+cd $DJANGODIR
+source /install_path/django-DefectDojo/venv/bin/activate
+export DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE
+export PYTHONPATH=$DJANGODIR:$PYTHONPATH
+
+echo $PYTHONPATH
+# Create the run directory if it doesn't exist
+#RUNDIR=$(dirname $SOCKFILE)
+#test -d $RUNDIR || mkdir -p $RUNDIR
+
+# Start your Django Unicorn
+exec gunicorn ${DJANGO_WSGI_MODULE}:application \
+  --name $NAME \
+  --timeout 300
+  --workers $NUM_WORKERS \
+  --user=$USER --group=$GROUP \
+#  --bind=unix:$SOCKFILE \
+  --bind 127.0.0.1:8001
+  --log-level=$GUNICORN_LOG_LEVEL \
+  --log-file=-

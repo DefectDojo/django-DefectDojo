@@ -306,6 +306,7 @@ def edit_product(request, pid):
     prod = Product.objects.get(pk=pid)
     jira_enabled = True
     jira_inst = None
+    jform = None
     try:
         jira_inst = JIRA_PKey.objects.get(product=prod)
     except:

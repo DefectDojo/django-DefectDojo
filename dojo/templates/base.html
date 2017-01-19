@@ -1,5 +1,6 @@
 {% load navigation_tags %}
 {% load display_tags %}
+{% load get_config_setting %}
 {% load static from staticfiles %}
 <!DOCTYPE html>
 <html lang="en">
@@ -245,10 +246,12 @@
                                     <a href="{% url 'calendar' %}"><i class="fa fa-calendar fa-fw"></i>
                                         <span>Calendar</span></a>
                                 </li>
+                                {% if "ENABLE_JIRA"|get_config_setting %}
                                 <li>
                                     <a href="{% url 'jira' %}"><i class="fa fa-comments fa-fw"></i>
                                         <span>JIRA</span></a>
                                 </li>
+                                {% endif %}
                             {% endif %}
 
                         {% endblock %}

@@ -578,7 +578,7 @@ class Finding(models.Model):
     last_reviewed = models.DateTimeField(null=True, editable=False)
     last_reviewed_by = models.ForeignKey(User, null=True, editable=False, related_name='last_reviewed_by')
     images = models.ManyToManyField('FindingImage', blank=True)
-
+    
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
 
