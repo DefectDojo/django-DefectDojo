@@ -126,7 +126,7 @@ BOWER_INSTALLED_APPS = (
     'chosen-bootstrap',
     'bootswatch-dist#readable',
     'bootstrap-wysiwyg-steveathon',
-    'juatgage'
+    'justgage'
 )
 
 # Make this unique, and don't share it with anybody.
