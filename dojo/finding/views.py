@@ -273,6 +273,7 @@ def edit_finding(request, fid):
     form = FindingForm(instance=finding)
     form.initial['tags'] = [tag.name for tag in finding.tags]
     form_error = False
+    jform = None
     try:
         jissue = JIRA_Issue.objects.get(finding=finding)
         enabled = True
@@ -308,7 +309,7 @@ def edit_finding(request, fid):
             t = ", ".join(tags)
             new_finding.tags = t
             new_finding.save()
-            if 'jiraform' in request.POST:
+            if 'jiraform-push_to_jira' in request.POST:
                jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=enabled)
                if jform.is_valid():
                     try:
@@ -364,6 +365,7 @@ def edit_finding(request, fid):
     return render(request, 'dojo/edit_findings.html',
                   {'form': form,
                    'finding': finding,
+                   'jform' : jform
                    })
 
 
@@ -519,7 +521,8 @@ def delete_finding_note(request, tid, nid):
 def delete_stub_finding(request, fid):
     finding = get_object_or_404(Stub_Finding, id=fid)
     tid = finding.test.id
-    del finding.tags
+    if hasattr(finding, 'tags'):
+        del finding.tags
     finding.delete()
     messages.add_message(request,
                          messages.SUCCESS,

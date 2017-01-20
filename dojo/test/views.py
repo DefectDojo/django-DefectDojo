@@ -202,13 +202,14 @@ def add_findings(request, tid):
             new_finding.save()
             new_finding.endpoints = form.cleaned_data['endpoints']
             new_finding.save()
-            jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=enabled)
-            if jform.is_valid():
-                add_issue_task.delay(new_finding, jform.cleaned_data.get('push_to_jira'))
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 'Finding added successfully.',
-                                 extra_tags='alert-success')
+            if 'jiraform-push_to_jira' in request.POST:
+                jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=enabled)
+                if jform.is_valid():
+                    add_issue_task.delay(new_finding, jform.cleaned_data.get('push_to_jira'))
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'Finding added successfully.',
+                                     extra_tags='alert-success')
             if create_template:
                 templates = Finding_Template.objects.filter(title=new_finding.title)
                 if len(templates) > 0:
@@ -282,7 +283,7 @@ def add_temp_finding(request, tid, fid):
             new_finding.save()
             new_finding.endpoints = form.cleaned_data['endpoints']
             new_finding.save()
-            if 'jiraform' in request.POST:
+            if 'jiraform-push_to_jira' in request.POST:
                     jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=True)
                     add_issue_task.delay(new_finding, jform.cleaned_data.get('push_to_jira'))
             messages.add_message(request,

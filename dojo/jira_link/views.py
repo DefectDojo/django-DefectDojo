@@ -92,8 +92,10 @@ def new_jira(request):
         jform = JIRAForm(request.POST, instance=JIRA_Conf())
         if jform.is_valid():
             try:
-                jira = JIRA(server=jform.cleaned_data.get('url'),
+                jira_server = jform.cleaned_data.get('url').rstrip('/')
+                jira = JIRA(server=jform.cleaned_data.get('url').rstrip('/'),
                             basic_auth=(jform.cleaned_data.get('username'), jform.cleaned_data.get('password')))
+                jform.url = jira_server
                 new_j = jform.save()
                 messages.add_message(request,
                                      messages.SUCCESS,
@@ -119,8 +121,10 @@ def edit_jira(request, jid):
         jform = JIRAForm(request.POST, instance=jira)
         if jform.is_valid():
             try:
-                jira = JIRA(server=jform.cleaned_data.get('url'),
+                jira_server = jform.cleaned_data.get('url').rstrip('/')
+                jira = JIRA(server=jira_server,
                             basic_auth=(jform.cleaned_data.get('username'), jform.cleaned_data.get('password')))
+                jform.url = jira_server
                 new_j = jform.save()
                 messages.add_message(request,
                                      messages.SUCCESS,

@@ -106,12 +106,13 @@ def new_engagement(request):
 @user_passes_test(lambda u: u.is_staff)
 def edit_engagement(request, eid):
     eng = Engagement.objects.get(pk=eid)
+    jform = None
     if request.method == 'POST':
         form = EngForm2(request.POST, instance=eng)
-        if 'jiraform' in request.POST:
+        if 'jiraform-push_to_jira' in request.POST:
             jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=True)
         if form.is_valid():
-            if 'jiraform' in request.POST:
+            if 'jiraform-push_to_jira' in request.POST:
                 try:
                     jissue = JIRA_Issue.objects.get(engagement=eng)
                     update_epic_task.delay(eng, jform.cleaned_data.get('push_to_jira'))
