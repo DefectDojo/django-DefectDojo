@@ -177,6 +177,7 @@ def add_findings(request, tid):
     test = Test.objects.get(id=tid)
     form_error = False
     enabled = False
+    jform = None
     form = AddFindingForm(initial={'date': datetime.now(tz=localtz).date()})
     if hasattr(settings, 'ENABLE_JIRA'):
         if settings.ENABLE_JIRA:
