@@ -231,7 +231,7 @@ def get_punchcard_data(findings, weeks_between, start_date):
 			days[day_offset[finding.date.weekday()]] += 1
 			if days[day_offset[finding.date.weekday()]] > highest_count:
 			    highest_count = days[day_offset[finding.date.weekday()]]
-	    except:	
+	    except:
 		if new_date < finding.date <= end_date:
 			# [0,0,(20*.02)]
 			# [week, day, weight]
@@ -387,7 +387,7 @@ def get_period_counts(active_findings, findings, findings_closed, accepted_findi
                     elif finding.severity == 'Low':
                         low_count += 1
                 pass
- 
+
         total = crit_count + high_count + med_count + low_count
         opened_in_period.append(
             [(tcalendar.timegm(new_date.timetuple()) * 1000), new_date, crit_count, high_count, med_count, low_count,
@@ -420,7 +420,7 @@ def get_period_counts(active_findings, findings, findings_closed, accepted_findi
 			    med_count += 1
 			elif finding.severity == 'Low':
 			    low_count += 1
-	    except:	
+	    except:
 		if finding.date <= end_date:
 			if finding.severity == 'Critical':
 			    crit_count += 1
@@ -430,12 +430,12 @@ def get_period_counts(active_findings, findings, findings_closed, accepted_findi
 			    med_count += 1
 			elif finding.severity == 'Low':
 			    low_count += 1
-		pass	
+		pass
         total = crit_count + high_count + med_count + low_count
         active_in_period.append(
             [(tcalendar.timegm(new_date.timetuple()) * 1000), new_date, crit_count, high_count, med_count, low_count,
              total])
- 
+
     return {'opened_per_period': opened_in_period,
             'accepted_per_period': accepted_in_period,
             'active_per_period': active_in_period}
@@ -733,6 +733,17 @@ def handle_uploaded_threat(f, eng):
     eng.tmodel_path = settings.MEDIA_ROOT + '/threat/%s%s' % (eng.id, extension)
     eng.save()
 
+def add_labels(find, issue):
+    #Update Label with Security
+    issue.fields.labels.append(u'security')
+    #Update the label with the product name (underscore)
+    prod_name = find.test.engagement.product.name.replace(" ", "_")
+    issue.fields.labels.append(prod_name)
+    issue.update(fields={"labels": issue.fields.labels})
+
+def jira_long_description(find_description, find_id):
+    return find_description + "\n\n*Dojo ID:* " + str(find_id)
+
 def add_issue(find, push_to_jira):
     eng = Engagement.objects.get(test=find.test)
     prod =  Product.objects.get(engagement= eng)
@@ -741,13 +752,17 @@ def add_issue(find, push_to_jira):
     if push_to_jira:
         if 'Active' in find.status() and 'Verified' in find.status():
                 jira = JIRA(server=jira_conf.url, basic_auth=(jira_conf.username, jira_conf.password))
-                new_issue = jira.create_issue(project=jpkey.project_key, summary=find.title, description=find.long_desc(), issuetype={'name': 'Bug'}, priority={'name': jira_conf.get_priority(find.severity)})
+                new_issue = jira.create_issue(project=jpkey.project_key, summary=find.title, description=jira_long_description(find.long_desc(), find.id), issuetype={'name': 'Bug'}, priority={'name': jira_conf.get_priority(find.severity)})
                 j_issue = JIRA_Issue(jira_id=new_issue.id, jira_key=new_issue, finding = find)
                 j_issue.save()
-                if jpkey.enable_engagement_epic_mapping:
-                      epic = JIRA_Issue.objects.get(engagement=eng)
-                      issue_list = [j_issue.jira_id,]
-                      jira.add_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
+                issue = jira.issue(new_issue.id)
+                #Add labels (security & product)
+                add_labels(find, new_issue)
+
+                #if jpkey.enable_engagement_epic_mapping:
+                #      epic = JIRA_Issue.objects.get(engagement=eng)
+                #      issue_list = [j_issue.jira_id,]
+                #      jira.add_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
 
 def update_issue( find, old_status, push_to_jira):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
@@ -757,7 +772,11 @@ def update_issue( find, old_status, push_to_jira):
         j_issue = JIRA_Issue.objects.get(finding=find)
         jira = JIRA(server=jira_conf.url, basic_auth=(jira_conf.username, jira_conf.password))
         issue = jira.issue(j_issue.jira_id)
-        issue.update(summary=find.title, description=find.long_desc(), priority={'name': jira_conf.get_priority(find.severity)})
+        issue.update(summary=find.title, description=jira_long_description(find.long_desc(), find.id), priority={'name': jira_conf.get_priority(find.severity)})
+
+        #Add labels(security & product)
+        add_labels(find, issue)
+
         req_url =jira_conf.url+'/rest/api/latest/issue/'+ j_issue.jira_id+'/transitions'
         if 'Inactive' in find.status() or 'Mitigated' in find.status() or 'False Positive' in find.status() or 'Out of Scope' in find.status() or 'Duplicate' in find.status():
             if 'Active' in old_status:
@@ -765,8 +784,8 @@ def update_issue( find, old_status, push_to_jira):
                 r = requests.post(url=req_url, auth=HTTPBasicAuth(jira_conf.username, jira_conf.password), json=json_data)
         elif 'Active' in find.status() and 'Verified' in find.status():
             if 'Inactive' in old_status:
-                    json_data = {'transition':{'id':jira_conf.open_status_key}}
-                    r = requests.post(url=req_url, auth=HTTPBasicAuth(jira_conf.username, jira_conf.password), json=json_data)
+                json_data = {'transition':{'id':jira_conf.open_status_key}}
+                r = requests.post(url=req_url, auth=HTTPBasicAuth(jira_conf.username, jira_conf.password), json=json_data)
 
 def close_epic(eng, push_to_jira):
     engagement = eng
@@ -835,5 +854,3 @@ def send_review_email(request, user, finding, users, new_note):
               recipients,
               fail_silently=False)
     pass
-
-
