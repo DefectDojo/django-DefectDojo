@@ -126,6 +126,36 @@
 
     <div class="row metric-data">
         <div class="col-md-12">
+        {% if critical_prods %}
+            <div class="row" >
+            {%  for c_prod in critical_prods %}
+            <div class ='col-md-4' align="center">
+            <div> <b>{{c_prod.name}} </b><br><br> </div>
+            <div   style="display:inline-block;" class="gaugeloop" name="{{ c_prod.name }}" id="{{ c_prod.name}}{{ c_prod.id }}" class="200x160px" start="{{ c_prod.calc_health }}"></div>
+            <div>
+                {%  if c_prod.critical_present and c_prod.high_present%}
+                    <p> {{ c_prod.name }} is affected by <b>both</b> critical and high severity vulnerabilities.</p>
+                    <p> <a href="/dojo/finding/open?title=&date=&severity=Critical&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">Critical Severity Vulnerabilities</a></p>
+                    <p> <a href="/dojo/finding/open?title=&date=&severity=High&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">High Severity Vulnerabilities</a></p>
+                {%  elif c_prod.critical_present %}
+                    <p> {{ c_prod.name }} is affected by critical vulnerabilities. </p>
+                    <p><a href="/dojo/finding/open?title=&date=&severity=Critical&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">Critical Severity Vulnerabilities</a></p>
+                {%  elif c_prod.high_present %}
+                    <p> {{ c_prod.name }} is affected by high severity vulnerabilities.</p>
+                    <p><a href="/dojo/finding/open?title=&date=&severity=High&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">High Severity Vulnerabilities</a></p> 
+					{% endif %}
+                	<p><a href='/dojo/metrics/product/type?date=2&test__engagement__product__prod_type={{ c_prod.id }}&status='> Full Metrics</a></p></div>
+                <br>
+            </div>
+            {% endfor %}
+            </div>
+        {% elif name == "Critical Product Metrics" %}
+            <div class="row" >
+                <div class="col-lg-6">
+                    <h3><b> No Critical Products registered</b> </h3>
+                </div>
+            </div>
+        {% endif %}
             <div class="row">
                 {% if opened_per_month %}
                     <div class="col-lg-6">
@@ -173,6 +203,7 @@
                         <!-- /.panel -->
                     </div>
                 {% endif %}
+			{% if  not critical_prods %}
                 <div class="col-lg-12">
                     <div class="panel panel-default">
                         <div class="panel-heading">
@@ -553,6 +584,7 @@
             </div>
         </div>
     </div>
+	{% endif %}
     <br/>
     <br/>
     <br/>
@@ -567,7 +599,22 @@
     <script src="{% static "flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
     <script src="{% static "flot/jquery.flot.stack.js" %}"></script>
     {% include "dojo/filter_js_snippet.html" %}
+    <script src="{% static "justgage/justgage.js" %}"></script>
+    <script src="{% static "justgage/raphael-2.1.4.min.js" %}"></script>
     <script>
+    $('.gaugeloop').each(function() {
+    j_obj = $(this);
+    var g_id = j_obj.attr('id');
+    var g_title = j_obj.attr('name');
+    var g_start = j_obj.attr('start');
+         var g = new JustGage({
+            id: g_id,
+            value: g_start ,
+             levelColors : [  "#FF0000", "#F9C802",  "#A9D70B" ],
+            min: 0,
+            max: 100,
+          });
+    });
         $(function () {
             {% if not show_pt_filter %}
                 $('#id_test__engagement__product__prod_type').parents('p').remove();

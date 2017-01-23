@@ -255,11 +255,17 @@ def view_product(request, pid):
 
 @user_passes_test(lambda u: u.is_staff)
 def new_product(request):
+    jform = None
     if request.method == 'POST':
         form = ProductForm(request.POST, instance=Product())
         if hasattr(settings, 'ENABLE_JIRA'):
             if settings.ENABLE_JIRA:
                 jform = JIRAPKeyForm(request.POST, instance=JIRA_PKey())
+            else:
+                jform = None
+        else:
+            jform = None
+
         if form.is_valid():
             product = form.save()
             tags = request.POST.getlist('tags')
@@ -300,6 +306,7 @@ def edit_product(request, pid):
     prod = Product.objects.get(pk=pid)
     jira_enabled = True
     jira_inst = None
+    jform = None
     try:
         jira_inst = JIRA_PKey.objects.get(product=prod)
     except:

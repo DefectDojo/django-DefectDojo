@@ -76,6 +76,34 @@ class Contact(models.Model):
 
 class Product_Type(models.Model):
     name = models.CharField(max_length=300)
+    critical_product = models.BooleanField(default=False)
+    key_product = models.BooleanField(default=False)
+
+    def critical_present(self):
+        c_findings = Finding.objects.filter(test__engagement__product__prod_type=self, severity='Critical')
+        if c_findings.count() > 0:
+            return True
+
+    def high_present(self):
+        c_findings = Finding.objects.filter(test__engagement__product__prod_type=self, severity='High')
+        if c_findings.count() > 0:
+            return True
+
+    def calc_health(self):
+        h_findings = Finding.objects.filter(test__engagement__product__prod_type=self, severity='High')
+        c_findings = Finding.objects.filter(test__engagement__product__prod_type=self, severity='Critical')
+        health = 100
+        if c_findings.count() > 0:
+            health = 40
+            health = health - ((c_findings.count() - 1) * 5)
+        if h_findings.count() > 0:
+            if health == 100:
+                health = 60
+            health = health - ((h_findings.count() - 1) * 2)
+        if health < 5:
+            return 5
+        else:
+            return health
 
     def findings_count(self):
         return Finding.objects.filter(mitigated__isnull=True,
@@ -406,6 +434,12 @@ class Endpoint(models.Model):
             url = url + '#' + fragment
         return url
 
+    def __eq__(self, other):
+        if isinstance(other, Endpoint):
+            return self.__unicode__() == other.__unicode__()
+        else:
+            return NotImplemented
+
     def finding_count(self):
         host = self.host_no_port
 
@@ -544,7 +578,7 @@ class Finding(models.Model):
     last_reviewed = models.DateTimeField(null=True, editable=False)
     last_reviewed_by = models.ForeignKey(User, null=True, editable=False, related_name='last_reviewed_by')
     images = models.ManyToManyField('FindingImage', blank=True)
-
+    
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
 

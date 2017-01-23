@@ -218,6 +218,7 @@
                     <th>Severity</th>
                     <th>Verified</th>
                     <th>Active</th>
+                    <th>Duplicate</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
@@ -238,6 +239,7 @@
                         {% else %}<span>{% endif %}{{ finding.severity }}</span></td>
                         <td>{{ finding.verified }}</td>
                         <td>{{ finding.active }}</td>
+                        <td>{{ finding.duplicate }}</td>
                         <td>
                             <div class="btn-group">
                                 <a class="btn btn-sm btn-primary"

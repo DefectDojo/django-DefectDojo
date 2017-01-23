@@ -3,6 +3,7 @@ import logging
 import os
 from datetime import datetime
 
+from django.contrib.auth.models import User
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
@@ -105,12 +106,13 @@ def new_engagement(request):
 @user_passes_test(lambda u: u.is_staff)
 def edit_engagement(request, eid):
     eng = Engagement.objects.get(pk=eid)
+    jform = None
     if request.method == 'POST':
         form = EngForm2(request.POST, instance=eng)
-        if 'jiraform' in request.POST:
+        if 'jiraform-push_to_jira' in request.POST:
             jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=True)
         if form.is_valid():
-            if 'jiraform' in request.POST:
+            if 'jiraform-push_to_jira' in request.POST:
                 try:
                     jissue = JIRA_Issue.objects.get(engagement=eng)
                     update_epic_task.delay(eng, jform.cleaned_data.get('push_to_jira'))
@@ -252,6 +254,7 @@ def add_tests(request, eid):
         if form.is_valid():
             new_test = form.save(commit=False)
             new_test.engagement = eng
+            # new_test.lead = User.objects.get(id=form['lead'].value())
             new_test.save()
             tags = request.POST.getlist('tags')
             t = ", ".join(tags)
@@ -296,6 +299,7 @@ def import_scan_results(request, eid):
             environment, env_created = Development_Environment.objects.get_or_create(name="Development")
             t = Test(engagement=engagement, test_type=tt, target_start=scan_date,
                      target_end=scan_date, environment=environment, percent_complete=100)
+            t.lead = request.user
             t.full_clean()
             t.save()
             tags = request.POST.getlist('tags')

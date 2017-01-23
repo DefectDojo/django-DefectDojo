@@ -523,6 +523,7 @@ class FindingResource(BaseModelResource):
             'risk_acceptance': ALL,
             'engagement': ALL_WITH_RELATIONS,
             'product': ALL_WITH_RELATIONS
+            #'build_id': ALL
         }
         authentication = DojoApiKeyAuthentication()
         authorization = DjangoAuthorization()
@@ -789,9 +790,9 @@ class ImportScanValidation(Validation):
         # Make sure scan_date matches required format
         if 'scan_date' in bundle.data:
             try:
-                datetime.strptime(bundle.data['scan_date'], '%Y/%m/%d')
+                datetime.strptime(bundle.data['scan_date'], '%Y-%m-%d')
             except ValueError:
-                errors.setdefault('scan_date', []).append("Incorrect scan_date format, should be YYYY/MM/DD")
+                errors.setdefault('scan_date', []).append("Incorrect scan_date format, should be YYYY-MM-DD")
 
         # Make sure scan_type and minimum_severity have valid options
         if 'engagement' not in bundle.data:
