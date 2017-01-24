@@ -578,7 +578,7 @@ class Finding(models.Model):
     last_reviewed = models.DateTimeField(null=True, editable=False)
     last_reviewed_by = models.ForeignKey(User, null=True, editable=False, related_name='last_reviewed_by')
     images = models.ManyToManyField('FindingImage', blank=True)
-    
+
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
 
@@ -633,6 +633,23 @@ class Finding(models.Model):
             days = (get_current_date() - localtz.localize(datetime.combine(self.date, datetime.min.time())).date()).days
 
         return days if days > 0 else 0
+
+    def jira(self):
+        try:
+            jissue = JIRA_Issue.objects.get(finding=self)
+        except:
+            jissue = None
+            pass
+        return jissue
+
+    def jira_conf(self):
+        try:
+            jpkey = JIRA_PKey.objects.get(product=self.test.engagement.product)
+            jconf = jpkey.conf
+        except:
+            jconf = None
+            pass
+        return jconf
 
     def long_desc(self):
         long_desc = ''
@@ -913,6 +930,14 @@ class JIRA_Conf(models.Model):
     password = models.CharField(max_length=2000)
 #    project_key = models.CharField(max_length=200,null=True, blank=True)
 #    enabled = models.BooleanField(default=True)
+    default_issue_type = models.CharField(max_length=9,
+                            choices=(
+                                ('Task', 'Task'),
+                                ('Story', 'Story'),
+                                ('Epic', 'Epic'),
+                                ('Spike', 'Spike'),
+                                ('Bug', 'Bug')),
+                            default='Bug')
     epic_name_id = models.IntegerField()
     open_status_key = models.IntegerField()
     close_status_key = models.IntegerField()
