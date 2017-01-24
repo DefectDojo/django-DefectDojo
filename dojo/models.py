@@ -653,7 +653,7 @@ class Finding(models.Model):
 
     def long_desc(self):
         long_desc = ''
-        long_desc += '=== ' + self.title + ' ===\n\n'
+        long_desc += '*' + self.title + '*\n\n'
         long_desc += '*Severity:* ' + self.severity + '\n\n'
         long_desc += '*Systems*: \n'
         for e in self.endpoints.all():
@@ -945,6 +945,8 @@ class JIRA_Conf(models.Model):
     medium_mapping_severity = models.CharField(max_length=200)
     high_mapping_severity = models.CharField(max_length=200)
     critical_mapping_severity = models.CharField(max_length=200)
+    finding_text = models.TextField(null=True, blank=True)
+
     def __unicode__(self):
         return self.url + " | " + self.username
 

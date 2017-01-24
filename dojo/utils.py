@@ -741,8 +741,8 @@ def add_labels(find, issue):
     issue.fields.labels.append(prod_name)
     issue.update(fields={"labels": issue.fields.labels})
 
-def jira_long_description(find_description, find_id):
-    return find_description + "\n\n*Dojo ID:* " + str(find_id)
+def jira_long_description(find_description, find_id, jira_conf_finding_text):
+    return find_description + "\n\n*Dojo ID:* " + str(find_id) + "\n\n" + jira_conf_finding_text
 
 def add_issue(find, push_to_jira):
     eng = Engagement.objects.get(test=find.test)
@@ -752,7 +752,7 @@ def add_issue(find, push_to_jira):
     if push_to_jira:
         if 'Active' in find.status() and 'Verified' in find.status():
                 jira = JIRA(server=jira_conf.url, basic_auth=(jira_conf.username, jira_conf.password))
-                new_issue = jira.create_issue(project=jpkey.project_key, summary=find.title, description=jira_long_description(find.long_desc(), find.id), issuetype={'name': jira_conf.default_issue_type}, priority={'name': jira_conf.get_priority(find.severity)})
+                new_issue = jira.create_issue(project=jpkey.project_key, summary=find.title, description=jira_long_description(find.long_desc(), find.id, jira_conf.finding_text), issuetype={'name': jira_conf.default_issue_type}, priority={'name': jira_conf.get_priority(find.severity)})
                 j_issue = JIRA_Issue(jira_id=new_issue.id, jira_key=new_issue, finding = find)
                 j_issue.save()
                 issue = jira.issue(new_issue.id)
@@ -772,7 +772,7 @@ def update_issue( find, old_status, push_to_jira):
         j_issue = JIRA_Issue.objects.get(finding=find)
         jira = JIRA(server=jira_conf.url, basic_auth=(jira_conf.username, jira_conf.password))
         issue = jira.issue(j_issue.jira_id)
-        issue.update(summary=find.title, description=jira_long_description(find.long_desc(), find.id), priority={'name': jira_conf.get_priority(find.severity)})
+        issue.update(summary=find.title, description=jira_long_description(find.long_desc(), find.id, jira_conf.finding_text), priority={'name': jira_conf.get_priority(find.severity)})
 
         #Add labels(security & product)
         add_labels(find, issue)
