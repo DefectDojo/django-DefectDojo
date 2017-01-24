@@ -752,7 +752,7 @@ def add_issue(find, push_to_jira):
     if push_to_jira:
         if 'Active' in find.status() and 'Verified' in find.status():
                 jira = JIRA(server=jira_conf.url, basic_auth=(jira_conf.username, jira_conf.password))
-                new_issue = jira.create_issue(project=jpkey.project_key, summary=find.title, description=jira_long_description(find.long_desc(), find.id), issuetype={'name': 'Bug'}, priority={'name': jira_conf.get_priority(find.severity)})
+                new_issue = jira.create_issue(project=jpkey.project_key, summary=find.title, description=jira_long_description(find.long_desc(), find.id), issuetype={'name': jira_conf.default_issue_type}, priority={'name': jira_conf.get_priority(find.severity)})
                 j_issue = JIRA_Issue(jira_id=new_issue.id, jira_key=new_issue, finding = find)
                 j_issue.save()
                 issue = jira.issue(new_issue.id)
