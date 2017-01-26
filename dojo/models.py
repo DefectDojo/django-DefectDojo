@@ -659,6 +659,7 @@ class Finding(models.Model):
         for e in self.endpoints.all():
             long_desc += str(e) + '\n\n'
         long_desc += '*Description*: \n' + self.description + '\n\n'
+        long_desc += '*Mitigation*: \n' + self.mitigation + '\n\n'
         long_desc += '*Impact*: \n' + self.impact + '\n\n'
         long_desc += '*References*:' + self.references
         return long_desc

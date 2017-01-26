@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load display_tags %}
+{% load get_config_setting %}
 {% block content %}
     <!-- start status bread crums -->
     <ul id="progress-crumbs" class="breadcrumb">
@@ -406,6 +407,9 @@
                     <th>Mitigation Date</th>
                     <th>Verified</th>
                     <th>Active</th>
+                    <{% if "ENABLE_JIRA"|get_config_setting %}
+                    <th>Jira</th>
+                    {% endif %}
                     <th>Actions</th>
                 </tr>
                 </thead>
@@ -420,6 +424,11 @@
                         <td>{{ finding.mitigated }}</td>
                         <td>{{ finding.verified }}</td>
                         <td>{{ finding.active }}</td>
+                        {% if "ENABLE_JIRA"|get_config_setting %}
+                        <td>
+                        <a href="{{finding.jira_conf.url}}/browse/{{finding.jira.jira_key}}" target="_blank"> {{finding.jira.jira_key}} </a>
+                        </td>
+                        {% endif %}
                         <td>
                             <div class="btn-group">
                                 <a class="btn btn-sm btn-primary"
