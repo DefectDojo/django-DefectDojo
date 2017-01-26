@@ -407,7 +407,7 @@
                     <th>Mitigation Date</th>
                     <th>Verified</th>
                     <th>Active</th>
-                    <{% if "ENABLE_JIRA"|get_config_setting %}
+                    {% if "ENABLE_JIRA"|get_config_setting %}
                     <th>Jira</th>
                     {% endif %}
                     <th>Actions</th>
