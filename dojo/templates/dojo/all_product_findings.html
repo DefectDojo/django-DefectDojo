@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
+{% load get_config_setting %}
 {% block content %}
     <div class="row">
         <div class="col-md-12">
@@ -34,6 +35,9 @@
                             <th>Verified</th>
                             <th>Active</th>
                             <th>Age</th>
+                            {% if "ENABLE_JIRA"|get_config_setting %}
+                            <th>Jira</th>
+                            {% endif %}
                         </tr>
                         </thead>
                         <tbody>
@@ -48,6 +52,11 @@
                                 <td>{{ finding.verified }}</td>
                                 <td>{{ finding.active }}</td>
                                 <td>{{ finding.age }}</td>
+                                {% if "ENABLE_JIRA"|get_config_setting %}
+                                <td>
+                                <a href="{{finding.jira_conf.url}}/browse/{{finding.jira.jira_key}}" target="_blank"> {{finding.jira.jira_key}} </a>
+                                </td>
+                                {% endif %}
                             </tr>
                         {% endfor %}
                         </tbody>
