@@ -1,5 +1,6 @@
 {% load navigation_tags %}
 {% load display_tags %}
+{% load get_config_setting %}
 {% load static from staticfiles %}
 <!DOCTYPE html>
 <html lang="en">
@@ -223,6 +224,7 @@
                                 <a href="/metrics"><i class="fa fa-bar-chart fa-fw"></i> <span>Metrics</span><span
                                         class="glyphicon arrow"></span></a>
                                 <ul class="nav nav-second-level">
+                                    <li><a href="{% url 'critical_product_metrics' %}"> Critical Product Metrics </a></li>
                                     <li><a href="{% url 'metrics_product_type' %}"> Product Type Metrics </a></li>
                                     <li><a href="{% url 'product_type_counts' %}"> Product Type Counts </a></li>
                                     {% if user.is_staff %}
@@ -244,6 +246,12 @@
                                     <a href="{% url 'calendar' %}"><i class="fa fa-calendar fa-fw"></i>
                                         <span>Calendar</span></a>
                                 </li>
+                                {% if "ENABLE_JIRA"|get_config_setting %}
+                                <li>
+                                    <a href="{% url 'jira' %}"><i class="fa fa-comments fa-fw"></i>
+                                        <span>JIRA</span></a>
+                                </li>
+                                {% endif %}
                             {% endif %}
 
                         {% endblock %}

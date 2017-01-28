@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load display_tags %}
+{% load get_config_setting %}
 {% load static from staticfiles %}
 {% block add_styles %}
     ul#select_by_severity a:hover, ul#bulk_edit a:hover {
@@ -218,6 +219,10 @@
                     <th>Severity</th>
                     <th>Verified</th>
                     <th>Active</th>
+                    <th>Duplicate</th>
+                    {% if "ENABLE_JIRA"|get_config_setting %}
+                    <th>Jira</th>
+                    {% endif %}
                     <th>Actions</th>
                 </tr>
                 </thead>
@@ -238,6 +243,12 @@
                         {% else %}<span>{% endif %}{{ finding.severity }}</span></td>
                         <td>{{ finding.verified }}</td>
                         <td>{{ finding.active }}</td>
+                        <td>{{ finding.duplicate }}</td>
+                        {% if "ENABLE_JIRA"|get_config_setting %}
+                        <td>
+                        <a href="{{finding.jira_conf.url}}/browse/{{finding.jira.jira_key}}" target="_blank"> {{finding.jira.jira_key}} </a>
+                        </td>
+                        {% endif %}
                         <td>
                             <div class="btn-group">
                                 <a class="btn btn-sm btn-primary"

@@ -76,6 +76,34 @@ class Contact(models.Model):
 
 class Product_Type(models.Model):
     name = models.CharField(max_length=300)
+    critical_product = models.BooleanField(default=False)
+    key_product = models.BooleanField(default=False)
+
+    def critical_present(self):
+        c_findings = Finding.objects.filter(test__engagement__product__prod_type=self, severity='Critical')
+        if c_findings.count() > 0:
+            return True
+
+    def high_present(self):
+        c_findings = Finding.objects.filter(test__engagement__product__prod_type=self, severity='High')
+        if c_findings.count() > 0:
+            return True
+
+    def calc_health(self):
+        h_findings = Finding.objects.filter(test__engagement__product__prod_type=self, severity='High')
+        c_findings = Finding.objects.filter(test__engagement__product__prod_type=self, severity='Critical')
+        health = 100
+        if c_findings.count() > 0:
+            health = 40
+            health = health - ((c_findings.count() - 1) * 5)
+        if h_findings.count() > 0:
+            if health == 100:
+                health = 60
+            health = health - ((h_findings.count() - 1) * 2)
+        if health < 5:
+            return 5
+        else:
+            return health
 
     def findings_count(self):
         return Finding.objects.filter(mitigated__isnull=True,
@@ -406,6 +434,12 @@ class Endpoint(models.Model):
             url = url + '#' + fragment
         return url
 
+    def __eq__(self, other):
+        if isinstance(other, Endpoint):
+            return self.__unicode__() == other.__unicode__()
+        else:
+            return NotImplemented
+
     def finding_count(self):
         host = self.host_no_port
 
@@ -600,14 +634,32 @@ class Finding(models.Model):
 
         return days if days > 0 else 0
 
+    def jira(self):
+        try:
+            jissue = JIRA_Issue.objects.get(finding=self)
+        except:
+            jissue = None
+            pass
+        return jissue
+
+    def jira_conf(self):
+        try:
+            jpkey = JIRA_PKey.objects.get(product=self.test.engagement.product)
+            jconf = jpkey.conf
+        except:
+            jconf = None
+            pass
+        return jconf
+
     def long_desc(self):
         long_desc = ''
-        long_desc += '=== ' + self.title + ' ===\n\n'
+        long_desc += '*' + self.title + '*\n\n'
         long_desc += '*Severity:* ' + self.severity + '\n\n'
         long_desc += '*Systems*: \n'
         for e in self.endpoints.all():
             long_desc += str(e) + '\n\n'
         long_desc += '*Description*: \n' + self.description + '\n\n'
+        long_desc += '*Mitigation*: \n' + self.mitigation + '\n\n'
         long_desc += '*Impact*: \n' + self.impact + '\n\n'
         long_desc += '*References*:' + self.references
         return long_desc
@@ -871,6 +923,59 @@ class FindingImageAccessToken(models.Model):
         if not self.token:
             self.token = uuid4()
         return super(FindingImageAccessToken, self).save(*args, **kwargs)
+
+class JIRA_Conf(models.Model):
+    url =  models.URLField(max_length=2000, verbose_name="JIRA URL")
+#    product = models.ForeignKey(Product)
+    username = models.CharField(max_length=2000 )
+    password = models.CharField(max_length=2000)
+#    project_key = models.CharField(max_length=200,null=True, blank=True)
+#    enabled = models.BooleanField(default=True)
+    default_issue_type = models.CharField(max_length=9,
+                            choices=(
+                                ('Task', 'Task'),
+                                ('Story', 'Story'),
+                                ('Epic', 'Epic'),
+                                ('Spike', 'Spike'),
+                                ('Bug', 'Bug')),
+                            default='Bug')
+    epic_name_id = models.IntegerField()
+    open_status_key = models.IntegerField()
+    close_status_key = models.IntegerField()
+    low_mapping_severity = models.CharField(max_length=200)
+    medium_mapping_severity = models.CharField(max_length=200)
+    high_mapping_severity = models.CharField(max_length=200)
+    critical_mapping_severity = models.CharField(max_length=200)
+    finding_text = models.TextField(null=True, blank=True)
+
+    def __unicode__(self):
+        return self.url + " | " + self.username
+
+    def get_priority(self, status):
+        if status == 'Low':
+            return self.low_mapping_severity
+        elif status == 'Medium':
+            return self.medium_mapping_severity
+        elif status == 'High':
+            return self.high_mapping_severity
+        elif status == 'Critical':
+            return self.critical_mapping_severity
+        else:
+            return 'N/A'
+
+class JIRA_Issue(models.Model):
+    jira_id =  models.CharField(max_length=200)
+    jira_key =  models.CharField(max_length=200)
+    finding = models.ForeignKey(Finding, null=True, blank=True)
+    engagement = models.ForeignKey(Engagement, null=True, blank=True)
+
+class JIRA_PKey(models.Model):
+    project_key = models.CharField(max_length=200, blank=True)
+    product = models.ForeignKey(Product)
+    conf = models.ForeignKey(JIRA_Conf, verbose_name="JIRA Configuration", null=True, blank=True)
+    push_all_issues = models.BooleanField(default=True, blank=True)
+    enable_engagement_epic_mapping = models.BooleanField(default=True, blank=True)
+    push_notes = models.BooleanField(default=True, blank=True)
 
 
 # Register for automatic logging to database

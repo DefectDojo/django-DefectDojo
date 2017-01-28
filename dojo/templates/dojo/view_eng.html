@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load display_tags %}
+{% load get_config_setting %}
 {% block content %}
     <!-- start status bread crums -->
     <ul id="progress-crumbs" class="breadcrumb">
@@ -166,7 +167,23 @@
             </div>
         {% endif %}
     </div>
-
+ {% if jissue and jconf %}
+    <div class="row to_highlight">
+        <div class="col-md-12">
+            <div class="panel panel-default endpoints table-responsive">
+                <div class="panel-heading">
+                    <h4>JIRA Link
+                        <span class="pull-right"><a data-toggle="collapse" href="#jira_link"><i
+                                class="glyphicon glyphicon-chevron-up"></i></a></span>
+                    </h4>
+                </div>
+                    <div id="jira_link" class="panel-body endpoint-panel table-responsive collapse in">
+                      <a href="{{jconf.url}}/browse/{{jissue.jira_key}}"> {{jconf.url}}/browse/{{jissue.jira_key}} </a>
+                    </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
     <div class="row">
         <div id="tests" class="col-md-12">
             <div class="panel panel-default">
@@ -390,6 +407,9 @@
                     <th>Mitigation Date</th>
                     <th>Verified</th>
                     <th>Active</th>
+                    {% if "ENABLE_JIRA"|get_config_setting %}
+                    <th>Jira</th>
+                    {% endif %}
                     <th>Actions</th>
                 </tr>
                 </thead>
@@ -404,6 +424,11 @@
                         <td>{{ finding.mitigated }}</td>
                         <td>{{ finding.verified }}</td>
                         <td>{{ finding.active }}</td>
+                        {% if "ENABLE_JIRA"|get_config_setting %}
+                        <td>
+                        <a href="{{finding.jira_conf.url}}/browse/{{finding.jira.jira_key}}" target="_blank"> {{finding.jira.jira_key}} </a>
+                        </td>
+                        {% endif %}
                         <td>
                             <div class="btn-group">
                                 <a class="btn btn-sm btn-primary"

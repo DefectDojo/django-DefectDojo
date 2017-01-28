@@ -1,0 +1,24 @@
+#!/bin/bash
+
+NAME="celery-defect-dojo"                         # Name of the app
+DJANGODIR=/install_path/django-DefectDojo/ # Django project dir
+USER=defectdojo                                      # run as this user
+GROUP=defectdojo                                     # the group to run as
+NUM_WORKERS=3                                 # how many workers
+                                              # usually # of CPU + 1
+DJANGO_SETTINGS_MODULE=dojo.settings # which settings file
+
+DJANGO_WSGI_MODULE=dojo.wsgi              # WSGI module name
+GUNICORN_LOG_LEVEL=debug                      # Set log level
+             # possible values: debug, info, warning, error, critical
+
+echo "Starting $NAME as `whoami`"
+
+# Activate the virtual environment
+cd $DJANGODIR
+source /install_path/django-DefectDojo/venv/bin/activate
+export DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE
+export PYTHONPATH=$DJANGODIR:$PYTHONPATH
+
+# Start your Django Unicorn
+exec celery -A dojo worker -l info --concurrency 3

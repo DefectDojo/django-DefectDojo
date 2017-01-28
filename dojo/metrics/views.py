@@ -43,6 +43,15 @@ status: in production
 generic metrics method
 """
 
+def critical_product_metrics(request, mtype):
+    template = 'dojo/metrics.html'
+    page_name = 'Critical Product Metrics'
+    critical_products = Product_Type.objects.filter(critical_product=True)
+    add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
+    return render(request, template, {
+        'name': page_name,
+        'critical_prods': critical_products
+    })
 
 @cache_page(60 * 5)  # cache for 5 minutes
 def metrics(request, mtype):

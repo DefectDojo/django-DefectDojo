@@ -73,7 +73,7 @@ if [[ ! -z "$BREW_CMD" ]]; then
 	LC_CTYPE=C
 fi
 
-SECRET=`cat /dev/urandom | tr -dc "a-zA-Z0-9" | head -c 128`
+SECRET=`cat /dev/urandom | LC_CTYPE=C tr -dc "a-zA-Z0-9" | head -c 128`
 
 cp dojo/settings.dist.py dojo/settings.py
 
