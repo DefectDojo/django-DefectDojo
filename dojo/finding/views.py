@@ -170,7 +170,8 @@ def view_finding(request, fid):
             finding.last_reviewed = new_note.date
             finding.last_reviewed_by = user
             finding.save()
-            add_comment_task(finding, new_note)
+            if jissue is not None:
+                add_comment_task(finding, new_note)
             form = NoteForm()
             messages.add_message(request,
                                  messages.SUCCESS,
