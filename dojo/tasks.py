@@ -13,12 +13,12 @@ from django.utils.http import urlencode
 from pytz import timezone
 from celery.utils.log import get_task_logger
 from celery.decorators import task
+from dojo.models import Finding
 
 import pdfkit
 from dojo.celery import app
 from dojo.reports.widgets import report_widget_factory
 from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, close_epic
-from dojo.models import Finding
 
 logger = get_task_logger(__name__)
 localtz = timezone(settings.TIME_ZONE)
@@ -210,6 +210,7 @@ def add_comment_task(find, note):
     add_comment(find, note)
 
 @app.task(name='async_dedupe')
+
 def async_dedupe(self,  new_finding, *args, **kwargs):
     logger.info("running deduplication")
     eng_findings_cwe = Finding.objects.filter(test__engagement__product=new_finding.test.engagement.product,
@@ -223,4 +224,3 @@ def async_dedupe(self,  new_finding, *args, **kwargs):
         if all(x in list2 for x in list1):
             find.duplicate = True
             super(Finding, find).save(*args, **kwargs)
-
