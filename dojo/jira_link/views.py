@@ -95,8 +95,9 @@ def new_jira(request):
                 jira_server = jform.cleaned_data.get('url').rstrip('/')
                 jira = JIRA(server=jform.cleaned_data.get('url').rstrip('/'),
                             basic_auth=(jform.cleaned_data.get('username'), jform.cleaned_data.get('password')))
-                jform.url = jira_server
-                new_j = jform.save()
+                new_j = jform.save(commit=False)
+                new_j.url = jira_server
+                new_j.save()
                 messages.add_message(request,
                                      messages.SUCCESS,
 
@@ -124,11 +125,12 @@ def edit_jira(request, jid):
                 jira_server = jform.cleaned_data.get('url').rstrip('/')
                 jira = JIRA(server=jira_server,
                             basic_auth=(jform.cleaned_data.get('username'), jform.cleaned_data.get('password')))
-                jform.url = jira_server
-                new_j = jform.save()
+
+                new_j = jform.save(commit=False)
+                new_j.url = jira_server
+                new_j.save()
                 messages.add_message(request,
                                      messages.SUCCESS,
-
                                      'JIRA Configuration Successfully Created.',
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('jira', ))

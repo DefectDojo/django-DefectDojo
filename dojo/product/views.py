@@ -327,6 +327,7 @@ def edit_product(request, pid):
                 if settings.ENABLE_JIRA:
                     if jira_enabled:
                         jform = JIRAPKeyForm(request.POST, instance=jira_inst)
+                        jform.save()
                     else:
                         jform = JIRAPKeyForm(request.POST)
                         new_conf = jform.save(commit=False)

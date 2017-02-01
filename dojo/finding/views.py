@@ -170,7 +170,8 @@ def view_finding(request, fid):
             finding.last_reviewed = new_note.date
             finding.last_reviewed_by = user
             finding.save()
-            add_comment_task(finding, new_note)
+            if jissue is not None:
+                add_comment_task(finding, new_note)
             form = NoteForm()
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -310,8 +311,8 @@ def edit_finding(request, fid):
             new_finding.tags = t
             new_finding.save()
             if 'jiraform-push_to_jira' in request.POST:
-               jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=enabled)
-               if jform.is_valid():
+                jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=enabled)
+                if jform.is_valid():
                     try:
                         jissue = JIRA_Issue.objects.get(finding=new_finding)
                         update_issue_task.delay(new_finding, old_status, jform.cleaned_data.get('push_to_jira'))

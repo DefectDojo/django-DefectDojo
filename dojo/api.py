@@ -888,7 +888,7 @@ class ImportScanResource(MultipartResource, Resource):
         tt, t_created = Test_Type.objects.get_or_create(name=bundle.data['scan_type'])
         # will save in development environment
         environment, env_created = Development_Environment.objects.get_or_create(name="Development")
-        scan_date = datetime.strptime(bundle.data['scan_date'], '%Y/%m/%d')
+        scan_date = datetime.strptime(bundle.data['scan_date'], '%Y-%m-%d')
         t = Test(engagement=bundle.obj.__getattr__('engagement_obj'), test_type=tt, target_start=scan_date,
                  target_end=scan_date, environment=environment, percent_complete=100)
         t.full_clean()
