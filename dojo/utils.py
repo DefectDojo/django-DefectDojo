@@ -18,7 +18,7 @@ from django.template.defaultfilters import pluralize
 from pytz import timezone
 from jira import JIRA
 from dojo.models import Finding, Scan, Test, Engagement, Stub_Finding, Finding_Template, Report, \
-    Product, JIRA_PKey, JIRA_Issue, Dojo_User, User
+    Product, JIRA_PKey, JIRA_Issue, Dojo_User, User, Notes
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -602,6 +602,25 @@ def get_alerts(user):
     start = now - timedelta(days=7)
     dojo_user = Dojo_User.objects.get(id=user.id)
     alerts = []
+    
+    #atmentions in notes
+    atmentions=Notes.objects.filter(date__range=[start, now],
+    entry__icontains='@'+user.username)
+    for note in atmentions:
+        finding=Finding.objects.filter(notes=note).first()
+        test=Test.objects.filter(notes=note).first()
+        if finding:#not ideal to have to do this every time, probably better to add a parent field to notes
+            url=reverse('view_finding', args=(finding.id,))
+            title=finding.title
+        elif test:
+            url=reverse('view_test', args=(test.id,))
+            title="Test %s on %s" % (test.test_type.name, test.engagement.product.name)
+        alerts.append(['You were mentioned by {} in a note on {}'.format(note.author,title),
+                       'Posted ' + note.date.strftime("%b. %d, %Y"),
+                       'file-text-o',
+                       url])
+    
+    
     # findings under review
     under_review = Finding.objects.filter(under_review=True, reviewers__in=[dojo_user])
 
