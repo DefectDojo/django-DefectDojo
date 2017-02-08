@@ -861,7 +861,7 @@ def process_notifications(request, note, parent_url, parent_title):
     users_to_notify=[User.objects.filter(username=username).get()
                    for username in usernames_to_check if User.objects.filter(is_active=True, username=username).exists()] #is_staff also?
     user_posting=request.user
-    send_atmention_email(user_posting, users_to_notify, parent_url, parent_title)
+    send_atmention_email(user_posting, users_to_notify, parent_url, parent_title, note)
     for u in users_to_notify:
         if u.email:
             messages.add_message(request,
@@ -874,7 +874,7 @@ def process_notifications(request, note, parent_url, parent_title):
                              'No email listed for {0}'.format(u.username),
                              extra_tags='alert-danger')
 
-def send_atmention_email(user, users, parent_url, parent_title):
+def send_atmention_email(user, users, parent_url, parent_title, new_note):
     recipients=[u.email for u in users]
     msg = "\nGreetings, \n\n"
     msg += "User {0} mentioned you in a note on {1}".format(str(user),parent_title)
