@@ -19,7 +19,7 @@ from dojo.forms import NoteForm, TestForm, FindingForm, \
 from dojo.models import Finding, Test, Notes, \
     BurpRawRequestResponse, Endpoint, Stub_Finding, Finding_Template, JIRA_PKey
 from dojo.tools.factory import import_parser_factory
-from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, message
+from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, message, process_notifications
 from dojo.tasks import add_issue_task
 
 localtz = timezone(settings.TIME_ZONE)
@@ -50,6 +50,9 @@ def view_test(request, tid):
             new_note.save()
             test.notes.add(new_note)
             form = NoteForm()
+            url = request.build_absolute_uri(reverse("view_test", args=(test.id,)))
+            title= "Test: "+ test.title
+            process_notifications(request, new_note, url, title)
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Note added successfully.',
