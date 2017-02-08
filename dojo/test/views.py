@@ -51,7 +51,7 @@ def view_test(request, tid):
             test.notes.add(new_note)
             form = NoteForm()
             url = request.build_absolute_uri(reverse("view_test", args=(test.id,)))
-            title= "Test: "+ test.title
+            title="Test: %s on %s" % (test.test_type.name, test.engagement.product.name)
             process_notifications(request, new_note, url, title)
             messages.add_message(request,
                                  messages.SUCCESS,
