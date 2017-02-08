@@ -1089,6 +1089,17 @@ class AddDojoUserForm(forms.ModelForm):
     authorized_products = forms.ModelMultipleChoiceField(
         queryset=Product.objects.all(), required=False,
         help_text='Select the products this user should have access to.')
+    class Meta:
+        model = Dojo_User
+        fields = ['username', 'first_name', 'last_name', 'email', 'is_active']
+        exclude = ['password', 'last_login', 'groups',
+                   'date_joined', 'user_permissions',
+                   'is_staff', 'is_superuser']
+                   
+class EditDojoUserForm(forms.ModelForm):
+    authorized_products = forms.ModelMultipleChoiceField(
+        queryset=Product.objects.all(), required=False,
+        help_text='Select the products this user should have access to.')
 
     class Meta:
         model = Dojo_User
