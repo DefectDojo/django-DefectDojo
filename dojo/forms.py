@@ -1092,10 +1092,10 @@ class AddDojoUserForm(forms.ModelForm):
 
     class Meta:
         model = Dojo_User
-        fields = ['username', 'first_name', 'last_name', 'email', 'is_active',
-                  'is_staff', 'is_superuser']
+        fields = ['username', 'first_name', 'last_name', 'email', 'is_active']
         exclude = ['password', 'last_login', 'groups',
-                   'date_joined', 'user_permissions']
+                   'date_joined', 'user_permissions',
+                   'is_staff', 'is_superuser']
 
 
 class DeleteUserForm(forms.ModelForm):
