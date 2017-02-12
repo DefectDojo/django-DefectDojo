@@ -605,20 +605,35 @@ def get_alerts(user):
     
     #atmentions in notes
     atmentions=Notes.objects.filter(date__range=[start, now],
-    entry__icontains='@'+user.username)
-    for note in atmentions:
-        finding=Finding.objects.filter(notes=note).first()
-        test=Test.objects.filter(notes=note).first()
-        if finding:#not ideal to have to do this every time, probably better to add a parent field to notes
-            url=reverse('view_finding', args=(finding.id,))
-            title=finding.title
-        elif test:
-            url=reverse('view_test', args=(test.id,))
-            title="Test %s on %s" % (test.test_type.name, test.engagement.product.name)
-        alerts.append(['You were mentioned by {} in a note on {}'.format(note.author,title),
-                       'Posted ' + note.date.strftime("%b. %d, %Y"),
+    entry__icontains='@'+user.username)   
+    
+    #show a single alert per finding/test for any finding where
+    #user was @mentioned in notes AND hasn't afterwards responded
+    findings_with_atmention=set([Finding.objects.get(notes=note)
+                    for note in atmentions if Finding.objects.filter(notes=note).exists()])
+    for f in findings_with_atmention:
+        f_notes=list(f.notes.all())
+        latest_mention=[n for n in f_notes if n in atmentions][0]
+        index_latest_mention=f_notes.index(latest_mention)
+        later_notes_than_mention=f_notes[:index_latest_mention]
+        if not any(n.author==user for n in later_notes_than_mention):
+            alerts.append(['You were mentioned in notes on Finding:{}'.format(f.title),
+                           'Posted ' + latest_mention.date.strftime("%b. %d, %Y"),
+                           'file-text-o',
+                           reverse('view_finding', args=(f.id,))])
+               
+    tests_with_atmention=set([Test.objects.get(notes=note)
+                    for note in atmentions if Test.objects.filter(notes=note).exists()])
+    for t in tests_with_atmention:
+        t_notes=list(t.notes.all())
+        latest_mention=[n for n in t_notes if n in atmentions][0]
+        index_latest_mention=t_notes.index(latest_mention)
+        later_notes_than_mention=t_notes[:index_latest_mention]
+        if not any(n.author==user for n in later_notes_than_mention):
+            alerts.append(['You were mentioned in notes on Test: %s on %s' % (t.test_type.name, t.engagement.product.name),
+                       'Posted ' + latest_mention.date.strftime("%b. %d, %Y"),
                        'file-text-o',
-                       url])
+                       reverse('view_test', args=(t.id,))])
     
     
     # findings under review
