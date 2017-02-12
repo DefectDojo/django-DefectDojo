@@ -12,12 +12,13 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import get_resolver, reverse
+from django.contrib import messages
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
 from django.template.defaultfilters import pluralize
 from pytz import timezone
 from jira import JIRA
 from dojo.models import Finding, Scan, Test, Engagement, Stub_Finding, Finding_Template, Report, \
-    Product, JIRA_PKey, JIRA_Issue, Dojo_User
+    Product, JIRA_PKey, JIRA_Issue, Dojo_User, User, Notes
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -601,6 +602,25 @@ def get_alerts(user):
     start = now - timedelta(days=7)
     dojo_user = Dojo_User.objects.get(id=user.id)
     alerts = []
+    
+    #atmentions in notes
+    atmentions=Notes.objects.filter(date__range=[start, now],
+    entry__icontains='@'+user.username)
+    for note in atmentions:
+        finding=Finding.objects.filter(notes=note).first()
+        test=Test.objects.filter(notes=note).first()
+        if finding:#not ideal to have to do this every time, probably better to add a parent field to notes
+            url=reverse('view_finding', args=(finding.id,))
+            title=finding.title
+        elif test:
+            url=reverse('view_test', args=(test.id,))
+            title="Test %s on %s" % (test.test_type.name, test.engagement.product.name)
+        alerts.append(['You were mentioned by {} in a note on {}'.format(note.author,title),
+                       'Posted ' + note.date.strftime("%b. %d, %Y"),
+                       'file-text-o',
+                       url])
+    
+    
     # findings under review
     under_review = Finding.objects.filter(under_review=True, reviewers__in=[dojo_user])
 
@@ -854,3 +874,35 @@ def send_review_email(request, user, finding, users, new_note):
               recipients,
               fail_silently=False)
     pass
+
+def process_notifications(request, note, parent_url, parent_title):
+    regex = re.compile(r'(?:\A|\s)@(\w+)\b')
+    usernames_to_check = set([un.lower() for un in regex.findall(note.entry)])  
+    users_to_notify=[User.objects.filter(username=username).get()
+                   for username in usernames_to_check if User.objects.filter(is_active=True, username=username).exists()] #is_staff also?
+    user_posting=request.user
+    send_atmention_email(user_posting, users_to_notify, parent_url, parent_title, note)
+    for u in users_to_notify:
+        if u.email:
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Notification sent to {0} - {1}'.format(u.username,u.email),
+                                 extra_tags='alert-success')
+        else:
+            messages.add_message(request,
+                             messages.ERROR,
+                             'No email listed for {0}'.format(u.username),
+                             extra_tags='alert-danger')
+
+def send_atmention_email(user, users, parent_url, parent_title, new_note):
+    recipients=[u.email for u in users]
+    msg = "\nGreetings, \n\n"
+    msg += "User {0} mentioned you in a note on {1}".format(str(user),parent_title)
+    msg += "\n\n" + new_note.entry
+    msg += "\n\nIt can be reviewed at " + parent_url
+    msg += "\n\nThanks\n"
+    send_mail('DefectDojo - {0} @mentioned you in a note'.format(str(user)),
+          msg,
+          user.email,
+          recipients,
+          fail_silently=False)
