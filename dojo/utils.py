@@ -12,12 +12,12 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import get_resolver, reverse
+from django.contrib import messages
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
 from django.template.defaultfilters import pluralize
 from pytz import timezone
 from jira import JIRA
-from dojo.models import Finding, Scan, Test, Engagement, Stub_Finding, Finding_Template, Report, \
-    Product, JIRA_PKey, JIRA_Issue, Dojo_User, FindingImage
+from dojo.models import Finding, Scan, Test, Engagement, Stub_Finding, Finding_Template, Report, Product, JIRA_PKey, JIRA_Issue, Dojo_User, User, Notes, FindingImage
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -601,6 +601,40 @@ def get_alerts(user):
     start = now - timedelta(days=7)
     dojo_user = Dojo_User.objects.get(id=user.id)
     alerts = []
+
+    #atmentions in notes
+    atmentions=Notes.objects.filter(date__range=[start, now],
+    entry__icontains='@'+user.username)
+
+    #show a single alert per finding/test for any finding where
+    #user was @mentioned in notes AND hasn't afterwards responded
+    findings_with_atmention=set([Finding.objects.get(notes=note)
+                    for note in atmentions if Finding.objects.filter(notes=note).exists()])
+    for f in findings_with_atmention:
+        f_notes=list(f.notes.all())
+        latest_mention=[n for n in f_notes if n in atmentions][0]
+        index_latest_mention=f_notes.index(latest_mention)
+        later_notes_than_mention=f_notes[:index_latest_mention]
+        if not any(n.author==user for n in later_notes_than_mention):
+            alerts.append(['You were mentioned in notes on Finding:{}'.format(f.title),
+                           'Posted ' + latest_mention.date.strftime("%b. %d, %Y"),
+                           'file-text-o',
+                           reverse('view_finding', args=(f.id,))])
+
+    tests_with_atmention=set([Test.objects.get(notes=note)
+                    for note in atmentions if Test.objects.filter(notes=note).exists()])
+    for t in tests_with_atmention:
+        t_notes=list(t.notes.all())
+        latest_mention=[n for n in t_notes if n in atmentions][0]
+        index_latest_mention=t_notes.index(latest_mention)
+        later_notes_than_mention=t_notes[:index_latest_mention]
+        if not any(n.author==user for n in later_notes_than_mention):
+            alerts.append(['You were mentioned in notes on Test: %s on %s' % (t.test_type.name, t.engagement.product.name),
+                       'Posted ' + latest_mention.date.strftime("%b. %d, %Y"),
+                       'file-text-o',
+                       reverse('view_test', args=(t.id,))])
+
+
     # findings under review
     under_review = Finding.objects.filter(under_review=True, reviewers__in=[dojo_user])
 
@@ -892,3 +926,35 @@ def send_review_email(request, user, finding, users, new_note):
               recipients,
               fail_silently=False)
     pass
+
+def process_notifications(request, note, parent_url, parent_title):
+    regex = re.compile(r'(?:\A|\s)@(\w+)\b')
+    usernames_to_check = set([un.lower() for un in regex.findall(note.entry)])
+    users_to_notify=[User.objects.filter(username=username).get()
+                   for username in usernames_to_check if User.objects.filter(is_active=True, username=username).exists()] #is_staff also?
+    user_posting=request.user
+    send_atmention_email(user_posting, users_to_notify, parent_url, parent_title, note)
+    for u in users_to_notify:
+        if u.email:
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Notification sent to {0} - {1}'.format(u.username,u.email),
+                                 extra_tags='alert-success')
+        else:
+            messages.add_message(request,
+                             messages.ERROR,
+                             'No email listed for {0}'.format(u.username),
+                             extra_tags='alert-danger')
+
+def send_atmention_email(user, users, parent_url, parent_title, new_note):
+    recipients=[u.email for u in users]
+    msg = "\nGreetings, \n\n"
+    msg += "User {0} mentioned you in a note on {1}".format(str(user),parent_title)
+    msg += "\n\n" + new_note.entry
+    msg += "\n\nIt can be reviewed at " + parent_url
+    msg += "\n\nThanks\n"
+    send_mail('DefectDojo - {0} @mentioned you in a note'.format(str(user)),
+          msg,
+          user.email,
+          recipients,
+          fail_silently=False)
