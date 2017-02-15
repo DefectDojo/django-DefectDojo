@@ -905,7 +905,7 @@ class FindingImage(models.Model):
 
 
 class FindingImageAccessToken(models.Model):
-    """This will allow reports to request the images without exposin the media root to the world without
+    """This will allow reports to request the images without exposing the media root to the world without
     authentication"""
     user = models.ForeignKey(User, null=False, blank=False)
     image = models.ForeignKey(FindingImage, null=False, blank=False)
@@ -973,9 +973,10 @@ class JIRA_PKey(models.Model):
     project_key = models.CharField(max_length=200, blank=True)
     product = models.ForeignKey(Product)
     conf = models.ForeignKey(JIRA_Conf, verbose_name="JIRA Configuration", null=True, blank=True)
-    push_all_issues = models.BooleanField(default=True, blank=True)
-    enable_engagement_epic_mapping = models.BooleanField(default=True, blank=True)
-    push_notes = models.BooleanField(default=True, blank=True)
+    component = models.CharField(max_length=200, blank=True)
+    push_all_issues = models.BooleanField(default=False, blank=True)
+    enable_engagement_epic_mapping = models.BooleanField(default=False, blank=True)
+    push_notes = models.BooleanField(default=False, blank=True)
 
 
 # Register for automatic logging to database

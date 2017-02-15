@@ -435,13 +435,18 @@ def new_eng_for_app(request, pid):
             else:
                 new_eng.progress = 'other'
             new_eng.save()
-            #if 'jiraform' in request.POST:
+
             if hasattr(settings, 'ENABLE_JIRA'):
-                 if settings.ENABLE_JIRA:
-                     jform = JIRAFindingForm(request.POST, prefix='jiraform',
-                                        enabled=JIRA_PKey.objects.get(product=prod).push_all_issues)
-                     if jform.is_valid():
-                        add_epic_task.delay(new_eng, jform.cleaned_data.get('push_to_jira'))
+                if settings.ENABLE_JIRA:
+                    #Test to make sure there is a Jira project associated the product
+                    try:
+                        jform = JIRAFindingForm(request.POST, prefix='jiraform',
+                                            enabled=JIRA_PKey.objects.get(product=prod).push_all_issues)
+                        if jform.is_valid():
+                            add_epic_task.delay(new_eng, jform.cleaned_data.get('push_to_jira'))
+                    except JIRA_PKey.DoesNotExist:
+                        pass
+
             #else:
             #    print >>sys.stderr, 'no prefix is found'
 
