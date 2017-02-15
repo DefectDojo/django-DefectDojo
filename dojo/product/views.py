@@ -435,10 +435,8 @@ def new_eng_for_app(request, pid):
             else:
                 new_eng.progress = 'other'
             new_eng.save()
-            #if 'jiraform' in request.POST:
-            if hasattr(settings, 'ENABLE_JIRA'):
-                print "###"
 
+            if hasattr(settings, 'ENABLE_JIRA'):
                 if settings.ENABLE_JIRA:
                     #Test to make sure there is a Jira project associated the product
                     try:
