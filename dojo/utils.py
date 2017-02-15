@@ -17,7 +17,7 @@ from django.template.defaultfilters import pluralize
 from pytz import timezone
 from jira import JIRA
 from dojo.models import Finding, Scan, Test, Engagement, Stub_Finding, Finding_Template, Report, \
-    Product, JIRA_PKey, JIRA_Issue, Dojo_User
+    Product, JIRA_PKey, JIRA_Issue, Dojo_User, FindingImage
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -752,27 +752,65 @@ def add_issue(find, push_to_jira):
     if push_to_jira:
         if 'Active' in find.status() and 'Verified' in find.status():
                 jira = JIRA(server=jira_conf.url, basic_auth=(jira_conf.username, jira_conf.password))
-                new_issue = jira.create_issue(project=jpkey.project_key, summary=find.title, description=jira_long_description(find.long_desc(), find.id, jira_conf.finding_text), issuetype={'name': jira_conf.default_issue_type}, priority={'name': jira_conf.get_priority(find.severity)})
+                new_issue = jira.create_issue(project=jpkey.project_key, summary=find.title, components=[{'name': jpkey.component},], description=jira_long_description(find.long_desc(), find.id, jira_conf.finding_text), issuetype={'name': jira_conf.default_issue_type}, priority={'name': jira_conf.get_priority(find.severity)})
                 j_issue = JIRA_Issue(jira_id=new_issue.id, jira_key=new_issue, finding = find)
                 j_issue.save()
                 issue = jira.issue(new_issue.id)
                 #Add labels (security & product)
                 add_labels(find, new_issue)
+                #Upload dojo finding screenshots to Jira
+                for pic in find.images.all():
+                    jira_attachment(jira, issue, settings.MEDIA_ROOT + pic.image_large.name)
 
                 #if jpkey.enable_engagement_epic_mapping:
                 #      epic = JIRA_Issue.objects.get(engagement=eng)
                 #      issue_list = [j_issue.jira_id,]
                 #      jira.add_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
 
-def update_issue( find, old_status, push_to_jira):
+def jira_attachment(jira, issue, file, jira_filename=None):
+
+    basename = file
+    if jira_filename is None:
+        basename = os.path.basename(file)
+
+    # Check to see if the file has been uploaded to Jira
+    if jira_check_attachment(issue, basename) == False:
+        if jira_filename is not None:
+            attachment = StringIO.StringIO()
+            attachment.write(data)
+            jira.add_attachment(issue=issue, attachment=attachment, filename=jira_filename)
+        else:
+            # read and upload a file
+            with open(file, 'rb') as f:
+                jira.add_attachment(issue=issue, attachment=f)
+
+def jira_check_attachment(issue, source_file_name):
+    file_exists = False
+    for attachment in issue.fields.attachment:
+        filename=attachment.filename
+
+        if filename == source_file_name:
+            file_exists = True
+            break
+
+    return file_exists
+
+def update_issue(find, old_status, push_to_jira):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
     jpkey = JIRA_PKey.objects.get(product=prod)
     jira_conf = jpkey.conf
+
     if push_to_jira:
         j_issue = JIRA_Issue.objects.get(finding=find)
         jira = JIRA(server=jira_conf.url, basic_auth=(jira_conf.username, jira_conf.password))
         issue = jira.issue(j_issue.jira_id)
-        issue.update(summary=find.title, description=jira_long_description(find.long_desc(), find.id, jira_conf.finding_text), priority={'name': jira_conf.get_priority(find.severity)})
+        #Add component to the Jira issue
+        component = [{'name': jpkey.component},]
+        #Upload dojo finding screenshots to Jira
+        for pic in find.images.all():
+            jira_attachment(jira, issue, settings.MEDIA_ROOT + pic.image_large.name)
+
+        issue.update(summary=find.title, description=jira_long_description(find.long_desc(), find.id, jira_conf.finding_text), priority={'name': jira_conf.get_priority(find.severity)}, fields={"components": component})
 
         #Add labels(security & product)
         add_labels(find, issue)
