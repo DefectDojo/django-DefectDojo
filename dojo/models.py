@@ -966,8 +966,8 @@ class JIRA_Conf(models.Model):
 class JIRA_Issue(models.Model):
     jira_id =  models.CharField(max_length=200)
     jira_key =  models.CharField(max_length=200)
-    finding = models.ForeignKey(Finding, null=True, blank=True)
-    engagement = models.ForeignKey(Engagement, null=True, blank=True)
+    finding = models.OneToOneField(Finding, null=True, blank=True)
+    engagement = models.OneToOneField(Engagement, null=True, blank=True)
 
 class JIRA_PKey(models.Model):
     project_key = models.CharField(max_length=200, blank=True)
@@ -978,6 +978,19 @@ class JIRA_PKey(models.Model):
     enable_engagement_epic_mapping = models.BooleanField(default=False, blank=True)
     push_notes = models.BooleanField(default=False, blank=True)
 
+class Alerts(models.Model):
+    description = models.CharField(max_length=2000, null=True)
+    url =  models.URLField(max_length=2000, null=True)
+    source = models.CharField(max_length=15,
+                            choices=(
+                                ('Jira', 'Jira'),
+                                ('Asynchimport', 'Asynch Import'),
+                                ('Generic', 'Generic')),
+                            default='Generic')
+    icon = models.CharField(max_length=25, default='icon-user-check')
+    user_id = models.ForeignKey(User, null=True, editable=False)
+    created = models.DateTimeField(null=False, editable=False, default=now)
+    display_date = models.DateTimeField(null=False, default=now)
 
 # Register for automatic logging to database
 auditlog.register(Dojo_User)
@@ -1015,6 +1028,8 @@ admin.site.register(Report)
 admin.site.register(Scan)
 admin.site.register(ScanSettings)
 admin.site.register(IPScan)
+admin.site.register(Alerts)
+admin.site.register(JIRA_Issue)
 
 watson.register(Product)
 watson.register(Test)
