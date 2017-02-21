@@ -162,7 +162,7 @@ class ProductForm(forms.ModelForm):
                            help_text="Add tags that help describe this product.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
     prod_type = forms.ModelChoiceField(label='Product Type',
-                                       queryset=Product_Type.objects.all(),
+                                       queryset=Product_Type.objects.all().order_by('name'),
                                        required=True)
 
     authorized_users = forms.ModelMultipleChoiceField(
@@ -510,9 +510,9 @@ class DeleteEngagementForm(forms.ModelForm):
 
 
 class TestForm(forms.ModelForm):
-    test_type = forms.ModelChoiceField(queryset=Test_Type.objects.all())
+    test_type = forms.ModelChoiceField(queryset=Test_Type.objects.all().order_by('name'))
     environment = forms.ModelChoiceField(
-        queryset=Development_Environment.objects.all())
+        queryset=Development_Environment.objects.all().order_by('name'))
     target_start = forms.DateTimeField(widget=forms.TextInput(
         attrs={'class': 'datepicker'}))
     target_end = forms.DateTimeField(widget=forms.TextInput(
