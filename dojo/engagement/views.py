@@ -287,6 +287,7 @@ def view_engagement(request, eid):
                    'closed_findings': closed_findings,
                    'accepted_findings': accepted_findings,
                    'new_findings': new_verified_findings,
+                   'start_date': start_date,
                    })
 
 
