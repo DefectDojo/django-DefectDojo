@@ -443,6 +443,8 @@ class EngForm(forms.ModelForm):
         help_text="Add a descriptive name to identify this engagement. " +
                   "Without a name the target start date will be used in " +
                   "listings.")
+    description = forms.CharField(widget=forms.Textarea(attrs={}),
+                                  required=False)
     target_start = forms.DateField(widget=forms.TextInput(
         attrs={'class': 'datepicker'}))
     target_end = forms.DateField(widget=forms.TextInput(
@@ -468,7 +470,8 @@ class EngForm2(forms.ModelForm):
                            help_text="Add a descriptive name to identify " +
                                      "this engagement. Without a name the target " +
                                      "start date will be used in listings.")
-
+    description = forms.CharField(widget=forms.Textarea(attrs={}),
+                                  required=False)                                 
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False,
                            help_text="Add tags that help describe this product.  "
@@ -968,6 +971,20 @@ class CloseFindingForm(forms.ModelForm):
         model = Notes
         fields = ['entry']
 
+class DefectFindingForm(forms.ModelForm):
+    CLOSE_CHOICES = (("Close Finding", "Close Finding"), ("Not Fixed", "Not Fixed"))
+    defect_choice = forms.ChoiceField(required=True, choices=CLOSE_CHOICES)
+
+    entry = forms.CharField(
+        required=True, max_length=2400,
+        widget=forms.Textarea, label='Notes:',
+        error_messages={'required': ('The reason for closing a finding is '
+                                     'required, please use the text area '
+                                     'below to provide documentation.')})
+
+    class Meta:
+        model = Notes
+        fields = ['entry']
 
 class ClearFindingReviewForm(forms.ModelForm):
     entry = forms.CharField(

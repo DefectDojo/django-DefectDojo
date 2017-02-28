@@ -777,9 +777,39 @@ def handle_uploaded_threat(f, eng):
     eng.tmodel_path = settings.MEDIA_ROOT + '/threat/%s%s' % (eng.id, extension)
     eng.save()
 
+#Gets a connection to a Jira server based on the finding
+def get_jira_connection(finding):
+    prod = Product.objects.get(engagement=Engagement.objects.get(test=finding.test))
+    jpkey = JIRA_PKey.objects.get(product=prod)
+    jira_conf = jpkey.conf
+
+    jira = JIRA(server=jira_conf.url, basic_auth=(jira_conf.username, jira_conf.password))
+    return jira
+
+def jira_get_resolution_id(jira, issue, status):
+    transitions = jira.transitions(issue)
+    resolution_id = None
+    for t in transitions:
+        if t['name'] == "Resolve Issue":
+            resolution_id = t['id']
+            break
+        if t['name'] == "Reopen Issue":
+            resolution_id = t['id']
+            break
+
+    return resolution_id
+
+def jira_change_resolution_id(jira, issue, id):
+    jira.transition_issue(issue, id)
+
 # Logs the error to the alerts table, which appears in the notification toolbar
 def log_jira_alert(error, finding):
-    alerts = Alerts(description="Jira update issue: Finding " + str(finding.id) + ", " + error, url=reverse('view_finding', args=(finding.id,)), icon="bullseye", display_date=localtz.localize(datetime.today()), source="Jira")
+    alerts = Alerts(description="Jira update issue: Finding: " + str(finding.id) + ", " + error, url=reverse('view_finding', args=(finding.id,)), icon="bullseye", display_date=localtz.localize(datetime.today()), source="Jira")
+    alerts.save()
+
+# Displays an alert for Jira notifications
+def log_jira_message(text, finding):
+    alerts = Alerts(description=text + " Finding: " + str(finding.id), url=reverse('view_finding', args=(finding.id,)), icon="bullseye", display_date=localtz.localize(datetime.today()), source="Jira")
     alerts.save()
 
 # Adds labels to a Jira issue
@@ -939,11 +969,11 @@ def add_epic(eng, push_to_jira):
         j_issue = JIRA_Issue(jira_id=new_issue.id, jira_key=new_issue, engagement=engagement)
         j_issue.save()
 
-def add_comment(find, note):
+def add_comment(find, note, force_push=False):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
     jpkey = JIRA_PKey.objects.get(product=prod)
     jira_conf = jpkey.conf
-    if jpkey.push_notes:
+    if jpkey.push_notes or force_push == True:
         jira = JIRA(server=jira_conf.url, basic_auth=(jira_conf.username, jira_conf.password))
         j_issue = JIRA_Issue.objects.get(finding=find)
         jira.add_comment(j_issue.jira_id, '(%s): %s' % (note.author.get_full_name(), note.entry))
