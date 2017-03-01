@@ -2,6 +2,7 @@ from django.contrib.contenttypes.models import ContentType
 
 from django.core.management.base import BaseCommand
 from pytz import timezone
+from requests.auth import HTTPBasicAuth
 
 from dojo.models import Finding, JIRA_PKey, JIRA_Issue, Product, Engagement, Alerts
 import dojo.settings as settings
@@ -29,17 +30,6 @@ class Command(BaseCommand):
         findings = findings.filter(verified=True, active=True)
 
         for finding in findings:
-            #prod = Product.objects.get(engagement=Engagement.objects.get(test=finding.test))
-            #jpkey = JIRA_PKey.objects.get(product=prod)
-            #jira_conf = jpkey.conf
-
-            #j_issue = JIRA_Issue.objects.get(finding=finding)
-            #print "Finding ID: " + str(finding.id)
-            #print finding.title
-            #jira_id = j_issue.jira_id
             print "Checking issue:" + str(finding.id)
             update_issue(finding, finding.status(), True)
             print "########\n"
-
-            #if save:
-            #    finding.save()

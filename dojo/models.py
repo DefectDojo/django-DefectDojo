@@ -336,6 +336,7 @@ class Engagement_Type(models.Model):
 
 class Engagement(models.Model):
     name = models.CharField(max_length=300, null=True, blank=True)
+    description = models.CharField(max_length=2000, null=True, blank=True)
     version = models.CharField(max_length=100, null=True, blank=True)
     eng_type = models.ForeignKey(Engagement_Type, null=True, blank=True)
     first_contacted = models.DateField(null=True, blank=True)
@@ -568,6 +569,11 @@ class Finding(models.Model):
     under_review = models.BooleanField(default=False)
     review_requested_by = models.ForeignKey(Dojo_User, null=True, blank=True, related_name='review_requested_by')
     reviewers = models.ManyToManyField(Dojo_User, blank=True)
+
+    #Defect Tracking Review
+    under_defect_review = models.BooleanField(default=False)
+    defect_review_requested_by = models.ForeignKey(Dojo_User, null=True, blank=True, related_name='defect_review_requested_by')
+
     thread_id = models.IntegerField(default=0, editable=False)
     mitigated = models.DateTimeField(editable=False, null=True, blank=True)
     mitigated_by = models.ForeignKey(User, null=True, editable=False, related_name="mitigated_by")
