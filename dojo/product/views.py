@@ -19,7 +19,8 @@ from pytz import timezone
 
 from dojo.filters import ProductFilter, ProductFindingFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, ProductMetaDataForm, JIRAPKeyForm, JIRAFindingForm
-from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey
+from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, \
+    Tool_Product_Settings
 from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data
 from custom_field.models import CustomFieldValue, CustomField
 from  dojo.tasks import add_epic_task
@@ -78,6 +79,7 @@ def view_product(request, pid):
     engs = Engagement.objects.filter(product=prod, active=True)
     i_engs = Engagement.objects.filter(product=prod, active=False)
     scan_sets = ScanSettings.objects.filter(product=prod)
+    tools = Tool_Product_Settings.objects.filter(product=prod).order_by('name')
     auth = request.user.is_staff or request.user in prod.authorized_users.all()
     if not auth:
         # will render 403
@@ -234,6 +236,7 @@ def view_product(request, pid):
                    'engs': engs,
                    'i_engs': i_engs,
                    'scan_sets': scan_sets,
+                   'tools': tools,
                    'verified_findings': verified_findings,
                    'open_findings': open_findings,
                    'closed_findings': closed_findings,

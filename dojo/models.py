@@ -720,7 +720,6 @@ class Finding(models.Model):
 
 Finding.endpoints.through.__unicode__ = lambda x: "Endpoint: " + x.endpoint.host
 
-
 class Stub_Finding(models.Model):
     title = models.TextField(max_length=1000, blank=False, null=False)
     date = models.DateField(default=get_current_date, blank=False, null=False)
@@ -966,6 +965,16 @@ class JIRA_Issue(models.Model):
     finding = models.OneToOneField(Finding, null=True, blank=True)
     engagement = models.OneToOneField(Engagement, null=True, blank=True)
 
+class JIRA_Clone(models.Model):
+    jira_id =  models.CharField(max_length=200)
+    jira_clone_id =  models.CharField(max_length=200)
+
+class JIRA_Details_Cache(models.Model):
+    jira_id =  models.CharField(max_length=200)
+    jira_key =  models.CharField(max_length=200)
+    jira_status = models.CharField(max_length=200)
+    jira_resolution = models.CharField(max_length=200)
+
 class JIRA_PKey(models.Model):
     project_key = models.CharField(max_length=200, blank=True)
     product = models.ForeignKey(Product)
@@ -975,13 +984,47 @@ class JIRA_PKey(models.Model):
     enable_engagement_epic_mapping = models.BooleanField(default=False, blank=True)
     push_notes = models.BooleanField(default=False, blank=True)
 
+class Tool_Type(models.Model):
+    name = models.CharField(max_length=200)
+    description = models.CharField(max_length=2000, null=True)
+
+    class Meta:
+        ordering = ['name']
+
+    def __unicode__(self):
+        return self.name
+
+class Tool_Configuration(models.Model):
+    name = models.CharField(max_length=200, null=False)
+    description = models.CharField(max_length=2000, null=True)
+    url =  models.URLField(max_length=2000, null=True)
+    tool_type = models.ForeignKey(Tool_Type, related_name='tool_type')
+
+    class Meta:
+        ordering = ['name']
+
+    def __unicode__(self):
+        return self.name
+
+class Tool_Product_Settings(models.Model):
+    name = models.CharField(max_length=200, null=False)
+    description = models.CharField(max_length=2000, null=True)
+    url =  models.URLField(max_length=2000, null=True, blank=True)
+    product = models.ForeignKey(Product, default=1, editable=False)
+    tool_configuration = models.ForeignKey(Tool_Configuration, null=False, related_name='tool_configuration')
+    tool_project_id = models.CharField(max_length=200, null=True, blank=True)
+    notes = models.ManyToManyField(Notes, blank=True, editable=False)
+
+    class Meta:
+        ordering = ['name']
+
 class Alerts(models.Model):
     description = models.CharField(max_length=2000, null=True)
     url =  models.URLField(max_length=2000, null=True)
     source = models.CharField(max_length=15,
                             choices=(
                                 ('Jira', 'Jira'),
-                                ('Asynchimport', 'Asynch Import'),
+                                ('AsyncImport', 'Async Import'),
                                 ('Generic', 'Generic')),
                             default='Generic')
     icon = models.CharField(max_length=25, default='icon-user-check')
@@ -1027,6 +1070,9 @@ admin.site.register(ScanSettings)
 admin.site.register(IPScan)
 admin.site.register(Alerts)
 admin.site.register(JIRA_Issue)
+admin.site.register(Tool_Configuration)
+admin.site.register(Tool_Product_Settings)
+admin.site.register(Tool_Type)
 
 watson.register(Product)
 watson.register(Test)
