@@ -21,7 +21,7 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                         <li role="presentation">
-                            <a href="">
+                            <a href="{% url 'edit_tool_product' tool.product.id tool.id  %}">
                                 <i class="fa fa-pencil-square-o"></i> Edit Configuraiton
                             </a>
                         </li>
@@ -32,7 +32,7 @@
                         </li>
                         <li role="separator" class="divider"></li>
                         <li role="presentation">
-                            <a class="text-danger" href="">
+                            <a class="text-danger" href="{% url 'delete_tool_product' tool.product.id tool.id  %}">
                                 <i class="fa fa-trash"></i> Delete Configuraiton
                             </a>
                         </li>

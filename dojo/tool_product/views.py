@@ -104,7 +104,7 @@ def edit_tool_product(request, pid, ttid):
     if request.method == 'POST':
         tform = ToolProductSettingsForm(request.POST, instance=tool_product)
         if tform.is_valid():
-            form.save()
+            tform.save()
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Tool Product Configuration Successfully Updated.',
