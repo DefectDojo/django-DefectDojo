@@ -6,7 +6,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading tight">
                     <h3 class="has-filters">
-                        Configuration List
+                        Tool Configuration
                         <div class="dropdown pull-right">
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
@@ -16,8 +16,8 @@
                             <ul class="dropdown-menu dropdown-menu-right" role="menu"
                                 aria-labelledby="dropdownMenu1">
                                     <li role="presentation">
-                                        <a href="{% url 'add_jira' %}">
-                                            <i class="fa fa-plus"></i> Add Jira Configuration
+                                        <a href="{% url 'add_tool_config' %}">
+                                            <i class="fa fa-plus"></i> Add Tool Configuration
                                         </a>
                                     </li>
                             </ul>
@@ -36,18 +36,22 @@
                            class="tablesorter-bootstrap table table-bordered table-condensed table-striped">
                         <thead>
                         <tr>
-                            <th>URL</th>
-                            <th> Username</th>
+                            <th>Tool Name</th>
+                            <th>Description</th>
+                            <th>Category</th>
                         </tr>
                         </thead>
                         <tbody>
                         {% for conf in confs %}
                             <tr>
                                 <td>
-                                    <a href="{% url 'edit_jira' conf.id %}"><b>{{ conf.url }}</b></a>
+                                    <a href="{% url 'edit_tool_config' conf.id %}"><b>{{ conf.name }}</b></a>
                                 </td>
                                 <td>
-                                        {{ conf.username }}
+                                        {{ conf.description }}
+                                </td>
+                                <td>
+                                  {{ conf.tool_type.name }}
                                 </td>
                             </tr>
                         {% endfor %}
@@ -58,7 +62,7 @@
                     {% include "dojo/paging_snippet.html" with page=confs page_size=True %}
                 </div>
             {% else %}
-                <p class="text-center">No configurations found.</p>
+                <p class="text-center">No tool configurations found.</p>
             {% endif %}
         </div>
     </div>

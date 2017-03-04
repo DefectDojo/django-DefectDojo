@@ -38,7 +38,7 @@ class Command(BaseCommand):
             issue = jira.issue(j_issue.jira_id)
 
             #Issue Cloned
-            #print issue.fields.issuelinks[0]
+            print issue.fields.issuelinks[0]
 
             print "Jira Issue: " + str(issue)
             print "Resolution: " + str(issue.fields.resolution)

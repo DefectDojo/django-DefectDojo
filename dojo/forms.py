@@ -19,7 +19,7 @@ from dojo import settings
 from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
-    JIRA_Issue, JIRA_PKey, JIRA_Conf, UserContactInfo
+    JIRA_Issue, JIRA_PKey, JIRA_Conf, UserContactInfo, Tool_Type, Tool_Configuration, Tool_Product_Settings
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
 localtz = timezone(settings.TIME_ZONE)
@@ -471,7 +471,7 @@ class EngForm2(forms.ModelForm):
                                      "this engagement. Without a name the target " +
                                      "start date will be used in listings.")
     description = forms.CharField(widget=forms.Textarea(attrs={}),
-                                  required=False)                                 
+                                  required=False)
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False,
                            help_text="Add tags that help describe this product.  "
@@ -1200,6 +1200,35 @@ class JIRAForm(forms.ModelForm):
         model = JIRA_Conf
         exclude = ['product']
 
+class ToolTypeForm(forms.ModelForm):
+
+    class Meta:
+        model = Tool_Type
+        exclude = ['product']
+
+class ToolConfigForm(forms.ModelForm):
+    tool_type = forms.ModelChoiceField(queryset=Tool_Type.objects.all(), label='Tool Type')
+
+    class Meta:
+        model = Tool_Configuration
+        exclude = ['product']
+
+class DeleteToolProductSettingsForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = Tool_Product_Settings
+        exclude = ['tool_type']
+
+class ToolProductSettingsForm(forms.ModelForm):
+    tool_configuration = forms.ModelChoiceField(queryset=Tool_Configuration.objects.all(), label='Tool Configuration')
+
+    class Meta:
+        model = Tool_Product_Settings
+        fields = ['name', 'description', 'url', 'tool_configuration', 'tool_project_id']
+        exclude = ['tool_type']
+        order = ['name']
 
 class JIRAPKeyForm(forms.ModelForm):
     conf = forms.ModelChoiceField(queryset=JIRA_Conf.objects.all(), label='JIRA Configuration')
