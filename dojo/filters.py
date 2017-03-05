@@ -273,11 +273,13 @@ class ProductFilter(DojoFilter):
     prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all().order_by('name'),
         label="Product Type")
+    #tags = CharFilter(lookup_type='icontains', label="Tags")
 
     def __init__(self, *args, **kwargs):
         self.user = None
         if 'user' in kwargs:
             self.user = kwargs.pop('user')
+
         super(ProductFilter, self).__init__(*args, **kwargs)
 
         if self.user is not None and not self.user.is_staff:
@@ -287,6 +289,7 @@ class ProductFilter(DojoFilter):
     class Meta:
         model = Product
         fields = ['name', 'prod_type']
+        exclude = ['tags']
         order_by = (('name', 'Product Name'),
                     ('-name', 'Product Name Desc'),
                     ('prod_type__name', 'Product Type'),

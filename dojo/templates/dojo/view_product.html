@@ -12,6 +12,13 @@
             <div class="clearfix">
                 <h3 class="pull-left">
                     {{ prod }}
+                    {% if prod.tags %}
+                      <sup>
+                          {% for tag in prod.tags %}
+                          <span class="label label-primary">{{ tag }}</span>
+                          {% endfor %}
+                      </sup>
+                    {% endif %}
                     <br/>
                     <small>{{ prod.endpoint_count }}
                         <a href="{% url 'vulnerable_endpoints' %}?product={{ prod.id }}">
@@ -408,23 +415,6 @@
                 </div>
             </div>
         </div>
-
-        {% if prod.tags %}
-            <div class="col-md-12">
-                <div class="panel panel-default tags">
-                    <div class="panel-heading">
-                        <h4>Tags</h4>
-                    </div>
-                    <div class="tags panel-body">
-                        {% for tag in prod.tags %}
-                            <span class="label label-primary">{{ tag }}</span>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-        {% endif %}
-
-
         {% if user.is_staff %}
             <div class="col-md-12">
                 <div class="panel panel-default table-responsive">
@@ -447,7 +437,15 @@
                             <tbody>
                             {% for eng in engs %}
                                 <tr>
-                                <td>{{ eng.name | default:"N/A" }}</td>
+                                <td>{{ eng.name | default:"N/A" }}
+                                {% if eng.tags %}
+                                    <sup>
+                                        {% for tag in eng.tags %}
+                                        <span class="label label-primary">{{ tag }}</span>
+                                        {% endfor %}
+                                    </sup>
+                                {% endif %}
+                                </td>
                                 <td>{{ eng.lead }}</td>
                                 <td>{{ eng.target_start }}</td>
                                 <td>{{ eng.target_end }}</td>

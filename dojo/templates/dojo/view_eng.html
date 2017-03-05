@@ -32,6 +32,13 @@
                         Engagement for <a href="{% url 'view_product' eng.product.id %}">{{ eng.product }}</a>
                     {% endif %}
                     <span class="text-muted">{{ eng.status }}</span>
+                    {% if eng.tags %}
+                        <sup>
+                            {% for tag in eng.tags %}
+                            <span class="label label-primary">{{ tag }}</span>
+                            {% endfor %}
+                        </sup>
+                    {% endif %}
                 </h3>
 
                 <div class="dropdown pull-right">
@@ -86,7 +93,7 @@
     </div>
 
     <div class="row same-height-panel-row">
-        <div class="col-md-3">
+        <div class="col-md-4">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h4>Testing Lead:
@@ -114,7 +121,7 @@
                 </div>
             </div>
         </div>
-        <div id="test-strategy" class="col-md-3">
+        <div id="test-strategy" class="col-md-4">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h4> Test Strategy </h4>
@@ -133,7 +140,7 @@
                 </div>
             </div>
         </div>
-        <div id="threat-model" class="col-md-3">
+        <div id="threat-model" class="col-md-4">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h4> Threat Model </h4>
@@ -152,20 +159,6 @@
                 </div>
             </div>
         </div>
-        {% if eng.tags %}
-            <div class="col-md-3">
-                <div class="panel panel-default tags">
-                    <div class="panel-heading">
-                        <h4>Tags</h4>
-                    </div>
-                    <div class="tags panel-body">
-                        {% for tag in eng.tags %}
-                            <span class="label label-primary">{{ tag }}</span>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-        {% endif %}
     </div>
  {% if jissue and jconf %}
     <div class="row to_highlight">
@@ -230,7 +223,15 @@
                             <tbody>
                             {% for test in tests %}
                                 <tr>
-                                    <td>{{ test.test_type }}</td>
+                                    <td>{{ test.test_type }}
+                                      {% if test.tags %}
+                                          <sup>
+                                              {% for tag in test.tags %}
+                                              <span class="label label-primary">{{ tag }}</span>
+                                              {% endfor %}
+                                          </sup>
+                                      {% endif %}
+                                    </td>
                                     <td>{{ test.target_start.date }}</td>
                                     <td>{{ test.target_end.date }}</td>
                                     <td>{{ test.finding_set.all|length }}</td>

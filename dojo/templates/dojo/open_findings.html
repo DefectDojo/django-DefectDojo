@@ -40,6 +40,11 @@
                             <tr>
                                 <td><a title="{{ finding.title }}"
                                                       href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a>
+                                    <sup>
+                                        {% for tag in finding.tags %}
+                                        <span class="label label-primary">{{ tag }}</span>
+                                        {% endfor %}
+                                    </sup>
                                 </td>
                                 <td class="nowrap">{{ finding.date }}</td>
                                 <td class="nowrap">{{ finding.last_reviewed }}</td>
