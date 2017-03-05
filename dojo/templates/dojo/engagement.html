@@ -50,7 +50,7 @@
                                 <td class="prod_name"><a href="{% url 'view_product' p.id %}">{{ p.name }}</a>
                                   <sup>
                                    {% for tag in p.tags %}
-                                        <span class="label label-primary">{{ tag }}</span>
+                                        <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                     {% endfor %}
                                   </sup>
                                 </td>
@@ -64,7 +64,7 @@
                                                 {% if e.name %}{{ e.name }} {% endif %}{{ e.target_start }}</a>
                                                 <sup>
                                                  {% for tag in e.tags %}
-                                                      <span class="label label-primary">{{ tag }}</span>
+                                                      <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                                   {% endfor %}
                                                 </sup>
                                         {% endif %}

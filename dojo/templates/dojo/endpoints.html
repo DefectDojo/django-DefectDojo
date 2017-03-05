@@ -50,7 +50,7 @@
                                   {% if e.tags %}
                                       <sup>
                                           {% for tag in e.tags %}
-                                          <span class="label label-primary">{{ tag }}</span>
+                                          <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                           {% endfor %}
                                       </sup>
                                   {% endif %}

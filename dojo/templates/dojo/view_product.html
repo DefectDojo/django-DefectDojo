@@ -15,7 +15,7 @@
                     {% if prod.tags %}
                       <sup>
                           {% for tag in prod.tags %}
-                          <span class="label label-primary">{{ tag }}</span>
+                          <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                           {% endfor %}
                       </sup>
                     {% endif %}
@@ -441,7 +441,7 @@
                                 {% if eng.tags %}
                                     <sup>
                                         {% for tag in eng.tags %}
-                                        <span class="label label-primary">{{ tag }}</span>
+                                        <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>t
                                         {% endfor %}
                                     </sup>
                                 {% endif %}

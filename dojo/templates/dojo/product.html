@@ -62,7 +62,7 @@
                                     <a href="{% url 'view_product' prod.id %}"><b>{{ prod.name }}</b></a>
                                     <sup>
                                     {% for tag in prod.tags %}
-                                        &nbsp;<span class="label label-primary">{{ tag }}</span>
+                                        &nbsp;<a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                     {% endfor %}
                                   </sup>
                                 </td>
