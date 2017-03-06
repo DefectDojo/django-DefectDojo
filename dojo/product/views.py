@@ -26,6 +26,7 @@ from custom_field.models import CustomFieldValue, CustomField
 from  dojo.tasks import add_epic_task
 from tagging.models import Tag
 from tagging.utils import get_tag_list
+from tagging.views import TaggedItem
 
 localtz = timezone(settings.TIME_ZONE)
 
@@ -52,10 +53,16 @@ def product(request):
                       for word in product.name.split() if len(word) > 2]
 
     product_type = None
+
     if 'prod_type' in request.GET:
         p = request.GET.getlist('prod_type', [])
         if len(p) == 1:
             product_type = get_object_or_404(Product_Type, id=p[0])
+    """
+    if 'tags' in request.GET:
+        tags = request.GET.getlist('tags', [])
+        initial_queryset = TaggedItem.objects.get_by_model(initial_queryset, Tag.objects.filter(name__in=tags))
+    """
 
     prods = ProductFilter(request.GET, queryset=initial_queryset, user=request.user)
     prod_list = get_page_items(request, prods, 25)

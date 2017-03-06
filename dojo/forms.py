@@ -246,7 +246,7 @@ class ImportScanForm(forms.Form):
 
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False,
-                           help_text="Add tags that help describe this product.  "
+                           help_text="Add tags that help describe this scan.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
     file = forms.FileField(widget=forms.widgets.FileInput(
         attrs={"accept": ".xml, .csv, .nessus, .json"}),
@@ -281,7 +281,7 @@ class ReImportScanForm(forms.Form):
     verified = forms.BooleanField(help_text="Select if these findings have been verified.", required=False)
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False,
-                           help_text="Add tags that help describe this product.  "
+                           help_text="Add tags that help describe this scan.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
     file = forms.FileField(widget=forms.widgets.FileInput(
         attrs={"accept": ".xml, .csv, .nessus, .json"}),
@@ -475,7 +475,7 @@ class EngForm2(forms.ModelForm):
                                   required=False)
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False,
-                           help_text="Add tags that help describe this product.  "
+                           help_text="Add tags that help describe this engagement.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
     product = forms.ModelChoiceField(queryset=Product.objects.all())
     target_start = forms.DateField(widget=forms.TextInput(
@@ -523,7 +523,7 @@ class TestForm(forms.ModelForm):
         attrs={'class': 'datepicker'}))
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False,
-                           help_text="Add tags that help describe this product.  "
+                           help_text="Add tags that help describe this test.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
 
     def __init__(self, *args, **kwargs):
@@ -640,7 +640,7 @@ class FindingForm(forms.ModelForm):
     references = forms.CharField(widget=forms.Textarea, required=False)
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False,
-                           help_text="Add tags that help describe this product.  "
+                           help_text="Add tags that help describe this finding.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
     is_template = forms.BooleanField(label="Create Template?", required=False,
                                      help_text="A new finding template will be created from this finding.")
@@ -692,7 +692,7 @@ class FindingTemplateForm(forms.ModelForm):
     title = forms.CharField(max_length=1000, required=True)
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False,
-                           help_text="Add tags that help describe this product.  "
+                           help_text="Add tags that help describe this finding template.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
     cwe = forms.IntegerField(label="CWE", required=False)
     severity_options = (('Low', 'Low'), ('Medium', 'Medium'),
@@ -744,7 +744,7 @@ class FindingBulkUpdateForm(forms.ModelForm):
 class EditEndpointForm(forms.ModelForm):
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False,
-                           help_text="Add tags that help describe this product.  "
+                           help_text="Add tags that help describe this endpoint.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
 
     class Meta:
@@ -835,7 +835,7 @@ class AddEndpointForm(forms.Form):
                                                                             "associated with.")
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False,
-                           help_text="Add tags that help describe this product.  "
+                           help_text="Add tags that help describe this endpoint.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
 
     def __init__(self, *args, **kwargs):

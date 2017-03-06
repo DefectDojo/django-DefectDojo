@@ -11,8 +11,15 @@
     <div class="panel panel-default">
         <div class="panel-heading">
             <div class="clearfix">
-                <h3 class="pull-left"> {{ test.test_type }}</h3>
-
+                <h3 class="pull-left"> {{ test.test_type }}
+                {% if test.tags %}
+                    <sup>
+                        {% for tag in test.tags %}
+                        <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                        {% endfor %}
+                    </sup>
+                {% endif %}
+              </h3>
                 <div id="test-pulldown" class="dropdown pull-right">
                     <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                             data-toggle="dropdown" aria-expanded="true">
@@ -102,18 +109,6 @@
             </table>
         </div>
     </div>
-    {% if test.tags %}
-        <div class="panel panel-default to_highlight">
-            <div class="panel-heading">
-                <h4>Tags</h4>
-            </div>
-            <div class="tags panel-body">
-                {% for tag in test.tags %}
-                    <span class="label label-primary">{{ tag }}</span>
-                {% endfor %}
-            </div>
-        </div>
-    {% endif %}
     <div class="panel panel-default to_highlight table-responsive">
         <div class="panel-heading">
             <div class="clearfix">
@@ -235,7 +230,15 @@
                                        class="select_one {{ finding.severity }}"/>
                             </form>
                         </td>
-                        <td><a href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a></td>
+                        <td><a href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a>
+                          {% if finding.tags %}
+                              <sup>
+                                  {% for tag in finding.tags %}
+                                  <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                  {% endfor %}
+                              </sup>
+                          {% endif %}
+                        </td>
                         <td>{{ finding.reporter.username }}</td>
                         <td>{{ finding.mitigated }}</td>
                         <td>{% if finding.severity == "Critical" or finding.severity == "High" %}

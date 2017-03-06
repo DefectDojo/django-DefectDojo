@@ -8,6 +8,13 @@
             <div class="clearfix">
                 <h3 class="pull-left to_highlight finding-title">
                     {{ finding.title }}
+                    {% if finding.tags %}
+                        <sup>
+                            {% for tag in finding.tags %}
+                            <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                            {% endfor %}
+                        </sup>
+                    {% endif %}
                     {% if finding.last_reviewed %}
                         <small>Last reviewed {{ finding.last_reviewed | naturalday }}
                             by {{ finding.last_reviewed_by }}</small>
@@ -170,25 +177,6 @@
             </table>
         </div>
     </div>
-
-    {% if finding.tags %}
-        <div class="row to_highlight">
-            <div class="col-md-12">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h4>
-                            Tags
-                        </h4>
-                    </div>
-                    <div class="tags panel-body">
-                        {% for tag in finding.tags %}
-                            <span class="label label-primary">{{ tag }}</span>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% endif %}
  {% if jissue and jconf %}
     <div class="row to_highlight">
         <div class="col-md-12">
@@ -224,7 +212,15 @@
                             <tr>
                                 {% for item in row %}
                                     <td>{% if item %}<i class="fa fa-circle"></i> <a title="View endpoint details"
-                                                                                     href="{% url 'view_endpoint' item.id %}">{{ item }}</a>{% endif %}
+                                                                                     href="{% url 'view_endpoint' item.id %}">{{ item }}</a>
+                                   {% if item.tags %}
+                                       <sup>
+                                           {% for tag in item.tags %}
+                                           <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                           {% endfor %}
+                                       </sup>
+                                      {% endif %}
+                                   {% endif %}
                                     </td>
                                 {% endfor %}
                             </tr>
