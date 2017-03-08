@@ -54,8 +54,7 @@ def new_tool_product(request, pid):
                                  messages.SUCCESS,
                                  'Product Tool Configuration Successfully Created.',
                                  extra_tags='alert-success')
-            #return HttpResponseRedirect(reverse('tool_type', ))
-            return HttpResponseRedirect(reverse('view_product',  args=(pid)))
+            return HttpResponseRedirect(reverse('view_product', args=(pid,)))
     else:
         tform = ToolProductSettingsForm()
         add_breadcrumb(title="New Product Tool Configuration", top_level=False, request=request)

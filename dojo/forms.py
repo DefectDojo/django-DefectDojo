@@ -19,7 +19,8 @@ from dojo import settings
 from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
-    JIRA_Issue, JIRA_PKey, JIRA_Conf, UserContactInfo, Tool_Type, Tool_Configuration, Tool_Product_Settings
+    JIRA_Issue, JIRA_PKey, JIRA_Conf, UserContactInfo, Tool_Type, Tool_Configuration, Tool_Product_Settings, \
+    Cred_User, Cred_Mapping
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
 localtz = timezone(settings.TIME_ZONE)
@@ -517,6 +518,7 @@ class TestForm(forms.ModelForm):
     test_type = forms.ModelChoiceField(queryset=Test_Type.objects.all().order_by('name'))
     environment = forms.ModelChoiceField(
         queryset=Development_Environment.objects.all().order_by('name'))
+    #credential = forms.ModelChoiceField(Cred_User.objects.all(), required=False)
     target_start = forms.DateTimeField(widget=forms.TextInput(
         attrs={'class': 'datepicker'}))
     target_end = forms.DateTimeField(widget=forms.TextInput(
@@ -525,6 +527,7 @@ class TestForm(forms.ModelForm):
                            required=False,
                            help_text="Add tags that help describe this test.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
+
 
     def __init__(self, *args, **kwargs):
         tags = Tag.objects.usage_for_model(Test)
@@ -1231,6 +1234,13 @@ class ToolProductSettingsForm(forms.ModelForm):
         exclude = ['tool_type']
         order = ['name']
 
+class CredMappingForm(forms.ModelForm):
+
+    class Meta:
+        model = Cred_Mapping
+        fields = ['cred_id', 'url', 'is_authn_provider']
+        exclude = ['product', 'finding', 'engagement', 'test']
+
 class JIRAPKeyForm(forms.ModelForm):
     conf = forms.ModelChoiceField(queryset=JIRA_Conf.objects.all(), label='JIRA Configuration')
     class Meta:
@@ -1246,3 +1256,10 @@ class JIRAFindingForm(forms.Form):
         self.fields['push_to_jira'].required=False
 
     push_to_jira = forms.BooleanField(required=False)
+
+class CredUserForm(forms.ModelForm):
+    #password = forms.CharField(widget=forms.PasswordInput, required=True)
+
+    class Meta:
+        model = Cred_User
+        exclude = ['']
