@@ -673,18 +673,9 @@ class Finding(models.Model):
     def save(self, *args, **kwargs):
         super(Finding, self).save(*args, **kwargs)
         if hasattr(settings, 'ENABLE_DEDUPLICATION'):
-            if settings.ENABLE_DEDUPLICATION:
-                eng_findings_cwe = Finding.objects.filter(test__engagement__product=self.test.engagement.product,
-                                                          cwe=self.cwe).exclude(id=self.id).exclude(cwe=None)
-                eng_findings_title = Finding.objects.filter(test__engagement__product=self.test.engagement.product,
-                                                            title=self.title).exclude(id=self.id)
-                total_findings = eng_findings_cwe | eng_findings_title
-                for find in total_findings:
-                    list1 = self.endpoints.all()
-                    list2 = find.endpoints.all()
-                    if all(x in list2 for x in list1):
-                        find.duplicate = True
-                        super(Finding, find).save(*args, **kwargs)
+            if settings.ENABLE_DEDUPLICATION and (len(self.endpoints.all()) != 0):
+                from dojo.tasks import async_dedupe
+                async_dedupe.delay(self, *args, **kwargs)
 
     def clean(self):
         no_check = ["test", "reporter"]

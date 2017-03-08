@@ -1,7 +1,7 @@
 # #  engagements
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.contrib.auth.models import User
 from django.conf import settings
@@ -143,7 +143,7 @@ def edit_engagement(request, eid):
             pass
         if hasattr(settings, "ENABLE_JIRA"):
             if settings.ENABLE_JIRA:
-                if JIRA_PKey.objects.filter(product= eng.product).count() != 0:
+                if JIRA_PKey.objects.filter(product=eng.product).count() != 0:
                     jform = JIRAFindingForm(prefix='jiraform', enabled=enabled)
                 else:
                     jform = None
@@ -196,8 +196,8 @@ def view_engagement(request, eid):
     try:
         jissue = JIRA_Issue.objects.get(engagement=eng)
     except:
-            jissue = None
-            pass
+        jissue = None
+        pass
     try:
         jconf = JIRA_PKey.objects.get(product=eng.product).conf
     except:
@@ -235,6 +235,46 @@ def view_engagement(request, eid):
     else:
         fpage = None
 
+    # ----------
+
+    try:
+        start_date = Finding.objects.filter(test__engagement__product=eng.product).order_by('date')[:1][0].date
+    except:
+        start_date = localtz.localize(datetime.today())
+
+    end_date = localtz.localize(datetime.today())
+
+    risk_acceptances = Risk_Acceptance.objects.filter(engagement__in=Engagement.objects.filter(product=eng.product))
+
+    accepted_findings = [finding for ra in risk_acceptances
+                         for finding in ra.accepted_findings.all()]
+
+    week_date = end_date - timedelta(days=7)  # seven days and /newer are considered "new"
+
+    new_verified_findings = Finding.objects.filter(test__engagement__product=eng.product,
+                                                   date__range=[week_date, end_date],
+                                                   false_p=False,
+                                                   verified=True,
+                                                   duplicate=False,
+                                                   out_of_scope=False).order_by("date")
+
+    open_findings = Finding.objects.filter(test__engagement__product=eng.product,
+                                           date__range=[start_date, end_date],
+                                           false_p=False,
+                                           verified=True,
+                                           duplicate=False,
+                                           out_of_scope=False,
+                                           active=True,
+                                           mitigated__isnull=True)
+
+    closed_findings = Finding.objects.filter(test__engagement__product=eng.product,
+                                             date__range=[start_date, end_date],
+                                             false_p=False,
+                                             verified=True,
+                                             duplicate=False,
+                                             out_of_scope=False,
+                                             mitigated__isnull=False)
+
     return render(request, 'dojo/view_eng.html',
                   {'eng': eng, 'tests': tests,
                    'findings': fpage, 'enabled': enabled,
@@ -243,6 +283,11 @@ def view_engagement(request, eid):
                    'risks_accepted': risks_accepted,
                    'can_add_risk': len(eng_findings),
                    'jissue': jissue, 'jconf': jconf,
+                   'open_findings': open_findings,
+                   'closed_findings': closed_findings,
+                   'accepted_findings': accepted_findings,
+                   'new_findings': new_verified_findings,
+                   'start_date': start_date,
                    })
 
 
