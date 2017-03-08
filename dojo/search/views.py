@@ -36,6 +36,11 @@ def simple_search(request):
     tests = None
     findings = None
     products = None
+    tagged_tests = None
+    tagged_findings = None
+    tagged_products = None
+    tagged_endpoints = None
+    tagged_engagements = None
     clean_query = ''
     cookie = False
     terms = ''

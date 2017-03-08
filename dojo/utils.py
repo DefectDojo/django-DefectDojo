@@ -1,6 +1,7 @@
 import calendar as tcalendar
-import os
 import re
+import binascii, os, hashlib
+from Crypto.Cipher import AES
 from calendar import monthrange
 from datetime import date, datetime, timedelta
 from math import pi, sqrt
@@ -1027,3 +1028,64 @@ def send_atmention_email(user, users, parent_url, parent_title, new_note):
           user.email,
           recipients,
           fail_silently=False)
+
+def encrypt(key, iv, plaintext):
+    aes = AES.new(key, AES.MODE_CBC, iv, segment_size=128)
+    plaintext = _pad_string(plaintext)
+    encrypted_text = aes.encrypt(plaintext)
+    return binascii.b2a_hex(encrypted_text).rstrip()
+
+def decrypt(key, iv, encrypted_text):
+    aes = AES.new(key, AES.MODE_CBC, iv, segment_size=128)
+    encrypted_text_bytes = binascii.a2b_hex(encrypted_text)
+    decrypted_text = aes.decrypt(encrypted_text_bytes)
+    decrypted_text = _unpad_string(decrypted_text)
+    return decrypted_text
+
+def _pad_string(value):
+    length = len(value)
+    pad_size = 16 - (length % 16)
+    return value.ljust(length + pad_size, '\x00')
+
+def _unpad_string(value):
+    while value[-1] == '\x00':
+        value = value[:-1]
+    return value
+
+def dojo_crypto_encrypt(plaintext):
+    key = None
+    key = get_db_key()
+
+    iv =  os.urandom(16)
+    return prepare_for_save(iv, encrypt(key, iv, plaintext))
+
+def prepare_for_save(iv, encrypted_value):
+    binascii.b2a_hex(encrypted_value).rstrip()
+    stored_value = "AES.1:" + binascii.b2a_hex(iv).rstrip() + ":" + encrypted_value
+    return stored_value
+
+def get_db_key():
+    db_key = None
+    if hasattr(settings, 'DB_KEY'):
+        db_key = settings.DB_KEY
+        db_key = binascii.b2a_hex(hashlib.sha256(db_key).digest().rstrip())[:32]
+
+    return db_key
+
+def prepare_for_view(encrypted_value):
+    key = None
+    decrypted_value = ""
+    key = get_db_key()
+    encrypted_values = encrypted_value.split(":")
+
+    if len(encrypted_values) > 1:
+        type = encrypted_values[0]
+        iv = binascii.a2b_hex(encrypted_values[1]).rstrip()
+        value = encrypted_values[2]
+        decrypted_value = decrypt(key, iv, value)
+        try:
+            decrypted_value.decode('ascii')
+        except UnicodeDecodeError:
+            decrypted_value = ""
+    
+    return decrypted_value

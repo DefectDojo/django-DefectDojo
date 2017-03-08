@@ -20,7 +20,7 @@ from pytz import timezone
 from dojo.filters import ProductFilter, ProductFindingFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, ProductMetaDataForm, JIRAPKeyForm, JIRAFindingForm
 from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, \
-    Tool_Product_Settings
+    Tool_Product_Settings, Cred_User, Cred_Mapping
 from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data
 from custom_field.models import CustomFieldValue, CustomField
 from  dojo.tasks import add_epic_task
@@ -88,6 +88,8 @@ def view_product(request, pid):
     scan_sets = ScanSettings.objects.filter(product=prod)
     tools = Tool_Product_Settings.objects.filter(product=prod).order_by('name')
     auth = request.user.is_staff or request.user in prod.authorized_users.all()
+    creds = Cred_Mapping.objects.filter(product=prod).select_related('cred_id')
+
     if not auth:
         # will render 403
         raise PermissionDenied
@@ -244,6 +246,7 @@ def view_product(request, pid):
                    'i_engs': i_engs,
                    'scan_sets': scan_sets,
                    'tools': tools,
+                   'creds': creds,
                    'verified_findings': verified_findings,
                    'open_findings': open_findings,
                    'closed_findings': closed_findings,

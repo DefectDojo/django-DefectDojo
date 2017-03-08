@@ -132,19 +132,21 @@
                         </tr>
                         </thead>
                         <tbody>
-                        {% for test in tagged_tests %}
-                            <tr>
-                                <td><a class="search-finding"
-                                       href="{% url 'view_test' test.id %}">{{ test.test_type }}</a>
-                                      <sup>
-                                        {% for tag in test.tags %}
-                                             <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
-                                         {% endfor %}
-                                      </sup>
-                                </td>
-                                <td>Test</td>
-                            </tr>
-                        {% endfor %}
+                        {% if tagged_tests %}
+                            {% for test in tagged_tests %}
+                                <tr>
+                                    <td><a class="search-finding"
+                                           href="{% url 'view_test' test.id %}">{{ test.test_type }}</a>
+                                          <sup>
+                                            {% for tag in test.tags %}
+                                                 <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                             {% endfor %}
+                                          </sup>
+                                    </td>
+                                    <td>Test</td>
+                                </tr>
+                            {% endfor %}
+                        {% endif %}
                         {% for finding in tagged_findings %}
                             <tr>
                                 <td><a class="search-finding"
@@ -188,13 +190,11 @@
                             <tr>
                                 <td><a class="search-finding"
                                        href="{% url 'view_engagement' eng.id %}">{{ eng }}</a>
-                                       <td>
-                                         <sup>
+                                          <sup>
                                            {% for tag in eng.tags %}
                                                <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                            {% endfor %}
                                         </sup>
-                                       </td>
                                 </td>
                                 <td>Engagement</td>
                             </tr>

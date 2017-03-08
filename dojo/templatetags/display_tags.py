@@ -11,6 +11,7 @@ from django.utils.text import normalize_newlines
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.conf import settings
+from dojo.utils import prepare_for_view
 
 from dojo.models import Check_List, FindingImage, FindingImageAccessToken, Finding
 
@@ -24,6 +25,9 @@ def ports_open(value):
         count += len(eval(ipscan.services))
     return count
 
+@register.filter(name='get_pwd')
+def get_pwd(value):
+    return prepare_for_view(value)
 
 @register.filter(name='checklist_status')
 def checklist_status(value):

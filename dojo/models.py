@@ -1041,6 +1041,44 @@ class Alerts(models.Model):
     created = models.DateTimeField(null=False, editable=False, default=now)
     display_date = models.DateTimeField(null=False, default=now)
 
+class Cred_User(models.Model):
+    name = models.CharField(max_length=200, null=False)
+    username = models.CharField(max_length=200, null=False)
+    password = models.CharField(max_length=400, null=False)
+    role = models.CharField(max_length=200, null=False)
+    authentication = models.CharField(max_length=15,
+                            choices=(
+                                ('Form', 'Form Authentication'),
+                                ('SSO', 'SSO Redirect')),
+                            default='Form')
+    http_authentication = models.CharField(max_length=15,
+                            choices=(
+                                ('Basic', 'Basic'),
+                                ('NTLM', 'NTLM')),
+                                null=True, blank=True)
+    description = models.CharField(max_length=2000, null=True, blank=True)
+    url =  models.URLField(max_length=2000, null=False)
+    environment = models.ForeignKey(Development_Environment, null=False)
+    login_regex = models.CharField(max_length=200, null=True, blank=True)
+    logout_regex = models.CharField(max_length=200, null=True, blank=True)
+    notes = models.ManyToManyField(Notes, blank=True, editable=False)
+    is_valid = models.BooleanField(default=True, verbose_name="Login is valid")
+
+    class Meta:
+        ordering = ['name']
+
+    def __unicode__(self):
+        return self.name + " (" + self.role + ")"
+
+class Cred_Mapping(models.Model):
+    cred_id = models.ForeignKey(Cred_User, null=False, related_name="cred_user", verbose_name="Credential")
+    product = models.ForeignKey(Product, null=True, blank=True, related_name="product")
+    finding = models.ForeignKey(Finding, null=True, blank=True, related_name="finding")
+    engagement = models.ForeignKey(Engagement, null=True, blank=True, related_name="engagement")
+    test = models.ForeignKey(Test, null=True, blank=True, related_name="test")
+    is_authn_provider = models.BooleanField(default=False, verbose_name="Authentication Provider")
+    url =  models.URLField(max_length=2000, null=True, blank=True)
+
 # Register for automatic logging to database
 auditlog.register(Dojo_User)
 auditlog.register(Endpoint)
@@ -1050,6 +1088,7 @@ auditlog.register(Product)
 auditlog.register(Test)
 auditlog.register(Risk_Acceptance)
 auditlog.register(Finding_Template)
+auditlog.register(Cred_User)
 
 # Register tagging for models
 tag_register(Product)
@@ -1082,6 +1121,8 @@ admin.site.register(JIRA_Issue)
 admin.site.register(Tool_Configuration)
 admin.site.register(Tool_Product_Settings)
 admin.site.register(Tool_Type)
+admin.site.register(Cred_User)
+admin.site.register(Cred_Mapping)
 
 watson.register(Product)
 watson.register(Test)
