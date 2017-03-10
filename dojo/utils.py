@@ -778,6 +778,15 @@ def handle_uploaded_threat(f, eng):
     eng.tmodel_path = settings.MEDIA_ROOT + '/threat/%s%s' % (eng.id, extension)
     eng.save()
 
+def handle_uploaded_selenium(f, cred):
+    name, extension = os.path.splitext(f.name)
+    with open(settings.MEDIA_ROOT + '/selenium/%s%s' % (cred.id, extension),
+              'wb+') as destination:
+        for chunk in f.chunks():
+            destination.write(chunk)
+    cred.selenium_script = settings.MEDIA_ROOT + '/selenium/%s%s' % (cred.id, extension)
+    cred.save()
+
 #Gets a connection to a Jira server based on the finding
 def get_jira_connection(finding):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=finding.test))
@@ -1057,7 +1066,7 @@ def dojo_crypto_encrypt(plaintext):
     key = get_db_key()
 
     iv =  os.urandom(16)
-    return prepare_for_save(iv, encrypt(key, iv, plaintext))
+    return prepare_for_save(iv, encrypt(key, iv, plaintext.encode('ascii', 'ignore')))
 
 def prepare_for_save(iv, encrypted_value):
     binascii.b2a_hex(encrypted_value).rstrip()
@@ -1087,5 +1096,5 @@ def prepare_for_view(encrypted_value):
             decrypted_value.decode('ascii')
         except UnicodeDecodeError:
             decrypted_value = ""
-    
+
     return decrypted_value
