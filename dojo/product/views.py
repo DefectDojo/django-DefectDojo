@@ -340,16 +340,21 @@ def edit_product(request, pid):
                 if settings.ENABLE_JIRA:
                     if jira_enabled:
                         jform = JIRAPKeyForm(request.POST, instance=jira_inst)
-                        jform.save()
+                        #need to handle delete 
+                        try:
+                            jform.save()
+                        except:
+                            pass
                     else:
                         jform = JIRAPKeyForm(request.POST)
-                        new_conf = jform.save(commit=False)
-                        new_conf.product_id = pid
-                        new_conf.save()
-                        messages.add_message(request,
-                                             messages.SUCCESS,
-                                             'JIRA information updated successfully.',
-                                             extra_tags='alert-success')
+                        if  jform.is_valid():
+                            new_conf = jform.save(commit=False)
+                            new_conf.product_id = pid
+                            new_conf.save()
+                            messages.add_message(request,
+                                                 messages.SUCCESS,
+                                                 'JIRA information updated successfully.',
+                                                 extra_tags='alert-success')
 
             return HttpResponseRedirect(reverse('view_product', args=(pid,)))
     else:
