@@ -6,7 +6,7 @@
     <br>
 {% endif %}
 {% for find in findings %}
-    <h4>=== Finding {{ find.id }}: {{ find.title | nice_title }} {% if find.mitigated %}
+    <h4>=== {{ find.title | nice_title }} {% if find.mitigated %}
         Mitigated on: {{ find.mitigated }} {% endif %}===</h4>
     <br>
     <p><b>==== Product: ====</b>
@@ -57,6 +57,10 @@
     <p><b>==== Further References: ====</b>
         <br>
         {{ find.references|linebreaksasciidocbr }}
+    </p>
+    <p><b>==== Finding ID: ====</b>
+        <br>
+        Finding {{ find.id }}
     </p>
     <br>
     {% if include_finding_images %}

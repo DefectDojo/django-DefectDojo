@@ -13,7 +13,7 @@
                 <div class="panel-heading finding-title">
                     <div class="clearfix">
                         <h5>
-                            Finding {{ finding.id }}: {{ finding.title }}
+                            {{ finding.title }}
                         </h5>
                     </div>
                 </div>
@@ -35,6 +35,7 @@
                             {% if finding.cwe > 0 %}
                                 <th>CWE</th>
                             {% endif %}
+                            <th>Finding ID</th>
                         </tr>
                         <tr>
                             <td>
@@ -68,7 +69,7 @@
                                     </a>
                                 </td>
                             {% endif %}
-
+                            <td>{{{ finding.id }}</td>
                         </tr>
                     </table>
                 </div>
