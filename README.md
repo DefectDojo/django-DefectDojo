@@ -54,7 +54,7 @@ that should give you an idea of how to use DefectDojo for your own team.
 # Getting Involved
 
 <img src="https://github.com/devGregA/django-DefectDojo/blob/master/doc/img/slack_rgb.png" width="100">  
-<b>[Get Access.](https://owasp.herokuapp.com/)</b> Realtime discussion is done in the OWASP Slack Channel, #defectdojo.
+<b> [Get Access.](https://owasp.herokuapp.com/) </b> Realtime discussion is done in the OWASP Slack Channel, #defectdojo.
 
 <br>
 <img src="https://github.com/devGregA/django-DefectDojo/blob/master/doc/img/Twitter_Logo.png" width="45">  
@@ -78,22 +78,17 @@ DefectDojo is maintained by:
 - Jay Paz ([@jjpaz](https://twitter.com/jjpaz))
 - Aaron Weaver ([@weavera](https://twitter.com/weavera))
 
-With past contributions from:
-
-- Fatimah Zohra
-- Michael Dong
-
 # Contributing
 
-We greatly appreciate all of our contributors < link>!
+We greatly appreciate all of our [contributors](https://github.com/devGregA/django-DefectDojo/graphs/contributors).
 
 We would also like to highlight the contributions from Michael Dong and Fatimah Zohra who contributed to DefectDojo before it was open source.
 
 ### Swag Rewards
 
 If you fix an issue with the 'Swag Reward' tag we'll send you a shirt
-shirt image
-shirt image
+![Shirt Front](./doc/img/dojo_tshirt_front.png)
+![Shirt Back](./doc/img/dojo_tshirt_back.png)
 
 # Support
 
