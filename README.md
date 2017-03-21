@@ -85,7 +85,7 @@ We greatly appreciate all of our [contributors](https://github.com/devGregA/djan
 We would also like to highlight the contributions from Michael Dong and Fatimah Zohra who contributed to DefectDojo before it was open source.
 
 ### Swag Rewards
-<b>If you fix an issue with the 'Swag Reward' tag <img align="" src="https://github.com/devGregA/django-DefectDojo/blob/master/doc/img/swag_reward.png" width="90"> we'll send you a shirt and some stickers!</b>
+If you fix an issue with the 'swag reward' tag <img align="" src="https://github.com/devGregA/django-DefectDojo/blob/master/doc/img/swag_reward.png" width="90"> we'll send you a shirt and some stickers!
 
 <img src="https://github.com/devGregA/django-DefectDojo/blob/master/doc/img/dojo_tshirt_front.png" width="300"><img src="https://github.com/devGregA/django-DefectDojo/blob/master/doc/img/dojo_tshirt_back.png" width="300">
 
