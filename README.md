@@ -87,8 +87,7 @@ We would also like to highlight the contributions from Michael Dong and Fatimah 
 ### Swag Rewards
 <b>If you fix an issue with the 'Swag Reward' tag we'll send you a shirt</b>
 
-<img src="https://github.com/devGregA/django-DefectDojo/blob/master/doc/img/dojo_tshirt_front.png" width="200">
-<img src="https://github.com/devGregA/django-DefectDojo/blob/master/doc/img/dojo_tshirt_back.png" width="200">
+<img src="https://github.com/devGregA/django-DefectDojo/blob/master/doc/img/dojo_tshirt_front.png" width="300"><img src="https://github.com/devGregA/django-DefectDojo/blob/master/doc/img/dojo_tshirt_back.png" width="300">
 
 
 # Support
