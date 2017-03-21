@@ -111,7 +111,7 @@
 
                                 <div class="pull-right inline-block text-right">
                                     <span class=" fa-2x">{{ open_findings|length }}</span>
-                                    <span><a href="{% url 'open_findings' %}?test__engagement__product={{ prod.id }}">open
+                                    <span><a href="{% url 'open_findings' %}?test__engagement__product={{ eng.product.id }}">open
                                         finding{{ open_findings|length|pluralize }} <i
                                                 class="fa fa-arrow-circle-right"></i></a>
                                     </span>
@@ -138,7 +138,7 @@
 
                                 <div class="text-right pull-right">
                                     <span class="fa-2x">{{ closed_findings|length }}</span>
-                                    <span><a href="{% url 'closed_findings' %}?test__engagement__product={{ prod.id }}">closed
+                                    <span><a href="{% url 'closed_findings' %}?test__engagement__product={{ eng.product.id }}">closed
                                         finding{{ closed_findings|length|pluralize }}. <i
                                                 class="fa fa-arrow-circle-right"></i></a>
                                     </span>
@@ -166,7 +166,7 @@
                                 <div class="pull-right text-right">
                                     <span class="fa-2x">{{ accepted_findings|length }}</span>
                                     <span><a
-                                            href="{% url 'accepted_findings' %}?test__engagement__product={{ prod.id }}">Accepted
+                                            href="{% url 'accepted_findings' %}?test__engagement__product={{ eng.product.id }}">Accepted
                                     findings. <i class="fa fa-arrow-circle-right"></i></a>
                                 </span>
                                 </div>
@@ -193,7 +193,7 @@
                                 <div class="pull-right inline-block text-right">
                                     <span class=" fa-2x">{{ new_findings|length }}</span>
                                     <span><a
-                                            href="{% url 'open_findings' %}?test__engagement__product={{ prod.id }}&amp;date=2">new
+                                            href="{% url 'open_findings' %}?test__engagement__product={{ eng.product.id }}&amp;date=2">new
                                         finding{{ new_findings|length|pluralize }} <i
                                                 class="fa fa-arrow-circle-right"></i></a>
                                     </span>
