@@ -76,12 +76,24 @@ DefectDojo is maintained by:
 - Greg Anderson ([@\_GRRegg](https://twitter.com/_GRRegg))
 - Charles Neill ([@ccneill](https://twitter.com/ccneill))
 - Jay Paz ([@jjpaz](https://twitter.com/jjpaz))
-- Aaron Weaver ([@weavera] (https://twitter.com/weavera))
+- Aaron Weaver ([@weavera](https://twitter.com/weavera))
 
 With past contributions from:
 
 - Fatimah Zohra
 - Michael Dong
+
+# Contributing
+
+We greatly appreciate all of our contributors < link>!
+
+We would also like to highlight the contributions from Michael Dong and Fatimah Zohra who contributed to DefectDojo before it was open source.
+
+### Swag Rewards
+
+If you fix an issue with the 'Swag Reward' tag we'll send you a shirt
+shirt image
+shirt image
 
 # Support
 
