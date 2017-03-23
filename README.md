@@ -88,7 +88,8 @@ We would also like to highlight the contributions from Michael Dong and Fatimah 
 If you fix an issue with the 'swag reward' tag <img align="" src="https://github.com/devGregA/django-DefectDojo/blob/master/doc/img/swag_reward.png" width="90"> we'll send you a shirt and some stickers!
 
 ### Cash Rewards
-We also are offer monetary rewards for issues tagged as such
+We also are offer monetary rewards for issues tagged as such <img align="" src="https://github.com/devGregA/django-DefectDojo/blob/master/doc/img/cash_reward.png" width="90">
+**Sorry Maintainers your not elgible for cash rewards ;)**
 
 <img src="https://github.com/devGregA/django-DefectDojo/blob/master/doc/img/dojo_tshirt_front.png" width="300"><img src="https://github.com/devGregA/django-DefectDojo/blob/master/doc/img/dojo_tshirt_back.png" width="300">
 
