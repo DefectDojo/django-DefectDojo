@@ -17,7 +17,7 @@ from dojo.forms import NoteForm, TestForm, FindingForm, \
     DeleteTestForm, AddFindingForm, \
     ImportScanForm, ReImportScanForm, FindingBulkUpdateForm, JIRAFindingForm
 from dojo.models import Finding, Test, Notes, \
-    BurpRawRequestResponse, Endpoint, Stub_Finding, Finding_Template, JIRA_PKey
+    BurpRawRequestResponse, Endpoint, Stub_Finding, Finding_Template, JIRA_PKey, Cred_User, Cred_Mapping
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, message, process_notifications
 from dojo.tasks import add_issue_task
@@ -40,6 +40,7 @@ def view_test(request, tid):
     person = request.user.username
     findings = Finding.objects.filter(test=test)
     stub_findings = Stub_Finding.objects.filter(test=test)
+    creds = Cred_Mapping.objects.filter(test=test).select_related('cred_id')
 
     if request.method == 'POST':
         form = NoteForm(request.POST)
@@ -76,6 +77,7 @@ def view_test(request, tid):
                    'request': request,
                    'show_re_upload': show_re_upload,
                    'ajax_url': ajax_url,
+                   'creds': creds,
                    })
 
 

@@ -1,6 +1,7 @@
 import calendar as tcalendar
-import os
 import re
+import binascii, os, hashlib
+from Crypto.Cipher import AES
 from calendar import monthrange
 from datetime import date, datetime, timedelta
 from math import pi, sqrt
@@ -777,9 +778,48 @@ def handle_uploaded_threat(f, eng):
     eng.tmodel_path = settings.MEDIA_ROOT + '/threat/%s%s' % (eng.id, extension)
     eng.save()
 
+def handle_uploaded_selenium(f, cred):
+    name, extension = os.path.splitext(f.name)
+    with open(settings.MEDIA_ROOT + '/selenium/%s%s' % (cred.id, extension),
+              'wb+') as destination:
+        for chunk in f.chunks():
+            destination.write(chunk)
+    cred.selenium_script = settings.MEDIA_ROOT + '/selenium/%s%s' % (cred.id, extension)
+    cred.save()
+
+#Gets a connection to a Jira server based on the finding
+def get_jira_connection(finding):
+    prod = Product.objects.get(engagement=Engagement.objects.get(test=finding.test))
+    jpkey = JIRA_PKey.objects.get(product=prod)
+    jira_conf = jpkey.conf
+
+    jira = JIRA(server=jira_conf.url, basic_auth=(jira_conf.username, jira_conf.password))
+    return jira
+
+def jira_get_resolution_id(jira, issue, status):
+    transitions = jira.transitions(issue)
+    resolution_id = None
+    for t in transitions:
+        if t['name'] == "Resolve Issue":
+            resolution_id = t['id']
+            break
+        if t['name'] == "Reopen Issue":
+            resolution_id = t['id']
+            break
+
+    return resolution_id
+
+def jira_change_resolution_id(jira, issue, id):
+    jira.transition_issue(issue, id)
+
 # Logs the error to the alerts table, which appears in the notification toolbar
 def log_jira_alert(error, finding):
-    alerts = Alerts(description="Jira update issue: Finding " + str(finding.id) + ", " + error, url=reverse('view_finding', args=(finding.id,)), icon="bullseye", display_date=localtz.localize(datetime.today()), source="Jira")
+    alerts = Alerts(description="Jira update issue: Finding: " + str(finding.id) + ", " + error, url=reverse('view_finding', args=(finding.id,)), icon="bullseye", display_date=localtz.localize(datetime.today()), source="Jira")
+    alerts.save()
+
+# Displays an alert for Jira notifications
+def log_jira_message(text, finding):
+    alerts = Alerts(description=text + " Finding: " + str(finding.id), url=reverse('view_finding', args=(finding.id,)), icon="bullseye", display_date=localtz.localize(datetime.today()), source="Jira")
     alerts.save()
 
 # Adds labels to a Jira issue
@@ -939,11 +979,11 @@ def add_epic(eng, push_to_jira):
         j_issue = JIRA_Issue(jira_id=new_issue.id, jira_key=new_issue, engagement=engagement)
         j_issue.save()
 
-def add_comment(find, note):
+def add_comment(find, note, force_push=False):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
     jpkey = JIRA_PKey.objects.get(product=prod)
     jira_conf = jpkey.conf
-    if jpkey.push_notes:
+    if jpkey.push_notes or force_push == True:
         jira = JIRA(server=jira_conf.url, basic_auth=(jira_conf.username, jira_conf.password))
         j_issue = JIRA_Issue.objects.get(finding=find)
         jira.add_comment(j_issue.jira_id, '(%s): %s' % (note.author.get_full_name(), note.entry))
@@ -997,3 +1037,64 @@ def send_atmention_email(user, users, parent_url, parent_title, new_note):
           user.email,
           recipients,
           fail_silently=False)
+
+def encrypt(key, iv, plaintext):
+    aes = AES.new(key, AES.MODE_CBC, iv, segment_size=128)
+    plaintext = _pad_string(plaintext)
+    encrypted_text = aes.encrypt(plaintext)
+    return binascii.b2a_hex(encrypted_text).rstrip()
+
+def decrypt(key, iv, encrypted_text):
+    aes = AES.new(key, AES.MODE_CBC, iv, segment_size=128)
+    encrypted_text_bytes = binascii.a2b_hex(encrypted_text)
+    decrypted_text = aes.decrypt(encrypted_text_bytes)
+    decrypted_text = _unpad_string(decrypted_text)
+    return decrypted_text
+
+def _pad_string(value):
+    length = len(value)
+    pad_size = 16 - (length % 16)
+    return value.ljust(length + pad_size, '\x00')
+
+def _unpad_string(value):
+    while value[-1] == '\x00':
+        value = value[:-1]
+    return value
+
+def dojo_crypto_encrypt(plaintext):
+    key = None
+    key = get_db_key()
+
+    iv =  os.urandom(16)
+    return prepare_for_save(iv, encrypt(key, iv, plaintext.encode('ascii', 'ignore')))
+
+def prepare_for_save(iv, encrypted_value):
+    binascii.b2a_hex(encrypted_value).rstrip()
+    stored_value = "AES.1:" + binascii.b2a_hex(iv).rstrip() + ":" + encrypted_value
+    return stored_value
+
+def get_db_key():
+    db_key = None
+    if hasattr(settings, 'DB_KEY'):
+        db_key = settings.DB_KEY
+        db_key = binascii.b2a_hex(hashlib.sha256(db_key).digest().rstrip())[:32]
+
+    return db_key
+
+def prepare_for_view(encrypted_value):
+    key = None
+    decrypted_value = ""
+    key = get_db_key()
+    encrypted_values = encrypted_value.split(":")
+
+    if len(encrypted_values) > 1:
+        type = encrypted_values[0]
+        iv = binascii.a2b_hex(encrypted_values[1]).rstrip()
+        value = encrypted_values[2]
+        decrypted_value = decrypt(key, iv, value)
+        try:
+            decrypted_value.decode('ascii')
+        except UnicodeDecodeError:
+            decrypted_value = ""
+
+    return decrypted_value

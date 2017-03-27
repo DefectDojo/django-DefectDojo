@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load navigation_tags %}
+{% load get_config_setting %}
+{% block content %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading tight">
+                    <h3 class="has-filters">
+                        Credential Manager
+                        <div class="dropdown pull-right">
+                            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                                    data-toggle="dropdown" aria-expanded="true">
+                                <span class="fa fa-wrench"></span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu"
+                                aria-labelledby="dropdownMenu1">
+                                    <li role="presentation">
+                                        <a href="{% url 'add_cred' %}">
+                                            <i class="fa fa-plus"></i> Add Credential
+                                        </a>
+                                    </li>
+                            </ul>
+                        </div>
+                    </h3>
+                </div>
+
+            </div>
+            {% if confs %}
+
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=confs page_size=True %}
+                </div>
+                <div class="panel panel-default table-responsive">
+                    <table id="products"
+                           class="tablesorter-bootstrap table table-bordered table-condensed table-striped">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Username</th>
+                            <th>Role</th>
+                            <th>Environment</th>
+                            <th>Valid</th>
+                            <th>Details</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for conf in confs %}
+                            <tr>
+                                <td>
+                                    <a href="{{ conf.url }}" target="_blank">{{ conf.name }}</a>
+                                </td>
+                                <td>{{ conf.username }}</td>
+                                <td>{{ conf.role }}</td>
+                                <td>{{ conf.environment }}</td>
+                                <td>{{ conf.is_valid }}</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a class="btn btn-sm btn-primary"
+                                           href="{% url 'view_cred_details' conf.id  %}">View</a>
+                                        <a class="btn btn-sm btn-warning"
+                                           href="{% url 'edit_cred' conf.id  %}">Edit</a>
+                                        <!--<a class="btn btn-sm btn-danger delete-finding"
+                                           href="">Delete</a>-->
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=confs page_size=True %}
+                </div>
+                {% if "DB_KEY"|get_config_setting == False %}
+                <p class="text-center"><strong>Please configure a key called DB_KEY and add to settings.py.</strong></p></br>
+                {% endif %}
+            {% else %}
+                <p class="text-center">No credentials configured.</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+{% block postscript %}
+    {% include "dojo/filter_js_snippet.html" %}
+{% endblock %}

@@ -1,6 +1,12 @@
 {% extends "base.html" %}
 {% load display_tags %}
 {% load get_config_setting %}
+{% load humanize %}
+{% load static from staticfiles %}
+{% block add_styles %}
+    .graph {min-height: 158px;}
+    h3 { margin-top: 5px; margin-bottom: 5px; font-size: 20px; line-height: 22px;}
+{% endblock %}
 {% block content %}
     <!-- start status bread crums -->
     <ul id="progress-crumbs" class="breadcrumb">
@@ -32,61 +38,184 @@
                         Engagement for <a href="{% url 'view_product' eng.product.id %}">{{ eng.product }}</a>
                     {% endif %}
                     <span class="text-muted">{{ eng.status }}</span>
+                    {% if eng.tags %}
+                        <sup>
+                            {% for tag in eng.tags %}
+                            <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                            {% endfor %}
+                        </sup>
+                    {% endif %}
                 </h3>
 
                 <div class="dropdown pull-right">
-                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
-                            data-toggle="dropdown" aria-expanded="true">
-                        <span class="fa fa-bars"></span>
-                        <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                        <li role="presentation">
-                            <a class="" href="{% url 'edit_engagement' eng.id %}">
-                                <i class="fa fa-pencil-square-o"></i> Edit Engagement
-                            </a>
-                        </li>
+                    <div class="btn-group">
+                        <button class="btn btn-primary clickable panel-collapsed">
+                            <span><i class="fa fa-bar-chart"></i></span>
+                        </button>
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                                data-toggle="dropdown" aria-expanded="true">
+                            <span class="fa fa-bars"></span>
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                            <li role="presentation">
+                                <a class="" href="{% url 'edit_engagement' eng.id %}">
+                                    <i class="fa fa-pencil-square-o"></i> Edit Engagement
+                                </a>
+                            </li>
 
-                        <li role="presentation">
-                            {% if eng.active %}
-                                <a class="" href="{% url 'close_engagement' eng.id %}">
-                                    <i class="fa fa-close"></i> Close Engagement
+                            <li role="presentation">
+                                {% if eng.active %}
+                                    <a class="" href="{% url 'close_engagement' eng.id %}">
+                                        <i class="fa fa-close"></i> Close Engagement
+                                    </a>
+                                {% else %}
+                                    <a class="" href="{% url 'reopen_engagement' eng.id %}">
+                                        <i class="fa fa-undo"></i> Reopen Engagement
+                                    </a>
+                                {% endif %}
+                            </li>
+                            <li role="presentation">
+                                <a href="{% url 'engagement_report' eng.id %}">
+                                    <i class="fa fa-file-text-o"></i> Report
                                 </a>
-                            {% else %}
-                                <a class="" href="{% url 'reopen_engagement' eng.id %}">
-                                    <i class="fa fa-undo"></i> Reopen Engagement
+                            </li>
+                            <li role="presentation">
+                                <a href="{% url 'engagement_ics' eng.id %}">
+                                    <i class="fa fa-calendar-plus-o"></i> Add To Calendar
                                 </a>
-                            {% endif %}
-                        </li>
-                        <li role="presentation">
-                            <a href="{% url 'engagement_report' eng.id %}">
-                                <i class="fa fa-file-text-o"></i> Report
-                            </a>
-                        </li>
-                        <li role="presentation">
-                            <a href="{% url 'engagement_ics' eng.id %}">
-                                <i class="fa fa-calendar-plus-o"></i> Add To Calendar
-                            </a>
-                        </li>
-                        <li role="presentation">
-                            <a href="{% url 'action_history' eng|content_type eng.id %}">
-                                <i class="fa fa-history"></i> View History
-                            </a>
-                        </li>
-                        <li role="separator" class="divider"></li>
-                        <li role="presentation">
-                            <a class="text-danger" href="{% url 'delete_engagement' eng.id %}">
-                                <i class="fa fa-trash-o"></i> Delete Engagement
-                            </a>
-                        </li>
-                    </ul>
+                            </li>
+                            <li role="presentation">
+                                <a href="{% url 'action_history' eng|content_type eng.id %}">
+                                    <i class="fa fa-history"></i> View History
+                                </a>
+                            </li>
+                            <li role="separator" class="divider"></li>
+                            <li role="presentation">
+                                <a class="text-danger" href="{% url 'delete_engagement' eng.id %}">
+                                    <i class="fa fa-trash-o"></i> Delete Engagement
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel-body product-graphs">
+            <div class="col-md-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <i class="fa fa-bug fa-2x"></i>
+
+                                <div class="pull-right inline-block text-right">
+                                    <span class=" fa-2x">{{ open_findings|length }}</span>
+                                    <span><a href="{% url 'open_findings' %}?test__engagement__product={{ eng.product.id }}">open
+                                        finding{{ open_findings|length|pluralize }} <i
+                                                class="fa fa-arrow-circle-right"></i></a>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="open_findings" class="graph"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i title="Accepted since {{ start_date }}"
+                           class="text-info fa fa-info-circle"></i>
+                        <small>Opened since {{ start_date|date:"D., M. d, Y" }}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <i class="fa fa-fire-extinguisher fa-2x"></i>
+
+                                <div class="text-right pull-right">
+                                    <span class="fa-2x">{{ closed_findings|length }}</span>
+                                    <span><a href="{% url 'closed_findings' %}?test__engagement__product={{ eng.product.id }}">closed
+                                        finding{{ closed_findings|length|pluralize }}. <i
+                                                class="fa fa-arrow-circle-right"></i></a>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="closed_findings" class="graph"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i title="Accepted since {{ start_date }}"
+                           class="text-info fa fa-info-circle"></i>
+                        <small>Closed since {{ start_date|date:"D., M. d, Y" }}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <i class="fa fa-check fa-2x"></i>
+
+                                <div class="pull-right text-right">
+                                    <span class="fa-2x">{{ accepted_findings|length }}</span>
+                                    <span><a
+                                            href="{% url 'accepted_findings' %}?test__engagement__product={{ eng.product.id }}">Accepted
+                                    findings. <i class="fa fa-arrow-circle-right"></i></a>
+                                </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="reported_findings" class="graph"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i title="Accepted since {{ start_date }}"
+                           class="text-info fa fa-info-circle"></i>
+                        <small>Accepted since {{ start_date|date:"D., M. d, Y" }}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <i class="fa fa-crosshairs fa-2x"></i>
+
+                                <div class="pull-right inline-block text-right">
+                                    <span class=" fa-2x">{{ new_findings|length }}</span>
+                                    <span><a
+                                            href="{% url 'open_findings' %}?test__engagement__product={{ eng.product.id }}&amp;date=2">new
+                                        finding{{ new_findings|length|pluralize }} <i
+                                                class="fa fa-arrow-circle-right"></i></a>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="new_findings" class="graph"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i title="Found in the last 7 days."
+                           class="text-info fa fa-info-circle"></i>
+                        <small>Found in the last 7 days.</small>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="row same-height-panel-row">
-        <div class="col-md-3">
+        <div class="col-md-4">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h4>Testing Lead:
@@ -114,7 +243,7 @@
                 </div>
             </div>
         </div>
-        <div id="test-strategy" class="col-md-3">
+        <div id="test-strategy" class="col-md-4">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h4> Test Strategy </h4>
@@ -133,7 +262,7 @@
                 </div>
             </div>
         </div>
-        <div id="threat-model" class="col-md-3">
+        <div id="threat-model" class="col-md-4">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h4> Threat Model </h4>
@@ -152,37 +281,23 @@
                 </div>
             </div>
         </div>
-        {% if eng.tags %}
-            <div class="col-md-3">
-                <div class="panel panel-default tags">
-                    <div class="panel-heading">
-                        <h4>Tags</h4>
-                    </div>
-                    <div class="tags panel-body">
-                        {% for tag in eng.tags %}
-                            <span class="label label-primary">{{ tag }}</span>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-        {% endif %}
     </div>
- {% if jissue and jconf %}
-    <div class="row to_highlight">
-        <div class="col-md-12">
-            <div class="panel panel-default endpoints table-responsive">
-                <div class="panel-heading">
-                    <h4>JIRA Link
-                        <span class="pull-right"><a data-toggle="collapse" href="#jira_link"><i
-                                class="glyphicon glyphicon-chevron-up"></i></a></span>
-                    </h4>
-                </div>
-                    <div id="jira_link" class="panel-body endpoint-panel table-responsive collapse in">
-                      <a href="{{jconf.url}}/browse/{{jissue.jira_key}}"> {{jconf.url}}/browse/{{jissue.jira_key}} </a>
+    {% if jissue and jconf %}
+        <div class="row to_highlight">
+            <div class="col-md-12">
+                <div class="panel panel-default endpoints table-responsive">
+                    <div class="panel-heading">
+                        <h4>JIRA Link
+                            <span class="pull-right"><a data-toggle="collapse" href="#jira_link"><i
+                                    class="glyphicon glyphicon-chevron-up"></i></a></span>
+                        </h4>
                     </div>
+                    <div id="jira_link" class="panel-body endpoint-panel table-responsive collapse in">
+                        <a href="{{ jconf.url }}/browse/{{ jissue.jira_key }}"> {{ jconf.url }}/browse/{{ jissue.jira_key }} </a>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
     {% endif %}
     <div class="row">
         <div id="tests" class="col-md-12">
@@ -230,7 +345,15 @@
                             <tbody>
                             {% for test in tests %}
                                 <tr>
-                                    <td>{{ test.test_type }}</td>
+                                    <td>{{ test.test_type }}
+                                      {% if test.tags %}
+                                          <sup>
+                                              {% for tag in test.tags %}
+                                              <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                              {% endfor %}
+                                          </sup>
+                                      {% endif %}
+                                    </td>
                                     <td>{{ test.target_start.date }}</td>
                                     <td>{{ test.target_end.date }}</td>
                                     <td>{{ test.finding_set.all|length }}</td>
@@ -260,7 +383,18 @@
         </div>
 
     </div>
-
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4>Description</h4>
+                </div>
+                <div class="panel-body">
+                    {{ eng.description }}
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="row">
         <div id="checklist" class="col-md-12">
             <div class="panel panel-default">
@@ -388,73 +522,648 @@
         </div>
 
     </div>
-{% if enabled %}
- <div class="row">
-        <div id="finding" class="col-md-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4> Findings</h4>
-                </div>
-        {% if findings %}
-            <table id="test_findings" class="table-bordered table table-condensed table-hover">
+    {% if enabled %}
+        <div class="row">
+            <div id="finding" class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4> Findings</h4>
+                    </div>
+                    {% if findings %}
+                        <table id="test_findings" class="table-bordered table table-condensed table-hover">
 
 
-                <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Severity</th>
-                    <th>Reporter</th>
-                    <th>Mitigation Date</th>
-                    <th>Verified</th>
-                    <th>Active</th>
-                    {% if "ENABLE_JIRA"|get_config_setting %}
-                    <th>Jira</th>
+                            <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Severity</th>
+                                <th>Reporter</th>
+                                <th>Mitigation Date</th>
+                                <th>Verified</th>
+                                <th>Active</th>
+                                {% if "ENABLE_JIRA"|get_config_setting %}
+                                    <th>Jira</th>
+                                {% endif %}
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for finding in findings %}
+                                <tr class="{% if finding.active %}active_finding{% else %}inactive_finding{% endif %}">
+                                    <td><a href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a></td>
+                                    <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
+                                        <span class="text-error">
+                                    {% else %}<span>{% endif %}{{ finding.severity }}</span></td>
+                                    <td>{{ finding.reporter.username }}</td>
+                                    <td>{{ finding.mitigated }}</td>
+                                    <td>{{ finding.verified }}</td>
+                                    <td>{{ finding.active }}</td>
+                                    {% if "ENABLE_JIRA"|get_config_setting %}
+                                        <td>
+                                            <a href="{{ finding.jira_conf.url }}/browse/{{ finding.jira.jira_key }}"
+                                               target="_blank"> {{ finding.jira.jira_key }} </a>
+                                        </td>
+                                    {% endif %}
+                                    <td>
+                                        <div class="btn-group">
+                                            <a class="btn btn-sm btn-primary"
+                                               href="{% url 'view_finding' finding.id %}">View</a>
+                                            <a class="btn btn-sm btn-warning"
+                                               href="{% url 'edit_finding' finding.id %}">Edit</a>
+                                            <a class="btn btn-sm btn-danger delete-finding"
+                                               href="{% url 'delete_finding' finding.id %}">Delete</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                        <div class="panel-body {% if findings %}show{% else %}hidden{% endif %}">
+                            {% include "dojo/paging_snippet.html" with page=findings %}
+                        </div>
+                    {% else %}
+                        <div class="panel-body">
+                            <p class="text-center">No findings found.</p>
+                        </div>
                     {% endif %}
-                    <th>Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for finding in findings %}
-                    <tr class="{% if finding.active %}active_finding{% else %}inactive_finding{% endif %}">
-                        <td><a href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a></td>
-                        <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
-                            <span class="text-error">
-                        {% else %}<span>{% endif %}{{ finding.severity }}</span></td>
-                        <td>{{ finding.reporter.username }}</td>
-                        <td>{{ finding.mitigated }}</td>
-                        <td>{{ finding.verified }}</td>
-                        <td>{{ finding.active }}</td>
-                        {% if "ENABLE_JIRA"|get_config_setting %}
-                        <td>
-                        <a href="{{finding.jira_conf.url}}/browse/{{finding.jira.jira_key}}" target="_blank"> {{finding.jira.jira_key}} </a>
-                        </td>
-                        {% endif %}
-                        <td>
-                            <div class="btn-group">
-                                <a class="btn btn-sm btn-primary"
-                                   href="{% url 'view_finding' finding.id %}">View</a>
-                                <a class="btn btn-sm btn-warning"
-                                   href="{% url 'edit_finding' finding.id %}">Edit</a>
-                                <a class="btn btn-sm btn-danger delete-finding"
-                                   href="{% url 'delete_finding' finding.id %}">Delete</a>
-                            </div>
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-            <div class="panel-body {% if findings %}show{% else %}hidden{% endif %}">
-                {% include "dojo/paging_snippet.html" with page=findings %}
-            </div>
-        {% else %}
-            <div class="panel-body">
-                <p class="text-center">No findings found.</p>
-            </div>
-        {% endif %}
+                </div>
+
             </div>
 
         </div>
+    {% endif %}
+{% endblock %}
+{% block postscript %}
+    <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
+    <!-- Flot Charts JavaScript -->
+    <script src="{% static "flot/excanvas.min.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.pie.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.resize.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.categories.js" %}"></script>
+    <script src="{% static "flot-axis/jquery.flot.axislabels.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.time.js" %}"></script>
+    <script src="{% static "flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
+    <script type="text/javascript">
+        $(function () {
+            if (document.referrer.indexOf('simple_search') > 0) {
+                var terms = '';
+                if ($.cookie('highlight')) {
+                    terms = $.cookie('highlight').split(' ');
 
-    </div>
-{% endif %}
+                    for (var i = 0; i < terms.length; i++) {
+                        $('body').highlight(terms[i]);
+                    }
+                }
+
+                $('input#simple_search').val(terms);
+            }
+
+            $(document).on('click', '.panel-heading button.clickable', function (e) {
+                var $this = $(this);
+                if (!$this.hasClass('panel-collapsed')) {
+                    $this.parents('.panel').find('.panel-body').slideUp();
+                    $this.addClass('panel-collapsed');
+                    $this.find('i').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
+                } else {
+                    $this.parents('.panel').find('.panel-body').slideDown();
+                    $this.removeClass('panel-collapsed');
+                    $this.find('i').removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
+                }
+            });
+
+            accepted_findings();
+            open_findings();
+            closed_findings();
+            new_findings();
+
+            $(".product-graphs").hide();
+
+        });
+
+        function accepted_findings() {
+            var critical = 0;
+            var high = 0;
+            var medium = 0;
+            var low = 0;
+            var info = 0;
+            var ticks = [
+                [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
+            ];
+
+            {% for f in accepted_findings %}
+                {% if f.severity == 'Critical' %}
+                    critical += 1;
+                {% elif f.severity == 'High' %}
+                    high += 1;
+                {% elif f.severity == 'Medium' %}
+                    medium += 1;
+                {% elif f.severity == 'Low' %}
+                    low += 1;
+                {% elif f.severity == 'Info' %}
+                    info += 1;
+                {% endif %}
+            {% endfor %}
+
+            var d1 = [
+                [0, critical],
+            ];
+            var d2 = [
+                [1, high],
+            ];
+            var d3 = [
+                [2, medium],
+            ];
+            var d4 = [
+                [3, low],
+            ];
+            var d5 = [
+                [4, info],
+            ];
+
+            var data = [
+                {
+                    label: "Critical",
+                    data: d1,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 1,
+                        fillColor: "#d9534f"
+                    },
+                    color: "#d9534f"
+                },
+                {
+                    label: "High",
+                    data: d2,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 2,
+                        fillColor: "#f0ad4e"
+                    },
+                    color: "#f0ad4e"
+                },
+                {
+                    label: "Medium",
+                    data: d3,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 3,
+                        fillColor: "#f0de28"
+                    },
+                    color: "#f0de28"
+                },
+                {
+                    label: "Low",
+                    data: d4,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 4,
+                        fillColor: "#337ab7"
+                    },
+                    color: "#337ab7"
+                },
+                {
+                    label: "info",
+                    data: d5,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 4,
+                        fillColor: "#80699B"
+                    },
+                    color: "#80699B"
+                }
+            ];
+
+            $.plot("#reported_findings", data, {
+                series: {
+                    stack: true,
+                    bars: {
+                        show: true,
+                        barWidth: .9,
+                        'align': "center",
+                    },
+
+                },
+                grid: {
+                    hoverable: false,
+                    borderWidth: 1,
+                    borderColor: '#e7e7e7',
+
+                },
+                tooltip: false,
+                legend: {
+                    show: false,
+                    position: "ne"
+                },
+                xaxis: {
+                    ticks: ticks,
+                },
+
+            });
+        }
+        ;
+        function open_findings() {
+            var critical = 0;
+            var high = 0;
+            var medium = 0;
+            var low = 0;
+            var info = 0;
+            var ticks = [
+                [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
+            ];
+
+            {% for f in open_findings %}
+                {% if f.severity == 'Critical' %}
+                    critical += 1;
+                {% elif f.severity == 'High' %}
+                    high += 1;
+                {% elif f.severity == 'Medium' %}
+                    medium += 1;
+                {% elif f.severity == 'Low' %}
+                    low += 1;
+                {% elif f.severity == 'Info' %}
+                    info += 1;
+                {% endif %}
+            {% endfor %}
+
+            var d1 = [
+                [0, critical],
+            ];
+            var d2 = [
+                [1, high],
+            ];
+            var d3 = [
+                [2, medium],
+            ];
+            var d4 = [
+                [3, low],
+            ];
+            var d5 = [
+                [4, info],
+            ];
+
+            var data = [
+                {
+                    label: "Critical",
+                    data: d1,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 1,
+                        fillColor: "#d9534f"
+                    },
+                    color: "#d9534f"
+                },
+                {
+                    label: "High",
+                    data: d2,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 2,
+                        fillColor: "#f0ad4e"
+                    },
+                    color: "#f0ad4e"
+                },
+                {
+                    label: "Medium",
+                    data: d3,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 3,
+                        fillColor: "#f0de28"
+                    },
+                    color: "#f0de28"
+                },
+                {
+                    label: "Low",
+                    data: d4,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 4,
+                        fillColor: "#337ab7"
+                    },
+                    color: "#337ab7"
+                },
+                {
+                    label: "info",
+                    data: d5,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 4,
+                        fillColor: "#80699B"
+                    },
+                    color: "#80699B"
+                }
+            ];
+
+            $.plot("#open_findings", data, {
+                series: {
+                    stack: true,
+                    bars: {
+                        show: true,
+                        barWidth: .9,
+                        'align': "center",
+                    },
+
+                },
+                grid: {
+                    hoverable: false,
+                    borderWidth: 1,
+                    borderColor: '#e7e7e7',
+
+                },
+                tooltip: false,
+                legend: {
+                    show: false,
+                    position: "ne"
+                },
+                xaxis: {
+                    ticks: ticks,
+                },
+
+            });
+        }
+        ;
+        function closed_findings() {
+            var critical = 0;
+            var high = 0;
+            var medium = 0;
+            var low = 0;
+            var info = 0;
+            var ticks = [
+                [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
+            ];
+
+            {% for f in closed_findings %}
+                {% if f.severity == 'Critical' %}
+                    critical += 1;
+                {% elif f.severity == 'High' %}
+                    high += 1;
+                {% elif f.severity == 'Medium' %}
+                    medium += 1;
+                {% elif f.severity == 'Low' %}
+                    low += 1;
+                {% elif f.severity == 'Info' %}
+                    info += 1;
+                {% endif %}
+            {% endfor %}
+
+            var d1 = [
+                [0, critical],
+            ];
+            var d2 = [
+                [1, high],
+            ];
+            var d3 = [
+                [2, medium],
+            ];
+            var d4 = [
+                [3, low],
+            ];
+            var d5 = [
+                [4, info],
+            ];
+
+            var data = [
+                {
+                    label: "Critical",
+                    data: d1,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 1,
+                        fillColor: "#d9534f"
+                    },
+                    color: "#d9534f"
+                },
+                {
+                    label: "High",
+                    data: d2,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 2,
+                        fillColor: "#f0ad4e"
+                    },
+                    color: "#f0ad4e"
+                },
+                {
+                    label: "Medium",
+                    data: d3,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 3,
+                        fillColor: "#f0de28"
+                    },
+                    color: "#f0de28"
+                },
+                {
+                    label: "Low",
+                    data: d4,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 4,
+                        fillColor: "#337ab7"
+                    },
+                    color: "#337ab7"
+                },
+                {
+                    label: "info",
+                    data: d5,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 4,
+                        fillColor: "#80699B"
+                    },
+                    color: "#80699B"
+                }
+            ];
+
+            $.plot("#closed_findings", data, {
+                series: {
+                    stack: true,
+                    bars: {
+                        show: true,
+                        barWidth: .9,
+                        'align': "center",
+                    },
+
+                },
+                grid: {
+                    hoverable: false,
+                    borderWidth: 1,
+                    borderColor: '#e7e7e7',
+
+                },
+                tooltip: false,
+                legend: {
+                    show: false,
+                    position: "ne"
+                },
+                xaxis: {
+                    ticks: ticks,
+                },
+
+            });
+        }
+        ;
+        function new_findings() {
+            var critical = 0;
+            var high = 0;
+            var medium = 0;
+            var low = 0;
+            var info = 0;
+            var ticks = [
+                [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
+            ];
+
+            {% for f in new_findings %}
+                {% if f.severity == 'Critical' %}
+                    critical += 1;
+                {% elif f.severity == 'High' %}
+                    high += 1;
+                {% elif f.severity == 'Medium' %}
+                    medium += 1;
+                {% elif f.severity == 'Low' %}
+                    low += 1;
+                {% elif f.severity == 'Info' %}
+                    info += 1;
+                {% endif %}
+            {% endfor %}
+
+            var d1 = [
+                [0, critical],
+            ];
+            var d2 = [
+                [1, high],
+            ];
+            var d3 = [
+                [2, medium],
+            ];
+            var d4 = [
+                [3, low],
+            ];
+            var d5 = [
+                [4, info],
+            ];
+
+            var data = [
+                {
+                    label: "Critical",
+                    data: d1,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 1,
+                        fillColor: "#d9534f"
+                    },
+                    color: "#d9534f"
+                },
+                {
+                    label: "High",
+                    data: d2,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 2,
+                        fillColor: "#f0ad4e"
+                    },
+                    color: "#f0ad4e"
+                },
+                {
+                    label: "Medium",
+                    data: d3,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 3,
+                        fillColor: "#f0de28"
+                    },
+                    color: "#f0de28"
+                },
+                {
+                    label: "Low",
+                    data: d4,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 4,
+                        fillColor: "#337ab7"
+                    },
+                    color: "#337ab7"
+                },
+                {
+                    label: "info",
+                    data: d5,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 4,
+                        fillColor: "#80699B"
+                    },
+                    color: "#80699B"
+                }
+            ];
+
+            $.plot("#new_findings", data, {
+                series: {
+                    stack: true,
+                    bars: {
+                        show: true,
+                        barWidth: .9,
+                        'align': "center",
+                    },
+
+                },
+                grid: {
+                    hoverable: false,
+                    borderWidth: 1,
+                    borderColor: '#e7e7e7',
+
+                },
+                tooltip: false,
+                legend: {
+                    show: false,
+                    position: "ne"
+                },
+                xaxis: {
+                    ticks: ticks,
+                },
+
+            });
+        }
+        ;
+    </script>
 {% endblock %}

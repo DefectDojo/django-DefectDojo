@@ -1,0 +1,15 @@
+from django.conf.urls import patterns, url
+from django.contrib import admin
+from django.apps import apps
+import views
+
+urlpatterns = patterns(
+'',
+url(r'^cred/add', views.new_cred, name='add_cred'),
+url(r'^cred/(?P<ttid>\d+)/view$', views.view_cred_details, name='view_cred_details'),
+url(r'^cred/(?P<ttid>\d+)/edit$', views.edit_cred, name='edit_cred'),
+url(r'^cred$', views.cred, name='cred'),
+url(r'^product/(?P<pid>\d+)/cred/add$', views.new_cred_product, name='new_cred_product'),
+url(r'^product/(?P<pid>\d+)/cred/(?P<ttid>\d+)/edit$', views.edit_cred_product, name='edit_cred_product'),
+url(r'^product/(?P<pid>\d+)/cred/(?P<ttid>\d+)/view$', views.view_cred_product, name='view_cred_product'),
+url(r'^product/(?P<pid>\d+)/cred/(?P<ttid>\d+)/delete$', views.delete_cred_product, name='delete_cred_product'),)

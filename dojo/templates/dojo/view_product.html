@@ -12,6 +12,13 @@
             <div class="clearfix">
                 <h3 class="pull-left">
                     {{ prod }}
+                    {% if prod.tags %}
+                      <sup>
+                          {% for tag in prod.tags %}
+                          <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                          {% endfor %}
+                      </sup>
+                    {% endif %}
                     <br/>
                     <small>{{ prod.endpoint_count }}
                         <a href="{% url 'vulnerable_endpoints' %}?product={{ prod.id }}">
@@ -408,23 +415,6 @@
                 </div>
             </div>
         </div>
-
-        {% if prod.tags %}
-            <div class="col-md-12">
-                <div class="panel panel-default tags">
-                    <div class="panel-heading">
-                        <h4>Tags</h4>
-                    </div>
-                    <div class="tags panel-body">
-                        {% for tag in prod.tags %}
-                            <span class="label label-primary">{{ tag }}</span>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-        {% endif %}
-
-
         {% if user.is_staff %}
             <div class="col-md-12">
                 <div class="panel panel-default table-responsive">
@@ -447,7 +437,15 @@
                             <tbody>
                             {% for eng in engs %}
                                 <tr>
-                                <td>{{ eng.name | default:"N/A" }}</td>
+                                <td>{{ eng.name | default:"N/A" }}
+                                {% if eng.tags %}
+                                    <sup>
+                                        {% for tag in eng.tags %}
+                                        <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                        {% endfor %}
+                                    </sup>
+                                {% endif %}
+                                </td>
                                 <td>{{ eng.lead }}</td>
                                 <td>{{ eng.target_start }}</td>
                                 <td>{{ eng.target_end }}</td>
@@ -508,6 +506,108 @@
                 </div>
             </div>
         {% endif %}
+        <div class="col-md-12">
+            <div class="panel panel-default table-responsive">
+                <div class="panel-heading">
+                    <h4>Credentials
+                        <a title="Add New Credential" class="pull-right btn btn-primary btn-sm"
+                           href="{% url 'new_cred_product' prod.id %}"><span class="fa fa-plus"></span></a>
+                    </h4>
+                </div>
+                {% if creds %}
+                    <table class="tablesorter-bootstrap table table-condensed table-striped table-hover">
+                        <thead>
+                        <tr>
+                          <th>Name</th>
+                          <th>Username</th>
+                          <th>Role</th>
+                          <th>Environment</th>
+                          <th>Authentication Provider</th>
+                          <th>Login Valid</th>
+                          <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for cred in creds %}
+                            <tr>
+                              <td>
+                                  <a href="{{ cred.cred_id.url }}" target="_blank">{{ cred.cred_id.name }}</a>
+                              </td>
+                              <td>{{ cred.cred_id.username }}</td>
+                              <td>{{ cred.cred_id.role }}</td>
+                              <td>{{ cred.cred_id.environment }}</td>
+                              <td>{{ cred.is_authn_provider }}</td>
+                              <td>{{ cred.cred_id.is_valid }}</td>
+                              <td>
+                                  <div class="btn-group">
+                                      <a class="btn btn-sm btn-primary"
+                                         href="{% url 'view_cred_product' cred.product.id cred.id  %}">View</a>
+                                      <a class="btn btn-sm btn-warning"
+                                         href="{% url 'edit_cred_product' cred.product.id cred.id  %}">Edit</a>
+                                      <a class="btn btn-sm btn-danger delete-finding"
+                                         href="{% url 'delete_cred_product' cred.product.id cred.id  %}">Delete</a>
+                                  </div>
+                              </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div class="panel-body">
+                        <p>No credentials configured.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+            <div class="col-md-12">
+                <div class="panel panel-default table-responsive">
+                    <div class="panel-heading">
+                        <h4>Tools
+                            <a title="Add New Tool" class="pull-right btn btn-primary btn-sm"
+                               href="{% url 'new_tool_product' prod.id %}"><span class="fa fa-plus"></span></a>
+                        </h4>
+                    </div>
+                    {% if tools %}
+                        <table class="tablesorter-bootstrap table table-condensed table-striped table-hover">
+                            <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>ID</th>
+                                <th>Type</th>
+                                <th>Category</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for tool in tools %}
+                                <tr>
+                                  <td><a href="{{ tool.url }}" target="_blank">
+                                    {{ tool.name }}</a></td>
+                                    <td>{{ tool.tool_project_id }}</td>
+                                    <td><a href="{{ tool.tool_configuration.url }}" target="_blank">
+                                      {{ tool.tool_configuration.name }}</a></td>
+                                    <td>{{ tool.tool_configuration.tool_type.name }}</td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a class="btn btn-sm btn-primary"
+                                               href="{% url 'view_tool_product' tool.product.id tool.id  %}">View</a>
+                                            <a class="btn btn-sm btn-warning"
+                                               href="{% url 'edit_tool_product' tool.product.id tool.id  %}">Edit</a>
+                                            <a class="btn btn-sm btn-danger delete-finding"
+                                               href="{% url 'delete_tool_product' tool.product.id tool.id  %}">Delete</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <div class="panel-body">
+                            <p>No tools configured.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
         {% if user.is_staff and i_engs %}
             <div class="col-md-12">
                 <div class="panel panel-default table-responsive">

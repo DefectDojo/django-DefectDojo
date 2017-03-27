@@ -4,6 +4,7 @@ import logging
 import mimetypes
 import os
 import shutil
+from jira import JIRA
 from datetime import datetime
 
 from django.conf import settings
@@ -23,11 +24,15 @@ from dojo.filters import OpenFindingFilter, \
     OpenFingingSuperFilter, AcceptedFingingSuperFilter, \
     ClosedFingingSuperFilter, TemplateFindingFilter
 from dojo.forms import NoteForm, CloseFindingForm, FindingForm, PromoteFindingForm, FindingTemplateForm, \
-    DeleteFindingTemplateForm, FindingImageFormSet, JIRAFindingForm, ReviewFindingForm, ClearFindingReviewForm
+    DeleteFindingTemplateForm, FindingImageFormSet, JIRAFindingForm, ReviewFindingForm, ClearFindingReviewForm, \
+    DefectFindingForm
 from dojo.models import Product_Type, Finding, Notes, \
     Risk_Acceptance, BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, \
     FindingImageAccessToken, JIRA_Issue, JIRA_PKey, JIRA_Conf, Dojo_User
-from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, send_review_email, process_notifications
+from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, send_review_email, process_notifications, \
+    add_comment, add_epic, add_issue, update_epic, update_issue, close_epic, jira_get_resolution_id, jira_change_resolution_id, \
+    get_jira_connection
+
 from dojo.tasks import add_issue_task, update_issue_task, add_comment_task
 
 localtz = timezone(settings.TIME_ZONE)
@@ -236,6 +241,68 @@ def close_finding(request, fid):
 
     add_breadcrumb(parent=finding, title="Close", top_level=False, request=request)
     return render(request, 'dojo/close_finding.html',
+                  {'finding': finding,
+                   'user': request.user, 'form': form})
+
+@user_passes_test(lambda u: u.is_staff)
+def defect_finding_review(request, fid):
+    finding = get_object_or_404(Finding, id=fid)
+    # in order to close a finding, we need to capture why it was closed
+    # we can do this with a Note
+    if request.method == 'POST':
+        form = DefectFindingForm(request.POST)
+
+        if form.is_valid():
+            now = datetime.now(tz=localtz)
+            new_note = form.save(commit=False)
+            new_note.author = request.user
+            new_note.date = now
+            new_note.save()
+            finding.notes.add(new_note)
+            finding.under_defect_review = False
+            defect_choice = form.cleaned_data['defect_choice']
+
+            if defect_choice == "Close Finding":
+                finding.active = False
+                finding.mitigated = now
+                finding.mitigated_by = request.user
+                finding.last_reviewed = finding.mitigated
+                finding.last_reviewed_by = request.user
+                finding.endpoints.clear()
+                jira = get_jira_connection(finding)
+                j_issue = JIRA_Issue.objects.get(finding=finding)
+                issue = jira.issue(j_issue.jira_id)
+                #If the issue id is closed jira will return Reopen Issue
+                resolution_id = jira_get_resolution_id(jira, issue, "Reopen Issue")
+                if resolution_id is None:
+                    resolution_id = jira_get_resolution_id(jira, issue, "Resolve Issue")
+                    jira_change_resolution_id(jira, issue, resolution_id)
+                    new_note.entry = new_note.entry + "\nJira issue set to resolved."
+            else:
+                #Re-open finding with notes stating why re-open
+                jira = get_jira_connection(finding)
+                j_issue = JIRA_Issue.objects.get(finding=finding)
+                issue = jira.issue(j_issue.jira_id)
+                resolution_id = jira_get_resolution_id(jira, issue, "Resolve Issue")
+                if resolution_id is not None:
+                    jira_change_resolution_id(jira, issue, resolution_id)
+                    new_note.entry = new_note.entry + "\nJira issue re-opened."
+
+            #Update Dojo and Jira with a notes
+            add_comment(finding, new_note, force_push=True)
+            finding.save()
+
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Defect Reviewed',
+                                 extra_tags='alert-success')
+            return HttpResponseRedirect(reverse('view_test', args=(finding.test.id,)))
+
+    else:
+        form = DefectFindingForm()
+
+    add_breadcrumb(parent=finding, title="Jira Status Review", top_level=False, request=request)
+    return render(request, 'dojo/defect_finding_review.html',
                   {'finding': finding,
                    'user': request.user, 'form': form})
 

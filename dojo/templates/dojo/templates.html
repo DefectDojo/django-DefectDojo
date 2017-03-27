@@ -43,7 +43,6 @@
                             <th nowrap="nowrap">{% dojo_sort request 'CWE' 'cwe' 'asc' %}</th>
                             <th nowrap="nowrap">{% dojo_sort request 'Name' 'title' %}</th>
                             <th nowrap="nowrap">{% dojo_sort request 'Severity' 'numerical_severity' %}</th>
-                            <th nowrap="nowrap">Tags</th>
                             <th nowrap="nowrap">Actions</th>
                         </tr>
                         </thead>
@@ -68,21 +67,26 @@
                                            data-trigger="hover" title="{{ finding.title|truncatechars:100 }}"
                                            data-content="{{ finding.description|truncatechars:500 }}">
                                             {{ finding.title }}
+                                            <sup>
+                                                {% for tag in finding.tags %}
+                                                <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                                {% endfor %}
+                                            </sup>
                                         </a>
                                     {% else %}
                                         <a title="{{ finding.title }}" href="{% url 'edit_template' finding.id %}">
                                             {{ finding.title }}
+                                            <sup>
+                                                {% for tag in finding.tags %}
+                                                <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                                {% endfor %}
+                                            </sup>
                                         </a>
                                     {% endif %}
                                 </td>
                                 <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
                                     <p class="text-error">
                                 {% else %}<p>{% endif %}{{ finding.severity }}</p></td>
-                                <td>
-                                    {% for tag in finding.tags %}
-                                        <span class="label label-primary">{{ tag }}</span>
-                                    {% endfor %}
-                                </td>
                                 {% if add_from_template %}
                                     <td nowrap="nowrap">
                                         <a href="{% url 'add_temp_finding' tid finding.id %}"
