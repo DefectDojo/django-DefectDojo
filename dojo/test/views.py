@@ -401,8 +401,8 @@ def finding_bulk_update(request, tid):
         else:
             messages.add_message(request,
                                  messages.ERROR,
-                                 'Unable to process bulk update.  The Severity field is required, '
-                                 'all others are optional.',
+                                 'Unable to process bulk update. Required fields are invalid,  '
+                                 'please update individually.',
                                  extra_tags='alert-danger')
 
     return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
