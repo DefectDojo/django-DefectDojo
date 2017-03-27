@@ -265,6 +265,7 @@ def add_findings(request, tid):
 
 @user_passes_test(lambda u: u.is_staff)
 def add_temp_finding(request, tid, fid):
+    jform = None
     test = get_object_or_404(Test, id=tid)
     finding = get_object_or_404(Finding_Template, id=fid)
     findings = Finding_Template.objects.all()
