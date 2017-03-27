@@ -61,8 +61,8 @@
                                            href="{% url 'view_cred_details' conf.id  %}">View</a>
                                         <a class="btn btn-sm btn-warning"
                                            href="{% url 'edit_cred' conf.id  %}">Edit</a>
-                                        <!--<a class="btn btn-sm btn-danger delete-finding"
-                                           href="">Delete</a>-->
+                                        <a class="btn btn-sm btn-danger delete-finding"
+                                           href="{% url 'delete_cred' conf.id  %}">Delete</a>
                                     </div>
                                 </td>
                             </tr>

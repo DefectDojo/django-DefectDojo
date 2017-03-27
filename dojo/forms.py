@@ -1212,7 +1212,7 @@ class ToolTypeForm(forms.ModelForm):
 
 class ToolConfigForm(forms.ModelForm):
     tool_type = forms.ModelChoiceField(queryset=Tool_Type.objects.all(), label='Tool Type')
-
+    ssh = forms.CharField(widget=forms.Textarea(attrs={}), required=False, label='SSH Key')
     class Meta:
         model = Tool_Configuration
         exclude = ['product']
@@ -1235,11 +1235,29 @@ class ToolProductSettingsForm(forms.ModelForm):
         order = ['name']
 
 class CredMappingForm(forms.ModelForm):
+    cred_user = forms.ModelChoiceField(queryset=Cred_Mapping.objects.all().select_related('cred_id'), required=False, label='Select a Credential')
+
+    class Meta:
+        model = Cred_Mapping
+        fields = ['cred_user']
+        exclude = ['product', 'finding', 'engagement', 'test', 'url', 'is_authn_provider']
+
+class CredMappingFormProd(forms.ModelForm):
 
     class Meta:
         model = Cred_Mapping
         fields = ['cred_id', 'url', 'is_authn_provider']
         exclude = ['product', 'finding', 'engagement', 'test']
+
+class CredUserForm(forms.ModelForm):
+    #selenium_script = forms.FileField(widget=forms.widgets.FileInput(
+    #    attrs={"accept": ".py"}),
+    #    label="Select a Selenium Script", required=False)
+
+    class Meta:
+        model = Cred_User
+        exclude = ['']
+        #fields = ['selenium_script']
 
 class JIRAPKeyForm(forms.ModelForm):
     conf = forms.ModelChoiceField(queryset=JIRA_Conf.objects.all(), label='JIRA Configuration')
@@ -1256,10 +1274,3 @@ class JIRAFindingForm(forms.Form):
         self.fields['push_to_jira'].required=False
 
     push_to_jira = forms.BooleanField(required=False)
-
-class CredUserForm(forms.ModelForm):
-    #password = forms.CharField(widget=forms.PasswordInput, required=True)
-
-    class Meta:
-        model = Cred_User
-        exclude = ['']

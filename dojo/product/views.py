@@ -88,7 +88,7 @@ def view_product(request, pid):
     scan_sets = ScanSettings.objects.filter(product=prod)
     tools = Tool_Product_Settings.objects.filter(product=prod).order_by('name')
     auth = request.user.is_staff or request.user in prod.authorized_users.all()
-    creds = Cred_Mapping.objects.filter(product=prod).select_related('cred_id')
+    creds = Cred_Mapping.objects.filter(product=prod).select_related('cred_id').order_by('cred_id')
 
     if not auth:
         # will render 403
@@ -340,7 +340,7 @@ def edit_product(request, pid):
                 if settings.ENABLE_JIRA:
                     if jira_enabled:
                         jform = JIRAPKeyForm(request.POST, instance=jira_inst)
-                        #need to handle delete 
+                        #need to handle delete
                         try:
                             jform.save()
                         except:

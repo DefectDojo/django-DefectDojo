@@ -40,7 +40,8 @@ def view_test(request, tid):
     person = request.user.username
     findings = Finding.objects.filter(test=test)
     stub_findings = Stub_Finding.objects.filter(test=test)
-    creds = Cred_Mapping.objects.filter(test=test).select_related('cred_id')
+    cred_test = Cred_Mapping.objects.filter(test=test).select_related('cred_id').order_by('cred_id')
+    creds = Cred_Mapping.objects.filter(engagement=test.engagement).select_related('cred_id').order_by('cred_id')
 
     if request.method == 'POST':
         form = NoteForm(request.POST)
@@ -78,6 +79,7 @@ def view_test(request, tid):
                    'show_re_upload': show_re_upload,
                    'ajax_url': ajax_url,
                    'creds': creds,
+                   'cred_test': cred_test
                    })
 
 

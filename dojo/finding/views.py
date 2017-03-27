@@ -28,7 +28,7 @@ from dojo.forms import NoteForm, CloseFindingForm, FindingForm, PromoteFindingFo
     DefectFindingForm
 from dojo.models import Product_Type, Finding, Notes, \
     Risk_Acceptance, BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, \
-    FindingImageAccessToken, JIRA_Issue, JIRA_PKey, JIRA_Conf, Dojo_User
+    FindingImageAccessToken, JIRA_Issue, JIRA_PKey, JIRA_Conf, Dojo_User, Cred_User, Cred_Mapping
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, send_review_email, process_notifications, \
     add_comment, add_epic, add_issue, update_epic, update_issue, close_epic, jira_get_resolution_id, jira_change_resolution_id, \
     get_jira_connection
@@ -143,7 +143,9 @@ def closed_findings(request):
 
 def view_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
-
+    cred_finding = Cred_Mapping.objects.filter(finding=finding.id).select_related('cred_id').order_by('cred_id')
+    creds = Cred_Mapping.objects.filter(test=finding.test.id).select_related('cred_id').order_by('cred_id')
+    cred_engagement = Cred_Mapping.objects.filter(engagement=finding.test.engagement.id).select_related('cred_id').order_by('cred_id')
     user = request.user
     try:
         jissue = JIRA_Issue.objects.get(finding=finding)
@@ -203,6 +205,9 @@ def view_finding(request, fid):
                    'burp_request': burp_request,
                    'jissue': jissue,
                    'jconf': jconf,
+                   'cred_finding': cred_finding,
+                   'creds': creds,
+                   'cred_engagement': cred_engagement,
                    'burp_response': burp_response, 'dojo_user': dojo_user,
                    'user': user, 'notes': notes, 'form': form})
 

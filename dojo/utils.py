@@ -1039,10 +1039,13 @@ def send_atmention_email(user, users, parent_url, parent_title, new_note):
           fail_silently=False)
 
 def encrypt(key, iv, plaintext):
-    aes = AES.new(key, AES.MODE_CBC, iv, segment_size=128)
-    plaintext = _pad_string(plaintext)
-    encrypted_text = aes.encrypt(plaintext)
-    return binascii.b2a_hex(encrypted_text).rstrip()
+    text = ""
+    if plaintext != "" and plaintext != None:
+        aes = AES.new(key, AES.MODE_CBC, iv, segment_size=128)
+        plaintext = _pad_string(plaintext)
+        encrypted_text = aes.encrypt(plaintext)
+        text = binascii.b2a_hex(encrypted_text).rstrip()
+    return text
 
 def decrypt(key, iv, encrypted_text):
     aes = AES.new(key, AES.MODE_CBC, iv, segment_size=128)
@@ -1057,8 +1060,9 @@ def _pad_string(value):
     return value.ljust(length + pad_size, '\x00')
 
 def _unpad_string(value):
-    while value[-1] == '\x00':
-        value = value[:-1]
+    if value != "" and value != None:
+        while value[-1] == '\x00':
+            value = value[:-1]
     return value
 
 def dojo_crypto_encrypt(plaintext):
@@ -1069,8 +1073,11 @@ def dojo_crypto_encrypt(plaintext):
     return prepare_for_save(iv, encrypt(key, iv, plaintext.encode('ascii', 'ignore')))
 
 def prepare_for_save(iv, encrypted_value):
-    binascii.b2a_hex(encrypted_value).rstrip()
-    stored_value = "AES.1:" + binascii.b2a_hex(iv).rstrip() + ":" + encrypted_value
+    stored_value = None
+
+    if encrypted_value != "" and encrypted_value != None:
+        binascii.b2a_hex(encrypted_value).rstrip()
+        stored_value = "AES.1:" + binascii.b2a_hex(iv) + ":" + encrypted_value
     return stored_value
 
 def get_db_key():
@@ -1082,19 +1089,23 @@ def get_db_key():
     return db_key
 
 def prepare_for_view(encrypted_value):
+
     key = None
     decrypted_value = ""
-    key = get_db_key()
-    encrypted_values = encrypted_value.split(":")
+    if encrypted_value != None:
+        key = get_db_key()
+        encrypted_values = encrypted_value.split(":")
 
-    if len(encrypted_values) > 1:
-        type = encrypted_values[0]
-        iv = binascii.a2b_hex(encrypted_values[1]).rstrip()
-        value = encrypted_values[2]
-        decrypted_value = decrypt(key, iv, value)
-        try:
-            decrypted_value.decode('ascii')
-        except UnicodeDecodeError:
-            decrypted_value = ""
+        if len(encrypted_values) > 1:
+            type = encrypted_values[0]
+
+            iv = binascii.a2b_hex(encrypted_values[1])
+            value = encrypted_values[2]
+
+            try:
+                decrypted_value = decrypt(key, iv, value)
+                decrypted_value.decode('ascii')
+            except UnicodeDecodeError:
+                decrypted_value = ""
 
     return decrypted_value

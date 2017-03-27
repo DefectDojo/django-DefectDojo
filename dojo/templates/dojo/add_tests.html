@@ -13,6 +13,7 @@
     <h3> Add tests to an engagement </h3>
     <form class="form-horizontal" action="{% url 'add_tests' eid%}" method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
+        {% include "dojo/form_fields.html" with form=cred_form %}
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
                 <input class="btn btn-primary" type="submit" name="_Add Another Test" value="Add Another Test"/>
@@ -44,4 +45,3 @@
         });
     </script>
 {% endblock %}
-

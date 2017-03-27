@@ -154,7 +154,7 @@ class Test_Type(models.Model):
 
 class Product(models.Model):
     name = models.CharField(max_length=300)
-    description = models.CharField(max_length=2000)
+    description = models.CharField(max_length=4000)
     '''
         The following three fields are deprecated and no longer in use.
         They remain in model for backwards compatibility and will be removed
@@ -996,9 +996,20 @@ class Tool_Type(models.Model):
 
 class Tool_Configuration(models.Model):
     name = models.CharField(max_length=200, null=False)
-    description = models.CharField(max_length=2000, null=True)
+    description = models.CharField(max_length=2000, null=True, blank=True)
     url =  models.URLField(max_length=2000, null=True)
     tool_type = models.ForeignKey(Tool_Type, related_name='tool_type')
+    authentication_type = models.CharField(max_length=15,
+                            choices=(
+                                ('API', 'API Key'),
+                                ('Password', 'Username/Password'),
+                                ('SSH', 'SSH')),
+                            null=True, blank=True)
+    username = models.CharField(max_length=200, null=True, blank=True)
+    password = models.CharField(max_length=600, null=True, blank=True)
+    auth_title = models.CharField(max_length=200, null=True, blank=True, verbose_name="Title for SSH/API Key")
+    ssh = models.CharField(max_length=6000, null=True, blank=True)
+    api_key = models.CharField(max_length=600, null=True, blank=True, verbose_name="API Key")
 
     class Meta:
         ordering = ['name']
@@ -1008,7 +1019,7 @@ class Tool_Configuration(models.Model):
 
 class Tool_Product_Settings(models.Model):
     name = models.CharField(max_length=200, null=False)
-    description = models.CharField(max_length=2000, null=True)
+    description = models.CharField(max_length=2000, null=True, blank=True)
     url =  models.URLField(max_length=2000, null=True, blank=True)
     product = models.ForeignKey(Product, default=1, editable=False)
     tool_configuration = models.ForeignKey(Tool_Configuration, null=False, related_name='tool_configuration')
@@ -1017,6 +1028,12 @@ class Tool_Product_Settings(models.Model):
 
     class Meta:
         ordering = ['name']
+
+class Tool_Product_History(models.Model):
+    product = models.ForeignKey(Tool_Product_Settings, editable=False)
+    last_scan = models.DateTimeField(null=False, editable=False, default=now)
+    succesfull = models.BooleanField(default=True, verbose_name="Succesfully")
+    configuration_details = models.CharField(max_length=2000, null=True, blank=True)
 
 class Alerts(models.Model):
     description = models.CharField(max_length=2000, null=True)
@@ -1035,7 +1052,7 @@ class Alerts(models.Model):
 class Cred_User(models.Model):
     name = models.CharField(max_length=200, null=False)
     username = models.CharField(max_length=200, null=False)
-    password = models.CharField(max_length=400, null=False)
+    password = models.CharField(max_length=600, null=False)
     role = models.CharField(max_length=200, null=False)
     authentication = models.CharField(max_length=15,
                             choices=(
@@ -1054,6 +1071,8 @@ class Cred_User(models.Model):
     logout_regex = models.CharField(max_length=200, null=True, blank=True)
     notes = models.ManyToManyField(Notes, blank=True, editable=False)
     is_valid = models.BooleanField(default=True, verbose_name="Login is valid")
+    #selenium_script = models.CharField(max_length=1000, default='none',
+    #    editable=False, blank=True, null=True, verbose_name="Selenium Script File")
 
     class Meta:
         ordering = ['name']
@@ -1069,6 +1088,9 @@ class Cred_Mapping(models.Model):
     test = models.ForeignKey(Test, null=True, blank=True, related_name="test")
     is_authn_provider = models.BooleanField(default=False, verbose_name="Authentication Provider")
     url =  models.URLField(max_length=2000, null=True, blank=True)
+
+    def __unicode__(self):
+        return self.cred_id.name + " (" + self.cred_id.role + ")"
 
 # Register for automatic logging to database
 auditlog.register(Dojo_User)
@@ -1100,6 +1122,7 @@ admin.site.register(Check_List)
 admin.site.register(Test_Type)
 admin.site.register(Endpoint)
 admin.site.register(Product)
+admin.site.register(Product_Type)
 admin.site.register(Dojo_User)
 admin.site.register(UserContactInfo)
 admin.site.register(Notes)
