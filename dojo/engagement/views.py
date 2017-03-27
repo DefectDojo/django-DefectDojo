@@ -383,7 +383,7 @@ def import_scan_results(request, eid):
 
             #Save the credential to the test
             if cred_form.is_valid():
-                if cred_form.cleaned_data['cred_user'].id:
+                if cred_form.cleaned_data['cred_user']:
                     #Select the credential mapping object from the selected list and only allow if the credential is associated with the product
                     cred_user = Cred_Mapping.objects.filter(pk=cred_form.cleaned_data['cred_user'].id, engagement=eid).first()
 
