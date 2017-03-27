@@ -265,6 +265,7 @@ def add_findings(request, tid):
 
 @user_passes_test(lambda u: u.is_staff)
 def add_temp_finding(request, tid, fid):
+    jform = None
     test = get_object_or_404(Test, id=tid)
     finding = get_object_or_404(Finding_Template, id=fid)
     findings = Finding_Template.objects.all()
@@ -403,8 +404,8 @@ def finding_bulk_update(request, tid):
         else:
             messages.add_message(request,
                                  messages.ERROR,
-                                 'Unable to process bulk update.  The Severity field is required, '
-                                 'all others are optional.',
+                                 'Unable to process bulk update. Required fields are invalid,  '
+                                 'please update individually.',
                                  extra_tags='alert-danger')
 
     return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
