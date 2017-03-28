@@ -62,8 +62,8 @@
                 <tr>
                     <td><a href="{{ cred.cred_id.url }}" target="_blank">{{ cred.cred_id.name  }}</a></td>
                     <td>
-                    {% if cred.url %}
-                      <a href="{{ cred.url }}">Alternate URL</a>
+                    {% if cred_product.url %}
+                      <a href="{{ cred_product.url }}">Alternate URL</a>
                     {% else %}
                       None Configured
                     {% endif %}
@@ -96,7 +96,7 @@
                           <th>Logout RegEx</th>
                         </tr>
                         <tr>
-                            <td>{{ cred.is_authn_provider }}</td>
+                            <td>{{ cred_product.is_authn_provider }}</td>
                             <td>{{ cred.cred_id.authentication }}</td>
                             <td>{{ cred.cred_id.http_authentication }}</td>
                             <td><!--<a href="{% url 'view_selenium' cred.cred_id.id %}">Download</a>-->

@@ -102,9 +102,7 @@ def view_cred_details(request, ttid):
             new_note.save()
             cred.notes.add(new_note)
             form = NoteForm()
-            #url = request.build_absolute_uri(reverse("view_test", args=(test.id,)))
-            #title="Test: %s on %s" % (test.test_type.name, test.engagement.product.name)
-            #process_notifications(request, new_note, url, title)
+
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Note added successfully.',
@@ -175,6 +173,7 @@ def view_cred_product(request, pid, ttid):
 @user_passes_test(lambda u: u.is_staff)
 def view_cred_product_engagement(request, eid, ttid):
     cred = get_object_or_404(Cred_Mapping.objects.select_related('cred_id'), id=ttid)
+    cred_product = Cred_Mapping.objects.filter(cred_id=cred.cred_id.id, product=cred.engagement.product.id).first()
     notes = cred.cred_id.notes.all()
 
     if request.method == 'POST':
@@ -208,12 +207,15 @@ def view_cred_product_engagement(request, eid, ttid):
                       'notes': notes,
                       'cred_type': cred_type,
                       'edit_link': edit_link,
-                      'delete_link': delete_link
+                      'delete_link': delete_link,
+                      'cred_product': cred_product
                   })
 
 @user_passes_test(lambda u: u.is_staff)
 def view_cred_engagement_test(request, tid, ttid):
     cred = get_object_or_404(Cred_Mapping.objects.select_related('cred_id'), id=ttid)
+    cred_product = Cred_Mapping.objects.filter(cred_id=cred.cred_id.id, product=cred.test.engagement.product.id).first()
+
     notes = cred.cred_id.notes.all()
 
     if request.method == 'POST':
@@ -247,12 +249,15 @@ def view_cred_engagement_test(request, tid, ttid):
                       'notes': notes,
                       'cred_type': cred_type,
                       'edit_link': edit_link,
-                      'delete_link': delete_link
+                      'delete_link': delete_link,
+                      'cred_product': cred_product
                   })
 
 @user_passes_test(lambda u: u.is_staff)
 def view_cred_finding(request, fid, ttid):
     cred = get_object_or_404(Cred_Mapping.objects.select_related('cred_id'), id=ttid)
+    cred_product = Cred_Mapping.objects.filter(cred_id=cred.cred_id.id, product=cred.finding.test.engagement.product.id).first()
+
     notes = cred.cred_id.notes.all()
 
     if request.method == 'POST':
@@ -286,7 +291,8 @@ def view_cred_finding(request, fid, ttid):
                       'notes': notes,
                       'cred_type': cred_type,
                       'edit_link': edit_link,
-                      'delete_link': delete_link
+                      'delete_link': delete_link,
+                      'cred_product': cred_product
                   })
 
 @user_passes_test(lambda u: u.is_staff)
