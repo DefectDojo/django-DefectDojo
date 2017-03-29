@@ -12,7 +12,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, StreamingHttpResponse, Http404, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from pytz import timezone
@@ -20,13 +20,13 @@ from pytz import timezone
 from dojo.filters import ProductFilter, ProductFindingFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm
 from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Cred_User, Cred_Mapping
-from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data
+from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, handle_uploaded_selenium
 from dojo.models import *
 from dojo.models import *
 from dojo.forms import *
 from dojo.tasks import *
 from dojo.forms import *
-from dojo.utils import dojo_crypto_encrypt, prepare_for_view
+from dojo.utils import dojo_crypto_encrypt, prepare_for_view, FileIterWrapper
 from dojo.product import views as ds
 
 localtz = timezone(settings.TIME_ZONE)
@@ -62,11 +62,13 @@ def new_cred(request):
 def edit_cred(request, ttid):
     tool_config = Cred_User.objects.get(pk=ttid)
     if request.method == 'POST':
-        tform = CredUserForm(request.POST, instance=tool_config)
+        tform = CredUserForm(request.POST, request.FILES, instance=tool_config)
         if tform.is_valid():
             form_copy = tform.save(commit=False)
             form_copy.password = dojo_crypto_encrypt(tform.cleaned_data['password'])
+            #handle_uploaded_selenium(request.FILES['selenium_script'], tool_config)
             form_copy.save()
+
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Credential Successfully Updated.',
@@ -100,9 +102,7 @@ def view_cred_details(request, ttid):
             new_note.save()
             cred.notes.add(new_note)
             form = NoteForm()
-            #url = request.build_absolute_uri(reverse("view_test", args=(test.id,)))
-            #title="Test: %s on %s" % (test.test_type.name, test.engagement.product.name)
-            #process_notifications(request, new_note, url, title)
+
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Note added successfully.',
@@ -145,9 +145,6 @@ def view_cred_product(request, pid, ttid):
             new_note.save()
             cred.cred_id.notes.add(new_note)
             form = NoteForm()
-            #url = request.build_absolute_uri(reverse("view_test", args=(test.id,)))
-            #title="Test: %s on %s" % (test.test_type.name, test.engagement.product.name)
-            #process_notifications(request, new_note, url, title)
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Note added successfully.',
@@ -156,19 +153,176 @@ def view_cred_product(request, pid, ttid):
         form = NoteForm()
 
     add_breadcrumb(title="Credential Manager", top_level=False, request=request)
+    cred_type = "Product"
+    view_link = reverse('view_cred_product', args=(cred.product.id, cred.id,))
+    edit_link = reverse('edit_cred_product', args=(cred.product.id,cred.id,))
+    delete_link = reverse('delete_cred_product', args=(cred.product.id,cred.id,))
 
     return render(request,
-                  'dojo/view_cred_product.html',
+                  'dojo/view_cred_all_details.html',
                   {
                       'cred': cred,
                       'form': form,
-                      'notes': notes
+                      'notes': notes,
+                      'cred_type': cred_type,
+                      'edit_link': edit_link,
+                      'delete_link': delete_link,
+                      'view_link': view_link
+                  })
+
+@user_passes_test(lambda u: u.is_staff)
+def view_cred_product_engagement(request, eid, ttid):
+    cred = get_object_or_404(Cred_Mapping.objects.select_related('cred_id'), id=ttid)
+    cred_product = Cred_Mapping.objects.filter(cred_id=cred.cred_id.id, product=cred.engagement.product.id).first()
+    notes = cred.cred_id.notes.all()
+
+    if request.method == 'POST':
+        form = NoteForm(request.POST)
+
+        if form.is_valid():
+            new_note = form.save(commit=False)
+            new_note.author = request.user
+            new_note.date = datetime.now(tz=localtz)
+            new_note.save()
+            cred.cred_id.notes.add(new_note)
+            form = NoteForm()
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Note added successfully.',
+                                 extra_tags='alert-success')
+    else:
+        form = NoteForm()
+
+    add_breadcrumb(title="Credential Manager", top_level=False, request=request)
+    cred_type = "Engagement"
+    edit_link = ""
+    view_link = reverse('view_cred_product_engagement', args=(eid, cred.id,))
+    delete_link = reverse('delete_cred_engagement', args=(eid,cred.id,))
+
+    return render(request,
+                  'dojo/view_cred_all_details.html',
+                  {
+                      'cred': cred,
+                      'form': form,
+                      'notes': notes,
+                      'cred_type': cred_type,
+                      'edit_link': edit_link,
+                      'delete_link': delete_link,
+                      'cred_product': cred_product
+                  })
+
+@user_passes_test(lambda u: u.is_staff)
+def view_cred_engagement_test(request, tid, ttid):
+    cred = get_object_or_404(Cred_Mapping.objects.select_related('cred_id'), id=ttid)
+    cred_product = Cred_Mapping.objects.filter(cred_id=cred.cred_id.id, product=cred.test.engagement.product.id).first()
+
+    notes = cred.cred_id.notes.all()
+
+    if request.method == 'POST':
+        form = NoteForm(request.POST)
+
+        if form.is_valid():
+            new_note = form.save(commit=False)
+            new_note.author = request.user
+            new_note.date = datetime.now(tz=localtz)
+            new_note.save()
+            cred.cred_id.notes.add(new_note)
+            form = NoteForm()
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Note added successfully.',
+                                 extra_tags='alert-success')
+    else:
+        form = NoteForm()
+
+    add_breadcrumb(title="Credential Manager", top_level=False, request=request)
+    cred_type = "Test"
+    edit_link = None
+    view_link = reverse('view_cred_engagement_test', args=(tid, cred.id,))
+    delete_link = reverse('delete_cred_test', args=(tid,cred.id,))
+
+    return render(request,
+                  'dojo/view_cred_all_details.html',
+                  {
+                      'cred': cred,
+                      'form': form,
+                      'notes': notes,
+                      'cred_type': cred_type,
+                      'edit_link': edit_link,
+                      'delete_link': delete_link,
+                      'cred_product': cred_product
+                  })
+
+@user_passes_test(lambda u: u.is_staff)
+def view_cred_finding(request, fid, ttid):
+    cred = get_object_or_404(Cred_Mapping.objects.select_related('cred_id'), id=ttid)
+    cred_product = Cred_Mapping.objects.filter(cred_id=cred.cred_id.id, product=cred.finding.test.engagement.product.id).first()
+
+    notes = cred.cred_id.notes.all()
+
+    if request.method == 'POST':
+        form = NoteForm(request.POST)
+
+        if form.is_valid():
+            new_note = form.save(commit=False)
+            new_note.author = request.user
+            new_note.date = datetime.now(tz=localtz)
+            new_note.save()
+            cred.cred_id.notes.add(new_note)
+            form = NoteForm()
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Note added successfully.',
+                                 extra_tags='alert-success')
+    else:
+        form = NoteForm()
+
+    add_breadcrumb(title="Credential Manager", top_level=False, request=request)
+    cred_type = "Finding"
+    edit_link = None
+    view_link = reverse('view_cred_finding', args=(fid, cred.id,))
+    delete_link = reverse('delete_cred_finding', args=(fid,cred.id,))
+
+    return render(request,
+                  'dojo/view_cred_all_details.html',
+                  {
+                      'cred': cred,
+                      'form': form,
+                      'notes': notes,
+                      'cred_type': cred_type,
+                      'edit_link': edit_link,
+                      'delete_link': delete_link,
+                      'cred_product': cred_product
                   })
 
 @user_passes_test(lambda u: u.is_staff)
 def edit_cred_product(request, pid, ttid):
-    #cred = get_object_or_404(Cred_Mapping.objects.select_related('cred_id'), id=ttid)
-    cred = Cred_Mapping.objects.get(pk=ttid)
+    cred = get_object_or_404(Cred_Mapping.objects.select_related('cred_id'), id=ttid)
+    if request.method == 'POST':
+        tform = CredMappingFormProd(request.POST, instance=cred)
+        if tform.is_valid():
+            tform.save()
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Credential Successfully Updated.',
+                                 extra_tags='alert-success')
+            return HttpResponseRedirect(reverse('view_product', args=(pid,)))
+    else:
+        tform = CredMappingFormProd(instance=cred)
+
+    add_breadcrumb(title="Edit Credential Configuration", top_level=False, request=request)
+
+    return render(request,
+                  'dojo/edit_cred_all.html',
+                  {
+                      'tform': tform,
+                      'cred_type': "Product"
+                  })
+
+@user_passes_test(lambda u: u.is_staff)
+def edit_cred_product_engagement(request, eid, ttid):
+    cred = get_object_or_404(Cred_Mapping.objects.select_related('cred_id'), id=ttid)
+    eng = get_object_or_404(Engagement, pk=eid)
 
     if request.method == 'POST':
         tform = CredMappingForm(request.POST, instance=cred)
@@ -178,35 +332,46 @@ def edit_cred_product(request, pid, ttid):
                                  messages.SUCCESS,
                                  'Credential Successfully Updated.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('view_product', args=(pid,)))
+            return HttpResponseRedirect(reverse('view_engagement', args=(eid,)))
     else:
-        tform = CredMappingForm(instance=cred)
+        tform = CredMappingFormProd(instance=cred)
+        tform.fields["cred_id"].queryset = Cred_Mapping.objects.filter(product=eng.product).order_by('cred_id')
 
     add_breadcrumb(title="Edit Credential Configuration", top_level=False, request=request)
 
     return render(request,
-                  'dojo/edit_cred_product.html',
+                  'dojo/edit_cred_all.html',
                   {
                       'tform': tform,
+                      'cred_type': "Engagement"
                   })
 
 @user_passes_test(lambda u: u.is_staff)
 def new_cred_product(request, pid):
 
     if request.method == 'POST':
-        tform = CredMappingForm(request.POST)
+        tform = CredMappingFormProd(request.POST)
         if tform.is_valid():
-            prod = Product.objects.get(id=pid)
-            new_f = tform.save(commit=False)
-            new_f.product = prod
-            new_f.save()
+            #Select the credential mapping object from the selected list and only allow if the credential is associated with the product
+            cred_user = Cred_Mapping.objects.filter(cred_id=tform.cleaned_data['cred_id'].id, product=pid).first()
+            message="Credential already associated."
+            status_tag = 'alert-danger'
+
+            if cred_user is None:
+                prod = Product.objects.get(id=pid)
+                new_f = tform.save(commit=False)
+                new_f.product = prod
+                new_f.save()
+                message = 'Credential Successfully Updated.'
+                status_tag = 'alert-success'
+
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 'Credential Successfully Updated.',
-                                 extra_tags='alert-success')
+                                 message,
+                                 extra_tags=status_tag)
             return HttpResponseRedirect(reverse('view_product', args=(pid,)))
     else:
-        tform = CredMappingForm()
+        tform = CredMappingFormProd()
 
     add_breadcrumb(title="Add Credential Configuration", top_level=False, request=request)
 
@@ -218,24 +383,254 @@ def new_cred_product(request, pid):
                   })
 
 @user_passes_test(lambda u: u.is_staff)
-def delete_cred_product(request, pid, ttid):
-    cred = Cred_Mapping.objects.get(pk=ttid)
+def new_cred_product_engagement(request, eid):
+    eng = get_object_or_404(Engagement, pk=eid)
 
     if request.method == 'POST':
+        tform = CredMappingForm(request.POST)
+        tform.fields["cred_user"].queryset = Cred_Mapping.objects.filter(product=eng.product).order_by('cred_id')
+        if tform.is_valid() and tform.cleaned_data['cred_user']:
+            #Select the credential mapping object from the selected list and only allow if the credential is associated with the product
+            cred_user = Cred_Mapping.objects.filter(pk=tform.cleaned_data['cred_user'].id, product=eng.product.id).order_by('cred_id').first()
+            #search for cred_user and engagement id
+            cred_lookup = Cred_Mapping.objects.filter(cred_id=cred_user.cred_id, engagement=eng.id)
+
+            message="Credential already associated."
+            status_tag = 'alert-danger'
+
+            if not cred_user:
+                message="Credential must first be associated with this product."
+
+            if not cred_lookup and cred_user:
+                new_f = tform.save(commit=False)
+                new_f.engagement = eng
+                new_f.cred_id = cred_user.cred_id
+                new_f.save()
+                message = 'Credential Successfully Updated.'
+                status_tag = 'alert-success'
+
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 message,
+                                 extra_tags=status_tag)
+            return HttpResponseRedirect(reverse('view_engagement', args=(eid,)))
+    else:
+        tform = CredMappingForm()
+        tform.fields["cred_user"].queryset = Cred_Mapping.objects.filter(product=eng.product).order_by('cred_id')
+
+    add_breadcrumb(title="Add Credential Configuration", top_level=False, request=request)
+
+    return render(request,
+                  'dojo/new_cred_mapping.html',
+                  {
+                      'tform': tform,
+                      'eid': eid,
+                      'formlink': reverse('new_cred_product_engagement', args=(eid,))
+                  })
+
+@user_passes_test(lambda u: u.is_staff)
+def new_cred_engagement_test(request, tid):
+    test = get_object_or_404(Test, pk=tid)
+
+    if request.method == 'POST':
+        tform = CredMappingForm(request.POST)
+        tform.fields["cred_user"].queryset = Cred_Mapping.objects.filter(engagement=test.engagement).order_by('cred_id')
+        if tform.is_valid() and tform.cleaned_data['cred_user']:
+            #Select the credential mapping object from the selected list and only allow if the credential is associated with the product
+            cred_user = Cred_Mapping.objects.filter(pk=tform.cleaned_data['cred_user'].id, engagement=test.engagement.id).first()
+            #search for cred_user and test id
+            cred_lookup = Cred_Mapping.objects.filter(cred_id=cred_user.cred_id, test=test.id)
+
+            message="Credential already associated."
+            status_tag = 'alert-danger'
+
+            if not cred_user:
+                message="Credential must first be associated with this product."
+
+            if not cred_lookup and cred_user:
+                new_f = tform.save(commit=False)
+                new_f.test = test
+                new_f.cred_id = cred_user.cred_id
+                new_f.save()
+                message = 'Credential Successfully Updated.'
+                status_tag = 'alert-success'
+
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 message,
+                                 extra_tags=status_tag)
+            return HttpResponseRedirect(reverse('view_test', args=(tid,)))
+    else:
+        tform = CredMappingForm()
+        tform.fields["cred_user"].queryset = Cred_Mapping.objects.filter(engagement=test.engagement).order_by('cred_id')
+
+    add_breadcrumb(title="Add Credential Configuration", top_level=False, request=request)
+
+    return render(request,
+                  'dojo/new_cred_mapping.html',
+                  {
+                      'tform': tform,
+                      'eid': tid,
+                      'formlink': reverse('new_cred_engagement_test', args=(tid,))
+                  })
+
+@user_passes_test(lambda u: u.is_staff)
+def new_cred_finding(request, fid):
+    finding = get_object_or_404(Finding, pk=fid)
+
+    if request.method == 'POST':
+        tform = CredMappingForm(request.POST)
+        tform.fields["cred_user"].queryset = Cred_Mapping.objects.filter(engagement=finding.test.engagement).order_by('cred_id')
+
+        if tform.is_valid() and tform.cleaned_data['cred_user']:
+            #Select the credential mapping object from the selected list and only allow if the credential is associated with the product
+            cred_user = Cred_Mapping.objects.filter(pk=tform.cleaned_data['cred_user'].id, engagement=finding.test.engagement.id).first()
+            #search for cred_user and test id
+            cred_lookup = Cred_Mapping.objects.filter(cred_id=cred_user.cred_id, finding=finding.id)
+
+            if cred_lookup:
+                print "Cred lookup valid"
+
+            if cred_user:
+                print "Cred user"
+
+            message="Credential already associated."
+            status_tag = 'alert-danger'
+
+            if not cred_user:
+                message="Credential must first be associated with this product."
+
+            if not cred_lookup and cred_user:
+                new_f = tform.save(commit=False)
+                new_f.finding = finding
+                new_f.cred_id = cred_user.cred_id
+                new_f.save()
+                message = 'Credential Successfully Updated.'
+                status_tag = 'alert-success'
+
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 message,
+                                 extra_tags=status_tag)
+            return HttpResponseRedirect(reverse('view_finding', args=(fid,)))
+    else:
+        tform = CredMappingForm()
+        tform.fields["cred_user"].queryset = Cred_Mapping.objects.filter(engagement=finding.test.engagement).order_by('cred_id')
+
+    add_breadcrumb(title="Add Credential Configuration", top_level=False, request=request)
+
+    return render(request,
+                  'dojo/new_cred_mapping.html',
+                  {
+                      'tform': tform,
+                      'eid': fid,
+                      'formlink': reverse('new_cred_finding', args=(fid,))
+                  })
+
+def delete_cred_controller(request, destination_url, id, ttid):
+    cred = None
+    try:
+        cred = Cred_Mapping.objects.get(pk=ttid)
+    except:
+        pass
+    if request.method == 'POST':
         tform = CredMappingForm(request.POST, instance=cred)
-        cred.delete()
+        message = ""
+        status_tag = ""
+        delete_cred = False
+
+        #Determine if the credential can be deleted
+        if destination_url == "cred":
+            if cred is None:
+                delete_cred = True
+            else:
+                cred_lookup = Cred_Mapping.objects.filter(cred_id=cred.cred_id).exclude(product__isnull=True)
+                message="Credential is associated with product(s). Remove the credential from the product(s) before this credential can be deleted."
+                if cred_lookup.exists() == False:
+                    delete_cred = True
+        elif destination_url == "view_product":
+            cred_lookup = Cred_Mapping.objects.filter(cred_id=cred.cred_id).exclude(engagement__isnull=True)
+            message="Credential is associated with engagement(s). Remove the credential from the engagement(s) before this credential can be deleted."
+            if cred_lookup.exists() == False:
+                delete_cred = True
+        elif destination_url == "view_engagement":
+            cred_lookup = Cred_Mapping.objects.filter(cred_id=cred.cred_id).exclude(test__isnull=True)
+            message="Credential is associated with test(s). Remove the test(s) before this credential can be deleted."
+            if cred_lookup.exists() == False:
+                cred_lookup = Cred_Mapping.objects.filter(cred_id=cred.cred_id).exclude(finding__isnull=True)
+                message="Credential is associated with finding(s). Remove the finding(s) before this credential can be deleted."
+                if cred_lookup.exists() == False:
+                    delete_cred = True
+            else:
+                if cred_lookup.exists() == False:
+                    delete_cred = True
+        elif destination_url == "view_test" or destination_url == "view_finding":
+            delete_cred = True
+
+        #Allow deletion if no credentials are associated
+        if delete_cred == True:
+            message = "Credential Successfully Deleted."
+            status_tag = "alert-success"
+            #check if main cred delete
+            if destination_url == "cred":
+                cred = Cred_User.objects.get(pk=ttid)
+                cred.delete()
+            else:
+                cred.delete()
+        else:
+            status_tag = 'alert-danger'
+
         messages.add_message(request,
                              messages.SUCCESS,
-                             'Credential Successfully Deleted.',
-                             extra_tags='alert-success')
-        return HttpResponseRedirect(reverse('view_product', args=(pid,)))
+                             message,
+                             extra_tags=status_tag)
+
+        if destination_url == "cred":
+            return HttpResponseRedirect(reverse(destination_url))
+        else:
+            return HttpResponseRedirect(reverse(destination_url, args=(id,)))
     else:
         tform = CredMappingForm(instance=cred)
 
     add_breadcrumb(title="Delete Credential", top_level=False, request=request)
 
     return render(request,
-                  'dojo/delete_cred_product.html',
+                  'dojo/delete_cred_all.html',
                   {
                       'tform': tform,
                   })
+
+@user_passes_test(lambda u: u.is_staff)
+def delete_cred(request, ttid):
+    return delete_cred_controller(request, "cred", 0, ttid)
+
+@user_passes_test(lambda u: u.is_staff)
+def delete_cred_product(request, pid, ttid):
+    return delete_cred_controller(request, "view_product", pid, ttid)
+
+@user_passes_test(lambda u: u.is_staff)
+def delete_cred_engagement(request, eid, ttid):
+    return delete_cred_controller(request, "view_engagement", eid, ttid)
+
+@user_passes_test(lambda u: u.is_staff)
+def delete_cred_test(request, tid, ttid):
+    return delete_cred_controller(request, "view_test", tid, ttid)
+
+@user_passes_test(lambda u: u.is_staff)
+def delete_cred_finding(request, fid, ttid):
+    return delete_cred_controller(request, "view_finding", fid, ttid)
+
+@user_passes_test(lambda u: u.is_staff)
+def view_selenium(request, ttid):
+    import mimetypes
+
+    mimetypes.init()
+    cred = Cred_Mapping.objects.get(pk=ttid)
+    print cred.cred_id.selenium_script
+    #mimetype, encoding = mimetypes.guess_type(cred.cred_id.selenium_script)
+    response = StreamingHttpResponse(FileIterWrapper(open(cred.cred_id.selenium_script)))
+    fileName, fileExtension = os.path.splitext(cred.cred_id.selenium_script)
+    response['Content-Disposition'] = 'attachment; filename=selenium_script' + fileExtension
+    response['Content-Type'] = mimetype
+
+    return response

@@ -20,6 +20,7 @@ from pytz import timezone
 from dojo.filters import ProductFilter, ProductFindingFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm
 from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance
+from dojo.utils import dojo_crypto_encrypt, prepare_for_view, FileIterWrapper
 from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data
 from dojo.models import *
 from dojo.models import *
@@ -63,13 +64,21 @@ def edit_tool_config(request, ttid):
     if request.method == 'POST':
         tform = ToolConfigForm(request.POST, instance=tool_config)
         if tform.is_valid():
-            tform.save()
+            form_copy = tform.save(commit=False)
+            form_copy.password = dojo_crypto_encrypt(tform.cleaned_data['password'])
+            print "######"
+            print tform.cleaned_data['ssh']
+
+            form_copy.ssh = dojo_crypto_encrypt(tform.cleaned_data['ssh'])
+            form_copy.save()
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Tool Configuration Successfully Updated.',
                                  extra_tags='alert-success')
             return HttpResponseRedirect(reverse('tool_config', ))
     else:
+        tool_config.password = prepare_for_view(tool_config.password)
+        tool_config.ssh = prepare_for_view(tool_config.ssh)
         tform = ToolConfigForm(instance=tool_config)
     add_breadcrumb(title="Edit Tool Configuration", top_level=False, request=request)
 

@@ -5,7 +5,7 @@
 {% endblock %}
 {% block content %}
     <h3> Edit Credential Configuration</h3>
-    <form class="form-horizontal" method="post">{% csrf_token %}
+    <form class="form-horizontal" enctype="multipart/form-data" method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=tform %}
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
