@@ -1,0 +1,2 @@
+[hosts]
+10.1.1.101 ansible_connection=ssh ansible_ssh_user=dojo ansible_ssh_pass=dojo-rockx ansible_become_pass=dojo-rockx
