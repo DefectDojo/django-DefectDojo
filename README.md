@@ -13,11 +13,11 @@ check out our [PythonAnywhere demo site](http://defectdojo.pythonanywhere.com/).
 
 You can log in as an administrator like so:
 
-![Admin](https://inventropy.us/dd/admin.png)
+![Admin](https://inventropy.us/dd/admin.png) with password **administrator**
 
 You can also log in as a product owner / non-staff user:
 
-![Product owner](https://inventropy.us/dd/owner.png)
+![Product owner](https://inventropy.us/dd/owner.png) with password **product_user**
 
 # Additional Documentation
 
@@ -54,11 +54,13 @@ that should give you an idea of how to use DefectDojo for your own team.
 # Getting Involved
 
 <img src="https://github.com/devGregA/django-DefectDojo/blob/master/doc/img/slack_rgb.png" width="100">  
-<b> [Get Access.](https://owasp.herokuapp.com/)  </b> Realtime discussion is done in the OWASP Slack Channel, #defectdojo.
 
-<br>
+[Get Access.](https://owasp.herokuapp.com/)   Realtime discussion is done in the OWASP Slack Channel, #defectdojo.
+
+
 <img src="https://github.com/devGregA/django-DefectDojo/blob/master/doc/img/Twitter_Logo.png" width="45">  
-The [DefectDojo Twitter Account](https://twitter.com/defect_dojo)  tweets project updates and changes.
+
+[DefectDojo Twitter Account](https://twitter.com/defect_dojo)  tweets project updates and changes.
 
 # Available Plugins
 
