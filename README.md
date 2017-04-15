@@ -6,38 +6,10 @@ DefectDojo is a security program and vulnerability management tool. DefectDojo a
 
 [![Build Status](https://travis-ci.org/OWASP/django-DefectDojo.svg?branch=master)](https://travis-ci.org/OWASP/django-DefectDojo)
 
-# Demo
 
-If you'd like to check out a demo of DefectDojo before installing it, you can
-check out our [PythonAnywhere demo site](http://defectdojo.pythonanywhere.com/).
+# Documentation
 
-You can log in as an administrator like so:
-
-![Admin](https://inventropy.us/dd/admin.png) with password **administrator**
-
-You can also log in as a product owner / non-staff user:
-
-![Product owner](https://inventropy.us/dd/owner.png) with password **product_user**
-
-# Additional Documentation
-
-For additional documentation you can visit our [Read the Docs site](http://defectdojo.readthedocs.io/).
-
-# Once Click Installations
-
-Deploy to Docker Cloud. (<b>Login first to Docker Cloud before clicking the install button.</b>)
-
-[![Deploy to Docker Cloud](https://files.cloud.docker.com/images/deploy-to-dockercloud.svg)](https://cloud.docker.com/stack/deploy/?repo=https://github.com/aaronweaver/docker-DefectDojo)
-
-# Installation Options
-
-### [Debian or RHEL-based Install Script](./doc/install_bash.md)
-Detailed guide for setting up DefectDojo on
-[Ubuntu 14.04](https://github.com/rackerlabs/django-DefectDojo/wiki/DefectDojo-Installation-Guide---Ubuntu-Desktop-14.04).
-
-### [Docker](http://defectdojo.readthedocs.io/en/latest/getting-started.html#docker-local-install)
-
-### [Vagrant (deprecated)](./doc/install_vagrant.md)
+For all documentation regarding DefectDojo, you can visit our [Read the Docs site](http://defectdojo.readthedocs.io/).
 
 # Getting Started
 
@@ -82,7 +54,7 @@ DefectDojo is maintained by:
 
 # Contributing
 
-We greatly appreciate all of our [contributors](https://github.com/devGregA/django-DefectDojo/graphs/contributors).
+We greatly appreciate all of our [contributors](https://github.com/OWASP/django-DefectDojo/graphs/contributors).
 
 We would also like to highlight the contributions from Michael Dong and Fatimah Zohra who contributed to DefectDojo before it was open source.
 
