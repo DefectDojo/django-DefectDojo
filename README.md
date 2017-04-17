@@ -13,11 +13,11 @@ check out our [PythonAnywhere demo site](http://defectdojo.pythonanywhere.com/).
 
 You can log in as an administrator like so:
 
-![Admin](https://inventropy.us/dd/admin.png) with password **administrator**
+![Admin](https://raw.githubusercontent.com/OWASP/django-DefectDojo/master/doc/img/admin.png)
 
 You can also log in as a product owner / non-staff user:
 
-![Product owner](https://inventropy.us/dd/owner.png) with password **product_user**
+![Product owner](https://raw.githubusercontent.com/OWASP/django-DefectDojo/master/doc/img/owner.png)
 
 # Additional Documentation
 
@@ -82,7 +82,7 @@ DefectDojo is maintained by:
 
 # Contributing
 
-We greatly appreciate all of our [contributors](https://github.com/devGregA/django-DefectDojo/graphs/contributors).
+We greatly appreciate all of our [contributors](https://github.com/OWASP/django-DefectDojo/graphs/contributors).
 
 We would also like to highlight the contributions from Michael Dong and Fatimah Zohra who contributed to DefectDojo before it was open source.
 
