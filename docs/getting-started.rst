@@ -5,6 +5,18 @@ Change into the newly created ```django-DefectDojo``` directory:
 
     ``cd django-DefectDojo/``
 
+There is a script in the main folder called ``setup.bash`` that will allow you to interactively install DefectDojo on any Linux based systems. We do not recommend running DefectDojo as root, but you may do so if you choose. 
+
+**You will need:**
+* MySQL
+* pip
+
+**Recommended**
+* virtualenv
+
+1. If you haven't already, run ``mysql_secure_install`` to set a password for your root MySQL user.
+
+2. Create a MySQL user with CREATE priviledges, or use root.
 
 **Run the ``setup.bash`` script**
 This script will:

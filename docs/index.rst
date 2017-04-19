@@ -50,6 +50,7 @@ User Documentation
 .. toctree::
    :maxdepth: 2
 
+   about
    getting-started
    models
    start-using
