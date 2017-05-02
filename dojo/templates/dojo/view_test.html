@@ -11,8 +11,15 @@
     <div class="panel panel-default">
         <div class="panel-heading">
             <div class="clearfix">
-                <h3 class="pull-left"> {{ test.test_type }}</h3>
-
+                <h3 class="pull-left"> {{ test.test_type }}
+                {% if test.tags %}
+                    <sup>
+                        {% for tag in test.tags %}
+                        <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                        {% endfor %}
+                    </sup>
+                {% endif %}
+              </h3>
                 <div id="test-pulldown" class="dropdown pull-right">
                     <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                             data-toggle="dropdown" aria-expanded="true">
@@ -102,18 +109,6 @@
             </table>
         </div>
     </div>
-    {% if test.tags %}
-        <div class="panel panel-default to_highlight">
-            <div class="panel-heading">
-                <h4>Tags</h4>
-            </div>
-            <div class="tags panel-body">
-                {% for tag in test.tags %}
-                    <span class="label label-primary">{{ tag }}</span>
-                {% endfor %}
-            </div>
-        </div>
-    {% endif %}
     <div class="panel panel-default to_highlight table-responsive">
         <div class="panel-heading">
             <div class="clearfix">
@@ -235,7 +230,15 @@
                                        class="select_one {{ finding.severity }}"/>
                             </form>
                         </td>
-                        <td><a href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a></td>
+                        <td><a href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a>
+                          {% if finding.tags %}
+                              <sup>
+                                  {% for tag in finding.tags %}
+                                  <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                  {% endfor %}
+                              </sup>
+                          {% endif %}
+                        </td>
                         <td>{{ finding.reporter.username }}</td>
                         <td>{{ finding.mitigated }}</td>
                         <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
@@ -338,6 +341,103 @@
 
         </div>
     </div>
+
+    <!--Cred Begin-->
+    <div class="row">
+    <div class="col-md-12" id="cred">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Credentials
+                  {% if not cred_test and creds %}
+                    <a title="Add New Credential" class="pull-right btn btn-primary btn-sm"
+                       href="{% url 'new_cred_engagement_test' test.id %}"><span class="fa fa-plus"></span></a>
+                  {% endif %}
+                </h4>
+            </div>
+            {% if creds %}
+                <table class="tablesorter-bootstrap table table-condensed table-striped table-hover">
+                    <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Username</th>
+                      <th>Role</th>
+                      <th>Environment</th>
+                      <th>Authentication Provider</th>
+                      <th>Login Valid</th>
+                      <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td colspan="7">
+                          Credentials Configured for this <strong>Test</strong>
+                          {% if not cred_test %}
+                            <br/><center>None configured</center>
+                          {% endif %}
+                        </td>
+                      </tr>
+
+                      {% for cred in cred_test %}
+                          <tr>
+                            <td>
+                                <a href="{{ cred.cred_id.url }}" target="_blank">{{ cred.cred_id.name }}</a>
+                            </td>
+                            <td>{{ cred.cred_id.username }}</td>
+                            <td>{{ cred.cred_id.role }}</td>
+                            <td>{{ cred.cred_id.environment }}</td>
+                            <td>{{ cred.is_authn_provider }}</td>
+                            <td>{{ cred.cred_id.is_valid }}</td>
+                            <td>
+                                <div class="btn-group">
+                                    <a class="btn btn-sm btn-primary"
+                                       href="{% url 'view_cred_engagement_test' cred.test.id cred.id  %}">View</a>
+                                    <a class="btn btn-sm btn-danger delete"
+                                       href="{% url 'delete_cred_test' cred.test.id cred.id  %}">Delete</a>
+                                </div>
+                            </td>
+                          </tr>
+                      {% endfor %}
+                      <tr>
+                        <td colspan="7">
+                          Credentials Configured for this <strong>Engagement</strong>
+                        </td>
+                      </tr>
+                    {% for cred in creds %}
+                        <tr>
+                          <td>
+                              <a href="{{ cred.cred_id.url }}" target="_blank">{{ cred.cred_id.name }}</a>
+                          </td>
+                          <td>{{ cred.cred_id.username }}</td>
+                          <td>{{ cred.cred_id.role }}</td>
+                          <td>{{ cred.cred_id.environment }}</td>
+                          <td>{{ cred.is_authn_provider }}</td>
+                          <td>{{ cred.cred_id.is_valid }}</td>
+                          <td>
+                              <div class="btn-group">
+                                  <a class="btn btn-sm btn-primary"
+                                     href="{% url 'view_cred_product_engagement' cred.engagement.id cred.id  %}">View</a>
+                              </div>
+                          </td>
+                        </tr>
+                    {% endfor %}
+
+
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="panel-body">
+                    <p>No credentials configured.
+                    {% if not creds %}
+                      Configure engagement credentials first, then add credentials to the test.
+                    {% endif %}
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+<!--Cred end -->
+
 
     <div class="panel panel-default to_highlight table-responsive">
         <div class="panel-heading">

@@ -170,8 +170,6 @@ def add_user(request):
         if form.is_valid() and contact_form.is_valid():
             user = form.save(commit=False)
             user.set_unusable_password()
-            user.is_staff = False
-            user.is_superuser = False
             user.active = True
             user.save()
             contact = contact_form.save(commit=False)

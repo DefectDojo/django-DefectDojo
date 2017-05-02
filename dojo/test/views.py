@@ -17,9 +17,9 @@ from dojo.forms import NoteForm, TestForm, FindingForm, \
     DeleteTestForm, AddFindingForm, \
     ImportScanForm, ReImportScanForm, FindingBulkUpdateForm, JIRAFindingForm
 from dojo.models import Finding, Test, Notes, \
-    BurpRawRequestResponse, Endpoint, Stub_Finding, Finding_Template, JIRA_PKey
+    BurpRawRequestResponse, Endpoint, Stub_Finding, Finding_Template, JIRA_PKey, Cred_User, Cred_Mapping
 from dojo.tools.factory import import_parser_factory
-from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, message
+from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, message, process_notifications
 from dojo.tasks import add_issue_task
 
 localtz = timezone(settings.TIME_ZONE)
@@ -40,6 +40,8 @@ def view_test(request, tid):
     person = request.user.username
     findings = Finding.objects.filter(test=test)
     stub_findings = Stub_Finding.objects.filter(test=test)
+    cred_test = Cred_Mapping.objects.filter(test=test).select_related('cred_id').order_by('cred_id')
+    creds = Cred_Mapping.objects.filter(engagement=test.engagement).select_related('cred_id').order_by('cred_id')
 
     if request.method == 'POST':
         form = NoteForm(request.POST)
@@ -50,6 +52,9 @@ def view_test(request, tid):
             new_note.save()
             test.notes.add(new_note)
             form = NoteForm()
+            url = request.build_absolute_uri(reverse("view_test", args=(test.id,)))
+            title="Test: %s on %s" % (test.test_type.name, test.engagement.product.name)
+            process_notifications(request, new_note, url, title)
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Note added successfully.',
@@ -73,6 +78,8 @@ def view_test(request, tid):
                    'request': request,
                    'show_re_upload': show_re_upload,
                    'ajax_url': ajax_url,
+                   'creds': creds,
+                   'cred_test': cred_test
                    })
 
 
@@ -260,6 +267,7 @@ def add_findings(request, tid):
 
 @user_passes_test(lambda u: u.is_staff)
 def add_temp_finding(request, tid, fid):
+    jform = None
     test = get_object_or_404(Test, id=tid)
     finding = get_object_or_404(Finding_Template, id=fid)
     findings = Finding_Template.objects.all()
@@ -398,8 +406,8 @@ def finding_bulk_update(request, tid):
         else:
             messages.add_message(request,
                                  messages.ERROR,
-                                 'Unable to process bulk update.  The Severity field is required, '
-                                 'all others are optional.',
+                                 'Unable to process bulk update. Required fields are invalid,  '
+                                 'please update individually.',
                                  extra_tags='alert-danger')
 
     return HttpResponseRedirect(reverse('view_test', args=(test.id,)))

@@ -1,9 +1,11 @@
 import StringIO
 import csv
 import hashlib
-from dojo.models import Finding
+from dojo.models import Finding, Endpoint
 from dateutil.parser import parse
-
+import re
+from urlparse import urlparse
+import socket
 
 class ColumnMappingStrategy(object):
 
@@ -69,8 +71,93 @@ class UrlColumnMappingStrategy(ColumnMappingStrategy):
         self.mapped_column = 'url'
         super(UrlColumnMappingStrategy, self).__init__()
 
+    def is_valid_ipv4_address(self, address):
+        valid = True
+        try:
+            socket.inet_aton(address.strip())
+        except:
+            valid = False
+
+        return valid
+
     def map_column_value(self, finding, column_value):
-        finding.url = column_value
+        url = column_value
+        finding.url = url
+        o = urlparse(url)
+
+        """
+        Todo: Replace this with a centralized parsing function as many of the parsers
+        use the same method for parsing urls.
+
+        ParseResult(scheme='http', netloc='www.cwi.nl:80', path='/%7Eguido/Python.html',
+                    params='', query='', fragment='')
+        """
+        if self.is_valid_ipv4_address(url) == False:
+            rhost = re.search(
+                "(http|https|ftp)\://([a-zA-Z0-9\.\-]+(\:[a-zA-Z0-9\.&amp;%\$\-]+)*@)*((25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])|localhost|([a-zA-Z0-9\-]+\.)*[a-zA-Z0-9\-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))[\:]*([0-9]+)*([/]*($|[a-zA-Z0-9\.\,\?\'\\\+&amp;%\$#\=~_\-]+)).*?$",
+                url)
+
+            if rhost:
+                protocol = o.scheme
+                host = o.netloc
+                path = o.path
+                query = o.query
+                fragment = o.fragment
+
+                port = 80
+                if protocol == 'https':
+                    port = 443
+
+                if rhost.group(11) is not None:
+                    port = rhost.group(11)
+
+                try:
+                    dupe_endpoint = Endpoint.objects.get(protocol=protocol,
+                                                         host=host + (":" + port) if port is not None else "",
+                                                         query=query,
+                                                         fragment=fragment,
+                                                         path=path,
+                                                         product=finding.test.engagement.product)
+                except:
+                    dupe_endpoint = None
+
+                if not dupe_endpoint:
+                    endpoint = Endpoint(protocol=protocol,
+                                        host=host + (":" + str(port)) if port is not None else "",
+                                        query=query,
+                                        fragment=fragment,
+                                        path=path,
+                                        product=finding.test.engagement.product)
+                else:
+                    endpoint = dupe_endpoint
+
+                if not dupe_endpoint:
+                    endpoints = [endpoint]
+                else:
+                    endpoints = [endpoint, dupe_endpoint]
+
+                finding.unsaved_endpoints = endpoints
+
+        #URL is an IP so save as an IP endpoint
+        elif self.is_valid_ipv4_address(url) == True:
+            try:
+                dupe_endpoint = Endpoint.objects.get(protocol=None,
+                                                     host=url,
+                                                     path=None,
+                                                     query=None,
+                                                     fragment=None,
+                                                     product=finding.test.engagement.product)
+            except:
+                dupe_endpoint = None
+
+            if not dupe_endpoint:
+                endpoints = [Endpoint(host=url, product=finding.test.engagement.product)]
+            else:
+                endpoints = [dupe_endpoint]
+
+            finding.unsaved_endpoints = endpoints
+
+
 
 
 class SeverityColumnMappingStrategy(ColumnMappingStrategy):

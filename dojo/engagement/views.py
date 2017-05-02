@@ -1,7 +1,7 @@
 # #  engagements
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.contrib.auth.models import User
 from django.conf import settings
@@ -19,11 +19,11 @@ from dojo.filters import EngagementFilter
 from dojo.forms import CheckForm, \
     UploadThreatForm, UploadRiskForm, NoteForm, DoneForm, \
     EngForm2, TestForm, ReplaceRiskAcceptanceForm, AddFindingsRiskAcceptanceForm, DeleteEngagementForm, ImportScanForm, \
-    JIRAFindingForm
+    JIRAFindingForm, CredMappingForm
 from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Type, Notes, \
     Risk_Acceptance, Development_Environment, BurpRawRequestResponse, Endpoint, \
-    JIRA_PKey, JIRA_Conf, JIRA_Issue
+    JIRA_PKey, JIRA_Conf, JIRA_Issue, Cred_User, Cred_Mapping
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, message
@@ -143,7 +143,7 @@ def edit_engagement(request, eid):
             pass
         if hasattr(settings, "ENABLE_JIRA"):
             if settings.ENABLE_JIRA:
-                if JIRA_PKey.objects.filter(product= eng.product).count() != 0:
+                if JIRA_PKey.objects.filter(product=eng.product).count() != 0:
                     jform = JIRAFindingForm(prefix='jiraform', enabled=enabled)
                 else:
                     jform = None
@@ -196,8 +196,8 @@ def view_engagement(request, eid):
     try:
         jissue = JIRA_Issue.objects.get(engagement=eng)
     except:
-            jissue = None
-            pass
+        jissue = None
+        pass
     try:
         jconf = JIRA_PKey.objects.get(product=eng.product).conf
     except:
@@ -218,6 +218,9 @@ def view_engagement(request, eid):
         eng.progress = 'check_list'
         eng.save()
 
+    creds = Cred_Mapping.objects.filter(product=eng.product).select_related('cred_id').order_by('cred_id')
+    cred_eng = Cred_Mapping.objects.filter(engagement=eng.id).select_related('cred_id').order_by('cred_id')
+
     add_breadcrumb(parent=eng, top_level=False, request=request)
     if hasattr(settings, 'ENABLE_DEDUPLICATION'):
         if settings.ENABLE_DEDUPLICATION:
@@ -235,6 +238,46 @@ def view_engagement(request, eid):
     else:
         fpage = None
 
+    # ----------
+
+    try:
+        start_date = Finding.objects.filter(test__engagement__product=eng.product).order_by('date')[:1][0].date
+    except:
+        start_date = localtz.localize(datetime.today())
+
+    end_date = localtz.localize(datetime.today())
+
+    risk_acceptances = Risk_Acceptance.objects.filter(engagement__in=Engagement.objects.filter(product=eng.product))
+
+    accepted_findings = [finding for ra in risk_acceptances
+                         for finding in ra.accepted_findings.all()]
+
+    week_date = end_date - timedelta(days=7)  # seven days and /newer are considered "new"
+
+    new_verified_findings = Finding.objects.filter(test__engagement__product=eng.product,
+                                                   date__range=[week_date, end_date],
+                                                   false_p=False,
+                                                   verified=True,
+                                                   duplicate=False,
+                                                   out_of_scope=False).order_by("date")
+
+    open_findings = Finding.objects.filter(test__engagement__product=eng.product,
+                                           date__range=[start_date, end_date],
+                                           false_p=False,
+                                           verified=True,
+                                           duplicate=False,
+                                           out_of_scope=False,
+                                           active=True,
+                                           mitigated__isnull=True)
+
+    closed_findings = Finding.objects.filter(test__engagement__product=eng.product,
+                                             date__range=[start_date, end_date],
+                                             false_p=False,
+                                             verified=True,
+                                             duplicate=False,
+                                             out_of_scope=False,
+                                             mitigated__isnull=False)
+
     return render(request, 'dojo/view_eng.html',
                   {'eng': eng, 'tests': tests,
                    'findings': fpage, 'enabled': enabled,
@@ -243,14 +286,26 @@ def view_engagement(request, eid):
                    'risks_accepted': risks_accepted,
                    'can_add_risk': len(eng_findings),
                    'jissue': jissue, 'jconf': jconf,
+                   'open_findings': open_findings,
+                   'closed_findings': closed_findings,
+                   'accepted_findings': accepted_findings,
+                   'new_findings': new_verified_findings,
+                   'start_date': start_date,
+                   'creds': creds,
+                   'cred_eng': cred_eng
                    })
 
 
 @user_passes_test(lambda u: u.is_staff)
 def add_tests(request, eid):
     eng = Engagement.objects.get(id=eid)
+    cred_form = CredMappingForm()
+    cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(engagement=eng).order_by('cred_id')
+
     if request.method == 'POST':
         form = TestForm(request.POST)
+        cred_form = CredMappingForm(request.POST)
+        cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(engagement=eng).order_by('cred_id')
         if form.is_valid():
             new_test = form.save(commit=False)
             new_test.engagement = eng
@@ -259,6 +314,18 @@ def add_tests(request, eid):
             tags = request.POST.getlist('tags')
             t = ", ".join(tags)
             new_test.tags = t
+
+            #Save the credential to the test
+            if cred_form.is_valid():
+                if cred_form.cleaned_data['cred_user']:
+                    #Select the credential mapping object from the selected list and only allow if the credential is associated with the product
+                    cred_user = Cred_Mapping.objects.filter(pk=cred_form.cleaned_data['cred_user'].id, engagement=eid).first()
+
+                    new_f = cred_form.save(commit=False)
+                    new_f.test = new_test
+                    new_f.cred_id = cred_user.cred_id
+                    new_f.save()
+
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Test added successfully.',
@@ -273,7 +340,10 @@ def add_tests(request, eid):
         form = TestForm()
     add_breadcrumb(parent=eng, title="Add Tests", top_level=False, request=request)
     return render(request, 'dojo/add_tests.html',
-                  {'form': form, 'eid': eid})
+                  {'form': form,
+                  'cred_form': cred_form,
+                  'eid': eid
+                  })
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -281,8 +351,13 @@ def import_scan_results(request, eid):
     engagement = get_object_or_404(Engagement, id=eid)
     finding_count = 0
     form = ImportScanForm()
+    cred_form = CredMappingForm()
+    cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(engagement=engagement).order_by('cred_id')
+
     if request.method == "POST":
         form = ImportScanForm(request.POST, request.FILES)
+        cred_form = CredMappingForm(request.POST)
+        cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(engagement=engagement).order_by('cred_id')
         if form.is_valid():
             file = request.FILES['file']
             scan_date = form.cleaned_data['scan_date']
@@ -305,6 +380,17 @@ def import_scan_results(request, eid):
             tags = request.POST.getlist('tags')
             ts = ", ".join(tags)
             t.tags = ts
+
+            #Save the credential to the test
+            if cred_form.is_valid():
+                if cred_form.cleaned_data['cred_user']:
+                    #Select the credential mapping object from the selected list and only allow if the credential is associated with the product
+                    cred_user = Cred_Mapping.objects.filter(pk=cred_form.cleaned_data['cred_user'].id, engagement=eid).first()
+
+                    new_f = cred_form.save(commit=False)
+                    new_f.test = t
+                    new_f.cred_id = cred_user.cred_id
+                    new_f.save()
 
             try:
                 parser = import_parser_factory(file, t)
@@ -374,11 +460,13 @@ def import_scan_results(request, eid):
                                      messages.ERROR,
                                      'There appears to be an error in the XML report, please check and try again.',
                                      extra_tags='alert-danger')
+
     add_breadcrumb(parent=engagement, title="Import Scan Results", top_level=False, request=request)
     return render(request,
                   'dojo/import_scan_results.html',
                   {'form': form,
                    'eid': engagement.id,
+                   'cred_form': cred_form,
                    })
 
 

@@ -54,11 +54,11 @@ that should give you an idea of how to use DefectDojo for your own team.
 # Getting Involved
 
 <img src="https://github.com/devGregA/django-DefectDojo/blob/master/doc/img/slack_rgb.png" width="100">  
-<b>[Get Access.](https://owasp.herokuapp.com/)</b> Realtime discussion is done in the OWASP Slack Channel, #defectdojo.
+<b> [Get Access.](https://owasp.herokuapp.com/)  </b> Realtime discussion is done in the OWASP Slack Channel, #defectdojo.
 
 <br>
 <img src="https://github.com/devGregA/django-DefectDojo/blob/master/doc/img/Twitter_Logo.png" width="45">  
-The [DefectDojo Twitter Account](https://twitter.com/defect_dojo) tweets project updates and changes.
+The [DefectDojo Twitter Account](https://twitter.com/defect_dojo)  tweets project updates and changes.
 
 # Available Plugins
 
@@ -76,12 +76,24 @@ DefectDojo is maintained by:
 - Greg Anderson ([@\_GRRegg](https://twitter.com/_GRRegg))
 - Charles Neill ([@ccneill](https://twitter.com/ccneill))
 - Jay Paz ([@jjpaz](https://twitter.com/jjpaz))
-- Aaron Weaver ([@weavera] (https://twitter.com/weavera))
+- Aaron Weaver ([@weavera](https://twitter.com/weavera))
 
-With past contributions from:
+# Contributing
 
-- Fatimah Zohra
-- Michael Dong
+We greatly appreciate all of our [contributors](https://github.com/devGregA/django-DefectDojo/graphs/contributors).
+
+We would also like to highlight the contributions from Michael Dong and Fatimah Zohra who contributed to DefectDojo before it was open source.
+
+### Swag Rewards
+If you fix an issue with the 'swag reward' tag <img align="" src="https://github.com/devGregA/django-DefectDojo/blob/master/doc/img/swag_reward.png" width="90"> we'll send you a shirt and some stickers!
+
+
+
+<img src="https://github.com/devGregA/django-DefectDojo/blob/master/doc/img/dojo_tshirt_front.png" width="300"><img src="https://github.com/devGregA/django-DefectDojo/blob/master/doc/img/dojo_tshirt_back.png" width="300">
+
+### Cash Rewards
+We also are offer monetary rewards for issues tagged as such <img align="" src="https://github.com/devGregA/django-DefectDojo/blob/master/doc/img/cash_reward.png" width="90">   
+**Sorry Maintainers you are not elgible for cash rewards ;)**
 
 # Support
 
@@ -93,7 +105,7 @@ Proceeds are used for testing, infrastructure, etc.
 
 # Sponsors
 
-Interested in becoming and sponsor and having your logo displayed? Please email greg.anderson@owasp.org
+Interested in becoming a sponsor and having your logo displayed? Please email greg.anderson@owasp.org
 
 # License
 

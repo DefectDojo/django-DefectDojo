@@ -2,28 +2,29 @@
 
 # Get MySQL details
 function get_db_details() {
-    read -p "MySQL user (should already exist): " SQLUSER
+    read -p "MySQL host: " SQLHOST
+    stty -echo
+    read -p "MySQL user (should already exist): " SQLUSER; echo
     stty -echo
     read -p "Password for user: " SQLPWD; echo
     stty echo
     read -p "Database name (should NOT exist): " DBNAME
-
     echo
 
-    if mysql -fs -u"$SQLUSER" -p"$SQLPWD" "$DBNAME" >/dev/null 2>&1 </dev/null; then
+    if mysql -fs -h "$SQLHOST" -u"$SQLUSER" -p"$SQLPWD" "$DBNAME" >/dev/null 2>&1 </dev/null; then
         echo "Database $DBNAME already exists!"
         echo
         read -p "Drop database $DBNAME? [Y/n] " DELETE
         if [[ ! $DELETE =~ ^[nN]$ ]]; then
-            mysqladmin -f --user="$SQLUSER" --password="$SQLPWD" drop "$DBNAME"
-            mysqladmin --user="$SQLUSER" --password="$SQLPWD" create "$DBNAME"
+            mysqladmin -f --host="$SQLHOST" --user="$SQLUSER" --password="$SQLPWD" drop "$DBNAME"
+            mysqladmin --host="$SQLHOST" --user="$SQLUSER" --password="$SQLPWD" create "$DBNAME"
         else
             echo "Error! Must supply an empty database to proceed."
             echo
             get_db_details
         fi
     else
-        if mysqladmin --user=$SQLUSER --password=$SQLPWD create $DBNAME; then
+        if mysqladmin --host="$SQLHOST" --user="$SQLUSER" --password="$SQLPWD" create $DBNAME; then
             echo "Created database $DBNAME."
         else
             echo "Error! Failed to create database $DBNAME. Check your credentials."
@@ -32,6 +33,7 @@ function get_db_details() {
         fi
     fi
 }
+
 
 echo "Welcome to DefectDojo! This is a quick script to get you up and running."
 echo
