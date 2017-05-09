@@ -23,7 +23,7 @@ You can also log in as a product owner / non-staff user:
 
 For additional documentation you can visit our [Read the Docs site](http://defectdojo.readthedocs.io/).
 
-# Once Click Installations
+# One-Click Installations
 
 Deploy to Docker Cloud. (<b>Login first to Docker Cloud before clicking the install button.</b>)
 
