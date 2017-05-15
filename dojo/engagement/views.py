@@ -476,7 +476,9 @@ def close_eng(request, eid):
     eng.active = False
     eng.status = 'Completed'
     eng.save()
-    close_epic_task(eng, True)
+    jpkey_set = JIRA_PKey.objects.filter(product=eng.product)
+    if jpkey_set.count() >= 1:
+        close_epic_task(eng, True)
     messages.add_message(request,
                          messages.SUCCESS,
                          'Engagement closed successfully.',
