@@ -469,6 +469,7 @@ class EngForm(forms.ModelForm):
             self.add_error('target_start', 'Your target start date exceeds your target end date')
             self.add_error('target_end', 'Your target start date exceeds your target end date')
             return False
+        return True
 
 
     class Meta:
@@ -518,6 +519,7 @@ class EngForm2(forms.ModelForm):
             self.add_error('target_start', 'Your target start date exceeds your target end date')
             self.add_error('target_end', 'Your target start date exceeds your target end date')
             return False
+        return True
 
     class Meta:
         model = Engagement
