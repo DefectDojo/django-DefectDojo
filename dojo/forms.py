@@ -459,6 +459,19 @@ class EngForm(forms.ModelForm):
         required=True, label="Testing Lead")
     test_strategy = forms.URLField(required=False, label="Test Strategy URL")
 
+    def is_valid(self):
+        valid = super(EngForm, self).is_valid()
+
+        # we're done now if not valid
+        if not valid:
+            return valid
+        if self.cleaned_data['target_start'] > self.cleaned_data['target_end']:
+            self.add_error('target_start', 'Your target start date exceeds your target end date')
+            self.add_error('target_end', 'Your target start date exceeds your target end date')
+            return False
+        return True
+
+
     class Meta:
         model = Engagement
         exclude = ('first_contacted', 'version', 'eng_type', 'real_start',
@@ -495,6 +508,18 @@ class EngForm2(forms.ModelForm):
         t = [(tag.name, tag.name) for tag in tags]
         super(EngForm2, self).__init__(*args, **kwargs)
         self.fields['tags'].widget.choices = t
+
+    def is_valid(self):
+        valid = super(EngForm2, self).is_valid()
+
+        # we're done now if not valid
+        if not valid:
+            return valid
+        if self.cleaned_data['target_start'] > self.cleaned_data['target_end']:
+            self.add_error('target_start', 'Your target start date exceeds your target end date')
+            self.add_error('target_end', 'Your target start date exceeds your target end date')
+            return False
+        return True
 
     class Meta:
         model = Engagement
