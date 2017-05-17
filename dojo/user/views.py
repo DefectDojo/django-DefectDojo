@@ -12,7 +12,7 @@ from pytz import timezone
 from tastypie.models import ApiKey
 
 from dojo.filters import UserFilter
-from dojo.forms import DojoUserForm, AddDojoUserForm, DeleteUserForm, APIKeyForm, UserContactInfoForm
+from dojo.forms import DojoUserForm, AddDojoUserForm, DeleteUserForm, APIKeyForm, UserContactInfoForm, EditDojoUserForm
 from dojo.models import Product, Dojo_User, UserContactInfo
 from dojo.utils import get_page_items, add_breadcrumb, get_alerts
 
@@ -201,7 +201,7 @@ def add_user(request):
 def edit_user(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     authed_products = Product.objects.filter(authorized_users__in=[user])
-    form = AddDojoUserForm(instance=user, initial={'authorized_products': authed_products})
+    form = EditDojoUserForm(instance=user, initial={'authorized_products': authed_products})
     try:
         user_contact = UserContactInfo.objects.get(user=user)
     except UserContactInfo.DoesNotExist:
