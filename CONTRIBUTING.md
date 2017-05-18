@@ -1,3 +1,13 @@
+# Submitting an Issue
+
+## For Bugs
+
+Before submitting, please ensure that you are using the latests code by performing a `git pull`.
+
+Please include your operating system, your operating system version number (16.04, 10.6, etc), and the dojo install you are using (setup.bash, docker, etc).
+
+Bugs that do not have this information will be closed.
+
 # Contributing to DefectDojo
 
 Here are a few things to keep in mind when making changes to DefectDojo.
