@@ -9,6 +9,7 @@ from dojo.tools.arachni.parser import ArachniJSONParser
 from dojo.tools.vcg.parser import VCGParser
 from dojo.tools.dependencycheck.parser import DependencyCheckParser
 from dojo.tools.retirejs.parser import RetireJsParser
+from dojo.tools.nsp.parser import NspParser
 from dojo.tools.generic.parser import GenericFindingUploadCsvParser
 
 
@@ -43,6 +44,8 @@ def import_parser_factory(file, test):
         parser = DependencyCheckParser(file, test)
     elif scan_type == 'Retire.js Scan':
         parser = RetireJsParser(file, test)
+    elif scan_type == 'Node Security Platform Scan':
+        parser = NspParser(file, test)
     elif scan_type == 'Generic Findings Import':
         parser = GenericFindingUploadCsvParser(file, test)
     else:

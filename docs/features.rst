@@ -398,7 +398,8 @@ DefectDojo has the ability to import reports from other security tools.  Current
 9. Visual Code Grepper XML or CSV
 10. OWASP Dependency Check XML
 11. Retire.js JavaScript Scan JSON
-12. Generic Findings in CSV format
+12. Node Security Platform JSON
+13. Generic Findings in CSV format
 
 
 The importers analyze each report and create new Findings for each item reported.  DefectDojo collapses duplicate
