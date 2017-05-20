@@ -790,9 +790,9 @@ class ImportScanValidation(Validation):
         # Make sure scan_date matches required format
         if 'scan_date' in bundle.data:
             try:
-                datetime.strptime(bundle.data['scan_date'], '%Y-%m-%d')
+                datetime.strptime(bundle.data['scan_date'], '%Y/%m/%d')
             except ValueError:
-                errors.setdefault('scan_date', []).append("Incorrect scan_date format, should be YYYY-MM-DD")
+                errors.setdefault('scan_date', []).append("Incorrect scan_date format, should be YYYY/MM/DD")
 
         # Make sure scan_type and minimum_severity have valid options
         if 'engagement' not in bundle.data:
@@ -888,7 +888,7 @@ class ImportScanResource(MultipartResource, Resource):
         tt, t_created = Test_Type.objects.get_or_create(name=bundle.data['scan_type'])
         # will save in development environment
         environment, env_created = Development_Environment.objects.get_or_create(name="Development")
-        scan_date = datetime.strptime(bundle.data['scan_date'], '%Y-%m-%d')
+        scan_date = datetime.strptime(bundle.data['scan_date'], '%Y/%m/%d')
         t = Test(engagement=bundle.obj.__getattr__('engagement_obj'), test_type=tt, target_start=scan_date,
                  target_end=scan_date, environment=environment, percent_complete=100)
         t.full_clean()
