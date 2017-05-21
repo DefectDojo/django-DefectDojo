@@ -47,7 +47,13 @@
 
                         {% for p in products %}
                             <tr>
-                                <td class="prod_name"><a href="{% url 'view_product' p.id %}">{{ p.name }}</a></td>
+                                <td class="prod_name"><a href="{% url 'view_product' p.id %}">{{ p.name }}</a>
+                                  <sup>
+                                   {% for tag in p.tags %}
+                                        <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                    {% endfor %}
+                                  </sup>
+                                </td>
                                 <td class="prod_name"><a
                                         href="{% url 'product_type_metrics' p.prod_type.id %}">{{ p.prod_type.name }}</a>
                                 </td>
@@ -56,6 +62,11 @@
                                         {% if e.active %}
                                             <a class="eng_link" href="{% url 'view_engagement' e.id %}">
                                                 {% if e.name %}{{ e.name }} {% endif %}{{ e.target_start }}</a>
+                                                <sup>
+                                                 {% for tag in e.tags %}
+                                                      <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                                  {% endfor %}
+                                                </sup>
                                         {% endif %}
                                     {% endfor %}
                                 </td>

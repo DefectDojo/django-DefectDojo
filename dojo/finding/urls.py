@@ -28,6 +28,8 @@ urlpatterns = [
         name='mktemplate'),
     url(r'^finding/(?P<fid>\d+)/close$', views.close_finding,
         name='close_finding'),
+    url(r'^finding/(?P<fid>\d+)/defect_review',
+        views.defect_finding_review, name='defect_finding_review'),
     url(r'^finding/(?P<fid>\d+)/open', views.reopen_finding,
         name='reopen_finding'),
     url(r'^finding/(?P<tid>\d+)/note/(?P<nid>\d+)/delete$',

@@ -23,7 +23,7 @@ At this point bower may ask you to select from different versions of packages, c
 
 Next you can run: ::
 
-    ./manage.py collectstatic --no-input
+    ./manage.py collectstatic --noinput
 
 If you are in your production system, you will need to restart gunicorn and celery to make sure the latest code is
 being used by both.

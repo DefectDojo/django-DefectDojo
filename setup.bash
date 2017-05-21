@@ -2,28 +2,28 @@
 
 # Get MySQL details
 function get_db_details() {
+    read -p "MySQL host: " SQLHOST
+    read -p "MySQL port: " SQLPORT
     read -p "MySQL user (should already exist): " SQLUSER
     stty -echo
     read -p "Password for user: " SQLPWD; echo
     stty echo
     read -p "Database name (should NOT exist): " DBNAME
 
-    echo
-
-    if mysql -fs -u"$SQLUSER" -p"$SQLPWD" "$DBNAME" >/dev/null 2>&1 </dev/null; then
+    if mysql -fs -h "$SQLHOST" -P "$SQLPORT" -u"$SQLUSER" -p"$SQLPWD" "$DBNAME" >/dev/null 2>&1 </dev/null; then
         echo "Database $DBNAME already exists!"
         echo
         read -p "Drop database $DBNAME? [Y/n] " DELETE
         if [[ ! $DELETE =~ ^[nN]$ ]]; then
-            mysqladmin -f --user="$SQLUSER" --password="$SQLPWD" drop "$DBNAME"
-            mysqladmin --user="$SQLUSER" --password="$SQLPWD" create "$DBNAME"
+            mysqladmin -f --host="$SQLHOST" --port="$SQLPORT" --user="$SQLUSER" --password="$SQLPWD" drop "$DBNAME"
+            mysqladmin    --host="$SQLHOST" --port="$SQLPORT" --user="$SQLUSER" --password="$SQLPWD" create "$DBNAME"
         else
             echo "Error! Must supply an empty database to proceed."
             echo
             get_db_details
         fi
     else
-        if mysqladmin --user=$SQLUSER --password=$SQLPWD create $DBNAME; then
+        if mysqladmin --host="$SQLHOST" --port="$SQLPORT" --user="$SQLUSER" --password="$SQLPWD" create $DBNAME; then
             echo "Created database $DBNAME."
         else
             echo "Error! Failed to create database $DBNAME. Check your credentials."
@@ -79,8 +79,8 @@ cp dojo/settings.dist.py dojo/settings.py
 
 # Save MySQL details in settings file
 if [[ ! -z $BREW_CMD ]]; then
-  sed -i ''  "s/MYSQLHOST/localhost/g" dojo/settings.py
-  sed -i ''  "s/MYSQLPORT/3306/g" dojo/settings.py
+  sed -i ''  "s/MYSQLHOST/$SQLHOST/g" dojo/settings.py
+  sed -i ''  "s/MYSQLPORT/$SQLPORT/g" dojo/settings.py
   sed -i ''  "s/MYSQLUSER/$SQLUSER/g" dojo/settings.py
   sed -i ''  "s/MYSQLPWD/$SQLPWD/g" dojo/settings.py
   sed -i ''  "s/MYSQLDB/$DBNAME/g" dojo/settings.py
@@ -90,8 +90,8 @@ if [[ ! -z $BREW_CMD ]]; then
   sed -i ''  "s#DOJO_MEDIA_ROOT#$PWD/media/#g" dojo/settings.py
   sed -i ''  "s#DOJO_STATIC_ROOT#$PWD/static/#g" dojo/settings.py
 else
-  sed -i  "s/MYSQLHOST/localhost/g" dojo/settings.py
-  sed -i  "s/MYSQLPORT/3306/g" dojo/settings.py
+  sed -i  "s/MYSQLHOST/$SQLHOST/g" dojo/settings.py
+  sed -i  "s/MYSQLPORT/$SQLPORT/g" dojo/settings.py
   sed -i  "s/MYSQLUSER/$SQLUSER/g" dojo/settings.py
   sed -i  "s/MYSQLPWD/$SQLPWD/g" dojo/settings.py
   sed -i  "s/MYSQLDB/$DBNAME/g" dojo/settings.py

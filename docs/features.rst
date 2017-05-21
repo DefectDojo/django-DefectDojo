@@ -620,3 +620,14 @@ Adding JIRA to Dojo
  8. The numeric value for 'epic name id' will be displayed in the URL
  9. **Note**: dojojira uses the same celery functionality as reports. Make sure the celery runner is setup correclty as described: http://defectdojo.readthedocs.io/en/latest/features.html#reports
 
+Issue Consolidation
+-------
+
+DefectDojo allows users to automatically consolidate issues from multiple scanners to remove duplicates.
+
+To enable this feature, change the following in `dojo/settings.py`: ::
+
+ENABLE_DEDUPLICATION = True
+
+When deduplication is enabled, Dojo will compare CWE, title, and endpoint details for all findings in a given product.
+If an issue is added with either the CWE or title being the same while the endpoint is also the same, Dojo marks the old issue as a duplicate.

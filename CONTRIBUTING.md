@@ -1,3 +1,13 @@
+# Submitting an Issue
+
+## For Bugs
+
+Before submitting, please ensure that you are using the latests code by performing a `git pull`.
+
+Please include your operating system, your operating system version number (16.04, 10.6, etc), and the dojo install you are using (setup.bash, docker, etc).
+
+Bugs that do not have this information will be closed.
+
 # Contributing to DefectDojo
 
 Here are a few things to keep in mind when making changes to DefectDojo.
@@ -23,7 +33,7 @@ DefectDojo.
 
 0. All submitted code should conform to [__PEP8 standards__][pep8].
 
-0. Pull requests should be submitted to the 'develop' branch.
+0. Pull requests should be submitted to the 'master' branch.
 
 [dojo_settings]: /dojo/settings.dist.py "DefectDojo settings file"
 [setup_py]: /setup.py "Python setup script"
