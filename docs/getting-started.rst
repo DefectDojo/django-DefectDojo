@@ -1,5 +1,19 @@
+Getting Started
+===============
 
+*Demo*
+If you'd like to check out a demo of DefectDojo before installing it, you can check out out `PythonAnywhere demo site`_.
+.. _PythonAnywhere demo site: https://defectdojo.pythonanywhere.com
 
+You can log in as an administrator like so:
+
+.. image:: /_static/admin-creds.png
+
+You can also log in as a product owner or non-staff user:
+
+.. image:: /_static/prod-owner-creds.png
+
+*Installation*
 
 Change into the newly created ```django-DefectDojo``` directory:
 
