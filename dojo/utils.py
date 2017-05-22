@@ -845,7 +845,19 @@ def add_issue(find, push_to_jira):
             try:
                 JIRAError.log_to_tempfile=False
                 jira = JIRA(server=jira_conf.url, basic_auth=(jira_conf.username, jira_conf.password))
-                new_issue = jira.create_issue(project=jpkey.project_key, summary=find.title, components=[{'name': jpkey.component},], description=jira_long_description(find.long_desc(), find.id, jira_conf.finding_text), issuetype={'name': jira_conf.default_issue_type}, priority={'name': jira_conf.get_priority(find.severity)})
+                if jpkey.component:
+                    new_issue = jira.create_issue(project=jpkey.project_key, summary=find.title,
+                                                  components=[{'name': jpkey.component}, ],
+                                                  description=jira_long_description(find.long_desc(), find.id,
+                                                                                    jira_conf.finding_text),
+                                                  issuetype={'name': jira_conf.default_issue_type},
+                                                  priority={'name': jira_conf.get_priority(find.severity)})
+                else:
+                    new_issue = jira.create_issue(project=jpkey.project_key, summary=find.title,
+                                                  description=jira_long_description(find.long_desc(), find.id,
+                                                                                    jira_conf.finding_text),
+                                                  issuetype={'name': jira_conf.default_issue_type},
+                                                  priority={'name': jira_conf.get_priority(find.severity)})
                 j_issue = JIRA_Issue(jira_id=new_issue.id, jira_key=new_issue, finding=find)
                 j_issue.save()
                 issue = jira.issue(new_issue.id)
