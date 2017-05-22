@@ -397,7 +397,9 @@ DefectDojo has the ability to import reports from other security tools.  Current
 8. Arachni Scanner JSON Report
 9. Visual Code Grepper XML or CSV
 10. OWASP Dependency Check XML
-11. Generic Findings in CSV format
+11. Retire.js JavaScript Scan JSON
+12. Node Security Platform JSON
+13. Generic Findings in CSV format
 
 
 The importers analyze each report and create new Findings for each item reported.  DefectDojo collapses duplicate
@@ -597,7 +599,7 @@ The custom report workflow takes advantage of the same asynchronous process desc
 JIRA Integration
 -------
 
-DefectDojo's JIRA integration is bidirectional. You may push findings to JIRA and share comments. If an issue is closed in JIRA it will automatically be closed in Dojo. 
+DefectDojo's JIRA integration is bidirectional. You may push findings to JIRA and share comments. If an issue is closed in JIRA it will automatically be closed in Dojo.
 
 
 Preparing Jira, Enabling the Webhook
