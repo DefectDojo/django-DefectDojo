@@ -47,6 +47,9 @@ This script will:
 
 5. Provide you with the commands needed to complete the installation
 
+Install Script
+~~~~~~~~~~~~~~~
+
 Run the script:
 
     ``./setup.bash``
