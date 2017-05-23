@@ -2,7 +2,7 @@ Getting Started
 ===============
 
 *Demo*
-If you'd like to check out a demo of DefectDojo before installing it, you can check out out `PythonAnywhere demo site`_.
+If you'd like to check out a demo of DefectDojo before installing it, you can check out on our `PythonAnywhere demo site`_.
 .. _PythonAnywhere demo site: https://defectdojo.pythonanywhere.com
 
 You can log in as an administrator like so:
