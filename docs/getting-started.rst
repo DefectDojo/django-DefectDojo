@@ -13,7 +13,8 @@ You can also log in as a product owner or non-staff user:
 
 .. image:: /_static/prod-owner-creds.png
 
-*Installation*
+Installation
+*************
 
 Change into the newly created ```django-DefectDojo``` directory:
 
