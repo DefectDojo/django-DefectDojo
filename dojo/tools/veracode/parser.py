@@ -73,7 +73,6 @@ class VeracodeXMLParser(object):
                                 active=False,
                                 verified=False,
                                 description=description + "\n\nVulnerable Module: " + flaw.attrib['module'] + ' Type: ' + flaw.attrib['type'],
-                                false_p = false_p,
 				mitigated = mitigated,
 				mitigated_by_id = mitigated_by_id,
 				severity=sev,
