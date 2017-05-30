@@ -52,21 +52,21 @@ class VeracodeXMLParser(object):
                             references = description[description.index('References:') + 13:].replace(')  ', ')\n')
                         else:
                             references = 'None'
-			false_p = 0
+			mitigatedTest = 0
                         if 'date_first_occurrence' in flaw.attrib:
                             find_date = datetime.strptime(flaw.attrib['date_first_occurrence'],
                                                           '%Y-%m-%d %H:%M:%S %Z')
                         else:
                             find_date = test.target_start
 	   		if 'falsepositive' in flaw.attrib:
-				false_p = 1
+				mitigatedTest = 1
 				for mitigations in flaw.iter('{https://www.veracode.com/schema/reports/export/1.0}mitigations'):
 					for mitigation in mitigations.iter('{https://www.veracode.com/schema/reports/export/1.0}mitigation'):
 						mitigated = datetime.strptime(mitigation.attrib.get('date'),'%Y-%m-%d %H:%M:%S %Z')
 				mitigated_by_id = 4
 			else:
 				pass
-			if false_p == 1:
+			if mitigatedTest == 1:
 				find = Finding(title=flaw.attrib['categoryname'],
                                 cwe=int(flaw.attrib['cweid']),
                                 test=test,
