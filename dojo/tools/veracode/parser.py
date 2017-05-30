@@ -52,27 +52,51 @@ class VeracodeXMLParser(object):
                             references = description[description.index('References:') + 13:].replace(')  ', ')\n')
                         else:
                             references = 'None'
-
+			false_p = 0
                         if 'date_first_occurrence' in flaw.attrib:
                             find_date = datetime.strptime(flaw.attrib['date_first_occurrence'],
                                                           '%Y-%m-%d %H:%M:%S %Z')
                         else:
                             find_date = test.target_start
-
-                        find = Finding(title=flaw.attrib['categoryname'],
-                                       cwe=int(flaw.attrib['cweid']),
-                                       test=test,
-                                       active=False,
-                                       verified=False,
-                                       description=description + "\n\nVulnerable Module: " + flaw.attrib[
-                                           'module'] + ' Type: ' + flaw.attrib['type'],
-                                       severity=sev,
-                                       numerical_severity=Finding.get_numerical_severity(sev),
-                                       mitigation=mitigation,
-                                       impact='CIA Impact: ' + flaw.attrib['cia_impact'].upper(),
-                                       references=references,
-                                       url='N/A',
-                                       date=find_date)
-                        dupes[dupe_key] = find
+	   		if 'falsepositive' in flaw.attrib:
+				false_p = 1
+				for mitigations in flaw.iter('{https://www.veracode.com/schema/reports/export/1.0}mitigations'):
+					for mitigation in mitigations.iter('{https://www.veracode.com/schema/reports/export/1.0}mitigation'):
+						mitigated = datetime.strptime(mitigation.attrib.get('date'),'%Y-%m-%d %H:%M:%S %Z')
+				mitigated_by_id = 4
+			else:
+				pass
+			if false_p == 1:
+				find = Finding(title=flaw.attrib['categoryname'],
+                                cwe=int(flaw.attrib['cweid']),
+                                test=test,
+                                active=False,
+                                verified=False,
+                                description=description + "\n\nVulnerable Module: " + flaw.attrib['module'] + ' Type: ' + flaw.attrib['type'],
+                                false_p = false_p,
+				mitigated = mitigated,
+				mitigated_by_id = mitigated_by_id,
+				severity=sev,
+                                numerical_severity=Finding.get_numerical_severity(sev),
+                                mitigation=mitigation,
+                                impact='CIA Impact: ' + flaw.attrib['cia_impact'].upper(),
+                                references=references,
+                                url='N/A',
+				date=find_date)
+			else:
+				find = Finding(title=flaw.attrib['categoryname'],
+                                cwe=int(flaw.attrib['cweid']),
+                                test=test,
+                                active=False,
+                                verified=False,
+                                description=description + "\n\nVulnerable Module: " + flaw.attrib['module'] + ' Type: ' + flaw.attrib['type'],
+				severity=sev,
+                                numerical_severity=Finding.get_numerical_severity(sev),
+                                mitigation=mitigation,
+                                impact='CIA Impact: ' + flaw.attrib['cia_impact'].upper(),
+                                references=references,
+                                url='N/A',
+				date=find_date)
+	                dupes[dupe_key] = find
 
         self.items = dupes.values()
