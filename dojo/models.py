@@ -4,7 +4,8 @@ import re
 from datetime import datetime
 from uuid import uuid4
 
-import watson
+
+from watson import search as watson
 from auditlog.registry import auditlog
 from django.conf import settings
 from django.contrib import admin
