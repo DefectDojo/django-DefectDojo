@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from django.utils import six
 from django.utils.translation import ugettext_lazy as _
 from django_filters import FilterSet, CharFilter, \
-    ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter, MethodFilter
+    ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter
 from django_filters.filters import ChoiceFilter, _truncate, DateTimeFilter
 from pytz import timezone
 
@@ -227,18 +227,6 @@ class MetricsDateRangeFilter(ChoiceFilter):
         kwargs['choices'] = [
             (key, value[0]) for key, value in six.iteritems(self.options)]
         super(MetricsDateRangeFilter, self).__init__(*args, **kwargs)
-
-        try:
-            earliest_finding = Finding.objects.earliest('date')
-        except Finding.DoesNotExist:
-            earliest_finding = None
-
-        if earliest_finding:
-            start_date = local_tz.localize(datetime.combine(
-                earliest_finding.date, datetime.min.time())
-            )
-            self.start_date = _truncate(start_date - timedelta(days=1))
-            self.end_date = _truncate(now() + timedelta(days=1))
 
     def filter(self, qs, value):
         try:
@@ -576,18 +564,6 @@ class FindingStatusFilter(ChoiceFilter):
             (key, value[0]) for key, value in six.iteritems(self.options)]
         super(FindingStatusFilter, self).__init__(*args, **kwargs)
 
-        try:
-            earliest_finding = Finding.objects.earliest('date')
-        except Finding.DoesNotExist:
-            earliest_finding = None
-
-        if earliest_finding:
-            start_date = local_tz.localize(datetime.combine(
-                earliest_finding.date, datetime.min.time())
-            )
-            self.start_date = _truncate(start_date - timedelta(days=1))
-            self.end_date = _truncate(now() + timedelta(days=1))
-
     def filter(self, qs, value):
         try:
             value = int(value)
@@ -630,6 +606,7 @@ class EndpointFilter(DojoFilter):
 
     class Meta:
         model = Endpoint
+        fields = '__all__'
         order_by = (('product', 'Product'),
                     ('-product', 'Product Desc'),
                     ('host', 'Host'),
@@ -791,7 +768,7 @@ class LogEntryFilter(DojoFilter):
 
     class Meta:
         model = LogEntry
-        exclude = ['content_type', 'object_pk', 'object_id', 'object_repr', 'changes']
+        exclude = ['content_type', 'object_pk', 'object_id', 'object_repr', 'changes', 'additional_data']
 
 
 class ProductTypeFilter(DojoFilter):
@@ -799,7 +776,7 @@ class ProductTypeFilter(DojoFilter):
 
     class Meta:
         model = Product_Type
-        include = ('name',)
+        fields = ('name',)
         order_by = (('name', ' Name'),
                     ('-name', 'Name Desc'))
 
@@ -809,7 +786,7 @@ class TestTypeFilter(DojoFilter):
 
     class Meta:
         model = Test_Type
-        include = ('name',)
+        fields = ('name',)
         order_by = (('name', ' Name'),
                     ('-name', 'Name Desc'))
 
@@ -819,6 +796,6 @@ class DevelopmentEnvironmentFilter(DojoFilter):
 
     class Meta:
         model = Development_Environment
-        include = ('name',)
+        fields = ('name',)
         order_by = (('name', ' Name'),
                     ('-name', 'Name Desc'))
