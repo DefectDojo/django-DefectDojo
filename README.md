@@ -41,10 +41,10 @@ Detailed guide for setting up DefectDojo on
 
 # Getting Started
 
-We recommend checking out the [about](./docs/about.rst) document to learn the
+We recommend checking out the [about](http://defectdojo.readthedocs.io/en/latest/about.html) document to learn the
 terminology of DefectDojo, and the
-[getting started guide](./docs/getting-started.rst) for setting up a new
-installation. We've also created some example [workflows](./docs/workflows.rst)
+[getting started guide](http://defectdojo.readthedocs.io/en/latest/getting-started.html) for setting up a new
+installation. We've also created some example [workflows](http://defectdojo.readthedocs.io/en/latest/workflows.html)
 that should give you an idea of how to use DefectDojo for your own team.
 
 # DefectDojo Client API's
