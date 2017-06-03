@@ -113,7 +113,7 @@ fi
 
 # Detect if we're in a a virtualenv
 if python -c 'import sys; print sys.real_prefix' 2>/dev/null; then
-    pip install .
+    pip install . --process-dependency-links
     python manage.py makemigrations dojo
     python manage.py makemigrations
     python manage.py migrate
@@ -124,7 +124,7 @@ if python -c 'import sys; print sys.real_prefix' 2>/dev/null; then
     python manage.py installwatson
     python manage.py buildwatson
 else
-    sudo pip install .
+    sudo pip install . --process-dependency-links
     sudo python manage.py makemigrations dojo
     sudo python manage.py makemigrations
     sudo python manage.py migrate

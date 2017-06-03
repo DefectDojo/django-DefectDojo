@@ -832,11 +832,11 @@ class BurpRawRequestResponse(models.Model):
 
 class Risk_Acceptance(models.Model):
     path = models.FileField(upload_to='risk/%Y/%m/%d',
-                            editable=False, null=False,
+                            editable=True, null=False,
                             blank=False, verbose_name="Risk Acceptance File")
     accepted_findings = models.ManyToManyField(Finding, null=False)
-    reporter = models.ForeignKey(User, editable=False)
-    notes = models.ManyToManyField(Notes, editable=False)
+    reporter = models.ForeignKey(User, editable=True)
+    notes = models.ManyToManyField(Notes, editable=True)
     created = models.DateTimeField(null=False, editable=False,
                                    default=now)
 
@@ -1137,7 +1137,3 @@ admin.site.register(Tool_Product_Settings)
 admin.site.register(Tool_Type)
 admin.site.register(Cred_User)
 admin.site.register(Cred_Mapping)
-
-watson.register(Product)
-watson.register(Test)
-watson.register(Finding)

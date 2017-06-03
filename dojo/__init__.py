@@ -8,3 +8,5 @@ __version__ = '1.1.4'
 __url__ = 'https://github.com/rackerlabs/django-DefectDojo'
 __docs__ = 'http://defectdojo.readthedocs.io/'
 __demo__ = 'http://defectdojo.pythonanywhere.com/'
+
+default_app_config = 'dojo.apps.DojoConfig'
