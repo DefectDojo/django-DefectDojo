@@ -65,7 +65,7 @@ def product(request):
     """
 
     prods = ProductFilter(request.GET, queryset=initial_queryset, user=request.user)
-    prod_list = get_page_items(request, prods, 25)
+    prod_list = get_page_items(request, prods.qs, 25)
     add_breadcrumb(title="Product List", top_level=not len(request.GET), request=request)
     return render(request,
                   'dojo/product.html',
@@ -426,7 +426,7 @@ def all_product_findings(request, pid):
         queryset=Finding.objects.filter(test__engagement__product=p,
                                         active=True,
                                         verified=True))
-    page = get_page_items(request, result, 25)
+    page = get_page_items(request, result.qs, 25)
 
     add_breadcrumb(title="Open findings", top_level=False, request=request)
 

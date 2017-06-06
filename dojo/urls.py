@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 from django.contrib import admin
 from tastypie.api import Api
 
@@ -53,28 +53,37 @@ ajax_api = Api(api_name='v1_a')
 ajax_api.register(ajax_stub_finding_resource())
 
 ur = []
-ur+= dev_env_urls
-ur+= endpoint_urls
-ur+= eng_urls
-ur+= finding_urls
-ur+= home_urls
-ur+= metrics_urls
-ur+= prod_urls
-ur+= pt_urls
-ur+= reports_urls
-ur+= scan_urls
-ur+= search_urls
-ur+= test_type_urls
-ur+= test_urls
-ur+= user_urls
-ur+= jira_urls
-ur+= tool_type_urls
-ur+= tool_config_urls
-ur+= tool_product_urls
-ur+= cred_urls
+ur += dev_env_urls
+ur += endpoint_urls
+ur += eng_urls
+ur += finding_urls
+ur += home_urls
+ur += metrics_urls
+ur += prod_urls
+ur += pt_urls
+ur += reports_urls
+ur += scan_urls
+ur += search_urls
+ur += test_type_urls
+ur += test_urls
+ur += user_urls
+ur += jira_urls
+ur += tool_type_urls
+ur += tool_config_urls
+ur += tool_product_urls
+ur += cred_urls
 
 if not hasattr(settings, 'URL_PREFIX'):
     settings.URL_PREFIX = ''
+
+from tastypie_swagger.views import SwaggerView, ResourcesView, SchemaView
+
+swagger_urls = [
+    url(r'^$', SwaggerView.as_view(), name='index'),
+    url(r'^resources/$', ResourcesView.as_view(), name='resources'),
+    url(r'^schema/(?P<resource>\S+)$', SchemaView.as_view()),
+    url(r'^schema/$', SchemaView.as_view(), name='schema'),
+]
 
 urlpatterns = [
     #  django admin
@@ -85,7 +94,7 @@ urlpatterns = [
     url(r'^%sajax/' % settings.URL_PREFIX, include(ajax_api.urls)),
     # api doc urls
     url(r'%sapi/v1/doc/' % settings.URL_PREFIX,
-        include('tastypie_swagger.urls', namespace='tastypie_swagger'),
+        include(swagger_urls, namespace='tastypie_swagger'),
         kwargs={
             "tastypie_api_module": "dojo.urls.v1_api",
             "namespace": "tastypie_swagger",
@@ -97,7 +106,7 @@ urlpatterns = [
 ]
 
 
-if settings.DEBUG:
-    urlpatterns += patterns('django.views.static',
-                            (r'media/(?P<path>.*)', 'serve', {
-                                'document_root': settings.MEDIA_ROOT}))
+# if settings.DEBUG:
+#     urlpatterns += patterns('django.views.static',
+#                             (r'media/(?P<path>.*)', 'serve', {
+#                                 'document_root': settings.MEDIA_ROOT}))

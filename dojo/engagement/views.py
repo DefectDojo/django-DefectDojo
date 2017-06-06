@@ -54,7 +54,7 @@ def engagement(request):
     filtered = EngagementFilter(request.GET, queryset=Product.objects.filter(
         ~Q(engagement=None),
         engagement__active=True, ).distinct())
-    prods = get_page_items(request, filtered, 25)
+    prods = get_page_items(request, filtered.qs, 25)
     name_words = [product.name for product in
                   Product.objects.filter(
                       ~Q(engagement=None),

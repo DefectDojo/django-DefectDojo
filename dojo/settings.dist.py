@@ -1,7 +1,6 @@
 # Django settings for dojo project.
 import os
 DEBUG = True
-TEMPLATE_DEBUG = DEBUG
 LOGIN_REDIRECT_URL = '/'
 #SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTOCOL', 'https')
 #SECURE_SSL_REDIRECT = True
@@ -132,22 +131,6 @@ BOWER_INSTALLED_APPS = (
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'DOJOSECRET'
 
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-)
-
-TEMPLATE_CONTEXT_PROCESSORS = (
-    "django.contrib.auth.context_processors.auth",
-    "django.core.context_processors.debug",
-    "django.core.context_processors.i18n",
-    "django.core.context_processors.media",
-    "django.core.context_processors.static",
-    "django.core.context_processors.tz",
-    "django.contrib.messages.context_processors.messages",
-    "django.core.context_processors.request",)
-
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -177,12 +160,22 @@ LOGIN_EXEMPT_URLS = (
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'dojo.wsgi.application'
 
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates"
-    # or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-)
+TEMPLATES = [
+{
+    'BACKEND': 'django.template.backends.django.DjangoTemplates',
+    'DEBUG': DEBUG,
+    'APP_DIRS': True,
+    'OPTIONS': {
+        'context_processors': [
+            'django.template.context_processors.debug',
+            'django.template.context_processors.request',
+            'django.contrib.auth.context_processors.auth',
+            'django.contrib.messages.context_processors.messages',
+        ],
+    },
+},
+]
+
 
 INSTALLED_APPS = (
     'django.contrib.auth',

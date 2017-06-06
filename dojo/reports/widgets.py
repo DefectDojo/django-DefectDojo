@@ -62,7 +62,7 @@ class Div(form_widget):
     def render(self, name, value, attrs=None):
         if value is None:
             value = ''
-        final_attrs = self.build_attrs(attrs, name=name)
+        final_attrs = self.build_attrs(attrs)
         return format_html(
             '<div class="btn-toolbar" data-role="editor-toolbar" data-target=""><div class="btn-group">'
             '<a class="btn btn-default" data-edit="bold" title="Bold (Ctrl/Cmd+B)"><i class="fa fa-bold"></i></a>'
@@ -267,7 +267,7 @@ class FindingList(Widget):
         super(FindingList, self).__init__(*args, **kwargs)
 
         self.title = 'Finding List'
-        if 'form' in self.findings:
+        if hasattr(self.findings, 'form'):
             self.form = self.findings.form
         else:
             self.form = None
@@ -275,13 +275,13 @@ class FindingList(Widget):
         self.extra_help = "You can use this form to filter findings and select only the ones to be included in the " \
                           "report."
         title_words = [word
-                       for finding in self.findings
+                       for finding in self.findings.qs
                        for word in finding.title.split() if len(word) > 2]
 
         self.title_words = sorted(set(title_words))
 
         if self.request is not None:
-            self.paged_findings = get_page_items(self.request, self.findings, 25)
+            self.paged_findings = get_page_items(self.request, self.findings.qs, 25)
         else:
             self.paged_findings = self.findings
 
@@ -344,10 +344,11 @@ class EndpointList(Widget):
         super(EndpointList, self).__init__(*args, **kwargs)
 
         self.title = 'Endpoint List'
+        print self.endpoints
         self.form = self.endpoints.form
         self.multiple = 'false'
         if self.request is not None:
-            self.paged_endpoints = get_page_items(self.request, self.endpoints, 25)
+            self.paged_endpoints = get_page_items(self.request, self.endpoints.qs, 25)
         else:
             self.paged_endpoints = self.endpoints
         self.multiple = 'true'

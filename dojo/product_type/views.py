@@ -37,7 +37,7 @@ def product_type(request):
                   initial_queryset]
 
     ptl = ProductTypeFilter(request.GET, queryset=initial_queryset)
-    pts = get_page_items(request, ptl, 25)
+    pts = get_page_items(request, ptl.qs, 25)
     add_breadcrumb(title="Product Type List", top_level=True, request=request)
     return render(request, 'dojo/product_type.html', {
         'name': 'Product Type List',

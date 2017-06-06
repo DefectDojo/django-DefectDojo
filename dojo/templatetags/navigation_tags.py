@@ -80,7 +80,7 @@ def dojo_sort(request, display='Name', value='title', default=None):
     dict_ = request.GET.copy()
     dict_[field] = value
     link = '<a title="' + title + '" href="?' + dict_.urlencode() + '">' + display + '&nbsp;' + icon + '</a>'
-    return link
+    return safe(link)
 
 
 class PaginationNav(object):

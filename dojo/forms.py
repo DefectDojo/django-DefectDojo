@@ -331,7 +331,7 @@ class UploadRiskForm(forms.ModelForm):
 
     class Meta:
         model = Risk_Acceptance
-        fields = ['accepted_findings', 'path', 'reporter', 'notes']
+        fields = ['accepted_findings']
 
 
 class ReplaceRiskAcceptanceForm(forms.ModelForm):

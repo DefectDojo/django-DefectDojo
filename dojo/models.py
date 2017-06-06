@@ -4,7 +4,7 @@ import re
 from datetime import datetime
 from uuid import uuid4
 
-import watson
+from watson import search as watson
 from auditlog.registry import auditlog
 from django.conf import settings
 from django.contrib import admin
@@ -834,7 +834,7 @@ class Risk_Acceptance(models.Model):
     path = models.FileField(upload_to='risk/%Y/%m/%d',
                             editable=False, null=False,
                             blank=False, verbose_name="Risk Acceptance File")
-    accepted_findings = models.ManyToManyField(Finding, null=False)
+    accepted_findings = models.ManyToManyField(Finding)
     reporter = models.ForeignKey(User, editable=False)
     notes = models.ManyToManyField(Notes, editable=False)
     created = models.DateTimeField(null=False, editable=False,

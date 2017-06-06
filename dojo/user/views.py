@@ -148,7 +148,7 @@ def change_password(request):
 def user(request):
     users = Dojo_User.objects.all().order_by('username', 'last_name', 'first_name')
     users = UserFilter(request.GET, queryset=users)
-    paged_users = get_page_items(request, users, 25)
+    paged_users = get_page_items(request, users.qs, 25)
     add_breadcrumb(title="All Users", top_level=True, request=request)
     return render(request,
                   'dojo/users.html',

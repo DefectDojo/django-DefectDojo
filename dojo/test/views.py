@@ -370,7 +370,7 @@ def search(request, tid):
     templates = TemplateFindingFilter(request.GET, queryset=templates)
     paged_templates = get_page_items(request, templates, 25)
     title_words = [word
-                   for finding in templates
+                   for finding in templates.qs
                    for word in finding.title.split() if len(word) > 2]
 
     title_words = sorted(set(title_words))
