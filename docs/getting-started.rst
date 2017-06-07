@@ -1,10 +1,8 @@
 Getting Started
 ===============
 
-Demo
-----
-
-If you'd like to check out a demo of DefectDojo before installing it, you can check out our `PythonAnywhere demo site`_.
+*Demo*
+If you'd like to check out a demo of DefectDojo before installing it, you can check out on our `PythonAnywhere demo site`_.
 
 .. _PythonAnywhere demo site: https://defectdojo.pythonanywhere.com
 
@@ -12,45 +10,104 @@ You can log in as an administrator like so:
 
 .. image:: /_static/admin-creds.png
 
-You can also log in as a product owner / non-staff user:
+You can also log in as a product owner or non-staff user:
 
 .. image:: /_static/prod-owner-creds.png
 
-Installation
-------------
+*Installation*
 
-.. _debian-or-rhel-based-bash-install-script:
 
-Debian or RHEL based Bash Install Script
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Change into the newly created ```django-DefectDojo``` directory:
 
-There is a script in the main folder called `setup.bash` that will allow you to
-interactively install DefectDojo on many Linux-based systems. We do not
-recommend running DefectDojo as root, but you may do so if you choose. This is
-the quick version of the installation instructions, but if you want more details
-about what's going on, check out `this wiki page`_ on Ubuntu 14.04 installation
-(most steps should be applicable to other distributions as well).
+    ``cd django-DefectDojo/``
 
-.. _this wiki page: https://github.com/rackerlabs/django-DefectDojo/wiki/DefectDojo-Installation-Guide---Ubuntu-Desktop-14.04
+There is a script in the main folder called ``setup.bash`` that will allow you to interactively install DefectDojo on any Linux based systems. We do not recommend running DefectDojo as root, but you may do so if you choose. 
 
 **You will need:**
-
 * MySQL
 * pip
 
-**Recommended:**
-
+**Recommended**
 * virtualenv
 
-**Instructions:**
+1. If you haven't already, run ``mysql_secure_install`` to set a password for your root MySQL user.
 
-#. *(OPTIONAL)* If you haven't already, run `mysql_secure_install` to set a
-   password for your root MySQL user
-#. *(OPTIONAL)* Set up a new virtualenv
-#. Create a MySQL user with CREATE privileges, or use root *(not recommended)*
-#. Run the `setup.bash` script, entering the required information to create a
-   MySQL database, install dependencies, and set up a Django superuser. If
-   installation is successful, you will see something like the following: ::
+2. Create a MySQL user with CREATE priviledges, or use root.
+
+**Run the ``setup.bash`` script**
+This script will:
+
+1. Install all the operating system packages needed
+
+2. Prompt for database connection information and create the necessary table
+
+3. Install all python packages needed
+
+4. Either ``makemigrations`` and ``migrate`` or ``syncdb`` depending on Django version installed.
+
+5. Provide you with the commands needed to complete the installation
+
+Install Script
+~~~~~~~~~~~~~~~
+
+Run the script:
+
+    ``./setup.bash``
+
+During the execution you will be prompted for a few items:
+
+    ``MySQL user (should already exist):``
+
+Enter the user you created or `root` if you used ```mysql_secure_installation```
+
+   ``Password for user:``
+
+Enter the password for the MySQL user you selected.
+
+    ``Database name (should NOT exist):``
+
+Select a name for the DefectDojo database.
+
+**All the packages**
+It may take some time for all the `OS` and `python` packages to be installed. As of this writing the packages for this `OS` are:
+
+* gcc
+* libssl-dev 
+* python-dev 
+* libmysqlclient-dev
+* python-pip
+* mysql-server
+* nodejs-legacy
+* npm
+
+And the `python` packages are (listed in `setup.py` as well):
+
+* 'Django==1.8',
+* 'MySQL-python==1.2.3',
+* 'Pillow==2.3.0',
+* 'django-secure==1.0',
+* 'django-tastypie==0.12.1',
+* 'django-tastypie-swagger',
+* 'gunicorn==19.1.1',
+* 'python-nmap==0.3.4',
+* 'pytz==2013.9',
+* 'requests==2.2.1',
+* 'wsgiref==0.1.2',
+* 'django-filter',
+* 'supervisor',
+* 'humanize',
+* 'django-bower'
+
+After all the components have been installed, the `makemigrations` process will prompt you to create a ``superuser``
+
+    ``You have installed Django's auth system, and don't have any superusers defined.
+      Would you like to create one now? (yes/no):``
+
+Answer `yes` and follow the prompts, this will be the user you will use to login to DefectDojo.
+#. *(OPTIONAL)* If you haven't already, run `mysql_secure_install` to set a password for your root MySQL user.
+
+
+#.  If installation is successful, you will see something like the following: ::
 
         ==============================================================================
 
@@ -74,10 +131,6 @@ about what's going on, check out `this wiki page`_ on Ubuntu 14.04 installation
 Vagrant Install
 ~~~~~~~~~~~~~~~
 
-.. note::
-    We recommend only installing with Vagrant for development / testing purposes. If you are deploying to
-    production, we recommend following the quick :ref:`debian-or-rhel-based-bash-install-script`, or if you're on Ubuntu
-    14.04, check out `this wiki page`_, on Ubuntu installation, complete with in-depth instructions and explanations.
 
 *You will need:*
 
@@ -123,7 +176,7 @@ Docker Compose Install
 * Latest version Docker Compose
 
 *Instructions:*
-`Tastypie`_
+
 #. Clone the `Docker Cloud DefectDojo`_ Repo
         ``git clone https://github.com/aaronweaver/docker-DefectDojo``
 #. Change directories into the newly created folder.
@@ -145,14 +198,13 @@ Docker Cloud Install
 
 *Instructions:*
 
-#. Log into `DockerCloud`_.
-#. Click on Stacks and then Create Stack.
-#. Name the Stack, DefectDojo for example.
-#. Copy the Docker Compose file from the `Docker DefectDojo Repo`_.
-#. Edit the DOJO_ADMIN_PASSWORD, MYSQL_PASSWORD and MYSQL_ROOT_PASSWORD. Each of these is labeled as: ChangeMe. Note: Make sure the passwords
-both match for dojo:MYSQL_PASSWORD and mysql:MYSQL_PASSWORD.
-#. Click 'Create and Deploy'
-#. Once the services are running then login with the username and password specified in the YAML file.
+* Log into `DockerCloud`_.
+* Click on Stacks and then Create Stack.
+* Name the Stack, DefectDojo for example.
+* Copy the Docker Compose file from the `Docker DefectDojo Repo`_.
+* Edit the ``DOJO_ADMIN_PASSWORD``, ``MYSQL_PASSWORD`` and ``MYSQL_ROOT_PASSWORD``. Each of these is labeled as: ChangeMe. Note: Make sure the passwords both match for ``dojo:MYSQL_PASSWORD`` and ``mysql:MYSQL_PASSWORD``.
+* Click 'Create and Deploy'
+* Once the services are running then login with the username and password specified in the YAML file.
 
-.. DockerCloud: https://cloud.docker.com
-.. Docker DefectDojo Repo: https://raw.githubusercontent.com/aaronweaver/docker-DefectDojo/master/docker-cloud.yml
+.. _DockerCloud: https://cloud.docker.com
+.. _Docker DefectDojo Repo: https://raw.githubusercontent.com/aaronweaver/docker-DefectDojo/master/docker-cloud.yml

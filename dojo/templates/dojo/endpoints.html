@@ -46,7 +46,15 @@
 
                         {% for e in endpoints %}
                             <tr>
-                                <td><a href="{% url 'view_endpoint' e.id %}">{{ e.host_no_port }}</a></td>
+                                <td><a href="{% url 'view_endpoint' e.id %}">{{ e.host_no_port }}</a>
+                                  {% if e.tags %}
+                                      <sup>
+                                          {% for tag in e.tags %}
+                                          <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                          {% endfor %}
+                                      </sup>
+                                  {% endif %}
+                                </td>
                                 <td><a href="{% url 'view_product' e.product.id %}">{{ e.product }}</a></td>
                                 <td class="text-center">{{ e.finding_count }}</td>
                             </tr>

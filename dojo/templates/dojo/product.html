@@ -60,6 +60,11 @@
                             <tr>
                                 <td>
                                     <a href="{% url 'view_product' prod.id %}"><b>{{ prod.name }}</b></a>
+                                    <sup>
+                                    {% for tag in prod.tags %}
+                                        &nbsp;<a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                    {% endfor %}
+                                  </sup>
                                 </td>
                                 <td>
                                     {% if prod.findings_count %}
@@ -75,7 +80,7 @@
                                 {% if user.is_staff %}
                                     <td>
                                         <a class="btn btn-sm btn-success" href="{% url 'new_eng_for_prod' prod.id %}">
-                                            <i class="fa fa-plus"></i> Add Engagement
+                                            <i class="fa fa-plus"></i> Add
                                         </a>
                                     </td>
                                 {% endif %}

@@ -154,7 +154,7 @@ class Test_Type(models.Model):
 
 class Product(models.Model):
     name = models.CharField(max_length=300)
-    description = models.CharField(max_length=2000)
+    description = models.CharField(max_length=4000)
     '''
         The following three fields are deprecated and no longer in use.
         They remain in model for backwards compatibility and will be removed
@@ -336,6 +336,7 @@ class Engagement_Type(models.Model):
 
 class Engagement(models.Model):
     name = models.CharField(max_length=300, null=True, blank=True)
+    description = models.CharField(max_length=2000, null=True, blank=True)
     version = models.CharField(max_length=100, null=True, blank=True)
     eng_type = models.ForeignKey(Engagement_Type, null=True, blank=True)
     first_contacted = models.DateField(null=True, blank=True)
@@ -568,6 +569,11 @@ class Finding(models.Model):
     under_review = models.BooleanField(default=False)
     review_requested_by = models.ForeignKey(Dojo_User, null=True, blank=True, related_name='review_requested_by')
     reviewers = models.ManyToManyField(Dojo_User, blank=True)
+
+    #Defect Tracking Review
+    under_defect_review = models.BooleanField(default=False)
+    defect_review_requested_by = models.ForeignKey(Dojo_User, null=True, blank=True, related_name='defect_review_requested_by')
+
     thread_id = models.IntegerField(default=0, editable=False)
     mitigated = models.DateTimeField(editable=False, null=True, blank=True)
     mitigated_by = models.ForeignKey(User, null=True, editable=False, related_name="mitigated_by")
@@ -667,18 +673,9 @@ class Finding(models.Model):
     def save(self, *args, **kwargs):
         super(Finding, self).save(*args, **kwargs)
         if hasattr(settings, 'ENABLE_DEDUPLICATION'):
-            if settings.ENABLE_DEDUPLICATION:
-                eng_findings_cwe = Finding.objects.filter(test__engagement__product=self.test.engagement.product,
-                                                          cwe=self.cwe).exclude(id=self.id).exclude(cwe=None)
-                eng_findings_title = Finding.objects.filter(test__engagement__product=self.test.engagement.product,
-                                                            title=self.title).exclude(id=self.id)
-                total_findings = eng_findings_cwe | eng_findings_title
-                for find in total_findings:
-                    list1 = self.endpoints.all()
-                    list2 = find.endpoints.all()
-                    if all(x in list2 for x in list1):
-                        find.duplicate = True
-                        super(Finding, find).save(*args, **kwargs)
+            if settings.ENABLE_DEDUPLICATION and (len(self.endpoints.all()) != 0):
+                from dojo.tasks import async_dedupe
+                async_dedupe.delay(self, *args, **kwargs)
 
     def clean(self):
         no_check = ["test", "reporter"]
@@ -722,7 +719,6 @@ class Finding(models.Model):
 
 
 Finding.endpoints.through.__unicode__ = lambda x: "Endpoint: " + x.endpoint.host
-
 
 class Stub_Finding(models.Model):
     title = models.TextField(max_length=1000, blank=False, null=False)
@@ -905,7 +901,7 @@ class FindingImage(models.Model):
 
 
 class FindingImageAccessToken(models.Model):
-    """This will allow reports to request the images without exposin the media root to the world without
+    """This will allow reports to request the images without exposing the media root to the world without
     authentication"""
     user = models.ForeignKey(User, null=False, blank=False)
     image = models.ForeignKey(FindingImage, null=False, blank=False)
@@ -966,17 +962,135 @@ class JIRA_Conf(models.Model):
 class JIRA_Issue(models.Model):
     jira_id =  models.CharField(max_length=200)
     jira_key =  models.CharField(max_length=200)
-    finding = models.ForeignKey(Finding, null=True, blank=True)
-    engagement = models.ForeignKey(Engagement, null=True, blank=True)
+    finding = models.OneToOneField(Finding, null=True, blank=True)
+    engagement = models.OneToOneField(Engagement, null=True, blank=True)
+
+class JIRA_Clone(models.Model):
+    jira_id =  models.CharField(max_length=200)
+    jira_clone_id =  models.CharField(max_length=200)
+
+class JIRA_Details_Cache(models.Model):
+    jira_id =  models.CharField(max_length=200)
+    jira_key =  models.CharField(max_length=200)
+    jira_status = models.CharField(max_length=200)
+    jira_resolution = models.CharField(max_length=200)
 
 class JIRA_PKey(models.Model):
     project_key = models.CharField(max_length=200, blank=True)
     product = models.ForeignKey(Product)
     conf = models.ForeignKey(JIRA_Conf, verbose_name="JIRA Configuration", null=True, blank=True)
-    push_all_issues = models.BooleanField(default=True, blank=True)
-    enable_engagement_epic_mapping = models.BooleanField(default=True, blank=True)
-    push_notes = models.BooleanField(default=True, blank=True)
+    component = models.CharField(max_length=200, blank=True)
+    push_all_issues = models.BooleanField(default=False, blank=True)
+    enable_engagement_epic_mapping = models.BooleanField(default=False, blank=True)
+    push_notes = models.BooleanField(default=False, blank=True)
 
+class Tool_Type(models.Model):
+    name = models.CharField(max_length=200)
+    description = models.CharField(max_length=2000, null=True)
+
+    class Meta:
+        ordering = ['name']
+
+    def __unicode__(self):
+        return self.name
+
+class Tool_Configuration(models.Model):
+    name = models.CharField(max_length=200, null=False)
+    description = models.CharField(max_length=2000, null=True, blank=True)
+    url =  models.URLField(max_length=2000, null=True)
+    tool_type = models.ForeignKey(Tool_Type, related_name='tool_type')
+    authentication_type = models.CharField(max_length=15,
+                            choices=(
+                                ('API', 'API Key'),
+                                ('Password', 'Username/Password'),
+                                ('SSH', 'SSH')),
+                            null=True, blank=True)
+    username = models.CharField(max_length=200, null=True, blank=True)
+    password = models.CharField(max_length=600, null=True, blank=True)
+    auth_title = models.CharField(max_length=200, null=True, blank=True, verbose_name="Title for SSH/API Key")
+    ssh = models.CharField(max_length=6000, null=True, blank=True)
+    api_key = models.CharField(max_length=600, null=True, blank=True, verbose_name="API Key")
+
+    class Meta:
+        ordering = ['name']
+
+    def __unicode__(self):
+        return self.name
+
+class Tool_Product_Settings(models.Model):
+    name = models.CharField(max_length=200, null=False)
+    description = models.CharField(max_length=2000, null=True, blank=True)
+    url =  models.URLField(max_length=2000, null=True, blank=True)
+    product = models.ForeignKey(Product, default=1, editable=False)
+    tool_configuration = models.ForeignKey(Tool_Configuration, null=False, related_name='tool_configuration')
+    tool_project_id = models.CharField(max_length=200, null=True, blank=True)
+    notes = models.ManyToManyField(Notes, blank=True, editable=False)
+
+    class Meta:
+        ordering = ['name']
+
+class Tool_Product_History(models.Model):
+    product = models.ForeignKey(Tool_Product_Settings, editable=False)
+    last_scan = models.DateTimeField(null=False, editable=False, default=now)
+    succesfull = models.BooleanField(default=True, verbose_name="Succesfully")
+    configuration_details = models.CharField(max_length=2000, null=True, blank=True)
+
+class Alerts(models.Model):
+    description = models.CharField(max_length=2000, null=True)
+    url =  models.URLField(max_length=2000, null=True)
+    source = models.CharField(max_length=15,
+                            choices=(
+                                ('Jira', 'Jira'),
+                                ('AsyncImport', 'Async Import'),
+                                ('Generic', 'Generic')),
+                            default='Generic')
+    icon = models.CharField(max_length=25, default='icon-user-check')
+    user_id = models.ForeignKey(User, null=True, editable=False)
+    created = models.DateTimeField(null=False, editable=False, default=now)
+    display_date = models.DateTimeField(null=False, default=now)
+
+class Cred_User(models.Model):
+    name = models.CharField(max_length=200, null=False)
+    username = models.CharField(max_length=200, null=False)
+    password = models.CharField(max_length=600, null=False)
+    role = models.CharField(max_length=200, null=False)
+    authentication = models.CharField(max_length=15,
+                            choices=(
+                                ('Form', 'Form Authentication'),
+                                ('SSO', 'SSO Redirect')),
+                            default='Form')
+    http_authentication = models.CharField(max_length=15,
+                            choices=(
+                                ('Basic', 'Basic'),
+                                ('NTLM', 'NTLM')),
+                                null=True, blank=True)
+    description = models.CharField(max_length=2000, null=True, blank=True)
+    url =  models.URLField(max_length=2000, null=False)
+    environment = models.ForeignKey(Development_Environment, null=False)
+    login_regex = models.CharField(max_length=200, null=True, blank=True)
+    logout_regex = models.CharField(max_length=200, null=True, blank=True)
+    notes = models.ManyToManyField(Notes, blank=True, editable=False)
+    is_valid = models.BooleanField(default=True, verbose_name="Login is valid")
+    #selenium_script = models.CharField(max_length=1000, default='none',
+    #    editable=False, blank=True, null=True, verbose_name="Selenium Script File")
+
+    class Meta:
+        ordering = ['name']
+
+    def __unicode__(self):
+        return self.name + " (" + self.role + ")"
+
+class Cred_Mapping(models.Model):
+    cred_id = models.ForeignKey(Cred_User, null=False, related_name="cred_user", verbose_name="Credential")
+    product = models.ForeignKey(Product, null=True, blank=True, related_name="product")
+    finding = models.ForeignKey(Finding, null=True, blank=True, related_name="finding")
+    engagement = models.ForeignKey(Engagement, null=True, blank=True, related_name="engagement")
+    test = models.ForeignKey(Test, null=True, blank=True, related_name="test")
+    is_authn_provider = models.BooleanField(default=False, verbose_name="Authentication Provider")
+    url =  models.URLField(max_length=2000, null=True, blank=True)
+
+    def __unicode__(self):
+        return self.cred_id.name + " (" + self.cred_id.role + ")"
 
 # Register for automatic logging to database
 auditlog.register(Dojo_User)
@@ -987,6 +1101,7 @@ auditlog.register(Product)
 auditlog.register(Test)
 auditlog.register(Risk_Acceptance)
 auditlog.register(Finding_Template)
+auditlog.register(Cred_User)
 
 # Register tagging for models
 tag_register(Product)
@@ -1007,6 +1122,7 @@ admin.site.register(Check_List)
 admin.site.register(Test_Type)
 admin.site.register(Endpoint)
 admin.site.register(Product)
+admin.site.register(Product_Type)
 admin.site.register(Dojo_User)
 admin.site.register(UserContactInfo)
 admin.site.register(Notes)
@@ -1014,6 +1130,13 @@ admin.site.register(Report)
 admin.site.register(Scan)
 admin.site.register(ScanSettings)
 admin.site.register(IPScan)
+admin.site.register(Alerts)
+admin.site.register(JIRA_Issue)
+admin.site.register(Tool_Configuration)
+admin.site.register(Tool_Product_Settings)
+admin.site.register(Tool_Type)
+admin.site.register(Cred_User)
+admin.site.register(Cred_Mapping)
 
 watson.register(Product)
 watson.register(Test)

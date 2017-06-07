@@ -19,7 +19,8 @@ from dojo import settings
 from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
-    JIRA_Issue, JIRA_PKey, JIRA_Conf, UserContactInfo
+    JIRA_Issue, JIRA_PKey, JIRA_Conf, UserContactInfo, Tool_Type, Tool_Configuration, Tool_Product_Settings, \
+    Cred_User, Cred_Mapping
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
 localtz = timezone(settings.TIME_ZONE)
@@ -162,7 +163,7 @@ class ProductForm(forms.ModelForm):
                            help_text="Add tags that help describe this product.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
     prod_type = forms.ModelChoiceField(label='Product Type',
-                                       queryset=Product_Type.objects.all(),
+                                       queryset=Product_Type.objects.all().order_by('name'),
                                        required=True)
 
     authorized_users = forms.ModelMultipleChoiceField(
@@ -191,7 +192,8 @@ class DeleteProductForm(forms.ModelForm):
     class Meta:
         model = Product
         exclude = ['name', 'description', 'prod_manager', 'tech_contact', 'manager', 'created',
-                   'prod_type', 'updated', 'tid', 'authorized_users']
+                   'prod_type', 'updated', 'tid', 'authorized_users', 'product_manager',
+                   'technical_contact', 'team_manager']
 
 
 class ProductMetaDataForm(forms.ModelForm):
@@ -228,7 +230,7 @@ class ImportScanForm(forms.Form):
                          ("AppSpider Scan", "AppSpider Scan"), ("Veracode Scan", "Veracode Scan"),
                          ("Checkmarx Scan", "Checkmarx Scan"), ("ZAP Scan", "ZAP Scan"),
                          ("Arachni Scan", "Arachni Scan"), ("VCG Scan", "VCG Scan"),
-                         ("Dependency Check Scan", "Dependency Check Scan"),
+                         ("Dependency Check Scan", "Dependency Check Scan"), ("Retire.js Scan", "Retire.js Scan"), ("Node Security Platform Scan", "Node Security Platform Scan"),
                          ("Generic Findings Import", "Generic Findings Import"))
     scan_date = forms.DateTimeField(
         required=True,
@@ -245,7 +247,7 @@ class ImportScanForm(forms.Form):
 
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False,
-                           help_text="Add tags that help describe this product.  "
+                           help_text="Add tags that help describe this scan.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
     file = forms.FileField(widget=forms.widgets.FileInput(
         attrs={"accept": ".xml, .csv, .nessus, .json"}),
@@ -280,7 +282,7 @@ class ReImportScanForm(forms.Form):
     verified = forms.BooleanField(help_text="Select if these findings have been verified.", required=False)
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False,
-                           help_text="Add tags that help describe this product.  "
+                           help_text="Add tags that help describe this scan.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
     file = forms.FileField(widget=forms.widgets.FileInput(
         attrs={"accept": ".xml, .csv, .nessus, .json"}),
@@ -443,6 +445,8 @@ class EngForm(forms.ModelForm):
         help_text="Add a descriptive name to identify this engagement. " +
                   "Without a name the target start date will be used in " +
                   "listings.")
+    description = forms.CharField(widget=forms.Textarea(attrs={}),
+                                  required=False)
     target_start = forms.DateField(widget=forms.TextInput(
         attrs={'class': 'datepicker'}))
     target_end = forms.DateField(widget=forms.TextInput(
@@ -454,6 +458,19 @@ class EngForm(forms.ModelForm):
         queryset=User.objects.exclude(is_staff=False),
         required=True, label="Testing Lead")
     test_strategy = forms.URLField(required=False, label="Test Strategy URL")
+
+    def is_valid(self):
+        valid = super(EngForm, self).is_valid()
+
+        # we're done now if not valid
+        if not valid:
+            return valid
+        if self.cleaned_data['target_start'] > self.cleaned_data['target_end']:
+            self.add_error('target_start', 'Your target start date exceeds your target end date')
+            self.add_error('target_end', 'Your target start date exceeds your target end date')
+            return False
+        return True
+
 
     class Meta:
         model = Engagement
@@ -468,10 +485,11 @@ class EngForm2(forms.ModelForm):
                            help_text="Add a descriptive name to identify " +
                                      "this engagement. Without a name the target " +
                                      "start date will be used in listings.")
-
+    description = forms.CharField(widget=forms.Textarea(attrs={}),
+                                  required=False)
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False,
-                           help_text="Add tags that help describe this product.  "
+                           help_text="Add tags that help describe this engagement.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
     product = forms.ModelChoiceField(queryset=Product.objects.all())
     target_start = forms.DateField(widget=forms.TextInput(
@@ -490,6 +508,18 @@ class EngForm2(forms.ModelForm):
         t = [(tag.name, tag.name) for tag in tags]
         super(EngForm2, self).__init__(*args, **kwargs)
         self.fields['tags'].widget.choices = t
+
+    def is_valid(self):
+        valid = super(EngForm2, self).is_valid()
+
+        # we're done now if not valid
+        if not valid:
+            return valid
+        if self.cleaned_data['target_start'] > self.cleaned_data['target_end']:
+            self.add_error('target_start', 'Your target start date exceeds your target end date')
+            self.add_error('target_end', 'Your target start date exceeds your target end date')
+            return False
+        return True
 
     class Meta:
         model = Engagement
@@ -510,17 +540,19 @@ class DeleteEngagementForm(forms.ModelForm):
 
 
 class TestForm(forms.ModelForm):
-    test_type = forms.ModelChoiceField(queryset=Test_Type.objects.all())
+    test_type = forms.ModelChoiceField(queryset=Test_Type.objects.all().order_by('name'))
     environment = forms.ModelChoiceField(
-        queryset=Development_Environment.objects.all())
+        queryset=Development_Environment.objects.all().order_by('name'))
+    #credential = forms.ModelChoiceField(Cred_User.objects.all(), required=False)
     target_start = forms.DateTimeField(widget=forms.TextInput(
         attrs={'class': 'datepicker'}))
     target_end = forms.DateTimeField(widget=forms.TextInput(
         attrs={'class': 'datepicker'}))
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False,
-                           help_text="Add tags that help describe this product.  "
+                           help_text="Add tags that help describe this test.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
+
 
     def __init__(self, *args, **kwargs):
         tags = Tag.objects.usage_for_model(Test)
@@ -636,7 +668,7 @@ class FindingForm(forms.ModelForm):
     references = forms.CharField(widget=forms.Textarea, required=False)
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False,
-                           help_text="Add tags that help describe this product.  "
+                           help_text="Add tags that help describe this finding.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
     is_template = forms.BooleanField(label="Create Template?", required=False,
                                      help_text="A new finding template will be created from this finding.")
@@ -688,7 +720,7 @@ class FindingTemplateForm(forms.ModelForm):
     title = forms.CharField(max_length=1000, required=True)
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False,
-                           help_text="Add tags that help describe this product.  "
+                           help_text="Add tags that help describe this finding template.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
     cwe = forms.IntegerField(label="CWE", required=False)
     severity_options = (('Low', 'Low'), ('Medium', 'Medium'),
@@ -740,7 +772,7 @@ class FindingBulkUpdateForm(forms.ModelForm):
 class EditEndpointForm(forms.ModelForm):
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False,
-                           help_text="Add tags that help describe this product.  "
+                           help_text="Add tags that help describe this endpoint.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
 
     class Meta:
@@ -831,7 +863,7 @@ class AddEndpointForm(forms.Form):
                                                                             "associated with.")
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False,
-                           help_text="Add tags that help describe this product.  "
+                           help_text="Add tags that help describe this endpoint.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
 
     def __init__(self, *args, **kwargs):
@@ -902,7 +934,7 @@ class AddEndpointForm(forms.Form):
                 except forms.ValidationError:
                     try:
                         regex = re.compile(
-                            r'^(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}(?<!-)\.?)|'  # domain...
+                            r'^(?:(?:[A-Z0-9](?:[A-Z0-9-_]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}(?<!-)\.?)|'  # domain...
                             r'localhost|'  # localhost...
                             r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|'  # ...or ipv4
                             r'\[?[A-F0-9]*:[A-F0-9:]+\]?)'  # ...or ipv6
@@ -968,6 +1000,20 @@ class CloseFindingForm(forms.ModelForm):
         model = Notes
         fields = ['entry']
 
+class DefectFindingForm(forms.ModelForm):
+    CLOSE_CHOICES = (("Close Finding", "Close Finding"), ("Not Fixed", "Not Fixed"))
+    defect_choice = forms.ChoiceField(required=True, choices=CLOSE_CHOICES)
+
+    entry = forms.CharField(
+        required=True, max_length=2400,
+        widget=forms.Textarea, label='Notes:',
+        error_messages={'required': ('The reason for closing a finding is '
+                                     'required, please use the text area '
+                                     'below to provide documentation.')})
+
+    class Meta:
+        model = Notes
+        fields = ['entry']
 
 class ClearFindingReviewForm(forms.ModelForm):
     entry = forms.CharField(
@@ -1183,6 +1229,60 @@ class JIRAForm(forms.ModelForm):
         model = JIRA_Conf
         exclude = ['product']
 
+class ToolTypeForm(forms.ModelForm):
+
+    class Meta:
+        model = Tool_Type
+        exclude = ['product']
+
+class ToolConfigForm(forms.ModelForm):
+    tool_type = forms.ModelChoiceField(queryset=Tool_Type.objects.all(), label='Tool Type')
+    ssh = forms.CharField(widget=forms.Textarea(attrs={}), required=False, label='SSH Key')
+    class Meta:
+        model = Tool_Configuration
+        exclude = ['product']
+
+class DeleteToolProductSettingsForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = Tool_Product_Settings
+        exclude = ['tool_type']
+
+class ToolProductSettingsForm(forms.ModelForm):
+    tool_configuration = forms.ModelChoiceField(queryset=Tool_Configuration.objects.all(), label='Tool Configuration')
+
+    class Meta:
+        model = Tool_Product_Settings
+        fields = ['name', 'description', 'url', 'tool_configuration', 'tool_project_id']
+        exclude = ['tool_type']
+        order = ['name']
+
+class CredMappingForm(forms.ModelForm):
+    cred_user = forms.ModelChoiceField(queryset=Cred_Mapping.objects.all().select_related('cred_id'), required=False, label='Select a Credential')
+
+    class Meta:
+        model = Cred_Mapping
+        fields = ['cred_user']
+        exclude = ['product', 'finding', 'engagement', 'test', 'url', 'is_authn_provider']
+
+class CredMappingFormProd(forms.ModelForm):
+
+    class Meta:
+        model = Cred_Mapping
+        fields = ['cred_id', 'url', 'is_authn_provider']
+        exclude = ['product', 'finding', 'engagement', 'test']
+
+class CredUserForm(forms.ModelForm):
+    #selenium_script = forms.FileField(widget=forms.widgets.FileInput(
+    #    attrs={"accept": ".py"}),
+    #    label="Select a Selenium Script", required=False)
+
+    class Meta:
+        model = Cred_User
+        exclude = ['']
+        #fields = ['selenium_script']
 
 class JIRAPKeyForm(forms.ModelForm):
     conf = forms.ModelChoiceField(queryset=JIRA_Conf.objects.all(), label='JIRA Configuration')

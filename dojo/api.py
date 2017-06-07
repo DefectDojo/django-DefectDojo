@@ -121,7 +121,7 @@ class MultipartResource(object):
             data.update(request.FILES)
             return data
 
-        return super(MultiPartResource, self).deserialize(request, data, format)
+        return super(MultipartResource, self).deserialize(request, data, format)
 
 # Authentication class - this only allows for header auth, no url parms allowed
 # like parent class.

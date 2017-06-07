@@ -1115,6 +1115,16 @@ hr.report-page-break:before {
     padding: 2px 10px;
 }
 
+.btn-tag {
+    background: #3498db;
+    border-radius: 3px;
+    border-color: #ddd;
+    color: #ffffff;
+    font-size: 90%;
+    padding: 2px 5px 2px 5px;
+    text-decoration: none;
+}
+
 div.tags .label {
     font-size: 90%;
     display: inline-block;
