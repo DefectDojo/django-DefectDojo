@@ -26,7 +26,7 @@ from dojo.filters import OpenFindingFilter, \
 from dojo.forms import NoteForm, CloseFindingForm, FindingForm, PromoteFindingForm, FindingTemplateForm, \
     DeleteFindingTemplateForm, FindingImageFormSet, JIRAFindingForm, ReviewFindingForm, ClearFindingReviewForm, \
     DefectFindingForm
-from dojo.models import Product_Type, Finding, Notes, \
+from dojo.models import Product_Type, Finding, Notes, Test, \
     Risk_Acceptance, BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, \
     FindingImageAccessToken, JIRA_Issue, JIRA_PKey, JIRA_Conf, Dojo_User, Cred_User, Cred_Mapping
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, send_review_email, process_notifications, \
@@ -577,6 +577,28 @@ def mktemplate(request, fid):
                              extra_tags='alert-success')
     return HttpResponseRedirect(reverse('view_finding', args=(finding.id,)))
 
+@user_passes_test(lambda u: u.is_staff)
+def apply_template(request, fid):
+    finding = get_object_or_404(Finding, id=fid)
+    test = get_object_or_404(Test, id=finding.test.id)
+    templates = Finding_Template.objects.all()
+    templates = TemplateFindingFilter(request.GET, queryset=templates)
+    paged_templates = get_page_items(request, templates, 25)
+    title_words = [word
+                   for finding in templates
+                   for word in finding.title.split() if len(word) > 2]
+
+    title_words = sorted(set(title_words))
+    add_breadcrumb(parent=test, title="Apply Template to Finding", top_level=False, request=request)
+    return render(request, 'dojo/templates.html',
+                  {'templates': paged_templates,
+                   'filtered': templates,
+                   'title_words': title_words,
+                   'tid': test.id,
+                   'fid': fid,
+                   'add_from_template': False,
+                   'apply_template': True,
+                   })
 
 @user_passes_test(lambda u: u.is_staff)
 def delete_finding_note(request, tid, nid):

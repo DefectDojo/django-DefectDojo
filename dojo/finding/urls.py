@@ -26,6 +26,8 @@ urlpatterns = [
         views.delete_finding, name='delete_finding'),
     url(r'^finding/(?P<fid>\d+)/mktemplate$', views.mktemplate,
         name='mktemplate'),
+    url(r'^finding/(?P<fid>\d+)/apply_template', views.apply_template,
+        name='apply_template'),
     url(r'^finding/(?P<fid>\d+)/close$', views.close_finding,
         name='close_finding'),
     url(r'^finding/(?P<fid>\d+)/defect_review',
