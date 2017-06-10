@@ -25,7 +25,7 @@ from dojo.filters import OpenFindingFilter, \
     ClosedFingingSuperFilter, TemplateFindingFilter
 from dojo.forms import NoteForm, CloseFindingForm, FindingForm, PromoteFindingForm, FindingTemplateForm, \
     DeleteFindingTemplateForm, FindingImageFormSet, JIRAFindingForm, ReviewFindingForm, ClearFindingReviewForm, \
-    DefectFindingForm
+    DefectFindingForm, ApplyFindingTemplateForm
 from dojo.models import Product_Type, Finding, Notes, Test, \
     Risk_Acceptance, BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, \
     FindingImageAccessToken, JIRA_Issue, JIRA_PKey, JIRA_Conf, Dojo_User, Cred_User, Cred_Mapping
@@ -604,7 +604,7 @@ def find_template_to_apply(request, fid):
 def choose_finding_template_options(request, tid, fid):
     finding = get_object_or_404(Finding, id=fid)
     template = get_object_or_404(Finding_Template, id=tid)
-    form = FindingForm(instance=finding)
+    form = ApplyFindingTemplateForm(instance=finding, template=template)
 
     return render(request, 'dojo/apply_finding_template.html',
                   {'finding': finding,

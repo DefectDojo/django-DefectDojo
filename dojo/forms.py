@@ -716,6 +716,50 @@ class StubFindingForm(forms.ModelForm):
         return cleaned_data
 
 
+class ApplyFindingTemplateForm(forms.ModelForm):
+    title = forms.CharField(max_length=1000, required=True)
+
+    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
+                           required=False,
+                           help_text="Add tags that help describe this finding template.  "
+                                     "Choose from the list or add new tags.  Press TAB key to add.")
+
+    cwe = forms.IntegerField(label="CWE", required=False)
+
+    severity_options = (('Low', 'Low'), ('Medium', 'Medium'),
+                        ('High', 'High'), ('Critical', 'Critical'))
+    severity = forms.ChoiceField(
+            required=False,
+            choices=severity_options,
+            error_messages={
+                'required': 'Select valid choice: In Progress, On Hold, Completed',
+                'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
+
+    def __init__(self, template, *args, **kwargs):
+        tags = Tag.objects.usage_for_model(Finding)
+        t = [(tag.name, tag.name) for tag in tags]
+        super(ApplyFindingTemplateForm, self).__init__(*args, **kwargs)
+        self.fields['tags'].widget.choices = t
+        self.template=template
+
+    def clean(self):
+        cleaned_data = super(ApplyFindingTemplateForm, self).clean()
+        if (cleaned_data['active'] or cleaned_data['verified']) and cleaned_data['duplicate']:
+            raise forms.ValidationError('Duplicate findings cannot be'
+                                        ' verified or active')
+        if cleaned_data['false_p'] and cleaned_data['verified']:
+            raise forms.ValidationError('False positive findings cannot '
+                                        'be verified.')
+        return cleaned_data
+
+    class Meta:
+        model = Finding
+        order = ('title', 'cwe', 'severity', 'description', 'impact')
+        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
+                   'review_requested_by', 'date', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope',
+                   'is_template', 'defect_review_requested_by', 'under_defect_review', 'endpoints')
+
+
 class FindingTemplateForm(forms.ModelForm):
     title = forms.CharField(max_length=1000, required=True)
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),

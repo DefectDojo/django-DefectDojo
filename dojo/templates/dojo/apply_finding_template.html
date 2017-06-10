@@ -11,11 +11,11 @@
 {% endblock %}
 {% block content %}
     <h3> Apply template to a Finding</h3>
-    <form class="form-horizontal" action="{% url 'edit_finding' finding.id %}" method="post">
+    <form class="form-horizontal" name="apply_template" action="{% url 'edit_finding' finding.id %}" method="post">
         {% csrf_token %}
-        {% include "dojo/form_fields.html" with form=form %}
+        {% include "dojo/apply_finding_template_form_fields.html" with form=form template=template %}
         {%  if jform %}
-            {% include "dojo/form_fields.html" with form=jform %}
+            {% include "dojo/apply_finding_template_form_fields.html" with form=jform template=template %}
         {% endif %}
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
