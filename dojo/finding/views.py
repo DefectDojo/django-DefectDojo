@@ -578,7 +578,7 @@ def mktemplate(request, fid):
     return HttpResponseRedirect(reverse('view_finding', args=(finding.id,)))
 
 @user_passes_test(lambda u: u.is_staff)
-def apply_template(request, fid):
+def find_template_to_apply(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     test = get_object_or_404(Test, id=finding.test.id)
     templates = Finding_Template.objects.all()
@@ -599,6 +599,18 @@ def apply_template(request, fid):
                    'add_from_template': False,
                    'apply_template': True,
                    })
+
+@user_passes_test(lambda u: u.is_staff)
+def choose_finding_template_options(request, tid, fid):
+    finding = get_object_or_404(Finding, id=fid)
+    template = get_object_or_404(Finding_Template, id=tid)
+    form = FindingForm(instance=finding)
+
+    return render(request, 'dojo/apply_finding_template.html',
+                  {'finding': finding,
+                   'template': template,
+                   'form': form,}
+                  )
 
 @user_passes_test(lambda u: u.is_staff)
 def delete_finding_note(request, tid, nid):

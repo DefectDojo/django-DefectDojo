@@ -82,7 +82,7 @@
                                             </sup>
                                         </a>
                                     {% elif apply_template %}
-                                        <a href="{% url 'apply_template' fid %}"
+                                        <a href="{% url 'choose_finding_template_options' finding.id fid %}"
                                            class="template-popover" data-placement="auto bottom" data-toggle="popover"
                                            data-trigger="hover" title="{{ finding.title|truncatechars:100 }}"
                                            data-content="{{ finding.description|truncatechars:500 }}">
@@ -116,7 +116,7 @@
                                     </td>
                                 {% elif apply_template %}
                                     <td nowrap="nowrap">
-                                        <a href="{% url 'apply_template' fid %}"
+                                        <a href="{% url 'choose_finding_template_options' finding.id fid %}"
                                            class="btn btn-success btn-sm">
                                             Use This Template
                                         </a>
