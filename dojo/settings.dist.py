@@ -1,10 +1,11 @@
 # Django settings for dojo project.
 import os
+
 DEBUG = True
 LOGIN_REDIRECT_URL = '/'
-#SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTOCOL', 'https')
-#SECURE_SSL_REDIRECT = True
-#SECURE_BROWSER_XSS_FILTER = True
+# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTOCOL', 'https')
+# SECURE_SSL_REDIRECT = True
+# SECURE_BROWSER_XSS_FILTER = True
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
@@ -30,14 +31,14 @@ DOJO_ROOT = 'DOJODIR'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',  # Add 'postgresql_psycopg2',
-                                               # 'mysql','sqlite3' or 'oracle'.
-        'NAME': 'MYSQLDB',         # Or path to database file if using sqlite3.
+        # 'mysql','sqlite3' or 'oracle'.
+        'NAME': 'MYSQLDB',  # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': 'MYSQLUSER',
         'PASSWORD': 'MYSQLPWD',
-        'HOST': 'MYSQLHOST',       # Empty for localhost through domain sockets
-                                   # or '127.0.0.1' for localhost through TCP.
-        'PORT': 'MYSQLPORT',           # Set to empty string for default.
+        'HOST': 'MYSQLHOST',  # Empty for localhost through domain sockets
+        # or '127.0.0.1' for localhost through TCP.
+        'PORT': 'MYSQLPORT',  # Set to empty string for default.
     }
 }
 
@@ -87,7 +88,6 @@ STATIC_ROOT = "DOJO_STATIC_ROOT"
 # Example: "http://example.com/static/", "http://static.example.com/"
 STATIC_URL = '/static/'
 
-
 # Additional locations of static files
 STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
@@ -135,7 +135,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    #'django.middleware.security.SecurityMiddleware',
+    # 'django.middleware.security.SecurityMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -161,21 +161,20 @@ LOGIN_EXEMPT_URLS = (
 WSGI_APPLICATION = 'dojo.wsgi.application'
 
 TEMPLATES = [
-{
-    'BACKEND': 'django.template.backends.django.DjangoTemplates',
-    'DEBUG': DEBUG,
-    'APP_DIRS': True,
-    'OPTIONS': {
-        'context_processors': [
-            'django.template.context_processors.debug',
-            'django.template.context_processors.request',
-            'django.contrib.auth.context_processors.auth',
-            'django.contrib.messages.context_processors.messages',
-        ],
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'debug': DEBUG,
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
     },
-},
 ]
-
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -229,7 +228,6 @@ WKHTMLTOPDF_PATH = '/usr/local/bin/wkhtmltopdf'
 # django-tagging settings
 FORCE_LOWERCASE_TAGS = True
 MAX_TAG_LENGTH = 25
-
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
