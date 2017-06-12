@@ -3,6 +3,8 @@ import collections
 from datetime import timedelta, datetime
 
 from auditlog.models import LogEntry
+from dojo.models import Dojo_User, Product_Type, Finding, \
+    Product, Test_Type, Endpoint, Development_Environment, Finding_Template, Report
 from django import forms
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -12,9 +14,6 @@ from django_filters import FilterSet, CharFilter, OrderingFilter, ModelMultipleC
     MultipleChoiceFilter
 from django_filters.filters import ChoiceFilter, _truncate, DateTimeFilter
 from pytz import timezone
-
-from dojo.models import Dojo_User, Product_Type, Finding, \
-    Product, Test_Type, Endpoint, Development_Environment, Finding_Template, Report
 
 local_tz = timezone(settings.TIME_ZONE)
 SEVERITY_CHOICES = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
