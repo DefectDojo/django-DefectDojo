@@ -4,7 +4,7 @@ from datetime import timedelta, datetime
 
 from auditlog.models import LogEntry
 from dojo.models import Dojo_User, Product_Type, Finding, \
-    Product, Test_Type, Endpoint, Development_Environment, Finding_Template, Report, get_earliest_finding
+    Product, Test_Type, Endpoint, Development_Environment, Finding_Template, Report
 from django import forms
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -20,8 +20,22 @@ SEVERITY_CHOICES = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
                     ('High', 'High'), ('Critical', 'Critical'))
 BOOLEAN_CHOICES = (('false', 'No'), ('true', 'Yes'),)
 
+EARLIEST_FINDING = None
+
 def now():
     return local_tz.localize(datetime.today())
+
+
+def get_earliest_finding():
+    global EARLIEST_FINDING
+    if EARLIEST_FINDING is not None:
+        return EARLIEST_FINDING
+
+    try:
+        EARLIEST_FINDING = Finding.objects.earliest('date')
+    except Finding.DoesNotExist:
+        EARLIEST_FINDING = None
+    return EARLIEST_FINDING
 
 
 class DojoFilter(FilterSet):
@@ -220,14 +234,14 @@ class MetricsDateRangeFilter(ChoiceFilter):
             (key, value[0]) for key, value in six.iteritems(self.options)]
         super(MetricsDateRangeFilter, self).__init__(*args, **kwargs)
 
+
+    def filter(self, qs, value):
         if get_earliest_finding() is not None:
             start_date = local_tz.localize(datetime.combine(
                 get_earliest_finding().date, datetime.min.time())
             )
             self.start_date = _truncate(start_date - timedelta(days=1))
             self.end_date = _truncate(now() + timedelta(days=1))
-
-    def filter(self, qs, value):
         try:
             value = int(value)
         except (ValueError, TypeError):
@@ -619,14 +633,14 @@ class FindingStatusFilter(ChoiceFilter):
             (key, value[0]) for key, value in six.iteritems(self.options)]
         super(FindingStatusFilter, self).__init__(*args, **kwargs)
 
+
+    def filter(self, qs, value):
         if get_earliest_finding() is not None:
             start_date = local_tz.localize(datetime.combine(
                 get_earliest_finding().date, datetime.min.time())
             )
             self.start_date = _truncate(start_date - timedelta(days=1))
             self.end_date = _truncate(now() + timedelta(days=1))
-
-    def filter(self, qs, value):
         try:
             value = int(value)
         except (ValueError, TypeError):

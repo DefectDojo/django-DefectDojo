@@ -720,13 +720,6 @@ class Finding(models.Model):
 
 Finding.endpoints.through.__unicode__ = lambda x: "Endpoint: " + x.endpoint.host
 
-def get_earliest_finding():
-    try:
-        earliest_finding = Finding.objects.earliest('date')
-    except Finding.DoesNotExist:
-        earliest_finding = None
-    return earliest_finding
-
 class Stub_Finding(models.Model):
     title = models.TextField(max_length=1000, blank=False, null=False)
     date = models.DateField(default=get_current_date, blank=False, null=False)
