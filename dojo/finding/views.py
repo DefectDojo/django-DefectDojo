@@ -67,11 +67,11 @@ def open_findings(request):
         findings = OpenFindingFilter(request.GET, queryset=findings, user=request.user)
 
     title_words = [word
-                   for finding in findings
+                   for finding in findings.qs
                    for word in finding.title.split() if len(word) > 2]
 
     title_words = sorted(set(title_words))
-    paged_findings = get_page_items(request, findings, 25)
+    paged_findings = get_page_items(request, findings.qs, 25)
 
     product_type = None
     if 'test__engagement__product__prod_type' in request.GET:
@@ -110,7 +110,7 @@ def accepted_findings(request):
                    for word in finding['title'].split() if len(word) > 2]
 
     title_words = sorted(set(title_words))
-    paged_findings = get_page_items(request, findings, 25)
+    paged_findings = get_page_items(request, findings.qs, 25)
 
     add_breadcrumb(title="Accepted findings", top_level=not len(request.GET), request=request)
 
@@ -127,11 +127,11 @@ def closed_findings(request):
     findings = Finding.objects.filter(mitigated__isnull=False)
     findings = ClosedFingingSuperFilter(request.GET, queryset=findings)
     title_words = [word
-                   for finding in findings
+                   for finding in findings.qs
                    for word in finding.title.split() if len(word) > 2]
 
     title_words = sorted(set(title_words))
-    paged_findings = get_page_items(request, findings, 25)
+    paged_findings = get_page_items(request, findings.qs, 25)
     add_breadcrumb(title="Closed findings", top_level=not len(request.GET), request=request)
     return render(request,
                   'dojo/closed_findings.html',
@@ -683,9 +683,9 @@ def promote_to_finding(request, fid):
 def templates(request):
     templates = Finding_Template.objects.all()
     templates = TemplateFindingFilter(request.GET, queryset=templates)
-    paged_templates = get_page_items(request, templates, 25)
+    paged_templates = get_page_items(request, templates.qs, 25)
     title_words = [word
-                   for finding in templates
+                   for finding in templates.qs
                    for word in finding.title.split() if len(word) > 2]
 
     title_words = sorted(set(title_words))

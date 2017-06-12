@@ -587,7 +587,7 @@ def engineer_metrics(request):
 
     users = EngineerFilter(request.GET,
                            queryset=users)
-    paged_users = get_page_items(request, users, 15)
+    paged_users = get_page_items(request, users.qs, 15)
 
     add_breadcrumb(title="Engineer Metrics", top_level=True, request=request)
 

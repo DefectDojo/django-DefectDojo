@@ -43,9 +43,9 @@ def vulnerable_endpoints(request):
         if len(p) == 1:
             product = get_object_or_404(Product, id=p[0])
 
-    ids = get_endpoint_ids(EndpointFilter(request.GET, queryset=endpoints, user=request.user))
+    ids = get_endpoint_ids(EndpointFilter(request.GET, queryset=endpoints, user=request.user).qs)
     endpoints = EndpointFilter(request.GET, queryset=endpoints.filter(id__in=ids), user=request.user)
-    paged_endpoints = get_page_items(request, endpoints, 25)
+    paged_endpoints = get_page_items(request, endpoints.qs, 25)
     add_breadcrumb(title="Vulnerable Endpoints", top_level=not len(request.GET), request=request)
     return render(request,
                   'dojo/endpoints.html',
@@ -73,9 +73,9 @@ def all_endpoints(request):
         if len(p) == 1:
             product = get_object_or_404(Product, id=p[0])
 
-    ids = get_endpoint_ids(EndpointFilter(request.GET, queryset=endpoints, user=request.user))
+    ids = get_endpoint_ids(EndpointFilter(request.GET, queryset=endpoints, user=request.user).qs)
     endpoints = EndpointFilter(request.GET, queryset=endpoints.filter(id__in=ids), user=request.user)
-    paged_endpoints = get_page_items(request, endpoints, 25)
+    paged_endpoints = get_page_items(request, endpoints.qs, 25)
     add_breadcrumb(title="All Endpoints", top_level=not len(request.GET), request=request)
     return render(request,
                   'dojo/endpoints.html',

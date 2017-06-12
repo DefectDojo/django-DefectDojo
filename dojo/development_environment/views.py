@@ -31,7 +31,7 @@ def dev_env(request):
     name_words = [de.name for de in
                   initial_queryset]
     devs = DevelopmentEnvironmentFilter(request.GET, queryset=initial_queryset)
-    dev_page = get_page_items(request, devs, 25)
+    dev_page = get_page_items(request, devs.qs, 25)
     add_breadcrumb(title="Development Environment List", top_level=True, request=request)
     return render(request, 'dojo/dev_env.html', {
         'name': 'Development Environment List',

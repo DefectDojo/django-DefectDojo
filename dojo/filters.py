@@ -3,27 +3,39 @@ import collections
 from datetime import timedelta, datetime
 
 from auditlog.models import LogEntry
+from dojo.models import Dojo_User, Product_Type, Finding, \
+    Product, Test_Type, Endpoint, Development_Environment, Finding_Template, Report
 from django import forms
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.utils import six
 from django.utils.translation import ugettext_lazy as _
-from django_filters import FilterSet, CharFilter, \
-    ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter, MethodFilter
+from django_filters import FilterSet, CharFilter, OrderingFilter, ModelMultipleChoiceFilter, ModelChoiceFilter, \
+    MultipleChoiceFilter
 from django_filters.filters import ChoiceFilter, _truncate, DateTimeFilter
 from pytz import timezone
-
-from dojo.models import Dojo_User, Product_Type, Finding, \
-    Product, Test_Type, Endpoint, Development_Environment, Finding_Template, Report
 
 local_tz = timezone(settings.TIME_ZONE)
 SEVERITY_CHOICES = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
                     ('High', 'High'), ('Critical', 'Critical'))
 BOOLEAN_CHOICES = (('false', 'No'), ('true', 'Yes'),)
 
+EARLIEST_FINDING = None
 
 def now():
     return local_tz.localize(datetime.today())
+
+
+def get_earliest_finding():
+    global EARLIEST_FINDING
+    if EARLIEST_FINDING is not None:
+        return EARLIEST_FINDING
+
+    try:
+        EARLIEST_FINDING = Finding.objects.earliest('date')
+    except Finding.DoesNotExist:
+        EARLIEST_FINDING = None
+    return EARLIEST_FINDING
 
 
 class DojoFilter(FilterSet):
@@ -130,7 +142,6 @@ class ReportBooleanFilter(ChoiceFilter):
 
 
 class ReportRiskAcceptanceFilter(ChoiceFilter):
-
     def any(self, qs, name):
         return qs.all()
 
@@ -161,14 +172,9 @@ class ReportRiskAcceptanceFilter(ChoiceFilter):
 
 class MetricsDateRangeFilter(ChoiceFilter):
     def any(self, qs, name):
-        try:
-            earliest_finding = Finding.objects.earliest('date')
-        except Finding.DoesNotExist:
-            earliest_finding = None
-
-        if earliest_finding:
+        if get_earliest_finding() is not None:
             start_date = local_tz.localize(datetime.combine(
-                earliest_finding.date, datetime.min.time())
+                get_earliest_finding().date, datetime.min.time())
             )
             self.start_date = _truncate(start_date - timedelta(days=1))
             self.end_date = _truncate(now() + timedelta(days=1))
@@ -228,19 +234,14 @@ class MetricsDateRangeFilter(ChoiceFilter):
             (key, value[0]) for key, value in six.iteritems(self.options)]
         super(MetricsDateRangeFilter, self).__init__(*args, **kwargs)
 
-        try:
-            earliest_finding = Finding.objects.earliest('date')
-        except Finding.DoesNotExist:
-            earliest_finding = None
 
-        if earliest_finding:
+    def filter(self, qs, value):
+        if get_earliest_finding() is not None:
             start_date = local_tz.localize(datetime.combine(
-                earliest_finding.date, datetime.min.time())
+                get_earliest_finding().date, datetime.min.time())
             )
             self.start_date = _truncate(start_date - timedelta(days=1))
             self.end_date = _truncate(now() + timedelta(days=1))
-
-    def filter(self, qs, value):
         try:
             value = int(value)
         except (ValueError, TypeError):
@@ -249,31 +250,53 @@ class MetricsDateRangeFilter(ChoiceFilter):
 
 
 class EngagementFilter(DojoFilter):
-    engagement__name = CharFilter(lookup_type='icontains')
     engagement__lead = ModelChoiceFilter(
         queryset=User.objects.filter(
             engagement__lead__isnull=False).distinct(),
         label="Lead")
-    name = CharFilter(lookup_type='icontains')
+    name = CharFilter(lookup_expr='icontains')
     prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all().order_by('name'),
         label="Product Type")
+
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('name', 'name'),
+            ('prod_type__name', 'prod_type__name'),
+        ),
+        field_labels={
+            'name': 'Product Name',
+            'prod_type__name': 'Product Type',
+        }
+
+    )
 
     class Meta:
         model = Product
         fields = ['name', 'prod_type']
-        order_by = (('name', 'Product Name'),
-                    ('-name', 'Product Name Desc'),
-                    ('prod_type__name', 'Product Type'),
-                    ('-prod_type__name', 'Product Type Desc'),)
 
 
 class ProductFilter(DojoFilter):
-    name = CharFilter(lookup_type='icontains', label="Product Name")
+    name = CharFilter(lookup_expr='icontains', label="Product Name")
     prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all().order_by('name'),
         label="Product Type")
-    #tags = CharFilter(lookup_type='icontains', label="Tags")
+
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('name', 'name'),
+            ('prod_type__name', 'prod_type__name'),
+        ),
+        field_labels={
+            'name': 'Product Name',
+            'prod_type__name': 'Product Type',
+        }
+
+    )
+
+    # tags = CharFilter(lookup_expr='icontains', label="Tags")
 
     def __init__(self, *args, **kwargs):
         self.user = None
@@ -290,14 +313,10 @@ class ProductFilter(DojoFilter):
         model = Product
         fields = ['name', 'prod_type']
         exclude = ['tags']
-        order_by = (('name', 'Product Name'),
-                    ('-name', 'Product Name Desc'),
-                    ('prod_type__name', 'Product Type'),
-                    ('-prod_type__name', 'Product Type Desc'))
 
 
 class OpenFindingFilter(DojoFilter):
-    title = CharFilter(lookup_type='icontains')
+    title = CharFilter(lookup_expr='icontains')
     date = DateRangeFilter()
     last_reviewed = DateRangeFilter()
     cwe = MultipleChoiceFilter(choices=[])
@@ -308,18 +327,20 @@ class OpenFindingFilter(DojoFilter):
         queryset=Product.objects.all(),
         label="Product")
 
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('numerical_severity', 'numerical_severity'),
+            ('date', 'date'),
+            ('last_reviewed', 'last_reviewed'),
+            ('title', 'title'),
+            ('test__engagement__product__name', 'test__engagement__product__name'),
+        ),
+
+    )
+
     class Meta:
         model = Finding
-        order_by = (('numerical_severity', 'Severity Asc'),
-                    ('-numerical_severity', 'Severity Desc'),
-                    ('date', 'Date Asc'),
-                    ('-date', 'Date Desc'),
-                    ('last_reviewed', 'Review Date Asc'),
-                    ('-last_reviewed', 'Review Date Desc'),
-                    ('title', 'Finding Name Asc'),
-                    ('-title', 'Finding Name Desc'),
-                    ('test__engagement__product__name', 'Product Name Asc'),
-                    ('-test__engagement__product__name', 'Product Name Desc'))
         exclude = ['url', 'description', 'mitigation', 'impact',
                    'endpoint', 'references', 'test', 'is_template',
                    'active', 'verified', 'out_of_scope', 'false_p',
@@ -358,7 +379,7 @@ class OpenFingingSuperFilter(OpenFindingFilter):
 
 
 class ClosedFindingFilter(DojoFilter):
-    title = CharFilter(lookup_type='icontains')
+    title = CharFilter(lookup_expr='icontains')
     mitigated = DateRangeFilter(label="Mitigated Date")
     cwe = MultipleChoiceFilter(choices=[])
     severity = MultipleChoiceFilter(choices=[])
@@ -371,18 +392,27 @@ class ClosedFindingFilter(DojoFilter):
         queryset=Product_Type.objects.all(),
         label="Product Type")
 
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('numerical_severity', 'numerical_severity'),
+            ('date', 'date'),
+            ('mitigated', 'mitigated'),
+            ('title', 'title'),
+            ('test__engagement__product__name', 'test__engagement__product__name'),
+        ),
+        field_labels={
+            'numerical_severity': 'Severity',
+            'date': 'Date',
+            'mitigated': 'Mitigated Date',
+            'title': 'Finding Name',
+            'test__engagement__product__name': 'Product Name',
+        }
+
+    )
+
     class Meta:
         model = Finding
-        order_by = (('numerical_severity', 'Severity'),
-                    ('-numerical_severity', 'Severity Desc'),
-                    ('date', 'Date Ascending'),
-                    ('-date', 'Date Descending'),
-                    ('mitigated', 'Mitigated Date Asc'),
-                    ('-mitigated', 'Mitigated Date Desc'),
-                    ('title', 'Finding Name'),
-                    ('-title', 'Finding Name Desc'),
-                    ('test__engagement__product__name', 'Product Name'),
-                    ('-test__engagement__product__name', 'Product Name Desc'))
         exclude = ['url', 'description', 'mitigation', 'impact',
                    'endpoint', 'references', 'test', 'is_template',
                    'active', 'verified', 'out_of_scope', 'false_p',
@@ -410,7 +440,7 @@ class ClosedFingingSuperFilter(ClosedFindingFilter):
 
 
 class AcceptedFindingFilter(DojoFilter):
-    title = CharFilter(lookup_type='icontains')
+    title = CharFilter(lookup_expr='icontains')
     test__engagement__risk_acceptance__created = \
         DateRangeFilter(label="Acceptance Date")
     date = DateRangeFilter(label="Finding Date")
@@ -425,20 +455,27 @@ class AcceptedFindingFilter(DojoFilter):
         queryset=Product_Type.objects.all(),
         label="Product Type")
 
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('numerical_severity', 'numerical_severity'),
+            ('date', 'date'),
+            ('test__engagement__risk_acceptance__created', 'test__engagement__risk_acceptance__created'),
+            ('title', 'title'),
+            ('test__engagement__product__name', 'test__engagement__product__name'),
+        ),
+        field_labels={
+            'numerical_severity': 'Severity',
+            'date': 'Finding Date',
+            'test__engagement__risk_acceptance__created': 'Acceptance Date',
+            'title': 'Finding Name',
+            'test__engagement__product__name': 'Product Name',
+        }
+
+    )
+
     class Meta:
         model = Finding
-        order_by = (('numerical_severity', 'Severity'),
-                    ('-numerical_severity', 'Severity Desc'),
-                    ('date', 'Finding Date Asc'),
-                    ('-date', 'Finding Date Desc'),
-                    ('test__engagement__risk_acceptance__created',
-                     'Acceptance Date Asc'),
-                    ('-test__engagement__risk_acceptance__created',
-                     'Acceptance Date Desc'),
-                    ('title', 'Finding Name'),
-                    ('-title', 'Finding Name Desc'),
-                    ('test__engagement__product__name', 'Product Name'),
-                    ('-test__engagement__product__name', 'Product Name Dec'))
         fields = ['title', 'test__engagement__risk_acceptance__created']
         exclude = ['url', 'description', 'mitigation', 'impact',
                    'endpoint', 'references', 'test', 'is_template',
@@ -469,21 +506,34 @@ class AcceptedFingingSuperFilter(AcceptedFindingFilter):
 
 
 class ProductFindingFilter(DojoFilter):
-    title = CharFilter(lookup_type='icontains')
+    title = CharFilter(lookup_expr='icontains')
     date = DateRangeFilter()
     cwe = MultipleChoiceFilter(choices=[])
     severity = MultipleChoiceFilter(choices=[])
     test__test_type = ModelMultipleChoiceFilter(
         queryset=Test_Type.objects.all())
 
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('numerical_severity', 'numerical_severity'),
+            ('date', 'date'),
+            ('test__engagement__risk_acceptance__created', 'test__engagement__risk_acceptance__created'),
+            ('title', 'title'),
+            ('test__engagement__product__name', 'test__engagement__product__name'),
+        ),
+        field_labels={
+            'numerical_severity': 'Severity',
+            'date': 'Finding Date',
+            'test__engagement__risk_acceptance__created': 'Acceptance Date',
+            'title': 'Finding Name',
+            'test__engagement__product__name': 'Product Name',
+        }
+
+    )
+
     class Meta:
         model = Finding
-        order_by = (('title', 'Name'),
-                    ('-title', 'Name Desc'),
-                    ('numerical_severity', 'Severity'),
-                    ('-numerical_severity', 'Severity Desc'),
-                    ('test__engagement__risk_acceptance__created', 'Date'),
-                    ('-test__engagement__risk_acceptance__created', 'Date Desc'))
         exclude = ['url', 'description', 'mitigation', 'impact',
                    'endpoint', 'references', 'test', 'is_template',
                    'active', 'verified', 'out_of_scope', 'false_p',
@@ -506,19 +556,26 @@ class ProductFindingFilter(DojoFilter):
 
 
 class TemplateFindingFilter(DojoFilter):
-    title = CharFilter(lookup_type='icontains')
+    title = CharFilter(lookup_expr='icontains')
     cwe = MultipleChoiceFilter(choices=[])
     severity = MultipleChoiceFilter(choices=[])
     numerical_severity = MultipleChoiceFilter(choices=[])
 
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('cwe', 'cwe'),
+            ('title', 'title'),
+            ('numerical_severity', 'numerical_severity'),
+        ),
+        field_labels={
+            'numerical_severity': 'Severity',
+        }
+
+    )
+
     class Meta:
         model = Finding_Template
-        order_by = (('cwe', 'CWE Asc'),
-                    ('-cwe', 'CWE Desc'),
-                    ('title', 'Title Asc'),
-                    ('-title', 'Title Desc'),
-                    ('-numerical_severity', 'Severity Asc'),
-                    ('numerical_severity', 'Severity Desc'),)
         exclude = ['description', 'mitigation', 'impact',
                    'references', 'numerical_severity']
 
@@ -576,19 +633,14 @@ class FindingStatusFilter(ChoiceFilter):
             (key, value[0]) for key, value in six.iteritems(self.options)]
         super(FindingStatusFilter, self).__init__(*args, **kwargs)
 
-        try:
-            earliest_finding = Finding.objects.earliest('date')
-        except Finding.DoesNotExist:
-            earliest_finding = None
 
-        if earliest_finding:
+    def filter(self, qs, value):
+        if get_earliest_finding() is not None:
             start_date = local_tz.localize(datetime.combine(
-                earliest_finding.date, datetime.min.time())
+                get_earliest_finding().date, datetime.min.time())
             )
             self.start_date = _truncate(start_date - timedelta(days=1))
             self.end_date = _truncate(now() + timedelta(days=1))
-
-    def filter(self, qs, value):
         try:
             value = int(value)
         except (ValueError, TypeError):
@@ -614,10 +666,18 @@ class EndpointFilter(DojoFilter):
     product = ModelMultipleChoiceFilter(
         queryset=Product.objects.all().order_by('name'),
         label="Product")
-    host = CharFilter(lookup_type='icontains')
-    path = CharFilter(lookup_type='icontains')
-    query = CharFilter(lookup_type='icontains')
-    fragment = CharFilter(lookup_type='icontains')
+    host = CharFilter(lookup_expr='icontains')
+    path = CharFilter(lookup_expr='icontains')
+    query = CharFilter(lookup_expr='icontains')
+    fragment = CharFilter(lookup_expr='icontains')
+
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('product', 'product'),
+            ('host', 'host'),
+        ),
+    )
 
     def __init__(self, *args, **kwargs):
         self.user = None
@@ -630,17 +690,14 @@ class EndpointFilter(DojoFilter):
 
     class Meta:
         model = Endpoint
-        order_by = (('product', 'Product'),
-                    ('-product', 'Product Desc'),
-                    ('host', 'Host'),
-                    ('-host', 'Host Desc'))
+        exclude = []
 
 
 class EndpointReportFilter(DojoFilter):
-    host = CharFilter(lookup_type='icontains')
-    path = CharFilter(lookup_type='icontains')
-    query = CharFilter(lookup_type='icontains')
-    fragment = CharFilter(lookup_type='icontains')
+    host = CharFilter(lookup_expr='icontains')
+    path = CharFilter(lookup_expr='icontains')
+    query = CharFilter(lookup_expr='icontains')
+    fragment = CharFilter(lookup_expr='icontains')
     finding__severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     finding__mitigated = MitigatedDateRangeFilter()
 
@@ -650,7 +707,7 @@ class EndpointReportFilter(DojoFilter):
 
 
 class ReportFindingFilter(DojoFilter):
-    title = CharFilter(lookup_type='icontains', label='Name')
+    title = CharFilter(lookup_expr='icontains', label='Name')
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     active = ReportBooleanFilter()
     mitigated = MitigatedDateRangeFilter()
@@ -669,9 +726,10 @@ class ReportFindingFilter(DojoFilter):
 
 
 class ReportAuthedFindingFilter(DojoFilter):
-    title = CharFilter(lookup_type='icontains', label='Name')
+    title = CharFilter(lookup_expr='icontains', label='Name')
     test__engagement__product = ModelMultipleChoiceFilter(queryset=Product.objects.all(), label="Product")
-    test__engagement__product__prod_type = ModelMultipleChoiceFilter(queryset=Product_Type.objects.all(), label="Product Type")
+    test__engagement__product__prod_type = ModelMultipleChoiceFilter(queryset=Product_Type.objects.all(),
+                                                                     label="Product Type")
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     active = ReportBooleanFilter()
     mitigated = MitigatedDateRangeFilter()
@@ -699,51 +757,62 @@ class ReportAuthedFindingFilter(DojoFilter):
 
 
 class UserFilter(DojoFilter):
-    first_name = CharFilter(lookup_type='icontains')
-    last_name = CharFilter(lookup_type='icontains')
-    username = CharFilter(lookup_type='icontains')
+    first_name = CharFilter(lookup_expr='icontains')
+    last_name = CharFilter(lookup_expr='icontains')
+    username = CharFilter(lookup_expr='icontains')
+
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('username', 'username'),
+            ('last_name', 'last_name'),
+            ('first_name', 'first_name'),
+            ('email', 'email'),
+            ('is_active', 'is_active'),
+            ('is_staff', 'is_staff'),
+            ('is_superuser', 'is_superuser'),
+        ),
+        field_labels={
+            'username': 'User Name',
+            'is_active': 'Active',
+            'is_staff': 'Staff',
+            'is_superuser': 'Superuser',
+        }
+
+    )
 
     class Meta:
         model = Dojo_User
         fields = ['is_staff', 'is_superuser', 'is_active', 'first_name', 'last_name', 'username']
         exclude = ['password', 'last_login', 'groups', 'user_permissions', 'date_joined']
-        order_by = (('username', 'User Name'),
-                    ('-username', 'User Name Desc'),
-                    ('last_name', 'Last Name'),
-                    ('-last_name', 'Last Name Desc'),
-                    ('first_name', 'First Name'),
-                    ('-first_name', 'First Name Desc'),
-                    ('email', 'Email'),
-                    ('-email', 'Email Desc'),
-                    ('is_active', 'Active'),
-                    ('-is_active', 'Active Desc'),
-                    ('is_staff', 'Staff'),
-                    ('-is_staff', 'Staff Desc'),
-                    ('is_superuser', 'SuperUser'),
-                    ('-is_superuser', 'SuperUser Desc'),)
 
 
 class ReportFilter(DojoFilter):
-    name = CharFilter(lookup_type='icontains')
+    name = CharFilter(lookup_expr='icontains')
     type = MultipleChoiceFilter(choices=[])
     format = MultipleChoiceFilter(choices=[])
     requester = ModelMultipleChoiceFilter(queryset=Dojo_User.objects.all())
     datetime = DateTimeFilter()
     status = MultipleChoiceFilter(choices=[])
 
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('datetime', 'datetime'),
+            ('name', 'name'),
+            ('type', 'type'),
+            ('format', 'format'),
+            ('requester', 'requester'),
+        ),
+        field_labels={
+            'datetime': 'Date',
+        }
+
+    )
+
     class Meta:
         model = Report
         exclude = ['task_id', 'file']
-        order_by = (('-datetime', 'Date Desc'),
-                    ('datetime', 'Date Asc'),
-                    ('name', 'Name'),
-                    ('-name', 'Name Desc'),
-                    ('type', 'Type'),
-                    ('-type', 'Type Desc'),
-                    ('format', 'Format'),
-                    ('-format', 'Format Desc'),
-                    ('requester', 'Requester'),
-                    ('-requester', 'Requester Desc'))
 
     def __init__(self, *args, **kwargs):
         super(ReportFilter, self).__init__(*args, **kwargs)
@@ -753,33 +822,37 @@ class ReportFilter(DojoFilter):
         self.form.fields['type'].choices = type.items()
 
         status = dict()
-        status = dict([report.status, report.status] for report in self.queryset.distinct() if report.status is not None)
+        status = dict(
+            [report.status, report.status] for report in self.queryset.distinct() if report.status is not None)
         status = collections.OrderedDict(sorted(status.items()))
         self.form.fields['status'].choices = status.items()
 
 
 class EngineerFilter(DojoFilter):
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('username', 'username'),
+            ('last_name', 'last_name'),
+            ('first_name', 'first_name'),
+            ('email', 'email'),
+            ('is_active', 'is_active'),
+            ('is_staff', 'is_staff'),
+            ('is_superuser', 'is_superuser'),
+        ),
+        field_labels={
+            'username': 'User Name',
+            'is_active': 'Active',
+            'is_staff': 'Staff',
+            'is_superuser': 'Superuser',
+        }
+
+    )
+
     class Meta:
         model = Dojo_User
         fields = ['is_staff', 'is_superuser', 'is_active', 'username', 'email', 'last_name', 'first_name']
         exclude = ['password', 'last_login', 'groups', 'user_permissions', 'date_joined']
-        order_by = (('username', 'User Name'),
-                    ('-username', 'User Name Desc'),
-                    ('last_name', 'Last Name'),
-                    ('-last_name', 'Last Name Desc'),
-                    ('first_name', 'First Name'),
-                    ('-first_name', 'First Name Desc'),
-                    ('email', 'Email'),
-                    ('-email', 'Email Desc'),
-                    ('last_login', 'Last Login'),
-                    ('-last_login', 'Last Login Desc'),
-                    ('is_active', 'Active'),
-                    ('-is_active', 'Active Desc'),
-                    ('is_staff', 'Staff'),
-                    ('-is_staff', 'Staff Desc'),
-                    ('is_superuser', 'SuperUser'),
-                    ('-is_superuser', 'SuperUser Desc'),
-                    )
 
 
 class LogEntryFilter(DojoFilter):
@@ -791,34 +864,52 @@ class LogEntryFilter(DojoFilter):
 
     class Meta:
         model = LogEntry
-        exclude = ['content_type', 'object_pk', 'object_id', 'object_repr', 'changes']
+        exclude = ['content_type', 'object_pk', 'object_id', 'object_repr', 'changes', 'additional_data']
 
 
 class ProductTypeFilter(DojoFilter):
-    name = CharFilter(lookup_type='icontains')
+    name = CharFilter(lookup_expr='icontains')
+
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('name', 'name'),
+        ),
+    )
 
     class Meta:
         model = Product_Type
+        exclude = []
         include = ('name',)
-        order_by = (('name', ' Name'),
-                    ('-name', 'Name Desc'))
 
 
 class TestTypeFilter(DojoFilter):
-    name = CharFilter(lookup_type='icontains')
+    name = CharFilter(lookup_expr='icontains')
+
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('name', 'name'),
+        ),
+    )
 
     class Meta:
         model = Test_Type
+        exclude = []
         include = ('name',)
-        order_by = (('name', ' Name'),
-                    ('-name', 'Name Desc'))
 
 
 class DevelopmentEnvironmentFilter(DojoFilter):
-    name = CharFilter(lookup_type='icontains')
+    name = CharFilter(lookup_expr='icontains')
+
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('name', 'name'),
+        ),
+    )
 
     class Meta:
         model = Development_Environment
+        exclude = []
         include = ('name',)
-        order_by = (('name', ' Name'),
-                    ('-name', 'Name Desc'))
