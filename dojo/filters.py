@@ -4,7 +4,7 @@ from datetime import timedelta, datetime
 
 from auditlog.models import LogEntry
 from dojo.models import Dojo_User, Product_Type, Finding, \
-    Product, Test_Type, Endpoint, Development_Environment, Finding_Template, Report
+    Product, Test_Type, Endpoint, Development_Environment, Finding_Template, Report, get_earliest_finding
 from django import forms
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -19,14 +19,6 @@ local_tz = timezone(settings.TIME_ZONE)
 SEVERITY_CHOICES = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
                     ('High', 'High'), ('Critical', 'Critical'))
 BOOLEAN_CHOICES = (('false', 'No'), ('true', 'Yes'),)
-
-EARLIEST_FINDING = None
-
-try:
-    EARLIEST_FINDING = Finding.objects.earliest('date')
-except Finding.DoesNotExist:
-    EARLIEST_FINDING = None
-
 
 def now():
     return local_tz.localize(datetime.today())
@@ -166,9 +158,9 @@ class ReportRiskAcceptanceFilter(ChoiceFilter):
 
 class MetricsDateRangeFilter(ChoiceFilter):
     def any(self, qs, name):
-        if EARLIEST_FINDING is not None:
+        if get_earliest_finding() is not None:
             start_date = local_tz.localize(datetime.combine(
-                EARLIEST_FINDING.date, datetime.min.time())
+                get_earliest_finding().date, datetime.min.time())
             )
             self.start_date = _truncate(start_date - timedelta(days=1))
             self.end_date = _truncate(now() + timedelta(days=1))
@@ -228,9 +220,9 @@ class MetricsDateRangeFilter(ChoiceFilter):
             (key, value[0]) for key, value in six.iteritems(self.options)]
         super(MetricsDateRangeFilter, self).__init__(*args, **kwargs)
 
-        if EARLIEST_FINDING is not None:
+        if get_earliest_finding() is not None:
             start_date = local_tz.localize(datetime.combine(
-                EARLIEST_FINDING.date, datetime.min.time())
+                get_earliest_finding().date, datetime.min.time())
             )
             self.start_date = _truncate(start_date - timedelta(days=1))
             self.end_date = _truncate(now() + timedelta(days=1))
@@ -627,9 +619,9 @@ class FindingStatusFilter(ChoiceFilter):
             (key, value[0]) for key, value in six.iteritems(self.options)]
         super(FindingStatusFilter, self).__init__(*args, **kwargs)
 
-        if EARLIEST_FINDING is not None:
+        if get_earliest_finding() is not None:
             start_date = local_tz.localize(datetime.combine(
-                EARLIEST_FINDING.date, datetime.min.time())
+                get_earliest_finding().date, datetime.min.time())
             )
             self.start_date = _truncate(start_date - timedelta(days=1))
             self.end_date = _truncate(now() + timedelta(days=1))
