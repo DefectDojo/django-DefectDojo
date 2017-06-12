@@ -20,6 +20,13 @@ SEVERITY_CHOICES = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
                     ('High', 'High'), ('Critical', 'Critical'))
 BOOLEAN_CHOICES = (('false', 'No'), ('true', 'Yes'),)
 
+EARLIEST_FINDING = None
+
+try:
+    EARLIEST_FINDING = Finding.objects.earliest('date')
+except Finding.DoesNotExist:
+    EARLIEST_FINDING = None
+
 
 def now():
     return local_tz.localize(datetime.today())
@@ -159,14 +166,9 @@ class ReportRiskAcceptanceFilter(ChoiceFilter):
 
 class MetricsDateRangeFilter(ChoiceFilter):
     def any(self, qs, name):
-        try:
-            earliest_finding = Finding.objects.earliest('date')
-        except Finding.DoesNotExist:
-            earliest_finding = None
-
-        if earliest_finding:
+        if EARLIEST_FINDING is not None:
             start_date = local_tz.localize(datetime.combine(
-                earliest_finding.date, datetime.min.time())
+                EARLIEST_FINDING.date, datetime.min.time())
             )
             self.start_date = _truncate(start_date - timedelta(days=1))
             self.end_date = _truncate(now() + timedelta(days=1))
@@ -226,14 +228,9 @@ class MetricsDateRangeFilter(ChoiceFilter):
             (key, value[0]) for key, value in six.iteritems(self.options)]
         super(MetricsDateRangeFilter, self).__init__(*args, **kwargs)
 
-        try:
-            earliest_finding = Finding.objects.earliest('date')
-        except Finding.DoesNotExist:
-            earliest_finding = None
-
-        if earliest_finding:
+        if EARLIEST_FINDING is not None:
             start_date = local_tz.localize(datetime.combine(
-                earliest_finding.date, datetime.min.time())
+                EARLIEST_FINDING.date, datetime.min.time())
             )
             self.start_date = _truncate(start_date - timedelta(days=1))
             self.end_date = _truncate(now() + timedelta(days=1))
@@ -630,14 +627,9 @@ class FindingStatusFilter(ChoiceFilter):
             (key, value[0]) for key, value in six.iteritems(self.options)]
         super(FindingStatusFilter, self).__init__(*args, **kwargs)
 
-        try:
-            earliest_finding = Finding.objects.earliest('date')
-        except Finding.DoesNotExist:
-            earliest_finding = None
-
-        if earliest_finding:
+        if EARLIEST_FINDING is not None:
             start_date = local_tz.localize(datetime.combine(
-                earliest_finding.date, datetime.min.time())
+                EARLIEST_FINDING.date, datetime.min.time())
             )
             self.start_date = _truncate(start_date - timedelta(days=1))
             self.end_date = _truncate(now() + timedelta(days=1))
