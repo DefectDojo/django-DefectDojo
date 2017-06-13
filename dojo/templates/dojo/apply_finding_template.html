@@ -11,7 +11,7 @@
 {% endblock %}
 {% block content %}
     <h3> Apply template to a Finding</h3>
-    <form class="form-horizontal" name="apply_template" action="{% url 'edit_finding' finding.id %}" method="post">
+    <form class="form-horizontal" name="apply_template" action="{% url 'apply_template_to_finding' finding.id %}" method="post">
         {% csrf_token %}
         {% include "dojo/apply_finding_template_form_fields.html" with form=form template=template %}
         {%  if jform %}

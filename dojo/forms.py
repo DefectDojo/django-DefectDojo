@@ -717,6 +717,7 @@ class StubFindingForm(forms.ModelForm):
 
 
 class ApplyFindingTemplateForm(forms.ModelForm):
+
     title = forms.CharField(max_length=1000, required=True)
 
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
@@ -735,6 +736,11 @@ class ApplyFindingTemplateForm(forms.ModelForm):
                 'required': 'Select valid choice: In Progress, On Hold, Completed',
                 'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
 
+    description = forms.CharField(widget=forms.Textarea)
+    mitigation = forms.CharField(widget=forms.Textarea)
+    impact = forms.CharField(widget=forms.Textarea)
+    references = forms.CharField(widget=forms.Textarea, required=False)
+
     def __init__(self, template, *args, **kwargs):
         tags = Tag.objects.usage_for_model(Finding)
         t = [(tag.name, tag.name) for tag in tags]
@@ -744,20 +750,22 @@ class ApplyFindingTemplateForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super(ApplyFindingTemplateForm, self).clean()
-        if (cleaned_data['active'] or cleaned_data['verified']) and cleaned_data['duplicate']:
-            raise forms.ValidationError('Duplicate findings cannot be'
-                                        ' verified or active')
-        if cleaned_data['false_p'] and cleaned_data['verified']:
-            raise forms.ValidationError('False positive findings cannot '
-                                        'be verified.')
+
+        if 'title' in cleaned_data:
+            if len(cleaned_data['title']) <= 0:
+                raise forms.ValidationError("The title is required.")
+        else:
+            raise forms.ValidationError("The title is required.")
+
         return cleaned_data
 
     class Meta:
         model = Finding
+        fields = ['title',  'cwe', 'severity', 'description', 'mitigation', 'impact', 'references', 'tags']
         order = ('title', 'cwe', 'severity', 'description', 'impact')
-        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
-                   'review_requested_by', 'date', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope',
-                   'is_template', 'defect_review_requested_by', 'under_defect_review', 'endpoints')
+        # exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
+        #            'review_requested_by', 'date', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope',
+        #            'is_template', 'defect_review_requested_by', 'under_defect_review', 'endpoints')
 
 
 class FindingTemplateForm(forms.ModelForm):

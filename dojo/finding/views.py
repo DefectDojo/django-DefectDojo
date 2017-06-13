@@ -613,6 +613,21 @@ def choose_finding_template_options(request, tid, fid):
                   )
 
 @user_passes_test(lambda u: u.is_staff)
+def apply_template_to_finding(request, fid):
+    finding = get_object_or_404(Finding, id=fid)
+
+    if (request.method == "POST"):
+        form = ApplyFindingTemplateForm(request.POST, instance=finding)
+
+        if form.is_valid():
+            new_finding = form.save(commit=False)
+            pass
+
+        return HttpResponseRedirect(reverse('view_finding', args=(finding.id,)))
+    else:
+        return HttpResponseRedirect(reverse('view_finding', args=(finding.id,)))
+
+@user_passes_test(lambda u: u.is_staff)
 def delete_finding_note(request, tid, nid):
     note = get_object_or_404(Notes, id=nid)
     if note.author == request.user:
