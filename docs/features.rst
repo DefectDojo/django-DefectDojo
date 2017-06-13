@@ -399,6 +399,7 @@ DefectDojo has the ability to import reports from other security tools.  Current
 10. OWASP Dependency Check XML
 11. Retire.js JavaScript Scan JSON
 12. Node Security Platform JSON
+12. Qualys XML
 13. Generic Findings in CSV format
 
 
