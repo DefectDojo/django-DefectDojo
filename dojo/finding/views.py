@@ -604,7 +604,7 @@ def find_template_to_apply(request, fid):
 def choose_finding_template_options(request, tid, fid):
     finding = get_object_or_404(Finding, id=fid)
     template = get_object_or_404(Finding_Template, id=tid)
-    form = ApplyFindingTemplateForm(instance=finding, template=template)
+    form = ApplyFindingTemplateForm(data=finding.__dict__, template=template)
 
     return render(request, 'dojo/apply_finding_template.html',
                   {'finding': finding,
@@ -613,15 +613,34 @@ def choose_finding_template_options(request, tid, fid):
                   )
 
 @user_passes_test(lambda u: u.is_staff)
-def apply_template_to_finding(request, fid):
+def apply_template_to_finding(request, fid, tid):
     finding = get_object_or_404(Finding, id=fid)
+    template = get_object_or_404(Finding_Template, id=tid)
 
     if (request.method == "POST"):
-        form = ApplyFindingTemplateForm(request.POST, instance=finding)
+        form = ApplyFindingTemplateForm(data=request.POST)
 
         if form.is_valid():
-            new_finding = form.save(commit=False)
-            pass
+            finding.title = form.cleaned_data['title']
+            finding.cwe = form.cleaned_data['cwe']
+            finding.severity = form.cleaned_data['severity']
+            finding.description = form.cleaned_data['description']
+            finding.mitigation = form.cleaned_data['mitigation']
+            finding.impact = form.cleaned_data['impact']
+            finding.references = form.cleaned_data['references']
+            finding.save()
+        else:
+            messages.add_message(request,
+                                 messages.ERROR,
+                                 'There appears to be errors on the form, please correct below.',
+                                 extra_tags='alert-danger')
+            form_error = True
+
+            return render(request, 'dojo/apply_finding_template.html',
+                          {'finding': finding,
+                           'template': template,
+                           'form': form,}
+                          )
 
         return HttpResponseRedirect(reverse('view_finding', args=(finding.id,)))
     else:

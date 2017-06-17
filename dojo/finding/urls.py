@@ -30,7 +30,7 @@ urlpatterns = [
         name='find_template_to_apply'),
     url(r'^finding/(?P<tid>\d+)/(?P<fid>\d+)/choose_finding_template_options', views.choose_finding_template_options,
         name='choose_finding_template_options'),
-    url(r'^finding/(?P<fid>\d+)/apply_template_to_finding',
+    url(r'^finding/(?P<fid>\d+)/(?P<tid>\d+)/apply_template_to_finding',
         views.apply_template_to_finding, name='apply_template_to_finding'),
     url(r'^finding/(?P<fid>\d+)/close$', views.close_finding,
         name='close_finding'),
