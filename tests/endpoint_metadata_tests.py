@@ -22,6 +22,7 @@ class EndpointMetaDataTestUtil:
     def create_user(is_staff):
         user = User()
         user.is_staff = is_staff
+        user.save()
         return user
 
     @staticmethod
