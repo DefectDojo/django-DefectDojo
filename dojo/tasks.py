@@ -215,7 +215,7 @@ def async_dedupe(self,  new_finding, *args, **kwargs):
     eng_findings_cwe = Finding.objects.filter(test__engagement__product=new_finding.test.engagement.product,
                                               cwe=new_finding.cwe).exclude(id=new_finding.id).exclude(cwe=None).exclude(endpoints=None)
     eng_findings_title = Finding.objects.filter(test__engagement__product=new_finding.test.engagement.product,
-                                                title=new_finding.title).exclude(id=new_finding.id).exlcude(endpoints=None)
+                                                title=new_finding.title).exclude(id=new_finding.id).exclude(endpoints=None)
     total_findings = eng_findings_cwe | eng_findings_title
     for find in total_findings:
         list1 = new_finding.endpoints.all()

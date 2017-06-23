@@ -1,5 +1,16 @@
 #!/bin/bash
 
+NONE='\033[00m'
+RED='\033[01;31m'
+GREEN='\033[01;32m'
+YELLOW='\033[01;33m'
+PURPLE='\033[01;35m'
+CYAN='\033[01;36m'
+WHITE='\033[01;37m'
+BOLD='\033[1m'
+UNDERLINE='\033[4m'
+
+
 # Get MySQL details
 function get_db_details() {
     read -p "MySQL host: " SQLHOST
@@ -117,7 +128,9 @@ if python -c 'import sys; print sys.real_prefix' 2>/dev/null; then
     python manage.py makemigrations dojo
     python manage.py makemigrations
     python manage.py migrate
-    python manage.py syncdb
+    echo -e "${GREEN}${BOLD}Create Dojo superuser:"
+    tput sgr0
+    python manage.py createsuperuser
     python manage.py loaddata product_type
     python manage.py loaddata test_type
     python manage.py loaddata development_environment
