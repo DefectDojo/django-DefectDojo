@@ -728,6 +728,9 @@ class Stub_Finding(models.Model):
     test = models.ForeignKey(Test, editable=False)
     reporter = models.ForeignKey(User, editable=False)
 
+    class Meta:
+        ordering = ('-date', 'title')
+
     def __unicode__(self):
         return self.title
 

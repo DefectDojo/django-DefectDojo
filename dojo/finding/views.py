@@ -1,5 +1,6 @@
 # #  findings
 import base64
+import json
 import logging
 import mimetypes
 import os
@@ -12,11 +13,12 @@ from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.http import HttpResponseNotFound
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.http import StreamingHttpResponse
 from django.shortcuts import render, get_object_or_404
+from django.utils import formats
 from django.utils.safestring import mark_safe
 from pytz import timezone
 
@@ -25,13 +27,13 @@ from dojo.filters import OpenFindingFilter, \
     ClosedFingingSuperFilter, TemplateFindingFilter
 from dojo.forms import NoteForm, CloseFindingForm, FindingForm, PromoteFindingForm, FindingTemplateForm, \
     DeleteFindingTemplateForm, FindingImageFormSet, JIRAFindingForm, ReviewFindingForm, ClearFindingReviewForm, \
-    DefectFindingForm
+    DefectFindingForm, StubFindingForm
 from dojo.models import Product_Type, Finding, Notes, \
     Risk_Acceptance, BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, \
-    FindingImageAccessToken, JIRA_Issue, JIRA_PKey, JIRA_Conf, Dojo_User, Cred_User, Cred_Mapping
+    FindingImageAccessToken, JIRA_Issue, JIRA_PKey, JIRA_Conf, Dojo_User, Cred_User, Cred_Mapping, Test
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, send_review_email, process_notifications, \
-    add_comment, add_epic, add_issue, update_epic, update_issue, close_epic, jira_get_resolution_id, jira_change_resolution_id, \
-    get_jira_connection
+    add_comment, add_epic, add_issue, update_epic, update_issue, close_epic, jira_get_resolution_id, \
+    jira_change_resolution_id, get_jira_connection
 
 from dojo.tasks import add_issue_task, update_issue_task, add_comment_task
 
@@ -591,6 +593,40 @@ def delete_finding_note(request, tid, nid):
                              extra_tags='alert-success')
         return view_finding(request, tid)
     return HttpResponseForbidden()
+
+
+@user_passes_test(lambda u: u.is_staff)
+def add_stub_finding(request, tid):
+    test = get_object_or_404(Test, id=tid)
+    form = StubFindingForm()
+    if request.method == 'POST':
+        form = StubFindingForm(request.POST)
+        if form.is_valid():
+            stub_finding = form.save(commit=False)
+            stub_finding.test = test
+            stub_finding.reporter = request.user
+            stub_finding.save()
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Stub Finding created successfully.',
+                                 extra_tags='alert-success')
+            if request.is_ajax():
+                data = {'message': 'Stub Finding created successfully.',
+                        'id': stub_finding.id,
+                        'severity': 'None',
+                        'date': formats.date_format(stub_finding.date, "DATE_FORMAT")}
+                return HttpResponse(json.dumps(data))
+        else:
+            if request.is_ajax():
+                data = {'message': 'Stub Finding form has error, please revise and try again.',}
+                return HttpResponse(json.dumps(data))
+
+            messages.add_message(request,
+                                 messages.ERROR,
+                                 'Stub Finding form has error, please revise and try again.',
+                                 extra_tags='alert-danger')
+    add_breadcrumb(title="Add Stub Finding", top_level=False, request=request)
+    return HttpResponseRedirect(reverse('view_test', args=(tid,)))
 
 
 @user_passes_test(lambda u: u.is_staff)

@@ -65,7 +65,6 @@ def view_test(request, tid):
     fpage = get_page_items(request, findings, 25)
     sfpage = get_page_items(request, stub_findings, 25)
     show_re_upload = any(test.test_type.name in code for code in ImportScanForm.SCAN_TYPE_CHOICES)
-    ajax_url = reverse('api_dispatch_list', kwargs={'resource_name': 'stub_findings', 'api_name': 'v1_a'})
 
     add_breadcrumb(parent=test, top_level=False, request=request)
     return render(request, 'dojo/view_test.html',
@@ -77,7 +76,6 @@ def view_test(request, tid):
                    'person': person,
                    'request': request,
                    'show_re_upload': show_re_upload,
-                   'ajax_url': ajax_url,
                    'creds': creds,
                    'cred_test': cred_test
                    })

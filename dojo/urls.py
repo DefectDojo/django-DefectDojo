@@ -4,7 +4,6 @@ from django.contrib import admin
 from tastypie.api import Api
 
 from dojo import views
-from dojo.ajax import StubFindingResource as ajax_stub_finding_resource
 from dojo.api import UserResource, ProductResource, EngagementResource, \
     TestResource, FindingResource, ScanSettingsResource, ScanResource, \
     StubFindingResource, FindingTemplateResource, ImportScanResource, \
@@ -49,8 +48,6 @@ v1_api.register(ImportScanResource())
 v1_api.register(ReImportScanResource())
 # v1_api.register(IPScanResource())
 
-ajax_api = Api(api_name='v1_a')
-ajax_api.register(ajax_stub_finding_resource())
 
 ur = []
 ur += dev_env_urls
@@ -90,8 +87,6 @@ urlpatterns = [
     url(r'^%sadmin/' % settings.URL_PREFIX, include(admin.site.urls)),
     #  tastypie api
     url(r'^%sapi/' % settings.URL_PREFIX, include(v1_api.urls)),
-    #  tastypie api
-    url(r'^%sajax/' % settings.URL_PREFIX, include(ajax_api.urls)),
     # api doc urls
     url(r'%sapi/v1/doc/' % settings.URL_PREFIX,
         include(swagger_urls, namespace='tastypie_swagger'),
