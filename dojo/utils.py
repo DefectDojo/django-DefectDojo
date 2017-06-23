@@ -331,6 +331,9 @@ def get_period_counts_legacy(findings, findings_closed, accepted_findings, perio
 
 def get_period_counts(active_findings, findings, findings_closed, accepted_findings, period_interval, start_date,
                       relative_delta='months'):
+    start_date = datetime(start_date.year,
+                          start_date.month, start_date.day,
+                          tzinfo=localtz)
     opened_in_period = list()
     active_in_period = list()
     accepted_in_period = list()
@@ -444,6 +447,12 @@ def get_period_counts(active_findings, findings, findings_closed, accepted_findi
 
 
 def opened_in_period(start_date, end_date, pt):
+    start_date = datetime(start_date.year,
+                          start_date.month, start_date.day,
+                          tzinfo=localtz)
+    end_date = datetime(end_date.year,
+                        end_date.month, end_date.day,
+                        tzinfo=localtz)
     opened_in_period = Finding.objects.filter(date__range=[start_date, end_date],
                                               test__engagement__product__prod_type=pt,
                                               verified=True,
