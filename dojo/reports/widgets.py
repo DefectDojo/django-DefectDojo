@@ -344,7 +344,6 @@ class EndpointList(Widget):
         super(EndpointList, self).__init__(*args, **kwargs)
 
         self.title = 'Endpoint List'
-        print self.endpoints
         self.form = self.endpoints.form
         self.multiple = 'false'
         if self.request is not None:

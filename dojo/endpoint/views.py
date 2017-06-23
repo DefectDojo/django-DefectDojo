@@ -93,11 +93,11 @@ def get_endpoint_ids(endpoints):
             host_no_port = e.host[:e.host.index(':')]
         else:
             host_no_port = e.host
-
-        if host_no_port in hosts:
+        key = host_no_port + '-' + str(e.product.id)
+        if key in hosts:
             continue
         else:
-            hosts.append(host_no_port)
+            hosts.append(key)
             ids.append(e.id)
     return ids
 
