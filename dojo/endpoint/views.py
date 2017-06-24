@@ -32,10 +32,19 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-@user_passes_test(lambda u: u.is_staff)
 def vulnerable_endpoints(request):
     endpoints = Endpoint.objects.filter(finding__active=True, finding__verified=True, finding__false_p=False,
                                         finding__duplicate=False, finding__out_of_scope=False).distinct()
+
+    # are they authorized
+    if request.user.is_staff:
+        pass
+    else:
+        products = Product.objects.filter(authorized_users__in=[request.user])
+        if products.exists():
+            endpoints = endpoints.filter(product__in=products.all())
+        else:
+            raise PermissionDenied
 
     product = None
     if 'product' in request.GET:

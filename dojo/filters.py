@@ -661,6 +661,9 @@ class MetricsFindingFilter(FilterSet):
         self.form.fields['severity'].choices = self.queryset.order_by('numerical_severity') \
             .values_list('severity', 'severity').distinct()
 
+    class Meta:
+        model = Finding
+        exclude = []
 
 class EndpointFilter(DojoFilter):
     product = ModelMultipleChoiceFilter(
