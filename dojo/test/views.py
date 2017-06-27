@@ -365,7 +365,7 @@ def add_temp_finding(request, tid, fid):
 def search(request, tid):
     test = get_object_or_404(Test, id=tid)
     templates = Finding_Template.objects.all()
-    templates = TemplateFindingFilter(request.GET, queryset=templates)
+    templates = TemplateFindingFilter(request.GET, queryset=templates).qs
     paged_templates = get_page_items(request, templates, 25)
     title_words = [word
                    for finding in templates.qs

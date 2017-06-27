@@ -822,7 +822,7 @@ def generate_report(request, obj):
             return HttpResponseRedirect(reverse('reports'))
         else:
             raise Http404()
-    paged_findings = get_page_items(request, findings, 25)
+    paged_findings = get_page_items(request, findings.qs, 25)
     return render(request, 'dojo/request_report.html',
                   {'product_type': product_type,
                    'product': product,
