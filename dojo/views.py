@@ -31,7 +31,7 @@ def action_history(request, cid, oid):
 
     history = LogEntry.objects.filter(content_type=ct, object_pk=obj.id).order_by('-timestamp')
     history = LogEntryFilter(request.GET, queryset=history)
-    paged_history = get_page_items(request, history, 25)
+    paged_history = get_page_items(request, history.qs, 25)
     add_breadcrumb(parent=obj, title="Action History", top_level=False, request=request)
     return render(request, 'dojo/action_history.html',
                   {"history": paged_history,
