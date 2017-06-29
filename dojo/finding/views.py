@@ -628,6 +628,9 @@ def apply_template_to_finding(request, fid, tid):
             finding.mitigation = form.cleaned_data['mitigation']
             finding.impact = form.cleaned_data['impact']
             finding.references = form.cleaned_data['references']
+            finding.last_reviewed = datetime.now(tz=localtz)
+            finding.last_reviewed_by = request.user
+
             finding.save()
         else:
             messages.add_message(request,
