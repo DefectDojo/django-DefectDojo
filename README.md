@@ -31,7 +31,7 @@ Deploy to Docker Cloud. (<b>Login first to Docker Cloud before clicking the inst
 
 # Installation Options
 
-### [Debian or RHEL-based Install Script](http://defectdojo.readthedocs.io/en/latest/getting-started.html#install-script)
+### [Debian, Ubuntu (16.04.2+) or RHEL-based Install Script](http://defectdojo.readthedocs.io/en/latest/getting-started.html#install-script)
 
 ### [Docker](http://defectdojo.readthedocs.io/en/latest/getting-started.html#docker-local-install) - There are currently a number of bugs in the Docker image that we're working to address. Please use the regular install script to avoid issues.
 
