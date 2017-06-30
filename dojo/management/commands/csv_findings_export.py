@@ -10,11 +10,11 @@ from datetime import datetime
 from auditlog.models import LogEntry
 from jira import JIRA
 from jira.exceptions import JIRAError
-from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, close_epic
+from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, close_epic, get_system_setting
 from django.core.urlresolvers import get_resolver, reverse
 from itertools import chain
 
-locale = timezone(settings.TIME_ZONE)
+locale = timezone(get_system_setting('time_zone'))
 
 """
 Author: Aaron Weaver

@@ -29,7 +29,7 @@ from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, message, get_system_setting
 from dojo.tasks import update_epic_task, add_epic_task, close_epic_task
 
-localtz = timezone(settings.TIME_ZONE)
+localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,

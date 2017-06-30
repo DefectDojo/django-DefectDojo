@@ -8,8 +8,9 @@ from pytz import timezone
 from dojo.models import ScanSettings, Product
 import dojo.settings as settings
 
+from dojo.utils import get_system_setting
 
-locale = timezone(settings.TIME_ZONE)
+locale = timezone(get_system_setting('time_zone'))
 
 """
 Authors: Fatimah

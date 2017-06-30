@@ -20,8 +20,28 @@ from imagekit.processors import ResizeToCover
 from pytz import timezone, all_timezones
 from tagging.registry import register as tag_register
 
-localtz = timezone(settings.TIME_ZONE)
+class System_Settings(models.Model):
+    enable_deduplication = models.BooleanField(default=False, 
+                                        blank=False,
+                                        verbose_name='Deduplicate findings',
+                                        help_text='With this setting turned on, Dojo deduplicates findings by comparing endpoints, ' \
+                                                  'cwe fields, and titles. ' \
+                                                  'If two findings share a URL and have the same CWE or title, Dojo marks the ' \
+                                                  'less recent finding as a duplicate. When deduplication is enabled, a list of ' \
+                                                  'deduplicated findings is added to the engagement view.')
+    enable_jira = models.BooleanField(default=False, verbose_name='Enable JIRA integration', blank=False)
+    s_finding_severity_naming = models.BooleanField(default=False, 
+                                                    blank=False, 
+                                                    help_text='With this setting turned on, Dojo will display S0, S1, S2, etc ' \
+                                                    'in most places, whereas if turned off Critical, High, Medium, etc will be displayed.')
+    time_zone = models.CharField(max_length=50,
+                                 choices=[(tz,tz) for tz in all_timezones],
+                                 default='UTC',blank=False)
 
+try:
+    localtz = timezone(System_Settings.objects.get().time_zone)
+except:
+    localtz = timezone(System_Settings().time_zone)
 
 def get_current_date():
     return localtz.normalize(now()).date()
@@ -988,25 +1008,6 @@ class JIRA_PKey(models.Model):
     push_all_issues = models.BooleanField(default=False, blank=True)
     enable_engagement_epic_mapping = models.BooleanField(default=False, blank=True)
     push_notes = models.BooleanField(default=False, blank=True)
-
-class System_Settings(models.Model):
-    enable_deduplication = models.BooleanField(default=False, 
-                                        blank=False,
-                                        verbose_name='Deduplicate findings',
-                                        help_text='With this setting turned on, Dojo deduplicates findings by comparing endpoints, ' \
-                                                  'cwe fields, and titles. ' \
-                                                  'If two findings share a URL and have the same CWE or title, Dojo marks the ' \
-                                                  'less recent finding as a duplicate. When deduplication is enabled, a list of ' \
-                                                  'deduplicated findings is added to the engagement view.')
-    enable_jira = models.BooleanField(default=False, verbose_name='Enable JIRA integration', blank=False)
-    s_finding_severity_naming = models.BooleanField(default=False, 
-                                                    blank=False, 
-                                                    help_text='With this setting turned on, Dojo will display S0, S1, S2, etc ' \
-                                                    'in most places, whereas if turned off Critical, High, Medium, etc will be displayed.')
-    time_zone = models.CharField(max_length=50,
-                                 choices=[(tz,tz) for tz in all_timezones],
-                                 default='UTC',blank=False)
-
 
 class Tool_Type(models.Model):
     name = models.CharField(max_length=200)

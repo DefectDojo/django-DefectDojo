@@ -12,9 +12,9 @@ from pytz import timezone
 from dojo.filters import DevelopmentEnvironmentFilter
 from dojo.forms import Development_EnvironmentForm
 from dojo.models import Development_Environment
-from dojo.utils import get_page_items, add_breadcrumb
+from dojo.utils import get_page_items, add_breadcrumb, get_system_setting
 
-localtz = timezone(settings.TIME_ZONE)
+localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,

@@ -19,10 +19,10 @@ from dojo.forms import NoteForm, TestForm, FindingForm, \
 from dojo.models import Finding, Test, Notes, \
     BurpRawRequestResponse, Endpoint, Stub_Finding, Finding_Template, JIRA_PKey, Cred_User, Cred_Mapping
 from dojo.tools.factory import import_parser_factory
-from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, message, process_notifications
+from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting
 from dojo.tasks import add_issue_task
 
-localtz = timezone(settings.TIME_ZONE)
+localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,

@@ -33,11 +33,11 @@ from dojo.models import Product_Type, Finding, Notes, \
     FindingImageAccessToken, JIRA_Issue, JIRA_PKey, JIRA_Conf, Dojo_User, Cred_User, Cred_Mapping, Test
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, send_review_email, process_notifications, \
     add_comment, add_epic, add_issue, update_epic, update_issue, close_epic, jira_get_resolution_id, \
-    jira_change_resolution_id, get_jira_connection
+    jira_change_resolution_id, get_jira_connection, get_system_setting
 
 from dojo.tasks import add_issue_task, update_issue_task, add_comment_task
 
-localtz = timezone(settings.TIME_ZONE)
+localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,

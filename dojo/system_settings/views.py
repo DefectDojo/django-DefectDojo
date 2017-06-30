@@ -20,10 +20,10 @@ from pytz import timezone
 from dojo.filters import ProductFilter, ProductFindingFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm
 from dojo.models import System_Settings
-from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, handle_uploaded_selenium
+from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, handle_uploaded_selenium, get_system_setting
 from dojo.forms import SystemSettingsForm
 
-localtz = timezone(settings.TIME_ZONE)
+localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,

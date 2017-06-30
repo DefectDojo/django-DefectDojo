@@ -28,7 +28,7 @@ from tagging.models import Tag
 from tagging.utils import get_tag_list
 from tagging.views import TaggedItem
 
-localtz = timezone(settings.TIME_ZONE)
+localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,
