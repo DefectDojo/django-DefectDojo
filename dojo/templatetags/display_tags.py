@@ -11,9 +11,9 @@ from django.utils.text import normalize_newlines
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.conf import settings
-from dojo.utils import prepare_for_view
+from dojo.utils import prepare_for_view, get_system_setting
 
-from dojo.models import Check_List, FindingImage, FindingImageAccessToken, Finding
+from dojo.models import Check_List, FindingImage, FindingImageAccessToken, Finding, System_Settings
 
 register = template.Library()
 
@@ -155,8 +155,10 @@ def pic_token(context, image, size):
 
 @register.simple_tag
 def severity_value(value):
-    if hasattr(settings, 'S_FINDING_SEVERITY_NAMING'):
-        if settings.S_FINDING_SEVERITY_NAMING:
-            return Finding.get_numerical_severity(value)
+    try:
+        if get_system_setting('s_finding_severity_naming'):
+            value = Finding.get_numerical_severity(value)
+    except:
+        pass
 
     return value

@@ -184,13 +184,13 @@ def add_findings(request, tid):
     enabled = False
     jform = None
     form = AddFindingForm(initial={'date': datetime.now(tz=localtz).date()})
-    if hasattr(settings, 'ENABLE_JIRA'):
-        if settings.ENABLE_JIRA:
-            if JIRA_PKey.objects.filter(product=test.engagement.product).count() != 0:
-                enabled = JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues
-                jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
-        else:
-            jform = None
+
+    if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(product=test.engagement.product).count() != 0:
+        enabled = JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues
+        jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
+    else:
+        jform = None
+
     if request.method == 'POST':
         form = AddFindingForm(request.POST)
         if form.is_valid():
@@ -343,10 +343,9 @@ def add_temp_finding(request, tid, fid):
                                     'impact': finding.impact,
                                     'references': finding.references,
                                     'numerical_severity': finding.numerical_severity})
-        if hasattr(settings, 'ENABLE_JIRA'):
-            if settings.ENABLE_JIRA:
-                enabled = JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues
-                jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
+        if get_system_setting('enable_jira'):
+            enabled = JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues
+            jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
         else:
             jform = None
 

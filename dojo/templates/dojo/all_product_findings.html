@@ -35,7 +35,7 @@
                             <th>Verified</th>
                             <th>Active</th>
                             <th>Age</th>
-                            {% if "ENABLE_JIRA"|get_config_setting %}
+                            {% if "enable_jira"|get_system_setting %}
                             <th>Jira</th>
                             {% endif %}
                         </tr>
@@ -57,7 +57,7 @@
                                 <td>{{ finding.verified }}</td>
                                 <td>{{ finding.active }}</td>
                                 <td>{{ finding.age }}</td>
-                                {% if "ENABLE_JIRA"|get_config_setting %}
+                                {% if "enable_jira"|get_system_setting %}
                                 <td>
                                 <a href="{{finding.jira_conf.url}}/browse/{{finding.jira.jira_key}}" target="_blank"> {{finding.jira.jira_key}} </a>
                                 </td>

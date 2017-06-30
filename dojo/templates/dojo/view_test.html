@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load display_tags %}
-{% load get_config_setting %}
+{% load get_system_setting %}
 {% load static from staticfiles %}
 {% block add_styles %}
     ul#select_by_severity a:hover, ul#bulk_edit a:hover {
@@ -215,7 +215,7 @@
                     <th>Verified</th>
                     <th>Active</th>
                     <th>Duplicate</th>
-                    {% if "ENABLE_JIRA"|get_config_setting %}
+                    {% if "enable_jira"|get_system_setting %}
                     <th>Jira</th>
                     {% endif %}
                     <th>Actions</th>
@@ -241,13 +241,15 @@
                         </td>
                         <td>{{ finding.reporter.username }}</td>
                         <td>{{ finding.mitigated }}</td>
-                        <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
-                            <span class="text-danger">
-                        {% else %}<span>{% endif %}{{ finding.severity }}</span></td>
+                        <td>
+                            <span class="label severity severity-{{ finding.severity|safe }}">
+                                {{ finding.severity_display }}
+                            </span>
+                        </td>
                         <td>{{ finding.verified }}</td>
                         <td>{{ finding.active }}</td>
                         <td>{{ finding.duplicate }}</td>
-                        {% if "ENABLE_JIRA"|get_config_setting %}
+                        {% if "enable_jira"|get_system_setting %}
                         <td>
                         <a href="{{finding.jira_conf.url}}/browse/{{finding.jira.jira_key}}" target="_blank"> {{finding.jira.jira_key}} </a>
                         </td>
