@@ -24,11 +24,10 @@
                         <span class="help-block {{ form.error_css_class }}">{{ error }}</span>
                     {% endfor %}
 
-                    {% if field.help_text %}
-                        <p class="help-block">
-                            {{ field.help_text|safe }}
-                        </p>
-                    {% endif %}
+                {% if field.help_text %}
+                    <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="{{ field.help_text|safe }}" data-placement="right" data-container="body">
+                    </i>
+                {% endif %}
                 </div>
             </div>
         {% elif field|is_radio %}
@@ -51,9 +50,8 @@
                 {% endfor %}
 
                 {% if field.help_text %}
-                    <p class="help-block">
-                        {{ field.help_text|safe }}
-                    </p>
+                    <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="{{ field.help_text|safe }}" data-placement="right" data-container="body">
+                    </i>
                 {% endif %}
             </div>
         {% else %}
@@ -71,9 +69,8 @@
                 {% endfor %}
 
                 {% if field.help_text %}
-                    <p class="help-block">
-                        {{ field.help_text|safe }}
-                    </p>
+                    <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="{{ field.help_text|safe }}" data-placement="right" data-container="body">
+                    </i>
                 {% endif %}
             </div>
         {% endif %}
