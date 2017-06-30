@@ -357,11 +357,11 @@ def edit_finding(request, fid):
         enabled = True
     except:
         enabled = False
-    pass
-    if hasattr(settings, 'ENABLE_JIRA'):
-        if settings.ENABLE_JIRA:
-            if JIRA_PKey.objects.filter(product=finding.test.engagement.product) != 0:
-                jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
+        pass
+
+    if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(product=finding.test.engagement.product) != 0:
+        jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
+
     if request.method == 'POST':
         form = FindingForm(request.POST, instance=finding)
         if form.is_valid():
@@ -649,14 +649,14 @@ def promote_to_finding(request, fid):
     test = finding.test
     form_error = False
     jira_available = False
-    if hasattr(settings, 'ENABLE_JIRA'):
-         if settings.ENABLE_JIRA:
-             if JIRA_PKey.objects.filter(product=test.engagement.product) != 0:
-                jform = JIRAFindingForm(request.POST, prefix='jiraform',
-                                         enabled=JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues)
-                jira_available = True
+
+    if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(product=test.engagement.product) != 0:
+        jform = JIRAFindingForm(request.POST, prefix='jiraform',
+                                enabled=JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues)
+        jira_available = True
     else:
-         jform = None
+        jform = None
+        
     form = PromoteFindingForm(initial={'title': finding.title,
                                        'date': finding.date,
                                        'severity': finding.severity,

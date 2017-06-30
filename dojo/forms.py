@@ -20,7 +20,7 @@ from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
     JIRA_Issue, JIRA_PKey, JIRA_Conf, UserContactInfo, Tool_Type, Tool_Configuration, Tool_Product_Settings, \
-    Cred_User, Cred_Mapping
+    Cred_User, Cred_Mapping, System_Settings
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
 localtz = timezone(settings.TIME_ZONE)
@@ -1274,6 +1274,13 @@ class CredMappingFormProd(forms.ModelForm):
         model = Cred_Mapping
         fields = ['cred_id', 'url', 'is_authn_provider']
         exclude = ['product', 'finding', 'engagement', 'test']
+
+class SystemSettingsForm(forms.ModelForm):
+
+    class Meta:
+        model = System_Settings
+        exclude = ['']
+
 
 class CredUserForm(forms.ModelForm):
     #selenium_script = forms.FileField(widget=forms.widgets.FileInput(

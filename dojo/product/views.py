@@ -21,7 +21,7 @@ from dojo.filters import ProductFilter, ProductFindingFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, ProductMetaDataForm, JIRAPKeyForm, JIRAFindingForm
 from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, \
     Tool_Product_Settings, Cred_User, Cred_Mapping
-from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data
+from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, get_system_setting
 from custom_field.models import CustomFieldValue, CustomField
 from  dojo.tasks import add_epic_task
 from tagging.models import Tag
@@ -336,37 +336,36 @@ def edit_product(request, pid):
                                  messages.SUCCESS,
                                  'Product updated successfully.',
                                  extra_tags='alert-success')
-            if hasattr(settings, 'ENABLE_JIRA'):
-                if settings.ENABLE_JIRA:
-                    if jira_enabled:
-                        jform = JIRAPKeyForm(request.POST, instance=jira_inst)
-                        #need to handle delete
-                        try:
-                            jform.save()
-                        except:
-                            pass
-                    else:
-                        jform = JIRAPKeyForm(request.POST)
-                        if  jform.is_valid():
-                            new_conf = jform.save(commit=False)
-                            new_conf.product_id = pid
-                            new_conf.save()
-                            messages.add_message(request,
-                                                 messages.SUCCESS,
-                                                 'JIRA information updated successfully.',
-                                                 extra_tags='alert-success')
+
+            if get_system_setting('enable_jira') and jira.enabled:
+                jform = JIRAPKeyForm(request.POST, instance=jira_inst)
+                #need to handle delete
+                try:
+                    jform.save()
+                except:
+                    pass
+            else:
+                jform = JIRAPKeyForm(request.POST)
+                if  jform.is_valid():
+                    new_conf = jform.save(commit=False)
+                    new_conf.product_id = pid
+                    new_conf.save()
+                    messages.add_message(request,
+                                            messages.SUCCESS,
+                                            'JIRA information updated successfully.',
+                                            extra_tags='alert-success')
 
             return HttpResponseRedirect(reverse('view_product', args=(pid,)))
     else:
         form = ProductForm(instance=prod,
                            initial={'auth_users': prod.authorized_users.all(),
                                     'tags': get_tag_list(Tag.objects.get_for_object(prod))})
-        if hasattr(settings, 'ENABLE_JIRA'):
-            if settings.ENABLE_JIRA:
-                if jira_enabled:
-                    jform = JIRAPKeyForm(instance=jira_inst)
-                else:
-                    jform = JIRAPKeyForm()
+
+        if get_system_setting('jira_enabled'):
+            if jira_enabled:
+                jform = JIRAPKeyForm(instance=jira_inst)
+            else:
+                jform = JIRAPKeyForm()
         else:
             jform = None
     add_breadcrumb(parent=prod, title="Edit", top_level=False, request=request)
