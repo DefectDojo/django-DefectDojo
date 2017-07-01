@@ -369,6 +369,12 @@
 <script src="{% static "jquery-cookie/jquery.cookie.js" %}"></script>
 <!-- our JS -->
 <script src="{% static "dojo/js/index.js" %}"></script>
+<script type="application/javascript">
+    $(document).ready(function() {
+        $('.has-popover').popover({'trigger':'hover'});
+    });
+</script>
+
 {% block postscript %}
 {% endblock %}
 </body>
