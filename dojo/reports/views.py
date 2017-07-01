@@ -506,7 +506,7 @@ def product_endpoint_report(request, pid):
                                             'include_executive_summary': include_executive_summary,
                                             'include_table_of_contents': include_table_of_contents,
                                             'user': user,
-                                            'team_name': settings.TEAM_NAME,
+                                            'team_name': get_system_setting('team_name'),
                                             'title': 'Generate Report',
                                             'host': report_url_resolver(request),
                                             'user_id': request.user.id},
@@ -735,7 +735,7 @@ def generate_report(request, obj):
                    'include_executive_summary': include_executive_summary,
                    'include_table_of_contents': include_table_of_contents,
                    'user': user,
-                   'team_name': settings.TEAM_NAME,
+                   'team_name': get_system_setting('team_name'),
                    'title': 'Generate Report',
                    'host': report_url_resolver(request),
                    'user_id': request.user.id}

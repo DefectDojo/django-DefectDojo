@@ -35,6 +35,7 @@ class System_Settings(models.Model):
                                                     help_text='With this setting turned on, Dojo will display S0, S1, S2, etc ' \
                                                     'in most places, whereas if turned off Critical, High, Medium, etc will be displayed.')
     url_prefix = models.CharField(max_length=300, default='', blank=True)
+    team_name = models.CharField(max_length=100, default='', blank=True)
     time_zone = models.CharField(max_length=50,
                                  choices=[(tz,tz) for tz in all_timezones],
                                  default='UTC',blank=False)

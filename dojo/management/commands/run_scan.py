@@ -82,11 +82,11 @@ class Command(BaseCommand):
             msg += "\nFor any questions please email "
             msg += settings.PORT_SCAN_CONTACT_EMAIL + "\n"
             msg += "Thanks,\nThe "
-            msg += settings.TEAM_NAME
+            msg += get_system_setting('team_name')
             msg += " Team"
             email_to = current_scan.scan_settings.email
 
-            send_mail(settings.TEAM_NAME + ' Port Scan Report',
+            send_mail(get_system_setting('team_name') + ' Port Scan Report',
                       msg,
                       settings.PORT_SCAN_RESULT_EMAIL_FROM,
                       [email_to],

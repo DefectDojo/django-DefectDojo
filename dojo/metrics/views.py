@@ -297,7 +297,7 @@ def metrics(request, mtype):
 
     if 'view' in request.GET and 'dashboard' == request.GET['view']:
         punchcard, ticks, highest_count = get_punchcard_data(findings.qs, weeks_between, start_date)
-        page_name = (settings.TEAM_NAME if settings.TEAM_NAME else "") + " Metrics"
+        page_name = (get_system_setting('team_name')) + " Metrics"
         template = 'dojo/dashboard-metrics.html'
 
     add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
