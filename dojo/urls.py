@@ -8,6 +8,7 @@ from dojo.api import UserResource, ProductResource, EngagementResource, \
     TestResource, FindingResource, ScanSettingsResource, ScanResource, \
     StubFindingResource, FindingTemplateResource, ImportScanResource, \
     ReImportScanResource
+from dojo.utils import get_system_setting
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
 from dojo.endpoint.urls import urlpatterns as endpoint_urls
 from dojo.engagement.urls import urlpatterns as eng_urls
@@ -72,9 +73,6 @@ ur += tool_product_urls
 ur += cred_urls
 ur += system_settings_urls
 
-if not hasattr(settings, 'URL_PREFIX'):
-    settings.URL_PREFIX = ''
-
 from tastypie_swagger.views import SwaggerView, ResourcesView, SchemaView
 
 swagger_urls = [
@@ -86,20 +84,20 @@ swagger_urls = [
 
 urlpatterns = [
     #  django admin
-    url(r'^%sadmin/' % settings.URL_PREFIX, include(admin.site.urls)),
+    url(r'^%sadmin/' % get_system_setting('url_prefix'), include(admin.site.urls)),
     #  tastypie api
-    url(r'^%sapi/' % settings.URL_PREFIX, include(v1_api.urls)),
+    url(r'^%sapi/' % get_system_setting('url_prefix'), include(v1_api.urls)),
     # api doc urls
-    url(r'%sapi/v1/doc/' % settings.URL_PREFIX,
+    url(r'%sapi/v1/doc/' % get_system_setting('url_prefix'),
         include(swagger_urls, namespace='tastypie_swagger'),
         kwargs={
             "tastypie_api_module": "dojo.urls.v1_api",
             "namespace": "tastypie_swagger",
             "version": "1.0"}),
     # action history
-    url(r'^%shistory/(?P<cid>\d+)/(?P<oid>\d+)$' % settings.URL_PREFIX, views.action_history,
+    url(r'^%shistory/(?P<cid>\d+)/(?P<oid>\d+)$' % get_system_setting('url_prefix'), views.action_history,
         name='action_history'),
-    url(r'^%s' % settings.URL_PREFIX, include(ur)),
+    url(r'^%s' % get_system_setting('url_prefix'), include(ur)),
 ]
 
 

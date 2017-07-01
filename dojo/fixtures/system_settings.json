@@ -6,6 +6,7 @@
     "enable_deduplication": false,
     "enable_jira": false,
     "s_finding_severity_naming": false,
+    "url_prefix": "",
     "time_zone": "UTC"
   }
 }
