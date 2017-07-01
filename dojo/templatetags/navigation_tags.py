@@ -1,5 +1,6 @@
 from django import template
 from django.utils.safestring import mark_safe as safe
+from django.utils.html import escape
 
 from dojo.models import Product_Type
 from dojo.utils import get_alerts
