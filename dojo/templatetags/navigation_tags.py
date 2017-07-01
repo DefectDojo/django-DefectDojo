@@ -32,7 +32,7 @@ def query_string_as_hidden(context):
                 inputs += "<input type='hidden' name='" + parts[0] + "' value='" + parts[1] + "'/>"
             else:
                 inputs += "<input type='hidden' name='" + parts[0] + "' value=''/>"
-    return inputs
+    return safe(inputs)
 
 
 @register.inclusion_tag('pt_nav_items.html')
