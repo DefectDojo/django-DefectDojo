@@ -29,9 +29,9 @@ def query_string_as_hidden(context):
         for param in parameters:
             parts = param.split('=')
             if len(parts) == 2:
-                inputs += "<input type='hidden' name='" + parts[0] + "' value='" + parts[1] + "'/>"
+                inputs += "<input type='hidden' name='" + escape(parts[0]) + "' value='" + escape(parts[1]) + "'/>"
             else:
-                inputs += "<input type='hidden' name='" + parts[0] + "' value=''/>"
+                inputs += "<input type='hidden' name='" + escape(parts[0]) + "' value=''/>"
     return safe(inputs)
 
 
