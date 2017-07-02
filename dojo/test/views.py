@@ -10,6 +10,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden, Http404, HttpResponse
 from django.shortcuts import render, get_object_or_404
+from django.views.decorators.cache import cache_page
 from pytz import timezone
 
 from dojo.filters import TemplateFindingFilter
@@ -17,7 +18,7 @@ from dojo.forms import NoteForm, TestForm, FindingForm, \
     DeleteTestForm, AddFindingForm, \
     ImportScanForm, ReImportScanForm, FindingBulkUpdateForm, JIRAFindingForm
 from dojo.models import Finding, Test, Notes, \
-    BurpRawRequestResponse, Endpoint, Stub_Finding, Finding_Template, JIRA_PKey, Cred_User, Cred_Mapping
+    BurpRawRequestResponse, Endpoint, Stub_Finding, Finding_Template, JIRA_PKey, Cred_User, Cred_Mapping, Dojo_User
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting
 from dojo.tasks import add_issue_task
@@ -156,6 +157,20 @@ def delete_test_note(request, tid, nid):
         return view_test(request, tid)
     return HttpResponseForbidden()
 
+
+@user_passes_test(lambda u: u.is_staff)
+@cache_page(60 * 5)  # cache for 5 minutes
+def test_calendar(request):
+    if not 'lead' in request.GET or '*' in request.GET.getlist('lead'):
+        tests = Test.objects.all()
+    else:
+        tests = Test.objects.filter(engagement__lead__username__in=request.GET.getlist('lead', ''))
+    add_breadcrumb(title="Calendar", top_level=True, request=request)
+    return render(request, 'dojo/calendar.html', {
+        'caltype': 'tests',
+        'leads': request.GET.getlist('lead', ''),
+        'tests': tests,
+        'users': Dojo_User.objects.all()})
 
 @user_passes_test(lambda u: u.is_staff)
 def test_ics(request, tid):

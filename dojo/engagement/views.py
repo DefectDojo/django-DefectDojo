@@ -23,7 +23,7 @@ from dojo.forms import CheckForm, \
 from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Type, Notes, \
     Risk_Acceptance, Development_Environment, BurpRawRequestResponse, Endpoint, \
-    JIRA_PKey, JIRA_Conf, JIRA_Issue, Cred_User, Cred_Mapping
+    JIRA_PKey, JIRA_Conf, JIRA_Issue, Cred_User, Cred_Mapping, Dojo_User
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, message, get_system_setting
@@ -42,11 +42,17 @@ logger = logging.getLogger(__name__)
 
 @user_passes_test(lambda u: u.is_staff)
 @cache_page(60 * 5)  # cache for 5 minutes
-def calendar(request):
-    engagements = Engagement.objects.all()
+def engagement_calendar(request):
+    if not 'lead' in request.GET or '*' in request.GET.getlist('lead'):
+        engagements = Engagement.objects.all()
+    else:
+        engagements = Engagement.objects.filter(lead__username__in=request.GET.getlist('lead', ''))
     add_breadcrumb(title="Calendar", top_level=True, request=request)
     return render(request, 'dojo/calendar.html', {
-        'engagements': engagements})
+        'caltype': 'engagements',
+        'leads': request.GET.getlist('lead', ''),
+        'engagements': engagements,
+        'users': Dojo_User.objects.all()})
 
 
 @user_passes_test(lambda u: u.is_staff)
