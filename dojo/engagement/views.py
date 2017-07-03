@@ -23,11 +23,12 @@ from dojo.forms import CheckForm, \
 from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Type, Notes, \
     Risk_Acceptance, Development_Environment, BurpRawRequestResponse, Endpoint, \
-    JIRA_PKey, JIRA_Conf, JIRA_Issue, Cred_User, Cred_Mapping
+    JIRA_PKey, JIRA_Conf, JIRA_Issue, Cred_User, Cred_Mapping, Notifications
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, message, get_system_setting
 from dojo.tasks import update_epic_task, add_epic_task, close_epic_task
+from django_slack import slack_message
 
 localtz = timezone(get_system_setting('time_zone'))
 
@@ -90,6 +91,14 @@ def new_engagement(request):
                                  messages.SUCCESS,
                                  'Engagement added successfully.',
                                  extra_tags='alert-success')
+            try:
+                notifications = Notifications.objects.get()
+            except:
+                notifications = Notifications()
+            if 'slack' in notifications.engagement_added:
+                slack_message('dojo/new_engagement.slack', {
+                    'engagement': new_eng
+                })
             if "_Add Tests" in request.POST:
                 return HttpResponseRedirect(reverse('add_tests', args=(new_eng.id,)))
             else:

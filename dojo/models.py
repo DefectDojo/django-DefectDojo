@@ -19,6 +19,7 @@ from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToCover
 from pytz import timezone, all_timezones
 from tagging.registry import register as tag_register
+from multiselectfield import MultiSelectField
 
 class System_Settings(models.Model):
     enable_deduplication = models.BooleanField(default=False, 
@@ -1010,6 +1011,14 @@ class JIRA_PKey(models.Model):
     push_all_issues = models.BooleanField(default=False, blank=True)
     enable_engagement_epic_mapping = models.BooleanField(default=False, blank=True)
     push_notes = models.BooleanField(default=False, blank=True)
+
+NOTIFICATION_CHOICES=(("slack","Slack"),("mail","Mail"))
+class Notifications(models.Model):
+    engagement_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='', blank=True)
+    test_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='', blank=True)
+    vulnerabilities_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='', blank=True)
+    report_created = MultiSelectField(choices=NOTIFICATION_CHOICES, default='', blank=True)
+    issue_accepted = MultiSelectField(choices=NOTIFICATION_CHOICES, default='', blank=True)
 
 class Tool_Type(models.Model):
     name = models.CharField(max_length=200)

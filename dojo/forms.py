@@ -20,7 +20,7 @@ from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
     JIRA_Issue, JIRA_PKey, JIRA_Conf, UserContactInfo, Tool_Type, Tool_Configuration, Tool_Product_Settings, \
-    Cred_User, Cred_Mapping, System_Settings
+    Cred_User, Cred_Mapping, System_Settings, Notifications
 from dojo.utils import get_system_setting
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
@@ -1283,6 +1283,11 @@ class SystemSettingsForm(forms.ModelForm):
         model = System_Settings
         exclude = ['']
 
+class NotificationsForm(forms.ModelForm):
+
+    class Meta:
+        model = Notifications
+        exclude = ['']
 
 class CredUserForm(forms.ModelForm):
     #selenium_script = forms.FileField(widget=forms.widgets.FileInput(
