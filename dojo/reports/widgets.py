@@ -287,7 +287,7 @@ class FindingList(Widget):
 
     def get_asciidoc(self):
         asciidoc = render_to_string("dojo/custom_asciidoc_report_findings.html",
-                                    {"findings": self.findings,
+                                    {"findings": self.findings.qs,
                                      "host": self.host,
                                      "include_finding_notes": self.finding_notes,
                                      "include_finding_images": self.finding_images,
@@ -297,7 +297,7 @@ class FindingList(Widget):
     def get_html(self):
         html = render_to_string("dojo/custom_pdf_report_finding_list.html",
                                 {"title": self.title,
-                                 "findings": self.findings,
+                                 "findings": self.findings.qs,
                                  "include_finding_notes": self.finding_notes,
                                  "include_finding_images": self.finding_images,
                                  "host": self.host,
@@ -357,7 +357,7 @@ class EndpointList(Widget):
     def get_html(self):
         html = render_to_string("dojo/custom_pdf_report_endpoint_list.html",
                                 {"title": self.title,
-                                 "endpoints": self.endpoints,
+                                 "endpoints": self.endpoints.qs,
                                  "include_finding_notes": self.finding_notes,
                                  "include_finding_images": self.finding_images,
                                  "host": self.host,
@@ -366,7 +366,7 @@ class EndpointList(Widget):
 
     def get_asciidoc(self):
         asciidoc = render_to_string("dojo/custom_asciidoc_report_endpoints.html",
-                                    {"endpoints": self.endpoints,
+                                    {"endpoints": self.endpoints.qs,
                                      "host": self.host,
                                      "include_finding_notes": self.finding_notes,
                                      "include_finding_images": self.finding_images,
