@@ -20,4 +20,6 @@ urlpatterns = [
         name='add_meta_data'),
     url(r'^product/(?P<pid>\d+)/edit_meta_data', views.edit_meta_data,
         name='edit_meta_data'),
+    url(r'^product/(?P<pid>\d+)/ad_hoc_finding', views.ad_hoc_finding,
+        name='ad_hoc_finding'),
 ]

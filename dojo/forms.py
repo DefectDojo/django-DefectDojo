@@ -621,6 +621,46 @@ class AddFindingForm(forms.ModelForm):
                    'review_requested_by')
 
 
+class AdHocFindingForm(forms.ModelForm):
+    title = forms.CharField(max_length=1000)
+    date = forms.DateField(required=True,
+                           widget=forms.TextInput(attrs={'class':
+                                                             'datepicker'}))
+    cwe = forms.IntegerField(required=False)
+    severity_options = (('Low', 'Low'), ('Medium', 'Medium'),
+                        ('High', 'High'), ('Critical', 'Critical'))
+    description = forms.CharField(widget=forms.Textarea)
+    severity = forms.ChoiceField(
+        choices=severity_options,
+        error_messages={
+            'required': 'Select valid choice: In Progress, On Hold, Completed',
+            'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
+    mitigation = forms.CharField(widget=forms.Textarea)
+    impact = forms.CharField(widget=forms.Textarea)
+    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
+                                               widget=MultipleSelectWithPopPlusMinus(attrs={'size': '11'}))
+    references = forms.CharField(widget=forms.Textarea, required=False)
+    is_template = forms.BooleanField(label="Create Template?", required=False,
+                                     help_text="A new finding template will be created from this finding.")
+
+    def clean(self):
+        # self.fields['endpoints'].queryset = Endpoint.objects.all()
+        cleaned_data = super(AddFindingForm, self).clean()
+        if ((cleaned_data['active'] or cleaned_data['verified'])
+            and cleaned_data['duplicate']):
+            raise forms.ValidationError('Duplicate findings cannot be'
+                                        ' verified or active')
+        if cleaned_data['false_p'] and cleaned_data['verified']:
+            raise forms.ValidationError('False positive findings cannot '
+                                        'be verified.')
+        return cleaned_data
+
+    class Meta:
+        model = Finding
+        order = ('title', 'severity', 'endpoints', 'description', 'impact')
+        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
+                   'review_requested_by')
+
 class PromoteFindingForm(forms.ModelForm):
     title = forms.CharField(max_length=1000)
     date = forms.DateField(required=True,

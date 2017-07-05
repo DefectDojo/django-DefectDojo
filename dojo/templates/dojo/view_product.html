@@ -47,6 +47,13 @@
                             {% endif %}
                             {% if user.is_staff %}
                                 <li role="presentation">
+                                    <a class="" href="{% url 'ad_hoc_finding' prod.id %}">
+                                        <i class="fa fa-list-alt"></i> Add Finding
+                                    </a>
+                                </li>
+                            {% endif %}
+                            {% if user.is_staff %}
+                                <li role="presentation">
                                     <a class="" href="{% url 'add_meta_data' prod.id %}">
                                         <i class="fa fa-list-alt"></i> Add Metadata
                                     </a>
