@@ -114,7 +114,7 @@ def delete_test(request, tid):
     eng = test.engagement
     form = DeleteTestForm(instance=test)
 
-    from django.contrib.admin.util import NestedObjects
+    from django.contrib.admin.utils import NestedObjects
     from django.db import DEFAULT_DB_ALIAS
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)

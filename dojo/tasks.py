@@ -124,11 +124,9 @@ def async_custom_pdf_report(self,
             toc_settings = selected_widgets['table-of-contents']
 
             toc_depth = toc_settings.depth
-
             toc_bytes = render_to_string(xsl_style_sheet_tempalte, {'widgets': widgets,
                                                                     'depth': toc_depth,
                                                                     'title': toc_settings.title})
-
             temp.write(toc_bytes)
             temp.seek(0)
 
@@ -143,12 +141,10 @@ def async_custom_pdf_report(self,
                            'info': cp.meta_info})
             cover = host + reverse(
                 'report_cover_page') + "?" + x
-
         bytes = render_to_string(template, {'widgets': widgets,
                                             'toc_depth': toc_depth,
                                             'host': host,
                                             'report_name': report.name})
-
         pdf = pdfkit.from_string(bytes,
                                  False,
                                  configuration=config,
