@@ -309,7 +309,7 @@ def add_tests(request, eid):
         if form.is_valid():
             new_test = form.save(commit=False)
             new_test.engagement = eng
-            # new_test.lead = User.objects.get(id=form['lead'].value())
+            new_test.lead = User.objects.get(id=form['lead'].value())
             new_test.save()
             tags = request.POST.getlist('tags')
             t = ", ".join(tags)
@@ -338,6 +338,8 @@ def add_tests(request, eid):
                 return HttpResponseRedirect(reverse('view_engagement', args=(eng.id,)))
     else:
         form = TestForm()
+	form.initial['target_start'] = eng.target_start
+	form.initial['target_end'] = eng.target_end
     add_breadcrumb(parent=eng, title="Add Tests", top_level=False, request=request)
     return render(request, 'dojo/add_tests.html',
                   {'form': form,
