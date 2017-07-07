@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load display_tags %}
-{% load get_config_setting %}
+{% load get_system_setting %}
 {% load humanize %}
 {% load static from staticfiles %}
 {% block add_styles %}
@@ -639,7 +639,7 @@
                                 <th>Mitigation Date</th>
                                 <th>Verified</th>
                                 <th>Active</th>
-                                {% if "ENABLE_JIRA"|get_config_setting %}
+                                {% if "enable_jira"|get_system_setting %}
                                     <th>Jira</th>
                                 {% endif %}
                                 <th>Actions</th>
@@ -649,14 +649,16 @@
                             {% for finding in findings %}
                                 <tr class="{% if finding.active %}active_finding{% else %}inactive_finding{% endif %}">
                                     <td><a href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a></td>
-                                    <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
-                                        <span class="text-error">
-                                    {% else %}<span>{% endif %}{{ finding.severity }}</span></td>
+                                    <td>
+                                        <span class="label severity severity-{{ finding.severity }}">
+                                            {{ finding.severity_display }}
+                                        </span>
+                                    </td>
                                     <td>{{ finding.reporter.username }}</td>
                                     <td>{{ finding.mitigated }}</td>
                                     <td>{{ finding.verified }}</td>
                                     <td>{{ finding.active }}</td>
-                                    {% if "ENABLE_JIRA"|get_config_setting %}
+                                    {% if "enable_jira"|get_system_setting %}
                                         <td>
                                             <a href="{{ finding.jira_conf.url }}/browse/{{ finding.jira.jira_key }}"
                                                target="_blank"> {{ finding.jira.jira_key }} </a>

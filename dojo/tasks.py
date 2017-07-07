@@ -18,10 +18,11 @@ from dojo.models import Finding
 import pdfkit
 from dojo.celery import app
 from dojo.reports.widgets import report_widget_factory
-from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, close_epic
+from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, close_epic, get_system_setting
 
 logger = get_task_logger(__name__)
-localtz = timezone(settings.TIME_ZONE)
+
+localtz = timezone(get_system_setting('time_zone'))
 
 """
 def email_requester(report, uri, error=None):

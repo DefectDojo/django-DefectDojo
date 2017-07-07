@@ -17,11 +17,33 @@ from django.db.models import Q
 from django.utils.timezone import now
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToCover
-from pytz import timezone
+from pytz import timezone, all_timezones
 from tagging.registry import register as tag_register
 
-localtz = timezone(settings.TIME_ZONE)
+class System_Settings(models.Model):
+    enable_deduplication = models.BooleanField(default=False, 
+                                        blank=False,
+                                        verbose_name='Deduplicate findings',
+                                        help_text='With this setting turned on, Dojo deduplicates findings by comparing endpoints, ' \
+                                                  'cwe fields, and titles. ' \
+                                                  'If two findings share a URL and have the same CWE or title, Dojo marks the ' \
+                                                  'less recent finding as a duplicate. When deduplication is enabled, a list of ' \
+                                                  'deduplicated findings is added to the engagement view.')
+    enable_jira = models.BooleanField(default=False, verbose_name='Enable JIRA integration', blank=False)
+    s_finding_severity_naming = models.BooleanField(default=False, 
+                                                    blank=False, 
+                                                    help_text='With this setting turned on, Dojo will display S0, S1, S2, etc ' \
+                                                    'in most places, whereas if turned off Critical, High, Medium, etc will be displayed.')
+    url_prefix = models.CharField(max_length=300, default='', blank=True)
+    team_name = models.CharField(max_length=100, default='', blank=True)
+    time_zone = models.CharField(max_length=50,
+                                 choices=[(tz,tz) for tz in all_timezones],
+                                 default='UTC',blank=False)
 
+try:
+    localtz = timezone(System_Settings.objects.get().time_zone)
+except:
+    localtz = timezone(System_Settings().time_zone)
 
 def get_current_date():
     return localtz.normalize(now()).date()
@@ -690,12 +712,14 @@ class Finding(models.Model):
                     setattr(self, field, "No %s given" % field)
 
     def severity_display(self):
-        if hasattr(settings, 'S_FINDING_SEVERITY_NAMING'):
-            if settings.S_FINDING_SEVERITY_NAMING:
+        try:
+            system_settings = System_Settings.objects.get()
+            if system_settings.s_finding_severity_naming:
                 return self.numerical_severity
             else:
                 return self.severity
-        else:
+
+        except:
             return self.numerical_severity
 
     def get_breadcrumbs(self):
@@ -1140,6 +1164,7 @@ admin.site.register(Tool_Product_Settings)
 admin.site.register(Tool_Type)
 admin.site.register(Cred_User)
 admin.site.register(Cred_Mapping)
+admin.site.register(System_Settings)
 
 watson.register(Product)
 watson.register(Test)

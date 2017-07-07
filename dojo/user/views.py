@@ -14,9 +14,9 @@ from tastypie.models import ApiKey
 from dojo.filters import UserFilter
 from dojo.forms import DojoUserForm, AddDojoUserForm, DeleteUserForm, APIKeyForm, UserContactInfoForm
 from dojo.models import Product, Dojo_User, UserContactInfo
-from dojo.utils import get_page_items, add_breadcrumb, get_alerts
+from dojo.utils import get_page_items, add_breadcrumb, get_alerts, get_system_setting
 
-localtz = timezone(settings.TIME_ZONE)
+localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,

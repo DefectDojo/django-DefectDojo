@@ -14,9 +14,9 @@ from pytz import timezone
 from dojo.forms import ScanSettingsForm, DeleteIPScanForm, VaForm
 from dojo.management.commands.run_scan import run_on_deman_scan
 from dojo.models import Product, Scan, IPScan, ScanSettings
-from dojo.utils import add_breadcrumb
+from dojo.utils import add_breadcrumb, get_system_setting
 
-localtz = timezone(settings.TIME_ZONE)
+localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,

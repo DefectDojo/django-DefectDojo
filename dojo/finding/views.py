@@ -33,11 +33,11 @@ from dojo.models import Product_Type, Finding, Notes, \
     FindingImageAccessToken, JIRA_Issue, JIRA_PKey, JIRA_Conf, Dojo_User, Cred_User, Cred_Mapping, Test
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, send_review_email, process_notifications, \
     add_comment, add_epic, add_issue, update_epic, update_issue, close_epic, jira_get_resolution_id, \
-    jira_change_resolution_id, get_jira_connection
+    jira_change_resolution_id, get_jira_connection, get_system_setting
 
 from dojo.tasks import add_issue_task, update_issue_task, add_comment_task
 
-localtz = timezone(settings.TIME_ZONE)
+localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -357,11 +357,11 @@ def edit_finding(request, fid):
         enabled = True
     except:
         enabled = False
-    pass
-    if hasattr(settings, 'ENABLE_JIRA'):
-        if settings.ENABLE_JIRA:
-            if JIRA_PKey.objects.filter(product=finding.test.engagement.product) != 0:
-                jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
+        pass
+
+    if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(product=finding.test.engagement.product) != 0:
+        jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
+
     if request.method == 'POST':
         form = FindingForm(request.POST, instance=finding)
         if form.is_valid():
@@ -649,14 +649,14 @@ def promote_to_finding(request, fid):
     test = finding.test
     form_error = False
     jira_available = False
-    if hasattr(settings, 'ENABLE_JIRA'):
-         if settings.ENABLE_JIRA:
-             if JIRA_PKey.objects.filter(product=test.engagement.product) != 0:
-                jform = JIRAFindingForm(request.POST, prefix='jiraform',
-                                         enabled=JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues)
-                jira_available = True
+
+    if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(product=test.engagement.product) != 0:
+        jform = JIRAFindingForm(request.POST, prefix='jiraform',
+                                enabled=JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues)
+        jira_available = True
     else:
-         jform = None
+        jform = None
+        
     form = PromoteFindingForm(initial={'title': finding.title,
                                        'date': finding.date,
                                        'severity': finding.severity,

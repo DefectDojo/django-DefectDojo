@@ -26,10 +26,10 @@ from dojo.models import Finding, Product, Engagement, Test, \
     JIRA_PKey, JIRA_Conf, JIRA_Issue, Cred_User, Cred_Mapping
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
-    FileIterWrapper, get_cal_event, message
+    FileIterWrapper, get_cal_event, message, get_system_setting
 from dojo.tasks import update_epic_task, add_epic_task, close_epic_task
 
-localtz = timezone(settings.TIME_ZONE)
+localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -141,12 +141,12 @@ def edit_engagement(request, eid):
         except:
             enabled = False
             pass
-        if hasattr(settings, "ENABLE_JIRA"):
-            if settings.ENABLE_JIRA:
-                if JIRA_PKey.objects.filter(product=eng.product).count() != 0:
-                    jform = JIRAFindingForm(prefix='jiraform', enabled=enabled)
-                else:
-                    jform = None
+
+        if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(product=eng.product).count() != 0:
+            jform = JIRAFindingForm(prefix='jiraform', enabled=enabled)
+        else:
+            jform = None
+
     form.initial['tags'] = [tag.name for tag in eng.tags]
     add_breadcrumb(parent=eng, title="Edit Engagement", top_level=False, request=request)
     return render(request, 'dojo/new_eng.html',
