@@ -555,7 +555,7 @@ class TestForm(forms.ModelForm):
                                      "Choose from the list or add new tags.  Press TAB key to add.")
     lead = forms.ModelChoiceField(
 	queryset=User.objects.exclude(is_staff=False),
-	required=True, label="Testing Lead")
+	required=False, label="Testing Lead")
 
 
     def __init__(self, *args, **kwargs):

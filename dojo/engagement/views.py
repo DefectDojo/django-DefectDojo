@@ -309,7 +309,11 @@ def add_tests(request, eid):
         if form.is_valid():
             new_test = form.save(commit=False)
             new_test.engagement = eng
-            new_test.lead = User.objects.get(id=form['lead'].value())
+	    try:
+            	new_test.lead = User.objects.get(id=form['lead'].value())
+	    except:
+		new_test.lead = None
+		pass
             new_test.save()
             tags = request.POST.getlist('tags')
             t = ", ".join(tags)
