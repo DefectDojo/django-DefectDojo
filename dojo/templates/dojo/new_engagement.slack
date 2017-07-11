@@ -1,5 +1,0 @@
-{% extends django_slack %}
-
-{% block text %}
-New engagement: {{ engagement.product }}
-{% endblock %}
