@@ -1,0 +1,5 @@
+Greetings,
+
+a new engagement has been created: {{ engagement.product }}
+
+Cheers!

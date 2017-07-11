@@ -1,0 +1,15 @@
+{% extends django_slack %}
+
+{% block token %}
+{{ token }}
+{% endblock %}
+{% block channel %}
+{{ channel }}
+{% endblock %}
+{% block username %}
+{{ username }}
+{% endblock %}
+
+{% block text %}
+New engagement: {{ engagement.product }}
+{% endblock %}
