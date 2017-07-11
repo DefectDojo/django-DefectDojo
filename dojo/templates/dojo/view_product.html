@@ -354,9 +354,9 @@
                     </tr>
                     <tr>
                         <td>{{ prod.prod_type }}</td>
-                        <td>{{ prod.team_manager | default:"Unknown" }}</td>
-                        <td>{{ prod.product_manager | default:"Unknown" }}</td>
-                        <td>{{ prod.technical_contact | default:"Unknown" }}</td>
+                        <td>{{ prod.manager | default:"Unknown" }}</td>
+                        <td>{{ prod.prod_manager | default:"Unknown" }}</td>
+                        <td>{{ prod.tech_contact | default:"Unknown" }}</td>
                         <td>
                             {% if prod.authorized_users.all %}
                                 <ul class="no-bullets">

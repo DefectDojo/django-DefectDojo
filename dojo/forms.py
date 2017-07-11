@@ -183,7 +183,7 @@ class ProductForm(forms.ModelForm):
 
     class Meta:
         model = Product
-        fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type',
+        fields = ['name', 'description', 'tags', 'prod_manager', 'tech_contact', 'manager', 'prod_type',
                   'authorized_users']
 
 
@@ -555,6 +555,9 @@ class TestForm(forms.ModelForm):
                            required=False,
                            help_text="Add tags that help describe this test.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
+    lead = forms.ModelChoiceField(
+	queryset=User.objects.exclude(is_staff=False),
+	required=False, label="Testing Lead")
 
 
     def __init__(self, *args, **kwargs):

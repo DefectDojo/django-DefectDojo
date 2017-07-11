@@ -531,6 +531,7 @@ class Development_Environment(models.Model):
 
 class Test(models.Model):
     engagement = models.ForeignKey(Engagement, editable=False)
+    lead = models.ForeignKey(User, editable=True, null=True)
     test_type = models.ForeignKey(Test_Type)
     target_start = models.DateTimeField()
     target_end = models.DateTimeField()
