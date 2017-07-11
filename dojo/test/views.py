@@ -19,7 +19,8 @@ from dojo.forms import NoteForm, TestForm, FindingForm, \
 from dojo.models import Finding, Test, Notes, \
     BurpRawRequestResponse, Endpoint, Stub_Finding, Finding_Template, JIRA_PKey, Cred_User, Cred_Mapping
 from dojo.tools.factory import import_parser_factory
-from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting
+from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, message, \
+                       process_notifications, get_system_setting, send_notifications
 from dojo.tasks import add_issue_task
 
 localtz = timezone(get_system_setting('time_zone'))
@@ -562,6 +563,11 @@ def re_import_scan_results(request, tid):
                                          'A total of ' + message(mitigated_count, 'finding',
                                                                  'mitigated') + '. Please manually verify each one.',
                                          extra_tags='alert-success')
+
+                send_notifications(event='results_added', eventargs={'finding_count': finding_count, 
+                                                                     'test': t, 
+                                                                     'engagement': engagement})
+
                 return HttpResponseRedirect(reverse('view_test', args=(t.id,)))
             except SyntaxError:
                 messages.add_message(request,
