@@ -19,7 +19,7 @@ from pytz import timezone
 
 from dojo.filters import ProductFilter, ProductFindingFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm
-from dojo.models import Notifications
+from dojo.models import Notifications, Dojo_User
 from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, handle_uploaded_selenium, get_system_setting
 from dojo.forms import NotificationsForm
 from pprint import pprint
@@ -37,12 +37,12 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-@user_passes_test(lambda u: u.is_staff)
-def notifications(request):
+def personal_notifications(request):
     try:
-        notifications_obj = Notifications.objects.get()
+        notifications_obj = Notifications.objects.get(user=Dojo_User(id=request.user.id))
     except:
-        notifications_obj = Notifications()
+        notifications_obj = Notifications(user=Dojo_User(id=request.user.id))
+
     form = NotificationsForm(instance=notifications_obj)
     if request.method == 'POST':
         form = NotificationsForm(request.POST, instance=notifications_obj)
@@ -52,8 +52,34 @@ def notifications(request):
                                  messages.SUCCESS,
                                  'Settings saved.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('notifications', ))
 
-    add_breadcrumb(title="Notification settings", top_level=False, request=request)
+    add_breadcrumb(title="Personal notification settings", top_level=False, request=request)
     return render(request, 'dojo/notifications.html',
-                  {'form': form})
+                  {'form': form,
+                   'scope': 'personal',
+                   'admin': request.user.is_superuser})
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def global_notifications(request):
+    try:
+        notifications_obj = Notifications.objects.get(user=None)
+    except:
+        notifications_obj = Notifications(user=None)
+
+    form = NotificationsForm(instance=notifications_obj)
+    if request.method == 'POST':
+        form = NotificationsForm(request.POST, instance=notifications_obj)
+        if form.is_valid():
+            new_settings = form.save()
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Settings saved.',
+                                 extra_tags='alert-success')
+
+    add_breadcrumb(title="Global notification settings", top_level=False, request=request)
+    return render(request, 'dojo/notifications.html',
+                  {'form': form,
+                   'scope': 'global',
+                   'admin': request.user.is_superuser})
+

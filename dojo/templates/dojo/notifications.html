@@ -6,10 +6,22 @@
 {% endblock %}
 
 {% block content %}
-    <h3> Notification Settings </h3>
-    <form class="form-horizontal col-sm-10" method="post">{% csrf_token %}
+    <h3> {% if scope == 'global' %}Global{% else %}Personal{% endif %} Notification Settings </h3>
+    <form class="form-inline col-sm-10" method="post" id="notform">{% csrf_token %}
         <div class="container" style="width:50%">
-            <table class="table table-hover">
+            {% if request.user.is_superuser %}
+               <div class="col-sm-5">
+                   <label for="notification-scope">Scope <span class="fa fa-question-circle has-popover" data-trigger="hover" data-content="Destinations for global notifications are configured in System Settings. Destinations for personal notifications are taken from your personal contact details (personal Slack notifications will be sent to you as a direct message)."/></label>
+                    <select data-placeholder="Scope" id="notification-scope" class="chosen-select form-control"/>
+                        <option value="global">Global</option>
+                         <option value="personal">Personal</option>
+                     </select>
+                </div>
+                <p>&nbsp;</p>
+                <p>&nbsp;</p>
+                <p>&nbsp;</p>
+            {% endif %}
+             <table class="table table-hover col-sm-5">
                 <thead>
                     <tr>
                         <th>Event</th><th>Slack</th><th>Mail</th>
@@ -20,10 +32,6 @@
                     {% if field.auto_id %}
                         <tr>
                             <td>{{ field.label }}{% if field.field.required%}<sup>*</sup>{% endif %}
-                                    {% if field.help_text %}
-                                        <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="{{ field.help_text }}" data-placement="right" data-container="body">
-                                        </i>
-                                    {% endif %}
                             </td>
                     {% endif %}
                     {% for pk,c in field.field.widget.choices %}
@@ -32,6 +40,9 @@
                         </td>
                     {% endfor %}
                     </tr>
+                    {% for error in field.errors %}
+                        <span class="help-block {{ form.error_css_class }}">{{ error }}</span>
+                    {% endfor %}
                 {% endfor %}
             </table>
             <div class="col-sm-offset-10">
@@ -39,4 +50,15 @@
             </div>
         </div>
     </form>
+{% endblock %}
+{% block postscript %}
+    <script type="application/javascript" src="{% static "chosen/chosen.jquery.min.js" %}"></script>
+    <script>
+        $(function () {
+            $(".chosen-select").chosen({disable_search_threshold: 10});
+            $('#notification-scope').val('{{ scope }}');
+            $('.chosen-select').trigger('chosen:updated');
+            $('#notification-scope').change(function() { window.location = '/notifications/' + $(this).val(); });
+        });
+    </script>
 {% endblock %}

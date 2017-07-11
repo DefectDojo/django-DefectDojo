@@ -31,6 +31,13 @@ class System_Settings(models.Model):
                                                   'less recent finding as a duplicate. When deduplication is enabled, a list of ' \
                                                   'deduplicated findings is added to the engagement view.')
     enable_jira = models.BooleanField(default=False, verbose_name='Enable JIRA integration', blank=False)
+    enable_slack_notifications = models.BooleanField(default=False, verbose_name='Enable Slack notifications', blank=False)
+    slack_channel = models.CharField(max_length=100, default='', blank=True)
+    slack_token = models.CharField(max_length=100, default='', blank=True)
+    slack_username = models.CharField(max_length=100, default='', blank=True)
+    enable_mail_notifications = models.BooleanField(default=False, blank=False)
+    mail_notifications_from = models.CharField(max_length=200, default='from@example.com', blank=True)
+    mail_notifications_to = models.CharField(max_length=200, default='', blank=True)
     s_finding_severity_naming = models.BooleanField(default=False, 
                                                     blank=False, 
                                                     help_text='With this setting turned on, Dojo will display S0, S1, S2, etc ' \
@@ -86,6 +93,7 @@ class UserContactInfo(models.Model):
                                              "Up to 15 digits allowed.")
     twitter_username = models.CharField(blank=True, null=True, max_length=150)
     github_username = models.CharField(blank=True, null=True, max_length=150)
+    slack_username = models.CharField(blank=True, null=True, max_length=150)
 
 
 class Contact(models.Model):
@@ -1012,13 +1020,13 @@ class JIRA_PKey(models.Model):
     enable_engagement_epic_mapping = models.BooleanField(default=False, blank=True)
     push_notes = models.BooleanField(default=False, blank=True)
 
-NOTIFICATION_CHOICES=(("slack","Slack"),("mail","Mail"))
+NOTIFICATION_CHOICES=(("slack","slack"),("mail","mail"))
 class Notifications(models.Model):
     engagement_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='', blank=True)
     test_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='', blank=True)
-    vulnerabilities_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='', blank=True)
+    results_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='', blank=True)
     report_created = MultiSelectField(choices=NOTIFICATION_CHOICES, default='', blank=True)
-    issue_accepted = MultiSelectField(choices=NOTIFICATION_CHOICES, default='', blank=True)
+    user = models.ForeignKey(User, default=None, null=True, editable=False)
 
 class Tool_Type(models.Model):
     name = models.CharField(max_length=200)

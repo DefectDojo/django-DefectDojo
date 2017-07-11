@@ -16,10 +16,14 @@ from django.core.urlresolvers import get_resolver, reverse
 from django.contrib import messages
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
 from django.template.defaultfilters import pluralize
+from django.template.loader import render_to_string
 from pytz import timezone
 from jira import JIRA
 from jira.exceptions import JIRAError
-from dojo.models import Finding, Scan, Test, Engagement, Stub_Finding, Finding_Template, Report, Product, JIRA_PKey, JIRA_Issue, Dojo_User, User, Notes, FindingImage, Alerts, System_Settings
+from dojo.models import Finding, Scan, Test, Engagement, Stub_Finding, Finding_Template, \
+                        Report, Product, JIRA_PKey, JIRA_Issue, Dojo_User, User, Notes, \
+                        FindingImage, Alerts, System_Settings, Notifications
+from django_slack import slack_message
 
 try:
     localtz = timezone(System_Settings.objects.get().time_zone)
@@ -1141,3 +1145,80 @@ def get_system_setting(setting):
         system_settings = System_Settings()
 
     return getattr(system_settings, setting, None)
+
+
+def send_notifications(event, eventargs, objowner=None):
+    def log_alert(e):
+        alert = Alerts(user_id=objowner, description="Notification issue: %s" % e, url=reverse('notifications'), icon="bullseye", display_date=localtz.localize(datetime.today()), source="Notifications")
+        alert.save()
+
+    try:
+        notifications = Notifications.objects.get(user_id=None)
+    except Exception as e:
+        notifications = Notifications()
+
+    slack_enabled = get_system_setting('enable_slack_notifications')
+    mail_enabled = get_system_setting('enable_mail_notifications')
+
+    if slack_enabled and 'slack' in getattr(notifications, event):
+        slacktemplate = 'notifications/%s.slack' % event.replace('/', '')
+        slackparams = {'token': get_system_setting('slack_token'),
+                       'channel': get_system_setting('slack_channel'),
+                       'username': get_system_setting('slack_username')}
+        slackparams.update(eventargs)
+        try:
+            slack_message(slacktemplate, slackparams)
+        except Exception as e:
+            log_alert(e)
+            pass
+
+    if mail_enabled and 'mail' in getattr(notifications, event):
+        msg = render_to_string('notifications/%s.mail' % event.replace('/', ''),
+                                eventargs)
+
+        try:
+            send_mail(get_system_setting('team_name') + ' Notification',
+                    msg,
+                    get_system_setting('mail_notifications_from'),
+                    [get_system_setting('mail_notifications_to')],
+                    fail_silently=False)
+        except Exception as e:
+            log_alert(e)
+            pass
+
+    if objowner:
+        users = [User.objects.get(id=objowner.id)]
+    else:
+        users = User.objects.all()
+    for user in users:
+        try:
+            notifications = Notifications.objects.get(user_id=user.id)
+        except Exception as e:
+            notifications = Notifications()
+
+        if slack_enabled and 'slack' in getattr(notifications, event):
+            slacktemplate = 'notifications/%s.slack' % event.replace('/', '')
+            slackparams = {'token': get_system_setting('slack_token'),
+                        'channel': '@%s' % user.usercontactinfo.slack_username,
+                        'username': get_system_setting('slack_username')}
+            slackparams.update(eventargs)
+
+            try:
+                slack_message(slacktemplate, slackparams)
+            except Exception as e:
+                log_alert(e)
+                pass
+
+        if mail_enabled and 'mail' in getattr(notifications, event):
+            msg = render_to_string('notifications/%s.mail' % event.replace('/', ''),
+                                    eventargs)
+
+            try:
+                send_mail(get_system_setting('team_name') + ' Notification',
+                        msg,
+                        get_system_setting('mail_notifications_from'),
+                        [user.email],
+                        fail_silently=False)
+            except Exception as e:
+                log_alert(e)
+                pass
