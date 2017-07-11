@@ -23,10 +23,10 @@ from dojo.forms import CheckForm, \
 from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Type, Notes, \
     Risk_Acceptance, Development_Environment, BurpRawRequestResponse, Endpoint, \
-    JIRA_PKey, JIRA_Conf, JIRA_Issue, Cred_User, Cred_Mapping, Notifications
+    JIRA_PKey, JIRA_Conf, JIRA_Issue, Cred_User, Cred_Mapping, Notifications, Dojo_User
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
-    FileIterWrapper, get_cal_event, message, get_system_setting
+    FileIterWrapper, get_cal_event, message, get_system_setting, send_notifications
 from dojo.tasks import update_epic_task, add_epic_task, close_epic_task
 from django_slack import slack_message
 
@@ -91,14 +91,6 @@ def new_engagement(request):
                                  messages.SUCCESS,
                                  'Engagement added successfully.',
                                  extra_tags='alert-success')
-            try:
-                notifications = Notifications.objects.get()
-            except:
-                notifications = Notifications()
-            if 'slack' in notifications.engagement_added:
-                slack_message('dojo/new_engagement.slack', {
-                    'engagement': new_eng
-                })
             if "_Add Tests" in request.POST:
                 return HttpResponseRedirect(reverse('add_tests', args=(new_eng.id,)))
             else:
@@ -339,6 +331,9 @@ def add_tests(request, eid):
                                  messages.SUCCESS,
                                  'Test added successfully.',
                                  extra_tags='alert-success')
+
+            send_notifications(event='test_added', eventargs={'test': new_test, 'engagement': eng})
+
             if '_Add Another Test' in request.POST:
                 return HttpResponseRedirect(reverse('add_tests', args=(eng.id,)))
             elif '_Add Findings' in request.POST:
@@ -463,6 +458,9 @@ def import_scan_results(request, eid):
                                      scan_type + ' processed, a total of ' + message(finding_count, 'finding',
                                                                                      'processed'),
                                      extra_tags='alert-success')
+
+                send_notifications(event='results_added', eventargs={'finding_count': finding_count, 'test': t, 'engagement': engagement})
+
                 return HttpResponseRedirect(reverse('view_test', args=(t.id,)))
             except SyntaxError:
                 messages.add_message(request,

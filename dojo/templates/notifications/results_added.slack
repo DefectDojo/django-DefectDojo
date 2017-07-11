@@ -1,0 +1,15 @@
+{% extends django_slack %}
+
+{% block token %}
+{{ token }}
+{% endblock %}
+{% block channel %}
+{{ channel }}
+{% endblock %}
+{% block username %}
+{{ username }}
+{% endblock %}
+
+{% block text %}
+Results added to the test "{{ test.test_type }}" in {{ engagement.product }}: {{ finding_count }} new findings.
+{% endblock %}

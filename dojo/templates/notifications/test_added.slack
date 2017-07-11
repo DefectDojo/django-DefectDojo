@@ -1,0 +1,15 @@
+{% extends django_slack %}
+
+{% block token %}
+{{ token }}
+{% endblock %}
+{% block channel %}
+{{ channel }}
+{% endblock %}
+{% block username %}
+{{ username }}
+{% endblock %}
+
+{% block text %}
+New test added for engagement {{ engagement.product }}: {{ test.test_type }}
+{% endblock %}
