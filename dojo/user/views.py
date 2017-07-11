@@ -75,7 +75,7 @@ def logout_view(request):
     return HttpResponseRedirect(reverse('login'))
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
 def alerts(request):
     alerts = get_alerts(request.user)
     paged_alerts = get_page_items(request, alerts, 25)
