@@ -662,9 +662,10 @@ def get_alerts(user):
                        ' icon-user-check',
                        reverse('view_finding', args=(fur.id,))])
 
-    # Alerts itmes in the last 7 days, ToDo add admin vs user view
     # reports requested in the last 7 days
     total_alerts = Alerts.objects.filter(created__range=[start, now]).order_by('-display_date')
+    if not user.is_superuser:
+        total_alerts = total_alerts.filter(user_id=user)
     for alert_item in total_alerts:
         alerts.append([alert_item.description,
                        humanize.naturaltime(localtz.normalize(now) - localtz.normalize(alert_item.display_date)),
@@ -1222,3 +1223,4 @@ def send_notifications(event, eventargs, objowner=None):
             except Exception as e:
                 log_alert(e)
                 pass
+                
