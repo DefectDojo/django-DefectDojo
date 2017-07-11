@@ -10,7 +10,8 @@ __author__ = 'patriknordlen'
 
 class NmapXMLParser(object):
     def __init__(self, file, test):
-        nscan = le.parse(file)
+        parser = le.XMLParser(resolve_entities=False)
+        nscan = le.parse(file, parser)
         root = nscan.getroot()
 
         if 'nmaprun' not in root.tag:
@@ -28,7 +29,7 @@ class NmapXMLParser(object):
                 
                 description = "%s:%s A service was found to be listening on this port." % (ip, port)
 
-                if portelem.find('service'):
+                if portelem.find('service') is not None:
                     if hasattr(portelem.find('service'),'product'):
                         serviceinfo = " (%s%s)" % (portelem.find('service').attrib['product'], " "+portelem.find('service').attrib['version'] if hasattr(portelem.find('service'),'version') else "")
                     else:
