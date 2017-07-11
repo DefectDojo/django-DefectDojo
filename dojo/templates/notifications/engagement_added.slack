@@ -11,5 +11,5 @@
 {% endblock %}
 
 {% block text %}
-New engagement: {{ engagement.product }}
+The engagement "{{ engagement.product }}" has been created. It can be viewed here: {{ url }}
 {% endblock %}

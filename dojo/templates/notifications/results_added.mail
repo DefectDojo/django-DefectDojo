@@ -1,5 +1,8 @@
+{% load get_system_setting %}
+
 Greetings,
 
-a new engagement has been created: {{ engagement.product }}
+Results added to the test "{{ test.test_type }}" in {{ engagement.product }}: {{ finding_count }} new findings. You can find the results here: {{ url }}
 
-Cheers!
+Kind regards,
+{{ "team_name"|get_system_setting }}

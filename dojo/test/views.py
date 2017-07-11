@@ -566,7 +566,8 @@ def re_import_scan_results(request, tid):
 
                 send_notifications(event='results_added', eventargs={'finding_count': finding_count, 
                                                                      'test': t, 
-                                                                     'engagement': engagement})
+                                                                     'engagement': engagement,
+                                                                     'url': request.build_absolute_uri(reverse('view_test', args=(t.id,)))})
 
                 return HttpResponseRedirect(reverse('view_test', args=(t.id,)))
             except SyntaxError:

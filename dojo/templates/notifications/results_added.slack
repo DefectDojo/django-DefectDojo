@@ -11,5 +11,5 @@
 {% endblock %}
 
 {% block text %}
-Results added to the test "{{ test.test_type }}" in {{ engagement.product }}: {{ finding_count }} new findings.
+Results added to the test "{{ test.test_type }}" in {{ engagement.product }}: {{ finding_count }} new findings. You can find the results here: {{ url }}
 {% endblock %}
