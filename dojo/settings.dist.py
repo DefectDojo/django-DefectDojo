@@ -192,6 +192,7 @@ INSTALLED_APPS = (
     'tagging',
     'custom_field',
     'imagekit',
+    'django_slack'
 )
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -261,3 +262,6 @@ LOGGING = {
         },
     }
 }
+
+# Slack notifications are disabled in debug mode by default. Uncomment the line below if you want it enabled in debug as well.
+# SLACK_BACKEND='django_slack.backends.UrllibBackend'
