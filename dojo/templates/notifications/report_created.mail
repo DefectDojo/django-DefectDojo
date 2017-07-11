@@ -1,0 +1,5 @@
+Greetings,
+
+your report "{{ report.name }}" is ready. It can be downloaded here: {{ url }}
+
+Cheers!

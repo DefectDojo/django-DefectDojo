@@ -18,7 +18,8 @@ from dojo.models import Finding
 import pdfkit
 from dojo.celery import app
 from dojo.reports.widgets import report_widget_factory
-from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, close_epic, get_system_setting
+from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, \
+                        close_epic, get_system_setting, send_notifications
 
 logger = get_task_logger(__name__)
 
@@ -84,7 +85,8 @@ def async_pdf_report(self,
         report.status = 'success'
         report.done_datetime = datetime.now(tz=localtz)
         report.save()
-        # email_requester(report, uri)
+
+        send_notifications(event='report_created', eventargs={'url': uri, 'report': report}, objowner=report.requester)
     except Exception as e:
         report.status = 'error'
         report.save()
@@ -163,7 +165,8 @@ def async_custom_pdf_report(self,
         report.status = 'success'
         report.done_datetime = datetime.now(tz=localtz)
         report.save()
-        # email_requester(report, uri)
+
+        send_notifications(event='report_created', eventargs={'url': uri, 'report': report}, objowner=report.requester)
     except Exception as e:
         report.status = 'error'
         report.save()
