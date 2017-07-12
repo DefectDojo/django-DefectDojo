@@ -14,8 +14,10 @@ from django_filters import FilterSet, CharFilter, OrderingFilter, ModelMultipleC
     MultipleChoiceFilter
 from django_filters.filters import ChoiceFilter, _truncate, DateTimeFilter
 from pytz import timezone
+from dojo.utils import get_system_setting
 
-local_tz = timezone(settings.TIME_ZONE)
+local_tz = timezone(get_system_setting('time_zone'))
+
 SEVERITY_CHOICES = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
                     ('High', 'High'), ('Critical', 'Critical'))
 BOOLEAN_CHOICES = (('false', 'No'), ('true', 'Yes'),)

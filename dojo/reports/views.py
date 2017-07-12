@@ -25,10 +25,10 @@ from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
 from dojo.reports.widgets import CoverPage, PageBreak, TableOfContents, WYSIWYGContent, FindingList, EndpointList, \
     CustomReportJsonForm, ReportOptions, report_widget_factory
 from dojo.tasks import async_pdf_report, async_custom_pdf_report
-from dojo.utils import get_page_items, add_breadcrumb, get_period_counts
+from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_system_setting
 from dojo.utils import get_period_counts_legacy
 
-localtz = timezone(settings.TIME_ZONE)
+localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -506,7 +506,7 @@ def product_endpoint_report(request, pid):
                                             'include_executive_summary': include_executive_summary,
                                             'include_table_of_contents': include_table_of_contents,
                                             'user': user,
-                                            'team_name': settings.TEAM_NAME,
+                                            'team_name': get_system_setting('team_name'),
                                             'title': 'Generate Report',
                                             'host': report_url_resolver(request),
                                             'user_id': request.user.id},
@@ -735,7 +735,7 @@ def generate_report(request, obj):
                    'include_executive_summary': include_executive_summary,
                    'include_table_of_contents': include_table_of_contents,
                    'user': user,
-                   'team_name': settings.TEAM_NAME,
+                   'team_name': get_system_setting('team_name'),
                    'title': 'Generate Report',
                    'host': report_url_resolver(request),
                    'user_id': request.user.id}

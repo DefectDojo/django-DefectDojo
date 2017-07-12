@@ -26,10 +26,10 @@ from dojo.models import Finding, Product, Engagement, Test, \
     JIRA_PKey, JIRA_Conf, JIRA_Issue, Cred_User, Cred_Mapping
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
-    FileIterWrapper, get_cal_event, message
+    FileIterWrapper, get_cal_event, message, get_system_setting
 from dojo.tasks import update_epic_task, add_epic_task, close_epic_task
 
-localtz = timezone(settings.TIME_ZONE)
+localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -141,12 +141,12 @@ def edit_engagement(request, eid):
         except:
             enabled = False
             pass
-        if hasattr(settings, "ENABLE_JIRA"):
-            if settings.ENABLE_JIRA:
-                if JIRA_PKey.objects.filter(product=eng.product).count() != 0:
-                    jform = JIRAFindingForm(prefix='jiraform', enabled=enabled)
-                else:
-                    jform = None
+
+        if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(product=eng.product).count() != 0:
+            jform = JIRAFindingForm(prefix='jiraform', enabled=enabled)
+        else:
+            jform = None
+
     form.initial['tags'] = [tag.name for tag in eng.tags]
     add_breadcrumb(parent=eng, title="Edit Engagement", top_level=False, request=request)
     return render(request, 'dojo/new_eng.html',
@@ -309,7 +309,11 @@ def add_tests(request, eid):
         if form.is_valid():
             new_test = form.save(commit=False)
             new_test.engagement = eng
-            # new_test.lead = User.objects.get(id=form['lead'].value())
+	    try:
+            	new_test.lead = User.objects.get(id=form['lead'].value())
+	    except:
+		new_test.lead = None
+		pass
             new_test.save()
             tags = request.POST.getlist('tags')
             t = ", ".join(tags)
@@ -338,6 +342,8 @@ def add_tests(request, eid):
                 return HttpResponseRedirect(reverse('view_engagement', args=(eng.id,)))
     else:
         form = TestForm()
+	form.initial['target_start'] = eng.target_start
+	form.initial['target_end'] = eng.target_end
     add_breadcrumb(parent=eng, title="Add Tests", top_level=False, request=request)
     return render(request, 'dojo/add_tests.html',
                   {'form': form,

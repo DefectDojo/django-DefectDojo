@@ -26,10 +26,10 @@ from dojo.models import *
 from dojo.forms import *
 from dojo.tasks import *
 from dojo.forms import *
-from dojo.utils import dojo_crypto_encrypt, prepare_for_view, FileIterWrapper
+from dojo.utils import dojo_crypto_encrypt, prepare_for_view, FileIterWrapper, get_system_setting
 from dojo.product import views as ds
 
-localtz = timezone(settings.TIME_ZONE)
+localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,

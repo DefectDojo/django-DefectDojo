@@ -25,9 +25,9 @@ from dojo.forms import SimpleMetricsForm, ProductTypeCountsForm
 from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
     Risk_Acceptance, Dojo_User
 from dojo.utils import get_page_items, add_breadcrumb, findings_this_period, opened_in_period, count_findings, \
-    get_period_counts, get_punchcard_data
+    get_period_counts, get_punchcard_data, get_system_setting
 
-localtz = timezone(settings.TIME_ZONE)
+localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -297,7 +297,7 @@ def metrics(request, mtype):
 
     if 'view' in request.GET and 'dashboard' == request.GET['view']:
         punchcard, ticks, highest_count = get_punchcard_data(findings.qs, weeks_between, start_date)
-        page_name = (settings.TEAM_NAME if settings.TEAM_NAME else "") + " Metrics"
+        page_name = (get_system_setting('team_name')) + " Metrics"
         template = 'dojo/dashboard-metrics.html'
 
     add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)

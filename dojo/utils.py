@@ -19,9 +19,12 @@ from django.template.defaultfilters import pluralize
 from pytz import timezone
 from jira import JIRA
 from jira.exceptions import JIRAError
-from dojo.models import Finding, Scan, Test, Engagement, Stub_Finding, Finding_Template, Report, Product, JIRA_PKey, JIRA_Issue, Dojo_User, User, Notes, FindingImage, Alerts
+from dojo.models import Finding, Scan, Test, Engagement, Stub_Finding, Finding_Template, Report, Product, JIRA_PKey, JIRA_Issue, Dojo_User, User, Notes, FindingImage, Alerts, System_Settings
 
-localtz = timezone(settings.TIME_ZONE)
+try:
+    localtz = timezone(System_Settings.objects.get().time_zone)
+except:
+    localtz = timezone(System_Settings().time_zone)
 
 """
 Michael & Fatima:
@@ -1130,3 +1133,11 @@ def prepare_for_view(encrypted_value):
                 decrypted_value = ""
 
     return decrypted_value
+
+def get_system_setting(setting):
+    try:
+        system_settings = System_Settings.objects.get()
+    except:
+        system_settings = System_Settings()
+
+    return getattr(system_settings, setting, None)

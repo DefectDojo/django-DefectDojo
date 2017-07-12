@@ -8,8 +8,9 @@ from pytz import timezone
 from dojo.models import ScanSettings, Product
 import dojo.settings as settings
 
+from dojo.utils import get_system_setting
 
-locale = timezone(settings.TIME_ZONE)
+locale = timezone(get_system_setting('time_zone'))
 
 """
 Authors: Fatimah
@@ -44,7 +45,7 @@ class Command(BaseCommand):
         # Send one giant email to External Unit with a list  of all the
         # ipaddresses that will be scanned
         msg = "\nGreetings, \n\n"
-        msg += settings.TEAM_NAME + " will be performing port scans of "
+        msg += get_system_setting('team_name') + " will be performing port scans of "
         msg += "the following products and target IPs:"
         msg += "\n\nStart Time: " + str(scan_start_time)
         msg += "\n\nStop Time (est): " + str(scan_stop_time)
@@ -61,7 +62,7 @@ class Command(BaseCommand):
 
         msg += "\n\nPlease let us know if you have any questions.\n Thanks,\n"
         msg += settings.PORT_SCAN_RESULT_EMAIL_FROM
-        send_mail(settings.TEAM_NAME + ' Port Scan',
+        send_mail(get_system_setting('team_name') + ' Port Scan',
                   msg,
                   settings.PORT_SCAN_RESULT_EMAIL_FROM,
                   settings.PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST,

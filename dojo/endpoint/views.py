@@ -17,11 +17,11 @@ from dojo.filters import EndpointFilter
 from dojo.forms import EditEndpointForm, \
     DeleteEndpointForm, AddEndpointForm, EndpointMetaDataForm
 from dojo.models import Product, Endpoint, Finding
-from dojo.utils import get_page_items, add_breadcrumb, get_period_counts
+from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_system_setting
 from django.contrib.contenttypes.models import ContentType
 from custom_field.models import CustomFieldValue, CustomField
 
-localtz = timezone(settings.TIME_ZONE)
+localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,
