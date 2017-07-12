@@ -28,7 +28,7 @@ def import_parser_factory(file, test):
             parser = NessusCSVParser(file, test)
         elif filename.endswith("xml") or filename.endswith("nessus"):
             parser = NessusXMLParser(file, test)
-    elif scan_type == "nmap Scan":
+    elif scan_type == "Nmap Scan":
         parser = NmapXMLParser(file, test)
     elif scan_type == "Nexpose Scan":
         parser = NexposeFullXmlParser(file, test)

@@ -15,7 +15,7 @@ class NmapXMLParser(object):
         root = nscan.getroot()
 
         if 'nmaprun' not in root.tag:
-            raise NamespaceErr("This doesn't seem to be a valid nmap xml file.")
+            raise NamespaceErr("This doesn't seem to be a valid Nmap xml file.")
         dupes = {}
         for host in root.iter("host"):
             ip = host.find("address[@addrtype='ipv4']").attrib['addr']
