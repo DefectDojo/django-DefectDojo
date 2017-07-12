@@ -645,7 +645,7 @@ class AdHocFindingForm(forms.ModelForm):
 
     def clean(self):
         # self.fields['endpoints'].queryset = Endpoint.objects.all()
-        cleaned_data = super(AddFindingForm, self).clean()
+        cleaned_data = super(AdHocFindingForm, self).clean()
         if ((cleaned_data['active'] or cleaned_data['verified'])
             and cleaned_data['duplicate']):
             raise forms.ValidationError('Duplicate findings cannot be'

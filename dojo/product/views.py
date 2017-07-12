@@ -20,7 +20,7 @@ from pytz import timezone
 from dojo.filters import ProductFilter, ProductFindingFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, ProductMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm
 from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, \
-    Tool_Product_Settings, Cred_User, Cred_Mapping, Finding_Template, Endpoint
+    Tool_Product_Settings, Cred_User, Cred_Mapping, Finding_Template, Endpoint, Test_Type
 from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data
 from custom_field.models import CustomFieldValue, CustomField
 from  dojo.tasks import add_epic_task, add_issue_task
@@ -569,8 +569,25 @@ def edit_meta_data(request, pid):
 
 @user_passes_test(lambda u: u.is_staff)
 def ad_hoc_finding(request, pid):
-    eng=Engagement()
-    test = Test()
+    prod = Product.objects.get(id=pid)
+    test = None
+    try:
+        eng = Engagement.objects.get(product=prod, name="Ad Hoc Engagement")
+        tests = Test.objects.filter(engagement=eng)
+
+        if len(tests) != 0:
+            test = tests[0]
+        else:
+            test = Test(engagement=eng, test_type=Test_Type.objects.get(name="Pen Test"),
+                        target_start=datetime.now(tz=localtz), target_end=datetime.now(tz=localtz))
+            test.save()
+    except:
+        eng = Engagement(name="Ad Hoc Engagement", target_start=datetime.now(tz=localtz),
+                         target_end=datetime.now(tz=localtz), active=False, product=prod)
+        eng.save()
+        test = Test(engagement=eng, test_type=Test_Type.objects.get(name="Pen Test"),
+                    target_start=datetime.now(tz=localtz), target_end=datetime.now(tz=localtz))
+        test.save()
     form_error = False
     enabled = False
     jform = None
@@ -643,11 +660,12 @@ def ad_hoc_finding(request, pid):
                                  messages.ERROR,
                                  'The form has errors, please correct them below.',
                                  extra_tags='alert-danger')
-    add_breadcrumb(parent=test, title="Add Finding", top_level=False, request=request)
-    return render(request, 'dojo/add_findings.html',
+    add_breadcrumb(parent=prod, title="Add Finding", top_level=False, request=request)
+    return render(request, 'dojo/ad_hoc_findings.html',
                   {'form': form,
                    'temp': False,
-                   'tid': tid,
+                   'tid' : test.id,
+                   'pid': pid,
                    'form_error': form_error,
                    'jform': jform,
                    })
