@@ -36,11 +36,11 @@
     <script type="application/javascript" src="{% static "chosen/chosen.jquery.min.js" %}"></script>
     <script>
           $(function () {
+            $('#caltype').change(function() { $('#calfilter').attr('action', '/calendar/' + $(this).val()); });
             $(".chosen-select").chosen({disable_search_threshold: 10});
-            $('#caltype').val('{{ caltype }}');
+            $('#caltype').val('{{ caltype }}'); $('#caltype').trigger('change');
             $('#lead').val([{% for lead in leads %} '{{ lead }}', {% endfor %}]);
             $('.chosen-select').trigger('chosen:updated');
-            $('#caltype').change(function() { $('#calfilter').attr('action', '/calendar/' + $(this).val()); });
             $('#calendar').fullCalendar({
                 header: {
                     left: 'prev,next today',
