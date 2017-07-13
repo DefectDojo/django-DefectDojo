@@ -173,7 +173,7 @@ def test_calendar(request):
             filters.append(Q(lead__isnull=True))
         filters.append(Q(lead__in=leads))
         tests = Test.objects.filter(reduce(operator.or_, filters))
-    add_breadcrumb(title="Calendar", top_level=True, request=request)
+    add_breadcrumb(title="Test Calendar", top_level=True, request=request)
     return render(request, 'dojo/calendar.html', {
         'caltype': 'tests',
         'leads': request.GET.getlist('lead', ''),

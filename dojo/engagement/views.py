@@ -55,7 +55,7 @@ def engagement_calendar(request):
         filters.append(Q(lead__in=leads))
         engagements = Engagement.objects.filter(reduce(operator.or_, filters))
 
-    add_breadcrumb(title="Calendar", top_level=True, request=request)
+    add_breadcrumb(title="Engagement Calendar", top_level=True, request=request)
     return render(request, 'dojo/calendar.html', {
         'caltype': 'engagements',
         'leads': request.GET.getlist('lead', ''),
