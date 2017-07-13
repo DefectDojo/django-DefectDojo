@@ -52,7 +52,7 @@
                     {% if caltype == 'tests' %}
                         {% for t in tests %}
                             {
-                                title: '{{t.engagement.product.name}}: {{ t.engagement.name|default:"Unknown" }} - {{ t.test_type }} ({{ t.engagement.lead }})',
+                                title: '{{t.engagement.product.name}}: {{ t.engagement.name|default:"Unknown" }} - {{ t.test_type }} ({{ t.lead|default:"Unassigned" }})',
                                 start: '{{t.target_start|date:"c"}}',
                                 end: '{{t.target_end|date:"c"}}',
                                 url: '{% url 'view_test' t.id %}',
