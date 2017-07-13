@@ -250,7 +250,9 @@
                                     <a href="{% url 'jira' %}"><i class="fa fa-cog fa-fw"></i>
                                         <span>Configuration</span></a>
                                     <ul class="nav nav-second-level">
+                                        {% if request.user.is_superuser%}
                                         <li><a href="{% url 'system_settings' %}">System Settings </a></li>
+                                        {% endif %}
                                         <li><a href="{% url 'cred' %}">Credential Manager </a></li>
                                         {% if "enable_jira"|get_system_setting %}
                                         <li><a href="{% url 'jira' %}">JIRA </a></li>
