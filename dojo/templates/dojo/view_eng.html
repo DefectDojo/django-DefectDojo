@@ -650,7 +650,7 @@
                                 <tr class="{% if finding.active %}active_finding{% else %}inactive_finding{% endif %}">
                                     <td><a href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a></td>
                                     <td>
-                                        <span class="label severity severity-{{ finding.severity|safe }}">
+                                        <span class="label severity severity-{{ finding.severity }}">
                                             {{ finding.severity_display }}
                                         </span>
                                     </td>
