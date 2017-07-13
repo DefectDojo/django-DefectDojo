@@ -2,6 +2,7 @@
 import logging
 import os
 from datetime import datetime, timedelta
+import operator
 
 from django.contrib.auth.models import User
 from django.conf import settings
@@ -43,10 +44,17 @@ logger = logging.getLogger(__name__)
 @user_passes_test(lambda u: u.is_staff)
 @cache_page(60 * 5)  # cache for 5 minutes
 def engagement_calendar(request):
-    if not 'lead' in request.GET or '*' in request.GET.getlist('lead'):
+    if not 'lead' in request.GET or '0' in request.GET.getlist('lead'):
         engagements = Engagement.objects.all()
     else:
-        engagements = Engagement.objects.filter(lead__username__in=request.GET.getlist('lead', ''))
+        filters = []
+        leads = request.GET.getlist('lead','')
+        if '-1' in request.GET.getlist('lead'):
+            leads.remove('-1')
+            filters.append(Q(lead__isnull=True))
+        filters.append(Q(lead__in=leads))
+        engagements = Engagement.objects.filter(reduce(operator.or_, filters))
+
     add_breadcrumb(title="Calendar", top_level=True, request=request)
     return render(request, 'dojo/calendar.html', {
         'caltype': 'engagements',

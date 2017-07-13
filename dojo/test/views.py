@@ -2,12 +2,14 @@
 
 import logging
 import sys
+import operator
 from datetime import datetime
 
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import reverse
+from django.db.models import Q
 from django.http import HttpResponseRedirect, HttpResponseForbidden, Http404, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.cache import cache_page
@@ -161,10 +163,16 @@ def delete_test_note(request, tid, nid):
 @user_passes_test(lambda u: u.is_staff)
 @cache_page(60 * 5)  # cache for 5 minutes
 def test_calendar(request):
-    if not 'lead' in request.GET or '*' in request.GET.getlist('lead'):
+    if not 'lead' in request.GET or '0' in request.GET.getlist('lead'):
         tests = Test.objects.all()
     else:
-        tests = Test.objects.filter(engagement__lead__username__in=request.GET.getlist('lead', ''))
+        filters = []
+        leads = request.GET.getlist('lead','')
+        if '-1' in request.GET.getlist('lead'):
+            leads.remove('-1')
+            filters.append(Q(lead__isnull=True))
+        filters.append(Q(lead__in=leads))
+        tests = Test.objects.filter(reduce(operator.or_, filters))
     add_breadcrumb(title="Calendar", top_level=True, request=request)
     return render(request, 'dojo/calendar.html', {
         'caltype': 'tests',
