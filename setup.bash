@@ -48,9 +48,9 @@ APT_GET_CMD=$(which apt-get)
 BREW_CMD=$(which brew)
 
 if [[ ! -z "$YUM_CMD" ]]; then
-    sudo curl -sL https://rpm.nodesource.com/setup | sudo bash -
-	sudo yum install gcc libmysqlclient-dev python-devel mysql-server mysql-devel MySQL-python python-setuptools python-pip nodejs wkhtmltopdf npm -y
-	sudo yum groupinstall 'Development Tools'
+    sudo yum install epel-release -y
+    sudo yum install gcc python-devel mysql-server mysql-devel MySQL-python python-setuptools python-pip nodejs wkhtmltopdf npm -y
+    sudo yum groupinstall 'Development Tools'
 elif [[ ! -z "$APT_GET_CMD" ]]; then
     sudo apt-get install libjpeg-dev gcc libssl-dev python-dev libmysqlclient-dev python-pip mysql-server nodejs-legacy wkhtmltopdf npm -y
 elif [[ ! -z "$BREW_CMD" ]]; then
