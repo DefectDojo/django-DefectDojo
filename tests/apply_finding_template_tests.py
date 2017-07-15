@@ -1,6 +1,7 @@
 import sys
 import datetime
 sys.path.append('..')
+from django.http import Http404
 from dojo.models import Product
 from dojo.models import Engagement
 from dojo.models import Test_Type
@@ -16,6 +17,57 @@ from custom_field.models import CustomFieldValue, CustomField
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.http import HttpResponseRedirect
 from django.http import HttpResponse
+
+class FindingMother:
+
+    @staticmethod
+    def create():
+        p = Product()
+        p.Name = 'Test Product'
+        p.Description = 'Product for Testing Apply Template functionality'
+        p.save()
+
+        e = Engagement()
+        e.product = p
+        e.target_start = datetime.datetime.now().date()
+        e.target_end = e.target_start + datetime.timedelta(days=5)
+        e.save()
+
+        tt = Test_Type()
+        tt.name = 'Temporary Test'
+        tt.save()
+
+        t = Test()
+        t.engagement = e
+        t.test_type = tt
+        t.target_start = datetime.datetime.now().date()
+        t.target_end = t.target_start + datetime.timedelta(days=5)
+        t.save()
+
+        user = FindingTemplateTestUtil.create_user(True)
+
+        f = Finding()
+        f.title = 'Finding for Testing Apply Template functionality'
+        f.severity = 'High'
+        f.description = 'Finding for Testing Apply Template Functionality'
+        f.test = t
+        f.reporter = user
+        f.last_reviewed = datetime.datetime.now()
+        f.last_reviewed_by = user
+        f.save()
+
+
+class FindingTemplateMother:
+    @staticmethod
+    def create():
+        tmp = Finding_Template()
+        tmp.title = 'Finding Template for Testing Apply Template functionality'
+        tmp.cwe = 0
+        tmp.severity = 'Low'
+        tmp.description = 'Finding Template for Testing Apply Template functionality'
+        tmp.mitigation = 'Finding Template Mitigation'
+        tmp.impact = 'Finding Template Impact'
+        tmp.save()
 
 class FindingTemplateTestUtil:
 
@@ -57,48 +109,8 @@ class TestApplyFindingTemplate(TestCase):
     apply_template_url = 'finding/1/1/apply_template_to_finding'
 
     def setUp(self):
-        p = Product()
-        p.Name = 'Test Product'
-        p.Description = 'Product for Testing Apply Template functionality'
-        p.save()
-
-        e = Engagement()
-        e.product = p
-        e.target_start = datetime.datetime.now().date()
-        e.target_end = e.target_start + datetime.timedelta(days=5)
-        e.save()
-
-        tt = Test_Type()
-        tt.name = 'Temporary Test'
-        tt.save()
-
-        t = Test()
-        t.engagement = e
-        t.test_type = tt
-        t.target_start = datetime.datetime.now().date()
-        t.target_end = t.target_start + datetime.timedelta(days=5)
-        t.save()
-
-        user = FindingTemplateTestUtil.create_user(True)
-
-        f = Finding()
-        f.title = 'Finding for Testing Apply Template functionality'
-        f.severity = 'High'
-        f.description = 'Finding for Testing Apply Template Functionality'
-        f.test = t
-        f.reporter = user
-        f.last_reviewed = datetime.datetime.now()
-        f.last_reviewed_by = user
-        f.save()
-
-        tmp = Finding_Template()
-        tmp.title = 'Finding Template for Testing Apply Template functionality'
-        tmp.cwe = 0
-        tmp.severity = 'Low'
-        tmp.description = 'Finding Template for Testing Apply Template functionality'
-        tmp.mitigation = 'Finding Template Mitigation'
-        tmp.impact = 'Finding Template Impact'
-        tmp.save()
+        FindingMother.create()
+        FindingTemplateMother.create()
 
     def make_request(self, user_is_staff, finding_id, template_id, data=None):
         user = FindingTemplateTestUtil.create_user(user_is_staff)
@@ -111,9 +123,6 @@ class TestApplyFindingTemplate(TestCase):
         v = views.apply_template_to_finding(request, finding_id, template_id)
 
         return v
-
-    def test_nothing(self):
-        self.assertTrue(True==True)
 
     def test_apply_template_to_finding_with_data_does_not_display_error_success(self):
         result = self.make_request(True, 1, 1,
@@ -207,3 +216,82 @@ class TestApplyFindingTemplate(TestCase):
                                     'impact':'template impact'})
         self.assertContains(result, 'There appears to be errors on the form')
 
+
+class TestFindTemplateToApply(TestCase):
+    choose_template_url = 'finding/1/find_template_to_apply'
+
+    def setUp(self):
+        FindingMother.create()
+        FindingTemplateMother.create()
+
+    def make_request(self, user_is_staff, finding_id, data=None):
+        user = FindingTemplateTestUtil.create_user(user_is_staff)
+
+        if data:
+            request = FindingTemplateTestUtil.create_post_request(user, self.choose_template_url, data)
+        else:
+            request = FindingTemplateTestUtil.create_get_request(user, self.choose_template_url)
+
+        v = views.find_template_to_apply(request, finding_id)
+
+        return v
+
+    def test_unauthorized_find_template_to_apply_fails(self):
+        result = self.make_request(False, 1)
+        self.assertEqual(302, result.status_code)
+        self.assertIn('login', result.url)
+
+    def test_authorized_find_template_to_apply_success(self):
+        result = self.make_request(True, 1)
+        self.assertEqual(200, result.status_code)
+
+    def test_find_template_to_apply_displays_templates_success(self):
+        result = self.make_request(True, 1)
+        self.assertContains(result, 'Finding Template for Testing Apply Template functionality')
+
+    def test_find_template_to_apply_displays_breadcrumb(self):
+        result = self.make_request(True, 1)
+        self.assertContains(result, 'Apply Template to Finding')
+
+
+class TestChooseFindingTemplateOptions(TestCase):
+    finding_template_options_url = 'finding/1/1/choose_finding_template_options'
+
+    def setUp(self):
+        FindingMother.create()
+        FindingTemplateMother.create()
+
+    def make_request(self, user_is_staff, finding_id, template_id, data=None):
+        user = FindingTemplateTestUtil.create_user(user_is_staff)
+
+        if data:
+            request = FindingTemplateTestUtil.create_post_request(user, self.finding_template_options_url, data)
+        else:
+            request = FindingTemplateTestUtil.create_get_request(user, self.finding_template_options_url)
+
+        v = views.choose_finding_template_options(request, finding_id, template_id)
+
+        return v
+
+    def test_unauthorized_choose_finding_template_options_fails(self):
+        result = self.make_request(False, 1, 1)
+        self.assertEqual(302, result.status_code)
+        self.assertIn('login', result.url)
+
+    def test_authorized_choose_finding_template_options_success(self):
+        result = self.make_request(True, 1, 1)
+        self.assertEqual(200, result.status_code)
+
+    def test_choose_finding_template_options_with_invalid_finding_fails(self):
+        with self.assertRaises(Http404):
+            result = self.make_request(True, 0, 1)
+            self.assertEqual(404, result.status_code)
+
+    def test_choose_finding_template_options_with_invalid_template_fails(self):
+        with self.assertRaises(Http404):
+            result = self.make_request(True, 1, 0)
+            self.assertEqual(404, result.status_code)
+
+    def test_choose_finding_template_options_with_valid_finding_and_template_renders_apply_finding_template_view(self):
+        result = self.make_request(True, 1, 1)
+        self.assertContains(result, '<h3> Apply template to a Finding</h3>')
