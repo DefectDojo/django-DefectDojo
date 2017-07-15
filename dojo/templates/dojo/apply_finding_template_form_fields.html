@@ -16,7 +16,7 @@
     <div class="form-group{% if field.errors %} has-error{% endif %}">
         <label class="col-sm-2 control-label">{{ field.label }} Option</label>
         <div class="col-sm-10 {{ classes.value }}">
-            <select class="form-control" onchange="(function(t){ var fieldValue = ''; switch(t.value.toLowerCase()){ case 'keep': fieldValue='{{ field.value }}'; break; case 'replace': fieldValue= '{{ template_value }}'; break; case 'combine': fieldValue= '{{ field.value }}'.concat('\r\n').concat('{{ template_value }}'); break;  } document.forms['apply_template']['{{ field.name }}'].value = fieldValue; })(this)">
+            <select class="form-control" data-field-value="{{ field.value }}" data-template-value="{{ template_value }}" onchange="(function(t){ var fieldValue = ''; switch(t.value.toLowerCase()){ case 'keep': fieldValue=t.getAttribute('data-field-value'); break; case 'replace': fieldValue= t.getAttribute('data-template-value'); break; case 'combine': fieldValue= t.getAttribute('data-field-value').concat('\r\n').concat(t.getAttribute('data-template-value')); break;  } document.forms['apply_template']['{{ field.name }}'].value = fieldValue; })(this)">
                 <option value="Keep">Keep</option>
                 <option value="Replace">Replace</option>
                 {% if field|is_text %}
