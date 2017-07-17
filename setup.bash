@@ -141,7 +141,9 @@ else
     sudo python manage.py makemigrations dojo
     sudo python manage.py makemigrations
     sudo python manage.py migrate
-    sudo python manage.py syncdb
+    echo -e "${GREEN}${BOLD}Create Dojo superuser:"
+    tput sgr0
+    sudo python manage.py createsuperuser
     sudo python manage.py loaddata product_type
     sudo python manage.py loaddata test_type
     sudo python manage.py loaddata development_environment
