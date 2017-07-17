@@ -271,11 +271,8 @@ def new_product(request):
     jform = None
     if request.method == 'POST':
         form = ProductForm(request.POST, instance=Product())
-        if hasattr(settings, 'ENABLE_JIRA'):
-            if settings.ENABLE_JIRA:
+        if get_system_setting('enable_jira'):
                 jform = JIRAPKeyForm(request.POST, instance=JIRA_PKey())
-            else:
-                jform = None
         else:
             jform = None
 
@@ -288,8 +285,7 @@ def new_product(request):
                                  messages.SUCCESS,
                                  'Product added successfully.',
                                  extra_tags='alert-success')
-            if hasattr(settings, 'ENABLE_JIRA'):
-                if settings.ENABLE_JIRA:
+            if get_system_setting('enable_jira'):
                     if jform.is_valid():
                         jira_pkey = jform.save(commit=False)
                         if jira_pkey.conf is not None:
@@ -303,8 +299,7 @@ def new_product(request):
             return HttpResponseRedirect(reverse('view_product', args=(product.id,)))
     else:
         form = ProductForm()
-        if hasattr(settings, 'ENABLE_JIRA'):
-            if settings.ENABLE_JIRA:
+        if get_system_setting('enable_jira'):
                 jform = JIRAPKeyForm()
         else:
             jform = None
@@ -337,7 +332,7 @@ def edit_product(request, pid):
                                  'Product updated successfully.',
                                  extra_tags='alert-success')
 
-            if get_system_setting('enable_jira') and jira.enabled:
+            if get_system_setting('enable_jira') and jira_enabled:
                 jform = JIRAPKeyForm(request.POST, instance=jira_inst)
                 #need to handle delete
                 try:
@@ -361,7 +356,7 @@ def edit_product(request, pid):
                            initial={'auth_users': prod.authorized_users.all(),
                                     'tags': get_tag_list(Tag.objects.get_for_object(prod))})
 
-        if get_system_setting('jira_enabled'):
+        if get_system_setting('enable_jira') and jira_enabled:
             if jira_enabled:
                 jform = JIRAPKeyForm(instance=jira_inst)
             else:
@@ -452,9 +447,7 @@ def new_eng_for_app(request, pid):
             else:
                 new_eng.progress = 'other'
             new_eng.save()
-
-            if hasattr(settings, 'ENABLE_JIRA'):
-                if settings.ENABLE_JIRA:
+            if get_system_setting('enable_jira'):
                     #Test to make sure there is a Jira project associated the product
                     try:
                         jform = JIRAFindingForm(request.POST, prefix='jiraform',
@@ -477,8 +470,7 @@ def new_eng_for_app(request, pid):
                 return HttpResponseRedirect(reverse('view_engagement', args=(new_eng.id,)))
     else:
         form = EngForm(initial={})
-        if hasattr(settings, 'ENABLE_JIRA'):
-            if settings.ENABLE_JIRA:
+        if(get_system_setting('enable_jira')):
                 if JIRA_PKey.objects.filter(product=prod).count() != 0:
                     jform = JIRAFindingForm(prefix='jiraform', enabled=JIRA_PKey.objects.get(product=prod).push_all_issues)
 
@@ -591,13 +583,12 @@ def ad_hoc_finding(request, pid):
     enabled = False
     jform = None
     form = AdHocFindingForm(initial={'date': datetime.now(tz=localtz).date()})
-    if hasattr(settings, 'ENABLE_JIRA'):
-        if settings.ENABLE_JIRA:
+    if get_system_setting('enable_jira'):
             if JIRA_PKey.objects.filter(product=test.engagement.product).count() != 0:
                 enabled = JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues
                 jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
-        else:
-            jform = None
+    else:
+        jform = None
     if request.method == 'POST':
         form = AdHocFindingForm(request.POST)
         if form.is_valid():
