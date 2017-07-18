@@ -202,9 +202,9 @@ class NessusXMLParser(object):
                                        cwe=cwe)
                         find.unsaved_endpoints = list()
                         dupes[dupe_key] = find
-
-                    find.unsaved_endpoints.append(Endpoint(host=ip + (":" + port) if port is not None else ""))
+                    find.unsaved_endpoints.append(Endpoint(host=ip + (":" + port if port is not None else "")))
 
                     if fqdn is not None:
                         find.unsaved_endpoints.append(Endpoint(host=fqdn))
+
         self.items = dupes.values()
