@@ -4,7 +4,8 @@ from dojo.engagement import views
 
 urlpatterns = [
     #  engagements and calendar
-    url(r'^calendar$', views.calendar, name='calendar'),
+    url(r'^calendar$', views.engagement_calendar, name='calendar'),
+    url(r'^calendar/engagements$', views.engagement_calendar, name='engagement_calendar'),
     url(r'^engagement$', views.engagement, name='engagement'),
     url(r'^engagement/new$', views.new_engagement, name='new_eng'),
     url(r'^engagement/(?P<eid>\d+)$', views.view_engagement,
