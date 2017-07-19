@@ -582,7 +582,8 @@ class DeleteTestForm(forms.ModelForm):
                    'target_start',
                    'target_end',
                    'engagement',
-                   'percent_complete')
+                   'percent_complete',
+                   'lead')
 
 
 class AddFindingForm(forms.ModelForm):
