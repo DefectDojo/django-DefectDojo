@@ -412,7 +412,7 @@ Greg
 Status: in production
 """
 
-
+@user_passes_test(lambda u: u.is_staff)
 def all_product_findings(request, pid):
     p = get_object_or_404(Product, id=pid)
     result = ProductFindingFilter(
