@@ -753,6 +753,14 @@ class ReportAuthedFindingFilter(DojoFilter):
             self.form.fields['test__engagement__product'].queryset = Product.objects.filter(
                 authorized_users__in=[self.user])
 
+    @property
+    def qs(self):
+        parent = super(ReportAuthedFindingFilter, self).qs
+        if self.user.is_staff:
+            return parent
+        else:
+            return parent.filter(test__engagement__product__authorized_users__in=[self.user])
+
     class Meta:
         model = Finding
         exclude = ['date', 'cwe', 'url', 'description', 'mitigation', 'impact',

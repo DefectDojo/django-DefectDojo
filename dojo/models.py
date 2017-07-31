@@ -728,7 +728,7 @@ class Finding(models.Model):
                 return self.severity
 
         except:
-            return self.numerical_severity
+            return self.severity
 
     def get_breadcrumbs(self):
         bc = self.test.get_breadcrumbs()
