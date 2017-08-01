@@ -307,6 +307,7 @@ def metrics(request, mtype):
         'start_date': start_date,
         'end_date': end_date,
         'findings': findings.qs,
+        'find_object': findings,
         'opened_per_month': monthly_counts['opened_per_period'],
         'active_per_month': monthly_counts['active_per_period'],
         'opened_per_week': weekly_counts['opened_per_period'],

@@ -120,7 +120,7 @@
             </h3>
         </div>
         <div id="the-filters" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
-            {% include "dojo/filter_snippet.html" with form=findings.form clear_link="/metrics" %}
+            {% include "dojo/filter_snippet.html" with form=find_object.form clear_link="/metrics" %}
         </div>
     </div>
 
