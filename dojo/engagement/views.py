@@ -2,6 +2,7 @@
 import logging
 import os
 from datetime import datetime, timedelta
+import operator
 
 from django.contrib.auth.models import User
 from django.conf import settings
@@ -23,7 +24,7 @@ from dojo.forms import CheckForm, \
 from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Type, Notes, \
     Risk_Acceptance, Development_Environment, BurpRawRequestResponse, Endpoint, \
-    JIRA_PKey, JIRA_Conf, JIRA_Issue, Cred_User, Cred_Mapping
+    JIRA_PKey, JIRA_Conf, JIRA_Issue, Cred_User, Cred_Mapping, Dojo_User
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, message, get_system_setting
@@ -42,11 +43,24 @@ logger = logging.getLogger(__name__)
 
 @user_passes_test(lambda u: u.is_staff)
 @cache_page(60 * 5)  # cache for 5 minutes
-def calendar(request):
-    engagements = Engagement.objects.all()
-    add_breadcrumb(title="Calendar", top_level=True, request=request)
+def engagement_calendar(request):
+    if not 'lead' in request.GET or '0' in request.GET.getlist('lead'):
+        engagements = Engagement.objects.all()
+    else:
+        filters = []
+        leads = request.GET.getlist('lead','')
+        if '-1' in request.GET.getlist('lead'):
+            leads.remove('-1')
+            filters.append(Q(lead__isnull=True))
+        filters.append(Q(lead__in=leads))
+        engagements = Engagement.objects.filter(reduce(operator.or_, filters))
+
+    add_breadcrumb(title="Engagement Calendar", top_level=True, request=request)
     return render(request, 'dojo/calendar.html', {
-        'engagements': engagements})
+        'caltype': 'engagements',
+        'leads': request.GET.getlist('lead', ''),
+        'engagements': engagements,
+        'users': Dojo_User.objects.all()})
 
 
 @user_passes_test(lambda u: u.is_staff)

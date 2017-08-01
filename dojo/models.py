@@ -702,8 +702,8 @@ class Finding(models.Model):
 
     def save(self, *args, **kwargs):
         super(Finding, self).save(*args, **kwargs)
-        if hasattr(settings, 'ENABLE_DEDUPLICATION'):
-            if settings.ENABLE_DEDUPLICATION and (len(self.endpoints.all()) != 0):
+        system_settings = System_Settings.objects.get()
+        if system_settings.enable_deduplication :
                 from dojo.tasks import async_dedupe
                 async_dedupe.delay(self, *args, **kwargs)
 
@@ -728,7 +728,7 @@ class Finding(models.Model):
                 return self.severity
 
         except:
-            return self.numerical_severity
+            return self.severity
 
     def get_breadcrumbs(self):
         bc = self.test.get_breadcrumbs()
