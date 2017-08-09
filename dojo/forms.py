@@ -781,7 +781,7 @@ class FindingTemplateForm(forms.ModelForm):
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
 
     def __init__(self, *args, **kwargs):
-        tags = Tag.objects.usage_for_model(Finding)
+        tags = Tag.objects.usage_for_model(Finding_Template)
         t = [(tag.name, tag.name) for tag in tags]
         super(FindingTemplateForm, self).__init__(*args, **kwargs)
         self.fields['tags'].widget.choices = t
