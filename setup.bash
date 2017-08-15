@@ -134,6 +134,7 @@ if python -c 'import sys; print sys.real_prefix' 2>/dev/null; then
     python manage.py loaddata product_type
     python manage.py loaddata test_type
     python manage.py loaddata development_environment
+    python manage.py loaddata system_settings
     python manage.py installwatson
     python manage.py buildwatson
 else
@@ -147,6 +148,7 @@ else
     sudo python manage.py loaddata product_type
     sudo python manage.py loaddata test_type
     sudo python manage.py loaddata development_environment
+    sudo python manage.py loaddata system_settings
     sudo python manage.py installwatson
     sudo python manage.py buildwatson
 fi
