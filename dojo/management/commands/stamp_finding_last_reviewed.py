@@ -6,8 +6,9 @@ from pytz import timezone
 from dojo.models import Finding
 import dojo.settings as settings
 from auditlog.models import LogEntry
+from dojo.utils import get_system_setting
 
-locale = timezone(settings.TIME_ZONE)
+locale = timezone(get_system_setting('time_zone'))
 
 """
 Authors: Jay Paz

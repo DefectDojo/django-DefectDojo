@@ -11,10 +11,10 @@ from auditlog.models import LogEntry
 from jira import JIRA
 from jira.exceptions import JIRAError
 from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, close_epic, jira_get_resolution_id, \
- jira_change_resolution_id, log_jira_message, get_jira_connection
+ jira_change_resolution_id, log_jira_message, get_jira_connection, get_system_setting
 from django.core.urlresolvers import get_resolver, reverse
 
-localtz = timezone(settings.TIME_ZONE)
+localtz = timezone(get_system_setting('time_zone'))
 
 """
 Author: Aaron Weaver

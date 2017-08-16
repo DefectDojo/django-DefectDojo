@@ -2,6 +2,7 @@
 import logging
 import os
 from datetime import datetime, timedelta
+import operator
 
 from django.contrib.auth.models import User
 from django.conf import settings
@@ -23,13 +24,13 @@ from dojo.forms import CheckForm, \
 from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Type, Notes, \
     Risk_Acceptance, Development_Environment, BurpRawRequestResponse, Endpoint, \
-    JIRA_PKey, JIRA_Conf, JIRA_Issue, Cred_User, Cred_Mapping
+    JIRA_PKey, JIRA_Conf, JIRA_Issue, Cred_User, Cred_Mapping, Dojo_User
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
-    FileIterWrapper, get_cal_event, message
+    FileIterWrapper, get_cal_event, message, get_system_setting
 from dojo.tasks import update_epic_task, add_epic_task, close_epic_task
 
-localtz = timezone(settings.TIME_ZONE)
+localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -42,11 +43,24 @@ logger = logging.getLogger(__name__)
 
 @user_passes_test(lambda u: u.is_staff)
 @cache_page(60 * 5)  # cache for 5 minutes
-def calendar(request):
-    engagements = Engagement.objects.all()
-    add_breadcrumb(title="Calendar", top_level=True, request=request)
+def engagement_calendar(request):
+    if not 'lead' in request.GET or '0' in request.GET.getlist('lead'):
+        engagements = Engagement.objects.all()
+    else:
+        filters = []
+        leads = request.GET.getlist('lead','')
+        if '-1' in request.GET.getlist('lead'):
+            leads.remove('-1')
+            filters.append(Q(lead__isnull=True))
+        filters.append(Q(lead__in=leads))
+        engagements = Engagement.objects.filter(reduce(operator.or_, filters))
+
+    add_breadcrumb(title="Engagement Calendar", top_level=True, request=request)
     return render(request, 'dojo/calendar.html', {
-        'engagements': engagements})
+        'caltype': 'engagements',
+        'leads': request.GET.getlist('lead', ''),
+        'engagements': engagements,
+        'users': Dojo_User.objects.all()})
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -54,7 +68,7 @@ def engagement(request):
     filtered = EngagementFilter(request.GET, queryset=Product.objects.filter(
         ~Q(engagement=None),
         engagement__active=True, ).distinct())
-    prods = get_page_items(request, filtered, 25)
+    prods = get_page_items(request, filtered.qs, 25)
     name_words = [product.name for product in
                   Product.objects.filter(
                       ~Q(engagement=None),
@@ -141,12 +155,12 @@ def edit_engagement(request, eid):
         except:
             enabled = False
             pass
-        if hasattr(settings, "ENABLE_JIRA"):
-            if settings.ENABLE_JIRA:
-                if JIRA_PKey.objects.filter(product=eng.product).count() != 0:
-                    jform = JIRAFindingForm(prefix='jiraform', enabled=enabled)
-                else:
-                    jform = None
+
+        if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(product=eng.product).count() != 0:
+            jform = JIRAFindingForm(prefix='jiraform', enabled=enabled)
+        else:
+            jform = None
+
     form.initial['tags'] = [tag.name for tag in eng.tags]
     add_breadcrumb(parent=eng, title="Edit Engagement", top_level=False, request=request)
     return render(request, 'dojo/new_eng.html',
@@ -309,7 +323,11 @@ def add_tests(request, eid):
         if form.is_valid():
             new_test = form.save(commit=False)
             new_test.engagement = eng
-            # new_test.lead = User.objects.get(id=form['lead'].value())
+	    try:
+            	new_test.lead = User.objects.get(id=form['lead'].value())
+	    except:
+		new_test.lead = None
+		pass
             new_test.save()
             tags = request.POST.getlist('tags')
             t = ", ".join(tags)
@@ -338,6 +356,8 @@ def add_tests(request, eid):
                 return HttpResponseRedirect(reverse('view_engagement', args=(eng.id,)))
     else:
         form = TestForm()
+	form.initial['target_start'] = eng.target_start
+	form.initial['target_end'] = eng.target_end
     add_breadcrumb(parent=eng, title="Add Tests", top_level=False, request=request)
     return render(request, 'dojo/add_tests.html',
                   {'form': form,

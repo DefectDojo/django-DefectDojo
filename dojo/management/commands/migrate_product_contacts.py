@@ -3,8 +3,9 @@ from django.core.management.base import BaseCommand
 from pytz import timezone
 import dojo.settings as settings
 from dojo.models import Product, Dojo_User
+from dojo.utils import get_system_setting
 
-locale = timezone(settings.TIME_ZONE)
+locale = timezone(get_system_setting('time_zone'))
 
 """
 Authors: Jay Paz

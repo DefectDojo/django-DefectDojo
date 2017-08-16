@@ -25,10 +25,10 @@ from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
 from dojo.reports.widgets import CoverPage, PageBreak, TableOfContents, WYSIWYGContent, FindingList, EndpointList, \
     CustomReportJsonForm, ReportOptions, report_widget_factory
 from dojo.tasks import async_pdf_report, async_custom_pdf_report
-from dojo.utils import get_page_items, add_breadcrumb, get_period_counts
+from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_system_setting
 from dojo.utils import get_period_counts_legacy
 
-localtz = timezone(settings.TIME_ZONE)
+localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -141,11 +141,11 @@ def report_findings(request):
     findings = ReportAuthedFindingFilter(request.GET, queryset=findings, user=request.user)
 
     title_words = [word
-                   for finding in findings
+                   for finding in findings.qs
                    for word in finding.title.split() if len(word) > 2]
 
     title_words = sorted(set(title_words))
-    paged_findings = get_page_items(request, findings, 25)
+    paged_findings = get_page_items(request, findings.qs, 25)
 
     product_type = None
     if 'test__engagement__product__prod_type' in request.GET:
@@ -176,7 +176,7 @@ def report_endpoints(request):
     endpoints = Endpoint.objects.filter(id__in=ids)
     endpoints = EndpointFilter(request.GET, queryset=endpoints)
 
-    paged_endpoints = get_page_items(request, endpoints, 25)
+    paged_endpoints = get_page_items(request, endpoints.qs, 25)
 
     return render(request,
                   'dojo/report_endpoints.html',
@@ -295,7 +295,7 @@ def reports(request):
 
     reports = ReportFilter(request.GET, queryset=reports)
 
-    paged_reports = get_page_items(request, reports, 25)
+    paged_reports = get_page_items(request, reports.qs, 25)
 
     add_breadcrumb(title="Report List", top_level=True, request=request)
 
@@ -396,7 +396,7 @@ def product_endpoint_report(request, pid):
 
     endpoints = EndpointReportFilter(request.GET, queryset=endpoints)
 
-    paged_endpoints = get_page_items(request, endpoints, 25)
+    paged_endpoints = get_page_items(request, endpoints.qs, 25)
     report_format = request.GET.get('report_type', 'AsciiDoc')
     include_finding_notes = int(request.GET.get('include_finding_notes', 0))
     include_finding_images = int(request.GET.get('include_finding_images', 0))
@@ -506,7 +506,7 @@ def product_endpoint_report(request, pid):
                                             'include_executive_summary': include_executive_summary,
                                             'include_table_of_contents': include_table_of_contents,
                                             'user': user,
-                                            'team_name': settings.TEAM_NAME,
+                                            'team_name': get_system_setting('team_name'),
                                             'title': 'Generate Report',
                                             'host': report_url_resolver(request),
                                             'user_id': request.user.id},
@@ -635,7 +635,7 @@ def generate_report(request, obj):
             test__engagement__product=product).distinct().prefetch_related('test',
                                                                            'test__engagement__product',
                                                                            'test__engagement__product__prod_type'))
-        ids = set(finding.id for finding in findings)
+        ids = set(finding.id for finding in findings.qs)
         engagements = Engagement.objects.filter(test__finding__id__in=ids).distinct()
         tests = Test.objects.filter(finding__id__in=ids).distinct()
 
@@ -667,7 +667,7 @@ def generate_report(request, obj):
         report_title = "Engagement Report"
         report_subtitle = str(engagement)
 
-        ids = set(finding.id for finding in findings)
+        ids = set(finding.id for finding in findings.qs)
         tests = Test.objects.filter(finding__id__in=ids).distinct()
 
         context = {'engagement': engagement,
@@ -735,7 +735,7 @@ def generate_report(request, obj):
                    'include_executive_summary': include_executive_summary,
                    'include_table_of_contents': include_table_of_contents,
                    'user': user,
-                   'team_name': settings.TEAM_NAME,
+                   'team_name': get_system_setting('team_name'),
                    'title': 'Generate Report',
                    'host': report_url_resolver(request),
                    'user_id': request.user.id}
@@ -822,7 +822,7 @@ def generate_report(request, obj):
             return HttpResponseRedirect(reverse('reports'))
         else:
             raise Http404()
-    paged_findings = get_page_items(request, findings, 25)
+    paged_findings = get_page_items(request, findings.qs, 25)
     return render(request, 'dojo/request_report.html',
                   {'product_type': product_type,
                    'product': product,

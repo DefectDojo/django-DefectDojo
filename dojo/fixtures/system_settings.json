@@ -1,0 +1,13 @@
+[
+{
+  "model": "dojo.system_settings",
+  "pk": 1,
+  "fields": {
+    "enable_deduplication": false,
+    "enable_jira": false,
+    "s_finding_severity_naming": false,
+    "url_prefix": "",
+    "time_zone": "UTC"
+  }
+}
+]

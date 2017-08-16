@@ -1108,7 +1108,7 @@ hr.report-page-break:before {
 
 .editor {
     overflow: scroll;
-    max-height: 250px
+    min-height: 250px;
 }
 
 .in-use-widgets .report-filter-set .btn-sm {

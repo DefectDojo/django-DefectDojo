@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load display_tags %}
-{% load get_config_setting %}
+{% load get_system_setting %}
 {% load static from staticfiles %}
 {% block add_styles %}
     ul#select_by_severity a:hover, ul#bulk_edit a:hover {
@@ -215,7 +215,7 @@
                     <th>Verified</th>
                     <th>Active</th>
                     <th>Duplicate</th>
-                    {% if "ENABLE_JIRA"|get_config_setting %}
+                    {% if "enable_jira"|get_system_setting %}
                     <th>Jira</th>
                     {% endif %}
                     <th>Actions</th>
@@ -241,13 +241,15 @@
                         </td>
                         <td>{{ finding.reporter.username }}</td>
                         <td>{{ finding.mitigated }}</td>
-                        <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
-                            <span class="text-danger">
-                        {% else %}<span>{% endif %}{{ finding.severity }}</span></td>
+                        <td>
+                            <span class="label severity severity-{{ finding.severity }}">
+                                {{ finding.severity_display }}
+                            </span>
+                        </td>
                         <td>{{ finding.verified }}</td>
                         <td>{{ finding.active }}</td>
                         <td>{{ finding.duplicate }}</td>
-                        {% if "ENABLE_JIRA"|get_config_setting %}
+                        {% if "enable_jira"|get_system_setting %}
                         <td>
                         <a href="{{finding.jira_conf.url}}/browse/{{finding.jira.jira_key}}" target="_blank"> {{finding.jira.jira_key}} </a>
                         </td>
@@ -287,9 +289,8 @@
                             <input id="quick_add_finding" name="title" type="text"
                                    placeholder="Add a potential finding..."
                                    class="form-control"/>
-                            <input type="hidden" value="/api/v1/users/{{ request.user.id }}/"
-                                   name="reporter"/>
-                            <input type="hidden" value="/api/v1/tests/{{ test.id }}/" name="test"/>
+                            <input type="hidden" value="tid"
+                                   name="{{ test.id }}"/>
                             <span class="input-group-btn">
                                     <button id="the_button" class="btn btn-success" type="submit"><i id="fa-icon"
                                                                                                      class="fa fa-fw fa-plus"></i>
@@ -568,12 +569,11 @@
                 $('form#quick-add-form').removeClass("has-error");
                 $('button#the_button').attr('disabled', true).removeClass("btn-success btn-danger").addClass('btn-warning');
                 $('i#fa-icon').removeClass("fa-plus").addClass("fa-spinner fa-pulse");
-
                 $.ajax({
-                    type: "POST",
-                    data: JSON.stringify($(this).serializeObject()),
-                    url: '{{ ajax_url }}',
-                    contentType: 'application/json',
+                    type: "post",
+                    dataType:'json',
+                    data: $(this).serialize(),
+                    url: '{% url 'add_stub_finding' test.id %}',
                     // The ``X-CSRFToken`` evidently can't be set in the
                     // ``headers`` option, so force it here.
                     // This method requires jQuery 1.5+.
@@ -585,17 +585,18 @@
                         // Your processing of the data here. <a href='" + jqXHR.getResponseHeader('Location') + "'>" +  + "</a>
                         //
                         $('table#stub_findings').removeClass('hidden');
-                        var fid = jqXHR.getResponseHeader('Location').split('/');
-                        fid = fid[fid.length - 2];
+                        var fid = data['id'];
+                        var fseverity = data['severity'];
+                        var fdate = data['date'];
                         var row = $("<tr id='added-" + fid + "' class='success'></tr>");
                         var link = $('<a></a>');
 
                         link.attr('href', "/stub_finding/" + fid + "/promote");
                         link.text($("input#quick_add_finding").val());
                         var title = $("<td></td>").append(link);
-                        var severity = $("<td> </td>");
+                        var severity = $("<td></td>").append(fseverity);
                         var reporter = $("<td>{{ request.user.username }}</td>");
-                        var date = $("<td>None</td>");
+                        var date = $("<td></td>").append(fdate);
                         var actions = $('<td><div class="btn-group"><a class="btn btn-sm btn-warning" href="/stub_finding/[id]/promote">Promote To Finding</a> <a class="btn btn-sm btn-danger" href="/stub_finding/[id]/delete">Delete</a></div></td>'.replace(/\[id\]/g, fid));
 
                         row.append(title, severity, reporter, date, actions).appendTo("#stub_findings tbody");

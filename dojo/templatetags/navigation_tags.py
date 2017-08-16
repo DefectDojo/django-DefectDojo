@@ -1,5 +1,6 @@
 from django import template
 from django.utils.safestring import mark_safe as safe
+from django.utils.html import escape
 
 from dojo.models import Product_Type
 from dojo.utils import get_alerts
@@ -29,10 +30,10 @@ def query_string_as_hidden(context):
         for param in parameters:
             parts = param.split('=')
             if len(parts) == 2:
-                inputs += "<input type='hidden' name='" + parts[0] + "' value='" + parts[1] + "'/>"
+                inputs += "<input type='hidden' name='" + escape(parts[0]) + "' value='" + escape(parts[1]) + "'/>"
             else:
-                inputs += "<input type='hidden' name='" + parts[0] + "' value=''/>"
-    return inputs
+                inputs += "<input type='hidden' name='" + escape(parts[0]) + "' value=''/>"
+    return safe(inputs)
 
 
 @register.inclusion_tag('pt_nav_items.html')
@@ -80,7 +81,7 @@ def dojo_sort(request, display='Name', value='title', default=None):
     dict_ = request.GET.copy()
     dict_[field] = value
     link = '<a title="' + title + '" href="?' + dict_.urlencode() + '">' + display + '&nbsp;' + icon + '</a>'
-    return link
+    return safe(link)
 
 
 class PaginationNav(object):

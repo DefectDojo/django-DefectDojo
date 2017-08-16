@@ -12,9 +12,9 @@ from pytz import timezone
 from dojo.filters import ProductTypeFilter
 from dojo.forms import Product_TypeForm, Product_TypeProductForm
 from dojo.models import Product_Type
-from dojo.utils import get_page_items, add_breadcrumb
+from dojo.utils import get_page_items, add_breadcrumb, get_system_setting
 
-localtz = timezone(settings.TIME_ZONE)
+localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -37,7 +37,7 @@ def product_type(request):
                   initial_queryset]
 
     ptl = ProductTypeFilter(request.GET, queryset=initial_queryset)
-    pts = get_page_items(request, ptl, 25)
+    pts = get_page_items(request, ptl.qs, 25)
     add_breadcrumb(title="Product Type List", top_level=True, request=request)
     return render(request, 'dojo/product_type.html', {
         'name': 'Product Type List',

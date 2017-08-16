@@ -4,7 +4,7 @@ import re
 from datetime import datetime
 from uuid import uuid4
 
-import watson
+from watson import search as watson
 from auditlog.registry import auditlog
 from django.conf import settings
 from django.contrib import admin
@@ -17,11 +17,33 @@ from django.db.models import Q
 from django.utils.timezone import now
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToCover
-from pytz import timezone
+from pytz import timezone, all_timezones
 from tagging.registry import register as tag_register
 
-localtz = timezone(settings.TIME_ZONE)
+class System_Settings(models.Model):
+    enable_deduplication = models.BooleanField(default=False, 
+                                        blank=False,
+                                        verbose_name='Deduplicate findings',
+                                        help_text='With this setting turned on, Dojo deduplicates findings by comparing endpoints, ' \
+                                                  'cwe fields, and titles. ' \
+                                                  'If two findings share a URL and have the same CWE or title, Dojo marks the ' \
+                                                  'less recent finding as a duplicate. When deduplication is enabled, a list of ' \
+                                                  'deduplicated findings is added to the engagement view.')
+    enable_jira = models.BooleanField(default=False, verbose_name='Enable JIRA integration', blank=False)
+    s_finding_severity_naming = models.BooleanField(default=False, 
+                                                    blank=False, 
+                                                    help_text='With this setting turned on, Dojo will display S0, S1, S2, etc ' \
+                                                    'in most places, whereas if turned off Critical, High, Medium, etc will be displayed.')
+    url_prefix = models.CharField(max_length=300, default='', blank=True)
+    team_name = models.CharField(max_length=100, default='', blank=True)
+    time_zone = models.CharField(max_length=50,
+                                 choices=[(tz,tz) for tz in all_timezones],
+                                 default='UTC',blank=False)
 
+try:
+    localtz = timezone(System_Settings.objects.get().time_zone)
+except:
+    localtz = timezone(System_Settings().time_zone)
 
 def get_current_date():
     return localtz.normalize(now()).date()
@@ -394,10 +416,12 @@ class CWE(models.Model):
 
 class Endpoint(models.Model):
     protocol = models.CharField(null=True, blank=True, max_length=10,
-                                help_text="The communication protocl such as 'http', 'ftp', etc.")
+                                help_text="The communication protocol such as 'http', 'ftp', etc.")
     host = models.CharField(null=True, blank=True, max_length=500,
                             help_text="The host name or IP address, you can also include the port number. For example"
                                       "'127.0.0.1', '127.0.0.1:8080', 'localhost', 'yourdomain.com'.")
+    fqdn = models.CharField(null=True, blank=True, max_length=500)
+    port = models.IntegerField(null=True, blank=True, help_text="The network port associated with the endpoint.")
     path = models.CharField(null=True, blank=True, max_length=500,
                             help_text="The location of the resource, it should start with a '/'. For example"
                                       "/endpoint/420/edit")
@@ -416,14 +440,19 @@ class Endpoint(models.Model):
         from urlparse import uses_netloc
 
         netloc = self.host
+        fqdn = self.fqdn
+        port = self.port
         scheme = self.protocol
         url = self.path if self.path else ''
         query = self.query
         fragment = self.fragment
 
+        if port:
+            netloc += ':%s' % port
+
         if netloc or (scheme and scheme in uses_netloc and url[:2] != '//'):
             if url and url[:1] != '/': url = '/' + url
-            if scheme:
+            if scheme and scheme in uses_netloc and url[:2] != '//':
                 url = '//' + (netloc or '') + url
             else:
                 url = (netloc or '') + url
@@ -509,6 +538,7 @@ class Development_Environment(models.Model):
 
 class Test(models.Model):
     engagement = models.ForeignKey(Engagement, editable=False)
+    lead = models.ForeignKey(User, editable=True, null=True)
     test_type = models.ForeignKey(Test_Type)
     target_start = models.DateTimeField()
     target_end = models.DateTimeField()
@@ -672,8 +702,8 @@ class Finding(models.Model):
 
     def save(self, *args, **kwargs):
         super(Finding, self).save(*args, **kwargs)
-        if hasattr(settings, 'ENABLE_DEDUPLICATION'):
-            if settings.ENABLE_DEDUPLICATION and (len(self.endpoints.all()) != 0):
+        system_settings = System_Settings.objects.get()
+        if system_settings.enable_deduplication :
                 from dojo.tasks import async_dedupe
                 async_dedupe.delay(self, *args, **kwargs)
 
@@ -690,13 +720,15 @@ class Finding(models.Model):
                     setattr(self, field, "No %s given" % field)
 
     def severity_display(self):
-        if hasattr(settings, 'S_FINDING_SEVERITY_NAMING'):
-            if settings.S_FINDING_SEVERITY_NAMING:
+        try:
+            system_settings = System_Settings.objects.get()
+            if system_settings.s_finding_severity_naming:
                 return self.numerical_severity
             else:
                 return self.severity
-        else:
-            return self.numerical_severity
+
+        except:
+            return self.severity
 
     def get_breadcrumbs(self):
         bc = self.test.get_breadcrumbs()
@@ -727,6 +759,9 @@ class Stub_Finding(models.Model):
     description = models.TextField(blank=True, null=True)
     test = models.ForeignKey(Test, editable=False)
     reporter = models.ForeignKey(User, editable=False)
+
+    class Meta:
+        ordering = ('-date', 'title')
 
     def __unicode__(self):
         return self.title
@@ -834,7 +869,7 @@ class Risk_Acceptance(models.Model):
     path = models.FileField(upload_to='risk/%Y/%m/%d',
                             editable=False, null=False,
                             blank=False, verbose_name="Risk Acceptance File")
-    accepted_findings = models.ManyToManyField(Finding, null=False)
+    accepted_findings = models.ManyToManyField(Finding)
     reporter = models.ForeignKey(User, editable=False)
     notes = models.ManyToManyField(Notes, editable=False)
     created = models.DateTimeField(null=False, editable=False,
@@ -1137,6 +1172,7 @@ admin.site.register(Tool_Product_Settings)
 admin.site.register(Tool_Type)
 admin.site.register(Cred_User)
 admin.site.register(Cred_Mapping)
+admin.site.register(System_Settings)
 
 watson.register(Product)
 watson.register(Test)

@@ -40,7 +40,8 @@ urlpatterns = [
         name='download_finding_pic'),
 
     # stub findings
-
+    url(r'^stub_finding/(?P<tid>\d+)/add$',
+        views.add_stub_finding, name='add_stub_finding'),
     url(r'^stub_finding/(?P<fid>\d+)/promote',
         views.promote_to_finding, name='promote_to_finding'),
     url(r'^stub_finding/(?P<fid>\d+)/delete$',

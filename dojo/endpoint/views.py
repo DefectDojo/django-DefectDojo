@@ -17,11 +17,11 @@ from dojo.filters import EndpointFilter
 from dojo.forms import EditEndpointForm, \
     DeleteEndpointForm, AddEndpointForm, EndpointMetaDataForm
 from dojo.models import Product, Endpoint, Finding
-from dojo.utils import get_page_items, add_breadcrumb, get_period_counts
+from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_system_setting
 from django.contrib.contenttypes.models import ContentType
 from custom_field.models import CustomFieldValue, CustomField
 
-localtz = timezone(settings.TIME_ZONE)
+localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -32,10 +32,19 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-@user_passes_test(lambda u: u.is_staff)
 def vulnerable_endpoints(request):
     endpoints = Endpoint.objects.filter(finding__active=True, finding__verified=True, finding__false_p=False,
                                         finding__duplicate=False, finding__out_of_scope=False).distinct()
+
+    # are they authorized
+    if request.user.is_staff:
+        pass
+    else:
+        products = Product.objects.filter(authorized_users__in=[request.user])
+        if products.exists():
+            endpoints = endpoints.filter(product__in=products.all())
+        else:
+            raise PermissionDenied
 
     product = None
     if 'product' in request.GET:
@@ -43,9 +52,9 @@ def vulnerable_endpoints(request):
         if len(p) == 1:
             product = get_object_or_404(Product, id=p[0])
 
-    ids = get_endpoint_ids(EndpointFilter(request.GET, queryset=endpoints, user=request.user))
+    ids = get_endpoint_ids(EndpointFilter(request.GET, queryset=endpoints, user=request.user).qs)
     endpoints = EndpointFilter(request.GET, queryset=endpoints.filter(id__in=ids), user=request.user)
-    paged_endpoints = get_page_items(request, endpoints, 25)
+    paged_endpoints = get_page_items(request, endpoints.qs, 25)
     add_breadcrumb(title="Vulnerable Endpoints", top_level=not len(request.GET), request=request)
     return render(request,
                   'dojo/endpoints.html',
@@ -73,9 +82,9 @@ def all_endpoints(request):
         if len(p) == 1:
             product = get_object_or_404(Product, id=p[0])
 
-    ids = get_endpoint_ids(EndpointFilter(request.GET, queryset=endpoints, user=request.user))
+    ids = get_endpoint_ids(EndpointFilter(request.GET, queryset=endpoints, user=request.user).qs)
     endpoints = EndpointFilter(request.GET, queryset=endpoints.filter(id__in=ids), user=request.user)
-    paged_endpoints = get_page_items(request, endpoints, 25)
+    paged_endpoints = get_page_items(request, endpoints.qs, 25)
     add_breadcrumb(title="All Endpoints", top_level=not len(request.GET), request=request)
     return render(request,
                   'dojo/endpoints.html',
@@ -93,11 +102,11 @@ def get_endpoint_ids(endpoints):
             host_no_port = e.host[:e.host.index(':')]
         else:
             host_no_port = e.host
-
-        if host_no_port in hosts:
+        key = host_no_port + '-' + str(e.product.id)
+        if key in hosts:
             continue
         else:
-            hosts.append(host_no_port)
+            hosts.append(key)
             ids.append(e.id)
     return ids
 

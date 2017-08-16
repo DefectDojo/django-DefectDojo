@@ -31,9 +31,7 @@ Deploy to Docker Cloud. (<b>Login first to Docker Cloud before clicking the inst
 
 # Installation Options
 
-### [Debian or RHEL-based Install Script](./doc/install_bash.md)
-Detailed guide for setting up DefectDojo on
-[Ubuntu 14.04](https://github.com/rackerlabs/django-DefectDojo/wiki/DefectDojo-Installation-Guide---Ubuntu-Desktop-14.04).
+### [Debian, Ubuntu (16.04.2+) or RHEL-based Install Script](http://defectdojo.readthedocs.io/en/latest/getting-started.html#install-script)
 
 ### [Docker](http://defectdojo.readthedocs.io/en/latest/getting-started.html#docker-local-install) - There are currently a number of bugs in the Docker image that we're working to address. Please use the regular install script to avoid issues.
 

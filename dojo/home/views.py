@@ -13,9 +13,9 @@ from django.shortcuts import render
 from pytz import timezone
 
 from dojo.models import Finding, Engagement, Risk_Acceptance
-from dojo.utils import add_breadcrumb, get_punchcard_data
+from dojo.utils import add_breadcrumb, get_punchcard_data, get_system_setting
 
-localtz = timezone(settings.TIME_ZONE)
+localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,

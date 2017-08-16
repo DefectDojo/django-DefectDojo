@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
-{% load get_config_setting %}
+{% load get_system_setting %}
 {% block content %}
     <div class="row">
         <div class="col-md-12">
@@ -29,7 +29,7 @@
                             <th class="nowrap">{% dojo_sort request 'Reviewed' 'last_reviewed'%}</th>
                             <th class="nowrap">{% dojo_sort request 'Severity' 'numerical_severity' 'asc' %}</th>
                             <th class="nowrap">Age</th>
-                            {% if "ENABLE_JIRA"|get_config_setting %}
+                            {% if "enable_jira"|get_system_setting %}
                             <th class="nowrap">Jira</th>
                             {% endif %}
                             <th class="nowrap">{% dojo_sort request 'Product' 'test__engagement__product__name'%}</th>
@@ -52,7 +52,7 @@
                                     <p class="text-error">
                                 {% else %}<p>{% endif %}{{ finding.severity }}</p></td>
                                 <td>{{ finding.age }}</td>
-                                {% if "ENABLE_JIRA"|get_config_setting %}
+                                {% if "enable_jira"|get_system_setting %}
                                 <td>
                                 <a href="{{finding.jira_conf.url}}/browse/{{finding.jira.jira_key}}" target="_blank"> {{finding.jira.jira_key}} </a>
                                 </td>

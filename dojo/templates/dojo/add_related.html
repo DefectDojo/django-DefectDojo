@@ -77,9 +77,14 @@
 <script src="{% static "moment/min/moment.min.js" %}"></script>
 <script src="{% static "fullcalendar/dist/fullcalendar.min.js" %}"></script>
 <!-- our JS -->
-<script src="{% static "dojo/js/index.js" %}"></script>
-<script type="application/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>
 <script type="application/javascript" src="{% static "chosen/chosen.jquery.min.js" %}"></script>
+
+<script type="text/javascript" src="{% static "admin/js/jquery.init.js"%}"></script>
+<script type="application/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>
+<script type="application/javascript">
+    $ = django.jQuery;
+</script>
+<script src="{% static "dojo/js/index.js" %}"></script>
 <script type="application/javascript">
     $(function () {
         var endpoints = '';

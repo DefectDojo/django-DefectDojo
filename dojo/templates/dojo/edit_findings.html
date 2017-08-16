@@ -45,12 +45,14 @@
 
 {% endblock %}
 {% block postscript %}
-    <script type="application/javascript">
-        $('#add_id_endpoints').attr('href', '/endpoints/{{ finding.test.engagement.product.id }}/add?_popup');
-    </script>
-    <script type="application/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>
     <script type="application/javascript" src="{% static "chosen/chosen.jquery.min.js" %}"></script>
+
+    <script type="text/javascript" src="{% static "admin/js/jquery.init.js"%}"></script>
+    <script type="application/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>
+
     <script type="application/javascript">
+        $ = django.jQuery;
+        $('#add_id_endpoints').attr('href', '/endpoints/{{ finding.test.engagement.product.id }}/add?_popup');
         $(function () {
             $('#id_tags').chosen({
                 'placeholder_text_multiple': 'Select or add some tags...',

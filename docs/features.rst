@@ -389,17 +389,19 @@ DefectDojo has the ability to import reports from other security tools.  Current
 
 1. Burp XML
 2. Nessus (CSV, XML)
-3. Nexpose XML 2.0
-4. ZAP XML
-5. Veracode Detailed XML Report
-6. Checkmarx Detailed XML Report
-7. AppSpider Vulnerabilities Summary XML Report (VulnerabilitiesSummary.xml)
-8. Arachni Scanner JSON Report
-9. Visual Code Grepper XML or CSV
-10. OWASP Dependency Check XML
-11. Retire.js JavaScript Scan JSON
-12. Node Security Platform JSON
-13. Generic Findings in CSV format
+3. Nmap (XML)
+4. Nexpose XML 2.0
+5. ZAP XML
+6. Veracode Detailed XML Report
+7. Checkmarx Detailed XML Report
+8. AppSpider Vulnerabilities Summary XML Report (VulnerabilitiesSummary.xml)
+9. Arachni Scanner JSON Report
+10. Visual Code Grepper XML or CSV
+11. OWASP Dependency Check XML
+12. Retire.js JavaScript Scan JSON
+13. Node Security Platform JSON
+14. Qualys XML
+15. Generic Findings in CSV format
 
 
 The importers analyze each report and create new Findings for each item reported.  DefectDojo collapses duplicate

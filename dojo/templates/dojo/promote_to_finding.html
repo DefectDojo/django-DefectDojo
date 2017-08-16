@@ -24,11 +24,13 @@
     </form>
 {% endblock %}
 {% block postscript %}
+    <script type="text/javascript" src="{% static "admin/js/jquery.init.js"%}"></script>
+    <script type="application/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>
     <script type="application/javascript">
+        $ = django.jQuery;
         $('#add_id_endpoints').attr('href', '/endpoints/{{ test.engagement.product.id }}/add?_popup');
         {% if not form_error %}
             $('#id_endpoints').find('option').remove();
         {% endif %}
     </script>
-    <script type="application/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>
 {% endblock %}
