@@ -192,7 +192,6 @@ INSTALLED_APPS = (
     'tagging',
     'custom_field',
     'imagekit',
-    'django_slack'
 )
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -217,6 +216,16 @@ CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_RESULT_EXPIRES = 86400
 CELERYBEAT_SCHEDULE_FILENAME = DOJO_ROOT + '/dojo.celery.beat.db'
 CELERY_ACCEPT_CONTENT = ['pickle', 'json', 'msgpack', 'yaml']
+
+# Celery beat scheduled tasks
+CELERYBEAT_SCHEDULE = {
+    'add-alerts': {
+        'task':'dojo.tasks.add_alerts',
+        'schedule': timedelta(seconds=10),
+        'args': [timedelta(seconds=10)]
+    },
+}
+
 
 # wkhtmltopdf settings
 WKHTMLTOPDF_PATH = '/usr/local/bin/wkhtmltopdf'
