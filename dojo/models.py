@@ -1020,12 +1020,16 @@ class JIRA_PKey(models.Model):
     enable_engagement_epic_mapping = models.BooleanField(default=False, blank=True)
     push_notes = models.BooleanField(default=False, blank=True)
 
-NOTIFICATION_CHOICES=(("slack","slack"),("mail","mail"))
+NOTIFICATION_CHOICES=(("slack","slack"),("mail","mail"),("alert","alert"))
 class Notifications(models.Model):
-    engagement_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='', blank=True)
-    test_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='', blank=True)
-    results_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='', blank=True)
-    report_created = MultiSelectField(choices=NOTIFICATION_CHOICES, default='', blank=True)
+    engagement_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    test_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    results_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    report_created = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    jira_update = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    upcoming_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    user_mentioned = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    other = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     user = models.ForeignKey(User, default=None, null=True, editable=False)
 
 class Tool_Type(models.Model):
