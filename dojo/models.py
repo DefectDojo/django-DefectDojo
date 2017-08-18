@@ -33,7 +33,7 @@ class System_Settings(models.Model):
     enable_jira = models.BooleanField(default=False, verbose_name='Enable JIRA integration', blank=False)
     enable_slack_notifications = models.BooleanField(default=False, verbose_name='Enable Slack notifications', blank=False)
     slack_channel = models.CharField(max_length=100, default='', blank=True)
-    slack_token = models.CharField(max_length=100, default='', blank=True)
+    slack_token = models.CharField(max_length=100, default='', blank=True, help_text='Token required for interacting with Slack. Get one at https://api.slack.com/tokens')
     slack_username = models.CharField(max_length=100, default='', blank=True)
     enable_mail_notifications = models.BooleanField(default=False, blank=False)
     mail_notifications_from = models.CharField(max_length=200, default='from@example.com', blank=True)
