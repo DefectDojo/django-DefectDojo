@@ -831,13 +831,14 @@ def jira_change_resolution_id(jira, issue, id):
 
 # Logs the error to the alerts table, which appears in the notification toolbar
 def log_jira_alert(error, finding):
-    alerts = Alerts(description="Jira update issue: Finding: " + str(finding.id) + ", " + error, url=reverse('view_finding', args=(finding.id,)), icon="bullseye", display_date=localtz.localize(datetime.today()), source="Jira")
-    alerts.save()
+    create_notification(event='jira_update', description='Jira update issue: Finding: ' + str(finding.id) + ', ' + error,
+                       icon='bullseye', source='Jira')
 
 # Displays an alert for Jira notifications
 def log_jira_message(text, finding):
-    alerts = Alerts(description=text + " Finding: " + str(finding.id), url=reverse('view_finding', args=(finding.id,)), icon="bullseye", display_date=localtz.localize(datetime.today()), source="Jira")
-    alerts.save()
+    create_notification(event='jira_update', description=text + " Finding: " + str(finding.id),
+                       url=reverse('view_finding', args=(finding.id,)),
+                       icon='bullseye', source='Jira')
 
 # Adds labels to a Jira issue
 def add_labels(find, issue):
@@ -1041,18 +1042,14 @@ def process_notifications(request, note, parent_url, parent_title):
     users_to_notify=[User.objects.filter(username=username).get()
                    for username in usernames_to_check if User.objects.filter(is_active=True, username=username).exists()] #is_staff also?
     user_posting=request.user
-    send_atmention_email(user_posting, users_to_notify, parent_url, parent_title, note)
-    for u in users_to_notify:
-        if u.email:
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 'Notification sent to {0} - {1}'.format(u.username,u.email),
-                                 extra_tags='alert-success')
-        else:
-            messages.add_message(request,
-                             messages.ERROR,
-                             'No email listed for {0}'.format(u.username),
-                             extra_tags='alert-danger')
+
+    create_notification(event='user_mentioned',
+                        section=parent_title,
+                        note=note,
+                        user=request.user,
+                        title='%s mentioned you in a note' % request.user,
+                        url=parent_url,
+                        recipients=users_to_notify)
 
 def send_atmention_email(user, users, parent_url, parent_title, new_note):
     recipients=[u.email for u in users]

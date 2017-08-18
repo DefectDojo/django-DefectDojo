@@ -19,7 +19,7 @@ import pdfkit
 from dojo.celery import app
 from dojo.reports.widgets import report_widget_factory
 from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, \
-                        close_epic, get_system_setting, send_notifications
+                        close_epic, get_system_setting, create_notification
 
 logger = get_task_logger(__name__)
 

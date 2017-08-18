@@ -20,7 +20,7 @@ from dojo.models import Finding, Test, Notes, \
     BurpRawRequestResponse, Endpoint, Stub_Finding, Finding_Template, JIRA_PKey, Cred_User, Cred_Mapping
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, message, \
-                       process_notifications, get_system_setting, send_notifications
+                       process_notifications, get_system_setting, create_notification
 from dojo.tasks import add_issue_task
 
 localtz = timezone(get_system_setting('time_zone'))
@@ -564,7 +564,7 @@ def re_import_scan_results(request, tid):
                                                                  'mitigated') + '. Please manually verify each one.',
                                          extra_tags='alert-success')
 
-                send_notifications(event='results_added', eventargs={'finding_count': finding_count, 
+                create_notification(event='results_added', eventargs={'finding_count': finding_count, 
                                                                      'test': t, 
                                                                      'engagement': engagement,
                                                                      'url': request.build_absolute_uri(reverse('view_test', args=(t.id,)))})

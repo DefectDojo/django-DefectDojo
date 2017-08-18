@@ -21,7 +21,7 @@ from dojo.filters import ProductFilter, ProductFindingFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, ProductMetaDataForm, JIRAPKeyForm, JIRAFindingForm
 from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, \
     Tool_Product_Settings, Cred_User, Cred_Mapping
-from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, get_system_setting, send_notifications
+from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, get_system_setting, create_notification
 from custom_field.models import CustomFieldValue, CustomField
 from  dojo.tasks import add_epic_task
 from tagging.models import Tag
@@ -472,7 +472,7 @@ def new_eng_for_app(request, pid):
                                  'Engagement added successfully.',
                                  extra_tags='alert-success')
 
-            send_notifications(event='engagement_added', eventargs={'engagement':new_eng, 'url': request.build_absolute_uri(reverse('view_engagement', args=(new_eng.id,)))}, objowner=new_eng.lead)
+            create_notification(event='engagement_added', eventargs={'engagement':new_eng, 'url': request.build_absolute_uri(reverse('view_engagement', args=(new_eng.id,)))}, objowner=new_eng.lead)
 
             if "_Add Tests" in request.POST:
                 return HttpResponseRedirect(reverse('add_tests', args=(new_eng.id,)))

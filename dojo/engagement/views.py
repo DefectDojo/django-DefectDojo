@@ -26,7 +26,7 @@ from dojo.models import Finding, Product, Engagement, Test, \
     JIRA_PKey, JIRA_Conf, JIRA_Issue, Cred_User, Cred_Mapping, Notifications, Dojo_User
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
-    FileIterWrapper, get_cal_event, message, get_system_setting, send_notifications
+    FileIterWrapper, get_cal_event, message, get_system_setting, create_notification
 from dojo.tasks import update_epic_task, add_epic_task, close_epic_task
 from django_slack import slack_message
 
@@ -332,7 +332,7 @@ def add_tests(request, eid):
                                  'Test added successfully.',
                                  extra_tags='alert-success')
 
-            send_notifications(event='test_added', eventargs={'test': new_test, 'engagement': eng, 'url': request.build_absolute_uri(reverse('view_engagement', args=(eng.id,)))})
+            create_notification(event='test_added', eventargs={'test': new_test, 'engagement': eng, 'url': request.build_absolute_uri(reverse('view_engagement', args=(eng.id,)))})
 
             if '_Add Another Test' in request.POST:
                 return HttpResponseRedirect(reverse('add_tests', args=(eng.id,)))
@@ -459,7 +459,7 @@ def import_scan_results(request, eid):
                                                                                      'processed'),
                                      extra_tags='alert-success')
 
-                send_notifications(event='results_added', eventargs={'finding_count': finding_count, 
+                create_notification(event='results_added', eventargs={'finding_count': finding_count, 
                                                                      'test': t, 
                                                                      'engagement': engagement,
                                                                      'url': request.build_absolute_uri(reverse('view_test', args=(t.id,)))})

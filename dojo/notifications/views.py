@@ -39,9 +39,9 @@ logger = logging.getLogger(__name__)
 
 def personal_notifications(request):
     try:
-        notifications_obj = Notifications.objects.get(user=Dojo_User(id=request.user.id))
+        notifications_obj = Notifications.objects.get(user=request.user)
     except:
-        notifications_obj = Notifications(user=Dojo_User(id=request.user.id))
+        notifications_obj = Notifications(user=request.user)
 
     form = NotificationsForm(instance=notifications_obj)
     if request.method == 'POST':
