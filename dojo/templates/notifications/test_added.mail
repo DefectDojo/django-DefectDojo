@@ -1,8 +1,0 @@
-{% load get_system_setting %}
-
-Greetings,
-
-a new test has been added to the engagement {{ engagement.product }}: {{ test.test_type }}. You can find details here: {{ url }}
-
-Kind regards,
-{% "team_name"|get_system_setting %}

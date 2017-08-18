@@ -1,8 +1,0 @@
-{% load get_system_setting %}
-
-Hello,
-
-the engagement "{{ engagement.product }}" has been created. It can be viewed here: {{ url }}
-
-Kind regards,
-{{ "team_name"|get_system_setting }}
