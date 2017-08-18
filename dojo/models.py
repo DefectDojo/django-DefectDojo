@@ -1084,6 +1084,7 @@ class Tool_Product_History(models.Model):
     configuration_details = models.CharField(max_length=2000, null=True, blank=True)
 
 class Alerts(models.Model):
+    title = models.CharField(max_length=100, default='', null=False)
     description = models.CharField(max_length=2000, null=True)
     url =  models.URLField(max_length=2000, null=True)
     source = models.CharField(max_length=15,
@@ -1096,6 +1097,9 @@ class Alerts(models.Model):
     user_id = models.ForeignKey(User, null=True, editable=False)
     created = models.DateTimeField(null=False, editable=False, default=now)
     display_date = models.DateTimeField(null=False, default=now)
+
+    class Meta:
+        ordering = ['-created']
 
 class Cred_User(models.Model):
     name = models.CharField(max_length=200, null=False)
