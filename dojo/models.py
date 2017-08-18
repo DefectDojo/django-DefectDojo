@@ -1087,7 +1087,7 @@ class Alerts(models.Model):
     title = models.CharField(max_length=100, default='', null=False)
     description = models.CharField(max_length=2000, null=True)
     url =  models.URLField(max_length=2000, null=True)
-    source = models.CharField(max_length=15, default='Generic')
+    source = models.CharField(max_length=100, default='Generic')
     icon = models.CharField(max_length=25, default='icon-user-check')
     user_id = models.ForeignKey(User, null=True, editable=False)
     created = models.DateTimeField(null=False, editable=False, default=now)
