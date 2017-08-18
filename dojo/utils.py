@@ -1148,79 +1148,95 @@ def get_system_setting(setting):
     return getattr(system_settings, setting, None)
 
 
-def send_notifications(event, eventargs, objowner=None):
-    def log_alert(e):
-        alert = Alerts(user_id=objowner, description="Notification issue: %s" % e, url=reverse('notifications'), icon="bullseye", display_date=localtz.localize(datetime.today()), source="Notifications")
+def create_notification(event=None, **kwargs):
+    def create_notification_message(event, notification_type):
+        template = 'notifications/%s.tpl' % event.replace('/', '')
+        kwargs.update({'type':notification_type})
+
+        return render_to_string(template, kwargs)
+
+    def send_slack_notification(channel):
+        try:
+            res = requests.request(method='POST', url='https://slack.com/api/chat.postMessage',
+                             data={'token':get_system_setting('slack_token'),
+                                   'channel':channel,
+                                   'username':get_system_setting('slack_username'),
+                                   'text':create_notification_message(event, 'slack')})
+        except Exception as e:
+            log_alert(e)
+            pass
+
+    def send_mail_notification(address):
+        subject = '%s notification' % get_system_setting('team_name')
+        if 'title' in kwargs:
+            subject += ': %s' % kwargs['title']
+        try:
+            send_mail(subject,
+                    create_notification_message(event, 'mail'),
+                    get_system_setting('mail_notifications_from'),
+                    [address],
+                    fail_silently=False)
+        except Exception as e:
+            log_alert(e)
+            pass
+
+    def send_alert_notification(user=None):
+        icons = {'report_created':'file-text-o',
+                 'jira_update':'bullseye',
+                 'default':'info-circle'}
+
+        icon = next((val for val in [kwargs.get('icon'), icons.get(event)] if val is not None), icons['default'])
+        alert = Alerts(user=user, 
+                       title=kwargs.get('title'),
+                       description=create_notification_message(event, 'alert'),
+                       url=kwargs.get('url', reverse('alerts')),
+                       icon=icon, 
+                       source=Notifications._meta.get_field(event).verbose_name.title())
         alert.save()
 
+
+    def log_alert(e):
+        alert = Alerts(user=Dojo_User.objects.get(is_superuser=True), description="Notification issue: %s" % e, icon="exclamation-triangle", source="Notifications")
+        alert.save()
+
+    # Global notifications
     try:
-        notifications = Notifications.objects.get(user_id=None)
+        notifications = Notifications.objects.get(user=None)
     except Exception as e:
         notifications = Notifications()
 
     slack_enabled = get_system_setting('enable_slack_notifications')
     mail_enabled = get_system_setting('enable_mail_notifications')
 
+    if not hasattr(notifications, event):
+        event = 'other'
+
     if slack_enabled and 'slack' in getattr(notifications, event):
-        slacktemplate = 'notifications/%s.slack' % event.replace('/', '')
-        slackparams = {'token': get_system_setting('slack_token'),
-                       'channel': get_system_setting('slack_channel'),
-                       'username': get_system_setting('slack_username')}
-        slackparams.update(eventargs)
-        try:
-            slack_message(slacktemplate, slackparams)
-        except Exception as e:
-            log_alert(e)
-            pass
+        send_slack_notification(get_system_setting('slack_channel'))
 
     if mail_enabled and 'mail' in getattr(notifications, event):
-        msg = render_to_string('notifications/%s.mail' % event.replace('/', ''),
-                                eventargs)
+        send_slack_notification(get_system_setting('mail_notifications_from'))
 
-        try:
-            send_mail(get_system_setting('team_name') + ' Notification',
-                    msg,
-                    get_system_setting('mail_notifications_from'),
-                    [get_system_setting('mail_notifications_to')],
-                    fail_silently=False)
-        except Exception as e:
-            log_alert(e)
-            pass
+    if 'alert' in getattr(notifications, event, None):
+        send_alert_notification()
 
-    if objowner:
-        users = [User.objects.get(id=objowner.id)]
+    # Personal notifications
+    if 'recipients' in kwargs:
+        users = User.objects.filter(username__in=kwargs['recipients'])
     else:
-        users = User.objects.all()
+        users = User.objects.filter(is_superuser=True)
     for user in users:
         try:
-            notifications = Notifications.objects.get(user_id=user.id)
+            notifications = Notifications.objects.get(user=user)
         except Exception as e:
             notifications = Notifications()
 
-        if slack_enabled and 'slack' in getattr(notifications, event):
-            slacktemplate = 'notifications/%s.slack' % event.replace('/', '')
-            slackparams = {'token': get_system_setting('slack_token'),
-                        'channel': '@%s' % user.usercontactinfo.slack_username,
-                        'username': get_system_setting('slack_username')}
-            slackparams.update(eventargs)
-
-            try:
-                slack_message(slacktemplate, slackparams)
-            except Exception as e:
-                log_alert(e)
-                pass
+        if slack_enabled and 'slack' in getattr(notifications, event) and user.usercontactinfo.slack_username is not None:
+            send_slack_notification('@%s' % user.usercontactinfo.slack_username)
 
         if mail_enabled and 'mail' in getattr(notifications, event):
-            msg = render_to_string('notifications/%s.mail' % event.replace('/', ''),
-                                    eventargs)
-
-            try:
-                send_mail(get_system_setting('team_name') + ' Notification',
-                        msg,
-                        get_system_setting('mail_notifications_from'),
-                        [user.email],
-                        fail_silently=False)
-            except Exception as e:
-                log_alert(e)
-                pass
+            send_mail_notification(user.email)
+                
+        if 'alert' in getattr(notifications, event):
+            send_alert_notification(user)
                 
