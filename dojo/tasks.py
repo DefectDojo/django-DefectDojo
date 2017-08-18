@@ -2,7 +2,7 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 
 import tempfile
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.core.files.base import ContentFile
@@ -10,10 +10,10 @@ from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
 from django.utils.http import urlencode
-from pytz import timezone
+from django.utils import timezone
 from celery.utils.log import get_task_logger
 from celery.decorators import task
-from dojo.models import Finding
+from dojo.models import Finding, Test, Engagement
 
 import pdfkit
 from dojo.celery import app
@@ -93,7 +93,7 @@ def async_pdf_report(self,
         report.done_datetime = datetime.now(tz=localtz)
         report.save()
 
-        send_notifications(event='report_created', eventargs={'url': uri, 'report': report}, objowner=report.requester)
+        create_notification(event='report_created', eventargs={'description':'The report "%s" is ready.' % report.name, 'url': uri, 'report': report}, objowner=report.requester)
     except Exception as e:
         report.status = 'error'
         report.save()
@@ -173,7 +173,7 @@ def async_custom_pdf_report(self,
         report.done_datetime = datetime.now(tz=localtz)
         report.save()
 
-        send_notifications(event='report_created', eventargs={'url': uri, 'report': report}, objowner=report.requester)
+        create_notification(event='report_created', eventargs={'description':'The report "%s" is ready.' % report.name, 'url': uri, 'report': report}, objowner=report.requester)
     except Exception as e:
         report.status = 'error'
         report.save()
