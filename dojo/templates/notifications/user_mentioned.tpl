@@ -16,7 +16,7 @@
 
     {{ note }}
 {% elif type == 'slack' %}
-    User {{ user }} mentioned you in a note on {{ section }}:
+    User {{ user.usercontactinfo.slack_username }} mentioned you in a note on {{ section }}:
 
     {{ note }}
 
