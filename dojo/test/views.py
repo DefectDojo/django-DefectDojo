@@ -564,10 +564,7 @@ def re_import_scan_results(request, tid):
                                                                  'mitigated') + '. Please manually verify each one.',
                                          extra_tags='alert-success')
 
-                create_notification(event='results_added', eventargs={'finding_count': finding_count, 
-                                                                     'test': t, 
-                                                                     'engagement': engagement,
-                                                                     'url': request.build_absolute_uri(reverse('view_test', args=(t.id,)))})
+                create_notification(event='results_added', title='Results added', finding_count=finding_count, test=t, engagement=engagement, url=request.build_absolute_uri(reverse('view_test', args=(t.id,))))
 
                 return HttpResponseRedirect(reverse('view_test', args=(t.id,)))
             except SyntaxError:

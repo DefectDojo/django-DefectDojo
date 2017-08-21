@@ -472,7 +472,7 @@ def new_eng_for_app(request, pid):
                                  'Engagement added successfully.',
                                  extra_tags='alert-success')
 
-            create_notification(event='engagement_added', eventargs={'engagement':new_eng, 'url': request.build_absolute_uri(reverse('view_engagement', args=(new_eng.id,)))}, objowner=new_eng.lead)
+            create_notification(event='engagement_added', title='Engagement added', engagement=new_eng, url=request.build_absolute_uri(reverse('view_engagement', args=(new_eng.id,))), objowner=new_eng.lead)
 
             if "_Add Tests" in request.POST:
                 return HttpResponseRedirect(reverse('add_tests', args=(new_eng.id,)))

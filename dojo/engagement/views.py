@@ -332,7 +332,7 @@ def add_tests(request, eid):
                                  'Test added successfully.',
                                  extra_tags='alert-success')
 
-            create_notification(event='test_added', eventargs={'test': new_test, 'engagement': eng, 'url': request.build_absolute_uri(reverse('view_engagement', args=(eng.id,)))})
+            create_notification(event='test_added', title='Test added', test=new_test, engagement=eng, url=request.build_absolute_uri(reverse('view_engagement', args=(eng.id,))))
 
             if '_Add Another Test' in request.POST:
                 return HttpResponseRedirect(reverse('add_tests', args=(eng.id,)))
@@ -459,10 +459,7 @@ def import_scan_results(request, eid):
                                                                                      'processed'),
                                      extra_tags='alert-success')
 
-                create_notification(event='results_added', eventargs={'finding_count': finding_count, 
-                                                                     'test': t, 
-                                                                     'engagement': engagement,
-                                                                     'url': request.build_absolute_uri(reverse('view_test', args=(t.id,)))})
+                create_notification(event='results_added', finding_count=finding_count, test=t, engagement=engagement, url=request.build_absolute_uri(reverse('view_test', args=(t.id,))))
 
                 return HttpResponseRedirect(reverse('view_test', args=(t.id,)))
             except SyntaxError:
