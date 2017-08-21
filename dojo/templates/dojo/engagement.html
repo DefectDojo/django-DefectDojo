@@ -60,8 +60,19 @@
                                 <td>
                                     {% for e in p.engagement_set.all %}
                                         {% if e.active %}
-                                            <a class="eng_link" href="{% url 'view_engagement' e.id %}">
+						<div class="lineContainer">
+							<a  style="display: inline" class="eng_link" href="{% url 'view_engagement' e.id %}">
                                                 {% if e.name %}{{ e.name }} {% endif %}{{ e.target_start }}</a>
+							| Lead: {{ e.lead.first_name }}
+                                                        |
+                                                        {%  for test in e.test_set.all %}
+								{% if test.lead %}
+                                                                <a href="{% url 'view_test' test.id %}"> {{ test.test_type }}: {{ test.lead.first_name }} </a> |
+								{% else %}
+                                                                <a href="{% url 'view_test' test.id %}"> {{ test.test_type }} </a> |
+								{% endif %}
+                                                        {% endfor %}
+						</div>
                                                 <sup>
                                                  {% for tag in e.tags %}
                                                       <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>

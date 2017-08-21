@@ -182,6 +182,10 @@ def user(request):
 @user_passes_test(lambda u: u.is_staff)
 def add_user(request):
     form = AddDojoUserForm()
+    if not request.user.is_superuser:
+        form.fields['is_staff'].widget.attrs['disabled'] = True
+        form.fields['is_superuser'].widget.attrs['disabled'] = True
+        form.fields['is_active'].widget.attrs['disabled'] = True
     contact_form = UserContactInfoForm()
     user = None
 
@@ -223,6 +227,10 @@ def edit_user(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     authed_products = Product.objects.filter(authorized_users__in=[user])
     form = AddDojoUserForm(instance=user, initial={'authorized_products': authed_products})
+    if not request.user.is_superuser:
+        form.fields['is_staff'].widget.attrs['disabled'] = True
+        form.fields['is_superuser'].widget.attrs['disabled'] = True
+        form.fields['is_active'].widget.attrs['disabled'] = True
     try:
         user_contact = UserContactInfo.objects.get(user=user)
     except UserContactInfo.DoesNotExist:
@@ -270,7 +278,7 @@ def delete_user(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     form = DeleteUserForm(instance=user)
 
-    from django.contrib.admin.util import NestedObjects
+    from django.contrib.admin.utils import NestedObjects
     from django.db import DEFAULT_DB_ALIAS
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)

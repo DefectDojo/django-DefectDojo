@@ -218,7 +218,7 @@ def add_comment_task(find, note):
     add_comment(find, note)
 
 @app.task(name='async_dedupe')
-def async_dedupe(self,  new_finding, *args, **kwargs):
+def async_dedupe(new_finding, *args, **kwargs):
     logger.info("running deduplication")
     eng_findings_cwe = Finding.objects.filter(test__engagement__product=new_finding.test.engagement.product,
                                               cwe=new_finding.cwe).exclude(id=new_finding.id).exclude(cwe=None).exclude(endpoints=None)

@@ -107,7 +107,7 @@ class MonthYearWidget(Widget):
         if not (self.required and value):
             month_choices.append(self.none_value)
         month_choices.sort()
-        local_attrs = self.build_attrs(id=self.month_field % id_)
+        local_attrs = self.build_attrs({'id':self.month_field % id_})
         s = Select(choices=month_choices)
         select_html = s.render(self.month_field % name, month_val, local_attrs)
 
@@ -183,7 +183,7 @@ class ProductForm(forms.ModelForm):
 
     class Meta:
         model = Product
-        fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type',
+        fields = ['name', 'description', 'tags', 'prod_manager', 'tech_contact', 'manager', 'prod_type',
                   'authorized_users']
 
 
@@ -228,11 +228,13 @@ class Product_TypeProductForm(forms.ModelForm):
 
 
 class ImportScanForm(forms.Form):
-    SCAN_TYPE_CHOICES = (("Burp Scan", "Burp Scan"), ("Nessus Scan", "Nessus Scan"), ("Nexpose Scan", "Nexpose Scan"),
+    SCAN_TYPE_CHOICES = (("Burp Scan", "Burp Scan"), ("Nessus Scan", "Nessus Scan"), ("Nmap Scan", "Nmap Scan"),
+                         ("Nexpose Scan", "Nexpose Scan"),
                          ("AppSpider Scan", "AppSpider Scan"), ("Veracode Scan", "Veracode Scan"),
                          ("Checkmarx Scan", "Checkmarx Scan"), ("ZAP Scan", "ZAP Scan"),
                          ("Arachni Scan", "Arachni Scan"), ("VCG Scan", "VCG Scan"),
-                         ("Dependency Check Scan", "Dependency Check Scan"), ("Retire.js Scan", "Retire.js Scan"), ("Node Security Platform Scan", "Node Security Platform Scan"),
+                         ("Dependency Check Scan", "Dependency Check Scan"), ("Retire.js Scan", "Retire.js Scan"),
+                         ("Node Security Platform Scan", "Node Security Platform Scan"),
                          ("Qualys Scan", "Qualys Scan"),
                          ("Generic Findings Import", "Generic Findings Import"))
     scan_date = forms.DateTimeField(
@@ -474,7 +476,6 @@ class EngForm(forms.ModelForm):
             return False
         return True
 
-
     class Meta:
         model = Engagement
         exclude = ('first_contacted', 'version', 'eng_type', 'real_start',
@@ -546,7 +547,7 @@ class TestForm(forms.ModelForm):
     test_type = forms.ModelChoiceField(queryset=Test_Type.objects.all().order_by('name'))
     environment = forms.ModelChoiceField(
         queryset=Development_Environment.objects.all().order_by('name'))
-    #credential = forms.ModelChoiceField(Cred_User.objects.all(), required=False)
+    # credential = forms.ModelChoiceField(Cred_User.objects.all(), required=False)
     target_start = forms.DateTimeField(widget=forms.TextInput(
         attrs={'class': 'datepicker'}))
     target_end = forms.DateTimeField(widget=forms.TextInput(
@@ -555,7 +556,9 @@ class TestForm(forms.ModelForm):
                            required=False,
                            help_text="Add tags that help describe this test.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
-
+    lead = forms.ModelChoiceField(
+        queryset=User.objects.exclude(is_staff=False),
+        required=False, label="Testing Lead")
 
     def __init__(self, *args, **kwargs):
         tags = Tag.objects.usage_for_model(Test)
@@ -565,7 +568,7 @@ class TestForm(forms.ModelForm):
 
     class Meta:
         model = Test
-        fields = ['test_type', 'target_start', 'target_end', 'environment', 'percent_complete', 'tags']
+        fields = ['test_type', 'target_start', 'target_end', 'environment', 'percent_complete', 'tags', 'lead']
 
 
 class DeleteTestForm(forms.ModelForm):
@@ -579,7 +582,8 @@ class DeleteTestForm(forms.ModelForm):
                    'target_start',
                    'target_end',
                    'engagement',
-                   'percent_complete')
+                   'percent_complete',
+                   'lead')
 
 
 class AddFindingForm(forms.ModelForm):
@@ -607,6 +611,47 @@ class AddFindingForm(forms.ModelForm):
     def clean(self):
         # self.fields['endpoints'].queryset = Endpoint.objects.all()
         cleaned_data = super(AddFindingForm, self).clean()
+        if ((cleaned_data['active'] or cleaned_data['verified'])
+            and cleaned_data['duplicate']):
+            raise forms.ValidationError('Duplicate findings cannot be'
+                                        ' verified or active')
+        if cleaned_data['false_p'] and cleaned_data['verified']:
+            raise forms.ValidationError('False positive findings cannot '
+                                        'be verified.')
+        return cleaned_data
+
+    class Meta:
+        model = Finding
+        order = ('title', 'severity', 'endpoints', 'description', 'impact')
+        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
+                   'review_requested_by')
+
+
+class AdHocFindingForm(forms.ModelForm):
+    title = forms.CharField(max_length=1000)
+    date = forms.DateField(required=True,
+                           widget=forms.TextInput(attrs={'class':
+                                                             'datepicker'}))
+    cwe = forms.IntegerField(required=False)
+    severity_options = (('Low', 'Low'), ('Medium', 'Medium'),
+                        ('High', 'High'), ('Critical', 'Critical'))
+    description = forms.CharField(widget=forms.Textarea)
+    severity = forms.ChoiceField(
+        choices=severity_options,
+        error_messages={
+            'required': 'Select valid choice: In Progress, On Hold, Completed',
+            'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
+    mitigation = forms.CharField(widget=forms.Textarea)
+    impact = forms.CharField(widget=forms.Textarea)
+    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
+                                               widget=MultipleSelectWithPopPlusMinus(attrs={'size': '11'}))
+    references = forms.CharField(widget=forms.Textarea, required=False)
+    is_template = forms.BooleanField(label="Create Template?", required=False,
+                                     help_text="A new finding template will be created from this finding.")
+
+    def clean(self):
+        # self.fields['endpoints'].queryset = Endpoint.objects.all()
+        cleaned_data = super(AdHocFindingForm, self).clean()
         if ((cleaned_data['active'] or cleaned_data['verified'])
             and cleaned_data['duplicate']):
             raise forms.ValidationError('Duplicate findings cannot be'
@@ -1003,6 +1048,7 @@ class CloseFindingForm(forms.ModelForm):
         model = Notes
         fields = ['entry']
 
+
 class DefectFindingForm(forms.ModelForm):
     CLOSE_CHOICES = (("Close Finding", "Close Finding"), ("Not Fixed", "Not Fixed"))
     defect_choice = forms.ChoiceField(required=True, choices=CLOSE_CHOICES)
@@ -1017,6 +1063,7 @@ class DefectFindingForm(forms.ModelForm):
     class Meta:
         model = Notes
         fields = ['entry']
+
 
 class ClearFindingReviewForm(forms.ModelForm):
     entry = forms.CharField(
@@ -1225,6 +1272,7 @@ class AddFindingImageForm(forms.ModelForm):
 
 FindingImageFormSet = modelformset_factory(FindingImage, extra=3, max_num=10, exclude=[''], can_delete=True)
 
+
 class JIRAForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput, required=True)
 
@@ -1232,18 +1280,21 @@ class JIRAForm(forms.ModelForm):
         model = JIRA_Conf
         exclude = ['product']
 
-class ToolTypeForm(forms.ModelForm):
 
+class ToolTypeForm(forms.ModelForm):
     class Meta:
         model = Tool_Type
         exclude = ['product']
 
+
 class ToolConfigForm(forms.ModelForm):
     tool_type = forms.ModelChoiceField(queryset=Tool_Type.objects.all(), label='Tool Type')
     ssh = forms.CharField(widget=forms.Textarea(attrs={}), required=False, label='SSH Key')
+
     class Meta:
         model = Tool_Configuration
         exclude = ['product']
+
 
 class DeleteToolProductSettingsForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
@@ -1252,6 +1303,7 @@ class DeleteToolProductSettingsForm(forms.ModelForm):
     class Meta:
         model = Tool_Product_Settings
         exclude = ['tool_type']
+
 
 class ToolProductSettingsForm(forms.ModelForm):
     tool_configuration = forms.ModelChoiceField(queryset=Tool_Configuration.objects.all(), label='Tool Configuration')
@@ -1262,23 +1314,25 @@ class ToolProductSettingsForm(forms.ModelForm):
         exclude = ['tool_type']
         order = ['name']
 
+
 class CredMappingForm(forms.ModelForm):
-    cred_user = forms.ModelChoiceField(queryset=Cred_Mapping.objects.all().select_related('cred_id'), required=False, label='Select a Credential')
+    cred_user = forms.ModelChoiceField(queryset=Cred_Mapping.objects.all().select_related('cred_id'), required=False,
+                                       label='Select a Credential')
 
     class Meta:
         model = Cred_Mapping
         fields = ['cred_user']
         exclude = ['product', 'finding', 'engagement', 'test', 'url', 'is_authn_provider']
 
-class CredMappingFormProd(forms.ModelForm):
 
+class CredMappingFormProd(forms.ModelForm):
     class Meta:
         model = Cred_Mapping
         fields = ['cred_id', 'url', 'is_authn_provider']
         exclude = ['product', 'finding', 'engagement', 'test']
 
-class SystemSettingsForm(forms.ModelForm):
 
+class SystemSettingsForm(forms.ModelForm):
     class Meta:
         model = System_Settings
         exclude = ['']
@@ -1290,17 +1344,19 @@ class NotificationsForm(forms.ModelForm):
         exclude = ['']
 
 class CredUserForm(forms.ModelForm):
-    #selenium_script = forms.FileField(widget=forms.widgets.FileInput(
+    # selenium_script = forms.FileField(widget=forms.widgets.FileInput(
     #    attrs={"accept": ".py"}),
     #    label="Select a Selenium Script", required=False)
 
     class Meta:
         model = Cred_User
         exclude = ['']
-        #fields = ['selenium_script']
+        # fields = ['selenium_script']
+
 
 class JIRAPKeyForm(forms.ModelForm):
     conf = forms.ModelChoiceField(queryset=JIRA_Conf.objects.all(), label='JIRA Configuration')
+
     class Meta:
         model = JIRA_PKey
         exclude = ['product']
@@ -1311,6 +1367,6 @@ class JIRAFindingForm(forms.Form):
         self.enabled = kwargs.pop('enabled')
         super(JIRAFindingForm, self).__init__(*args, **kwargs)
         self.fields['push_to_jira'] = forms.BooleanField(initial=self.enabled)
-        self.fields['push_to_jira'].required=False
+        self.fields['push_to_jira'].required = False
 
     push_to_jira = forms.BooleanField(required=False)

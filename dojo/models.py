@@ -425,10 +425,12 @@ class CWE(models.Model):
 
 class Endpoint(models.Model):
     protocol = models.CharField(null=True, blank=True, max_length=10,
-                                help_text="The communication protocl such as 'http', 'ftp', etc.")
+                                help_text="The communication protocol such as 'http', 'ftp', etc.")
     host = models.CharField(null=True, blank=True, max_length=500,
                             help_text="The host name or IP address, you can also include the port number. For example"
                                       "'127.0.0.1', '127.0.0.1:8080', 'localhost', 'yourdomain.com'.")
+    fqdn = models.CharField(null=True, blank=True, max_length=500)
+    port = models.IntegerField(null=True, blank=True, help_text="The network port associated with the endpoint.")
     path = models.CharField(null=True, blank=True, max_length=500,
                             help_text="The location of the resource, it should start with a '/'. For example"
                                       "/endpoint/420/edit")
@@ -447,14 +449,19 @@ class Endpoint(models.Model):
         from urlparse import uses_netloc
 
         netloc = self.host
+        fqdn = self.fqdn
+        port = self.port
         scheme = self.protocol
         url = self.path if self.path else ''
         query = self.query
         fragment = self.fragment
 
+        if port:
+            netloc += ':%s' % port
+
         if netloc or (scheme and scheme in uses_netloc and url[:2] != '//'):
             if url and url[:1] != '/': url = '/' + url
-            if scheme:
+            if scheme and scheme in uses_netloc and url[:2] != '//':
                 url = '//' + (netloc or '') + url
             else:
                 url = (netloc or '') + url
@@ -540,6 +547,7 @@ class Development_Environment(models.Model):
 
 class Test(models.Model):
     engagement = models.ForeignKey(Engagement, editable=False)
+    lead = models.ForeignKey(User, editable=True, null=True)
     test_type = models.ForeignKey(Test_Type)
     target_start = models.DateTimeField()
     target_end = models.DateTimeField()
@@ -703,8 +711,8 @@ class Finding(models.Model):
 
     def save(self, *args, **kwargs):
         super(Finding, self).save(*args, **kwargs)
-        if hasattr(settings, 'ENABLE_DEDUPLICATION'):
-            if settings.ENABLE_DEDUPLICATION and (len(self.endpoints.all()) != 0):
+        system_settings = System_Settings.objects.get()
+        if system_settings.enable_deduplication :
                 from dojo.tasks import async_dedupe
                 async_dedupe.delay(self, *args, **kwargs)
 
@@ -729,7 +737,7 @@ class Finding(models.Model):
                 return self.severity
 
         except:
-            return self.numerical_severity
+            return self.severity
 
     def get_breadcrumbs(self):
         bc = self.test.get_breadcrumbs()
