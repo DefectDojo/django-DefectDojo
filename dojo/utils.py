@@ -1049,6 +1049,7 @@ def process_notifications(request, note, parent_url, parent_title):
                         user=request.user,
                         title='%s mentioned you in a note' % request.user,
                         url=parent_url,
+                        icon='commenting',
                         recipients=users_to_notify)
 
 def send_atmention_email(user, users, parent_url, parent_title, new_note):
@@ -1178,12 +1179,8 @@ def create_notification(event=None, **kwargs):
             pass
 
     def send_alert_notification(user=None):
-        icons = {'report_created':'file-text-o',
-                 'jira_update':'bullseye',
-                 'default':'info-circle'}
-
-        icon = next((val for val in [kwargs.get('icon'), icons.get(event)] if val is not None), icons['default'])
-        alert = Alerts(user=user, 
+        icon = kwargs.get('icon', 'info-circle')
+        alert = Alerts(user_id=user, 
                        title=kwargs.get('title'),
                        description=create_notification_message(event, 'alert'),
                        url=kwargs.get('url', reverse('alerts')),
@@ -1193,7 +1190,7 @@ def create_notification(event=None, **kwargs):
 
 
     def log_alert(e):
-        alert = Alerts(user=Dojo_User.objects.get(is_superuser=True), description="Notification issue: %s" % e, icon="exclamation-triangle", source="Notifications")
+        alert = Alerts(user_id=Dojo_User.objects.get(is_superuser=True), title='Notification issue', description="%s" % e, icon="exclamation-triangle", source="Notifications")
         alert.save()
 
     # Global notifications
