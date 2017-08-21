@@ -4,16 +4,18 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, logout
 from django.contrib.auth.decorators import user_passes_test
+from django.core import serializers
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
+from django.db.models import Q
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from pytz import timezone
 from tastypie.models import ApiKey
 
 from dojo.filters import UserFilter
 from dojo.forms import DojoUserForm, AddDojoUserForm, DeleteUserForm, APIKeyForm, UserContactInfoForm
-from dojo.models import Product, Dojo_User, UserContactInfo
+from dojo.models import Product, Dojo_User, UserContactInfo, Alerts
 from dojo.utils import get_page_items, add_breadcrumb, get_alerts, get_system_setting
 
 localtz = timezone(get_system_setting('time_zone'))
@@ -77,12 +79,31 @@ def logout_view(request):
 
 # @user_passes_test(lambda u: u.is_staff)
 def alerts(request):
-    alerts = get_alerts(request.user)
+    alerts = Alerts.objects.filter(user_id=request.user)
+
+    if request.method == 'POST':
+        removed_alerts = request.POST.getlist('alert_select')
+        alerts.filter(id__in=removed_alerts).delete()
+        alerts = alerts.filter(~Q(id__in=removed_alerts))
+
     paged_alerts = get_page_items(request, alerts, 25)
     add_breadcrumb(title="Alerts for " + request.user.get_full_name(), top_level=True, request=request)
     return render(request,
                   'dojo/alerts.html',
                   {'alerts': paged_alerts})
+
+def alerts_json(request, limit=None):
+    limit = request.GET.get('limit')
+    if limit:
+        alerts = serializers.serialize('json', Alerts.objects.filter(user_id=request.user)[:limit])
+    else:
+        alerts = serializers.serialize('json', Alerts.objects.filter(user_id=request.user))
+    return HttpResponse(alerts, content_type='application/json')
+
+
+def alertcount(request):
+    count = Alerts.objects.filter(user_id=request.user).count()
+    return JsonResponse({'count':count})
 
 
 def view_profile(request):

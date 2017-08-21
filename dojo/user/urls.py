@@ -9,6 +9,8 @@ urlpatterns = [
         {'template_name': 'dojo/login.html'}, name='login'),
     url(r'^logout$', views.logout_view, name='logout'),
     url(r'^alerts$', views.alerts, name='alerts'),
+    url(r'^alerts/json$', views.alerts_json, name='alerts_json'),
+    url(r'^alerts/count$', views.alertcount, name='alertcount'),
     url(r'^profile$', views.view_profile, name='view_profile'),
     url(r'^change_password$', views.change_password,
         name='change_password'),
