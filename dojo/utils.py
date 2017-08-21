@@ -831,12 +831,12 @@ def jira_change_resolution_id(jira, issue, id):
 
 # Logs the error to the alerts table, which appears in the notification toolbar
 def log_jira_alert(error, finding):
-    create_notification(event='jira_update', description='Jira update issue: Finding: ' + str(finding.id) + ', ' + error,
+    create_notification(event='jira_update', title='Jira update issue', description='Finding: ' + str(finding.id) + ', ' + error,
                        icon='bullseye', source='Jira')
 
 # Displays an alert for Jira notifications
 def log_jira_message(text, finding):
-    create_notification(event='jira_update', description=text + " Finding: " + str(finding.id),
+    create_notification(event='jira_update', title='Jira update message', description=text + " Finding: " + str(finding.id),
                        url=reverse('view_finding', args=(finding.id,)),
                        icon='bullseye', source='Jira')
 
@@ -1151,7 +1151,12 @@ def create_notification(event=None, **kwargs):
         template = 'notifications/%s.tpl' % event.replace('/', '')
         kwargs.update({'type':notification_type})
 
-        return render_to_string(template, kwargs)
+        try:
+            notification = render_to_string(template, kwargs)
+        except:
+            notification = render_to_string('notifications/other.tpl', kwargs)
+
+        return notification
 
     def send_slack_notification(channel):
         try:
@@ -1201,9 +1206,6 @@ def create_notification(event=None, **kwargs):
 
     slack_enabled = get_system_setting('enable_slack_notifications')
     mail_enabled = get_system_setting('enable_mail_notifications')
-
-    if not hasattr(notifications, event):
-        event = 'other'
 
     if slack_enabled and 'slack' in getattr(notifications, event):
         send_slack_notification(get_system_setting('slack_channel'))
