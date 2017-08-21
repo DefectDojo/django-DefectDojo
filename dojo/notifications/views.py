@@ -24,8 +24,6 @@ from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, handl
 from dojo.forms import NotificationsForm
 from pprint import pprint
 
-from django_slack import slack_message
-
 localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(

@@ -28,8 +28,6 @@ from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, message, get_system_setting, create_notification
 from dojo.tasks import update_epic_task, add_epic_task, close_epic_task
-from django_slack import slack_message
-
 localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
