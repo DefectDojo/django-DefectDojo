@@ -15,7 +15,7 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.contrib.contenttypes.models import ContentType
-from pytz import timezone
+from django.utils import timezone
 
 from dojo.filters import ProductFilter, ProductFindingFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, ProductMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm
@@ -27,8 +27,6 @@ from  dojo.tasks import add_epic_task
 from tagging.models import Tag
 from tagging.utils import get_tag_list
 from tagging.views import TaggedItem
-
-localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -106,9 +104,9 @@ def view_product(request, pid):
     try:
         start_date = Finding.objects.filter(test__engagement__product=prod).order_by('date')[:1][0].date
     except:
-        start_date = localtz.localize(datetime.today())
+        start_date = timezone.today()
 
-    end_date = localtz.localize(datetime.today())
+    end_date = timezone.today()
 
     tests = Test.objects.filter(engagement__product=prod)
 
@@ -150,7 +148,7 @@ def view_product(request, pid):
                                              out_of_scope=False,
                                              mitigated__isnull=False)
 
-    start_date = localtz.localize(datetime.combine(start_date, datetime.min.time()))
+    start_date = datetime.combine(start_date, datetime.min.time(tzinfo=timezone.get_current_timezone()))
 
     r = relativedelta(end_date, start_date)
     weeks_between = int(ceil((((r.years * 12) + r.months) * 4.33) + (r.days / 7)))
@@ -573,19 +571,19 @@ def ad_hoc_finding(request, pid):
             test = tests[0]
         else:
             test = Test(engagement=eng, test_type=Test_Type.objects.get(name="Pen Test"),
-                        target_start=datetime.now(tz=localtz), target_end=datetime.now(tz=localtz))
+                        target_start=timezone.now(), target_end=timezone.now())
             test.save()
     except:
-        eng = Engagement(name="Ad Hoc Engagement", target_start=datetime.now(tz=localtz),
-                         target_end=datetime.now(tz=localtz), active=False, product=prod)
+        eng = Engagement(name="Ad Hoc Engagement", target_start=timezone.now(),
+                         target_end=timezone.now(), active=False, product=prod)
         eng.save()
         test = Test(engagement=eng, test_type=Test_Type.objects.get(name="Pen Test"),
-                    target_start=datetime.now(tz=localtz), target_end=datetime.now(tz=localtz))
+                    target_start=timezone.now(), target_end=timezone.now())
         test.save()
     form_error = False
     enabled = False
     jform = None
-    form = AdHocFindingForm(initial={'date': datetime.now(tz=localtz).date()})
+    form = AdHocFindingForm(initial={'date': timezone.now().date()})
     if get_system_setting('enable_jira'):
             if JIRA_PKey.objects.filter(product=test.engagement.product).count() != 0:
                 enabled = JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues
@@ -601,7 +599,7 @@ def ad_hoc_finding(request, pid):
             new_finding.numerical_severity = Finding.get_numerical_severity(
                 new_finding.severity)
             if new_finding.false_p or new_finding.active is False:
-                new_finding.mitigated = datetime.now(tz=localtz)
+                new_finding.mitigated = timezone.now()
                 new_finding.mitigated_by = request.user
             create_template = new_finding.is_template
             # always false now since this will be deprecated soon in favor of new Finding_Template model

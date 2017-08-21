@@ -17,7 +17,8 @@ from django.db.models import Q
 from django.utils.timezone import now
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToCover
-from pytz import timezone, all_timezones
+from django.utils import timezone
+from pytz import all_timezones
 from tagging.registry import register as tag_register
 from multiselectfield import MultiSelectField
 
@@ -48,17 +49,11 @@ class System_Settings(models.Model):
                                  choices=[(tz,tz) for tz in all_timezones],
                                  default='UTC',blank=False)
 
-try:
-    localtz = timezone(System_Settings.objects.get().time_zone)
-except:
-    localtz = timezone(System_Settings().time_zone)
-
 def get_current_date():
-    return localtz.normalize(now()).date()
-
+    return timezone.now().date()
 
 def get_current_datetime():
-    return localtz.normalize(now())
+    return timezone.now()
 
 
 # proxy class for convenience and UI
@@ -672,10 +667,9 @@ class Finding(models.Model):
 
     def age(self):
         if self.mitigated:
-            days = (self.mitigated.date() - localtz.localize(datetime.combine(self.date,
-                                                                              datetime.min.time())).date()).days
+            days = (self.mitigated.date() - datetime.combine(self.date, datetime.min.time(tzinfo=timezone.get_current_timezone())).date()).days
         else:
-            days = (get_current_date() - localtz.localize(datetime.combine(self.date, datetime.min.time())).date()).days
+            days = (get_current_date() - datetime.combine(self.date, datetime.min.time(tzinfo=timezone.get_current_timezone())).date()).days
 
         return days if days > 0 else 0
 

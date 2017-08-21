@@ -7,14 +7,11 @@ from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
-from pytz import timezone
 
 from dojo.filters import DevelopmentEnvironmentFilter
 from dojo.forms import Development_EnvironmentForm
 from dojo.models import Development_Environment
 from dojo.utils import get_page_items, add_breadcrumb, get_system_setting
-
-localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,

@@ -15,21 +15,17 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
-from pytz import timezone
+from django.utils import timezone
 
 from dojo.filters import ProductFilter, ProductFindingFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm
 from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance
 from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, get_system_setting
 from dojo.models import *
-from dojo.models import *
 from dojo.forms import *
 from jira import JIRA
 from dojo.tasks import *
-from dojo.forms import *
 from dojo.product import views as ds
-
-localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -54,7 +50,7 @@ def webhook(request):
                     resolved = False
                 if finding.active == resolved:
                     if finding.active:
-                        now = datetime.now(tz=localtz)
+                        now = timezone.now()
                         finding.active = False
                         finding.mitigated = now
                         finding.endpoints.clear()

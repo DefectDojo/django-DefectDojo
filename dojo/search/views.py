@@ -4,14 +4,11 @@ import re
 from watson import search as watson
 from django.conf import settings
 from django.shortcuts import render
-from pytz import timezone
 from tagging.models import TaggedItem, Tag
 
 from dojo.forms import SimpleSearchForm
 from dojo.models import Finding, Product, Test, Endpoint, Engagement
 from dojo.utils import add_breadcrumb, get_system_setting
-
-localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,

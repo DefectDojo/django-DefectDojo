@@ -10,11 +10,10 @@ from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
 from django.utils.http import urlencode
-from django.utils import timezone as tz
 from celery.utils.log import get_task_logger
 from celery.decorators import task
 from dojo.models import Finding, Test, Engagement
-from pytz import timezone
+from django.utils import timezone
 
 import pdfkit
 from dojo.celery import app
@@ -24,11 +23,9 @@ from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_iss
 
 logger = get_task_logger(__name__)
 
-localtz = timezone(get_system_setting('time_zone'))
-
 @app.task(bind=True)
 def add_alerts(self, runinterval):
-    now = tz.now()
+    now = timezone.now()
 
     upcoming_engagements = Engagement.objects.filter(target_start__gt=now+timedelta(days=3),target_start__lt=now+timedelta(days=3)+runinterval).order_by('target_start')
     for engagement in upcoming_engagements:
@@ -91,7 +88,7 @@ def async_pdf_report(self,
             f = ContentFile(pdf)
             report.file.save(filename, f)
         report.status = 'success'
-        report.done_datetime = datetime.now(tz=localtz)
+        report.done_datetime = timezone.now()
         report.save()
 
         create_notification(event='report_created', title='Report created', description='The report "%s" is ready.' % report.name, url=uri, report=report, objowner=report.requester)
@@ -171,7 +168,7 @@ def async_custom_pdf_report(self,
             f = ContentFile(pdf)
             report.file.save(filename, f)
         report.status = 'success'
-        report.done_datetime = datetime.now(tz=localtz)
+        report.done_datetime = timezone.now()
         report.save()
 
         create_notification(event='report_created', title='Report created', description='The report "%s" is ready.' % report.name, url=uri, report=report, objowner=report.requester)

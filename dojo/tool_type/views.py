@@ -15,8 +15,6 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
-from pytz import timezone
-
 from dojo.filters import ProductFilter, ProductFindingFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm
 from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance
@@ -28,8 +26,6 @@ from jira import JIRA
 from dojo.tasks import *
 from dojo.forms import *
 from dojo.product import views as ds
-
-localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,
