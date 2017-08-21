@@ -222,8 +222,8 @@ CELERY_ACCEPT_CONTENT = ['pickle', 'json', 'msgpack', 'yaml']
 CELERYBEAT_SCHEDULE = {
     'add-alerts': {
         'task':'dojo.tasks.add_alerts',
-        'schedule': timedelta(seconds=10),
-        'args': [timedelta(seconds=10)]
+        'schedule': timedelta(hours=1),
+        'args': [timedelta(hours=1)]
     },
 }
 
