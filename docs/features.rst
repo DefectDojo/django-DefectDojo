@@ -501,9 +501,8 @@ follow the directions for your specific OS in the `wkhtmltopdf documentation`_.
 Some operating systems are capable of installing `wkhtmltopdf` from their package managers:
 
 .. Note::
-    Report email notifications are commented out by default.  In order to enable them please uncomment the
-    `email_requester(report, uri, error=None)` function and its references in the `tasks.py` file in the main `dojo`
-    directory.
+    To get report email notifications, make sure you have a working email configuration in the system settings,
+    and enable notifications for generated reports in the notification settings.
 
 Mac: ::
 
@@ -544,7 +543,8 @@ DefectDojo and can be set up by following the `Celery documentation`_.  A sample
 
 .. _can be found at: https://github.com/celery/celery/blob/3.1/extra/supervisord/celeryd.conf
 
-Celery beat should also be running, this will allow for celery to clean up after itself and keep your task database from
+Celery beat should also be running, this will enable defectDojo to perform periodic checks of things like upcoming and stale engagements
+as well as allowing for celery to clean up after itself and keep your task database from
 getting too large.  In development you can run the process like: ::
 
     celery beat -A dojo -l info
