@@ -1,5 +1,6 @@
 # Django settings for dojo project.
 import os
+from datetime import timedelta
 
 DEBUG = True
 LOGIN_REDIRECT_URL = '/'
