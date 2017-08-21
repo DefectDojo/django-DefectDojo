@@ -10,10 +10,11 @@ from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
 from django.utils.http import urlencode
-from django.utils import timezone
+from django.utils import timezone as tz
 from celery.utils.log import get_task_logger
 from celery.decorators import task
 from dojo.models import Finding, Test, Engagement
+from pytz import timezone
 
 import pdfkit
 from dojo.celery import app
@@ -27,21 +28,21 @@ localtz = timezone(get_system_setting('time_zone'))
 
 @app.task(bind=True)
 def add_alerts(self, runinterval):
-    now = timezone.now()
+    now = tz.now()
 
-    upcoming_tests = Test.objects.filter(target_start__gt=now+timedelta(days=3),target_start__lt=now+timedelta(days=3)+runinterval).order_by('target_start')
-    for test in upcoming_tests:
+    upcoming_engagements = Engagement.objects.filter(target_start__gt=now+timedelta(days=3),target_start__lt=now+timedelta(days=3)+runinterval).order_by('target_start')
+    for engagement in upcoming_engagements:
         create_notification(event='upcoming_engagement',
-                           title='Upcoming test: %s' % test.test_type.name,
-                           description='This is a reminder that the test "%s" is scheduled to start on %s.' % (test.test_type.name, test.target_start),
-                           recipients=[test.engagement.lead],
-                           url=reverse('view_test', args=(test.id,)))
-    
-    outstanding_engagements = Engagement.objects.filter(
+                           title='Upcoming engagement: %s' % engagement.name,
+                           engagement=engagement,
+                           recipients=[engagement.lead],
+                           url=request.build_absolute_uri(reverse('view_engagement', args=(engagement.id,))))
+
+    stale_engagements = Engagement.objects.filter(
         target_start__gt=now-runinterval,
         target_end__lt=now,
         status='In Progress').order_by('-target_end')
-    for eng in outstanding_engagements:
+    for eng in stale_engagements:
         create_notification(event='stale_engagement', 
                            title='Stale Engagement: %s' % eng.name,
                            description='The engagement "%s" is stale. Target end was %s.' % (eng.name, eng.target_end.strftime("%b. %d, %Y")),
@@ -93,7 +94,7 @@ def async_pdf_report(self,
         report.done_datetime = datetime.now(tz=localtz)
         report.save()
 
-        create_notification(event='report_created', eventargs={'description':'The report "%s" is ready.' % report.name, 'url': uri, 'report': report}, objowner=report.requester)
+        create_notification(event='report_created', title='Report created', description='The report "%s" is ready.' % report.name, url=uri, report=report, objowner=report.requester)
     except Exception as e:
         report.status = 'error'
         report.save()
@@ -173,7 +174,7 @@ def async_custom_pdf_report(self,
         report.done_datetime = datetime.now(tz=localtz)
         report.save()
 
-        create_notification(event='report_created', eventargs={'description':'The report "%s" is ready.' % report.name, 'url': uri, 'report': report}, objowner=report.requester)
+        create_notification(event='report_created', title='Report created', description='The report "%s" is ready.' % report.name, url=uri, report=report, objowner=report.requester)
     except Exception as e:
         report.status = 'error'
         report.save()
