@@ -2,6 +2,7 @@
 import logging
 import os
 from datetime import datetime, timedelta
+import operator
 
 from django.contrib.auth.models import User
 from django.conf import settings
@@ -41,11 +42,24 @@ logger = logging.getLogger(__name__)
 
 @user_passes_test(lambda u: u.is_staff)
 @cache_page(60 * 5)  # cache for 5 minutes
-def calendar(request):
-    engagements = Engagement.objects.all()
-    add_breadcrumb(title="Calendar", top_level=True, request=request)
+def engagement_calendar(request):
+    if not 'lead' in request.GET or '0' in request.GET.getlist('lead'):
+        engagements = Engagement.objects.all()
+    else:
+        filters = []
+        leads = request.GET.getlist('lead','')
+        if '-1' in request.GET.getlist('lead'):
+            leads.remove('-1')
+            filters.append(Q(lead__isnull=True))
+        filters.append(Q(lead__in=leads))
+        engagements = Engagement.objects.filter(reduce(operator.or_, filters))
+
+    add_breadcrumb(title="Engagement Calendar", top_level=True, request=request)
     return render(request, 'dojo/calendar.html', {
-        'engagements': engagements})
+        'caltype': 'engagements',
+        'leads': request.GET.getlist('lead', ''),
+        'engagements': engagements,
+        'users': Dojo_User.objects.all()})
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -159,7 +173,7 @@ def delete_engagement(request, eid):
     product = engagement.product
     form = DeleteEngagementForm(instance=engagement)
 
-    from django.contrib.admin.util import NestedObjects
+    from django.contrib.admin.utils import NestedObjects
     from django.db import DEFAULT_DB_ALIAS
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)
@@ -308,7 +322,11 @@ def add_tests(request, eid):
         if form.is_valid():
             new_test = form.save(commit=False)
             new_test.engagement = eng
-            # new_test.lead = User.objects.get(id=form['lead'].value())
+	    try:
+            	new_test.lead = User.objects.get(id=form['lead'].value())
+	    except:
+		new_test.lead = None
+		pass
             new_test.save()
             tags = request.POST.getlist('tags')
             t = ", ".join(tags)
@@ -340,6 +358,8 @@ def add_tests(request, eid):
                 return HttpResponseRedirect(reverse('view_engagement', args=(eng.id,)))
     else:
         form = TestForm()
+	form.initial['target_start'] = eng.target_start
+	form.initial['target_end'] = eng.target_end
     add_breadcrumb(parent=eng, title="Add Tests", top_level=False, request=request)
     return render(request, 'dojo/add_tests.html',
                   {'form': form,

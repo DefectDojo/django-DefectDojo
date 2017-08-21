@@ -306,7 +306,7 @@ def metrics(request, mtype):
         'name': page_name,
         'start_date': start_date,
         'end_date': end_date,
-        'findings': findings.qs,
+        'findings': findings,
         'opened_per_month': monthly_counts['opened_per_period'],
         'active_per_month': monthly_counts['active_per_period'],
         'opened_per_week': weekly_counts['opened_per_period'],
@@ -365,6 +365,7 @@ def simple_metrics(request):
                                        false_p=False,
                                        duplicate=False,
                                        out_of_scope=False,
+                                       date=now,
                                        ).distinct()
 
         for f in total.all():

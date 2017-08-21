@@ -47,6 +47,13 @@
                             {% endif %}
                             {% if user.is_staff %}
                                 <li role="presentation">
+                                    <a class="" href="{% url 'ad_hoc_finding' prod.id %}">
+                                        <i class="fa fa-list-alt"></i> Add Finding
+                                    </a>
+                                </li>
+                            {% endif %}
+                            {% if user.is_staff %}
+                                <li role="presentation">
                                     <a class="" href="{% url 'add_meta_data' prod.id %}">
                                         <i class="fa fa-list-alt"></i> Add Metadata
                                     </a>
@@ -354,9 +361,9 @@
                     </tr>
                     <tr>
                         <td>{{ prod.prod_type }}</td>
-                        <td>{{ prod.team_manager | default:"Unknown" }}</td>
-                        <td>{{ prod.product_manager | default:"Unknown" }}</td>
-                        <td>{{ prod.technical_contact | default:"Unknown" }}</td>
+                        <td>{{ prod.manager | default:"Unknown" }}</td>
+                        <td>{{ prod.prod_manager | default:"Unknown" }}</td>
+                        <td>{{ prod.tech_contact | default:"Unknown" }}</td>
                         <td>
                             {% if prod.authorized_users.all %}
                                 <ul class="no-bullets">

@@ -24,6 +24,7 @@ BOOLEAN_CHOICES = (('false', 'No'), ('true', 'Yes'),)
 
 EARLIEST_FINDING = None
 
+
 def now():
     return local_tz.localize(datetime.today())
 
@@ -235,7 +236,6 @@ class MetricsDateRangeFilter(ChoiceFilter):
         kwargs['choices'] = [
             (key, value[0]) for key, value in six.iteritems(self.options)]
         super(MetricsDateRangeFilter, self).__init__(*args, **kwargs)
-
 
     def filter(self, qs, value):
         if get_earliest_finding() is not None:
@@ -635,7 +635,6 @@ class FindingStatusFilter(ChoiceFilter):
             (key, value[0]) for key, value in six.iteritems(self.options)]
         super(FindingStatusFilter, self).__init__(*args, **kwargs)
 
-
     def filter(self, qs, value):
         if get_earliest_finding() is not None:
             start_date = local_tz.localize(datetime.combine(
@@ -656,7 +655,7 @@ class MetricsFindingFilter(FilterSet):
         queryset=Product_Type.objects.all().order_by('name'),
         label="Product Type")
     severity = MultipleChoiceFilter(choices=[])
-    status = FindingStatusFilter()
+    status = FindingStatusFilter(label='Status')
 
     def __init__(self, *args, **kwargs):
         super(MetricsFindingFilter, self).__init__(*args, **kwargs)
@@ -665,7 +664,24 @@ class MetricsFindingFilter(FilterSet):
 
     class Meta:
         model = Finding
-        exclude = []
+        exclude = ['url',
+                   'description',
+                   'mitigation',
+                   'unsaved_endpoints',
+                   'unsaved_request',
+                   'unsaved_response',
+                   'unsaved_tags',
+                   'references',
+                   'review_requested_by',
+                   'reviewers',
+                   'defect_review_requested_by',
+                   'thread_id',
+                   'notes',
+                   'last_reviewed_by',
+                   'images',
+                   'endpoints',
+                   'is_template']
+
 
 class EndpointFilter(DojoFilter):
     product = ModelMultipleChoiceFilter(
@@ -752,6 +768,14 @@ class ReportAuthedFindingFilter(DojoFilter):
         if not self.user.is_staff:
             self.form.fields['test__engagement__product'].queryset = Product.objects.filter(
                 authorized_users__in=[self.user])
+
+    @property
+    def qs(self):
+        parent = super(ReportAuthedFindingFilter, self).qs
+        if self.user.is_staff:
+            return parent
+        else:
+            return parent.filter(test__engagement__product__authorized_users__in=[self.user])
 
     class Meta:
         model = Finding

@@ -1,5 +1,6 @@
 from dojo.tools.burp.parser import BurpXmlParser
 from dojo.tools.nessus.parser import NessusCSVParser, NessusXMLParser
+from dojo.tools.nmap.parser import NmapXMLParser
 from dojo.tools.nexpose.parser import NexposeFullXmlParser
 from dojo.tools.veracode.parser import VeracodeXMLParser
 from dojo.tools.zap.parser import ZapXmlParser
@@ -27,6 +28,8 @@ def import_parser_factory(file, test):
             parser = NessusCSVParser(file, test)
         elif filename.endswith("xml") or filename.endswith("nessus"):
             parser = NessusXMLParser(file, test)
+    elif scan_type == "Nmap Scan":
+        parser = NmapXMLParser(file, test)
     elif scan_type == "Nexpose Scan":
         parser = NexposeFullXmlParser(file, test)
     elif scan_type == "Veracode Scan":

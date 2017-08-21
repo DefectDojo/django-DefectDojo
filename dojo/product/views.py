@@ -18,9 +18,9 @@ from django.contrib.contenttypes.models import ContentType
 from pytz import timezone
 
 from dojo.filters import ProductFilter, ProductFindingFilter
-from dojo.forms import ProductForm, EngForm, DeleteProductForm, ProductMetaDataForm, JIRAPKeyForm, JIRAFindingForm
+from dojo.forms import ProductForm, EngForm, DeleteProductForm, ProductMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm
 from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, \
-    Tool_Product_Settings, Cred_User, Cred_Mapping
+    Tool_Product_Settings, Cred_User, Cred_Mapping, Test_Type
 from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, get_system_setting, create_notification
 from custom_field.models import CustomFieldValue, CustomField
 from  dojo.tasks import add_epic_task
@@ -271,11 +271,8 @@ def new_product(request):
     jform = None
     if request.method == 'POST':
         form = ProductForm(request.POST, instance=Product())
-        if hasattr(settings, 'ENABLE_JIRA'):
-            if settings.ENABLE_JIRA:
+        if get_system_setting('enable_jira'):
                 jform = JIRAPKeyForm(request.POST, instance=JIRA_PKey())
-            else:
-                jform = None
         else:
             jform = None
 
@@ -288,8 +285,7 @@ def new_product(request):
                                  messages.SUCCESS,
                                  'Product added successfully.',
                                  extra_tags='alert-success')
-            if hasattr(settings, 'ENABLE_JIRA'):
-                if settings.ENABLE_JIRA:
+            if get_system_setting('enable_jira'):
                     if jform.is_valid():
                         jira_pkey = jform.save(commit=False)
                         if jira_pkey.conf is not None:
@@ -303,8 +299,7 @@ def new_product(request):
             return HttpResponseRedirect(reverse('view_product', args=(product.id,)))
     else:
         form = ProductForm()
-        if hasattr(settings, 'ENABLE_JIRA'):
-            if settings.ENABLE_JIRA:
+        if get_system_setting('enable_jira'):
                 jform = JIRAPKeyForm()
         else:
             jform = None
@@ -337,7 +332,7 @@ def edit_product(request, pid):
                                  'Product updated successfully.',
                                  extra_tags='alert-success')
 
-            if get_system_setting('enable_jira') and jira.enabled:
+            if get_system_setting('enable_jira') and jira_enabled:
                 jform = JIRAPKeyForm(request.POST, instance=jira_inst)
                 #need to handle delete
                 try:
@@ -361,7 +356,7 @@ def edit_product(request, pid):
                            initial={'auth_users': prod.authorized_users.all(),
                                     'tags': get_tag_list(Tag.objects.get_for_object(prod))})
 
-        if get_system_setting('jira_enabled'):
+        if get_system_setting('enable_jira') and jira_enabled:
             if jira_enabled:
                 jform = JIRAPKeyForm(instance=jira_inst)
             else:
@@ -383,7 +378,7 @@ def delete_product(request, pid):
     product = get_object_or_404(Product, pk=pid)
     form = DeleteProductForm(instance=product)
 
-    from django.contrib.admin.util import NestedObjects
+    from django.contrib.admin.utils import NestedObjects
     from django.db import DEFAULT_DB_ALIAS
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)
@@ -417,7 +412,7 @@ Greg
 Status: in production
 """
 
-
+@user_passes_test(lambda u: u.is_staff)
 def all_product_findings(request, pid):
     p = get_object_or_404(Product, id=pid)
     result = ProductFindingFilter(
@@ -452,9 +447,7 @@ def new_eng_for_app(request, pid):
             else:
                 new_eng.progress = 'other'
             new_eng.save()
-
-            if hasattr(settings, 'ENABLE_JIRA'):
-                if settings.ENABLE_JIRA:
+            if get_system_setting('enable_jira'):
                     #Test to make sure there is a Jira project associated the product
                     try:
                         jform = JIRAFindingForm(request.POST, prefix='jiraform',
@@ -480,8 +473,7 @@ def new_eng_for_app(request, pid):
                 return HttpResponseRedirect(reverse('view_engagement', args=(new_eng.id,)))
     else:
         form = EngForm(initial={})
-        if hasattr(settings, 'ENABLE_JIRA'):
-            if settings.ENABLE_JIRA:
+        if(get_system_setting('enable_jira')):
                 if JIRA_PKey.objects.filter(product=prod).count() != 0:
                     jform = JIRAFindingForm(prefix='jiraform', enabled=JIRA_PKey.objects.get(product=prod).push_all_issues)
 
@@ -567,3 +559,107 @@ def edit_meta_data(request, pid):
                   {'product': prod,
                    'product_metadata': product_metadata,
                    })
+
+
+@user_passes_test(lambda u: u.is_staff)
+def ad_hoc_finding(request, pid):
+    prod = Product.objects.get(id=pid)
+    test = None
+    try:
+        eng = Engagement.objects.get(product=prod, name="Ad Hoc Engagement")
+        tests = Test.objects.filter(engagement=eng)
+
+        if len(tests) != 0:
+            test = tests[0]
+        else:
+            test = Test(engagement=eng, test_type=Test_Type.objects.get(name="Pen Test"),
+                        target_start=datetime.now(tz=localtz), target_end=datetime.now(tz=localtz))
+            test.save()
+    except:
+        eng = Engagement(name="Ad Hoc Engagement", target_start=datetime.now(tz=localtz),
+                         target_end=datetime.now(tz=localtz), active=False, product=prod)
+        eng.save()
+        test = Test(engagement=eng, test_type=Test_Type.objects.get(name="Pen Test"),
+                    target_start=datetime.now(tz=localtz), target_end=datetime.now(tz=localtz))
+        test.save()
+    form_error = False
+    enabled = False
+    jform = None
+    form = AdHocFindingForm(initial={'date': datetime.now(tz=localtz).date()})
+    if get_system_setting('enable_jira'):
+            if JIRA_PKey.objects.filter(product=test.engagement.product).count() != 0:
+                enabled = JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues
+                jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
+    else:
+        jform = None
+    if request.method == 'POST':
+        form = AdHocFindingForm(request.POST)
+        if form.is_valid():
+            new_finding = form.save(commit=False)
+            new_finding.test = test
+            new_finding.reporter = request.user
+            new_finding.numerical_severity = Finding.get_numerical_severity(
+                new_finding.severity)
+            if new_finding.false_p or new_finding.active is False:
+                new_finding.mitigated = datetime.now(tz=localtz)
+                new_finding.mitigated_by = request.user
+            create_template = new_finding.is_template
+            # always false now since this will be deprecated soon in favor of new Finding_Template model
+            new_finding.is_template = False
+            new_finding.save()
+            new_finding.endpoints = form.cleaned_data['endpoints']
+            new_finding.save()
+            if 'jiraform-push_to_jira' in request.POST:
+                jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=enabled)
+                if jform.is_valid():
+                    add_issue_task.delay(new_finding, jform.cleaned_data.get('push_to_jira'))
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'Finding added successfully.',
+                                     extra_tags='alert-success')
+            if create_template:
+                templates = Finding_Template.objects.filter(title=new_finding.title)
+                if len(templates) > 0:
+                    messages.add_message(request,
+                                         messages.ERROR,
+                                         'A finding template was not created.  A template with this title already '
+                                         'exists.',
+                                         extra_tags='alert-danger')
+                else:
+                    template = Finding_Template(title=new_finding.title,
+                                                cwe=new_finding.cwe,
+                                                severity=new_finding.severity,
+                                                description=new_finding.description,
+                                                mitigation=new_finding.mitigation,
+                                                impact=new_finding.impact,
+                                                references=new_finding.references,
+                                                numerical_severity=new_finding.numerical_severity)
+                    template.save()
+                    messages.add_message(request,
+                                         messages.SUCCESS,
+                                         'A finding template was also created.',
+                                         extra_tags='alert-success')
+            if '_Finished' in request.POST:
+                return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
+            else:
+                return HttpResponseRedirect(reverse('add_findings', args=(test.id,)))
+        else:
+            if 'endpoints' in form.cleaned_data:
+                form.fields['endpoints'].queryset = form.cleaned_data['endpoints']
+            else:
+                form.fields['endpoints'].queryset = Endpoint.objects.none()
+            form_error = True
+            messages.add_message(request,
+                                 messages.ERROR,
+                                 'The form has errors, please correct them below.',
+                                 extra_tags='alert-danger')
+    add_breadcrumb(parent=prod, title="Add Finding", top_level=False, request=request)
+    return render(request, 'dojo/ad_hoc_findings.html',
+                  {'form': form,
+                   'temp': False,
+                   'tid' : test.id,
+                   'pid': pid,
+                   'form_error': form_error,
+                   'jform': jform,
+                   })
+

@@ -114,48 +114,63 @@
     <div class="col-md-12">
     <div class="panel panel-default">
         <div class="panel-heading tight">
-            <h3 class="has-filters">
+            <h3 {% if not critical_prods %}class="has-filters" {% endif %}>
                 {{ name }}
-                <div class="dropdown pull-right"></div>
+                {% if not critical_prods %}
+                    <div class="dropdown pull-right"></div>
+                {% endif %}
             </h3>
         </div>
         <div id="the-filters" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
-            {% include "dojo/filter_snippet.html" with form=findings.form clear_link="/metrics" %}
+            {% include "dojo/filter_snippet.html" with form=findings.form clear_link="/metrics/product/type" %}
         </div>
     </div>
 
     <div class="row metric-data">
         <div class="col-md-12">
-        {% if critical_prods %}
-            <div class="row" >
-            {%  for c_prod in critical_prods %}
-            <div class ='col-md-4' align="center">
-            <div> <b>{{c_prod.name}} </b><br><br> </div>
-            <div   style="display:inline-block;" class="gaugeloop" name="{{ c_prod.name }}" id="{{ c_prod.name}}{{ c_prod.id }}" class="200x160px" start="{{ c_prod.calc_health }}"></div>
-            <div>
-                {%  if c_prod.critical_present and c_prod.high_present%}
-                    <p> {{ c_prod.name }} is affected by <b>both</b> critical and high severity vulnerabilities.</p>
-                    <p> <a href="/dojo/finding/open?title=&date=&severity=Critical&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">Critical Severity Vulnerabilities</a></p>
-                    <p> <a href="/dojo/finding/open?title=&date=&severity=High&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">High Severity Vulnerabilities</a></p>
-                {%  elif c_prod.critical_present %}
-                    <p> {{ c_prod.name }} is affected by critical vulnerabilities. </p>
-                    <p><a href="/dojo/finding/open?title=&date=&severity=Critical&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">Critical Severity Vulnerabilities</a></p>
-                {%  elif c_prod.high_present %}
-                    <p> {{ c_prod.name }} is affected by high severity vulnerabilities.</p>
-                    <p><a href="/dojo/finding/open?title=&date=&severity=High&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">High Severity Vulnerabilities</a></p> 
-					{% endif %}
-                	<p><a href='/dojo/metrics/product/type?date=2&test__engagement__product__prod_type={{ c_prod.id }}&status='> Full Metrics</a></p></div>
-                <br>
-            </div>
-            {% endfor %}
-            </div>
-        {% elif name == "Critical Product Metrics" %}
-            <div class="row" >
-                <div class="col-lg-6">
-                    <h3><b> No Critical Products registered</b> </h3>
+            {% if critical_prods %}
+                <div class="row">
+                    {% for c_prod in critical_prods %}
+                        <div class='col-md-4' align="center">
+                            <div><b>{{ c_prod.name }} </b><br><br></div>
+                            <div style="display:inline-block;" class="gaugeloop" name="{{ c_prod.name }}"
+                                 id="{{ c_prod.name }}{{ c_prod.id }}" class="200x160px"
+                                 start="{{ c_prod.calc_health }}"></div>
+                            <div>
+                                {% if c_prod.critical_present and c_prod.high_present %}
+                                    <p> {{ c_prod.name }} is affected by <b>both</b> critical and high severity
+                                        vulnerabilities.</p>
+                                    <p>
+                                        <a href="/dojo/finding/open?title=&date=&severity=Critical&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">Critical
+                                            Severity Vulnerabilities</a></p>
+                                    <p>
+                                        <a href="/dojo/finding/open?title=&date=&severity=High&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">High
+                                            Severity Vulnerabilities</a></p>
+                                {% elif c_prod.critical_present %}
+                                    <p> {{ c_prod.name }} is affected by critical vulnerabilities. </p>
+                                    <p>
+                                        <a href="/dojo/finding/open?title=&date=&severity=Critical&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">Critical
+                                            Severity Vulnerabilities</a></p>
+                                {% elif c_prod.high_present %}
+                                    <p> {{ c_prod.name }} is affected by high severity vulnerabilities.</p>
+                                    <p>
+                                        <a href="/dojo/finding/open?title=&date=&severity=High&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">High
+                                            Severity Vulnerabilities</a></p>
+                                {% endif %}
+                                <p>
+                                    <a href='/dojo/metrics/product/type?date=2&test__engagement__product__prod_type={{ c_prod.id }}&status='>
+                                        Full Metrics</a></p></div>
+                            <br>
+                        </div>
+                    {% endfor %}
                 </div>
-            </div>
-        {% endif %}
+            {% elif name == "Critical Product Metrics" %}
+                <div class="row">
+                    <div class="col-lg-6">
+                        <h3><b> No Critical Products registered</b></h3>
+                    </div>
+                </div>
+            {% endif %}
             <div class="row">
                 {% if opened_per_month %}
                     <div class="col-lg-6">
@@ -187,7 +202,7 @@
                         <!-- /.panel -->
                     </div>
                 {% endif %}
- 
+
                 {% if accepted_per_month %}
                     <div class="col-lg-6">
                         <div class="panel panel-default">
@@ -203,388 +218,390 @@
                         <!-- /.panel -->
                     </div>
                 {% endif %}
-			{% if  not critical_prods %}
-                <div class="col-lg-12">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            Open Bug Count by Week
+                {% if  not critical_prods %}
+                    <div class="col-lg-12">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                Open Bug Count by Week
+                            </div>
+                            <!-- /.panel-heading -->
+                            <div class="panel-body">
+                                <div id="chart_div3"></div>
+                            </div>
+                            <!-- /.panel-body -->
                         </div>
-                        <!-- /.panel-heading -->
-                        <div class="panel-body">
-                            <div id="chart_div3"></div>
-                        </div>
-                        <!-- /.panel-body -->
+                        <!-- /.panel -->
                     </div>
-                    <!-- /.panel -->
-                </div>
-                <div class="col-lg-12">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            Accepted Bug Count by Week
+                    <div class="col-lg-12">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                Accepted Bug Count by Week
+                            </div>
+                            <!-- /.panel-heading -->
+                            <div class="panel-body">
+                                <div id="chart_div4"></div>
+                            </div>
+                            <!-- /.panel-body -->
                         </div>
-                        <!-- /.panel-heading -->
-                        <div class="panel-body">
-                            <div id="chart_div4"></div>
-                        </div>
-                        <!-- /.panel-body -->
+                        <!-- /.panel -->
                     </div>
-                    <!-- /.panel -->
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row" id="metric_counts">
-        <div class="col-md-12">
-            <h3>Metric Counts</h3>
-        </div>
-        <div class="col-md-12">
-            <div class="tabbable tabs-left">
-                <ul class="nav nav-tabs">
-                    {% if top_ten_products %}
-                        <li class="active"><a data-toggle="tab" href="#tabs-1">Top
-                            10 Products <br/> by bug severity
-                        </a></li> {% endif %}
-                    <li><a data-toggle="tab" href="#tabs-2">Detail Breakdown</a></li>
-                    <li><a data-toggle="tab" href="#tabs-3">Opened Findings</a></li>
-                    <li><a data-toggle="tab" href="#tabs-4">Accepted Findings</a></li>
-                    <li><a data-toggle="tab" href="#tabs-5">Closed Findings</a></li>
-                    <li><a data-toggle="tab" href="#tabs-6">Trending Open <br/>
-                        Bug Count
-                    </a></li>
-                    <li><a data-toggle="tab" href="#tabs-7">Trending Accepted <br/>
-                        Bug Count
-                    </a></li>
-                    <li><a data-toggle="tab" href="#tabs-8">Age of Issues</a></li>
-                </ul>
-                <div class="tab-content">
-                    {% if top_ten_products %}
-                        <div class="table-responsive tab-pane active" id="tabs-1">
-                            <table
-                                    class="table table-bordered table-condensed table-striped table-400">
-                                <tr>
-                                    <th>Product</th>
-                                    <th>{% severity_value 'Critical'%}</th>
-                                    <th>{% severity_value 'High'%}</th>
-                                    <th>{% severity_value 'Medium'%}</th>
-                                    <th>{% severity_value 'Low'%}</th>
-                                    <th>Total</th>
-                                </tr>
-                                {% for t in top_ten_products %}
-                                    <tr>
-                                        <td><a href="{% url 'view_product' t.id %}">{{ t.name }}</a></td>
-                                        <td>{{ t.critical|default_if_none:0 }}</td>
-                                        <td>{{ t.high|default_if_none:0 }}</td>
-                                        <td>{{ t.medium|default_if_none:0 }}</td>
-                                        <td>{{ t.low|default_if_none:0 }}</td>
-                                        <td>{{ t.total|default_if_none:0 }}</td>
-                                    </tr>
-                                {% endfor %}
-                            </table>
+                    </div>
+                    </div>
+                    </div>
+                    <div class="row" id="metric_counts">
+                        <div class="col-md-12">
+                            <h3>Metric Counts</h3>
                         </div>
-                    {% endif %}
-                    <div class="tab-pane table-responsive" id="tabs-2">
-                        <table class="table table-bordered table-condensed table-striped table-600">
-                            <tr>
-                                <th class="nowrap">Team</th>
-                                <th class="">Product</th>
-                                <th>Severity</th>
-                                <th>Description</th>
-                                <th class="nowrap">Days<br/>Open</th>
-                                <th class="nowrap">Status</th>
-                                <th class="nowrap">Engineer</th>
+                        <div class="col-md-12">
+                            <div class="tabbable tabs-left">
+                                <ul class="nav nav-tabs">
+                                    {% if top_ten_products %}
+                                        <li class="active"><a data-toggle="tab" href="#tabs-1">Top
+                                            10 Products <br/> by bug severity
+                                        </a></li> {% endif %}
+                                    <li><a data-toggle="tab" href="#tabs-2">Detail Breakdown</a></li>
+                                    <li><a data-toggle="tab" href="#tabs-3">Opened Findings</a></li>
+                                    <li><a data-toggle="tab" href="#tabs-4">Accepted Findings</a></li>
+                                    <li><a data-toggle="tab" href="#tabs-5">Closed Findings</a></li>
+                                    <li><a data-toggle="tab" href="#tabs-6">Trending Open <br/>
+                                        Bug Count
+                                    </a></li>
+                                    <li><a data-toggle="tab" href="#tabs-7">Trending Accepted <br/>
+                                        Bug Count
+                                    </a></li>
+                                    <li><a data-toggle="tab" href="#tabs-8">Age of Issues</a></li>
+                                </ul>
+                                <div class="tab-content">
+                                    {% if top_ten_products %}
+                                        <div class="table-responsive tab-pane active" id="tabs-1">
+                                            <table
+                                                    class="table table-bordered table-condensed table-striped table-400">
+                                                <tr>
+                                                    <th>Product</th>
+                                                    <th>{% severity_value 'Critical' %}</th>
+                                                    <th>{% severity_value 'High' %}</th>
+                                                    <th>{% severity_value 'Medium' %}</th>
+                                                    <th>{% severity_value 'Low' %}</th>
+                                                    <th>Total</th>
+                                                </tr>
+                                                {% for t in top_ten_products %}
+                                                    <tr>
+                                                        <td><a href="{% url 'view_product' t.id %}">{{ t.name }}</a>
+                                                        </td>
+                                                        <td>{{ t.critical|default_if_none:0 }}</td>
+                                                        <td>{{ t.high|default_if_none:0 }}</td>
+                                                        <td>{{ t.medium|default_if_none:0 }}</td>
+                                                        <td>{{ t.low|default_if_none:0 }}</td>
+                                                        <td>{{ t.total|default_if_none:0 }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </table>
+                                        </div>
+                                    {% endif %}
+                                    <div class="tab-pane table-responsive" id="tabs-2">
+                                        <table class="table table-bordered table-condensed table-striped table-600">
+                                            <tr>
+                                                <th class="nowrap">Team</th>
+                                                <th class="">Product</th>
+                                                <th>Severity</th>
+                                                <th>Description</th>
+                                                <th class="nowrap">Days<br/>Open</th>
+                                                <th class="nowrap">Status</th>
+                                                <th class="nowrap">Engineer</th>
 
-                            </tr>
-                            {% for finding in findings %}
-                                <tr>
-                                    <td>{{ finding.test.engagement.product.prod_type.name }}</td>
-                                    <td>
+                                            </tr>
+                                            {% for finding in findings.qs %}
+                                                <tr>
+                                                    <td>{{ finding.test.engagement.product.prod_type.name }}</td>
+                                                    <td>
                                         <span title="{{ finding.test.engagement.product.name }}">
                                             {{ finding.test.engagement.product.name|truncatechars:20 }}
                                         </span>
-                                    </td>
-                                    <td>{{ finding.severity_display }}</td>
-                                    <td><a href="{% url 'view_finding' finding.id %}"
-                                           title="{{ finding.title }}">{{ finding.title|truncatechars:20 }}</a></td>
-                                    <td>{{ finding.sql_age }}</td>
-                                    <td>{{ finding.status }}</td>
-                                    <td>{{ finding.reporter }}</td>
-                                </tr>
-                            {% endfor %}
-                        </table>
-                    </div>
-                    <div class="tab-pane" id="tabs-3">
-                        <div class="table-responsive">
-                            <h4>Opened During Period</h4>
-                            <table
-                                    class="table table-bordered table-condensed table-striped table-600">
-                                <tr>
-                                    <th>{% severity_value 'Critical'%}</th>
-                                    <th>{% severity_value 'High'%}</th>
-                                    <th>{% severity_value 'Medium'%}</th>
-                                    <th>{% severity_value 'Low'%}</th>
-                                    <th>{% severity_value 'Info'%}</th>
-                                    <th>Total</th>
-                                </tr>
-                                <tr>
-                                    <td>{{ in_period_counts.Critical }}</td>
-                                    <td>{{ in_period_counts.High }}</td>
-                                    <td>{{ in_period_counts.Medium }}</td>
-                                    <td>{{ in_period_counts.Low }}</td>
-                                    <td>{{ in_period_counts.Info }}</td>
-                                    <td>{{ in_period_counts.Total }}</td>
-                                </tr>
-                            </table>
-                            <table
-                                    class="table table-bordered table-condensed table-striped table-600">
-                                <tr>
-                                    <th>Product</th>
-                                    <th>{% severity_value 'Critical'%}</th>
-                                    <th>{% severity_value 'High'%}</th>
-                                    <th>{% severity_value 'Medium'%}</th>
-                                    <th>{% severity_value 'Low'%}</th>
-                                    <th>{% severity_value 'Info'%}</th>
-                                    <th>Total</th>
+                                                    </td>
+                                                    <td>{{ finding.severity_display }}</td>
+                                                    <td><a href="{% url 'view_finding' finding.id %}"
+                                                           title="{{ finding.title }}">{{ finding.title|truncatechars:20 }}</a>
+                                                    </td>
+                                                    <td>{{ finding.sql_age }}</td>
+                                                    <td>{{ finding.status }}</td>
+                                                    <td>{{ finding.reporter }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </table>
+                                    </div>
+                                    <div class="tab-pane" id="tabs-3">
+                                        <div class="table-responsive">
+                                            <h4>Opened During Period</h4>
+                                            <table
+                                                    class="table table-bordered table-condensed table-striped table-600">
+                                                <tr>
+                                                    <th>{% severity_value 'Critical' %}</th>
+                                                    <th>{% severity_value 'High' %}</th>
+                                                    <th>{% severity_value 'Medium' %}</th>
+                                                    <th>{% severity_value 'Low' %}</th>
+                                                    <th>{% severity_value 'Info' %}</th>
+                                                    <th>Total</th>
+                                                </tr>
+                                                <tr>
+                                                    <td>{{ in_period_counts.Critical }}</td>
+                                                    <td>{{ in_period_counts.High }}</td>
+                                                    <td>{{ in_period_counts.Medium }}</td>
+                                                    <td>{{ in_period_counts.Low }}</td>
+                                                    <td>{{ in_period_counts.Info }}</td>
+                                                    <td>{{ in_period_counts.Total }}</td>
+                                                </tr>
+                                            </table>
+                                            <table
+                                                    class="table table-bordered table-condensed table-striped table-600">
+                                                <tr>
+                                                    <th>Product</th>
+                                                    <th>{% severity_value 'Critical' %}</th>
+                                                    <th>{% severity_value 'High' %}</th>
+                                                    <th>{% severity_value 'Medium' %}</th>
+                                                    <th>{% severity_value 'Low' %}</th>
+                                                    <th>{% severity_value 'Info' %}</th>
+                                                    <th>Total</th>
 
-                                </tr>
-                                {% for key, value in in_period_details.items %}
-                                    <tr>
-                                        <td><a href="{{ value.path }}">{{ key }}</a></td>
-                                        <td>{{ value.Critical }}</td>
-                                        <td>{{ value.High }}</td>
-                                        <td>{{ value.Medium }}</td>
-                                        <td>{{ value.Low }}</td>
-                                        <td>{{ value.Info }}</td>
-                                        <td>{{ value.Total }}</td>
-                                    </tr>
-                                {% endfor %}
-                            </table>
-                        </div>
-                    </div>
-                    <div class="tab-pane" id="tabs-4">
-                        <div class="table-responsive">
-                            <h4>Accepted in Period</h4>
-                            <table
-                                    class="table table-bordered table-condensed table-striped table-600">
-                                <tr>
-                                    <th>{% severity_value 'Critical'%}</th>
-                                    <th>{% severity_value 'High'%}</th>
-                                    <th>{% severity_value 'Medium'%}</th>
-                                    <th>{% severity_value 'Low'%}</th>
-                                    <th>{% severity_value 'Info'%}</th>
-                                    <th>Total</th>
-                                </tr>
-                                <tr>
-                                    <td>{{ accepted_in_period_counts.critical|default_if_none:0 }}</td>
-                                    <td>{{ accepted_in_period_counts.high|default_if_none:0 }}</td>
-                                    <td>{{ accepted_in_period_counts.medium|default_if_none:0 }}</td>
-                                    <td>{{ accepted_in_period_counts.low|default_if_none:0 }}</td>
-                                    <td>{{ accepted_in_period_counts.info|default_if_none:0 }}</td>
-                                    <td>{{ accepted_in_period_counts.total|default_if_none:0 }}</td>
-                                </tr>
-                            </table>
-                            <table
-                                    class="table table-bordered table-condensed table-striped table-600">
-                                <tr>
-                                    <th>Product</th>
-                                    <th>{% severity_value 'Critical'%}</th>
-                                    <th>{% severity_value 'High'%}</th>
-                                    <th>{% severity_value 'Medium'%}</th>
-                                    <th>{% severity_value 'Low'%}</th>
-                                    <th>{% severity_value 'Info'%}</th>
-                                    <th>Total</th>
+                                                </tr>
+                                                {% for key, value in in_period_details.items %}
+                                                    <tr>
+                                                        <td><a href="{{ value.path }}">{{ key }}</a></td>
+                                                        <td>{{ value.Critical }}</td>
+                                                        <td>{{ value.High }}</td>
+                                                        <td>{{ value.Medium }}</td>
+                                                        <td>{{ value.Low }}</td>
+                                                        <td>{{ value.Info }}</td>
+                                                        <td>{{ value.Total }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane" id="tabs-4">
+                                        <div class="table-responsive">
+                                            <h4>Accepted in Period</h4>
+                                            <table
+                                                    class="table table-bordered table-condensed table-striped table-600">
+                                                <tr>
+                                                    <th>{% severity_value 'Critical' %}</th>
+                                                    <th>{% severity_value 'High' %}</th>
+                                                    <th>{% severity_value 'Medium' %}</th>
+                                                    <th>{% severity_value 'Low' %}</th>
+                                                    <th>{% severity_value 'Info' %}</th>
+                                                    <th>Total</th>
+                                                </tr>
+                                                <tr>
+                                                    <td>{{ accepted_in_period_counts.critical|default_if_none:0 }}</td>
+                                                    <td>{{ accepted_in_period_counts.high|default_if_none:0 }}</td>
+                                                    <td>{{ accepted_in_period_counts.medium|default_if_none:0 }}</td>
+                                                    <td>{{ accepted_in_period_counts.low|default_if_none:0 }}</td>
+                                                    <td>{{ accepted_in_period_counts.info|default_if_none:0 }}</td>
+                                                    <td>{{ accepted_in_period_counts.total|default_if_none:0 }}</td>
+                                                </tr>
+                                            </table>
+                                            <table
+                                                    class="table table-bordered table-condensed table-striped table-600">
+                                                <tr>
+                                                    <th>Product</th>
+                                                    <th>{% severity_value 'Critical' %}</th>
+                                                    <th>{% severity_value 'High' %}</th>
+                                                    <th>{% severity_value 'Medium' %}</th>
+                                                    <th>{% severity_value 'Low' %}</th>
+                                                    <th>{% severity_value 'Info' %}</th>
+                                                    <th>Total</th>
 
-                                </tr>
-                                {% for key, value in accepted_in_period_details.items %}
-                                    <tr>
-                                        <td><a href="{{ value.path }}">{{ key }}</a></td>
-                                        <td>{{ value.Critical }}</td>
-                                        <td>{{ value.High }}</td>
-                                        <td>{{ value.Medium }}</td>
-                                        <td>{{ value.Low }}</td>
-                                        <td>{{ value.Info }}</td>
-                                        <td>{{ value.Total }}</td>
-                                    </tr>
-                                {% endfor %}
-                            </table>
-                        </div>
+                                                </tr>
+                                                {% for key, value in accepted_in_period_details.items %}
+                                                    <tr>
+                                                        <td><a href="{{ value.path }}">{{ key }}</a></td>
+                                                        <td>{{ value.Critical }}</td>
+                                                        <td>{{ value.High }}</td>
+                                                        <td>{{ value.Medium }}</td>
+                                                        <td>{{ value.Low }}</td>
+                                                        <td>{{ value.Info }}</td>
+                                                        <td>{{ value.Total }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </table>
+                                        </div>
 
 
-                    </div>
-                    <div class="tab-pane" id="tabs-5">
-                        <div class="table-responsive">
-                            <h4>Closed in Period</h4>
-                            <table
-                                    class="table table-bordered table-condensed table-striped table-600">
-                                <tr>
-                                    <th>{% severity_value 'Critical'%}</th>
-                                    <th>{% severity_value 'High'%}</th>
-                                    <th>{% severity_value 'Medium'%}</th>
-                                    <th>{% severity_value 'Low'%}</th>
-                                    <th>{% severity_value 'Info'%}</th>
-                                    <th>Total</th>
-                                </tr>
-                                <tr>
-                                    <td>{{ closed_in_period_counts.Critical }}</td>
-                                    <td>{{ closed_in_period_counts.High }}</td>
-                                    <td>{{ closed_in_period_counts.Medium }}</td>
-                                    <td>{{ closed_in_period_counts.Low }}</td>
-                                    <td>{{ closed_in_period_counts.Info }}</td>
-                                    <td>{{ closed_in_period_counts.Total }}</td>
-                                </tr>
-                            </table>
-                            <table
-                                    class="table table-bordered table-condensed table-striped table-600">
-                                <tr>
-                                    <th>Product</th>
-                                    <th>{% severity_value 'Critical'%}</th>
-                                    <th>{% severity_value 'High'%}</th>
-                                    <th>{% severity_value 'Medium'%}</th>
-                                    <th>{% severity_value 'Low'%}</th>
-                                    <th>{% severity_value 'Info'%}</th>
-                                    <th>Total</th>
+                                    </div>
+                                    <div class="tab-pane" id="tabs-5">
+                                        <div class="table-responsive">
+                                            <h4>Closed in Period</h4>
+                                            <table
+                                                    class="table table-bordered table-condensed table-striped table-600">
+                                                <tr>
+                                                    <th>{% severity_value 'Critical' %}</th>
+                                                    <th>{% severity_value 'High' %}</th>
+                                                    <th>{% severity_value 'Medium' %}</th>
+                                                    <th>{% severity_value 'Low' %}</th>
+                                                    <th>{% severity_value 'Info' %}</th>
+                                                    <th>Total</th>
+                                                </tr>
+                                                <tr>
+                                                    <td>{{ closed_in_period_counts.Critical }}</td>
+                                                    <td>{{ closed_in_period_counts.High }}</td>
+                                                    <td>{{ closed_in_period_counts.Medium }}</td>
+                                                    <td>{{ closed_in_period_counts.Low }}</td>
+                                                    <td>{{ closed_in_period_counts.Info }}</td>
+                                                    <td>{{ closed_in_period_counts.Total }}</td>
+                                                </tr>
+                                            </table>
+                                            <table
+                                                    class="table table-bordered table-condensed table-striped table-600">
+                                                <tr>
+                                                    <th>Product</th>
+                                                    <th>{% severity_value 'Critical' %}</th>
+                                                    <th>{% severity_value 'High' %}</th>
+                                                    <th>{% severity_value 'Medium' %}</th>
+                                                    <th>{% severity_value 'Low' %}</th>
+                                                    <th>{% severity_value 'Info' %}</th>
+                                                    <th>Total</th>
 
-                                </tr>
-                                {% for key, value in closed_in_period_details.items %}
-                                    <tr>
-                                        <td><a href="{{ value.path }}">{{ key }}</a></td>
-                                        <td>{{ value.Critical }}</td>
-                                        <td>{{ value.High }}</td>
-                                        <td>{{ value.Medium }}</td>
-                                        <td>{{ value.Low }}</td>
-                                        <td>{{ value.Info }}</td>
-                                        <td>{{ value.Total }}</td>
-                                    </tr>
-                                {% endfor %}
-                            </table>
+                                                </tr>
+                                                {% for key, value in closed_in_period_details.items %}
+                                                    <tr>
+                                                        <td><a href="{{ value.path }}">{{ key }}</a></td>
+                                                        <td>{{ value.Critical }}</td>
+                                                        <td>{{ value.High }}</td>
+                                                        <td>{{ value.Medium }}</td>
+                                                        <td>{{ value.Low }}</td>
+                                                        <td>{{ value.Info }}</td>
+                                                        <td>{{ value.Total }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane" id="tabs-6">
+                                        <div class="metric-half table-responsive">
+                                            <table class="table table-bordered table-condensed table-striped">
+                                                <tr>
+                                                    <th>Weekly</th>
+                                                    <th>{% severity_value 'Critical' %}</th>
+                                                    <th>{% severity_value 'High' %}</th>
+                                                    <th>{% severity_value 'Medium' %}</th>
+                                                    <th>{% severity_value 'Low' %}</th>
+                                                    <th>Total</th>
+                                                    <th>Closed*</th>
+                                                </tr>
+                                                {% for week in opened_per_week|slice:'1:' %}
+                                                    <tr>
+                                                        <td>{{ week.1|date:"m-d-Y" }}</td>
+                                                        <td>{{ week.2 }}</td>
+                                                        <td>{{ week.3 }}</td>
+                                                        <td>{{ week.4 }}</td>
+                                                        <td>{{ week.5 }}</td>
+                                                        <td>{{ week.6 }}</td>
+                                                        <td>{{ week.7 }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </table>
+                                        </div>
+                                        <div class="metric-half table-responsive">
+                                            <table class="table table-bordered table-condensed table-striped">
+                                                <tr>
+                                                    <th>Monthly</th>
+                                                    <th>{% severity_value 'Critical' %}</th>
+                                                    <th>{% severity_value 'High' %}</th>
+                                                    <th>{% severity_value 'Medium' %}</th>
+                                                    <th>{% severity_value 'Low' %}</th>
+                                                    <th>Total</th>
+                                                    <th>Closed*</th>
+                                                </tr>
+                                                {% for month in opened_per_month|slice:'1:' %}
+                                                    <tr>
+                                                        <td>{{ month.1|date:"m-Y" }}</td>
+                                                        <td>{{ month.2 }}</td>
+                                                        <td>{{ month.3 }}</td>
+                                                        <td>{{ month.4 }}</td>
+                                                        <td>{{ month.5 }}</td>
+                                                        <td>{{ month.6 }}</td>
+                                                        <td>{{ month.7 }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </table>
+                                            <p>*Closed findings may have been opened outside of requested period.</p>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane" id="tabs-7">
+                                        <div class="metric-half table-responsive">
+                                            <table class="table table-bordered table-condensed table-striped">
+                                                <tr>
+                                                    <th>By Week</th>
+                                                    <th>{% severity_value 'Critical' %}</th>
+                                                    <th>{% severity_value 'High' %}</th>
+                                                    <th>{% severity_value 'Medium' %}</th>
+                                                    <th>{% severity_value 'Low' %}</th>
+                                                    <th>Total</th>
+                                                </tr>
+                                                {% for week in accepted_per_week|slice:'1:' %}
+                                                    <tr>
+                                                        <td>{{ week.1|date:"m-d-Y" }}</td>
+                                                        <td>{{ week.2 }}</td>
+                                                        <td>{{ week.3 }}</td>
+                                                        <td>{{ week.4 }}</td>
+                                                        <td>{{ week.5 }}</td>
+                                                        <td>{{ week.6 }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </table>
+                                        </div>
+                                        <div class="metric-half table-responsive">
+                                            <table class="table table-bordered table-condensed table-striped">
+                                                <tr>
+                                                    <th>By Month</th>
+                                                    <th>{% severity_value 'Critical' %}</th>
+                                                    <th>{% severity_value 'High' %}</th>
+                                                    <th>{% severity_value 'Medium' %}</th>
+                                                    <th>{% severity_value 'Low' %}</th>
+                                                    <th>Total</th>
+                                                </tr>
+                                                {% for month in accepted_per_month|slice:'1:' %}
+                                                    <tr>
+                                                        <td>{{ month.1|date:"m-Y" }}</td>
+                                                        <td>{{ month.2 }}</td>
+                                                        <td>{{ month.3 }}</td>
+                                                        <td>{{ month.4 }}</td>
+                                                        <td>{{ month.5 }}</td>
+                                                        <td>{{ month.6 }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane table-responsive" id="tabs-8">
+                                        <table
+                                                class="table table-bordered table-condensed table-striped table-400">
+                                            <tr>
+                                                <th>Days</th>
+                                                <th>Bug Count</th>
+                                            </tr>
+                                            <tr>
+                                                <td>0 - 30 Days</td>
+                                                <td>{{ age_detail.0 }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>31 - 60 Days</td>
+                                                <td>{{ age_detail.1 }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>61 - 90 Days</td>
+                                                <td>{{ age_detail.2 }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>91+ Days</td>
+                                                <td>{{ age_detail.3 }}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="tab-pane" id="tabs-6">
-                        <div class="metric-half table-responsive">
-                            <table class="table table-bordered table-condensed table-striped">
-                                <tr>
-                                    <th>Weekly</th>
-                                    <th>{% severity_value 'Critical'%}</th>
-                                    <th>{% severity_value 'High'%}</th>
-                                    <th>{% severity_value 'Medium'%}</th>
-                                    <th>{% severity_value 'Low'%}</th>
-                                    <th>Total</th>
-                                    <th>Closed*</th>
-                                </tr>
-                                {% for week in opened_per_week|slice:'1:' %}
-                                    <tr>
-                                        <td>{{ week.1|date:"m-d-Y" }}</td>
-                                        <td>{{ week.2 }}</td>
-                                        <td>{{ week.3 }}</td>
-                                        <td>{{ week.4 }}</td>
-                                        <td>{{ week.5 }}</td>
-                                        <td>{{ week.6 }}</td>
-                                        <td>{{ week.7 }}</td>
-                                    </tr>
-                                {% endfor %}
-                            </table>
-                        </div>
-                        <div class="metric-half table-responsive">
-                            <table class="table table-bordered table-condensed table-striped">
-                                <tr>
-                                    <th>Monthly</th>
-                                    <th>{% severity_value 'Critical'%}</th>
-                                    <th>{% severity_value 'High'%}</th>
-                                    <th>{% severity_value 'Medium'%}</th>
-                                    <th>{% severity_value 'Low'%}</th>
-                                    <th>Total</th>
-                                    <th>Closed*</th>
-                                </tr>
-                                {% for month in opened_per_month|slice:'1:' %}
-                                    <tr>
-                                        <td>{{ month.1|date:"m-Y" }}</td>
-                                        <td>{{ month.2 }}</td>
-                                        <td>{{ month.3 }}</td>
-                                        <td>{{ month.4 }}</td>
-                                        <td>{{ month.5 }}</td>
-                                        <td>{{ month.6 }}</td>
-                                        <td>{{ month.7 }}</td>
-                                    </tr>
-                                {% endfor %}
-                            </table>
-                            <p>*Closed findings may have been opened outside of requested period.</p>
-                        </div>
-                    </div>
-                    <div class="tab-pane" id="tabs-7">
-                        <div class="metric-half table-responsive">
-                            <table class="table table-bordered table-condensed table-striped">
-                                <tr>
-                                    <th>By Week</th>
-                                    <th>{% severity_value 'Critical'%}</th>
-                                    <th>{% severity_value 'High'%}</th>
-                                    <th>{% severity_value 'Medium'%}</th>
-                                    <th>{% severity_value 'Low'%}</th>
-                                    <th>Total</th>
-                                </tr>
-                                {% for week in accepted_per_week|slice:'1:' %}
-                                    <tr>
-                                        <td>{{ week.1|date:"m-d-Y" }}</td>
-                                        <td>{{ week.2 }}</td>
-                                        <td>{{ week.3 }}</td>
-                                        <td>{{ week.4 }}</td>
-                                        <td>{{ week.5 }}</td>
-                                        <td>{{ week.6 }}</td>
-                                    </tr>
-                                {% endfor %}
-                            </table>
-                        </div>
-                        <div class="metric-half table-responsive">
-                            <table class="table table-bordered table-condensed table-striped">
-                                <tr>
-                                    <th>By Month</th>
-                                    <th>{% severity_value 'Critical'%}</th>
-                                    <th>{% severity_value 'High'%}</th>
-                                    <th>{% severity_value 'Medium'%}</th>
-                                    <th>{% severity_value 'Low'%}</th>
-                                    <th>Total</th>
-                                </tr>
-                                {% for month in accepted_per_month|slice:'1:' %}
-                                    <tr>
-                                        <td>{{ month.1|date:"m-Y" }}</td>
-                                        <td>{{ month.2 }}</td>
-                                        <td>{{ month.3 }}</td>
-                                        <td>{{ month.4 }}</td>
-                                        <td>{{ month.5 }}</td>
-                                        <td>{{ month.6 }}</td>
-                                    </tr>
-                                {% endfor %}
-                            </table>
-                        </div>
-                    </div>
-                    <div class="tab-pane table-responsive" id="tabs-8">
-                        <table
-                                class="table table-bordered table-condensed table-striped table-400">
-                            <tr>
-                                <th>Days</th>
-                                <th>Bug Count</th>
-                            </tr>
-                            <tr>
-                                <td>0 - 30 Days</td>
-                                <td>{{ age_detail.0 }}</td>
-                            </tr>
-                            <tr>
-                                <td>31 - 60 Days</td>
-                                <td>{{ age_detail.1 }}</td>
-                            </tr>
-                            <tr>
-                                <td>61 - 90 Days</td>
-                                <td>{{ age_detail.2 }}</td>
-                            </tr>
-                            <tr>
-                                <td>91+ Days</td>
-                                <td>{{ age_detail.3 }}</td>
-                            </tr>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-	{% endif %}
+                {% endif %}
     <br/>
     <br/>
     <br/>
@@ -602,19 +619,19 @@
     <script src="{% static "justgage/justgage.js" %}"></script>
     <script src="{% static "justgage/raphael-2.1.4.min.js" %}"></script>
     <script>
-    $('.gaugeloop').each(function() {
-    j_obj = $(this);
-    var g_id = j_obj.attr('id');
-    var g_title = j_obj.attr('name');
-    var g_start = j_obj.attr('start');
-         var g = new JustGage({
-            id: g_id,
-            value: g_start ,
-             levelColors : [  "#FF0000", "#F9C802",  "#A9D70B" ],
-            min: 0,
-            max: 100,
-          });
-    });
+        $('.gaugeloop').each(function () {
+            j_obj = $(this);
+            var g_id = j_obj.attr('id');
+            var g_title = j_obj.attr('name');
+            var g_start = j_obj.attr('start');
+            var g = new JustGage({
+                id: g_id,
+                value: g_start,
+                levelColors: ["#FF0000", "#F9C802", "#A9D70B"],
+                min: 0,
+                max: 100,
+            });
+        });
         $(function () {
             {% if not show_pt_filter %}
                 $('#id_test__engagement__product__prod_type').parents('p').remove();
@@ -635,9 +652,9 @@
             {% if opened_per_month %}
                 function chart_div() {
                     var critical = [],
-                            high = [],
-                            medium = [],
-                            low = [];
+                        high = [],
+                        medium = [],
+                        low = [];
 
                     {% for month in opened_per_month|slice:'1:' %}
                         critical.push([{{ month.0 }}, {{ month.2 }}]);
@@ -646,7 +663,7 @@
                         low.push([{{ month.0 }}, {{ month.5 }}]);
                     {% endfor %}
 
-                    var tick_count = critical.length < 7?critical.length:7;
+                    var tick_count = critical.length < 7 ? critical.length : 7;
                     var options = {
                         xaxis: {
                             mode: "time",
@@ -676,35 +693,35 @@
                         tooltip: true
                     };
                     var plotObj = $.plot($("#chart_div"), [{
-                                data: critical,
-                                label: " Critical",
-                                color: "#d9534f",
+                            data: critical,
+                            label: " Critical",
+                            color: "#d9534f",
 
-                            }, {
-                                data: high,
-                                label: " High",
-                                color: '#f0ad4e',
+                        }, {
+                            data: high,
+                            label: " High",
+                            color: '#f0ad4e',
 
-                            }, {
-                                data: medium,
-                                label: " Medium",
-                                color: '#f0de28',
+                        }, {
+                            data: medium,
+                            label: " Medium",
+                            color: '#f0de28',
 
-                            }, {
-                                data: low,
-                                label: " Low",
-                                color: '#337ab7',
+                        }, {
+                            data: low,
+                            label: " Low",
+                            color: '#337ab7',
 
-                            }],
-                            options);
+                        }],
+                        options);
                 }
             {%  endif %}
             {% if active_per_month %}
                 function chart_div5() {
                     var critical = [],
-                            high = [],
-                            medium = [],
-                            low = [];
+                        high = [],
+                        medium = [],
+                        low = [];
 
                     {% for month in active_per_month|slice:'1:' %}
                         critical.push([{{ month.0 }}, {{ month.2 }}]);
@@ -713,7 +730,7 @@
                         low.push([{{ month.0 }}, {{ month.5 }}]);
                     {% endfor %}
 
-                    var tick_count = critical.length < 7?critical.length:7;
+                    var tick_count = critical.length < 7 ? critical.length : 7;
                     var options = {
                         xaxis: {
                             mode: "time",
@@ -743,36 +760,36 @@
                         tooltip: true
                     };
                     var plotObj = $.plot($("#chart_div5"), [{
-                                data: critical,
-                                label: " Critical",
-                                color: "#d9534f",
+                            data: critical,
+                            label: " Critical",
+                            color: "#d9534f",
 
-                            }, {
-                                data: high,
-                                label: " High",
-                                color: '#f0ad4e',
+                        }, {
+                            data: high,
+                            label: " High",
+                            color: '#f0ad4e',
 
-                            }, {
-                                data: medium,
-                                label: " Medium",
-                                color: '#f0de28',
+                        }, {
+                            data: medium,
+                            label: " Medium",
+                            color: '#f0de28',
 
-                            }, {
-                                data: low,
-                                label: " Low",
-                                color: '#337ab7',
+                        }, {
+                            data: low,
+                            label: " Low",
+                            color: '#337ab7',
 
-                            }],
-                            options);
+                        }],
+                        options);
                 }
             {%  endif %}
- 
+
             {%  if accepted_per_month %}
                 function chart_div2() {
                     var critical = [],
-                            high = [],
-                            medium = [],
-                            low = [];
+                        high = [],
+                        medium = [],
+                        low = [];
 
                     {% for month in accepted_per_month|slice:'1:' %}
                         critical.push([{{ month.0 }}, {{ month.2 }}]);
@@ -782,7 +799,7 @@
                     {% endfor %}
 
 
-                    var tick_count = critical.length < 7?critical.length:7;
+                    var tick_count = critical.length < 7 ? critical.length : 7;
                     var options = {
                         xaxis: {
                             mode: "time",
@@ -812,31 +829,31 @@
                         tooltip: true
                     };
                     var plotObj = $.plot($("#chart_div2"), [{
-                                data: critical,
-                                label: " Critical",
-                                color: "#d9534f"
-                            }, {
-                                data: high,
-                                label: " High",
-                                color: '#f0ad4e'
-                            }, {
-                                data: medium,
-                                label: " Medium",
-                                color: '#f0de28'
-                            }, {
-                                data: low,
-                                label: " Low",
-                                color: '#337ab7'
-                            }],
-                            options);
+                            data: critical,
+                            label: " Critical",
+                            color: "#d9534f"
+                        }, {
+                            data: high,
+                            label: " High",
+                            color: '#f0ad4e'
+                        }, {
+                            data: medium,
+                            label: " Medium",
+                            color: '#f0de28'
+                        }, {
+                            data: low,
+                            label: " Low",
+                            color: '#337ab7'
+                        }],
+                        options);
                 }
             {% endif %}
 
             function chart_div3() {
                 var critical = [],
-                        high = [],
-                        medium = [],
-                        low = [];
+                    high = [],
+                    medium = [],
+                    low = [];
 
                 {% for month in opened_per_week|slice:'1:' %}
                     critical.push([{{ month.0 }}, {{ month.2 }}]);
@@ -875,30 +892,30 @@
 
 
                 var plotObj = $.plot($("#chart_div3"), [{
-                            data: critical,
-                            label: " Critical",
-                            color: "#d9534f"
-                        }, {
-                            data: high,
-                            label: " High",
-                            color: '#f0ad4e'
-                        }, {
-                            data: medium,
-                            label: " Medium",
-                            color: '#f0de28'
-                        }, {
-                            data: low,
-                            label: " Low",
-                            color: '#337ab7'
-                        }],
-                        options);
+                        data: critical,
+                        label: " Critical",
+                        color: "#d9534f"
+                    }, {
+                        data: high,
+                        label: " High",
+                        color: '#f0ad4e'
+                    }, {
+                        data: medium,
+                        label: " Medium",
+                        color: '#f0de28'
+                    }, {
+                        data: low,
+                        label: " Low",
+                        color: '#337ab7'
+                    }],
+                    options);
             }
 
             function chart_div4() {
                 var critical = [],
-                        high = [],
-                        medium = [],
-                        low = [];
+                    high = [],
+                    medium = [],
+                    low = [];
 
                 {% for month in accepted_per_week|slice:'1:' %}
                     critical.push([{{ month.0 }}, {{ month.2 }}]);
@@ -937,23 +954,23 @@
 
 
                 var plotObj = $.plot($("#chart_div4"), [{
-                            data: critical,
-                            label: " Critical",
-                            color: "#d9534f"
-                        }, {
-                            data: high,
-                            label: " High",
-                            color: '#f0ad4e'
-                        }, {
-                            data: medium,
-                            label: " Medium",
-                            color: '#f0de28'
-                        }, {
-                            data: low,
-                            label: " Low",
-                            color: '#337ab7'
-                        }],
-                        options);
+                        data: critical,
+                        label: " Critical",
+                        color: "#d9534f"
+                    }, {
+                        data: high,
+                        label: " High",
+                        color: '#f0ad4e'
+                    }, {
+                        data: medium,
+                        label: " Medium",
+                        color: '#f0de28'
+                    }, {
+                        data: low,
+                        label: " Low",
+                        color: '#337ab7'
+                    }],
+                    options);
             }
         });
     </script>

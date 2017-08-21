@@ -4,6 +4,7 @@ from dojo.test import views
 
 urlpatterns = [
     #  tests
+    url(r'^calendar/tests$', views.test_calendar, name='test_calendar'),
     url(r'^test/(?P<tid>\d+)$', views.view_test,
         name='view_test'),
     url(r'^test/(?P<tid>\d+)/ics$', views.test_ics,

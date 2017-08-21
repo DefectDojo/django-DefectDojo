@@ -29,9 +29,6 @@
     <!-- MetisMenu CSS -->
     <link href="{% static "metisMenu/dist/metisMenu.min.css" %}" rel="stylesheet">
 
-    <!-- Timeline CSS -->
-    <link href="{% static "startbootstrap-sb-admin-2/dist/css/timeline.css" %}" rel="stylesheet">
-
     <!-- Custom CSS -->
     <link href="{% static "startbootstrap-sb-admin-2/dist/css/sb-admin-2.css" %}" rel="stylesheet">
 
@@ -242,7 +239,7 @@
                             {% endif %}
                             {% if request.user.is_staff %}
                                 <li>
-                                    <a href="{% url 'calendar' %}"><i class="fa fa-calendar fa-fw"></i>
+                                    <a href="{% url 'engagement_calendar' %}"><i class="fa fa-calendar fa-fw"></i>
                                         <span>Calendar</span></a>
                                 </li>
                             {% endif %}
@@ -251,8 +248,9 @@
                                         <span>Configuration</span></a>
                                     <ul class="nav nav-second-level">
                                         <li><a href="{% url 'notifications' %}">Notifications </a></li>
-                                        {% if request.user.is_staff %}
+                                        {% if request.user.is_superuser%}
                                         <li><a href="{% url 'system_settings' %}">System Settings </a></li>
+                                        {% endif %}
                                         <li><a href="{% url 'cred' %}">Credential Manager </a></li>
                                         {% if "enable_jira"|get_system_setting %}
                                         <li><a href="{% url 'jira' %}">JIRA </a></li>
