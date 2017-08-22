@@ -35,6 +35,10 @@ class System_Settings(models.Model):
     slack_channel = models.CharField(max_length=100, default='', blank=True)
     slack_token = models.CharField(max_length=100, default='', blank=True, help_text='Token required for interacting with Slack. Get one at https://api.slack.com/tokens')
     slack_username = models.CharField(max_length=100, default='', blank=True)
+    enable_hipchat_notifications = models.BooleanField(default=False, verbose_name='Enable HipChat notifications', blank=False)
+    hipchat_site = models.CharField(max_length=100, default='', blank=True, help_text='The full fqdn of your hipchat site, e.g. "yoursite.hipchat.com"')
+    hipchat_channel = models.CharField(max_length=100, default='', blank=True)
+    hipchat_token = models.CharField(max_length=100, default='', blank=True, help_text='Token required for interacting with HipChat. Get one at https://patriktest.hipchat.com/addons/')
     enable_mail_notifications = models.BooleanField(default=False, blank=False)
     mail_notifications_from = models.CharField(max_length=200, default='from@example.com', blank=True)
     mail_notifications_to = models.CharField(max_length=200, default='', blank=True)
@@ -94,6 +98,7 @@ class UserContactInfo(models.Model):
     twitter_username = models.CharField(blank=True, null=True, max_length=150)
     github_username = models.CharField(blank=True, null=True, max_length=150)
     slack_username = models.CharField(blank=True, null=True, max_length=150)
+    hipchat_username = models.CharField(blank=True, null=True, max_length=150)
 
 
 class Contact(models.Model):
@@ -1028,7 +1033,7 @@ class JIRA_PKey(models.Model):
     enable_engagement_epic_mapping = models.BooleanField(default=False, blank=True)
     push_notes = models.BooleanField(default=False, blank=True)
 
-NOTIFICATION_CHOICES=(("slack","slack"),("mail","mail"),("alert","alert"))
+NOTIFICATION_CHOICES=(("slack","slack"),("hipchat","hipchat"),("mail","mail"),("alert","alert"))
 class Notifications(models.Model):
     engagement_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     test_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)

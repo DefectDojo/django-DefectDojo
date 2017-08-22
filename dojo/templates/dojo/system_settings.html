@@ -31,9 +31,10 @@
         }
 
         $(function () {
-            updatenotificationsgroup('slack'); updatenotificationsgroup('mail');
-            $('#id_enable_slack_notifications').change(function() { updatenotificationsgroup('slack') });
-            $('#id_enable_mail_notifications').change(function() { updatenotificationsgroup('mail') });
+            $.each(['slack','hipchat','mail'], function (index, value) {
+                updatenotificationsgroup(value);
+                $('#id_enable_' + value + '_notifications').change(function() { updatenotificationsgroup(value)});
+            });
         });
 
     </script>

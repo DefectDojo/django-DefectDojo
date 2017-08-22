@@ -1169,6 +1169,18 @@ def create_notification(event=None, **kwargs):
             log_alert(e)
             pass
 
+    def send_hipchat_notification(channel):
+        try:
+            # We use same template for HipChat as for slack
+            res = requests.request(method='POST',
+                            url='https://%s/v2/room/%s/notification?auth_token=%s' % (get_system_setting('hipchat_site'), channel, get_system_setting('hipchat_token')),
+                            data={'message':create_notification_message(event, 'slack'),
+                                  'message_format':'text'})
+            print res
+        except Exception as e:
+            log_alert(e)
+            pass
+
     def send_mail_notification(address):
         subject = '%s notification' % get_system_setting('team_name')
         if 'title' in kwargs:
@@ -1205,10 +1217,14 @@ def create_notification(event=None, **kwargs):
         notifications = Notifications()
 
     slack_enabled = get_system_setting('enable_slack_notifications')
+    hipchat_enabled = get_system_setting('enable_hipchat_notifications')
     mail_enabled = get_system_setting('enable_mail_notifications')
 
     if slack_enabled and 'slack' in getattr(notifications, event):
         send_slack_notification(get_system_setting('slack_channel'))
+
+    if hipchat_enabled and 'hipchat' in getattr(notifications, event):
+        send_hipchat_notification(get_system_setting('hipchat_channel'))
 
     if mail_enabled and 'mail' in getattr(notifications, event):
         send_slack_notification(get_system_setting('mail_notifications_from'))
@@ -1229,6 +1245,8 @@ def create_notification(event=None, **kwargs):
 
         if slack_enabled and 'slack' in getattr(notifications, event) and user.usercontactinfo.slack_username is not None:
             send_slack_notification('@%s' % user.usercontactinfo.slack_username)
+
+        # HipChat doesn't seem to offer direct message functionality, so no HipChat PM functionality here...
 
         if mail_enabled and 'mail' in getattr(notifications, event):
             send_mail_notification(user.email)
