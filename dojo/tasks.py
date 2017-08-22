@@ -18,10 +18,11 @@ from dojo.models import Finding
 import pdfkit
 from dojo.celery import app
 from dojo.reports.widgets import report_widget_factory
-from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, close_epic
+from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, close_epic, get_system_setting
 
 logger = get_task_logger(__name__)
-localtz = timezone(settings.TIME_ZONE)
+
+localtz = timezone(get_system_setting('time_zone'))
 
 """
 def email_requester(report, uri, error=None):
@@ -124,11 +125,9 @@ def async_custom_pdf_report(self,
             toc_settings = selected_widgets['table-of-contents']
 
             toc_depth = toc_settings.depth
-
             toc_bytes = render_to_string(xsl_style_sheet_tempalte, {'widgets': widgets,
                                                                     'depth': toc_depth,
                                                                     'title': toc_settings.title})
-
             temp.write(toc_bytes)
             temp.seek(0)
 
@@ -143,12 +142,10 @@ def async_custom_pdf_report(self,
                            'info': cp.meta_info})
             cover = host + reverse(
                 'report_cover_page') + "?" + x
-
         bytes = render_to_string(template, {'widgets': widgets,
                                             'toc_depth': toc_depth,
                                             'host': host,
                                             'report_name': report.name})
-
         pdf = pdfkit.from_string(bytes,
                                  False,
                                  configuration=config,
@@ -210,12 +207,12 @@ def add_comment_task(find, note):
     add_comment(find, note)
 
 @app.task(name='async_dedupe')
-def async_dedupe(self,  new_finding, *args, **kwargs):
+def async_dedupe(new_finding, *args, **kwargs):
     logger.info("running deduplication")
     eng_findings_cwe = Finding.objects.filter(test__engagement__product=new_finding.test.engagement.product,
                                               cwe=new_finding.cwe).exclude(id=new_finding.id).exclude(cwe=None).exclude(endpoints=None)
     eng_findings_title = Finding.objects.filter(test__engagement__product=new_finding.test.engagement.product,
-                                                title=new_finding.title).exclude(id=new_finding.id).exlcude(endpoints=None)
+                                                title=new_finding.title).exclude(id=new_finding.id).exclude(endpoints=None)
     total_findings = eng_findings_cwe | eng_findings_title
     for find in total_findings:
         list1 = new_finding.endpoints.all()

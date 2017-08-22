@@ -11,9 +11,9 @@ from pytz import timezone
 
 from dojo.models import Scan, Product, ScanSettings, IPScan
 import dojo.settings as settings
+from dojo.utils import get_system_setting
 
-
-locale = timezone(settings.TIME_ZONE)
+locale = timezone(get_system_setting('time_zone'))
 
 
 """
@@ -82,11 +82,11 @@ class Command(BaseCommand):
             msg += "\nFor any questions please email "
             msg += settings.PORT_SCAN_CONTACT_EMAIL + "\n"
             msg += "Thanks,\nThe "
-            msg += settings.TEAM_NAME
+            msg += get_system_setting('team_name')
             msg += " Team"
             email_to = current_scan.scan_settings.email
 
-            send_mail(settings.TEAM_NAME + ' Port Scan Report',
+            send_mail(get_system_setting('team_name') + ' Port Scan Report',
                       msg,
                       settings.PORT_SCAN_RESULT_EMAIL_FROM,
                       [email_to],

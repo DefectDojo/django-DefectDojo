@@ -25,9 +25,9 @@ from dojo.forms import SimpleMetricsForm, ProductTypeCountsForm
 from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
     Risk_Acceptance, Dojo_User
 from dojo.utils import get_page_items, add_breadcrumb, findings_this_period, opened_in_period, count_findings, \
-    get_period_counts, get_punchcard_data
+    get_period_counts, get_punchcard_data, get_system_setting
 
-localtz = timezone(settings.TIME_ZONE)
+localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -58,7 +58,6 @@ def metrics(request, mtype):
     template = 'dojo/metrics.html'
     page_name = 'Product Type Metrics'
     show_pt_filter = True
-
     findings = Finding.objects.filter(verified=True,
                                       severity__in=('Critical', 'High', 'Medium', 'Low', 'Info')).prefetch_related(
         'test__engagement__product',
@@ -105,7 +104,6 @@ def metrics(request, mtype):
         prod_type = Product_Type.objects.filter(id__in=request.GET.getlist('test__engagement__product__prod_type', []))
     else:
         prod_type = Product_Type.objects.all()
-
     findings = MetricsFindingFilter(request.GET, queryset=findings)
     active_findings = MetricsFindingFilter(request.GET, queryset=active_findings)
 
@@ -113,7 +111,13 @@ def metrics(request, mtype):
     active_findings.qs  # this is needed to load details from filter since it is lazy
 
     start_date = findings.filters['date'].start_date
+    start_date = datetime(start_date.year,
+                          start_date.month, start_date.day,
+                          tzinfo=localtz)
     end_date = findings.filters['date'].end_date
+    end_date = datetime(end_date.year,
+                        end_date.month, end_date.day,
+                        tzinfo=localtz)
 
     if len(prod_type) > 0:
         findings_closed = Finding.objects.filter(mitigated__range=[start_date, end_date],
@@ -193,9 +197,9 @@ def metrics(request, mtype):
     if weeks_between <= 0:
         weeks_between += 2
 
-    monthly_counts = get_period_counts(active_findings, findings, findings_closed, accepted_findings, months_between, start_date,
+    monthly_counts = get_period_counts(active_findings.qs, findings.qs, findings_closed, accepted_findings, months_between, start_date,
                                        relative_delta='months')
-    weekly_counts = get_period_counts(active_findings, findings, findings_closed, accepted_findings, weeks_between, start_date,
+    weekly_counts = get_period_counts(active_findings.qs, findings.qs, findings_closed, accepted_findings, weeks_between, start_date,
                                       relative_delta='weeks')
 
     top_ten = Product.objects.filter(engagement__test__finding__verified=True,
@@ -240,7 +244,7 @@ def metrics(request, mtype):
 
     accepted_in_period_details = {}
 
-    for finding in findings:
+    for finding in findings.qs:
         if 0 <= finding.sql_age <= 30:
             age_detail[0] += 1
         elif 30 < finding.sql_age <= 60:
@@ -292,8 +296,8 @@ def metrics(request, mtype):
     highest_count = 0
 
     if 'view' in request.GET and 'dashboard' == request.GET['view']:
-        punchcard, ticks, highest_count = get_punchcard_data(findings, weeks_between, start_date)
-        page_name = (settings.TEAM_NAME if settings.TEAM_NAME else "") + " Metrics"
+        punchcard, ticks, highest_count = get_punchcard_data(findings.qs, weeks_between, start_date)
+        page_name = (get_system_setting('team_name')) + " Metrics"
         template = 'dojo/dashboard-metrics.html'
 
     add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
@@ -361,6 +365,7 @@ def simple_metrics(request):
                                        false_p=False,
                                        duplicate=False,
                                        out_of_scope=False,
+                                       date=now,
                                        ).distinct()
 
         for f in total.all():
@@ -435,7 +440,13 @@ def product_type_counts(request):
             end_of_month = month_requested.replace(day=monthrange(month_requested.year, month_requested.month)[1],
                                                    hour=23, minute=59, second=59, microsecond=999999)
             start_date = first_of_month
+            start_date = datetime(start_date.year,
+                                  start_date.month, start_date.day,
+                                  tzinfo=localtz)
             end_date = end_of_month
+            end_date = datetime(end_date.year,
+                                end_date.month, end_date.day,
+                                tzinfo=localtz)
 
             oip = opened_in_period(start_date, end_date, pt)
 
@@ -587,7 +598,7 @@ def engineer_metrics(request):
 
     users = EngineerFilter(request.GET,
                            queryset=users)
-    paged_users = get_page_items(request, users, 15)
+    paged_users = get_page_items(request, users.qs, 15)
 
     add_breadcrumb(title="Engineer Metrics", top_level=True, request=request)
 

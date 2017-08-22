@@ -45,9 +45,11 @@
                                 <td class="nowrap">{{ finding.date }}</td>
                                 <td class="">{{ finding.mitigated.date }}</td>
                                 <td>{{ finding.age }}</td>
-                                <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
-                                    <p class="text-error">
-                                {% else %}<p>{% endif %}{{ finding.severity }}</p></td>
+                                <td>
+                                    <p class="label severity severity-{{ finding.severity }}">
+                                        {{ finding.severity_display }}
+                                    </p>
+                                </td>
                                 <td><a
                                         href="{% url 'view_product' finding.test.engagement.product.id %}"
                                         title="{{ finding.test.engagement.product }}">{{ finding.test.engagement.product}}</a>

@@ -2,14 +2,17 @@
 
 import logging
 import sys
+import operator
 from datetime import datetime
 
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import reverse
+from django.db.models import Q
 from django.http import HttpResponseRedirect, HttpResponseForbidden, Http404, HttpResponse
 from django.shortcuts import render, get_object_or_404
+from django.views.decorators.cache import cache_page
 from pytz import timezone
 
 from dojo.filters import TemplateFindingFilter
@@ -17,12 +20,12 @@ from dojo.forms import NoteForm, TestForm, FindingForm, \
     DeleteTestForm, AddFindingForm, \
     ImportScanForm, ReImportScanForm, FindingBulkUpdateForm, JIRAFindingForm
 from dojo.models import Finding, Test, Notes, \
-    BurpRawRequestResponse, Endpoint, Stub_Finding, Finding_Template, JIRA_PKey, Cred_User, Cred_Mapping
+    BurpRawRequestResponse, Endpoint, Stub_Finding, Finding_Template, JIRA_PKey, Cred_User, Cred_Mapping, Dojo_User
 from dojo.tools.factory import import_parser_factory
-from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, message, process_notifications
+from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting
 from dojo.tasks import add_issue_task
 
-localtz = timezone(settings.TIME_ZONE)
+localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -65,7 +68,6 @@ def view_test(request, tid):
     fpage = get_page_items(request, findings, 25)
     sfpage = get_page_items(request, stub_findings, 25)
     show_re_upload = any(test.test_type.name in code for code in ImportScanForm.SCAN_TYPE_CHOICES)
-    ajax_url = reverse('api_dispatch_list', kwargs={'resource_name': 'stub_findings', 'api_name': 'v1_a'})
 
     add_breadcrumb(parent=test, top_level=False, request=request)
     return render(request, 'dojo/view_test.html',
@@ -77,7 +79,6 @@ def view_test(request, tid):
                    'person': person,
                    'request': request,
                    'show_re_upload': show_re_upload,
-                   'ajax_url': ajax_url,
                    'creds': creds,
                    'cred_test': cred_test
                    })
@@ -116,7 +117,7 @@ def delete_test(request, tid):
     eng = test.engagement
     form = DeleteTestForm(instance=test)
 
-    from django.contrib.admin.util import NestedObjects
+    from django.contrib.admin.utils import NestedObjects
     from django.db import DEFAULT_DB_ALIAS
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)
@@ -160,6 +161,26 @@ def delete_test_note(request, tid, nid):
 
 
 @user_passes_test(lambda u: u.is_staff)
+@cache_page(60 * 5)  # cache for 5 minutes
+def test_calendar(request):
+    if not 'lead' in request.GET or '0' in request.GET.getlist('lead'):
+        tests = Test.objects.all()
+    else:
+        filters = []
+        leads = request.GET.getlist('lead','')
+        if '-1' in request.GET.getlist('lead'):
+            leads.remove('-1')
+            filters.append(Q(lead__isnull=True))
+        filters.append(Q(lead__in=leads))
+        tests = Test.objects.filter(reduce(operator.or_, filters))
+    add_breadcrumb(title="Test Calendar", top_level=True, request=request)
+    return render(request, 'dojo/calendar.html', {
+        'caltype': 'tests',
+        'leads': request.GET.getlist('lead', ''),
+        'tests': tests,
+        'users': Dojo_User.objects.all()})
+
+@user_passes_test(lambda u: u.is_staff)
 def test_ics(request, tid):
     test = get_object_or_404(Test, id=tid)
     start_date = datetime.combine(test.target_start, datetime.min.time())
@@ -186,13 +207,13 @@ def add_findings(request, tid):
     enabled = False
     jform = None
     form = AddFindingForm(initial={'date': datetime.now(tz=localtz).date()})
-    if hasattr(settings, 'ENABLE_JIRA'):
-        if settings.ENABLE_JIRA:
-            if JIRA_PKey.objects.filter(product=test.engagement.product).count() != 0:
-                enabled = JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues
-                jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
-        else:
-            jform = None
+
+    if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(product=test.engagement.product).count() != 0:
+        enabled = JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues
+        jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
+    else:
+        jform = None
+
     if request.method == 'POST':
         form = AddFindingForm(request.POST)
         if form.is_valid():
@@ -345,10 +366,9 @@ def add_temp_finding(request, tid, fid):
                                     'impact': finding.impact,
                                     'references': finding.references,
                                     'numerical_severity': finding.numerical_severity})
-        if hasattr(settings, 'ENABLE_JIRA'):
-            if settings.ENABLE_JIRA:
-                enabled = JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues
-                jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
+        if get_system_setting('enable_jira'):
+            enabled = JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues
+            jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
         else:
             jform = None
 
@@ -367,7 +387,7 @@ def add_temp_finding(request, tid, fid):
 def search(request, tid):
     test = get_object_or_404(Test, id=tid)
     templates = Finding_Template.objects.all()
-    templates = TemplateFindingFilter(request.GET, queryset=templates)
+    templates = TemplateFindingFilter(request.GET, queryset=templates).qs
     paged_templates = get_page_items(request, templates, 25)
     title_words = [word
                    for finding in templates

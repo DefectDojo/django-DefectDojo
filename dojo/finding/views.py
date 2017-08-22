@@ -1,5 +1,6 @@
 # #  findings
 import base64
+import json
 import logging
 import mimetypes
 import os
@@ -12,11 +13,12 @@ from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.http import HttpResponseNotFound
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.http import StreamingHttpResponse
 from django.shortcuts import render, get_object_or_404
+from django.utils import formats
 from django.utils.safestring import mark_safe
 from pytz import timezone
 
@@ -25,17 +27,17 @@ from dojo.filters import OpenFindingFilter, \
     ClosedFingingSuperFilter, TemplateFindingFilter
 from dojo.forms import NoteForm, CloseFindingForm, FindingForm, PromoteFindingForm, FindingTemplateForm, \
     DeleteFindingTemplateForm, FindingImageFormSet, JIRAFindingForm, ReviewFindingForm, ClearFindingReviewForm, \
-    DefectFindingForm, ApplyFindingTemplateForm
-from dojo.models import Product_Type, Finding, Notes, Test, \
+    DefectFindingForm, StubFindingForm
+from dojo.models import Product_Type, Finding, Notes, \
     Risk_Acceptance, BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, \
-    FindingImageAccessToken, JIRA_Issue, JIRA_PKey, JIRA_Conf, Dojo_User, Cred_User, Cred_Mapping
+    FindingImageAccessToken, JIRA_Issue, JIRA_PKey, JIRA_Conf, Dojo_User, Cred_User, Cred_Mapping, Test
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, send_review_email, process_notifications, \
-    add_comment, add_epic, add_issue, update_epic, update_issue, close_epic, jira_get_resolution_id, jira_change_resolution_id, \
-    get_jira_connection
+    add_comment, add_epic, add_issue, update_epic, update_issue, close_epic, jira_get_resolution_id, \
+    jira_change_resolution_id, get_jira_connection, get_system_setting
 
 from dojo.tasks import add_issue_task, update_issue_task, add_comment_task
 
-localtz = timezone(settings.TIME_ZONE)
+localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -67,11 +69,11 @@ def open_findings(request):
         findings = OpenFindingFilter(request.GET, queryset=findings, user=request.user)
 
     title_words = [word
-                   for finding in findings
+                   for finding in findings.qs
                    for word in finding.title.split() if len(word) > 2]
 
     title_words = sorted(set(title_words))
-    paged_findings = get_page_items(request, findings, 25)
+    paged_findings = get_page_items(request, findings.qs, 25)
 
     product_type = None
     if 'test__engagement__product__prod_type' in request.GET:
@@ -110,7 +112,7 @@ def accepted_findings(request):
                    for word in finding['title'].split() if len(word) > 2]
 
     title_words = sorted(set(title_words))
-    paged_findings = get_page_items(request, findings, 25)
+    paged_findings = get_page_items(request, findings.qs, 25)
 
     add_breadcrumb(title="Accepted findings", top_level=not len(request.GET), request=request)
 
@@ -127,11 +129,11 @@ def closed_findings(request):
     findings = Finding.objects.filter(mitigated__isnull=False)
     findings = ClosedFingingSuperFilter(request.GET, queryset=findings)
     title_words = [word
-                   for finding in findings
+                   for finding in findings.qs
                    for word in finding.title.split() if len(word) > 2]
 
     title_words = sorted(set(title_words))
-    paged_findings = get_page_items(request, findings, 25)
+    paged_findings = get_page_items(request, findings.qs, 25)
     add_breadcrumb(title="Closed findings", top_level=not len(request.GET), request=request)
     return render(request,
                   'dojo/closed_findings.html',
@@ -355,11 +357,11 @@ def edit_finding(request, fid):
         enabled = True
     except:
         enabled = False
-    pass
-    if hasattr(settings, 'ENABLE_JIRA'):
-        if settings.ENABLE_JIRA:
-            if JIRA_PKey.objects.filter(product=finding.test.engagement.product) != 0:
-                jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
+        pass
+
+    if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(product=finding.test.engagement.product) != 0:
+        jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
+
     if request.method == 'POST':
         form = FindingForm(request.POST, instance=finding)
         if form.is_valid():
@@ -577,77 +579,6 @@ def mktemplate(request, fid):
                              extra_tags='alert-success')
     return HttpResponseRedirect(reverse('view_finding', args=(finding.id,)))
 
-@user_passes_test(lambda u: u.is_staff)
-def find_template_to_apply(request, fid):
-    finding = get_object_or_404(Finding, id=fid)
-    test = get_object_or_404(Test, id=finding.test.id)
-    templates = Finding_Template.objects.all()
-    templates = TemplateFindingFilter(request.GET, queryset=templates)
-    paged_templates = get_page_items(request, templates, 25)
-    title_words = [word
-                   for finding in templates
-                   for word in finding.title.split() if len(word) > 2]
-
-    title_words = sorted(set(title_words))
-    add_breadcrumb(parent=test, title="Apply Template to Finding", top_level=False, request=request)
-    return render(request, 'dojo/templates.html',
-                  {'templates': paged_templates,
-                   'filtered': templates,
-                   'title_words': title_words,
-                   'tid': test.id,
-                   'fid': fid,
-                   'add_from_template': False,
-                   'apply_template': True,
-                   })
-
-@user_passes_test(lambda u: u.is_staff)
-def choose_finding_template_options(request, tid, fid):
-    finding = get_object_or_404(Finding, id=fid)
-    template = get_object_or_404(Finding_Template, id=tid)
-    form = ApplyFindingTemplateForm(data=finding.__dict__, template=template)
-
-    return render(request, 'dojo/apply_finding_template.html',
-                  {'finding': finding,
-                   'template': template,
-                   'form': form,}
-                  )
-
-@user_passes_test(lambda u: u.is_staff)
-def apply_template_to_finding(request, fid, tid):
-    finding = get_object_or_404(Finding, id=fid)
-    template = get_object_or_404(Finding_Template, id=tid)
-
-    if (request.method == "POST"):
-        form = ApplyFindingTemplateForm(data=request.POST)
-
-        if form.is_valid():
-            finding.title = form.cleaned_data['title']
-            finding.cwe = form.cleaned_data['cwe']
-            finding.severity = form.cleaned_data['severity']
-            finding.description = form.cleaned_data['description']
-            finding.mitigation = form.cleaned_data['mitigation']
-            finding.impact = form.cleaned_data['impact']
-            finding.references = form.cleaned_data['references']
-            finding.last_reviewed = datetime.now(tz=localtz)
-            finding.last_reviewed_by = request.user
-
-            finding.save()
-        else:
-            messages.add_message(request,
-                                 messages.ERROR,
-                                 'There appears to be errors on the form, please correct below.',
-                                 extra_tags='alert-danger')
-            form_error = True
-
-            return render(request, 'dojo/apply_finding_template.html',
-                          {'finding': finding,
-                           'template': template,
-                           'form': form,}
-                          )
-
-        return HttpResponseRedirect(reverse('view_finding', args=(finding.id,)))
-    else:
-        return HttpResponseRedirect(reverse('view_finding', args=(finding.id,)))
 
 @user_passes_test(lambda u: u.is_staff)
 def delete_finding_note(request, tid, nid):
@@ -662,6 +593,40 @@ def delete_finding_note(request, tid, nid):
                              extra_tags='alert-success')
         return view_finding(request, tid)
     return HttpResponseForbidden()
+
+
+@user_passes_test(lambda u: u.is_staff)
+def add_stub_finding(request, tid):
+    test = get_object_or_404(Test, id=tid)
+    form = StubFindingForm()
+    if request.method == 'POST':
+        form = StubFindingForm(request.POST)
+        if form.is_valid():
+            stub_finding = form.save(commit=False)
+            stub_finding.test = test
+            stub_finding.reporter = request.user
+            stub_finding.save()
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Stub Finding created successfully.',
+                                 extra_tags='alert-success')
+            if request.is_ajax():
+                data = {'message': 'Stub Finding created successfully.',
+                        'id': stub_finding.id,
+                        'severity': 'None',
+                        'date': formats.date_format(stub_finding.date, "DATE_FORMAT")}
+                return HttpResponse(json.dumps(data))
+        else:
+            if request.is_ajax():
+                data = {'message': 'Stub Finding form has error, please revise and try again.',}
+                return HttpResponse(json.dumps(data))
+
+            messages.add_message(request,
+                                 messages.ERROR,
+                                 'Stub Finding form has error, please revise and try again.',
+                                 extra_tags='alert-danger')
+    add_breadcrumb(title="Add Stub Finding", top_level=False, request=request)
+    return HttpResponseRedirect(reverse('view_test', args=(tid,)))
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -684,14 +649,14 @@ def promote_to_finding(request, fid):
     test = finding.test
     form_error = False
     jira_available = False
-    if hasattr(settings, 'ENABLE_JIRA'):
-         if settings.ENABLE_JIRA:
-             if JIRA_PKey.objects.filter(product=test.engagement.product) != 0:
-                jform = JIRAFindingForm(request.POST, prefix='jiraform',
-                                         enabled=JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues)
-                jira_available = True
+
+    if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(product=test.engagement.product) != 0:
+        jform = JIRAFindingForm(request.POST, prefix='jiraform',
+                                enabled=JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues)
+        jira_available = True
     else:
-         jform = None
+        jform = None
+        
     form = PromoteFindingForm(initial={'title': finding.title,
                                        'date': finding.date,
                                        'severity': finding.severity,
@@ -754,9 +719,9 @@ def promote_to_finding(request, fid):
 def templates(request):
     templates = Finding_Template.objects.all()
     templates = TemplateFindingFilter(request.GET, queryset=templates)
-    paged_templates = get_page_items(request, templates, 25)
+    paged_templates = get_page_items(request, templates.qs, 25)
     title_words = [word
-                   for finding in templates
+                   for finding in templates.qs
                    for word in finding.title.split() if len(word) > 2]
 
     title_words = sorted(set(title_words))

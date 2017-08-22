@@ -12,9 +12,9 @@ from pytz import timezone
 from dojo.filters import TestTypeFilter
 from dojo.forms import Test_TypeForm
 from dojo.models import Test_Type
-from dojo.utils import get_page_items, add_breadcrumb
+from dojo.utils import get_page_items, add_breadcrumb, get_system_setting
 
-localtz = timezone(settings.TIME_ZONE)
+localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -37,7 +37,7 @@ def test_type(request):
     name_words = [tt.name for tt in
                   initial_queryset]
     test_types = TestTypeFilter(request.GET, queryset=initial_queryset)
-    tts = get_page_items(request, test_types, 25)
+    tts = get_page_items(request, test_types.qs, 25)
     add_breadcrumb(title="Test Type List", top_level=True, request=request)
     return render(request, 'dojo/test_type.html', {
         'name': 'Test Type List',

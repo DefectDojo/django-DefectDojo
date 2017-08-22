@@ -1,7 +1,7 @@
 import logging
 import re
 
-import watson
+from watson import search as watson
 from django.conf import settings
 from django.shortcuts import render
 from pytz import timezone
@@ -9,9 +9,9 @@ from tagging.models import TaggedItem, Tag
 
 from dojo.forms import SimpleSearchForm
 from dojo.models import Finding, Product, Test, Endpoint, Engagement
-from dojo.utils import add_breadcrumb
+from dojo.utils import add_breadcrumb, get_system_setting
 
-localtz = timezone(settings.TIME_ZONE)
+localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -53,6 +53,7 @@ def simple_search(request):
             tag_list = re.findall(r"[\w']+", clean_query)
             tags = Tag.objects.filter(name__in=tag_list)
             if request.user.is_staff:
+                findings = watson.search(clean_query, models=(Finding,))
                 findings = watson.search(clean_query, models=(Finding,))
                 tests = watson.search(clean_query, models=(Test,))
                 products = watson.search(clean_query, models=(Product,))

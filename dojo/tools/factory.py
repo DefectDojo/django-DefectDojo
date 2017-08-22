@@ -1,5 +1,6 @@
 from dojo.tools.burp.parser import BurpXmlParser
 from dojo.tools.nessus.parser import NessusCSVParser, NessusXMLParser
+from dojo.tools.nmap.parser import NmapXMLParser
 from dojo.tools.nexpose.parser import NexposeFullXmlParser
 from dojo.tools.veracode.parser import VeracodeXMLParser
 from dojo.tools.zap.parser import ZapXmlParser
@@ -11,6 +12,7 @@ from dojo.tools.dependencycheck.parser import DependencyCheckParser
 from dojo.tools.retirejs.parser import RetireJsParser
 from dojo.tools.nsp.parser import NspParser
 from dojo.tools.generic.parser import GenericFindingUploadCsvParser
+from dojo.tools.qualys.parser import QualysParser
 
 
 __author__ = 'Jay Paz'
@@ -26,6 +28,8 @@ def import_parser_factory(file, test):
             parser = NessusCSVParser(file, test)
         elif filename.endswith("xml") or filename.endswith("nessus"):
             parser = NessusXMLParser(file, test)
+    elif scan_type == "Nmap Scan":
+        parser = NmapXMLParser(file, test)
     elif scan_type == "Nexpose Scan":
         parser = NexposeFullXmlParser(file, test)
     elif scan_type == "Veracode Scan":
@@ -48,6 +52,8 @@ def import_parser_factory(file, test):
         parser = NspParser(file, test)
     elif scan_type == 'Generic Findings Import':
         parser = GenericFindingUploadCsvParser(file, test)
+    elif scan_type == 'Qualys Scan':
+        parser = QualysParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 

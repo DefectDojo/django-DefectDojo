@@ -24,10 +24,10 @@ from dojo.forms import ProductForm, EngForm2, TestForm, \
     ScanSettingsForm, FindingForm, StubFindingForm, FindingTemplateForm, \
     ImportScanForm, SEVERITY_CHOICES
 from dojo.tools.factory import import_parser_factory
-
+from dojo.utils import get_system_setting
 from datetime import datetime
 
-localtz = timezone(settings.TIME_ZONE)
+localtz = timezone(get_system_setting('time_zone'))
 
 """
     Setup logging for the api

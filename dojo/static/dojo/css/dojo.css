@@ -642,6 +642,11 @@ td .fa-fw {
     background-color: transparent;
     border: 0px;
     padding: 0px;
+    white-space: pre-wrap;
+    white-space: -moz-pre-wrap;
+    white-space: -pre-wrap;
+    white-space: -o-pre-wrap;
+    word-wrap: break-word;
 }
 
 h4.finding-title {
@@ -1108,7 +1113,7 @@ hr.report-page-break:before {
 
 .editor {
     overflow: scroll;
-    max-height: 250px
+    min-height: 250px;
 }
 
 .in-use-widgets .report-filter-set .btn-sm {
