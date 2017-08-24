@@ -75,9 +75,11 @@ function get_postgres_db_details() {
             PGPASSWORD=$SQLPWD dropdb $DBNAME -h $SQLHOST -p $SQLPORT -U $SQLUSER
             PGPASSWORD=$SQLPWD createdb $DBNAME -h $SQLHOST -p $SQLPORT -U $SQLUSER
         else
-            echo "Error! Must supply an empty database to proceed."
-            echo
-            get_postgres_db_details
+            read -p "Try and install anyway? [Y/n] " INSTALL
+            if [[ $INSTALL =~ ^[nN]$ ]]; then
+              echo
+              get_postgres_db_details
+            fi
         fi
     else
         PGPASSWORD=$SQLPWD createdb $DBNAME -h $SQLHOST -p $SQLPORT -U $SQLUSER
