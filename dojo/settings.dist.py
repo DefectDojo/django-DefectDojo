@@ -193,6 +193,7 @@ INSTALLED_APPS = (
     'tagging',
     'custom_field',
     'imagekit',
+    'multiselectfield'
 )
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
