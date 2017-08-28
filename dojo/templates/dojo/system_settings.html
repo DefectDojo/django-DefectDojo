@@ -20,3 +20,22 @@
         </div>
     </form>
 {% endblock %}
+{% block postscript %}
+    <script>
+        function updatenotificationsgroup(group) {
+            if ($('#id_enable_' + group + "_notifications").is(':checked')) {
+                $("[id^='id_" + group + "']").closest('.form-group').show();
+            } else {
+                $("[id^='id_" + group + "']").closest('.form-group').hide();
+            }
+        }
+
+        $(function () {
+            $.each(['slack','hipchat','mail'], function (index, value) {
+                updatenotificationsgroup(value);
+                $('#id_enable_' + value + '_notifications').change(function() { updatenotificationsgroup(value)});
+            });
+        });
+
+    </script>
+{% endblock %}

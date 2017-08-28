@@ -33,7 +33,7 @@ from dojo.models import Product_Type, Finding, Notes, \
     FindingImageAccessToken, JIRA_Issue, JIRA_PKey, JIRA_Conf, Dojo_User, Cred_User, Cred_Mapping, Test
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, send_review_email, process_notifications, \
     add_comment, add_epic, add_issue, update_epic, update_issue, close_epic, jira_get_resolution_id, \
-    jira_change_resolution_id, get_jira_connection, get_system_setting
+    jira_change_resolution_id, get_jira_connection, get_system_setting, create_notification
 
 from dojo.tasks import add_issue_task, update_issue_task, add_comment_task
 
@@ -485,7 +485,12 @@ def request_finding_review(request, fid):
             finding.reviewers = users
             finding.save()
 
-            send_review_email(request, user, finding, users, new_note)
+            create_notification(event='review_requested',
+                               title='Finding review requested',
+                               description='User %s has requested that you please review the finding "%s" for accuracy:\n\n%s' \
+                                           % (user, finding.title, new_note),
+                               icon='check',
+                               url=request.build_absolute_uri(reverse("view_finding", args=(finding.id,))))
 
             messages.add_message(request,
                                  messages.SUCCESS,

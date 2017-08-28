@@ -30,6 +30,7 @@ from dojo.tool_config.urls import urlpatterns as tool_config_urls
 from dojo.tool_product.urls import urlpatterns as tool_product_urls
 from dojo.cred.urls import urlpatterns as cred_urls
 from dojo.system_settings.urls import urlpatterns as system_settings_urls
+from dojo.notifications.urls import urlpatterns as notifications_urls
 import sys
 
 admin.autodiscover()
@@ -73,6 +74,7 @@ ur += tool_config_urls
 ur += tool_product_urls
 ur += cred_urls
 ur += system_settings_urls
+ur += notifications_urls
 
 from tastypie_swagger.views import SwaggerView, ResourcesView, SchemaView
 
