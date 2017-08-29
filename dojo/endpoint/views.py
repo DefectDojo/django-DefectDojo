@@ -139,7 +139,7 @@ def view_endpoint(request, eid):
     closed_findings = Finding.objects.filter(endpoints__in=endpoints,
                                              mitigated__isnull=False).distinct()
     if all_findings:
-        start_date = datetime.combine(all_findings.last().date, datetime.min.time(tzinfo=timezone.get_current_timezone()))
+        start_date = datetime.combine(all_findings.last().date, datetime.min.time())
     else:
         start_date = timezone.datetime.today()
     end_date = timezone.datetime.today()

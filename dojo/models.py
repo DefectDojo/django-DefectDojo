@@ -672,9 +672,9 @@ class Finding(models.Model):
 
     def age(self):
         if self.mitigated:
-            days = (self.mitigated.date() - datetime.combine(self.date, datetime.min.time(tzinfo=timezone.get_current_timezone())).date()).days
+            days = (self.mitigated.date() - datetime.combine(self.date, datetime.min.time()).date()).days
         else:
-            days = (get_current_date() - datetime.combine(self.date, datetime.min.time(tzinfo=timezone.get_current_timezone())).date()).days
+            days = (get_current_date() - datetime.combine(self.date, datetime.min.time()).date()).days
 
         return days if days > 0 else 0
 
