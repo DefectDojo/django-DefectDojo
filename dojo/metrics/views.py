@@ -334,7 +334,7 @@ simple metrics for easy reporting
 
 @cache_page(60 * 5)  # cache for 5 minutes
 def simple_metrics(request):
-    now = timezone.today()
+    now = timezone.datetime.today()
 
     if request.method == 'POST':
         form = SimpleMetricsForm(request.POST)
@@ -417,7 +417,7 @@ def product_type_counts(request):
     all_current_in_pt = None
     top_ten = None
     pt = None
-    today = timezone.today()
+    today = timezone.datetime.today()
     first_of_month = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     mid_month = first_of_month.replace(day=15, hour=23, minute=59, second=59, microsecond=999999)
     end_of_month = mid_month.replace(day=monthrange(today.year, today.month)[1], hour=23, minute=59, second=59,
@@ -622,7 +622,7 @@ def view_engineer(request, eid):
             or request.user.username == 'root'
             or request.user.username == user.username):
         return HttpResponseRedirect(reverse('engineer_metrics'))
-    now = timezone.today()
+    now = timezone.datetime.today()
 
     findings = Finding.objects.filter(reporter=user, verified=True)
     closed_findings = Finding.objects.filter(mitigated_by=user)
@@ -929,7 +929,7 @@ For tracking issues reported by SEC researchers.
 
 @user_passes_test(lambda u: u.is_staff)
 def research_metrics(request):
-    now = timezone.today()
+    now = timezone.datetime.today()
     findings = Finding.objects.filter(
         test__test_type__name='Security Research')
     findings = findings.filter(date__year=now.year, date__month=now.month)

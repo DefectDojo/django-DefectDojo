@@ -255,9 +255,9 @@ def view_engagement(request, eid):
     try:
         start_date = Finding.objects.filter(test__engagement__product=eng.product).order_by('date')[:1][0].date
     except:
-        start_date = timezone.today()
+        start_date = timezone.datetime.today()
 
-    end_date = timezone.today()
+    end_date = timezone.datetime.today()
 
     risk_acceptances = Risk_Acceptance.objects.filter(engagement__in=Engagement.objects.filter(product=eng.product))
 
@@ -600,7 +600,7 @@ def upload_risk(request, eid):
             if form.cleaned_data['notes']:
                 notes = Notes(entry=form.cleaned_data['notes'],
                               author=request.user,
-                              date=timezone.today())
+                              date=timezone.datetime.today())
                 notes.save()
                 risk.notes.add(notes)
 

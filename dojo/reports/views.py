@@ -414,9 +414,9 @@ def product_endpoint_report(request, pid):
     try:
         start_date = Finding.objects.filter(endpoints__in=endpoints.qs).order_by('date')[:1][0].date
     except:
-        start_date = timezone.today()
+        start_date = timezone.datetime.today()
 
-    end_date = timezone.today()
+    end_date = timezone.datetime.today()
 
     risk_acceptances = Risk_Acceptance.objects.filter(engagement__test__finding__endpoints__in=endpoints.qs)
 
@@ -590,9 +590,9 @@ def generate_report(request, obj):
         if findings:
             start_date = datetime.combine(findings.qs.last().date, datetime.min.time(tzinfo=timezone.get_current_timezone()))
         else:
-            start_date = timezone.today()
+            start_date = timezone.datetime.today()
 
-        end_date = timezone.today()
+        end_date = timezone.datetime.today()
 
         r = relativedelta(end_date, start_date)
         months_between = (r.years * 12) + r.months

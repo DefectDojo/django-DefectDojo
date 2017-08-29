@@ -141,8 +141,8 @@ def view_endpoint(request, eid):
     if all_findings:
         start_date = datetime.combine(all_findings.last().date, datetime.min.time(tzinfo=timezone.get_current_timezone()))
     else:
-        start_date = timezone.today()
-    end_date = timezone.today()
+        start_date = timezone.datetime.today()
+    end_date = timezone.datetime.today()
 
     r = relativedelta(end_date, start_date)
     months_between = (r.years * 12) + r.months
