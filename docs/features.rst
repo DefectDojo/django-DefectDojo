@@ -484,6 +484,29 @@ These scans call also be kicked off on demand by selecting the Launch Scan Now o
 .. image:: /_static/scan_3.png
     :alt: Port Scan Form
 
+Notifications
+-------------
+
+.. image:: /_static/notifications_1.png
+    :alt: Notification settings
+
+DefectDojo can inform you of different events in a variety of ways. You can be notified about things like
+an upcoming engagement, when someone mentions you in a comment, a scheduled report has finished generating, and more.
+
+The following notification methods currently exist:
+- Email
+- Slack
+- HipChat
+- Alerts within DefectDojo
+
+You can set these notifications on a global scope (if you have administrator rights) or on a personal scope. For instance,
+an administrator might want notifications of all upcoming engagements sent to a certain Slack channel, whereas an individual user
+wants email notifications to be sent to the user's specified email address when a report has finished generating.
+
+In order to identify and notify you about things like upcoming engagements, DefectDojo runs scheduled tasks for this
+purpose. These tasks are scheduled and run using Celery beat, so this needs to run for those notifications to work. Instructions
+on how to run Celery beat are available in the `Reports`_ section.
+
 Reports
 -------
 
