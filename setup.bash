@@ -10,6 +10,19 @@ WHITE='\033[01;37m'
 BOLD='\033[1m'
 UNDERLINE='\033[4m'
 
+#Supported databases
+MYSQL=1
+POSTGRES=2
+
+function prompt_db_type() {
+    read -p "Select database type: 1.) MySQL or 2.) Postgres: " DBTYPE
+    if [ "$DBTYPE" == '1' ] || [ "$DBTYPE" == '2' ] ; then
+    	echo "Setting up database"
+    else
+	echo "Please enter 1 or 2"
+	prompt_db_type
+    fi
+}
 
 # Get MySQL details
 function get_db_details() {
@@ -44,7 +57,47 @@ function get_db_details() {
     fi
 }
 
+function get_postgres_db_details() {
+    read -p "Postgres host: " SQLHOST
+    read -p "Postgres port: " SQLPORT
+    read -p "Postgres user (should already exist): " SQLUSER
+    stty -echo
+    read -p "Password for user: " SQLPWD; echo
+    stty echo
+    read -p "Database name (should NOT exist): " DBNAME
+
+    if [ "$( PGPASSWORD=$SQLPWD psql -h $SQLHOST -p $SQLPORT -U $SQLUSER -tAc "SELECT 1 FROM pg_database WHERE datname='$DBNAME'" )" = '1' ]
+    then
+        echo "Database $DBNAME already exists!"
+        echo
+        read -p "Drop database $DBNAME? [Y/n] " DELETE
+        if [[ ! $DELETE =~ ^[nN]$ ]]; then
+            PGPASSWORD=$SQLPWD dropdb $DBNAME -h $SQLHOST -p $SQLPORT -U $SQLUSER
+            PGPASSWORD=$SQLPWD createdb $DBNAME -h $SQLHOST -p $SQLPORT -U $SQLUSER
+        else
+            read -p "Try and install anyway? [Y/n] " INSTALL
+            if [[ $INSTALL =~ ^[nN]$ ]]; then
+              echo
+              get_postgres_db_details
+            fi
+        fi
+    else
+        PGPASSWORD=$SQLPWD createdb $DBNAME -h $SQLHOST -p $SQLPORT -U $SQLUSER
+        if [ $? = 0 ]
+        then
+            echo "Created database $DBNAME."
+        else
+            echo "Error! Failed to create database $DBNAME. Check your credentials."
+            echo
+            get_postgres_db_details
+        fi
+    fi
+
+}
+
 echo "Welcome to DefectDojo! This is a quick script to get you up and running."
+echo
+prompt_db_type
 echo
 echo "NEED SUDO PRIVILEGES FOR NEXT STEPS!"
 echo
@@ -59,13 +112,36 @@ APT_GET_CMD=$(which apt-get)
 BREW_CMD=$(which brew)
 
 if [[ ! -z "$YUM_CMD" ]]; then
-    sudo curl -sL https://rpm.nodesource.com/setup | sudo bash -
-	sudo yum install gcc libmysqlclient-dev python-devel mysql-server mysql-devel MySQL-python python-setuptools python-pip nodejs wkhtmltopdf npm 
-	sudo yum groupinstall 'Development Tools'
+    curl -sL https://rpm.nodesource.com/setup | sudo bash -
+	sudo yum install gcc python-devel python-setuptools python-pip nodejs wkhtmltopdf npm
+
+        if [ "$DBTYPE" == $MYSQL ]; then
+           echo "Installing MySQL client"
+           sudo yum install libmysqlclient-dev mysql-server mysql-devel MySQL-python
+        elif [ "$DBTYPE" == $POSTGRES ]; then
+           echo "Installing Postgres client"
+           sudo yum install libpq-dev postgresql postgresql-contrib libmysqlclient-dev
+        fi
+        sudo yum groupinstall 'Development Tools'
 elif [[ ! -z "$APT_GET_CMD" ]]; then
-    sudo apt-get install libjpeg-dev gcc libssl-dev python-dev libmysqlclient-dev python-pip mysql-server nodejs-legacy wkhtmltopdf npm 
+     if [ "$DBTYPE" == $MYSQL ]; then
+        echo "Installing MySQL client"
+        sudo apt-get install libmysqlclient-dev mysql-server
+     elif [ "$DBTYPE" == $POSTGRES ]; then
+	echo "Installing Postgres client"
+        sudo apt-get install libpq-dev postgresql postgresql-contrib libmysqlclient-dev
+     fi
+
+     sudo apt-get install libjpeg-dev gcc libssl-dev python-dev python-pip nodejs-legacy wkhtmltopdf npm
 elif [[ ! -z "$BREW_CMD" ]]; then
-    brew install gcc openssl python mysql node npm Caskroom/cask/wkhtmltopdf
+    brew install gcc openssl python node npm Caskroom/cask/wkhtmltopdf
+    if [ "$DBTYPE" == $MYSQL ]; then
+        echo "Installing MySQL client"
+        brew install mysql
+    elif [ "$DBTYPE" == $POSTGRES ]; then
+        echo "Installing Postgres client"
+        brew install postgresql
+    fi
 else
 	echo "ERROR! OS not supported. Try the Vagrant option."
 	exit 1;
@@ -76,7 +152,12 @@ sudo npm install -g bower
 
 echo
 
-get_db_details
+if [ "$DBTYPE" == $MYSQL ]; then
+   echo "Installing MySQL client"
+   get_db_details
+elif [ "$DBTYPE" == $POSTGRES ]; then
+   get_postgres_db_details
+fi
 
 unset HISTFILE
 
@@ -111,6 +192,12 @@ else
   sed -i  "s#BOWERDIR#$PWD/components#g" dojo/settings.py
   sed -i  "s#DOJO_MEDIA_ROOT#$PWD/media/#g" dojo/settings.py
   sed -i  "s#DOJO_STATIC_ROOT#$PWD/static/#g" dojo/settings.py
+
+  if [ "$DBTYPE" == '1' ]; then
+    sed -i  "s/BACKENDDB/django.db.backends.mysql/g" dojo/settings.py
+  elif [ "$DBTYPE" == '2' ]; then
+    sed -i  "s/BACKENDDB/django.db.backends.postgresql_psycopg2/g" dojo/settings.py
+  fi
 fi
 
 # Detect Python version
@@ -138,19 +225,19 @@ if python -c 'import sys; print sys.real_prefix' 2>/dev/null; then
     python manage.py installwatson
     python manage.py buildwatson
 else
-    sudo pip install .
-    sudo python manage.py makemigrations dojo
-    sudo python manage.py makemigrations
-    sudo python manage.py migrate
+    pip install .
+    python manage.py makemigrations dojo
+    python manage.py makemigrations
+    python manage.py migrate
     echo -e "${GREEN}${BOLD}Create Dojo superuser:"
     tput sgr0
-    sudo python manage.py createsuperuser
-    sudo python manage.py loaddata product_type
-    sudo python manage.py loaddata test_type
-    sudo python manage.py loaddata development_environment
-    sudo python manage.py loaddata system_settings
-    sudo python manage.py installwatson
-    sudo python manage.py buildwatson
+    python manage.py createsuperuser
+    python manage.py loaddata product_type
+    python manage.py loaddata test_type
+    python manage.py loaddata development_environment
+    python manage.py loaddata system_settings
+    python manage.py installwatson
+    python manage.py buildwatson
 fi
 
 if [[ "$USER" == "root" ]]; then
@@ -163,7 +250,7 @@ fi
 if python -c 'import sys; print sys.real_prefix' 2>/dev/null; then
     python manage.py collectstatic --noinput
 else
-    sudo python manage.py collectstatic --noinput
+     python manage.py collectstatic --noinput
 fi
 
 
