@@ -1098,7 +1098,6 @@ class Alerts(models.Model):
     icon = models.CharField(max_length=25, default='icon-user-check')
     user_id = models.ForeignKey(User, null=True, editable=False)
     created = models.DateTimeField(null=False, editable=False, default=now)
-    display_date = models.DateTimeField(null=False, default=now)
 
     class Meta:
         ordering = ['-created']
