@@ -148,7 +148,7 @@ def view_product(request, pid):
                                              out_of_scope=False,
                                              mitigated__isnull=False)
 
-    start_date = datetime.combine(start_date, datetime.min.time())
+    start_date = timezone.make_aware(datetime.combine(start_date, datetime.min.time()))
 
     r = relativedelta(end_date, start_date)
     weeks_between = int(ceil((((r.years * 12) + r.months) * 4.33) + (r.days / 7)))
