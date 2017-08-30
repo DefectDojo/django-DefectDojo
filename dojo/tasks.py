@@ -221,3 +221,18 @@ def async_dedupe(new_finding, *args, **kwargs):
             find.duplicate = True
             super(Finding, find).save(*args, **kwargs)
 
+@app.task(name='async_false_history')
+def async_false_history(new_finding, *args, **kwargs):
+    logger.info("running false_history")
+    eng_findings_cwe = Finding.objects.filter(test__engagement__product=new_finding.test.engagement.product,
+                                              cwe=new_finding.cwe, test__test_type=new_finding.test.test_type,
+                                              false_p=True).exclude(
+                                              id=new_finding.id).exclude(cwe=None).exclude(endpoints=None)
+    eng_findings_title = Finding.objects.filter(test__engagement__product=new_finding.test.engagement.product,
+                                                title=new_finding.title, test__test_type=new_finding.test.test_type,
+                                                false_p=True).exclude(id=new_finding.id).exclude(endpoints=None)
+    total_findings = eng_findings_cwe | eng_findings_title
+    if total_findings.count() > 0:
+            new_finding.false_p = True
+            super(Finding, new_finding).save(*args, **kwargs)
+

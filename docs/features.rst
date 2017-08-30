@@ -635,3 +635,8 @@ ENABLE_DEDUPLICATION = True
 
 When deduplication is enabled, Dojo will compare CWE, title, and endpoint details for all findings in a given product.
 If an issue is added with either the CWE or title being the same while the endpoint is also the same, Dojo marks the old issue as a duplicate.
+
+False Positive Removal
+-------
+
+DefectDojo allows users to tune out false positives by enabling False Positive History. This will track what engineers have labeled as false positive for a specific product and for a specific scanner. While enabled, when a tool reports the same issue that has been flagged as a false positive previously, it will automatically mark the finding as a false positive, helping to tune overly verbose security tools.

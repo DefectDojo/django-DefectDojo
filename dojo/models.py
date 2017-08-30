@@ -34,6 +34,7 @@ class System_Settings(models.Model):
                                                     blank=False, 
                                                     help_text='With this setting turned on, Dojo will display S0, S1, S2, etc ' \
                                                     'in most places, whereas if turned off Critical, High, Medium, etc will be displayed.')
+    false_positive_history = models.BooleanField(default=False)
     url_prefix = models.CharField(max_length=300, default='', blank=True)
     team_name = models.CharField(max_length=100, default='', blank=True)
     time_zone = models.CharField(max_length=50,
@@ -706,6 +707,9 @@ class Finding(models.Model):
         if system_settings.enable_deduplication :
                 from dojo.tasks import async_dedupe
                 async_dedupe.delay(self, *args, **kwargs)
+        if system_settings.false_positive_history:
+            from dojo.tasks import async_false_history
+            async_false_history.delay(self, *args, **kwargs)
 
     def clean(self):
         no_check = ["test", "reporter"]
