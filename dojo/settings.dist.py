@@ -1,5 +1,6 @@
 # Django settings for dojo project.
 import os
+from datetime import timedelta
 
 DEBUG = True
 LOGIN_REDIRECT_URL = '/'
@@ -192,6 +193,7 @@ INSTALLED_APPS = (
     'tagging',
     'custom_field',
     'imagekit',
+    'multiselectfield'
 )
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -216,6 +218,16 @@ CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_RESULT_EXPIRES = 86400
 CELERYBEAT_SCHEDULE_FILENAME = DOJO_ROOT + '/dojo.celery.beat.db'
 CELERY_ACCEPT_CONTENT = ['pickle', 'json', 'msgpack', 'yaml']
+
+# Celery beat scheduled tasks
+CELERYBEAT_SCHEDULE = {
+    'add-alerts': {
+        'task':'dojo.tasks.add_alerts',
+        'schedule': timedelta(hours=1),
+        'args': [timedelta(hours=1)]
+    },
+}
+
 
 # wkhtmltopdf settings
 WKHTMLTOPDF_PATH = '/usr/local/bin/wkhtmltopdf'

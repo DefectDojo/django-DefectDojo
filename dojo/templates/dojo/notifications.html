@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load static from staticfiles %}
+{% load event_tags %}
+{% block add_css %}
+    <link rel="stylesheet" href="{% static "chosen-bootstrap/chosen.bootstrap.min.css" %}">
+{% endblock %}
+
+{% block content %}
+    <h3> {% if scope == 'global' %}Global{% else %}Personal{% endif %} Notification Settings </h3>
+    <form class="form-inline col-sm-10" method="post" id="notform">{% csrf_token %}
+        <div class="container" style="width:50%">
+            {% if request.user.is_superuser %}
+               <div class="col-sm-5">
+                   <label for="notification-scope">Scope <span class="fa fa-question-circle has-popover" data-trigger="hover" data-content="Destinations for global notifications are configured in System Settings. Destinations for personal notifications are taken from your personal contact details (personal Slack notifications will be sent to you as a direct message)."/></label>
+                    <select data-placeholder="Scope" id="notification-scope" class="chosen-select form-control"/>
+                        <option value="global">Global</option>
+                         <option value="personal">Personal</option>
+                     </select>
+                </div>
+                <p>&nbsp;</p>
+                <p>&nbsp;</p>
+                <p>&nbsp;</p>
+            {% endif %}
+             <table class="table table-hover col-sm-5">
+                <thead>
+                    <tr>
+                        <th>Event</th><th>Slack</th><th>HipChat</th><th>Mail</th><th>Alert</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for field in form.visible_fields %}
+                    {% if field.auto_id %}
+                        <tr>
+                            <td>{{ field.label }}{% if field.field.required%}<sup>*</sup>{% endif %}
+                            </td>
+                    {% endif %}
+                    {% for pk,c in field.field.widget.choices %}
+                        <td class="{{ classes.value }} {% if field|is_multiple_checkbox %}multiple-checkbox{% endif %}">
+                            <input type="checkbox" name="{{ field.name }}" {% if c in field.value %}checked{% endif %} value="{{ c }}"/>
+                        </td>
+                    {% endfor %}
+                    </tr>
+                    {% for error in field.errors %}
+                        <span class="help-block {{ form.error_css_class }}">{{ error }}</span>
+                    {% endfor %}
+                {% endfor %}
+            </table>
+            <div class="col-sm-offset-10">
+                <input class="btn btn-primary" type="submit" name="edit_notifications" value="Submit"/>
+            </div>
+            </div>
+    </form>
+{% endblock %}
+{% block postscript %}
+    <script type="application/javascript" src="{% static "chosen/chosen.jquery.min.js" %}"></script>
+    <script>
+        $(function () {
+            $(".chosen-select").chosen({disable_search_threshold: 10});
+            $('#notification-scope').val('{{ scope }}');
+            $('.chosen-select').trigger('chosen:updated');
+            $('#notification-scope').change(function() { window.location = '/notifications/' + $(this).val(); });
+        });
+    </script>
+{% endblock %}

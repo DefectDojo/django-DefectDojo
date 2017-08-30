@@ -40,7 +40,9 @@ setup(
         'jira',
         'pycrypto',
         'lxml',
-        'psycopg2'],
+        'psycopg2',
+        'django-multiselectfield'],
+
     dependency_links=[
         "https://github.com/grendel513/python-pdfkit/tarball/master#egg=pdfkit-0.5.0",
     ],

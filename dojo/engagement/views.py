@@ -24,12 +24,11 @@ from dojo.forms import CheckForm, \
 from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Type, Notes, \
     Risk_Acceptance, Development_Environment, BurpRawRequestResponse, Endpoint, \
-    JIRA_PKey, JIRA_Conf, JIRA_Issue, Cred_User, Cred_Mapping, Dojo_User
+    JIRA_PKey, JIRA_Conf, JIRA_Issue, Cred_User, Cred_Mapping, Notifications, Dojo_User
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
-    FileIterWrapper, get_cal_event, message, get_system_setting
+    FileIterWrapper, get_cal_event, message, get_system_setting, create_notification
 from dojo.tasks import update_epic_task, add_epic_task, close_epic_task
-
 localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
@@ -348,6 +347,9 @@ def add_tests(request, eid):
                                  messages.SUCCESS,
                                  'Test added successfully.',
                                  extra_tags='alert-success')
+
+            create_notification(event='test_added', title='Test added', test=new_test, engagement=eng, url=request.build_absolute_uri(reverse('view_engagement', args=(eng.id,))))
+
             if '_Add Another Test' in request.POST:
                 return HttpResponseRedirect(reverse('add_tests', args=(eng.id,)))
             elif '_Add Findings' in request.POST:
@@ -474,6 +476,9 @@ def import_scan_results(request, eid):
                                      scan_type + ' processed, a total of ' + message(finding_count, 'finding',
                                                                                      'processed'),
                                      extra_tags='alert-success')
+
+                create_notification(event='results_added', title='Results added', finding_count=finding_count, test=t, engagement=engagement, url=request.build_absolute_uri(reverse('view_test', args=(t.id,))))
+
                 return HttpResponseRedirect(reverse('view_test', args=(t.id,)))
             except SyntaxError:
                 messages.add_message(request,
