@@ -484,6 +484,29 @@ These scans call also be kicked off on demand by selecting the Launch Scan Now o
 .. image:: /_static/scan_3.png
     :alt: Port Scan Form
 
+Notifications
+-------------
+
+.. image:: /_static/notifications_1.png
+    :alt: Notification settings
+
+DefectDojo can inform you of different events in a variety of ways. You can be notified about things like
+an upcoming engagement, when someone mentions you in a comment, a scheduled report has finished generating, and more.
+
+The following notification methods currently exist:
+- Email
+- Slack
+- HipChat
+- Alerts within DefectDojo
+
+You can set these notifications on a global scope (if you have administrator rights) or on a personal scope. For instance,
+an administrator might want notifications of all upcoming engagements sent to a certain Slack channel, whereas an individual user
+wants email notifications to be sent to the user's specified email address when a report has finished generating.
+
+In order to identify and notify you about things like upcoming engagements, DefectDojo runs scheduled tasks for this
+purpose. These tasks are scheduled and run using Celery beat, so this needs to run for those notifications to work. Instructions
+on how to run Celery beat are available in the `Reports`_ section.
+
 Reports
 -------
 
@@ -502,9 +525,8 @@ follow the directions for your specific OS in the `wkhtmltopdf documentation`_.
 Some operating systems are capable of installing `wkhtmltopdf` from their package managers:
 
 .. Note::
-    Report email notifications are commented out by default.  In order to enable them please uncomment the
-    `email_requester(report, uri, error=None)` function and its references in the `tasks.py` file in the main `dojo`
-    directory.
+    To get report email notifications, make sure you have a working email configuration in the system settings,
+    and enable notifications for generated reports in the notification settings.
 
 Mac: ::
 
@@ -545,7 +567,8 @@ DefectDojo and can be set up by following the `Celery documentation`_.  A sample
 
 .. _can be found at: https://github.com/celery/celery/blob/3.1/extra/supervisord/celeryd.conf
 
-Celery beat should also be running, this will allow for celery to clean up after itself and keep your task database from
+Celery beat should also be running, this will enable defectDojo to perform periodic checks of things like upcoming and stale engagements
+as well as allowing for celery to clean up after itself and keep your task database from
 getting too large.  In development you can run the process like: ::
 
     celery beat -A dojo -l info

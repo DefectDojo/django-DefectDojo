@@ -2,7 +2,7 @@ from django import template
 from django.utils.safestring import mark_safe as safe
 from django.utils.html import escape
 
-from dojo.models import Product_Type
+from dojo.models import Product_Type, Alerts
 from dojo.utils import get_alerts
 
 register = template.Library()
@@ -16,8 +16,8 @@ def alert_nav_items(user):
 
 @register.simple_tag(takes_context=True)
 def alert_count(context):
-    count = len(get_alerts(context['request'].user))
-    return count if count > 0 else ''
+    count = Alerts.objects.filter(user_id=context['request'].user).count()
+    return count if count > 0 else 0
 
 
 @register.simple_tag(takes_context=True)

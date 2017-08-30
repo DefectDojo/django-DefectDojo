@@ -16,10 +16,14 @@ from django.core.urlresolvers import get_resolver, reverse
 from django.contrib import messages
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
 from django.template.defaultfilters import pluralize
+from django.template.loader import render_to_string
 from pytz import timezone
 from jira import JIRA
 from jira.exceptions import JIRAError
-from dojo.models import Finding, Scan, Test, Engagement, Stub_Finding, Finding_Template, Report, Product, JIRA_PKey, JIRA_Issue, Dojo_User, User, Notes, FindingImage, Alerts, System_Settings
+from dojo.models import Finding, Scan, Test, Engagement, Stub_Finding, Finding_Template, \
+                        Report, Product, JIRA_PKey, JIRA_Issue, Dojo_User, User, Notes, \
+                        FindingImage, Alerts, System_Settings, Notifications
+from django_slack import slack_message
 
 try:
     localtz = timezone(System_Settings.objects.get().time_zone)
@@ -658,9 +662,10 @@ def get_alerts(user):
                        ' icon-user-check',
                        reverse('view_finding', args=(fur.id,))])
 
-    # Alerts itmes in the last 7 days, ToDo add admin vs user view
     # reports requested in the last 7 days
     total_alerts = Alerts.objects.filter(created__range=[start, now]).order_by('-display_date')
+    if not user.is_superuser:
+        total_alerts = total_alerts.filter(user_id=user)
     for alert_item in total_alerts:
         alerts.append([alert_item.description,
                        humanize.naturaltime(localtz.normalize(now) - localtz.normalize(alert_item.display_date)),
@@ -826,13 +831,14 @@ def jira_change_resolution_id(jira, issue, id):
 
 # Logs the error to the alerts table, which appears in the notification toolbar
 def log_jira_alert(error, finding):
-    alerts = Alerts(description="Jira update issue: Finding: " + str(finding.id) + ", " + error, url=reverse('view_finding', args=(finding.id,)), icon="bullseye", display_date=localtz.localize(datetime.today()), source="Jira")
-    alerts.save()
+    create_notification(event='jira_update', title='Jira update issue', description='Finding: ' + str(finding.id) + ', ' + error,
+                       icon='bullseye', source='Jira')
 
 # Displays an alert for Jira notifications
 def log_jira_message(text, finding):
-    alerts = Alerts(description=text + " Finding: " + str(finding.id), url=reverse('view_finding', args=(finding.id,)), icon="bullseye", display_date=localtz.localize(datetime.today()), source="Jira")
-    alerts.save()
+    create_notification(event='jira_update', title='Jira update message', description=text + " Finding: " + str(finding.id),
+                       url=reverse('view_finding', args=(finding.id,)),
+                       icon='bullseye', source='Jira')
 
 # Adds labels to a Jira issue
 def add_labels(find, issue):
@@ -1036,18 +1042,15 @@ def process_notifications(request, note, parent_url, parent_title):
     users_to_notify=[User.objects.filter(username=username).get()
                    for username in usernames_to_check if User.objects.filter(is_active=True, username=username).exists()] #is_staff also?
     user_posting=request.user
-    send_atmention_email(user_posting, users_to_notify, parent_url, parent_title, note)
-    for u in users_to_notify:
-        if u.email:
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 'Notification sent to {0} - {1}'.format(u.username,u.email),
-                                 extra_tags='alert-success')
-        else:
-            messages.add_message(request,
-                             messages.ERROR,
-                             'No email listed for {0}'.format(u.username),
-                             extra_tags='alert-danger')
+
+    create_notification(event='user_mentioned',
+                        section=parent_title,
+                        note=note,
+                        user=request.user,
+                        title='%s mentioned you in a note' % request.user,
+                        url=parent_url,
+                        icon='commenting',
+                        recipients=users_to_notify)
 
 def send_atmention_email(user, users, parent_url, parent_title, new_note):
     recipients=[u.email for u in users]
@@ -1141,3 +1144,113 @@ def get_system_setting(setting):
         system_settings = System_Settings()
 
     return getattr(system_settings, setting, None)
+
+
+def create_notification(event=None, **kwargs):
+    def create_notification_message(event, notification_type):
+        template = 'notifications/%s.tpl' % event.replace('/', '')
+        kwargs.update({'type':notification_type})
+
+        try:
+            notification = render_to_string(template, kwargs)
+        except:
+            notification = render_to_string('notifications/other.tpl', kwargs)
+
+        return notification
+
+    def send_slack_notification(channel):
+        try:
+            res = requests.request(method='POST', url='https://slack.com/api/chat.postMessage',
+                             data={'token':get_system_setting('slack_token'),
+                                   'channel':channel,
+                                   'username':get_system_setting('slack_username'),
+                                   'text':create_notification_message(event, 'slack')})
+        except Exception as e:
+            log_alert(e)
+            pass
+
+    def send_hipchat_notification(channel):
+        try:
+            # We use same template for HipChat as for slack
+            res = requests.request(method='POST',
+                            url='https://%s/v2/room/%s/notification?auth_token=%s' % (get_system_setting('hipchat_site'), channel, get_system_setting('hipchat_token')),
+                            data={'message':create_notification_message(event, 'slack'),
+                                  'message_format':'text'})
+            print res
+        except Exception as e:
+            log_alert(e)
+            pass
+
+    def send_mail_notification(address):
+        subject = '%s notification' % get_system_setting('team_name')
+        if 'title' in kwargs:
+            subject += ': %s' % kwargs['title']
+        try:
+            send_mail(subject,
+                    create_notification_message(event, 'mail'),
+                    get_system_setting('mail_notifications_from'),
+                    [address],
+                    fail_silently=False)
+        except Exception as e:
+            log_alert(e)
+            pass
+
+    def send_alert_notification(user=None):
+        icon = kwargs.get('icon', 'info-circle')
+        alert = Alerts(user_id=user, 
+                       title=kwargs.get('title'),
+                       description=create_notification_message(event, 'alert'),
+                       url=kwargs.get('url', reverse('alerts')),
+                       icon=icon, 
+                       source=Notifications._meta.get_field(event).verbose_name.title())
+        alert.save()
+
+
+    def log_alert(e):
+        alert = Alerts(user_id=Dojo_User.objects.get(is_superuser=True), title='Notification issue', description="%s" % e, icon="exclamation-triangle", source="Notifications")
+        alert.save()
+
+    # Global notifications
+    try:
+        notifications = Notifications.objects.get(user=None)
+    except Exception as e:
+        notifications = Notifications()
+
+    slack_enabled = get_system_setting('enable_slack_notifications')
+    hipchat_enabled = get_system_setting('enable_hipchat_notifications')
+    mail_enabled = get_system_setting('enable_mail_notifications')
+
+    if slack_enabled and 'slack' in getattr(notifications, event):
+        send_slack_notification(get_system_setting('slack_channel'))
+
+    if hipchat_enabled and 'hipchat' in getattr(notifications, event):
+        send_hipchat_notification(get_system_setting('hipchat_channel'))
+
+    if mail_enabled and 'mail' in getattr(notifications, event):
+        send_slack_notification(get_system_setting('mail_notifications_from'))
+
+    if 'alert' in getattr(notifications, event, None):
+        send_alert_notification()
+
+    # Personal notifications
+    if 'recipients' in kwargs:
+        users = User.objects.filter(username__in=kwargs['recipients'])
+    else:
+        users = User.objects.filter(is_superuser=True)
+    for user in users:
+        try:
+            notifications = Notifications.objects.get(user=user)
+        except Exception as e:
+            notifications = Notifications()
+
+        if slack_enabled and 'slack' in getattr(notifications, event) and user.usercontactinfo.slack_username is not None:
+            send_slack_notification('@%s' % user.usercontactinfo.slack_username)
+
+        # HipChat doesn't seem to offer direct message functionality, so no HipChat PM functionality here...
+
+        if mail_enabled and 'mail' in getattr(notifications, event):
+            send_mail_notification(user.email)
+                
+        if 'alert' in getattr(notifications, event):
+            send_alert_notification(user)
+                

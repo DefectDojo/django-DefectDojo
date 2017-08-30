@@ -25,8 +25,7 @@ from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
 from dojo.reports.widgets import CoverPage, PageBreak, TableOfContents, WYSIWYGContent, FindingList, EndpointList, \
     CustomReportJsonForm, ReportOptions, report_widget_factory
 from dojo.tasks import async_pdf_report, async_custom_pdf_report
-from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_system_setting
-from dojo.utils import get_period_counts_legacy
+from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_system_setting, get_period_counts_legacy
 
 localtz = timezone(get_system_setting('time_zone'))
 
@@ -116,7 +115,7 @@ def custom_report(request):
                                           finding_notes=finding_notes,
                                           finding_images=finding_images)
             messages.add_message(request, messages.SUCCESS,
-                                 'Your report is building, you will receive an email when it is ready.',
+                                 'Your report is building.',
                                  extra_tags='alert-success')
 
             return HttpResponseRedirect(reverse('reports'))
@@ -322,7 +321,7 @@ def regen_report(request, rid):
                                       user=request.user,
                                       uri=request.build_absolute_uri(report.get_url()))
         messages.add_message(request, messages.SUCCESS,
-                             'Your report is building, you will receive an email when it is ready.',
+                             'Your report is building.',
                              extra_tags='alert-success')
 
         return HttpResponseRedirect(reverse('reports'))
@@ -512,7 +511,7 @@ def product_endpoint_report(request, pid):
                                             'user_id': request.user.id},
                                    uri=request.build_absolute_uri(report.get_url()))
             messages.add_message(request, messages.SUCCESS,
-                                 'Your report is building, you will receive an email when it is ready.',
+                                 'Your report is building.',
                                  extra_tags='alert-success')
             return HttpResponseRedirect(reverse('reports'))
         else:
@@ -816,7 +815,7 @@ def generate_report(request, obj):
                                    context=context,
                                    uri=request.build_absolute_uri(report.get_url()))
             messages.add_message(request, messages.SUCCESS,
-                                 'Your report is building, you will receive an email when it is ready.',
+                                 'Your report is building.',
                                  extra_tags='alert-success')
 
             return HttpResponseRedirect(reverse('reports'))

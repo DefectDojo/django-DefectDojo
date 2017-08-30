@@ -19,6 +19,7 @@ from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToCover
 from pytz import timezone, all_timezones
 from tagging.registry import register as tag_register
+from multiselectfield import MultiSelectField
 
 class System_Settings(models.Model):
     enable_deduplication = models.BooleanField(default=False, 
@@ -30,6 +31,17 @@ class System_Settings(models.Model):
                                                   'less recent finding as a duplicate. When deduplication is enabled, a list of ' \
                                                   'deduplicated findings is added to the engagement view.')
     enable_jira = models.BooleanField(default=False, verbose_name='Enable JIRA integration', blank=False)
+    enable_slack_notifications = models.BooleanField(default=False, verbose_name='Enable Slack notifications', blank=False)
+    slack_channel = models.CharField(max_length=100, default='', blank=True)
+    slack_token = models.CharField(max_length=100, default='', blank=True, help_text='Token required for interacting with Slack. Get one at https://api.slack.com/tokens')
+    slack_username = models.CharField(max_length=100, default='', blank=True)
+    enable_hipchat_notifications = models.BooleanField(default=False, verbose_name='Enable HipChat notifications', blank=False)
+    hipchat_site = models.CharField(max_length=100, default='', blank=True, help_text='The full fqdn of your hipchat site, e.g. "yoursite.hipchat.com"')
+    hipchat_channel = models.CharField(max_length=100, default='', blank=True)
+    hipchat_token = models.CharField(max_length=100, default='', blank=True, help_text='Token required for interacting with HipChat. Get one at https://patriktest.hipchat.com/addons/')
+    enable_mail_notifications = models.BooleanField(default=False, blank=False)
+    mail_notifications_from = models.CharField(max_length=200, default='from@example.com', blank=True)
+    mail_notifications_to = models.CharField(max_length=200, default='', blank=True)
     s_finding_severity_naming = models.BooleanField(default=False, 
                                                     blank=False, 
                                                     help_text='With this setting turned on, Dojo will display S0, S1, S2, etc ' \
@@ -86,6 +98,8 @@ class UserContactInfo(models.Model):
                                              "Up to 15 digits allowed.")
     twitter_username = models.CharField(blank=True, null=True, max_length=150)
     github_username = models.CharField(blank=True, null=True, max_length=150)
+    slack_username = models.CharField(blank=True, null=True, max_length=150)
+    hipchat_username = models.CharField(blank=True, null=True, max_length=150)
 
 
 class Contact(models.Model):
@@ -1023,6 +1037,18 @@ class JIRA_PKey(models.Model):
     enable_engagement_epic_mapping = models.BooleanField(default=False, blank=True)
     push_notes = models.BooleanField(default=False, blank=True)
 
+NOTIFICATION_CHOICES=(("slack","slack"),("hipchat","hipchat"),("mail","mail"),("alert","alert"))
+class Notifications(models.Model):
+    engagement_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    test_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    results_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    report_created = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    jira_update = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    upcoming_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    user_mentioned = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    other = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    user = models.ForeignKey(User, default=None, null=True, editable=False)
+
 class Tool_Type(models.Model):
     name = models.CharField(max_length=200)
     description = models.CharField(max_length=2000, null=True)
@@ -1075,18 +1101,17 @@ class Tool_Product_History(models.Model):
     configuration_details = models.CharField(max_length=2000, null=True, blank=True)
 
 class Alerts(models.Model):
+    title = models.CharField(max_length=100, default='', null=False)
     description = models.CharField(max_length=2000, null=True)
     url =  models.URLField(max_length=2000, null=True)
-    source = models.CharField(max_length=15,
-                            choices=(
-                                ('Jira', 'Jira'),
-                                ('AsyncImport', 'Async Import'),
-                                ('Generic', 'Generic')),
-                            default='Generic')
+    source = models.CharField(max_length=100, default='Generic')
     icon = models.CharField(max_length=25, default='icon-user-check')
     user_id = models.ForeignKey(User, null=True, editable=False)
     created = models.DateTimeField(null=False, editable=False, default=now)
     display_date = models.DateTimeField(null=False, default=now)
+
+    class Meta:
+        ordering = ['-created']
 
 class Cred_User(models.Model):
     name = models.CharField(max_length=200, null=False)
