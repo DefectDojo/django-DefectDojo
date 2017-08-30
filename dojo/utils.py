@@ -74,7 +74,7 @@ def count_findings(findings):
 def findings_this_period(findings, period_type, stuff, o_stuff, a_stuff):
     # periodType: 0 - weeks
     # 1 - months
-    now = timezone.datetime.today()
+    now = timezone.now()
     for i in range(6):
         counts = []
         # Weeks start on Monday
