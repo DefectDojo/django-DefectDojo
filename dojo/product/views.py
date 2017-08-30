@@ -104,9 +104,9 @@ def view_product(request, pid):
     try:
         start_date = Finding.objects.filter(test__engagement__product=prod).order_by('date')[:1][0].date
     except:
-        start_date = timezone.datetime.today()
+        start_date = timezone.now()
 
-    end_date = timezone.datetime.today()
+    end_date = timezone.now()
 
     tests = Test.objects.filter(engagement__product=prod)
 
