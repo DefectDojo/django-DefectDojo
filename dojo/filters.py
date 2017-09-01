@@ -602,7 +602,6 @@ class TemplateFindingFilter(DojoFilter):
                                                           (u'S3', u'S3'),
                                                           (u'S4', u'S4'))
 
-
 class FindingStatusFilter(ChoiceFilter):
     def any(self, qs, name):
         return qs.filter(verified=True,
