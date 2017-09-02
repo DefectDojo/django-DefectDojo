@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name='DefectDojo',
-    version='1.0.5',
+    version='1.2.0',
     author='Greg Anderson',
     description="Tool for managing vulnerability engagements",
     install_requires=[
@@ -39,7 +39,11 @@ setup(
         'django-imagekit',
         'jira',
         'pycrypto',
-        'lxml'],
+        'lxml',
+        'psycopg2',
+        'django-multiselectfield',
+	'django-slack'],
+
     dependency_links=[
         "https://github.com/grendel513/python-pdfkit/tarball/master#egg=pdfkit-0.5.0",
     ],

@@ -7,6 +7,7 @@ directory named `defect-dojo` you can complete the following steps to upgrade to
     cd defect-dojo
     git checkout master
     git pull
+    pip install .
     ./manage.py makemigrations dojo
     ./manage.py makemigrations
     ./manage.py migrate
