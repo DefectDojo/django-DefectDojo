@@ -42,7 +42,8 @@ def report_url_resolver(request):
     try:
         url_resolver = request.META['HTTP_X_FORWARDED_PROTO'] + "://" +  request.META['HTTP_X_FORWARDED_FOR']
     except:
-        url_resolver = request.scheme + "://" + request.META['HTTP_HOST']
+        hostname = request.META['HTTP_HOST']
+        url_resolver = request.scheme + "://" + hostname[:hostname.find(":")]
 
     return url_resolver
 
