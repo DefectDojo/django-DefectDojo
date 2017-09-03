@@ -43,8 +43,11 @@ def report_url_resolver(request):
         url_resolver = request.META['HTTP_X_FORWARDED_PROTO'] + "://" +  request.META['HTTP_X_FORWARDED_FOR']
     except:
         hostname = request.META['HTTP_HOST']
-        url_resolver = request.scheme + "://" + hostname[:hostname.find(":")]
-
+        port_index = hostname.find(":")
+        if port_index != -1:
+            url_resolver = request.scheme + "://" + hostname[:port_index]
+        else:
+            url_resolver = request.scheme + "://" + hostname
     return url_resolver
 
 
