@@ -25,7 +25,7 @@ This guide will walk you through how to setup DefectDojo for running in producti
 
   mysql> quit
 
-*Install, Setup, and Activate Virtualenv*
+**Install, Setup, and Activate Virtualenv**
 
 .. code-block:: console
 
@@ -57,13 +57,71 @@ from inside the django-DefectDojo/ directory execute:
 
   ./reports.sh
 
-**Disable Debugging**
+**Configure Defect Dojo for Production**
 
 Using the text-editor of your choice, change ``DEBUG`` in django-DefectDojo/dojo/settings.py to:
 
 .. code-block:: console
 
   `DEBUG = False` 
+
+Modify `ALLOWED_HOSTS` with valid hostnames for the site:
+
+.. code-block:: console
+
+  `ALLOWED_HOSTS = ['localhost','127.0.0.1']`
+
+Modify the path to `wkhtmltopdf` if you ran the reports.bash script:
+
+.. code-block:: console
+
+  `WKHTMLTOPDF_PATH = '/usr/bin/wkhtmltopdf'`
+
+**Configure Nginx**
+
+Everyone feels a little differently about nginx settings, so here are the barebones to add your to your nginx configuration to proxy uwsgi. Make sure to modify the filesystem paths if needed.
+
+.. code-block:: json
+
+  upstream django {
+    server 127.0.0.1:8001; 
+  }
+
+  server {
+    listen 80;
+    location /static/ {
+        alias   /data/prod_dojo/django-DefectDojo/static/;
+    }
+
+    location /media/ {
+        alias   /data/prod_dojo/django-DefectDojo/media/;
+    }
+
+    location / {
+        uwsgi_pass django;
+        include     /data/prod_dojo/django-DefectDojo/wsgi_params;
+    }
+  }
+
+You can add this configuration to Nginx in a variety of ways, but assuming you aren't hosting any other sites, the following steps should work:
+
+Save the configuration above to `/etc/nginx/conf.d/dojo.conf`:
+
+.. code-block:: console
+
+  sudo vim /etc/nginx/conf.d/dojo.conf
+
+Disable the default site:
+
+.. code-block:: console
+
+  sudo rm /etc/nginx/sites-enabled/default
+
+Reload Nginx:
+
+.. code-block:: console
+
+  sudo nginx -s reload
 
 **Start Celery and Beats**
 
@@ -101,31 +159,5 @@ It is recommended that you use an Upstart job or a @restart cron job to launch u
 .. code-block:: console
 
   uwsgi --socket :8001 --wsgi-file wsgi.py --workers 7 &
-
-*NGINX Configuration*
-
-Everyone feels a little differently about nginx settings, so here are the barebones to add your to your nginx configuration to proxy uwsgi. Make sure to modify the filesystem paths if needed:
-
-.. code-block:: json
-
-  upstream django {
-    server 127.0.0.1:8001; 
-  }
-
-  server {
-    listen 80;
-    location /static/ {
-        alias   /data/prod_dojo/django-DefectDojo/static/;
-    }
-
-    location /media/ {
-        alias   /data/prod_dojo/django-DefectDojo/media/;
-    }
-
-    location / {
-        uwsgi_pass django;
-        include     /data/prod_dojo/django-DefectDojo/wsgi_params;
-    }
-  }
 
 *That's it!*
