@@ -3,6 +3,28 @@ Running in Production
 
 This guide will walk you through how to setup DefectDojo for running in production using Ubuntu 16.04, nginx, and uwsgi.
 
+**Install Required Packages**
+
+.. code-block:: console
+
+  sudo apt-get install python-pip nginx mysql-server
+
+**Create MySQL Database and User**
+
+.. code-block:: console
+
+  mysql -u root -p
+
+  mysql> create user 'dojo'@'localhost' identified by '<password>';
+
+  mysql> create database defectdojo;
+
+  mysql> grant all privileges on defectdojo.* to 'dojo'@'localhost';
+
+  mysql> flush privileges;
+
+  mysql> quit
+
 *Install, Setup, and Activate Virtualenv*
 
 .. code-block:: console
@@ -11,7 +33,7 @@ This guide will walk you through how to setup DefectDojo for running in producti
 
   virtualenv dojo
 
-  source my_project/bin/activate
+  source dojo/bin/activate
 
 **Install Dojo**
 
@@ -19,7 +41,7 @@ This guide will walk you through how to setup DefectDojo for running in producti
 
   cd django-DefectDojo
 
-  ./install.bash
+  ./setup.bash
 
 **Install Uwsgi**
 
@@ -82,27 +104,28 @@ It is recommended that you use an Upstart job or a @restart cron job to launch u
 
 *NGINX Configuration*
 
-Everyone feels a little differently about nginx settings, so here are the barebones to add your to your nginx configuration to proxy uwsgi:
+Everyone feels a little differently about nginx settings, so here are the barebones to add your to your nginx configuration to proxy uwsgi. Make sure to modify the filesystem paths if needed:
 
 .. code-block:: json
 
   upstream django {
-   
     server 127.0.0.1:8001; 
   }
 
-  location /dojo/static/ {
-      alias   /data/prod_dojo/django-DefectDojo/static/;
-  }
+  server {
+    listen 80;
+    location /static/ {
+        alias   /data/prod_dojo/django-DefectDojo/static/;
+    }
 
-  location /dojo/media/ {
-      alias   /data/prod_dojo/django-DefectDojo/media/;
-  }
+    location /media/ {
+        alias   /data/prod_dojo/django-DefectDojo/media/;
+    }
 
-
-  location /dojo {
-      uwsgi_pass django;
-      include     /data/prod_dojo/django-DefectDojo/wsgi_params;
+    location / {
+        uwsgi_pass django;
+        include     /data/prod_dojo/django-DefectDojo/wsgi_params;
+    }
   }
 
 *That's it!*
