@@ -11,7 +11,7 @@ This guide will walk you through how to setup DefectDojo for running in producti
 
   virtualenv dojo
 
-  source my_project/bin/activate
+  source dojo/bin/activate
 
 **Install Dojo**
 
