@@ -63,19 +63,19 @@ Using the text-editor of your choice, change ``DEBUG`` in django-DefectDojo/dojo
 
 .. code-block:: console
 
-  `DEBUG = False` 
+  DEBUG = False
 
 Modify `ALLOWED_HOSTS` with valid hostnames for the site:
 
 .. code-block:: console
 
-  `ALLOWED_HOSTS = ['localhost','127.0.0.1']`
+  ALLOWED_HOSTS = ['localhost','127.0.0.1']
 
 Modify the path to `wkhtmltopdf` if you ran the reports.bash script:
 
 .. code-block:: console
 
-  `WKHTMLTOPDF_PATH = '/usr/bin/wkhtmltopdf'`
+  WKHTMLTOPDF_PATH = '/usr/bin/wkhtmltopdf'
 
 **Configure Nginx**
 
@@ -146,7 +146,7 @@ However, for a quick setup you can use the following to run both in the backgrou
 
   celery beat -A dojo -l info &
 
-*Start Uwsgi*
+**Start Uwsgi**
 
 From inside the django-DefectDojo/ directory execute:
 
