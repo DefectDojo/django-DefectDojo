@@ -1,7 +1,7 @@
 Running in Production
 =====================
 
-This guide will walk you through how to setup DefectDojo for running in production using Ubuntu 16.04, nginx, and uwsgi.
+This guide will walk you through how to setup DefectDojo for running in production using Ubuntu 16.04, MySQL, nginx, and uwsgi.
 
 **Install Required Packages**
 
