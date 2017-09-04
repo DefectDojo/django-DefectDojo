@@ -20,6 +20,7 @@
   - name: Set hostname
     hostname: 
       name: "{{ hostname }}"
+    ignore_errors: yes
 
   - name: Set IP and hostname in /etc/hosts
     lineinfile: 
@@ -27,6 +28,7 @@
       state: present 
       insertafter: '^127' 
       line: "{{ ip }} {{hostname}}"
+    ignore_errors: yes
   
   - name: Get latest pages aka "apt-get update"
     apt: 
@@ -66,7 +68,7 @@
 
   - name: Download and extract wkhtmltox tarball 
     unarchive: 
-      src: http://download.gna.org/wkhtmltopdf/0.12/0.12.4/wkhtmltox-0.12.4_linux-generic-amd64.tar.xz 
+      src: https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.4/wkhtmltox-0.12.4_linux-generic-amd64.tar.xz 
       dest: /tmp/wkhtml 
       remote_src: True 
     register: downloadwkhtml
@@ -90,6 +92,12 @@
       path: "{{ install_path }}/README.md"
     register: dojopresent
     ignore_errors: yes
+
+  - name: Ensure mysql is running and starts on boot
+    service: 
+      name: mysql 
+      state: started 
+      enabled: true
 
   - name: Create database for new Defect Dojo install
     mysql_db: 
@@ -123,7 +131,7 @@
       comment: "Defect Dojo" 
       password: "{{ cryptpass }}" 
       state: present 
-      groups: dojo
+      groups: '{{ dojo_group }}'
 
   - name: Create Defect Dojo base directory
     file: 
@@ -179,8 +187,8 @@
     template: 
       src: ./templates/settings.py.j2
       dest: '{{ dojo_root }}/settings.py'
-      owner: dojo
-      group: dojo
+      owner: "{{ dojo_user }}"
+      group: "{{ dojo_group }}"
 
   - name: Generate a secret key for Defect Dojo
     shell: 'cat /dev/urandom | LC_CTYPE=C tr -dc "a-zA-Z0-9" | head -c 128'
@@ -263,7 +271,7 @@
     args: 
       chdir: '{{ dojo_bower}}'
     become: yes
-    become_user: dojo
+    become_user: "{{ dojo_user }}"
 
   - name: Django collectstatic
     django_manage:
@@ -272,16 +280,16 @@
       virtualenv: '{{ install_path }}'
 
   - name: Create a script to check for Django admin user
-    template: 
+    template:
       src: ./templates/super_user_exists.py.j2
-      dest: '{{ base_dir }}/super_user_exists.py'
-      owner: dojo
-      group: dojo
+      dest: '{{ dojo_src }}/super_user_exists.py'
+      owner: "{{ dojo_user }}"
+      group: "{{ dojo_group }}"
 
   - name: Run script to check for Django admin
     shell: "{{install_path}}/bin/python super_user_exists.py"
     args:
-      chdir: "{{base_dir}}"
+      chdir: "{{dojo_src}}"
     register: superuser_exists
 
   - name: Create Django super user
