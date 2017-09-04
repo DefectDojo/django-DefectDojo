@@ -21,9 +21,9 @@ dbpass: Cu3zehoh7eegoogohdoh1the
 dbhost: localhost
 dbport: 3306
 
-# Default Defect Dojo system user and group
-dojo_group: dojo
-dojo_user: dojo
+# Default Defect Dojo system user and group to run Dojo under
+dojo_group: dojo-srv
+dojo_user: dojo-srv
 
 # Default Defect Dojo app admin
 dojo_admin: admin
