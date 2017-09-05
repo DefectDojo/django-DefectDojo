@@ -48,7 +48,7 @@ def report_url_resolver(request):
             url_resolver = request.scheme + "://" + hostname[:port_index]
         else:
             url_resolver = request.scheme + "://" + hostname
-    return url_resolver
+    return url_resolver + ":" + request.META['SERVER_PORT']
 
 
 def report_builder(request):
