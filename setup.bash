@@ -181,6 +181,12 @@ if [[ ! -z $BREW_CMD ]]; then
   sed -i ''  "s#BOWERDIR#$PWD/components#g" dojo/settings.py
   sed -i ''  "s#DOJO_MEDIA_ROOT#$PWD/media/#g" dojo/settings.py
   sed -i ''  "s#DOJO_STATIC_ROOT#$PWD/static/#g" dojo/settings.py
+  if [ "$DBTYPE" == '1' ]; then
+    sed -i ''  "s/BACKENDDB/django.db.backends.mysql/g" dojo/settings.py
+  elif [ "$DBTYPE" == '2' ]; then
+    sed -i ''  "s/BACKENDDB/django.db.backends.postgresql_psycopg2/g" dojo/settings.py
+  fi
+
 else
   sed -i  "s/MYSQLHOST/$SQLHOST/g" dojo/settings.py
   sed -i  "s/MYSQLPORT/$SQLPORT/g" dojo/settings.py
