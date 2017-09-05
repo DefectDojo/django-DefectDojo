@@ -32,28 +32,11 @@ function get_db_details() {
     stty -echo
     read -p "Password for user: " SQLPWD; echo
     stty echo
-    read -p "Database name (should NOT exist): " DBNAME
+    read -p "Database name (should already exist): " DBNAME
 
-    if mysql -fs -h "$SQLHOST" -P "$SQLPORT" -u"$SQLUSER" -p"$SQLPWD" "$DBNAME" >/dev/null 2>&1 </dev/null; then
-        echo "Database $DBNAME already exists!"
-        echo
-        read -p "Drop database $DBNAME? [Y/n] " DELETE
-        if [[ ! $DELETE =~ ^[nN]$ ]]; then
-            mysqladmin -f --host="$SQLHOST" --port="$SQLPORT" --user="$SQLUSER" --password="$SQLPWD" drop "$DBNAME"
-            mysqladmin    --host="$SQLHOST" --port="$SQLPORT" --user="$SQLUSER" --password="$SQLPWD" create "$DBNAME"
-        else
-            echo "Error! Must supply an empty database to proceed."
-            echo
-            get_db_details
-        fi
-    else
-        if mysqladmin --host="$SQLHOST" --port="$SQLPORT" --user="$SQLUSER" --password="$SQLPWD" create $DBNAME; then
-            echo "Created database $DBNAME."
-        else
-            echo "Error! Failed to create database $DBNAME. Check your credentials."
-            echo
-            get_db_details
-        fi
+    if ! mysql -h"$SQLHOST" -P"$SQLPORT" -u"$SQLUSER" -p"$SQLPWD" -e "use $DBNAME" 2> /dev/null; then
+        echo "Error connecting to database! Check that user and database have been created and permissions have been granted."
+        exit 1;
     fi
 }
 
@@ -64,33 +47,12 @@ function get_postgres_db_details() {
     stty -echo
     read -p "Password for user: " SQLPWD; echo
     stty echo
-    read -p "Database name (should NOT exist): " DBNAME
+    read -p "Database name (should already exist): " DBNAME
 
-    if [ "$( PGPASSWORD=$SQLPWD psql -h $SQLHOST -p $SQLPORT -U $SQLUSER -tAc "SELECT 1 FROM pg_database WHERE datname='$DBNAME'" )" = '1' ]
+    if [ "$( PGPASSWORD=$SQLPWD psql -h $SQLHOST -p $SQLPORT -U $SQLUSER -tAc "SELECT 1 FROM pg_database WHERE datname='$DBNAME'" )" != '1' ]
     then
-        echo "Database $DBNAME already exists!"
-        echo
-        read -p "Drop database $DBNAME? [Y/n] " DELETE
-        if [[ ! $DELETE =~ ^[nN]$ ]]; then
-            PGPASSWORD=$SQLPWD dropdb $DBNAME -h $SQLHOST -p $SQLPORT -U $SQLUSER
-            PGPASSWORD=$SQLPWD createdb $DBNAME -h $SQLHOST -p $SQLPORT -U $SQLUSER
-        else
-            read -p "Try and install anyway? [Y/n] " INSTALL
-            if [[ $INSTALL =~ ^[nN]$ ]]; then
-              echo
-              get_postgres_db_details
-            fi
-        fi
-    else
-        PGPASSWORD=$SQLPWD createdb $DBNAME -h $SQLHOST -p $SQLPORT -U $SQLUSER
-        if [ $? = 0 ]
-        then
-            echo "Created database $DBNAME."
-        else
-            echo "Error! Failed to create database $DBNAME. Check your credentials."
-            echo
-            get_postgres_db_details
-        fi
+        echo "Error connecting to database! Check that user and database have been created and permissions have been granted."
+        exit 1;
     fi
 
 }
