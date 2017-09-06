@@ -45,6 +45,8 @@ def new_cred(request):
         tform = CredUserForm(request.POST)
         if tform.is_valid():
             form_copy = tform.save(commit=False)
+            print tform.cleaned_data['password']
+            print "1!!!"
             form_copy.password = dojo_crypto_encrypt(tform.cleaned_data['password'])
             form_copy.save()
             messages.add_message(request,
