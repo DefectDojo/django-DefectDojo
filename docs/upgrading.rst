@@ -30,7 +30,7 @@ If you are in your production system, you will need to restart gunicorn and cele
 being used by both.
 
 Upgrading to Django 1.11
-========================
+------------------------
 
 Pull request #300 makes DefectDojo Django 1.11 ready.  A fresh install of DefectDojo can be done with the setup.bash
 script included - no special steps are required.
@@ -75,7 +75,7 @@ Once all these steps are completed your installation of DefectDojo will be runni
 
 
 July 6th 2017 - New location for system settings
-================================================
+------------------------------------------------
 
 Pull request #313 moves a number of system settings previously located in the application's settings.py
 to a model that can be used and changed within the web application under "Configuration -> System Settings". 
