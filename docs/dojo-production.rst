@@ -89,20 +89,36 @@ Everyone feels a little differently about nginx settings, so here are the barebo
   upstream django {
     server 127.0.0.1:8001; 
   }
-
+  
   server {
     listen 80;
+    return 301 https://$host$request_uri;
+  }
+
+  server {
+    listen 443;
+    server_name <YOUR_SERVER_NAME>;
+    
+    client_max_body_size 500m; # To accommodate large scan files
+    
+    ssl_certificate           <PATH_TO_CRT>;
+    ssl_certificate_key       <PATH_TO_KEY>;
+    
+    ssl on;
+    
+    <YOUR_SSL_SETTINGS> # ciphers, options, logging, etc
+    
     location /static/ {
-        alias   /data/prod_dojo/django-DefectDojo/static/;
+        alias   <PATH_TO_DOJO>/django-DefectDojo/static/;
     }
 
     location /media/ {
-        alias   /data/prod_dojo/django-DefectDojo/media/;
+        alias   <PATH_TO_DOJO>/django-DefectDojo/media/;
     }
 
     location / {
         uwsgi_pass django;
-        include     /data/prod_dojo/django-DefectDojo/wsgi_params;
+        include     <PATH_TO_DOJO>/django-DefectDojo/wsgi_params;
     }
   }
 
