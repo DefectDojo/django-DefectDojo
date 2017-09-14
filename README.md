@@ -15,7 +15,7 @@ $ ./setup.bash
 $ python manage.py runserver
 ```
 
-navagate to `127.0.0.1:8000`
+navigate to `127.0.0.1:8000`
 
 # Demo
 
