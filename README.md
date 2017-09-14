@@ -13,7 +13,7 @@ $ git clone https://github.com/OWASP/django-DefectDojo
 $ cd django-DefectDojo
 $ ./setup.bash
 $ python manage.py runserver
-$ ```
+```
 
 navagate to `127.0.0.1:8000`
 
