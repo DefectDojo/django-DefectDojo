@@ -91,9 +91,6 @@ If you fix an issue with the 'swag reward' tag <img align="" src="https://github
 
 <img src="https://github.com/devGregA/django-DefectDojo/blob/master/doc/img/dojo_tshirt_front.png" width="300"><img src="https://github.com/devGregA/django-DefectDojo/blob/master/doc/img/dojo_tshirt_back.png" width="300">
 
-### Cash Rewards
-We also are offer monetary rewards for issues tagged as such <img align="" src="https://github.com/devGregA/django-DefectDojo/blob/master/doc/img/cash_reward.png" width="90">   
-**Sorry Maintainers you are not elgible for cash rewards ;)**
 
 # Support
 
