@@ -12,7 +12,7 @@ from tastypie.http import HttpCreated
 from tastypie.resources import ModelResource, Resource
 from tastypie.serializers import Serializer
 from tastypie.validation import FormValidation, Validation
-from django.core.exceptions import ObjectDoesNotExist
+from django.urls.exceptions import Resolver404
 from pytz import timezone
 from django.conf import settings
 
