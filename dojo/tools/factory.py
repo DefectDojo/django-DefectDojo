@@ -57,7 +57,7 @@ def import_parser_factory(file, test):
     elif scan_type == 'Qualys Scan':
         parser = QualysParser(file, test)
     elif scan_type == "OpenVAS CSV":
-        parser = OpenVASUploadCsvParser(filem test)
+        parser = OpenVASUploadCsvParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 
