@@ -399,13 +399,14 @@
                     </div>
 
                     <div class="panel-body">
-                        {% for key, value in product_metadata.items %}
-                            <div class="col-md-2 centered">
-                                <b>{{ key }}</b><br/>
-                                {{ value }}
-                                <br/>&nbsp;
-                            </div>
-                        {% endfor %}
+                        <div id="meta_accordion">
+                            {% for key, value in product_metadata.items %}
+                                <h3>{{ key }}</h3>
+                                <div>
+                                    {{ value }}
+                                </div>
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -707,7 +708,7 @@
             test_type();
             finding_age();
             $(".product-graphs").hide();
-
+            $("#meta_accordion").accordion();
         });
 
         function accepted_findings() {
