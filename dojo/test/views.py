@@ -13,7 +13,7 @@ from django.db.models import Q
 from django.http import HttpResponseRedirect, HttpResponseForbidden, Http404, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.cache import cache_page
-from pytz import timezone
+from django.utils import timezone
 
 from dojo.filters import TemplateFindingFilter
 from dojo.forms import NoteForm, TestForm, FindingForm, \
@@ -25,8 +25,6 @@ from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, message, \
                        process_notifications, get_system_setting, create_notification
 from dojo.tasks import add_issue_task
-
-localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -52,7 +50,7 @@ def view_test(request, tid):
         if form.is_valid():
             new_note = form.save(commit=False)
             new_note.author = request.user
-            new_note.date = datetime.now(tz=localtz)
+            new_note.date = timezone.now()
             new_note.save()
             test.notes.add(new_note)
             form = NoteForm()
@@ -207,7 +205,7 @@ def add_findings(request, tid):
     form_error = False
     enabled = False
     jform = None
-    form = AddFindingForm(initial={'date': datetime.now(tz=localtz).date()})
+    form = AddFindingForm(initial={'date': timezone.now().date()})
 
     if get_system_setting('enable_jira') and JIRA_PKey.objects.filter(product=test.engagement.product).count() != 0:
         enabled = JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues
@@ -224,7 +222,7 @@ def add_findings(request, tid):
             new_finding.numerical_severity = Finding.get_numerical_severity(
                 new_finding.severity)
             if new_finding.false_p or new_finding.active is False:
-                new_finding.mitigated = datetime.now(tz=localtz)
+                new_finding.mitigated = timezone.now()
                 new_finding.mitigated_by = request.user
             create_template = new_finding.is_template
             # always false now since this will be deprecated soon in favor of new Finding_Template model
@@ -304,7 +302,7 @@ def add_temp_finding(request, tid, fid):
                 new_finding.severity)
             new_finding.date = datetime.today()
             if new_finding.false_p or new_finding.active is False:
-                new_finding.mitigated = datetime.now(tz=localtz)
+                new_finding.mitigated = timezone.now()
                 new_finding.mitigated_by = request.user
 
             create_template = new_finding.is_template
@@ -354,7 +352,7 @@ def add_temp_finding(request, tid, fid):
 
     else:
         form = FindingForm(initial={'active': False,
-                                    'date': datetime.now(tz=localtz).date(),
+                                    'date': timezone.now().date(),
                                     'verified': False,
                                     'false_p': False,
                                     'duplicate': False,
@@ -511,7 +509,7 @@ def re_import_scan_results(request, tid):
                         item.test = t
                         item.date = t.target_start
                         item.reporter = request.user
-                        item.last_reviewed = datetime.now(tz=localtz)
+                        item.last_reviewed = timezone.now()
                         item.last_reviewed_by = request.user
                         item.verified = verified
                         item.active = active
@@ -554,7 +552,7 @@ def re_import_scan_results(request, tid):
                 to_mitigate = set(original_items) - set(new_items)
                 for finding_id in to_mitigate:
                     finding = Finding.objects.get(id=finding_id)
-                    finding.mitigated = datetime.combine(scan_date, datetime.now(tz=localtz).time())
+                    finding.mitigated = datetime.combine(scan_date, timezone.now().time())
                     finding.mitigated_by = request.user
                     finding.active = False
                     finding.save()

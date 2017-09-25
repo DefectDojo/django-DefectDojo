@@ -136,6 +136,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'dojo.middleware.LoginRequiredMiddleware',
+    'dojo.middleware.TimezoneMiddleware'
 )
 
 ROOT_URLCONF = 'dojo.urls'
