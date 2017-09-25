@@ -1,6 +1,5 @@
 # Sorry for the lazyness but I just update the column name fields
 # Didn't change the class names, only the main one..
-# AIN'T NOBODY GOT TIME FOR THAT - https://www.youtube.com/watch?v=zGxwbhkDjZM
 
 import StringIO
 import csv
