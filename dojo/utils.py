@@ -17,7 +17,7 @@ from django.contrib import messages
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
 from django.template.defaultfilters import pluralize
 from django.template.loader import render_to_string
-from pytz import timezone
+from django.utils import timezone
 from jira import JIRA
 from jira.exceptions import JIRAError
 from dojo.models import Finding, Scan, Test, Engagement, Stub_Finding, Finding_Template, \
@@ -25,10 +25,6 @@ from dojo.models import Finding, Scan, Test, Engagement, Stub_Finding, Finding_T
                         FindingImage, Alerts, System_Settings, Notifications
 from django_slack import slack_message
 
-try:
-    localtz = timezone(System_Settings.objects.get().time_zone)
-except:
-    localtz = timezone(System_Settings().time_zone)
 
 """
 Michael & Fatima:
@@ -78,7 +74,7 @@ def count_findings(findings):
 def findings_this_period(findings, period_type, stuff, o_stuff, a_stuff):
     # periodType: 0 - weeks
     # 1 - months
-    now = localtz.localize(datetime.today())
+    now = timezone.now()
     for i in range(6):
         counts = []
         # Weeks start on Monday
@@ -234,7 +230,7 @@ def get_punchcard_data(findings, weeks_between, start_date):
         days = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0}
         for finding in findings:
 	    try:
-		    if new_date < datetime.combine(finding.date, datetime.min.time()).replace(tzinfo=localtz) <= end_date:
+		    if new_date < datetime.combine(finding.date, datetime.min.time()).replace(tzinfo=timezone.get_current_timezone()) <= end_date:
 			# [0,0,(20*.02)]
 			# [week, day, weight]
 			days[day_offset[finding.date.weekday()]] += 1
@@ -290,18 +286,18 @@ def get_period_counts_legacy(findings, findings_closed, accepted_findings, perio
             risks_a = accepted_findings.filter(
                 risk_acceptance__created__range=[datetime(new_date.year,
                                                           new_date.month, 1,
-                                                          tzinfo=localtz),
+                                                          tzinfo=timezone.get_current_timezone()),
                                                  datetime(new_date.year,
                                                           new_date.month,
                                                           monthrange(new_date.year,
                                                                      new_date.month)[1],
-                                                          tzinfo=localtz)])
+                                                          tzinfo=timezone.get_current_timezone())])
         else:
             risks_a = None
 
         crit_count, high_count, med_count, low_count, closed_count = [0, 0, 0, 0, 0]
         for finding in findings:
-            if new_date <= datetime.combine(finding.date, datetime.min.time()).replace(tzinfo=localtz) <= end_date:
+            if new_date <= datetime.combine(finding.date, datetime.min.time()).replace(tzinfo=timezone.get_current_timezone()) <= end_date:
                 if finding.severity == 'Critical':
                     crit_count += 1
                 elif finding.severity == 'High':
@@ -340,7 +336,7 @@ def get_period_counts(active_findings, findings, findings_closed, accepted_findi
                       relative_delta='months'):
     start_date = datetime(start_date.year,
                           start_date.month, start_date.day,
-                          tzinfo=localtz)
+                          tzinfo=timezone.get_current_timezone())
     opened_in_period = list()
     active_in_period = list()
     accepted_in_period = list()
@@ -367,19 +363,19 @@ def get_period_counts(active_findings, findings, findings_closed, accepted_findi
             risks_a = accepted_findings.filter(
                 risk_acceptance__created__range=[datetime(new_date.year,
                                                           new_date.month, 1,
-                                                          tzinfo=localtz),
+                                                          tzinfo=timezone.get_current_timezone()),
                                                  datetime(new_date.year,
                                                           new_date.month,
                                                           monthrange(new_date.year,
                                                                      new_date.month)[1],
-                                                          tzinfo=localtz)])
+                                                          tzinfo=timezone.get_current_timezone())])
         else:
             risks_a = None
 
         crit_count, high_count, med_count, low_count, closed_count = [0, 0, 0, 0, 0]
         for finding in findings:
             try:
-                if new_date <= datetime.combine(finding.date, datetime.min.time()).replace(tzinfo=localtz) <= end_date:
+                if new_date <= datetime.combine(finding.date, datetime.min.time()).replace(tzinfo=timezone.get_current_timezone()) <= end_date:
                     if finding.severity == 'Critical':
                         crit_count += 1
                     elif finding.severity == 'High':
@@ -423,7 +419,7 @@ def get_period_counts(active_findings, findings, findings_closed, accepted_findi
         crit_count, high_count, med_count, low_count, closed_count = [0, 0, 0, 0, 0]
         for finding in active_findings:
             try:
-		    if datetime.combine(finding.date, datetime.min.time()).replace(tzinfo=localtz) <= end_date:
+		    if datetime.combine(finding.date, datetime.min.time()).replace(tzinfo=timezone.get_current_timezone()) <= end_date:
 			if finding.severity == 'Critical':
 			    crit_count += 1
 			elif finding.severity == 'High':
@@ -456,10 +452,10 @@ def get_period_counts(active_findings, findings, findings_closed, accepted_findi
 def opened_in_period(start_date, end_date, pt):
     start_date = datetime(start_date.year,
                           start_date.month, start_date.day,
-                          tzinfo=localtz)
+                          tzinfo=timezone.get_current_timezone())
     end_date = datetime(end_date.year,
                         end_date.month, end_date.day,
-                        tzinfo=localtz)
+                        tzinfo=timezone.get_current_timezone())
     opened_in_period = Finding.objects.filter(date__range=[start_date, end_date],
                                               test__engagement__product__prod_type=pt,
                                               verified=True,
@@ -611,179 +607,6 @@ def get_page_items(request, items, page_size, param_name='page'):
         page = paginator.page(paginator.num_pages)
 
     return page
-
-
-def get_alerts(user):
-    import humanize
-    now = localtz.localize(datetime.today())
-    start = now - timedelta(days=7)
-    dojo_user = Dojo_User.objects.get(id=user.id)
-    alerts = []
-
-    #atmentions in notes
-    atmentions=Notes.objects.filter(date__range=[start, now],
-    entry__icontains='@'+user.username)
-
-    #show a single alert per finding/test for any finding where
-    #user was @mentioned in notes AND hasn't afterwards responded
-    findings_with_atmention=set([Finding.objects.get(notes=note)
-                    for note in atmentions if Finding.objects.filter(notes=note).exists()])
-    for f in findings_with_atmention:
-        f_notes=list(f.notes.all())
-        latest_mention=[n for n in f_notes if n in atmentions][0]
-        index_latest_mention=f_notes.index(latest_mention)
-        later_notes_than_mention=f_notes[:index_latest_mention]
-        if not any(n.author==user for n in later_notes_than_mention):
-            alerts.append(['You were mentioned in notes on Finding:{}'.format(f.title),
-                           'Posted ' + latest_mention.date.strftime("%b. %d, %Y"),
-                           'file-text-o',
-                           reverse('view_finding', args=(f.id,))])
-
-    tests_with_atmention=set([Test.objects.get(notes=note)
-                    for note in atmentions if Test.objects.filter(notes=note).exists()])
-    for t in tests_with_atmention:
-        t_notes=list(t.notes.all())
-        latest_mention=[n for n in t_notes if n in atmentions][0]
-        index_latest_mention=t_notes.index(latest_mention)
-        later_notes_than_mention=t_notes[:index_latest_mention]
-        if not any(n.author==user for n in later_notes_than_mention):
-            alerts.append(['You were mentioned in notes on Test: %s on %s' % (t.test_type.name, t.engagement.product.name),
-                       'Posted ' + latest_mention.date.strftime("%b. %d, %Y"),
-                       'file-text-o',
-                       reverse('view_test', args=(t.id,))])
-
-
-    # findings under review
-    under_review = Finding.objects.filter(under_review=True, reviewers__in=[dojo_user])
-
-    for fur in under_review:
-        alerts.append(['Finding Review: ' + fur.title,
-                       'Reviewed On ' + fur.last_reviewed.strftime("%b. %d, %Y"),
-                       ' icon-user-check',
-                       reverse('view_finding', args=(fur.id,))])
-
-    # reports requested in the last 7 days
-    total_alerts = Alerts.objects.filter(created__range=[start, now]).order_by('-display_date')
-    if not user.is_superuser:
-        total_alerts = total_alerts.filter(user_id=user)
-    for alert_item in total_alerts:
-        alerts.append([alert_item.description,
-                       humanize.naturaltime(localtz.normalize(now) - localtz.normalize(alert_item.display_date)),
-                       alert_item.icon,
-                       alert_item.url])
-
-    # reports requested in the last 7 days
-    completed_reports = Report.objects.filter(requester=user, datetime__range=[start, now], status='success')
-    running_reports = Report.objects.filter(requester=user, datetime__range=[start, now], status='requested')
-    for report in completed_reports:
-        alerts.append(['Report Ready: ' + report.name,
-                       humanize.naturaltime(localtz.normalize(now) - localtz.normalize(report.datetime)),
-                       'file-text-o',
-                       reverse('reports')])
-
-    for report in running_reports:
-        alerts.append(['Report Running: ' + report.name,
-                       humanize.naturaltime(localtz.normalize(now) - localtz.normalize(report.datetime)),
-                       'spinner fa-pulse',
-                       reverse('reports')])
-
-    # scans completed in last 7 days
-    completed_scans = Scan.objects.filter(
-        date__range=[start, now],
-        scan_settings__user=user).order_by('-date')
-    running_scans = Scan.objects.filter(date__range=[start, now],
-                                        status='Running').order_by('-date')
-    for scan in completed_scans:
-        alerts.append(['Scan Completed',
-                       humanize.naturaltime(localtz.normalize(now) - localtz.normalize(scan.date)),
-                       'crosshairs',
-                       reverse('view_scan', args=(scan.id,))])
-    for scan in running_scans:
-        alerts.append(['Scan Running',
-                       humanize.naturaltime(localtz.normalize(now) - localtz.normalize(scan.date)),
-                       'crosshairs',
-                       reverse('view_scan_settings', args=(scan.scan_settings.product.id, scan.scan_settings.id,))])
-
-    upcoming_tests = Test.objects.filter(
-        target_start__gt=now,
-        engagement__lead=user).order_by('target_start')
-    for test in upcoming_tests:
-        alerts.append([
-            'Upcomming ' + (
-                test.test_type.name if test.test_type is not None else 'Test'),
-            'Target Start ' + test.target_start.strftime("%b. %d, %Y"),
-            'user-secret',
-            reverse('view_test', args=(test.id,))])
-
-    outstanding_engagements = Engagement.objects.filter(
-        target_end__lt=now,
-        status='In Progress',
-        lead=user).order_by('-target_end')
-    for eng in outstanding_engagements:
-        alerts.append([
-            'Stale Engagement: ' + (
-                eng.name if eng.name is not None else 'Engagement'),
-            'Target End ' + eng.target_end.strftime("%b. %d, %Y"),
-            'bullseye',
-            reverse('view_engagement', args=(eng.id,))])
-
-    twenty_four_hours_ago = now - timedelta(hours=24)
-    outstanding_s0_findings = Finding.objects.filter(
-        severity='Critical',
-        reporter=user,
-        mitigated=None,
-        verified=True,
-        false_p=False,
-        last_reviewed__lt=twenty_four_hours_ago).order_by('-date')
-    for finding in outstanding_s0_findings:
-        alerts.append([
-            'S0 Finding: ' + (
-                finding.title if finding.title is not None else 'Finding'),
-            'Reviewed On ' + finding.last_reviewed.strftime("%b. %d, %Y"),
-            'bug',
-            reverse('view_finding', args=(finding.id,))])
-
-    seven_days_ago = now - timedelta(days=7)
-    outstanding_s1_findings = Finding.objects.filter(
-        severity='High',
-        reporter=user,
-        mitigated=None,
-        verified=True,
-        false_p=False,
-        last_reviewed__lt=seven_days_ago).order_by('-date')
-    for finding in outstanding_s1_findings:
-        alerts.append([
-            'S1 Finding: ' + (
-                finding.title if finding.title is not None else 'Finding'),
-            'Reviewed On ' + finding.last_reviewed.strftime("%b. %d, %Y"),
-            'bug',
-            reverse('view_finding', args=(finding.id,))])
-
-    fourteen_days_ago = now - timedelta(days=14)
-    outstanding_s2_findings = Finding.objects.filter(
-        severity='Medium',
-        reporter=user,
-        mitigated=None,
-        verified=True,
-        false_p=False,
-        last_reviewed__lt=fourteen_days_ago).order_by('-date')
-    for finding in outstanding_s2_findings:
-        alerts.append([
-            'S2 Finding: ' + (
-                finding.title if finding.title is not None else 'Finding'),
-            'Reviewed On ' + finding.last_reviewed.strftime("%b. %d, %Y"),
-            'bug',
-            reverse('view_finding', args=(finding.id,))])
-
-    incomplete_findings = Stub_Finding.objects.filter(reporter=user)
-    for incomplete_finding in incomplete_findings:
-        alerts.append([
-            'Incomplete Finding: ' + (
-                incomplete_finding.title if incomplete_finding.title is not None else 'Finding'),
-            'Started On ' + incomplete_finding.date.strftime("%b. %d, %Y"),
-            'bug',
-            reverse('promote_to_finding', args=(incomplete_finding.id,))])
-    return alerts
 
 
 def handle_uploaded_threat(f, eng):

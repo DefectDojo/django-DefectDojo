@@ -9,14 +9,10 @@ from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
-from pytz import timezone
-
 from dojo.forms import ScanSettingsForm, DeleteIPScanForm, VaForm
 from dojo.management.commands.run_scan import run_on_deman_scan
 from dojo.models import Product, Scan, IPScan, ScanSettings
 from dojo.utils import add_breadcrumb, get_system_setting
-
-localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,
