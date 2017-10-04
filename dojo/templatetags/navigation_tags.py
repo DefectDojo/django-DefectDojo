@@ -3,15 +3,8 @@ from django.utils.safestring import mark_safe as safe
 from django.utils.html import escape
 
 from dojo.models import Product_Type, Alerts
-from dojo.utils import get_alerts
 
 register = template.Library()
-
-
-@register.inclusion_tag('alert_nav_items.html')
-def alert_nav_items(user):
-    alerts = get_alerts(user)
-    return {'alerts': alerts[:12]}
 
 
 @register.simple_tag(takes_context=True)

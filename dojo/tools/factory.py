@@ -14,10 +14,12 @@ from dojo.tools.nsp.parser import NspParser
 from dojo.tools.generic.parser import GenericFindingUploadCsvParser
 from dojo.tools.qualys.parser import QualysParser
 from dojo.tools.qualyswebapp.parser import QualysWebAppParser
+from dojo.tools.openvas_csv.parser import OpenVASUploadCsvParser
 
 
 __author__ = 'Jay Paz'
 
+#Modified by dkade to use OpenVASUploadCsvParser
 
 def import_parser_factory(file, test):
     scan_type = test.test_type.name
@@ -57,6 +59,8 @@ def import_parser_factory(file, test):
         parser = QualysParser(file, test)
     elif scan_type == 'Qualys Webapp Scan':
         parser = QualysWebAppParser(file, test)
+    elif scan_type == "OpenVAS CSV":
+        parser = OpenVASUploadCsvParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 

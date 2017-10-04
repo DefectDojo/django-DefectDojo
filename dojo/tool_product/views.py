@@ -15,7 +15,7 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
-from pytz import timezone
+from django.utils import timezone
 
 from dojo.filters import ProductFilter, ProductFindingFilter
 from dojo.forms import ProductForm, EngForm, DeleteToolProductSettingsForm
@@ -28,8 +28,6 @@ from jira import JIRA
 from dojo.tasks import *
 from dojo.forms import *
 from dojo.product import views as ds
-
-localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -72,7 +70,7 @@ def view_tool_product(request, pid, ttid):
         if form.is_valid():
             new_note = form.save(commit=False)
             new_note.author = request.user
-            new_note.date = datetime.now(tz=localtz)
+            new_note.date = timezone.now()
             new_note.save()
             tool.notes.add(new_note)
             form = NoteForm()

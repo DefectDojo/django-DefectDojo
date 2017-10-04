@@ -11,7 +11,7 @@ from django.forms import modelformset_factory
 from django.forms.widgets import Widget, Select
 from django.utils.dates import MONTHS
 from django.utils.safestring import mark_safe
-from pytz import timezone
+from django.utils import timezone
 from tagging.forms import TagField
 from tagging.models import Tag
 
@@ -24,8 +24,6 @@ from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
 from dojo.utils import get_system_setting
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
-
-localtz = timezone(get_system_setting('time_zone'))
 
 FINDING_STATUS = (('verified', 'Verified'),
                   ('false_p', 'False Positive'),
@@ -237,6 +235,7 @@ class ImportScanForm(forms.Form):
                          ("Node Security Platform Scan", "Node Security Platform Scan"),
                          ("Qualys Scan", "Qualys Scan"),
                          ("Qualys Webapp Scan", "Qualys Webapp Scan"),
+                         ("OpenVAS CSV", "OpenVAS CSV"),
                          ("Generic Findings Import", "Generic Findings Import"))
     scan_date = forms.DateTimeField(
         required=True,
@@ -1213,7 +1212,7 @@ class UserContactInfoForm(forms.ModelForm):
 
 
 def get_years():
-    now = datetime.now(tz=localtz)
+    now = timezone.now()
     return [(now.year, now.year), (now.year - 1, now.year - 1), (now.year - 2, now.year - 2)]
 
 

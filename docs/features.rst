@@ -401,7 +401,8 @@ DefectDojo has the ability to import reports from other security tools.  Current
 12. Retire.js JavaScript Scan JSON
 13. Node Security Platform JSON
 14. Qualys XML
-15. Generic Findings in CSV format
+15. OpenVAS CSV
+16. Generic Findings in CSV format
 
 
 The importers analyze each report and create new Findings for each item reported.  DefectDojo collapses duplicate

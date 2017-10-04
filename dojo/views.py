@@ -3,12 +3,8 @@ import logging
 from django.conf import settings
 from django.http import Http404
 from django.shortcuts import render
-from pytz import timezone
-
 from dojo.filters import LogEntryFilter
 from dojo.utils import get_page_items, add_breadcrumb, get_system_setting
-
-localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,

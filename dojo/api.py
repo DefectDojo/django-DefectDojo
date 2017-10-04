@@ -29,7 +29,6 @@ from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_system_setting
 from datetime import datetime
 
-
 localtz = timezone(get_system_setting('time_zone'))
 
 """
@@ -931,7 +930,7 @@ class ImportScanResource(MultipartResource, Resource):
                 item.test = t
                 item.date = t.target_start
                 item.reporter = bundle.request.user
-                item.last_reviewed = datetime.now(tz=localtz)
+                item.last_reviewed = timezone.now()
                 item.last_reviewed_by = bundle.request.user
                 item.active = bundle.data['active']
                 item.verified = bundle.data['verified']
@@ -1145,7 +1144,7 @@ class ReImportScanResource(MultipartResource, Resource):
                     item.test = test
                     item.date = test.target_start
                     item.reporter = bundle.request.user
-                    item.last_reviewed = datetime.now(tz=localtz)
+                    item.last_reviewed = timezone.now()
                     item.last_reviewed_by = bundle.request.user
                     item.verified = verified
                     item.active = active
@@ -1187,7 +1186,7 @@ class ReImportScanResource(MultipartResource, Resource):
             to_mitigate = set(original_items) - set(new_items)
             for finding_id in to_mitigate:
                 finding = Finding.objects.get(id=finding_id)
-                finding.mitigated = datetime.combine(scan_date, datetime.now(tz=localtz).time())
+                finding.mitigated = datetime.combine(scan_date, timezone.now().time())
                 finding.mitigated_by = bundle.request.user
                 finding.active = False
                 finding.save()
