@@ -1,35 +1,65 @@
 {% extends "base.html" %}
+{% load static from staticfiles %}
 {% block content %}
     <div class="row">
         <div class="col-md-12">
             {% if alerts %}
+            <form id="delete_alerts" method="POST">{% csrf_token %}
                 <div class="table-responsive panel panel-default">
                     <table id="open_findings"
-                           class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
+                        class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
                         <thead>
                         <tr>
                             <th>Type</th>
+                            <th>Title</th>
                             <th>Description</th>
                             <th>Timeframe</th>
+                            <th class="hidden-sm centered" title="Select all visible alerts.">
+                                    <input type="checkbox" name="select_all" id="select_all"/>
+                            </th>
                         </tr>
                         </thead>
                         <tbody>
                         {% for alert in alerts %}
                             <tr>
-                                <td class="text-center"><i class="fa fa-{{ alert.2 }} fa-fw"></i></td>
-                                <td><a href="{{ alert.3 }}">{{ alert.0 }}</a></td>
-                                <td>{{ alert.1 }}</td>
-                            </tr>
+                                <td class="text-center"><i class="fa fa-{{ alert.icon }} fa-fw"></i></td>
+                                <td>{%if alert.url %}<a href="{{ alert.url }}">{% endif %}{{ alert.title }}{% if alert.url %}</a>{% endif %}</td>
+                                <td>{{ alert.description|linebreaks }}</td>
+                                <td>{{ alert.created }}</td>
+                                <td class="hidden-sm centered">
+                                        <input type="checkbox" name="alert_select" value="{{ alert.id }}"
+                                                class="select_one {{ alert.source }}"/>
+                                </td>
+                                </tr>
                         {% endfor %}
                         </tbody>
                     </table>
                 </div>
-                <div class="clearfix">
-                    {% include "dojo/paging_snippet.html" with page=alerts page_size=False%}
-                </div>
+                <button class="btn btn-primary pull-right" type="submit">Remove selected</button>
+            </form>
+        </div>
+        <div class="col-md-12">
+            <div class="clearfix">
+                {% include "dojo/paging_snippet.html" with page=alerts page_size=False%}
+            </div>
             {% else %}
                 <p class="text-center">No alerts found.</p>
             {% endif %}
         </div>
     </div>
+{% endblock %}
+{% block postscript %}
+<script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
+<script type="text/javascript">
+    $(function () {
+        $('input#select_all').on('click', function (e) {
+            if ($(this).is(":checked")) {
+                $('input.select_one').prop('checked', true);
+            }
+            else {
+                $('input.select_one').prop('checked', false);
+            }
+        });
+    });
+</script>
 {% endblock %}
