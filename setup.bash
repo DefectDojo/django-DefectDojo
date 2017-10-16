@@ -26,13 +26,28 @@ function prompt_db_type() {
 
 # Get MySQL details
 function get_db_details() {
-    read -p "MySQL host: " SQLHOST
-    read -p "MySQL port: " SQLPORT
-    read -p "MySQL user (should already exist): " SQLUSER
-    stty -echo
-    read -p "Password for user: " SQLPWD; echo
-    stty echo
-    read -p "Database name (should NOT exist): " DBNAME
+    # Allow script to be called non-interactively using:
+    # export AUTO_DOCKER=yes && /opt/django-DefectDojo/setup.bash
+    if [ "$AUTO_DOCKER" != "yes" ]; then
+        # Run interactively
+        read -p "MySQL host: " SQLHOST
+        read -p "MySQL port: " SQLPORT
+        read -p "MySQL user (should already exist): " SQLUSER
+        stty -echo
+        read -p "Password for user: " SQLPWD; echo
+        stty echo
+        read -p "Database name (should NOT exist): " DBNAME
+    else
+        # Set the root password for mysql - install has it blank
+        mysql -uroot -e "SET PASSWORD = PASSWORD('Cu3zehoh7eegoogohdoh1the');"
+        # Default values for a automated Docker install
+        echo "Setting default values for MySQL install"
+        SQLHOST="localhost"
+        SQLPORT="3306"
+        SQLUSER="root"
+        SQLPWD="Cu3zehoh7eegoogohdoh1the"
+        DBNAME="dojodb"
+    fi
 
     if mysql -fs -h "$SQLHOST" -P "$SQLPORT" -u"$SQLUSER" -p"$SQLPWD" "$DBNAME" >/dev/null 2>&1 </dev/null; then
         echo "Database $DBNAME already exists!"
@@ -97,7 +112,14 @@ function get_postgres_db_details() {
 
 echo "Welcome to DefectDojo! This is a quick script to get you up and running."
 echo
-prompt_db_type
+# Allow script to be called non-interactively using:
+# export AUTO_DOCKER=yes && /opt/django-DefectDojo/setup.bash
+if [ "$AUTO_DOCKER" != "yes" ]; then
+    prompt_db_type
+else
+    # Default to MySQL install
+    DBTYPE=$MYSQL
+fi
 echo
 echo "NEED SUDO PRIVILEGES FOR NEXT STEPS!"
 echo
@@ -126,13 +148,13 @@ if [[ ! -z "$YUM_CMD" ]]; then
 elif [[ ! -z "$APT_GET_CMD" ]]; then
      if [ "$DBTYPE" == $MYSQL ]; then
         echo "Installing MySQL client"
-        sudo apt-get install libmysqlclient-dev mysql-server
+        sudo apt-get -y install libmysqlclient-dev mysql-server
      elif [ "$DBTYPE" == $POSTGRES ]; then
 	echo "Installing Postgres client"
-        sudo apt-get install libpq-dev postgresql postgresql-contrib libmysqlclient-dev
+        sudo apt-get -y install libpq-dev postgresql postgresql-contrib libmysqlclient-dev
      fi
 
-     sudo apt-get install libjpeg-dev gcc libssl-dev python-dev python-pip nodejs-legacy wkhtmltopdf npm
+     sudo apt-get install -y libjpeg-dev gcc libssl-dev python-dev python-pip nodejs-legacy wkhtmltopdf npm
 elif [[ ! -z "$BREW_CMD" ]]; then
     brew install gcc openssl python node npm Caskroom/cask/wkhtmltopdf
     if [ "$DBTYPE" == $MYSQL ]; then
@@ -167,7 +189,15 @@ fi
 
 SECRET=`cat /dev/urandom | LC_CTYPE=C tr -dc "a-zA-Z0-9" | head -c 128`
 
-cp dojo/settings.dist.py dojo/settings.py
+# Allow script to be called non-interactively using:
+# export AUTO_DOCKER=yes && /opt/django-DefectDojo/setup.bash
+if [ "$AUTO_DOCKER" != "yes" ]; then
+    cp dojo/settings.dist.py dojo/settings.py
+else
+    # locate to the install directory first
+    cd /opt/django-DefectDojo/
+    cp dojo/settings.dist.py dojo/settings.py
+fi
 
 # Save MySQL details in settings file
 if [[ ! -z $BREW_CMD ]]; then
@@ -235,9 +265,17 @@ else
     python manage.py makemigrations dojo
     python manage.py makemigrations
     python manage.py migrate
-    echo -e "${GREEN}${BOLD}Create Dojo superuser:"
-    tput sgr0
-    python manage.py createsuperuser
+    # Allow script to be called non-interactively using:
+    # export AUTO_DOCKER=yes && /opt/django-DefectDojo/setup.bash
+    if [ "$AUTO_DOCKER" != "yes" ]; then
+        echo -e "${GREEN}${BOLD}Create Dojo superuser:"
+        tput sgr0
+        python manage.py createsuperuser
+    else
+        # non-interactively setup the superuser
+        python manage.py createsuperuser --noinput --username=admin --email='ed@example.com'
+        /opt/django-DefectDojo/docker/setup-superuser.expect
+    fi
     python manage.py loaddata product_type
     python manage.py loaddata test_type
     python manage.py loaddata development_environment
@@ -246,8 +284,9 @@ else
     python manage.py buildwatson
 fi
 
-if [[ "$USER" == "root" ]]; then
-    cd components && bower install --allow-root && cd ..
+if [ $(id -u) = 0 ]; then
+    adduser --disabled-password --gecos "DefectDojo" dojo
+    sudo - dojo -c 'cd /opt/django-DefectDojo/components && bower install'
 else
     cd components && bower install && cd ..
 fi
@@ -256,7 +295,7 @@ fi
 if python -c 'import sys; print sys.real_prefix' 2>/dev/null; then
     python manage.py collectstatic --noinput
 else
-     python manage.py collectstatic --noinput
+    python manage.py collectstatic --noinput
 fi
 
 
