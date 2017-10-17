@@ -1,5 +1,5 @@
 # see tastypie documentation at http://django-tastypie.readthedocs.org/en
-from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.core.urlresolvers import resolve, get_script_prefix
 from tastypie import fields
 from tastypie.fields import RelatedField
@@ -13,8 +13,10 @@ from tastypie.resources import ModelResource, Resource
 from tastypie.serializers import Serializer
 from tastypie.validation import FormValidation, Validation
 from django.core.exceptions import ObjectDoesNotExist
-from django.utils import timezone
+from django.urls.exceptions import Resolver404
+from pytz import timezone
 from django.conf import settings
+
 
 from dojo.models import Product, Engagement, Test, Finding, \
     User, ScanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance, \
@@ -26,6 +28,8 @@ from dojo.forms import ProductForm, EngForm2, TestForm, \
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_system_setting
 from datetime import datetime
+
+localtz = timezone(get_system_setting('time_zone'))
 
 """
     Setup logging for the api
@@ -841,10 +845,11 @@ class ImportScanResource(MultipartResource, Resource):
     tags = fields.CharField(attribute='tags')
     file = fields.FileField(attribute='file')
     engagement = fields.CharField(attribute='engagement')
+    lead = fields.CharField(attribute='lead')
 
     class Meta:
         resource_name = 'importscan'
-        fields = ['scan_date', 'minimum_severity', 'active', 'verified', 'scan_type', 'tags', 'file']
+        fields = ['scan_date', 'minimum_severity', 'active', 'verified', 'scan_type', 'tags', 'file', 'lead']
         list_allowed_methods = ['post']
         detail_allowed_methods = []
         include_resource_uri = True
@@ -869,6 +874,9 @@ class ImportScanResource(MultipartResource, Resource):
         bundle.obj.__setattr__('engagement_obj',
                                Engagement.objects.get(id=get_pk_from_uri(bundle.data['engagement'])))
 
+        bundle.obj.__setattr__('user_obj',
+                               User.objects.get(id=get_pk_from_uri(bundle.data['lead'])))
+
         return bundle
 
     def detail_uri_kwargs(self, bundle_or_obj):
@@ -880,18 +888,28 @@ class ImportScanResource(MultipartResource, Resource):
         self.is_valid(bundle)
         if bundle.errors:
             raise ImmediateHttpResponse(response=self.error_response(bundle.request, bundle.errors))
+
         bundle = self.full_hydrate(bundle)
 
         # We now have all the options we need and will just replicate the process in views.py
         tt, t_created = Test_Type.objects.get_or_create(name=bundle.data['scan_type'])
         # will save in development environment
         environment, env_created = Development_Environment.objects.get_or_create(name="Development")
+
         scan_date = datetime.strptime(bundle.data['scan_date'], '%Y-%m-%d')
-        t = Test(engagement=bundle.obj.__getattr__('engagement_obj'), test_type=tt, target_start=scan_date,
+
+        t = Test(engagement=bundle.obj.__getattr__('engagement_obj'), lead = bundle.obj.__getattr__('user_obj'), test_type=tt, target_start=scan_date,
                  target_end=scan_date, environment=environment, percent_complete=100)
-        t.full_clean()
+
+        try:
+            t.full_clean()
+        except ValidationError:
+            print "Error Validating Test Object"
+            print ValidationError
+
         t.save()
         t.tags = bundle.data['tags']
+
 
         try:
             parser = import_parser_factory(bundle.data['file'], t)

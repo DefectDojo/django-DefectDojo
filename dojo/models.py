@@ -625,6 +625,13 @@ class Finding(models.Model):
     last_reviewed_by = models.ForeignKey(User, null=True, editable=False, related_name='last_reviewed_by')
     images = models.ManyToManyField('FindingImage', blank=True)
 
+    line_number = models.TextField()
+    sourcefilepath = models.TextField()
+    sourcefile = models.TextField()
+    sourcefile = models.TextField()
+    param = models.TextField()
+    payload = models.TextField()
+
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
 

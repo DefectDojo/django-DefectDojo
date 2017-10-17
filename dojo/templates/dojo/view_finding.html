@@ -177,6 +177,55 @@
             </table>
         </div>
     </div>
+
+    <div class="panel panel-default">
+            <table id="error_notes" class="table-striped table table-condensed table-hover centered">
+                <tr>
+                    <th>Source File path</th>
+                    <th>Source File</th>
+                    <th>Line Number</th>
+                </tr>
+                <tr>
+                    <td>
+                        <span>
+                           {{ finding.sourcefilepath }}
+                        </span>
+                    </td>
+                    <td>
+                        <span>
+                           {{ finding.sourcefile }}
+                        </span>
+                    </td>
+                    <td>
+                        <span>
+                           {{ finding.line_number }}
+                        </span>
+                    </td>
+                </tr>
+            </table>
+    </div>
+
+    <div class="panel panel-default">
+        <table id="error_notes" class="table-striped table table-condensed table-hover centered">
+                <tr>
+                    <th>Parameters</th>
+                    <th>Payload</th>
+                </tr>
+                <tr>
+                    <td>
+                        <span>
+                             {{ finding.param }}
+                        </span>
+                    </td>
+                    <td>
+                        <span>
+                             {{ finding.payload }}
+                        </span>
+                    </td>
+                </tr>
+        </table>
+    </div>
+
  {% if jissue and jconf %}
     <div class="row to_highlight">
         <div class="col-md-12">

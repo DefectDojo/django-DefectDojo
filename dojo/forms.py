@@ -234,6 +234,7 @@ class ImportScanForm(forms.Form):
                          ("Dependency Check Scan", "Dependency Check Scan"), ("Retire.js Scan", "Retire.js Scan"),
                          ("Node Security Platform Scan", "Node Security Platform Scan"),
                          ("Qualys Scan", "Qualys Scan"),
+                         ("Qualys Webapp Scan", "Qualys Webapp Scan"),
                          ("OpenVAS CSV", "OpenVAS CSV"),
                          ("Generic Findings Import", "Generic Findings Import"))
     scan_date = forms.DateTimeField(
