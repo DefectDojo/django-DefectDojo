@@ -235,6 +235,7 @@ class ImportScanForm(forms.Form):
                          ("Node Security Platform Scan", "Node Security Platform Scan"),
                          ("Qualys Scan", "Qualys Scan"),
                          ("OpenVAS CSV", "OpenVAS CSV"),
+                         ("Snyk Scan", "Snyk Scan"),
                          ("Generic Findings Import", "Generic Findings Import"))
     scan_date = forms.DateTimeField(
         required=True,

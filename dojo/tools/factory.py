@@ -13,6 +13,7 @@ from dojo.tools.retirejs.parser import RetireJsParser
 from dojo.tools.nsp.parser import NspParser
 from dojo.tools.generic.parser import GenericFindingUploadCsvParser
 from dojo.tools.qualys.parser import QualysParser
+from dojo.tools.snyk.parser import SnykParser
 from dojo.tools.openvas_csv.parser import OpenVASUploadCsvParser
 
 
@@ -58,6 +59,8 @@ def import_parser_factory(file, test):
         parser = QualysParser(file, test)
     elif scan_type == "OpenVAS CSV":
         parser = OpenVASUploadCsvParser(file, test)
+    elif scan_type == 'Snyk Scan':
+        parser = SnykParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 
