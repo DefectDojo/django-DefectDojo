@@ -1,22 +1,21 @@
-FROM appsecpipeline/dojo-base
 
-#Create the dojo user
-RUN useradd -m dojo
+FROM ubuntu:16.04
+MAINTAINER Matt Tesauro <matt.tesauro@owasp.org<mailto:matt.tesauro@owasp.org>>
 
-#Change to the dojo user
-USER dojo
+# Create a single Docker running DefectDojo and all dependencies
 
-#Add DefectDojo
-ADD . /django-DefectDojo
+RUN apt update \
+    && DEBIAN_FRONTEND=noninteractive apt install -y mysql-server sudo git expect \
+    && usermod -d /var/lib/mysql/ mysql \
+    && service mysql start \
+    && cd /opt \
+    && git clone https://github.com/OWASP/django-DefectDojo.git \
+    && export AUTO_DOCKER=yes \
+    && /opt/django-DefectDojo/setup.bash \
+    && service mysql stop
 
-#Set working directory
-WORKDIR /django-DefectDojo
+WORKDIR /opt/django-DefectDojo
 
-USER root
-
-#Run the setup script
-RUN bash docker/docker-startup.bash setup
-
-USER dojo
-
-CMD bash docker/docker-startup.bash
+CMD chown -R mysql:mysql /var/lib/mysql /var/run/mysqld \
+    && service mysql start \
+    && python manage.py runserver 0.0.0.0:8000<http://0.0.0.0:8000>
