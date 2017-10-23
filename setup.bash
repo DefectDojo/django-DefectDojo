@@ -287,7 +287,7 @@ fi
 if [ $(id -u) = 0 ]; then
     adduser --disabled-password --gecos "DefectDojo" dojo
     chown -R dojo:dojo /opt/django-DefectDojo
-    su - dojo -c 'cd /opt/django-DefectDojo/components && bower install'
+    su - dojo -c 'cd /opt/django-DefectDojo/components && bower install && cd ..'
 else
     cd components && bower install && cd ..
 fi
