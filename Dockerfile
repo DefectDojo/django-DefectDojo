@@ -18,4 +18,4 @@ WORKDIR /opt/django-DefectDojo
 
 CMD chown -R mysql:mysql /var/lib/mysql /var/run/mysqld \
     && service mysql start \
-    && python manage.py runserver 0.0.0.0:8000<http://0.0.0.0:8000>
+    && python manage.py runserver 0.0.0.0:8000
