@@ -1,6 +1,6 @@
 
 FROM ubuntu:16.04
-MAINTAINER Matt Tesauro <matt.tesauro@owasp.org<mailto:matt.tesauro@owasp.org>>
+MAINTAINER Matt Tesauro matt.tesauro@owasp.org
 
 # Create a single Docker running DefectDojo and all dependencies
 
