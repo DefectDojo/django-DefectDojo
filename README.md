@@ -1,7 +1,3 @@
-# Project Summit October 20th, 2017
-
-Info here: https://docs.google.com/document/d/1q_gQW-jc7PdWWUqGqi8H40WsA4RM37UOjlfSEHiFrQQ/edit?usp=sharing
-
 # Description
 
 ![Screenshot of DefectDojo](./doc/img/screenshot1.png)
