@@ -8,7 +8,7 @@ RUN apt update \
     && usermod -d /var/lib/mysql/ mysql \
     && service mysql start \
     && cd /opt \
-    && git clone https://github.com/mtesauro/django-DefectDojo.git \
+    && git clone https://github.com/OWASP/django-DefectDojo.git \
     && export AUTO_DOCKER=yes \
     && /opt/django-DefectDojo/setup.bash \
     && cd /tmp \
