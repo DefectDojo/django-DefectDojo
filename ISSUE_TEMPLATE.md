@@ -1,6 +1,6 @@
 Please use the following template when submitting issues:
 
-<h2> Issue Template </h2>
+## Issue Template
 
 ### Issue Type 
 - [ ] Bug
