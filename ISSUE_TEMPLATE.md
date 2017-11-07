@@ -1,4 +1,4 @@
-Please copy, paste, and use the following template when submitting issues:
+Please use the following template when submitting issues:
 
 <h2> Issue Template </h2>
 
