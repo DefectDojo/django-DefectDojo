@@ -29,6 +29,7 @@ class Login(unittest.TestCase):
     def get_api_key(self):
         driver = self.login_page()
         driver.get(self.base_url + "api/key")
+        time.sleep(3)
         api_text = driver.find_element_by_tag_name("BODY").text
         r_pattern = re.compile('Your current API key is (\w+)')
         r_match = r_pattern.search(api_text)
