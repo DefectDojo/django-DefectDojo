@@ -23,7 +23,7 @@ before_install:
   - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH ; fi`
   - docker build -t $REPO:${TRAVIS_COMMIT::8} .
     # - docker run -e DOJO_ADMIN_USER=$DOJO_ADMIN_USER -e DOJO_ADMIN_PASSWORD=$DOJO_ADMIN_PASSWORD --name dojo -d -p 127.0.0.1:8000:8000 $REPO:${TRAVIS_COMMIT::8} bash /django-DefectDojo/docker/docker-startup.bash
-  - docker run -d -p 8000:8000 --name=$CONTAINER_NAME $REPO:${TRAVIS_COMMIT::8}
+  - docker run -d -p 127.0.0.1:8000:8000 --name=$CONTAINER_NAME $REPO:${TRAVIS_COMMIT::8}
     # - sleep 30 #allow dojo time to startup
   - sudo service docker restart
   - docker logs $CONTAINER_NAME
