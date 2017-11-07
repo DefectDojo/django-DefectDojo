@@ -11,7 +11,7 @@ import requests
 
 class Login(unittest.TestCase):
     def setUp(self):
-        self.driver = webdriver.Firefox()
+        self.driver = webdriver.Chrome('/usr/local/bin/chromedriver')
         self.driver.implicitly_wait(30)
         self.base_url = "http://localhost:8000/"
         self.verificationErrors = []
