@@ -33,7 +33,7 @@ before_install:
   - docker ps -a
   - docker logs $CONTAINER_NAME
   - echo "Checking to see if dojo is running"
-  ##- curl http://127.0.0.1:8000/login?next=/
+  - curl http://127.0.0.1:8000/login?next=/
   ## Selenium and ZAP requirements
   - pip install selenium==2.53.6
   - pip install requests
