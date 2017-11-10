@@ -23,7 +23,7 @@ from tagging.registry import register as tag_register
 from multiselectfield import MultiSelectField
 
 class System_Settings(models.Model):
-    enable_deduplication = models.BooleanField(default=False, 
+    enable_deduplication = models.BooleanField(default=False,
                                         blank=False,
                                         verbose_name='Deduplicate findings',
                                         help_text='With this setting turned on, Dojo deduplicates findings by comparing endpoints, ' \
@@ -43,8 +43,8 @@ class System_Settings(models.Model):
     enable_mail_notifications = models.BooleanField(default=False, blank=False)
     mail_notifications_from = models.CharField(max_length=200, default='from@example.com', blank=True)
     mail_notifications_to = models.CharField(max_length=200, default='', blank=True)
-    s_finding_severity_naming = models.BooleanField(default=False, 
-                                                    blank=False, 
+    s_finding_severity_naming = models.BooleanField(default=False,
+                                                    blank=False,
                                                     help_text='With this setting turned on, Dojo will display S0, S1, S2, etc ' \
                                                     'in most places, whereas if turned off Critical, High, Medium, etc will be displayed.')
     false_positive_history = models.BooleanField(default=False)
@@ -625,12 +625,11 @@ class Finding(models.Model):
     last_reviewed_by = models.ForeignKey(User, null=True, editable=False, related_name='last_reviewed_by')
     images = models.ManyToManyField('FindingImage', blank=True)
 
-    line_number = models.TextField()
-    sourcefilepath = models.TextField()
-    sourcefile = models.TextField()
-    sourcefile = models.TextField()
-    param = models.TextField()
-    payload = models.TextField()
+    line_number = models.TextField(null=True, blank=True)
+    sourcefilepath = models.TextField(null=True, blank=True)
+    sourcefile = models.TextField(null=True, blank=True)
+    param = models.TextField(null=True, blank=True)
+    payload = models.TextField(null=True, blank=True)
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}

@@ -14,7 +14,7 @@ from tastypie.serializers import Serializer
 from tastypie.validation import FormValidation, Validation
 from django.core.exceptions import ObjectDoesNotExist
 from django.urls.exceptions import Resolver404
-from pytz import timezone
+from django.utils import timezone
 from django.conf import settings
 
 
@@ -29,8 +29,6 @@ from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_system_setting
 from datetime import datetime
 
-localtz = timezone(get_system_setting('time_zone'))
-
 """
     Setup logging for the api
 
@@ -42,7 +40,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 """
-
 
 class ModelFormValidation(FormValidation):
     """
@@ -871,11 +868,12 @@ class ImportScanResource(MultipartResource, Resource):
         if 'tags' not in bundle.data:
             bundle.data['tags'] = ""
 
+        if 'lead' in bundle.data:
+            bundle.obj.__setattr__('user_obj',
+                                   User.objects.get(id=get_pk_from_uri(bundle.data['lead'])))
+
         bundle.obj.__setattr__('engagement_obj',
                                Engagement.objects.get(id=get_pk_from_uri(bundle.data['engagement'])))
-
-        bundle.obj.__setattr__('user_obj',
-                               User.objects.get(id=get_pk_from_uri(bundle.data['lead'])))
 
         return bundle
 
