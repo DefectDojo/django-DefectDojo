@@ -361,6 +361,7 @@ def edit_product(request, pid):
                 jform = JIRAPKeyForm()
         else:
             jform = None
+    form.initial['tags'] = [tag.name for tag in prod.tags]
     add_breadcrumb(parent=prod, title="Edit", top_level=False, request=request)
 
     return render(request,
