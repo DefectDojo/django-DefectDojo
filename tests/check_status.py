@@ -42,6 +42,8 @@ class Login(unittest.TestCase):
         headers = {'content-type': 'application/json',
                    'Authorization': 'ApiKey %s:%s' % (user, api_key)}
         r = requests.get(api_url, headers=headers, verify=False)
+        print headers
+        print r.text
         self.assertEqual(r.status_code, 200)
 
     def test_finding_status(self):
@@ -50,7 +52,10 @@ class Login(unittest.TestCase):
         user = os.environ['DOJO_ADMIN_USER']
         headers = {'content-type': 'application/json',
                    'Authorization': 'ApiKey %s:%s' % (user, api_key)}
+
+        print headers
         r = requests.get(api_url, headers=headers, verify=False)
+        print r.text
         self.assertEqual(r.status_code, 200)
 
     def test_product_status(self):
