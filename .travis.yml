@@ -16,8 +16,8 @@ before_script:
 
 before_install:
   ## Docker Build
-  - export DOJO_ADMIN_USER='test_user'
-  - export DOJO_ADMIN_PASSWORD='test_password'
+  - export DOJO_ADMIN_USER='admin'
+  - export DOJO_ADMIN_PASSWORD='admin'
   - export REPO=mtesauro/defect-dojo
   - export CONTAINER_NAME=dojo
   - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH ; fi`
@@ -30,11 +30,6 @@ before_install:
   - docker logs $CONTAINER_NAME
   ## Turn off Zap tests while re-configuring how they run
   ##- docker run -d --name zap --link $CONTAINER_NAME -p 127.0.0.1:8080:8080 -i owasp/zap2docker-stable zap.sh -daemon -host 0.0.0.0 -port 8080 -config api.disablekey=true
-  - docker ps -a
-  - docker logs $CONTAINER_NAME
-  - echo "Checking to see if dojo is running"
-  - sleep 10
-  - curl http://127.0.0.1:8000/login?next=/
   ## Selenium and ZAP requirements
   - pip install selenium==2.53.6
   - pip install requests
@@ -47,6 +42,10 @@ before_install:
   - sudo mv -f ~/chromedriver /usr/local/share/
   - sudo chmod +x /usr/local/share/chromedriver
   - sudo ln -s /usr/local/share/chromedriver /usr/local/bin/chromedriver
+  - docker ps -a
+  - docker logs $CONTAINER_NAME
+  - echo "Checking to see if dojo is running"
+  - travis_retry curl http://127.0.0.1:8000/login?next=/
 
 after_success:
   ## Run the SRC:CLR Scan
@@ -63,7 +62,7 @@ after_success:
 
 script:
   - whereis chromedriver
-  - python tests/check_status.py -v && python tests/smoke_test.py && python tests/zap.py
+  - python tests/check_status.py -v #&& python tests/smoke_test.py && python tests/zap.py
 
 notifications:
   slack:
@@ -75,4 +74,3 @@ notifications:
 addons:
   firefox: "45.0"
   chrome: stable
-  
