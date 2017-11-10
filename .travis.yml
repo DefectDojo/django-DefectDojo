@@ -16,8 +16,8 @@ before_script:
 
 before_install:
   ## Docker Build
-  - export DOJO_ADMIN_USER='test_user'
-  - export DOJO_ADMIN_PASSWORD='test_password'
+  - export DOJO_ADMIN_USER='admin'
+  - export DOJO_ADMIN_PASSWORD='admin'
   - export REPO=mtesauro/defect-dojo
   - export CONTAINER_NAME=dojo
   - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH ; fi`
