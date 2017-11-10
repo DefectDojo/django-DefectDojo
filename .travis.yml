@@ -30,13 +30,6 @@ before_install:
   - docker logs $CONTAINER_NAME
   ## Turn off Zap tests while re-configuring how they run
   ##- docker run -d --name zap --link $CONTAINER_NAME -p 127.0.0.1:8080:8080 -i owasp/zap2docker-stable zap.sh -daemon -host 0.0.0.0 -port 8080 -config api.disablekey=true
-  - docker ps -a
-  - npm install sleep-ms -g;
-  - node -e "setTimeout(null,5000)";
-  - docker logs $CONTAINER_NAME
-  - docker ps -a
-  - echo "Checking to see if dojo is running"
-  - curl http://127.0.0.1:8000/login?next=/
   ## Selenium and ZAP requirements
   - pip install selenium==2.53.6
   - pip install requests
@@ -50,12 +43,9 @@ before_install:
   - sudo chmod +x /usr/local/share/chromedriver
   - sudo ln -s /usr/local/share/chromedriver /usr/local/bin/chromedriver
   - docker ps -a
-  - npm install sleep-ms -g;
-  - node -e "setTimeout(null,5000)";
   - docker logs $CONTAINER_NAME
-  - docker ps -a
   - echo "Checking to see if dojo is running"
-  - curl http://127.0.0.1:8000/login?next=/
+  - travis_retry curl http://127.0.0.1:8000/login?next=/
 
 after_success:
   ## Run the SRC:CLR Scan
