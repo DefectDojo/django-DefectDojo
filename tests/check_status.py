@@ -11,7 +11,7 @@ import requests
 
 class Login(unittest.TestCase):
     def setUp(self):
-        self.driver = webdriver.Chrome('/usr/local/bin/chromedriver')
+        self.driver = webdriver.Chrome('chromedriver')
         self.driver.implicitly_wait(500)
         self.base_url = "http://localhost:8000/"
         self.verificationErrors = []
@@ -42,8 +42,6 @@ class Login(unittest.TestCase):
         headers = {'content-type': 'application/json',
                    'Authorization': 'ApiKey %s:%s' % (user, api_key)}
         r = requests.get(api_url, headers=headers, verify=False)
-        print headers
-        print r.text
         self.assertEqual(r.status_code, 200)
 
     def test_finding_status(self):
@@ -53,9 +51,7 @@ class Login(unittest.TestCase):
         headers = {'content-type': 'application/json',
                    'Authorization': 'ApiKey %s:%s' % (user, api_key)}
 
-        print headers
         r = requests.get(api_url, headers=headers, verify=False)
-        print r.text
         self.assertEqual(r.status_code, 200)
 
     def test_product_status(self):

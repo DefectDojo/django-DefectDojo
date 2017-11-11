@@ -472,7 +472,6 @@ class RiskAcceptanceResource(BaseModelResource):
         detail_allowed_methods = ['get']
         queryset = Risk_Acceptance.objects.all().order_by('created')
 
-
 """
     /api/v1/findings/
     GET [/id/], DELETE [/id/]
@@ -491,7 +490,7 @@ class RiskAcceptanceResource(BaseModelResource):
 class FindingResource(BaseModelResource):
     reporter = fields.ForeignKey(UserResource, 'reporter', null=False)
     test = fields.ForeignKey(TestResource, 'test', null=False)
-    risk_acceptance = fields.ManyToManyField(RiskAcceptanceResource, 'risk_acceptance', null=True)
+    #risk_acceptance = fields.ManyToManyField(RiskAcceptanceResource, 'risk_acceptance', full=True, null=True)
     product = fields.ForeignKey(ProductResource, 'test__engagement__product', full=False, null=False)
     engagement = fields.ForeignKey(EngagementResource, 'test__engagement', full=False, null=False)
 
@@ -503,6 +502,7 @@ class FindingResource(BaseModelResource):
         list_allowed_methods = ['get', 'post']
         detail_allowed_methods = ['get', 'post', 'put']
         include_resource_uri = True
+
         filtering = {
             'id': ALL,
             'title': ALL,
@@ -519,7 +519,7 @@ class FindingResource(BaseModelResource):
             'url': ALL,
             'out_of_scope': ALL,
             'duplicate': ALL,
-            'risk_acceptance': ALL,
+            'risk_acceptance': ALL_WITH_RELATIONS,
             'engagement': ALL_WITH_RELATIONS,
             'product': ALL_WITH_RELATIONS
             #'build_id': ALL
