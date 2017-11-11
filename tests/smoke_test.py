@@ -23,9 +23,9 @@ class DojoTests(unittest.TestCase):
         'sslProxy': myProxy,
         'noProxy':''})
 
-        self.driver = webdriver.Firefox(proxy=proxy)
+        self.driver = webdriver.Chrome('chromedriver')
         self.driver.implicitly_wait(30)
-        self.base_url = "http://dojo:8000/"
+        self.base_url = "http://localhost:8000/"
         self.verificationErrors = []
         self.accept_next_alert = True
 

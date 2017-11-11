@@ -62,7 +62,8 @@ after_success:
 
 script:
   - whereis chromedriver
-  - python tests/check_status.py -v #&& python tests/smoke_test.py && python tests/zap.py
+  - export PATH=$PATH:/usr/local/bin/
+  - python tests/check_status.py -v && python tests/smoke_test.py #&& python tests/zap.py
 
 notifications:
   slack:
