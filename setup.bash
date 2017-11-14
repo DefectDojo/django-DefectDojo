@@ -248,8 +248,8 @@ fi
 # Detect if we're in a a virtualenv
 if python -c 'import sys; print sys.real_prefix' 2>/dev/null; then
     pip install .
-    python manage.py makemigrations dojo
-    python manage.py makemigrations
+    #python manage.py makemigrations dojo
+    python manage.py makemigrations --merge --noinput
     python manage.py migrate
     echo -e "${GREEN}${BOLD}Create Dojo superuser:"
     tput sgr0
@@ -262,8 +262,8 @@ if python -c 'import sys; print sys.real_prefix' 2>/dev/null; then
     python manage.py buildwatson
 else
     pip install .
-    python manage.py makemigrations dojo
-    python manage.py makemigrations
+    #python manage.py makemigrations dojo
+    python manage.py makemigrations --merge --noinput
     python manage.py migrate
     # Allow script to be called non-interactively using:
     # export AUTO_DOCKER=yes && /opt/django-DefectDojo/setup.bash
