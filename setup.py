@@ -31,7 +31,7 @@ setup(
         'kombu==3.0.37',
         'sqlalchemy',
         'django-polymorphic==1.2',
-        'pdfkit==0.5.0',
+        'pdfkit==0.6.1',
         'django-overextends',
         'defusedxml',
         'django-tagging',
