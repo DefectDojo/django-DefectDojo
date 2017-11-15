@@ -40,7 +40,7 @@ def add_alerts(self, runinterval):
         target_end__lt=now,
         status='In Progress').order_by('-target_end')
     for eng in stale_engagements:
-        create_notification(event='stale_engagement', 
+        create_notification(event='stale_engagement',
                            title='Stale Engagement: %s' % eng.name,
                            description='The engagement "%s" is stale. Target end was %s.' % (eng.name, eng.target_end.strftime("%b. %d, %Y")),
                            url=reverse('view_engagement', args=(eng.id,)),
@@ -141,8 +141,12 @@ def async_custom_pdf_report(self,
             toc = {'toc-header-text': toc_settings.title,
                    'xsl-style-sheet': temp.name}
 
+        # default the cover to not come first by default
+        cover_first_val=False
+
         cover = None
         if 'cover-page' in selected_widgets:
+            cover_first_val=True
             cp = selected_widgets['cover-page']
             x = urlencode({'title': cp.title,
                            'subtitle': cp.sub_heading,
@@ -156,9 +160,9 @@ def async_custom_pdf_report(self,
         pdf = pdfkit.from_string(bytes,
                                  False,
                                  configuration=config,
-                                 cover=cover,
                                  toc=toc,
-                                 )
+                                 cover=cover,
+                                 cover_first=cover_first_val)
 
         if report.file.name:
             with open(report.file.path, 'w') as f:
@@ -243,4 +247,3 @@ def async_false_history(new_finding, *args, **kwargs):
     if total_findings.count() > 0:
             new_finding.false_p = True
             super(Finding, new_finding).save(*args, **kwargs)
-
