@@ -593,7 +593,7 @@ class AddFindingForm(forms.ModelForm):
                            widget=forms.TextInput(attrs={'class':
                                                              'datepicker'}))
     cwe = forms.IntegerField(required=False)
-    severity_options = (('Low', 'Low'), ('Medium', 'Medium'),
+    severity_options = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
                         ('High', 'High'), ('Critical', 'Critical'))
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
