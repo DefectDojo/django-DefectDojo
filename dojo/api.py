@@ -519,7 +519,7 @@ class FindingResource(BaseModelResource):
             'url': ALL,
             'out_of_scope': ALL,
             'duplicate': ALL,
-            'risk_acceptance': ALL_WITH_RELATIONS,
+            #'risk_acceptance': ALL_WITH_RELATIONS,
             'engagement': ALL_WITH_RELATIONS,
             'product': ALL_WITH_RELATIONS
             #'build_id': ALL
