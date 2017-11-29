@@ -88,6 +88,7 @@ DefectDojo is maintained by:
 - Charles Neill ([@ccneill](https://twitter.com/ccneill))
 - Jay Paz ([@jjpaz](https://twitter.com/jjpaz))
 - Aaron Weaver ([@weavera](https://twitter.com/weavera))
+- Matt Tesauro ([@mtesauro](https://twitter.com/matt_tesauro))
 
 # Contributing
 
