@@ -310,7 +310,7 @@ echo "    DEBUG = True  # you should set this to False when you are ready for pr
 echo "    Uncomment the following lines if you enabled SSL/TLS on your server:"
 echo "        SESSION_COOKIE_SECURE = True"
 echo "        CSRF_COOKIE_SECURE = True"
-echo "        SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTOCOL', 'https')"
+echo "        SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')"
 echo "        SECURE_SSL_REDIRECT = True"
 echo "        SECURE_BROWSER_XSS_FILTER = True"
 echo "        django.middleware.security.SecurityMiddleware"
