@@ -54,8 +54,8 @@ after_success:
   - cd docker-bench-security
   - sh docker-bench-security.sh
   #Push to docker repo
-  - docker tag $REPO:$COMMIT $REPO:$TAG
-  - docker tag $REPO:$COMMIT $REPO:travis-$TRAVIS_BUILD_NUMBER
+  - docker tag $REPO $REPO:$TAG
+  - docker tag $REPO $REPO:travis-$TRAVIS_BUILD_NUMBER
   - |
     if [ "$TRAVIS_BRANCH" == "master" ]; then
       docker login -u '$DOCKER_USER' -p '$DOCKER_PASS';
