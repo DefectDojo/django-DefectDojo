@@ -57,8 +57,12 @@ after_success:
   - cd docker-bench-security
   - sh docker-bench-security.sh
   #Push to docker repo
-  - cd ../
-# - sh docker/dojo-container-build-push.bash
+  - export REPO='appsecpipeline/django-defectdojo'
+  - docker login -u '$DOCKER_USER' -p '$DOCKER_PASS'
+  - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH ; fi`
+  - docker tag $REPO:$COMMIT $REPO:$TAG
+  - docker tag $REPO:$COMMIT $REPO:travis-$TRAVIS_BUILD_NUMBER
+  - `if [ "$TRAVIS_BRANCH" == "master" ]; then docker push $REPO ; fi`
 
 script:
   - whereis chromedriver
