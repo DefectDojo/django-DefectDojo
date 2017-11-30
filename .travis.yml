@@ -18,7 +18,7 @@ before_install:
   ## Docker Build
   - export DOJO_ADMIN_USER='admin'
   - export DOJO_ADMIN_PASSWORD='admin'
-  - export REPO=mtesauro/defect-dojo
+  - export REPO=appsecpipeline/dojo-base
   - export CONTAINER_NAME=dojo
   - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH ; fi`
   - docker build -t $REPO:${TRAVIS_COMMIT::8} .
@@ -57,9 +57,7 @@ after_success:
   - cd docker-bench-security
   - sh docker-bench-security.sh
   #Push to docker repo
-  - export REPO='appsecpipeline/django-defectdojo'
   - docker login -u '$DOCKER_USER' -p '$DOCKER_PASS'
-  - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH ; fi`
   - docker tag $REPO:$COMMIT $REPO:$TAG
   - docker tag $REPO:$COMMIT $REPO:travis-$TRAVIS_BUILD_NUMBER
   - |
