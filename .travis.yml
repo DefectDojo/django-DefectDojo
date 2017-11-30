@@ -18,15 +18,12 @@ before_install:
   ## Docker Build
   - export DOJO_ADMIN_USER='admin'
   - export DOJO_ADMIN_PASSWORD='admin'
-  - export REPO=mtesauro/defect-dojo
+  - export REPO=appsecpipeline/django-defectdojo
   - export CONTAINER_NAME=dojo
   - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH ; fi`
-  - docker build -t $REPO:${TRAVIS_COMMIT::8} .
+  - docker build -t $REPO .
     # - docker run -e DOJO_ADMIN_USER=$DOJO_ADMIN_USER -e DOJO_ADMIN_PASSWORD=$DOJO_ADMIN_PASSWORD --name dojo -d -p 127.0.0.1:8000:8000 $REPO:${TRAVIS_COMMIT::8} bash /django-DefectDojo/docker/docker-startup.bash
-  - docker run -d -p 127.0.0.1:8000:8000 --name=$CONTAINER_NAME $REPO:${TRAVIS_COMMIT::8}
-    # - sleep 30 #allow dojo time to startup
-  ## Why are we restarting docker when it will cause the dojo container to exit aka not be running??
-  ##- sudo service docker restart
+  - docker run -d -p 127.0.0.1:8000:8000 --name=$CONTAINER_NAME $REPO
   - docker logs $CONTAINER_NAME
   ## Turn off Zap tests while re-configuring how they run
   ##- docker run -d --name zap --link $CONTAINER_NAME -p 127.0.0.1:8080:8080 -i owasp/zap2docker-stable zap.sh -daemon -host 0.0.0.0 -port 8080 -config api.disablekey=true
@@ -57,8 +54,13 @@ after_success:
   - cd docker-bench-security
   - sh docker-bench-security.sh
   #Push to docker repo
-  - cd ../
-# - sh docker/dojo-container-build-push.bash
+  - docker tag $REPO $REPO:$TAG
+  - docker tag $REPO $REPO:travis-$TRAVIS_BUILD_NUMBER
+  - |
+    if [ "$TRAVIS_BRANCH" == "master" ]; then
+      docker login -u '$DOCKER_USER' -p '$DOCKER_PASS';
+      docker push $REPO ;
+    fi
 
 script:
   - whereis chromedriver
