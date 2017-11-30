@@ -46,7 +46,7 @@ Deploy to Docker Cloud. (<b>Login first to Docker Cloud before clicking the inst
 
 ### [Docker](http://defectdojo.readthedocs.io/en/latest/getting-started.html#docker-local-install) - There are currently a number of bugs in the Docker image that we're working to address. Please use the regular install script to avoid issues.
 
-### [Vagrant (deprecated)](./doc/install_vagrant.md)
+### [Ansible](https://github.com/OWASP/django-DefectDojo/tree/master/ansible/prod-install)
 
 # Getting Started
 
