@@ -57,7 +57,7 @@ after_success:
   - docker tag $REPO $REPO:$TAG
   - docker tag $REPO $REPO:travis-$TRAVIS_BUILD_NUMBER
   - |
-    if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TEST" == "integration-test" ]; then
+    if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TEST" == "integration-test" ] && [ "$DOCKER_USER" != "" ] && [  "$DOCKER_PASS" != "" ]; then
       docker login -u "$DOCKER_USER" -p "$DOCKER_PASS";
       docker push $REPO ;
     fi
