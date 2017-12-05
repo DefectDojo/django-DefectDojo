@@ -1,71 +1,67 @@
 sudo: required
-
 language: python
-
 install: true
 
 env:
-  - COMMIT=${TRAVIS_COMMIT::8}
+  - TEST=integration-test
+  - TEST=sourceclear
+  - TEST=bandit
+  - TEST=docker-bench-security
+  - TEST=ansible
+
+matrix:
+  allow_failures:
+    - env: TEST=bandit 
+    - env: TEST=sourceclear
+
 services:
   - docker
 
 before_script:
-  - "export DISPLAY=:99.0"
-  - "sh -e /etc/init.d/xvfb start"
-  - sleep 3 # give xvfb some time to start
-
-before_install:
-  ## Docker Build
-  - export DOJO_ADMIN_USER='admin'
-  - export DOJO_ADMIN_PASSWORD='admin'
+  - export -f travis_fold
   - export REPO=appsecpipeline/django-defectdojo
-  - export CONTAINER_NAME=dojo
   - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH ; fi`
-  - docker build -t $REPO .
-    # - docker run -e DOJO_ADMIN_USER=$DOJO_ADMIN_USER -e DOJO_ADMIN_PASSWORD=$DOJO_ADMIN_PASSWORD --name dojo -d -p 127.0.0.1:8000:8000 $REPO:${TRAVIS_COMMIT::8} bash /django-DefectDojo/docker/docker-startup.bash
-  - docker run -d -p 127.0.0.1:8000:8000 --name=$CONTAINER_NAME $REPO
-  - docker logs $CONTAINER_NAME
-  ## Turn off Zap tests while re-configuring how they run
-  ##- docker run -d --name zap --link $CONTAINER_NAME -p 127.0.0.1:8080:8080 -i owasp/zap2docker-stable zap.sh -daemon -host 0.0.0.0 -port 8080 -config api.disablekey=true
-  ## Selenium and ZAP requirements
-  - pip install selenium==2.53.6
-  - pip install requests
-  - pip install python-owasp-zap-v2.4
-  - pip install prettytable
-  - pip install bandit
-  - wget -N https://chromedriver.storage.googleapis.com/2.33/chromedriver_linux64.zip -P ~/
-  - unzip ~/chromedriver_linux64.zip -d ~/
-  - rm ~/chromedriver_linux64.zip
-  - sudo mv -f ~/chromedriver /usr/local/share/
-  - sudo chmod +x /usr/local/share/chromedriver
-  - sudo ln -s /usr/local/share/chromedriver /usr/local/bin/chromedriver
-  - docker ps -a
-  - docker logs $CONTAINER_NAME
-  - echo "Checking to see if dojo is running"
-  - travis_retry curl http://127.0.0.1:8000/login?next=/
+
+script:
+  - |
+    echo "Running test=$TEST"
+    case "$TEST" in
+      integration-test)
+        travis_fold start "integration-test"
+        ./scripts/travis-integration-test.sh 
+        travis_fold end "integration-test"
+        ;;
+      sourceclear)
+        ## Run the SRC:CLR Scan
+        curl -sSL https://download.sourceclear.com/ci.sh | bash
+        ;;
+      bandit)
+        # install bandit
+        pip install bandit
+  
+        ## Run Bandit python static code
+        bandit -r * -x venv,tests,ansible
+        ;;
+      docker-bench-security)
+        ## Run Docker Bench for Security
+        git clone https://github.com/docker/docker-bench-security.git
+        cd docker-bench-security
+        sh docker-bench-security.sh
+        ;;
+      ansible)
+        true
+        ;;
+    esac
 
 after_success:
-  ## Run the SRC:CLR Scan
-  - curl -sSL https://download.sourceclear.com/ci.sh | bash
-  ## Run Bandit python static code
-  - bandit -r * -x venv,tests,ansible
-  ## Run Docker Bench for Security
-  - git clone https://github.com/docker/docker-bench-security.git
-  - cd docker-bench-security
-  - sh docker-bench-security.sh
   #Push to docker repo
   - docker tag $REPO $REPO:$TAG
   - docker tag $REPO $REPO:travis-$TRAVIS_BUILD_NUMBER
   - |
-    if [ "$TRAVIS_BRANCH" == "master" ]; then
+    if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TEST" == "integration-test" ] && [ "$DOCKER_USER" != "" ] && [  "$DOCKER_PASS" != "" ]; then
       docker login -u "$DOCKER_USER" -p "$DOCKER_PASS";
       docker push $REPO ;
     fi
-
-script:
-  - whereis chromedriver
-  - export PATH=$PATH:/usr/local/bin/
-  - python tests/check_status.py -v && python tests/smoke_test.py #&& python tests/zap.py
 
 notifications:
   slack:
