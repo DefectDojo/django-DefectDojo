@@ -12,6 +12,7 @@ env:
 matrix:
   allow_failures:
     - env: TEST=bandit 
+    - env: TEST=sourceclear
 
 services:
   - docker
