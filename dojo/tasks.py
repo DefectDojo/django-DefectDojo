@@ -222,16 +222,20 @@ def add_comment_task(find, note):
 def async_dedupe(new_finding, *args, **kwargs):
     logger.info("running deduplication")
     eng_findings_cwe = Finding.objects.filter(test__engagement__product=new_finding.test.engagement.product,
-                                              cwe=new_finding.cwe).exclude(id=new_finding.id).exclude(cwe=None).exclude(endpoints=None)
+                                              cwe=new_finding.cwe).exclude(id=new_finding.id).exclude(cwe=None)
     eng_findings_title = Finding.objects.filter(test__engagement__product=new_finding.test.engagement.product,
-                                                title=new_finding.title).exclude(id=new_finding.id).exclude(endpoints=None)
+                                                title=new_finding.title).exclude(id=new_finding.id)
     total_findings = eng_findings_cwe | eng_findings_title
     for find in total_findings:
-        list1 = new_finding.endpoints.all()
-        list2 = find.endpoints.all()
-        if all(x in list2 for x in list1):
-            find.duplicate = True
-            super(Finding, find).save(*args, **kwargs)
+        if find.endpoints != None:
+            list1 = new_finding.endpoints.all()
+            list2 = find.endpoints.all()
+            if all(x in list2 for x in list1):
+                find.duplicate = True
+                super(Finding, find).save(*args, **kwargs)
+        elif find.get_hash_code() == new_finding.get_hash_code():
+                find.duplicate = True
+                super(Finding, find).save(*args, **kwargs)
 
 @app.task(name='async_false_history')
 def async_false_history(new_finding, *args, **kwargs):
