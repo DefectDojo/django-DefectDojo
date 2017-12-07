@@ -649,11 +649,7 @@ class Finding(models.Model):
 
 
     def get_hash_code(self):
-        logging.debug("Hash Coude Function")
-        logging.debug(self.title+self.description)
         hash_string = self.title + self.description
-        logging.debug(hashlib.sha256(hash_string).hexdigest())
-        logging.debug("End hashcode function")
         return hashlib.sha256(hash_string).hexdigest()
 
     @staticmethod
