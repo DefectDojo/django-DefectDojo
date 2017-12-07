@@ -249,7 +249,7 @@
                         <td>{{ finding.verified }}</td>
                         <td>{{ finding.active }}</td>
                         {% if finding.duplicate %}
-                        <td><a href="{% url 'view_finding' finding.duplicate_finding.id%}">{{ finding.duplicate_finding }}</a></td>
+                        <td><a href="{% url 'view_finding' finding.duplicate_finding.id%}">original</a></td>
                         {% else %}
                             <td>False</td>
                         {% endif %}
