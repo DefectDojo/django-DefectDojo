@@ -613,6 +613,7 @@ class Finding(models.Model):
     verified = models.BooleanField(default=True)
     false_p = models.BooleanField(default=False, verbose_name="False Positive")
     duplicate = models.BooleanField(default=False)
+    duplicate_finding = models.ForeignKey('self', editable=False, null=True, related_name='original_finding', blank=True)
     out_of_scope = models.BooleanField(default=False)
     under_review = models.BooleanField(default=False)
     review_requested_by = models.ForeignKey(Dojo_User, null=True, blank=True, related_name='review_requested_by')
