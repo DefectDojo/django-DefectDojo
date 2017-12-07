@@ -1,8 +1,15 @@
 import base64
 import os
 import re
+import logging
 from datetime import datetime
 from uuid import uuid4
+from django.conf import settings
+
+fmt = getattr(settings, 'LOG_FORMAT', None)
+lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
+
+logging.basicConfig(format=fmt, level=lvl)
 
 from watson import search as watson
 from auditlog.registry import auditlog
@@ -21,6 +28,7 @@ from django.utils import timezone
 from pytz import all_timezones
 from tagging.registry import register as tag_register
 from multiselectfield import MultiSelectField
+import hashlib
 
 class System_Settings(models.Model):
     enable_deduplication = models.BooleanField(default=False,
@@ -625,17 +633,23 @@ class Finding(models.Model):
     last_reviewed_by = models.ForeignKey(User, null=True, editable=False, related_name='last_reviewed_by')
     images = models.ManyToManyField('FindingImage', blank=True)
 
-    line_number = models.TextField(null=True, blank=True)
-    sourcefilepath = models.TextField(null=True, blank=True)
-    sourcefile = models.TextField(null=True, blank=True)
-    param = models.TextField(null=True, blank=True)
-    payload = models.TextField(null=True, blank=True)
+    line_number = models.CharField(null=True, blank=True, max_length=200)
+    sourcefilepath = models.TextField(null=True, blank=True, editable=False)
+    sourcefile = models.TextField(null=True, blank=True, editable=False)
+    param = models.TextField(null=True, blank=True, editable=False)
+    payload = models.TextField(null=True, blank=True, editable=False)
+    hash_code = models.TextField(null=True,blank=True,editable=False)
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
 
     class Meta:
         ordering = ('numerical_severity', '-date', 'title')
+
+
+    def get_hash_code(self):
+        hash_string = self.title + self.description
+        return hashlib.sha256(hash_string).hexdigest()
 
     @staticmethod
     def get_numerical_severity(severity):
@@ -717,6 +731,7 @@ class Finding(models.Model):
 
     def save(self, *args, **kwargs):
         super(Finding, self).save(*args, **kwargs)
+        self.hash_code = self.get_hash_code()
         system_settings = System_Settings.objects.get()
         if system_settings.enable_deduplication :
                 from dojo.tasks import async_dedupe
