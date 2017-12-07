@@ -151,7 +151,9 @@
                             {% endif %}
                         </span>
                     </td>
-                    <td> {% if finding.under_review %}Under Review, {% endif %}{{ finding.status }}</td>
+                    <td> {% if finding.under_review %}Under Review, {% endif %}{{ finding.status }}
+                        {% if finding.duplicate %} <a href="{% url 'view_finding' finding.duplicate_finding.id%}">{{ finding.duplicate_finding }}
+                        {% endif %}</a></td>
                     {% if finding.risk_acceptance_set.all %}
                         <td>
                             <a href="{% url 'view_risk' finding.test.engagement.id finding.risk_acceptance_set.all.0.id %}">
