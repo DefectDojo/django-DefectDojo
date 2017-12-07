@@ -234,11 +234,16 @@ def async_dedupe(new_finding, *args, **kwargs):
             if all(x in list1 for x in list2):
                 new_finding.duplicate = True
                 new_finding.duplicate_finding = find
+                find.duplicate_list.add(new_finding)
                 super(Finding, find).save(*args, **kwargs)
+                super(Finding, new_finding).save(*args, **kwargs)
                 break
         elif find.get_hash_code() == new_finding.get_hash_code():
-                find.duplicate = True
+                new_finding.duplicate = True
+                new_finding.duplicate_finding = find
+                find.duplicate_list.add(new_finding)
                 super(Finding, find).save(*args, **kwargs)
+                super(Finding, new_finding).save(*args, **kwargs)
 
 @app.task(name='async_false_history')
 def async_false_history(new_finding, *args, **kwargs):
