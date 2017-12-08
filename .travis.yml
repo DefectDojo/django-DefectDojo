@@ -8,11 +8,13 @@ env:
   - TEST=bandit
   - TEST=docker-bench-security
   - TEST=ansible
+  - TEST=pep8
 
 matrix:
   allow_failures:
     - env: TEST=bandit 
     - env: TEST=sourceclear
+    - env: TEST=pep8
 
 services:
   - docker
@@ -51,6 +53,9 @@ script:
       ansible)
         true
         ;;
+      pep8)
+        pip install pep8
+        pep8 .
     esac
 
 after_success:
