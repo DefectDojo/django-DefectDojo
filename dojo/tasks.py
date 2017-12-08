@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import tempfile
 from datetime import datetime, timedelta
 
+from django.db.models import Count
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.mail import send_mail
@@ -12,7 +13,7 @@ from django.template.loader import render_to_string
 from django.utils.http import urlencode
 from celery.utils.log import get_task_logger
 from celery.decorators import task
-from dojo.models import Finding, Test, Engagement
+from dojo.models import Finding, Test, Engagement, System_Settings
 from django.utils import timezone
 
 import pdfkit
@@ -259,3 +260,16 @@ def async_false_history(new_finding, *args, **kwargs):
     if total_findings.count() > 0:
             new_finding.false_p = True
             super(Finding, new_finding).save(*args, **kwargs)
+
+@app.task(name='dupe_delete')
+def async_dupe_delete(*args, **kwargs):
+    system_settings = System_Settings.objects.get()
+    dupe_max = system_settings.max_dupes
+    findings = Finding.objects.filter.annotate(num_dupes=Count('dupe_list')).filter(num_dupes__gt=dupe_max)
+    for finding in findings:
+        duplicate_list = finding.duplicate_list.objects.sort_by('date')
+        while (len(duplicate_list) > dupe_max ):
+            dupe_finding = duplicate_list.pop(0)
+            dupe_finding.delete
+        finding.duplicate_list = duplicate_list
+        super(Finding, finding).save(*args, **kwargs)
