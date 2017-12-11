@@ -3,7 +3,6 @@ import os
 from celery import Celery
 from celery.schedules import crontab
 from django.conf import settings
-from dojo.tasks import async_dupe_delete
 
 # set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dojo.settings')
@@ -21,6 +20,17 @@ app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 def debug_task(self):
     print('Request: {0!r}'.format(self.request))
 
+"""
 @app.on_after_configure.connect
 def setup_periodic_tasks(sender, *args, **kwargs):
-    sender.add_periodic_task(crontab(hours=0,minutes=0),async_dupe_delete(*args, **kwargs) )
+    from dojo.tasks import async_dupe_delete
+    sender.add_periodic_task(crontab(hours=0,minutes=0), async_dupe_delete(*args, **kwargs) )
+"""
+app.conf.beat_schedule = {
+    # Executes every Monday morning at 7:30 a.m.
+    'add-every-monday-morning': {
+        'task': 'dojo.tasks.async_dupe_delete',
+        'schedule': 30.0,
+        'args': (16, 16),
+    },
+}

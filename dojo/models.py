@@ -39,7 +39,7 @@ class System_Settings(models.Model):
                                                   'If two findings share a URL and have the same CWE or title, Dojo marks the ' \
                                                   'less recent finding as a duplicate. When deduplication is enabled, a list of ' \
                                                   'deduplicated findings is added to the engagement view.')
-    max_dupes = models.IntegerField(blank=True, Null=True, verbose_name='Max Duplicates', help_text='When enabled, if' \
+    max_dupes = models.IntegerField(blank=True, null=True, verbose_name='Max Duplicates', help_text='When enabled, if' \
                                     'a single issue reaches the maximum number of duplicates, the oldest will be' \
                                     'deleted.')
     enable_jira = models.BooleanField(default=False, verbose_name='Enable JIRA integration', blank=False)
