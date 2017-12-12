@@ -28,9 +28,9 @@ def setup_periodic_tasks(sender, *args, **kwargs):
 """
 app.conf.beat_schedule = {
     # Executes every Monday morning at 7:30 a.m.
-    'add-every-monday-morning': {
+    'add-every-10-seconds': {
         'task': 'dojo.tasks.async_dupe_delete',
-        'schedule': 30.0,
+        'schedule': 10.0,
         'args': (16, 16),
     },
 }
