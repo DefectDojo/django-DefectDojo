@@ -226,7 +226,7 @@ class Product_TypeProductForm(forms.ModelForm):
 
 
 class ImportScanForm(forms.Form):
-    SCAN_TYPE_CHOICES = (("Burp Scan", "Burp Scan"), ("Nessus Scan", "Nessus Scan"), ("Nmap Scan", "Nmap Scan"),
+    SCAN_TYPE_CHOICES = (("", "Please Select a Scan Type"),("Burp Scan", "Burp Scan"), ("Nessus Scan", "Nessus Scan"), ("Nmap Scan", "Nmap Scan"),
                          ("Nexpose Scan", "Nexpose Scan"),
                          ("AppSpider Scan", "AppSpider Scan"), ("Veracode Scan", "Veracode Scan"),
                          ("Checkmarx Scan", "Checkmarx Scan"), ("ZAP Scan", "ZAP Scan"),
@@ -238,6 +238,8 @@ class ImportScanForm(forms.Form):
                          ("OpenVAS CSV", "OpenVAS CSV"),
                          ("Snyk Scan", "Snyk Scan"),
                          ("Generic Findings Import", "Generic Findings Import"))
+    SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
+
     scan_date = forms.DateTimeField(
         required=True,
         label="Scan Completion Date",
@@ -249,7 +251,7 @@ class ImportScanForm(forms.Form):
                                          choices=SEVERITY_CHOICES[0:4])
     active = forms.BooleanField(help_text="Select if these findings are currently active.", required=False)
     verified = forms.BooleanField(help_text="Select if these findings have been verified.", required=False)
-    scan_type = forms.ChoiceField(required=True, choices=SCAN_TYPE_CHOICES)
+    scan_type = forms.ChoiceField(required=True, choices=SORTED_SCAN_TYPE_CHOICES)
 
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False,
