@@ -499,6 +499,7 @@ def close_eng(request, eid):
     eng = Engagement.objects.get(id=eid)
     eng.active = False
     eng.status = 'Completed'
+    eng.updated = timezone.now()
     eng.save()
     jpkey_set = JIRA_PKey.objects.filter(product=eng.product)
     if jpkey_set.count() >= 1:

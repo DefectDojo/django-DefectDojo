@@ -82,7 +82,7 @@ def iso_to_gregorian(iso_year, iso_week, iso_day):
 def view_product(request, pid):
     prod = get_object_or_404(Product, id=pid)
     engs = Engagement.objects.filter(product=prod, active=True)
-    i_engs = Engagement.objects.filter(product=prod, active=False)
+    i_engs = Engagement.objects.filter(product=prod, active=False).order_by('-updated')
     scan_sets = ScanSettings.objects.filter(product=prod)
     tools = Tool_Product_Settings.objects.filter(product=prod).order_by('name')
     auth = request.user.is_staff or request.user in prod.authorized_users.all()
@@ -661,4 +661,3 @@ def ad_hoc_finding(request, pid):
                    'form_error': form_error,
                    'jform': jform,
                    })
-
