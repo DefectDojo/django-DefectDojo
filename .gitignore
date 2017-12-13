@@ -80,10 +80,10 @@ Quarterly.txt
 # Vagrant
 .vagrant
 
-# bower
+# yarn
 components/*
-!components/bower.json
-bower_components/
+!components/package.json
+yarn_components/
 dojo/static/*
 !dojo/static/dojo/*
 dojo/media

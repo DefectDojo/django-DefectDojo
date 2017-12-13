@@ -22,7 +22,6 @@ setup(
         'django-filter==1.0.4',
         'supervisor',
         'humanize',
-        'django-bower',
         'django-auditlog==0.3.3',
         'vobject',
         'html2text',

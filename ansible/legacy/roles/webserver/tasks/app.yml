@@ -113,11 +113,6 @@
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
-- name: Install django-bower
-  pip: name=django-bower state=present virtualenv={{ venv_dir }}
-  sudo: yes
-  sudo_user: '{{ dd_user }}'
-
 - name: Install django-auditlog
   pip: name=django-auditlog version=0.3.3 virtualenv={{ venv_dir }}
   sudo: yes
@@ -225,13 +220,13 @@
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
-- name: Run 'bower install' command
-  command: bower install 
+- name: Run 'yarn install' command
+  command: yarn
   sudo: yes
   sudo_user: '{{ dd_user }}'
-  register: bower_install
+  register: yarn_install
   ignore_errors: True
-  args: 
+  args:
     chdir: '{{ dd_install_dir }}/components/'
 
 - name: Git HTTPS Preference
@@ -246,7 +241,7 @@
   sudo_user: '{{ dd_user }}'
   register: bower_install2
   ignore_errors: True
-  args: 
+  args:
     chdir: '{{ dd_install_dir }}/components/'
   when: "bower_install.changed and bower_install.stderr"
 
