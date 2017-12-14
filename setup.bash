@@ -160,7 +160,7 @@ elif [[ ! -z "$APT_GET_CMD" ]]; then
      echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
      #Node
      curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash
-     sudo apt-get update && apt-get install -y apt-transport-https libjpeg-dev gcc libssl-dev python-dev python-pip nodejs yarn wkhtmltopdf build-essential
+     sudo apt-get update && sudo apt-get install -y apt-transport-https libjpeg-dev gcc libssl-dev python-dev python-pip nodejs yarn wkhtmltopdf build-essential
 elif [[ ! -z "$BREW_CMD" ]]; then
     brew install gcc openssl python node npm yarn Caskroom/cask/wkhtmltopdf
     if [ "$DBTYPE" == $MYSQL ]; then
@@ -285,7 +285,7 @@ else
     python manage.py buildwatson
 fi
 
-if [ $(id -u) = 0 ]; then
+if [ "$AUTO_DOCKER" == "yes"]; then
     adduser --disabled-password --gecos "DefectDojo" dojo
     chown -R dojo:dojo /opt/django-DefectDojo
     su - dojo -c 'cd /opt/django-DefectDojo/components && yarn && cd ..'
