@@ -33,6 +33,10 @@ Upgrading to Django 1.1.5
 ------------------------
 If you are upgrading an existing version of DefectDojo, you will need to run the following commands manually: ::
 
+First install Yarn:
+
+Follow the instructions based on your OS: https://yarnpkg.com/lang/en/docs/install/
+
 The following must be removed/commented out from settings.py: ::
 
     'djangobower.finders.BowerFinder',
