@@ -203,6 +203,11 @@ CELERYBEAT_SCHEDULE = {
         'schedule': timedelta(hours=1),
         'args': [timedelta(hours=1)]
     },
+        'dedupe-delete': {
+        'task':'dojo.tasks.async_dupe_delete',
+        'schedule': timedelta(hours=24),
+        'args': [timedelta(hours=24)]
+    },
 }
 
 

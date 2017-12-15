@@ -39,6 +39,10 @@ class System_Settings(models.Model):
                                                   'If two findings share a URL and have the same CWE or title, Dojo marks the ' \
                                                   'less recent finding as a duplicate. When deduplication is enabled, a list of ' \
                                                   'deduplicated findings is added to the engagement view.')
+    delete_dupulicates = models.BooleanField(default=False, blank=False)
+    max_dupes = models.IntegerField(blank=True, null=True, verbose_name='Max Duplicates', help_text='When enabled, if' \
+                                    'a single issue reaches the maximum number of duplicates, the oldest will be' \
+                                    'deleted.')
     enable_jira = models.BooleanField(default=False, verbose_name='Enable JIRA integration', blank=False)
     enable_slack_notifications = models.BooleanField(default=False, verbose_name='Enable Slack notifications', blank=False)
     slack_channel = models.CharField(max_length=100, default='', blank=True)
@@ -613,6 +617,8 @@ class Finding(models.Model):
     verified = models.BooleanField(default=True)
     false_p = models.BooleanField(default=False, verbose_name="False Positive")
     duplicate = models.BooleanField(default=False)
+    duplicate_finding = models.ForeignKey('self', editable=False, null=True, related_name='original_finding', blank=True)
+    duplicate_list = models.ManyToManyField("self",editable=False, null=True, blank=True)
     out_of_scope = models.BooleanField(default=False)
     under_review = models.BooleanField(default=False)
     review_requested_by = models.ForeignKey(Dojo_User, null=True, blank=True, related_name='review_requested_by')
