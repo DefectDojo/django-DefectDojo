@@ -135,7 +135,8 @@ BREW_CMD=$(which brew)
 
 if [[ ! -z "$YUM_CMD" ]]; then
     curl -sL https://rpm.nodesource.com/setup | sudo bash -
-	sudo yum install gcc python-devel python-setuptools python-pip nodejs wkhtmltopdf npm
+    wget https://dl.yarnpkg.com/rpm/yarn.repo -O /etc/yum.repos.d/yarn.repo
+	sudo yum install gcc python-devel python-setuptools python-pip nodejs yarn wkhtmltopdf npm
 
         if [ "$DBTYPE" == $MYSQL ]; then
            echo "Installing MySQL client"
@@ -153,10 +154,15 @@ elif [[ ! -z "$APT_GET_CMD" ]]; then
 	echo "Installing Postgres client"
         sudo apt-get -y install libpq-dev postgresql postgresql-contrib libmysqlclient-dev
      fi
-
-     sudo apt-get install -y libjpeg-dev gcc libssl-dev python-dev python-pip nodejs-legacy wkhtmltopdf npm
+     sudo apt-get install -y curl apt-transport-https
+     #Yarn
+     curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+     echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+     #Node
+     curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash
+     sudo apt-get update && sudo apt-get install -y apt-transport-https libjpeg-dev gcc libssl-dev python-dev python-pip nodejs yarn wkhtmltopdf build-essential
 elif [[ ! -z "$BREW_CMD" ]]; then
-    brew install gcc openssl python node npm Caskroom/cask/wkhtmltopdf
+    brew install gcc openssl python node npm yarn Caskroom/cask/wkhtmltopdf
     if [ "$DBTYPE" == $MYSQL ]; then
         echo "Installing MySQL client"
         brew install mysql
@@ -168,9 +174,6 @@ else
 	echo "ERROR! OS not supported. Try the Vagrant option."
 	exit 1;
 fi
-
-# bower install
-sudo npm install -g bower
 
 echo
 
@@ -208,7 +211,6 @@ if [[ ! -z $BREW_CMD ]]; then
   sed -i ''  "s/MYSQLDB/$DBNAME/g" dojo/settings.py
   sed -i ''  "s#DOJODIR#$PWD/dojo#g" dojo/settings.py
   sed -i ''  "s/DOJOSECRET/$SECRET/g" dojo/settings.py
-  sed -i ''  "s#BOWERDIR#$PWD/components#g" dojo/settings.py
   sed -i ''  "s#DOJO_MEDIA_ROOT#$PWD/media/#g" dojo/settings.py
   sed -i ''  "s#DOJO_STATIC_ROOT#$PWD/static/#g" dojo/settings.py
   if [ "$DBTYPE" == '1' ]; then
@@ -225,7 +227,6 @@ else
   sed -i  "s/MYSQLDB/$DBNAME/g" dojo/settings.py
   sed -i  "s#DOJODIR#$PWD/dojo#g" dojo/settings.py
   sed -i  "s/DOJOSECRET/$SECRET/g" dojo/settings.py
-  sed -i  "s#BOWERDIR#$PWD/components#g" dojo/settings.py
   sed -i  "s#DOJO_MEDIA_ROOT#$PWD/media/#g" dojo/settings.py
   sed -i  "s#DOJO_STATIC_ROOT#$PWD/static/#g" dojo/settings.py
 
@@ -284,21 +285,15 @@ else
     python manage.py buildwatson
 fi
 
-if [ "$AUTO_DOCKER" == "yes" ]; then
+if [ "$AUTO_DOCKER" == "yes"]; then
     adduser --disabled-password --gecos "DefectDojo" dojo
     chown -R dojo:dojo /opt/django-DefectDojo
-    su - dojo -c 'cd /opt/django-DefectDojo/components && bower install && cd ..'
+    su - dojo -c 'cd /opt/django-DefectDojo/components && yarn && cd ..'
 else
-    cd components && bower install && cd ..
+    cd components && yarn && cd ..
 fi
 
-# Detect if we're in a a virtualenv
-if python -c 'import sys; print sys.real_prefix' 2>/dev/null; then
-    python manage.py collectstatic --noinput
-else
-    python manage.py collectstatic --noinput
-fi
-
+python manage.py collectstatic --noinput
 
 echo "=============================================================================="
 echo
@@ -319,6 +314,3 @@ echo "When you're ready to start the DefectDojo server, type in this directory:"
 echo
 echo "    python manage.py runserver"
 echo
-echo "Note: If git cannot connect using the git:// protocol when downloading bower artifacts, you can run the command "
-echo "below to switch over to https://"
-echo "          git config --global url."https://".insteadOf git://"

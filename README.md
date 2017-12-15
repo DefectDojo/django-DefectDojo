@@ -84,7 +84,7 @@ that should give you an idea of how to use DefectDojo for your own team.
 
 DefectDojo is maintained by:
 
-- Greg Anderson ([@\_GRRegg](https://twitter.com/_GRRegg))
+- Greg Anderson
 - Charles Neill ([@ccneill](https://twitter.com/ccneill))
 - Jay Paz ([@jjpaz](https://twitter.com/jjpaz))
 - Aaron Weaver ([@weavera](https://twitter.com/weavera))

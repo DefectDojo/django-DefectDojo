@@ -6,7 +6,7 @@
   vars_files:
   - deploy-vars.yml
 
-# Notes: 
+# Notes:
 # * Defect Dojo defaults and changable configurations are all in deploy-vars.yml
 # Future enhancements
 # * Create custom mange.py commands to handle checking for super user and other install/upgrade tasks
@@ -18,35 +18,35 @@
 
   tasks:
   - name: Set hostname
-    hostname: 
+    hostname:
       name: "{{ hostname }}"
     ignore_errors: yes
 
   - name: Set IP and hostname in /etc/hosts
-    lineinfile: 
+    lineinfile:
       dest: /etc/hosts
-      state: present 
-      insertafter: '^127' 
+      state: present
+      insertafter: '^127'
       line: "{{ ip }} {{hostname}}"
     ignore_errors: yes
-  
+
   - name: Get latest pages aka "apt-get update"
-    apt: 
-      update_cache: yes 
+    apt:
+      update_cache: yes
       cache_valid_time: 6000
 
   - name: Install Dojo Prerequisites
-    apt: 
-     name: "{{item}}" 
+    apt:
+     name: "{{item}}"
      state: installed
      update_cache: no
     with_items:
          - python-simplejson
-         - git 
+         - git
          - mysql-server
-         - nodejs 
-         - npm 
-         - python-pip 
+         - nodejs
+         - npm
+         - python-pip
          - libjpeg-dev
          - libxrender1
          - libfontconfig1
@@ -55,7 +55,7 @@
          - expect
 
   - name: Check for existing wkhtmltox install
-    stat: 
+    stat:
       path: /usr/bin/wkhtmltopdf
     register: wkhtml
 
@@ -66,16 +66,16 @@
       mode: 0755
     when: not wkhtml.stat.exists
 
-  - name: Download and extract wkhtmltox tarball 
-    unarchive: 
-      src: https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.4/wkhtmltox-0.12.4_linux-generic-amd64.tar.xz 
-      dest: /tmp/wkhtml 
-      remote_src: True 
+  - name: Download and extract wkhtmltox tarball
+    unarchive:
+      src: https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.4/wkhtmltox-0.12.4_linux-generic-amd64.tar.xz
+      dest: /tmp/wkhtml
+      remote_src: True
     register: downloadwkhtml
     when: not wkhtml.stat.exists
     # need to add architechture conditional for x386
     # depends on: zlib, fontconfig, freetype, X11 libs (libX11, libXext, libXrender)
-    # http://wkhtmltopdf.org/downloads.html 
+    # http://wkhtmltopdf.org/downloads.html
 
   - name: Move wkhtmltopdf into /usr/bin
     copy:
@@ -88,58 +88,58 @@
     when: not wkhtml.stat.exists
 
   - name: Check for existing Defect Dojo install
-    stat: 
+    stat:
       path: "{{ install_path }}/README.md"
     register: dojopresent
     ignore_errors: yes
 
   - name: Ensure mysql is running and starts on boot
-    service: 
-      name: mysql 
-      state: started 
+    service:
+      name: mysql
+      state: started
       enabled: true
 
   - name: Create database for new Defect Dojo install
-    mysql_db: 
+    mysql_db:
       name: '{{ dbname }}'
-      state: present 
-      encoding: utf8mb4 
+      state: present
+      encoding: utf8mb4
       collation: utf8mb4_unicode_ci
 
   - name: Set DB user and password for Defect Dojo
-    mysql_user: 
-      name: '{{ dbuser }}' 
+    mysql_user:
+      name: '{{ dbuser }}'
       password: '{{ dbpass }}'
-      priv: "{{ dbname }}.*:ALL" 
+      priv: "{{ dbname }}.*:ALL"
       state: present
- 
+
   - name: Adjust adduser.conf to allow for periods in usernames
-    lineinfile: 
-      dest: /etc/adduser.conf 
-      state: present 
-      insertafter: EOF 
+    lineinfile:
+      dest: /etc/adduser.conf
+      state: present
+      insertafter: EOF
       line: 'NAME_REGEX="^[a-z][-a-z0-9_\.]*\$?$"'
 
   - name: Add the dojo group
-    group: 
+    group:
       name: '{{ dojo_group }}'
       state: present
 
   - name: Add the dojo user
-    user: 
+    user:
       name: "{{ dojo_user }}"
-      comment: "Defect Dojo" 
-      password: "{{ cryptpass }}" 
-      state: present 
+      comment: "Defect Dojo"
+      password: "{{ cryptpass }}"
+      state: present
       groups: '{{ dojo_group }}'
 
   - name: Create Defect Dojo base directory
-    file: 
-      path: '{{ item }}'  
+    file:
+      path: '{{ item }}'
       state: directory
     with_items:
-         - '{{ base_dir }}'  
-         - '{{ install_path }}' 
+         - '{{ base_dir }}'
+         - '{{ install_path }}'
 
   - name: Install a very basic requirements.txt
     copy:
@@ -150,7 +150,7 @@
       mode: "u=rw,g=r,o=r"
 
   - name: Install virtualenv
-    pip: 
+    pip:
       name: virtualenv
 
   - name: Setup Virtual Environment
@@ -172,19 +172,19 @@
       update: yes
     when: not firstclone
 
-  - name: Install bower
-    command: 'npm install -g bower'
+  - name: Install yarn
+    command: 'npm install -g yarn'
     args:
-      creates: /usr/local/bin/bower
+      creates: /usr/local/bin/yarn
 
   - name: Make sure node is in the path
-    file: 
+    file:
       path: /usr/bin/node
       src: /usr/bin/nodejs
       state: link
 
   - name: Create a settings.py for Defect Dojo
-    template: 
+    template:
       src: ./templates/settings.py.j2
       dest: '{{ dojo_root }}/settings.py'
       owner: "{{ dojo_user }}"
@@ -202,7 +202,7 @@
 
   - name: Pip install the required modules in the Defect Dojo virtual env
     command: '{{ install_path}}/bin/pip install .'
-    args: 
+    args:
       chdir: '{{ dojo_src}}'
 
   - name: Django makemigrations dojo
@@ -211,9 +211,9 @@
       app_path: '{{ dojo_src }}'
       virtualenv: '{{ install_path }}'
 
-  - name: Django makemigrations 
+  - name: Django makemigrations
     django_manage:
-      command: makemigrations 
+      command: makemigrations
       app_path: '{{ dojo_src }}'
       virtualenv: '{{ install_path }}'
 
@@ -260,16 +260,16 @@
       virtualenv: '{{ install_path }}'
 
   - name: Change ownership of Defect Dojo to dojo user
-    file: 
-      dest: '{{ base_dir }}' 
-      owner: '{{ dojo_user }}' 
-      group: '{{ dojo_group }}' 
+    file:
+      dest: '{{ base_dir }}'
+      owner: '{{ dojo_user }}'
+      group: '{{ dojo_group }}'
       recurse: yes
 
-  - name: Install bower components
-    command: 'bower install'
-    args: 
-      chdir: '{{ dojo_bower}}'
+  - name: Install yarn components
+    command: 'yarn install'
+    args:
+      chdir: '{{ dojo_yarn}}'
     become: yes
     become_user: "{{ dojo_user }}"
 
@@ -293,15 +293,15 @@
     register: superuser_exists
 
   - name: Create Django super user
-    django_manage: 
+    django_manage:
       command: "createsuperuser --noinput --username={{dojo_admin}} --email={{admin_email}}"
       app_path: "{{dojo_src}}"
       virtualenv: '{{ install_path }}'
     when: superuser_exists.stdout.find('exists') == -1
 
   - name: Add script to change Django super user password
-    template: 
-      src: ./templates/change_dojo_password.sh.j2 
+    template:
+      src: ./templates/change_dojo_password.sh.j2
       dest: "{{dojo_src}}/change_dojo_password.sh"
       mode: 0755
 
@@ -311,7 +311,7 @@
       chdir: "{{dojo_src}}"
 
   - name: Clean-up password change script
-    file: 
+    file:
       path: "{{dojo_src}}/change_dojo_password.sh"
       state: absent
 
@@ -321,8 +321,8 @@
       state: directory
 
   - name: Add Defect Dojo startup script
-    template: 
-      src: ./templates/startup-dojo.sh.j2 
+    template:
+      src: ./templates/startup-dojo.sh.j2
       dest: "{{ base_dir }}/startup-dojo.sh"
       mode: 0755
 
@@ -333,9 +333,8 @@
     async: 1
     poll: 0
     ignore_errors: true
-    register: started 
+    register: started
 
   - name: Defect Dojo install completed
     debug:
       msg: 'Defect Dojo is listening on port 8000 - http://{{ip}}:8000 or http://{{hostname}}:8000 if DNS is setup'
-

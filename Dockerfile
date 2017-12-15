@@ -3,12 +3,13 @@ MAINTAINER Matt Tesauro <matt.tesauro@owasp.org>
 
 # Create a single Docker running DefectDojo and all dependencies
 
+ADD . /opt/django-DefectDojo
+
 RUN apt update \
     && DEBIAN_FRONTEND=noninteractive apt install -y mysql-server sudo git expect wget \
     && usermod -d /var/lib/mysql/ mysql \
     && service mysql start \
     && cd /opt \
-    && git clone https://github.com/OWASP/django-DefectDojo.git \
     && export AUTO_DOCKER=yes \
     && /opt/django-DefectDojo/setup.bash \
     && cd /tmp \
@@ -16,7 +17,7 @@ RUN apt update \
     && tar xvfJ wkhtmltox-0.12.4_linux-generic-amd64.tar.xz \
     && sudo chown root:root wkhtmltox/bin/wkhtmltopdf \
     && sudo cp wkhtmltox/bin/wkhtmltopdf /usr/local/bin/wkhtmltopdf \
-    && service mysql stop 
+    && service mysql stop
 
 WORKDIR /opt/django-DefectDojo
 
@@ -25,4 +26,3 @@ ENTRYPOINT chown -R mysql:mysql /var/lib/mysql /var/run/mysqld \
     && su - dojo -c "cd /opt/django-DefectDojo && celery -A dojo worker -l info --concurrency 3 >> /opt/django-DefectDojo/worker.log 2>&1 &" \
     && su - dojo -c "cd /opt/django-DefectDojo && celery beat -A dojo -l info  >> /opt/django-DefectDojo/beat.log 2>&1 &" \
     && su - dojo -c "cd /opt/django-DefectDojo && python manage.py runserver 0.0.0.0:8000 >> /opt/django-DefectDojo/dojo.log 2>&1"
-
