@@ -85,6 +85,8 @@ swagger_urls = [
     url(r'^schema/$', SchemaView.as_view(), name='schema'),
 ]
 
+
+
 urlpatterns = [
     #  django admin
     url(r'^%sadmin/' % get_system_setting('url_prefix'), include(admin.site.urls)),

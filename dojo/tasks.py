@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import tempfile
 from datetime import datetime, timedelta
 
+from django.db.models import Count
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.mail import send_mail
@@ -12,7 +13,7 @@ from django.template.loader import render_to_string
 from django.utils.http import urlencode
 from celery.utils.log import get_task_logger
 from celery.decorators import task
-from dojo.models import Finding, Test, Engagement
+from dojo.models import Finding, Test, Engagement, System_Settings
 from django.utils import timezone
 
 import pdfkit
@@ -20,6 +21,11 @@ from dojo.celery import app
 from dojo.reports.widgets import report_widget_factory
 from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, \
                         close_epic, get_system_setting, create_notification
+
+import logging
+fmt = getattr(settings, 'LOG_FORMAT', None)
+lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
+logging.basicConfig(format=fmt, level=lvl)
 
 logger = get_task_logger(__name__)
 
@@ -40,7 +46,7 @@ def add_alerts(self, runinterval):
         target_end__lt=now,
         status='In Progress').order_by('-target_end')
     for eng in stale_engagements:
-        create_notification(event='stale_engagement', 
+        create_notification(event='stale_engagement',
                            title='Stale Engagement: %s' % eng.name,
                            description='The engagement "%s" is stale. Target end was %s.' % (eng.name, eng.target_end.strftime("%b. %d, %Y")),
                            url=reverse('view_engagement', args=(eng.id,)),
@@ -141,8 +147,12 @@ def async_custom_pdf_report(self,
             toc = {'toc-header-text': toc_settings.title,
                    'xsl-style-sheet': temp.name}
 
+        # default the cover to not come first by default
+        cover_first_val=False
+
         cover = None
         if 'cover-page' in selected_widgets:
+            cover_first_val=True
             cp = selected_widgets['cover-page']
             x = urlencode({'title': cp.title,
                            'subtitle': cp.sub_heading,
@@ -156,9 +166,9 @@ def async_custom_pdf_report(self,
         pdf = pdfkit.from_string(bytes,
                                  False,
                                  configuration=config,
-                                 cover=cover,
                                  toc=toc,
-                                 )
+                                 cover=cover,
+                                 cover_first=cover_first_val)
 
         if report.file.name:
             with open(report.file.path, 'w') as f:
@@ -218,16 +228,28 @@ def add_comment_task(find, note):
 def async_dedupe(new_finding, *args, **kwargs):
     logger.info("running deduplication")
     eng_findings_cwe = Finding.objects.filter(test__engagement__product=new_finding.test.engagement.product,
-                                              cwe=new_finding.cwe).exclude(id=new_finding.id).exclude(cwe=None).exclude(endpoints=None)
+                                              cwe=new_finding.cwe).exclude(id=new_finding.id).exclude(cwe=None)
     eng_findings_title = Finding.objects.filter(test__engagement__product=new_finding.test.engagement.product,
-                                                title=new_finding.title).exclude(id=new_finding.id).exclude(endpoints=None)
+                                                title=new_finding.title).exclude(id=new_finding.id)
     total_findings = eng_findings_cwe | eng_findings_title
+    total_findings = total_findings.order_by('date')
     for find in total_findings:
-        list1 = new_finding.endpoints.all()
-        list2 = find.endpoints.all()
-        if all(x in list2 for x in list1):
-            find.duplicate = True
-            super(Finding, find).save(*args, **kwargs)
+        if find.endpoints != None:
+            list1 = new_finding.endpoints.all()
+            list2 = find.endpoints.all()
+            if all(x in list1 for x in list2):
+                new_finding.duplicate = True
+                new_finding.duplicate_finding = find
+                find.duplicate_list.add(new_finding)
+                super(Finding, find).save(*args, **kwargs)
+                super(Finding, new_finding).save(*args, **kwargs)
+                break
+        elif find.get_hash_code() == new_finding.get_hash_code():
+                new_finding.duplicate = True
+                new_finding.duplicate_finding = find
+                find.duplicate_list.add(new_finding)
+                super(Finding, find).save(*args, **kwargs)
+                super(Finding, new_finding).save(*args, **kwargs)
 
 @app.task(name='async_false_history')
 def async_false_history(new_finding, *args, **kwargs):
@@ -244,3 +266,18 @@ def async_false_history(new_finding, *args, **kwargs):
             new_finding.false_p = True
             super(Finding, new_finding).save(*args, **kwargs)
 
+@app.task(bind=True)
+def async_dupe_delete(*args, **kwargs):
+    logger.info("delete excess duplicates")
+    system_settings = System_Settings.objects.get()
+    if system_settings.delete_dupulicates:
+        dupe_max = system_settings.max_dupes
+        findings = Finding.objects.all().annotate(num_dupes=Count('duplicate_list')).filter(num_dupes__gt=dupe_max)
+        for finding in findings:
+            duplicate_list = finding.duplicate_list.all().order_by('date').all()
+            dupe_count =  len(duplicate_list) - dupe_max
+            for finding in duplicate_list:
+                finding.delete()
+                dupe_count = dupe_count - 1
+                if dupe_count == 0:
+                    break
