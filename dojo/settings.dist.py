@@ -4,7 +4,7 @@ from datetime import timedelta
 
 DEBUG = True
 LOGIN_REDIRECT_URL = '/'
-# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTOCOL', 'https')
+# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # SECURE_SSL_REDIRECT = True
 # SECURE_BROWSER_XSS_FILTER = True
 SESSION_COOKIE_HTTPONLY = True
@@ -202,6 +202,11 @@ CELERYBEAT_SCHEDULE = {
         'task':'dojo.tasks.add_alerts',
         'schedule': timedelta(hours=1),
         'args': [timedelta(hours=1)]
+    },
+        'dedupe-delete': {
+        'task':'dojo.tasks.async_dupe_delete',
+        'schedule': timedelta(hours=24),
+        'args': [timedelta(hours=24)]
     },
 }
 

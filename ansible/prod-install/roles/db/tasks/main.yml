@@ -1,0 +1,7 @@
+---
+
+- include: setup_mysql.yml
+  when: db_type == "MySQL"
+
+- include: setup_postgresql.yml
+  when: db_type == "PostgreSQL"

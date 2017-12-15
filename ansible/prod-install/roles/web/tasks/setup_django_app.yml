@@ -1,0 +1,94 @@
+---
+- name: Upload local requirements file
+  copy:
+    src: files/requirements/production.txt
+    dest: '{{ project_path }}/requirements.txt'
+
+- name: Upload production settings file
+  template:
+    src: prod-settings.py.j2
+    dest: '{{ project_path }}/{{ application_name }}/settings.py'
+
+- name: Install packages required by the Django app inside virtualenv
+  pip:
+    virtualenv: "{{ virtualenv_path }}"
+    requirements: "{{ requirements_file }}"
+
+- name: Install MySQL-python when MySQL is used as DB 
+  pip:
+    name: MySQL-python
+    virtualenv: "{{ virtualenv_path }}"
+  when: db_type == "MySQL"
+
+- name: Run the Django makemigrations dojo
+  django_manage:
+    command: makemigrations dojo
+    app_path: "{{ app_path}}"
+    virtualenv: "{{ virtualenv_path }}"
+    settings: "{{ django_settings_file }}"
+  environment: "{{ django_environment }}"
+  when: run_django_syncdb is defined and run_django_syncdb
+  tags: django.syncdb
+
+- name: Run the Django makemigrations
+  django_manage:
+    command: makemigrations
+    app_path: "{{ app_path}}"
+    virtualenv: "{{ virtualenv_path }}"
+    settings: "{{ django_settings_file }}"
+  environment: "{{ django_environment }}"
+  when: run_django_syncdb is defined and run_django_syncdb
+  tags: django.syncdb
+
+- name: Run Django database migrations
+  django_manage:
+    command: migrate
+    app_path: "{{ app_path}}"
+    virtualenv: "{{ virtualenv_path }}"
+    settings: "{{ django_settings_file }}"
+  environment: "{{ django_environment }}"
+  when: run_django_db_migrations is defined and run_django_db_migrations
+  tags: django.migrate
+
+- name: Run the installwatson command
+  django_manage:
+    command: installwatson
+    app_path: "{{ app_path}}"
+    virtualenv: "{{ virtualenv_path }}"
+    settings: "{{ django_settings_file }}"
+  environment: "{{ django_environment }}"
+
+- name: Run the buildwatson command
+  django_manage:
+    command: buildwatson
+    app_path: "{{ app_path}}"
+    virtualenv: "{{ virtualenv_path }}"
+    settings: "{{ django_settings_file }}"
+  environment: "{{ django_environment }}"
+
+- name: Run Django loaddata
+  django_manage:
+    command: loaddata
+    app_path: "{{ app_path}}"
+    virtualenv: "{{ virtualenv_path }}"
+    fixtures: "{{ django_fixtures_file }}"
+    settings: "{{ django_settings_file }}"
+  environment: "{{ django_environment }}"
+  when: run_django_loaddata is defined and run_django_loaddata
+  tags: django.loaddata
+
+- name: Install bower components using bower.json
+  bower:
+    path: "{{ bower_dir }}"
+  when: run_django_bower is defined and run_django_bower
+  tags: django.bower
+
+- name: Run Django collectstatic
+  django_manage:
+    command: collectstatic --noinput
+    app_path: "{{ app_path}}"
+    virtualenv: "{{ virtualenv_path }}"
+    settings: "{{ django_settings_file }}"
+  environment: "{{ django_environment }}"
+  when: run_django_collectstatic is defined and run_django_collectstatic
+  tags: django.collectstatic

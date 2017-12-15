@@ -44,9 +44,9 @@ Deploy to Docker Cloud. (<b>Login first to Docker Cloud before clicking the inst
 
 ### [Debian, Ubuntu (16.04.2+) or RHEL-based Install Script](http://defectdojo.readthedocs.io/en/latest/getting-started.html#install-script)
 
-### [Docker](http://defectdojo.readthedocs.io/en/latest/getting-started.html#docker-local-install) - There are currently a number of bugs in the Docker image that we're working to address. Please use the regular install script to avoid issues.
+### [Docker](http://defectdojo.readthedocs.io/en/latest/getting-started.html#docker-local-install)
 
-### [Vagrant (deprecated)](./doc/install_vagrant.md)
+### [Ansible](https://github.com/OWASP/django-DefectDojo/tree/master/ansible/prod-install)
 
 # Getting Started
 
@@ -75,7 +75,7 @@ that should give you an idea of how to use DefectDojo for your own team.
 
 [Engagement Surveys](https://github.com/grendel513/defectDojo-engagement-survey) - A plugin that adds answerable surveys to engagements.
 
-[LDAP Integration](https://pythonhosted.org/django-auth-ldap/)
+[LDAP Integration](https://django-auth-ldap.readthedocs.io/en/latest/)
 
 [SAML Integration](https://pypi.python.org/pypi/djangosaml2/)
 
@@ -84,10 +84,11 @@ that should give you an idea of how to use DefectDojo for your own team.
 
 DefectDojo is maintained by:
 
-- Greg Anderson ([@\_GRRegg](https://twitter.com/_GRRegg))
+- Greg Anderson
 - Charles Neill ([@ccneill](https://twitter.com/ccneill))
 - Jay Paz ([@jjpaz](https://twitter.com/jjpaz))
 - Aaron Weaver ([@weavera](https://twitter.com/weavera))
+- Matt Tesauro ([@matt_tesauro](https://twitter.com/matt_tesauro))
 
 # Contributing
 
