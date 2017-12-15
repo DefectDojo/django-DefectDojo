@@ -20,17 +20,3 @@ app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 def debug_task(self):
     print('Request: {0!r}'.format(self.request))
 
-"""
-@app.on_after_configure.connect
-def setup_periodic_tasks(sender, *args, **kwargs):
-    from dojo.tasks import async_dupe_delete
-    sender.add_periodic_task(crontab(hours=0,minutes=0), async_dupe_delete(*args, **kwargs) )
-"""
-app.conf.beat_schedule = {
-    # Executes every Monday morning at 7:30 a.m.
-    'add-every-10-seconds': {
-        'task': 'dojo.tasks.async_dupe_delete',
-        'schedule': 10.0,
-        'args': (16, 16),
-    },
-}
