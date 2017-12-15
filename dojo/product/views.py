@@ -23,7 +23,7 @@ from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings
     Tool_Product_Settings, Cred_User, Cred_Mapping, Test_Type
 from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, get_system_setting, create_notification
 from custom_field.models import CustomFieldValue, CustomField
-from  dojo.tasks import add_epic_task
+from dojo.tasks import add_epic_task, add_issue_task
 from tagging.models import Tag
 from tagging.utils import get_tag_list
 from tagging.views import TaggedItem
