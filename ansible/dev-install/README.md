@@ -38,7 +38,7 @@ Go grab your favorite beverage and enjoy watching the install scroll by.
 Here's an example run done against a VM running in VirturalBox:
 
 ```
-$ ansible-playbook dojo-dev-environment.yml 
+$ ansible-playbook dojo-dev-environment.yml
 
 PLAY [all] *********************************************************************
 
@@ -109,7 +109,7 @@ ok: [192.168.56.101]
 TASK [Update Defect Dojo to latest source from GitHub] *************************
 skipping: [192.168.56.101]
 
-TASK [Install bower] ***********************************************************
+TASK [Install yarn] ***********************************************************
 ok: [192.168.56.101]
 
 TASK [Make sure node is in the path] *******************************************
@@ -157,7 +157,7 @@ ok: [192.168.56.101]
 TASK [Change ownership of Defect Dojo to dojo user] ****************************
 changed: [192.168.56.101]
 
-TASK [Install bower components] ************************************************
+TASK [Install yarn components] ************************************************
 changed: [192.168.56.101]
 
 TASK [Django collectstatic] ****************************************************

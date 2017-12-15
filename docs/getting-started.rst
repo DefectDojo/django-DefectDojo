@@ -21,7 +21,7 @@ Change into the newly created ```django-DefectDojo``` directory:
 
     ``cd django-DefectDojo/``
 
-There is a script in the main folder called ``setup.bash`` that will allow you to interactively install DefectDojo on any Linux based systems. We do not recommend running DefectDojo as root, but you may do so if you choose. 
+There is a script in the main folder called ``setup.bash`` that will allow you to interactively install DefectDojo on any Linux based systems. We do not recommend running DefectDojo as root, but you may do so if you choose.
 
 **You will need:**
 * MySQL
@@ -72,8 +72,8 @@ Select a name for the DefectDojo database.
 It may take some time for all the `OS` and `python` packages to be installed. As of this writing the packages for this `OS` are:
 
 * gcc
-* libssl-dev 
-* python-dev 
+* libssl-dev
+* python-dev
 * libmysqlclient-dev
 * python-pip
 * mysql-server
@@ -95,8 +95,7 @@ And the `python` packages are (listed in `setup.py` as well):
 * 'wsgiref==0.1.2',
 * 'django-filter',
 * 'supervisor',
-* 'humanize',
-* 'django-bower'
+* 'humanize'
 
 After all the components have been installed, the `makemigrations` process will prompt you to create a ``superuser``
 
