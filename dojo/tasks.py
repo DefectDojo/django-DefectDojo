@@ -22,6 +22,11 @@ from dojo.reports.widgets import report_widget_factory
 from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, \
                         close_epic, get_system_setting, create_notification
 
+import logging
+fmt = getattr(settings, 'LOG_FORMAT', None)
+lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
+logging.basicConfig(format=fmt, level=lvl)
+
 logger = get_task_logger(__name__)
 
 @app.task(bind=True)
@@ -261,15 +266,18 @@ def async_false_history(new_finding, *args, **kwargs):
             new_finding.false_p = True
             super(Finding, new_finding).save(*args, **kwargs)
 
-@app.task(name='dupe_delete')
+@app.task(bind=True)
 def async_dupe_delete(*args, **kwargs):
+    logger.info("delete excess duplicates")
     system_settings = System_Settings.objects.get()
-    dupe_max = system_settings.max_dupes
-    findings = Finding.objects.filter.annotate(num_dupes=Count('dupe_list')).filter(num_dupes__gt=dupe_max)
-    for finding in findings:
-        duplicate_list = finding.duplicate_list.objects.sort_by('date')
-        while (len(duplicate_list) > dupe_max ):
-            dupe_finding = duplicate_list.pop(0)
-            dupe_finding.delete
-        finding.duplicate_list = duplicate_list
-        super(Finding, finding).save(*args, **kwargs)
+    if system_settings.delete_dupulicates:
+        dupe_max = system_settings.max_dupes
+        findings = Finding.objects.all().annotate(num_dupes=Count('duplicate_list')).filter(num_dupes__gt=dupe_max)
+        for finding in findings:
+            duplicate_list = finding.duplicate_list.all().order_by('date').all()
+            dupe_count =  len(duplicate_list) - dupe_max
+            for finding in duplicate_list:
+                finding.delete()
+                dupe_count = dupe_count - 1
+                if dupe_count == 0:
+                    break

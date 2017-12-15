@@ -284,7 +284,7 @@ else
     python manage.py buildwatson
 fi
 
-if [ $(id -u) = 0 ]; then
+if [ "$AUTO_DOCKER" == "yes" ]; then
     adduser --disabled-password --gecos "DefectDojo" dojo
     chown -R dojo:dojo /opt/django-DefectDojo
     su - dojo -c 'cd /opt/django-DefectDojo/components && bower install && cd ..'
