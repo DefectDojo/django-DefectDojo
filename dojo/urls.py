@@ -89,7 +89,6 @@ swagger_urls = [
 
 urlpatterns = [
     #  django admin
-    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^%sadmin/' % get_system_setting('url_prefix'), include(admin.site.urls)),
     #  tastypie api
     url(r'^%sapi/' % get_system_setting('url_prefix'), include(v1_api.urls)),
