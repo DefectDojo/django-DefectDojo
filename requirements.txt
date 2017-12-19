@@ -1,7 +1,7 @@
-amqp==1.4.9
+amqp==2.2.2
 anyjson==0.3.3
-billiard==3.3.0.23
-celery==3.1.24
+billiard==3.5.0.3
+celery==4.1
 certifi==2017.11.5
 chardet==3.0.4
 DefectDojo==1.2.0
@@ -28,7 +28,7 @@ html2text==2017.10.4
 humanize==0.5.1
 idna==2.6
 jira==1.0.10
-kombu==3.0.37
+kombu==4.1
 lxml==4.1.1
 meld3==1.0.2
 MySQL-python==1.2.5
