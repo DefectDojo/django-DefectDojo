@@ -2,6 +2,8 @@ import base64
 import os
 import re
 import logging
+import time
+import sys
 from datetime import datetime
 from uuid import uuid4
 from django.conf import settings
@@ -107,6 +109,7 @@ class UserContactInfo(models.Model):
     github_username = models.CharField(blank=True, null=True, max_length=150)
     slack_username = models.CharField(blank=True, null=True, max_length=150)
     hipchat_username = models.CharField(blank=True, null=True, max_length=150)
+    block_execution = models.BooleanField(default=False)
 
 
 class Contact(models.Model):
@@ -735,16 +738,26 @@ class Finding(models.Model):
         long_desc += '*References*:' + self.references
         return long_desc
 
-    def save(self, *args, **kwargs):
+    def save(self, dedupe_option=True, *args, **kwargs):
         super(Finding, self).save(*args, **kwargs)
         self.hash_code = self.get_hash_code()
-        system_settings = System_Settings.objects.get()
-        if system_settings.enable_deduplication :
-                from dojo.tasks import async_dedupe
-                async_dedupe.delay(self, *args, **kwargs)
-        if system_settings.false_positive_history:
-            from dojo.tasks import async_false_history
-            async_false_history.delay(self, *args, **kwargs)
+        super(Finding, self).save(*args, **kwargs)
+        if (dedupe_option):
+            system_settings = System_Settings.objects.get()
+            if system_settings.enable_deduplication:
+                    from dojo.tasks import async_dedupe
+                    from dojo.utils import sync_dedupe
+                    if self.reporter.usercontactinfo.block_execution:
+                        sync_dedupe(self, *args, **kwargs)
+                    else:
+                         async_dedupe.delay(self, *args, **kwargs)
+            if system_settings.false_positive_history:
+                from dojo.tasks import async_false_history
+                from dojo.utils import sync_false_history
+                if self.reporter.usercontactinfo.block_execution:
+                    sync_false_history(self, *args, **kwargs)
+                else:
+                    async_false_history.delay(self, *args, **kwargs)
 
     def clean(self):
         no_check = ["test", "reporter"]

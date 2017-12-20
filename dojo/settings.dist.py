@@ -195,6 +195,7 @@ CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_RESULT_EXPIRES = 86400
 CELERYBEAT_SCHEDULE_FILENAME = DOJO_ROOT + '/dojo.celery.beat.db'
 CELERY_ACCEPT_CONTENT = ['pickle', 'json', 'msgpack', 'yaml']
+CELERY_TASK_SERIALIZER = "pickle"
 
 # Celery beat scheduled tasks
 CELERYBEAT_SCHEDULE = {
