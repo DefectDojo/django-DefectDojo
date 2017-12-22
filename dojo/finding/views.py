@@ -71,7 +71,8 @@ def open_findings(request):
                    for word in finding.title.split() if len(word) > 2]
 
     title_words = sorted(set(title_words))
-    paged_findings = get_page_items(request, findings.qs, 25)
+
+    # paged_findings = get_page_items(request, findings.qs, 25)
 
     product_type = None
     if 'test__engagement__product__prod_type' in request.GET:
@@ -81,12 +82,25 @@ def open_findings(request):
 
     add_breadcrumb(title="Open findings", top_level=not len(request.GET), request=request)
 
+    specificFindings = []
+    generalFindings = []
+
+    for finding in findings.qs:
+        if request.user.id == finding.reviewer_id:
+            specificFindings.append(finding)
+        else:
+            generalFindings.append(finding)
+
+    specific_paged_findings = get_page_items(request, specificFindings, 25)
+    paged_findings = get_page_items(request, generalFindings, 25)
+
     return render(request,
                   'dojo/open_findings.html',
-                  {"findings": paged_findings,
-                   "filtered": findings,
-                   "title_words": title_words,
-                   })
+                    {"specificFindings": specific_paged_findings,
+                     "generalFindings": paged_findings,
+                     "filtered": findings,
+                     "title_words": title_words,
+                     })
 
 
 """
