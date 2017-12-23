@@ -70,7 +70,9 @@ class VeracodeXMLParser(object):
 			if mitigatedTest == 1:
 				find = Finding(title=flaw.attrib['categoryname'],
                                line_number=flaw.attrib['line'],
+                               #line=flaw.attrib['line'],
                                sourcefilepath=flaw.attrib['sourcefilepath'],
+                               #file_path=flaw.attrib['sourcefilepath'],
                                sourcefile=flaw.attrib['sourcefile'],
                                 cwe=int(flaw.attrib['cweid']),
                                 test=test,
@@ -89,7 +91,9 @@ class VeracodeXMLParser(object):
 			else:
 				find = Finding(title=flaw.attrib['categoryname'],
                                line_number=flaw.attrib['line'],
+                               #line=flaw.attrib['line'],
                                sourcefilepath=flaw.attrib['sourcefilepath'],
+                               #file_path=flaw.attrib['sourcefilepath'],
                                sourcefile=flaw.attrib['sourcefile'],
                                 cwe=int(flaw.attrib['cweid']),
                                 test=test,
