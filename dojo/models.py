@@ -189,6 +189,8 @@ class Report_Type(models.Model):
 
 class Test_Type(models.Model):
     name = models.CharField(max_length=200)
+    static_tool = models.BooleanField(default=False)
+    dynamic_tool = models.BooleanField(default=False)
 
     def __unicode__(self):
         return self.name
@@ -642,12 +644,18 @@ class Finding(models.Model):
     last_reviewed_by = models.ForeignKey(User, null=True, editable=False, related_name='last_reviewed_by')
     images = models.ManyToManyField('FindingImage', blank=True)
 
-    line_number = models.CharField(null=True, blank=True, max_length=200)
+    line_number = models.CharField(null=True, blank=True, max_length=200, editable=False)
     sourcefilepath = models.TextField(null=True, blank=True, editable=False)
     sourcefile = models.TextField(null=True, blank=True, editable=False)
     param = models.TextField(null=True, blank=True, editable=False)
     payload = models.TextField(null=True, blank=True, editable=False)
     hash_code = models.TextField(null=True,blank=True,editable=False)
+
+    line = models.IntegerField(null=True, blank=True, verbose_name="Line number")
+    file_path = models.CharField(null=True,blank=True, max_length=1000)
+    found_by = models.ManyToManyField(Test_Type, editable=False)
+    static_finding = models.BooleanField(default=False)
+    dynamic_finding = models.BooleanField(default=False)
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
@@ -657,7 +665,7 @@ class Finding(models.Model):
 
 
     def get_hash_code(self):
-        hash_string = self.title + self.description
+        hash_string = self.title + self.description + self.line + self.file_path
         return hashlib.sha256(hash_string).hexdigest()
 
     @staticmethod
@@ -741,6 +749,11 @@ class Finding(models.Model):
     def save(self, dedupe_option=True, *args, **kwargs):
         super(Finding, self).save(*args, **kwargs)
         self.hash_code = self.get_hash_code()
+        if self.test.test_type.static_tool:
+            self.static_finding = True
+        else:
+            self.dyanmic_finding = True
+        self.found_by.add(self.test.test_type)
         super(Finding, self).save(*args, **kwargs)
         if (dedupe_option):
             system_settings = System_Settings.objects.get()

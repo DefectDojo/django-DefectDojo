@@ -183,24 +183,18 @@
     <div class="panel panel-default">
             <table id="error_notes" class="table-striped table table-condensed table-hover centered">
                 <tr>
-                    <th>Source File path</th>
-                    <th>Source File</th>
+                    <th>Location</th>
                     <th>Line Number</th>
                 </tr>
                 <tr>
-                    <td>
+                   <td>
                         <span>
-                           {{ finding.sourcefilepath }}
+                           {{ finding.file_path }}
                         </span>
                     </td>
                     <td>
                         <span>
-                           {{ finding.sourcefile }}
-                        </span>
-                    </td>
-                    <td>
-                        <span>
-                           {{ finding.line_number }}
+                           {{ finding.line }}
                         </span>
                     </td>
                 </tr>

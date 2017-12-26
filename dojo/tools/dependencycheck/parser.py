@@ -33,6 +33,7 @@ class DependencyCheckParser(object):
 
         return Finding(
             title=title,
+            file_path=filename,
             test=test,
             active=False,
             verified=False,
