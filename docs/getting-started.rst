@@ -104,26 +104,8 @@ After all the components have been installed, the `makemigrations` process will 
 
 Answer `yes` and follow the prompts, this will be the user you will use to login to DefectDojo.
 #. *(OPTIONAL)* If you haven't already, run `mysql_secure_install` to set a password for your root MySQL user.
-
-
-#.  If installation is successful, you will see something like the following: ::
-
-        ==============================================================================
-
-        SUCCESS! Now edit your settings.py file in the 'dojo' directory to complete the installation.
-
-        When you're ready to start the DefectDojo server, type in this directory:
-            1. python manage.py bower install
-            2. python manage.py collectstatic
-            3. python manage.py runserver
-
-
 #. Edit the settings.py file to modify any other settings that you want to
    change, such as your SMTP server information, which we leave off by default.
-#. Install bower dependencies by running
-        ``python manage.py bower install``
-#. Install static files to the correct directories
-        ``python manage.py collectstatic``
 #. When you are ready to run DefectDojo, run the server with
         ``python manage.py runserver``
 
