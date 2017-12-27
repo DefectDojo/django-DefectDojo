@@ -665,7 +665,7 @@ class Finding(models.Model):
 
 
     def get_hash_code(self):
-        hash_string = self.title + self.description + self.line + self.file_path
+        hash_string = self.title + self.description + str(self.line) + str(self.file_path)
         return hashlib.sha256(hash_string).hexdigest()
 
     @staticmethod
