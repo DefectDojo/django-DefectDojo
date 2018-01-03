@@ -114,7 +114,7 @@ Proceeds are used for testing, infrastructure, etc.
 
 # Sponsors
 
-<img src="https://github.com/OWASP/django-DefectDojo/blob/master/doc/img/XING_logo.png" width="45">  
+<img src="https://github.com/OWASP/django-DefectDojo/blob/master/doc/img/XING_logo.png">  
 
 Interested in becoming a sponsor and having your logo displayed? Please email greg.anderson@owasp.org
 
