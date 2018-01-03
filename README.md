@@ -67,7 +67,7 @@ that should give you an idea of how to use DefectDojo for your own team.
 [Get Access.](https://owasp.herokuapp.com/)   Realtime discussion is done in the OWASP Slack Channel, #defectdojo.
 
 
-<img src="https://github.com/devGregA/django-DefectDojo/blob/master/doc/img/Twitter_Logo.png" width="45">  
+<img src="https://github.com/devGregA/django-DefectDojo/blob/master/doc/img/Twitter_Logo.png" width="100">  
 
 [DefectDojo Twitter Account](https://twitter.com/defect_dojo)  tweets project updates and changes.
 
