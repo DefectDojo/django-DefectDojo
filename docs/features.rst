@@ -654,9 +654,8 @@ Issue Consolidation
 
 DefectDojo allows users to automatically consolidate issues from multiple scanners to remove duplicates.
 
-To enable this feature, change the following in `dojo/settings.py`: ::
+To enable this feature, hover over the configuration tab on the left menu and click on system settings. In system settings, click 'Deduplicate findings'. Click 'Submit' at the bottom of the page.
 
-ENABLE_DEDUPLICATION = True
 
 When deduplication is enabled, Dojo will compare CWE, title, and endpoint details for all findings in a given product.
 If an issue is added with either the CWE or title being the same while the endpoint is also the same, Dojo marks the old issue as a duplicate.
