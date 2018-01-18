@@ -107,7 +107,7 @@ Answer `yes` and follow the prompts, this will be the user you will use to login
 #. Edit the settings.py file to modify any other settings that you want to
    change, such as your SMTP server information, which we leave off by default.
 #. When you are ready to run DefectDojo, run the server with
-        ``python manage.py runserver``
+        ``./run_dojo.bash``
 
 Vagrant Install
 ~~~~~~~~~~~~~~~
