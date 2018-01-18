@@ -4,7 +4,6 @@ billiard==3.5.0.3
 celery==4.1
 certifi==2017.11.5
 chardet==3.0.4
-DefectDojo==1.2.0
 defusedxml==0.5.0
 Django==1.11.2
 django-appconf==1.0.2
