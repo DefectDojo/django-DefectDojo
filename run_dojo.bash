@@ -15,7 +15,7 @@ cpid=$!
 celery beat -A dojo -l info &
 bpid=$!
 
-python manage.py runserver
+python manage.py runserver &
 ppid=$!
 
 tail -f /dev/null
