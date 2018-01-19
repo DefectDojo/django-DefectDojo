@@ -13,7 +13,7 @@ DefectDojo is a security program and vulnerability management tool. DefectDojo a
 $ git clone https://github.com/OWASP/django-DefectDojo
 $ cd django-DefectDojo
 $ ./setup.bash
-$ python manage.py runserver
+$ ./run_dojo.bash
 ```
 
 navigate to `127.0.0.1:8000`
