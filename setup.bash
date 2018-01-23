@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 NONE='\033[00m'
 RED='\033[01;31m'
