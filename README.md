@@ -80,6 +80,8 @@ that should give you an idea of how to use DefectDojo for your own team.
 
 [SAML Integration](https://pypi.python.org/pypi/djangosaml2/)
 
+[Multi-Factor Auth](http://django-mfa.readthedocs.io/en/latest/)
+
 
 # About Us
 
