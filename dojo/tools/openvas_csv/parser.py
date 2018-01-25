@@ -328,7 +328,7 @@ class OpenVASUploadCsvParser(object):
                 column_number += 1
 
             if finding is not None:
-                key = hashlib.md5(finding.severity + '|' + finding.title + '|' + finding.description).hexdigest()
+                key = hashlib.md5(finding.url + '|' + finding.severity + '|' + finding.title + '|' + finding.description).hexdigest()
 
                 if key not in self.dupes:
                     self.dupes[key] = finding

@@ -160,7 +160,7 @@ elif [[ ! -z "$APT_GET_CMD" ]]; then
      echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
      #Node
      curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash
-     sudo apt-get update && apt-get install -y apt-transport-https libjpeg-dev gcc libssl-dev python-dev python-pip nodejs yarn wkhtmltopdf build-essential
+     sudo apt-get update && sudo apt-get install -y apt-transport-https libjpeg-dev gcc libssl-dev python-dev python-pip nodejs yarn wkhtmltopdf build-essential
 elif [[ ! -z "$BREW_CMD" ]]; then
     brew install gcc openssl python node npm yarn Caskroom/cask/wkhtmltopdf
     if [ "$DBTYPE" == $MYSQL ]; then
@@ -250,7 +250,7 @@ fi
 if python -c 'import sys; print sys.real_prefix' 2>/dev/null; then
     pip install .
     python manage.py makemigrations dojo
-    python manage.py makemigrations
+    python manage.py makemigrations --merge --noinput
     python manage.py migrate
     echo -e "${GREEN}${BOLD}Create Dojo superuser:"
     tput sgr0
@@ -264,7 +264,7 @@ if python -c 'import sys; print sys.real_prefix' 2>/dev/null; then
 else
     pip install .
     python manage.py makemigrations dojo
-    python manage.py makemigrations
+    python manage.py makemigrations --merge --noinput
     python manage.py migrate
     # Allow script to be called non-interactively using:
     # export AUTO_DOCKER=yes && /opt/django-DefectDojo/setup.bash
@@ -287,7 +287,7 @@ fi
 
 echo "!!!!!!!!!!!!!!!!!!!"
 echo $(id -u)
-if [ $(id -u) = 0 ]; then
+if [ "$AUTO_DOCKER" == "yes"]; then
     echo "Creating dojo user!"
     adduser --disabled-password --gecos "DefectDojo" dojo
     chown -R dojo:dojo /opt/django-DefectDojo
@@ -308,7 +308,7 @@ echo "    DEBUG = True  # you should set this to False when you are ready for pr
 echo "    Uncomment the following lines if you enabled SSL/TLS on your server:"
 echo "        SESSION_COOKIE_SECURE = True"
 echo "        CSRF_COOKIE_SECURE = True"
-echo "        SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTOCOL', 'https')"
+echo "        SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')"
 echo "        SECURE_SSL_REDIRECT = True"
 echo "        SECURE_BROWSER_XSS_FILTER = True"
 echo "        django.middleware.security.SecurityMiddleware"
