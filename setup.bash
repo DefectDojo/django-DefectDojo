@@ -285,7 +285,10 @@ else
     python manage.py buildwatson
 fi
 
+echo "!!!!!!!!!!!!!!!!!!!"
+echo $(id -u)
 if [ $(id -u) = 0 ]; then
+    echo "Creating dojo user!"
     adduser --disabled-password --gecos "DefectDojo" dojo
     chown -R dojo:dojo /opt/django-DefectDojo
     su - dojo -c 'cd /opt/django-DefectDojo/components && yarn && cd ..'
