@@ -285,10 +285,8 @@ else
     python manage.py buildwatson
 fi
 
-echo "!!!!!!!!!!!!!!!!!!!"
-echo $(id -u)
-if [ "$AUTO_DOCKER" == "yes"]; then
-    echo "Creating dojo user!"
+if [ "$AUTO_DOCKER" == "yes" ]; then
+    echo "Creating dojo user"
     adduser --disabled-password --gecos "DefectDojo" dojo
     chown -R dojo:dojo /opt/django-DefectDojo
     su - dojo -c 'cd /opt/django-DefectDojo/components && yarn && cd ..'
