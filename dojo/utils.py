@@ -720,6 +720,7 @@ def add_labels(find, issue):
 def jira_long_description(find_description, find_id, jira_conf_finding_text):
     return find_description + "\n\n*Dojo ID:* " + str(find_id) + "\n\n" + jira_conf_finding_text
 
+
 def add_issue(find, push_to_jira):
     eng = Engagement.objects.get(test=find.test)
     prod =  Product.objects.get(engagement= eng)
@@ -728,40 +729,45 @@ def add_issue(find, push_to_jira):
 
     if push_to_jira:
         if 'Active' in find.status() and 'Verified' in find.status():
-            try:
-                JIRAError.log_to_tempfile=False
-                jira = JIRA(server=jira_conf.url, basic_auth=(jira_conf.username, jira_conf.password))
-                if jpkey.component:
-                    new_issue = jira.create_issue(project=jpkey.project_key, summary=find.title,
-                                                  components=[{'name': jpkey.component}, ],
-                                                  description=jira_long_description(find.long_desc(), find.id,
-                                                                                    jira_conf.finding_text),
-                                                  issuetype={'name': jira_conf.default_issue_type},
-                                                  priority={'name': jira_conf.get_priority(find.severity)})
-                else:
-                    new_issue = jira.create_issue(project=jpkey.project_key, summary=find.title,
-                                                  description=jira_long_description(find.long_desc(), find.id,
-                                                                                    jira_conf.finding_text),
-                                                  issuetype={'name': jira_conf.default_issue_type},
-                                                  priority={'name': jira_conf.get_priority(find.severity)})
-                j_issue = JIRA_Issue(jira_id=new_issue.id, jira_key=new_issue, finding=find)
-                j_issue.save()
-                issue = jira.issue(new_issue.id)
+            if ((jpkey.push_all_issues and
+                Finding.get_number_severity(System_Settings.objects.get().jira_minimum_severity) >
+                Finding.get_number_severity(find.severity))):
+                pass
+            else:
+                try:
+                    JIRAError.log_to_tempfile=False
+                    jira = JIRA(server=jira_conf.url, basic_auth=(jira_conf.username, jira_conf.password))
+                    if jpkey.component:
+                        new_issue = jira.create_issue(project=jpkey.project_key, summary=find.title,
+                                                      components=[{'name': jpkey.component}, ],
+                                                      description=jira_long_description(find.long_desc(), find.id,
+                                                                                        jira_conf.finding_text),
+                                                      issuetype={'name': jira_conf.default_issue_type},
+                                                      priority={'name': jira_conf.get_priority(find.severity)})
+                    else:
+                        new_issue = jira.create_issue(project=jpkey.project_key, summary=find.title,
+                                                      description=jira_long_description(find.long_desc(), find.id,
+                                                                                        jira_conf.finding_text),
+                                                      issuetype={'name': jira_conf.default_issue_type},
+                                                      priority={'name': jira_conf.get_priority(find.severity)})
+                    j_issue = JIRA_Issue(jira_id=new_issue.id, jira_key=new_issue, finding=find)
+                    j_issue.save()
+                    issue = jira.issue(new_issue.id)
 
-                #Add labels (security & product)
-                add_labels(find, new_issue)
-                #Upload dojo finding screenshots to Jira
-                for pic in find.images.all():
-                    jira_attachment(jira, issue, settings.MEDIA_ROOT + pic.image_large.name)
+                    #Add labels (security & product)
+                    add_labels(find, new_issue)
+                    #Upload dojo finding screenshots to Jira
+                    for pic in find.images.all():
+                        jira_attachment(jira, issue, settings.MEDIA_ROOT + pic.image_large.name)
 
-                    #if jpkey.enable_engagement_epic_mapping:
-                    #      epic = JIRA_Issue.objects.get(engagement=eng)
-                    #      issue_list = [j_issue.jira_id,]
-                    #      jira.add_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
-            except JIRAError as e:
-                log_jira_alert(e.text, find)
+                        #if jpkey.enable_engagement_epic_mapping:
+                        #      epic = JIRA_Issue.objects.get(engagement=eng)
+                        #      issue_list = [j_issue.jira_id,]
+                        #      jira.add_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
+                except JIRAError as e:
+                    log_jira_alert(e.text, find)
         else:
-            log_jira_alert("Finding not active or verified.", find)
+            log_jira_alert("Finding not active, verified, or over threshold.", find)
 
 def jira_attachment(jira, issue, file, jira_filename=None):
 
