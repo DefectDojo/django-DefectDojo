@@ -46,6 +46,8 @@ class System_Settings(models.Model):
                                     'a single issue reaches the maximum number of duplicates, the oldest will be' \
                                     'deleted.')
     enable_jira = models.BooleanField(default=False, verbose_name='Enable JIRA integration', blank=False)
+    jira_choices = (('Critical', 'Critical'), ('High', 'High'), ('Medium', 'Medium'), ('Low', 'Low'))
+    jira_minimum_severity = models.CharField(max_length=20, blank=True, null=True, choices=jira_choices, default='None')
     enable_slack_notifications = models.BooleanField(default=False, verbose_name='Enable Slack notifications', blank=False)
     slack_channel = models.CharField(max_length=100, default='', blank=True)
     slack_token = models.CharField(max_length=100, default='', blank=True, help_text='Token required for interacting with Slack. Get one at https://api.slack.com/tokens')
@@ -680,6 +682,19 @@ class Finding(models.Model):
             return 'S3'
         else:
             return 'S4'
+
+    @staticmethod
+    def get_number_severity(severity):
+        if severity == 'Critical':
+            return 4
+        elif severity == 'High':
+            return 3
+        elif severity == 'Medium':
+            return 2
+        elif severity == 'Low':
+            return 1
+        else:
+            return 5
 
     def __unicode__(self):
         return self.title
