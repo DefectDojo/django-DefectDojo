@@ -237,7 +237,8 @@ class ImportScanForm(forms.Form):
                          ("Qualys Webapp Scan", "Qualys Webapp Scan"),
                          ("OpenVAS CSV", "OpenVAS CSV"),
                          ("Snyk Scan", "Snyk Scan"),
-                         ("Generic Findings Import", "Generic Findings Import"))
+                         ("Generic Findings Import", "Generic Findings Import"),
+                         ("SKF Scan", "SKF Scan"))
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
 
     scan_date = forms.DateTimeField(
