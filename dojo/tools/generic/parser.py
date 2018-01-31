@@ -1,12 +1,11 @@
 import StringIO
 import csv
 import hashlib
-from dojo.models import Finding, Endpoint, Notes
+from dojo.models import Finding, Endpoint
 from dateutil.parser import parse
 import re
 from urlparse import urlparse
 import socket
-from django.contrib.auth.models import User
 
 class ColumnMappingStrategy(object):
 
@@ -259,22 +258,6 @@ class DuplicateColumnMappingStrategy(ColumnMappingStrategy):
         finding.duplicate = self.evaluate_bool_value(column_value)
 
 
-class NotesColumnMappingStrategy(ColumnMappingStrategy):
-
-    def __init__(self):
-        self.mapped_column = 'notes'
-        super(NotesColumnMappingStrategy, self).__init__()
-
-    def map_column_value(self, finding, column_value):
-        user = User.objects.all().first()
-        note = Notes(entry=column_value,author=user)
-        note.save()
-        print note.entry
-        finding.reporter_id = user.id
-        finding.save()
-        finding.notes.add(note)
-
-
 class GenericFindingUploadCsvParser(object):
 
     def create_chain(self):
@@ -291,9 +274,7 @@ class GenericFindingUploadCsvParser(object):
         verified_column_strategy = VerifiedColumnMappingStrategy()
         false_positive_strategy = FalsePositiveColumnMappingStrategy()
         duplicate_strategy = DuplicateColumnMappingStrategy()
-        notes_strategy = NotesColumnMappingStrategy()
 
-        duplicate_strategy.successor = notes_strategy
         false_positive_strategy.successor = duplicate_strategy
         verified_column_strategy.successor = false_positive_strategy
         active_column_strategy.successor = verified_column_strategy
