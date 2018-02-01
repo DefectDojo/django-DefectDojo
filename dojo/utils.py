@@ -711,7 +711,10 @@ def log_jira_message(text, finding):
 # Adds labels to a Jira issue
 def add_labels(find, issue):
     #Update Label with Security
-    issue.fields.labels.append(u'security')
+    system_settings = System_Settings.objects.get()
+    labels = system_settings.jira_labels.split()
+    for label in labels:
+        issue.fields.labels.append(label)
     #Update the label with the product name (underscore)
     prod_name = find.test.engagement.product.name.replace(" ", "_")
     issue.fields.labels.append(prod_name)
