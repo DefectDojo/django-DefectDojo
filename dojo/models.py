@@ -48,6 +48,7 @@ class System_Settings(models.Model):
     enable_jira = models.BooleanField(default=False, verbose_name='Enable JIRA integration', blank=False)
     jira_choices = (('Critical', 'Critical'), ('High', 'High'), ('Medium', 'Medium'), ('Low', 'Low'))
     jira_minimum_severity = models.CharField(max_length=20, blank=True, null=True, choices=jira_choices, default='None')
+    jira_labels = models.CharField(max_length=200, blank=True,null=True, help_text='JIRA issue labels space seperated')
     enable_slack_notifications = models.BooleanField(default=False, verbose_name='Enable Slack notifications', blank=False)
     slack_channel = models.CharField(max_length=100, default='', blank=True)
     slack_token = models.CharField(max_length=100, default='', blank=True, help_text='Token required for interacting with Slack. Get one at https://api.slack.com/tokens')
@@ -64,6 +65,7 @@ class System_Settings(models.Model):
                                                     help_text='With this setting turned on, Dojo will display S0, S1, S2, etc ' \
                                                     'in most places, whereas if turned off Critical, High, Medium, etc will be displayed.')
     false_positive_history = models.BooleanField(default=False)
+
     url_prefix = models.CharField(max_length=300, default='', blank=True)
     team_name = models.CharField(max_length=100, default='', blank=True)
     time_zone = models.CharField(max_length=50,

@@ -41,6 +41,7 @@ setup(
         'lxml',
         'psycopg2',
         'django-multiselectfield',
+        'pbr',
 	'django-slack'],
 
     dependency_links=[
