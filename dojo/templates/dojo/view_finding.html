@@ -129,6 +129,7 @@
                     {% if finding.risk_acceptance_set.all %}
                         <th>Acceptance</th>
                     {% endif %}
+                    <th>Type</th>
                     <!--<th>Build ID</th>-->
                     <th>Date discovered</th>
                     <th>Age</th>
@@ -160,6 +161,13 @@
                                 View Risk Acceptance</a>
                         </td>
                     {% endif %}
+                    <td>
+                      {% if finding.static_finding or finding.line > 0 %}
+                        Static
+                      {% else %}
+                        Dyanamic
+                      {% endif %}
+                    </td>
                     <td>{{ finding.date }}</td>
                     <td>{{ finding.age }} days</td>
                     <td>{{ finding.reporter }}</td>
@@ -179,7 +187,7 @@
             </table>
         </div>
     </div>
-
+    {% if finding.static_finding or finding.line > 0 %}
     <div class="panel panel-default">
             <table id="error_notes" class="table-striped table table-condensed table-hover centered">
                 <tr>
@@ -200,7 +208,8 @@
                 </tr>
             </table>
     </div>
-
+    {% endif %}
+    {% if finding.param or finding.payload %}
     <div class="panel panel-default">
         <table id="error_notes" class="table-striped table table-condensed table-hover centered">
                 <tr>
@@ -221,7 +230,7 @@
                 </tr>
         </table>
     </div>
-
+    {% endif %}
  {% if jissue and jconf %}
     <div class="row to_highlight">
         <div class="col-md-12">
@@ -505,7 +514,7 @@
         </div>
     </div>
     <!--Cred end -->
-    
+
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h4>References <span class="pull-right"><a data-toggle="collapse" href="#vuln_refs"><i
