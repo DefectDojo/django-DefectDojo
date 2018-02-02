@@ -16,11 +16,12 @@ from dojo.tools.qualys.parser import QualysParser
 from dojo.tools.qualyswebapp.parser import QualysWebAppParser
 from dojo.tools.snyk.parser import SnykParser
 from dojo.tools.openvas_csv.parser import OpenVASUploadCsvParser
-
+from dojo.tools.skf.parser import SKFCsvParser
 
 __author__ = 'Jay Paz'
 
 #Modified by dkade to use OpenVASUploadCsvParser
+#Modified by martin.marsicano added SKFCsvParser
 
 def import_parser_factory(file, test):
     scan_type = test.test_type.name
@@ -64,6 +65,8 @@ def import_parser_factory(file, test):
         parser = OpenVASUploadCsvParser(file, test)
     elif scan_type == 'Snyk Scan':
         parser = SnykParser(file, test)
+    elif scan_type == 'SKF Scan':
+        parser = SKFCsvParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 

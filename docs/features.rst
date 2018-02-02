@@ -404,6 +404,7 @@ DefectDojo has the ability to import reports from other security tools.  Current
 15. OpenVAS CSV
 16. Snyk JSON
 17. Generic Findings in CSV format
+18. OWASP SKF
 
 
 The importers analyze each report and create new Findings for each item reported.  DefectDojo collapses duplicate
