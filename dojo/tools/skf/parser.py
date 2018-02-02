@@ -4,7 +4,7 @@ import hashlib
 from dojo.models import Finding, Notes
 from dateutil.parser import parse
 from django.contrib.auth.models import User
-import dateutil.parser
+from datetime import datetime
 
 class ColumnMappingStrategy(object):
 
@@ -31,7 +31,7 @@ class DateColumnMappingStrategy(ColumnMappingStrategy):
         super(DateColumnMappingStrategy, self).__init__()
 
     def map_column_value(self, finding, column_value):
-        finding.date = dateutil.parser.parse(column_value)
+        finding.date = datetime.strptime(column_value, '%Y-%m-%d %H:%M:%S').date()
 
 
 class TitleColumnMappingStrategy(ColumnMappingStrategy):
