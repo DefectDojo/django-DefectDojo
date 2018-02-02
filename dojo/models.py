@@ -648,7 +648,7 @@ class Finding(models.Model):
     last_reviewed_by = models.ForeignKey(User, null=True, editable=False, related_name='last_reviewed_by')
     images = models.ManyToManyField('FindingImage', blank=True)
 
-    line_number = models.CharField(null=True, blank=True, max_length=200, editable=False)
+    line_number = models.CharField(null=True, blank=True, max_length=200, editable=False) #Deprecated will be removed, use line
     sourcefilepath = models.TextField(null=True, blank=True, editable=False)
     sourcefile = models.TextField(null=True, blank=True, editable=False)
     param = models.TextField(null=True, blank=True, editable=False)
