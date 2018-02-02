@@ -1275,6 +1275,11 @@ class AddFindingImageForm(forms.ModelForm):
 
 FindingImageFormSet = modelformset_factory(FindingImage, extra=3, max_num=10, exclude=[''], can_delete=True)
 
+class JIRA_IssueForm(forms.ModelForm):
+    
+    class Meta:
+        model = JIRA_Issue
+        exclude = ['product']
 
 class JIRAForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput, required=True)
@@ -1283,6 +1288,11 @@ class JIRAForm(forms.ModelForm):
         model = JIRA_Conf
         exclude = ['product']
 
+class JIRA_PKeyForm(forms.ModelForm):
+
+    class Meta:
+        model = JIRA_PKey
+        exclude = ['product']
 
 class ToolTypeForm(forms.ModelForm):
     class Meta:
