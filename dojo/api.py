@@ -436,7 +436,7 @@ class Tool_TypeResource(BaseModelResource):
         resource_name = 'tool_types'
         list_allowed_methods = ['get', 'post', 'put', 'delete']
         detail_allowed_methods = ['get', 'post', 'put', 'delete']
-        queryset = Tool_Configuration.objects.all()
+        queryset = Tool_Type.objects.all()
         include_resource_uri = True
         filtering = {
             'id': ALL,
