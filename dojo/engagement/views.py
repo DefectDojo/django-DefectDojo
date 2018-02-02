@@ -430,7 +430,9 @@ def import_scan_results(request, eid):
                         continue
 
                     item.test = t
-                    item.date = t.target_start
+                    if item.date == timezone.now().date():
+                      item.date = t.target_start
+                    
                     item.reporter = request.user
                     item.last_reviewed = timezone.now()
                     item.last_reviewed_by = request.user
