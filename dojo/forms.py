@@ -1358,7 +1358,7 @@ class CredUserForm(forms.ModelForm):
 
 
 class JIRAPKeyForm(forms.ModelForm):
-    conf = forms.ModelChoiceField(queryset=JIRA_Conf.objects.all(), label='JIRA Configuration')
+    conf = forms.ModelChoiceField(queryset=JIRA_Conf.objects.all(), label='JIRA Configuration', required=False)
 
     class Meta:
         model = JIRA_PKey
