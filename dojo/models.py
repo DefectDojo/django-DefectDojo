@@ -1126,7 +1126,7 @@ class Tool_Type(models.Model):
 class Tool_Configuration(models.Model):
     name = models.CharField(max_length=200, null=False)
     description = models.CharField(max_length=2000, null=True, blank=True)
-    url =  models.URLField(max_length=2000, null=True)
+    url =  models.CharField(max_length=2000, null=True)
     tool_type = models.ForeignKey(Tool_Type, related_name='tool_type')
     authentication_type = models.CharField(max_length=15,
                             choices=(
@@ -1149,7 +1149,7 @@ class Tool_Configuration(models.Model):
 class Tool_Product_Settings(models.Model):
     name = models.CharField(max_length=200, null=False)
     description = models.CharField(max_length=2000, null=True, blank=True)
-    url =  models.URLField(max_length=2000, null=True, blank=True)
+    url =  models.CharField(max_length=2000, null=True, blank=True)
     product = models.ForeignKey(Product, default=1, editable=False)
     tool_configuration = models.ForeignKey(Tool_Configuration, null=False, related_name='tool_configuration')
     tool_project_id = models.CharField(max_length=200, null=True, blank=True)

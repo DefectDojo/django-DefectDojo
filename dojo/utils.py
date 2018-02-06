@@ -970,11 +970,15 @@ def _unpad_string(value):
     return value
 
 def dojo_crypto_encrypt(plaintext):
-    key = None
-    key = get_db_key()
+    data = None
+    if plaintext:
+        key = None
+        key = get_db_key()
 
-    iv =  os.urandom(16)
-    return prepare_for_save(iv, encrypt(key, iv, plaintext.encode('ascii', 'ignore')))
+        iv =  os.urandom(16)
+        data = prepare_for_save(iv, encrypt(key, iv, plaintext.encode('ascii', 'ignore')))
+
+    return data
 
 def prepare_for_save(iv, encrypted_value):
     stored_value = None
@@ -1074,11 +1078,11 @@ def create_notification(event=None, **kwargs):
 
     def send_alert_notification(user=None):
         icon = kwargs.get('icon', 'info-circle')
-        alert = Alerts(user_id=user, 
+        alert = Alerts(user_id=user,
                        title=kwargs.get('title'),
                        description=create_notification_message(event, 'alert'),
                        url=kwargs.get('url', reverse('alerts')),
-                       icon=icon, 
+                       icon=icon,
                        source=Notifications._meta.get_field(event).verbose_name.title())
         alert.save()
 
@@ -1127,7 +1131,6 @@ def create_notification(event=None, **kwargs):
 
         if mail_enabled and 'mail' in getattr(notifications, event):
             send_mail_notification(user.email)
-                
+
         if 'alert' in getattr(notifications, event):
             send_alert_notification(user)
-                
