@@ -1277,7 +1277,7 @@ class AddFindingImageForm(forms.ModelForm):
 FindingImageFormSet = modelformset_factory(FindingImage, extra=3, max_num=10, exclude=[''], can_delete=True)
 
 class JIRA_IssueForm(forms.ModelForm):
-    
+
     class Meta:
         model = JIRA_Issue
         exclude = ['product']
@@ -1300,14 +1300,26 @@ class ToolTypeForm(forms.ModelForm):
         model = Tool_Type
         exclude = ['product']
 
-
 class ToolConfigForm(forms.ModelForm):
     tool_type = forms.ModelChoiceField(queryset=Tool_Type.objects.all(), label='Tool Type')
     ssh = forms.CharField(widget=forms.Textarea(attrs={}), required=False, label='SSH Key')
-
     class Meta:
         model = Tool_Configuration
         exclude = ['product']
+
+    def clean(self):
+        from django.core.validators import URLValidator
+        form_data = self.cleaned_data
+
+        try:
+            url_validator = URLValidator(schemes=['ssh','http', 'https'])
+            url_validator(form_data["url"])
+        except forms.ValidationError:
+            raise forms.ValidationError(
+                'It does not appear as though this endpoint is a valid URL/SSH or IP address.',
+                code='invalid')
+
+        return form_data
 
 
 class DeleteToolProductSettingsForm(forms.ModelForm):
@@ -1327,6 +1339,21 @@ class ToolProductSettingsForm(forms.ModelForm):
         fields = ['name', 'description', 'url', 'tool_configuration', 'tool_project_id']
         exclude = ['tool_type']
         order = ['name']
+
+    def clean(self):
+        from django.core.validators import URLValidator
+        form_data = self.cleaned_data
+
+        try:
+            url_validator = URLValidator(schemes=['ssh','http', 'https'])
+            url_validator(form_data["url"])
+        except forms.ValidationError:
+            raise forms.ValidationError(
+                'It does not appear as though this endpoint is a valid URL/SSH or IP address.',
+                code='invalid')
+
+        return form_data
+
 
 
 class CredMappingForm(forms.ModelForm):
