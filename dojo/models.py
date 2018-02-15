@@ -777,10 +777,15 @@ class Finding(models.Model):
             if system_settings.enable_deduplication:
                     from dojo.tasks import async_dedupe
                     from dojo.utils import sync_dedupe
-                    if self.reporter.usercontactinfo.block_execution:
-                        sync_dedupe(self, *args, **kwargs)
-                    else:
-                         async_dedupe.delay(self, *args, **kwargs)
+                    try:
+                        if self.reporter.usercontactinfo.block_execution:
+                            sync_dedupe(self, *args, **kwargs)
+                        else:
+                             async_dedupe.delay(self, *args, **kwargs)
+                    except:
+                        async_dedupe.delay(self, *args, **kwargs)
+                        pass
+
             if system_settings.false_positive_history:
                 from dojo.tasks import async_false_history
                 from dojo.utils import sync_false_history
