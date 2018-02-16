@@ -82,5 +82,12 @@
     },
     "model": "dojo.test_type",
     "pk": 12
+  },
+  {
+    "fields": {
+      "name": "OpenVAS CSV"
+    },
+    "model": "dojo.test_type",
+    "pk": 13
   }
 ]

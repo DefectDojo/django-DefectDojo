@@ -15,21 +15,17 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, StreamingHttpResponse, Http404, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
-from pytz import timezone
+from django.utils import timezone
 
 from dojo.filters import ProductFilter, ProductFindingFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm
 from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Cred_User, Cred_Mapping
 from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, handle_uploaded_selenium
 from dojo.models import *
-from dojo.models import *
 from dojo.forms import *
 from dojo.tasks import *
-from dojo.forms import *
 from dojo.utils import dojo_crypto_encrypt, prepare_for_view, FileIterWrapper, get_system_setting
 from dojo.product import views as ds
-
-localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -98,7 +94,7 @@ def view_cred_details(request, ttid):
         if form.is_valid():
             new_note = form.save(commit=False)
             new_note.author = request.user
-            new_note.date = datetime.now(tz=localtz)
+            new_note.date = timezone.now()
             new_note.save()
             cred.notes.add(new_note)
             form = NoteForm()
@@ -141,7 +137,7 @@ def view_cred_product(request, pid, ttid):
         if form.is_valid():
             new_note = form.save(commit=False)
             new_note.author = request.user
-            new_note.date = datetime.now(tz=localtz)
+            new_note.date = timezone.now()
             new_note.save()
             cred.cred_id.notes.add(new_note)
             form = NoteForm()
@@ -182,7 +178,7 @@ def view_cred_product_engagement(request, eid, ttid):
         if form.is_valid():
             new_note = form.save(commit=False)
             new_note.author = request.user
-            new_note.date = datetime.now(tz=localtz)
+            new_note.date = timezone.now()
             new_note.save()
             cred.cred_id.notes.add(new_note)
             form = NoteForm()
@@ -224,7 +220,7 @@ def view_cred_engagement_test(request, tid, ttid):
         if form.is_valid():
             new_note = form.save(commit=False)
             new_note.author = request.user
-            new_note.date = datetime.now(tz=localtz)
+            new_note.date = timezone.now()
             new_note.save()
             cred.cred_id.notes.add(new_note)
             form = NoteForm()
@@ -266,7 +262,7 @@ def view_cred_finding(request, fid, ttid):
         if form.is_valid():
             new_note = form.save(commit=False)
             new_note.author = request.user
-            new_note.date = datetime.now(tz=localtz)
+            new_note.date = timezone.now()
             new_note.save()
             cred.cred_id.notes.add(new_note)
             form = NoteForm()

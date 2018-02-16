@@ -11,7 +11,7 @@ from django.forms import modelformset_factory
 from django.forms.widgets import Widget, Select
 from django.utils.dates import MONTHS
 from django.utils.safestring import mark_safe
-from pytz import timezone
+from django.utils import timezone
 from tagging.forms import TagField
 from tagging.models import Tag
 
@@ -24,8 +24,6 @@ from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
 from dojo.utils import get_system_setting
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
-
-localtz = timezone(get_system_setting('time_zone'))
 
 FINDING_STATUS = (('verified', 'Verified'),
                   ('false_p', 'False Positive'),
@@ -228,7 +226,7 @@ class Product_TypeProductForm(forms.ModelForm):
 
 
 class ImportScanForm(forms.Form):
-    SCAN_TYPE_CHOICES = (("Burp Scan", "Burp Scan"), ("Nessus Scan", "Nessus Scan"), ("Nmap Scan", "Nmap Scan"),
+    SCAN_TYPE_CHOICES = (("", "Please Select a Scan Type"),("Burp Scan", "Burp Scan"), ("Nessus Scan", "Nessus Scan"), ("Nmap Scan", "Nmap Scan"),
                          ("Nexpose Scan", "Nexpose Scan"),
                          ("AppSpider Scan", "AppSpider Scan"), ("Veracode Scan", "Veracode Scan"),
                          ("Checkmarx Scan", "Checkmarx Scan"), ("ZAP Scan", "ZAP Scan"),
@@ -236,7 +234,13 @@ class ImportScanForm(forms.Form):
                          ("Dependency Check Scan", "Dependency Check Scan"), ("Retire.js Scan", "Retire.js Scan"),
                          ("Node Security Platform Scan", "Node Security Platform Scan"),
                          ("Qualys Scan", "Qualys Scan"),
-                         ("Generic Findings Import", "Generic Findings Import"))
+                         ("Qualys Webapp Scan", "Qualys Webapp Scan"),
+                         ("OpenVAS CSV", "OpenVAS CSV"),
+                         ("Snyk Scan", "Snyk Scan"),
+                         ("Generic Findings Import", "Generic Findings Import"),
+                         ("SKF Scan", "SKF Scan"))
+    SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
+
     scan_date = forms.DateTimeField(
         required=True,
         label="Scan Completion Date",
@@ -248,7 +252,7 @@ class ImportScanForm(forms.Form):
                                          choices=SEVERITY_CHOICES[0:4])
     active = forms.BooleanField(help_text="Select if these findings are currently active.", required=False)
     verified = forms.BooleanField(help_text="Select if these findings have been verified.", required=False)
-    scan_type = forms.ChoiceField(required=True, choices=SCAN_TYPE_CHOICES)
+    scan_type = forms.ChoiceField(required=True, choices=SORTED_SCAN_TYPE_CHOICES)
 
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False,
@@ -592,7 +596,7 @@ class AddFindingForm(forms.ModelForm):
                            widget=forms.TextInput(attrs={'class':
                                                              'datepicker'}))
     cwe = forms.IntegerField(required=False)
-    severity_options = (('Low', 'Low'), ('Medium', 'Medium'),
+    severity_options = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
                         ('High', 'High'), ('Critical', 'Critical'))
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
@@ -1212,7 +1216,7 @@ class UserContactInfoForm(forms.ModelForm):
 
 
 def get_years():
-    now = datetime.now(tz=localtz)
+    now = timezone.now()
     return [(now.year, now.year), (now.year - 1, now.year - 1), (now.year - 2, now.year - 2)]
 
 
@@ -1272,6 +1276,11 @@ class AddFindingImageForm(forms.ModelForm):
 
 FindingImageFormSet = modelformset_factory(FindingImage, extra=3, max_num=10, exclude=[''], can_delete=True)
 
+class JIRA_IssueForm(forms.ModelForm):
+
+    class Meta:
+        model = JIRA_Issue
+        exclude = ['product']
 
 class JIRAForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput, required=True)
@@ -1280,20 +1289,37 @@ class JIRAForm(forms.ModelForm):
         model = JIRA_Conf
         exclude = ['product']
 
+class JIRA_PKeyForm(forms.ModelForm):
+
+    class Meta:
+        model = JIRA_PKey
+        exclude = ['product']
 
 class ToolTypeForm(forms.ModelForm):
     class Meta:
         model = Tool_Type
         exclude = ['product']
 
-
 class ToolConfigForm(forms.ModelForm):
     tool_type = forms.ModelChoiceField(queryset=Tool_Type.objects.all(), label='Tool Type')
     ssh = forms.CharField(widget=forms.Textarea(attrs={}), required=False, label='SSH Key')
-
     class Meta:
         model = Tool_Configuration
         exclude = ['product']
+
+    def clean(self):
+        from django.core.validators import URLValidator
+        form_data = self.cleaned_data
+
+        try:
+            url_validator = URLValidator(schemes=['ssh','http', 'https'])
+            url_validator(form_data["url"])
+        except forms.ValidationError:
+            raise forms.ValidationError(
+                'It does not appear as though this endpoint is a valid URL/SSH or IP address.',
+                code='invalid')
+
+        return form_data
 
 
 class DeleteToolProductSettingsForm(forms.ModelForm):
@@ -1313,6 +1339,21 @@ class ToolProductSettingsForm(forms.ModelForm):
         fields = ['name', 'description', 'url', 'tool_configuration', 'tool_project_id']
         exclude = ['tool_type']
         order = ['name']
+
+    def clean(self):
+        from django.core.validators import URLValidator
+        form_data = self.cleaned_data
+
+        try:
+            url_validator = URLValidator(schemes=['ssh','http', 'https'])
+            url_validator(form_data["url"])
+        except forms.ValidationError:
+            raise forms.ValidationError(
+                'It does not appear as though this endpoint is a valid URL/SSH or IP address.',
+                code='invalid')
+
+        return form_data
+
 
 
 class CredMappingForm(forms.ModelForm):
@@ -1355,7 +1396,7 @@ class CredUserForm(forms.ModelForm):
 
 
 class JIRAPKeyForm(forms.ModelForm):
-    conf = forms.ModelChoiceField(queryset=JIRA_Conf.objects.all(), label='JIRA Configuration')
+    conf = forms.ModelChoiceField(queryset=JIRA_Conf.objects.all(), label='JIRA Configuration', required=False)
 
     class Meta:
         model = JIRA_PKey

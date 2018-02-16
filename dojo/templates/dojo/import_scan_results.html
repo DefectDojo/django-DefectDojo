@@ -15,22 +15,26 @@
 
         <p>DefectDojo accepts:</p>
     <ul>
+        <li><b>Arachni Scanner</b> - Arachni JSON report format.</li>
+        <li><b>AppSpider (Rapid7)</b> - Use the VulnerabilitiesSummary.xml file found in the zipped report download.</li>
         <li><b>Burp XML</b> - When the Burp report is generated, we recommend selecting the option to Base64 encode both the request and
             response fields. These fields will be processed and made available in the Finding view page.</li>
-        <li><b>Tenable Nessus</b> - Reports can be imported in the CSV, and .nessus (XML) report formats.</li>
-        <li><b>Nmap</b> - XML output (use -oX)</li>
-        <li><b>Rapid7 Nexpose XML 2.0</b> - Use the full XML export template from Nexpose.</li>
-        <li><b>Rapid7 AppSpider</b> - Use the VulnerabilitiesSummary.xml file found in the zipped report download.</li>
-        <li><b>Veracode Detailed XML Report</b></li>
         <li><b>Checkmarx Detailed XML Report</b></li>
-        <li><b>Zed Attack Proxy</b> - ZAP XML report format.</li>
-        <li><b>Arachni Scanner</b> - Arachni JSON report format.</li>
-		    <li><b>Visual Code Grepper (VCG)</b> - VCG output can be imported in CSV or Xml formats.</li>
         <li><b>Dependency Check</b> - OWASP Dependency Check output can be imported in Xml format.</li>
-        <li><b>Retire.js</b> - Retire.js JavaScript scan (--js) output file can be imported in JSON format.</li>
-        <li><b>Node Security Platform</b> - Node Security Platform (NSP) output file can be imported in JSON format.</li>
-        <li><b>Qualys</b> - Qualys output files can be imported in XML format.</li>
         <li><b>Generic Findings Import</b> - Import Generic findings in CSV format.</li>
+        <li><b>Nessus (Tenable)</b> - Reports can be imported in the CSV, and .nessus (XML) report formats.</li>
+        <li><b>Nexpose XML 2.0 (Rapid7)</b> - Use the full XML export template from Nexpose.</li>
+        <li><b>Nmap</b> - XML output (use -oX)</li>
+        <li><b>Node Security Platform</b> - Node Security Platform (NSP) output file can be imported in JSON format.</li>
+        <li><b>OpenVAS CSV</b> - Import OpenVAS Scan in CSV format. Export as CSV Results on OpenVAS.</li>
+        <li><b>Qualys</b> - Qualys output files can be imported in XML format.</li>
+        <li><b>Qualys WebScan</b> - Qualys WebScan output files can be imported in XML format.</li>
+        <li><b>Retire.js</b> - Retire.js JavaScript scan (--js) output file can be imported in JSON format.</li>
+        <li><b>SKF Scan</b> - Output of SKF Sprint summary export.</li>
+        <li><b>Snyk</b> - Snyk output file (snyk test --json > snyk.json) can be imported in JSON format.</li>
+        <li><b>Visual Code Grepper (VCG)</b> - VCG output can be imported in CSV or Xml formats.</li>
+        <li><b>Veracode Detailed XML Report</b></li>
+        <li><b>Zed Attack Proxy</b> - ZAP XML report format.</li>
     </ul>
 
         {% if additional_message %}

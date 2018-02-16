@@ -19,6 +19,7 @@ class VeracodeXMLParser(object):
                                'https://www.veracode.com/schema/reports/export/1.0 schema.')
 
         dupes = dict()
+        severitycount = 0
 
         for severity in root.iter('{https://www.veracode.com/schema/reports/export/1.0}severity'):
             if severity.attrib['level'] == '5':
@@ -68,6 +69,11 @@ class VeracodeXMLParser(object):
 				pass
 			if mitigatedTest == 1:
 				find = Finding(title=flaw.attrib['categoryname'],
+                               line=flaw.attrib['line'],
+                               #line=flaw.attrib['line'],
+                               sourcefilepath=flaw.attrib['sourcefilepath'],
+                               #file_path=flaw.attrib['sourcefilepath'],
+                               sourcefile=flaw.attrib['sourcefile'],
                                 cwe=int(flaw.attrib['cweid']),
                                 test=test,
                                 active=False,
@@ -84,6 +90,11 @@ class VeracodeXMLParser(object):
 				date=find_date)
 			else:
 				find = Finding(title=flaw.attrib['categoryname'],
+                               line_number=flaw.attrib['line'],
+                               #line=flaw.attrib['line'],
+                               sourcefilepath=flaw.attrib['sourcefilepath'],
+                               #file_path=flaw.attrib['sourcefilepath'],
+                               sourcefile=flaw.attrib['sourcefile'],
                                 cwe=int(flaw.attrib['cweid']),
                                 test=test,
                                 active=False,

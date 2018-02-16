@@ -319,6 +319,10 @@ class ProductFilter(DojoFilter):
 
 class OpenFindingFilter(DojoFilter):
     title = CharFilter(lookup_expr='icontains')
+    sourcefile = CharFilter(lookup_expr='icontains')
+    sourcefilepath = CharFilter(lookup_expr='icontains')
+    param = CharFilter(lookup_expr='icontains')
+    payload = CharFilter(lookup_expr='icontains')
     date = DateRangeFilter()
     last_reviewed = DateRangeFilter()
     cwe = MultipleChoiceFilter(choices=[])
@@ -382,6 +386,10 @@ class OpenFingingSuperFilter(OpenFindingFilter):
 
 class ClosedFindingFilter(DojoFilter):
     title = CharFilter(lookup_expr='icontains')
+    sourcefile = CharFilter(lookup_expr='icontains')
+    sourcefilepath = CharFilter(lookup_expr='icontains')
+    param = CharFilter(lookup_expr='icontains')
+    payload = CharFilter(lookup_expr='icontains')
     mitigated = DateRangeFilter(label="Mitigated Date")
     cwe = MultipleChoiceFilter(choices=[])
     severity = MultipleChoiceFilter(choices=[])
@@ -443,6 +451,10 @@ class ClosedFingingSuperFilter(ClosedFindingFilter):
 
 class AcceptedFindingFilter(DojoFilter):
     title = CharFilter(lookup_expr='icontains')
+    sourcefile = CharFilter(lookup_expr='icontains')
+    sourcefilepath = CharFilter(lookup_expr='icontains')
+    param = CharFilter(lookup_expr='icontains')
+    payload = CharFilter(lookup_expr='icontains')
     test__engagement__risk_acceptance__created = \
         DateRangeFilter(label="Acceptance Date")
     date = DateRangeFilter(label="Finding Date")
@@ -509,6 +521,10 @@ class AcceptedFingingSuperFilter(AcceptedFindingFilter):
 
 class ProductFindingFilter(DojoFilter):
     title = CharFilter(lookup_expr='icontains')
+    sourcefile = CharFilter(lookup_expr='icontains')
+    sourcefilepath = CharFilter(lookup_expr='icontains')
+    param = CharFilter(lookup_expr='icontains')
+    payload = CharFilter(lookup_expr='icontains')
     date = DateRangeFilter()
     cwe = MultipleChoiceFilter(choices=[])
     severity = MultipleChoiceFilter(choices=[])

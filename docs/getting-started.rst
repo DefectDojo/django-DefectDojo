@@ -21,7 +21,7 @@ Change into the newly created ```django-DefectDojo``` directory:
 
     ``cd django-DefectDojo/``
 
-There is a script in the main folder called ``setup.bash`` that will allow you to interactively install DefectDojo on any Linux based systems. We do not recommend running DefectDojo as root, but you may do so if you choose. 
+There is a script in the main folder called ``setup.bash`` that will allow you to interactively install DefectDojo on any Linux based systems. We do not recommend running DefectDojo as root, but you may do so if you choose.
 
 **You will need:**
 * MySQL
@@ -72,8 +72,8 @@ Select a name for the DefectDojo database.
 It may take some time for all the `OS` and `python` packages to be installed. As of this writing the packages for this `OS` are:
 
 * gcc
-* libssl-dev 
-* python-dev 
+* libssl-dev
+* python-dev
 * libmysqlclient-dev
 * python-pip
 * mysql-server
@@ -95,8 +95,7 @@ And the `python` packages are (listed in `setup.py` as well):
 * 'wsgiref==0.1.2',
 * 'django-filter',
 * 'supervisor',
-* 'humanize',
-* 'django-bower'
+* 'humanize'
 
 After all the components have been installed, the `makemigrations` process will prompt you to create a ``superuser``
 
@@ -105,28 +104,10 @@ After all the components have been installed, the `makemigrations` process will 
 
 Answer `yes` and follow the prompts, this will be the user you will use to login to DefectDojo.
 #. *(OPTIONAL)* If you haven't already, run `mysql_secure_install` to set a password for your root MySQL user.
-
-
-#.  If installation is successful, you will see something like the following: ::
-
-        ==============================================================================
-
-        SUCCESS! Now edit your settings.py file in the 'dojo' directory to complete the installation.
-
-        When you're ready to start the DefectDojo server, type in this directory:
-            1. python manage.py bower install
-            2. python manage.py collectstatic
-            3. python manage.py runserver
-
-
 #. Edit the settings.py file to modify any other settings that you want to
    change, such as your SMTP server information, which we leave off by default.
-#. Install bower dependencies by running
-        ``python manage.py bower install``
-#. Install static files to the correct directories
-        ``python manage.py collectstatic``
 #. When you are ready to run DefectDojo, run the server with
-        ``python manage.py runserver``
+        ``./run_dojo.bash``
 
 Vagrant Install
 ~~~~~~~~~~~~~~~

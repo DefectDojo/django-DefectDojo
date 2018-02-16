@@ -4,31 +4,35 @@ from __future__ import unicode_literals
 import tempfile
 from datetime import datetime, timedelta
 
+from django.db.models import Count
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
 from django.utils.http import urlencode
-from django.utils import timezone as tz
 from celery.utils.log import get_task_logger
 from celery.decorators import task
-from dojo.models import Finding, Test, Engagement
-from pytz import timezone
+from dojo.models import Finding, Test, Engagement, System_Settings
+from django.utils import timezone
 
 import pdfkit
 from dojo.celery import app
+from dojo.utils import sync_dedupe, sync_false_history
 from dojo.reports.widgets import report_widget_factory
 from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, \
                         close_epic, get_system_setting, create_notification
 
-logger = get_task_logger(__name__)
+import logging
+fmt = getattr(settings, 'LOG_FORMAT', None)
+lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
+logging.basicConfig(format=fmt, level=lvl)
 
-localtz = timezone(get_system_setting('time_zone'))
+logger = get_task_logger(__name__)
 
 @app.task(bind=True)
 def add_alerts(self, runinterval):
-    now = tz.now()
+    now = timezone.now()
 
     upcoming_engagements = Engagement.objects.filter(target_start__gt=now+timedelta(days=3),target_start__lt=now+timedelta(days=3)+runinterval).order_by('target_start')
     for engagement in upcoming_engagements:
@@ -43,7 +47,7 @@ def add_alerts(self, runinterval):
         target_end__lt=now,
         status='In Progress').order_by('-target_end')
     for eng in stale_engagements:
-        create_notification(event='stale_engagement', 
+        create_notification(event='stale_engagement',
                            title='Stale Engagement: %s' % eng.name,
                            description='The engagement "%s" is stale. Target end was %s.' % (eng.name, eng.target_end.strftime("%b. %d, %Y")),
                            url=reverse('view_engagement', args=(eng.id,)),
@@ -91,7 +95,7 @@ def async_pdf_report(self,
             f = ContentFile(pdf)
             report.file.save(filename, f)
         report.status = 'success'
-        report.done_datetime = datetime.now(tz=localtz)
+        report.done_datetime = timezone.now()
         report.save()
 
         create_notification(event='report_created', title='Report created', description='The report "%s" is ready.' % report.name, url=uri, report=report, objowner=report.requester)
@@ -144,8 +148,12 @@ def async_custom_pdf_report(self,
             toc = {'toc-header-text': toc_settings.title,
                    'xsl-style-sheet': temp.name}
 
+        # default the cover to not come first by default
+        cover_first_val=False
+
         cover = None
         if 'cover-page' in selected_widgets:
+            cover_first_val=True
             cp = selected_widgets['cover-page']
             x = urlencode({'title': cp.title,
                            'subtitle': cp.sub_heading,
@@ -159,9 +167,9 @@ def async_custom_pdf_report(self,
         pdf = pdfkit.from_string(bytes,
                                  False,
                                  configuration=config,
-                                 cover=cover,
                                  toc=toc,
-                                 )
+                                 cover=cover,
+                                 cover_first=cover_first_val)
 
         if report.file.name:
             with open(report.file.path, 'w') as f:
@@ -171,7 +179,7 @@ def async_custom_pdf_report(self,
             f = ContentFile(pdf)
             report.file.save(filename, f)
         report.status = 'success'
-        report.done_datetime = datetime.now(tz=localtz)
+        report.done_datetime = timezone.now()
         report.save()
 
         create_notification(event='report_created', title='Report created', description='The report "%s" is ready.' % report.name, url=uri, report=report, objowner=report.requester)
@@ -220,30 +228,25 @@ def add_comment_task(find, note):
 @app.task(name='async_dedupe')
 def async_dedupe(new_finding, *args, **kwargs):
     logger.info("running deduplication")
-    eng_findings_cwe = Finding.objects.filter(test__engagement__product=new_finding.test.engagement.product,
-                                              cwe=new_finding.cwe).exclude(id=new_finding.id).exclude(cwe=None).exclude(endpoints=None)
-    eng_findings_title = Finding.objects.filter(test__engagement__product=new_finding.test.engagement.product,
-                                                title=new_finding.title).exclude(id=new_finding.id).exclude(endpoints=None)
-    total_findings = eng_findings_cwe | eng_findings_title
-    for find in total_findings:
-        list1 = new_finding.endpoints.all()
-        list2 = find.endpoints.all()
-        if all(x in list2 for x in list1):
-            find.duplicate = True
-            super(Finding, find).save(*args, **kwargs)
+    sync_dedupe(new_finding, *args, **kwargs)
 
 @app.task(name='async_false_history')
 def async_false_history(new_finding, *args, **kwargs):
     logger.info("running false_history")
-    eng_findings_cwe = Finding.objects.filter(test__engagement__product=new_finding.test.engagement.product,
-                                              cwe=new_finding.cwe, test__test_type=new_finding.test.test_type,
-                                              false_p=True).exclude(
-                                              id=new_finding.id).exclude(cwe=None).exclude(endpoints=None)
-    eng_findings_title = Finding.objects.filter(test__engagement__product=new_finding.test.engagement.product,
-                                                title=new_finding.title, test__test_type=new_finding.test.test_type,
-                                                false_p=True).exclude(id=new_finding.id).exclude(endpoints=None)
-    total_findings = eng_findings_cwe | eng_findings_title
-    if total_findings.count() > 0:
-            new_finding.false_p = True
-            super(Finding, new_finding).save(*args, **kwargs)
+    sync_false_history(new_finding, *args, **kwargs)
 
+@app.task(bind=True)
+def async_dupe_delete(*args, **kwargs):
+    logger.info("delete excess duplicates")
+    system_settings = System_Settings.objects.get()
+    if system_settings.delete_dupulicates:
+        dupe_max = system_settings.max_dupes
+        findings = Finding.objects.all().annotate(num_dupes=Count('duplicate_list')).filter(num_dupes__gt=dupe_max)
+        for finding in findings:
+            duplicate_list = finding.duplicate_list.all().order_by('date').all()
+            dupe_count =  len(duplicate_list) - dupe_max
+            for finding in duplicate_list:
+                finding.delete()
+                dupe_count = dupe_count - 1
+                if dupe_count == 0:
+                    break

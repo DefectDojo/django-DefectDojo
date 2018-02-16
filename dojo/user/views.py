@@ -10,15 +10,12 @@ from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404
-from pytz import timezone
 from tastypie.models import ApiKey
 
 from dojo.filters import UserFilter
 from dojo.forms import DojoUserForm, AddDojoUserForm, DeleteUserForm, APIKeyForm, UserContactInfoForm
 from dojo.models import Product, Dojo_User, UserContactInfo, Alerts
-from dojo.utils import get_page_items, add_breadcrumb, get_alerts, get_system_setting
-
-localtz = timezone(get_system_setting('time_zone'))
+from dojo.utils import get_page_items, add_breadcrumb, get_system_setting
 
 logging.basicConfig(
     level=logging.DEBUG,
