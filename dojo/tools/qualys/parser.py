@@ -16,6 +16,7 @@ from urlparse import urlparse
 
 # Non-standard libraries
 try:
+    import defusedxml.lxml as lxml
     from lxml import etree
 except ImportError:
     print "Missing lxml library. Please install using PIP. https://pypi.python.org/pypi/lxml/3.4.2"

@@ -11,8 +11,8 @@ import requests
 
 class Login(unittest.TestCase):
     def setUp(self):
-        self.driver = webdriver.Firefox()
-        self.driver.implicitly_wait(30)
+        self.driver = webdriver.Chrome('chromedriver')
+        self.driver.implicitly_wait(500)
         self.base_url = "http://localhost:8000/"
         self.verificationErrors = []
         self.accept_next_alert = True
@@ -29,6 +29,7 @@ class Login(unittest.TestCase):
     def get_api_key(self):
         driver = self.login_page()
         driver.get(self.base_url + "api/key")
+        time.sleep(3)
         api_text = driver.find_element_by_tag_name("BODY").text
         r_pattern = re.compile('Your current API key is (\w+)')
         r_match = r_pattern.search(api_text)
@@ -49,6 +50,7 @@ class Login(unittest.TestCase):
         user = os.environ['DOJO_ADMIN_USER']
         headers = {'content-type': 'application/json',
                    'Authorization': 'ApiKey %s:%s' % (user, api_key)}
+
         r = requests.get(api_url, headers=headers, verify=False)
         self.assertEqual(r.status_code, 200)
 

@@ -73,11 +73,11 @@
                 <div class="clearfix">
                     {% include "dojo/paging_snippet.html" with page=confs page_size=True %}
                 </div>
-                {% if "DB_KEY"|get_config_setting == False %}
-                <p class="text-center"><strong>Please configure a key called DB_KEY and add to settings.py.</strong></p></br>
-                {% endif %}
             {% else %}
                 <p class="text-center">No credentials configured.</p>
+            {% endif %}
+            {% if "DB_KEY"|get_config_setting == False %}
+            <p class="text-center"><strong>Please configure a randomly generated key called DB_KEY and add to settings.py.</strong></p></br>
             {% endif %}
         </div>
     </div>

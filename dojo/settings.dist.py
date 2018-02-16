@@ -4,7 +4,7 @@ from datetime import timedelta
 
 DEBUG = True
 LOGIN_REDIRECT_URL = '/'
-# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTOCOL', 'https')
+# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # SECURE_SSL_REDIRECT = True
 # SECURE_BROWSER_XSS_FILTER = True
 SESSION_COOKIE_HTTPONLY = True
@@ -26,7 +26,7 @@ DOJO_ROOT = 'DOJODIR'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'BACKENDDB', 
+        'ENGINE': 'BACKENDDB',
         # 'mysql','sqlite3' or 'oracle'.
         'NAME': 'MYSQLDB',  # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
@@ -89,7 +89,7 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-
+    os.path.dirname(DOJO_ROOT) + "/components/yarn_components",
 )
 
 # List of finder classes that know how to find static files in
@@ -97,32 +97,9 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'djangobower.finders.BowerFinder',
 )
 
 FILE_UPLOAD_HANDLERS = ("django.core.files.uploadhandler.TemporaryFileUploadHandler",)
-
-# where should bower install components
-# collect static will move them to the static root
-BOWER_COMPONENTS_ROOT = 'BOWERDIR'
-
-# what components should be installed
-BOWER_INSTALLED_APPS = (
-    'fontawesome',
-    'https://github.com/BlackrockDigital/startbootstrap-sb-admin-2.git',
-    'fullcalendar',
-    'jquery-cookie',
-    'jquery-ui',
-    'jquery-highlight',
-    # directly from github since no bower comp available
-    'https://github.com/jumjum123/JUMFlot.git',
-    'https://github.com/markrcote/flot-axislabels.git',
-    'chosen',
-    'chosen-bootstrap',
-    'bootswatch-dist#readable',
-    'bootstrap-wysiwyg-steveathon',
-    'justgage'
-)
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'DOJOSECRET'
@@ -136,6 +113,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'dojo.middleware.LoginRequiredMiddleware',
+    'dojo.middleware.TimezoneMiddleware'
 )
 
 ROOT_URLCONF = 'dojo.urls'
@@ -185,7 +163,6 @@ INSTALLED_APPS = (
     'django.contrib.humanize',
     'gunicorn',
     'tastypie',
-    'djangobower',
     'auditlog',
     'dojo',
     'tastypie_swagger',
@@ -218,6 +195,7 @@ CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_RESULT_EXPIRES = 86400
 CELERYBEAT_SCHEDULE_FILENAME = DOJO_ROOT + '/dojo.celery.beat.db'
 CELERY_ACCEPT_CONTENT = ['pickle', 'json', 'msgpack', 'yaml']
+CELERY_TASK_SERIALIZER = "pickle"
 
 # Celery beat scheduled tasks
 CELERYBEAT_SCHEDULE = {
@@ -225,6 +203,11 @@ CELERYBEAT_SCHEDULE = {
         'task':'dojo.tasks.add_alerts',
         'schedule': timedelta(hours=1),
         'args': [timedelta(hours=1)]
+    },
+        'dedupe-delete': {
+        'task':'dojo.tasks.async_dupe_delete',
+        'schedule': timedelta(hours=24),
+        'args': [timedelta(hours=24)]
     },
 }
 

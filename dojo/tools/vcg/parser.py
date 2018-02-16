@@ -88,8 +88,10 @@ class VCGXmlParser(object):
         data.severity = self.get_field_from_xml(issue, 'Severity')
         data.description = self.get_field_from_xml(issue, 'Description')
         data.filename = self.get_field_from_xml(issue, 'FileName')
+        #data.file_path = self.get_field_from_xml(issue, 'FileName')
         data.line = self.get_field_from_xml(issue, 'Line')
         data.code_line = self.get_field_from_xml(issue, 'CodeLine')
+        #data.line = self.get_field_from_xml(issue, 'CodeLine')
 
         finding = data.to_finding(test)
         return finding

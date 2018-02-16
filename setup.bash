@@ -26,13 +26,28 @@ function prompt_db_type() {
 
 # Get MySQL details
 function get_db_details() {
-    read -p "MySQL host: " SQLHOST
-    read -p "MySQL port: " SQLPORT
-    read -p "MySQL user (should already exist): " SQLUSER
-    stty -echo
-    read -p "Password for user: " SQLPWD; echo
-    stty echo
-    read -p "Database name (should NOT exist): " DBNAME
+    # Allow script to be called non-interactively using:
+    # export AUTO_DOCKER=yes && /opt/django-DefectDojo/setup.bash
+    if [ "$AUTO_DOCKER" != "yes" ]; then
+        # Run interactively
+        read -p "MySQL host: " SQLHOST
+        read -p "MySQL port: " SQLPORT
+        read -p "MySQL user (should already exist): " SQLUSER
+        stty -echo
+        read -p "Password for user: " SQLPWD; echo
+        stty echo
+        read -p "Database name (should NOT exist): " DBNAME
+    else
+        # Set the root password for mysql - install has it blank
+        mysql -uroot -e "SET PASSWORD = PASSWORD('Cu3zehoh7eegoogohdoh1the');"
+        # Default values for a automated Docker install
+        echo "Setting default values for MySQL install"
+        SQLHOST="localhost"
+        SQLPORT="3306"
+        SQLUSER="root"
+        SQLPWD="Cu3zehoh7eegoogohdoh1the"
+        DBNAME="dojodb"
+    fi
 
     if mysql -fs -h "$SQLHOST" -P "$SQLPORT" -u"$SQLUSER" -p"$SQLPWD" "$DBNAME" >/dev/null 2>&1 </dev/null; then
         echo "Database $DBNAME already exists!"
@@ -97,7 +112,14 @@ function get_postgres_db_details() {
 
 echo "Welcome to DefectDojo! This is a quick script to get you up and running."
 echo
-prompt_db_type
+# Allow script to be called non-interactively using:
+# export AUTO_DOCKER=yes && /opt/django-DefectDojo/setup.bash
+if [ "$AUTO_DOCKER" != "yes" ]; then
+    prompt_db_type
+else
+    # Default to MySQL install
+    DBTYPE=$MYSQL
+fi
 echo
 echo "NEED SUDO PRIVILEGES FOR NEXT STEPS!"
 echo
@@ -113,7 +135,8 @@ BREW_CMD=$(which brew)
 
 if [[ ! -z "$YUM_CMD" ]]; then
     curl -sL https://rpm.nodesource.com/setup | sudo bash -
-	sudo yum install gcc python-devel python-setuptools python-pip nodejs wkhtmltopdf npm
+    wget https://dl.yarnpkg.com/rpm/yarn.repo -O /etc/yum.repos.d/yarn.repo
+	sudo yum install gcc python-devel python-setuptools python-pip nodejs yarn wkhtmltopdf npm
 
         if [ "$DBTYPE" == $MYSQL ]; then
            echo "Installing MySQL client"
@@ -126,15 +149,20 @@ if [[ ! -z "$YUM_CMD" ]]; then
 elif [[ ! -z "$APT_GET_CMD" ]]; then
      if [ "$DBTYPE" == $MYSQL ]; then
         echo "Installing MySQL client"
-        sudo apt-get install libmysqlclient-dev mysql-server
+        sudo apt-get -y install libmysqlclient-dev mysql-server
      elif [ "$DBTYPE" == $POSTGRES ]; then
 	echo "Installing Postgres client"
-        sudo apt-get install libpq-dev postgresql postgresql-contrib libmysqlclient-dev
+        sudo apt-get -y install libpq-dev postgresql postgresql-contrib libmysqlclient-dev
      fi
-
-     sudo apt-get install libjpeg-dev gcc libssl-dev python-dev python-pip nodejs-legacy wkhtmltopdf npm
+     sudo apt-get install -y curl apt-transport-https
+     #Yarn
+     curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+     echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+     #Node
+     curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash
+     sudo apt-get update && sudo apt-get install -y apt-transport-https libjpeg-dev gcc libssl-dev python-dev python-pip nodejs yarn wkhtmltopdf build-essential
 elif [[ ! -z "$BREW_CMD" ]]; then
-    brew install gcc openssl python node npm Caskroom/cask/wkhtmltopdf
+    brew install gcc openssl python node npm yarn Caskroom/cask/wkhtmltopdf
     if [ "$DBTYPE" == $MYSQL ]; then
         echo "Installing MySQL client"
         brew install mysql
@@ -146,9 +174,6 @@ else
 	echo "ERROR! OS not supported. Try the Vagrant option."
 	exit 1;
 fi
-
-# bower install
-sudo npm install -g bower
 
 echo
 
@@ -167,7 +192,15 @@ fi
 
 SECRET=`cat /dev/urandom | LC_CTYPE=C tr -dc "a-zA-Z0-9" | head -c 128`
 
-cp dojo/settings.dist.py dojo/settings.py
+# Allow script to be called non-interactively using:
+# export AUTO_DOCKER=yes && /opt/django-DefectDojo/setup.bash
+if [ "$AUTO_DOCKER" != "yes" ]; then
+    cp dojo/settings.dist.py dojo/settings.py
+else
+    # locate to the install directory first
+    cd /opt/django-DefectDojo/
+    cp dojo/settings.dist.py dojo/settings.py
+fi
 
 # Save MySQL details in settings file
 if [[ ! -z $BREW_CMD ]]; then
@@ -178,9 +211,14 @@ if [[ ! -z $BREW_CMD ]]; then
   sed -i ''  "s/MYSQLDB/$DBNAME/g" dojo/settings.py
   sed -i ''  "s#DOJODIR#$PWD/dojo#g" dojo/settings.py
   sed -i ''  "s/DOJOSECRET/$SECRET/g" dojo/settings.py
-  sed -i ''  "s#BOWERDIR#$PWD/components#g" dojo/settings.py
   sed -i ''  "s#DOJO_MEDIA_ROOT#$PWD/media/#g" dojo/settings.py
   sed -i ''  "s#DOJO_STATIC_ROOT#$PWD/static/#g" dojo/settings.py
+  if [ "$DBTYPE" == '1' ]; then
+    sed -i ''  "s/BACKENDDB/django.db.backends.mysql/g" dojo/settings.py
+  elif [ "$DBTYPE" == '2' ]; then
+    sed -i ''  "s/BACKENDDB/django.db.backends.postgresql_psycopg2/g" dojo/settings.py
+  fi
+
 else
   sed -i  "s/MYSQLHOST/$SQLHOST/g" dojo/settings.py
   sed -i  "s/MYSQLPORT/$SQLPORT/g" dojo/settings.py
@@ -189,7 +227,6 @@ else
   sed -i  "s/MYSQLDB/$DBNAME/g" dojo/settings.py
   sed -i  "s#DOJODIR#$PWD/dojo#g" dojo/settings.py
   sed -i  "s/DOJOSECRET/$SECRET/g" dojo/settings.py
-  sed -i  "s#BOWERDIR#$PWD/components#g" dojo/settings.py
   sed -i  "s#DOJO_MEDIA_ROOT#$PWD/media/#g" dojo/settings.py
   sed -i  "s#DOJO_STATIC_ROOT#$PWD/static/#g" dojo/settings.py
 
@@ -213,7 +250,7 @@ fi
 if python -c 'import sys; print sys.real_prefix' 2>/dev/null; then
     pip install .
     python manage.py makemigrations dojo
-    python manage.py makemigrations
+    python manage.py makemigrations --merge --noinput
     python manage.py migrate
     echo -e "${GREEN}${BOLD}Create Dojo superuser:"
     tput sgr0
@@ -227,11 +264,19 @@ if python -c 'import sys; print sys.real_prefix' 2>/dev/null; then
 else
     pip install .
     python manage.py makemigrations dojo
-    python manage.py makemigrations
+    python manage.py makemigrations --merge --noinput
     python manage.py migrate
-    echo -e "${GREEN}${BOLD}Create Dojo superuser:"
-    tput sgr0
-    python manage.py createsuperuser
+    # Allow script to be called non-interactively using:
+    # export AUTO_DOCKER=yes && /opt/django-DefectDojo/setup.bash
+    if [ "$AUTO_DOCKER" != "yes" ]; then
+        echo -e "${GREEN}${BOLD}Create Dojo superuser:"
+        tput sgr0
+        python manage.py createsuperuser
+    else
+        # non-interactively setup the superuser
+        python manage.py createsuperuser --noinput --username=admin --email='ed@example.com'
+        /opt/django-DefectDojo/docker/setup-superuser.expect
+    fi
     python manage.py loaddata product_type
     python manage.py loaddata test_type
     python manage.py loaddata development_environment
@@ -240,19 +285,16 @@ else
     python manage.py buildwatson
 fi
 
-if [[ "$USER" == "root" ]]; then
-    cd components && bower install --allow-root && cd ..
+if [ "$AUTO_DOCKER" == "yes" ]; then
+    echo "Creating dojo user"
+    adduser --disabled-password --gecos "DefectDojo" dojo
+    chown -R dojo:dojo /opt/django-DefectDojo
+    su - dojo -c 'cd /opt/django-DefectDojo/components && yarn && cd ..'
 else
-    cd components && bower install && cd ..
+    cd components && yarn && cd ..
 fi
 
-# Detect if we're in a a virtualenv
-if python -c 'import sys; print sys.real_prefix' 2>/dev/null; then
-    python manage.py collectstatic --noinput
-else
-     python manage.py collectstatic --noinput
-fi
-
+python manage.py collectstatic --noinput
 
 echo "=============================================================================="
 echo
@@ -264,7 +306,7 @@ echo "    DEBUG = True  # you should set this to False when you are ready for pr
 echo "    Uncomment the following lines if you enabled SSL/TLS on your server:"
 echo "        SESSION_COOKIE_SECURE = True"
 echo "        CSRF_COOKIE_SECURE = True"
-echo "        SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTOCOL', 'https')"
+echo "        SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')"
 echo "        SECURE_SSL_REDIRECT = True"
 echo "        SECURE_BROWSER_XSS_FILTER = True"
 echo "        django.middleware.security.SecurityMiddleware"
@@ -273,6 +315,3 @@ echo "When you're ready to start the DefectDojo server, type in this directory:"
 echo
 echo "    python manage.py runserver"
 echo
-echo "Note: If git cannot connect using the git:// protocol when downloading bower artifacts, you can run the command "
-echo "below to switch over to https://"
-echo "          git config --global url."https://".insteadOf git://"

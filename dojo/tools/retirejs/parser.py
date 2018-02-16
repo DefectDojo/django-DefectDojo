@@ -56,6 +56,7 @@ def get_item(item_node, test, file):
                       test=test,
                       severity=item_node['severity'].title(),
                       description=title + "\n\n Affected File - " + file,
+                      file_path = file,
                       mitigation="No Mitigation Provided",
                       references="\n\n".join(item_node['info']),
                       active=False,

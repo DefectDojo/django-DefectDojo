@@ -14,7 +14,7 @@ from django.db.models import Q
 from django.http import HttpResponseRedirect, StreamingHttpResponse, Http404, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.cache import cache_page
-from pytz import timezone
+from django.utils import timezone
 
 from dojo.filters import EngagementFilter
 from dojo.forms import CheckForm, \
@@ -29,7 +29,6 @@ from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, message, get_system_setting, create_notification
 from dojo.tasks import update_epic_task, add_epic_task, close_epic_task
-localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -256,9 +255,9 @@ def view_engagement(request, eid):
     try:
         start_date = Finding.objects.filter(test__engagement__product=eng.product).order_by('date')[:1][0].date
     except:
-        start_date = localtz.localize(datetime.today())
+        start_date = timezone.now()
 
-    end_date = localtz.localize(datetime.today())
+    end_date = timezone.now()
 
     risk_acceptances = Risk_Acceptance.objects.filter(engagement__in=Engagement.objects.filter(product=eng.product))
 
@@ -431,13 +430,15 @@ def import_scan_results(request, eid):
                         continue
 
                     item.test = t
-                    item.date = t.target_start
+                    if item.date == timezone.now().date():
+                      item.date = t.target_start
+                    
                     item.reporter = request.user
-                    item.last_reviewed = datetime.now(tz=localtz)
+                    item.last_reviewed = timezone.now()
                     item.last_reviewed_by = request.user
                     item.active = active
                     item.verified = verified
-                    item.save()
+                    item.save(dedupe_option=False)
 
                     if hasattr(item, 'unsaved_req_resp') and len(item.unsaved_req_resp) > 0:
                         for req_resp in item.unsaved_req_resp:
@@ -465,6 +466,7 @@ def import_scan_results(request, eid):
                                                                      product=t.engagement.product)
 
                         item.endpoints.add(ep)
+                    item.save()
 
                     if item.unsaved_tags is not None:
                         item.tags = item.unsaved_tags
@@ -500,6 +502,7 @@ def close_eng(request, eid):
     eng = Engagement.objects.get(id=eid)
     eng.active = False
     eng.status = 'Completed'
+    eng.updated = timezone.now()
     eng.save()
     jpkey_set = JIRA_PKey.objects.filter(product=eng.product)
     if jpkey_set.count() >= 1:
@@ -601,7 +604,7 @@ def upload_risk(request, eid):
             if form.cleaned_data['notes']:
                 notes = Notes(entry=form.cleaned_data['notes'],
                               author=request.user,
-                              date=localtz.localize(datetime.today()))
+                              date=timezone.now())
                 notes.save()
                 risk.notes.add(notes)
 
@@ -638,7 +641,7 @@ def view_risk(request, eid, raid):
         if note_form.is_valid():
             new_note = note_form.save(commit=False)
             new_note.author = request.user
-            new_note.date = datetime.now(tz=localtz)
+            new_note.date = timezone.now()
             new_note.save()
             risk_approval.notes.add(new_note)
             messages.add_message(request,

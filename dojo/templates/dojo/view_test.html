@@ -248,7 +248,11 @@
                         </td>
                         <td>{{ finding.verified }}</td>
                         <td>{{ finding.active }}</td>
-                        <td>{{ finding.duplicate }}</td>
+                        {% if finding.duplicate %}
+                        <td><a href="{% url 'view_finding' finding.duplicate_finding.id%}">Original</a></td>
+                        {% else %}
+                            <td>False</td>
+                        {% endif %}
                         {% if "enable_jira"|get_system_setting %}
                         <td>
                         <a href="{{finding.jira_conf.url}}/browse/{{finding.jira.jira_key}}" target="_blank"> {{finding.jira.jira_key}} </a>

@@ -401,7 +401,10 @@ DefectDojo has the ability to import reports from other security tools.  Current
 12. Retire.js JavaScript Scan JSON
 13. Node Security Platform JSON
 14. Qualys XML
-15. Generic Findings in CSV format
+15. OpenVAS CSV
+16. Snyk JSON
+17. Generic Findings in CSV format
+18. OWASP SKF
 
 
 The importers analyze each report and create new Findings for each item reported.  DefectDojo collapses duplicate
@@ -652,9 +655,8 @@ Issue Consolidation
 
 DefectDojo allows users to automatically consolidate issues from multiple scanners to remove duplicates.
 
-To enable this feature, change the following in `dojo/settings.py`: ::
+To enable this feature, hover over the configuration tab on the left menu and click on system settings. In system settings, click 'Deduplicate findings'. Click 'Submit' at the bottom of the page.
 
-ENABLE_DEDUPLICATION = True
 
 When deduplication is enabled, Dojo will compare CWE, title, and endpoint details for all findings in a given product.
 If an issue is added with either the CWE or title being the same while the endpoint is also the same, Dojo marks the old issue as a duplicate.

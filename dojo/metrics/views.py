@@ -18,7 +18,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.utils.html import escape
 from django.views.decorators.cache import cache_page
-from pytz import timezone
+from django.utils import timezone
 
 from dojo.filters import MetricsFindingFilter, EngineerFilter
 from dojo.forms import SimpleMetricsForm, ProductTypeCountsForm
@@ -26,8 +26,6 @@ from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
     Risk_Acceptance, Dojo_User
 from dojo.utils import get_page_items, add_breadcrumb, findings_this_period, opened_in_period, count_findings, \
     get_period_counts, get_punchcard_data, get_system_setting
-
-localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -121,11 +119,11 @@ def metrics(request, mtype):
     start_date = findings.filters['date'].start_date
     start_date = datetime(start_date.year,
                           start_date.month, start_date.day,
-                          tzinfo=localtz)
+                          tzinfo=timezone.get_current_timezone())
     end_date = findings.filters['date'].end_date
     end_date = datetime(end_date.year,
                         end_date.month, end_date.day,
-                        tzinfo=localtz)
+                        tzinfo=timezone.get_current_timezone())
 
     if len(prod_type) > 0:
         findings_closed = Finding.objects.filter(mitigated__range=[start_date, end_date],
@@ -344,7 +342,7 @@ simple metrics for easy reporting
 
 @cache_page(60 * 5)  # cache for 5 minutes
 def simple_metrics(request):
-    now = localtz.localize(datetime.today())
+    now = timezone.now()
 
     if request.method == 'POST':
         form = SimpleMetricsForm(request.POST)
@@ -427,7 +425,7 @@ def product_type_counts(request):
     all_current_in_pt = None
     top_ten = None
     pt = None
-    today = datetime.now(tz=localtz)
+    today = timezone.now()
     first_of_month = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     mid_month = first_of_month.replace(day=15, hour=23, minute=59, second=59, microsecond=999999)
     end_of_month = mid_month.replace(day=monthrange(today.year, today.month)[1], hour=23, minute=59, second=59,
@@ -450,11 +448,11 @@ def product_type_counts(request):
             start_date = first_of_month
             start_date = datetime(start_date.year,
                                   start_date.month, start_date.day,
-                                  tzinfo=localtz)
+                                  tzinfo=timezone.get_current_timezone())
             end_date = end_of_month
             end_date = datetime(end_date.year,
                                 end_date.month, end_date.day,
-                                tzinfo=localtz)
+                                tzinfo=timezone.get_current_timezone())
 
             oip = opened_in_period(start_date, end_date, pt)
 
@@ -632,7 +630,7 @@ def view_engineer(request, eid):
             or request.user.username == 'root'
             or request.user.username == user.username):
         return HttpResponseRedirect(reverse('engineer_metrics'))
-    now = localtz.localize(datetime.today())
+    now = timezone.now()
 
     findings = Finding.objects.filter(reporter=user, verified=True)
     closed_findings = Finding.objects.filter(mitigated_by=user)
@@ -641,12 +639,12 @@ def view_engineer(request, eid):
     accepted_month = [finding for ra in Risk_Acceptance.objects.filter(
         created__range=[datetime(now.year,
                                  now.month, 1,
-                                 tzinfo=localtz),
+                                 tzinfo=timezone.get_current_timezone()),
                         datetime(now.year,
                                  now.month,
                                  monthrange(now.year,
                                             now.month)[1],
-                                 tzinfo=localtz)],
+                                 tzinfo=timezone.get_current_timezone())],
         reporter=user)
                       for finding in ra.accepted_findings.all()]
     closed_month = []
@@ -690,14 +688,14 @@ def view_engineer(request, eid):
     # findings_this_period no longer fits the need for accepted findings
     # however will use its week finding output to use here
     for month in a_stuff:
-        month_start = localtz.localize(datetime.strptime(
-            month[0].strip(), "%b %Y"))
+        month_start = datetime.strptime(
+            month[0].strip(), "%b %Y")
         month_end = datetime(month_start.year,
                              month_start.month,
                              monthrange(
                                  month_start.year,
                                  month_start.month)[1],
-                             tzinfo=localtz)
+                             tzinfo=timezone.get_current_timezone())
         for finding in [finding for ra in Risk_Acceptance.objects.filter(
                 created__range=[month_start, month_end], reporter=user)
                         for finding in ra.accepted_findings.all()]:
@@ -720,10 +718,10 @@ def view_engineer(request, eid):
     # however will use its week finding output to use here
     for week in week_a_stuff:
         wk_range = week[0].split('-')
-        week_start = localtz.localize(datetime.strptime(
-            wk_range[0].strip() + " " + str(now.year), "%b %d %Y"))
-        week_end = localtz.localize(datetime.strptime(
-            wk_range[1].strip() + " " + str(now.year), "%b %d %Y"))
+        week_start = datetime.strptime(
+            wk_range[0].strip() + " " + str(now.year), "%b %d %Y")
+        week_end = datetime.strptime(
+            wk_range[1].strip() + " " + str(now.year), "%b %d %Y")
 
         for finding in [finding for ra in Risk_Acceptance.objects.filter(
                 created__range=[week_start, week_end], reporter=user)
@@ -939,7 +937,7 @@ For tracking issues reported by SEC researchers.
 
 @user_passes_test(lambda u: u.is_staff)
 def research_metrics(request):
-    now = localtz.localize(datetime.today())
+    now = timezone.now()
     findings = Finding.objects.filter(
         test__test_type__name='Security Research')
     findings = findings.filter(date__year=now.year, date__month=now.month)

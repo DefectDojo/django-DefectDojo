@@ -56,6 +56,7 @@ User Documentation
    start-using
    workflows
    upgrading
+   running-in-production
 
 .. _feature-docs:
 

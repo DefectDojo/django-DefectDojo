@@ -10,12 +10,10 @@ from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from pytz import timezone
+from django.utils import timezone
 
 from dojo.models import Finding, Engagement, Risk_Acceptance
 from dojo.utils import add_breadcrumb, get_punchcard_data, get_system_setting
-
-localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -34,7 +32,7 @@ def home(request):
 
 @user_passes_test(lambda u: u.is_staff)
 def dashboard(request):
-    now = localtz.localize(datetime.today())
+    now = timezone.now()
     seven_days_ago = now - timedelta(days=7)
     if request.user.is_superuser:
         engagement_count = Engagement.objects.filter(active=True).count()
@@ -98,12 +96,12 @@ def dashboard(request):
                 verified=True,
                 date__range=[datetime(date_to_use.year,
                                       date_to_use.month, 1,
-                                      tzinfo=localtz),
+                                      tzinfo=timezone.get_current_timezone()),
                              datetime(date_to_use.year,
                                       date_to_use.month,
                                       monthrange(date_to_use.year,
                                                  date_to_use.month)[1],
-                                      tzinfo=localtz)]):
+                                      tzinfo=timezone.get_current_timezone())]):
             if finding.severity == 'Critical':
                 sourcedata['a'] += 1
             elif finding.severity == 'High':

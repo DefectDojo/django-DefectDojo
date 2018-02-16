@@ -68,8 +68,8 @@ class CheckmarxXMLParser(object):
                         title = query.get('name').replace('_', ' ') + ' (' + path.get('PathId') + ')'
                         for pathnode in path.findall('PathNode'):
                             findingdetail += 'Source Object: %s\n' % (pathnode.find('Name').text)
-                            findingdetail += 'Filename: %s\n' % (pathnode.find('FileName').text)
-                            findingdetail += 'Line Number: %s\n' % (pathnode.find('Line').text)
+                            #findingdetail += 'Filename: %s\n' % (pathnode.find('FileName').text)
+                            #findingdetail += 'Line Number: %s\n' % (pathnode.find('Line').text)
                             for codefragment in pathnode.findall('Snippet/Line'):
                                 findingdetail += 'Code: %s\n' % (codefragment.find('Code').text.strip())
 
@@ -86,6 +86,8 @@ class CheckmarxXMLParser(object):
                                    mitigation=mitigation,
                                    impact=impact,
                                    references=references,
+                                   file_path = pathnode.find('FileName').text,
+                                   line = pathnode.find('Line').text,
                                    url='N/A',
                                    date=find_date)
                     dupes[dupe_key] = find

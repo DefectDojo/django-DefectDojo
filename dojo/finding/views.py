@@ -20,7 +20,7 @@ from django.http import StreamingHttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import formats
 from django.utils.safestring import mark_safe
-from pytz import timezone
+from django.utils import timezone
 
 from dojo.filters import OpenFindingFilter, \
     OpenFingingSuperFilter, AcceptedFingingSuperFilter, \
@@ -36,8 +36,6 @@ from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, send_rev
     jira_change_resolution_id, get_jira_connection, get_system_setting, create_notification
 
 from dojo.tasks import add_issue_task, update_issue_task, add_comment_task
-
-localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -173,7 +171,7 @@ def view_finding(request, fid):
         if form.is_valid():
             new_note = form.save(commit=False)
             new_note.author = request.user
-            new_note.date = datetime.now(tz=localtz)
+            new_note.date = timezone.now()
             new_note.save()
             finding.notes.add(new_note)
             finding.last_reviewed = new_note.date
@@ -223,7 +221,7 @@ def close_finding(request, fid):
         form = CloseFindingForm(request.POST)
 
         if form.is_valid():
-            now = datetime.now(tz=localtz)
+            now = timezone.now()
             new_note = form.save(commit=False)
             new_note.author = request.user
             new_note.date = now
@@ -260,7 +258,7 @@ def defect_finding_review(request, fid):
         form = DefectFindingForm(request.POST)
 
         if form.is_valid():
-            now = datetime.now(tz=localtz)
+            now = timezone.now()
             new_note = form.save(commit=False)
             new_note.author = request.user
             new_note.date = now
@@ -370,7 +368,7 @@ def edit_finding(request, fid):
             new_finding.numerical_severity = Finding.get_numerical_severity(
                 new_finding.severity)
             if new_finding.false_p or new_finding.active is False:
-                new_finding.mitigated = datetime.now(tz=localtz)
+                new_finding.mitigated = timezone.now()
                 new_finding.mitigated_by = request.user
             if new_finding.active is True:
                 new_finding.false_p = False
@@ -381,7 +379,7 @@ def edit_finding(request, fid):
             # always false now since this will be deprecated soon in favor of new Finding_Template model
             new_finding.is_template = False
             new_finding.endpoints = form.cleaned_data['endpoints']
-            new_finding.last_reviewed = datetime.now(tz=localtz)
+            new_finding.last_reviewed = timezone.now()
             new_finding.last_reviewed_by = request.user
             tags = request.POST.getlist('tags')
             t = ", ".join(tags)
@@ -450,7 +448,7 @@ def edit_finding(request, fid):
 @user_passes_test(lambda u: u.is_staff)
 def touch_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
-    finding.last_reviewed = datetime.now(tz=localtz)
+    finding.last_reviewed = timezone.now()
     finding.last_reviewed_by = request.user
     finding.save()
     return HttpResponseRedirect(reverse('view_finding', args=(finding.id,)))
@@ -466,7 +464,7 @@ def request_finding_review(request, fid):
         form = ReviewFindingForm(request.POST)
 
         if form.is_valid():
-            now = datetime.now(tz=localtz)
+            now = timezone.now()
             new_note = Notes()
 
             new_note.entry = "Review Request: " + form.cleaned_data['entry']
@@ -523,7 +521,7 @@ def clear_finding_review(request, fid):
         form = ClearFindingReviewForm(request.POST, instance=finding)
 
         if form.is_valid():
-            now = datetime.now(tz=localtz)
+            now = timezone.now()
             new_note = Notes()
             new_note.entry = "Review Cleared: " + form.cleaned_data['entry']
             new_note.author = request.user

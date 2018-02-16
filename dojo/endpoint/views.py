@@ -12,7 +12,7 @@ from django.db.models import Count
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils.html import escape
-from pytz import timezone
+from django.utils import timezone
 from dojo.filters import EndpointFilter
 from dojo.forms import EditEndpointForm, \
     DeleteEndpointForm, AddEndpointForm, EndpointMetaDataForm
@@ -20,8 +20,6 @@ from dojo.models import Product, Endpoint, Finding
 from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_system_setting
 from django.contrib.contenttypes.models import ContentType
 from custom_field.models import CustomFieldValue, CustomField
-
-localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -141,10 +139,10 @@ def view_endpoint(request, eid):
     closed_findings = Finding.objects.filter(endpoints__in=endpoints,
                                              mitigated__isnull=False).distinct()
     if all_findings:
-        start_date = localtz.localize(datetime.combine(all_findings.last().date, datetime.min.time()))
+        start_date = timezone.make_aware(datetime.combine(all_findings.last().date, datetime.min.time()))
     else:
-        start_date = localtz.localize(datetime.today())
-    end_date = localtz.localize(datetime.today())
+        start_date = timezone.now()
+    end_date = timezone.now()
 
     r = relativedelta(end_date, start_date)
     months_between = (r.years * 12) + r.months

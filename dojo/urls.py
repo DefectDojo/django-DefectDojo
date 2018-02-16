@@ -8,7 +8,9 @@ from dojo import views
 from dojo.api import UserResource, ProductResource, EngagementResource, \
     TestResource, FindingResource, ScanSettingsResource, ScanResource, \
     StubFindingResource, FindingTemplateResource, ImportScanResource, \
-    ReImportScanResource
+    ReImportScanResource, JiraResource, JIRA_ConfResource, EndpointResource, \
+    JIRA_IssueResource, ToolProductSettingsResource, Tool_ConfigurationResource, \
+    Tool_TypeResource
 from dojo.utils import get_system_setting
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
 from dojo.endpoint.urls import urlpatterns as endpoint_urls
@@ -50,6 +52,13 @@ v1_api.register(ScanResource())
 v1_api.register(StubFindingResource())
 v1_api.register(ImportScanResource())
 v1_api.register(ReImportScanResource())
+v1_api.register(EndpointResource())
+v1_api.register(JiraResource())
+v1_api.register(JIRA_ConfResource())
+v1_api.register(JIRA_IssueResource())
+v1_api.register(ToolProductSettingsResource())
+v1_api.register(Tool_ConfigurationResource())
+v1_api.register(Tool_TypeResource())
 # v1_api.register(IPScanResource())
 
 
@@ -84,6 +93,8 @@ swagger_urls = [
     url(r'^schema/(?P<resource>\S+)$', SchemaView.as_view()),
     url(r'^schema/$', SchemaView.as_view(), name='schema'),
 ]
+
+
 
 urlpatterns = [
     #  django admin

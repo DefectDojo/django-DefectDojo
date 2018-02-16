@@ -15,20 +15,18 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.contrib.contenttypes.models import ContentType
-from pytz import timezone
+from django.utils import timezone
 
 from dojo.filters import ProductFilter, ProductFindingFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, ProductMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm
 from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, \
-    Tool_Product_Settings, Cred_User, Cred_Mapping, Test_Type
+    Tool_Product_Settings, Cred_User, Cred_Mapping, Test_Type, System_Settings
 from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, get_system_setting, create_notification
 from custom_field.models import CustomFieldValue, CustomField
-from  dojo.tasks import add_epic_task
+from dojo.tasks import add_epic_task, add_issue_task
 from tagging.models import Tag
 from tagging.utils import get_tag_list
 from tagging.views import TaggedItem
-
-localtz = timezone(get_system_setting('time_zone'))
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -84,7 +82,7 @@ def iso_to_gregorian(iso_year, iso_week, iso_day):
 def view_product(request, pid):
     prod = get_object_or_404(Product, id=pid)
     engs = Engagement.objects.filter(product=prod, active=True)
-    i_engs = Engagement.objects.filter(product=prod, active=False)
+    i_engs = Engagement.objects.filter(product=prod, active=False).order_by('-updated')
     scan_sets = ScanSettings.objects.filter(product=prod)
     tools = Tool_Product_Settings.objects.filter(product=prod).order_by('name')
     auth = request.user.is_staff or request.user in prod.authorized_users.all()
@@ -106,9 +104,9 @@ def view_product(request, pid):
     try:
         start_date = Finding.objects.filter(test__engagement__product=prod).order_by('date')[:1][0].date
     except:
-        start_date = localtz.localize(datetime.today())
+        start_date = timezone.now()
 
-    end_date = localtz.localize(datetime.today())
+    end_date = timezone.now()
 
     tests = Test.objects.filter(engagement__product=prod)
 
@@ -150,7 +148,7 @@ def view_product(request, pid):
                                              out_of_scope=False,
                                              mitigated__isnull=False)
 
-    start_date = localtz.localize(datetime.combine(start_date, datetime.min.time()))
+    start_date = timezone.make_aware(datetime.combine(start_date, datetime.min.time()))
 
     r = relativedelta(end_date, start_date)
     weeks_between = int(ceil((((r.years * 12) + r.months) * 4.33) + (r.days / 7)))
@@ -312,13 +310,14 @@ def new_product(request):
 @user_passes_test(lambda u: u.is_staff)
 def edit_product(request, pid):
     prod = Product.objects.get(pk=pid)
-    jira_enabled = True
+    system_settings = System_Settings.objects.get()
+    jira_enabled =  system_settings.enable_jira
     jira_inst = None
     jform = None
     try:
         jira_inst = JIRA_PKey.objects.get(product=prod)
     except:
-        jira_enabled = False
+        jira_inst = None
         pass
     if request.method == 'POST':
         form = ProductForm(request.POST, instance=prod)
@@ -332,7 +331,7 @@ def edit_product(request, pid):
                                  'Product updated successfully.',
                                  extra_tags='alert-success')
 
-            if get_system_setting('enable_jira') and jira_enabled:
+            if get_system_setting('enable_jira') and jira_inst:
                 jform = JIRAPKeyForm(request.POST, instance=jira_inst)
                 #need to handle delete
                 try:
@@ -356,13 +355,16 @@ def edit_product(request, pid):
                            initial={'auth_users': prod.authorized_users.all(),
                                     'tags': get_tag_list(Tag.objects.get_for_object(prod))})
 
-        if get_system_setting('enable_jira') and jira_enabled:
-            if jira_enabled:
+        if jira_enabled and (jira_inst != None):
+            if jira_inst != None:
                 jform = JIRAPKeyForm(instance=jira_inst)
             else:
                 jform = JIRAPKeyForm()
+        elif jira_enabled:
+            jform = JIRAPKeyForm()
         else:
             jform = None
+    form.initial['tags'] = [tag.name for tag in prod.tags]
     add_breadcrumb(parent=prod, title="Edit", top_level=False, request=request)
 
     return render(request,
@@ -573,19 +575,19 @@ def ad_hoc_finding(request, pid):
             test = tests[0]
         else:
             test = Test(engagement=eng, test_type=Test_Type.objects.get(name="Pen Test"),
-                        target_start=datetime.now(tz=localtz), target_end=datetime.now(tz=localtz))
+                        target_start=timezone.now(), target_end=timezone.now())
             test.save()
     except:
-        eng = Engagement(name="Ad Hoc Engagement", target_start=datetime.now(tz=localtz),
-                         target_end=datetime.now(tz=localtz), active=False, product=prod)
+        eng = Engagement(name="Ad Hoc Engagement", target_start=timezone.now(),
+                         target_end=timezone.now(), active=False, product=prod)
         eng.save()
         test = Test(engagement=eng, test_type=Test_Type.objects.get(name="Pen Test"),
-                    target_start=datetime.now(tz=localtz), target_end=datetime.now(tz=localtz))
+                    target_start=timezone.now(), target_end=timezone.now())
         test.save()
     form_error = False
     enabled = False
     jform = None
-    form = AdHocFindingForm(initial={'date': datetime.now(tz=localtz).date()})
+    form = AdHocFindingForm(initial={'date': timezone.now().date()})
     if get_system_setting('enable_jira'):
             if JIRA_PKey.objects.filter(product=test.engagement.product).count() != 0:
                 enabled = JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues
@@ -601,7 +603,7 @@ def ad_hoc_finding(request, pid):
             new_finding.numerical_severity = Finding.get_numerical_severity(
                 new_finding.severity)
             if new_finding.false_p or new_finding.active is False:
-                new_finding.mitigated = datetime.now(tz=localtz)
+                new_finding.mitigated = timezone.now()
                 new_finding.mitigated_by = request.user
             create_template = new_finding.is_template
             # always false now since this will be deprecated soon in favor of new Finding_Template model
@@ -662,4 +664,3 @@ def ad_hoc_finding(request, pid):
                    'form_error': form_error,
                    'jform': jform,
                    })
-
