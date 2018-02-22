@@ -20,10 +20,10 @@ from django.utils import timezone
 from dojo.filters import ProductFilter, ProductFindingFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, ProductMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm
 from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, \
-    Tool_Product_Settings, Cred_User, Cred_Mapping, Test_Type
+    Tool_Product_Settings, Cred_User, Cred_Mapping, Test_Type, System_Settings
 from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, get_system_setting, create_notification
 from custom_field.models import CustomFieldValue, CustomField
-from  dojo.tasks import add_epic_task
+from dojo.tasks import add_epic_task, add_issue_task
 from tagging.models import Tag
 from tagging.utils import get_tag_list
 from tagging.views import TaggedItem
@@ -82,7 +82,7 @@ def iso_to_gregorian(iso_year, iso_week, iso_day):
 def view_product(request, pid):
     prod = get_object_or_404(Product, id=pid)
     engs = Engagement.objects.filter(product=prod, active=True)
-    i_engs = Engagement.objects.filter(product=prod, active=False)
+    i_engs = Engagement.objects.filter(product=prod, active=False).order_by('-updated')
     scan_sets = ScanSettings.objects.filter(product=prod)
     tools = Tool_Product_Settings.objects.filter(product=prod).order_by('name')
     auth = request.user.is_staff or request.user in prod.authorized_users.all()
@@ -310,13 +310,14 @@ def new_product(request):
 @user_passes_test(lambda u: u.is_staff)
 def edit_product(request, pid):
     prod = Product.objects.get(pk=pid)
-    jira_enabled = True
+    system_settings = System_Settings.objects.get()
+    jira_enabled =  system_settings.enable_jira
     jira_inst = None
     jform = None
     try:
         jira_inst = JIRA_PKey.objects.get(product=prod)
     except:
-        jira_enabled = False
+        jira_inst = None
         pass
     if request.method == 'POST':
         form = ProductForm(request.POST, instance=prod)
@@ -330,7 +331,7 @@ def edit_product(request, pid):
                                  'Product updated successfully.',
                                  extra_tags='alert-success')
 
-            if get_system_setting('enable_jira') and jira_enabled:
+            if get_system_setting('enable_jira') and jira_inst:
                 jform = JIRAPKeyForm(request.POST, instance=jira_inst)
                 #need to handle delete
                 try:
@@ -354,11 +355,13 @@ def edit_product(request, pid):
                            initial={'auth_users': prod.authorized_users.all(),
                                     'tags': get_tag_list(Tag.objects.get_for_object(prod))})
 
-        if get_system_setting('enable_jira') and jira_enabled:
-            if jira_enabled:
+        if jira_enabled and (jira_inst != None):
+            if jira_inst != None:
                 jform = JIRAPKeyForm(instance=jira_inst)
             else:
                 jform = JIRAPKeyForm()
+        elif jira_enabled:
+            jform = JIRAPKeyForm()
         else:
             jform = None
     form.initial['tags'] = [tag.name for tag in prod.tags]
@@ -661,4 +664,3 @@ def ad_hoc_finding(request, pid):
                    'form_error': form_error,
                    'jform': jform,
                    })
-

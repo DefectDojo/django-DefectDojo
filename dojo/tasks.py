@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import tempfile
 from datetime import datetime, timedelta
 
+from django.db.models import Count
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.mail import send_mail
@@ -12,14 +13,20 @@ from django.template.loader import render_to_string
 from django.utils.http import urlencode
 from celery.utils.log import get_task_logger
 from celery.decorators import task
-from dojo.models import Finding, Test, Engagement
+from dojo.models import Finding, Test, Engagement, System_Settings
 from django.utils import timezone
 
 import pdfkit
 from dojo.celery import app
+from dojo.utils import sync_dedupe, sync_false_history
 from dojo.reports.widgets import report_widget_factory
 from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, \
                         close_epic, get_system_setting, create_notification
+
+import logging
+fmt = getattr(settings, 'LOG_FORMAT', None)
+lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
+logging.basicConfig(format=fmt, level=lvl)
 
 logger = get_task_logger(__name__)
 
@@ -221,29 +228,25 @@ def add_comment_task(find, note):
 @app.task(name='async_dedupe')
 def async_dedupe(new_finding, *args, **kwargs):
     logger.info("running deduplication")
-    eng_findings_cwe = Finding.objects.filter(test__engagement__product=new_finding.test.engagement.product,
-                                              cwe=new_finding.cwe).exclude(id=new_finding.id).exclude(cwe=None).exclude(endpoints=None)
-    eng_findings_title = Finding.objects.filter(test__engagement__product=new_finding.test.engagement.product,
-                                                title=new_finding.title).exclude(id=new_finding.id).exclude(endpoints=None)
-    total_findings = eng_findings_cwe | eng_findings_title
-    for find in total_findings:
-        list1 = new_finding.endpoints.all()
-        list2 = find.endpoints.all()
-        if all(x in list2 for x in list1):
-            find.duplicate = True
-            super(Finding, find).save(*args, **kwargs)
+    sync_dedupe(new_finding, *args, **kwargs)
 
 @app.task(name='async_false_history')
 def async_false_history(new_finding, *args, **kwargs):
     logger.info("running false_history")
-    eng_findings_cwe = Finding.objects.filter(test__engagement__product=new_finding.test.engagement.product,
-                                              cwe=new_finding.cwe, test__test_type=new_finding.test.test_type,
-                                              false_p=True).exclude(
-                                              id=new_finding.id).exclude(cwe=None).exclude(endpoints=None)
-    eng_findings_title = Finding.objects.filter(test__engagement__product=new_finding.test.engagement.product,
-                                                title=new_finding.title, test__test_type=new_finding.test.test_type,
-                                                false_p=True).exclude(id=new_finding.id).exclude(endpoints=None)
-    total_findings = eng_findings_cwe | eng_findings_title
-    if total_findings.count() > 0:
-            new_finding.false_p = True
-            super(Finding, new_finding).save(*args, **kwargs)
+    sync_false_history(new_finding, *args, **kwargs)
+
+@app.task(bind=True)
+def async_dupe_delete(*args, **kwargs):
+    logger.info("delete excess duplicates")
+    system_settings = System_Settings.objects.get()
+    if system_settings.delete_dupulicates:
+        dupe_max = system_settings.max_dupes
+        findings = Finding.objects.all().annotate(num_dupes=Count('duplicate_list')).filter(num_dupes__gt=dupe_max)
+        for finding in findings:
+            duplicate_list = finding.duplicate_list.all().order_by('date').all()
+            dupe_count =  len(duplicate_list) - dupe_max
+            for finding in duplicate_list:
+                finding.delete()
+                dupe_count = dupe_count - 1
+                if dupe_count == 0:
+                    break

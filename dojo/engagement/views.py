@@ -430,13 +430,15 @@ def import_scan_results(request, eid):
                         continue
 
                     item.test = t
-                    item.date = t.target_start
+                    if item.date == timezone.now().date():
+                      item.date = t.target_start
+                    
                     item.reporter = request.user
                     item.last_reviewed = timezone.now()
                     item.last_reviewed_by = request.user
                     item.active = active
                     item.verified = verified
-                    item.save()
+                    item.save(dedupe_option=False)
 
                     if hasattr(item, 'unsaved_req_resp') and len(item.unsaved_req_resp) > 0:
                         for req_resp in item.unsaved_req_resp:
@@ -464,6 +466,7 @@ def import_scan_results(request, eid):
                                                                      product=t.engagement.product)
 
                         item.endpoints.add(ep)
+                    item.save()
 
                     if item.unsaved_tags is not None:
                         item.tags = item.unsaved_tags
@@ -499,6 +502,7 @@ def close_eng(request, eid):
     eng = Engagement.objects.get(id=eid)
     eng.active = False
     eng.status = 'Completed'
+    eng.updated = timezone.now()
     eng.save()
     jpkey_set = JIRA_PKey.objects.filter(product=eng.product)
     if jpkey_set.count() >= 1:

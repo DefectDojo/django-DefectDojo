@@ -17,24 +17,45 @@ class NmapXMLParser(object):
         if 'nmaprun' not in root.tag:
             raise NamespaceErr("This doesn't seem to be a valid Nmap xml file.")
         dupes = {}
+        hostInfo = ""
+
         for host in root.iter("host"):
             ip = host.find("address[@addrtype='ipv4']").attrib['addr']
             fqdn = host.find("hostnames/hostname[@type='PTR']").attrib['name'] if host.find("hostnames/hostname[@type='PTR']") is not None else None
+
+            for os in root.iter("os"):
+                if ip is not None:
+                    hostInfo += "IP Address: %s\n" % ip
+                if  fqdn is not None:
+                    fqdn += "FQDN: %s\n" % ip     
+                if 'name' in os.find('osmatch').attrib:
+                    hostInfo += "Host OS: %s\n" % os.find('osmatch').attrib['name']
+                if 'accuracy' in os.find('osmatch').attrib:
+                    hostInfo += "Accuracy: {0}%\n".format(os.find('osmatch').attrib['accuracy'])
+
+                hostInfo += "\n"
 
             for portelem in host.xpath("ports/port[state/@state='open']"):
                 port = portelem.attrib['portid']
                 protocol = portelem.attrib['protocol']
 
                 title = "Open port: %s/%s" % (port, protocol)
-                
-                description = "%s:%s A service was found to be listening on this port." % (ip, port)
+                description = hostInfo
+                description += "Port: %s\n" % (port)
+                serviceinfo = ""
 
                 if portelem.find('service') is not None:
-                    if hasattr(portelem.find('service'),'product'):
-                        serviceinfo = " (%s%s)" % (portelem.find('service').attrib['product'], " "+portelem.find('service').attrib['version'] if hasattr(portelem.find('service'),'version') else "")
-                    else:
-                        serviceinfo = ""
-                    description += " It was identified as '%s%s'." % (portelem.find('service').attrib['name'], serviceinfo)
+                    if 'product' in portelem.find('service').attrib:
+                        serviceinfo += "Product: %s\n" % portelem.find('service').attrib['product']
+
+                    if 'version' in portelem.find('service').attrib:
+                        serviceinfo += "Version: %s\n" % portelem.find('service').attrib['version']
+
+                    if 'extrainfo' in portelem.find('service').attrib:
+                        serviceinfo += "Extra Info: %s\n" % portelem.find('service').attrib['extrainfo']
+
+                    description += serviceinfo
+
                 description += '\n\n'
 
                 severity = "Info"

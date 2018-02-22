@@ -1,8 +1,17 @@
 import base64
 import os
 import re
+import logging
+import time
+import sys
 from datetime import datetime
 from uuid import uuid4
+from django.conf import settings
+
+fmt = getattr(settings, 'LOG_FORMAT', None)
+lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
+
+logging.basicConfig(format=fmt, level=lvl)
 
 from watson import search as watson
 from auditlog.registry import auditlog
@@ -21,6 +30,7 @@ from django.utils import timezone
 from pytz import all_timezones
 from tagging.registry import register as tag_register
 from multiselectfield import MultiSelectField
+import hashlib
 
 class System_Settings(models.Model):
     enable_deduplication = models.BooleanField(default=False,
@@ -31,7 +41,14 @@ class System_Settings(models.Model):
                                                   'If two findings share a URL and have the same CWE or title, Dojo marks the ' \
                                                   'less recent finding as a duplicate. When deduplication is enabled, a list of ' \
                                                   'deduplicated findings is added to the engagement view.')
+    delete_dupulicates = models.BooleanField(default=False, blank=False)
+    max_dupes = models.IntegerField(blank=True, null=True, verbose_name='Max Duplicates', help_text='When enabled, if' \
+                                    'a single issue reaches the maximum number of duplicates, the oldest will be' \
+                                    'deleted.')
     enable_jira = models.BooleanField(default=False, verbose_name='Enable JIRA integration', blank=False)
+    jira_choices = (('Critical', 'Critical'), ('High', 'High'), ('Medium', 'Medium'), ('Low', 'Low'))
+    jira_minimum_severity = models.CharField(max_length=20, blank=True, null=True, choices=jira_choices, default='None')
+    jira_labels = models.CharField(max_length=200, blank=True,null=True, help_text='JIRA issue labels space seperated')
     enable_slack_notifications = models.BooleanField(default=False, verbose_name='Enable Slack notifications', blank=False)
     slack_channel = models.CharField(max_length=100, default='', blank=True)
     slack_token = models.CharField(max_length=100, default='', blank=True, help_text='Token required for interacting with Slack. Get one at https://api.slack.com/tokens')
@@ -48,6 +65,7 @@ class System_Settings(models.Model):
                                                     help_text='With this setting turned on, Dojo will display S0, S1, S2, etc ' \
                                                     'in most places, whereas if turned off Critical, High, Medium, etc will be displayed.')
     false_positive_history = models.BooleanField(default=False)
+
     url_prefix = models.CharField(max_length=300, default='', blank=True)
     team_name = models.CharField(max_length=100, default='', blank=True)
     time_zone = models.CharField(max_length=50,
@@ -95,6 +113,7 @@ class UserContactInfo(models.Model):
     github_username = models.CharField(blank=True, null=True, max_length=150)
     slack_username = models.CharField(blank=True, null=True, max_length=150)
     hipchat_username = models.CharField(blank=True, null=True, max_length=150)
+    block_execution = models.BooleanField(default=False)
 
 
 class Contact(models.Model):
@@ -174,6 +193,8 @@ class Report_Type(models.Model):
 
 class Test_Type(models.Model):
     name = models.CharField(max_length=200)
+    static_tool = models.BooleanField(default=False)
+    dynamic_tool = models.BooleanField(default=False)
 
     def __unicode__(self):
         return self.name
@@ -605,6 +626,8 @@ class Finding(models.Model):
     verified = models.BooleanField(default=True)
     false_p = models.BooleanField(default=False, verbose_name="False Positive")
     duplicate = models.BooleanField(default=False)
+    duplicate_finding = models.ForeignKey('self', editable=False, null=True, related_name='original_finding', blank=True)
+    duplicate_list = models.ManyToManyField("self",editable=False, null=True, blank=True)
     out_of_scope = models.BooleanField(default=False)
     under_review = models.BooleanField(default=False)
     review_requested_by = models.ForeignKey(Dojo_User, null=True, blank=True, related_name='review_requested_by')
@@ -627,17 +650,29 @@ class Finding(models.Model):
     last_reviewed_by = models.ForeignKey(User, null=True, editable=False, related_name='last_reviewed_by')
     images = models.ManyToManyField('FindingImage', blank=True)
 
-    line_number = models.TextField(null=True, blank=True)
-    sourcefilepath = models.TextField(null=True, blank=True)
-    sourcefile = models.TextField(null=True, blank=True)
-    param = models.TextField(null=True, blank=True)
-    payload = models.TextField(null=True, blank=True)
+    line_number = models.CharField(null=True, blank=True, max_length=200, editable=False) #Deprecated will be removed, use line
+    sourcefilepath = models.TextField(null=True, blank=True, editable=False)
+    sourcefile = models.TextField(null=True, blank=True, editable=False)
+    param = models.TextField(null=True, blank=True, editable=False)
+    payload = models.TextField(null=True, blank=True, editable=False)
+    hash_code = models.TextField(null=True,blank=True,editable=False)
+
+    line = models.IntegerField(null=True, blank=True, verbose_name="Line number")
+    file_path = models.CharField(null=True,blank=True, max_length=1000)
+    found_by = models.ManyToManyField(Test_Type, editable=False)
+    static_finding = models.BooleanField(default=False)
+    dynamic_finding = models.BooleanField(default=False)
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
 
     class Meta:
         ordering = ('numerical_severity', '-date', 'title')
+
+
+    def get_hash_code(self):
+        hash_string = self.title + self.description + str(self.line) + str(self.file_path)
+        return hashlib.sha256(hash_string.encode('utf-8')).hexdigest()
 
     @staticmethod
     def get_numerical_severity(severity):
@@ -651,6 +686,19 @@ class Finding(models.Model):
             return 'S3'
         else:
             return 'S4'
+
+    @staticmethod
+    def get_number_severity(severity):
+        if severity == 'Critical':
+            return 4
+        elif severity == 'High':
+            return 3
+        elif severity == 'Medium':
+            return 2
+        elif severity == 'Low':
+            return 1
+        else:
+            return 5
 
     def __unicode__(self):
         return self.title
@@ -717,15 +765,36 @@ class Finding(models.Model):
         long_desc += '*References*:' + self.references
         return long_desc
 
-    def save(self, *args, **kwargs):
+    def save(self, dedupe_option=True, *args, **kwargs):
         super(Finding, self).save(*args, **kwargs)
-        system_settings = System_Settings.objects.get()
-        if system_settings.enable_deduplication :
-                from dojo.tasks import async_dedupe
-                async_dedupe.delay(self, *args, **kwargs)
-        if system_settings.false_positive_history:
-            from dojo.tasks import async_false_history
-            async_false_history.delay(self, *args, **kwargs)
+        self.hash_code = self.get_hash_code()
+        if self.test.test_type.static_tool:
+            self.static_finding = True
+        else:
+            self.dyanmic_finding = True
+        self.found_by.add(self.test.test_type)
+        super(Finding, self).save(*args, **kwargs)
+        if (dedupe_option):
+            system_settings = System_Settings.objects.get()
+            if system_settings.enable_deduplication:
+                    from dojo.tasks import async_dedupe
+                    from dojo.utils import sync_dedupe
+                    try:
+                        if self.reporter.usercontactinfo.block_execution:
+                            sync_dedupe(self, *args, **kwargs)
+                        else:
+                             async_dedupe.delay(self, *args, **kwargs)
+                    except:
+                        async_dedupe.delay(self, *args, **kwargs)
+                        pass
+
+            if system_settings.false_positive_history:
+                from dojo.tasks import async_false_history
+                from dojo.utils import sync_false_history
+                if self.reporter.usercontactinfo.block_execution:
+                    sync_false_history(self, *args, **kwargs)
+                else:
+                    async_false_history.delay(self, *args, **kwargs)
 
     def clean(self):
         no_check = ["test", "reporter"]
@@ -1064,7 +1133,7 @@ class Tool_Type(models.Model):
 class Tool_Configuration(models.Model):
     name = models.CharField(max_length=200, null=False)
     description = models.CharField(max_length=2000, null=True, blank=True)
-    url =  models.URLField(max_length=2000, null=True)
+    url =  models.CharField(max_length=2000, null=True)
     tool_type = models.ForeignKey(Tool_Type, related_name='tool_type')
     authentication_type = models.CharField(max_length=15,
                             choices=(
@@ -1087,7 +1156,7 @@ class Tool_Configuration(models.Model):
 class Tool_Product_Settings(models.Model):
     name = models.CharField(max_length=200, null=False)
     description = models.CharField(max_length=2000, null=True, blank=True)
-    url =  models.URLField(max_length=2000, null=True, blank=True)
+    url =  models.CharField(max_length=2000, null=True, blank=True)
     product = models.ForeignKey(Product, default=1, editable=False)
     tool_configuration = models.ForeignKey(Tool_Configuration, null=False, related_name='tool_configuration')
     tool_project_id = models.CharField(max_length=200, null=True, blank=True)
@@ -1197,6 +1266,8 @@ admin.site.register(ScanSettings)
 admin.site.register(IPScan)
 admin.site.register(Alerts)
 admin.site.register(JIRA_Issue)
+admin.site.register(JIRA_Conf)
+admin.site.register(JIRA_PKey)
 admin.site.register(Tool_Configuration)
 admin.site.register(Tool_Product_Settings)
 admin.site.register(Tool_Type)

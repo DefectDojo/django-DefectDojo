@@ -1,7 +1,7 @@
 import hashlib
 from defusedxml import ElementTree
 from dojo.models import Finding
-
+import re
 
 class DependencyCheckParser(object):
 
@@ -33,6 +33,7 @@ class DependencyCheckParser(object):
 
         return Finding(
             title=title,
+            file_path=filename,
             test=test,
             active=False,
             verified=False,
@@ -43,7 +44,6 @@ class DependencyCheckParser(object):
         )
 
     def __init__(self, filename, test):
-        self.namespace = "{https://jeremylong.github.io/DependencyCheck/dependency-check.1.3.xsd}"
         self.dupes = dict()
         self.items = ()
 
@@ -56,6 +56,12 @@ class DependencyCheckParser(object):
             return
 
         scan = ElementTree.fromstring(content)
+
+        scan = ElementTree.fromstring(content)
+        regex = r"{.*}"
+        matches = re.match(regex, scan.tag)
+        self.namespace = matches.group(0)
+
         dependencies = scan.find(self.namespace + 'dependencies')
 
         for dependency in dependencies.findall(self.namespace + 'dependency'):

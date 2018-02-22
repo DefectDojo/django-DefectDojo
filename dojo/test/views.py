@@ -227,7 +227,7 @@ def add_findings(request, tid):
             create_template = new_finding.is_template
             # always false now since this will be deprecated soon in favor of new Finding_Template model
             new_finding.is_template = False
-            new_finding.save()
+            new_finding.save(dedupe_option=False)
             new_finding.endpoints = form.cleaned_data['endpoints']
             new_finding.save()
             if 'jiraform-push_to_jira' in request.POST:
@@ -309,7 +309,7 @@ def add_temp_finding(request, tid, fid):
             # is template always False now in favor of new model Finding_Template
             # no further action needed here since this is already adding from template.
             new_finding.is_template = False
-            new_finding.save()
+            new_finding.save(dedupe_option=False)
             new_finding.endpoints = form.cleaned_data['endpoints']
             new_finding.save()
             if 'jiraform-push_to_jira' in request.POST:
@@ -386,10 +386,10 @@ def add_temp_finding(request, tid, fid):
 def search(request, tid):
     test = get_object_or_404(Test, id=tid)
     templates = Finding_Template.objects.all()
-    templates = TemplateFindingFilter(request.GET, queryset=templates).qs
-    paged_templates = get_page_items(request, templates, 25)
+    templates = TemplateFindingFilter(request.GET, queryset=templates)
+    paged_templates = get_page_items(request, templates.qs, 25)
     title_words = [word
-                   for finding in templates
+                   for finding in templates.qs
                    for word in finding.title.split() if len(word) > 2]
 
     title_words = sorted(set(title_words))

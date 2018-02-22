@@ -1,5 +1,6 @@
 import calendar as tcalendar
 import re
+import sys
 import binascii, os, hashlib
 from Crypto.Cipher import AES
 from calendar import monthrange
@@ -32,6 +33,50 @@ Helper function for metrics
 Counts the number of findings and the count for the products for each level of
 severity for a given finding querySet
 """
+
+def sync_false_history(new_finding, *args, **kwargs):
+    eng_findings_cwe = Finding.objects.filter(test__engagement__product=new_finding.test.engagement.product,
+                                              cwe=new_finding.cwe, test__test_type=new_finding.test.test_type,
+                                              false_p=True).exclude(
+                                              id=new_finding.id).exclude(cwe=None).exclude(endpoints=None)
+    eng_findings_title = Finding.objects.filter(test__engagement__product=new_finding.test.engagement.product,
+                                                title=new_finding.title, test__test_type=new_finding.test.test_type,
+                                                false_p=True).exclude(id=new_finding.id).exclude(endpoints=None)
+    total_findings = eng_findings_cwe | eng_findings_title
+    if total_findings.count() > 0:
+            new_finding.false_p = True
+            super(Finding, new_finding).save(*args, **kwargs)
+
+def sync_dedupe(new_finding, *args, **kwargs):
+    eng_findings_cwe = Finding.objects.filter(test__engagement__product=new_finding.test.engagement.product,
+                                              cwe=new_finding.cwe, static_finding=new_finding.static_finding,
+                                              dynamic_finding=new_finding.dynamic_finding, date__lte=new_finding.date).exclude(id=new_finding.id).exclude(cwe=None).exclude(duplicate=True)
+    eng_findings_title = Finding.objects.filter(test__engagement__product=new_finding.test.engagement.product,
+                                                title=new_finding.title,
+                                                static_finding=new_finding.static_finding,
+                                                dynamic_finding=new_finding.dynamic_finding, date__lte=new_finding.date).exclude(id=new_finding.id).exclude(duplicate=True)
+    total_findings = eng_findings_cwe | eng_findings_title
+    #total_findings = total_findings.order_by('date')
+    for find in total_findings:
+        if find.endpoints != None:
+            list1 = new_finding.endpoints.all()
+            list2 = find.endpoints.all()
+            if all(x in list1 for x in list2):
+                new_finding.duplicate = True
+                new_finding.duplicate_finding = find
+                find.duplicate_list.add(new_finding)
+                super(Finding, new_finding).save(*args, **kwargs)
+                break
+        elif find.line == new_finding.line and find.file_path  == new_finding.file_path and new_finding.static_finding and len(new_finding.file_path) > 0:
+            new_finding.duplicate = True
+            new_finding.duplicate_finding = find
+            find.duplicate_list.add(new_finding)
+            super(Finding, new_finding).save(*args, **kwargs)
+        elif find.get_hash_code() == new_finding.get_hash_code():
+                new_finding.duplicate = True
+                new_finding.duplicate_finding = find
+                find.duplicate_list.add(new_finding)
+                super(Finding, new_finding).save(*args, **kwargs)
 
 
 def count_findings(findings):
@@ -666,7 +711,10 @@ def log_jira_message(text, finding):
 # Adds labels to a Jira issue
 def add_labels(find, issue):
     #Update Label with Security
-    issue.fields.labels.append(u'security')
+    system_settings = System_Settings.objects.get()
+    labels = system_settings.jira_labels.split()
+    for label in labels:
+        issue.fields.labels.append(label)
     #Update the label with the product name (underscore)
     prod_name = find.test.engagement.product.name.replace(" ", "_")
     issue.fields.labels.append(prod_name)
@@ -674,6 +722,7 @@ def add_labels(find, issue):
 
 def jira_long_description(find_description, find_id, jira_conf_finding_text):
     return find_description + "\n\n*Dojo ID:* " + str(find_id) + "\n\n" + jira_conf_finding_text
+
 
 def add_issue(find, push_to_jira):
     eng = Engagement.objects.get(test=find.test)
@@ -683,40 +732,45 @@ def add_issue(find, push_to_jira):
 
     if push_to_jira:
         if 'Active' in find.status() and 'Verified' in find.status():
-            try:
-                JIRAError.log_to_tempfile=False
-                jira = JIRA(server=jira_conf.url, basic_auth=(jira_conf.username, jira_conf.password))
-                if jpkey.component:
-                    new_issue = jira.create_issue(project=jpkey.project_key, summary=find.title,
-                                                  components=[{'name': jpkey.component}, ],
-                                                  description=jira_long_description(find.long_desc(), find.id,
-                                                                                    jira_conf.finding_text),
-                                                  issuetype={'name': jira_conf.default_issue_type},
-                                                  priority={'name': jira_conf.get_priority(find.severity)})
-                else:
-                    new_issue = jira.create_issue(project=jpkey.project_key, summary=find.title,
-                                                  description=jira_long_description(find.long_desc(), find.id,
-                                                                                    jira_conf.finding_text),
-                                                  issuetype={'name': jira_conf.default_issue_type},
-                                                  priority={'name': jira_conf.get_priority(find.severity)})
-                j_issue = JIRA_Issue(jira_id=new_issue.id, jira_key=new_issue, finding=find)
-                j_issue.save()
-                issue = jira.issue(new_issue.id)
+            if ((jpkey.push_all_issues and
+                Finding.get_number_severity(System_Settings.objects.get().jira_minimum_severity) >
+                Finding.get_number_severity(find.severity))):
+                pass
+            else:
+                try:
+                    JIRAError.log_to_tempfile=False
+                    jira = JIRA(server=jira_conf.url, basic_auth=(jira_conf.username, jira_conf.password))
+                    if jpkey.component:
+                        new_issue = jira.create_issue(project=jpkey.project_key, summary=find.title,
+                                                      components=[{'name': jpkey.component}, ],
+                                                      description=jira_long_description(find.long_desc(), find.id,
+                                                                                        jira_conf.finding_text),
+                                                      issuetype={'name': jira_conf.default_issue_type},
+                                                      priority={'name': jira_conf.get_priority(find.severity)})
+                    else:
+                        new_issue = jira.create_issue(project=jpkey.project_key, summary=find.title,
+                                                      description=jira_long_description(find.long_desc(), find.id,
+                                                                                        jira_conf.finding_text),
+                                                      issuetype={'name': jira_conf.default_issue_type},
+                                                      priority={'name': jira_conf.get_priority(find.severity)})
+                    j_issue = JIRA_Issue(jira_id=new_issue.id, jira_key=new_issue, finding=find)
+                    j_issue.save()
+                    issue = jira.issue(new_issue.id)
 
-                #Add labels (security & product)
-                add_labels(find, new_issue)
-                #Upload dojo finding screenshots to Jira
-                for pic in find.images.all():
-                    jira_attachment(jira, issue, settings.MEDIA_ROOT + pic.image_large.name)
+                    #Add labels (security & product)
+                    add_labels(find, new_issue)
+                    #Upload dojo finding screenshots to Jira
+                    for pic in find.images.all():
+                        jira_attachment(jira, issue, settings.MEDIA_ROOT + pic.image_large.name)
 
-                    #if jpkey.enable_engagement_epic_mapping:
-                    #      epic = JIRA_Issue.objects.get(engagement=eng)
-                    #      issue_list = [j_issue.jira_id,]
-                    #      jira.add_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
-            except JIRAError as e:
-                log_jira_alert(e.text, find)
+                        #if jpkey.enable_engagement_epic_mapping:
+                        #      epic = JIRA_Issue.objects.get(engagement=eng)
+                        #      issue_list = [j_issue.jira_id,]
+                        #      jira.add_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
+                except JIRAError as e:
+                    log_jira_alert(e.text, find)
         else:
-            log_jira_alert("Finding not active or verified.", find)
+            log_jira_alert("Finding not active, verified, or over threshold.", find)
 
 def jira_attachment(jira, issue, file, jira_filename=None):
 
@@ -916,11 +970,15 @@ def _unpad_string(value):
     return value
 
 def dojo_crypto_encrypt(plaintext):
-    key = None
-    key = get_db_key()
+    data = None
+    if plaintext:
+        key = None
+        key = get_db_key()
 
-    iv =  os.urandom(16)
-    return prepare_for_save(iv, encrypt(key, iv, plaintext.encode('ascii', 'ignore')))
+        iv =  os.urandom(16)
+        data = prepare_for_save(iv, encrypt(key, iv, plaintext.encode('ascii', 'ignore')))
+
+    return data
 
 def prepare_for_save(iv, encrypted_value):
     stored_value = None
@@ -1020,11 +1078,11 @@ def create_notification(event=None, **kwargs):
 
     def send_alert_notification(user=None):
         icon = kwargs.get('icon', 'info-circle')
-        alert = Alerts(user_id=user, 
+        alert = Alerts(user_id=user,
                        title=kwargs.get('title'),
                        description=create_notification_message(event, 'alert'),
                        url=kwargs.get('url', reverse('alerts')),
-                       icon=icon, 
+                       icon=icon,
                        source=Notifications._meta.get_field(event).verbose_name.title())
         alert.save()
 
@@ -1073,7 +1131,6 @@ def create_notification(event=None, **kwargs):
 
         if mail_enabled and 'mail' in getattr(notifications, event):
             send_mail_notification(user.email)
-                
+
         if 'alert' in getattr(notifications, event):
             send_alert_notification(user)
-                
