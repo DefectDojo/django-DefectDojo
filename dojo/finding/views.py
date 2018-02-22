@@ -82,18 +82,22 @@ def open_findings(request):
 
     add_breadcrumb(title="Open findings", top_level=not len(request.GET), request=request)
 
+    # Init findings lists
     specificFindings = []
     generalFindings = []
 
+    # Fill in the findings lists
     for finding in findings.qs:
         if request.user.id == finding.reviewer_id:
             specificFindings.append(finding)
         else:
             generalFindings.append(finding)
 
+    # Init paged findings for the front end
     specific_paged_findings = get_page_items(request, specificFindings, 25)
     paged_findings = get_page_items(request, generalFindings, 25)
 
+    # Render the front-end by using the paged findings we have created
     return render(request,
                   'dojo/open_findings.html',
                     {"specificFindings": specific_paged_findings,
