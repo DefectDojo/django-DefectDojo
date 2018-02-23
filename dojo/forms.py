@@ -768,6 +768,43 @@ class StubFindingForm(forms.ModelForm):
         return cleaned_data
 
 
+class ApplyFindingTemplateForm(forms.Form):
+
+    title = forms.CharField(max_length=1000, required=True)
+
+    cwe = forms.IntegerField(label="CWE", required=False)
+
+    severity = forms.ChoiceField(
+            required=False,
+            choices=(('Low', 'Low'), ('Medium', 'Medium'),
+                     ('High', 'High'), ('Critical', 'Critical')),
+            error_messages={
+                'required': 'Select valid choice: In Progress, On Hold, Completed',
+                'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
+
+    description = forms.CharField(widget=forms.Textarea)
+    mitigation = forms.CharField(widget=forms.Textarea)
+    impact = forms.CharField(widget=forms.Textarea)
+    references = forms.CharField(widget=forms.Textarea, required=False)
+
+    def __init__(self, template=None, *args, **kwargs):
+        super(ApplyFindingTemplateForm, self).__init__(*args, **kwargs)
+        self.template = template
+
+    def clean(self):
+        cleaned_data = super(ApplyFindingTemplateForm, self).clean()
+
+        if 'title' in cleaned_data:
+            if len(cleaned_data['title']) <= 0:
+                raise forms.ValidationError("The title is required.")
+        else:
+            raise forms.ValidationError("The title is required.")
+
+        return cleaned_data
+
+    class Meta:
+        fields = ['title',  'cwe', 'severity', 'description', 'mitigation', 'impact', 'references']
+        order = ('title', 'cwe', 'severity', 'description', 'impact')
 class FindingTemplateForm(forms.ModelForm):
     title = forms.CharField(max_length=1000, required=True)
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
