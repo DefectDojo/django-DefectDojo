@@ -64,6 +64,11 @@
                                     <i class="fa fa-copy"></i> Make Finding a Template
                                 </a>
                             </li>
+                            <li role="presentation">
+                                <a href="{% url 'find_template_to_apply' finding.id %}">
+                                    <i class="fa fa-copy"></i> Apply Template to Finding
+                                </a>
+                            </li>
                             {% if finding.active %}
                                 <li role="presentation">
                                     <a href="{% url 'close_finding' finding.id %}">
