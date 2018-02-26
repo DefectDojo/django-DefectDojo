@@ -26,12 +26,6 @@ from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, message, \
                        process_notifications, get_system_setting, create_notification
 from dojo.tasks import add_issue_task
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='[%(asctime)s] %(levelname)s [%(name)s:%(lineno)d] %(message)s',
-    datefmt='%d/%b/%Y %H:%M:%S',
-    filename=settings.DOJO_ROOT + '/../django_app.log',
-)
 logger = logging.getLogger(__name__)
 
 
