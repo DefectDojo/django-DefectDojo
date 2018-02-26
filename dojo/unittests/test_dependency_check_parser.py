@@ -1,12 +1,11 @@
 import sys
+
+from django.test import TestCase
+
 sys.path.append('..')
 from dojo.tools.dependencycheck.parser import DependencyCheckParser
 from defusedxml import ElementTree
-from dojo.models import Finding
 from dojo.models import Test
-import unittest
-import csv
-import StringIO
 
 class TestFile(object):
 
@@ -17,7 +16,7 @@ class TestFile(object):
         self.name = name
         self.content = content
 
-class TestDependencyCheckParser(unittest.TestCase):
+class TestDependencyCheckParser(TestCase):
 
     def test_parse_without_file_has_no_findings(self):
         parser = DependencyCheckParser(None, Test())
@@ -374,7 +373,8 @@ class TestDependencyCheckParser(unittest.TestCase):
         expected_references += 'name: Reference for a bad vulnerability\nsource: MISC\n'
         expected_references += 'url: http://localhost2/reference_for_badvulnerability.pdf\n\n'
 
-        parser = DependencyCheckParser(None, Test())
+        testfile = TestFile('dp_finding.xml', finding_xml)
+        parser = DependencyCheckParser(testfile, Test())
         finding = parser.get_finding_from_vulnerability(vulnerability, 'testfile.jar', Test())
         self.assertEqual('testfile.jar | CVE-0000-0001', finding.title)
         self.assertEqual('High', finding.severity)
