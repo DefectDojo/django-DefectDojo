@@ -1,7 +1,11 @@
 import hashlib
+import logging
+
 from defusedxml import ElementTree
 from dojo.models import Finding
 import re
+
+logger = logging.getLogger(__name__)
 
 class DependencyCheckParser(object):
 
@@ -46,6 +50,7 @@ class DependencyCheckParser(object):
     def __init__(self, filename, test):
         self.dupes = dict()
         self.items = ()
+        self.namespace = ''
 
         if filename is None:
             return
@@ -56,26 +61,25 @@ class DependencyCheckParser(object):
             return
 
         scan = ElementTree.fromstring(content)
-
-        scan = ElementTree.fromstring(content)
         regex = r"{.*}"
         matches = re.match(regex, scan.tag)
         self.namespace = matches.group(0)
 
         dependencies = scan.find(self.namespace + 'dependencies')
 
-        for dependency in dependencies.findall(self.namespace + 'dependency'):
-            dependency_filename = self.get_filename_from_dependency(dependency)
-            vulnerabilities = dependency.find(self.namespace + 'vulnerabilities')
-            if vulnerabilities is not None:
-                for vulnerability in vulnerabilities.findall(self.namespace + 'vulnerability'):
-                    finding = self.get_finding_from_vulnerability(vulnerability, dependency_filename, test)
+        if dependencies:
+            for dependency in dependencies.findall(self.namespace + 'dependency'):
+                dependency_filename = self.get_filename_from_dependency(dependency)
+                vulnerabilities = dependency.find(self.namespace + 'vulnerabilities')
+                if vulnerabilities is not None:
+                    for vulnerability in vulnerabilities.findall(self.namespace + 'vulnerability'):
+                        finding = self.get_finding_from_vulnerability(vulnerability, dependency_filename, test)
 
-                    if finding is not None:
-                        key = hashlib.md5(finding.severity + '|' + finding.title + '|' +
-                                          finding.description).hexdigest()
+                        if finding is not None:
+                            key = hashlib.md5(finding.severity + '|' + finding.title + '|' +
+                                              finding.description).hexdigest()
 
-                        if key not in self.dupes:
-                            self.dupes[key] = finding
+                            if key not in self.dupes:
+                                self.dupes[key] = finding
 
         self.items = self.dupes.values()
