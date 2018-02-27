@@ -177,8 +177,8 @@ fi
 
 echo
 
+echo "Creating application database"
 if [ "$DBTYPE" == $MYSQL ]; then
-   echo "Installing MySQL client"
    get_db_details
 elif [ "$DBTYPE" == $POSTGRES ]; then
    get_postgres_db_details
@@ -194,13 +194,11 @@ SECRET=`cat /dev/urandom | LC_CTYPE=C tr -dc "a-zA-Z0-9" | head -c 128`
 
 # Allow script to be called non-interactively using:
 # export AUTO_DOCKER=yes && /opt/django-DefectDojo/setup.bash
-if [ "$AUTO_DOCKER" != "yes" ]; then
-    cp dojo/settings.dist.py dojo/settings.py
-else
+if [ "$AUTO_DOCKER" == "yes" ]; then
     # locate to the install directory first
     cd /opt/django-DefectDojo/
-    cp dojo/settings/settings.dist.py dojo/settings/settings.py
 fi
+cp dojo/settings/settings.dist.py dojo/settings/settings.py
 
 # Save MySQL details in settings file
 if [[ ! -z $BREW_CMD ]]; then
