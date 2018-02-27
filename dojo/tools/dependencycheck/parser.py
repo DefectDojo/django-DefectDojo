@@ -1,11 +1,13 @@
 import hashlib
 import logging
-
-from defusedxml import ElementTree
-from dojo.models import Finding
 import re
 
+from defusedxml import ElementTree
+
+from dojo.models import Finding
+
 logger = logging.getLogger(__name__)
+
 
 class DependencyCheckParser(object):
 
@@ -18,22 +20,26 @@ class DependencyCheckParser(object):
         return self.get_field_value(dependency, 'fileName')
 
     def get_finding_from_vulnerability(self, vulnerability, filename, test):
-        title = '{0} | {1}'.format(filename, self.get_field_value(vulnerability, 'name'))
+        title = '{0} | {1}'.format(filename,
+                                   self.get_field_value(vulnerability, 'name'))
         severity = self.get_field_value(vulnerability, 'severity')
         finding_detail = '{0}\n\n{1}'.format(
-                self.get_field_value(vulnerability, 'cwe'),
-                self.get_field_value(vulnerability, 'description'))
+            self.get_field_value(vulnerability, 'cwe'),
+            self.get_field_value(vulnerability, 'description'))
         reference_detail = None
 
         references_node = vulnerability.find(self.namespace + 'references')
 
         if references_node is not None:
             reference_detail = ''
-            for reference_node in references_node.findall(self.namespace + 'reference'):
-                reference_detail += 'name: {0}\nsource: {1}\nurl: {2}\n\n'.format(
-                          self.get_field_value(reference_node, 'name'),
-                          self.get_field_value(reference_node, 'source'),
-                          self.get_field_value(reference_node, 'url'))
+            for reference_node in references_node.findall(
+                    self.namespace + 'reference'):
+                reference_detail += 'name: {0}\n' \
+                                    'source: {1}\n' \
+                                    'url: {2}\n\n'.format(
+                    self.get_field_value(reference_node, 'name'),
+                    self.get_field_value(reference_node, 'source'),
+                    self.get_field_value(reference_node, 'url'))
 
         return Finding(
             title=title,
@@ -68,16 +74,22 @@ class DependencyCheckParser(object):
         dependencies = scan.find(self.namespace + 'dependencies')
 
         if dependencies:
-            for dependency in dependencies.findall(self.namespace + 'dependency'):
-                dependency_filename = self.get_filename_from_dependency(dependency)
-                vulnerabilities = dependency.find(self.namespace + 'vulnerabilities')
+            for dependency in dependencies.findall(
+                    self.namespace + 'dependency'):
+                dependency_filename = self.get_filename_from_dependency(
+                    dependency)
+                vulnerabilities = dependency.find(
+                    self.namespace + 'vulnerabilities')
                 if vulnerabilities is not None:
-                    for vulnerability in vulnerabilities.findall(self.namespace + 'vulnerability'):
-                        finding = self.get_finding_from_vulnerability(vulnerability, dependency_filename, test)
+                    for vulnerability in vulnerabilities.findall(
+                            self.namespace + 'vulnerability'):
+                        finding = self.get_finding_from_vulnerability(
+                            vulnerability, dependency_filename, test)
 
                         if finding is not None:
-                            key = hashlib.md5(finding.severity + '|' + finding.title + '|' +
-                                              finding.description).hexdigest()
+                            key = hashlib.md5(
+                                finding.severity + '|' + finding.title + '|' +
+                                finding.description).hexdigest()
 
                             if key not in self.dupes:
                                 self.dupes[key] = finding
