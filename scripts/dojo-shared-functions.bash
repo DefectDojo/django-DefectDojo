@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 #####################################################################################
 #####
 ##### Shared set of functions for setting up dojo
@@ -95,7 +96,7 @@ setupdojo() {
       echo "ERROR: DefectDojo requires Python 2.7+"
       exit 1;
   else
-      echo "Leaving Django 1.8.4 requirement"
+      echo "Leaving Django 1.x.y requirement"
   fi
 
   echo "=============================================================================="
