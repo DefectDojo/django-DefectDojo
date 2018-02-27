@@ -1,11 +1,9 @@
-import sys
-
+from defusedxml import ElementTree
 from django.test import TestCase
 
-sys.path.append('..')
-from dojo.tools.dependencycheck.parser import DependencyCheckParser
-from defusedxml import ElementTree
 from dojo.models import Test
+from dojo.tools.dependencycheck.parser import DependencyCheckParser
+
 
 class TestFile(object):
 
@@ -15,6 +13,7 @@ class TestFile(object):
     def __init__(self, name, content):
         self.name = name
         self.content = content
+
 
 class TestDependencyCheckParser(TestCase):
 
@@ -185,7 +184,8 @@ class TestDependencyCheckParser(TestCase):
         parser = DependencyCheckParser(testfile, Test())
         self.assertEqual(1, len(parser.items))
 
-    def test_parse_file_with_multiple_vulnerabilities_has_multiple_findings(self):
+    def test_parse_file_with_multiple_vulnerabilities_has_multiple_findings(
+            self):
         content = """<?xml version="1.0"?>
 <analysis xmlns="https://jeremylong.github.io/DependencyCheck/dependency-check.1.3.xsd">
     <scanInfo>
@@ -375,8 +375,11 @@ class TestDependencyCheckParser(TestCase):
 
         testfile = TestFile('dp_finding.xml', finding_xml)
         parser = DependencyCheckParser(testfile, Test())
-        finding = parser.get_finding_from_vulnerability(vulnerability, 'testfile.jar', Test())
+        finding = parser.get_finding_from_vulnerability(vulnerability,
+                                                        'testfile.jar', Test())
         self.assertEqual('testfile.jar | CVE-0000-0001', finding.title)
         self.assertEqual('High', finding.severity)
-        self.assertEqual('CWE-00 Bad Vulnerability\n\nDescription of a bad vulnerability.', finding.description)
+        self.assertEqual(
+            'CWE-00 Bad Vulnerability\n\nDescription of a bad vulnerability.',
+            finding.description)
         self.assertEqual(expected_references, finding.references)
