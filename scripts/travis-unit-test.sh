@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Run available unittests with a simple setup
 
+set -ex
+
 pip install virtualenv
 virtualenv ~/dojo-venv
 
@@ -17,3 +19,5 @@ DJANGO_SETTINGS_MODULE=dojo.settings.unittest python manage.py test dojo.unittes
 deactivate
 
 rm ./dojo/settings/settings.py
+
+set +ex
