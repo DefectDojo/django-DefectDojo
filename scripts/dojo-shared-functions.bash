@@ -109,13 +109,13 @@ setupdojo() {
   echo "=============================================================================="
   echo
   #Copying setting.py temporarily so that collect static will run correctly
-  cp /django-DefectDojo/dojo/settings.dist.py /django-DefectDojo/dojo/settings.py
-  sed -i  "s#DOJO_STATIC_ROOT#$PWD/static/#g" /django-DefectDojo/dojo/settings.py
+  cp /django-DefectDojo/dojo/settings/settings.dist.py /django-DefectDojo/dojo/settings/settings.py
+  sed -i  "s#DOJO_STATIC_ROOT#$PWD/static/#g" /django-DefectDojo/dojo/settings/settings.py
 
   echo "Setting dojo settings for SQLLITEDB."
   SQLLITEDB="'NAME': os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'db.sqlite3')"
-  sed -i  "s/django.db.backends.mysql/django.db.backends.sqlite3/g" dojo/settings.py
-  sed -i  "s/'NAME': 'MYSQLDB'/$SQLLITEDB/g" dojo/settings.py
+  sed -i  "s/django.db.backends.mysql/django.db.backends.sqlite3/g" dojo/settings/settings.py
+  sed -i  "s/'NAME': 'MYSQLDB'/$SQLLITEDB/g" dojo/settings/settings.py
 
   echo "=============================================================================="
   echo "Installing bower"
@@ -130,7 +130,7 @@ setupdojo() {
   echo "Removing temporary files"
   echo "=============================================================================="
   #echo
-  rm /django-DefectDojo/dojo/settings.py
+  rm /django-DefectDojo/dojo/settings/settings.py
 
   echo "=============================================================================="
   echo "SUCCESS!"
