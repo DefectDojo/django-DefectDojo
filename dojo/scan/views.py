@@ -14,12 +14,6 @@ from dojo.management.commands.run_scan import run_on_deman_scan
 from dojo.models import Product, Scan, IPScan, ScanSettings
 from dojo.utils import add_breadcrumb, get_system_setting
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='[%(asctime)s] %(levelname)s [%(name)s:%(lineno)d] %(message)s',
-    datefmt='%d/%b/%Y %H:%M:%S',
-    filename=settings.DOJO_ROOT + '/../django_app.log',
-)
 logger = logging.getLogger(__name__)
 
 """

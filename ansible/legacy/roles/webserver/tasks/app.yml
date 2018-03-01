@@ -19,11 +19,11 @@
 - name: Generate Django secret
   shell: 'cat /dev/urandom | tr -dc "a-zA-Z0-9" | head -c 128'
   args:
-    creates: '{{ dd_install_dir }}/dojo/settings.py'
+    creates: '{{ dd_install_dir }}/dojo/settings/settings.py'
   register: django_secret
 
 - name: Populate DefectDojo settings file
-  template: src=settings.j2 dest={{ dd_install_dir }}/dojo/settings.py owner={{ dd_user }} group=www-data
+  template: src=settings.j2 dest={{ dd_install_dir }}/dojo/settings/settings.py owner={{ dd_user }} group=www-data
 
 - name: Install virtualenv
   pip: name=virtualenv

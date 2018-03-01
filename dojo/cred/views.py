@@ -27,12 +27,6 @@ from dojo.tasks import *
 from dojo.utils import dojo_crypto_encrypt, prepare_for_view, FileIterWrapper, get_system_setting
 from dojo.product import views as ds
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='[%(asctime)s] %(levelname)s [%(name)s:%(lineno)d] %(message)s',
-    datefmt='%d/%b/%Y %H:%M:%S',
-    filename=settings.DOJO_ROOT + '/../django_app.log',
-)
 logger = logging.getLogger(__name__)
 
 @user_passes_test(lambda u: u.is_staff)

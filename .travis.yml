@@ -4,6 +4,7 @@ install: true
 
 env:
   - TEST=integration-test
+  - TEST=unit-test
   - TEST=sourceclear
   - TEST=bandit
   - TEST=docker-bench-security
@@ -28,9 +29,14 @@ script:
   - |
     echo "Running test=$TEST"
     case "$TEST" in
+      unit-test)
+        travis_fold start "unit-test"
+        bash ./scripts/travis-unit-test.sh
+        travis_fold end "unit-test"
+        ;;
       integration-test)
         travis_fold start "integration-test"
-        ./scripts/travis-integration-test.sh 
+        bash ./scripts/travis-integration-test.sh
         travis_fold end "integration-test"
         ;;
       sourceclear)

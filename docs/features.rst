@@ -637,7 +637,7 @@ Preparing Jira, Enabling the Webhook
  4. Under 'Comments' enable 'Created'. Under Issue enable 'Updated'.
 
 Configurations in Dojo
- 1. In dojo/settings.py set ENABLE_JIRA = True.
+ 1. In dojo/settings/settings.py set ENABLE_JIRA = True.
 
 Adding JIRA to Dojo
  1. Click 'JIRA' from the left hand menu.

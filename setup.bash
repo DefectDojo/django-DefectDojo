@@ -177,8 +177,8 @@ fi
 
 echo
 
+echo "Creating application database"
 if [ "$DBTYPE" == $MYSQL ]; then
-   echo "Installing MySQL client"
    get_db_details
 elif [ "$DBTYPE" == $POSTGRES ]; then
    get_postgres_db_details
@@ -194,46 +194,44 @@ SECRET=`cat /dev/urandom | LC_CTYPE=C tr -dc "a-zA-Z0-9" | head -c 128`
 
 # Allow script to be called non-interactively using:
 # export AUTO_DOCKER=yes && /opt/django-DefectDojo/setup.bash
-if [ "$AUTO_DOCKER" != "yes" ]; then
-    cp dojo/settings.dist.py dojo/settings.py
-else
+if [ "$AUTO_DOCKER" == "yes" ]; then
     # locate to the install directory first
     cd /opt/django-DefectDojo/
-    cp dojo/settings.dist.py dojo/settings.py
 fi
+cp dojo/settings/settings.dist.py dojo/settings/settings.py
 
 # Save MySQL details in settings file
 if [[ ! -z $BREW_CMD ]]; then
-  sed -i ''  "s/MYSQLHOST/$SQLHOST/g" dojo/settings.py
-  sed -i ''  "s/MYSQLPORT/$SQLPORT/g" dojo/settings.py
-  sed -i ''  "s/MYSQLUSER/$SQLUSER/g" dojo/settings.py
-  sed -i ''  "s/MYSQLPWD/$SQLPWD/g" dojo/settings.py
-  sed -i ''  "s/MYSQLDB/$DBNAME/g" dojo/settings.py
-  sed -i ''  "s#DOJODIR#$PWD/dojo#g" dojo/settings.py
-  sed -i ''  "s/DOJOSECRET/$SECRET/g" dojo/settings.py
-  sed -i ''  "s#DOJO_MEDIA_ROOT#$PWD/media/#g" dojo/settings.py
-  sed -i ''  "s#DOJO_STATIC_ROOT#$PWD/static/#g" dojo/settings.py
+  sed -i ''  "s/MYSQLHOST/$SQLHOST/g" dojo/settings/settings.py
+  sed -i ''  "s/MYSQLPORT/$SQLPORT/g" dojo/settings/settings.py
+  sed -i ''  "s/MYSQLUSER/$SQLUSER/g" dojo/settings/settings.py
+  sed -i ''  "s/MYSQLPWD/$SQLPWD/g" dojo/settings/settings.py
+  sed -i ''  "s/MYSQLDB/$DBNAME/g" dojo/settings/settings.py
+  sed -i ''  "s#DOJODIR#$PWD/dojo#g" dojo/settings/settings.py
+  sed -i ''  "s/DOJOSECRET/$SECRET/g" dojo/settings/settings.py
+  sed -i ''  "s#DOJO_MEDIA_ROOT#$PWD/media/#g" dojo/settings/settings.py
+  sed -i ''  "s#DOJO_STATIC_ROOT#$PWD/static/#g" dojo/settings/settings.py
   if [ "$DBTYPE" == '1' ]; then
-    sed -i ''  "s/BACKENDDB/django.db.backends.mysql/g" dojo/settings.py
+    sed -i ''  "s/BACKENDDB/django.db.backends.mysql/g" dojo/settings/settings.py
   elif [ "$DBTYPE" == '2' ]; then
-    sed -i ''  "s/BACKENDDB/django.db.backends.postgresql_psycopg2/g" dojo/settings.py
+    sed -i ''  "s/BACKENDDB/django.db.backends.postgresql_psycopg2/g" dojo/settings/settings.py
   fi
 
 else
-  sed -i  "s/MYSQLHOST/$SQLHOST/g" dojo/settings.py
-  sed -i  "s/MYSQLPORT/$SQLPORT/g" dojo/settings.py
-  sed -i  "s/MYSQLUSER/$SQLUSER/g" dojo/settings.py
-  sed -i  "s/MYSQLPWD/$SQLPWD/g" dojo/settings.py
-  sed -i  "s/MYSQLDB/$DBNAME/g" dojo/settings.py
-  sed -i  "s#DOJODIR#$PWD/dojo#g" dojo/settings.py
-  sed -i  "s/DOJOSECRET/$SECRET/g" dojo/settings.py
-  sed -i  "s#DOJO_MEDIA_ROOT#$PWD/media/#g" dojo/settings.py
-  sed -i  "s#DOJO_STATIC_ROOT#$PWD/static/#g" dojo/settings.py
+  sed -i  "s/MYSQLHOST/$SQLHOST/g" dojo/settings/settings.py
+  sed -i  "s/MYSQLPORT/$SQLPORT/g" dojo/settings/settings.py
+  sed -i  "s/MYSQLUSER/$SQLUSER/g" dojo/settings/settings.py
+  sed -i  "s/MYSQLPWD/$SQLPWD/g" dojo/settings/settings.py
+  sed -i  "s/MYSQLDB/$DBNAME/g" dojo/settings/settings.py
+  sed -i  "s#DOJODIR#$PWD/dojo#g" dojo/settings/settings.py
+  sed -i  "s/DOJOSECRET/$SECRET/g" dojo/settings/settings.py
+  sed -i  "s#DOJO_MEDIA_ROOT#$PWD/media/#g" dojo/settings/settings.py
+  sed -i  "s#DOJO_STATIC_ROOT#$PWD/static/#g" dojo/settings/settings.py
 
   if [ "$DBTYPE" == '1' ]; then
-    sed -i  "s/BACKENDDB/django.db.backends.mysql/g" dojo/settings.py
+    sed -i  "s/BACKENDDB/django.db.backends.mysql/g" dojo/settings/settings.py
   elif [ "$DBTYPE" == '2' ]; then
-    sed -i  "s/BACKENDDB/django.db.backends.postgresql_psycopg2/g" dojo/settings.py
+    sed -i  "s/BACKENDDB/django.db.backends.postgresql_psycopg2/g" dojo/settings/settings.py
   fi
 fi
 
@@ -298,7 +296,7 @@ python manage.py collectstatic --noinput
 
 echo "=============================================================================="
 echo
-echo "SUCCESS! Now edit your settings.py file in the 'dojo' directory to complete the installation."
+echo "SUCCESS! Now edit your settings.py file in the 'dojo/settings/' directory to complete the installation."
 echo
 echo "We suggest you consider changing the following defaults:"
 echo

@@ -21,12 +21,6 @@ from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_sy
 from django.contrib.contenttypes.models import ContentType
 from custom_field.models import CustomFieldValue, CustomField
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='[%(asctime)s] %(levelname)s [%(name)s:%(lineno)d] %(message)s',
-    datefmt='%d/%b/%Y %H:%M:%S',
-    filename=settings.DOJO_ROOT + '/../django_app.log',
-)
 logger = logging.getLogger(__name__)
 
 

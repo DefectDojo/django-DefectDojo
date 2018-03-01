@@ -24,41 +24,41 @@ else
   source venv/bin/activate
 
   #Check to see if Dojo has been setup by checking the settings.py file
-  if [ ! -f dojo/settings.py ];
+  if [ ! -f dojo/settings/settings.py ];
   then
     echo "=============================================================================="
-    echo "Creating dojo/settings.py file"
+    echo "Creating dojo/settings/settings.py file"
     echo "=============================================================================="
     echo
     unset HISTFILE
 
     SECRET=`cat /dev/urandom | tr -dc "a-zA-Z0-9" | head -c 128`
 
-    cp dojo/settings.dist.py dojo/settings.py
+    cp dojo/settings/settings.dist.py dojo/settings/settings.py
 
     # Save MySQL details in settings file
-    sed -i  "s/MYSQLUSER/$SQLUSER/g" dojo/settings.py
-    sed -i  "s/MYSQLPWD/$SQLPWD/g" dojo/settings.py
-    sed -i  "s/MYSQLDB/$DBNAME/g" dojo/settings.py
-    sed -i  "s/MYSQLHOST/$DOJO_MYSQL_HOST/g" dojo/settings.py
-    sed -i  "s/MYSQLPORT/$DOJO_MYSQL_PORT/g" dojo/settings.py
-    sed -i  "s#DOJODIR#$PWD/dojo#g" dojo/settings.py
-    sed -i  "s/DOJOSECRET/$SECRET/g" dojo/settings.py
-    sed -i  "s#DOJOURLPREFIX#$DOJO_URL_PREFIX#g" dojo/settings.py
-    sed -i  "s#BOWERDIR#$PWD/components#g" dojo/settings.py
-    sed -i  "s#DOJO_MEDIA_ROOT#$PWD/media/#g" dojo/settings.py
-    sed -i  "s#DOJO_STATIC_ROOT#$PWD/static/#g" dojo/settings.py
+    sed -i  "s/MYSQLUSER/$SQLUSER/g" dojo/settings/settings.py
+    sed -i  "s/MYSQLPWD/$SQLPWD/g" dojo/settings/settings.py
+    sed -i  "s/MYSQLDB/$DBNAME/g" dojo/settings/settings.py
+    sed -i  "s/MYSQLHOST/$DOJO_MYSQL_HOST/g" dojo/settings/settings.py
+    sed -i  "s/MYSQLPORT/$DOJO_MYSQL_PORT/g" dojo/settings/settings.py
+    sed -i  "s#DOJODIR#$PWD/dojo#g" dojo/settings/settings.py
+    sed -i  "s/DOJOSECRET/$SECRET/g" dojo/settings/settings.py
+    sed -i  "s#DOJOURLPREFIX#$DOJO_URL_PREFIX#g" dojo/settings/settings.py
+    sed -i  "s#BOWERDIR#$PWD/components#g" dojo/settings/settings.py
+    sed -i  "s#DOJO_MEDIA_ROOT#$PWD/media/#g" dojo/settings/settings.py
+    sed -i  "s#DOJO_STATIC_ROOT#$PWD/static/#g" dojo/settings/settings.py
 
     if [ "$RUN_TIERED" = True ]; then
       echo "Setting dojo settings for tiered docker-compose."
-      sed -i  "s/TEMPLATE_DEBUG = DEBUG/TEMPLATE_DEBUG = False/g" dojo/settings.py
-      sed -i  "s/DEBUG = True/DEBUG = False/g" dojo/settings.py
-      sed -i  "s/ALLOWED_HOSTS = \[]/ALLOWED_HOSTS = ['localhost', '127.0.0.1']/g" dojo/settings.py
+      sed -i  "s/TEMPLATE_DEBUG = DEBUG/TEMPLATE_DEBUG = False/g" dojo/settings/settings.py
+      sed -i  "s/DEBUG = True/DEBUG = False/g" dojo/settings/settings.py
+      sed -i  "s/ALLOWED_HOSTS = \[]/ALLOWED_HOSTS = ['localhost', '127.0.0.1']/g" dojo/settings/settings.py
     else
       echo "Setting dojo settings for SQLLITEDB."
       SQLLITEDB="'NAME': os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'db.sqlite3')"
-      sed -i  "s/django.db.backends.mysql/django.db.backends.sqlite3/g" dojo/settings.py
-      sed -i  "s/'NAME': '$DBNAME'/$SQLLITEDB/g" dojo/settings.py
+      sed -i  "s/django.db.backends.mysql/django.db.backends.sqlite3/g" dojo/settings/settings.py
+      sed -i  "s/'NAME': '$DBNAME'/$SQLLITEDB/g" dojo/settings/settings.py
     fi
   fi
 

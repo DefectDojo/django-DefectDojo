@@ -35,7 +35,7 @@ DefectDojo.
 
 0. Pull requests should be submitted to the 'master' branch.
 
-[dojo_settings]: /dojo/settings.dist.py "DefectDojo settings file"
+[dojo_settings]: /dojo/settings/settings.dist.py "DefectDojo settings file"
 [setup_py]: /setup.py "Python setup script"
 [setup_bash]: /setup.bash "Bash setup script"
 [pep8]: https://www.python.org/dev/peps/pep-0008/ "PEP8"
