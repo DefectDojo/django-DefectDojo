@@ -28,12 +28,6 @@ from tagging.models import Tag
 from tagging.utils import get_tag_list
 from tagging.views import TaggedItem
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='[%(asctime)s] %(levelname)s [%(name)s:%(lineno)d] %(message)s',
-    datefmt='%d/%b/%Y %H:%M:%S',
-    filename=settings.DOJO_ROOT + '/../django_app.log',
-)
 logger = logging.getLogger(__name__)
 
 

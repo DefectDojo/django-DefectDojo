@@ -37,7 +37,7 @@ from inside the django-DefectDojo/ directory execute:
 
 **Disable Debugging**
 
-Using the text-editor of your choice, change ``DEBUG`` in django-DefectDojo/dojo/settings.py to:
+Using the text-editor of your choice, change ``DEBUG`` in django-DefectDojo/dojo/settings/settings.py to:
 
 .. code-block:: console
 

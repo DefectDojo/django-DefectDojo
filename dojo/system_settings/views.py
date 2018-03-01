@@ -21,12 +21,6 @@ from dojo.models import System_Settings
 from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, handle_uploaded_selenium, get_system_setting
 from dojo.forms import SystemSettingsForm
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='[%(asctime)s] %(levelname)s [%(name)s:%(lineno)d] %(message)s',
-    datefmt='%d/%b/%Y %H:%M:%S',
-    filename=settings.DOJO_ROOT + '/../django_app.log',
-)
 logger = logging.getLogger(__name__)
 
 

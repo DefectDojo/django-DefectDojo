@@ -1,6 +1,5 @@
 import logging
 
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, logout
 from django.contrib.auth.decorators import user_passes_test
@@ -17,12 +16,6 @@ from dojo.forms import DojoUserForm, AddDojoUserForm, DeleteUserForm, APIKeyForm
 from dojo.models import Product, Dojo_User, UserContactInfo, Alerts
 from dojo.utils import get_page_items, add_breadcrumb, get_system_setting
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='[%(asctime)s] %(levelname)s [%(name)s:%(lineno)d] %(message)s',
-    datefmt='%d/%b/%Y %H:%M:%S',
-    filename=settings.DOJO_ROOT + '/../django_app.log',
-)
 logger = logging.getLogger(__name__)
 
 

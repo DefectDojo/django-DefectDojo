@@ -2,8 +2,6 @@ import base64
 import os
 import re
 import logging
-import time
-import sys
 from datetime import datetime
 from uuid import uuid4
 from django.conf import settings
@@ -15,10 +13,8 @@ logging.basicConfig(format=fmt, level=lvl)
 
 from watson import search as watson
 from auditlog.registry import auditlog
-from django.conf import settings
 from django.contrib import admin
-from django.contrib.auth.models import User
-from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.core.validators import RegexValidator
 from django.db import models
@@ -78,7 +74,7 @@ def get_current_date():
 def get_current_datetime():
     return timezone.now()
 
-
+User = get_user_model()
 # proxy class for convenience and UI
 class Dojo_User(User):
     class Meta:
