@@ -291,18 +291,18 @@ function install_db() {
 
     if [[ ! -z "$YUM_CMD" ]]; then
         if [ "$DBTYPE" == $MYSQL ]; then
-            echo "Installing MySQL client"
+            echo "Installing MySQL client (and server if not already installed)"
             sudo yum install libmysqlclient-dev mysql-server mysql-devel
         elif [ "$DBTYPE" == $POSTGRES ]; then
-            echo "Installing Postgres client"
+            echo "Installing Postgres client (and server if not already installed)"
             sudo yum install libpq-dev postgresql postgresql-contrib libmysqlclient-dev
         fi
     elif [[ ! -z "$APT_GET_CMD" ]]; then
         if [ "$DBTYPE" == $MYSQL ]; then
-            echo "Installing MySQL client"
+            echo "Installing MySQL client (and server if not already installed)"
             sudo apt-get install -y libmysqlclient-dev mysql-server
         elif [ "$DBTYPE" == $POSTGRES ]; then
-            echo "Installing Postgres client"
+            echo "Installing Postgres client (and server if not already installed)"
             sudo apt-get install -y libpq-dev postgresql postgresql-contrib libmysqlclient-dev
         fi
     elif [[ ! -z "$BREW_CMD" ]]; then
@@ -411,4 +411,16 @@ function install_app(){
     cd components && yarn && cd $PWD_BAK
 
     python manage.py collectstatic --noinput
+}
+
+function start_local_mysql_db_server() {
+    # Nasty workaround according to https://serverfault.com/a/872576
+    # This error was observed only on travis and not locally:
+    # "Fatal error: Can't open and lock privilege tables: Table storage engine for 'user' doesn't have this option"
+    sudo chown -R mysql:mysql /var/lib/mysql /var/run/mysqld
+    sudo service mysql start
+}
+
+function stop_local_mysql_db_server() {
+    sudo service mysql stop
 }

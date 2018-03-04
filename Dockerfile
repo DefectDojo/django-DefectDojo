@@ -28,7 +28,8 @@ RUN wget -O /tmp/wkhtmltox.tar.xz https://github.com/wkhtmltopdf/wkhtmltopdf/rel
     && sudo cp /tmp/wkhtmltox/bin/wkhtmltopdf /usr/local/bin/wkhtmltopdf
 
 # Start the DB server and rund the app
-ENTRYPOINT sudo service mysql start \
-    && celery -A dojo worker -l info --concurrency 3 >> /opt/django-DefectDojo/worker.log 2>&1 & \
-    && celery beat -A dojo -l info  >> /opt/django-DefectDojo/beat.log 2>&1 & \
-    && python manage.py runserver 0.0.0.0:8000 >> /opt/django-DefectDojo/dojo.log 2>&1
+ENTRYPOINT sudo chown -R mysql:mysql /var/lib/mysql /var/run/mysqld \
+    && sudo service mysql start \
+    && (celery -A dojo worker -l info --concurrency 3 >> /opt/django-DefectDojo/worker.log 2>&1 &) \
+    && (celery beat -A dojo -l info  >> /opt/django-DefectDojo/beat.log 2>&1 &) \
+    && (python manage.py runserver 0.0.0.0:8000 >> /opt/django-DefectDojo/dojo.log 2>&1)
