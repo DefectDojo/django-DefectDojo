@@ -25,8 +25,9 @@ install_os_dependencies
 install_db
 
 if [ "$AUTO_DOCKER" == "yes" ]; then
-    sudo service mysql start
+    start_local_mysql_db_server
 fi
+
 # Create the application DB or recreate it, if it's already present
 ensure_application_db
 
@@ -37,7 +38,7 @@ verify_python_version
 install_app
 
 if [ "$AUTO_DOCKER" == "yes" ]; then
-    sudo service mysql stop
+    stop_local_mysql_db_server
 fi
 
 echo "=============================================================================="
