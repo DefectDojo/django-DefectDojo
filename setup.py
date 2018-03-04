@@ -9,7 +9,7 @@ setup(
     description="Tool for managing vulnerability engagements",
     install_requires=[
         'Django==1.11.2',
-        'MySQL-python',
+        'mysqlclient==1.3.12',
         'Pillow==4.1.1',
         'django-secure>1.0',
         'django-tastypie>=0.12.2',
