@@ -31,12 +31,12 @@ script:
     case "$TEST" in
       unit-test)
         travis_fold start "unit-test"
-        bash ./scripts/travis-unit-test.sh
+        bash entrypoint_scripts/test/travis-unit-test.sh
         travis_fold end "unit-test"
         ;;
       integration-test)
         travis_fold start "integration-test"
-        bash ./scripts/travis-integration-test.sh
+        bash entrypoint_scripts/test/travis-integration-test.sh
         travis_fold end "integration-test"
         ;;
       sourceclear)
