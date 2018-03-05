@@ -467,7 +467,7 @@ def re_import_scan_results(request, tid):
                     if sev == 'Information' or sev == 'Informational':
                         sev = 'Info'
 
-                    if Finding.SEVERITIES[sev] > Finding.SEVERITIES[min_sev]:
+                    if Finding.SEVERITIES[sev] >= Finding.SEVERITIES[min_sev]:
                         continue
 
                     if scan_type == 'Veracode Scan' or scan_type == 'Arachni Scan':
