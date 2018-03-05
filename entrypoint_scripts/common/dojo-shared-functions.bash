@@ -6,8 +6,8 @@
 #####################################################################################
 
 function verify_cwd() {
-    cwd=$(basename $PWD)
-    if [ "$cwd" != "$DOJO_APP_DIR_NAME" ]; then
+    current_folder_name=$(basename $PWD)
+    if [ "$current_folder_name" != "$DOJO_APP_DIR_NAME" ]; then
         echo "The current working dir is NOT the app's root directory"
         return 1
     fi
@@ -36,11 +36,11 @@ function createadmin() {
 
 function setupdb() {
     echo "=============================================================================="
-    echo "Setting up dojo"
+    echo "Setting up dojodb"
     echo "=============================================================================="
     echo
     python manage.py makemigrations dojo
-    python manage.py makemigrations
+    python manage.py makemigrations --merge --noinput
     python manage.py migrate
     python manage.py syncdb --noinput
     python manage.py loaddata product_type
@@ -82,17 +82,17 @@ function verify_python_version() {
 
 function setupdojo() {
     echo "=============================================================================="
-    echo "DefectDojo Docker Setup"
+    echo "DefectDojo Setup"
     echo "Installing required packages"
     echo "=============================================================================="
     echo
 
     echo "=============================================================================="
-    echo "Installing Bower"
+    echo "Installing Yarn"
     echo "=============================================================================="
     echo
-    # bower install
-    npm install -g bower
+    # yarn install
+    npm install -g yarn
 
     echo "=============================================================================="
     echo "Creating Virtual Environment"
@@ -122,27 +122,27 @@ function setupdojo() {
     echo
     #Copying setting.py temporarily so that collect static will run correctly
     cp $DOJO_ROOT_DIR/dojo/settings/settings.dist.py $DOJO_ROOT_DIR/dojo/settings/settings.py
-    sed -i  "s#DOJO_STATIC_ROOT#$PWD/static/#g" $DOJO_ROOT_DIR/dojo/settings/settings.py
+    sed -i "s#DOJO_STATIC_ROOT#$PWD/static/#g" $DOJO_ROOT_DIR/dojo/settings/settings.py
 
     echo "Setting dojo settings for SQLLITEDB."
     SQLLITEDB="'NAME': os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'db.sqlite3')"
-    sed -i  "s/django.db.backends.mysql/django.db.backends.sqlite3/g" dojo/settings/settings.py
-    sed -i  "s/'NAME': 'MYSQLDB'/$SQLLITEDB/g" dojo/settings/settings.py
+    sed -i "s/django.db.backends.mysql/django.db.backends.sqlite3/g" dojo/settings/settings.py
+    sed -i "s/'NAME': 'MYSQLDB'/$SQLLITEDB/g" dojo/settings/settings.py
 
     echo "=============================================================================="
-    echo "Installing bower"
+    echo "Installing yarn"
     echo "=============================================================================="
     echo
-    cd $DOJO_ROOT_DIR/components
-    bower install --allow-root
+    cd $DOJO_ROOT_DIR/components && yarn && cd ..
 
+    # Setup the DB
     setupdb
 
     echo "=============================================================================="
     echo "Removing temporary files"
     echo "=============================================================================="
     echo
-    rm $DOJO_ROOT_DIR/dojo/settings/settings.py
+    rm $DOJO_ROOT_DIR/dojo/settings/settings.dist.py
 
     echo "=============================================================================="
     echo "SUCCESS!"
@@ -150,8 +150,10 @@ function setupdojo() {
 }
 
 function prompt_db_type() {
-    read -p "Select database type: 1.) MySQL or 2.) Postgres: " DBTYPE
-    if [ "$DBTYPE" == '1' ] || [ "$DBTYPE" == '2' ] ; then
+    read -p "Select database type: 0.) SQLite, 1.) MySQL or 2.) Postgres: " DBTYPE
+    if [ "$DBTYPE" == "$SQLITE" ] \
+        || [ "$DBTYPE" == "$MYSQL" ] \
+        || [ "$DBTYPE" == "$POSTGRES" ] ; then
     	echo "Setting up database"
     else
         echo "Please enter 1 or 2"
@@ -317,6 +319,10 @@ function install_db() {
 }
 
 function prepare_settings_file() {
+    echo "=============================================================================="
+    echo "Creating dojo/settings/settings.py file"
+    echo "=============================================================================="
+    echo
     unset HISTFILE
 
     if [[ ! -z "$BREW_CMD" ]]; then
@@ -331,40 +337,26 @@ function prepare_settings_file() {
         # locate to the install directory first
         cd $DOJO_ROOT_DIR
     fi
-    cp dojo/settings/settings.dist.py dojo/settings/settings.py
 
     # Save MySQL details in settings file
-    if [[ ! -z $BREW_CMD ]]; then
-        sed -i "s/MYSQLHOST/$SQLHOST/g" dojo/settings/settings.py
-        sed -i "s/MYSQLPORT/$SQLPORT/g" dojo/settings/settings.py
-        sed -i "s/MYSQLUSER/$SQLUSER/g" dojo/settings/settings.py
-        sed -i "s/MYSQLPWD/$SQLPWD/g" dojo/settings/settings.py
-        sed -i "s/MYSQLDB/$DBNAME/g" dojo/settings/settings.py
-        sed -i "s#DOJODIR#$PWD/dojo#g" dojo/settings/settings.py
-        sed -i "s/DOJOSECRET/$SECRET/g" dojo/settings/settings.py
-        sed -i "s#DOJO_MEDIA_ROOT#$PWD/media/#g" dojo/settings/settings.py
-        sed -i "s#DOJO_STATIC_ROOT#$PWD/static/#g" dojo/settings/settings.py
-        if [ "$DBTYPE" == '1' ]; then
-            sed -i "s/BACKENDDB/django.db.backends.mysql/g" dojo/settings/settings.py
-        elif [ "$DBTYPE" == '2' ]; then
-            sed -i "s/BACKENDDB/django.db.backends.postgresql_psycopg2/g" dojo/settings/settings.py
-        fi
-    else
-        sed -i "s/MYSQLHOST/$SQLHOST/g" dojo/settings/settings.py
-        sed -i "s/MYSQLPORT/$SQLPORT/g" dojo/settings/settings.py
-        sed -i "s/MYSQLUSER/$SQLUSER/g" dojo/settings/settings.py
-        sed -i "s/MYSQLPWD/$SQLPWD/g" dojo/settings/settings.py
-        sed -i "s/MYSQLDB/$DBNAME/g" dojo/settings/settings.py
-        sed -i "s#DOJODIR#$PWD/dojo#g" dojo/settings/settings.py
-        sed -i "s/DOJOSECRET/$SECRET/g" dojo/settings/settings.py
-        sed -i "s#DOJO_MEDIA_ROOT#$PWD/media/#g" dojo/settings/settings.py
-        sed -i "s#DOJO_STATIC_ROOT#$PWD/static/#g" dojo/settings/settings.py
+    cp dojo/settings/settings.dist.py dojo/settings/settings.py
+    sed -i "s/MYSQLHOST/$SQLHOST/g" dojo/settings/settings.py
+    sed -i "s/MYSQLPORT/$SQLPORT/g" dojo/settings/settings.py
+    sed -i "s/MYSQLUSER/$SQLUSER/g" dojo/settings/settings.py
+    sed -i "s/MYSQLPWD/$SQLPWD/g" dojo/settings/settings.py
+    sed -i "s/MYSQLDB/$DBNAME/g" dojo/settings/settings.py
+    sed -i "s#DOJODIR#$PWD/dojo#g" dojo/settings/settings.py
+    sed -i "s/DOJOSECRET/$SECRET/g" dojo/settings/settings.py
+    sed -i "s#DOJO_MEDIA_ROOT#$PWD/media/#g" dojo/settings/settings.py
+    sed -i "s#DOJO_STATIC_ROOT#$PWD/static/#g" dojo/settings/settings.py
 
-        if [ "$DBTYPE" == '1' ]; then
-            sed -i "s/BACKENDDB/django.db.backends.mysql/g" dojo/settings/settings.py
-        elif [ "$DBTYPE" == '2' ]; then
-            sed -i "s/BACKENDDB/django.db.backends.postgresql_psycopg2/g" dojo/settings/settings.py
-        fi
+    if [ "$DBTYPE" == "$SQLITE" ]; then
+        sed -i "s/BACKENDDB/django.db.backends.sqlite3/g" dojo/settings/settings.py
+        sed -i "s/MYSQLDB/db.sqlite3/g" dojo/settings/settings.py
+    elif [ "$DBTYPE" == "$MYSQL" ]; then
+        sed -i "s/BACKENDDB/django.db.backends.mysql/g" dojo/settings/settings.py
+    elif [ "$DBTYPE" == "$POSTGRES" ]; then
+        sed -i "s/BACKENDDB/django.db.backends.postgresql_psycopg2/g" dojo/settings/settings.py
     fi
 }
 
