@@ -426,7 +426,7 @@ def import_scan_results(request, eid):
 
                     item.severity = sev
 
-                    if Finding.SEVERITIES[sev] > Finding.SEVERITIES[min_sev]:
+                    if Finding.SEVERITIES[sev] >= Finding.SEVERITIES[min_sev]:
                         continue
 
                     item.test = t
