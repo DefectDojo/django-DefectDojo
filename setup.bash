@@ -20,8 +20,9 @@ echo
 echo "Attempting to install required packages..."
 echo
 
-# Install OS dependencies like a DB client, further package managers, etc
+# Install OS dependencies like DB client, further package managers, etc.
 install_os_dependencies
+# Install database-related packages
 install_db
 
 if [ "$AUTO_DOCKER" == "yes" ]; then
@@ -31,10 +32,13 @@ fi
 # Create the application DB or recreate it, if it's already present
 ensure_application_db
 
+# Adjust the settings.py file
 prepare_settings_file
 
+# Ensure, we're running on a supported python version
 verify_python_version
 
+# Install the actual application
 install_app
 
 if [ "$AUTO_DOCKER" == "yes" ]; then

@@ -1,11 +1,12 @@
 FROM ubuntu:16.04
 MAINTAINER Matt Tesauro <matt.tesauro@owasp.org>
 
-# Create a single Docker image running DefectDojo and all dependencies
+# # # Create a single Docker image running DefectDojo and all dependencies
 
 # Update and install basic requirements;
-# Install mysql-server already at this place, since we want to avoid interactivity
-# Also: create the application user
+# Install mysql-server already at this place, since we want to avoid
+# interactivity when creating a Docker image;
+# Also: create the application user;
 RUN apt-get update \
     && apt-get install -y sudo git expect wget \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y mysql-server \
@@ -21,7 +22,7 @@ WORKDIR /opt/django-DefectDojo
 ENV AUTO_DOCKER=yes
 RUN ./setup.bash
 
-# Install wkhtmltox
+# Install wkhtmltopdf
 RUN wget -O /tmp/wkhtmltox.tar.xz https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.4/wkhtmltox-0.12.4_linux-generic-amd64.tar.xz \
     && tar xvfJ /tmp/wkhtmltox.tar.xz -C /tmp \
     && sudo chown root:root /tmp/wkhtmltox/bin/wkhtmltopdf \
