@@ -31,7 +31,7 @@ echo "Checking to see if dojo is running"
 set +e
 STATE="inactive"
 for i in $(seq 1 5); do
-    curl -s http://127.0.0.1:8000/login?next=/
+    curl -o /dev/null http://127.0.0.1:8000/login?next=/
     if [ "$?" == "0" ]; then
         STATE="running"
         break
