@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ev
+set -e
 
 # Docker Build
 export DOJO_ADMIN_USER='admin'
@@ -26,7 +26,7 @@ sudo ln -s /usr/local/share/chromedriver /usr/local/bin/chromedriver
 docker ps -a
 docker logs $CONTAINER_NAME
 echo "Checking to see if dojo is running"
-curl http://127.0.0.1:8000/login?next=/
+curl http://127.0.0.1:8000/login?next=/ || docker exec $CONTAINER_NAME bash -c "cat /opt/django-DefectDojo/dojo.log" && exit 1
 
 export DISPLAY=:99.0
 sh -e /etc/init.d/xvfb start
@@ -35,4 +35,4 @@ whereis chromedriver
 export PATH=$PATH:/usr/local/bin/
 python tests/check_status.py -v && python tests/smoke_test.py #&& python tests/zap.py
 
-set +ev 
+set +e
