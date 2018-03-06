@@ -2,47 +2,59 @@
 {% load navigation_tags %}
 {% load get_system_setting %}
 {% block content %}
-    <div class="row">
-        <div class="col-md-12">
-            <div class="panel panel-default">
-                <div class="panel-heading tight">
-                    <h3 class="has-filters">
-                        Open Findings
-                        <div class="dropdown pull-right"></div>
-                    </h3>
-                </div>
-                <div id="the-filters" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
-                    {% include "dojo/filter_snippet.html" with form=filtered.form %}
-                </div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading tight">
+                <h3 class="has-filters">
+                    Open Findings
+                    <div class="dropdown pull-right"></div>
+                </h3>
             </div>
-            {% if findings %}
-                <div class="clearfix">
-                    {% include "dojo/paging_snippet.html" with page=findings page_size=True %}
-                </div>
-                <div class="panel panel-default table-responsive">
-                    <table id="open_findings"
-                           class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
-                        <thead>
-                        <tr>
-                            <th class="nowrap">{% dojo_sort request 'Name' 'title' %}</th>
-                            <th class="nowrap">{% dojo_sort request 'Date' 'date'%}</th>
-                            <th class="nowrap">{% dojo_sort request 'Reviewed' 'last_reviewed'%}</th>
-                            <th class="nowrap">{% dojo_sort request 'Severity' 'numerical_severity' 'asc' %}</th>
-                            <th class="nowrap">Age</th>
-                            {% if "enable_jira"|get_system_setting %}
-                            <th class="nowrap">Jira</th>
-                            {% endif %}
-                            <th class="nowrap">{% dojo_sort request 'Product' 'test__engagement__product__name'%}</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for finding in findings %}
+            <div id="the-filters" class="panel-body collapse ">
+                {% if request.META.QUERY_STRING %}in{% endif %}
+                {% include "dojo/filter_snippet.html" with form=filtered.form %}
+            </div>
+        </div>
+        {% if specificFindings %}
+        <div class="clearfix">
+            {% include "dojo/paging_snippet.html" with page=specificFindings page_size=True %}
+        </div>
+
+        <!--Begin of the specific findings table-->
+        <div class="panel-group" id="accordion">
+
+            <div class="panel panel-default table-responsive">
+                <div class="panel-heading tight"><a href="#collapse1" data-parent="#accordion" data-toggle="collapse">Your
+                    findings</a></div>
+                <div class="panel-collapse collapse in" id="collapse1">
+                    <div class="panel-body ">
+                        <table id="your_findings"
+                               class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
+                            <thead>
+                            <tr>
+                                <th class="nowrap">{% dojo_sort request 'Name' 'title' %}</th>
+                                <th class="nowrap">{% dojo_sort request 'Date' 'date'%}</th>
+                                <th class="nowrap">{% dojo_sort request 'Reviewed' 'last_reviewed'%}</th>
+                                <th class="nowrap">{% dojo_sort request 'Severity' 'numerical_severity' 'asc' %}</th>
+                                <th class="nowrap">Age</th>
+                                {% if "enable_jira"|get_system_setting %}
+                                <th class="nowrap">Jira</th>
+                                {% endif %}
+                                <th class="nowrap">{% dojo_sort request 'Product' 'test__engagement__product__name'%}
+                                </th>
+                                <th class="nowrap">Reviewer</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for finding in specificFindings %}
                             <tr>
                                 <td><a title="{{ finding.title }}"
-                                                      href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a>
+                                       href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a>
                                     <sup>
                                         {% for tag in finding.tags %}
-                                        <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                        <a title="Search {{ tag }}" class="btn btn-tag btn-primary"
+                                           href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                         {% endfor %}
                                     </sup>
                                 </td>
@@ -50,35 +62,123 @@
                                 <td class="nowrap">{{ finding.last_reviewed }}</td>
                                 <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
                                     <p class="text-error">
-                                {% else %}<p>{% endif %}{{ finding.severity }}</p></td>
+                                        {% else %}
+                                    <p>{% endif %}{{ finding.severity }}</p></td>
                                 <td>{{ finding.age }}</td>
                                 {% if "enable_jira"|get_system_setting %}
                                 <td>
-                                <a href="{{finding.jira_conf.url}}/browse/{{finding.jira.jira_key}}" target="_blank"> {{finding.jira.jira_key}} </a>
+                                    <a href="{{finding.jira_conf.url}}/browse/{{finding.jira.jira_key}}"
+                                       target="_blank">
+                                        {{finding.jira.jira_key}} </a>
                                 </td>
                                 {% endif %}
                                 <td><a
                                         href="{% url 'view_product' finding.test.engagement.product.id %}"
                                         title="{{ finding.test.engagement.product }}">{{ finding.test.engagement.product }}</a>
                                 </td>
+                                <td class="nowrap">{{ finding.reviewer }}</td>
                             </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <div class="clearfix">
-                    {% include "dojo/paging_snippet.html" with page=findings page_size=True%}
-                </div>
-            {% else %}
-                <p class="text-center">No findings found.</p>
-            {% endif %}
+            </div>
         </div>
+        <div class="clearfix">
+            {% include "dojo/paging_snippet.html" with page=findings page_size=True%}
+        </div>
+        {% else %}
+        <p class="text-center">There are no findings for you.</p>
+        {% endif %}
     </div>
+</div>
+
+<!--Begin of the general findings table-->
+<div class="row">
+    <div class="col-md-12">
+        {% if generalFindings %}
+        <div class="clearfix">
+            {% include "dojo/paging_snippet.html" with page=specificFindings page_size=True %}
+        </div>
+
+        <div class="panel-group" id="accordionGeneralFindings">
+
+            <div class="panel panel-default table-responsive">
+                <div class="panel-heading tight"><a href="#collapseGeneralFindings" data-parent="#accordionGeneralFindings"
+                                                    data-toggle="collapse">General findings</a></div>
+                <div class="panel-collapse collapse in" id="collapseGeneralFindings">
+                    <div class="panel-body ">
+                        <table id="general_findings"
+                               class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
+                            <thead>
+                            <tr>
+                                <th class="nowrap">{% dojo_sort request 'Name' 'title' %}</th>
+                                <th class="nowrap">{% dojo_sort request 'Date' 'date'%}</th>
+                                <th class="nowrap">{% dojo_sort request 'Reviewed' 'last_reviewed'%}</th>
+                                <th class="nowrap">{% dojo_sort request 'Severity' 'numerical_severity' 'asc' %}</th>
+                                <th class="nowrap">Age</th>
+                                {% if "enable_jira"|get_system_setting %}
+                                <th class="nowrap">Jira</th>
+                                {% endif %}
+                                <th class="nowrap">{% dojo_sort request 'Product' 'test__engagement__product__name'%}
+                                </th>
+                                <th class="nowrap">Reviewer</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for finding in generalFindings %}
+                            <tr>
+                                <td><a title="{{ finding.title }}"
+                                       href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a>
+                                    <sup>
+                                        {% for tag in finding.tags %}
+                                        <a title="Search {{ tag }}" class="btn btn-tag btn-primary"
+                                           href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                        {% endfor %}
+                                    </sup>
+                                </td>
+                                <td class="nowrap">{{ finding.date }}</td>
+                                <td class="nowrap">{{ finding.last_reviewed }}</td>
+                                <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
+                                    <p class="text-error">
+                                        {% else %}
+                                    <p>{% endif %}{{ finding.severity }}</p></td>
+                                <td>{{ finding.age }}</td>
+                                {% if "enable_jira"|get_system_setting %}
+                                <td>
+                                    <a href="{{finding.jira_conf.url}}/browse/{{finding.jira.jira_key}}"
+                                       target="_blank">
+                                        {{finding.jira.jira_key}} </a>
+                                </td>
+                                {% endif %}
+                                <td><a
+                                        href="{% url 'view_product' finding.test.engagement.product.id %}"
+                                        title="{{ finding.test.engagement.product }}">{{ finding.test.engagement.product}}
+                                </a>
+                                </td>
+                                <td class="nowrap">{{ finding.reviewer }}</td>
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="clearfix">
+            {% include "dojo/paging_snippet.html" with page=findings page_size=True%}
+        </div>
+        {% else %}
+        <p class="text-center">No general findings found.</p>
+        {% endif %}
+    </div>
+</div>
 
 
 {% endblock %}
 {% block postscript %}
-    <script>
+<script>
         $(function () {
             var availableTags = [
                 {% for word in title_words %}
@@ -89,6 +189,10 @@
                 source: availableTags
             });
         });
-    </script>
-    {% include "dojo/filter_js_snippet.html" %}
+
+
+
+
+</script>
+{% include "dojo/filter_js_snippet.html" %}
 {% endblock %}

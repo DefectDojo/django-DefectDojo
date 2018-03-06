@@ -629,6 +629,8 @@ class Finding(models.Model):
     review_requested_by = models.ForeignKey(Dojo_User, null=True, blank=True, related_name='review_requested_by')
     reviewers = models.ManyToManyField(Dojo_User, blank=True)
 
+    reviewer = models.ForeignKey(Dojo_User, null=True, blank=True, related_name='reviewer')
+
     #Defect Tracking Review
     under_defect_review = models.BooleanField(default=False)
     defect_review_requested_by = models.ForeignKey(Dojo_User, null=True, blank=True, related_name='defect_review_requested_by')
