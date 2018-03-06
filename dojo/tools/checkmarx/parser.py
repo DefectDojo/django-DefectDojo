@@ -2,6 +2,7 @@ __author__ = 'aaronweaver'
 
 from defusedxml import ElementTree
 from datetime import datetime
+from dateutil import parser
 
 from dojo.models import Finding
 
@@ -24,7 +25,7 @@ class CheckmarxXMLParser(object):
             group = ''
             status = ''
 
-            find_date = root.get("ScanStart")
+            find_date = parser.parse(root.get("ScanStart"))
             name = query.get('name')
             cwe = query.get('cweId')
 
