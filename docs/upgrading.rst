@@ -124,3 +124,13 @@ If you like you can then remove the following settings from settings.py to avoid
 * ``URL_PREFIX``
 * ``TIME_ZONE``
 * ``TEAM_NAME``
+
+Upgrading to DefectDojo Version 1.2.2
+------------------------------------
+
+Upgrading to 1.2.2 requires:
+
+1. Copying settings.py to the settings/ folder.
+
+2. If you have supervisor scripts change DJANGO_SETTINGS_MODULE=dojo.settings.settings
+
