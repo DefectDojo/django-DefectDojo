@@ -26,7 +26,25 @@ sudo ln -s /usr/local/share/chromedriver /usr/local/bin/chromedriver
 docker ps -a
 docker logs $CONTAINER_NAME
 echo "Checking to see if dojo is running"
-curl -s http://127.0.0.1:8000/login?next=/ || docker exec $CONTAINER_NAME bash -c "cat /opt/django-DefectDojo/dojo.log" && exit 1
+
+# Check whether the container is running and came up as expected
+set +e
+STATE="inactive"
+for i in $(seq 1 5); do
+    curl -s http://127.0.0.1:8000/login?next=/
+    if [ "$?" == "0" ]; then
+        STATE="running"
+        break
+    fi
+    sleep 10
+done
+if [ "$STATE" != "running" ]; then
+    docker ps -a
+    docker logs $CONTAINER_NAME
+    echo "Container did not come up properly" >&2
+    exit 1
+fi
+set -e
 
 export DISPLAY=:99.0
 sh -e /etc/init.d/xvfb start
