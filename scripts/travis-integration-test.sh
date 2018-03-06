@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -ex
 
 # Docker Build
 export DOJO_ADMIN_USER='admin'
@@ -35,4 +35,4 @@ whereis chromedriver
 export PATH=$PATH:/usr/local/bin/
 python tests/check_status.py -v && python tests/smoke_test.py #&& python tests/zap.py
 
-set +e
+set +ex
