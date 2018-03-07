@@ -420,13 +420,13 @@ def import_scan_results(request, eid):
 
                     item.severity = sev
 
-                    if Finding.SEVERITIES[sev] <= Finding.SEVERITIES[min_sev]:
+                    if Finding.SEVERITIES[sev] > Finding.SEVERITIES[min_sev]:
                         continue
 
                     item.test = t
                     if item.date == timezone.now().date():
                       item.date = t.target_start
-                    
+
                     item.reporter = request.user
                     item.last_reviewed = timezone.now()
                     item.last_reviewed_by = request.user
