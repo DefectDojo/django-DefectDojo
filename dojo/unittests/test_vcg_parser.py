@@ -1,14 +1,13 @@
-import sys
-sys.path.append('..')
+import StringIO
+import csv
+
+from defusedxml import ElementTree
+from django.test import TestCase
+
+from dojo.models import Test
+from dojo.tools.vcg.parser import VCGCsvParser
 from dojo.tools.vcg.parser import VCGParser
 from dojo.tools.vcg.parser import VCGXmlParser
-from dojo.tools.vcg.parser import VCGCsvParser
-from defusedxml import ElementTree
-from dojo.models import Finding
-from dojo.models import Test
-import unittest
-import csv
-import StringIO
 
 
 class TestFile(object):
@@ -21,7 +20,7 @@ class TestFile(object):
         self.content = content
 
 
-class TestVCGXmlParser(unittest.TestCase):
+class TestVCGXmlParser(TestCase):
 
     def setUp(self):
         self.parser = VCGXmlParser()
@@ -139,13 +138,15 @@ class TestVCGXmlParser(unittest.TestCase):
         </CodeIssueCollection>"""
 
         vcgscan = ElementTree.fromstring(single_finding)
-        finding = self.parser.parse_issue(vcgscan.findall('CodeIssue')[0], Test())
+        finding = self.parser.parse_issue(vcgscan.findall('CodeIssue')[0],
+                                          Test())
         self.assertEqual('Info', finding.severity)
         self.assertEqual('S4', finding.numerical_severity)
-        self.assertEqual('Comment Indicates Potentially Unfinished Code', finding.title)
+        self.assertEqual('Comment Indicates Potentially Unfinished Code',
+                         finding.title)
 
 
-class TestVCGCsvParser(unittest.TestCase):
+class TestVCGCsvParser(TestCase):
 
     def setUp(self):
         self.parser = VCGCsvParser()
@@ -161,13 +162,13 @@ class TestVCGCsvParser(unittest.TestCase):
         self.assertEqual(1, len(results))
 
     def test_parse_multiple_findings_multiple_results(self):
-        findings ="""6,Suspicious Comment,"Comment Indicates Potentially Unfinished Code","The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.",C:\Projects\WebGoat.Net\Core\Cart.cs,16,"TODO: Refactor this. Use LINQ with aggregation to get SUM.",False,"LawnGreen"
+        findings = """6,Suspicious Comment,"Comment Indicates Potentially Unfinished Code","The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.",C:\Projects\WebGoat.Net\Core\Cart.cs,16,"TODO: Refactor this. Use LINQ with aggregation to get SUM.",False,"LawnGreen"
 6,Suspicious Comment,"Comment Indicates Potentially Unfinished Code","The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.",C:\Projects\WebGoat.Net\Core\Cart.cs,41,"TODO: Add ability to delete an orderDetail and to change quantities.",False,"LawnGreen"""""
         results = self.parser.parse(findings, Test())
         self.assertEqual(2, len(results))
 
     def test_parse_duplicate_findings_deduped_results(self):
-        findings ="""6,Suspicious Comment,"Comment Indicates Potentially Unfinished Code","The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.",C:\Projects\WebGoat.Net\Core\Cart.cs,16,"TODO: Refactor this. Use LINQ with aggregation to get SUM.",False,"LawnGreen"
+        findings = """6,Suspicious Comment,"Comment Indicates Potentially Unfinished Code","The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.",C:\Projects\WebGoat.Net\Core\Cart.cs,16,"TODO: Refactor this. Use LINQ with aggregation to get SUM.",False,"LawnGreen"
 6,Suspicious Comment,"Comment Indicates Potentially Unfinished Code","The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.",C:\Projects\WebGoat.Net\Core\Cart.cs,16,"TODO: Refactor this. Use LINQ with aggregation to get SUM.",False,"LawnGreen"""""
         results = self.parser.parse(findings, Test())
         self.assertEqual(1, len(results))
@@ -183,7 +184,8 @@ class TestVCGCsvParser(unittest.TestCase):
 
     def test_parseissuerow_with_row_has_finding(self):
         findings = """6,Suspicious Comment,"Comment Indicates Potentially Unfinished Code","The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.",C:\Projects\WebGoat.Net\Core\Cart.cs,16,"TODO: Refactor this. Use LINQ with aggregation to get SUM.",False,"LawnGreen"""""
-        reader = csv.reader(StringIO.StringIO(findings), delimiter=',', quotechar='"')
+        reader = csv.reader(StringIO.StringIO(findings), delimiter=',',
+                            quotechar='"')
         finding = None
         for row in reader:
             finding = self.parser.parse_issue(row, Test())
@@ -191,10 +193,11 @@ class TestVCGCsvParser(unittest.TestCase):
         self.assertIsNotNone(finding)
         self.assertEqual('Info', finding.severity)
         self.assertEqual('S4', finding.numerical_severity)
-        self.assertEqual('Comment Indicates Potentially Unfinished Code', finding.title)
+        self.assertEqual('Comment Indicates Potentially Unfinished Code',
+                         finding.title)
 
 
-class TestVCGImport(unittest.TestCase):
+class TestVCGImport(TestCase):
 
     def setUp(self):
         self.parser = VCGParser(None, Test())
