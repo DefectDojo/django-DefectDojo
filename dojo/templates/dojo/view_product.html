@@ -618,6 +618,9 @@
             </div>
         {% if user.is_staff and i_engs %}
             <div class="col-md-12">
+              <div class="clearfix">
+                  {% include "dojo/paging_snippet.html" with page=i_engs page_size=True %}
+              </div>
                 <div class="panel panel-default table-responsive">
                     <div class="panel-heading">
                         <h4> Closed Engagements </h4>
@@ -644,6 +647,9 @@
                         {% endfor %}
                         </tbody>
                     </table>
+                </div>
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=i_engs page_size=True %}
                 </div>
             </div>
         {% endif %}
