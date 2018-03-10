@@ -1,17 +1,8 @@
-from django.contrib.contenttypes.models import ContentType
-
 from django.core.management.base import BaseCommand
 from pytz import timezone
-from requests.auth import HTTPBasicAuth
 
-from dojo.models import Finding, JIRA_PKey, JIRA_Issue, Product, Engagement, Alerts
-import dojo.settings as settings
-from datetime import datetime
-from auditlog.models import LogEntry
-from jira import JIRA
-from jira.exceptions import JIRAError
-from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, close_epic, get_system_setting
-from django.core.urlresolvers import get_resolver, reverse
+from dojo.models import Finding
+from dojo.utils import update_issue, get_system_setting
 
 locale = timezone(get_system_setting('time_zone'))
 
