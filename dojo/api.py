@@ -1172,7 +1172,7 @@ class ImportScanResource(MultipartResource, Resource):
                 item.last_reviewed_by = bundle.request.user
                 item.active = bundle.data['active']
                 item.verified = bundle.data['verified']
-                item.save()
+                item.save(dedupe_option=False)
 
                 if hasattr(item, 'unsaved_req_resp') and len(item.unsaved_req_resp) > 0:
                     for req_resp in item.unsaved_req_resp:
@@ -1200,6 +1200,7 @@ class ImportScanResource(MultipartResource, Resource):
                                                                  product=t.engagement.product)
 
                     item.endpoints.add(ep)
+                item.save()
 
                 if item.unsaved_tags is not None:
                     item.tags = item.unsaved_tags
