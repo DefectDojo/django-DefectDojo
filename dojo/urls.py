@@ -10,7 +10,7 @@ from dojo.api import UserResource, ProductResource, EngagementResource, \
     StubFindingResource, FindingTemplateResource, ImportScanResource, \
     ReImportScanResource, JiraResource, JIRA_ConfResource, EndpointResource, \
     JIRA_IssueResource, ToolProductSettingsResource, Tool_ConfigurationResource, \
-    Tool_TypeResource
+    Tool_TypeResource, LanguagesResource, LanguageTypeResource, App_AnalysisResource
 from dojo.utils import get_system_setting
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
 from dojo.endpoint.urls import urlpatterns as endpoint_urls
@@ -59,6 +59,9 @@ v1_api.register(JIRA_IssueResource())
 v1_api.register(ToolProductSettingsResource())
 v1_api.register(Tool_ConfigurationResource())
 v1_api.register(Tool_TypeResource())
+v1_api.register(LanguagesResource())
+v1_api.register(LanguageTypeResource())
+v1_api.register(App_AnalysisResource())
 # v1_api.register(IPScanResource())
 
 
