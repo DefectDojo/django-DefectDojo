@@ -234,7 +234,6 @@ Add imagekit to INSTALLED_APPS::
         'django.contrib.messages',
         'django.contrib.staticfiles',
         'polymorphic',  # provides admin templates
-        'overextends',
         'django.contrib.admin',
         'django.contrib.humanize',
         'gunicorn',
