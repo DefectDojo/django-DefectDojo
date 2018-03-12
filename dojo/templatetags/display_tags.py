@@ -1,7 +1,7 @@
 import base64
 from itertools import izip, chain
 
-import re
+import re, random
 from django import template
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import stringfilter
@@ -74,6 +74,26 @@ def content_type_str(obj):
         return False
     return ContentType.objects.get_for_model(obj)
 
+@register.filter(name='percentage')
+def percentage(fraction, value):
+
+    try:
+        return "%.1f%%" % ((float(fraction) / float(value)) * 100)
+    except ValueError:
+        return ''
+
+@register.filter(name='version_num')
+def version_num(value):
+    version = ""
+    if value is not None or value is not "":
+        version = "v. " + value
+
+    return version
+
+@register.simple_tag
+def random_html():
+    r = lambda: random.randint(0,255)
+    return ('#%02X%02X%02X' % (r(),r(),r()))
 
 @register.filter(is_safe=True, needs_autoescape=False)
 @stringfilter
