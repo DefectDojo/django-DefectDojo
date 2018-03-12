@@ -1,6 +1,5 @@
 Django==1.11.2
 Pillow==4.1.1
-django-secure>1.0
 django-tastypie>=0.12.2
 django-tastypie-swagger
 gunicorn>=19.1.1

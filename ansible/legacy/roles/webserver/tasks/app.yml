@@ -48,11 +48,6 @@
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
-- name: Install django-secure
-  pip: name=django-secure virtualenv={{ venv_dir }}
-  sudo: yes
-  sudo_user: '{{ dd_user }}'
-
 - name: Install django-tastypie
   pip: name=django-tastypie virtualenv={{ venv_dir }}
   sudo: yes
