@@ -36,6 +36,7 @@ setup(
         'psycopg2',
         'django-multiselectfield',
 	    'django-slack',
+        'Pillow',
     ],
 
     dependency_links=[
