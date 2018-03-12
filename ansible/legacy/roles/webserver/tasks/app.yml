@@ -148,11 +148,6 @@
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
-- name: Install sqlalchemy
-  pip: name=sqlalchemy virtualenv={{ venv_dir }}
-  sudo: yes
-  sudo_user: '{{ dd_user }}'
-
 - name: install pdfkit
   pip: name=pdfkit virtualenv={{ venv_dir }}
   sudo: yes

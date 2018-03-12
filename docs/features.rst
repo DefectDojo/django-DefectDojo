@@ -585,10 +585,6 @@ you can run: ::
 
     pip install celery
 
-You will also need to install `sqlalchemy`: ::
-
-    pip install sqlalchemy
-
 If you are using virtual environments make sure your environment is activated.  You can also follow the `installation
 instructions`_ from the Celery documentation.
 
