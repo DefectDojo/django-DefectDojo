@@ -25,7 +25,7 @@ setup(
         'django-auditlog==0.3.3',
         'vobject',
         'html2text',
-        'django-watson==1.3.1',
+        'django-watson',
         'celery>=4.1',
         'kombu>=4.1',
         'sqlalchemy',
