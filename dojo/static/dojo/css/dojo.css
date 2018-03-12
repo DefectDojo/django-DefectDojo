@@ -1145,3 +1145,21 @@ div.tags .label {
 #finding_pic, .modal_finding_pic:hover {
     cursor: url(../img/zoom-in.cur), zoom-in;
 }
+
+.product-detailed-info ol.product-detailed-info-numbers li {
+    display: table-cell;
+    width: 1%;
+    padding: 5px 5px;
+    text-align: center;
+    white-space: nowrap;
+    border-bottom: 0;
+    border-bottom-width: 0px;
+    border-bottom-style: initial;
+    border-bottom-color: initial;
+}
+.product-detailed-info ol.product-detailed-info-numbers li .language-color {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
