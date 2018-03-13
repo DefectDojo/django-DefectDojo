@@ -1,11 +1,9 @@
+from auditlog.models import LogEntry
 from django.contrib.contenttypes.models import ContentType
-
 from django.core.management.base import BaseCommand
 from pytz import timezone
 
 from dojo.models import Finding
-import dojo.settings as settings
-from auditlog.models import LogEntry
 from dojo.utils import get_system_setting
 
 locale = timezone(get_system_setting('time_zone'))
@@ -42,7 +40,8 @@ class Command(BaseCommand):
                 last_note_date = finding.date
 
                 if finding.notes.all():
-                    last_note_date = finding.notes.order_by('-date')[0].date.date()
+                    last_note_date = finding.notes.order_by('-date')[
+                        0].date.date()
 
                 mitigation_date = finding.date
 
@@ -52,15 +51,20 @@ class Command(BaseCommand):
                 last_action_date = finding.date
 
                 try:
-                    ct = ContentType.objects.get_for_id(ContentType.objects.get_for_model(finding).id)
+                    ct = ContentType.objects.get_for_id(
+                        ContentType.objects.get_for_model(finding).id)
                     obj = ct.get_object_for_this_type(pk=finding.id)
-                    log_entries = LogEntry.objects.filter(content_type=ct, object_pk=obj.id).order_by('-timestamp')
+                    log_entries = LogEntry.objects.filter(content_type=ct,
+                                                          object_pk=obj.id).order_by(
+                        '-timestamp')
                     if log_entries:
                         last_action_date = log_entries[0].timestamp.date()
                 except KeyError:
                     pass
 
-                finding.last_reviewed = max([date_discovered, last_note_date, mitigation_date, last_action_date])
+                finding.last_reviewed = max(
+                    [date_discovered, last_note_date, mitigation_date,
+                     last_action_date])
                 save = True
 
             if not finding.last_reviewed_by:
