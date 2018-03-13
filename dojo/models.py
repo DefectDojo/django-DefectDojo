@@ -1239,9 +1239,10 @@ class App_Analysis(models.Model):
     name = models.CharField(max_length=200, null=False)
     user = models.ForeignKey(User, editable=True)
     confidence = models.IntegerField(blank=True, null=True, verbose_name='Confidence level')
-    version = models.CharField(max_length=200, null=True, verbose_name='Version Number')
-    icon = models.CharField(max_length=200, null=True)
-    website = models.URLField(max_length=400, null=True)
+    version = models.CharField(max_length=200, null=True, blank=True, verbose_name='Version Number')
+    icon = models.CharField(max_length=200, null=True, blank=True,)
+    website = models.URLField(max_length=400, null=True, blank=True)
+    website_found = models.URLField(max_length=400, null=True, blank=True)
     created = models.DateTimeField(null=False, editable=False, default=now)
 
 # Register for automatic logging to database

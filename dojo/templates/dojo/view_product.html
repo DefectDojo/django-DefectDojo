@@ -416,7 +416,7 @@
                             {% for app in app_analysis %}
                             <li>
                                 <span class="color-block language-color" style="background-color:{% random_html %}"></span>
-                            <strong><a href="{{ app.website }}" location="#" alt="{{ app.name }}, Confidence: {{ app.confidence }}">{{ app.name }}</a></strong>
+                            <strong><a href="{{ app.website }}"  target="_blank" alt="{{ app.name }}, Confidence: {{ app.confidence }}">{{ app.name }}</a></strong>
                             {{ app.version|version_num }}
                             </li>
                         </span>
