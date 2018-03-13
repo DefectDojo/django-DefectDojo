@@ -153,6 +153,11 @@
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
+- name: install django-overextends
+  pip: name=django-overextends virtualenv={{ venv_dir }}
+  sudo: yes
+  sudo_user: '{{ dd_user }}'
+
 - name: Run Django 'makemigrations dojo' command
   django_manage: command='makemigrations dojo' app_path={{ dd_install_dir }} virtualenv={{ venv_dir }}
   sudo: yes
