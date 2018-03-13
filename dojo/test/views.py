@@ -8,6 +8,7 @@ from datetime import datetime
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
+from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import HttpResponseRedirect, HttpResponseForbidden, Http404, HttpResponse
@@ -29,9 +30,13 @@ from dojo.tasks import add_issue_task
 logger = logging.getLogger(__name__)
 
 
-@user_passes_test(lambda u: u.is_staff)
 def view_test(request, tid):
     test = Test.objects.get(id=tid)
+    prod = test.engagement.product
+    auth = request.user.is_staff or request.user in prod.authorized_users.all()
+    if not auth:
+        # will render 403
+        raise PermissionDenied
     notes = test.notes.all()
     person = request.user.username
     findings = Finding.objects.filter(test=test)
@@ -39,7 +44,7 @@ def view_test(request, tid):
     cred_test = Cred_Mapping.objects.filter(test=test).select_related('cred_id').order_by('cred_id')
     creds = Cred_Mapping.objects.filter(engagement=test.engagement).select_related('cred_id').order_by('cred_id')
 
-    if request.method == 'POST':
+    if request.method == 'POST' and request.user.is_staff:
         form = NoteForm(request.POST)
         if form.is_valid():
             new_note = form.save(commit=False)

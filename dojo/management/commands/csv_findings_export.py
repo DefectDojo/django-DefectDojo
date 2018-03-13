@@ -1,18 +1,10 @@
-from django.contrib.contenttypes.models import ContentType
+import csv
 
 from django.core.management.base import BaseCommand
 from pytz import timezone
-from requests.auth import HTTPBasicAuth
-import csv
-from dojo.models import Finding, JIRA_PKey, JIRA_Issue, Product, Engagement, Alerts
-import dojo.settings as settings
-from datetime import datetime
-from auditlog.models import LogEntry
-from jira import JIRA
-from jira.exceptions import JIRAError
-from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, close_epic, get_system_setting
-from django.core.urlresolvers import get_resolver, reverse
-from itertools import chain
+
+from dojo.models import Finding
+from dojo.utils import get_system_setting
 
 locale = timezone(get_system_setting('time_zone'))
 
@@ -31,7 +23,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         file_path = options['file_path']
 
-        findings = Finding.objects.filter(verified=True, active=True).select_related("test__engagement__product")
+        findings = Finding.objects.filter(verified=True,
+                                          active=True).select_related(
+            "test__engagement__product")
         opts = findings.model._meta
         model = findings.model
 
@@ -46,8 +40,8 @@ class Command(BaseCommand):
         headers.append("date")
         headers.append("url")
         headers.append("severity")
-        
-        #for field in opts.fields:
+
+        # for field in opts.fields:
         #    headers.append(field.name)
 
         writer.writerow(headers)
