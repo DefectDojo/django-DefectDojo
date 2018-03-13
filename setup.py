@@ -16,6 +16,7 @@ setup(
         'django-filter==1.0.4',
         'django-imagekit',
         'django-multiselectfield',
+        'django-overextends==0.4.3',  # Required for extensions
         'django-polymorphic==1.2',
         'django-slack',
         'django-tagging',
