@@ -374,6 +374,58 @@
                             {% endif %}
                         </td>
                     </tr>
+                    {% if languages %}
+                    <tr>
+                        <td colspan="5" align="left">
+                            <div class="product-detailed-info">
+                              <ol class="product-detailed-info-numbers">
+                                  <li>
+                                      <strong>Code Composition</strong>
+                                  </li>
+                                  <li>
+                                      <span class="color-block language-color" style="background-color:#4b0ba0"></span>
+                                  <strong>Total Files</strong>
+                                  {{ langSummary.files__sum|intcomma }}
+                                  </li>
+                                  <li>
+                                      <span class="color-block language-color" style="background-color:#21aec6"></span>
+                                  <strong>Lines of Code</strong>
+                                  {{ langSummary.code__sum|intcomma }}
+                                  </li>
+                            {% for lang in languages %}
+                            <li>
+                                <span class="color-block language-color" style="background-color:{{ lang.language.color }}"></span>
+                            <strong>{{ lang.language.language }}</strong>
+                            {{ lang.files|percentage:langSummary.files__sum }}
+                            </li>
+                        </span>
+                        {% endfor %}
+                        </ol>
+                      </div>
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% if app_analysis %}
+                    <tr>
+                        <td colspan="5" align="left">
+                            <div class="product-detailed-info">
+                              <ol class="product-detailed-info-numbers">
+                                  <li>
+                                      <strong>Technologies</strong>
+                                  </li>
+                            {% for app in app_analysis %}
+                            <li>
+                                <span class="color-block language-color" style="background-color:{% random_html %}"></span>
+                            <strong><a href="{{ app.website }}"  target="_blank" alt="{{ app.name }}, Confidence: {{ app.confidence }}">{{ app.name }}</a></strong>
+                            {{ app.version|version_num }}
+                            </li>
+                        </span>
+                        {% endfor %}
+                        </ol>
+                      </div>
+                        </td>
+                    </tr>
+                    {% endif %}
                 </table>
 
             </div>
@@ -423,7 +475,8 @@
                 </div>
             </div>
         </div>
-        {% if user.is_staff %}
+        {% if user.is_staff or authorized %}
+
             <div class="col-md-12">
                 <div class="panel panel-default table-responsive">
                     <div class="panel-heading">
@@ -472,7 +525,7 @@
             </div>
         {% endif %}
 
-        {% if authorized %}
+        {% if False %}
             <div class="col-md-12">
                 <div class="panel panel-default table-responsive">
                     <div class="panel-heading">

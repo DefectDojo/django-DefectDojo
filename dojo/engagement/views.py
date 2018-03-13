@@ -194,11 +194,16 @@ def delete_engagement(request, eid):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
 def view_engagement(request, eid):
     eng = Engagement.objects.get(id=eid)
     tests = Test.objects.filter(engagement=eng)
+    prod = eng.product
+    auth = request.user.is_staff or request.user in prod.authorized_users.all()
     risks_accepted = eng.risk_acceptance.all()
+    if not auth:
+        # will render 403
+        raise PermissionDenied
+
     try:
         jissue = JIRA_Issue.objects.get(engagement=eng)
     except:
@@ -220,7 +225,7 @@ def view_engagement(request, eid):
         check = None
         pass
     form = DoneForm()
-    if request.method == 'POST':
+    if request.method == 'POST' and request.user.is_staff:
         eng.progress = 'check_list'
         eng.save()
 

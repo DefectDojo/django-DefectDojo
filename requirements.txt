@@ -6,7 +6,7 @@ chardet==3.0.4
 defusedxml==0.5.0
 Django==1.11.11
 django-appconf==1.0.2
-django-auditlog==0.3.3
+django-auditlog==0.4.5
 django-custom-field==2.9
 django-filter==1.0.4
 django-imagekit==4.0.2

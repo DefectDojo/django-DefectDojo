@@ -3,17 +3,17 @@ import collections
 from datetime import timedelta, datetime
 
 from auditlog.models import LogEntry
-from dojo.models import Dojo_User, Product_Type, Finding, \
-    Product, Test_Type, Endpoint, Development_Environment, Finding_Template, Report
 from django import forms
-from django.conf import settings
 from django.contrib.auth.models import User
 from django.utils import six
 from django.utils.translation import ugettext_lazy as _
-from django_filters import FilterSet, CharFilter, OrderingFilter, ModelMultipleChoiceFilter, ModelChoiceFilter, \
-    MultipleChoiceFilter
+from django_filters import FilterSet, CharFilter, OrderingFilter, \
+    ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter
 from django_filters.filters import ChoiceFilter, _truncate, DateTimeFilter
 from pytz import timezone
+
+from dojo.models import Dojo_User, Product_Type, Finding, Product, Test_Type, \
+    Endpoint, Development_Environment, Finding_Template, Report
 from dojo.utils import get_system_setting
 
 local_tz = timezone(get_system_setting('time_zone'))
@@ -184,7 +184,8 @@ class MetricsDateRangeFilter(ChoiceFilter):
             return qs.all()
 
     def current_month(self, qs, name):
-        self.start_date = local_tz.localize(datetime(now().year, now().month, 1, 0, 0, 0))
+        self.start_date = local_tz.localize(
+            datetime(now().year, now().month, 1, 0, 0, 0))
         self.end_date = now()
         return qs.filter(**{
             '%s__year' % name: self.start_date.year,
@@ -192,7 +193,8 @@ class MetricsDateRangeFilter(ChoiceFilter):
         })
 
     def current_year(self, qs, name):
-        self.start_date = local_tz.localize(datetime(now().year, 1, 1, 0, 0, 0))
+        self.start_date = local_tz.localize(
+            datetime(now().year, 1, 1, 0, 0, 0))
         self.end_date = now()
         return qs.filter(**{
             '%s__year' % name: now().year,
@@ -308,7 +310,8 @@ class ProductFilter(DojoFilter):
         super(ProductFilter, self).__init__(*args, **kwargs)
 
         if self.user is not None and not self.user.is_staff:
-            self.form.fields['prod_type'].queryset = Product_Type.objects.filter(
+            self.form.fields[
+                'prod_type'].queryset = Product_Type.objects.filter(
                 prod_type__authorized_users__in=[self.user])
 
     class Meta:
@@ -340,7 +343,8 @@ class OpenFindingFilter(DojoFilter):
             ('date', 'date'),
             ('last_reviewed', 'last_reviewed'),
             ('title', 'title'),
-            ('test__engagement__product__name', 'test__engagement__product__name'),
+            ('test__engagement__product__name',
+             'test__engagement__product__name'),
         ),
 
     )
@@ -370,7 +374,8 @@ class OpenFindingFilter(DojoFilter):
                     if finding.severity not in sevs)
         self.form.fields['severity'].choices = sevs.items()
         if self.user is not None and not self.user.is_staff:
-            self.form.fields['test__engagement__product'].queryset = Product.objects.filter(
+            self.form.fields[
+                'test__engagement__product'].queryset = Product.objects.filter(
                 authorized_users__in=[self.user])
             self.form.fields['endpoints'].queryset = Endpoint.objects.filter(
                 product__authorized_users__in=[self.user]).distinct()
@@ -409,7 +414,8 @@ class ClosedFindingFilter(DojoFilter):
             ('date', 'date'),
             ('mitigated', 'mitigated'),
             ('title', 'title'),
-            ('test__engagement__product__name', 'test__engagement__product__name'),
+            ('test__engagement__product__name',
+             'test__engagement__product__name'),
         ),
         field_labels={
             'numerical_severity': 'Severity',
@@ -427,7 +433,8 @@ class ClosedFindingFilter(DojoFilter):
                    'endpoint', 'references', 'test', 'is_template',
                    'active', 'verified', 'out_of_scope', 'false_p',
                    'duplicate', 'thread_id', 'date', 'notes',
-                   'numerical_severity', 'reporter', 'endpoints', 'last_reviewed']
+                   'numerical_severity', 'reporter', 'endpoints',
+                   'last_reviewed']
 
     def __init__(self, *args, **kwargs):
         super(ClosedFindingFilter, self).__init__(*args, **kwargs)
@@ -474,9 +481,11 @@ class AcceptedFindingFilter(DojoFilter):
         fields=(
             ('numerical_severity', 'numerical_severity'),
             ('date', 'date'),
-            ('test__engagement__risk_acceptance__created', 'test__engagement__risk_acceptance__created'),
+            ('test__engagement__risk_acceptance__created',
+             'test__engagement__risk_acceptance__created'),
             ('title', 'title'),
-            ('test__engagement__product__name', 'test__engagement__product__name'),
+            ('test__engagement__product__name',
+             'test__engagement__product__name'),
         ),
         field_labels={
             'numerical_severity': 'Severity',
@@ -495,7 +504,8 @@ class AcceptedFindingFilter(DojoFilter):
                    'endpoint', 'references', 'test', 'is_template',
                    'active', 'verified', 'out_of_scope', 'false_p',
                    'duplicate', 'thread_id', 'mitigated', 'notes',
-                   'numerical_severity', 'reporter', 'endpoints', 'last_reviewed', 'o']
+                   'numerical_severity', 'reporter', 'endpoints',
+                   'last_reviewed', 'o']
 
     def __init__(self, *args, **kwargs):
         super(AcceptedFindingFilter, self).__init__(*args, **kwargs)
@@ -536,9 +546,11 @@ class ProductFindingFilter(DojoFilter):
         fields=(
             ('numerical_severity', 'numerical_severity'),
             ('date', 'date'),
-            ('test__engagement__risk_acceptance__created', 'test__engagement__risk_acceptance__created'),
+            ('test__engagement__risk_acceptance__created',
+             'test__engagement__risk_acceptance__created'),
             ('title', 'title'),
-            ('test__engagement__product__name', 'test__engagement__product__name'),
+            ('test__engagement__product__name',
+             'test__engagement__product__name'),
         ),
         field_labels={
             'numerical_severity': 'Severity',
@@ -556,7 +568,8 @@ class ProductFindingFilter(DojoFilter):
                    'endpoint', 'references', 'test', 'is_template',
                    'active', 'verified', 'out_of_scope', 'false_p',
                    'duplicate', 'thread_id', 'mitigated', 'notes',
-                   'numerical_severity', 'reporter', 'endpoints', 'last_reviewed']
+                   'numerical_severity', 'reporter', 'endpoints',
+                   'last_reviewed']
 
     def __init__(self, *args, **kwargs):
         super(ProductFindingFilter, self).__init__(*args, **kwargs)
@@ -675,7 +688,8 @@ class MetricsFindingFilter(FilterSet):
 
     def __init__(self, *args, **kwargs):
         super(MetricsFindingFilter, self).__init__(*args, **kwargs)
-        self.form.fields['severity'].choices = self.queryset.order_by('numerical_severity') \
+        self.form.fields['severity'].choices = self.queryset.order_by(
+            'numerical_severity') \
             .values_list('severity', 'severity').distinct()
 
     class Meta:
@@ -750,7 +764,8 @@ class ReportFindingFilter(DojoFilter):
     mitigated = MitigatedDateRangeFilter()
     verified = ReportBooleanFilter()
     false_p = ReportBooleanFilter(label="False Positive")
-    test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(label="Risk Accepted")
+    test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(
+        label="Risk Accepted")
     duplicate = ReportBooleanFilter()
     out_of_scope = ReportBooleanFilter()
 
@@ -764,15 +779,18 @@ class ReportFindingFilter(DojoFilter):
 
 class ReportAuthedFindingFilter(DojoFilter):
     title = CharFilter(lookup_expr='icontains', label='Name')
-    test__engagement__product = ModelMultipleChoiceFilter(queryset=Product.objects.all(), label="Product")
-    test__engagement__product__prod_type = ModelMultipleChoiceFilter(queryset=Product_Type.objects.all(),
-                                                                     label="Product Type")
+    test__engagement__product = ModelMultipleChoiceFilter(
+        queryset=Product.objects.all(), label="Product")
+    test__engagement__product__prod_type = ModelMultipleChoiceFilter(
+        queryset=Product_Type.objects.all(),
+        label="Product Type")
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     active = ReportBooleanFilter()
     mitigated = MitigatedDateRangeFilter()
     verified = ReportBooleanFilter()
     false_p = ReportBooleanFilter(label="False Positive")
-    test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(label="Risk Accepted")
+    test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(
+        label="Risk Accepted")
     duplicate = ReportBooleanFilter()
     out_of_scope = ReportBooleanFilter()
 
@@ -782,7 +800,8 @@ class ReportAuthedFindingFilter(DojoFilter):
             self.user = kwargs.pop('user')
         super(ReportAuthedFindingFilter, self).__init__(*args, **kwargs)
         if not self.user.is_staff:
-            self.form.fields['test__engagement__product'].queryset = Product.objects.filter(
+            self.form.fields[
+                'test__engagement__product'].queryset = Product.objects.filter(
                 authorized_users__in=[self.user])
 
     @property
@@ -791,7 +810,8 @@ class ReportAuthedFindingFilter(DojoFilter):
         if self.user.is_staff:
             return parent
         else:
-            return parent.filter(test__engagement__product__authorized_users__in=[self.user])
+            return parent.filter(
+                test__engagement__product__authorized_users__in=[self.user])
 
     class Meta:
         model = Finding
@@ -828,8 +848,10 @@ class UserFilter(DojoFilter):
 
     class Meta:
         model = Dojo_User
-        fields = ['is_staff', 'is_superuser', 'is_active', 'first_name', 'last_name', 'username']
-        exclude = ['password', 'last_login', 'groups', 'user_permissions', 'date_joined']
+        fields = ['is_staff', 'is_superuser', 'is_active', 'first_name',
+                  'last_name', 'username']
+        exclude = ['password', 'last_login', 'groups', 'user_permissions',
+                   'date_joined']
 
 
 class ReportFilter(DojoFilter):
@@ -862,13 +884,16 @@ class ReportFilter(DojoFilter):
     def __init__(self, *args, **kwargs):
         super(ReportFilter, self).__init__(*args, **kwargs)
         type = dict()
-        type = dict([report.type, report.type] for report in self.queryset.distinct() if report.type is not None)
+        type = dict(
+            [report.type, report.type] for report in self.queryset.distinct()
+            if report.type is not None)
         type = collections.OrderedDict(sorted(type.items()))
         self.form.fields['type'].choices = type.items()
 
         status = dict()
         status = dict(
-            [report.status, report.status] for report in self.queryset.distinct() if report.status is not None)
+            [report.status, report.status] for report in
+            self.queryset.distinct() if report.status is not None)
         status = collections.OrderedDict(sorted(status.items()))
         self.form.fields['status'].choices = status.items()
 
@@ -896,8 +921,10 @@ class EngineerFilter(DojoFilter):
 
     class Meta:
         model = Dojo_User
-        fields = ['is_staff', 'is_superuser', 'is_active', 'username', 'email', 'last_name', 'first_name']
-        exclude = ['password', 'last_login', 'groups', 'user_permissions', 'date_joined']
+        fields = ['is_staff', 'is_superuser', 'is_active', 'username', 'email',
+                  'last_name', 'first_name']
+        exclude = ['password', 'last_login', 'groups', 'user_permissions',
+                   'date_joined']
 
 
 class LogEntryFilter(DojoFilter):
@@ -909,7 +936,8 @@ class LogEntryFilter(DojoFilter):
 
     class Meta:
         model = LogEntry
-        exclude = ['content_type', 'object_pk', 'object_id', 'object_repr', 'changes', 'additional_data']
+        exclude = ['content_type', 'object_pk', 'object_id', 'object_repr',
+                   'changes', 'additional_data']
 
 
 class ProductTypeFilter(DojoFilter):

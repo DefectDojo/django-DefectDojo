@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 def home(request):
     if request.user.is_authenticated() and request.user.is_staff:
         return HttpResponseRedirect(reverse('dashboard'))
-    return HttpResponseRedirect(reverse('metrics'))
+    return HttpResponseRedirect(reverse('product'))
 
 
 @user_passes_test(lambda u: u.is_staff)

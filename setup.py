@@ -22,7 +22,7 @@ setup(
         'django-filter==1.0.4',
         'supervisor',
         'humanize',
-        'django-auditlog==0.3.3',
+        'django-auditlog',
         'vobject',
         'html2text',
         'django-watson==1.3.1',
