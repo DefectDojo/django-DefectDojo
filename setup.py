@@ -11,7 +11,7 @@ setup(
         'celery>=4.1',
         'defusedxml',
         'Django==1.11.11',
-        'django-auditlog==0.3.3',
+        'django-auditlog',
         'django-custom-field',
         'django-filter==1.0.4',
         'django-imagekit',

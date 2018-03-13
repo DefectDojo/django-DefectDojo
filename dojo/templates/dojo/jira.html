@@ -38,6 +38,7 @@
                         <tr>
                             <th>URL</th>
                             <th> Username</th>
+                            <th></th>
                         </tr>
                         </thead>
                         <tbody>
@@ -48,6 +49,11 @@
                                 </td>
                                 <td>
                                         {{ conf.username }}
+                                </td>
+                                <td>
+                                    <a class="text-danger" href="{% url 'delete_jira' conf.id %}" >
+                                    <i class="fa fa-trash"></i> Delete
+                                    </a>
                                 </td>
                             </tr>
                         {% endfor %}

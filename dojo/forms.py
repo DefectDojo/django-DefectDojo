@@ -20,7 +20,7 @@ from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
     JIRA_Issue, JIRA_PKey, JIRA_Conf, UserContactInfo, Tool_Type, Tool_Configuration, Tool_Product_Settings, \
-    Cred_User, Cred_Mapping, System_Settings, Notifications
+    Cred_User, Cred_Mapping, System_Settings, Notifications, Languages, Language_Type, App_Analysis
 from dojo.utils import get_system_setting
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
@@ -1295,9 +1295,33 @@ class JIRA_PKeyForm(forms.ModelForm):
         model = JIRA_PKey
         exclude = ['product']
 
+class DeleteJIRAConfForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = JIRA_Conf
+        fields = ('id',)
+
+
 class ToolTypeForm(forms.ModelForm):
     class Meta:
         model = Tool_Type
+        exclude = ['product']
+
+class LanguagesTypeForm(forms.ModelForm):
+    class Meta:
+        model = Languages
+        exclude = ['product']
+
+class Languages_TypeTypeForm(forms.ModelForm):
+    class Meta:
+        model = Language_Type
+        exclude = ['product']
+
+class App_AnalysisTypeForm(forms.ModelForm):
+    class Meta:
+        model = App_Analysis
         exclude = ['product']
 
 class ToolConfigForm(forms.ModelForm):
