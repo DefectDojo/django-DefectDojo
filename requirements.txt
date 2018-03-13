@@ -6,6 +6,7 @@ django-custom-field==2.9
 django-filter==1.0.4
 django-imagekit==4.0.2
 django-multiselectfield==0.1.8
+django-overextends==0.4.3  # Required for extensions
 django-polymorphic==1.2
 django-slack==5.11.1
 django-tagging==0.4.6
