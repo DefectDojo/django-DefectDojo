@@ -80,8 +80,7 @@ def view_product(request, pid):
 
     result = EngagementFilter(
         request.GET,
-        queryset=Engagement.objects.filter(test__engagement__product=prod,
-                                        active=False).order_by('-target_end'))
+        queryset=Engagement.objects.filter(product=prod, active=False).order_by('-target_end'))
 
     i_engs_page = get_page_items(request, result.qs, 10)
 
