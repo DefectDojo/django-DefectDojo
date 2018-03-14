@@ -90,7 +90,8 @@ class CheckmarxXMLParser(object):
                                    file_path = pathnode.find('FileName').text,
                                    line = pathnode.find('Line').text,
                                    url='N/A',
-                                   date=find_date)
+                                   date=find_date,
+                                   static_finding=True)
                     dupes[dupe_key] = find
                     findingdetail = ''
 
