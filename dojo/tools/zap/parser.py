@@ -11,7 +11,7 @@ import re
 import socket
 import urlparse
 from defusedxml import ElementTree as ET
-
+from django.utils.html import strip_tags
 from dojo.models import Finding, Endpoint
 
 
@@ -67,10 +67,10 @@ class ZapXmlParser(object):
 
                 find = Finding(title=item.name,
                                cwe=item.cwe,
-                               description=item.desc,
+                               description=strip_tags(item.desc),
                                test=test,
                                severity=severity,
-                               mitigation=item.resolution,
+                               mitigation=strip_tags(item.resolution),
                                references=references,
                                active=False,
                                verified=False,
@@ -174,7 +174,7 @@ class Item(object):
         self.riskdesc = self.get_text_from_subnode('riskdesc')
         self.desc = self.get_text_from_subnode('desc')
         self.resolution = self.get_text_from_subnode('solution') if self.get_text_from_subnode('solution') else ""
-        self.desc += "\nReference: " + self.get_text_from_subnode('reference') if self.get_text_from_subnode(
+        self.desc += "\n\nReference: " + self.get_text_from_subnode('reference') if self.get_text_from_subnode(
             'reference') else ""
         self.ref = []
         if self.get_text_from_subnode('cweid'):
@@ -182,7 +182,25 @@ class Item(object):
             self.cwe = self.get_text_from_subnode('cweid')
         else: self.cwe = 0
 
-            
+        description_detail = "\n"
+        for instance in item_node.findall('instances/instance'):
+            for node in instance.getiterator():
+                if node.tag == "uri":
+                    if node.text != "":
+                        description_detail += "URL: " + node.text
+                if node.tag == "method":
+                    if node.text != "":
+                        description_detail += "Method: " + node.text
+                if node.tag == "param":
+                    if node.text != "":
+                        description_detail += "Parameter: " + node.text
+                if node.tag == "evidence":
+                    if node.text != "":
+                        description_detail += "Evidence: " + node.text
+                description_detail += "\n"
+
+        self.desc += description_detail
+
         if self.get_text_from_subnode('wascid'):
             self.ref.append("WASC-" + self.get_text_from_subnode('wascid'))
 

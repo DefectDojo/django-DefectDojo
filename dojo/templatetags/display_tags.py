@@ -85,8 +85,8 @@ def percentage(fraction, value):
 @register.filter(name='version_num')
 def version_num(value):
     version = ""
-    if value is not None or value is not "":
-        version = "v. " + value
+    if value:
+        version = "v." + value
 
     return version
 

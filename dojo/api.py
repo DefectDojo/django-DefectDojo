@@ -436,6 +436,8 @@ class App_AnalysisResource(BaseModelResource):
     product = fields.ForeignKey(ProductResource, 'product',
                                 full=False, null=False)
 
+    user = fields.ForeignKey(UserResource, 'user', null=False)
+    
     class Meta:
         resource_name = 'app_analysis'
         list_allowed_methods = ['get', 'post', 'put', 'delete']
@@ -506,6 +508,8 @@ class LanguagesResource(BaseModelResource):
 
     language_type = fields.ForeignKey(LanguageTypeResource, 'language',
                                 full=False, null=False)
+
+    user = fields.ForeignKey(UserResource, 'user', null=False)
 
     class Meta:
         resource_name = 'languages'
