@@ -16,9 +16,9 @@ export CONTAINER_NAME=dojo
 docker build -t $REPO .
 
 # Launch one container per service
-container_id_worker=$(docker run -d --entrypoint=su $REPO - dojo -c "cd /opt/django-DefectDojo && celery -A dojo worker -l info -c 1 -P solo")
-container_id_beat=$(docker run -d --entrypoint=su $REPO - dojo -c "cd /opt/django-DefectDojo && celery beat -A dojo -l info")
-container_id_server=$(docker run -d --entrypoint=su $REPO - dojo -c "cd /opt/django-DefectDojo && python manage.py runserver 0.0.0.0:8000")
+container_id_worker=$(docker run -d --entrypoint=celery $REPO worker -A dojo -l info -c 1 -P solo)
+container_id_beat=$(docker run -d --entrypoint=celery $REPO beat -A dojo -l info)
+container_id_server=$(docker run -d --entrypoint=python $REPO manage.py runserver 0.0.0.0:8000)
 
 # Wait for the container to spin up and gie it some time to fail
 sleep 10
@@ -33,9 +33,7 @@ for container_id in $container_id_worker $container_id_beat $container_id_server
     else
         # Container did not come up, there must be a problem somewhere
         echo "Container did not come up; Trying to fetch the logs and cat them out"
-        mkdir ./smoke-logs/
-        docker cp $container_id:/opt/django-DefectDojo/*.log ./smoke-logs/
-        cat ./smoke-logs/*.log
+        docker logs $container_id
         ((EXIT_STATUS+=1))
     fi
     
