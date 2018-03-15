@@ -84,8 +84,7 @@ And the `python` packages are (listed in `setup.py` as well):
 
 * 'Django==1.8',
 * 'MySQL-python==1.2.3',
-* 'Pillow==2.3.0',
-* 'django-secure==1.0',
+* 'Pillow==5.0.0',
 * 'django-tastypie==0.12.1',
 * 'django-tastypie-swagger',
 * 'gunicorn==19.1.1',
