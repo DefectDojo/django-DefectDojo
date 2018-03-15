@@ -1338,6 +1338,30 @@ class Cred_Mapping(models.Model):
     def __unicode__(self):
         return self.cred_id.name + " (" + self.cred_id.role + ")"
 
+class Language_Type(models.Model):
+    language = models.CharField(max_length=100, null=False)
+    color = models.CharField(max_length=7, null=True, verbose_name='HTML color')
+
+class Languages(models.Model):
+    language = models.ForeignKey(Language_Type)
+    product = models.ForeignKey(Product)
+    user = models.ForeignKey(User, editable=True)
+    files = models.IntegerField(blank=True, null=True, verbose_name='Number of files')
+    blank = models.IntegerField(blank=True, null=True, verbose_name='Number of blank lines')
+    comment = models.IntegerField(blank=True, null=True, verbose_name='Number of comment lines')
+    code = models.IntegerField(blank=True, null=True, verbose_name='Number of code lines')
+    created = models.DateTimeField(null=False, editable=False, default=now)
+
+class App_Analysis(models.Model):
+    product = models.ForeignKey(Product)
+    name = models.CharField(max_length=200, null=False)
+    user = models.ForeignKey(User, editable=True)
+    confidence = models.IntegerField(blank=True, null=True, verbose_name='Confidence level')
+    version = models.CharField(max_length=200, null=True, blank=True, verbose_name='Version Number')
+    icon = models.CharField(max_length=200, null=True, blank=True,)
+    website = models.URLField(max_length=400, null=True, blank=True)
+    website_found = models.URLField(max_length=400, null=True, blank=True)
+    created = models.DateTimeField(null=False, editable=False, default=now)
 
 # Register for automatic logging to database
 auditlog.register(Dojo_User)
@@ -1357,7 +1381,11 @@ tag_register(Finding)
 tag_register(Engagement)
 tag_register(Endpoint)
 tag_register(Finding_Template)
+tag_register(App_Analysis)
 
+admin.site.register(Languages)
+admin.site.register(Language_Type)
+admin.site.register(App_Analysis)
 admin.site.register(Test)
 admin.site.register(Finding)
 admin.site.register(FindingImage)
