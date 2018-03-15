@@ -148,6 +148,11 @@ def view_endpoint(request, eid):
 
     paged_findings = get_page_items(request, active_findings, 25)
 
+    vulnerable = False
+
+    if active_findings.count() != 0:
+        vulnerable = True
+
     add_breadcrumb(parent=endpoint, top_level=False, request=request)
     return render(request,
                   "dojo/view_endpoint.html",
@@ -157,6 +162,7 @@ def view_endpoint(request, eid):
                    'all_findings': all_findings,
                    'opened_per_month': monthly_counts['opened_per_period'],
                    'endpoint_metadata': endpoint_metadata,
+                   'vulnerable': vulnerable,
                    })
 
 

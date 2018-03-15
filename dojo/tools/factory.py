@@ -5,6 +5,7 @@ from dojo.tools.nexpose.parser import NexposeFullXmlParser
 from dojo.tools.veracode.parser import VeracodeXMLParser
 from dojo.tools.zap.parser import ZapXmlParser
 from dojo.tools.checkmarx.parser import CheckmarxXMLParser
+from dojo.tools.bandit.parser import BanditParser
 from dojo.tools.appspider.parser import AppSpiderXMLParser
 from dojo.tools.arachni.parser import ArachniJSONParser
 from dojo.tools.vcg.parser import VCGParser
@@ -17,6 +18,7 @@ from dojo.tools.qualyswebapp.parser import QualysWebAppParser
 from dojo.tools.snyk.parser import SnykParser
 from dojo.tools.openvas_csv.parser import OpenVASUploadCsvParser
 from dojo.tools.skf.parser import SKFCsvParser
+from dojo.tools.ssllabs.parser import SSLlabsParser
 
 __author__ = 'Jay Paz'
 
@@ -41,6 +43,8 @@ def import_parser_factory(file, test):
         parser = VeracodeXMLParser(file, test)
     elif scan_type == "Checkmarx Scan":
         parser = CheckmarxXMLParser(file, test)
+    elif scan_type == "Bandit Scan":
+        parser = BanditParser(file, test)
     elif scan_type == "ZAP Scan":
         parser = ZapXmlParser(file, test)
     elif scan_type == "AppSpider Scan":
@@ -67,6 +71,8 @@ def import_parser_factory(file, test):
         parser = SnykParser(file, test)
     elif scan_type == 'SKF Scan':
         parser = SKFCsvParser(file, test)
+    elif scan_type == 'SSL Labs Scan':
+        parser = SSLlabsParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 
