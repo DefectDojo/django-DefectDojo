@@ -56,7 +56,7 @@ setup(
         'psycopg2',
         'django-multiselectfield',
         'pbr',
-	'django-slack'],
+	'django-slack',
     ],
 
     dependency_links=[
