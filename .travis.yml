@@ -32,7 +32,7 @@ script:
     case "$TEST" in
       smoke-test)
         travis_fold start "smoke-test"
-        bash ./scripts/travis-smoke-test.sh || exit 1
+        bash entrypoint_scripts/test/travis-smoke-test.sh || exit 1
         travis_fold end "smoke-test"
         ;;
       unit-test)
