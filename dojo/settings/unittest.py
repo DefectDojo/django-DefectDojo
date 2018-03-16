@@ -2,7 +2,7 @@
 # first;
 # Do so by copying the file dojo/settings/settings_dist.py to
 # dojo/settings/settings.py; Otherwise, the following import will not work
-from dojo.settings_dist import *
+from dojo.settings.settings_dist import *
 
 DEBUG = True
 
