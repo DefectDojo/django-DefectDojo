@@ -159,7 +159,7 @@ For you this means the following, depending on how you've used DefectDojo until 
   **makemigrations** at every new release it's going to be a bit harder.
   In this case, you probably have a couple of migration files under ``dojo/migrations/`` already.
 
-Follow these steps to reach a consistent state again (**Disclaimer**: no warranty for the correctness of these steps! ALWAYS back up your DB before running this kind of operations!)::
+Follow these steps to reach a consistent state again (**Disclaimer**: no warranty for the correctness of these steps! ALWAYS back up your DB before running this kind of operations!):
 
 #. Back up your migration files (at ``dojo/migrations/``) **before** merging the remote git branch
 #. Move the ``0001_initial.py`` migration file that came with the merge to a safe place (you'll need it again later)
