@@ -339,6 +339,7 @@
                                 <th>End Date</th>
 				<th>Lead</th>
                                 <th>Findings</th>
+                                <th>Duplicate Findings</th>
                                 <th>Notes</th>
                                 <th>Actions</th>
                             </tr>
@@ -357,8 +358,9 @@
                                     </td>
                                     <td>{{ test.target_start.date }}</td>
                                     <td>{{ test.target_end.date }}</td>
-				    <td>{{ test.lead }}</td>
-                                    <td>{{ test.finding_set.all|length }}</td>
+				                    <td>{{ test.lead }}</td>
+                                    <td>{{ test.finding_set.all|finding_status:False|length }}</td>
+                                    <td>{{ test.finding_set.all|finding_status:True|length }}</td>
                                     <td>{{ test.notes.all|length }}</td>
                                     <td>
                                         <div class="btn-group">

@@ -437,7 +437,7 @@ class App_AnalysisResource(BaseModelResource):
                                 full=False, null=False)
 
     user = fields.ForeignKey(UserResource, 'user', null=False)
-    
+
     class Meta:
         resource_name = 'app_analysis'
         list_allowed_methods = ['get', 'post', 'put', 'delete']
@@ -748,8 +748,8 @@ class JIRA_ConfResource(BaseModelResource):
 class JiraResource(BaseModelResource):
     product = fields.ForeignKey(ProductResource, 'product',
                                 full=False, null=False)
-    conf = fields.ForeignKey(JIRA_ConfResource, 'JIRA_Conf',
-                                full=False, null=False)
+    conf = fields.ForeignKey(JIRA_ConfResource, 'conf',
+                                full=False, null=True)
     class Meta:
         resource_name = 'jira_product_configurations'
         list_allowed_methods = ['get', 'post', 'put', 'delete']
