@@ -1245,6 +1245,22 @@ class App_Analysis(models.Model):
     website_found = models.URLField(max_length=400, null=True, blank=True)
     created = models.DateTimeField(null=False, editable=False, default=now)
 
+class Objects_Review(models.Model):
+    name = models.CharField(max_length=100, null=True)
+    created = models.DateTimeField(null=False, editable=False, default=now)
+
+class Objects(models.Model):
+    engagement = models.ForeignKey(Engagement)
+    name = models.CharField(max_length=100, null=True)
+    path = models.CharField(max_length=600, null=False)
+    review_status = models.ForeignKey(Objects_Review)
+    created = models.DateTimeField(null=False, editable=False, default=now)
+
+class Objects_Engagement(models.Model):
+    engagement = models.ForeignKey(Engagement)
+    object = models.ForeignKey(Objects)
+    created = models.DateTimeField(null=False, editable=False, default=now)
+
 # Register for automatic logging to database
 auditlog.register(Dojo_User)
 auditlog.register(Endpoint)
@@ -1264,7 +1280,11 @@ tag_register(Engagement)
 tag_register(Endpoint)
 tag_register(Finding_Template)
 tag_register(App_Analysis)
+tag_register(Objects)
 
+admin.site.register(Objects)
+admin.site.register(Objects_Review)
+admin.site.register(Objects_Engagement)
 admin.site.register(Languages)
 admin.site.register(Language_Type)
 admin.site.register(App_Analysis)
