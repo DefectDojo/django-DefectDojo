@@ -43,6 +43,7 @@ script:
         # newly created migration file(s) a meaningful name.
         DJANGO_SETTINGS_MODULE=dojo.settings.unittest python manage.py makemigrations --check dojo
         travis_fold end "migration-test"
+        ;;
       smoke-test)
         travis_fold start "smoke-test"
         bash ./scripts/travis-smoke-test.sh || exit 1
