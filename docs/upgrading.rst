@@ -8,8 +8,6 @@ directory named `defect-dojo` you can complete the following steps to upgrade to
     git checkout master
     git pull
     pip install .
-    ./manage.py makemigrations dojo
-    ./manage.py makemigrations
     ./manage.py migrate
 
 Because yarn assets change from time to time, it is always a good idea to re-install them and collect the static
@@ -73,7 +71,6 @@ If you are upgrading an existing installation of DefectDojo, you will need to ru
     pip install django-polymorphic --upgrade
     pip install django --upgrade
     pip install pillow --upgrade
-    ./manage.py makemigrations
     ./manage.py migrate
 
 The following must be removed/commented out from settings.py: ::
@@ -126,7 +123,7 @@ If you like you can then remove the following settings from settings.py to avoid
 * ``TEAM_NAME``
 
 Upgrading to DefectDojo Version 1.2.2
-------------------------------------
+-------------------------------------
 
 Upgrading to 1.2.2 requires:
 
@@ -134,8 +131,8 @@ Upgrading to 1.2.2 requires:
 
 2. If you have supervisor scripts change DJANGO_SETTINGS_MODULE=dojo.settings.settings
 
-Upgrading to DefectDojo Version 1.2.2
-------------------------------------
+Upgrading to DefectDojo Version 1.2.3
+-------------------------------------
 
 Upgrading to 1.2.3 requires:
 
@@ -144,3 +141,21 @@ Upgrading to 1.2.3 requires:
     ./manage.py loaddata dojo/fixtures/language_type.json
 
 2. Currently languages and technologies can be updated via the API or in the admin section of Django.
+
+Upgrading to DefectDojo Version 1.3.0
+-------------------------------------
+
+In version 1.3.0, we've done an important change: we're now keeping migration files under version control.
+For you this means the following, depending on how you've used DefectDojo until now:
+
+    - If you've **cloned** the repo everytime a new release came out,
+    **built a Docker container** and ran Defect Dojo this way, you don't
+    need to do anything and you can continue as is.
+    Be aware, though, that if you want to persist your data, you can do so,
+    now with a DB running outside the Docker container.
+
+    - If you've **fetched and merged** the latest version at every new release
+    it's going to be a bit harder.
+    TODO: Describe how to upgrade properly: makemigrations --merge???
+
+

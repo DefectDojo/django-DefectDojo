@@ -32,7 +32,7 @@ There is a script in the main folder called ``setup.bash`` that will allow you t
 
 1. If you haven't already, run ``mysql_secure_install`` to set a password for your root MySQL user.
 
-2. Create a MySQL user with CREATE priviledges, or use root.
+2. Create a MySQL user with CREATE privileges, or use root.
 
 **Run the ``setup.bash`` script**
 This script will:
@@ -43,7 +43,7 @@ This script will:
 
 3. Install all python packages needed
 
-4. Either ``makemigrations`` and ``migrate`` or ``syncdb`` depending on Django version installed.
+4. Run all DB migrations using Django's ``migrate`` command.
 
 5. Provide you with the commands needed to complete the installation
 
@@ -82,16 +82,16 @@ It may take some time for all the `OS` and `python` packages to be installed. As
 
 And the `python` packages are (listed in `setup.py` as well):
 
-* 'Django==1.8',
-* 'MySQL-python==1.2.3',
-* 'Pillow==5.0.0',
-* 'django-tastypie==0.12.1',
+* 'Django',
+* 'MySQL-python',
+* 'Pillow',
+* 'django-tastypie',
 * 'django-tastypie-swagger',
-* 'gunicorn==19.1.1',
-* 'python-nmap==0.3.4',
-* 'pytz==2013.9',
-* 'requests==2.2.1',
-* 'wsgiref==0.1.2',
+* 'gunicorn',
+* 'python-nmap',
+* 'pytz',
+* 'requests',
+* 'wsgiref',
 * 'django-filter',
 * 'supervisor',
 * 'humanize'

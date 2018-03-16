@@ -268,8 +268,6 @@ Then run the following commands (make sure your virtual environment is activated
 
     pip install django-imagekit
     pip install pillow --upgrade
-    ./manage.py makemigrations dojo
-    ./manage.py makemigrations
     ./manage.py migrate
 
 New installations will already have finding images configured.
