@@ -173,4 +173,4 @@ Follow these steps to reach a consistent state again (**Disclaimer**: no warrant
 
 For future releases of DefectDojo, a simple ``python manage.py migrate`` will be sufficient to keep the DB schema up to date.
 
-For more information on Django's migration mechanism refer to [the Django documentation](https://docs.djangoproject.com/en/dev/topics/migrations/).
+For more information on Django's migration mechanism refer to `the Django documentation <https://docs.djangoproject.com/en/dev/topics/migrations/>`_.
