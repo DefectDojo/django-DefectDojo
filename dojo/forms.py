@@ -12,16 +12,13 @@ from django.forms.widgets import Widget, Select
 from django.utils.dates import MONTHS
 from django.utils.safestring import mark_safe
 from django.utils import timezone
-from tagging.forms import TagField
 from tagging.models import Tag
 
-from dojo import settings
 from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
     JIRA_Issue, JIRA_PKey, JIRA_Conf, UserContactInfo, Tool_Type, Tool_Configuration, Tool_Product_Settings, \
     Cred_User, Cred_Mapping, System_Settings, Notifications, Languages, Language_Type, App_Analysis
-from dojo.utils import get_system_setting
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
 
