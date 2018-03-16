@@ -198,7 +198,7 @@ if [ "$AUTO_DOCKER" == "yes" ]; then
     # locate to the install directory first
     cd /opt/django-DefectDojo/
 fi
-cp dojo/settings/settings.dist.py dojo/settings/settings.py
+cp dojo/settings/settings_dist.py dojo/settings/settings.py
 
 # Save MySQL details in settings file
 if [[ ! -z $BREW_CMD ]]; then

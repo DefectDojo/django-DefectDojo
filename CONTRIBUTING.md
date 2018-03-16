@@ -16,7 +16,7 @@ Here are a few things to keep in mind when making changes to DefectDojo.
 
 Please use [these test scripts](./tests) to test your changes. These are the exact scripts we run in our [Travis Build](https://travis-ci.org/OWASP/django-DefectDojo)
 
-For changes that require additional settings. settings.dist.py is the file you want to change. settings.py is populated by setup.bash from settings.dist.py
+For changes that require additional settings. settings_dist.py is the file you want to change. settings.py is populated by setup.bash from settings_dist.py
 
 ## Submitting Pull Requests
 
@@ -35,7 +35,7 @@ DefectDojo.
 
 0. Pull requests should be submitted to the 'master' branch.
 
-[dojo_settings]: /dojo/settings/settings.dist.py "DefectDojo settings file"
+[dojo_settings]: /dojo/settings/settings_dist.py "DefectDojo settings file"
 [setup_py]: /setup.py "Python setup script"
 [setup_bash]: /setup.bash "Bash setup script"
 [pep8]: https://www.python.org/dev/peps/pep-0008/ "PEP8"
