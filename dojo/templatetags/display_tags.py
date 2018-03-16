@@ -90,6 +90,10 @@ def version_num(value):
 
     return version
 
+@register.filter
+def finding_status(finding, duplicate):
+    return finding.filter(duplicate=duplicate)
+
 @register.simple_tag
 def random_html():
     r = lambda: random.randint(0,255)
