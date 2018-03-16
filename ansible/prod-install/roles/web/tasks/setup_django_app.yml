@@ -20,26 +20,6 @@
     virtualenv: "{{ virtualenv_path }}"
   when: db_type == "MySQL"
 
-- name: Run the Django makemigrations dojo
-  django_manage:
-    command: makemigrations dojo
-    app_path: "{{ app_path}}"
-    virtualenv: "{{ virtualenv_path }}"
-    settings: "{{ django_settings_file }}"
-  environment: "{{ django_environment }}"
-  when: run_django_syncdb is defined and run_django_syncdb
-  tags: django.syncdb
-
-- name: Run the Django makemigrations
-  django_manage:
-    command: makemigrations
-    app_path: "{{ app_path}}"
-    virtualenv: "{{ virtualenv_path }}"
-    settings: "{{ django_settings_file }}"
-  environment: "{{ django_environment }}"
-  when: run_django_syncdb is defined and run_django_syncdb
-  tags: django.syncdb
-
 - name: Run Django database migrations
   django_manage:
     command: migrate

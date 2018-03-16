@@ -158,16 +158,6 @@
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
-- name: Run Django 'makemigrations dojo' command
-  django_manage: command='makemigrations dojo' app_path={{ dd_install_dir }} virtualenv={{ venv_dir }}
-  sudo: yes
-  sudo_user: '{{ dd_user }}'
-
-- name: Run Django 'makemigrations' command
-  django_manage: command='makemigrations' app_path={{ dd_install_dir }} virtualenv={{ venv_dir }}
-  sudo: yes
-  sudo_user: '{{ dd_user }}'
-
 - name: Run Django 'migrate' command
   django_manage: command=migrate app_path={{ dd_install_dir }} virtualenv={{ venv_dir }}
   sudo: yes

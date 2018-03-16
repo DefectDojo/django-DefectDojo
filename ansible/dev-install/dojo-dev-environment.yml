@@ -205,27 +205,9 @@
     args:
       chdir: '{{ dojo_src}}'
 
-  - name: Django makemigrations dojo
-    django_manage:
-      command: makemigrations dojo
-      app_path: '{{ dojo_src }}'
-      virtualenv: '{{ install_path }}'
-
-  - name: Django makemigrations
-    django_manage:
-      command: makemigrations
-      app_path: '{{ dojo_src }}'
-      virtualenv: '{{ install_path }}'
-
   - name: Django migrate
     django_manage:
       command: migrate
-      app_path: '{{ dojo_src }}'
-      virtualenv: '{{ install_path }}'
-
-  - name: Django syncdb
-    django_manage:
-      command: makemigrations dojo
       app_path: '{{ dojo_src }}'
       virtualenv: '{{ install_path }}'
 

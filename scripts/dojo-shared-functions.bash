@@ -31,8 +31,6 @@ setupdb() {
   echo "=============================================================================="
   echo
   cd /django-DefectDojo/
-  python manage.py makemigrations dojo
-  python manage.py makemigrations
   python manage.py migrate
   python manage.py syncdb --noinput
   python manage.py loaddata product_type
