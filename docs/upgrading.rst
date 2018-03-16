@@ -149,27 +149,27 @@ Upgrading to DefectDojo Version 1.3.0
 In version 1.3.0, we've done an important change: we're now keeping migration files under version control.
 For you this means the following, depending on how you've used DefectDojo until now:
 
-- If you've **cloned** the repo everytime a new release came out,
+- **No persistent data to take over**: If you've **cloned** the repo everytime a new release came out,
   **built a Docker container** and ran Defect Dojo this way, you don't
   need to do anything and you can continue as is.
   Be aware, though, that if you want to persist your data, you can do so,
   now with a DB running outside the Docker container.
 
-- If you've **fetched and merged** the latest version and you have run
+- **Data needs to be migrated**: If you've **fetched and merged** the latest version and you have run
   **makemigrations** at every new release it's going to be a bit harder.
   In this case, you probably have a couple of migration files under ``dojo/migrations/`` already.
 
-Follow these steps to reach a consistent state again (**Disclaimer**: no warranty for the correctness of these steps! ALWAYS back up your DB before running this kind of operations!):
+  Follow these steps to reach a consistent state again (**Disclaimer**: no warranty for the correctness of these steps! ALWAYS back up your DB before running this kind of operations!):
 
-#. Back up your migration files (at ``dojo/migrations/``) **before** merging the remote git branch
-#. Move the ``0001_initial.py`` migration file that came with the merge to a safe place (you'll need it again later)
-#. Add your own migration files back to the ``dojo/migrations/`` folder
-#. Run ``python manage.py makemigrations dojo``, which probably creates a new migration file
-#. Run ``python manage.py migrate`` to apply all migrations
-#. Remove all your migration files from the folder ``dojo/migrations/`` and restore the ``0001_initial.py`` migration that you've backed up in the second step
-#. Remove migration information from the DB by running the raw SQL statement ``DELETE FROM django_migrations WHERE app = 'dojo'``
-#. Run ``python manage.py migrate --fake-initial``
-#. You're done! Your data now follows the DefectDojo migrations under version control.
+  #. Back up your migration files (at ``dojo/migrations/``) **before** merging the remote git branch
+  #. Move the ``0001_initial.py`` migration file that came with the merge to a safe place (you'll need it again later)
+  #. Add your own migration files back to the ``dojo/migrations/`` folder
+  #. Run ``python manage.py makemigrations dojo``, which probably creates a new migration file
+  #. Run ``python manage.py migrate`` to apply all migrations
+  #. Remove all your migration files from the folder ``dojo/migrations/`` and restore the ``0001_initial.py`` migration that you've backed up in the second step
+  #. Remove migration information from the DB by running the raw SQL statement ``DELETE FROM django_migrations WHERE app = 'dojo'``
+  #. Run ``python manage.py migrate --fake-initial``
+  #. You're done! Your data now follows the DefectDojo migrations under version control.
 
 For future releases of DefectDojo, a simple ``python manage.py migrate`` will be sufficient to keep the DB schema up to date.
 
