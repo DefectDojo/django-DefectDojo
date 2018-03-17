@@ -367,8 +367,13 @@ function install_app(){
     python -c 'import sys; print sys.real_prefix' 2>/dev/null
     VENV_ACTIVE=$?
 
-    sudo -H pip install -U pip
-    sudo -H pip install .
+    if [ "$VENV_ACTIVE" == "0" ]; then
+        pip install -U pip
+        pip install .
+    else
+        sudo -H pip install -U pip
+        sudo -H pip install .
+    fi
     python manage.py makemigrations dojo
     python manage.py makemigrations --merge --noinput
     python manage.py migrate
