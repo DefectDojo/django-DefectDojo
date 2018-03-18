@@ -46,7 +46,11 @@
 
                         {% for e in endpoints %}
                             <tr>
+                                {% if show_uri %}
+                                <td><a href="{% url 'view_endpoint' e.id %}">{{ e }}</a>
+                                {% else %}
                                 <td><a href="{% url 'view_endpoint' e.id %}">{{ e.host_no_port }}</a>
+                                {% endif %}
                                   {% if e.tags %}
                                       <sup>
                                           {% for tag in e.tags %}

@@ -104,6 +104,7 @@ class System_Settings(models.Model):
     time_zone = models.CharField(max_length=50,
                                  choices=[(tz, tz) for tz in all_timezones],
                                  default='UTC', blank=False)
+    display_endpoint_uri = models.BooleanField(default=False)
 
 
 def get_current_date():
