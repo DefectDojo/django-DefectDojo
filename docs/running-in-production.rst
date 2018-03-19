@@ -3,15 +3,27 @@ Running in Production
 
 This guide will walk you through how to setup DefectDojo for running in production using Ubuntu 16.04, nginx, and uwsgi.
 
-*Install, Setup, and Activate Virtualenv*
+**Install, Setup, and Activate Virtualenv**
+
+Assumes running as root or using sudo command for the below.
 
 .. code-block:: console
 
   pip install virtualenv
 
+  cd /opt
+  
   virtualenv dojo
+  
+  cd /opt/dojo
+  
+  git clone https://github.com/DefectDojo/django-DefectDojo.git
+  
+  useradd -m dojo
+  
+  chown -R dojo /opt/dojo
 
-  source dojo/bin/activate
+  source ./bin/activate
 
 **Install Dojo**
 
@@ -66,7 +78,7 @@ However, for a quick setup you can use the following to run both in the backgrou
 
   celery beat -A dojo -l info &
 
-*Start Uwsgi*
+**Start Uwsgi**
 
 From inside the django-DefectDojo/ directory execute:
 
@@ -79,6 +91,45 @@ It is recommended that you use an Upstart job or a @restart cron job to launch u
 .. code-block:: console
 
   uwsgi --socket :8001 --wsgi-file wsgi.py --workers 7 &
+
+**Making Defect Dojo start on boot**
+
+Below we configure service files for systemd.  The commands follow, the config files are below the Nginx in the next section.
+
+.. code-block:: console
+
+  cd /etc/systemd/system/
+  
+  vi dojo.service
+    [contents below]
+  
+  systemctl enable dojo
+  
+  systemctl start dojo
+  
+  systemctl status dojo
+    [ensure it launched OK]
+  
+  vi celery-worker.service
+    [contents below]
+  
+  systemctl enable celery-worker
+  
+  systemctl start celery-worker
+  
+  systemctl status celery-worker
+    [ensure it launched OK]
+  
+  vi celery-beat.service
+    [contents below]
+  
+  systemctl enable celery-beat
+  
+  systemctl start celery-beat
+  
+  systemctl status celery-beat
+    [ensure it launched OK]
+  
 
 *NGINX Configuration*
 
@@ -121,5 +172,69 @@ Everyone feels a little differently about nginx settings, so here are the barebo
         include     <PATH_TO_DOJO>/django-DefectDojo/wsgi_params;
     }
   }
+
+*Systemd Configuration Files*
+
+dojo.service
+
+.. code-block:: console
+
+  [Unit]
+  Description=uWSGI instance to serve DefectDojo
+  Requires=nginx.service mysql.service
+  Before=nginx.service
+  After=mysql.service
+  
+  [Service]
+  ExecStart=/bin/bash -c 'su - dojo -c "cd /opt/dojo/django-DefectDojo && source ../bin/activate && uwsgi --socket :8001 --wsgi-file wsgi.py --workers 7"'
+  Restart=always
+  RestartSec=3
+  #StandardOutput=syslog 
+  #StandardError=syslog  
+  SyslogIdentifier=dojo
+  
+  [Install]
+  WantedBy=multi-user.target
+
+celery-worker.service
+
+.. code-block:: console
+
+  [Unit]
+  Description=celery workers for DefectDojo
+  Requires=dojo.service
+  After=dojo.service
+  
+  [Service]
+  ExecStart=/bin/bash -c 'su - dojo -c "cd /opt/dojo/django-DefectDojo && source ../bin/activate && celery -A dojo worker -l info --concurrency 3"'
+  Restart=always
+  RestartSec=3
+  #StandardOutput=syslog 
+  #StandardError=syslog  
+  SyslogIdentifier=celeryworker
+  
+  [Install]
+  WantedBy=multi-user.target
+
+celery-beat.service
+
+.. code-block:: console
+
+  [Unit]
+  Description=celery beat for DefectDojo
+  Requires=dojo.service
+  After=dojo.service
+  
+  [Service]
+  ExecStart=/bin/bash -c 'su - dojo -c "cd /opt/dojo/django-DefectDojo && source ../bin/activate && celery beat -A dojo -l info"'
+  Restart=always
+  RestartSec=3
+  #StandardOutput=syslog 
+  #StandardError=syslog  
+  SyslogIdentifier=celerybeat
+  
+  [Install]
+  WantedBy=multi-user.target
+
 
 *That's it!*
