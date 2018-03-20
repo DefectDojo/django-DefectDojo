@@ -42,7 +42,8 @@ def critical_product_metrics(request, mtype):
     add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
     return render(request, template, {
         'name': page_name,
-        'critical_prods': critical_products
+        'critical_prods': critical_products,
+        'url_prefix': get_system_setting('url_prefix')
     })
 
 @cache_page(60 * 5)  # cache for 5 minutes
