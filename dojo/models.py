@@ -1195,22 +1195,15 @@ NOTIFICATION_CHOICES = (
 
 
 class Notifications(models.Model):
-    engagement_added = MultiSelectField(choices=NOTIFICATION_CHOICES,
-                                        default='alert', blank=True)
-    test_added = MultiSelectField(choices=NOTIFICATION_CHOICES,
-                                  default='alert', blank=True)
-    results_added = MultiSelectField(choices=NOTIFICATION_CHOICES,
-                                     default='alert', blank=True)
-    report_created = MultiSelectField(choices=NOTIFICATION_CHOICES,
-                                      default='alert', blank=True)
-    jira_update = MultiSelectField(choices=NOTIFICATION_CHOICES,
-                                   default='alert', blank=True)
-    upcoming_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES,
-                                           default='alert', blank=True)
-    user_mentioned = MultiSelectField(choices=NOTIFICATION_CHOICES,
-                                      default='alert', blank=True)
-    other = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert',
-                             blank=True)
+    engagement_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    test_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    results_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    report_created = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    jira_update = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    upcoming_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    user_mentioned = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    code_review = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    other = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     user = models.ForeignKey(User, default=None, null=True, editable=False)
 
 
@@ -1359,7 +1352,7 @@ class App_Analysis(models.Model):
     user = models.ForeignKey(User, editable=True)
     confidence = models.IntegerField(blank=True, null=True, verbose_name='Confidence level')
     version = models.CharField(max_length=200, null=True, blank=True, verbose_name='Version Number')
-    icon = models.CharField(max_length=200, null=True, blank=True,)
+    icon = models.CharField(max_length=200, null=True, blank=True)
     website = models.URLField(max_length=400, null=True, blank=True)
     website_found = models.URLField(max_length=400, null=True, blank=True)
     created = models.DateTimeField(null=False, editable=False, default=now)
@@ -1368,17 +1361,51 @@ class Objects_Review(models.Model):
     name = models.CharField(max_length=100, null=True)
     created = models.DateTimeField(null=False, editable=False, default=now)
 
+    def __unicode__(self):
+        return self.name
+
 class Objects(models.Model):
-    engagement = models.ForeignKey(Engagement)
-    name = models.CharField(max_length=100, null=True)
-    path = models.CharField(max_length=600, null=False)
+    product = models.ForeignKey(Product)
+    name = models.CharField(max_length=100, null=True, blank=True)
+    path = models.CharField(max_length=600, verbose_name='Full file path', null=True, blank=True)
+    folder = models.CharField(max_length=400, verbose_name='Folder', null=True, blank=True)
+    artifact = models.CharField(max_length=400, verbose_name='Artifact', null=True, blank=True)
     review_status = models.ForeignKey(Objects_Review)
     created = models.DateTimeField(null=False, editable=False, default=now)
 
+    def __unicode__(self):
+        name = None
+        if self.path != None:
+            name = self.path
+        elif self.folder != None:
+            name = self.folder
+        elif self.artifact != None:
+            name = self.artifact
+
+        return name
+
+    class Meta:
+        unique_together = [('product', 'path')]
+
 class Objects_Engagement(models.Model):
     engagement = models.ForeignKey(Engagement)
-    object = models.ForeignKey(Objects)
+    object_id = models.ForeignKey(Objects)
+    build_id = models.CharField(max_length=150, null=True)
     created = models.DateTimeField(null=False, editable=False, default=now)
+    full_url = models.URLField(max_length=400, null=True, blank=True)
+    type = models.CharField(max_length=30, null=True)
+    percentUnchanged = models.CharField(max_length=10, null=True)
+
+    def __unicode__(self):
+        data = ""
+        if self.object_id.path:
+            data = self.object_id.path
+        elif self.object_id.folder:
+            data = self.object_id.folder
+        elif self.object_id.artifact:
+            data = self.object_id.artifact
+
+        return data + " | " + self.engagement.name + " | " + str(self.engagement.id)
 
 # Register for automatic logging to database
 auditlog.register(Dojo_User)

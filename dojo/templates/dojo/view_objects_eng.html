@@ -8,119 +8,55 @@
     }
 {% endblock %}
 {% block content %}
+{% if object_queryset %}
     <div class="panel panel-default">
         <div class="panel-heading">
             <div class="clearfix">
-                <h3 class="pull-left"> Product Tool Configuration</h3>
-
-                <div id="test-pulldown" class="dropdown pull-right">
-                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
-                            data-toggle="dropdown" aria-expanded="true">
-                        <span class="fa fa-bars"></span>
-                        <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                        <li role="presentation">
-                            <a href="{% url 'edit_tool_product' tool.product.id tool.id  %}">
-                                <i class="fa fa-pencil-square-o"></i> Edit Configuraiton
-                            </a>
-                        </li>
-                        <li role="presentation">
-                            <a id="add_notes_link" href="#add_notes">
-                                <i class="fa fa-comments"></i> Add Notes
-                            </a>
-                        </li>
-                        <li role="separator" class="divider"></li>
-                        <li role="presentation">
-                            <a class="text-danger" href="{% url 'delete_tool_product' tool.product.id tool.id  %}">
-                                <i class="fa fa-trash"></i> Delete Configuraiton
-                            </a>
-                        </li>
-
-                    </ul>
-                </div>
+                <h3 class="pull-left">Files from Build #{{ object_queryset.0.build_id }} on {{ object_queryset.0.created }}</h3>
             </div>
         </div>
         <div class="table-responsive">
-            <table class="table-striped table table-condensed table-hover centered">
+            <table class="table-striped table table-condensed table-hover left">
                 <tr>
+                    <th>Object</th>
+                    <th>Object Type</th>
                     <th>Name</th>
-                    <th>Tool Configuration</th>
-                    <th>ID</th>
-                    <th>Category</th>
+                    <th>Change Type</th>
+                    <th>Percent Unchanged</th>
+                    <th>Action</th>
                 </tr>
+                {% for object in object_queryset %}
                 <tr>
-                  <td><a href="{{ tool.url }}" target="_blank">
-                    {{ tool.name }}</a></td>
-                    <td>{{ tool.tool_project_id }}</td>
-                    <td><a href="{{ tool.tool_configuration.url }}" target="_blank">
-                      {{ tool.tool_configuration.name }}</a></td>
-                    <td>{{ tool.tool_configuration.tool_type.name }}</td>
+                  <td>
+                    {% if object.full_url %}
+                      <a href="{{ object.full_url }}" target="_blank">{{ object.object_id|tracked_object_value }}</a>
+                    {% else %}
+                    {{ object.object_id|tracked_object_value }}
+                    {% endif %}
+                    {% if object.object_id.tags %}
+                         <sup>
+                             {% for tag in object.object_id.tags %}
+                             <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                             {% endfor %}
+                         </sup>
+                    {% endif %}
+                   </td>
+                    <td>{{ object.object_id|tracked_object_type }}</td>
+                    <td>{{ object.object_id.name|default_if_none:"" }}</td>
+                    <td>{{ object.type|default_if_none:"" }}</td>
+                    <td>{{ object.percentUnchanged|default_if_none:"" }}</td>
+                    <td>{{ object.object_id.review_status }}</td>
                 </tr>
-                <tr>
-                  <td colspan="4">
-                      {{ tool.description }}
-                  </td>
-                </tr>
-            </table>
-        </div>
-    </div>
-
-    <div class="panel panel-default to_highlight table-responsive">
-        <div class="panel-heading">
-            <h3>Notes</h3>
-        </div>
-        {% if notes %}
-            <table id="notes" class="table-striped table table-condensed table-hover">
-                <thead>
-                <tr>
-                    <th>User</th>
-                    <th>Date</th>
-                    <th>Note</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for note in notes %}
-                    <tr>
-                        <td>
-                            {{ note.author.username }}
-                        </td>
-                        <td>
-                            {{ note.date }}
-                        </td>
-                        <td>
-                            {{ note }}
-                            {% ifequal person note.author.username %}
-                                <a href="{% url 'delete_test_note' test.id note.id %}" class="btn btn-danger btn-xs"
-                                   title="Delete">
-                                    <i class="fa fa-trash" aria-hidden="true"></i>
-                                </a>
-                            {% endifequal %}
-                        </td>
-                    </tr>
                 {% endfor %}
-
-                </tbody>
             </table>
-        {% else %}
-
-            <p class="text-center">No notes found.</p>
-        {% endif %}
-        <hr/>
-
-        <form class="form-horizontal" id="add_notes" action="{% url 'view_tool_product' tool.product.id tool.id  %}"
-              method="post">{% csrf_token %}
-            {% include "dojo/form_fields.html" with form=form %}
-            <div class="form-group">
-                <div class="col-sm-offset-2 col-sm-10">
-                    <input class="btn btn-primary" type="submit" value="Add Note"/>
-
-                </div>
-            </div>
-        </form>
-        <br/>
-        <br/>
+        </div>
     </div>
+
+    </div>
+{% else %}
+No files for this build were found.
+{% endif %}
+
 {% endblock %}
 {% block postscript %}
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
