@@ -133,7 +133,11 @@
 
     <div class="panel panel-default endpoints table-responsive">
         <div class="panel-heading">
+            {% if vulnerable %}
             <h4>Vulnerable Services</h4>
+            {% else %}
+            <h4>Endpoints Services</h4>
+            {% endif %}
         </div>
         {% if  endpoints %}
             {% colgroup endpoints into 3 cols as grouped_items %}

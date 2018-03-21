@@ -1295,6 +1295,15 @@ class JIRA_PKeyForm(forms.ModelForm):
         model = JIRA_PKey
         exclude = ['product']
 
+class DeleteJIRAConfForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = JIRA_Conf
+        fields = ('id',)
+
+
 class ToolTypeForm(forms.ModelForm):
     class Meta:
         model = Tool_Type

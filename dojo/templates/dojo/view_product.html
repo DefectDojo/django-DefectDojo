@@ -481,7 +481,8 @@
                 </div>
             </div>
         </div>
-        {% if user.is_staff %}
+        {% if user.is_staff or authorized %}
+
             <div class="col-md-12">
                 <div class="panel panel-default table-responsive">
                     <div class="panel-heading">
@@ -530,7 +531,7 @@
             </div>
         {% endif %}
 
-        {% if authorized %}
+        {% if False %}
             <div class="col-md-12">
                 <div class="panel panel-default table-responsive">
                     <div class="panel-heading">

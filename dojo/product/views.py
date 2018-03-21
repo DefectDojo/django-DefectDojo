@@ -421,9 +421,12 @@ Greg
 Status: in production
 """
 
-@user_passes_test(lambda u: u.is_staff)
 def all_product_findings(request, pid):
     p = get_object_or_404(Product, id=pid)
+    auth = request.user.is_staff or request.user in p.authorized_users.all()
+    if not auth:
+        # will render 403
+        raise PermissionDenied
     result = ProductFindingFilter(
         request.GET,
         queryset=Finding.objects.filter(test__engagement__product=p,
