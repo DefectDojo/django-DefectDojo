@@ -58,6 +58,7 @@ def vulnerable_endpoints(request):
 
 def all_endpoints(request):
     endpoints = Endpoint.objects.all()
+    show_uri = get_system_setting('display_endpoint_uri')
     # are they authorized
     if request.user.is_staff:
         pass
@@ -75,14 +76,18 @@ def all_endpoints(request):
             product = get_object_or_404(Product, id=p[0])
 
     ids = get_endpoint_ids(EndpointFilter(request.GET, queryset=endpoints, user=request.user).qs)
-    endpoints = EndpointFilter(request.GET, queryset=endpoints.filter(id__in=ids), user=request.user)
-    paged_endpoints = get_page_items(request, endpoints.qs, 25)
+    if show_uri:
+        paged_endpoints = get_page_items(request, endpoints, 25)
+    else:
+        endpoints = EndpointFilter(request.GET, queryset=endpoints.filter(id__in=ids), user=request.user)
+        paged_endpoints = get_page_items(request, endpoints.qs, 25)
     add_breadcrumb(title="All Endpoints", top_level=not len(request.GET), request=request)
     return render(request,
                   'dojo/endpoints.html',
                   {"endpoints": paged_endpoints,
                    "filtered": endpoints,
                    "name": "All Endpoints",
+                   "show_uri": show_uri
                    })
 
 
@@ -148,6 +153,11 @@ def view_endpoint(request, eid):
 
     paged_findings = get_page_items(request, active_findings, 25)
 
+    vulnerable = False
+
+    if active_findings.count() != 0:
+        vulnerable = True
+
     add_breadcrumb(parent=endpoint, top_level=False, request=request)
     return render(request,
                   "dojo/view_endpoint.html",
@@ -157,6 +167,7 @@ def view_endpoint(request, eid):
                    'all_findings': all_findings,
                    'opened_per_month': monthly_counts['opened_per_period'],
                    'endpoint_metadata': endpoint_metadata,
+                   'vulnerable': vulnerable,
                    })
 
 

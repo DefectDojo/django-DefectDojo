@@ -44,12 +44,7 @@
   sudo_user: '{{ dd_user }}'
 
 - name: Install Pillow
-  pip: name=Pillow version=2.3.0 virtualenv={{ venv_dir }}
-  sudo: yes
-  sudo_user: '{{ dd_user }}'
-
-- name: Install django-secure
-  pip: name=django-secure virtualenv={{ venv_dir }}
+  pip: name=Pillow version=5.0.0 virtualenv={{ venv_dir }}
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
@@ -150,11 +145,6 @@
 
 - name: Install celery
   pip: name=celery virtualenv={{ venv_dir }}
-  sudo: yes
-  sudo_user: '{{ dd_user }}'
-
-- name: Install sqlalchemy
-  pip: name=sqlalchemy virtualenv={{ venv_dir }}
   sudo: yes
   sudo_user: '{{ dd_user }}'
 

@@ -1,9 +1,10 @@
 import base64
+import logging
 import os
 import re
-import logging
 from datetime import datetime
 from uuid import uuid4
+
 from django.conf import settings
 
 fmt = getattr(settings, 'LOG_FORMAT', None)
@@ -28,53 +29,95 @@ from tagging.registry import register as tag_register
 from multiselectfield import MultiSelectField
 import hashlib
 
+
 class System_Settings(models.Model):
-    enable_deduplication = models.BooleanField(default=False,
-                                        blank=False,
-                                        verbose_name='Deduplicate findings',
-                                        help_text='With this setting turned on, Dojo deduplicates findings by comparing endpoints, ' \
-                                                  'cwe fields, and titles. ' \
-                                                  'If two findings share a URL and have the same CWE or title, Dojo marks the ' \
-                                                  'less recent finding as a duplicate. When deduplication is enabled, a list of ' \
-                                                  'deduplicated findings is added to the engagement view.')
+    enable_deduplication = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name='Deduplicate findings',
+        help_text="With this setting turned on, Dojo deduplicates findings by "
+                  "comparing endpoints, cwe fields, and titles. "
+                  "If two findings share a URL and have the same CWE or "
+                  "title, Dojo marks the less recent finding as a duplicate. "
+                  "When deduplication is enabled, a list of "
+                  "deduplicated findings is added to the engagement view.")
     delete_dupulicates = models.BooleanField(default=False, blank=False)
-    max_dupes = models.IntegerField(blank=True, null=True, verbose_name='Max Duplicates', help_text='When enabled, if' \
-                                    'a single issue reaches the maximum number of duplicates, the oldest will be' \
-                                    'deleted.')
-    enable_jira = models.BooleanField(default=False, verbose_name='Enable JIRA integration', blank=False)
-    jira_choices = (('Critical', 'Critical'), ('High', 'High'), ('Medium', 'Medium'), ('Low', 'Low'))
-    jira_minimum_severity = models.CharField(max_length=20, blank=True, null=True, choices=jira_choices, default='None')
-    jira_labels = models.CharField(max_length=200, blank=True,null=True, help_text='JIRA issue labels space seperated')
-    enable_slack_notifications = models.BooleanField(default=False, verbose_name='Enable Slack notifications', blank=False)
+    max_dupes = models.IntegerField(blank=True, null=True,
+                                    verbose_name='Max Duplicates',
+                                    help_text="When enabled, if a single "
+                                              "issue reaches the maximum "
+                                              "number of duplicates, the "
+                                              "oldest will be deleted.")
+    enable_jira = models.BooleanField(default=False,
+                                      verbose_name='Enable JIRA integration',
+                                      blank=False)
+    jira_choices = (('Critical', 'Critical'),
+                    ('High', 'High'),
+                    ('Medium', 'Medium'),
+                    ('Low', 'Low'))
+    jira_minimum_severity = models.CharField(max_length=20, blank=True,
+                                             null=True, choices=jira_choices,
+                                             default='None')
+    jira_labels = models.CharField(max_length=200, blank=True, null=True,
+                                   help_text='JIRA issue labels space seperated')
+    enable_slack_notifications = \
+        models.BooleanField(default=False,
+                            verbose_name='Enable Slack notifications',
+                            blank=False)
     slack_channel = models.CharField(max_length=100, default='', blank=True)
-    slack_token = models.CharField(max_length=100, default='', blank=True, help_text='Token required for interacting with Slack. Get one at https://api.slack.com/tokens')
+    slack_token = models.CharField(max_length=100, default='', blank=True,
+                                   help_text='Token required for interacting '
+                                             'with Slack. Get one at '
+                                             'https://api.slack.com/tokens')
     slack_username = models.CharField(max_length=100, default='', blank=True)
-    enable_hipchat_notifications = models.BooleanField(default=False, verbose_name='Enable HipChat notifications', blank=False)
-    hipchat_site = models.CharField(max_length=100, default='', blank=True, help_text='The full fqdn of your hipchat site, e.g. "yoursite.hipchat.com"')
+    enable_hipchat_notifications = \
+        models.BooleanField(default=False,
+                            verbose_name='Enable HipChat notifications',
+                            blank=False)
+    hipchat_site = models.CharField(max_length=100, default='', blank=True,
+                                    help_text='The full fqdn of your '
+                                              'hipchat site, e.g. '
+                                              '"yoursite.hipchat.com"')
     hipchat_channel = models.CharField(max_length=100, default='', blank=True)
-    hipchat_token = models.CharField(max_length=100, default='', blank=True, help_text='Token required for interacting with HipChat. Get one at https://patriktest.hipchat.com/addons/')
+    hipchat_token = \
+        models.CharField(max_length=100, default='', blank=True,
+                         help_text='Token required for interacting with '
+                                   'HipChat. Get one at '
+                                   'https://patriktest.hipchat.com/addons/')
     enable_mail_notifications = models.BooleanField(default=False, blank=False)
-    mail_notifications_from = models.CharField(max_length=200, default='from@example.com', blank=True)
-    mail_notifications_to = models.CharField(max_length=200, default='', blank=True)
-    s_finding_severity_naming = models.BooleanField(default=False,
-                                                    blank=False,
-                                                    help_text='With this setting turned on, Dojo will display S0, S1, S2, etc ' \
-                                                    'in most places, whereas if turned off Critical, High, Medium, etc will be displayed.')
+    mail_notifications_from = models.CharField(max_length=200,
+                                               default='from@example.com',
+                                               blank=True)
+    mail_notifications_to = models.CharField(max_length=200, default='',
+                                             blank=True)
+    s_finding_severity_naming = \
+        models.BooleanField(default=False, blank=False,
+                            help_text='With this setting turned on, Dojo '
+                                      'will display S0, S1, S2, etc in most '
+                                      'places, whereas if turned off '
+                                      'Critical, High, Medium, etc will '
+                                      'be displayed.')
     false_positive_history = models.BooleanField(default=False)
 
     url_prefix = models.CharField(max_length=300, default='', blank=True)
     team_name = models.CharField(max_length=100, default='', blank=True)
     time_zone = models.CharField(max_length=50,
-                                 choices=[(tz,tz) for tz in all_timezones],
-                                 default='UTC',blank=False)
+                                 choices=[(tz, tz) for tz in all_timezones],
+                                 default='UTC', blank=False)
+    display_endpoint_uri = models.BooleanField(default=False)
+
 
 def get_current_date():
     return timezone.now().date()
 
+
 def get_current_datetime():
     return timezone.now()
 
+
 User = get_user_model()
+
+
 # proxy class for convenience and UI
 class Dojo_User(User):
     class Meta:
@@ -99,10 +142,12 @@ class UserContactInfo(models.Model):
     phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$',
                                  message="Phone number must be entered in the format: '+999999999'. "
                                          "Up to 15 digits allowed.")
-    phone_number = models.CharField(validators=[phone_regex], blank=True, max_length=15,
+    phone_number = models.CharField(validators=[phone_regex], blank=True,
+                                    max_length=15,
                                     help_text="Phone number must be entered in the format: '+999999999'. "
                                               "Up to 15 digits allowed.")
-    cell_number = models.CharField(validators=[phone_regex], blank=True, max_length=15,
+    cell_number = models.CharField(validators=[phone_regex], blank=True,
+                                   max_length=15,
                                    help_text="Phone number must be entered in the format: '+999999999'. "
                                              "Up to 15 digits allowed.")
     twitter_username = models.CharField(blank=True, null=True, max_length=150)
@@ -127,18 +172,22 @@ class Product_Type(models.Model):
     key_product = models.BooleanField(default=False)
 
     def critical_present(self):
-        c_findings = Finding.objects.filter(test__engagement__product__prod_type=self, severity='Critical')
+        c_findings = Finding.objects.filter(
+            test__engagement__product__prod_type=self, severity='Critical')
         if c_findings.count() > 0:
             return True
 
     def high_present(self):
-        c_findings = Finding.objects.filter(test__engagement__product__prod_type=self, severity='High')
+        c_findings = Finding.objects.filter(
+            test__engagement__product__prod_type=self, severity='High')
         if c_findings.count() > 0:
             return True
 
     def calc_health(self):
-        h_findings = Finding.objects.filter(test__engagement__product__prod_type=self, severity='High')
-        c_findings = Finding.objects.filter(test__engagement__product__prod_type=self, severity='Critical')
+        h_findings = Finding.objects.filter(
+            test__engagement__product__prod_type=self, severity='High')
+        c_findings = Finding.objects.filter(
+            test__engagement__product__prod_type=self, severity='Critical')
         health = 100
         if c_findings.count() > 0:
             health = 40
@@ -158,10 +207,11 @@ class Product_Type(models.Model):
                                       false_p=False,
                                       duplicate=False,
                                       out_of_scope=False,
-                                      test__engagement__product__prod_type=self).filter(Q(severity="Critical") |
-                                                                                        Q(severity="High") |
-                                                                                        Q(severity="Medium") |
-                                                                                        Q(severity="Low")).count()
+                                      test__engagement__product__prod_type=self).filter(
+            Q(severity="Critical") |
+            Q(severity="High") |
+            Q(severity="Medium") |
+            Q(severity="Low")).count()
 
     def products_count(self):
         return Product.objects.filter(prod_type=self).count()
@@ -204,21 +254,26 @@ class Test_Type(models.Model):
 class Product(models.Model):
     name = models.CharField(max_length=300)
     description = models.CharField(max_length=4000)
-    '''
-        The following three fields are deprecated and no longer in use.
-        They remain in model for backwards compatibility and will be removed
-        in a future release.  prod_manager, tech_contact, manager
 
-        The admin script migrate_product_contacts should be used to migrate data from
-        these fields to their replacements.  ./manage.py migrate_product_contacts
+    '''
+    The following three fields are deprecated and no longer in use.
+    They remain in model for backwards compatibility and will be removed
+    in a future release.  prod_manager, tech_contact, manager
+
+    The admin script migrate_product_contacts should be used to migrate data 
+    from these fields to their replacements.  
+    ./manage.py migrate_product_contacts
     '''
     prod_manager = models.CharField(default=0, max_length=200)  # unused
     tech_contact = models.CharField(default=0, max_length=200)  # unused
     manager = models.CharField(default=0, max_length=200)  # unused
 
-    product_manager = models.ForeignKey(Dojo_User, null=True, blank=True, related_name='product_manager')
-    technical_contact = models.ForeignKey(Dojo_User, null=True, blank=True, related_name='technical_contact')
-    team_manager = models.ForeignKey(Dojo_User, null=True, blank=True, related_name='team_manager')
+    product_manager = models.ForeignKey(Dojo_User, null=True, blank=True,
+                                        related_name='product_manager')
+    technical_contact = models.ForeignKey(Dojo_User, null=True, blank=True,
+                                          related_name='technical_contact')
+    team_manager = models.ForeignKey(Dojo_User, null=True, blank=True,
+                                     related_name='team_manager')
 
     created = models.DateTimeField(editable=False, null=True, blank=True)
     prod_type = models.ForeignKey(Product_Type, related_name='prod_type',
@@ -244,10 +299,11 @@ class Product(models.Model):
 
     @property
     def endpoint_count(self):
-        endpoints = Endpoint.objects.filter(finding__test__engagement__product=self,
-                                            finding__active=True,
-                                            finding__verified=True,
-                                            finding__mitigated__isnull=True)
+        endpoints = Endpoint.objects.filter(
+            finding__test__engagement__product=self,
+            finding__active=True,
+            finding__verified=True,
+            finding__mitigated__isnull=True)
 
         hosts = []
         ids = []
@@ -336,7 +392,8 @@ class ScanSettings(models.Model):
     def get_breadcrumbs(self):
         bc = self.product.get_breadcrumbs()
         bc += [{'title': "Scan Settings",
-                'url': reverse('view_scan_settings', args=(self.product.id, self.id,))}]
+                'url': reverse('view_scan_settings',
+                               args=(self.product.id, self.id,))}]
         return bc
 
 
@@ -448,7 +505,8 @@ class Endpoint(models.Model):
                             help_text="The host name or IP address, you can also include the port number. For example"
                                       "'127.0.0.1', '127.0.0.1:8080', 'localhost', 'yourdomain.com'.")
     fqdn = models.CharField(null=True, blank=True, max_length=500)
-    port = models.IntegerField(null=True, blank=True, help_text="The network port associated with the endpoint.")
+    port = models.IntegerField(null=True, blank=True,
+                               help_text="The network port associated with the endpoint.")
     path = models.CharField(null=True, blank=True, max_length=500,
                             help_text="The location of the resource, it should start with a '/'. For example"
                                       "/endpoint/420/edit")
@@ -520,7 +578,8 @@ class Endpoint(models.Model):
                                       verified=True,
                                       mitigated__isnull=True,
                                       false_p=False,
-                                      duplicate=False).distinct().order_by('numerical_severity')
+                                      duplicate=False).distinct().order_by(
+            'numerical_severity')
 
     def get_breadcrumbs(self):
         bc = self.product.get_breadcrumbs()
@@ -560,7 +619,8 @@ class Development_Environment(models.Model):
         return self.name
 
     def get_breadcrumbs(self):
-        return [{"title": self.__unicode__(), "url": reverse("edit_dev_env", args=(self.id,))}]
+        return [{"title": self.__unicode__(),
+                 "url": reverse("edit_dev_env", args=(self.id,))}]
 
 
 class Test(models.Model):
@@ -622,37 +682,46 @@ class Finding(models.Model):
     verified = models.BooleanField(default=True)
     false_p = models.BooleanField(default=False, verbose_name="False Positive")
     duplicate = models.BooleanField(default=False)
-    duplicate_finding = models.ForeignKey('self', editable=False, null=True, related_name='original_finding', blank=True)
-    duplicate_list = models.ManyToManyField("self",editable=False, blank=True)
+    duplicate_finding = models.ForeignKey('self', editable=False, null=True,
+                                          related_name='original_finding',
+                                          blank=True)
+    duplicate_list = models.ManyToManyField("self", editable=False, blank=True)
     out_of_scope = models.BooleanField(default=False)
     under_review = models.BooleanField(default=False)
-    review_requested_by = models.ForeignKey(Dojo_User, null=True, blank=True, related_name='review_requested_by')
+    review_requested_by = models.ForeignKey(Dojo_User, null=True, blank=True,
+                                            related_name='review_requested_by')
     reviewers = models.ManyToManyField(Dojo_User, blank=True)
 
-    #Defect Tracking Review
+    # Defect Tracking Review
     under_defect_review = models.BooleanField(default=False)
-    defect_review_requested_by = models.ForeignKey(Dojo_User, null=True, blank=True, related_name='defect_review_requested_by')
+    defect_review_requested_by = models.ForeignKey(Dojo_User, null=True,
+                                                   blank=True,
+                                                   related_name='defect_review_requested_by')
 
     thread_id = models.IntegerField(default=0, editable=False)
     mitigated = models.DateTimeField(editable=False, null=True, blank=True)
-    mitigated_by = models.ForeignKey(User, null=True, editable=False, related_name="mitigated_by")
+    mitigated_by = models.ForeignKey(User, null=True, editable=False,
+                                     related_name="mitigated_by")
     reporter = models.ForeignKey(User, editable=False, related_name='reporter')
     notes = models.ManyToManyField(Notes, blank=True,
                                    editable=False)
     numerical_severity = models.CharField(max_length=4)
     last_reviewed = models.DateTimeField(null=True, editable=False)
-    last_reviewed_by = models.ForeignKey(User, null=True, editable=False, related_name='last_reviewed_by')
+    last_reviewed_by = models.ForeignKey(User, null=True, editable=False,
+                                         related_name='last_reviewed_by')
     images = models.ManyToManyField('FindingImage', blank=True)
 
-    line_number = models.CharField(null=True, blank=True, max_length=200, editable=False) #Deprecated will be removed, use line
+    line_number = models.CharField(null=True, blank=True, max_length=200,
+                                   editable=False)  # Deprecated will be removed, use line
     sourcefilepath = models.TextField(null=True, blank=True, editable=False)
     sourcefile = models.TextField(null=True, blank=True, editable=False)
     param = models.TextField(null=True, blank=True, editable=False)
     payload = models.TextField(null=True, blank=True, editable=False)
-    hash_code = models.TextField(null=True,blank=True,editable=False)
+    hash_code = models.TextField(null=True, blank=True, editable=False)
 
-    line = models.IntegerField(null=True, blank=True, verbose_name="Line number")
-    file_path = models.CharField(null=True,blank=True, max_length=1000)
+    line = models.IntegerField(null=True, blank=True,
+                               verbose_name="Line number")
+    file_path = models.CharField(null=True, blank=True, max_length=1000)
     found_by = models.ManyToManyField(Test_Type, editable=False)
     static_finding = models.BooleanField(default=False)
     dynamic_finding = models.BooleanField(default=False)
@@ -663,9 +732,9 @@ class Finding(models.Model):
     class Meta:
         ordering = ('numerical_severity', '-date', 'title')
 
-
     def get_hash_code(self):
-        hash_string = self.title + self.description + str(self.line) + str(self.file_path)
+        hash_string = self.title + self.description + str(self.line) + str(
+            self.file_path)
         return hashlib.sha256(hash_string.encode('utf-8')).hexdigest()
 
     @staticmethod
@@ -723,9 +792,11 @@ class Finding(models.Model):
 
     def age(self):
         if self.mitigated:
-            days = (self.mitigated.date() - datetime.combine(self.date, datetime.min.time()).date()).days
+            days = (self.mitigated.date() - datetime.combine(self.date,
+                                                             datetime.min.time()).date()).days
         else:
-            days = (get_current_date() - datetime.combine(self.date, datetime.min.time()).date()).days
+            days = (get_current_date() - datetime.combine(self.date,
+                                                          datetime.min.time()).date()).days
 
         return days if days > 0 else 0
 
@@ -771,16 +842,16 @@ class Finding(models.Model):
         if (dedupe_option):
             system_settings = System_Settings.objects.get()
             if system_settings.enable_deduplication:
-                    from dojo.tasks import async_dedupe
-                    from dojo.utils import sync_dedupe
-                    try:
-                        if self.reporter.usercontactinfo.block_execution:
-                            sync_dedupe(self, *args, **kwargs)
-                        else:
-                             async_dedupe.delay(self, *args, **kwargs)
-                    except:
+                from dojo.tasks import async_dedupe
+                from dojo.utils import sync_dedupe
+                try:
+                    if self.reporter.usercontactinfo.block_execution:
+                        sync_dedupe(self, *args, **kwargs)
+                    else:
                         async_dedupe.delay(self, *args, **kwargs)
-                        pass
+                except:
+                    async_dedupe.delay(self, *args, **kwargs)
+                    pass
 
             if system_settings.false_positive_history:
                 from dojo.tasks import async_false_history
@@ -792,7 +863,8 @@ class Finding(models.Model):
 
     def clean(self):
         no_check = ["test", "reporter"]
-        bigfields = ["description", "mitigation", "references", "impact", "url"]
+        bigfields = ["description", "mitigation", "references", "impact",
+                     "url"]
         for field_obj in self._meta.fields:
             field = field_obj.name
             if field not in no_check:
@@ -833,7 +905,9 @@ class Finding(models.Model):
         #         return res
 
 
-Finding.endpoints.through.__unicode__ = lambda x: "Endpoint: " + x.endpoint.host
+Finding.endpoints.through.__unicode__ = lambda \
+        x: "Endpoint: " + x.endpoint.host
+
 
 class Stub_Finding(models.Model):
     title = models.TextField(max_length=1000, blank=False, null=False)
@@ -864,7 +938,8 @@ class Finding_Template(models.Model):
     mitigation = models.TextField(null=True, blank=True)
     impact = models.TextField(null=True, blank=True)
     references = models.TextField(null=True, blank=True, db_column="refs")
-    numerical_severity = models.CharField(max_length=4, null=True, blank=True, editable=False)
+    numerical_severity = models.CharField(max_length=4, null=True, blank=True,
+                                          editable=False)
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
@@ -929,7 +1004,8 @@ class Check_List(models.Model):
     def get_breadcrumb(self):
         bc = self.engagement.get_breadcrumb()
         bc += [{'title': "Check List",
-                'url': reverse('complete_checklist', args=(self.engagement.id,))}]
+                'url': reverse('complete_checklist',
+                               args=(self.engagement.id,))}]
         return bc
 
 
@@ -969,7 +1045,8 @@ class Risk_Acceptance(models.Model):
     def get_breadcrumbs(self):
         bc = self.engagement_set.first().get_breadcrumbs()
         bc += [{'title': self.__unicode__(),
-                'url': reverse('view_risk', args=(self.engagement_set.first().product.id, self.id,))}]
+                'url': reverse('view_risk', args=(
+                    self.engagement_set.first().product.id, self.id,))}]
         return bc
 
 
@@ -979,7 +1056,8 @@ class Report(models.Model):
     format = models.CharField(max_length=15, default='AsciiDoc')
     requester = models.ForeignKey(User)
     task_id = models.CharField(max_length=50)
-    file = models.FileField(upload_to='reports/%Y/%m/%d', verbose_name='Report File', null=True)
+    file = models.FileField(upload_to='reports/%Y/%m/%d',
+                            verbose_name='Report File', null=True)
     status = models.CharField(max_length=10, default='requested')
     options = models.TextField()
     datetime = models.DateTimeField(auto_now_add=True)
@@ -1019,7 +1097,8 @@ class FindingImage(models.Model):
 
 
 class FindingImageAccessToken(models.Model):
-    """This will allow reports to request the images without exposing the media root to the world without
+    """This will allow reports to request the images without exposing the
+    media root to the world without
     authentication"""
     user = models.ForeignKey(User, null=False, blank=False)
     image = models.ForeignKey(FindingImage, null=False, blank=False)
@@ -1038,21 +1117,22 @@ class FindingImageAccessToken(models.Model):
             self.token = uuid4()
         return super(FindingImageAccessToken, self).save(*args, **kwargs)
 
+
 class JIRA_Conf(models.Model):
-    url =  models.URLField(max_length=2000, verbose_name="JIRA URL")
-#    product = models.ForeignKey(Product)
-    username = models.CharField(max_length=2000 )
+    url = models.URLField(max_length=2000, verbose_name="JIRA URL")
+    #    product = models.ForeignKey(Product)
+    username = models.CharField(max_length=2000)
     password = models.CharField(max_length=2000)
-#    project_key = models.CharField(max_length=200,null=True, blank=True)
-#    enabled = models.BooleanField(default=True)
+    #    project_key = models.CharField(max_length=200,null=True, blank=True)
+    #    enabled = models.BooleanField(default=True)
     default_issue_type = models.CharField(max_length=9,
-                            choices=(
-                                ('Task', 'Task'),
-                                ('Story', 'Story'),
-                                ('Epic', 'Epic'),
-                                ('Spike', 'Spike'),
-                                ('Bug', 'Bug')),
-                            default='Bug')
+                                          choices=(
+                                              ('Task', 'Task'),
+                                              ('Story', 'Story'),
+                                              ('Epic', 'Epic'),
+                                              ('Spike', 'Spike'),
+                                              ('Bug', 'Bug')),
+                                          default='Bug')
     epic_name_id = models.IntegerField()
     open_status_key = models.IntegerField()
     close_status_key = models.IntegerField()
@@ -1077,32 +1157,43 @@ class JIRA_Conf(models.Model):
         else:
             return 'N/A'
 
+
 class JIRA_Issue(models.Model):
-    jira_id =  models.CharField(max_length=200)
-    jira_key =  models.CharField(max_length=200)
+    jira_id = models.CharField(max_length=200)
+    jira_key = models.CharField(max_length=200)
     finding = models.OneToOneField(Finding, null=True, blank=True)
     engagement = models.OneToOneField(Engagement, null=True, blank=True)
 
+
 class JIRA_Clone(models.Model):
-    jira_id =  models.CharField(max_length=200)
-    jira_clone_id =  models.CharField(max_length=200)
+    jira_id = models.CharField(max_length=200)
+    jira_clone_id = models.CharField(max_length=200)
+
 
 class JIRA_Details_Cache(models.Model):
-    jira_id =  models.CharField(max_length=200)
-    jira_key =  models.CharField(max_length=200)
+    jira_id = models.CharField(max_length=200)
+    jira_key = models.CharField(max_length=200)
     jira_status = models.CharField(max_length=200)
     jira_resolution = models.CharField(max_length=200)
+
 
 class JIRA_PKey(models.Model):
     project_key = models.CharField(max_length=200, blank=True)
     product = models.ForeignKey(Product)
-    conf = models.ForeignKey(JIRA_Conf, verbose_name="JIRA Configuration", null=True, blank=True)
+    conf = models.ForeignKey(JIRA_Conf, verbose_name="JIRA Configuration",
+                             null=True, blank=True)
     component = models.CharField(max_length=200, blank=True)
     push_all_issues = models.BooleanField(default=False, blank=True)
-    enable_engagement_epic_mapping = models.BooleanField(default=False, blank=True)
+    enable_engagement_epic_mapping = models.BooleanField(default=False,
+                                                         blank=True)
     push_notes = models.BooleanField(default=False, blank=True)
 
-NOTIFICATION_CHOICES=(("slack","slack"),("hipchat","hipchat"),("mail","mail"),("alert","alert"))
+
+NOTIFICATION_CHOICES = (
+    ("slack", "slack"), ("hipchat", "hipchat"), ("mail", "mail"),
+    ("alert", "alert"))
+
+
 class Notifications(models.Model):
     engagement_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     test_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
@@ -1115,6 +1206,7 @@ class Notifications(models.Model):
     other = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     user = models.ForeignKey(User, default=None, null=True, editable=False)
 
+
 class Tool_Type(models.Model):
     name = models.CharField(max_length=200)
     description = models.CharField(max_length=2000, null=True)
@@ -1125,22 +1217,26 @@ class Tool_Type(models.Model):
     def __unicode__(self):
         return self.name
 
+
 class Tool_Configuration(models.Model):
     name = models.CharField(max_length=200, null=False)
     description = models.CharField(max_length=2000, null=True, blank=True)
-    url =  models.CharField(max_length=2000, null=True)
+    url = models.CharField(max_length=2000, null=True)
     tool_type = models.ForeignKey(Tool_Type, related_name='tool_type')
     authentication_type = models.CharField(max_length=15,
-                            choices=(
-                                ('API', 'API Key'),
-                                ('Password', 'Username/Password'),
-                                ('SSH', 'SSH')),
-                            null=True, blank=True)
+                                           choices=(
+                                               ('API', 'API Key'),
+                                               ('Password',
+                                                'Username/Password'),
+                                               ('SSH', 'SSH')),
+                                           null=True, blank=True)
     username = models.CharField(max_length=200, null=True, blank=True)
     password = models.CharField(max_length=600, null=True, blank=True)
-    auth_title = models.CharField(max_length=200, null=True, blank=True, verbose_name="Title for SSH/API Key")
+    auth_title = models.CharField(max_length=200, null=True, blank=True,
+                                  verbose_name="Title for SSH/API Key")
     ssh = models.CharField(max_length=6000, null=True, blank=True)
-    api_key = models.CharField(max_length=600, null=True, blank=True, verbose_name="API Key")
+    api_key = models.CharField(max_length=600, null=True, blank=True,
+                               verbose_name="API Key")
 
     class Meta:
         ordering = ['name']
@@ -1148,28 +1244,33 @@ class Tool_Configuration(models.Model):
     def __unicode__(self):
         return self.name
 
+
 class Tool_Product_Settings(models.Model):
     name = models.CharField(max_length=200, null=False)
     description = models.CharField(max_length=2000, null=True, blank=True)
-    url =  models.CharField(max_length=2000, null=True, blank=True)
+    url = models.CharField(max_length=2000, null=True, blank=True)
     product = models.ForeignKey(Product, default=1, editable=False)
-    tool_configuration = models.ForeignKey(Tool_Configuration, null=False, related_name='tool_configuration')
+    tool_configuration = models.ForeignKey(Tool_Configuration, null=False,
+                                           related_name='tool_configuration')
     tool_project_id = models.CharField(max_length=200, null=True, blank=True)
     notes = models.ManyToManyField(Notes, blank=True, editable=False)
 
     class Meta:
         ordering = ['name']
 
+
 class Tool_Product_History(models.Model):
     product = models.ForeignKey(Tool_Product_Settings, editable=False)
     last_scan = models.DateTimeField(null=False, editable=False, default=now)
     succesfull = models.BooleanField(default=True, verbose_name="Succesfully")
-    configuration_details = models.CharField(max_length=2000, null=True, blank=True)
+    configuration_details = models.CharField(max_length=2000, null=True,
+                                             blank=True)
+
 
 class Alerts(models.Model):
     title = models.CharField(max_length=100, default='', null=False)
     description = models.CharField(max_length=2000, null=True)
-    url =  models.URLField(max_length=2000, null=True)
+    url = models.URLField(max_length=2000, null=True)
     source = models.CharField(max_length=100, default='Generic')
     icon = models.CharField(max_length=25, default='icon-user-check')
     user_id = models.ForeignKey(User, null=True, editable=False)
@@ -1178,30 +1279,33 @@ class Alerts(models.Model):
     class Meta:
         ordering = ['-created']
 
+
 class Cred_User(models.Model):
     name = models.CharField(max_length=200, null=False)
     username = models.CharField(max_length=200, null=False)
     password = models.CharField(max_length=600, null=False)
     role = models.CharField(max_length=200, null=False)
     authentication = models.CharField(max_length=15,
-                            choices=(
-                                ('Form', 'Form Authentication'),
-                                ('SSO', 'SSO Redirect')),
-                            default='Form')
+                                      choices=(
+                                          ('Form', 'Form Authentication'),
+                                          ('SSO', 'SSO Redirect')),
+                                      default='Form')
     http_authentication = models.CharField(max_length=15,
-                            choices=(
-                                ('Basic', 'Basic'),
-                                ('NTLM', 'NTLM')),
-                                null=True, blank=True)
+                                           choices=(
+                                               ('Basic', 'Basic'),
+                                               ('NTLM', 'NTLM')),
+                                           null=True, blank=True)
     description = models.CharField(max_length=2000, null=True, blank=True)
-    url =  models.URLField(max_length=2000, null=False)
+    url = models.URLField(max_length=2000, null=False)
     environment = models.ForeignKey(Development_Environment, null=False)
     login_regex = models.CharField(max_length=200, null=True, blank=True)
     logout_regex = models.CharField(max_length=200, null=True, blank=True)
     notes = models.ManyToManyField(Notes, blank=True, editable=False)
     is_valid = models.BooleanField(default=True, verbose_name="Login is valid")
-    #selenium_script = models.CharField(max_length=1000, default='none',
-    #    editable=False, blank=True, null=True, verbose_name="Selenium Script File")
+
+    # selenium_script = models.CharField(max_length=1000, default='none',
+    #    editable=False, blank=True, null=True,
+    #    verbose_name="Selenium Script File")
 
     class Meta:
         ordering = ['name']
@@ -1209,14 +1313,21 @@ class Cred_User(models.Model):
     def __unicode__(self):
         return self.name + " (" + self.role + ")"
 
+
 class Cred_Mapping(models.Model):
-    cred_id = models.ForeignKey(Cred_User, null=False, related_name="cred_user", verbose_name="Credential")
-    product = models.ForeignKey(Product, null=True, blank=True, related_name="product")
-    finding = models.ForeignKey(Finding, null=True, blank=True, related_name="finding")
-    engagement = models.ForeignKey(Engagement, null=True, blank=True, related_name="engagement")
+    cred_id = models.ForeignKey(Cred_User, null=False,
+                                related_name="cred_user",
+                                verbose_name="Credential")
+    product = models.ForeignKey(Product, null=True, blank=True,
+                                related_name="product")
+    finding = models.ForeignKey(Finding, null=True, blank=True,
+                                related_name="finding")
+    engagement = models.ForeignKey(Engagement, null=True, blank=True,
+                                   related_name="engagement")
     test = models.ForeignKey(Test, null=True, blank=True, related_name="test")
-    is_authn_provider = models.BooleanField(default=False, verbose_name="Authentication Provider")
-    url =  models.URLField(max_length=2000, null=True, blank=True)
+    is_authn_provider = models.BooleanField(default=False,
+                                            verbose_name="Authentication Provider")
+    url = models.URLField(max_length=2000, null=True, blank=True)
 
     def __unicode__(self):
         return self.cred_id.name + " (" + self.cred_id.role + ")"
