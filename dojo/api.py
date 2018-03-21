@@ -32,6 +32,7 @@ from dojo.forms import ProductForm, EngForm2, TestForm, \
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_system_setting
 from datetime import datetime
+from object.parser import import_object_eng
 
 """
     Setup logging for the api
@@ -1188,6 +1189,38 @@ class ImportScanValidation(Validation):
                 errors.setdefault('verified', []).append('verified must be a boolean')
 
         return errors
+
+class BuildDetails(MultipartResource, Resource):
+    file = fields.FileField(attribute='file')
+    engagement = fields.CharField(attribute='engagement')
+
+    class Meta:
+        resource_name = 'build_details'
+        fields = ['engagement', 'file']
+        list_allowed_methods = ['post']
+        detail_allowed_methods = []
+        include_resource_uri = True
+
+        authentication = DojoApiKeyAuthentication()
+        authorization = DjangoAuthorization()
+        #validation = ImportScanValidation()
+        #object_class = ImportScanObject
+
+    def hydrate(self, bundle):
+        bundle.obj.__setattr__('engagement_obj',
+                               Engagement.objects.get(id=get_pk_from_uri(bundle.data['engagement'])))
+
+        return bundle
+
+    def obj_create(self, bundle, **kwargs):
+        bundle.obj = ImportScanObject(initial=kwargs)
+        self.is_valid(bundle)
+        if bundle.errors:
+            raise ImmediateHttpResponse(response=self.error_response(bundle.request, bundle.errors))
+
+        bundle = self.full_hydrate(bundle)
+
+        import_object_eng(bundle.request, bundle.obj.__getattr__('engagement_obj'), bundle.data['file'])
 
 class ImportScanResource(MultipartResource, Resource):
     scan_date = fields.DateTimeField(attribute='scan_date')

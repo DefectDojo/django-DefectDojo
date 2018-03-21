@@ -10,7 +10,8 @@ from dojo.api import UserResource, ProductResource, EngagementResource, \
     StubFindingResource, FindingTemplateResource, ImportScanResource, \
     ReImportScanResource, JiraResource, JIRA_ConfResource, EndpointResource, \
     JIRA_IssueResource, ToolProductSettingsResource, Tool_ConfigurationResource, \
-    Tool_TypeResource, LanguagesResource, LanguageTypeResource, App_AnalysisResource
+    Tool_TypeResource, LanguagesResource, LanguageTypeResource, App_AnalysisResource, \
+    BuildDetails
 from dojo.utils import get_system_setting
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
 from dojo.endpoint.urls import urlpatterns as endpoint_urls
@@ -33,6 +34,7 @@ from dojo.tool_product.urls import urlpatterns as tool_product_urls
 from dojo.cred.urls import urlpatterns as cred_urls
 from dojo.system_settings.urls import urlpatterns as system_settings_urls
 from dojo.notifications.urls import urlpatterns as notifications_urls
+from dojo.object.urls import urlpatterns as object_urls
 import sys
 
 admin.autodiscover()
@@ -62,6 +64,7 @@ v1_api.register(Tool_TypeResource())
 v1_api.register(LanguagesResource())
 v1_api.register(LanguageTypeResource())
 v1_api.register(App_AnalysisResource())
+v1_api.register(BuildDetails())
 # v1_api.register(IPScanResource())
 
 
@@ -87,6 +90,7 @@ ur += tool_product_urls
 ur += cred_urls
 ur += system_settings_urls
 ur += notifications_urls
+ur += object_urls
 
 from tastypie_swagger.views import SwaggerView, ResourcesView, SchemaView
 

@@ -186,3 +186,29 @@ def severity_value(value):
         pass
 
     return value
+
+@register.filter
+def tracked_object_value(current_object):
+    value = ""
+
+    if current_object.path is not None:
+        value = current_object.path
+    elif current_object.folder is not None:
+        value = current_object.folder
+    elif current_object.artifact is not None:
+        value = current_object.artifact
+
+    return value
+
+@register.filter
+def tracked_object_type(current_object):
+    value = ""
+
+    if current_object.path is not None:
+        value = "File"
+    elif current_object.folder is not None:
+        value = "Folder"
+    elif current_object.artifact is not None:
+        value = "Artifact"
+
+    return value

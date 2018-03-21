@@ -44,26 +44,27 @@
                                         <i class="fa fa-pencil-square-o"></i> Edit
                                     </a>
                                 </li>
-                            {% endif %}
-                            {% if user.is_staff %}
                                 <li role="presentation">
                                     <a class="" href="{% url 'ad_hoc_finding' prod.id %}">
                                         <i class="fa fa-list-alt"></i> Add Finding
                                     </a>
                                 </li>
-                            {% endif %}
-                            {% if user.is_staff %}
                                 <li role="presentation">
                                     <a class="" href="{% url 'add_meta_data' prod.id %}">
                                         <i class="fa fa-list-alt"></i> Add Metadata
                                     </a>
                                 </li>
-                            {% endif %}
+                                <li role="presentation">
+                                    <a class="" href="{% url 'new_object' prod.id %}">
+                                        <i class="fa fa-list-alt"></i> Add Product Tracking Files
+                                    </a>
+                                </li>
                             <li role="presentation">
                                 <a href="{% url 'view_product_findings' prod.id %}">
                                     <i class="fa fa-bug"></i> View Open Findings
                                 </a>
                             </li>
+                            {% endif %}
                             <li role="presentation">
                                 <a href="{% url 'product_report' prod.id %}">
                                     <i class="fa fa-file-text-o"></i> Product Report
@@ -76,6 +77,11 @@
                                     </a>
                                 </li>
                             {% endif %}
+                            <li role="presentation">
+                                <a href="{% url 'view_objects' prod.id %}">
+                                    <i class="fa fa-history"></i> View Product Tracking Files
+                                </a>
+                            </li>
                             <li role="presentation">
                                 <a href="{% url 'action_history' prod|content_type prod.id %}">
                                     <i class="fa fa-history"></i> View History
