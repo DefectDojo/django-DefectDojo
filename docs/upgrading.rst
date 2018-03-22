@@ -143,6 +143,18 @@ Upgrading to 1.2.3 requires:
 
 2. Currently languages and technologies can be updated via the API or in the admin section of Django.
 
+
+Upgrading to DefectDojo Version 1.2.4
+------------------------------------
+
+Upgrading to 1.2.4 requires:
+
+1.  ./manage.py makemigrations
+    ./manage.py migrate
+    ./manage.py loaddata dojo/fixtures/test_type.json
+    ./manage.py loaddata dojo/fixtures/objects_review.json
+
+
 Upgrading to DefectDojo Version 1.3.0
 -------------------------------------
 
@@ -174,3 +186,4 @@ For you this means the following, depending on how you've used DefectDojo until 
 For future releases of DefectDojo, a simple ``python manage.py migrate`` will be sufficient to keep the DB schema up to date.
 
 For more information on Django's migration mechanism refer to `the Django documentation <https://docs.djangoproject.com/en/dev/topics/migrations/>`_.
+

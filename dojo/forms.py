@@ -18,7 +18,8 @@ from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
     JIRA_Issue, JIRA_PKey, JIRA_Conf, UserContactInfo, Tool_Type, Tool_Configuration, Tool_Product_Settings, \
-    Cred_User, Cred_Mapping, System_Settings, Notifications, Languages, Language_Type, App_Analysis
+    Cred_User, Cred_Mapping, System_Settings, Notifications, Languages, Language_Type, App_Analysis, Objects
+from dojo.utils import get_system_setting
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
 
@@ -1342,6 +1343,13 @@ class ToolConfigForm(forms.ModelForm):
 
         return form_data
 
+class DeleteObjectsSettingsForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = Objects
+        exclude = ['tool_type']
 
 class DeleteToolProductSettingsForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
@@ -1375,6 +1383,28 @@ class ToolProductSettingsForm(forms.ModelForm):
 
         return form_data
 
+class ObjectSettingsForm(forms.ModelForm):
+
+    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
+                           required=False,
+                           help_text="Add tags that help describe this object.  "
+                                     "Choose from the list or add new tags.  Press TAB key to add.")
+
+    class Meta:
+        model = Objects
+        fields = ['path', 'folder', 'artifact', 'name', 'review_status']
+        exclude = ['product']
+
+    def __init__(self, *args, **kwargs):
+        tags = Tag.objects.usage_for_model(Objects)
+        t = [(tag.name, tag.name) for tag in tags]
+        super(ObjectSettingsForm, self).__init__(*args, **kwargs)
+        self.fields['tags'].widget.choices = t
+
+    def clean(self):
+        form_data = self.cleaned_data
+
+        return form_data
 
 
 class CredMappingForm(forms.ModelForm):

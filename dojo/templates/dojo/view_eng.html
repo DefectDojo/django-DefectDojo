@@ -86,6 +86,11 @@
                                 </a>
                             </li>
                             <li role="presentation">
+                                <a href="{% url 'view_object_eng' eng.id %}">
+                                    <i class="fa fa-file-text-o"></i> View Files for this Build
+                                </a>
+                            </li>
+                            <li role="presentation">
                                 <a href="{% url 'action_history' eng|content_type eng.id %}">
                                     <i class="fa fa-history"></i> View History
                                 </a>
@@ -339,6 +344,7 @@
                                 <th>End Date</th>
 				<th>Lead</th>
                                 <th>Findings</th>
+                                <th>Duplicate Findings</th>
                                 <th>Notes</th>
                                 <th>Actions</th>
                             </tr>
@@ -357,8 +363,9 @@
                                     </td>
                                     <td>{{ test.target_start.date }}</td>
                                     <td>{{ test.target_end.date }}</td>
-				    <td>{{ test.lead }}</td>
-                                    <td>{{ test.finding_set.all|length }}</td>
+				                    <td>{{ test.lead }}</td>
+                                    <td>{{ test.finding_set.all|finding_status:False|length }}</td>
+                                    <td>{{ test.finding_set.all|finding_status:True|length }}</td>
                                     <td>{{ test.notes.all|length }}</td>
                                     <td>
                                         <div class="btn-group">
