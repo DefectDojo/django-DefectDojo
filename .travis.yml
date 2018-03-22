@@ -41,7 +41,7 @@ script:
         # If there are model changes that are not reflected in migrations yet, this will fail.
         # If it fails, try running the same command without the '--check' argument and give the
         # newly created migration file(s) a meaningful name.
-        DJANGO_SETTINGS_MODULE=dojo.settings.unittest python manage.py makemigrations --check dojo
+        DJANGO_SETTINGS_MODULE=dojo.settings.unittest python manage.py makemigrations --check dojo || exit 1
         travis_fold end "migration-test"
         ;;
       smoke-test)
