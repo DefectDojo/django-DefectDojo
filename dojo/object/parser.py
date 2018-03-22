@@ -32,6 +32,7 @@ def find_item(item, object_queryset):
     object_type = None
     found_object = None
 
+    #Check for file
     for object in object_queryset:
         if object.path == item:
             object_type = "file"
@@ -43,9 +44,9 @@ def find_item(item, object_queryset):
                 found_object = object
                 break
         elif object.artifact is not None:
-            object_type = "artifact"
-            found_object = object
             if item in object.artifact:
+                object_type = "artifact"
+                found_object = object
                 break
 
     return object_type, found_object
@@ -59,13 +60,14 @@ def import_object_eng(request, engagement, json_data):
 
     #Retrieve the files currently set for this product
     object_queryset = Objects.objects.filter(product=engagement.product.id).order_by('-path')
-    data = json.loads(json_data)
+    data = json.load(json_data)
 
     #Set default review status
     review_status_id = 1
     review_status = Objects_Review.objects.get(pk=review_status_id)
 
     for file in data:
+        print file["path"]
         #Save the file if the object isn't in object table
         file_type, found_object = find_item(file["path"], object_queryset)
 
