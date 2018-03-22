@@ -152,5 +152,4 @@ Upgrading to 1.2.4 requires:
 
 1.  ./manage.py makemigrations
     ./manage.py migrate
-    ./manage.py loaddata dojo/fixtures/test_type.json
     ./manage.py loaddata dojo/fixtures/objects_review.json

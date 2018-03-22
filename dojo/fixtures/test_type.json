@@ -78,7 +78,7 @@
   },
   {
     "fields": {
-      "name": "Checkmarx"
+      "name": "Checkmarx Scan"
     },
     "model": "dojo.test_type",
     "pk": 12
