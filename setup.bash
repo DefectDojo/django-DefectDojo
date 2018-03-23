@@ -140,7 +140,7 @@ if [[ ! -z "$YUM_CMD" ]]; then
 
         if [ "$DBTYPE" == $MYSQL ]; then
            echo "Installing MySQL client"
-           sudo yum install libmysqlclient-dev mysql-server mysql-devel MySQL-py2thon
+           sudo yum install mysql mysql-devel mysql-lib MySQL-python
         elif [ "$DBTYPE" == $POSTGRES ]; then
            echo "Installing Postgres client"
            sudo yum install postgresql-libs postgresql postgresql-contrib
