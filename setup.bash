@@ -1,19 +1,35 @@
 #!/bin/bash
+# setup.bash helps you installing DefectDojo in your current environment
+#
+# setup.bash covers the following cases (and types of environments):
+# - Fresh installs on non-transient environments (physical or virtual OS)
+# - Fresh installs on transient environment blueprints (containerized environments)
+# - Fresh installs on transient VMs (Vagrant and the like)
+# - Updates on non-transient environments
+#
+# Not (yet) addressed:
+# - Updates for transient environments
+#
 
-# Initialize variables and functions
-source entrypoint_scripts/common/dojo-build-env.sh
-source entrypoint_scripts/common/dojo-shared-functions.bash
-
+echo
 echo "Welcome to DefectDojo! This is a quick script to get you up and running."
 echo
+
+# Initialize variables and functions
+source entrypoint_scripts/common/dojo-shared-resources.sh
+
+# This function invocation ensures we're running the script at the right place
+verify_cwd
+
 # Allow script to be called non-interactively using:
 # export AUTO_DOCKER=yes && /opt/django-DefectDojo/setup.bash
-if [ "$AUTO_DOCKER" != "yes" ]; then
-    prompt_db_type
-else
+if [ "$AUTO_DOCKER" == "yes" ]; then
     # Default to MySQL install
     DBTYPE=$MYSQL
+else
+    prompt_db_type
 fi
+
 echo
 echo "NEED SUDO PRIVILEGES FOR NEXT STEPS!"
 echo

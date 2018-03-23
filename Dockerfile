@@ -20,7 +20,7 @@ USER dojo:dojo
 ADD --chown=dojo:dojo . /opt/django-DefectDojo
 WORKDIR /opt/django-DefectDojo
 ENV AUTO_DOCKER=yes
-RUN ./setup.bash
+RUN ./setup.bash -y
 
 # Install wkhtmltopdf
 RUN wget -O /tmp/wkhtmltox.tar.xz https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.4/wkhtmltox-0.12.4_linux-generic-amd64.tar.xz \

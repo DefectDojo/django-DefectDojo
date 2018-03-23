@@ -1,13 +1,22 @@
 #!/bin/sh
-source ./entrypoint_scripts/common/dojo_build_env.sh
+# This script can be used as an entrypoint to get the Docker image started as
+# follows:
+#
+#   ``docker run -it -p 8000:8000 appsecpipeline/django-defectdojo bash -c "export LOAD_SAMPLE_DATA=True && bash /opt/django-DefectDojo/docker/docker-startup.bash"``
+#
+# Run it at the application root
+#
+
+source entrypoint_scripts/common/dojo-shared-resources.sh
+
+# This function invocation ensures we're running the script at the right place
+verify_cwd
 
 #Set the SQL variables
 SQLUSER=$MYSQL_USER
 SQLPWD=$MYSQL_PASSWORD
 SQLHOST=$DOJO_MYSQL_HOST
 DBNAME=$MYSQL_DATABASE
-
-source $SCRIPTS_DIR/dojo-shared-functions.bash
 
 ########### Setup and Run Entry #############
 if [ "$1" == "setup" ]; then
@@ -22,8 +31,7 @@ else
     PORT=8000
   fi
 
-  cd $DOJO_ROOT_DIR
-  source venv/bin/activate
+  source $DOJO_VENV_NAME/bin/activate
 
   #Check to see if Dojo has been setup by checking the settings.py file
   if [ ! -f dojo/settings/settings.py ];
@@ -113,8 +121,8 @@ else
     echo "Starting Python  Server"
     echo "=============================================================================="
     echo
-    cd $DOJO_ROOT_DIR
-    source venv/bin/activate
+
+    source $DOJO_VENV_NAME/bin/activate
     pip freeze
     python manage.py runserver 0.0.0.0:$PORT & celery -A dojo worker -l info --concurrency 3
     echo
