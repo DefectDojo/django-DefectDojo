@@ -1,19 +1,71 @@
 #!/usr/bin/env bash
-#####################################################################################
+###############################################################################
 #####
-##### Shared set of functions for setting up dojo
+##### Shared set of variables and functions for setting up dojo
 #####
-#####################################################################################
+###############################################################################
 
-function verify_cwd() {
-    current_folder_name=$(basename $PWD)
-    if [ "$current_folder_name" != "$DOJO_APP_DIR_NAME" ]; then
-        echo "The current working dir is NOT the app's root directory"
-        return 1
-    fi
-    return 0
+function help() {
+    echo ""
+    echo "$0 usage:"
+    echo "  -h      Display this help message and exit with a status code of 0"
+    echo "  -y      Disable interactivity (i.e. useful for Dockerfile usage)"
+    echo ""
 }
 
+TARGET_DIR=
+AUTO_DOCKER=
+
+while getopts 'hry' opt; do
+    case $opt in
+        h)
+            help
+            exit 0
+            ;;
+        y)
+            AUTO_DOCKER="yes"
+            ;;
+        ?)
+            help
+            exit 1
+            ;;
+    esac
+done
+
+# Set up output text styles
+export NONE='\033[00m'
+export RED='\033[01;31m'
+export GREEN='\033[01;32m'
+export YELLOW='\033[01;33m'
+export PURPLE='\033[01;35m'
+export CYAN='\033[01;36m'
+export WHITE='\033[01;37m'
+export BOLD='\033[1m'
+export UNDERLINE='\033[4m'
+
+# Supported databases
+export SQLITE=0
+export MYSQL=1
+export POSTGRES=2
+
+# Main DefectDojo directory
+export DOJO_ROOT_DIR=$PWD
+# The name of the virtualenv
+export DOJO_VENV_NAME=venv
+
+function verify_cwd() {
+    required_fs_objects="manage.py setup.bash dojo"
+    for obj in $required_fs_objects; do
+        if [ ! -e $obj ]; then
+            echo "Couldn't find '$obj' in $DOJO_ROOT_DIR; Please run this script at the application's root directory" >&2
+            exit 1
+        fi
+    done
+}
+
+###
+### Declare functions required and used throughout scripts
+###
 function createadmin() {
     echo "=============================================================================="
     echo "Creating Dojo Admin User"
@@ -98,15 +150,13 @@ function setupdojo() {
     echo "Creating Virtual Environment"
     echo "=============================================================================="
     echo
-    #Create virtual environment
-    cd $DOJO_ROOT_DIR
     #Remove any previous virtual environments
-    if [ -d venv ];
+    if [ -d $DOJO_VENV_NAME ];
     then
-        rm -r venv
+        rm -r $DOJO_VENV_NAME
     fi
-    virtualenv venv
-    source venv/bin/activate
+    virtualenv $DOJO_VENV_NAME
+    source $DOJO_VENV_NAME/bin/activate
 
     verify_python_version
 
@@ -133,7 +183,7 @@ function setupdojo() {
     echo "Installing yarn"
     echo "=============================================================================="
     echo
-    cd $DOJO_ROOT_DIR/components && yarn && cd ..
+    cd components && yarn && cd ..
 
     # Setup the DB
     setupdb
@@ -142,7 +192,7 @@ function setupdojo() {
     echo "Removing temporary files"
     echo "=============================================================================="
     echo
-    rm $DOJO_ROOT_DIR/dojo/settings/settings.dist.py
+    rm dojo/settings/settings.dist.py
 
     echo "=============================================================================="
     echo "SUCCESS!"
@@ -331,13 +381,6 @@ function prepare_settings_file() {
 
     SECRET=`cat /dev/urandom | LC_CTYPE=C tr -dc "a-zA-Z0-9" | head -c 128`
 
-    # Allow script to be called non-interactively using:
-    # export AUTO_DOCKER=yes && /opt/django-DefectDojo/setup.bash
-    if [ "$AUTO_DOCKER" == "yes" ]; then
-        # locate to the install directory first
-        cd $DOJO_ROOT_DIR
-    fi
-
     # Save MySQL details in settings file
     cp dojo/settings/settings.dist.py dojo/settings/settings.py
     sed -i "s/MYSQLHOST/$SQLHOST/g" dojo/settings/settings.py
@@ -393,7 +436,7 @@ function install_app(){
         else
             # non-interactively setup the superuser
             python manage.py createsuperuser --noinput --username=admin --email='ed@example.com'
-            $DOJO_DOCKER_DIR/setup-superuser.expect
+            docker/setup-superuser.expect
         fi
     fi
 
@@ -405,8 +448,7 @@ function install_app(){
     python manage.py buildwatson
 
     # Install yarn packages
-    PWD_BAK=$PWD
-    cd components && yarn && cd $PWD_BAK
+    cd components && yarn && cd ..
 
     python manage.py collectstatic --noinput
 }
