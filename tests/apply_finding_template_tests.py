@@ -8,6 +8,7 @@ from dojo.models import Test_Type
 from dojo.models import Test
 from dojo.models import Finding
 from dojo.models import Finding_Template
+from dojo.models import System_Settings
 from dojo.finding import views
 from django.test import TestCase
 from django.test.client import RequestFactory
@@ -17,11 +18,15 @@ from custom_field.models import CustomFieldValue, CustomField
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.http import HttpResponseRedirect
 from django.http import HttpResponse
+from django.utils import timezone
 
 class FindingMother:
 
     @staticmethod
     def create():
+        settings = System_Settings()
+        settings.save()
+
         p = Product()
         p.Name = 'Test Product'
         p.Description = 'Product for Testing Apply Template functionality'
@@ -29,7 +34,7 @@ class FindingMother:
 
         e = Engagement()
         e.product = p
-        e.target_start = datetime.datetime.now().date()
+        e.target_start = timezone.now()
         e.target_end = e.target_start + datetime.timedelta(days=5)
         e.save()
 
@@ -40,7 +45,7 @@ class FindingMother:
         t = Test()
         t.engagement = e
         t.test_type = tt
-        t.target_start = datetime.datetime.now().date()
+        t.target_start = timezone.now()
         t.target_end = t.target_start + datetime.timedelta(days=5)
         t.save()
 
@@ -52,7 +57,7 @@ class FindingMother:
         f.description = 'Finding for Testing Apply Template Functionality'
         f.test = t
         f.reporter = user
-        f.last_reviewed = datetime.datetime.now()
+        f.last_reviewed = timezone.now()
         f.last_reviewed_by = user
         f.save()
 
