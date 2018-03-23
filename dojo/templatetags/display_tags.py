@@ -90,6 +90,10 @@ def version_num(value):
 
     return version
 
+@register.filter
+def finding_status(finding, duplicate):
+    return finding.filter(duplicate=duplicate)
+
 @register.simple_tag
 def random_html():
     r = lambda: random.randint(0,255)
@@ -180,5 +184,31 @@ def severity_value(value):
             value = Finding.get_numerical_severity(value)
     except:
         pass
+
+    return value
+
+@register.filter
+def tracked_object_value(current_object):
+    value = ""
+
+    if current_object.path is not None:
+        value = current_object.path
+    elif current_object.folder is not None:
+        value = current_object.folder
+    elif current_object.artifact is not None:
+        value = current_object.artifact
+
+    return value
+
+@register.filter
+def tracked_object_type(current_object):
+    value = ""
+
+    if current_object.path is not None:
+        value = "File"
+    elif current_object.folder is not None:
+        value = "Folder"
+    elif current_object.artifact is not None:
+        value = "Artifact"
 
     return value

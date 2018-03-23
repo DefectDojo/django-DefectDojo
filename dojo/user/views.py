@@ -77,7 +77,11 @@ def alerts(request):
         alerts = alerts.filter(~Q(id__in=removed_alerts))
 
     paged_alerts = get_page_items(request, alerts, 25)
-    add_breadcrumb(title="Alerts for " + request.user.get_full_name(), top_level=True, request=request)
+    alert_title = "Alerts"
+    if request.user.get_full_name():
+        alert_title += " for " + request.user.get_full_name()
+        
+    add_breadcrumb(title=alert_title, top_level=True, request=request)
     return render(request,
                   'dojo/alerts.html',
                   {'alerts': paged_alerts})
