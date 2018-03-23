@@ -22,6 +22,7 @@ class EndpointMetaDataTestUtil:
     def create_user(is_staff):
         user = User()
         user.is_staff = is_staff
+        user.save()
         return user
 
     @staticmethod
@@ -140,8 +141,8 @@ class TestAddEndpointMetaData(TestCase):
     def test_add_meta_data_returns_view_with_form(self):
         v = self.make_request(True, 1)
         self.assertContains(v, '<form')
-        self.assertContains(v, '<input class="form-control" id="id_name" maxlength="150" name="name" type="text" />')
-        self.assertContains(v, '<textarea class="form-control" cols="40" id="id_value" name="value" rows="10">')
+        self.assertContains(v, '<input type="text" name="name" id="id_name"')
+        self.assertContains(v, '<textarea name="value" id="id_value"')
 
     def test_save_meta_data_form_without_name_and_value(self):
         util = EndpointMetaDataTestUtil()
