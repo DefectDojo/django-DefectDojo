@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name='DefectDojo',
-    version='1.2.0',
+    version='1.2.1',
     author='Greg Anderson',
     description="Tool for managing vulnerability engagements",
     install_requires=[
@@ -28,7 +28,6 @@ setup(
         'humanize',
         'jira',
         'lxml',
-        'mysqlclient==1.3.12',
         'pdfkit==0.6.1',
         'Pillow',
         'psycopg2',
@@ -57,8 +56,9 @@ setup(
         'psycopg2',
         'django-multiselectfield',
         'pbr',
-	'django-slack',
+    'django-slack',
     ],
+    extra_requires={'mysql': ['mysqlclient==1.3.12']},
 
     dependency_links=[
         "https://github.com/grendel513/python-pdfkit/tarball/master#egg=pdfkit-0.5.0",
