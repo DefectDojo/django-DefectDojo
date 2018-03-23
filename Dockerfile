@@ -19,7 +19,7 @@ USER dojo:dojo
 # Add the application files and start the setup
 ADD --chown=dojo:dojo . /opt/django-DefectDojo
 WORKDIR /opt/django-DefectDojo
-ENV AUTO_DOCKER=yes
+# Add the -y option to avoid interactive prompts
 RUN ./setup.bash -y
 
 # Install wkhtmltopdf
