@@ -32,6 +32,7 @@ def dashboard(request):
         engagement_count = Engagement.objects.filter(active=True).count()
         finding_count = Finding.objects.filter(verified=True,
                                                mitigated=None,
+                                               duplicate=False,
                                                date__range=[seven_days_ago,
                                                             now]).count()
         mitigated_count = Finding.objects.filter(mitigated__range=[seven_days_ago,
@@ -41,12 +42,13 @@ def dashboard(request):
             reporter=request.user, created__range=[seven_days_ago, now]) for finding in ra.accepted_findings.all()])
 
         # forever counts
-        findings = Finding.objects.filter(verified=True)
+        findings = Finding.objects.filter(verified=True, duplicate=False)
     else:
         engagement_count = Engagement.objects.filter(lead=request.user,
                                                      active=True).count()
         finding_count = Finding.objects.filter(reporter=request.user,
                                                verified=True,
+                                               duplicate=False,
                                                mitigated=None,
                                                date__range=[seven_days_ago,
                                                             now]).count()
@@ -59,7 +61,7 @@ def dashboard(request):
 
         # forever counts
         findings = Finding.objects.filter(reporter=request.user,
-                                          verified=True)
+                                          verified=True, duplicate=True)
 
     sev_counts = {'Critical': 0,
                   'High': 0,
@@ -88,6 +90,7 @@ def dashboard(request):
         for finding in Finding.objects.filter(
                 reporter=request.user,
                 verified=True,
+                duplicate=False,
                 date__range=[datetime(date_to_use.year,
                                       date_to_use.month, 1,
                                       tzinfo=timezone.get_current_timezone()),

@@ -141,24 +141,24 @@
                                     <p> {{ c_prod.name }} is affected by <b>both</b> critical and high severity
                                         vulnerabilities.</p>
                                     <p>
-                                        <a href="/dojo/finding/open?title=&date=&severity=Critical&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">Critical
+                                        <a href="{{ url_prefix }}/finding/open?title=&date=&severity=Critical&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">Critical
                                             Severity Vulnerabilities</a></p>
                                     <p>
-                                        <a href="/dojo/finding/open?title=&date=&severity=High&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">High
+                                        <a href="{{ url_prefix }}/finding/open?title=&date=&severity=High&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">High
                                             Severity Vulnerabilities</a></p>
                                 {% elif c_prod.critical_present %}
                                     <p> {{ c_prod.name }} is affected by critical vulnerabilities. </p>
                                     <p>
-                                        <a href="/dojo/finding/open?title=&date=&severity=Critical&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">Critical
+                                        <a href="{{ url_prefix }}/finding/open?title=&date=&severity=Critical&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">Critical
                                             Severity Vulnerabilities</a></p>
                                 {% elif c_prod.high_present %}
                                     <p> {{ c_prod.name }} is affected by high severity vulnerabilities.</p>
                                     <p>
-                                        <a href="/dojo/finding/open?title=&date=&severity=High&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">High
+                                        <a href="{{ url_prefix }}/finding/open?title=&date=&severity=High&mitigated_by=&last_reviewed_by=&last_reviewed=&test__engagement__product__prod_type={{ c_prod.id }}&o=numerical_severity&page_size=25">High
                                             Severity Vulnerabilities</a></p>
                                 {% endif %}
                                 <p>
-                                    <a href='/dojo/metrics/product/type?date=2&test__engagement__product__prod_type={{ c_prod.id }}&status='>
+                                    <a href='{{ url_prefix }}/metrics/product/type?date=2&test__engagement__product__prod_type={{ c_prod.id }}&status='>
                                         Full Metrics</a></p></div>
                             <br>
                         </div>
