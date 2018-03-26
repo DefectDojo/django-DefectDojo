@@ -14,7 +14,7 @@ env:
 
 matrix:
   allow_failures:
-    - env: TEST=bandit 
+    - env: TEST=bandit
     - env: TEST=sourceclear
     - env: TEST=pep8
 
@@ -52,7 +52,7 @@ script:
       bandit)
         # install bandit
         pip install bandit
-  
+
         ## Run Bandit python static code
         bandit -r * -x venv,tests,ansible
         ;;
@@ -72,6 +72,8 @@ script:
 
 after_success:
   #Push to docker repo
+  - echo $TRAVIS_TAG
+  
   - docker tag $REPO $REPO:$TAG
   - docker tag $REPO $REPO:travis-$TRAVIS_BUILD_NUMBER
   - |
