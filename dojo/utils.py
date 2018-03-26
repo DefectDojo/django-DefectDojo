@@ -58,24 +58,27 @@ def sync_dedupe(new_finding, *args, **kwargs):
     total_findings = eng_findings_cwe | eng_findings_title
     #total_findings = total_findings.order_by('date')
     for find in total_findings:
-        if find.endpoints != None:
+        if find.endpoints.count() != 0 and new_finding.endpoints.count() != 0:
             list1 = new_finding.endpoints.all()
             list2 = find.endpoints.all()
             if all(x in list1 for x in list2):
                 new_finding.duplicate = True
                 new_finding.duplicate_finding = find
                 find.duplicate_list.add(new_finding)
+                find.found_by.add(new_finding.test.test_type)
                 super(Finding, new_finding).save(*args, **kwargs)
                 break
         elif find.line == new_finding.line and find.file_path  == new_finding.file_path and new_finding.static_finding and len(new_finding.file_path) > 0:
             new_finding.duplicate = True
             new_finding.duplicate_finding = find
             find.duplicate_list.add(new_finding)
+            find.found_by.add(new_finding.test.test_type)
             super(Finding, new_finding).save(*args, **kwargs)
         elif find.get_hash_code() == new_finding.get_hash_code():
                 new_finding.duplicate = True
                 new_finding.duplicate_finding = find
                 find.duplicate_list.add(new_finding)
+                find.found_by.add(new_finding.test.test_type)
                 super(Finding, new_finding).save(*args, **kwargs)
 
 

@@ -203,7 +203,7 @@ def view_finding(request, fid):
                    'creds': creds,
                    'cred_engagement': cred_engagement,
                    'burp_response': burp_response, 'dojo_user': dojo_user,
-                   'user': user, 'notes': notes, 'form': form})
+                   'user': user, 'notes': notes, 'form': form, 'found_by': finding.found_by.all().distinct()})
 
 
 @user_passes_test(lambda u: u.is_staff)
