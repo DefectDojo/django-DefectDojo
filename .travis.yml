@@ -71,11 +71,10 @@ script:
     esac
 
 after_success:
-  #Push to docker repo only if branch is master and this is a release
-    - docker tag $REPO $REPO:$TRAVIS_TAG
+  #Push to docker repo
   - |
     if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_TAG" != "" ] && [ "$TEST" == "integration-test" ] && [ "$DOCKER_USER" != "" ] && [  "$DOCKER_PASS" != "" ]; then
-      docker tag $REPO $REPO:$TAG
+      docker tag $REPO $REPO:$TRAVIS_TAG
       docker login -u "$DOCKER_USER" -p "$DOCKER_PASS";
       docker push $REPO ;
     fi
