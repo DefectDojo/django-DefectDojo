@@ -17,10 +17,10 @@ POSTGRES=2
 function prompt_db_type() {
     read -p "Select database type: 1.) MySQL or 2.) Postgres: " DBTYPE
     if [ "$DBTYPE" == '1' ] || [ "$DBTYPE" == '2' ] ; then
-    	echo "Setting up database"
+      echo "Setting up database"
     else
-	echo "Please enter 1 or 2"
-	prompt_db_type
+  echo "Please enter 1 or 2"
+  prompt_db_type
     fi
 }
 
@@ -135,15 +135,15 @@ BREW_CMD=$(which brew)
 
 if [[ ! -z "$YUM_CMD" ]]; then
     curl -sL https://rpm.nodesource.com/setup | sudo bash -
-    wget https://dl.yarnpkg.com/rpm/yarn.repo -O /etc/yum.repos.d/yarn.repo
-	sudo yum install gcc python-devel python-setuptools python-pip nodejs yarn wkhtmltopdf npm
+    sudo wget https://dl.yarnpkg.com/rpm/yarn.repo -O /etc/yum.repos.d/yarn.repo
+  sudo yum install gcc python-devel python-setuptools python-pip nodejs yarn wkhtmltopdf npm
 
         if [ "$DBTYPE" == $MYSQL ]; then
            echo "Installing MySQL client"
-           sudo yum install libmysqlclient-dev mysql-server mysql-devel MySQL-python
+           sudo yum install mysql mysql-devel mysql-libs MySQL-python
         elif [ "$DBTYPE" == $POSTGRES ]; then
            echo "Installing Postgres client"
-           sudo yum install libpq-dev postgresql postgresql-contrib libmysqlclient-dev
+           sudo yum install postgresql-libs postgresql postgresql-contrib
         fi
         sudo yum groupinstall 'Development Tools'
 elif [[ ! -z "$APT_GET_CMD" ]]; then
@@ -151,7 +151,7 @@ elif [[ ! -z "$APT_GET_CMD" ]]; then
         echo "Installing MySQL client"
         sudo apt-get -y install libmysqlclient-dev mysql-server
      elif [ "$DBTYPE" == $POSTGRES ]; then
-	echo "Installing Postgres client"
+  echo "Installing Postgres client"
         sudo apt-get -y install libpq-dev postgresql postgresql-contrib libmysqlclient-dev
      fi
      sudo apt-get install -y curl apt-transport-https
@@ -171,8 +171,8 @@ elif [[ ! -z "$BREW_CMD" ]]; then
         brew install postgresql
     fi
 else
-	echo "ERROR! OS not supported. Try the Vagrant option."
-	exit 1;
+  echo "ERROR! OS not supported. Try the Vagrant option."
+  exit 1;
 fi
 
 echo
@@ -187,7 +187,7 @@ fi
 unset HISTFILE
 
 if [[ ! -z "$BREW_CMD" ]]; then
-	LC_CTYPE=C
+  LC_CTYPE=C
 fi
 
 SECRET=`cat /dev/urandom | LC_CTYPE=C tr -dc "a-zA-Z0-9" | head -c 128`
@@ -246,7 +246,11 @@ fi
 
 # Detect if we're in a a virtualenv
 if python -c 'import sys; print sys.real_prefix' 2>/dev/null; then
-    pip install .
+    if [ "$DBTYPE" == $MYSQL ]; then
+      pip install .[mysql]
+    else
+      pip install .
+    fi
     python manage.py makemigrations dojo
     python manage.py makemigrations --merge --noinput
     python manage.py migrate
@@ -260,7 +264,11 @@ if python -c 'import sys; print sys.real_prefix' 2>/dev/null; then
     python manage.py installwatson
     python manage.py buildwatson
 else
-    pip install .
+    if [ "$DBTYPE" == $MYSQL ]; then
+      pip install .[mysql]
+    else
+      pip install .
+    fi
     python manage.py makemigrations dojo
     python manage.py makemigrations --merge --noinput
     python manage.py migrate
