@@ -73,7 +73,7 @@ script:
 after_success:
   #Push to docker repo
   - |
-    if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_TAG" != "" ] && [ "$TEST" == "integration-test" ] && [ "$DOCKER_USER" != "" ] && [  "$DOCKER_PASS" != "" ]; then
+    if [ "$TRAVIS_TAG" != "" ] && [ "$DOCKER_USER" != "" ] && [  "$DOCKER_PASS" != "" ]; then
       docker tag $REPO $REPO:$TRAVIS_TAG
       docker login -u "$DOCKER_USER" -p "$DOCKER_PASS";
       docker push $REPO ;
