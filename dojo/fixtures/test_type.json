@@ -78,7 +78,7 @@
   },
   {
     "fields": {
-      "name": "Checkmarx"
+      "name": "Checkmarx Scan"
     },
     "model": "dojo.test_type",
     "pk": 12
@@ -89,5 +89,110 @@
     },
     "model": "dojo.test_type",
     "pk": 13
+  },
+  {
+    "fields": {
+      "name": "Bandit Scan"
+    },
+    "model": "dojo.test_type",
+    "pk": 14
+  },
+  {
+    "fields": {
+      "name": "SSL Labs Scan"
+    },
+    "model": "dojo.test_type",
+    "pk": 15
+  },
+  {
+    "fields": {
+      "name": "AppSpider Scan"
+    },
+    "model": "dojo.test_type",
+    "pk": 16
+  },
+  {
+    "fields": {
+      "name": "Arachni Scan"
+    },
+    "model": "dojo.test_type",
+    "pk": 17
+  },
+  {
+    "fields": {
+      "name": "Dependency Check Scan"
+    },
+    "model": "dojo.test_type",
+    "pk": 17
+  },
+  {
+    "fields": {
+      "name": "Generic Findings Import"
+    },
+    "model": "dojo.test_type",
+    "pk": 18
+  },
+  {
+    "fields": {
+      "name": "Nmap Scan"
+    },
+    "model": "dojo.test_type",
+    "pk": 19
+  },
+  {
+    "fields": {
+      "name": "Node Security Platform Scan"
+    },
+    "model": "dojo.test_type",
+    "pk": 20
+  },
+  {
+    "fields": {
+      "name": "Qualys Scan"
+    },
+    "model": "dojo.test_type",
+    "pk": 21
+  },
+  {
+    "fields": {
+      "name": "Qualys Web App Scan"
+    },
+    "model": "dojo.test_type",
+    "pk": 22
+  },
+  {
+    "fields": {
+      "name": "Retire.js Scan"
+    },
+    "model": "dojo.test_type",
+    "pk": 23
+  },
+  {
+    "fields": {
+      "name": "SKF Scan"
+    },
+    "model": "dojo.test_type",
+    "pk": 24
+  },
+  {
+    "fields": {
+      "name": "Snyk Scan"
+    },
+    "model": "dojo.test_type",
+    "pk": 25
+  },
+  {
+    "fields": {
+      "name": "VCG Scan"
+    },
+    "model": "dojo.test_type",
+    "pk": 26
+  },
+  {
+    "fields": {
+      "name": "Manual Code Review"
+    },
+    "model": "dojo.test_type",
+    "pk": 27
   }
 ]

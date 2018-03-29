@@ -37,12 +37,6 @@ from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, send_rev
 
 from dojo.tasks import add_issue_task, update_issue_task, add_comment_task
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='[%(asctime)s] %(levelname)s [%(name)s:%(lineno)d] %(message)s',
-    datefmt='%d/%b/%Y %H:%M:%S',
-    filename=settings.DOJO_ROOT + '/../django_app.log',
-)
 logger = logging.getLogger(__name__)
 
 """
@@ -209,7 +203,7 @@ def view_finding(request, fid):
                    'creds': creds,
                    'cred_engagement': cred_engagement,
                    'burp_response': burp_response, 'dojo_user': dojo_user,
-                   'user': user, 'notes': notes, 'form': form})
+                   'user': user, 'notes': notes, 'form': form, 'found_by': finding.found_by.all().distinct()})
 
 
 @user_passes_test(lambda u: u.is_staff)

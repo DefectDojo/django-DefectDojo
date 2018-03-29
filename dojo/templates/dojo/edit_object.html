@@ -1,0 +1,38 @@
+d{% extends "base.html" %}
+{% load static from staticfiles %}
+{% block add_css %}
+    <link rel="stylesheet" href="{% static "chosen-bootstrap/chosen.bootstrap.min.css" %}">
+{% endblock %}
+{% block content %}
+    <h3>Edit Tracked Files</h3>
+    <form class="form-horizontal" enctype="multipart/form-data" method="post">{% csrf_token %}
+        {% include "dojo/form_fields.html" with form=tform %}
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <input class="btn btn-primary" type="submit" value="Submit"/>
+            </div>
+        </div>
+    </form>
+{% endblock %}
+{% block postscript %}
+    <script type="application/javascript" src="{% static "chosen/chosen.jquery.min.js" %}"></script>
+    <script type="application/javascript">
+        $(function () {
+            $('#id_tags').chosen({
+                'placeholder_text_multiple': 'Select or add some tags...',
+                'no_results_text': "Tag not found, press TAB key to add.",
+            });
+
+            $(".search-field").find("input").on("keydown", function (evt) {
+                var stroke;
+                stroke = (_ref = evt.which) != null ? _ref : evt.keyCode;
+                if (stroke == 9) { // 9 = tab key
+                    $('#id_tags').append('<option value="' + $(this).val() + '" selected="selected">' + $(this).val() + '</option>');
+                    $('#id_tags').trigger('chosen:updated');
+                    $('#id_tags').focus();
+                    return false;
+                }
+            });
+        });
+    </script>
+{% endblock %}

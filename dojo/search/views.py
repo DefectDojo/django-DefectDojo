@@ -1,21 +1,14 @@
 import logging
 import re
 
-from watson import search as watson
-from django.conf import settings
 from django.shortcuts import render
 from tagging.models import TaggedItem, Tag
+from watson import search as watson
 
 from dojo.forms import SimpleSearchForm
 from dojo.models import Finding, Product, Test, Endpoint, Engagement
-from dojo.utils import add_breadcrumb, get_system_setting
+from dojo.utils import add_breadcrumb
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='[%(asctime)s] %(levelname)s [%(name)s:%(lineno)d] %(message)s',
-    datefmt='%d/%b/%Y %H:%M:%S',
-    filename=settings.DOJO_ROOT + '/../django_app.log',
-)
 logger = logging.getLogger(__name__)
 
 # #  search
@@ -54,30 +47,45 @@ def simple_search(request):
                 findings = watson.search(clean_query, models=(Finding,))
                 tests = watson.search(clean_query, models=(Test,))
                 products = watson.search(clean_query, models=(Product,))
-                tagged_findings = TaggedItem.objects.get_by_model(Finding, tags)
+                tagged_findings = TaggedItem.objects.get_by_model(Finding,
+                                                                  tags)
                 tagged_tests = TaggedItem.objects.get_by_model(Test, tags)
-                tagged_products = TaggedItem.objects.get_by_model(Product, tags)
-                tagged_endpoints = TaggedItem.objects.get_by_model(Endpoint, tags)
-                tagged_engagements = TaggedItem.objects.get_by_model(Engagement, tags)
+                tagged_products = TaggedItem.objects.get_by_model(Product,
+                                                                  tags)
+                tagged_endpoints = TaggedItem.objects.get_by_model(Endpoint,
+                                                                   tags)
+                tagged_engagements = TaggedItem.objects.get_by_model(
+                    Engagement, tags)
             else:
                 findings = watson.search(clean_query, models=(
-                    Finding.objects.filter(test__engagement__product__authorized_users__in=[
+                    Finding.objects.filter(
+                        test__engagement__product__authorized_users__in=[
+                            request.user]),))
+                tests = watson.search(
+                    clean_query,
+                    models=(Test.objects.filter(
+                        engagement__product__authorized_users__in=[
+                            request.user]),))
+                products = watson.search(clean_query, models=(
+                    Product.objects.filter(authorized_users__in=[
                         request.user]),))
-                tests = watson.search(clean_query,
-                                      models=(Test.objects.filter(engagement__product__authorized_users__in=[
-                                          request.user]),))
-                products = watson.search(clean_query, models=(Product.objects.filter(authorized_users__in=[
-                    request.user]),))
                 tagged_findings = TaggedItem.objects.get_by_model(
-                    Finding.objects.filter(test__engagement__product__authorized_users__in=[request.user]), tags)
+                    Finding.objects.filter(
+                        test__engagement__product__authorized_users__in=[
+                            request.user]), tags)
                 tagged_tests = TaggedItem.objects.get_by_model(
-                    Test.objects.filter(engagement__product__authorized_users__in=[request.user]), tags)
+                    Test.objects.filter(
+                        engagement__product__authorized_users__in=[
+                            request.user]), tags)
                 tagged_products = TaggedItem.objects.get_by_model(
-                    Product.objects.filter(authorized_users__in=[request.user]), tags)
+                    Product.objects.filter(
+                        authorized_users__in=[request.user]), tags)
                 tagged_endpoints = TaggedItem.objects.get_by_model(
-                    Endpoint.objects.filter(product__authorized_users__in=[request.user]), tags)
+                    Endpoint.objects.filter(
+                        product__authorized_users__in=[request.user]), tags)
                 tagged_engagements = TaggedItem.objects.get_by_model(
-                    Engagement.objects.filter(product__authorized_users__in=[request.user]), tags)
+                    Engagement.objects.filter(
+                        product__authorized_users__in=[request.user]), tags)
         else:
             form = SimpleSearchForm()
         add_breadcrumb(title="Simple Search", top_level=True, request=request)

@@ -19,7 +19,7 @@ from django.utils import timezone
 
 from dojo.filters import ProductFilter, ProductFindingFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm
-from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance
+from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, JIRA_Conf
 from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, get_system_setting
 from dojo.models import *
 from dojo.forms import *
@@ -27,12 +27,6 @@ from jira import JIRA
 from dojo.tasks import *
 from dojo.product import views as ds
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='[%(asctime)s] %(levelname)s [%(name)s:%(lineno)d] %(message)s',
-    datefmt='%d/%b/%Y %H:%M:%S',
-    filename=settings.DOJO_ROOT + '/../django_app.log',
-)
 logger = logging.getLogger(__name__)
 
 
@@ -160,3 +154,37 @@ def jira(request):
                   'dojo/jira.html',
                   {'confs': confs,
                    })
+
+@user_passes_test(lambda u: u.is_staff)
+def delete_jira(request, tid):
+    inst = get_object_or_404(JIRA_Conf, pk=tid)
+    #eng = test.engagement
+    #TODO Make Form
+    form = DeleteJIRAConfForm(instance=inst)
+
+    from django.contrib.admin.utils import NestedObjects
+    from django.db import DEFAULT_DB_ALIAS
+
+    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+    collector.collect([inst])
+    rels = collector.nested()
+
+    if request.method == 'POST':
+        if 'id' in request.POST and str(inst.id) == request.POST['id']:
+            form = DeleteJIRAConfForm(request.POST, instance=inst)
+            if form.is_valid():
+                inst.delete()
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'JIRA Conf and relationships removed.',
+                                     extra_tags='alert-success')
+                return HttpResponseRedirect(reverse('jira'))
+
+    add_breadcrumb( title="Delete", top_level=False, request=request)
+    return render(request, 'dojo/delete_jira.html',
+                  {'inst': inst,
+                   'form': form,
+                   'rels': rels,
+                   'deletable_objects': rels,
+                   })
+

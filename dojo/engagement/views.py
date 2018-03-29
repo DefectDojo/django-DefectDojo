@@ -30,12 +30,6 @@ from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, message, get_system_setting, create_notification
 from dojo.tasks import update_epic_task, add_epic_task, close_epic_task
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='[%(asctime)s] %(levelname)s [%(name)s:%(lineno)d] %(message)s',
-    datefmt='%d/%b/%Y %H:%M:%S',
-    filename=settings.DOJO_ROOT + '/../django_app.log',
-)
 logger = logging.getLogger(__name__)
 
 
@@ -200,11 +194,16 @@ def delete_engagement(request, eid):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
 def view_engagement(request, eid):
     eng = Engagement.objects.get(id=eid)
     tests = Test.objects.filter(engagement=eng)
+    prod = eng.product
+    auth = request.user.is_staff or request.user in prod.authorized_users.all()
     risks_accepted = eng.risk_acceptance.all()
+    if not auth:
+        # will render 403
+        raise PermissionDenied
+
     try:
         jissue = JIRA_Issue.objects.get(engagement=eng)
     except:
@@ -226,7 +225,7 @@ def view_engagement(request, eid):
         check = None
         pass
     form = DoneForm()
-    if request.method == 'POST':
+    if request.method == 'POST' and request.user.is_staff:
         eng.progress = 'check_list'
         eng.save()
 
@@ -432,7 +431,7 @@ def import_scan_results(request, eid):
                     item.test = t
                     if item.date == timezone.now().date():
                       item.date = t.target_start
-                    
+
                     item.reporter = request.user
                     item.last_reviewed = timezone.now()
                     item.last_reviewed_by = request.user

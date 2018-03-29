@@ -146,6 +146,7 @@
                     {% if finding.cwe > 0 %}
                         <th>CWE</th>
                     {% endif %}
+                    <th>Found by</th>
                 </tr>
                 <tr>
                     <td>
@@ -187,6 +188,9 @@
                             </a>
                         </td>
                     {% endif %}
+                    <td> {% for scanner in found_by %}
+                         {{scanner}}
+                         {% endfor %}</td>
 
                 </tr>
             </table>

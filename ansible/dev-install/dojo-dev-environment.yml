@@ -196,7 +196,7 @@
 
   - name: Add new secret key into settings.py
     replace:
-      dest: '{{ dojo_src }}/dojo/settings.py'
+      dest: '{{ dojo_src }}/dojo/settings/settings.py'
       regexp: 'DOJOSECRET'
       replace: '{{ secret_key.stdout }}'
 

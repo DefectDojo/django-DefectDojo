@@ -44,26 +44,27 @@
                                         <i class="fa fa-pencil-square-o"></i> Edit
                                     </a>
                                 </li>
-                            {% endif %}
-                            {% if user.is_staff %}
                                 <li role="presentation">
                                     <a class="" href="{% url 'ad_hoc_finding' prod.id %}">
                                         <i class="fa fa-list-alt"></i> Add Finding
                                     </a>
                                 </li>
-                            {% endif %}
-                            {% if user.is_staff %}
                                 <li role="presentation">
                                     <a class="" href="{% url 'add_meta_data' prod.id %}">
                                         <i class="fa fa-list-alt"></i> Add Metadata
                                     </a>
                                 </li>
-                            {% endif %}
+                                <li role="presentation">
+                                    <a class="" href="{% url 'new_object' prod.id %}">
+                                        <i class="fa fa-list-alt"></i> Add Product Tracking Files
+                                    </a>
+                                </li>
                             <li role="presentation">
                                 <a href="{% url 'view_product_findings' prod.id %}">
                                     <i class="fa fa-bug"></i> View Open Findings
                                 </a>
                             </li>
+                            {% endif %}
                             <li role="presentation">
                                 <a href="{% url 'product_report' prod.id %}">
                                     <i class="fa fa-file-text-o"></i> Product Report
@@ -76,6 +77,11 @@
                                     </a>
                                 </li>
                             {% endif %}
+                            <li role="presentation">
+                                <a href="{% url 'view_objects' prod.id %}">
+                                    <i class="fa fa-history"></i> View Product Tracking Files
+                                </a>
+                            </li>
                             <li role="presentation">
                                 <a href="{% url 'action_history' prod|content_type prod.id %}">
                                     <i class="fa fa-history"></i> View History
@@ -374,6 +380,58 @@
                             {% endif %}
                         </td>
                     </tr>
+                    {% if languages %}
+                    <tr>
+                        <td colspan="5" align="left">
+                            <div class="product-detailed-info">
+                              <ol class="product-detailed-info-numbers">
+                                  <li>
+                                      <strong>Code Composition</strong>
+                                  </li>
+                                  <li>
+                                      <span class="color-block language-color" style="background-color:#4b0ba0"></span>
+                                  <strong>Total Files</strong>
+                                  {{ langSummary.files__sum|intcomma }}
+                                  </li>
+                                  <li>
+                                      <span class="color-block language-color" style="background-color:#21aec6"></span>
+                                  <strong>Lines of Code</strong>
+                                  {{ langSummary.code__sum|intcomma }}
+                                  </li>
+                            {% for lang in languages %}
+                            <li>
+                                <span class="color-block language-color" style="background-color:{{ lang.language.color }}"></span>
+                            <strong>{{ lang.language.language }}</strong>
+                            {{ lang.files|percentage:langSummary.files__sum }}
+                            </li>
+                        </span>
+                        {% endfor %}
+                        </ol>
+                      </div>
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% if app_analysis %}
+                    <tr>
+                        <td colspan="5" align="left">
+                            <div class="product-detailed-info">
+                              <ol class="product-detailed-info-numbers">
+                                  <li>
+                                      <strong>Technologies</strong>
+                                  </li>
+                            {% for app in app_analysis %}
+                            <li>
+                                <span class="color-block language-color" style="background-color:{% random_html %}"></span>
+                            <strong><a href="{{ app.website }}"  target="_blank" alt="{{ app.name }}, Confidence: {{ app.confidence }}">{{ app.name }}</a></strong>
+                            {{ app.version|version_num }}
+                            </li>
+                        </span>
+                        {% endfor %}
+                        </ol>
+                      </div>
+                        </td>
+                    </tr>
+                    {% endif %}
                 </table>
 
             </div>
@@ -423,7 +481,8 @@
                 </div>
             </div>
         </div>
-        {% if user.is_staff %}
+        {% if user.is_staff or authorized %}
+
             <div class="col-md-12">
                 <div class="panel panel-default table-responsive">
                     <div class="panel-heading">
@@ -472,7 +531,7 @@
             </div>
         {% endif %}
 
-        {% if authorized %}
+        {% if False %}
             <div class="col-md-12">
                 <div class="panel panel-default table-responsive">
                     <div class="panel-heading">
@@ -618,6 +677,9 @@
             </div>
         {% if user.is_staff and i_engs %}
             <div class="col-md-12">
+              <div class="clearfix">
+                  {% include "dojo/paging_snippet.html" with page=i_engs page_size=True %}
+              </div>
                 <div class="panel panel-default table-responsive">
                     <div class="panel-heading">
                         <h4> Closed Engagements </h4>
@@ -644,6 +706,9 @@
                         {% endfor %}
                         </tbody>
                     </table>
+                </div>
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=i_engs page_size=True %}
                 </div>
             </div>
         {% endif %}
