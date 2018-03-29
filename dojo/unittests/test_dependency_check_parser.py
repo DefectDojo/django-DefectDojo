@@ -1,12 +1,9 @@
-import sys
-sys.path.append('..')
-from dojo.tools.dependencycheck.parser import DependencyCheckParser
 from defusedxml import ElementTree
-from dojo.models import Finding
+from django.test import TestCase
+
 from dojo.models import Test
-import unittest
-import csv
-import StringIO
+from dojo.tools.dependencycheck.parser import DependencyCheckParser
+
 
 class TestFile(object):
 
@@ -17,7 +14,8 @@ class TestFile(object):
         self.name = name
         self.content = content
 
-class TestDependencyCheckParser(unittest.TestCase):
+
+class TestDependencyCheckParser(TestCase):
 
     def test_parse_without_file_has_no_findings(self):
         parser = DependencyCheckParser(None, Test())
@@ -186,7 +184,8 @@ class TestDependencyCheckParser(unittest.TestCase):
         parser = DependencyCheckParser(testfile, Test())
         self.assertEqual(1, len(parser.items))
 
-    def test_parse_file_with_multiple_vulnerabilities_has_multiple_findings(self):
+    def test_parse_file_with_multiple_vulnerabilities_has_multiple_findings(
+            self):
         content = """<?xml version="1.0"?>
 <analysis xmlns="https://jeremylong.github.io/DependencyCheck/dependency-check.1.3.xsd">
     <scanInfo>
@@ -374,9 +373,13 @@ class TestDependencyCheckParser(unittest.TestCase):
         expected_references += 'name: Reference for a bad vulnerability\nsource: MISC\n'
         expected_references += 'url: http://localhost2/reference_for_badvulnerability.pdf\n\n'
 
-        parser = DependencyCheckParser(None, Test())
-        finding = parser.get_finding_from_vulnerability(vulnerability, 'testfile.jar', Test())
+        testfile = TestFile('dp_finding.xml', finding_xml)
+        parser = DependencyCheckParser(testfile, Test())
+        finding = parser.get_finding_from_vulnerability(vulnerability,
+                                                        'testfile.jar', Test())
         self.assertEqual('testfile.jar | CVE-0000-0001', finding.title)
         self.assertEqual('High', finding.severity)
-        self.assertEqual('CWE-00 Bad Vulnerability\n\nDescription of a bad vulnerability.', finding.description)
+        self.assertEqual(
+                'CWE-00 Bad Vulnerability\n\nDescription of a bad vulnerability.',
+                finding.description)
         self.assertEqual(expected_references, finding.references)
