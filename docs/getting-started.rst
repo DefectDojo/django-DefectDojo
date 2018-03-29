@@ -84,8 +84,7 @@ And the `python` packages are (listed in `setup.py` as well):
 
 * 'Django==1.8',
 * 'MySQL-python==1.2.3',
-* 'Pillow==2.3.0',
-* 'django-secure==1.0',
+* 'Pillow==5.0.0',
 * 'django-tastypie==0.12.1',
 * 'django-tastypie-swagger',
 * 'gunicorn==19.1.1',
@@ -145,7 +144,7 @@ Docker Local Install
 *Instructions:*
 
 #. Run the docker command to pull the latest version of DefectDojo.
-        ``docker run -it -p 8000:8000 appsecpipeline/django-defectdojo bash -c "export LOAD_SAMPLE_DATA=True && bash /django-DefectDojo/docker/docker-startup.bash"``
+        ``docker run -it -p 8000:8000 appsecpipeline/django-defectdojo bash -c "export LOAD_SAMPLE_DATA=True && bash /opt/django-DefectDojo/docker/docker-startup.bash"``
 #. Navigate to: http://localhost:8000 and login with the credentials shown in the terminal.
 
 Docker Compose Install

@@ -375,7 +375,6 @@ class TestDependencyCheckParser(unittest.TestCase):
         expected_references += 'url: http://localhost2/reference_for_badvulnerability.pdf\n\n'
 
         parser = DependencyCheckParser(None, Test())
-        parser.namespace = '{https://jeremylong.github.io/DependencyCheck/dependency-check.1.3.xsd}'
         finding = parser.get_finding_from_vulnerability(vulnerability, 'testfile.jar', Test())
         self.assertEqual('testfile.jar | CVE-0000-0001', finding.title)
         self.assertEqual('High', finding.severity)

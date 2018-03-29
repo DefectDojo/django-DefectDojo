@@ -22,15 +22,17 @@ from dojo.models import Product, Engagement, Test, Finding, \
     User, ScanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, \
     BurpRawRequestResponse, Endpoint, Notes, JIRA_PKey, JIRA_Conf, \
-    JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type
+    JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
+    Languages, Language_Type, App_Analysis
 from dojo.forms import ProductForm, EngForm2, TestForm, \
     ScanSettingsForm, FindingForm, StubFindingForm, FindingTemplateForm, \
     ImportScanForm, SEVERITY_CHOICES, JIRAForm, JIRA_PKeyForm, EditEndpointForm, \
     AddEndpointForm, JIRA_IssueForm, ToolConfigForm, ToolProductSettingsForm, \
-    ToolTypeForm
+    ToolTypeForm, LanguagesTypeForm, Languages_TypeTypeForm, App_AnalysisTypeForm
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_system_setting
 from datetime import datetime
+from object.parser import import_object_eng
 
 """
     Setup logging for the api
@@ -421,6 +423,121 @@ class EngagementResource(BaseModelResource):
         return bundle
 
 """
+    /api/v1/app_analysis/
+    GET [/id/], DELETE [/id/]
+    Expects: no params or id
+    Returns Tool_ConfigurationResource
+    Relevant apply filter ?test_type=?, ?id=?
+
+    POST, PUT, DLETE [/id/]
+"""
+
+class App_AnalysisResource(BaseModelResource):
+
+    product = fields.ForeignKey(ProductResource, 'product',
+                                full=False, null=False)
+
+    user = fields.ForeignKey(UserResource, 'user', null=False)
+
+    class Meta:
+        resource_name = 'app_analysis'
+        list_allowed_methods = ['get', 'post', 'put', 'delete']
+        detail_allowed_methods = ['get', 'post', 'put', 'delete']
+        queryset = App_Analysis.objects.all()
+        include_resource_uri = True
+        filtering = {
+            'id': ALL,
+            'product': ALL_WITH_RELATIONS,
+            'user': ALL,
+            'confidence': ALL,
+            'version': ALL,
+            'icon': ALL,
+            'website': ALL,
+        }
+        authentication = DojoApiKeyAuthentication()
+        authorization = DjangoAuthorization()
+        serializer = Serializer(formats=['json'])
+
+        @property
+        def validation(self):
+            return ModelFormValidation(form_class=App_AnalysisTypeForm, resource=App_AnalysisResource)
+
+"""
+    /api/v1/language_types/
+    GET [/id/], DELETE [/id/]
+    Expects: no params or id
+    Returns Tool_ConfigurationResource
+    Relevant apply filter ?test_type=?, ?id=?
+
+    POST, PUT, DLETE [/id/]
+"""
+
+class LanguageTypeResource(BaseModelResource):
+
+    class Meta:
+        resource_name = 'language_types'
+        list_allowed_methods = ['get', 'post', 'put', 'delete']
+        detail_allowed_methods = ['get', 'post', 'put', 'delete']
+        queryset = Language_Type.objects.all()
+        include_resource_uri = True
+        filtering = {
+            'id': ALL,
+            'language': ALL,
+        }
+        authentication = DojoApiKeyAuthentication()
+        authorization = DjangoAuthorization()
+        serializer = Serializer(formats=['json'])
+
+        @property
+        def validation(self):
+            return ModelFormValidation(form_class=Languages_TypeTypeForm, resource=LanguageTypeResource)
+
+"""
+    /api/v1/languages/
+    GET [/id/], DELETE [/id/]
+    Expects: no params or id
+    Returns Tool_ConfigurationResource
+    Relevant apply filter ?test_type=?, ?id=?
+
+    POST, PUT, DLETE [/id/]
+"""
+
+class LanguagesResource(BaseModelResource):
+
+    product = fields.ForeignKey(ProductResource, 'product',
+                                full=False, null=False)
+
+    language_type = fields.ForeignKey(LanguageTypeResource, 'language',
+                                full=False, null=False)
+
+    user = fields.ForeignKey(UserResource, 'user', null=False)
+
+    class Meta:
+        resource_name = 'languages'
+        list_allowed_methods = ['get', 'post', 'put', 'delete']
+        detail_allowed_methods = ['get', 'post', 'put', 'delete']
+        queryset = Languages.objects.all()
+        include_resource_uri = True
+        filtering = {
+            'id': ALL,
+            'files': ALL,
+            'language_type': ALL_WITH_RELATIONS,
+            'product': ALL_WITH_RELATIONS,
+            'user': ALL,
+            'blank': ALL,
+            'comment': ALL,
+            'code': ALL
+        }
+        authentication = DojoApiKeyAuthentication()
+        authorization = DjangoAuthorization()
+        serializer = Serializer(formats=['json'])
+
+        @property
+        def validation(self):
+            return ModelFormValidation(form_class=LanguagesTypeForm, resource=LanguagesResource)
+
+
+"""
     /api/v1/tool_configurations/
     GET [/id/], DELETE [/id/]
     Expects: no params or id
@@ -632,8 +749,8 @@ class JIRA_ConfResource(BaseModelResource):
 class JiraResource(BaseModelResource):
     product = fields.ForeignKey(ProductResource, 'product',
                                 full=False, null=False)
-    conf = fields.ForeignKey(JIRA_ConfResource, 'JIRA_Conf',
-                                full=False, null=False)
+    conf = fields.ForeignKey(JIRA_ConfResource, 'conf',
+                                full=False, null=True)
     class Meta:
         resource_name = 'jira_product_configurations'
         list_allowed_methods = ['get', 'post', 'put', 'delete']
@@ -1073,6 +1190,37 @@ class ImportScanValidation(Validation):
 
         return errors
 
+class BuildDetails(MultipartResource, Resource):
+    file = fields.FileField(attribute='file')
+    engagement = fields.CharField(attribute='engagement')
+
+    class Meta:
+        resource_name = 'build_details'
+        fields = ['engagement', 'file']
+        list_allowed_methods = ['post']
+        detail_allowed_methods = []
+        include_resource_uri = True
+
+        authentication = DojoApiKeyAuthentication()
+        authorization = DjangoAuthorization()
+        object_class = ImportScanObject
+
+    def hydrate(self, bundle):
+        bundle.obj.__setattr__('engagement_obj',
+                               Engagement.objects.get(id=get_pk_from_uri(bundle.data['engagement'])))
+
+        return bundle
+
+    def obj_create(self, bundle, **kwargs):
+        bundle.obj = ImportScanObject(initial=kwargs)
+        self.is_valid(bundle)
+        if bundle.errors:
+            raise ImmediateHttpResponse(response=self.error_response(bundle.request, bundle.errors))
+
+        bundle = self.full_hydrate(bundle)
+
+        import_object_eng(bundle.request, bundle.obj.__getattr__('engagement_obj'), bundle.data['file'])
+
 class ImportScanResource(MultipartResource, Resource):
     scan_date = fields.DateTimeField(attribute='scan_date')
     minimum_severity = fields.CharField(attribute='minimum_severity')
@@ -1172,7 +1320,7 @@ class ImportScanResource(MultipartResource, Resource):
                 item.last_reviewed_by = bundle.request.user
                 item.active = bundle.data['active']
                 item.verified = bundle.data['verified']
-                item.save()
+                item.save(dedupe_option=False)
 
                 if hasattr(item, 'unsaved_req_resp') and len(item.unsaved_req_resp) > 0:
                     for req_resp in item.unsaved_req_resp:
@@ -1200,6 +1348,7 @@ class ImportScanResource(MultipartResource, Resource):
                                                                  product=t.engagement.product)
 
                     item.endpoints.add(ep)
+                item.save()
 
                 if item.unsaved_tags is not None:
                     item.tags = item.unsaved_tags

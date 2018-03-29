@@ -1,7 +1,7 @@
 import base64
 from itertools import izip, chain
 
-import re
+import re, random
 from django import template
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import stringfilter
@@ -74,6 +74,30 @@ def content_type_str(obj):
         return False
     return ContentType.objects.get_for_model(obj)
 
+@register.filter(name='percentage')
+def percentage(fraction, value):
+
+    try:
+        return "%.1f%%" % ((float(fraction) / float(value)) * 100)
+    except ValueError:
+        return ''
+
+@register.filter(name='version_num')
+def version_num(value):
+    version = ""
+    if value:
+        version = "v." + value
+
+    return version
+
+@register.filter
+def finding_status(finding, duplicate):
+    return finding.filter(duplicate=duplicate)
+
+@register.simple_tag
+def random_html():
+    r = lambda: random.randint(0,255)
+    return ('#%02X%02X%02X' % (r(),r(),r()))
 
 @register.filter(is_safe=True, needs_autoescape=False)
 @stringfilter
@@ -160,5 +184,31 @@ def severity_value(value):
             value = Finding.get_numerical_severity(value)
     except:
         pass
+
+    return value
+
+@register.filter
+def tracked_object_value(current_object):
+    value = ""
+
+    if current_object.path is not None:
+        value = current_object.path
+    elif current_object.folder is not None:
+        value = current_object.folder
+    elif current_object.artifact is not None:
+        value = current_object.artifact
+
+    return value
+
+@register.filter
+def tracked_object_type(current_object):
+    value = ""
+
+    if current_object.path is not None:
+        value = "File"
+    elif current_object.folder is not None:
+        value = "Folder"
+    elif current_object.artifact is not None:
+        value = "Artifact"
 
     return value

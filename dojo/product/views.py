@@ -16,11 +16,12 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
+from django.db.models import Sum, Count
 
-from dojo.filters import ProductFilter, ProductFindingFilter
+from dojo.filters import ProductFilter, ProductFindingFilter, EngagementFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, ProductMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm
 from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, \
-    Tool_Product_Settings, Cred_User, Cred_Mapping, Test_Type, System_Settings
+    Tool_Product_Settings, Cred_User, Cred_Mapping, Test_Type, System_Settings, Languages, App_Analysis
 from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, get_system_setting, create_notification
 from custom_field.models import CustomFieldValue, CustomField
 from dojo.tasks import add_epic_task, add_issue_task
@@ -28,12 +29,6 @@ from tagging.models import Tag
 from tagging.utils import get_tag_list
 from tagging.views import TaggedItem
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='[%(asctime)s] %(levelname)s [%(name)s:%(lineno)d] %(message)s',
-    datefmt='%d/%b/%Y %H:%M:%S',
-    filename=settings.DOJO_ROOT + '/../django_app.log',
-)
 logger = logging.getLogger(__name__)
 
 
@@ -82,11 +77,20 @@ def iso_to_gregorian(iso_year, iso_week, iso_day):
 def view_product(request, pid):
     prod = get_object_or_404(Product, id=pid)
     engs = Engagement.objects.filter(product=prod, active=True)
-    i_engs = Engagement.objects.filter(product=prod, active=False).order_by('-updated')
+
+    result = EngagementFilter(
+        request.GET,
+        queryset=Engagement.objects.filter(product=prod, active=False).order_by('-target_end'))
+
+    i_engs_page = get_page_items(request, result.qs, 10)
+
     scan_sets = ScanSettings.objects.filter(product=prod)
     tools = Tool_Product_Settings.objects.filter(product=prod).order_by('name')
     auth = request.user.is_staff or request.user in prod.authorized_users.all()
     creds = Cred_Mapping.objects.filter(product=prod).select_related('cred_id').order_by('cred_id')
+    langSummary = Languages.objects.filter(product=prod).aggregate(Sum('files'), Sum('code'), Count('files'))
+    languages = Languages.objects.filter(product=prod).order_by('-code')
+    app_analysis = App_Analysis.objects.filter(product=prod).order_by('name')
 
     if not auth:
         # will render 403
@@ -241,7 +245,7 @@ def view_product(request, pid):
                   {'prod': prod,
                    'product_metadata': product_metadata,
                    'engs': engs,
-                   'i_engs': i_engs,
+                   'i_engs': i_engs_page,
                    'scan_sets': scan_sets,
                    'tools': tools,
                    'creds': creds,
@@ -261,6 +265,9 @@ def view_product(request, pid):
                    'medium_weekly': medium_weekly,
                    'test_data': test_data,
                    'user': request.user,
+                   'languages': languages,
+                   'langSummary': langSummary,
+                   'app_analysis': app_analysis,
                    'authorized': auth})
 
 
@@ -414,9 +421,12 @@ Greg
 Status: in production
 """
 
-@user_passes_test(lambda u: u.is_staff)
 def all_product_findings(request, pid):
     p = get_object_or_404(Product, id=pid)
+    auth = request.user.is_staff or request.user in p.authorized_users.all()
+    if not auth:
+        # will render 403
+        raise PermissionDenied
     result = ProductFindingFilter(
         request.GET,
         queryset=Finding.objects.filter(test__engagement__product=p,

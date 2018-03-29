@@ -3,7 +3,9 @@ language: python
 install: true
 
 env:
+  - TEST=smoke-test
   - TEST=integration-test
+  - TEST=unit-test
   - TEST=sourceclear
   - TEST=bandit
   - TEST=docker-bench-security
@@ -12,7 +14,7 @@ env:
 
 matrix:
   allow_failures:
-    - env: TEST=bandit 
+    - env: TEST=bandit
     - env: TEST=sourceclear
     - env: TEST=pep8
 
@@ -28,9 +30,19 @@ script:
   - |
     echo "Running test=$TEST"
     case "$TEST" in
+      smoke-test)
+        travis_fold start "smoke-test"
+        bash entrypoint_scripts/test/travis-smoke-test.sh || exit 1
+        travis_fold end "smoke-test"
+        ;;
+      unit-test)
+        travis_fold start "unit-test"
+        bash entrypoint_scripts/test/travis-unit-test.sh || exit 1
+        travis_fold end "unit-test"
+        ;;
       integration-test)
         travis_fold start "integration-test"
-        ./scripts/travis-integration-test.sh 
+        bash entrypoint_scripts/test/travis-integration-test.sh || exit 1
         travis_fold end "integration-test"
         ;;
       sourceclear)
@@ -40,7 +52,7 @@ script:
       bandit)
         # install bandit
         pip install bandit
-  
+
         ## Run Bandit python static code
         bandit -r * -x venv,tests,ansible
         ;;
@@ -60,10 +72,9 @@ script:
 
 after_success:
   #Push to docker repo
-  - docker tag $REPO $REPO:$TAG
-  - docker tag $REPO $REPO:travis-$TRAVIS_BUILD_NUMBER
   - |
-    if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TEST" == "integration-test" ] && [ "$DOCKER_USER" != "" ] && [  "$DOCKER_PASS" != "" ]; then
+    if [ "$TRAVIS_TAG" != "" ] && [ "$DOCKER_USER" != "" ] && [  "$DOCKER_PASS" != "" ]; then
+      docker tag $REPO $REPO:$TRAVIS_TAG
       docker login -u "$DOCKER_USER" -p "$DOCKER_PASS";
       docker push $REPO ;
     fi

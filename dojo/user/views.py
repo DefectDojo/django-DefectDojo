@@ -1,6 +1,5 @@
 import logging
 
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, logout
 from django.contrib.auth.decorators import user_passes_test
@@ -17,12 +16,6 @@ from dojo.forms import DojoUserForm, AddDojoUserForm, DeleteUserForm, APIKeyForm
 from dojo.models import Product, Dojo_User, UserContactInfo, Alerts
 from dojo.utils import get_page_items, add_breadcrumb, get_system_setting
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='[%(asctime)s] %(levelname)s [%(name)s:%(lineno)d] %(message)s',
-    datefmt='%d/%b/%Y %H:%M:%S',
-    filename=settings.DOJO_ROOT + '/../django_app.log',
-)
 logger = logging.getLogger(__name__)
 
 
@@ -84,7 +77,11 @@ def alerts(request):
         alerts = alerts.filter(~Q(id__in=removed_alerts))
 
     paged_alerts = get_page_items(request, alerts, 25)
-    add_breadcrumb(title="Alerts for " + request.user.get_full_name(), top_level=True, request=request)
+    alert_title = "Alerts"
+    if request.user.get_full_name():
+        alert_title += " for " + request.user.get_full_name()
+        
+    add_breadcrumb(title=alert_title, top_level=True, request=request)
     return render(request,
                   'dojo/alerts.html',
                   {'alerts': paged_alerts})

@@ -27,12 +27,6 @@ from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
 from dojo.utils import get_page_items, add_breadcrumb, findings_this_period, opened_in_period, count_findings, \
     get_period_counts, get_punchcard_data, get_system_setting
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='[%(asctime)s] %(levelname)s [%(name)s:%(lineno)d] %(message)s',
-    datefmt='%d/%b/%Y %H:%M:%S',
-    filename=settings.DOJO_ROOT + '/../django_app.log',
-)
 logger = logging.getLogger(__name__)
 
 """
@@ -48,7 +42,8 @@ def critical_product_metrics(request, mtype):
     add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
     return render(request, template, {
         'name': page_name,
-        'critical_prods': critical_products
+        'critical_prods': critical_products,
+        'url_prefix': get_system_setting('url_prefix')
     })
 
 @cache_page(60 * 5)  # cache for 5 minutes

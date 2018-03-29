@@ -19,11 +19,11 @@
 - name: Generate Django secret
   shell: 'cat /dev/urandom | tr -dc "a-zA-Z0-9" | head -c 128'
   args:
-    creates: '{{ dd_install_dir }}/dojo/settings.py'
+    creates: '{{ dd_install_dir }}/dojo/settings/settings.py'
   register: django_secret
 
 - name: Populate DefectDojo settings file
-  template: src=settings.j2 dest={{ dd_install_dir }}/dojo/settings.py owner={{ dd_user }} group=www-data
+  template: src=settings.j2 dest={{ dd_install_dir }}/dojo/settings/settings.py owner={{ dd_user }} group=www-data
 
 - name: Install virtualenv
   pip: name=virtualenv
@@ -44,12 +44,7 @@
   sudo_user: '{{ dd_user }}'
 
 - name: Install Pillow
-  pip: name=Pillow version=2.3.0 virtualenv={{ venv_dir }}
-  sudo: yes
-  sudo_user: '{{ dd_user }}'
-
-- name: Install django-secure
-  pip: name=django-secure virtualenv={{ venv_dir }}
+  pip: name=Pillow version=5.0.0 virtualenv={{ venv_dir }}
   sudo: yes
   sudo_user: '{{ dd_user }}'
 
@@ -150,11 +145,6 @@
 
 - name: Install celery
   pip: name=celery virtualenv={{ venv_dir }}
-  sudo: yes
-  sudo_user: '{{ dd_user }}'
-
-- name: Install sqlalchemy
-  pip: name=sqlalchemy virtualenv={{ venv_dir }}
   sudo: yes
   sudo_user: '{{ dd_user }}'
 

@@ -3,7 +3,7 @@
 function control_c()
 # run if user hits control-c
 {
-  kill -15 $cpid  $bpid $ppid
+  kill -15 $cpid $bpid $ppid
   exit $?
 }
 

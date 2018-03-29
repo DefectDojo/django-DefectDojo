@@ -15,19 +15,13 @@ from django.utils import timezone
 from dojo.models import Finding, Engagement, Risk_Acceptance
 from dojo.utils import add_breadcrumb, get_punchcard_data, get_system_setting
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='[%(asctime)s] %(levelname)s [%(name)s:%(lineno)d] %(message)s',
-    datefmt='%d/%b/%Y %H:%M:%S',
-    filename=settings.DOJO_ROOT + '/../django_app.log',
-)
 logger = logging.getLogger(__name__)
 
 
 def home(request):
     if request.user.is_authenticated() and request.user.is_staff:
         return HttpResponseRedirect(reverse('dashboard'))
-    return HttpResponseRedirect(reverse('metrics'))
+    return HttpResponseRedirect(reverse('product'))
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -38,6 +32,7 @@ def dashboard(request):
         engagement_count = Engagement.objects.filter(active=True).count()
         finding_count = Finding.objects.filter(verified=True,
                                                mitigated=None,
+                                               duplicate=False,
                                                date__range=[seven_days_ago,
                                                             now]).count()
         mitigated_count = Finding.objects.filter(mitigated__range=[seven_days_ago,
@@ -47,12 +42,13 @@ def dashboard(request):
             reporter=request.user, created__range=[seven_days_ago, now]) for finding in ra.accepted_findings.all()])
 
         # forever counts
-        findings = Finding.objects.filter(verified=True)
+        findings = Finding.objects.filter(verified=True, duplicate=False)
     else:
         engagement_count = Engagement.objects.filter(lead=request.user,
                                                      active=True).count()
         finding_count = Finding.objects.filter(reporter=request.user,
                                                verified=True,
+                                               duplicate=False,
                                                mitigated=None,
                                                date__range=[seven_days_ago,
                                                             now]).count()
@@ -65,7 +61,7 @@ def dashboard(request):
 
         # forever counts
         findings = Finding.objects.filter(reporter=request.user,
-                                          verified=True)
+                                          verified=True, duplicate=True)
 
     sev_counts = {'Critical': 0,
                   'High': 0,
@@ -94,6 +90,7 @@ def dashboard(request):
         for finding in Finding.objects.filter(
                 reporter=request.user,
                 verified=True,
+                duplicate=False,
                 date__range=[datetime(date_to_use.year,
                                       date_to_use.month, 1,
                                       tzinfo=timezone.get_current_timezone()),

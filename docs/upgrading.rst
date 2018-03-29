@@ -124,3 +124,32 @@ If you like you can then remove the following settings from settings.py to avoid
 * ``URL_PREFIX``
 * ``TIME_ZONE``
 * ``TEAM_NAME``
+
+Upgrading to DefectDojo Version 1.2.2
+------------------------------------
+
+Upgrading to 1.2.2 requires:
+
+1. Copying settings.py to the settings/ folder.
+
+2. If you have supervisor scripts change DJANGO_SETTINGS_MODULE=dojo.settings.settings
+
+Upgrading to DefectDojo Version 1.2.3
+------------------------------------
+
+Upgrading to 1.2.3 requires:
+
+1.  ./manage.py makemigrations
+    ./manage.py migrate
+    ./manage.py loaddata dojo/fixtures/language_type.json
+
+2. Currently languages and technologies can be updated via the API or in the admin section of Django.
+
+Upgrading to DefectDojo Version 1.2.4
+------------------------------------
+
+Upgrading to 1.2.4 requires:
+
+1.  ./manage.py makemigrations
+    ./manage.py migrate
+    ./manage.py loaddata dojo/fixtures/objects_review.json

@@ -27,7 +27,7 @@ DOJO_ROOT = 'DOJODIR'
 DATABASES = {
     'default': {
         'ENGINE': 'BACKENDDB',
-        # 'mysql','sqlite3' or 'oracle'.
+        # 'django.db.backends.mysql','django.db.backends.sqlite3' or 'django.db.backends.oracle'.
         'NAME': 'MYSQLDB',  # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': 'MYSQLUSER',
@@ -239,14 +239,29 @@ LOGGING = {
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
-        }
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue'
+        },
     },
     'handlers': {
         'mail_admins': {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
-        }
+        },
+        'file_handler_debug': {
+            'level': 'DEBUG',
+            'filters': ['require_debug_true'],
+            'class': 'logging.FileHandler',
+            'filename': '%s/../django_app.log' % (DOJO_ROOT or '.',)
+        },
+        'file_handler': {
+            'level': 'INFO',
+            'filters': ['require_debug_false'],
+            'class': 'logging.FileHandler',
+            'filename': '%s/../django_app.log' % (DOJO_ROOT or '.',)
+        },
     },
     'loggers': {
         'django.request': {
@@ -254,5 +269,10 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
+        'dojo': {
+            'handlers': ['file_handler', 'file_handler_debug'],
+            'level': 'DEBUG',
+            'propagate': False,
+        }
     }
 }
