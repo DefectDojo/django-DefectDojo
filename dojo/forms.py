@@ -1212,7 +1212,7 @@ class DeleteUserForm(forms.ModelForm):
 class UserContactInfoForm(forms.ModelForm):
     class Meta:
         model = UserContactInfo
-        exclude = ['user']
+        exclude = ['user', 'slack_user_id']
 
 
 def get_years():
@@ -1429,7 +1429,7 @@ class CredMappingFormProd(forms.ModelForm):
 class SystemSettingsForm(forms.ModelForm):
     class Meta:
         model = System_Settings
-        exclude = ['']
+        exclude = ['product_grade']
 
 class NotificationsForm(forms.ModelForm):
 

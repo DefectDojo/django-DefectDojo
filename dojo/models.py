@@ -19,7 +19,7 @@ from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.core.validators import RegexValidator
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.utils.timezone import now
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToCover
@@ -28,7 +28,7 @@ from pytz import all_timezones
 from tagging.registry import register as tag_register
 from multiselectfield import MultiSelectField
 import hashlib
-
+from django import forms
 
 class System_Settings(models.Model):
     enable_deduplication = models.BooleanField(
@@ -99,13 +99,29 @@ class System_Settings(models.Model):
                                       'be displayed.')
     false_positive_history = models.BooleanField(default=False)
 
-    url_prefix = models.CharField(max_length=300, default='', blank=True)
+    url_prefix = models.CharField(max_length=300, default='', blank=True, help_text="URL prefix if DefectDojo is installed in it's own virtual subdirectory.")
     team_name = models.CharField(max_length=100, default='', blank=True)
     time_zone = models.CharField(max_length=50,
                                  choices=[(tz, tz) for tz in all_timezones],
                                  default='UTC', blank=False)
-    display_endpoint_uri = models.BooleanField(default=False)
+    display_endpoint_uri = models.BooleanField(default=False, verbose_name="Display Endpoint Full URI", help_text="Displays the full endpoint URI in the endpoint view.")
+    enable_product_grade = models.BooleanField(default=False, verbose_name="Enable Product Grading", help_text="Displays a grade letter next to a product to show the overall health.")
+    product_grade = models.CharField(max_length=800, blank=True)
+    product_grade_a = models.IntegerField(default=90, verbose_name="Grade A", help_text="Percentage score for an 'A' >=")
+    product_grade_b = models.IntegerField(default=80, verbose_name="Grade B", help_text="Percentage score for a 'B' >=")
+    product_grade_c = models.IntegerField(default=70, verbose_name="Grade C", help_text="Percentage score for a 'C' >=")
+    product_grade_d = models.IntegerField(default=60, verbose_name="Grade D", help_text="Percentage score for a 'D' >=")
+    product_grade_f = models.IntegerField(default=59, verbose_name="Grade F", help_text="Percentage score for an 'F' <=")
 
+class SystemSettingsFormAdmin(forms.ModelForm):
+    product_grade = forms.CharField( widget=forms.Textarea )
+    class Meta:
+        model = System_Settings
+        fields = ['product_grade']
+
+class System_SettingsAdmin(admin.ModelAdmin):
+    form = SystemSettingsFormAdmin
+    fields = ('product_grade',)
 
 def get_current_date():
     return timezone.now().date()
@@ -152,9 +168,10 @@ class UserContactInfo(models.Model):
                                              "Up to 15 digits allowed.")
     twitter_username = models.CharField(blank=True, null=True, max_length=150)
     github_username = models.CharField(blank=True, null=True, max_length=150)
-    slack_username = models.CharField(blank=True, null=True, max_length=150)
+    slack_username = models.CharField(blank=True, null=True, max_length=150, help_text="Email address associated with your slack account", verbose_name="Slack Email Address")
+    slack_user_id = models.CharField(blank=True, null=True, max_length=25)
     hipchat_username = models.CharField(blank=True, null=True, max_length=150)
-    block_execution = models.BooleanField(default=False)
+    block_execution = models.BooleanField(default=False, help_text="Instead of async deduping a finding the findings will be deduped synchronously and will 'block' the user until completion.")
 
 
 class Contact(models.Model):
@@ -260,8 +277,8 @@ class Product(models.Model):
     They remain in model for backwards compatibility and will be removed
     in a future release.  prod_manager, tech_contact, manager
 
-    The admin script migrate_product_contacts should be used to migrate data 
-    from these fields to their replacements.  
+    The admin script migrate_product_contacts should be used to migrate data
+    from these fields to their replacements.
     ./manage.py migrate_product_contacts
     '''
     prod_manager = models.CharField(default=0, max_length=200)  # unused
@@ -281,6 +298,7 @@ class Product(models.Model):
     updated = models.DateTimeField(editable=False, null=True, blank=True)
     tid = models.IntegerField(default=0, editable=False)
     authorized_users = models.ManyToManyField(User, blank=True)
+    prod_numeric_grade = models.IntegerField(null=True, blank=True)
 
     def __unicode__(self):
         return self.name
@@ -838,6 +856,10 @@ class Finding(models.Model):
         else:
             self.dyanmic_finding = True
         self.found_by.add(self.test.test_type)
+
+        from dojo.utils import calculate_grade
+        calculate_grade(self.test.engagement.product)
+
         super(Finding, self).save(*args, **kwargs)
         if (dedupe_option):
             system_settings = System_Settings.objects.get()
@@ -860,6 +882,11 @@ class Finding(models.Model):
                     sync_false_history(self, *args, **kwargs)
                 else:
                     async_false_history.delay(self, *args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        super(Finding, self).delete(*args, **kwargs)
+        from dojo.utils import calculate_grade
+        calculate_grade(self.test.engagement.product)
 
     def clean(self):
         no_check = ["test", "reporter"]
@@ -1203,6 +1230,7 @@ class Notifications(models.Model):
     upcoming_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     user_mentioned = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     code_review = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    review_requested = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     other = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     user = models.ForeignKey(User, default=None, null=True, editable=False)
 
@@ -1462,7 +1490,8 @@ admin.site.register(Tool_Product_Settings)
 admin.site.register(Tool_Type)
 admin.site.register(Cred_User)
 admin.site.register(Cred_Mapping)
-admin.site.register(System_Settings)
+admin.site.register(System_Settings, System_SettingsAdmin)
+
 
 watson.register(Product)
 watson.register(Test)
