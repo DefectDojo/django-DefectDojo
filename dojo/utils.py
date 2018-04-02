@@ -1032,7 +1032,7 @@ def get_slack_user_id(user_email):
     user_id = None
 
     res = requests.request(method='POST', url='https://slack.com/api/users.list',
-                     data={'token':'xoxb-242897902580-JxwtAaOY5NSUeOgEgjGsZlrR'})
+                     data={'token': get_system_setting('slack_token')})
 
     users = json.loads(res.text)
 
