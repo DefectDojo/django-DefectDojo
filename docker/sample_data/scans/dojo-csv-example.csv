@@ -1,2 +1,0 @@
-Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified,FalsePositive,Duplicate
-2/2/17,XSS on Login Page,79,http://www.bodgeit-all.com/login,High,"XSS Description","Please use the OWASP Java Encoder.","Once the malicious script is injected, the attacker can perform a variety of malicious activities.",True,True,False,False

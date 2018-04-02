@@ -144,7 +144,7 @@ Docker Local Install
 *Instructions:*
 
 #. Run the docker command to pull the latest version of DefectDojo.
-        ``docker run -it -p 8000:8000 appsecpipeline/django-defectdojo bash -c "export LOAD_SAMPLE_DATA=True && bash /django-DefectDojo/docker/docker-startup.bash"``
+        ``docker run -it -p 8000:8000 appsecpipeline/django-defectdojo bash -c "export LOAD_SAMPLE_DATA=True && bash /opt/django-DefectDojo/docker/docker-startup.bash"``
 #. Navigate to: http://localhost:8000 and login with the credentials shown in the terminal.
 
 Docker Compose Install
