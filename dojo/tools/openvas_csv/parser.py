@@ -327,7 +327,14 @@ class OpenVASUploadCsvParser(object):
                 self.chain.process_column(self.column_names[column_number], column, finding)
                 column_number += 1
 
-            if finding is not None:
+            if finding is not None and row_number > 0:
+                if finding.url is None:
+                    finding.url = ""
+                if finding.title is None:
+                    finding.title = ""
+                if finding.description is None:
+                    finding.description = ""
+
                 key = hashlib.md5(finding.url + '|' + finding.severity + '|' + finding.title + '|' + finding.description).hexdigest()
 
                 if key not in self.dupes:
