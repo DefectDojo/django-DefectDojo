@@ -247,14 +247,18 @@ function ensure_mysql_application_db() {
     if mysql -fs --protocol=TCP -h "$SQLHOST" -P "$SQLPORT" -u"$SQLUSER" -p"$SQLPWD" "$DBNAME" >/dev/null 2>&1 </dev/null; then
         echo "Database $DBNAME already exists!"
         echo
-        read -p "Drop database $DBNAME? [Y/n] " DELETE
+        if [ "$AUTO_DOCKER" == "yes" ]; then
+            if [ -z "$FLUSHDB" ]; then
+                DELETE="yes"
+            else
+                DELETE="$FLUSHDB"
+            fi
+        else
+            read -p "Drop database $DBNAME? [Y/n] " DELETE
+        fi
         if [[ ! $DELETE =~ ^[nN]$ ]]; then
             mysqladmin -f --protocol=TCP --host="$SQLHOST" --port="$SQLPORT" --user="$SQLUSER" --password="$SQLPWD" drop "$DBNAME"
             mysqladmin    --protocol=TCP --host="$SQLHOST" --port="$SQLPORT" --user="$SQLUSER" --password="$SQLPWD" create "$DBNAME"
-        else
-            echo "Error! Must supply an empty database to proceed."
-            echo
-            ensure_mysql_application_db
         fi
     else
         # Set the root password for mysql - install has it blank
