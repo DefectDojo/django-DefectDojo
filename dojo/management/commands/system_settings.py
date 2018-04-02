@@ -8,7 +8,7 @@ class Command(BaseCommand):
         code = """def grade_product(crit, high, med, low):
             health=100
             if crit > 0:
-                health = 90
+                health = 40
                 health = health - ((crit - 1) * 5)
             if high > 0:
                 if health == 100:
