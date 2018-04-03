@@ -153,3 +153,20 @@ Upgrading to 1.2.4 requires:
 1.  ./manage.py makemigrations
     ./manage.py migrate
     ./manage.py loaddata dojo/fixtures/objects_review.json
+
+
+Upgrading to DefectDojo Version 1.2.8
+------------------------------------
+
+New feature: Product Grading (Overall Product Health)
+Upgrading to 1.2.8 requires:
+
+1.  ./manage.py makemigrations
+    ./manage.py migrate
+    ./manage.py system_settings
+
+2. ./manage.py collectstatic --noinput
+
+3. pip install asteval
+
+4. Complete
