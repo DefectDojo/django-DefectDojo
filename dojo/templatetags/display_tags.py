@@ -88,7 +88,32 @@ def version_num(value):
     if value:
         version = "v." + value
 
-    return version
+    return value
+
+@register.filter(name='product_grade')
+def product_grade(product):
+    grade = ""
+    system_settings = System_Settings.objects.get()
+    if system_settings.enable_product_grade:
+        prod_numeric_grade = product.prod_numeric_grade
+
+        #print prod_numeric_grade
+        if prod_numeric_grade is "" or prod_numeric_grade is None:
+            from dojo.utils import calculate_grade
+            calculate_grade(product)
+        if prod_numeric_grade:
+            if prod_numeric_grade >= system_settings.product_grade_a:
+                grade = 'A'
+            elif prod_numeric_grade < system_settings.product_grade_a and prod_numeric_grade >= system_settings.product_grade_b:
+                grade = 'B'
+            elif prod_numeric_grade < system_settings.product_grade_b and prod_numeric_grade >= system_settings.product_grade_c:
+                grade = 'C'
+            elif prod_numeric_grade < system_settings.product_grade_c and prod_numeric_grade >= system_settings.product_grade_d:
+                grade = 'D'
+            elif prod_numeric_grade <= system_settings.product_grade_f:
+                grade = 'F'
+
+    return grade
 
 @register.filter
 def finding_status(finding, duplicate):

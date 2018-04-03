@@ -1,7 +1,7 @@
 import calendar as tcalendar
 import re
 import sys
-import binascii, os, hashlib
+import binascii, os, hashlib, json
 from Crypto.Cipher import AES
 from calendar import monthrange
 from datetime import date, datetime, timedelta
@@ -25,7 +25,7 @@ from dojo.models import Finding, Scan, Test, Engagement, Stub_Finding, Finding_T
                         Report, Product, JIRA_PKey, JIRA_Issue, Dojo_User, User, Notes, \
                         FindingImage, Alerts, System_Settings, Notifications
 from django_slack import slack_message
-
+from asteval import Interpreter
 
 """
 Michael & Fatima:
@@ -81,6 +81,7 @@ def sync_dedupe(new_finding, *args, **kwargs):
                 find.found_by.add(new_finding.test.test_type)
                 super(Finding, new_finding).save(*args, **kwargs)
 
+        calculate_grade(find.test.engagement.product)
 
 def count_findings(findings):
     product_count = {}
@@ -1030,6 +1031,22 @@ def get_system_setting(setting):
 
     return getattr(system_settings, setting, None)
 
+def get_slack_user_id(user_email):
+    user_id = None
+
+    res = requests.request(method='POST', url='https://slack.com/api/users.list',
+                     data={'token': get_system_setting('slack_token')})
+
+    users = json.loads(res.text)
+
+    if users:
+        for member in users["members"]:
+            if "email" in member["profile"]:
+                if user_email == member["profile"]["email"]:
+                    user_id = member["id"]
+                    break
+
+    return user_id
 
 def create_notification(event=None, **kwargs):
     def create_notification_message(event, notification_type):
@@ -1129,7 +1146,12 @@ def create_notification(event=None, **kwargs):
             notifications = Notifications()
 
         if slack_enabled and 'slack' in getattr(notifications, event) and user.usercontactinfo.slack_username is not None:
-            send_slack_notification('@%s' % user.usercontactinfo.slack_username)
+            slack_user_id = user.usercontactinfo.slack_user_id
+            if user.usercontactinfo.slack_user_id is None:
+                #Lookup the slack userid
+                slack_user_id = get_slack_user_id(user.usercontactinfo.slack_username)
+
+            send_slack_notification('@%s' % slack_user_id)
 
         # HipChat doesn't seem to offer direct message functionality, so no HipChat PM functionality here...
 
@@ -1138,3 +1160,30 @@ def create_notification(event=None, **kwargs):
 
         if 'alert' in getattr(notifications, event):
             send_alert_notification(user)
+
+def calculate_grade(product):
+    system_settings = System_Settings.objects.get()
+    if system_settings.enable_product_grade:
+        severity_values = Finding.objects.filter(~Q(severity='Info'),active=True,duplicate=False, verified=True, false_p=False, test__engagement__product=product).values('severity').annotate(Count('numerical_severity')).order_by()
+
+        low = 0
+        medium = 0
+        high = 0
+        critical = 0
+        for severity_count in severity_values:
+            if severity_count['severity'] == "Critical":
+                critical = severity_count['numerical_severity__count']
+            elif severity_count['severity'] == "High":
+                high = severity_count['numerical_severity__count']
+            elif severity_count['severity'] == "Medium":
+                medium = severity_count['numerical_severity__count']
+            elif severity_count['severity'] == "Low":
+                low = severity_count['numerical_severity__count']
+
+        if severity_values:
+            aeval = Interpreter()
+            aeval(system_settings.product_grade)
+            grade_product = "grade_product(%s, %s, %s, %s)" % (critical, high, medium, low)
+            #prod = Product.objects.get(id=finding.test.engagement.product.id)
+            product.prod_numeric_grade = aeval(grade_product)
+            product.save()
