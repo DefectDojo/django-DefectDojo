@@ -12,6 +12,11 @@
             <div class="clearfix">
                 <h3 class="pull-left">
                     {{ prod }}
+                    {% with grade=prod|product_grade %}
+                      {% if grade %}
+                        <div class="btn btn-tag {{ grade }}">{{ grade }}</div>
+                      {% endif %}
+                    {% endwith %}
                     {% if prod.tags %}
                       <sup>
                           {% for tag in prod.tags %}

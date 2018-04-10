@@ -1130,6 +1130,30 @@ hr.report-page-break:before {
     text-decoration: none;
 }
 
+.btn-grade {
+    border-radius: 2px;
+    border-color: #ddd;
+    color: #ffffff;
+    padding: 1px 1px 1px 1px;
+    text-decoration: none;
+}
+
+.A {
+    background: #4ec83d;
+}
+.B {
+  background: #ffa100;
+}
+.C {
+  background: #FFBD33;
+}
+.D {
+  background: #cc3300;
+}
+.F {
+  background: #ef251e;
+}
+
 div.tags .label {
     font-size: 90%;
     display: inline-block;
