@@ -3,6 +3,23 @@ MAINTAINER Matt Tesauro <matt.tesauro@owasp.org>
 
 # # # Create a single Docker image running DefectDojo and all dependencies
 
+# Setup database environment variables. Used to setup an external
+# database, and is optional.
+# Set a variable using build args.
+#   i.e. `docker build --build-arg DBNAME="db.foopy.com" ...`
+
+ARG SQLHOST=""
+ARG SQLPORT=""
+ARG SQLUSER=""
+ARG SQLPWD=""
+ARG DBNAME=""
+
+ENV SQLHOST=$SQLHOST
+ENV SQLPORT=$SQLPORT
+ENV SQLUSER=$SQLUSER
+ENV SQLPWD=$SQLPWD
+ENV DBNAME=$DBNAME
+
 # Update and install basic requirements;
 # Install mysql-server already at this place, since we want to avoid
 # interactivity when creating a Docker image;
