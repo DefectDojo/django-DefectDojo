@@ -262,7 +262,7 @@ function ensure_mysql_application_db() {
         fi
     else
         # Set the root password for mysql - install has it blank
-        mysql -uroot -e "SET PASSWORD = PASSWORD('${SQLPW}');"
+        mysql -uroot -e "SET PASSWORD = PASSWORD('${SQLPWD}');"
 
         if mysqladmin --protocol=TCP --host="$SQLHOST" --port="$SQLPORT" --user="$SQLUSER" --password="$SQLPWD" create $DBNAME; then
             echo "Created database $DBNAME."

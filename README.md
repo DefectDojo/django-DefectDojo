@@ -35,12 +35,6 @@ You can also log in as a product owner / non-staff user:
 
 For additional documentation you can visit our [Read the Docs site](https://defectdojo.readthedocs.io/).
 
-# One-Click Installations
-
-Deploy to Docker Cloud. (__Login first to Docker Cloud before clicking the install button.__)
-
-[![Deploy to Docker Cloud](https://files.cloud.docker.com/images/deploy-to-dockercloud.svg)](https://cloud.docker.com/stack/deploy/?repo=https://github.com/aaronweaver/docker-DefectDojo)
-
 # Installation Options
 
 ### [Debian, Ubuntu (16.04.2+) or RHEL-based Install Script](https://defectdojo.readthedocs.io/en/latest/getting-started.html#install-script)

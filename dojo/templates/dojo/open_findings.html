@@ -38,8 +38,14 @@
                         <tbody>
                         {% for finding in findings %}
                             <tr>
-                                <td><a title="{{ finding.title }}"
+                                <td>
+                                  {% if finding.title %}
+                                  <a title="{{ finding.title }}"
                                                       href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a>
+                                  {% else %}
+                                  <a title="{{ finding.id }}"
+                                                      href="{% url 'view_finding' finding.id %}">{{ finding.id }}</a>
+                                  {% endif %}
                                     <sup>
                                         {% for tag in finding.tags %}
                                         <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
