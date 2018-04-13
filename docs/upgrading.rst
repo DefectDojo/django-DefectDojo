@@ -170,3 +170,20 @@ Upgrading to 1.2.8 requires:
 3. pip install asteval
 
 4. Complete
+
+Upgrading to DefectDojo Version 1.2.9
+------------------------------------
+
+New feature: Benchmarks (OWASP ASVS)
+Upgrading to 1.2.9 requires:
+
+1.  ./manage.py makemigrations
+    ./manage.py migrate
+    ./manage.py loaddata dojo/fixtures/benchmark_type
+    ./manage.py loaddata dojo/fixtures/benchmark_category
+    ./manage.py loaddata dojo/fixtures/benchmark_requirement
+
+2. ./manage.py collectstatic --noinput
+
+
+4. Complete
