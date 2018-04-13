@@ -109,7 +109,7 @@ def asvs_calc_level(benchmark_score):
 @register.filter(name='asvs_level')
 def asvs_level(benchmark_score):
     benchmark_score.desired_level, level, total_pass, total = asvs_calc_level(benchmark_score)
-    return "ASVS " + benchmark_score.desired_level + " (" + str(level) + ") Total Pass: " + str(total_pass) + " Total:  " + str(total)
+    return "ASVS " + benchmark_score.desired_level + " (" + level + ") Pass: " + total_pass + " Total:  " + total
 
 @register.filter(name='version_num')
 def version_num(value):
