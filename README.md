@@ -1,6 +1,6 @@
 # Description
 
-![Screenshot of DefectDojo](./doc/img/screenshot1.png)
+![Screenshot of DefectDojo](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/screenshot1.png)
 
 DefectDojo is a security program and vulnerability management tool. DefectDojo allows you to manage your application security program, maintain product and application information, schedule scans, triage vulnerabilities and push findings into defect trackers. Consolidate your findings into one source of truth with DefectDojo.
 
@@ -25,11 +25,11 @@ check out our [PythonAnywhere demo site](https://defectdojo.pythonanywhere.com/)
 
 You can log in as an administrator like so:
 
-![Admin](./doc/img/admin.png)
+![Admin](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/admin.png)
 
 You can also log in as a product owner / non-staff user:
 
-![Product owner](./doc/img/owner.png)
+![Product owner](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/owner.png)
 
 # Additional Documentation
 
@@ -41,7 +41,7 @@ For additional documentation you can visit our [Read the Docs site](https://defe
 
 ### [Docker](https://defectdojo.readthedocs.io/en/latest/getting-started.html#docker-local-install)
 
-### [Ansible](./ansible/prod-install)
+### [Ansible](https://raw.githubusercontent.com/DefectDojo/Documentation/master/ansible/prod-install)
 
 # Getting Started
 
@@ -57,11 +57,11 @@ that should give you an idea of how to use DefectDojo for your own team.
 
 # Getting Involved
 
-![Slack](./doc/img/slack_rgb.png)
+![Slack](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/slack_rgb.png)
 
 [Get Access.](https://owasp.herokuapp.com/)   Realtime discussion is done in the OWASP Slack Channel, #defectdojo.
 
-![Twitter](./doc/img/Twitter_Logo.png)
+![Twitter](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/Twitter_Logo.png)
 
 [DefectDojo Twitter Account](https://twitter.com/defect_dojo)  tweets project updates and changes.
 
@@ -95,8 +95,8 @@ We would also like to highlight the contributions from Michael Dong and Fatimah 
 ### Swag Rewards
 If you fix an issue with the `swag reward` tag,  we'll send you a shirt and some stickers!
 
-![Dojo tshirt front](./doc/img/dojo_tshirt_front.png)
-![Dojo tshirt back](./doc/img/dojo_tshirt_back.png)
+![Dojo tshirt front](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/dojo_tshirt_front.png)
+![Dojo tshirt back](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/dojo_tshirt_back.png)
 
 
 # Support

@@ -23,7 +23,7 @@ from jira import JIRA
 from jira.exceptions import JIRAError
 from dojo.models import Finding, Scan, Test, Engagement, Stub_Finding, Finding_Template, \
                         Report, Product, JIRA_PKey, JIRA_Issue, Dojo_User, User, Notes, \
-                        FindingImage, Alerts, System_Settings, Notifications
+                        FindingImage, Alerts, System_Settings, Notifications, UserContactInfo
 from django_slack import slack_message
 from asteval import Interpreter
 
@@ -1043,8 +1043,9 @@ def get_slack_user_id(user_email):
         for member in users["members"]:
             if "email" in member["profile"]:
                 if user_email == member["profile"]["email"]:
-                    user_id = member["id"]
-                    break
+                    if "id" in member:
+                        user_id = member["id"]
+                        break
 
     return user_id
 
@@ -1061,15 +1062,15 @@ def create_notification(event=None, **kwargs):
         return notification
 
     def send_slack_notification(channel):
-        try:
-            res = requests.request(method='POST', url='https://slack.com/api/chat.postMessage',
-                             data={'token':get_system_setting('slack_token'),
-                                   'channel':channel,
-                                   'username':get_system_setting('slack_username'),
-                                   'text':create_notification_message(event, 'slack')})
-        except Exception as e:
-            log_alert(e)
-            pass
+        #try:
+        res = requests.request(method='POST', url='https://slack.com/api/chat.postMessage',
+                         data={'token':get_system_setting('slack_token'),
+                               'channel':channel,
+                               'username':get_system_setting('slack_username'),
+                               'text':create_notification_message(event, 'slack')})
+        #except Exception as e:
+        #    log_alert(e)
+        #    pass
 
     def send_hipchat_notification(channel):
         try:
@@ -1150,6 +1151,9 @@ def create_notification(event=None, **kwargs):
             if user.usercontactinfo.slack_user_id is None:
                 #Lookup the slack userid
                 slack_user_id = get_slack_user_id(user.usercontactinfo.slack_username)
+                slack_user_save = UserContactInfo.objects.get(user_id=user.id)
+                slack_user_save.slack_user_id = slack_user_id
+                slack_user_save.save()
 
             send_slack_notification('@%s' % slack_user_id)
 
