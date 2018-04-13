@@ -25,7 +25,7 @@ check out our [PythonAnywhere demo site](https://defectdojo.pythonanywhere.com/)
 
 You can log in as an administrator like so:
 
-![Admin](./doc/img/admin.png)
+![Admin](https://github.com/DefectDojo/Documentation/tree/master/doc/img/admin.png)
 
 You can also log in as a product owner / non-staff user:
 
