@@ -35,6 +35,7 @@ from dojo.cred.urls import urlpatterns as cred_urls
 from dojo.system_settings.urls import urlpatterns as system_settings_urls
 from dojo.notifications.urls import urlpatterns as notifications_urls
 from dojo.object.urls import urlpatterns as object_urls
+from dojo.benchmark.urls import urlpatterns as benchmark_urls
 import sys
 
 admin.autodiscover()
@@ -91,6 +92,7 @@ ur += cred_urls
 ur += system_settings_urls
 ur += notifications_urls
 ur += object_urls
+ur += benchmark_urls
 
 from tastypie_swagger.views import SwaggerView, ResourcesView, SchemaView
 

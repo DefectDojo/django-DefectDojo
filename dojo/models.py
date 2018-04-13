@@ -112,6 +112,8 @@ class System_Settings(models.Model):
     product_grade_c = models.IntegerField(default=70, verbose_name="Grade C", help_text="Percentage score for a 'C' >=")
     product_grade_d = models.IntegerField(default=60, verbose_name="Grade D", help_text="Percentage score for a 'D' >=")
     product_grade_f = models.IntegerField(default=59, verbose_name="Grade F", help_text="Percentage score for an 'F' <=")
+    enable_benchmark = models.BooleanField(default=True, blank=False, verbose_name="Enable Benchmarks",
+                            help_text='Enables Benchmarks such as the OWASP ASVS (Application Security Verification Standard)')
 
 class SystemSettingsFormAdmin(forms.ModelForm):
     product_grade = forms.CharField( widget=forms.Textarea )
@@ -1435,6 +1437,121 @@ class Objects_Engagement(models.Model):
 
         return data + " | " + self.engagement.name + " | " + str(self.engagement.id)
 
+class Testing_Guide_Category(models.Model):
+    name = models.CharField(max_length=300)
+    created = models.DateTimeField(null=False, editable=False, default=now)
+    updated = models.DateTimeField(editable=False, default=now)
+
+    class Meta:
+        ordering = ('name',)
+
+    def __unicode__(self):
+        return self.name
+
+class Testing_Guide(models.Model):
+    testing_guide_category = models.ForeignKey(Testing_Guide_Category)
+    identifier = models.CharField(max_length=20, blank=True, null=True, help_text="Test Unique Identifier")
+    name = models.CharField(max_length=400, help_text="Name of the test")
+    summary = models.CharField(max_length=800, help_text="Summary of the test")
+    objective = models.CharField(max_length=800, help_text="Objective of the test")
+    how_to_test = models.TextField(default=None, help_text="How to test the objective")
+    results_expected = models.CharField(max_length=800, help_text="What the results look like for a test")
+    created = models.DateTimeField(null=False, editable=False, default=now)
+    updated = models.DateTimeField(editable=False, default=now)
+
+    def __unicode__(self):
+        return self.testing_guide_category.name + ': ' + self.name
+
+class Benchmark_Type(models.Model):
+    name = models.CharField(max_length=300)
+    version = models.CharField(max_length=15)
+    source = (('PCI', 'PCI'),
+                    ('OWASP ASVS', 'OWASP ASVS'),
+                    ('OWASP Mobile ASVS', 'OWASP Mobile ASVS'))
+    benchmark_source = models.CharField(max_length=20, blank=False,
+                                             null=True, choices=source,
+                                             default='OWASP ASVS')
+    created = models.DateTimeField(null=False, editable=False, default=now)
+    updated = models.DateTimeField(editable=False, default=now)
+    enabled = models.BooleanField(default=True)
+    def __unicode__(self):
+        return self.name + " " + self.version
+
+class Benchmark_Category(models.Model):
+    type = models.ForeignKey(Benchmark_Type, verbose_name='Benchmark Type')
+    name = models.CharField(max_length=300)
+    objective = models.TextField()
+    references = models.TextField(blank=True, null=True)
+    enabled = models.BooleanField(default=True)
+    created = models.DateTimeField(null=False, editable=False, default=now)
+    updated = models.DateTimeField(editable=False, default=now)
+
+    class Meta:
+        ordering = ('name',)
+
+    def __unicode__(self):
+        return self.name + ': ' + self.type.name
+
+class Benchmark_Requirement(models.Model):
+    category = models.ForeignKey(Benchmark_Category)
+    objective_number = models.CharField(max_length=15, null=True)
+    objective = models.TextField()
+    references = models.TextField(blank=True, null=True)
+    level_1 = models.BooleanField(default=False)
+    level_2 = models.BooleanField(default=False)
+    level_3 = models.BooleanField(default=False)
+    enabled = models.BooleanField(default=True)
+    cwe_mapping = models.ManyToManyField(CWE, blank=True)
+    testing_guide = models.ManyToManyField(Testing_Guide, blank=True)
+    created = models.DateTimeField(null=False, editable=False, default=now)
+    updated = models.DateTimeField(editable=False, default=now)
+
+    def __unicode__(self):
+        return str(self.objective_number) + ': ' + self.category.name
+
+class Benchmark_Product(models.Model):
+    product = models.ForeignKey(Product)
+    control = models.ForeignKey(Benchmark_Requirement)
+    pass_fail = models.BooleanField(default=False, verbose_name='Pass', help_text='Does the product meet the requirement?')
+    enabled = models.BooleanField(default=True, help_text='Applicable for this specific product.')
+    notes = models.ManyToManyField(Notes, blank=True, editable=False)
+    created = models.DateTimeField(null=False, editable=False, default=now)
+    updated = models.DateTimeField(editable=False, default=now)
+
+    def __unicode__(self):
+        return self.product.name + ': ' + self.control.objective_number + ': ' + self.control.category.name
+
+    class Meta:
+        unique_together = [('product', 'control')]
+
+class Benchmark_Product_Summary(models.Model):
+    product = models.ForeignKey(Product)
+    benchmark_type = models.ForeignKey(Benchmark_Type)
+    asvs_level = (('Level 1', 'Level 1'),
+                    ('Level 2', 'Level 2'),
+                    ('Level 3', 'Level 3'))
+    desired_level = models.CharField(max_length=15,
+                                             null=False, choices=asvs_level,
+                                             default='Level 1')
+    current_level = models.CharField(max_length=15, blank=True,
+                                             null=True, choices=asvs_level,
+                                             default='None')
+    asvs_level_1_benchmark = models.IntegerField(null=False, default=0, help_text="Total number of active benchmarks for this application.")
+    asvs_level_1_score = models.IntegerField(null=False, default=0, help_text="ASVS Level 1 Score")
+    asvs_level_2_benchmark = models.IntegerField(null=False, default=0, help_text="Total number of active benchmarks for this application.")
+    asvs_level_2_score = models.IntegerField(null=False, default=0, help_text="ASVS Level 2 Score")
+    asvs_level_3_benchmark = models.IntegerField(null=False, default=0, help_text="Total number of active benchmarks for this application.")
+    asvs_level_3_score = models.IntegerField(null=False, default=0, help_text="ASVS Level 3 Score")
+    publish = models.BooleanField(default=False, help_text='Publish score to Product.')
+    created = models.DateTimeField(null=False, editable=False, default=now)
+    updated = models.DateTimeField(editable=False, default=now)
+
+    def __unicode__(self):
+        return self.product.name + ': ' + self.benchmark_type.name
+
+    class Meta:
+        unique_together = [('product', 'benchmark_type')]
+
 # Register for automatic logging to database
 auditlog.register(Dojo_User)
 auditlog.register(Endpoint)
@@ -1455,6 +1572,17 @@ tag_register(Endpoint)
 tag_register(Finding_Template)
 tag_register(App_Analysis)
 tag_register(Objects)
+
+#Benchmarks
+admin.site.register(Benchmark_Type)
+admin.site.register(Benchmark_Requirement)
+admin.site.register(Benchmark_Category)
+admin.site.register(Benchmark_Product)
+admin.site.register(Benchmark_Product_Summary)
+
+#Testing
+admin.site.register(Testing_Guide_Category)
+admin.site.register(Testing_Guide)
 
 admin.site.register(Objects)
 admin.site.register(Objects_Review)

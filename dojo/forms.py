@@ -20,7 +20,8 @@ from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
     JIRA_Issue, JIRA_PKey, JIRA_Conf, UserContactInfo, Tool_Type, Tool_Configuration, Tool_Product_Settings, \
-    Cred_User, Cred_Mapping, System_Settings, Notifications, Languages, Language_Type, App_Analysis, Objects
+    Cred_User, Cred_Mapping, System_Settings, Notifications, Languages, Language_Type, App_Analysis, Objects, \
+    Benchmark_Product, Benchmark_Requirement, Benchmark_Product_Summary
 from dojo.utils import get_system_setting
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
@@ -1326,6 +1327,12 @@ class JIRAForm(forms.ModelForm):
         model = JIRA_Conf
         exclude = ['product']
 
+class Benchmark_Product_SummaryForm(forms.ModelForm):
+
+    class Meta:
+        model = Benchmark_Product_Summary
+        exclude = ['product', 'current_level', 'benchmark_type', 'asvs_level_1_benchmark', 'asvs_level_1_score', 'asvs_level_2_benchmark', 'asvs_level_2_score', 'asvs_level_3_benchmark', 'asvs_level_3_score']
+
 class JIRA_PKeyForm(forms.ModelForm):
 
     class Meta:
@@ -1467,6 +1474,18 @@ class SystemSettingsForm(forms.ModelForm):
     class Meta:
         model = System_Settings
         exclude = ['product_grade']
+
+class BenchmarkForm(forms.ModelForm):
+
+    class Meta:
+        model = Benchmark_Product
+        exclude = ['product', 'control']
+
+class Benchmark_RequirementForm(forms.ModelForm):
+
+    class Meta:
+        model = Benchmark_Requirement
+        exclude = ['']
 
 class NotificationsForm(forms.ModelForm):
 

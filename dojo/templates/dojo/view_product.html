@@ -12,6 +12,12 @@
             <div class="clearfix">
                 <h3 class="pull-left">
                     {{ prod }}
+                    {% if system_settings.enable_benchmark%}
+                      {% for benchmark in benchmarks%}
+                        <sup><span class="fa fa-bookmark has-popover" data-trigger="hover" data-content="{{ benchmark|asvs_level }}"></label></span>
+                        {{ benchmark.desired_level }}</sup>
+                      {% endfor %}
+                    {% endif %}
                     {% with grade=prod|product_grade %}
                       {% if grade %}
                         <div class="btn btn-tag {{ grade }}">{{ grade }}</div>
@@ -49,6 +55,7 @@
                                         <i class="fa fa-pencil-square-o"></i> Edit
                                     </a>
                                 </li>
+                                <li role="separator" class="divider"></li>
                                 <li role="presentation">
                                     <a class="" href="{% url 'ad_hoc_finding' prod.id %}">
                                         <i class="fa fa-list-alt"></i> Add Finding
@@ -64,17 +71,19 @@
                                         <i class="fa fa-list-alt"></i> Add Product Tracking Files
                                     </a>
                                 </li>
+                            <li role="separator" class="divider"></li>
                             <li role="presentation">
                                 <a href="{% url 'view_product_findings' prod.id %}">
                                     <i class="fa fa-bug"></i> View Open Findings
                                 </a>
                             </li>
-                            {% endif %}
                             <li role="presentation">
-                                <a href="{% url 'product_report' prod.id %}">
-                                    <i class="fa fa-file-text-o"></i> Product Report
+                                <a href="{% url 'view_objects' prod.id %}">
+                                    <i class="fa fa-history"></i> View Product Tracking Files
                                 </a>
                             </li>
+                            {% endif %}
+                            <li role="separator" class="divider"></li>
                             {% if prod.endpoint_count > 0 %}
                                 <li role="presentation">
                                     <a href="{% url 'product_endpoint_report' prod.id %}">
@@ -83,10 +92,21 @@
                                 </li>
                             {% endif %}
                             <li role="presentation">
-                                <a href="{% url 'view_objects' prod.id %}">
-                                    <i class="fa fa-history"></i> View Product Tracking Files
+                                <a href="{% url 'product_report' prod.id %}">
+                                    <i class="fa fa-file-text-o"></i> Product Report
                                 </a>
                             </li>
+                            {% if system_settings.enable_benchmark %}
+                            <li role="separator" class="divider"></li>
+                            {% for bt in benchmark_type %}
+                            <li role="presentation">
+                                <a title="{{ bt.name }}" href="{% url 'view_product_benchmark' prod.id bt.id %}">
+                                    <span class="fa fa-list"></span> {{ bt.name }} {{ bt.version }}
+                                </a>
+                            </li>
+                            {% endfor %}
+                            {% endif %}
+                            <li role="separator" class="divider"></li>
                             <li role="presentation">
                                 <a href="{% url 'action_history' prod|content_type prod.id %}">
                                     <i class="fa fa-history"></i> View History

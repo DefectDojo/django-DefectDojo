@@ -21,7 +21,7 @@ from django.db.models import Sum, Count
 from dojo.filters import ProductFilter, ProductFindingFilter, EngagementFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, ProductMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm
 from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, \
-    Tool_Product_Settings, Cred_User, Cred_Mapping, Test_Type, System_Settings, Languages, App_Analysis
+    Tool_Product_Settings, Cred_User, Cred_Mapping, Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary
 from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, get_system_setting, create_notification
 from custom_field.models import CustomFieldValue, CustomField
 from dojo.tasks import add_epic_task, add_issue_task
@@ -91,6 +91,9 @@ def view_product(request, pid):
     langSummary = Languages.objects.filter(product=prod).aggregate(Sum('files'), Sum('code'), Count('files'))
     languages = Languages.objects.filter(product=prod).order_by('-code')
     app_analysis = App_Analysis.objects.filter(product=prod).order_by('name')
+    benchmark_type = Benchmark_Type.objects.filter(enabled=True).order_by('name')
+    benchmarks = Benchmark_Product_Summary.objects.filter(product=prod, publish=True, benchmark_type__enabled=True).order_by('benchmark_type__name')
+    system_settings = System_Settings.objects.get()
 
     if not auth:
         # will render 403
@@ -243,6 +246,8 @@ def view_product(request, pid):
     return render(request,
                   'dojo/view_product.html',
                   {'prod': prod,
+                   'benchmark_type': benchmark_type,
+                   'benchmarks': benchmarks,
                    'product_metadata': product_metadata,
                    'engs': engs,
                    'i_engs': i_engs_page,
@@ -268,6 +273,7 @@ def view_product(request, pid):
                    'languages': languages,
                    'langSummary': langSummary,
                    'app_analysis': app_analysis,
+                   'system_settings': system_settings,
                    'authorized': auth})
 
 
@@ -378,7 +384,7 @@ def edit_product(request, pid):
                   'dojo/edit_product.html',
                   {'form': form,
                    'jform': jform,
-                   'product': prod,
+                   'product': prod
                    })
 
 
