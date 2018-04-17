@@ -89,7 +89,8 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    os.path.dirname(DOJO_ROOT) + "/components/yarn_components",
+    os.path.join(os.path.dirname(DOJO_ROOT), 'components', 'node_modules',
+                 '@yarn_components'),
 )
 
 # List of finder classes that know how to find static files in
@@ -99,7 +100,9 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
 
-FILE_UPLOAD_HANDLERS = ("django.core.files.uploadhandler.TemporaryFileUploadHandler",)
+FILE_UPLOAD_HANDLERS = (
+    "django.core.files.uploadhandler.TemporaryFileUploadHandler",
+)
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'DOJOSECRET'
@@ -229,7 +232,8 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '[%(asctime)s] %(levelname)s [%(name)s:%(lineno)d] %(message)s',
+            'format': '[%(asctime)s] %(levelname)s '
+                      '[%(name)s:%(lineno)d] %(message)s',
             'datefmt': '%d/%b/%Y %H:%M:%S',
         },
         'simple': {
