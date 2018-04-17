@@ -12,12 +12,12 @@ docker logs $CONTAINER_NAME
 # Turn off Zap tests while re-configuring how they run
 #- docker run -d --name zap --link $CONTAINER_NAME -p 127.0.0.1:8080:8080 -i owasp/zap2docker-stable zap.sh -daemon -host 0.0.0.0 -port 8080 -config api.disablekey=true
 # Selenium and ZAP requirements
-pip install selenium==2.53.6
+pip install selenium
 pip install requests
 pip install python-owasp-zap-v2.4
 pip install prettytable
 pip install bandit
-wget -N https://chromedriver.storage.googleapis.com/2.33/chromedriver_linux64.zip -P ~/
+wget -N https://chromedriver.storage.googleapis.com/2.37/chromedriver_linux64.zip -P ~/
 unzip ~/chromedriver_linux64.zip -d ~/
 rm ~/chromedriver_linux64.zip
 sudo mv -f ~/chromedriver /usr/local/share/
