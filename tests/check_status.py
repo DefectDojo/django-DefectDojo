@@ -21,11 +21,12 @@ class Login(unittest.TestCase):
     def login_page(self):
         driver = self.driver
         driver.get(self.base_url + "login")
-        driver.find_element_by_id("id_username").clear()
-        driver.find_element_by_id("id_username").send_keys(
-            os.environ['DOJO_ADMIN_USER'])
-        driver.find_element_by_id("id_password").send_keys(
-            os.environ['DOJO_ADMIN_PASSWORD'])
+        cred_user_elem = driver.find_element_by_id("id_username")
+        cred_user_elem.clear()
+        cred_user_elem.send_keys(os.environ['DOJO_ADMIN_USER'])
+        cred_pass_elem = driver.find_element_by_id("id_password")
+        cred_pass_elem.clear()
+        cred_pass_elem.send_keys(os.environ['DOJO_ADMIN_PASSWORD'])
         driver.find_element_by_css_selector("button.btn.btn-success").click()
         return driver
 
