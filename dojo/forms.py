@@ -807,8 +807,13 @@ class DeleteFindingTemplateForm(forms.ModelForm):
 
 
 class FindingBulkUpdateForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(FindingBulkUpdateForm, self).__init__(*args, **kwargs)
+        self.fields['severity'].required = False
+
     def clean(self):
         cleaned_data = super(FindingBulkUpdateForm, self).clean()
+
         if (cleaned_data['active'] or cleaned_data['verified']) and cleaned_data['duplicate']:
             raise forms.ValidationError('Duplicate findings cannot be'
                                         ' verified or active')
@@ -1295,6 +1300,14 @@ class Benchmark_Product_SummaryForm(forms.ModelForm):
     class Meta:
         model = Benchmark_Product_Summary
         exclude = ['product', 'current_level', 'benchmark_type', 'asvs_level_1_benchmark', 'asvs_level_1_score', 'asvs_level_2_benchmark', 'asvs_level_2_score', 'asvs_level_3_benchmark', 'asvs_level_3_score']
+
+class DeleteBenchmarkForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = Benchmark_Product_Summary
+        exclude = ['product', 'benchmark_type', 'desired_level', 'current_level', 'asvs_level_1_benchmark', 'asvs_level_1_score', 'asvs_level_2_benchmark', 'asvs_level_2_score', 'asvs_level_3_benchmark', 'asvs_level_3_score', 'publish']
 
 class JIRA_PKeyForm(forms.ModelForm):
 

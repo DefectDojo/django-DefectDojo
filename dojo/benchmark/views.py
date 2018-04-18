@@ -19,7 +19,7 @@ from django.forms import formset_factory, modelformset_factory, inlineformset_fa
 from django.db.models import Count, Q
 
 from dojo.filters import ProductFilter, ProductFindingFilter
-from dojo.forms import ProductForm, EngForm, DeleteProductForm, Benchmark_Requirement, Benchmark_Product_SummaryForm
+from dojo.forms import Benchmark_Requirement, Benchmark_Product_SummaryForm, DeleteBenchmarkForm
 from dojo.models import Notifications, Dojo_User, Benchmark_Type, Benchmark_Category, \
 Benchmark_Requirement, Benchmark_Product, Product, Benchmark_Product_Summary
 from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, handle_uploaded_selenium, get_system_setting
@@ -79,7 +79,7 @@ def score_asvs(product, benchmark_type):
 
     benchmark_product_summary.save()
 
-
+@user_passes_test(lambda u: u.is_staff)
 def benchmark_view(request, pid, type, cat=None):
     product = get_object_or_404(Product, id=pid)
     benchmark_type = get_object_or_404(Benchmark_Type, id=type)
@@ -145,26 +145,32 @@ def benchmark_view(request, pid, type, cat=None):
                    'category_name': category_name,
                    'benchmark_category': benchmark_category})
 
+@user_passes_test(lambda u: u.is_staff)
+def delete(request, pid, type):
+    product = get_object_or_404(Product, id=pid)
+    benchmark_type = get_object_or_404(Benchmark_Type, id=type)
+    benchmark_product_summary = Benchmark_Product_Summary.objects.filter(product=product, benchmark_type=type).first()
+    form = DeleteBenchmarkForm(instance=benchmark_product_summary)
+    print form
+    from django.contrib.admin.utils import NestedObjects
+    from django.db import DEFAULT_DB_ALIAS
 
-@user_passes_test(lambda u: u.is_superuser)
-def global_notifications(request):
-    try:
-        notifications_obj = Notifications.objects.get(user=None)
-    except:
-        notifications_obj = Notifications(user=None)
-
-    form = NotificationsForm(instance=notifications_obj)
     if request.method == 'POST':
-        form = NotificationsForm(request.POST, instance=notifications_obj)
-        if form.is_valid():
-            new_settings = form.save()
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 'Settings saved.',
-                                 extra_tags='alert-success')
+        if 'id' in request.POST and str(benchmark_product_summary.id) == request.POST['id']:
+            form = DeleteBenchmarkForm(request.POST, instance=benchmark_product_summary)
+            if form.is_valid():
+                benchmark_product = Benchmark_Product.objects.filter(product=product, control__category__type=type)
+                benchmark_product.delete()
+                benchmark_product_summary.delete()
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'Benchmarks removed.',
+                                     extra_tags='alert-success')
+                return HttpResponseRedirect(reverse('product'))
 
-    add_breadcrumb(title="Global notification settings", top_level=False, request=request)
-    return render(request, 'dojo/notifications.html',
-                  {'form': form,
-                   'scope': 'global',
-                   'admin': request.user.is_superuser})
+    add_breadcrumb(parent=product, title="Delete Benchmarks", top_level=False, request=request)
+
+    return render(request, 'dojo/delete_benchmark.html',
+                  {'product': product,
+                   'form': form
+                   })
