@@ -816,6 +816,27 @@ def generate_report(request, obj):
                                  extra_tags='alert-success')
 
             return HttpResponseRedirect(reverse('reports'))
+
+        elif report_format == 'HTML':
+            return render(request,
+                          template,
+                          {'product_type': product_type,
+                           'product': product,
+                           'engagement': engagement,
+                           'test': test,
+                           'endpoint': endpoint,
+                           'findings': findings.qs,
+                           'include_finding_notes': include_finding_notes,
+                           'include_finding_images': include_finding_images,
+                           'include_executive_summary': include_executive_summary,
+                           'include_table_of_contents': include_table_of_contents,
+                           'user': user,
+                           'team_name': settings.TEAM_NAME,
+                           'title': 'Generate Report',
+                           'user_id': request.user.id,
+                           'host': report_url_resolver(request),
+                           })
+
         else:
             raise Http404()
     paged_findings = get_page_items(request, findings.qs, 25)
