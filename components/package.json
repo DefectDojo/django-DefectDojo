@@ -32,8 +32,5 @@
   },
   "engines": {
     "yarn": ">= 1.0.0"
-  },
-  "scripts": {
-    "postinstall": "node -e \"try { require('fs').symlinkSync(require('path').resolve('node_modules/@yarn_components'), 'yarn_components', 'junction') } catch (e) { }\""
   }
 }
