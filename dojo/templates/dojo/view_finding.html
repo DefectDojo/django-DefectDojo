@@ -89,11 +89,14 @@
                             </li>
                             <li role="separator" class="divider"></li>
                             <li role="presentation">
-                                <a class="text-danger" href="{% url 'delete_finding' finding.id %}"
-                                   onclick="return confirm('Are you sure you want to delete this finding?')">
-                                    <i class="fa fa-trash"></i> Delete Finding
-                                </a>
+                            <a class="text-danger delete-finding" href="#">
+                                <i class="fa fa-trash"></i> Delete Finding
+                            </a>
                             </li>
+                              <form id="delete-finding-form" method="post" action="{% url 'delete_finding' finding.id %}">
+                                 {% csrf_token %}
+                                 <input type="hidden" name="id" value="{{ finding.id }}"/>
+                              </form>
                             </li>
                         </ul>
                     </div>
@@ -611,6 +614,14 @@
                 var i = $($(this).find('i').get(0));
                 i.toggleClass('glyphicon-chevron-up').toggleClass('glyphicon-chevron-down');
             })
+        });
+
+        $('a.delete-finding').on('click', function (e) {
+            if (confirm('Are you sure you want to delete this finding?'))
+            {
+              $( "form#delete-finding-form" ).submit();
+            }
+
         });
 
         $('#findingImageModal').on('show.bs.modal', function (event) {
