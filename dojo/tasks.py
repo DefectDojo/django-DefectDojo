@@ -30,6 +30,11 @@ logging.basicConfig(format=fmt, level=lvl)
 
 logger = get_task_logger(__name__)
 
+# Logs the error to the alerts table, which appears in the notification toolbar
+def log_generic_alert(source, title, description):
+    create_notification(event='other', title=title, description=description,
+                       icon='bullseye', source=source)
+
 @app.task(bind=True)
 def add_alerts(self, runinterval):
     now = timezone.now()
@@ -72,8 +77,8 @@ def async_pdf_report(self,
     cover = context['host'] + reverse(
         'report_cover_page') + "?" + x
 
-    config = pdfkit.configuration(wkhtmltopdf=settings.WKHTMLTOPDF_PATH)
     try:
+        config = pdfkit.configuration(wkhtmltopdf=settings.WKHTMLTOPDF_PATH)
         report.task_id = async_pdf_report.request.id
         report.save()
         bytes = render_to_string(template, context)
@@ -102,8 +107,7 @@ def async_pdf_report(self,
     except Exception as e:
         report.status = 'error'
         report.save()
-        # email_requester(report, uri, error=e)
-        raise e
+        log_generic_alert("PDF Report", "Report Creation Failure", "Make sure WKHTMLTOPDF is installed. " + str(e))
     return True
 
 
@@ -187,7 +191,8 @@ def async_custom_pdf_report(self,
         report.status = 'error'
         report.save()
         # email_requester(report, uri, error=e)
-        raise e
+        #raise e
+        log_generic_alert("PDF Report", "Report Creation Failure", "Make sure WKHTMLTOPDF is installed. " + str(e))
     finally:
         if temp is not None:
             # deleting temp xsl file

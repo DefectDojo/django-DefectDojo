@@ -844,8 +844,13 @@ class DeleteFindingTemplateForm(forms.ModelForm):
 
 
 class FindingBulkUpdateForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(FindingBulkUpdateForm, self).__init__(*args, **kwargs)
+        self.fields['severity'].required = False
+
     def clean(self):
         cleaned_data = super(FindingBulkUpdateForm, self).clean()
+
         if (cleaned_data['active'] or cleaned_data['verified']) and cleaned_data['duplicate']:
             raise forms.ValidationError('Duplicate findings cannot be'
                                         ' verified or active')
@@ -1286,7 +1291,7 @@ class ReportOptionsForm(forms.Form):
     include_finding_images = forms.ChoiceField(choices=yes_no, label="Finding Images")
     include_executive_summary = forms.ChoiceField(choices=yes_no, label="Executive Summary")
     include_table_of_contents = forms.ChoiceField(choices=yes_no, label="Table of Contents")
-    report_type = forms.ChoiceField(choices=(('AsciiDoc', 'AsciiDoc'), ('PDF', 'PDF')))
+    report_type = forms.ChoiceField(choices=(('AsciiDoc', 'AsciiDoc'),('HTML', 'HTML'), ('PDF', 'PDF')))
 
 
 class CustomReportOptionsForm(forms.Form):
@@ -1305,6 +1310,21 @@ class DeleteReportForm(forms.ModelForm):
         model = Report
         fields = ('id',)
 
+class DeleteFindingForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = Finding
+        fields = ('id',)
+
+class DeleteStubFindingForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = Stub_Finding
+        fields = ('id',)
 
 class AddFindingImageForm(forms.ModelForm):
     class Meta:
@@ -1332,6 +1352,14 @@ class Benchmark_Product_SummaryForm(forms.ModelForm):
     class Meta:
         model = Benchmark_Product_Summary
         exclude = ['product', 'current_level', 'benchmark_type', 'asvs_level_1_benchmark', 'asvs_level_1_score', 'asvs_level_2_benchmark', 'asvs_level_2_score', 'asvs_level_3_benchmark', 'asvs_level_3_score']
+
+class DeleteBenchmarkForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = Benchmark_Product_Summary
+        exclude = ['product', 'benchmark_type', 'desired_level', 'current_level', 'asvs_level_1_benchmark', 'asvs_level_1_score', 'asvs_level_2_benchmark', 'asvs_level_2_score', 'asvs_level_3_benchmark', 'asvs_level_3_score', 'publish']
 
 class JIRA_PKeyForm(forms.ModelForm):
 
