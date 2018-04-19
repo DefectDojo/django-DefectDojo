@@ -408,25 +408,37 @@ def finding_bulk_update(request, tid):
     finding = test.finding_set.all()[0]
     form = FindingBulkUpdateForm(request.POST)
     if request.method == "POST":
-        if form.is_valid():
-            finding_to_update = request.POST.getlist('finding_to_update')
+        finding_to_update = request.POST.getlist('finding_to_update')
+        if request.POST.get('delete_bulk_findings') and finding_to_update:
             finds = Finding.objects.filter(test=test, id__in=finding_to_update)
-            finds.update(severity=form.cleaned_data['severity'],
-                         active=form.cleaned_data['active'],
-                         verified=form.cleaned_data['verified'],
-                         false_p=form.cleaned_data['false_p'],
-                         duplicate=form.cleaned_data['duplicate'],
-                         out_of_scope=form.cleaned_data['out_of_scope'])
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 'Bulk edit of findings was successful.  Check to make sure it is what you intended.',
-                                 extra_tags='alert-success')
+            finds.delete()
         else:
-            messages.add_message(request,
-                                 messages.ERROR,
-                                 'Unable to process bulk update. Required fields are invalid,  '
-                                 'please update individually.',
-                                 extra_tags='alert-danger')
+            if form.is_valid() and finding_to_update:
+                finding_to_update = request.POST.getlist('finding_to_update')
+                finds = Finding.objects.filter(test=test, id__in=finding_to_update)
+                if form.cleaned_data['severity']:
+                    finds.update(severity=form.cleaned_data['severity'],
+                                 active=form.cleaned_data['active'],
+                                 verified=form.cleaned_data['verified'],
+                                 false_p=form.cleaned_data['false_p'],
+                                 duplicate=form.cleaned_data['duplicate'],
+                                 out_of_scope=form.cleaned_data['out_of_scope'])
+                else:
+                    finds.update(active=form.cleaned_data['active'],
+                                 verified=form.cleaned_data['verified'],
+                                 false_p=form.cleaned_data['false_p'],
+                                 duplicate=form.cleaned_data['duplicate'],
+                                 out_of_scope=form.cleaned_data['out_of_scope'])
+
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'Bulk edit of findings was successful.  Check to make sure it is what you intended.',
+                                     extra_tags='alert-success')
+            else:
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     'Unable to process bulk update. Required fields were not selected.',
+                                     extra_tags='alert-danger')
 
     return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
 

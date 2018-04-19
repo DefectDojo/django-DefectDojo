@@ -1619,6 +1619,7 @@ admin.site.register(Tool_Type)
 admin.site.register(Cred_User)
 admin.site.register(Cred_Mapping)
 admin.site.register(System_Settings, System_SettingsAdmin)
+admin.site.register(CWE)
 
 
 watson.register(Product)

@@ -92,6 +92,7 @@
 </div>
 <div class="form-group">
     <input class="btn btn-primary" type="submit" name="edit_benchmarks" value="Submit"/>
+    <a class="btn btn btn-danger" href="{% url 'delete_product_benchmark' benchmarks.0.product.id benchmark_type.id %}">Delete</a>
 </div>
 </form>
 {% endblock %}
