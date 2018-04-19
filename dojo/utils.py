@@ -702,6 +702,11 @@ def jira_change_resolution_id(jira, issue, id):
     jira.transition_issue(issue, id)
 
 # Logs the error to the alerts table, which appears in the notification toolbar
+def log_jira_generic_alert(title, description):
+    create_notification(event='jira_update', title=title, description=description,
+                       icon='bullseye', source='Jira')
+
+# Logs the error to the alerts table, which appears in the notification toolbar
 def log_jira_alert(error, finding):
     create_notification(event='jira_update', title='Jira update issue', description='Finding: ' + str(finding.id) + ', ' + error,
                        icon='bullseye', source='Jira')
@@ -856,11 +861,15 @@ def close_epic(eng, push_to_jira):
     jpkey = JIRA_PKey.objects.get(product=prod)
     jira_conf = jpkey.conf
     if jpkey.enable_engagement_epic_mapping and push_to_jira:
-        j_issue = JIRA_Issue.objects.get(engagement=eng)
-        req_url = jira_conf.url+'/rest/api/latest/issue/'+ j_issue.jira_id+'/transitions'
-        j_issue = JIRA_Issue.objects.get(engagement=eng)
-        json_data = {'transition':{'id':jira_conf.close_status_key}}
-        r = requests.post(url=req_url, auth=HTTPBasicAuth(jira_conf.username, jira_conf.password), json=json_data)
+        try:
+            j_issue = JIRA_Issue.objects.get(engagement=eng)
+            req_url = jira_conf.url+'/rest/api/latest/issue/'+ j_issue.jira_id+'/transitions'
+            j_issue = JIRA_Issue.objects.get(engagement=eng)
+            json_data = {'transition':{'id':jira_conf.close_status_key}}
+            r = requests.post(url=req_url, auth=HTTPBasicAuth(jira_conf.username, jira_conf.password), json=json_data)
+        except Exception as e:
+            log_jira_generic_alert('Jira Engagement/Epic Close Error', e)
+            pass
 
 def update_epic(eng, push_to_jira):
     engagement = eng
@@ -868,10 +877,14 @@ def update_epic(eng, push_to_jira):
     jpkey = JIRA_PKey.objects.get(product=prod)
     jira_conf = jpkey.conf
     if jpkey.enable_engagement_epic_mapping and push_to_jira:
-        jira = JIRA(server=jira_conf.url, basic_auth=(jira_conf.username, jira_conf.password))
-        j_issue = JIRA_Issue.objects.get(engagement=eng)
-        issue = jira.issue(j_issue.jira_id)
-        issue.update(summary=eng.name, description=eng.name)
+        try:
+            jira = JIRA(server=jira_conf.url, basic_auth=(jira_conf.username, jira_conf.password))
+            j_issue = JIRA_Issue.objects.get(engagement=eng)
+            issue = jira.issue(j_issue.jira_id)
+            issue.update(summary=eng.name, description=eng.name)
+        except Exception as e:
+            log_jira_generic_alert('Jira Engagement/Epic Update Error', e)
+            pass
 
 def add_epic(eng, push_to_jira):
     engagement = eng
@@ -886,19 +899,27 @@ def add_epic(eng, push_to_jira):
             'issuetype': {'name': 'Epic'},
             'customfield_' + str(jira_conf.epic_name_id) : engagement.name,
             }
-        jira = JIRA(server=jira_conf.url, basic_auth=(jira_conf.username, jira_conf.password))
-        new_issue = jira.create_issue(fields=issue_dict)
-        j_issue = JIRA_Issue(jira_id=new_issue.id, jira_key=new_issue, engagement=engagement)
-        j_issue.save()
+        try:
+            jira = JIRA(server=jira_conf.url, basic_auth=(jira_conf.username, jira_conf.password))
+            new_issue = jira.create_issue(fields=issue_dict)
+            j_issue = JIRA_Issue(jira_id=new_issue.id, jira_key=new_issue, engagement=engagement)
+            j_issue.save()
+        except Exception as e:
+            log_jira_generic_alert('Jira Engagement/Epic Creation Error', e)
+            pass
 
 def add_comment(find, note, force_push=False):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
     jpkey = JIRA_PKey.objects.get(product=prod)
     jira_conf = jpkey.conf
     if jpkey.push_notes or force_push == True:
-        jira = JIRA(server=jira_conf.url, basic_auth=(jira_conf.username, jira_conf.password))
-        j_issue = JIRA_Issue.objects.get(finding=find)
-        jira.add_comment(j_issue.jira_id, '(%s): %s' % (note.author.get_full_name(), note.entry))
+        try:
+            jira = JIRA(server=jira_conf.url, basic_auth=(jira_conf.username, jira_conf.password))
+            j_issue = JIRA_Issue.objects.get(finding=find)
+            jira.add_comment(j_issue.jira_id, '(%s): %s' % (note.author.get_full_name(), note.entry))
+        except Exception as e:
+            log_jira_generic_alert('Jira Add Comment Error', e)
+            pass
 
 def send_review_email(request, user, finding, users, new_note):
     recipients = [u.email for u in users]
@@ -1062,15 +1083,15 @@ def create_notification(event=None, **kwargs):
         return notification
 
     def send_slack_notification(channel):
-        #try:
-        res = requests.request(method='POST', url='https://slack.com/api/chat.postMessage',
-                         data={'token':get_system_setting('slack_token'),
-                               'channel':channel,
-                               'username':get_system_setting('slack_username'),
-                               'text':create_notification_message(event, 'slack')})
-        #except Exception as e:
-        #    log_alert(e)
-        #    pass
+        try:
+            res = requests.request(method='POST', url='https://slack.com/api/chat.postMessage',
+                             data={'token':get_system_setting('slack_token'),
+                                   'channel':channel,
+                                   'username':get_system_setting('slack_username'),
+                                   'text':create_notification_message(event, 'slack')})
+        except Exception as e:
+            log_alert(e)
+            pass
 
     def send_hipchat_notification(channel):
         try:
@@ -1079,7 +1100,6 @@ def create_notification(event=None, **kwargs):
                             url='https://%s/v2/room/%s/notification?auth_token=%s' % (get_system_setting('hipchat_site'), channel, get_system_setting('hipchat_token')),
                             data={'message':create_notification_message(event, 'slack'),
                                   'message_format':'text'})
-            print res
         except Exception as e:
             log_alert(e)
             pass
@@ -1110,8 +1130,10 @@ def create_notification(event=None, **kwargs):
 
 
     def log_alert(e):
-        alert = Alerts(user_id=Dojo_User.objects.get(is_superuser=True), title='Notification issue', description="%s" % e, icon="exclamation-triangle", source="Notifications")
-        alert.save()
+        users = Dojo_User.objects.filter(is_superuser=True)
+        for user in users:
+            alert = Alerts(user_id=user, url=kwargs.get('url', reverse('alerts')), title='Notification issue', description="%s" % e, icon="exclamation-triangle", source="Notifications")
+            alert.save()
 
     # Global notifications
     try:
