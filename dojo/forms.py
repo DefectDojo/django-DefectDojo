@@ -1310,6 +1310,21 @@ class DeleteReportForm(forms.ModelForm):
         model = Report
         fields = ('id',)
 
+class DeleteFindingForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = Finding
+        fields = ('id',)
+
+class DeleteStubFindingForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = Stub_Finding
+        fields = ('id',)
 
 class AddFindingImageForm(forms.ModelForm):
     class Meta:
