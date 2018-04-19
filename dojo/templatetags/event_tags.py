@@ -70,6 +70,11 @@ def is_file(field):
     return isinstance(field.field.widget, forms.FileInput) or \
            isinstance(field, forms.ClearableFileInput)
 
+@register.filter
+def is_text(field):
+    return isinstance(field.field.widget, forms.TextInput) or \
+            isinstance(field.field.widget, forms.Textarea)
+
 
 @register.filter
 def sum_dict(d):

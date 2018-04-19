@@ -1,8 +1,9 @@
+import sys
+sys.path.append('..')
+import unittest
 import datetime
-
 from django.test import TestCase
-
-from dojo.models import Test, Engagement, Product
+from dojo.models import Finding, Test, Engagement, Product
 from dojo.tools.generic.parser import GenericFindingUploadCsvParser
 
 
