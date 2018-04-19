@@ -27,7 +27,7 @@ from dojo.filters import OpenFindingFilter, \
     ClosedFingingSuperFilter, TemplateFindingFilter
 from dojo.forms import NoteForm, CloseFindingForm, FindingForm, PromoteFindingForm, FindingTemplateForm, \
     DeleteFindingTemplateForm, FindingImageFormSet, JIRAFindingForm, ReviewFindingForm, ClearFindingReviewForm, \
-    DefectFindingForm, StubFindingForm, ApplyFindingTemplateForm
+    DefectFindingForm, StubFindingForm, DeleteFindingForm, DeleteStubFindingForm, ApplyFindingTemplateForm
 from dojo.models import Product_Type, Finding, Notes, \
     Risk_Acceptance, BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, \
     FindingImageAccessToken, JIRA_Issue, JIRA_PKey, JIRA_Conf, Dojo_User, Cred_User, Cred_Mapping, Test
@@ -322,19 +322,30 @@ def reopen_finding(request, fid):
                          extra_tags='alert-success')
     return HttpResponseRedirect(reverse('view_finding', args=(finding.id,)))
 
-
 @user_passes_test(lambda u: u.is_staff)
 def delete_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
-    tid = finding.test.id
-    del finding.tags
-    finding.delete()
-    messages.add_message(request,
-                         messages.SUCCESS,
-                         'Finding deleted successfully.',
-                         extra_tags='alert-success')
-    return HttpResponseRedirect(reverse('view_test', args=(tid,)))
 
+    form = DeleteFindingForm(instance=finding)
+
+    if request.method == 'POST':
+        form = DeleteFindingForm(request.POST, instance=finding)
+        if form.is_valid():
+            tid = finding.test.id
+            del finding.tags
+            finding.delete()
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Finding deleted successfully.',
+                                 extra_tags='alert-success')
+            return HttpResponseRedirect(reverse('view_test', args=(tid,)))
+        else:
+            messages.add_message(request,
+                                 messages.ERROR,
+                                 'Unable to delete finding, please try again.',
+                                 extra_tags='alert-danger')
+    else:
+        return HttpResponseForbidden()
 
 @user_passes_test(lambda u: u.is_staff)
 def edit_finding(request, fid):
@@ -697,20 +708,30 @@ def add_stub_finding(request, tid):
     add_breadcrumb(title="Add Stub Finding", top_level=False, request=request)
     return HttpResponseRedirect(reverse('view_test', args=(tid,)))
 
-
 @user_passes_test(lambda u: u.is_staff)
 def delete_stub_finding(request, fid):
     finding = get_object_or_404(Stub_Finding, id=fid)
-    tid = finding.test.id
-    if hasattr(finding, 'tags'):
-        del finding.tags
-    finding.delete()
-    messages.add_message(request,
-                         messages.SUCCESS,
-                         'Potential Finding deleted successfully.',
-                         extra_tags='alert-success')
-    return HttpResponseRedirect(reverse('view_test', args=(tid,)))
+    form = DeleteStubFindingForm(instance=finding)
 
+    if request.method == 'POST':
+        form = DeleteStubFindingForm(request.POST, instance=finding)
+        if form.is_valid():
+            tid = finding.test.id
+            if hasattr(finding, 'tags'):
+                del finding.tags
+            finding.delete()
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Potential Finding deleted successfully.',
+                                 extra_tags='alert-success')
+            return HttpResponseRedirect(reverse('view_test', args=(tid,)))
+        else:
+            messages.add_message(request,
+                                 messages.ERROR,
+                                 'Unable to delete potential finding, please try again.',
+                                 extra_tags='alert-danger')
+    else:
+        return HttpResponseForbidden()
 
 @user_passes_test(lambda u: u.is_staff)
 def promote_to_finding(request, fid):
@@ -725,7 +746,7 @@ def promote_to_finding(request, fid):
         jira_available = True
     else:
         jform = None
-        
+
     form = PromoteFindingForm(initial={'title': finding.title,
                                        'date': finding.date,
                                        'severity': finding.severity,

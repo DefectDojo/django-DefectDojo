@@ -120,6 +120,10 @@
                         Bulk Edit
                         <span class="caret"></span>
                     </button>
+
+                    <a class="text-danger delete-bulk" href="#" alt="Delete Findings">
+                        <i class="fa fa-trash"></i>
+                    </a>
                     <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" id="bulk_edit">
                         <li class="dropdown-header">Choose wisely...</li>
                         <li style="padding-left: 8px;">
@@ -264,8 +268,14 @@
                                    href="{% url 'view_finding' finding.id %}">View</a>
                                 <a class="btn btn-sm btn-warning"
                                    href="{% url 'edit_finding' finding.id %}">Edit</a>
-                                <a class="btn btn-sm btn-danger delete-finding"
-                                   href="{% url 'delete_finding' finding.id %}">Delete</a>
+                                <form method="post" action="{% url 'delete_finding' finding.id %}"
+                                     style="display: inline" class="form-inline form">
+                                   {% csrf_token %}
+                                   <input type="hidden" name="id" value="{{ finding.id }}"/>
+                                   <button type="submit" class="btn btn-danger btn-sm delete-finding">
+                                       Delete
+                                   </button>
+                               </form>
                             </div>
                         </td>
                     </tr>
@@ -331,8 +341,14 @@
                             <div class="btn-group">
                                 <a class="btn btn-sm btn-warning"
                                    href="{% url 'promote_to_finding' finding.id %}">Promote To Finding</a>
-                                <a class="btn btn-sm btn-danger"
-                                   href="{% url 'delete_stub_finding' finding.id %}">Delete</a>
+                                 <form method="post" action="{% url 'delete_stub_finding' finding.id %}"
+                                      style="display: inline" class="form-inline form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="id" value="{{ finding.id }}"/>
+                                    <button type="submit" class="btn btn-danger btn-sm delete-finding">
+                                        Delete
+                                    </button>
+                                </form>
                             </div>
                         </td>
                     </tr>
@@ -504,6 +520,27 @@
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
     <script type="text/javascript">
         $(function () {
+            $('input[type="checkbox"]').change(function () {
+              finding = $(this).attr("name");
+              if (finding.indexOf("select_") >= 0)
+              {
+                if ($(this).prop("checked")) {
+                  $('div#bulk_edit_menu').removeClass('hidden');
+                } else {
+                  var checkbox_values = $("input[type=checkbox][name^='select_']");
+                  var checked = false;
+                  for (var i = 0; i < checkbox_values.length; i++) {
+                    if ($(checkbox_values[i]).prop("checked")) {
+                      checked = true;
+                    }
+                  }
+                  if (checked == false) {
+                    $('div#bulk_edit_menu').addClass('hidden');
+                  }
+                }
+
+              }
+            });
             $('form#bulk_change_form').on('submit', function(e){
                 $('input[type=checkbox].select_one:checked').each(function(){
                     var hidden_input = $('<input type="hidden" value="' + this.id + '" name="finding_to_update">')
@@ -542,9 +579,17 @@
                 }
             });
 
+            $('a.delete-bulk').on('click', function (e) {
+                if (confirm('Are you sure you want to delete this finding?'))
+                {
+                    var hidden_input = $('<input type="hidden" value="delete_bulk_findings" name="delete_bulk_findings">')
+                    $('form#bulk_change_form').append(hidden_input);
+                    $( "form#bulk_change_form" ).submit();
+                }
+            });
 
-            $('a.delete-finding').on('click', function (e) {
-                return confirm('Are you sure you want to delete this finding?');
+            $( document ).on( "click", "button.delete-finding", function (e) {
+                return confirm('Are you sure you want to delete this finding?')
             });
 
             $('a#add_notes_link').on('click', function (e) {
@@ -601,7 +646,8 @@
                         var severity = $("<td></td>").append(fseverity);
                         var reporter = $("<td>{{ request.user.username }}</td>");
                         var date = $("<td></td>").append(fdate);
-                        var actions = $('<td><div class="btn-group"><a class="btn btn-sm btn-warning" href="/stub_finding/[id]/promote">Promote To Finding</a> <a class="btn btn-sm btn-danger" href="/stub_finding/[id]/delete">Delete</a></div></td>'.replace(/\[id\]/g, fid));
+                        var td_info = '<td><div class="btn-group"><a class="btn btn-sm btn-warning" href="/stub_finding/[id]/promote">Promote To Finding</a> <form method="post" action="/stub_finding/[id]/delete" style="display: inline" class="form-inline form"><input type="hidden" name="id" value="[id]"/><input type="hidden" name="csrfmiddlewaretoken" value="' + $('input[name=csrfmiddlewaretoken]').val() + '"><button type="submit" class="btn btn-danger btn-sm delete-finding">Delete</button></form></div></td>';
+                        var actions = $(td_info.replace(/\[id\]/g, fid));
 
                         row.append(title, severity, reporter, date, actions).appendTo("#stub_findings tbody");
                         $("input#quick_add_finding").val("")
