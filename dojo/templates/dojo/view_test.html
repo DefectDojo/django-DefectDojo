@@ -235,6 +235,16 @@
                             </form>
                         </td>
                         <td><a href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a>
+                          {% if finding.file_path %}
+                          <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="{{ finding.file_path }}" data-placement="right" data-container="body" data-original-title="" title="">
+                          {% else %}
+                            <i class="fa fa-question-circle has-popover" data-html="true" data-trigger="hover" data-content="
+                            {% for endpoint in finding.endpoints.all %}
+                              {{ endpoint }}<br/>
+                            {% endfor %}
+                            " data-placement="right" data-container="body" data-original-title="" title="">
+                          {% endif %}
+                        </i>
                           {% if finding.tags %}
                               <sup>
                                   {% for tag in finding.tags %}

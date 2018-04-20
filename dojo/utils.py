@@ -868,7 +868,7 @@ def close_epic(eng, push_to_jira):
             json_data = {'transition':{'id':jira_conf.close_status_key}}
             r = requests.post(url=req_url, auth=HTTPBasicAuth(jira_conf.username, jira_conf.password), json=json_data)
         except Exception as e:
-            log_jira_generic_alert('Jira Engagement/Epic Close Error', e)
+            log_jira_generic_alert('Jira Engagement/Epic Close Error', str(e))
             pass
 
 def update_epic(eng, push_to_jira):
@@ -883,7 +883,7 @@ def update_epic(eng, push_to_jira):
             issue = jira.issue(j_issue.jira_id)
             issue.update(summary=eng.name, description=eng.name)
         except Exception as e:
-            log_jira_generic_alert('Jira Engagement/Epic Update Error', e)
+            log_jira_generic_alert('Jira Engagement/Epic Update Error', str(e))
             pass
 
 def add_epic(eng, push_to_jira):
@@ -905,7 +905,12 @@ def add_epic(eng, push_to_jira):
             j_issue = JIRA_Issue(jira_id=new_issue.id, jira_key=new_issue, engagement=engagement)
             j_issue.save()
         except Exception as e:
-            log_jira_generic_alert('Jira Engagement/Epic Creation Error', e)
+            error = str(e)
+            message = ""
+            if "customfield" in error:
+                message = "The 'Epic name id' in your DefectDojo Jira Configuration does not appear to be correct. Please visit, " + jira_conf.url + "/rest/api/2/field and search for Epic Name. Copy the number out of cf[number] and place in your DefectDojo settings for Jira and try again. For example, if your results are cf[100001] then copy 100001 and place it in 'Epic name id'. (Your Epic Id will be different.) \n\n"
+
+            log_jira_generic_alert('Jira Engagement/Epic Creation Error', message + error)
             pass
 
 def add_comment(find, note, force_push=False):
@@ -918,7 +923,7 @@ def add_comment(find, note, force_push=False):
             j_issue = JIRA_Issue.objects.get(finding=find)
             jira.add_comment(j_issue.jira_id, '(%s): %s' % (note.author.get_full_name(), note.entry))
         except Exception as e:
-            log_jira_generic_alert('Jira Add Comment Error', e)
+            log_jira_generic_alert('Jira Add Comment Error', str(e))
             pass
 
 def send_review_email(request, user, finding, users, new_note):

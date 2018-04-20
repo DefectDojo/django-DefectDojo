@@ -260,6 +260,7 @@
         </div>
     </div>
     {% endif %}
+    {% if  finding.static_finding != True %}
     <div class="row to_highlight">
         <div class="col-md-12">
             <div class="panel panel-default endpoints table-responsive">
@@ -302,6 +303,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
 
     <div class="view-finding to_highlight">
         <div class="panel panel-default">
@@ -426,6 +428,7 @@
         </div>
 
         <!--Cred Begin-->
+        {% if  finding.static_finding != True %}
         <div class="row">
         <div class="col-md-12" id="cred">
             <div class="panel panel-default">
@@ -526,7 +529,7 @@
         </div>
     </div>
     <!--Cred end -->
-
+    {% endif %}
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h4>References <span class="pull-right"><a data-toggle="collapse" href="#vuln_refs"><i
@@ -537,8 +540,6 @@
             </div>
         </div>
     </div>
-
-
 
     <div class="panel panel-default to_highlight table-responsive">
         <div class="panel-heading">
