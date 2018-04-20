@@ -1148,7 +1148,7 @@ class FindingImageAccessToken(models.Model):
 
 
 class JIRA_Conf(models.Model):
-    url = models.URLField(max_length=2000, verbose_name="JIRA URL")
+    url = models.URLField(max_length=2000, verbose_name="JIRA URL", help_text="For configuring Jira, view: https://defectdojo.readthedocs.io/en/latest/features.html#jira-integration")
     #    product = models.ForeignKey(Product)
     username = models.CharField(max_length=2000)
     password = models.CharField(max_length=2000)
@@ -1162,14 +1162,14 @@ class JIRA_Conf(models.Model):
                                               ('Spike', 'Spike'),
                                               ('Bug', 'Bug')),
                                           default='Bug')
-    epic_name_id = models.IntegerField()
-    open_status_key = models.IntegerField()
-    close_status_key = models.IntegerField()
-    low_mapping_severity = models.CharField(max_length=200)
-    medium_mapping_severity = models.CharField(max_length=200)
-    high_mapping_severity = models.CharField(max_length=200)
-    critical_mapping_severity = models.CharField(max_length=200)
-    finding_text = models.TextField(null=True, blank=True)
+    epic_name_id = models.IntegerField(help_text="To obtain the 'Epic name id' visit https://<YOUR JIRA URL>/rest/api/2/field and search for Epic Name. Copy the number out of cf[number] and paste it here.")
+    open_status_key = models.IntegerField(help_text="To obtain the 'open status key' visit https://<YOUR JIRA URL>/rest/api/latest/issue/<ANY VALID ISSUE KEY>/transitions?expand=transitions.fields")
+    close_status_key = models.IntegerField(help_text="To obtain the 'open status key' visit https://<YOUR JIRA URL>/rest/api/latest/issue/<ANY VALID ISSUE KEY>/transitions?expand=transitions.fields")
+    low_mapping_severity = models.CharField(max_length=200, help_text="Maps to the 'Priority' field in Jira. For example: Low")
+    medium_mapping_severity = models.CharField(max_length=200, help_text="Maps to the 'Priority' field in Jira. For example: Medium")
+    high_mapping_severity = models.CharField(max_length=200, help_text="Maps to the 'Priority' field in Jira. For example: High")
+    critical_mapping_severity = models.CharField(max_length=200, help_text="Maps to the 'Priority' field in Jira. For example: Critical")
+    finding_text = models.TextField(null=True, blank=True, help_text="Additional text that will be added to the finding in Jira. For example including how the finding was created or who to contact for more information.")
 
     def __unicode__(self):
         return self.url + " | " + self.username

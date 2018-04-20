@@ -1043,6 +1043,10 @@ a.template-popover:hover {
     cursor: url(../img/zoom-in.cur), zoom-in;
 }
 
+.popover{
+    max-width: 100%; 
+}
+
 #template_findings div.popover {
     width: 50% !important;
     max-width: 50% !important;
