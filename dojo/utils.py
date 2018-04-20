@@ -1,6 +1,5 @@
 import calendar as tcalendar
 import re
-import sys
 import binascii, os, hashlib, json
 from Crypto.Cipher import AES
 from calendar import monthrange
@@ -1078,7 +1077,6 @@ def create_notification(event=None, **kwargs):
                             url='https://%s/v2/room/%s/notification?auth_token=%s' % (get_system_setting('hipchat_site'), channel, get_system_setting('hipchat_token')),
                             data={'message':create_notification_message(event, 'slack'),
                                   'message_format':'text'})
-            print res
         except Exception as e:
             log_alert(e)
             pass
@@ -1187,3 +1185,21 @@ def calculate_grade(product):
             #prod = Product.objects.get(id=finding.test.engagement.product.id)
             product.prod_numeric_grade = aeval(grade_product)
             product.save()
+
+def get_celery_worker_status():
+    ERROR_KEY = "ERROR"
+    try:
+        from celery.task.control import inspect
+        insp = inspect()
+        d = insp.stats()
+        if not d:
+            d = { ERROR_KEY: 'No running Celery workers were found.' }
+    except IOError as e:
+        from errno import errorcode
+        msg = "Error connecting to the backend: " + str(e)
+        if len(e.args) > 0 and errorcode.get(e.args[0]) == 'ECONNREFUSED':
+            msg += ' Check that the RabbitMQ server is running.'
+        d = { ERROR_KEY: msg }
+    except ImportError as e:
+        d = { ERROR_KEY: str(e)}
+    return d
