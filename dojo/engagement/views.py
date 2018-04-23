@@ -117,7 +117,7 @@ def edit_engagement(request, eid):
         form = EngForm2(request.POST, instance=eng)
         if 'jiraform-push_to_jira' in request.POST:
             jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=True)
-        if form.is_valid():
+        if form.is_valid() and jform and jform.is_valid():
             if 'jiraform-push_to_jira' in request.POST:
                 try:
                     jissue = JIRA_Issue.objects.get(engagement=eng)
