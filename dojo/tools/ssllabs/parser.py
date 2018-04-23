@@ -61,37 +61,66 @@ class SSLlabsParser(object):
 
                 description += suite_info
                 description += "Additional Information:\n\n"
-
-                description += "serverSignature: " + endpoints["details"]["serverSignature"] + "\n"
-                description += "prefixDelegation: " + str(endpoints["details"]["prefixDelegation"]) + "\n"
-                description += "nonPrefixDelegation: " + str(endpoints["details"]["nonPrefixDelegation"]) + "\n"
-                description += "vulnBeast: " + str(endpoints["details"]["vulnBeast"]) + "\n"
-                description += "renegSupport: " + str(endpoints["details"]["renegSupport"]) + "\n"
-                description += "stsStatus: " + endpoints["details"]["stsStatus"] + "\n"
-                description += "stsResponseHeader: " + endpoints["details"]["stsResponseHeader"] + "\n"
-                description += "stsPreload: " + str(endpoints["details"]["stsPreload"]) + "\n"
-                description += "sessionResumption: " + str(endpoints["details"]["sessionResumption"]) + "\n"
-                description += "compressionMethods: " + str(endpoints["details"]["compressionMethods"]) + "\n"
-                description += "supportsNpn: " + str(endpoints["details"]["supportsNpn"]) + "\n"
-                description += "supportsAlpn: " + str(endpoints["details"]["supportsAlpn"]) + "\n"
-                description += "sessionTickets: " + str(endpoints["details"]["sessionTickets"]) + "\n"
-                description += "ocspStapling: " + str(endpoints["details"]["ocspStapling"]) + "\n"
-                description += "sniRequired: " + str(endpoints["details"]["sniRequired"]) + "\n"
-                description += "httpStatusCode: " + str(endpoints["details"]["httpStatusCode"]) + "\n"
-                description += "supportsRc4: " + str(endpoints["details"]["supportsRc4"]) + "\n"
-                description += "rc4WithModern: " + str(endpoints["details"]["rc4WithModern"]) + "\n"
-                description += "forwardSecrecy: " + str(endpoints["details"]["forwardSecrecy"]) + "\n"
-                description += "protocolIntolerance: " + str(endpoints["details"]["protocolIntolerance"]) + "\n"
-                description += "miscIntolerance: " + str(endpoints["details"]["miscIntolerance"]) + "\n"
-                description += "heartbleed: " + str(endpoints["details"]["heartbleed"]) + "\n"
-                description += "heartbeat: " + str(endpoints["details"]["heartbeat"]) + "\n"
-                description += "openSslCcs: " + str(endpoints["details"]["openSslCcs"]) + "\n"
-                description += "openSSLLuckyMinus20: " + str(endpoints["details"]["openSSLLuckyMinus20"]) + "\n"
-                description += "poodle: " + str(endpoints["details"]["poodle"]) + "\n"
-                description += "poodleTls: " + str(endpoints["details"]["poodleTls"]) + "\n"
-                description += "fallbackScsv: " + str(endpoints["details"]["fallbackScsv"]) + "\n"
-                description += "freak: " + str(endpoints["details"]["freak"]) + "\n"
-                description += "hasSct: " + str(endpoints["details"]["hasSct"]) + "\n"
+                if "serverSignature" in endpoints["details"]:
+                    description += "serverSignature: " + endpoints["details"]["serverSignature"] + "\n"
+                if "prefixDelegation" in endpoints["details"]:
+                    description += "prefixDelegation: " + str(endpoints["details"]["prefixDelegation"]) + "\n"
+                if "nonPrefixDelegation" in endpoints["details"]:
+                    description += "nonPrefixDelegation: " + str(endpoints["details"]["nonPrefixDelegation"]) + "\n"
+                if "vulnBeast" in endpoints["details"]:
+                    description += "vulnBeast: " + str(endpoints["details"]["vulnBeast"]) + "\n"
+                if "renegSupport" in endpoints["details"]:
+                    description += "renegSupport: " + str(endpoints["details"]["renegSupport"]) + "\n"
+                if "stsStatus" in endpoints["details"]:
+                    description += "stsStatus: " + endpoints["details"]["stsStatus"] + "\n"
+                if "stsResponseHeader" in endpoints["details"]:
+                    description += "stsResponseHeader: " + endpoints["details"]["stsResponseHeader"] + "\n"
+                if "stsPreload" in endpoints["details"]:
+                    description += "stsPreload: " + str(endpoints["details"]["stsPreload"]) + "\n"
+                if "sessionResumption" in endpoints["details"]:
+                    description += "sessionResumption: " + str(endpoints["details"]["sessionResumption"]) + "\n"
+                if "compressionMethods" in endpoints["details"]:
+                    description += "compressionMethods: " + str(endpoints["details"]["compressionMethods"]) + "\n"
+                if "supportsNpn" in endpoints["details"]:
+                    description += "supportsNpn: " + str(endpoints["details"]["supportsNpn"]) + "\n"
+                if "supportsAlpn" in endpoints["details"]:
+                    description += "supportsAlpn: " + str(endpoints["details"]["supportsAlpn"]) + "\n"
+                if "sessionTickets" in endpoints["details"]:
+                    description += "sessionTickets: " + str(endpoints["details"]["sessionTickets"]) + "\n"
+                if "ocspStapling" in endpoints["details"]:
+                    description += "ocspStapling: " + str(endpoints["details"]["ocspStapling"]) + "\n"
+                if "sniRequired" in endpoints["details"]:
+                    description += "sniRequired: " + str(endpoints["details"]["sniRequired"]) + "\n"
+                if "httpStatusCode" in endpoints["details"]:
+                    description += "httpStatusCode: " + str(endpoints["details"]["httpStatusCode"]) + "\n"
+                if "supportsRc4" in endpoints["details"]:
+                    description += "supportsRc4: " + str(endpoints["details"]["supportsRc4"]) + "\n"
+                if "rc4WithModern" in endpoints["details"]:
+                    description += "rc4WithModern: " + str(endpoints["details"]["rc4WithModern"]) + "\n"
+                if "forwardSecrecy" in endpoints["details"]:
+                    description += "forwardSecrecy: " + str(endpoints["details"]["forwardSecrecy"]) + "\n"
+                if "protocolIntolerance" in endpoints["details"]:
+                    description += "protocolIntolerance: " + str(endpoints["details"]["protocolIntolerance"]) + "\n"
+                if "miscIntolerance" in endpoints["details"]:
+                    description += "miscIntolerance: " + str(endpoints["details"]["miscIntolerance"]) + "\n"
+                if "heartbleed" in endpoints["details"]:
+                    description += "heartbleed: " + str(endpoints["details"]["heartbleed"]) + "\n"
+                if "heartbeat" in endpoints["details"]:
+                    description += "heartbeat: " + str(endpoints["details"]["heartbeat"]) + "\n"
+                if "openSslCcs" in endpoints["details"]:
+                    description += "openSslCcs: " + str(endpoints["details"]["openSslCcs"]) + "\n"
+                if "openSSLLuckyMinus20" in endpoints["details"]:
+                    description += "openSSLLuckyMinus20: " + str(endpoints["details"]["openSSLLuckyMinus20"]) + "\n"
+                if "poodle" in endpoints["details"]:
+                    description += "poodle: " + str(endpoints["details"]["poodle"]) + "\n"
+                if "poodleTls" in endpoints["details"]:
+                    description += "poodleTls: " + str(endpoints["details"]["poodleTls"]) + "\n"
+                if "fallbackScsv" in endpoints["details"]:
+                    description += "fallbackScsv: " + str(endpoints["details"]["fallbackScsv"]) + "\n"
+                if "freak" in endpoints["details"]:
+                    description += "freak: " + str(endpoints["details"]["freak"]) + "\n"
+                if "hasSct" in endpoints["details"]:
+                    description += "hasSct: " + str(endpoints["details"]["hasSct"]) + "\n"
 
                 cName = ""
                 for commonNames in cert["commonNames"]:
