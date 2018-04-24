@@ -1203,8 +1203,7 @@ class BuildDetails(MultipartResource, Resource):
 
         authentication = DojoApiKeyAuthentication()
         authorization = DjangoAuthorization()
-        #validation = ImportScanValidation()
-        #object_class = ImportScanObject
+        object_class = ImportScanObject
 
     def hydrate(self, bundle):
         bundle.obj.__setattr__('engagement_obj',

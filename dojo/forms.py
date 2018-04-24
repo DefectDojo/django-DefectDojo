@@ -18,7 +18,8 @@ from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
     JIRA_Issue, JIRA_PKey, JIRA_Conf, UserContactInfo, Tool_Type, Tool_Configuration, Tool_Product_Settings, \
-    Cred_User, Cred_Mapping, System_Settings, Notifications, Languages, Language_Type, App_Analysis, Objects
+    Cred_User, Cred_Mapping, System_Settings, Notifications, Languages, Language_Type, App_Analysis, Objects, \
+    Benchmark_Product, Benchmark_Requirement, Benchmark_Product_Summary
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
 
@@ -765,6 +766,43 @@ class StubFindingForm(forms.ModelForm):
         return cleaned_data
 
 
+class ApplyFindingTemplateForm(forms.Form):
+
+    title = forms.CharField(max_length=1000, required=True)
+
+    cwe = forms.IntegerField(label="CWE", required=False)
+
+    severity = forms.ChoiceField(
+            required=False,
+            choices=(('Low', 'Low'), ('Medium', 'Medium'),
+                     ('High', 'High'), ('Critical', 'Critical')),
+            error_messages={
+                'required': 'Select valid choice: In Progress, On Hold, Completed',
+                'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
+
+    description = forms.CharField(widget=forms.Textarea)
+    mitigation = forms.CharField(widget=forms.Textarea)
+    impact = forms.CharField(widget=forms.Textarea)
+    references = forms.CharField(widget=forms.Textarea, required=False)
+
+    def __init__(self, template=None, *args, **kwargs):
+        super(ApplyFindingTemplateForm, self).__init__(*args, **kwargs)
+        self.template = template
+
+    def clean(self):
+        cleaned_data = super(ApplyFindingTemplateForm, self).clean()
+
+        if 'title' in cleaned_data:
+            if len(cleaned_data['title']) <= 0:
+                raise forms.ValidationError("The title is required.")
+        else:
+            raise forms.ValidationError("The title is required.")
+
+        return cleaned_data
+
+    class Meta:
+        fields = ['title',  'cwe', 'severity', 'description', 'mitigation', 'impact', 'references']
+        order = ('title', 'cwe', 'severity', 'description', 'impact')
 class FindingTemplateForm(forms.ModelForm):
     title = forms.CharField(max_length=1000, required=True)
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
@@ -782,7 +820,7 @@ class FindingTemplateForm(forms.ModelForm):
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
 
     def __init__(self, *args, **kwargs):
-        tags = Tag.objects.usage_for_model(Finding)
+        tags = Tag.objects.usage_for_model(Finding_Template)
         t = [(tag.name, tag.name) for tag in tags]
         super(FindingTemplateForm, self).__init__(*args, **kwargs)
         self.fields['tags'].widget.choices = t
@@ -803,8 +841,13 @@ class DeleteFindingTemplateForm(forms.ModelForm):
 
 
 class FindingBulkUpdateForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(FindingBulkUpdateForm, self).__init__(*args, **kwargs)
+        self.fields['severity'].required = False
+
     def clean(self):
         cleaned_data = super(FindingBulkUpdateForm, self).clean()
+
         if (cleaned_data['active'] or cleaned_data['verified']) and cleaned_data['duplicate']:
             raise forms.ValidationError('Duplicate findings cannot be'
                                         ' verified or active')
@@ -1209,7 +1252,7 @@ class DeleteUserForm(forms.ModelForm):
 class UserContactInfoForm(forms.ModelForm):
     class Meta:
         model = UserContactInfo
-        exclude = ['user']
+        exclude = ['user', 'slack_user_id']
 
 
 def get_years():
@@ -1245,7 +1288,7 @@ class ReportOptionsForm(forms.Form):
     include_finding_images = forms.ChoiceField(choices=yes_no, label="Finding Images")
     include_executive_summary = forms.ChoiceField(choices=yes_no, label="Executive Summary")
     include_table_of_contents = forms.ChoiceField(choices=yes_no, label="Table of Contents")
-    report_type = forms.ChoiceField(choices=(('AsciiDoc', 'AsciiDoc'), ('PDF', 'PDF')))
+    report_type = forms.ChoiceField(choices=(('AsciiDoc', 'AsciiDoc'),('HTML', 'HTML'), ('PDF', 'PDF')))
 
 
 class CustomReportOptionsForm(forms.Form):
@@ -1264,6 +1307,21 @@ class DeleteReportForm(forms.ModelForm):
         model = Report
         fields = ('id',)
 
+class DeleteFindingForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = Finding
+        fields = ('id',)
+
+class DeleteStubFindingForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = Stub_Finding
+        fields = ('id',)
 
 class AddFindingImageForm(forms.ModelForm):
     class Meta:
@@ -1285,6 +1343,20 @@ class JIRAForm(forms.ModelForm):
     class Meta:
         model = JIRA_Conf
         exclude = ['product']
+
+class Benchmark_Product_SummaryForm(forms.ModelForm):
+
+    class Meta:
+        model = Benchmark_Product_Summary
+        exclude = ['product', 'current_level', 'benchmark_type', 'asvs_level_1_benchmark', 'asvs_level_1_score', 'asvs_level_2_benchmark', 'asvs_level_2_score', 'asvs_level_3_benchmark', 'asvs_level_3_score']
+
+class DeleteBenchmarkForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = Benchmark_Product_Summary
+        exclude = ['product', 'benchmark_type', 'desired_level', 'current_level', 'asvs_level_1_benchmark', 'asvs_level_1_score', 'asvs_level_2_benchmark', 'asvs_level_2_score', 'asvs_level_3_benchmark', 'asvs_level_3_score', 'publish']
 
 class JIRA_PKeyForm(forms.ModelForm):
 
@@ -1426,6 +1498,18 @@ class CredMappingFormProd(forms.ModelForm):
 class SystemSettingsForm(forms.ModelForm):
     class Meta:
         model = System_Settings
+        exclude = ['product_grade']
+
+class BenchmarkForm(forms.ModelForm):
+
+    class Meta:
+        model = Benchmark_Product
+        exclude = ['product', 'control']
+
+class Benchmark_RequirementForm(forms.ModelForm):
+
+    class Meta:
+        model = Benchmark_Requirement
         exclude = ['']
 
 class NotificationsForm(forms.ModelForm):

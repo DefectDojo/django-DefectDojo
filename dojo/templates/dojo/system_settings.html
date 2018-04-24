@@ -10,8 +10,28 @@
 {% endblock %}
 
 {% block content %}
+<div class="row">
+    <h3> System Status </h3>
+    <br>
+   <div id="test-strategy" class="col-md-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        {%if celery_bool%}
+                        <h4> Celery <span class="label label-success">{{celery_status}}</span> </h4>
+                        {% else %}
+                        <h4> Celery <span class="label label-danger">{{celery_status}}</span> </h4>
+                        {% endif %}
+                    </div>
+                    <div class="panel-body text-center">
+                        {{celery_msg}}
+                    </div>
+                </div>
+            </div>
+</div>
+<hr>
+    <div class="row">
     <h3> System Settings </h3>
-    <form class="form-horizontal" method="post">{% csrf_token %}
+   <form class="form-horizontal" method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
@@ -19,6 +39,7 @@
             </div>
         </div>
     </form>
+    </div>
 {% endblock %}
 {% block postscript %}
     <script>

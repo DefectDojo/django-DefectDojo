@@ -982,6 +982,28 @@ table.finding-endpoints {
     background-color: rgb(255, 255, 123);
 }
 
+.level1 {
+    background-color: #FEFFA2;
+}
+.level2 {
+    background-color: #B7D784;
+}
+.level3 {
+    background-color: #BDE8EF;
+}
+.benchmark_pass {
+  background-color: #DAF89F;
+}
+.benchmark_fail {
+  background-color: #FFEEEE;
+}
+.benchmark_disabled {
+  background-color: #eaedf2
+}
+.highlight_asvs_level_1 {
+  background-color: #89C4F4
+}
+
 form#quick-add-form {
     display: inline-block;
     width: 40%;
@@ -1019,6 +1041,10 @@ div.potential-finding, div.potential-finding div.panel-heading {
 
 a.template-popover:hover {
     cursor: url(../img/zoom-in.cur), zoom-in;
+}
+
+.popover{
+    max-width: 100%; 
 }
 
 #template_findings div.popover {
@@ -1128,6 +1154,30 @@ hr.report-page-break:before {
     font-size: 90%;
     padding: 2px 5px 2px 5px;
     text-decoration: none;
+}
+
+.btn-grade {
+    border-radius: 2px;
+    border-color: #ddd;
+    color: #ffffff;
+    padding: 1px 1px 1px 1px;
+    text-decoration: none;
+}
+
+.A {
+    background: #4ec83d;
+}
+.B {
+  background: #ffa100;
+}
+.C {
+  background: #FFBD33;
+}
+.D {
+  background: #cc3300;
+}
+.F {
+  background: #ef251e;
 }
 
 div.tags .label {

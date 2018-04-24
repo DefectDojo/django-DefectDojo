@@ -40,7 +40,7 @@
                                     <i class="fa fa-file-image-o"></i> Manage Images
                                 </a>
                             </li>
-                            {% if finding.under_review and dojo_user in finding.reviewers.all or dojo_user == finding.review_requested_by %}
+                            {% if finding.under_review and dojo_user in finding.reviewers.all or dojo_user == finding.review_requested_by and finding.under_review %}
                                 <li role="presentation">
                                     <a href="{% url 'clear_finding_review' finding.id %}">
                                         <i class="icon-user-check"></i> Clear Review
@@ -64,6 +64,11 @@
                                     <i class="fa fa-copy"></i> Make Finding a Template
                                 </a>
                             </li>
+                            <li role="presentation">
+                                <a href="{% url 'find_template_to_apply' finding.id %}">
+                                    <i class="fa fa-copy"></i> Apply Template to Finding
+                                </a>
+                            </li>
                             {% if finding.active %}
                                 <li role="presentation">
                                     <a href="{% url 'close_finding' finding.id %}">
@@ -84,11 +89,14 @@
                             </li>
                             <li role="separator" class="divider"></li>
                             <li role="presentation">
-                                <a class="text-danger" href="{% url 'delete_finding' finding.id %}"
-                                   onclick="return confirm('Are you sure you want to delete this finding?')">
-                                    <i class="fa fa-trash"></i> Delete Finding
-                                </a>
+                            <a class="text-danger delete-finding" href="#">
+                                <i class="fa fa-trash"></i> Delete Finding
+                            </a>
                             </li>
+                              <form id="delete-finding-form" method="post" action="{% url 'delete_finding' finding.id %}">
+                                 {% csrf_token %}
+                                 <input type="hidden" name="id" value="{{ finding.id }}"/>
+                              </form>
                             </li>
                         </ul>
                     </div>
@@ -141,6 +149,7 @@
                     {% if finding.cwe > 0 %}
                         <th>CWE</th>
                     {% endif %}
+                    <th>Found by</th>
                 </tr>
                 <tr>
                     <td>
@@ -182,6 +191,9 @@
                             </a>
                         </td>
                     {% endif %}
+                    <td> {% for scanner in found_by %}
+                         {{scanner}}
+                         {% endfor %}</td>
 
                 </tr>
             </table>
@@ -248,6 +260,7 @@
         </div>
     </div>
     {% endif %}
+    {% if  finding.static_finding != True %}
     <div class="row to_highlight">
         <div class="col-md-12">
             <div class="panel panel-default endpoints table-responsive">
@@ -290,6 +303,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
 
     <div class="view-finding to_highlight">
         <div class="panel panel-default">
@@ -414,6 +428,7 @@
         </div>
 
         <!--Cred Begin-->
+        {% if  finding.static_finding != True %}
         <div class="row">
         <div class="col-md-12" id="cred">
             <div class="panel panel-default">
@@ -514,7 +529,7 @@
         </div>
     </div>
     <!--Cred end -->
-
+    {% endif %}
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h4>References <span class="pull-right"><a data-toggle="collapse" href="#vuln_refs"><i
@@ -525,8 +540,6 @@
             </div>
         </div>
     </div>
-
-
 
     <div class="panel panel-default to_highlight table-responsive">
         <div class="panel-heading">
@@ -602,6 +615,14 @@
                 var i = $($(this).find('i').get(0));
                 i.toggleClass('glyphicon-chevron-up').toggleClass('glyphicon-chevron-down');
             })
+        });
+
+        $('a.delete-finding').on('click', function (e) {
+            if (confirm('Are you sure you want to delete this finding?'))
+            {
+              $( "form#delete-finding-form" ).submit();
+            }
+
         });
 
         $('#findingImageModal').on('show.bs.modal', function (event) {

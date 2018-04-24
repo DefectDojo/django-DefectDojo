@@ -3,6 +3,7 @@ __author__ = 'aaronweaver'
 from defusedxml import ElementTree
 from datetime import datetime
 from dateutil import parser
+import ntpath
 
 from dojo.models import Finding
 
@@ -17,8 +18,8 @@ class CheckmarxXMLParser(object):
         for query in root.findall('Query'):
             categories = ''
             language = ''
-            mitigation = ''
-            impact = ''
+            mitigation = 'N/A'
+            impact = 'N/A'
             references = ''
             findingdetail = ''
             title = ''
@@ -55,33 +56,26 @@ class CheckmarxXMLParser(object):
 
                 findingdetail += 'Finding Link: ' +  deeplink + '\n\n'
 
-                dupe_key = categories + cwe + name + result.get('FileName') + result.get('Line')
+                dupe_key = categories + cwe + name + result.get('FileName') #+ result.get('Line')
 
                 if dupe_key in dupes:
                     find = dupes[dupe_key]
+                    title, description, pathnode = self.get_finding_detail(query, result)
+                    find.description = find.description + "\n" + description
+                    dupes[dupe_key] = find
                 else:
                     dupes[dupe_key] = True
 
                     sev = result.get('Severity')
                     result.get('FileName')
-
-                    for path in result.findall('Path'):
-                        title = query.get('name').replace('_', ' ') + ' (' + path.get('PathId') + ')'
-                        for pathnode in path.findall('PathNode'):
-                            findingdetail += 'Source Object: %s\n' % (pathnode.find('Name').text)
-                            #findingdetail += 'Filename: %s\n' % (pathnode.find('FileName').text)
-                            #findingdetail += 'Line Number: %s\n' % (pathnode.find('Line').text)
-                            for codefragment in pathnode.findall('Snippet/Line'):
-                                findingdetail += 'Code: %s\n' % (codefragment.find('Code').text.strip())
-
-                            findingdetail += '\n'
+                    title, description, pathnode = self.get_finding_detail(query, result)
 
                     find = Finding(title=title,
                                    cwe=int(cwe),
                                    test=test,
                                    active=False,
                                    verified=False,
-                                   description=findingdetail,
+                                   description=findingdetail + description,
                                    severity=sev,
                                    numerical_severity=Finding.get_numerical_severity(sev),
                                    mitigation=mitigation,
@@ -96,3 +90,25 @@ class CheckmarxXMLParser(object):
                     findingdetail = ''
 
         self.items = dupes.values()
+
+    def get_finding_detail(self, query, result):
+        findingdetail = ""
+        title = ""
+
+        for path in result.findall('Path'):
+            title = query.get('name').replace('_', ' ') #+ ' (' + path.get('PathId') + ')'
+            for pathnode in path.findall('PathNode'):
+                findingdetail += 'Source Object: %s\n' % (pathnode.find('Name').text)
+
+                for codefragment in pathnode.findall('Snippet/Line'):
+                    findingdetail += 'Code: %s\n' % (codefragment.find('Code').text.strip())
+
+                findingdetail += '\n'
+
+        if pathnode:
+            findingdetail = "Line Number: " + pathnode.find('Line').text + "\n" + findingdetail
+
+        if title and pathnode.find('FileName').text:
+            title = title + " (" + ntpath.basename(pathnode.find('FileName').text) + ")"
+
+        return title, findingdetail, pathnode

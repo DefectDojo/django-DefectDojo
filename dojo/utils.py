@@ -1,7 +1,6 @@
 import calendar as tcalendar
 import re
-import sys
-import binascii, os, hashlib
+import binascii, os, hashlib, json
 from Crypto.Cipher import AES
 from calendar import monthrange
 from datetime import date, datetime, timedelta
@@ -23,9 +22,9 @@ from jira import JIRA
 from jira.exceptions import JIRAError
 from dojo.models import Finding, Scan, Test, Engagement, Stub_Finding, Finding_Template, \
                         Report, Product, JIRA_PKey, JIRA_Issue, Dojo_User, User, Notes, \
-                        FindingImage, Alerts, System_Settings, Notifications
+                        FindingImage, Alerts, System_Settings, Notifications, UserContactInfo
 from django_slack import slack_message
-
+from asteval import Interpreter
 
 """
 Michael & Fatima:
@@ -58,26 +57,30 @@ def sync_dedupe(new_finding, *args, **kwargs):
     total_findings = eng_findings_cwe | eng_findings_title
     #total_findings = total_findings.order_by('date')
     for find in total_findings:
-        if find.endpoints != None:
+        if find.endpoints.count() != 0 and new_finding.endpoints.count() != 0:
             list1 = new_finding.endpoints.all()
             list2 = find.endpoints.all()
             if all(x in list1 for x in list2):
                 new_finding.duplicate = True
                 new_finding.duplicate_finding = find
                 find.duplicate_list.add(new_finding)
+                find.found_by.add(new_finding.test.test_type)
                 super(Finding, new_finding).save(*args, **kwargs)
                 break
         elif find.line == new_finding.line and find.file_path  == new_finding.file_path and new_finding.static_finding and len(new_finding.file_path) > 0:
             new_finding.duplicate = True
             new_finding.duplicate_finding = find
             find.duplicate_list.add(new_finding)
+            find.found_by.add(new_finding.test.test_type)
             super(Finding, new_finding).save(*args, **kwargs)
         elif find.get_hash_code() == new_finding.get_hash_code():
                 new_finding.duplicate = True
                 new_finding.duplicate_finding = find
                 find.duplicate_list.add(new_finding)
+                find.found_by.add(new_finding.test.test_type)
                 super(Finding, new_finding).save(*args, **kwargs)
 
+        calculate_grade(find.test.engagement.product)
 
 def count_findings(findings):
     product_count = {}
@@ -698,6 +701,11 @@ def jira_change_resolution_id(jira, issue, id):
     jira.transition_issue(issue, id)
 
 # Logs the error to the alerts table, which appears in the notification toolbar
+def log_jira_generic_alert(title, description):
+    create_notification(event='jira_update', title=title, description=description,
+                       icon='bullseye', source='Jira')
+
+# Logs the error to the alerts table, which appears in the notification toolbar
 def log_jira_alert(error, finding):
     create_notification(event='jira_update', title='Jira update issue', description='Finding: ' + str(finding.id) + ', ' + error,
                        icon='bullseye', source='Jira')
@@ -852,11 +860,15 @@ def close_epic(eng, push_to_jira):
     jpkey = JIRA_PKey.objects.get(product=prod)
     jira_conf = jpkey.conf
     if jpkey.enable_engagement_epic_mapping and push_to_jira:
-        j_issue = JIRA_Issue.objects.get(engagement=eng)
-        req_url = jira_conf.url+'/rest/api/latest/issue/'+ j_issue.jira_id+'/transitions'
-        j_issue = JIRA_Issue.objects.get(engagement=eng)
-        json_data = {'transition':{'id':jira_conf.close_status_key}}
-        r = requests.post(url=req_url, auth=HTTPBasicAuth(jira_conf.username, jira_conf.password), json=json_data)
+        try:
+            j_issue = JIRA_Issue.objects.get(engagement=eng)
+            req_url = jira_conf.url+'/rest/api/latest/issue/'+ j_issue.jira_id+'/transitions'
+            j_issue = JIRA_Issue.objects.get(engagement=eng)
+            json_data = {'transition':{'id':jira_conf.close_status_key}}
+            r = requests.post(url=req_url, auth=HTTPBasicAuth(jira_conf.username, jira_conf.password), json=json_data)
+        except Exception as e:
+            log_jira_generic_alert('Jira Engagement/Epic Close Error', str(e))
+            pass
 
 def update_epic(eng, push_to_jira):
     engagement = eng
@@ -864,10 +876,14 @@ def update_epic(eng, push_to_jira):
     jpkey = JIRA_PKey.objects.get(product=prod)
     jira_conf = jpkey.conf
     if jpkey.enable_engagement_epic_mapping and push_to_jira:
-        jira = JIRA(server=jira_conf.url, basic_auth=(jira_conf.username, jira_conf.password))
-        j_issue = JIRA_Issue.objects.get(engagement=eng)
-        issue = jira.issue(j_issue.jira_id)
-        issue.update(summary=eng.name, description=eng.name)
+        try:
+            jira = JIRA(server=jira_conf.url, basic_auth=(jira_conf.username, jira_conf.password))
+            j_issue = JIRA_Issue.objects.get(engagement=eng)
+            issue = jira.issue(j_issue.jira_id)
+            issue.update(summary=eng.name, description=eng.name)
+        except Exception as e:
+            log_jira_generic_alert('Jira Engagement/Epic Update Error', str(e))
+            pass
 
 def add_epic(eng, push_to_jira):
     engagement = eng
@@ -882,19 +898,32 @@ def add_epic(eng, push_to_jira):
             'issuetype': {'name': 'Epic'},
             'customfield_' + str(jira_conf.epic_name_id) : engagement.name,
             }
-        jira = JIRA(server=jira_conf.url, basic_auth=(jira_conf.username, jira_conf.password))
-        new_issue = jira.create_issue(fields=issue_dict)
-        j_issue = JIRA_Issue(jira_id=new_issue.id, jira_key=new_issue, engagement=engagement)
-        j_issue.save()
+        try:
+            jira = JIRA(server=jira_conf.url, basic_auth=(jira_conf.username, jira_conf.password))
+            new_issue = jira.create_issue(fields=issue_dict)
+            j_issue = JIRA_Issue(jira_id=new_issue.id, jira_key=new_issue, engagement=engagement)
+            j_issue.save()
+        except Exception as e:
+            error = str(e)
+            message = ""
+            if "customfield" in error:
+                message = "The 'Epic name id' in your DefectDojo Jira Configuration does not appear to be correct. Please visit, " + jira_conf.url + "/rest/api/2/field and search for Epic Name. Copy the number out of cf[number] and place in your DefectDojo settings for Jira and try again. For example, if your results are cf[100001] then copy 100001 and place it in 'Epic name id'. (Your Epic Id will be different.) \n\n"
+
+            log_jira_generic_alert('Jira Engagement/Epic Creation Error', message + error)
+            pass
 
 def add_comment(find, note, force_push=False):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
     jpkey = JIRA_PKey.objects.get(product=prod)
     jira_conf = jpkey.conf
     if jpkey.push_notes or force_push == True:
-        jira = JIRA(server=jira_conf.url, basic_auth=(jira_conf.username, jira_conf.password))
-        j_issue = JIRA_Issue.objects.get(finding=find)
-        jira.add_comment(j_issue.jira_id, '(%s): %s' % (note.author.get_full_name(), note.entry))
+        try:
+            jira = JIRA(server=jira_conf.url, basic_auth=(jira_conf.username, jira_conf.password))
+            j_issue = JIRA_Issue.objects.get(finding=find)
+            jira.add_comment(j_issue.jira_id, '(%s): %s' % (note.author.get_full_name(), note.entry))
+        except Exception as e:
+            log_jira_generic_alert('Jira Add Comment Error', str(e))
+            pass
 
 def send_review_email(request, user, finding, users, new_note):
     recipients = [u.email for u in users]
@@ -1027,6 +1056,23 @@ def get_system_setting(setting):
 
     return getattr(system_settings, setting, None)
 
+def get_slack_user_id(user_email):
+    user_id = None
+
+    res = requests.request(method='POST', url='https://slack.com/api/users.list',
+                     data={'token': get_system_setting('slack_token')})
+
+    users = json.loads(res.text)
+
+    if users:
+        for member in users["members"]:
+            if "email" in member["profile"]:
+                if user_email == member["profile"]["email"]:
+                    if "id" in member:
+                        user_id = member["id"]
+                        break
+
+    return user_id
 
 def create_notification(event=None, **kwargs):
     def create_notification_message(event, notification_type):
@@ -1058,7 +1104,6 @@ def create_notification(event=None, **kwargs):
                             url='https://%s/v2/room/%s/notification?auth_token=%s' % (get_system_setting('hipchat_site'), channel, get_system_setting('hipchat_token')),
                             data={'message':create_notification_message(event, 'slack'),
                                   'message_format':'text'})
-            print res
         except Exception as e:
             log_alert(e)
             pass
@@ -1089,8 +1134,10 @@ def create_notification(event=None, **kwargs):
 
 
     def log_alert(e):
-        alert = Alerts(user_id=Dojo_User.objects.get(is_superuser=True), title='Notification issue', description="%s" % e, icon="exclamation-triangle", source="Notifications")
-        alert.save()
+        users = Dojo_User.objects.filter(is_superuser=True)
+        for user in users:
+            alert = Alerts(user_id=user, url=kwargs.get('url', reverse('alerts')), title='Notification issue', description="%s" % e, icon="exclamation-triangle", source="Notifications")
+            alert.save()
 
     # Global notifications
     try:
@@ -1126,7 +1173,15 @@ def create_notification(event=None, **kwargs):
             notifications = Notifications()
 
         if slack_enabled and 'slack' in getattr(notifications, event) and user.usercontactinfo.slack_username is not None:
-            send_slack_notification('@%s' % user.usercontactinfo.slack_username)
+            slack_user_id = user.usercontactinfo.slack_user_id
+            if user.usercontactinfo.slack_user_id is None:
+                #Lookup the slack userid
+                slack_user_id = get_slack_user_id(user.usercontactinfo.slack_username)
+                slack_user_save = UserContactInfo.objects.get(user_id=user.id)
+                slack_user_save.slack_user_id = slack_user_id
+                slack_user_save.save()
+
+            send_slack_notification('@%s' % slack_user_id)
 
         # HipChat doesn't seem to offer direct message functionality, so no HipChat PM functionality here...
 
@@ -1135,3 +1190,48 @@ def create_notification(event=None, **kwargs):
 
         if 'alert' in getattr(notifications, event):
             send_alert_notification(user)
+
+def calculate_grade(product):
+    system_settings = System_Settings.objects.get()
+    if system_settings.enable_product_grade:
+        severity_values = Finding.objects.filter(~Q(severity='Info'),active=True,duplicate=False, verified=True, false_p=False, test__engagement__product=product).values('severity').annotate(Count('numerical_severity')).order_by()
+
+        low = 0
+        medium = 0
+        high = 0
+        critical = 0
+        for severity_count in severity_values:
+            if severity_count['severity'] == "Critical":
+                critical = severity_count['numerical_severity__count']
+            elif severity_count['severity'] == "High":
+                high = severity_count['numerical_severity__count']
+            elif severity_count['severity'] == "Medium":
+                medium = severity_count['numerical_severity__count']
+            elif severity_count['severity'] == "Low":
+                low = severity_count['numerical_severity__count']
+
+        if severity_values:
+            aeval = Interpreter()
+            aeval(system_settings.product_grade)
+            grade_product = "grade_product(%s, %s, %s, %s)" % (critical, high, medium, low)
+            #prod = Product.objects.get(id=finding.test.engagement.product.id)
+            product.prod_numeric_grade = aeval(grade_product)
+            product.save()
+
+def get_celery_worker_status():
+    ERROR_KEY = "ERROR"
+    try:
+        from celery.task.control import inspect
+        insp = inspect()
+        d = insp.stats()
+        if not d:
+            d = { ERROR_KEY: 'No running Celery workers were found.' }
+    except IOError as e:
+        from errno import errorcode
+        msg = "Error connecting to the backend: " + str(e)
+        if len(e.args) > 0 and errorcode.get(e.args[0]) == 'ECONNREFUSED':
+            msg += ' Check that the RabbitMQ server is running.'
+        d = { ERROR_KEY: msg }
+    except ImportError as e:
+        d = { ERROR_KEY: str(e)}
+    return d

@@ -19,7 +19,7 @@ from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.core.validators import RegexValidator
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.utils.timezone import now
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToCover
@@ -28,7 +28,7 @@ from pytz import all_timezones
 from tagging.registry import register as tag_register
 from multiselectfield import MultiSelectField
 import hashlib
-
+from django import forms
 
 class System_Settings(models.Model):
     enable_deduplication = models.BooleanField(
@@ -99,13 +99,31 @@ class System_Settings(models.Model):
                                       'be displayed.')
     false_positive_history = models.BooleanField(default=False)
 
-    url_prefix = models.CharField(max_length=300, default='', blank=True)
+    url_prefix = models.CharField(max_length=300, default='', blank=True, help_text="URL prefix if DefectDojo is installed in it's own virtual subdirectory.")
     team_name = models.CharField(max_length=100, default='', blank=True)
     time_zone = models.CharField(max_length=50,
                                  choices=[(tz, tz) for tz in all_timezones],
                                  default='UTC', blank=False)
-    display_endpoint_uri = models.BooleanField(default=False)
+    display_endpoint_uri = models.BooleanField(default=False, verbose_name="Display Endpoint Full URI", help_text="Displays the full endpoint URI in the endpoint view.")
+    enable_product_grade = models.BooleanField(default=False, verbose_name="Enable Product Grading", help_text="Displays a grade letter next to a product to show the overall health.")
+    product_grade = models.CharField(max_length=800, blank=True)
+    product_grade_a = models.IntegerField(default=90, verbose_name="Grade A", help_text="Percentage score for an 'A' >=")
+    product_grade_b = models.IntegerField(default=80, verbose_name="Grade B", help_text="Percentage score for a 'B' >=")
+    product_grade_c = models.IntegerField(default=70, verbose_name="Grade C", help_text="Percentage score for a 'C' >=")
+    product_grade_d = models.IntegerField(default=60, verbose_name="Grade D", help_text="Percentage score for a 'D' >=")
+    product_grade_f = models.IntegerField(default=59, verbose_name="Grade F", help_text="Percentage score for an 'F' <=")
+    enable_benchmark = models.BooleanField(default=True, blank=False, verbose_name="Enable Benchmarks",
+                            help_text='Enables Benchmarks such as the OWASP ASVS (Application Security Verification Standard)')
 
+class SystemSettingsFormAdmin(forms.ModelForm):
+    product_grade = forms.CharField( widget=forms.Textarea )
+    class Meta:
+        model = System_Settings
+        fields = ['product_grade']
+
+class System_SettingsAdmin(admin.ModelAdmin):
+    form = SystemSettingsFormAdmin
+    fields = ('product_grade',)
 
 def get_current_date():
     return timezone.now().date()
@@ -152,9 +170,10 @@ class UserContactInfo(models.Model):
                                              "Up to 15 digits allowed.")
     twitter_username = models.CharField(blank=True, null=True, max_length=150)
     github_username = models.CharField(blank=True, null=True, max_length=150)
-    slack_username = models.CharField(blank=True, null=True, max_length=150)
+    slack_username = models.CharField(blank=True, null=True, max_length=150, help_text="Email address associated with your slack account", verbose_name="Slack Email Address")
+    slack_user_id = models.CharField(blank=True, null=True, max_length=25)
     hipchat_username = models.CharField(blank=True, null=True, max_length=150)
-    block_execution = models.BooleanField(default=False)
+    block_execution = models.BooleanField(default=False, help_text="Instead of async deduping a finding the findings will be deduped synchronously and will 'block' the user until completion.")
 
 
 class Contact(models.Model):
@@ -260,8 +279,8 @@ class Product(models.Model):
     They remain in model for backwards compatibility and will be removed
     in a future release.  prod_manager, tech_contact, manager
 
-    The admin script migrate_product_contacts should be used to migrate data 
-    from these fields to their replacements.  
+    The admin script migrate_product_contacts should be used to migrate data
+    from these fields to their replacements.
     ./manage.py migrate_product_contacts
     '''
     prod_manager = models.CharField(default=0, max_length=200)  # unused
@@ -281,6 +300,7 @@ class Product(models.Model):
     updated = models.DateTimeField(editable=False, null=True, blank=True)
     tid = models.IntegerField(default=0, editable=False)
     authorized_users = models.ManyToManyField(User, blank=True)
+    prod_numeric_grade = models.IntegerField(null=True, blank=True)
 
     def __unicode__(self):
         return self.name
@@ -838,6 +858,10 @@ class Finding(models.Model):
         else:
             self.dyanmic_finding = True
         self.found_by.add(self.test.test_type)
+
+        from dojo.utils import calculate_grade
+        calculate_grade(self.test.engagement.product)
+
         super(Finding, self).save(*args, **kwargs)
         if (dedupe_option):
             system_settings = System_Settings.objects.get()
@@ -860,6 +884,11 @@ class Finding(models.Model):
                     sync_false_history(self, *args, **kwargs)
                 else:
                     async_false_history.delay(self, *args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        super(Finding, self).delete(*args, **kwargs)
+        from dojo.utils import calculate_grade
+        calculate_grade(self.test.engagement.product)
 
     def clean(self):
         no_check = ["test", "reporter"]
@@ -1119,7 +1148,7 @@ class FindingImageAccessToken(models.Model):
 
 
 class JIRA_Conf(models.Model):
-    url = models.URLField(max_length=2000, verbose_name="JIRA URL")
+    url = models.URLField(max_length=2000, verbose_name="JIRA URL", help_text="For configuring Jira, view: https://defectdojo.readthedocs.io/en/latest/features.html#jira-integration")
     #    product = models.ForeignKey(Product)
     username = models.CharField(max_length=2000)
     password = models.CharField(max_length=2000)
@@ -1133,14 +1162,14 @@ class JIRA_Conf(models.Model):
                                               ('Spike', 'Spike'),
                                               ('Bug', 'Bug')),
                                           default='Bug')
-    epic_name_id = models.IntegerField()
-    open_status_key = models.IntegerField()
-    close_status_key = models.IntegerField()
-    low_mapping_severity = models.CharField(max_length=200)
-    medium_mapping_severity = models.CharField(max_length=200)
-    high_mapping_severity = models.CharField(max_length=200)
-    critical_mapping_severity = models.CharField(max_length=200)
-    finding_text = models.TextField(null=True, blank=True)
+    epic_name_id = models.IntegerField(help_text="To obtain the 'Epic name id' visit https://<YOUR JIRA URL>/rest/api/2/field and search for Epic Name. Copy the number out of cf[number] and paste it here.")
+    open_status_key = models.IntegerField(help_text="To obtain the 'open status key' visit https://<YOUR JIRA URL>/rest/api/latest/issue/<ANY VALID ISSUE KEY>/transitions?expand=transitions.fields")
+    close_status_key = models.IntegerField(help_text="To obtain the 'open status key' visit https://<YOUR JIRA URL>/rest/api/latest/issue/<ANY VALID ISSUE KEY>/transitions?expand=transitions.fields")
+    low_mapping_severity = models.CharField(max_length=200, help_text="Maps to the 'Priority' field in Jira. For example: Low")
+    medium_mapping_severity = models.CharField(max_length=200, help_text="Maps to the 'Priority' field in Jira. For example: Medium")
+    high_mapping_severity = models.CharField(max_length=200, help_text="Maps to the 'Priority' field in Jira. For example: High")
+    critical_mapping_severity = models.CharField(max_length=200, help_text="Maps to the 'Priority' field in Jira. For example: Critical")
+    finding_text = models.TextField(null=True, blank=True, help_text="Additional text that will be added to the finding in Jira. For example including how the finding was created or who to contact for more information.")
 
     def __unicode__(self):
         return self.url + " | " + self.username
@@ -1203,6 +1232,7 @@ class Notifications(models.Model):
     upcoming_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     user_mentioned = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     code_review = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    review_requested = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     other = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     user = models.ForeignKey(User, default=None, null=True, editable=False)
 
@@ -1407,6 +1437,121 @@ class Objects_Engagement(models.Model):
 
         return data + " | " + self.engagement.name + " | " + str(self.engagement.id)
 
+class Testing_Guide_Category(models.Model):
+    name = models.CharField(max_length=300)
+    created = models.DateTimeField(null=False, editable=False, default=now)
+    updated = models.DateTimeField(editable=False, default=now)
+
+    class Meta:
+        ordering = ('name',)
+
+    def __unicode__(self):
+        return self.name
+
+class Testing_Guide(models.Model):
+    testing_guide_category = models.ForeignKey(Testing_Guide_Category)
+    identifier = models.CharField(max_length=20, blank=True, null=True, help_text="Test Unique Identifier")
+    name = models.CharField(max_length=400, help_text="Name of the test")
+    summary = models.CharField(max_length=800, help_text="Summary of the test")
+    objective = models.CharField(max_length=800, help_text="Objective of the test")
+    how_to_test = models.TextField(default=None, help_text="How to test the objective")
+    results_expected = models.CharField(max_length=800, help_text="What the results look like for a test")
+    created = models.DateTimeField(null=False, editable=False, default=now)
+    updated = models.DateTimeField(editable=False, default=now)
+
+    def __unicode__(self):
+        return self.testing_guide_category.name + ': ' + self.name
+
+class Benchmark_Type(models.Model):
+    name = models.CharField(max_length=300)
+    version = models.CharField(max_length=15)
+    source = (('PCI', 'PCI'),
+                    ('OWASP ASVS', 'OWASP ASVS'),
+                    ('OWASP Mobile ASVS', 'OWASP Mobile ASVS'))
+    benchmark_source = models.CharField(max_length=20, blank=False,
+                                             null=True, choices=source,
+                                             default='OWASP ASVS')
+    created = models.DateTimeField(null=False, editable=False, default=now)
+    updated = models.DateTimeField(editable=False, default=now)
+    enabled = models.BooleanField(default=True)
+    def __unicode__(self):
+        return self.name + " " + self.version
+
+class Benchmark_Category(models.Model):
+    type = models.ForeignKey(Benchmark_Type, verbose_name='Benchmark Type')
+    name = models.CharField(max_length=300)
+    objective = models.TextField()
+    references = models.TextField(blank=True, null=True)
+    enabled = models.BooleanField(default=True)
+    created = models.DateTimeField(null=False, editable=False, default=now)
+    updated = models.DateTimeField(editable=False, default=now)
+
+    class Meta:
+        ordering = ('name',)
+
+    def __unicode__(self):
+        return self.name + ': ' + self.type.name
+
+class Benchmark_Requirement(models.Model):
+    category = models.ForeignKey(Benchmark_Category)
+    objective_number = models.CharField(max_length=15, null=True)
+    objective = models.TextField()
+    references = models.TextField(blank=True, null=True)
+    level_1 = models.BooleanField(default=False)
+    level_2 = models.BooleanField(default=False)
+    level_3 = models.BooleanField(default=False)
+    enabled = models.BooleanField(default=True)
+    cwe_mapping = models.ManyToManyField(CWE, blank=True)
+    testing_guide = models.ManyToManyField(Testing_Guide, blank=True)
+    created = models.DateTimeField(null=False, editable=False, default=now)
+    updated = models.DateTimeField(editable=False, default=now)
+
+    def __unicode__(self):
+        return str(self.objective_number) + ': ' + self.category.name
+
+class Benchmark_Product(models.Model):
+    product = models.ForeignKey(Product)
+    control = models.ForeignKey(Benchmark_Requirement)
+    pass_fail = models.BooleanField(default=False, verbose_name='Pass', help_text='Does the product meet the requirement?')
+    enabled = models.BooleanField(default=True, help_text='Applicable for this specific product.')
+    notes = models.ManyToManyField(Notes, blank=True, editable=False)
+    created = models.DateTimeField(null=False, editable=False, default=now)
+    updated = models.DateTimeField(editable=False, default=now)
+
+    def __unicode__(self):
+        return self.product.name + ': ' + self.control.objective_number + ': ' + self.control.category.name
+
+    class Meta:
+        unique_together = [('product', 'control')]
+
+class Benchmark_Product_Summary(models.Model):
+    product = models.ForeignKey(Product)
+    benchmark_type = models.ForeignKey(Benchmark_Type)
+    asvs_level = (('Level 1', 'Level 1'),
+                    ('Level 2', 'Level 2'),
+                    ('Level 3', 'Level 3'))
+    desired_level = models.CharField(max_length=15,
+                                             null=False, choices=asvs_level,
+                                             default='Level 1')
+    current_level = models.CharField(max_length=15, blank=True,
+                                             null=True, choices=asvs_level,
+                                             default='None')
+    asvs_level_1_benchmark = models.IntegerField(null=False, default=0, help_text="Total number of active benchmarks for this application.")
+    asvs_level_1_score = models.IntegerField(null=False, default=0, help_text="ASVS Level 1 Score")
+    asvs_level_2_benchmark = models.IntegerField(null=False, default=0, help_text="Total number of active benchmarks for this application.")
+    asvs_level_2_score = models.IntegerField(null=False, default=0, help_text="ASVS Level 2 Score")
+    asvs_level_3_benchmark = models.IntegerField(null=False, default=0, help_text="Total number of active benchmarks for this application.")
+    asvs_level_3_score = models.IntegerField(null=False, default=0, help_text="ASVS Level 3 Score")
+    publish = models.BooleanField(default=False, help_text='Publish score to Product.')
+    created = models.DateTimeField(null=False, editable=False, default=now)
+    updated = models.DateTimeField(editable=False, default=now)
+
+    def __unicode__(self):
+        return self.product.name + ': ' + self.benchmark_type.name
+
+    class Meta:
+        unique_together = [('product', 'benchmark_type')]
+
 # Register for automatic logging to database
 auditlog.register(Dojo_User)
 auditlog.register(Endpoint)
@@ -1427,6 +1572,17 @@ tag_register(Endpoint)
 tag_register(Finding_Template)
 tag_register(App_Analysis)
 tag_register(Objects)
+
+#Benchmarks
+admin.site.register(Benchmark_Type)
+admin.site.register(Benchmark_Requirement)
+admin.site.register(Benchmark_Category)
+admin.site.register(Benchmark_Product)
+admin.site.register(Benchmark_Product_Summary)
+
+#Testing
+admin.site.register(Testing_Guide_Category)
+admin.site.register(Testing_Guide)
 
 admin.site.register(Objects)
 admin.site.register(Objects_Review)
@@ -1462,7 +1618,9 @@ admin.site.register(Tool_Product_Settings)
 admin.site.register(Tool_Type)
 admin.site.register(Cred_User)
 admin.site.register(Cred_Mapping)
-admin.site.register(System_Settings)
+admin.site.register(System_Settings, System_SettingsAdmin)
+admin.site.register(CWE)
+
 
 watson.register(Product)
 watson.register(Test)

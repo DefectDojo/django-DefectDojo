@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import Select
-from selenium.common.exceptions import NoSuchElementException
-from selenium.common.exceptions import NoAlertPresentException
-import unittest, time, re
 import os
+import re
+import time
+import unittest
+
 import requests
+from selenium import webdriver
+from selenium.common.exceptions import NoAlertPresentException
+from selenium.common.exceptions import NoSuchElementException
+
 
 class Login(unittest.TestCase):
     def setUp(self):
@@ -20,9 +21,12 @@ class Login(unittest.TestCase):
     def login_page(self):
         driver = self.driver
         driver.get(self.base_url + "login")
-        driver.find_element_by_id("id_username").clear()
-        driver.find_element_by_id("id_username").send_keys(os.environ['DOJO_ADMIN_USER'])
-        driver.find_element_by_id("id_password").send_keys(os.environ['DOJO_ADMIN_PASSWORD'])
+        cred_user_elem = driver.find_element_by_id("id_username")
+        cred_user_elem.clear()
+        cred_user_elem.send_keys(os.environ['DOJO_ADMIN_USER'])
+        cred_pass_elem = driver.find_element_by_id("id_password")
+        cred_pass_elem.clear()
+        cred_pass_elem.send_keys(os.environ['DOJO_ADMIN_PASSWORD'])
         driver.find_element_by_css_selector("button.btn.btn-success").click()
         return driver
 
@@ -37,7 +41,7 @@ class Login(unittest.TestCase):
 
     def test_engagement_status(self):
         api_key = self.get_api_key()
-        api_url = self.base_url+ "api/v1/engagements"
+        api_url = self.base_url + "api/v1/engagements"
         user = os.environ['DOJO_ADMIN_USER']
         headers = {'content-type': 'application/json',
                    'Authorization': 'ApiKey %s:%s' % (user, api_key)}
@@ -46,7 +50,7 @@ class Login(unittest.TestCase):
 
     def test_finding_status(self):
         api_key = self.get_api_key()
-        api_url = self.base_url+ "api/v1/findings"
+        api_url = self.base_url + "api/v1/findings"
         user = os.environ['DOJO_ADMIN_USER']
         headers = {'content-type': 'application/json',
                    'Authorization': 'ApiKey %s:%s' % (user, api_key)}
@@ -56,7 +60,7 @@ class Login(unittest.TestCase):
 
     def test_product_status(self):
         api_key = self.get_api_key()
-        api_url = self.base_url+ "api/v1/products"
+        api_url = self.base_url + "api/v1/products"
         user = os.environ['DOJO_ADMIN_USER']
         headers = {'content-type': 'application/json',
                    'Authorization': 'ApiKey %s:%s' % (user, api_key)}
@@ -65,23 +69,25 @@ class Login(unittest.TestCase):
 
     def test_t_status(self):
         api_key = self.get_api_key()
-        api_url = self.base_url+ "api/v1/tests"
+        api_url = self.base_url + "api/v1/tests"
         user = os.environ['DOJO_ADMIN_USER']
         headers = {'content-type': 'application/json',
                    'Authorization': 'ApiKey %s:%s' % (user, api_key)}
         r = requests.get(api_url, headers=headers, verify=False)
         self.assertEqual(r.status_code, 200)
 
-
-
     def is_element_present(self, how, what):
-        try: self.driver.find_element(by=how, value=what)
-        except NoSuchElementException as e: return False
+        try:
+            self.driver.find_element(by=how, value=what)
+        except NoSuchElementException as e:
+            return False
         return True
 
     def is_alert_present(self):
-        try: self.driver.switch_to_alert()
-        except NoAlertPresentException as e: return False
+        try:
+            self.driver.switch_to_alert()
+        except NoAlertPresentException as e:
+            return False
         return True
 
     def close_alert_and_get_its_text(self):
@@ -93,11 +99,13 @@ class Login(unittest.TestCase):
             else:
                 alert.dismiss()
             return alert_text
-        finally: self.accept_next_alert = True
+        finally:
+            self.accept_next_alert = True
 
     def tearDown(self):
         self.driver.quit()
         self.assertEqual([], self.verificationErrors)
+
 
 if __name__ == "__main__":
     unittest.main()

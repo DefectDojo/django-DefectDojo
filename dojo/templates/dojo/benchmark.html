@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% load static from staticfiles %}
+{% load event_tags %}
+{% load display_tags %}
+{% block add_css %}
+    <link rel="stylesheet" href="{% static "chosen-bootstrap/chosen.bootstrap.min.css" %}">
+{% endblock %}
+{% block content %}
+      <div class="panel panel-default">
+          <div class="panel-heading">
+              <div class="clearfix">
+                  <span class="pull-left"><h4>{{ benchmark_type.name }} <i>{{ benchmark_type.version }}</i></h4>{% if category_name %}{{ category_name }}&nbsp;&nbsp;<br>{% endif %}{{ benchmark_product_summary|asvs_level }}</span>
+                  <div id="test-pulldown" class="dropdown pull-right">
+                    <form method="post" id="summary" name="summary">{% csrf_token %}
+                      {{ benchmark_summary_form.management_form }}
+                      {{ benchmark_summary_form.benchmark_type.as_hidden }}
+                      {{ benchmark_summary_form.product.as_hidden }}
+                      <label for="target">Target Level <span class="fa fa-question-circle has-popover" data-trigger="hover" data-content="Target ASVS Level for this application."></label>
+                      {{ benchmark_summary_form.desired_level }}
+                      {{ benchmark_summary_form.score.as_hidden }}
+                      <label for="publish">Publish <span class="fa fa-question-circle has-popover" data-trigger="hover" data-content="Publish will display the ASVS Level on the product and other areas in DefectDojo. Check this once you have completed the assessment."></label>
+                      {{ benchmark_summary_form.publish }}
+                      <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                              data-toggle="dropdown" aria-expanded="true">
+                              <i class="fa fa-filter">
+                              </i>
+                          <span class="caret"></span>
+                      </button>
+                      <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                        <li role="presentation">
+                            <a title="{{ bc.name }}" href="{% url 'view_product_benchmark' product.id benchmark_type.id %}">
+                                <span class="fa fa-angle-right"></span> View All
+                              </a>
+                          </li>
+                          {% for bc in benchmark_category %}
+                          <li role="presentation">
+                              <a title="{{ bc.name }}" href="{% url 'view_product_benchmark' product.id benchmark_type.id bc.id %}">
+                                  <span class="fa fa-list"></span> {{ bc.name }}
+                              </a>
+                          </li>
+                          {% endfor %}
+
+                      </ul>
+                  </div>
+              </div>
+
+          </div>
+
+          {{ benchmark_formset.management_form }}
+          {% if benchmarks %}
+              <table id="test_findings" class="table-bordered table table-condensed table-hover">
+                  <thead>
+                  <tr>
+                      <th>#</th>
+                      <th>Description</th>
+                      <th class="level1_select">L1</th>
+                      <th>L2</th>
+                      <th>L3</th>
+                      <th>Applicable</th>
+                      <th>Pass</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  {% for benchmark in benchmark_formset %}
+                    {% with value=benchmarks|display_index:forloop.counter0 %}
+                    {{ form.id }}
+                    {{ benchmark.id }}
+                    {{ benchmark.control.as_hidden }}
+                    {{ benchmark.product.as_hidden }}
+                      <tr>
+                          <td class="highlight_{% if value.control.level_1 %}asvs_level_1{% elif value.control.level_2 %}asvs_level_2{% elif value.control.level_3 %}asvs_level_3{%endif%}">{{ value.control.objective_number }}</td>
+                          <td>{{ value.control.objective }}</td>
+                          <td class="level1_select">{% if value.control.level_1 %}✓{% endif %}</td>
+                          <td class="level2_select">{% if value.control.level_2 %}✓{% endif %}</td>
+                          <td class="level3_select">{% if value.control.level_3 %}✓{% endif %}</td>
+                          <td id="td_{{ benchmark.id.auto_id|remove_string:'id-' }}-enabled">
+                            {{ benchmark.enabled }}
+                          </td>
+                          <td id="td_{{ benchmark.id.auto_id|remove_string:'-id' }}-pass_fail">
+                            {{ benchmark.pass_fail }}
+                          </td>
+                      </tr>
+                    {% endwith %}
+                  {% endfor %}
+                  </tbody>
+              </table>
+          {% else %}
+              <div class="panel-body">
+                  <p class="text-center">No benchmarks found.</p>
+              </div>
+          {% endif %}
+</div>
+<div class="form-group">
+    <input class="btn btn-primary" type="submit" name="edit_benchmarks" value="Submit"/>
+    <a class="btn btn btn-danger" href="{% url 'delete_product_benchmark' benchmarks.0.product.id benchmark_type.id %}">Delete</a>
+</div>
+</form>
+{% endblock %}
+{% block postscript %}
+    <script type="application/javascript" src="{% static "chosen/chosen.jquery.min.js" %}"></script>
+    <script>
+        function highlight_level(desired_level) {
+            $( ".level2_select" ).removeClass("level2");
+            $( ".level3_select" ).removeClass("level3");
+            $( ".level1_select" ).addClass("level1");
+            $(".highlight_asvs_level_2").removeClass("highlight_asvs_level_1");
+            $(".highlight_asvs_level_3").removeClass("highlight_asvs_level_1");
+
+            if (desired_level == "Level 2" | desired_level == "Level 3") {
+              $( ".level2_select" ).addClass("level2");
+              $(".highlight_asvs_level_2").addClass("highlight_asvs_level_1");
+              $(".highlight_asvs_level_3").removeClass("highlight_asvs_level_1");
+            }
+            if (desired_level == "Level 3") {
+              $( ".level3_select" ).addClass("level3");
+              $(".highlight_asvs_level_3").addClass("highlight_asvs_level_1");
+            }
+        }
+
+        function grid_highlight(name, checked) {
+            name = '#td_' + name;
+            if (checked)
+            {
+                $(name).removeClass("benchmark_fail");
+                $(name).addClass("benchmark_pass");
+            } else {
+                $(name).removeClass("benchmark_pass")
+                $(name).addClass("benchmark_fail");
+            }
+        }
+
+        function iterate_checkbox(formname) {
+            var value_checked = false;
+            $('input[type="checkbox"]').each(function() {
+                disable($(this).attr("id"));
+                if ($(this).is(":checked")) {
+                    value_checked = true;
+                }
+                grid_highlight($(this).attr("id"), value_checked)
+                value_checked = false;
+            });
+        }
+
+        function disable(check_name) {
+          var target_check_name;
+          target_check_name = check_name.replace("enabled","pass_fail");
+          if (check_name.indexOf("enable") >= 0) {
+              if ($('#'+check_name).prop( "checked" )) {
+                $('#'+target_check_name).prop('disabled', false);
+                $('#td_'+target_check_name).removeClass("benchmark_disabled");
+                $('#td_'+target_check_name).addClass("benchmark_fail");
+              } else {
+                $('#'+target_check_name).prop('checked', false);
+                $('#'+target_check_name).prop('disabled', true);
+                $('#td_'+target_check_name).addClass("benchmark_disabled");
+              }
+          } else if (check_name.indexOf("pass") >= 0) {
+              if ($('#'+check_name).prop( "checked" )) {
+                grid_highlight(check_name, true);
+              } else {
+                grid_highlight(check_name, false);
+              }
+          }
+        }
+
+        $(document).ready(function() {
+            //Get the desired ASVS Level
+            desired_level = $('#id_desired_level option:selected').text();
+            highlight_level(desired_level);
+            //Set the pass/fail colors
+            iterate_checkbox('summary');
+          $("#id_desired_level").change(function () {
+            desired_level = $('#id_desired_level option:selected').text();
+            highlight_level(desired_level);
+          });
+          $('input[type="checkbox"]').change(function () {
+            disable($(this).attr("id"));
+          });
+        });
+    </script>
+{% endblock %}

@@ -27,7 +27,7 @@ from dojo.filters import OpenFindingFilter, \
     ClosedFingingSuperFilter, TemplateFindingFilter
 from dojo.forms import NoteForm, CloseFindingForm, FindingForm, PromoteFindingForm, FindingTemplateForm, \
     DeleteFindingTemplateForm, FindingImageFormSet, JIRAFindingForm, ReviewFindingForm, ClearFindingReviewForm, \
-    DefectFindingForm, StubFindingForm
+    DefectFindingForm, StubFindingForm, DeleteFindingForm, DeleteStubFindingForm, ApplyFindingTemplateForm
 from dojo.models import Product_Type, Finding, Notes, \
     Risk_Acceptance, BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, \
     FindingImageAccessToken, JIRA_Issue, JIRA_PKey, JIRA_Conf, Dojo_User, Cred_User, Cred_Mapping, Test
@@ -203,7 +203,7 @@ def view_finding(request, fid):
                    'creds': creds,
                    'cred_engagement': cred_engagement,
                    'burp_response': burp_response, 'dojo_user': dojo_user,
-                   'user': user, 'notes': notes, 'form': form})
+                   'user': user, 'notes': notes, 'form': form, 'found_by': finding.found_by.all().distinct()})
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -322,19 +322,30 @@ def reopen_finding(request, fid):
                          extra_tags='alert-success')
     return HttpResponseRedirect(reverse('view_finding', args=(finding.id,)))
 
-
 @user_passes_test(lambda u: u.is_staff)
 def delete_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
-    tid = finding.test.id
-    del finding.tags
-    finding.delete()
-    messages.add_message(request,
-                         messages.SUCCESS,
-                         'Finding deleted successfully.',
-                         extra_tags='alert-success')
-    return HttpResponseRedirect(reverse('view_test', args=(tid,)))
 
+    form = DeleteFindingForm(instance=finding)
+
+    if request.method == 'POST':
+        form = DeleteFindingForm(request.POST, instance=finding)
+        if form.is_valid():
+            tid = finding.test.id
+            del finding.tags
+            finding.delete()
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Finding deleted successfully.',
+                                 extra_tags='alert-success')
+            return HttpResponseRedirect(reverse('view_test', args=(tid,)))
+        else:
+            messages.add_message(request,
+                                 messages.ERROR,
+                                 'Unable to delete finding, please try again.',
+                                 extra_tags='alert-danger')
+    else:
+        return HttpResponseForbidden()
 
 @user_passes_test(lambda u: u.is_staff)
 def edit_finding(request, fid):
@@ -576,6 +587,78 @@ def mktemplate(request, fid):
                              extra_tags='alert-success')
     return HttpResponseRedirect(reverse('view_finding', args=(finding.id,)))
 
+@user_passes_test(lambda u: u.is_staff)
+def find_template_to_apply(request, fid):
+    finding = get_object_or_404(Finding, id=fid)
+    test = get_object_or_404(Test, id=finding.test.id)
+    templates = Finding_Template.objects.all()
+    templates = TemplateFindingFilter(request.GET, queryset=templates)
+    paged_templates = get_page_items(request, templates.qs, 25)
+
+    title_words = [word
+                   for finding in templates.qs
+                   for word in finding.title.split() if len(word) > 2]
+
+    title_words = sorted(set(title_words))
+    add_breadcrumb(parent=test, title="Apply Template to Finding", top_level=False, request=request)
+    return render(request, 'dojo/templates.html',
+                  {'templates': paged_templates,
+                   'filtered': templates,
+                   'title_words': title_words,
+                   'tid': test.id,
+                   'fid': fid,
+                   'add_from_template': False,
+                   'apply_template': True,
+                   })
+
+@user_passes_test(lambda u: u.is_staff)
+def choose_finding_template_options(request, tid, fid):
+    finding = get_object_or_404(Finding, id=fid)
+    template = get_object_or_404(Finding_Template, id=tid)
+    form = ApplyFindingTemplateForm(data=finding.__dict__, template=template)
+
+    return render(request, 'dojo/apply_finding_template.html',
+                  {'finding': finding,
+                   'template': template,
+                   'form': form,}
+                  )
+
+@user_passes_test(lambda u: u.is_staff)
+def apply_template_to_finding(request, fid, tid):
+    finding = get_object_or_404(Finding, id=fid)
+    template = get_object_or_404(Finding_Template, id=tid)
+
+    if (request.method == "POST"):
+        form = ApplyFindingTemplateForm(data=request.POST)
+
+        if form.is_valid():
+            finding.title = form.cleaned_data['title']
+            finding.cwe = form.cleaned_data['cwe']
+            finding.severity = form.cleaned_data['severity']
+            finding.description = form.cleaned_data['description']
+            finding.mitigation = form.cleaned_data['mitigation']
+            finding.impact = form.cleaned_data['impact']
+            finding.references = form.cleaned_data['references']
+            finding.last_reviewed = timezone.now()
+            finding.last_reviewed_by = request.user
+
+            finding.save()
+        else:
+            messages.add_message(request,
+                                 messages.ERROR,
+                                 'There appears to be errors on the form, please correct below.',
+                                 extra_tags='alert-danger')
+            form_error = True
+
+            return render(request, 'dojo/apply_finding_template.html',
+                          {'finding': finding,
+                           'template': template,
+                           'form': form,}
+                          )
+
+        return HttpResponseRedirect(reverse('view_finding', args=(finding.id,)))
+    else:
+        return HttpResponseRedirect(reverse('view_finding', args=(finding.id,)))
 
 @user_passes_test(lambda u: u.is_staff)
 def delete_finding_note(request, tid, nid):
@@ -625,20 +708,30 @@ def add_stub_finding(request, tid):
     add_breadcrumb(title="Add Stub Finding", top_level=False, request=request)
     return HttpResponseRedirect(reverse('view_test', args=(tid,)))
 
-
 @user_passes_test(lambda u: u.is_staff)
 def delete_stub_finding(request, fid):
     finding = get_object_or_404(Stub_Finding, id=fid)
-    tid = finding.test.id
-    if hasattr(finding, 'tags'):
-        del finding.tags
-    finding.delete()
-    messages.add_message(request,
-                         messages.SUCCESS,
-                         'Potential Finding deleted successfully.',
-                         extra_tags='alert-success')
-    return HttpResponseRedirect(reverse('view_test', args=(tid,)))
+    form = DeleteStubFindingForm(instance=finding)
 
+    if request.method == 'POST':
+        form = DeleteStubFindingForm(request.POST, instance=finding)
+        if form.is_valid():
+            tid = finding.test.id
+            if hasattr(finding, 'tags'):
+                del finding.tags
+            finding.delete()
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Potential Finding deleted successfully.',
+                                 extra_tags='alert-success')
+            return HttpResponseRedirect(reverse('view_test', args=(tid,)))
+        else:
+            messages.add_message(request,
+                                 messages.ERROR,
+                                 'Unable to delete potential finding, please try again.',
+                                 extra_tags='alert-danger')
+    else:
+        return HttpResponseForbidden()
 
 @user_passes_test(lambda u: u.is_staff)
 def promote_to_finding(request, fid):
@@ -653,7 +746,7 @@ def promote_to_finding(request, fid):
         jira_available = True
     else:
         jform = None
-        
+
     form = PromoteFindingForm(initial={'title': finding.title,
                                        'date': finding.date,
                                        'severity': finding.severity,

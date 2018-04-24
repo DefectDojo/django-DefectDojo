@@ -80,7 +80,6 @@ Quarterly.txt
 # yarn
 components/*
 !components/package.json
-yarn_components/
 dojo/static/*
 !dojo/static/dojo/*
 dojo/media

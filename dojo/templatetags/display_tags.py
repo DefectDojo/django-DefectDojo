@@ -54,7 +54,6 @@ def dojo_version():
     from dojo import __version__
     return 'v. ' + __version__
 
-
 @register.simple_tag
 def dojo_docs_url():
     from dojo import __docs__
@@ -74,13 +73,48 @@ def content_type_str(obj):
         return False
     return ContentType.objects.get_for_model(obj)
 
+@register.filter(name='remove_string')
+def remove_string(string, value):
+    return string.replace(value, '')
+
 @register.filter(name='percentage')
 def percentage(fraction, value):
+    if value > 0:
+        try:
+            return "%.1f%%" % ((float(fraction) / float(value)) * 100)
+        except ValueError:
+            return ''
 
-    try:
-        return "%.1f%%" % ((float(fraction) / float(value)) * 100)
-    except ValueError:
-        return ''
+def asvs_calc_level(benchmark_score):
+    level = 0
+    total_pass = 0
+    total = 0
+    if benchmark_score:
+        total = benchmark_score.asvs_level_1_benchmark + benchmark_score.asvs_level_2_benchmark + benchmark_score.asvs_level_3_benchmark
+        total_pass = benchmark_score.asvs_level_1_score+benchmark_score.asvs_level_2_score+benchmark_score.asvs_level_3_score
+
+        if benchmark_score.desired_level == "Level 1":
+            total = benchmark_score.asvs_level_1_benchmark
+            total_pass = benchmark_score.asvs_level_1_score
+        elif benchmark_score.desired_level == "Level 2":
+            total = benchmark_score.asvs_level_1_benchmark + benchmark_score.asvs_level_2_benchmark
+            total_pass = benchmark_score.asvs_level_1_score+benchmark_score.asvs_level_2_score
+        elif benchmark_score.desired_level == "Level 3":
+            total = benchmark_score.asvs_level_1_benchmark + benchmark_score.asvs_level_2_benchmark + benchmark_score.asvs_level_3_benchmark
+
+        level = percentage(total_pass, total)
+
+    return benchmark_score.desired_level, level, str(total_pass), str(total)
+
+@register.filter(name='asvs_level')
+def asvs_level(benchmark_score):
+    benchmark_score.desired_level, level, total_pass, total = asvs_calc_level(benchmark_score)
+    if level is None:
+        level = ""
+    else:
+        level = "(" + level + ")"
+
+    return "ASVS " + str(benchmark_score.desired_level) + " " + level + " Pass: " + str(total_pass) + " Total:  " + total
 
 @register.filter(name='version_num')
 def version_num(value):
@@ -88,7 +122,36 @@ def version_num(value):
     if value:
         version = "v." + value
 
-    return version
+    return value
+
+@register.filter(name='product_grade')
+def product_grade(product):
+    grade = ""
+    system_settings = System_Settings.objects.get()
+    if system_settings.enable_product_grade:
+        prod_numeric_grade = product.prod_numeric_grade
+
+        #print prod_numeric_grade
+        if prod_numeric_grade is "" or prod_numeric_grade is None:
+            from dojo.utils import calculate_grade
+            calculate_grade(product)
+        if prod_numeric_grade:
+            if prod_numeric_grade >= system_settings.product_grade_a:
+                grade = 'A'
+            elif prod_numeric_grade < system_settings.product_grade_a and prod_numeric_grade >= system_settings.product_grade_b:
+                grade = 'B'
+            elif prod_numeric_grade < system_settings.product_grade_b and prod_numeric_grade >= system_settings.product_grade_c:
+                grade = 'C'
+            elif prod_numeric_grade < system_settings.product_grade_c and prod_numeric_grade >= system_settings.product_grade_d:
+                grade = 'D'
+            elif prod_numeric_grade <= system_settings.product_grade_f:
+                grade = 'F'
+
+    return grade
+
+@register.filter
+def display_index(data, index):
+    return data[index]
 
 @register.filter
 def finding_status(finding, duplicate):
