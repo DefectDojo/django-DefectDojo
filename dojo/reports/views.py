@@ -825,7 +825,7 @@ def generate_report(request, obj):
                            'engagement': engagement,
                            'test': test,
                            'endpoint': endpoint,
-                           'findings': findings.qs,
+                           'findings': findings.qs.order_by('severity'),
                            'include_finding_notes': include_finding_notes,
                            'include_finding_images': include_finding_images,
                            'include_executive_summary': include_executive_summary,
