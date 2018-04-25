@@ -18,11 +18,14 @@ setup(
         'django-multiselectfield',
         'django-overextends==0.4.3',  # Required for extensions
         'django-polymorphic==1.2',
+        'django-rest-swagger==2.1.2',
         'django-slack',
         'django-tagging',
         'django-tastypie-swagger',
         'django-tastypie>=0.12.2',
         'django-watson==1.3.1',
+        'django-rest-swagger==2.1.2',
+        'djangorestframework==3.7.7',
         'gunicorn>=19.1.1',
         'html2text',
         'humanize',
@@ -57,7 +60,7 @@ setup(
         'psycopg2',
         'django-multiselectfield',
         'pbr',
-	    'django-slack',
+        'django-slack',
         'asteval',
     ],
 
