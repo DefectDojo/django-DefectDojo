@@ -1,6 +1,5 @@
 import base64
 import logging
-import binascii
 import os
 import re
 from datetime import datetime
@@ -921,18 +920,24 @@ class Finding(models.Model):
                 'url': reverse('view_finding', args=(self.id,))}]
         return bc
 
+    def get_report_requests(self):
+        if self.burprawrequestresponse_set.count() >= 3:
+            return BurpRawRequestResponse.objects.filter(finding=self)[0:3]
+        elif self.burprawrequestresponse_set.count() > 0:
+            return BurpRawRequestResponse.objects.filter(finding=self)
+
     def get_request(self):
-          if self.burprawrequestresponse_set.count() > 0:
-              reqres = BurpRawRequestResponse.objects.get(finding=self)
-              return base64.b64decode(binascii.b2a_base64(reqres.burpRequestBase64))
+        if self.burprawrequestresponse_set.count() > 0:
+            reqres = BurpRawRequestResponse.objects.filter(finding=self)[0]
+        return base64.b64decode(reqres.burpRequestBase64)
 
     def get_response(self):
-          if self.burprawrequestresponse_set.count() > 0:
-              reqres = BurpRawRequestResponse.objects.get(finding=self)
-              res = base64.b64decode(binascii.b2a_base64(reqres.burpResponseBase64))
-              # Removes all blank lines
-              res = re.sub(r'\n\s*\n', '\n', res)
-              return res
+        if self.burprawrequestresponse_set.count() > 0:
+            reqres = BurpRawRequestResponse.objects.filter(finding=self)[0]
+        res = base64.b64decode(reqres.burpResponseBase64)
+        # Removes all blank lines
+        res = re.sub(r'\n\s*\n', '\n', res)
+        return res
 
 
 Finding.endpoints.through.__unicode__ = lambda \
@@ -1045,10 +1050,10 @@ class BurpRawRequestResponse(models.Model):
     burpResponseBase64 = models.BinaryField()
 
     def get_request(self):
-        return base64.b64decode(binascii.b2a_base64(self.burpRequestBase64))
+        return base64.b64decode(self.burpRequestBase64)
 
     def get_response(self):
-        res = base64.b64decode(binascii.b2a_base64(self.burpResponseBase64))
+        res = base64.b64decode(self.burpResponseBase64)
         # Removes all blank lines
         res = re.sub(r'\n\s*\n', '\n', res)
         return res
