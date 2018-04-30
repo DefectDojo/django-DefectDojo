@@ -517,6 +517,12 @@ class CWE(models.Model):
     description = models.CharField(max_length=2000)
     number = models.IntegerField()
 
+class Endpoint_Params(models.Model):
+    param = models.CharField(max_length=150)
+    value = models.CharField(max_length=150)
+    method_type = (('GET', 'GET'),
+                    ('POST', 'POST'))
+    method = models.CharField(max_length=20, blank=False, null=True, choices=method_type)
 
 class Endpoint(models.Model):
     protocol = models.CharField(null=True, blank=True, max_length=10,
@@ -537,6 +543,8 @@ class Endpoint(models.Model):
                                 help_text="The fragment identifier which follows the hash mark. The hash mark should "
                                           "be omitted. For example 'section-13', 'paragraph-2'.")
     product = models.ForeignKey(Product, null=True, blank=True, )
+    endpoint_params = models.ManyToManyField(Endpoint_Params, blank=True,
+                                   editable=False)
 
     class Meta:
         ordering = ['product', 'protocol', 'host', 'path', 'query', 'fragment']
@@ -1044,10 +1052,10 @@ class BurpRawRequestResponse(models.Model):
     burpResponseBase64 = models.BinaryField()
 
     def get_request(self):
-        return base64.b64decode(self.burpRequestBase64)
+        return base64.b64decode(self.burpRequestBase64).decode("utf-8")
 
     def get_response(self):
-        res = base64.b64decode(self.burpResponseBase64)
+        res = base64.b64decode(self.burpResponseBase64).decode("utf-8")
         # Removes all blank lines
         res = re.sub(r'\n\s*\n', '\n', res)
         return res

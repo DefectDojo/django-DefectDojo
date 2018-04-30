@@ -646,7 +646,7 @@ td .fa-fw {
     white-space: -moz-pre-wrap;
     white-space: -pre-wrap;
     white-space: -o-pre-wrap;
-    word-wrap: break-word;
+    word-break: normal;
 }
 
 h4.finding-title {
@@ -1044,7 +1044,7 @@ a.template-popover:hover {
 }
 
 .popover{
-    max-width: 100%; 
+    max-width: 100%;
 }
 
 #template_findings div.popover {
@@ -1212,4 +1212,8 @@ div.tags .label {
     width: 10px;
     height: 10px;
     border-radius: 50%;
+}
+mark{
+    background: orange;
+    color: black;
 }
