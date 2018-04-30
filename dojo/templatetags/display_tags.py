@@ -12,11 +12,21 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.conf import settings
 from dojo.utils import prepare_for_view, get_system_setting
-
+from django.utils.safestring import mark_safe
 from dojo.models import Check_List, FindingImage, FindingImageAccessToken, Finding, System_Settings
+import markdown
+from markdown.extensions import Extension
 
 register = template.Library()
 
+class EscapeHtml(Extension):
+    def extendMarkdown(self, md, md_globals):
+        del md.preprocessors['html_block']
+        del md.inlinePatterns['html']
+
+@register.filter
+def markdown_render(value):
+    return mark_safe(markdown.markdown(value, extensions=[EscapeHtml(), 'markdown.extensions.codehilite', 'markdown.extensions.toc']))
 
 @register.filter(name='ports_open')
 def ports_open(value):

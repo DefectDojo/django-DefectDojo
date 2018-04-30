@@ -3,6 +3,7 @@
 {% load humanize %}
 {% load static from staticfiles %}
 {% block content %}
+
     <div class="panel panel-default">
         <div class="panel-heading">
             <div class="clearfix">
@@ -312,7 +313,7 @@
                         class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
             </div>
             <div id="vuln_desc" class="panel-body finding-description collapse in">
-                <pre>{{ finding.description }}</pre>
+                <pre id="description_text">{{ finding.description|markdown_render }}</pre>
             </div>
         </div>
 
@@ -381,7 +382,7 @@
                         class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
             </div>
             <div id="vuln_mitigation" class="panel-body collapse in">
-                <pre>{{ finding.mitigation }}</pre>
+                <pre>{{ finding.mitigation|markdown_render }}</pre>
             </div>
         </div>
         {% if finding.burprawrequestresponse_set.all %}
@@ -423,12 +424,22 @@
                         class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
             </div>
             <div id="vuln_impact" class="panel-body collapse in">
-                <pre>{{ finding.impact }}</pre>
+                <pre>{{ finding.impact|markdown_render }}</pre>
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>References <span class="pull-right"><a data-toggle="collapse" href="#vuln_refs"><i
+                        class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
+            </div>
+            <div id="vuln_refs" class="panel-body collapse in">
+                <pre>{{ finding.references|markdown_render  }}</pre>
             </div>
         </div>
 
         <!--Cred Begin-->
-        {% if  finding.static_finding != True %}
+        {% if  finding.static_finding != True and cred_finding%}
         <div class="row">
         <div class="col-md-12" id="cred">
             <div class="panel panel-default">
@@ -530,15 +541,6 @@
     </div>
     <!--Cred end -->
     {% endif %}
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h4>References <span class="pull-right"><a data-toggle="collapse" href="#vuln_refs"><i
-                        class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
-            </div>
-            <div id="vuln_refs" class="panel-body collapse in">
-                <pre>{{ finding.references }}</pre>
-            </div>
-        </div>
     </div>
 
     <div class="panel panel-default to_highlight table-responsive">
@@ -653,5 +655,5 @@
                 }
             });
         });
-    </script>
+      </script>
 {% endblock %}
