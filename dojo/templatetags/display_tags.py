@@ -15,6 +15,7 @@ from dojo.utils import prepare_for_view, get_system_setting
 from django.utils.safestring import mark_safe
 from dojo.models import Check_List, FindingImage, FindingImageAccessToken, Finding, System_Settings
 import markdown
+from django.utils import timezone
 from markdown.extensions import Extension
 
 register = template.Library()
@@ -63,6 +64,10 @@ def linebreaksasciidocbr(value, autoescape=None):
 def dojo_version():
     from dojo import __version__
     return 'v. ' + __version__
+
+@register.simple_tag
+def display_date():
+    return timezone.now().strftime("%b %d, %Y")
 
 @register.simple_tag
 def dojo_docs_url():
