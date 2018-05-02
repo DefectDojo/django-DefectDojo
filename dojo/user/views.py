@@ -9,6 +9,7 @@ from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404
+from rest_framework.authtoken.models import Token
 from tastypie.models import ApiKey
 
 from dojo.filters import UserFilter
@@ -55,6 +56,41 @@ def api_key(request):
                    'form': form,
                    })
 
+
+# #  Django Rest Framework API v2
+
+def api_v2_key(request):
+    api_key = ''
+    form = APIKeyForm(instance=request.user)
+    if request.method == 'POST':  # new key requested
+        form = APIKeyForm(request.POST, instance=request.user)
+        if form.is_valid() and form.cleaned_data['id'] == request.user.id:
+            try:
+                api_key = Token.objects.get(user=request.user)
+                api_key.delete()
+                api_key = Token.objects.create(user=request.user)
+            except Token.DoesNotExist:
+                api_key = Token.objects.create(user=request.user)
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'API Key generated successfully.',
+                                 extra_tags='alert-success')
+        else:
+            raise PermissionDenied
+    else:
+        try:
+            api_key = Token.objects.get(user=request.user)
+        except Token.DoesNotExist:
+            api_key = Token.objects.create(user=request.user)
+    add_breadcrumb(title="API Key", top_level=True, request=request)
+
+    return render(request, 'dojo/api_v2_key.html',
+                  {'name': 'API v2 Key',
+                   'metric': False,
+                   'user': request.user,
+                   'key': api_key,
+                   'form': form,
+                   })
 
 # #  user specific
 

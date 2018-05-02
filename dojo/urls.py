@@ -133,7 +133,7 @@ swagger_urls = [
     url(r'^schema/$', SchemaView.as_view(), name='schema'),
 ]
 
-schema_view = get_swagger_view(title='Defect Dojo API')
+schema_view = get_swagger_view(title='Defect Dojo API v2')
 
 urlpatterns = [
     #  django admin
@@ -154,7 +154,7 @@ urlpatterns = [
         name='action_history'),
     url(r'^%s' % get_system_setting('url_prefix'), include(ur)),
     url(r'^api/v2/api-token-auth/', tokenviews.obtain_auth_token),
-    url(r'^api/v2/doc/', schema_view),
+    url(r'^api/v2/doc/', schema_view, name="api_v2_schema"),
 ]
 
 if settings.DEBUG:

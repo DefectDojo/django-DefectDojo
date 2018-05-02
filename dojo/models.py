@@ -483,7 +483,7 @@ class IPScan(models.Model):
 
 
 class Engagement_Type(models.Model):
-    name = models.CharField(max_length=200, unique=True)
+    name = models.CharField(max_length=200)
 
 
 class Engagement(models.Model):
