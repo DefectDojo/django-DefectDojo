@@ -322,6 +322,7 @@ class ProductFilter(DojoFilter):
 
 class OpenFindingFilter(DojoFilter):
     title = CharFilter(lookup_expr='icontains')
+    duplicate = ReportBooleanFilter()
     sourcefile = CharFilter(lookup_expr='icontains')
     sourcefilepath = CharFilter(lookup_expr='icontains')
     param = CharFilter(lookup_expr='icontains')
@@ -354,7 +355,7 @@ class OpenFindingFilter(DojoFilter):
         exclude = ['url', 'description', 'mitigation', 'impact',
                    'endpoint', 'references', 'test', 'is_template',
                    'active', 'verified', 'out_of_scope', 'false_p',
-                   'duplicate', 'thread_id', 'mitigated', 'notes',
+                    'thread_id', 'mitigated', 'notes',
                    'numerical_severity', 'reporter', 'last_reviewed']
 
     def __init__(self, *args, **kwargs):
