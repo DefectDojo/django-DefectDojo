@@ -145,7 +145,8 @@
                         <div class="panel-heading finding-title">
                             <div class="clearfix">
                                 <h5>
-                                    Finding {{ finding.id }}: {{ finding.title }}
+                                    Finding {{ forloop.counter }}: {{ finding.title }}
+
                                 </h5>
                             </div>
                         </div>
@@ -167,6 +168,7 @@
                                     {% if finding.cwe > 0 %}
                                         <th>CWE</th>
                                     {% endif %}
+                                    <th>Dojo ID</th>
                                 </tr>
                                 <tr>
                                     <td>
@@ -200,7 +202,7 @@
                                             </a>
                                         </td>
                                     {% endif %}
-
+                                    <td>{{ finding.id }}</td>
                                 </tr>
                             </table>
                         </div>
@@ -237,10 +239,10 @@
                     </div>
 
                     <h6>Description</h6>
-                    <pre>{{ finding.description }}</pre>
+                    <pre>{{ finding.description|markdown_render }}</pre>
 
                     <h6>Mitigation</h6>
-                    <pre>{{ finding.mitigation }}</pre>
+                    <pre>{{ finding.mitigation|markdown_render }}</pre>
                     {% if finding.get_request %}
                         <h6>Request</h6>
                         <pre>{{ finding.get_request }}</pre>
@@ -251,8 +253,10 @@
                     {% endif %}
                     <h6>Impact</h6>
                     <pre>{{ finding.impact }}</pre>
+                    {% if finding.references %}
                     <h6>References</h6>
-                    <pre>{{ finding.references }}</pre>
+                    <pre>{{ finding.references|markdown_render }}</pre>
+                    {% endif %}
                     {% if include_finding_images %}
                         <h6>Images</h6>
                         {% if finding.images.all.count > 0 %}
