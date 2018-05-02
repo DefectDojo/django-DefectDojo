@@ -32,3 +32,4 @@ supervisor==3.3.3
 urllib3==1.22
 vobject==0.9.5
 asteval==0.9.12
+Markdown==2.6.11

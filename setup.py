@@ -58,7 +58,8 @@ setup(
         'django-multiselectfield',
         'pbr',
 	    'django-slack',
-        'asteval',
+        'asteval',',
+        'Markdown>=2.6.11',
     ],
 
     dependency_links=[
