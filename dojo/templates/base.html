@@ -111,13 +111,10 @@
                                 <li><a href="{% url 'view_profile' %}"><i
                                         class="fa fa-user fa-fw"></i> {{ request.user.username }}</a>
                                 </li>
-                                <li><a href="{% url 'api_key' %}"><i class="fa fa-fw fa-key"></i> API v1 Key</a></li>
-                                <li><a href="{% url 'api_v2_key' %}"><i class="fa fa-fw fa-key"></i> API v2 Key</a></li>
+                                <li><a href="{% url 'api_key' %}"><i class="fa fa-fw fa-key"></i> API Key</a></li>
                             {% endif %}
                             <li><a href="{% url 'tastypie_swagger:index' %}"><i class="fa fa-book fa-fw"></i> API
-                                v1 Docs</a></li>
-                            <li><a href="{% url 'api_v2_schema' %}"><i class="fa fa-book fa-fw"></i> API
-                                v2 Docs</a></li>
+                                Docs</a></li>
                         {% endblock %}
                         {% if request.user.is_authenticated %}
                             <li><a href="{% url 'logout' %}"><i class="fa fa-sign-out fa-fw"></i> Logout</a></li>
