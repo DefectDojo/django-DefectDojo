@@ -25,7 +25,7 @@ __author__ = 'Jay Paz'
 #Modified by dkade to use OpenVASUploadCsvParser
 #Modified by martin.marsicano added SKFCsvParser
 
-def import_parser_factory(file, test, scan_type=None):
+def import_parser_factory(file, test):
     scan_type = test.test_type.name
     if scan_type == "Burp Scan":
         parser = BurpXmlParser(file, test)
