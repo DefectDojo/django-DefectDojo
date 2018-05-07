@@ -12,7 +12,6 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.conf import settings
 from dojo.utils import prepare_for_view, get_system_setting
-from django.utils.safestring import mark_safe
 from dojo.models import Check_List, FindingImage, FindingImageAccessToken, Finding, System_Settings
 import markdown
 from django.utils import timezone
@@ -20,14 +19,17 @@ from markdown.extensions import Extension
 
 register = template.Library()
 
+
 class EscapeHtml(Extension):
     def extendMarkdown(self, md, md_globals):
         del md.preprocessors['html_block']
         del md.inlinePatterns['html']
 
+
 @register.filter
 def markdown_render(value):
     return mark_safe(markdown.markdown(value, extensions=[EscapeHtml(), 'markdown.extensions.codehilite', 'markdown.extensions.toc']))
+
 
 @register.filter(name='ports_open')
 def ports_open(value):
@@ -36,9 +38,11 @@ def ports_open(value):
         count += len(eval(ipscan.services))
     return count
 
+
 @register.filter(name='get_pwd')
 def get_pwd(value):
     return prepare_for_view(value)
+
 
 @register.filter(name='checklist_status')
 def checklist_status(value):
@@ -65,9 +69,11 @@ def dojo_version():
     from dojo import __version__
     return 'v. ' + __version__
 
+
 @register.simple_tag
 def display_date():
     return timezone.now().strftime("%b %d, %Y")
+
 
 @register.simple_tag
 def dojo_docs_url():
@@ -88,9 +94,11 @@ def content_type_str(obj):
         return False
     return ContentType.objects.get_for_model(obj)
 
+
 @register.filter(name='remove_string')
 def remove_string(string, value):
     return string.replace(value, '')
+
 
 @register.filter(name='percentage')
 def percentage(fraction, value):
@@ -99,6 +107,7 @@ def percentage(fraction, value):
             return "%.1f%%" % ((float(fraction) / float(value)) * 100)
         except ValueError:
             return ''
+
 
 def asvs_calc_level(benchmark_score):
     level = 0
@@ -120,6 +129,7 @@ def asvs_calc_level(benchmark_score):
         level = percentage(total_pass, total)
 
     return benchmark_score.desired_level, level, str(total_pass), str(total)
+
 
 @register.filter(name='asvs_level')
 def asvs_level(benchmark_score):
