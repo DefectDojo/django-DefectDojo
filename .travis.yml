@@ -11,12 +11,12 @@ env:
   - TEST=docker-bench-security
   - TEST=ansible
   - TEST=pep8
+  - TEST=flake8
 
 matrix:
   allow_failures:
     - env: TEST=bandit
     - env: TEST=sourceclear
-    - env: TEST=pep8
 
 services:
   - docker
@@ -66,8 +66,17 @@ script:
         true
         ;;
       pep8)
-        pip install pep8
+        pip install pep8 flake8 flake8-diff
         pep8 .
+      flake8)
+        if [ "$TRAVIS_BRANCH" != "dev" ]
+        then 
+            echo "Running Flake8 tests on dev branch aka pull requests"
+            pip install pep8 flake8 flake8-diff
+            flake8-diff
+        else
+            echo "true"
+        fi
     esac
 
 after_success:
