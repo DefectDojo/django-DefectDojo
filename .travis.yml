@@ -11,6 +11,7 @@ env:
   - TEST=docker-bench-security
   - TEST=ansible
   - TEST=pep8
+  - TEST=flake8
 
 matrix:
   allow_failures:
@@ -68,6 +69,19 @@ script:
       pep8)
         pip install pep8
         pep8 .
+        ;;
+      flake8)
+        echo "$TRAVIS_BRANCH"
+        if [ "$TRAVIS_BRANCH" == "dev" ]
+        then 
+            echo "Running Flake8 tests on dev branch aka pull requests"
+            # We need to checkout dev for flake8-diff to work properly
+            git checkout dev
+            pip install pep8 flake8 flake8-diff
+            flake8-diff
+        else
+            echo "true"
+        fi
     esac
 
 after_success:
