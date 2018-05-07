@@ -17,6 +17,7 @@ matrix:
   allow_failures:
     - env: TEST=bandit
     - env: TEST=sourceclear
+    - env: TEST=pep8
 
 services:
   - docker
@@ -66,12 +67,16 @@ script:
         true
         ;;
       pep8)
-        pip install pep8 flake8 flake8-diff
+        pip install pep8
         pep8 .
+        ;;
       flake8)
-        if [ "$TRAVIS_BRANCH" != "dev" ]
+        echo "$TRAVIS_BRANCH"
+        if [ "$TRAVIS_BRANCH" == "dev" ]
         then 
             echo "Running Flake8 tests on dev branch aka pull requests"
+            # We need to checkout dev for flake8-diff to work properly
+            git checkout dev
             pip install pep8 flake8 flake8-diff
             flake8-diff
         else
