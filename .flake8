@@ -5,6 +5,8 @@ ignore =
     E501,
     # Suppress - Continuation line missing indentation or outdented
     E127
+    # Suppress - Function is too complex
+    C901
 exclude =
     # No need to traverse our git directory
     .git,
