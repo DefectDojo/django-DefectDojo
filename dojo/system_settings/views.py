@@ -35,12 +35,12 @@ def system_settings(request):
     celery_bool = True
     celery_stat = celery_status.keys()[0]
     celery_msg = celery_status.values()[0]
-    jira_msg = 'None'
     if celery_status.keys()[0] == 'ERROR':
         celery_bool = False
     """
     **** To be Finished JIRA Status info ****
     jira_bool = True
+    jira_msg = 'None'
     if not celery_bool:
         jira_bool = False
         jira_msg = 'Celery is not working properly'
