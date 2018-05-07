@@ -834,7 +834,7 @@ def generate_report(request, obj):
                            'team_name': settings.TEAM_NAME,
                            'title': 'Generate Report',
                            'user_id': request.user.id,
-                           'host': report_url_resolver(request),
+                           'host': "",
                            })
 
         else:
