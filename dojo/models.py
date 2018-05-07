@@ -7,11 +7,6 @@ from uuid import uuid4
 
 from django.conf import settings
 
-fmt = getattr(settings, 'LOG_FORMAT', None)
-lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
-
-logging.basicConfig(format=fmt, level=lvl)
-
 from watson import search as watson
 from auditlog.registry import auditlog
 from django.contrib import admin
@@ -19,7 +14,7 @@ from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.core.validators import RegexValidator
 from django.db import models
-from django.db.models import Q, Count
+from django.db.models import Q
 from django.utils.timezone import now
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToCover
@@ -29,6 +24,12 @@ from tagging.registry import register as tag_register
 from multiselectfield import MultiSelectField
 import hashlib
 from django import forms
+
+fmt = getattr(settings, 'LOG_FORMAT', None)
+lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
+
+logging.basicConfig(format=fmt, level=lvl)
+
 
 class System_Settings(models.Model):
     enable_deduplication = models.BooleanField(
