@@ -275,7 +275,7 @@ class Product_Line(models.Model):
 
 
 class Report_Type(models.Model):
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255)
 
 
 class Test_Type(models.Model):
@@ -293,7 +293,7 @@ class Test_Type(models.Model):
 
 
 class Product(models.Model):
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255)
     description = models.CharField(max_length=4000)
 
     '''
@@ -309,11 +309,11 @@ class Product(models.Model):
     tech_contact = models.CharField(default=0, max_length=200)  # unused
     manager = models.CharField(default=0, max_length=200)  # unused
 
-    product_manager = models.ForeignKey(User, null=True, blank=True,
+    product_manager = models.ForeignKey(Dojo_User, null=True, blank=True,
                                         related_name='product_manager')
-    technical_contact = models.ForeignKey(User, null=True, blank=True,
+    technical_contact = models.ForeignKey(Dojo_User, null=True, blank=True,
                                           related_name='technical_contact')
-    team_manager = models.ForeignKey(User, null=True, blank=True,
+    team_manager = models.ForeignKey(Dojo_User, null=True, blank=True,
                                      related_name='team_manager')
 
     created = models.DateTimeField(editable=False, null=True, blank=True)
@@ -495,8 +495,6 @@ class Engagement(models.Model):
     target_start = models.DateField(null=False, blank=False)
     target_end = models.DateField(null=False, blank=False)
     lead = models.ForeignKey(User, editable=True, null=True)
-    requester = models.ForeignKey(User, null=True, blank=True,
-                                  related_name='requester')
     requester = models.ForeignKey(Contact, null=True, blank=True)
     reason = models.CharField(max_length=2000, null=True, blank=True)
     report_type = models.ForeignKey(Report_Type, null=True, blank=True)
@@ -545,12 +543,15 @@ class CWE(models.Model):
     description = models.CharField(max_length=2000)
     number = models.IntegerField()
 
+
 class Endpoint_Params(models.Model):
     param = models.CharField(max_length=150)
     value = models.CharField(max_length=150)
     method_type = (('GET', 'GET'),
-                    ('POST', 'POST'))
-    method = models.CharField(max_length=20, blank=False, null=True, choices=method_type)
+                   ('POST', 'POST'))
+    method = models.CharField(max_length=20, blank=False, null=True,
+                              choices=method_type)
+
 
 class Endpoint(models.Model):
     protocol = models.CharField(null=True, blank=True, max_length=10,
@@ -744,13 +745,13 @@ class Finding(models.Model):
     duplicate_list = models.ManyToManyField("self", editable=False, blank=True)
     out_of_scope = models.BooleanField(default=False)
     under_review = models.BooleanField(default=False)
-    review_requested_by = models.ForeignKey(User, null=True, blank=True,
+    review_requested_by = models.ForeignKey(Dojo_User, null=True, blank=True,
                                             related_name='review_requested_by')
-    reviewers = models.ManyToManyField(User, blank=True)
+    reviewers = models.ManyToManyField(Dojo_User, blank=True)
 
     # Defect Tracking Review
     under_defect_review = models.BooleanField(default=False)
-    defect_review_requested_by = models.ForeignKey(User, null=True, blank=True,
+    defect_review_requested_by = models.ForeignKey(Dojo_User, null=True, blank=True,
                                                    related_name='defect_review_requested_by')
 
     thread_id = models.IntegerField(default=0, editable=False)
@@ -955,11 +956,11 @@ class Finding(models.Model):
                 'url': reverse('view_finding', args=(self.id,))}]
         return bc
 
-    def get_report_requests(self):
-        if self.burprawrequestresponse_set.count() >= 3:
-            return BurpRawRequestResponse.objects.filter(finding=self)[0:3]
-        elif self.burprawrequestresponse_set.count() > 0:
-            return BurpRawRequestResponse.objects.filter(finding=self)
+    # def get_report_requests(self):
+    #     if self.burprawrequestresponse_set.count() >= 3:
+    #         return BurpRawRequestResponse.objects.filter(finding=self)[0:3]
+    #     elif self.burprawrequestresponse_set.count() > 0:
+    #         return BurpRawRequestResponse.objects.filter(finding=self)
 
     def get_request(self):
         if self.burprawrequestresponse_set.count() > 0:
@@ -1085,10 +1086,10 @@ class BurpRawRequestResponse(models.Model):
     burpResponseBase64 = models.BinaryField()
 
     def get_request(self):
-        return base64.b64decode(self.burpRequestBase64).decode("utf-8")
+        return base64.b64decode(self.burpRequestBase64)
 
     def get_response(self):
-        res = base64.b64decode(self.burpResponseBase64).decode("utf-8")
+        res = base64.b64decode(self.burpResponseBase64)
         # Removes all blank lines
         res = re.sub(r'\n\s*\n', '\n', res)
         return res

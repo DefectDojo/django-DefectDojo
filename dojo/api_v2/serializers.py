@@ -303,16 +303,16 @@ class FindingSerializer(serializers.HyperlinkedModelSerializer):
 
 class FindingCreateSerializer(serializers.HyperlinkedModelSerializer):
     review_requested_by = serializers.HyperlinkedRelatedField(
-        queryset=User.objects.all(),
+        queryset=Dojo_User.objects.all(),
         view_name='user-detail',
         format='html')
     reviewers = serializers.HyperlinkedRelatedField(
-        queryset=User.objects.all(),
+        queryset=Dojo_User.objects.all(),
         view_name='user-detail',
         format='html',
         many=True)
     defect_review_requested_by = serializers.HyperlinkedRelatedField(
-        queryset=User.objects.all(),
+        queryset=Dojo_User.objects.all(),
         view_name='user-detail',
         format='html')
     notes = serializers.SlugRelatedField(
@@ -326,7 +326,7 @@ class FindingCreateSerializer(serializers.HyperlinkedModelSerializer):
         )
     thread_id = serializers.IntegerField()
     reporter = serializers.HyperlinkedRelatedField(
-        queryset=User.objects.all(),
+        queryset=Dojo_User.objects.all(),
         format='html',
         view_name='user-detail')
     found_by = serializers.PrimaryKeyRelatedField(
