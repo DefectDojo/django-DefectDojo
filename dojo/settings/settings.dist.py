@@ -16,29 +16,6 @@ URL_PREFIX = ''
 # SESSION_COOKIE_SECURE = True
 # CSRF_COOKIE_SECURE = True
 
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.TokenAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
-    ),
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.DjangoModelPermissions',
-    ),
-    'DEFAULT_RENDERER_CLASSES': (
-        'rest_framework.renderers.JSONRenderer',
-    )
-}
-
-SWAGGER_SETTINGS = {
-    'SECURITY_DEFINITIONS': {
-        'api_key': {
-            'type': 'apiKey',
-            'in': 'header',
-            'name': 'Authorization'
-        }
-    },
-}
-
 ADMINS = (
     ('Your Name', 'your.name@yourdomain')
 )
@@ -154,8 +131,7 @@ LOGIN_EXEMPT_URLS = (
     r'^%sapi/v1/' % URL_PREFIX,
     r'^%sajax/v1/' % URL_PREFIX,
     r'^%sreports/cover$' % URL_PREFIX,
-    r'^%sfinding/image/(?P<token>[^/]+)$' % URL_PREFIX,
-    r'^%sapi/v2/' % URL_PREFIX,
+    r'^%sfinding/image/(?P<token>[^/]+)$' % URL_PREFIX
 )
 
 # Python dotted path to the WSGI application used by Django's runserver.
@@ -197,10 +173,7 @@ INSTALLED_APPS = (
     'tagging',
     'custom_field',
     'imagekit',
-    'multiselectfield',
-    'rest_framework',
-    'rest_framework.authtoken',
-    'rest_framework_swagger',
+    'multiselectfield'
 )
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
