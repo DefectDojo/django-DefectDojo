@@ -63,7 +63,7 @@ class BaseClass():
         def test_detail(self):
             current_objects = self.client.get(
                 reverse(self.viewname + '-list'), format='json').data
-            relative_url = urlparse(current_objects[0]['url']).path
+            relative_url = urlparse(current_objects['results'][0]['url']).path
             response = self.client.get(relative_url)
             self.assertEqual(200, response.status_code)
 
@@ -71,7 +71,7 @@ class BaseClass():
         def test_delete(self):
             current_objects = self.client.get(
                 reverse(self.viewname + '-list'), format='json').data
-            relative_url = urlparse(current_objects[0]['url']).path
+            relative_url = urlparse(current_objects['results'][0]['url']).path
             response = self.client.delete(relative_url)
             self.assertEqual(204, response.status_code)
 
@@ -79,7 +79,7 @@ class BaseClass():
         def test_update(self):
             current_objects = self.client.get(
                 reverse(self.viewname + '-list'), format='json').data
-            relative_url = urlparse(current_objects[0]['url']).path
+            relative_url = urlparse(current_objects['results'][0]['url']).path
             response = self.client.patch(
                 relative_url, self.update_fields)
             for key, value in self.update_fields.iteritems():
@@ -434,7 +434,7 @@ class ProductPermissionTest(APITestCase):
     def test_user_should_not_have_access_to_product_3_in_list(self):
         response = self.client.get(
                 reverse('product-list'), format='json')
-        for obj in response.data:
+        for obj in response.data['results']:
             self.assertNotEqual(
                 obj['url'],
                 'http://testserver/api/v2/products/3/')
@@ -456,7 +456,7 @@ class ScanSettingsPermissionTest(APITestCase):
     def test_user_should_not_have_access_to_setting_3_in_list(self):
         response = self.client.get(
                 reverse('scansettings-list'), format='json')
-        for obj in response.data:
+        for obj in response.data['results']:
             self.assertNotEqual(
                 obj['url'],
                 'http://testserver/api/v2/scan_settings/3/')
@@ -478,7 +478,7 @@ class ScansPermissionTest(APITestCase):
     def test_user_should_not_have_access_to_scan_3_in_list(self):
         response = self.client.get(
                 reverse('scan-list'), format='json')
-        for obj in response.data:
+        for obj in response.data['results']:
             self.assertNotEqual(
                 obj['url'],
                 'http://testserver/api/v2/scans/3/')
