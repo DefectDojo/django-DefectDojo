@@ -22,8 +22,9 @@ from dojo.tools.ssllabs.parser import SSLlabsParser
 
 __author__ = 'Jay Paz'
 
-#Modified by dkade to use OpenVASUploadCsvParser
-#Modified by martin.marsicano added SKFCsvParser
+# Modified by dkade to use OpenVASUploadCsvParser
+# Modified by martin.marsicano added SKFCsvParser
+
 
 def import_parser_factory(file, test, scan_type=None):
     scan_type = test.test_type.name

@@ -1,22 +1,19 @@
 from dojo.models import Product, Engagement, Test, Finding, \
-    User, ScanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance, \
-    Finding_Template, Test_Type, Development_Environment, \
-    BurpRawRequestResponse, Endpoint, Notes, JIRA_PKey, JIRA_Conf, \
-    JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type
+    User, ScanSettings, Scan, Stub_Finding, Finding_Template,\
+    JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
+    Endpoint, JIRA_PKey, JIRA_Conf
+
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraConfigurationsViewSet, \
     JiraIssuesViewSet, JiraViewSet, ProductViewSet, ScanSettingsViewSet, \
     ScansViewSet, StubFindingsViewSet, TestsViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
-    UsersViewSet, ImportScanView, ReImportScanView
+    UsersViewSet, ImportScanView
 
 from django.core.urlresolvers import reverse
 from rest_framework.authtoken.models import Token
-from rest_framework import status
-from rest_framework.test import (
-    APITestCase, APIClient, force_authenticate)
+from rest_framework.test import (APITestCase, APIClient)
 from urlparse import urlparse
-from unittest import skipIf
 
 
 def skipIfNotSubclass(baseclass_name):
@@ -54,8 +51,7 @@ class BaseClass():
             length = self.endpoint_model.objects.count()
             response = self.client.post(
                 reverse(self.viewname + '-list'),
-                self.payload
-                )
+                self.payload)
             self.assertEqual(201, response.status_code)
             self.assertEqual(self.endpoint_model.objects.count(), length + 1)
 
@@ -433,7 +429,7 @@ class ProductPermissionTest(APITestCase):
 
     def test_user_should_not_have_access_to_product_3_in_list(self):
         response = self.client.get(
-                reverse('product-list'), format='json')
+            reverse('product-list'), format='json')
         for obj in response.data:
             self.assertNotEqual(
                 obj['url'],
@@ -455,7 +451,7 @@ class ScanSettingsPermissionTest(APITestCase):
 
     def test_user_should_not_have_access_to_setting_3_in_list(self):
         response = self.client.get(
-                reverse('scansettings-list'), format='json')
+            reverse('scansettings-list'), format='json')
         for obj in response.data:
             self.assertNotEqual(
                 obj['url'],
@@ -477,7 +473,7 @@ class ScansPermissionTest(APITestCase):
 
     def test_user_should_not_have_access_to_scan_3_in_list(self):
         response = self.client.get(
-                reverse('scan-list'), format='json')
+            reverse('scan-list'), format='json')
         for obj in response.data:
             self.assertNotEqual(
                 obj['url'],
@@ -521,15 +517,14 @@ class ReimportScanTest(APITestCase):
     def test_import_zap_xml(self):
         length = Test.objects.all().count()
         response = self.client.post(
-                reverse('reimportscan-list'), {
-                    "scan_date": '2017-12-30',
-                    "minimum_severity": 'Low',
-                    "active": True,
-                    "verified": True,
-                    "scan_type": 'ZAP Scan',
-                    "tags": "test",
-                    "file": open('tests/zap_sample.xml'),
-                    "test": 'http://testserver/api/v2/tests/3/'}
-                )
+            reverse('reimportscan-list'), {
+                "scan_date": '2017-12-30',
+                "minimum_severity": 'Low',
+                "active": True,
+                "verified": True,
+                "scan_type": 'ZAP Scan',
+                "tags": "test",
+                "file": open('tests/zap_sample.xml'),
+                "test": 'http://testserver/api/v2/tests/3/'})
         self.assertEqual(length, Test.objects.all().count())
         self.assertEqual(201, response.status_code)
