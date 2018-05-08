@@ -21,4 +21,5 @@ urlpatterns = [
     url(r'^user/(?P<uid>\d+)/delete', views.delete_user,
         name='delete_user'),
     url(r'^api/key$', views.api_key, name='api_key'),
+    url(r'^api/v2/key$', views.api_v2_key, name='api_v2_key'),
 ]
