@@ -6,8 +6,9 @@ from dojo.models import Product, Engagement_Type, Engagement, Test, Finding, \
     Notes, Dojo_User
 from dojo.forms import ImportScanForm, SEVERITY_CHOICES
 from dojo.tools.factory import import_parser_factory
+from django.core.validators import URLValidator, validate_ipv46_address
 
-from rest_framework import serializers, reverse
+from rest_framework import serializers
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 import datetime
@@ -101,8 +102,6 @@ class EndpointSerializer(serializers.HyperlinkedModelSerializer):
         fields = '__all__'
 
     def validate(self, data):
-        from django.core.validators import URLValidator, validate_ipv46_address
-
         port_re = "(:[0-9]{1,5}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}" \
                   "|655[0-2][0-9]|6553[0-5])"
 
@@ -160,7 +159,7 @@ class EndpointSerializer(serializers.HyperlinkedModelSerializer):
                         for g in regex.findall(endpoint):
                             host = re.sub(port_re, '', host)
                     validate_hostname(host)
-                except:
+                except:  # noqa
                     raise serializers.ValidationError(
                         'It does not appear as though this endpoint is a '
                         'valid URL or IP address.',
@@ -209,8 +208,7 @@ class TestSerializer(serializers.HyperlinkedModelSerializer):
     engagement = serializers.HyperlinkedRelatedField(
         read_only=True,
         view_name='engagement-detail',
-        format='html'
-        )
+        format='html')
     test_type = serializers.PrimaryKeyRelatedField(
         queryset=Test_Type.objects.all())
     environment = serializers.PrimaryKeyRelatedField(
@@ -322,8 +320,7 @@ class FindingCreateSerializer(serializers.HyperlinkedModelSerializer):
     test = serializers.HyperlinkedRelatedField(
         queryset=Test.objects.all(),
         view_name='test-detail',
-        format='html'
-        )
+        format='html')
     thread_id = serializers.IntegerField()
     reporter = serializers.HyperlinkedRelatedField(
         queryset=Dojo_User.objects.all(),
@@ -455,8 +452,7 @@ class ImportScanSerializer(serializers.Serializer):
             percent_complete=100)
         try:
             test.full_clean()
-        except ValidationError as e:
-            # TODO: validation error
+        except ValidationError:
             pass
 
         test.save()
@@ -595,8 +591,7 @@ class ReImportScanSerializer(serializers.Serializer):
                         title=item.title,
                         test=test,
                         severity=sev,
-                        numerical_severity=Finding.get_numerical_severity(sev)
-                        ).all()
+                        numerical_severity=Finding.get_numerical_severity(sev)).all()
 
                 if findings:
                     finding = findings[0]
