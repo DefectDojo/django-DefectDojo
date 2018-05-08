@@ -14,7 +14,7 @@ from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.core.validators import RegexValidator
 from django.db import models
-from django.db.models import Q, Count
+from django.db.models import Q
 from django.utils.timezone import now
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToCover
@@ -136,7 +136,8 @@ class System_Settings(models.Model):
 
 
 class SystemSettingsFormAdmin(forms.ModelForm):
-    product_grade = forms.CharField( widget=forms.Textarea )
+    product_grade = forms.CharField(widget=forms.Textarea)
+
     class Meta:
         model = System_Settings
         fields = ['product_grade']
@@ -275,7 +276,7 @@ class Product_Line(models.Model):
 
 
 class Report_Type(models.Model):
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255)
 
 
 class Test_Type(models.Model):
@@ -293,7 +294,7 @@ class Test_Type(models.Model):
 
 
 class Product(models.Model):
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255)
     description = models.CharField(max_length=4000)
 
     '''
@@ -309,11 +310,11 @@ class Product(models.Model):
     tech_contact = models.CharField(default=0, max_length=200)  # unused
     manager = models.CharField(default=0, max_length=200)  # unused
 
-    product_manager = models.ForeignKey(User, null=True, blank=True,
+    product_manager = models.ForeignKey(Dojo_User, null=True, blank=True,
                                         related_name='product_manager')
-    technical_contact = models.ForeignKey(User, null=True, blank=True,
+    technical_contact = models.ForeignKey(Dojo_User, null=True, blank=True,
                                           related_name='technical_contact')
-    team_manager = models.ForeignKey(User, null=True, blank=True,
+    team_manager = models.ForeignKey(Dojo_User, null=True, blank=True,
                                      related_name='team_manager')
 
     created = models.DateTimeField(editable=False, null=True, blank=True)
@@ -495,8 +496,6 @@ class Engagement(models.Model):
     target_start = models.DateField(null=False, blank=False)
     target_end = models.DateField(null=False, blank=False)
     lead = models.ForeignKey(User, editable=True, null=True)
-    requester = models.ForeignKey(User, null=True, blank=True,
-                                  related_name='requester')
     requester = models.ForeignKey(Contact, null=True, blank=True)
     reason = models.CharField(max_length=2000, null=True, blank=True)
     report_type = models.ForeignKey(Report_Type, null=True, blank=True)
@@ -545,12 +544,14 @@ class CWE(models.Model):
     description = models.CharField(max_length=2000)
     number = models.IntegerField()
 
+
 class Endpoint_Params(models.Model):
     param = models.CharField(max_length=150)
     value = models.CharField(max_length=150)
     method_type = (('GET', 'GET'),
-                    ('POST', 'POST'))
+                   ('POST', 'POST'))
     method = models.CharField(max_length=20, blank=False, null=True, choices=method_type)
+
 
 class Endpoint(models.Model):
     protocol = models.CharField(null=True, blank=True, max_length=10,
@@ -572,7 +573,7 @@ class Endpoint(models.Model):
                                           "be omitted. For example 'section-13', 'paragraph-2'.")
     product = models.ForeignKey(Product, null=True, blank=True, )
     endpoint_params = models.ManyToManyField(Endpoint_Params, blank=True,
-                                   editable=False)
+                                             editable=False)
 
     class Meta:
         ordering = ['product', 'protocol', 'host', 'path', 'query', 'fragment']
@@ -581,7 +582,6 @@ class Endpoint(models.Model):
         from urlparse import uses_netloc
 
         netloc = self.host
-        fqdn = self.fqdn
         port = self.port
         scheme = self.protocol
         url = self.path if self.path else ''
@@ -592,7 +592,8 @@ class Endpoint(models.Model):
             netloc += ':%s' % port
 
         if netloc or (scheme and scheme in uses_netloc and url[:2] != '//'):
-            if url and url[:1] != '/': url = '/' + url
+            if url and url[:1] != '/':
+                url = '/' + url
             if scheme and scheme in uses_netloc and url[:2] != '//':
                 url = '//' + (netloc or '') + url
             else:
@@ -744,13 +745,13 @@ class Finding(models.Model):
     duplicate_list = models.ManyToManyField("self", editable=False, blank=True)
     out_of_scope = models.BooleanField(default=False)
     under_review = models.BooleanField(default=False)
-    review_requested_by = models.ForeignKey(User, null=True, blank=True,
+    review_requested_by = models.ForeignKey(Dojo_User, null=True, blank=True,
                                             related_name='review_requested_by')
     reviewers = models.ManyToManyField(User, blank=True)
 
     # Defect Tracking Review
     under_defect_review = models.BooleanField(default=False)
-    defect_review_requested_by = models.ForeignKey(User, null=True, blank=True,
+    defect_review_requested_by = models.ForeignKey(Dojo_User, null=True, blank=True,
                                                    related_name='defect_review_requested_by')
 
     thread_id = models.IntegerField(default=0, editable=False)
@@ -976,7 +977,7 @@ class Finding(models.Model):
 
 
 Finding.endpoints.through.__unicode__ = lambda \
-        x: "Endpoint: " + x.endpoint.host
+    x: "Endpoint: " + x.endpoint.host
 
 
 class Stub_Finding(models.Model):
@@ -1454,11 +1455,11 @@ class Objects(models.Model):
 
     def __unicode__(self):
         name = None
-        if self.path != None:
+        if self.path is not None:
             name = self.path
-        elif self.folder != None:
+        elif self.folder is not None:
             name = self.folder
-        elif self.artifact != None:
+        elif self.artifact is not None:
             name = self.artifact
 
         return name
@@ -1596,7 +1597,7 @@ class Benchmark_Product_Summary(models.Model):
     current_level = models.CharField(max_length=15, blank=True,
                                      null=True, choices=asvs_level,
                                      default='None')
-    asvs_level_1_benchmark = models.IntegerField(null=False, default=0,help_text="Total number of active benchmarks for this application.")
+    asvs_level_1_benchmark = models.IntegerField(null=False, default=0, help_text="Total number of active benchmarks for this application.")
     asvs_level_1_score = models.IntegerField(null=False, default=0, help_text="ASVS Level 1 Score")
     asvs_level_2_benchmark = models.IntegerField(null=False, default=0, help_text="Total number of active benchmarks for this application.")
     asvs_level_2_score = models.IntegerField(null=False, default=0, help_text="ASVS Level 2 Score")
@@ -1634,14 +1635,14 @@ tag_register(Finding_Template)
 tag_register(App_Analysis)
 tag_register(Objects)
 
-#Benchmarks
+# Benchmarks
 admin.site.register(Benchmark_Type)
 admin.site.register(Benchmark_Requirement)
 admin.site.register(Benchmark_Category)
 admin.site.register(Benchmark_Product)
 admin.site.register(Benchmark_Product_Summary)
 
-#Testing
+# Testing
 admin.site.register(Testing_Guide_Category)
 admin.site.register(Testing_Guide)
 
