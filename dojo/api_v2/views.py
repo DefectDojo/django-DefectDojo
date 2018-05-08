@@ -1,16 +1,12 @@
-from django.shortcuts import get_object_or_404
-from django.db.models import Count, Q, Sum, When, IntegerField, Case
-from rest_framework import viewsets, mixins, renderers, views
-from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework import viewsets, mixins
 from rest_framework.permissions import DjangoModelPermissions
 from django_filters.rest_framework import DjangoFilterBackend
 
 from dojo.models import Product, Engagement, Test, Finding, \
-    User, ScanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance, \
-    Finding_Template, Test_Type, Development_Environment, \
-    BurpRawRequestResponse, Endpoint, Notes, JIRA_PKey, JIRA_Conf, \
-    JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type
+    User, ScanSettings, Scan, Stub_Finding, Finding_Template, \
+    JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
+    Endpoint, JIRA_PKey, JIRA_Conf
+
 from dojo.api_v2 import serializers, permissions
 
 

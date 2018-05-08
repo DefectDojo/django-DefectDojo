@@ -140,7 +140,7 @@ urlpatterns = [
     url(r'^%sadmin/' % get_system_setting('url_prefix'), include(admin.site.urls)),
     #  tastypie api
     url(r'^%sapi/' % get_system_setting('url_prefix'), include(v1_api.urls)),
-    #  Django Rest Framework API v2 
+    #  Django Rest Framework API v2
     url(r'^%sapi/v2/' % get_system_setting('url_prefix'), include(v2_api.urls)),
     # api doc urls
     url(r'%sapi/v1/doc/' % get_system_setting('url_prefix'),
