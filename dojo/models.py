@@ -128,11 +128,11 @@ class System_Settings(models.Model):
                                           help_text="Percentage score for an "
                                                     "'F' <=")
     enable_benchmark = models.BooleanField(
-            default=True,
-            blank=False,
-            verbose_name="Enable Benchmarks",
-            help_text="Enables Benchmarks such as the OWASP ASVS "
-                      "(Application Security Verification Standard)")
+        default=True,
+        blank=False,
+        verbose_name="Enable Benchmarks",
+        help_text="Enables Benchmarks such as the OWASP ASVS "
+                  "(Application Security Verification Standard)")
 
 
 class SystemSettingsFormAdmin(forms.ModelForm):
