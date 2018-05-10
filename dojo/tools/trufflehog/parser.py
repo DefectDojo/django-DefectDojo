@@ -14,9 +14,9 @@ class TruffleHogJSONParser(object):
         for line in data.splitlines():
             json_data = self.parse_json(line)
             file = json_data["path"]
-            titleText = "Hard Coded Credential(s) or Secret(s) in: " + file
-            reason = json_data["reason"]
 
+            reason = json_data["reason"]
+            titleText = "Hard Coded " + reason + " in: " + file
 
             commit = json_data["commit"]
             description = "**Commit:** " + commit.rstrip("\n") + "\n"
@@ -26,14 +26,19 @@ class TruffleHogJSONParser(object):
             description += "**Reason:** " + json_data["reason"] + "\n"
             description += "**Path:** " + file + "\n"
 
-            severity = "Info"
+            severity = "High"
+            if reason == "High Entropy":
+                severity = "Info"
+            elif "Oauth" in reason or "AWS" in reason or "Heroku" in reason:
+                severity = "Critical"
+            elif reason == "Generic Secret":
+                severity = "Medium"
 
             strings_found = ""
-
             for string in json_data["stringsFound"]:
                     strings_found += string + "\n"
 
-            dupe_key = file
+            dupe_key = file + reason
             description += "\n**Strings Found:**\n" + strings_found + "\n"
 
             if dupe_key in self.dupes:
