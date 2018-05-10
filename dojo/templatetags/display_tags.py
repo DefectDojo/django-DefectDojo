@@ -27,7 +27,8 @@ class EscapeHtml(Extension):
 
 @register.filter
 def markdown_render(value):
-    return mark_safe(markdown.markdown(value, extensions=[EscapeHtml(), 'markdown.extensions.codehilite', 'markdown.extensions.toc']))
+    if value:
+         return mark_safe(markdown.markdown(value, extensions=[EscapeHtml(), 'markdown.extensions.codehilite', 'markdown.extensions.toc']))
 
 @register.filter(name='ports_open')
 def ports_open(value):
