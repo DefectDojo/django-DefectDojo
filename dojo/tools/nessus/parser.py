@@ -221,7 +221,6 @@ class NessusXMLParser(object):
 
                     find.unsaved_endpoints.append(Endpoint(host=ip + (":" + port if port is not None else ""),
                                                            protocol=protocol))
-
                     if fqdn is not None:
                         find.unsaved_endpoints.append(Endpoint(host=fqdn,
                                                                protocol=protocol))
