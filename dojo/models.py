@@ -7,11 +7,6 @@ from uuid import uuid4
 
 from django.conf import settings
 
-fmt = getattr(settings, 'LOG_FORMAT', None)
-lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
-
-logging.basicConfig(format=fmt, level=lvl)
-
 from watson import search as watson
 from auditlog.registry import auditlog
 from django.contrib import admin
@@ -19,7 +14,7 @@ from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.core.validators import RegexValidator
 from django.db import models
-from django.db.models import Q, Count
+from django.db.models import Q
 from django.utils.timezone import now
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToCover
@@ -29,6 +24,12 @@ from tagging.registry import register as tag_register
 from multiselectfield import MultiSelectField
 import hashlib
 from django import forms
+
+fmt = getattr(settings, 'LOG_FORMAT', None)
+lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
+
+logging.basicConfig(format=fmt, level=lvl)
+
 
 class System_Settings(models.Model):
     enable_deduplication = models.BooleanField(
@@ -517,12 +518,14 @@ class CWE(models.Model):
     description = models.CharField(max_length=2000)
     number = models.IntegerField()
 
+
 class Endpoint_Params(models.Model):
     param = models.CharField(max_length=150)
     value = models.CharField(max_length=150)
     method_type = (('GET', 'GET'),
                     ('POST', 'POST'))
     method = models.CharField(max_length=20, blank=False, null=True, choices=method_type)
+
 
 class Endpoint(models.Model):
     protocol = models.CharField(null=True, blank=True, max_length=10,
@@ -544,7 +547,7 @@ class Endpoint(models.Model):
                                           "be omitted. For example 'section-13', 'paragraph-2'.")
     product = models.ForeignKey(Product, null=True, blank=True, )
     endpoint_params = models.ManyToManyField(Endpoint_Params, blank=True,
-                                   editable=False)
+                                             editable=False)
 
     class Meta:
         ordering = ['product', 'protocol', 'host', 'path', 'query', 'fragment']
