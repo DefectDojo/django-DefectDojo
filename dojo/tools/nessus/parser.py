@@ -8,6 +8,18 @@ from dojo.models import Endpoint, Finding
 __author__ = 'jay7958'
 
 
+def get_text_severity(severity_id):
+    if severity_id == 4:
+        return 'Critical'
+    elif severity_id == 3:
+        return 'High'
+    elif severity_id == 2:
+        return 'Medium'
+    elif severity_id == 1:
+        return 'Low'
+    else:
+        return 'Info'
+
 class NessusCSVParser(object):
     def __init__(self, filename, test):
         content = open(filename.temporary_file_path(), "rb").read().replace("\r", "\n")
@@ -147,6 +159,11 @@ class NessusXMLParser(object):
                     port = None
                     if float(item.attrib["port"]) > 0:
                         port = item.attrib["port"]
+
+                    protocol = None
+                    if str(item.attrib["protocol"]):
+                        protocol = item.attrib["protocol"]
+
                     description = ""
                     plugin_output = None
                     if item.find("synopsis") is not None:
@@ -156,9 +173,8 @@ class NessusXMLParser(object):
                             (":" + port) if port is not None else "") + " " + item.find("plugin_output").text + "\n\n"
                         description += plugin_output
 
-                    severity = item.find("risk_factor").text
-                    if severity == "None":
-                        severity = "Info"
+                    nessus_severity_id = int(item.attrib["severity"])
+                    severity = get_text_severity(nessus_severity_id)
 
                     impact = item.find("description").text + "\n\n"
                     if item.find("cvss_vector") is not None:
@@ -202,9 +218,11 @@ class NessusXMLParser(object):
                                        cwe=cwe)
                         find.unsaved_endpoints = list()
                         dupes[dupe_key] = find
-                    find.unsaved_endpoints.append(Endpoint(host=ip + (":" + port if port is not None else "")))
 
+                    find.unsaved_endpoints.append(Endpoint(host=ip + (":" + port if port is not None else ""),
+                                                           protocol=protocol))
                     if fqdn is not None:
-                        find.unsaved_endpoints.append(Endpoint(host=fqdn))
+                        find.unsaved_endpoints.append(Endpoint(host=fqdn,
+                                                               protocol=protocol))
 
         self.items = dupes.values()
