@@ -5,6 +5,7 @@ from dojo.tools.nexpose.parser import NexposeFullXmlParser
 from dojo.tools.veracode.parser import VeracodeXMLParser
 from dojo.tools.zap.parser import ZapXmlParser
 from dojo.tools.checkmarx.parser import CheckmarxXMLParser
+from dojo.tools.contrast.parser import ContrastCSVParser
 from dojo.tools.bandit.parser import BanditParser
 from dojo.tools.appspider.parser import AppSpiderXMLParser
 from dojo.tools.arachni.parser import ArachniJSONParser
@@ -19,6 +20,8 @@ from dojo.tools.snyk.parser import SnykParser
 from dojo.tools.openvas_csv.parser import OpenVASUploadCsvParser
 from dojo.tools.skf.parser import SKFCsvParser
 from dojo.tools.ssllabs.parser import SSLlabsParser
+from dojo.tools.nikto.parser import NiktoXMLParser
+from dojo.tools.trufflehog.parser import TruffleHogJSONParser
 
 __author__ = 'Jay Paz'
 
@@ -37,12 +40,16 @@ def import_parser_factory(file, test):
             parser = NessusXMLParser(file, test)
     elif scan_type == "Nmap Scan":
         parser = NmapXMLParser(file, test)
+    elif scan_type == "Nikto Scan":
+        parser = NiktoXMLParser(file, test)
     elif scan_type == "Nexpose Scan":
         parser = NexposeFullXmlParser(file, test)
     elif scan_type == "Veracode Scan":
         parser = VeracodeXMLParser(file, test)
     elif scan_type == "Checkmarx Scan":
         parser = CheckmarxXMLParser(file, test)
+    elif scan_type == "Contrast Scan":
+        parser = ContrastCSVParser(file, test)
     elif scan_type == "Bandit Scan":
         parser = BanditParser(file, test)
     elif scan_type == "ZAP Scan":
@@ -73,6 +80,8 @@ def import_parser_factory(file, test):
         parser = SKFCsvParser(file, test)
     elif scan_type == 'SSL Labs Scan':
         parser = SSLlabsParser(file, test)
+    elif scan_type == 'Trufflehog Scan':
+        parser = TruffleHogJSONParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 

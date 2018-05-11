@@ -1,7 +1,5 @@
-import base64
 from itertools import izip, chain
-
-import re, random
+import random
 from django import template
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import stringfilter
@@ -10,9 +8,8 @@ from django.utils.safestring import mark_safe, SafeData
 from django.utils.text import normalize_newlines
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
-from django.conf import settings
 from dojo.utils import prepare_for_view, get_system_setting
-from dojo.models import Check_List, FindingImage, FindingImageAccessToken, Finding, System_Settings
+from dojo.models import Check_List, FindingImageAccessToken, Finding, System_Settings
 import markdown
 from django.utils import timezone
 from markdown.extensions import Extension
@@ -28,7 +25,9 @@ class EscapeHtml(Extension):
 
 @register.filter
 def markdown_render(value):
-    return mark_safe(markdown.markdown(value, extensions=[EscapeHtml(), 'markdown.extensions.codehilite', 'markdown.extensions.toc']))
+    if value:
+        return mark_safe(markdown.markdown(value, extensions=[EscapeHtml(), 'markdown.extensions.codehilite', 'markdown.extensions.toc']))
+
 
 
 @register.filter(name='ports_open')
@@ -114,17 +113,22 @@ def asvs_calc_level(benchmark_score):
     total_pass = 0
     total = 0
     if benchmark_score:
-        total = benchmark_score.asvs_level_1_benchmark + benchmark_score.asvs_level_2_benchmark + benchmark_score.asvs_level_3_benchmark
-        total_pass = benchmark_score.asvs_level_1_score+benchmark_score.asvs_level_2_score+benchmark_score.asvs_level_3_score
+        total = benchmark_score.asvs_level_1_benchmark + \
+            benchmark_score.asvs_level_2_benchmark + benchmark_score.asvs_level_3_benchmark
+        total_pass = benchmark_score.asvs_level_1_score + \
+            benchmark_score.asvs_level_2_score + benchmark_score.asvs_level_3_score
 
         if benchmark_score.desired_level == "Level 1":
             total = benchmark_score.asvs_level_1_benchmark
             total_pass = benchmark_score.asvs_level_1_score
         elif benchmark_score.desired_level == "Level 2":
-            total = benchmark_score.asvs_level_1_benchmark + benchmark_score.asvs_level_2_benchmark
-            total_pass = benchmark_score.asvs_level_1_score+benchmark_score.asvs_level_2_score
+            total = benchmark_score.asvs_level_1_benchmark + \
+                benchmark_score.asvs_level_2_benchmark
+            total_pass = benchmark_score.asvs_level_1_score + \
+                benchmark_score.asvs_level_2_score
         elif benchmark_score.desired_level == "Level 3":
-            total = benchmark_score.asvs_level_1_benchmark + benchmark_score.asvs_level_2_benchmark + benchmark_score.asvs_level_3_benchmark
+            total = benchmark_score.asvs_level_1_benchmark + \
+                benchmark_score.asvs_level_2_benchmark + benchmark_score.asvs_level_3_benchmark
 
         level = percentage(total_pass, total)
 
@@ -133,7 +137,8 @@ def asvs_calc_level(benchmark_score):
 
 @register.filter(name='asvs_level')
 def asvs_level(benchmark_score):
-    benchmark_score.desired_level, level, total_pass, total = asvs_calc_level(benchmark_score)
+    benchmark_score.desired_level, level, total_pass, total = asvs_calc_level(
+        benchmark_score)
     if level is None:
         level = ""
     else:
@@ -141,13 +146,15 @@ def asvs_level(benchmark_score):
 
     return "ASVS " + str(benchmark_score.desired_level) + " " + level + " Pass: " + str(total_pass) + " Total:  " + total
 
+
 @register.filter(name='version_num')
 def version_num(value):
     version = ""
     if value:
         version = "v." + value
 
-    return value
+    return version
+
 
 @register.filter(name='product_grade')
 def product_grade(product):
@@ -156,7 +163,6 @@ def product_grade(product):
     if system_settings.enable_product_grade:
         prod_numeric_grade = product.prod_numeric_grade
 
-        #print prod_numeric_grade
         if prod_numeric_grade is "" or prod_numeric_grade is None:
             from dojo.utils import calculate_grade
             calculate_grade(product)
@@ -174,18 +180,22 @@ def product_grade(product):
 
     return grade
 
+
 @register.filter
 def display_index(data, index):
     return data[index]
+
 
 @register.filter
 def finding_status(finding, duplicate):
     return finding.filter(duplicate=duplicate)
 
+
 @register.simple_tag
 def random_html():
-    r = lambda: random.randint(0,255)
-    return ('#%02X%02X%02X' % (r(),r(),r()))
+    def r(): return random.randint(0, 255)
+    return ('#%02X%02X%02X' % (r(), r(), r()))
+
 
 @register.filter(is_safe=True, needs_autoescape=False)
 @stringfilter
@@ -194,7 +204,8 @@ def action_log_entry(value, autoescape=None):
     history = json.loads(value)
     text = ''
     for k in history.iterkeys():
-        text += k.capitalize() + ' changed from "' + history[k][0] + '" to "' + history[k][1] + '"'
+        text += k.capitalize() + ' changed from "' + \
+            history[k][0] + '" to "' + history[k][1] + '"'
 
     return text
 
@@ -245,14 +256,16 @@ def colgroup(parser, token):
         def render(self, context):
             iterable = template.Variable(self.iterable).resolve(context)
             num_cols = self.num_cols
-            context[self.varname] = izip(*[chain(iterable, [None] * (num_cols - 1))] * num_cols)
+            context[self.varname] = izip(
+                *[chain(iterable, [None] * (num_cols - 1))] * num_cols)
             return u''
 
     try:
         _, iterable, _, num_cols, _, _, varname = token.split_contents()
         num_cols = int(num_cols)
     except ValueError:
-        raise template.TemplateSyntaxError("Invalid arguments passed to %r." % token.contents.split()[0])
+        raise template.TemplateSyntaxError(
+            "Invalid arguments passed to %r." % token.contents.split()[0])
     return Node(iterable, num_cols, varname)
 
 
@@ -275,6 +288,7 @@ def severity_value(value):
 
     return value
 
+
 @register.filter
 def tracked_object_value(current_object):
     value = ""
@@ -287,6 +301,7 @@ def tracked_object_value(current_object):
         value = current_object.artifact
 
     return value
+
 
 @register.filter
 def tracked_object_type(current_object):
