@@ -59,6 +59,8 @@ setup(
         'pbr',
 	    'django-slack',
         'asteval',
+        'Markdown>=2.6.11',
+        'pandas>=0.22.0',
     ],
 
     dependency_links=[

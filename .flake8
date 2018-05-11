@@ -1,0 +1,17 @@
+[flake8]
+# Documentation for flake8 http://flake8.pycqa.org/en/3.1.1/user/index.html
+ignore =
+    # Suppress - line too long (> 79 characters)
+    E501,
+    # Suppress - Continuation line missing indentation or outdented
+    E127
+    # Suppress - Function is too complex
+    C901
+exclude =
+    # No need to traverse our git directory
+    .git,
+    # There's no value in checking cache directories
+    __pycache__,
+    # This contains of branch that we don't want to check
+    # dev
+max-complexity = 10

@@ -8,20 +8,19 @@
         {% if include_executive_summary %}
             <div class="row pretty-graphs">
                 <div class="col-lg-12">
-                    <h3 id="executive">Executive Summary</h3>
-                    <p>
-                        This report represents a security audit performed by the {{ team_name }} team.
-                        It contains confidential information about the state of your network and applications.
-                        Access to this information by unauthorized personnel may allow them to compromise your network.
-                    </p>
+                    <h3 id="executive">Executive Summary for {{ product.name }}</h3>
+                    <h4>Assessment Details</h4>
+                    <strong>Date Generated:</strong> {% display_date %}</br>
+                    <strong>Assessed by:</strong> {% if product.engagement_set.all.0.lead.first_name|length > 0 %} {{ product.engagement_set.all.0.lead.first_name }} {{ product.engagement_set.all.0.lead.last_name }} {%else%} product.engagement_set.all.0.lead {% endif %}</br>
+                    <strong>Scope:</strong> {{ product.name }}</br>
                 </div>
                 <div class="col-lg-12">
                     {% if product %}
                         {% if product.engagement_set.all %}
+                            <h4>Engagement Details</h4>
                             {% for eng in product.engagement_set.all %}
-                                {% if eng in engagements %}
                                     <p>
-                                        {% if eng.name  and eng.name|length > 0 %}
+                                        {% if eng.name and eng.name|length > 0 %}
                                             The {{ eng.name }}
                                         {% else %}
                                             An
@@ -35,15 +34,13 @@
                                     </p>
                                     {% if eng.test_set %}
                                         <p>
-                                            The engagement also included the following tests which may be reported here:
+                                            The engagement included the following tests:
                                         </p>
                                         <ul>
                                             {% for t in eng.test_set.all %}
-                                                {% if t in tests %}
-                                                    <li>{{ t.test_type.name }}
-                                                        ({{ t.environment.name|default:"unknown" }}): {{ t.target_start|date:"SHORT_DATE_FORMAT" }}</li>
-                                                {% endif %}
-                                            {% endfor %}
+                                                  <li>{{ t.test_type.name }}
+                                                      ({{ t.environment.name|default:"unknown" }}): {{ t.target_start|date:"SHORT_DATE_FORMAT" }}</li>
+                                          {% endfor %}
                                         </ul>
                                     {% endif %}
                                     {% if eng.test_strategy %}
@@ -52,7 +49,6 @@
                                             <a href="{{ eng.test_strategy }}">{{ eng.test_strategy }}</a><br/><br/>
                                         </p>
                                     {% endif %}
-                                {% endif %}
                             {% endfor %}
                         {% else %}
                             <p>No engagements found for {{ product.name }}</p>
@@ -88,7 +84,13 @@
                         </div>
                     </div>
                 </div>
-
+                <div class="col-lg-12">
+                <p>
+                    This report represents a security audit performed by the {{ team_name }} team.
+                    It contains confidential information about the state of your network and applications.
+                    Access to this information by unauthorized personnel may allow them to compromise your network.
+                </p>
+              </div>
             </div>
         {% endif %}
         <div class="row">
@@ -145,7 +147,8 @@
                         <div class="panel-heading finding-title">
                             <div class="clearfix">
                                 <h5>
-                                    Finding {{ finding.id }}: {{ finding.title }}
+                                    Finding {{ forloop.counter }}: {{ finding.title }}
+
                                 </h5>
                             </div>
                         </div>
@@ -167,6 +170,7 @@
                                     {% if finding.cwe > 0 %}
                                         <th>CWE</th>
                                     {% endif %}
+                                    <th>Dojo ID</th>
                                 </tr>
                                 <tr>
                                     <td>
@@ -200,7 +204,7 @@
                                             </a>
                                         </td>
                                     {% endif %}
-
+                                    <td>{{ finding.id }}</td>
                                 </tr>
                             </table>
                         </div>
@@ -209,7 +213,11 @@
                         <div class="col-md-12">
                             <div class="panel panel-info endpoints table-responsive">
                                 <div class="panel-heading">
+                                    {% if finding.file_path %}
+                                    <h6> Location </h6>
+                                    {%  else %}
                                     <h6>Vulnerable Endpoints / Systems</h6>
+                                    {% endif %}
                                 </div>
 
                                 {% if  finding.endpoints.all %}
@@ -225,6 +233,21 @@
                                             </tr>
                                         {% endfor %}
                                     </table>
+                                {% elif finding.file_path %}
+                                    <table class="table-striped table table table-condensed table-hover finding-endpoints">
+                        <tr>
+                            <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
+                                File Path
+                            </th>
+                            <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
+                                Line Number
+                            </th>
+                        </tr>
+                                <tr>
+                                    <td style="padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.file_path }}</td>
+                                    <td style=" text-align:center; padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.line }}</td>
+                                </tr>
+                                </table>
                                 {% else %}
                                     <div id="vuln_endpoints" class="panel-body endpoint-panel table-responsive">
                                         No endpoints.
@@ -237,30 +260,34 @@
                     </div>
 
                     <h6>Description</h6>
-                    <pre>{{ finding.description }}</pre>
+                    <pre>{{ finding.description|markdown_render }}</pre>
 
                     <h6>Mitigation</h6>
-                    <pre>{{ finding.mitigation }}</pre>
-                    {% if finding.get_request %}
-                        <h6>Request</h6>
-                        <pre>{{ finding.get_request }}</pre>
-                    {% endif %}
-                    {% if finding.get_response %}
-                        <h6>Response</h6>
-                        <pre>{{ finding.get_response|truncatechars:800 }}</pre>
-                    {% endif %}
+                    <pre>{{ finding.mitigation|markdown_render }}</pre>
+                    {% if finding.get_report_requests %}
+                        <h5>Sample Request(s): Displaying {{finding.get_report_requests.count}} of {{finding.burprawrequestresponse_set.count}}</h5>
+                        {% for req in finding.get_report_requests %}
+                           <h6>Request {{forloop.counter}} </h6>
+                           <pre class="raw_request">{{ req.get_request }}</pre>
+                        {% if req.get_response != "" %}
+                           <h6>Response {{forloop.counter}}</h6>
+                           <pre class="raw_request">{{ req.get_response|truncatechars:800 }}</pre>
+                        {% endif %}
+                        {% endfor %}
+                        {% endif %}
+
                     <h6>Impact</h6>
                     <pre>{{ finding.impact }}</pre>
+                    {% if finding.references %}
                     <h6>References</h6>
-                    <pre>{{ finding.references }}</pre>
+                    <pre>{{ finding.references|markdown_render }}</pre>
+                    {% endif %}
                     {% if include_finding_images %}
-                        <h6>Images</h6>
                         {% if finding.images.all.count > 0 %}
+                        <h6>Images</h6>
                             {% for pic in finding.images.all %}
                                 <p><img src="{{ host }}{% pic_token pic 'original' %}" style="max-width: 85%"></p>
                             {% endfor %}
-                        {% else %}
-                            <p class="text-center">No images found.</p>
                         {% endif %}
                     {% endif %}
                     {% if include_finding_notes %}
@@ -581,13 +608,12 @@
 
             });
         }
-        ;
 
         function finding_age() {
             var data = {};
             var data_1 = []
             var ticks = []
-            {% for f in verified_findings %}
+            {% for f in findings %}
                 if (data[{{ f.age }}]) {
                     data[{{ f.age }}] += 1
                 }
@@ -648,5 +674,5 @@
 
             $.plot("#finding_age", dataset, options);
         }
-    </script>
+  </script>
 {% endblock %}

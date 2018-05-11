@@ -8,7 +8,6 @@ from __future__ import with_statement
 
 import re
 from defusedxml import ElementTree as ET
-
 import html2text
 
 from dojo.models import Finding, Endpoint
@@ -73,6 +72,7 @@ class BurpXmlParser(object):
             item = get_item(node, test)
             dupe_key = str(item.url) + item.severity + item.title
             if dupe_key in items:
+                item
                 items[dupe_key].unsaved_endpoints = items[dupe_key].unsaved_endpoints + item.unsaved_endpoints
                 items[dupe_key].unsaved_req_resp = items[dupe_key].unsaved_req_resp + item.unsaved_req_resp
 
@@ -86,6 +86,10 @@ class BurpXmlParser(object):
                     unique_objs.append(o.__unicode__())
 
                 items[dupe_key].unsaved_endpoints = new_list
+                print new_list
+
+                # Description details of the finding are added
+                items[dupe_key].description = item.description + items[dupe_key].description
             else:
                 items[dupe_key] = item
 
@@ -136,10 +140,11 @@ def do_clean(value):
 def get_item(item_node, test):
     host_node = item_node.findall('host')[0]
 
-    url = host_node.text
+    url_host = host_node.text
+
     rhost = re.search(
             "(http|https|ftp)\://([a-zA-Z0-9\.\-]+(\:[a-zA-Z0-9\.&amp;%\$\-]+)*@)*((25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])|localhost|([a-zA-Z0-9\-]+\.)*[a-zA-Z0-9\-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))[\:]*([0-9]+)*([/]*($|[a-zA-Z0-9\.\,\?\'\\\+&amp;%\$#\=~_\-]+)).*?$",
-            url)
+            url_host)
     protocol = rhost.group(1)
     host = rhost.group(4)
 
@@ -201,21 +206,24 @@ def get_item(item_node, test):
         else:
             endpoints = [endpoint, dupe_endpoint]
 
+    text_maker = html2text.HTML2Text()
+    text_maker.body_width = 0
+
     background = do_clean(item_node.findall('issueBackground'))
     if background:
-        background = html2text.html2text(background)
+        background = text_maker.handle(background)
 
     detail = do_clean(item_node.findall('issueDetail'))
     if detail:
-        detail = html2text.html2text(detail)
+        detail = text_maker.handle(detail)
 
     remediation = do_clean(item_node.findall('remediationBackground'))
     if remediation:
-        remediation = html2text.html2text(remediation)
+        remediation = text_maker.handle(remediation)
 
     references = do_clean(item_node.findall('references'))
     if references:
-        references = html2text.html2text(references)
+        references = text_maker.handle(references)
 
     severity = item_node.findall('severity')[0].text
 
@@ -224,7 +232,7 @@ def get_item(item_node, test):
                       url=url,
                       test=test,
                       severity=severity,
-                      description=background + "\n\n" + detail,
+                      description="URL: " + url_host + path + "\n\n" + detail + "\n",
                       mitigation=remediation,
                       references=references,
                       active=False,
@@ -233,7 +241,8 @@ def get_item(item_node, test):
                       duplicate=False,
                       out_of_scope=False,
                       mitigated=None,
-                      impact="No impact provided",
+                      dynamic_finding=True,
+                      impact=background,
                       numerical_severity=Finding.get_numerical_severity(severity))
     finding.unsaved_endpoints = endpoints
     finding.unsaved_req_resp = unsaved_req_resp

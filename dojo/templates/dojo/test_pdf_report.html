@@ -234,7 +234,11 @@
                         <div class="col-md-12">
                             <div class="panel panel-info endpoints table-responsive">
                                 <div class="panel-heading">
+                                    {% if finding.file_path %}
+                                    <h6> Location </h6>
+                                    {%  else %}
                                     <h6>Vulnerable Endpoints / Systems</h6>
+                                    {% endif %}
                                 </div>
 
                                 {% if  finding.endpoints.all %}
@@ -250,6 +254,21 @@
                                             </tr>
                                         {% endfor %}
                                     </table>
+                                {% elif finding.file_path %}
+                                    <table class="table-striped table table table-condensed table-hover finding-endpoints">
+                        <tr>
+                            <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
+                                File Path
+                            </th>
+                            <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
+                                Line Number
+                            </th>
+                        </tr>
+                                <tr>
+                                    <td style="padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.file_path }}</td>
+                                    <td style=" text-align:center; padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.line }}</td>
+                                </tr>
+                                </table>
                                 {% else %}
                                     <div id="vuln_endpoints" class="panel-body endpoint-panel table-responsive">
                                         No endpoints.
@@ -266,14 +285,18 @@
 
                     <h6>Mitigation</h6>
                     <pre>{{ finding.mitigation }}</pre>
-                    {% if finding.get_request %}
-                        <h6>Request</h6>
-                        <pre>{{ finding.get_request }}</pre>
-                    {% endif %}
-                    {% if finding.get_response %}
-                        <h6>Response</h6>
-                        <pre>{{ finding.get_response|truncatechars:800 }}</pre>
-                    {% endif %}
+                 {% if finding.get_report_requests %}
+                        <h5>Sample Request(s): Displaying {{finding.get_report_requests.count}} of {{finding.burprawrequestresponse_set.count}}</h5>
+                        {% for req in finding.get_report_requests %}
+                           <h6>Request {{forloop.counter}} </h6>
+                           <pre>{{ req.get_request }}</pre>
+                        {% if req.get_response %}
+                           <h6>Response {{forloop.counter}}</h6>
+                           <pre>{{ req.get_response|truncatechars:800 }}</pre>
+                        {% endif %}
+                        {% endfor %}
+                        {% endif %}
+
                     <h6>Impact</h6>
                     <pre>{{ finding.impact }}</pre>
                     <h6>References</h6>

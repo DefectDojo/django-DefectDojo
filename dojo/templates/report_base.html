@@ -28,6 +28,10 @@
     <style type="text/css">
         @import url(https://fonts.googleapis.com/css?family=Roboto+Slab:400,700);
 
+        .label {
+          border-color: #DEE1E6;
+          color: #ffffff !important;
+        }
         .container {
             margin: 0 auto;
             max-width: 960px;
@@ -42,27 +46,27 @@
         }
 
         .panel-default {
-            border-color: #A1C0D7;
+            border-color: #A1C0D7 !important;
         }
 
         .panel-default > .panel-heading {
-            color: #333;
-            background-color: #EBF4FB;
-            border-color: #A1C0D7;
+            color: #333 !important;
+            background-color: #EBF4FB !important;
+            border-color: #A1C0D7 !important;
         }
 
         .panel-info {
-            border-color: #DEE1E6;
+            border-color: #DEE1E6 !important;
         }
 
         .panel-info > .panel-heading {
-            color: #333;
-            background-color: #DEE1E6;
-            border-color: #DEE1E6;
+            color: #333 !important;
+            background-color: #DEE1E6 !important;
+            border-color: #DEE1E6 !important;
         }
 
         .panel-body {
-            border-radius: inherit;
+            border-radius: inherit !important;
         }
 
         .severity {
@@ -74,23 +78,23 @@
         }
 
         .severity-Info {
-            background-color: #888888;
+            background-color: #888888 !important;
         }
 
         .severity-Low {
-            background-color: #337ab7;
+            background-color: #337ab7 !important;
         }
 
         .severity-Medium {
-            background-color: #FBE413;
+            background-color: #FBE413 !important;
         }
 
         .severity-High {
-            background-color: #f09835;
+            background-color: #f09835 !important;
         }
 
         .severity-Critical {
-            background-color: #d9534f;
+            background-color: #d9534f !important;
         }
 
         .panel-heading {
@@ -142,6 +146,7 @@
             white-space: pre-wrap !important;
             padding: 0 !important;
             overflow: visible !important;
+            word-break: normal !important;
         }
 
         ul{
@@ -164,6 +169,10 @@
 
         .flot-tick-label.tickLabel {
             font-size: 11px;
+        }
+
+        .raw_request {
+            font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace !important;
         }
 
         .panel-warning .panel-heading h4{
