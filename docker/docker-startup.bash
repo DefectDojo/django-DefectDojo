@@ -44,7 +44,7 @@ else
 
     SECRET=`cat /dev/urandom | tr -dc "a-zA-Z0-9" | head -c 128`
 
-    cp dojo/settings/settings.dist.py dojo/settings/settings.py
+    cp dojo/settings/settings_dist.py dojo/settings/settings.py
 
     # Save MySQL details in settings file
     sed -i "s/MYSQLUSER/$SQLUSER/g" dojo/settings/settings.py

@@ -91,8 +91,6 @@ function setupdb() {
     echo "Setting up dojodb"
     echo "=============================================================================="
     echo
-    python manage.py makemigrations dojo
-    python manage.py makemigrations --merge --noinput
     python manage.py migrate
     python manage.py syncdb --noinput
     python manage.py loaddata product_type
@@ -398,7 +396,7 @@ function prepare_settings_file() {
     TARGET_SETTINGS_FILE=dojo/settings/settings.py
 
     # Save MySQL details in settings file
-    cp dojo/settings/settings.dist.py ${TARGET_SETTINGS_FILE}
+    cp dojo/settings/settings_dist.py ${TARGET_SETTINGS_FILE}
 
     # Test whether we're running on a "brew"-system, like Mac OS X; then use
     # BSD-style sed;
@@ -462,8 +460,6 @@ function install_app(){
         sudo -H pip install -U pip
         sudo -H pip install .
     fi
-    python manage.py makemigrations dojo
-    python manage.py makemigrations --merge --noinput
     python manage.py migrate
 
     if [ "$VENV_ACTIVE" == "0" ]; then

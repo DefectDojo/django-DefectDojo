@@ -127,12 +127,6 @@ changed: [192.168.56.101]
 TASK [Pip install the required modules in the Defect Dojo virtual env] *********
 changed: [192.168.56.101]
 
-TASK [Django makemigrations dojo] **********************************************
-ok: [192.168.56.101]
-
-TASK [Django makemigrations] ***************************************************
-ok: [192.168.56.101]
-
 TASK [Django migrate] **********************************************************
 ok: [192.168.56.101]
 

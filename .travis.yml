@@ -1,8 +1,10 @@
 sudo: required
 language: python
-install: true
+python:
+  - "2.7"
 
 env:
+  - TEST=migration-test
   - TEST=smoke-test
   - TEST=integration-test
   - TEST=unit-test
@@ -22,6 +24,10 @@ matrix:
 services:
   - docker
 
+# Enable running some tests in the travis env directly
+install:
+  - pip install -r requirements.txt
+
 before_script:
   - export -f travis_fold
   - export REPO=appsecpipeline/django-defectdojo
@@ -31,6 +37,14 @@ script:
   - |
     echo "Running test=$TEST"
     case "$TEST" in
+      migration-test)
+        travis_fold start "migration-test"
+        # If there are model changes that are not reflected in migrations yet, this will fail.
+        # If it fails, try running the same command without the '--check' argument and give the
+        # newly created migration file(s) a meaningful name.
+        DJANGO_SETTINGS_MODULE=dojo.settings.unittest python manage.py makemigrations --check dojo || exit 1
+        travis_fold end "migration-test"
+        ;;
       smoke-test)
         travis_fold start "smoke-test"
         bash entrypoint_scripts/test/travis-smoke-test.sh || exit 1
@@ -100,6 +114,7 @@ notifications:
     on_success: never
     on_failure: never
     on_start: never
+
 addons:
   firefox: "45.0"
   chrome: stable
