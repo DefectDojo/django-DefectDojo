@@ -1214,9 +1214,10 @@ def calculate_grade(product):
             aeval = Interpreter()
             aeval(system_settings.product_grade)
             grade_product = "grade_product(%s, %s, %s, %s)" % (critical, high, medium, low)
-            #prod = Product.objects.get(id=finding.test.engagement.product.id)
+            # prod = Product.objects.get(id=finding.test.engagement.product.id)
             product.prod_numeric_grade = aeval(grade_product)
             product.save()
+
 
 def get_celery_worker_status():
     ERROR_KEY = "ERROR"
@@ -1225,13 +1226,13 @@ def get_celery_worker_status():
         insp = inspect()
         d = insp.stats()
         if not d:
-            d = { ERROR_KEY: 'No running Celery workers were found.' }
+            d = {ERROR_KEY: 'No running Celery workers were found.'}
     except IOError as e:
         from errno import errorcode
         msg = "Error connecting to the backend: " + str(e)
         if len(e.args) > 0 and errorcode.get(e.args[0]) == 'ECONNREFUSED':
             msg += ' Check that the RabbitMQ server is running.'
-        d = { ERROR_KEY: msg }
+        d = {ERROR_KEY: msg}
     except ImportError as e:
-        d = { ERROR_KEY: str(e)}
+        d = {ERROR_KEY: str(e)}
     return d

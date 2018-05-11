@@ -56,7 +56,7 @@ class CheckmarxXMLParser(object):
 
                 findingdetail += 'Finding Link: ' +  deeplink + '\n\n'
 
-                dupe_key = categories + cwe + name + result.get('FileName') #+ result.get('Line')
+                dupe_key = categories + cwe + name + result.get('FileName')   # + result.get('Line')
 
                 if dupe_key in dupes:
                     find = dupes[dupe_key]
@@ -96,7 +96,7 @@ class CheckmarxXMLParser(object):
         title = ""
 
         for path in result.findall('Path'):
-            title = query.get('name').replace('_', ' ') #+ ' (' + path.get('PathId') + ')'
+            title = query.get('name').replace('_', ' ')  # + ' (' + path.get('PathId') + ')'
             for pathnode in path.findall('PathNode'):
                 findingdetail += 'Source Object: %s\n' % (pathnode.find('Name').text)
 

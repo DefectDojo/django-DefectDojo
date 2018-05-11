@@ -8,7 +8,6 @@ from __future__ import with_statement
 
 import re
 from defusedxml import ElementTree as ET
-from django.utils.html import strip_tags
 import html2text
 
 from dojo.models import Finding, Endpoint
@@ -89,7 +88,7 @@ class BurpXmlParser(object):
                 items[dupe_key].unsaved_endpoints = new_list
                 print new_list
 
-                #Description details of the finding are added
+                # Description details of the finding are added
                 items[dupe_key].description = item.description + items[dupe_key].description
             else:
                 items[dupe_key] = item
@@ -222,8 +221,7 @@ def get_item(item_node, test):
     if remediation:
         remediation = text_maker.handle(remediation)
 
-    references = do_clean(
-    item_node.findall('references'))
+    references = do_clean(item_node.findall('references'))
     if references:
         references = text_maker.handle(references)
 
