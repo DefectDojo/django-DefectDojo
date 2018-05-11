@@ -226,5 +226,3 @@ class NessusXMLParser(object):
                                                                protocol=protocol))
 
         self.items = dupes.values()
-
-
