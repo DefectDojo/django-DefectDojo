@@ -597,11 +597,9 @@ class AddFindingForm(forms.ModelForm):
                            widget=forms.TextInput(attrs={'class':
                                                              'datepicker'}))
     cwe = forms.IntegerField(required=False)
-    severity_options = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
-                        ('High', 'High'), ('Critical', 'Critical'))
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
-        choices=severity_options,
+        choices=SEVERITY_CHOICES,
         error_messages={
             'required': 'Select valid choice: In Progress, On Hold, Completed',
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
@@ -638,11 +636,9 @@ class AdHocFindingForm(forms.ModelForm):
                            widget=forms.TextInput(attrs={'class':
                                                              'datepicker'}))
     cwe = forms.IntegerField(required=False)
-    severity_options = (('Low', 'Low'), ('Medium', 'Medium'),
-                        ('High', 'High'), ('Critical', 'Critical'))
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
-        choices=severity_options,
+        choices=SEVERITY_CHOICES,
         error_messages={
             'required': 'Select valid choice: In Progress, On Hold, Completed',
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
@@ -679,11 +675,9 @@ class PromoteFindingForm(forms.ModelForm):
                            widget=forms.TextInput(attrs={'class':
                                                              'datepicker'}))
     cwe = forms.IntegerField(required=False)
-    severity_options = (('Low', 'Low'), ('Medium', 'Medium'),
-                        ('High', 'High'), ('Critical', 'Critical'))
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
-        choices=severity_options,
+        choices=SEVERITY_CHOICES,
         error_messages={
             'required': 'Select valid choice: In Progress, On Hold, Completed',
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
@@ -706,11 +700,9 @@ class FindingForm(forms.ModelForm):
                            widget=forms.TextInput(attrs={'class':
                                                              'datepicker'}))
     cwe = forms.IntegerField(required=False)
-    severity_options = (('Low', 'Low'), ('Medium', 'Medium'),
-                        ('High', 'High'), ('Critical', 'Critical'))
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
-        choices=severity_options,
+        choices=SEVERITY_CHOICES,
         error_messages={
             'required': 'Select valid choice: In Progress, On Hold, Completed',
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
@@ -777,8 +769,7 @@ class ApplyFindingTemplateForm(forms.Form):
 
     severity = forms.ChoiceField(
             required=False,
-            choices=(('Low', 'Low'), ('Medium', 'Medium'),
-                     ('High', 'High'), ('Critical', 'Critical')),
+            choices=SEVERITY_CHOICES,
             error_messages={
                 'required': 'Select valid choice: In Progress, On Hold, Completed',
                 'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
@@ -813,11 +804,9 @@ class FindingTemplateForm(forms.ModelForm):
                            help_text="Add tags that help describe this finding template.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
     cwe = forms.IntegerField(label="CWE", required=False)
-    severity_options = (('Low', 'Low'), ('Medium', 'Medium'),
-                        ('High', 'High'), ('Critical', 'Critical'))
     severity = forms.ChoiceField(
         required=False,
-        choices=severity_options,
+        choices=SEVERITY_CHOICES,
         error_messages={
             'required': 'Select valid choice: In Progress, On Hold, Completed',
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})

@@ -173,14 +173,18 @@
                     <pre>{{ finding.description }}</pre>
                     <h6>Mitigation</h6>
                     <pre>{{ finding.mitigation }}</pre>
-                    {% if finding.get_request %}
-                        <h6>Request</h6>
-                        <pre>{{ finding.get_request }}</pre>
-                    {% endif %}
-                    {% if finding.get_response %}
-                        <h6>Response</h6>
-                        <pre>{{ finding.get_response|truncatechars:800 }}</pre>
-                    {% endif %}
+                 {% if finding.get_report_requests %}
+                        <h5>Sample Request(s): Displaying {{finding.get_report_requests.count}} of {{finding.burprawrequestresponse_set.count}}</h5>
+                        {% for req in finding.get_report_requests %}
+                           <h6>Request {{forloop.counter}} </h6>
+                           <pre>{{ req.get_request }}</pre>
+                        {% if req.get_response %}
+                           <h6>Response {{forloop.counter}}</h6>
+                           <pre>{{ req.get_response|truncatechars:800 }}</pre>
+                        {% endif %}
+                        {% endfor %}
+                        {% endif %}
+
                     <h6>Impact</h6>
                     <pre>{{ finding.impact }}</pre>
                     <h6>References</h6>
