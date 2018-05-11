@@ -1,7 +1,0 @@
----
-
-- name: Restart postgresql
-  service: name=postgresql state=restarted enabled=yes
-
-- name: Restart mysql
-  service: name=mysql state=restarted enabled=yes

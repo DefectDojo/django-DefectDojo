@@ -1,5 +1,0 @@
-[webservers]
-webserver1.example.com ansible_ssh_host=webserver1.example.com ansible_ssh_port=22 ansible_ssh_user='ubuntu' ansible_ssh_private_key_file='~/amazon-ec2.pem' nginx_use_letsencrypt=true
-
-[dbservers]
-db.example.com ansible_ssh_host=db.example.com ansible_ssh_port=22 ansible_ssh_user='ubuntu' ansible_ssh_private_key_file='~/amazon-ec2.pem'

@@ -1,9 +1,0 @@
----
-
-- name: Install fail2ban
-  apt: update_cache={{ update_apt_cache }} state=installed pkg=fail2ban
-
-- name: Set up fail2ban
-  command: cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
-           creates=/etc/fail2ban/jail.local
-  notify: restart fail2ban
