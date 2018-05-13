@@ -3,9 +3,13 @@
 {% load static from staticfiles %}
 {% block add_css %}
     <link rel="stylesheet" href="{% static "chosen-bootstrap/chosen.bootstrap.min.css" %}">
+    <link rel="stylesheet" href="{% static "simplemde/dist/simplemde.min.css" %}">
 {% endblock %}
 {% block add_styles %}
     .chosen-container {
+    width: 70% !important;
+    }
+    .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
     width: 70% !important;
     }
 {% endblock %}
@@ -28,6 +32,7 @@
     <script type="application/javascript">
         $('#add_id_endpoints').attr('href', '/endpoints/{{ finding.test.engagement.product.id }}/add?_popup');
     </script>
+    <script type="application/javascript" src="{% static "simplemde/dist/simplemde.min.js" %}"></script>
     <script type="application/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>
     <script type="application/javascript" src="{% static "chosen/chosen.jquery.min.js" %}"></script>
     <script type="application/javascript">
@@ -46,6 +51,15 @@
                     $('#id_tags').focus();
                     return false;
                 }
+            });
+
+            $("textarea").each(function (index, elem) {
+                var mde = new SimpleMDE({
+                    element: elem,
+                    autofocus: false,
+                    hideIcons: ["side-by-side", "fullscreen"]
+                });
+                mde.render();
             });
         });
     </script>
