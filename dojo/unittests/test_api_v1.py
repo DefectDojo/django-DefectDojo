@@ -27,7 +27,8 @@ class ApiBasicOperationsTest(ResourceTestCaseMixin, TestCase):
     def prepare_a_product(self):
         name = "Product %s" % str(random.randint(0, 999))
         description = "A precise product description"
-        return Product.objects.create(name=name, description=description, prod_type=self.prod_type)
+        return Product.objects.create(name=name, description=description,
+                                      prod_type=self.prod_type)
 
     def test_unauthenticated_request(self):
         """
