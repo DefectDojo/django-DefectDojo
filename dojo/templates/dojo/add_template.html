@@ -2,11 +2,15 @@
 {% load static from staticfiles %}
 {% block add_css %}
     <link rel="stylesheet" href="{% static "chosen-bootstrap/chosen.bootstrap.min.css" %}">
+    <link rel="stylesheet" href="{% static "simplemde/dist/simplemde.min.css" %}">
 {% endblock %}
 {% block add_styles %}
-.chosen-container {
+    .chosen-container {
     width: 70% !important;
-}
+    }
+    .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
+    width: 70% !important;
+    }
 {% endblock %}
 {% block content %}
     <h3> {{ name }} {{ template }}</h3>
@@ -16,7 +20,6 @@
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
                 <input class="btn btn-primary" type="submit" name="add_template" value="Save Template"/>
-                &nbsp;&nbsp;
             </div>
         </div>
     </form>
@@ -25,7 +28,6 @@
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
                     <input class="btn btn-danger" type="submit" name="delete_template" value="Delete Template"/>
-                    &nbsp;&nbsp;
                     <input type="hidden" name="id" value="{{ template.id }}"/>
                 </div>
             </div>
@@ -34,6 +36,7 @@
 {% endblock %}
 {% block postscript %}
     <script type="application/javascript" src="{% static "chosen/chosen.jquery.min.js" %}"></script>
+    <script type="application/javascript" src="{% static "simplemde/dist/simplemde.min.js" %}"></script>
     <script type="application/javascript">
         $(function () {
             $('#id_tags').chosen({
@@ -50,6 +53,15 @@
                     $('#id_tags').focus();
                     return false;
                 }
+            });
+
+            $("textarea").each(function (index, elem) {
+                var mde = new SimpleMDE({
+                    element: elem,
+                    autofocus: false,
+                    hideIcons: ["side-by-side", "fullscreen"]
+                });
+                mde.render();
             });
         });
     </script>
