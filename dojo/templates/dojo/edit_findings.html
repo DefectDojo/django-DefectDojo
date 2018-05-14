@@ -17,7 +17,7 @@
     <h3> Edit a Finding</h3>
     {% if temp %}
 
-        <form class="form-horizontal" action="{% url 'edit_finding' finding.id %}" method="post">
+        <form id="add_finding" class="form-horizontal" action="{% url 'edit_finding' finding.id %}" method="post">
             {% csrf_token %}
             {% include "dojo/form_fields.html" with form=form %}
             {% if jform %}
@@ -33,7 +33,7 @@
             </div>
         </form>
     {% else %}
-        <form class="form-horizontal" action="{% url 'edit_finding' finding.id %}" method="post">
+        <form id="add_finding" class="form-horizontal" action="{% url 'edit_finding' finding.id %}" method="post">
             {% csrf_token %}
             {% include "dojo/form_fields.html" with form=form %}
             {% if jform %}
@@ -76,13 +76,38 @@
             });
 
             $("textarea").each(function (index, elem) {
+
+                if (elem.hasAttribute("required")) {
+                    elem.removeAttribute("required");
+                    elem.id = "req"
+                }
+
                 var mde = new SimpleMDE({
                     element: elem,
                     autofocus: false,
+                    forceSync: true,
                     hideIcons: ["side-by-side", "fullscreen"]
                 });
                 mde.render();
             });
+        });
+
+        $("#add_finding").submit(function () {
+            var isFormValid = true;
+
+            $("textarea#req").each(function () {
+                if ($.trim($(this).val()).length == 0) {
+                    $(this).addClass("highlight");
+                    isFormValid = false;
+                }
+                else {
+                    $(this).removeClass("highlight");
+                }
+            });
+
+            if (!isFormValid) alert("Please fill in all the required fields (indicated by *)");
+
+            return isFormValid;
         });
     </script>
 
