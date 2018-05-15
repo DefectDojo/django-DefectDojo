@@ -18,8 +18,8 @@ from django.views.decorators.csrf import csrf_exempt
 from dojo.filters import ProductFilter, ProductFindingFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm
 from dojo.models import System_Settings
-from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, handle_uploaded_selenium, \
-    get_system_setting, get_celery_worker_status
+from dojo.utils import (add_breadcrumb,
+                        get_celery_worker_status)
 from dojo.forms import SystemSettingsForm
 
 logger = logging.getLogger(__name__)
@@ -35,12 +35,12 @@ def system_settings(request):
     celery_bool = True
     celery_stat = celery_status.keys()[0]
     celery_msg = celery_status.values()[0]
-    jira_msg = 'None'
     if celery_status.keys()[0] == 'ERROR':
         celery_bool = False
     """
     **** To be Finished JIRA Status info ****
     jira_bool = True
+    jira_msg = 'None'
     if not celery_bool:
         jira_bool = False
         jira_msg = 'Celery is not working properly'

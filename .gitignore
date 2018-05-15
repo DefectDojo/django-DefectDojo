@@ -68,7 +68,7 @@ dojo/scans/scan*
 dojo/uploads/threat/*
 .idea
 *.sqlite
-dojo.celery.beat.db
+*.db
 celerybeat.pid
 
 weekly.txt

@@ -1,16 +1,11 @@
 import base64
+import hashlib
 import logging
 import os
 import re
 from datetime import datetime
 from uuid import uuid4
-
 from django.conf import settings
-
-fmt = getattr(settings, 'LOG_FORMAT', None)
-lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
-
-logging.basicConfig(format=fmt, level=lvl)
 
 from watson import search as watson
 from auditlog.registry import auditlog
@@ -19,7 +14,7 @@ from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.core.validators import RegexValidator
 from django.db import models
-from django.db.models import Q, Count
+from django.db.models import Q
 from django.utils.timezone import now
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToCover
@@ -27,8 +22,13 @@ from django.utils import timezone
 from pytz import all_timezones
 from tagging.registry import register as tag_register
 from multiselectfield import MultiSelectField
-import hashlib
 from django import forms
+
+fmt = getattr(settings, 'LOG_FORMAT', None)
+lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
+
+logging.basicConfig(format=fmt, level=lvl)
+
 
 class System_Settings(models.Model):
     enable_deduplication = models.BooleanField(
@@ -107,23 +107,46 @@ class System_Settings(models.Model):
     display_endpoint_uri = models.BooleanField(default=False, verbose_name="Display Endpoint Full URI", help_text="Displays the full endpoint URI in the endpoint view.")
     enable_product_grade = models.BooleanField(default=False, verbose_name="Enable Product Grading", help_text="Displays a grade letter next to a product to show the overall health.")
     product_grade = models.CharField(max_length=800, blank=True)
-    product_grade_a = models.IntegerField(default=90, verbose_name="Grade A", help_text="Percentage score for an 'A' >=")
-    product_grade_b = models.IntegerField(default=80, verbose_name="Grade B", help_text="Percentage score for a 'B' >=")
-    product_grade_c = models.IntegerField(default=70, verbose_name="Grade C", help_text="Percentage score for a 'C' >=")
-    product_grade_d = models.IntegerField(default=60, verbose_name="Grade D", help_text="Percentage score for a 'D' >=")
-    product_grade_f = models.IntegerField(default=59, verbose_name="Grade F", help_text="Percentage score for an 'F' <=")
-    enable_benchmark = models.BooleanField(default=True, blank=False, verbose_name="Enable Benchmarks",
-                            help_text='Enables Benchmarks such as the OWASP ASVS (Application Security Verification Standard)')
+    product_grade_a = models.IntegerField(default=90,
+                                          verbose_name="Grade A",
+                                          help_text="Percentage score for an "
+                                                    "'A' >=")
+    product_grade_b = models.IntegerField(default=80,
+                                          verbose_name="Grade B",
+                                          help_text="Percentage score for a "
+                                                    "'B' >=")
+    product_grade_c = models.IntegerField(default=70,
+                                          verbose_name="Grade C",
+                                          help_text="Percentage score for a "
+                                                    "'C' >=")
+    product_grade_d = models.IntegerField(default=60,
+                                          verbose_name="Grade D",
+                                          help_text="Percentage score for a "
+                                                    "'D' >=")
+    product_grade_f = models.IntegerField(default=59,
+                                          verbose_name="Grade F",
+                                          help_text="Percentage score for an "
+                                                    "'F' <=")
+    enable_benchmark = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name="Enable Benchmarks",
+        help_text="Enables Benchmarks such as the OWASP ASVS "
+                  "(Application Security Verification Standard)")
+
 
 class SystemSettingsFormAdmin(forms.ModelForm):
-    product_grade = forms.CharField( widget=forms.Textarea )
+    product_grade = forms.CharField(widget=forms.Textarea)
+
     class Meta:
         model = System_Settings
         fields = ['product_grade']
 
+
 class System_SettingsAdmin(admin.ModelAdmin):
     form = SystemSettingsFormAdmin
     fields = ('product_grade',)
+
 
 def get_current_date():
     return timezone.now().date()
@@ -253,7 +276,7 @@ class Product_Line(models.Model):
 
 
 class Report_Type(models.Model):
-    name = models.CharField(max_length=300)
+    name = models.CharField(max_length=255)
 
 
 class Test_Type(models.Model):
@@ -271,7 +294,7 @@ class Test_Type(models.Model):
 
 
 class Product(models.Model):
-    name = models.CharField(max_length=300)
+    name = models.CharField(max_length=255)
     description = models.CharField(max_length=4000)
 
     '''
@@ -391,6 +414,10 @@ class Product(models.Model):
         bc = [{'title': self.__unicode__(),
                'url': reverse('view_product', args=(self.id,))}]
         return bc
+
+    @property
+    def get_product_type(self):
+        return self.prod_type if self.prod_type is not None else 'unknown'
 
 
 class ScanSettings(models.Model):
@@ -517,12 +544,14 @@ class CWE(models.Model):
     description = models.CharField(max_length=2000)
     number = models.IntegerField()
 
+
 class Endpoint_Params(models.Model):
     param = models.CharField(max_length=150)
     value = models.CharField(max_length=150)
     method_type = (('GET', 'GET'),
-                    ('POST', 'POST'))
+                   ('POST', 'POST'))
     method = models.CharField(max_length=20, blank=False, null=True, choices=method_type)
+
 
 class Endpoint(models.Model):
     protocol = models.CharField(null=True, blank=True, max_length=10,
@@ -544,7 +573,7 @@ class Endpoint(models.Model):
                                           "be omitted. For example 'section-13', 'paragraph-2'.")
     product = models.ForeignKey(Product, null=True, blank=True, )
     endpoint_params = models.ManyToManyField(Endpoint_Params, blank=True,
-                                   editable=False)
+                                             editable=False)
 
     class Meta:
         ordering = ['product', 'protocol', 'host', 'path', 'query', 'fragment']
@@ -553,7 +582,6 @@ class Endpoint(models.Model):
         from urlparse import uses_netloc
 
         netloc = self.host
-        fqdn = self.fqdn
         port = self.port
         scheme = self.protocol
         url = self.path if self.path else ''
@@ -564,7 +592,8 @@ class Endpoint(models.Model):
             netloc += ':%s' % port
 
         if netloc or (scheme and scheme in uses_netloc and url[:2] != '//'):
-            if url and url[:1] != '/': url = '/' + url
+            if url and url[:1] != '/':
+                url = '/' + url
             if scheme and scheme in uses_netloc and url[:2] != '//':
                 url = '//' + (netloc or '') + url
             else:
@@ -718,12 +747,11 @@ class Finding(models.Model):
     under_review = models.BooleanField(default=False)
     review_requested_by = models.ForeignKey(Dojo_User, null=True, blank=True,
                                             related_name='review_requested_by')
-    reviewers = models.ManyToManyField(Dojo_User, blank=True)
+    reviewers = models.ManyToManyField(User, blank=True)
 
     # Defect Tracking Review
     under_defect_review = models.BooleanField(default=False)
-    defect_review_requested_by = models.ForeignKey(Dojo_User, null=True,
-                                                   blank=True,
+    defect_review_requested_by = models.ForeignKey(Dojo_User, null=True, blank=True,
                                                    related_name='defect_review_requested_by')
 
     thread_id = models.IntegerField(default=0, editable=False)
@@ -860,17 +888,17 @@ class Finding(models.Model):
 
     def save(self, dedupe_option=True, *args, **kwargs):
         super(Finding, self).save(*args, **kwargs)
+        self.found_by.add(self.test.test_type)
         self.hash_code = self.get_hash_code()
         if self.test.test_type.static_tool:
             self.static_finding = True
         else:
             self.dyanmic_finding = True
-        self.found_by.add(self.test.test_type)
 
         from dojo.utils import calculate_grade
         calculate_grade(self.test.engagement.product)
 
-        super(Finding, self).save(*args, **kwargs)
+        super(Finding, self).save()
         if (dedupe_option):
             system_settings = System_Settings.objects.get()
             if system_settings.enable_deduplication:
@@ -949,7 +977,7 @@ class Finding(models.Model):
 
 
 Finding.endpoints.through.__unicode__ = lambda \
-        x: "Endpoint: " + x.endpoint.host
+    x: "Endpoint: " + x.endpoint.host
 
 
 class Stub_Finding(models.Model):
@@ -1136,7 +1164,7 @@ class FindingImage(models.Model):
                                  options={'quality': 100})
 
     def __unicode__(self):
-        return self.image.name
+        return self.image.name or u'No Image'
 
 
 class FindingImageAccessToken(models.Model):
@@ -1376,9 +1404,11 @@ class Cred_Mapping(models.Model):
     def __unicode__(self):
         return self.cred_id.name + " (" + self.cred_id.role + ")"
 
+
 class Language_Type(models.Model):
     language = models.CharField(max_length=100, null=False)
     color = models.CharField(max_length=7, null=True, verbose_name='HTML color')
+
 
 class Languages(models.Model):
     language = models.ForeignKey(Language_Type)
@@ -1389,6 +1419,7 @@ class Languages(models.Model):
     comment = models.IntegerField(blank=True, null=True, verbose_name='Number of comment lines')
     code = models.IntegerField(blank=True, null=True, verbose_name='Number of code lines')
     created = models.DateTimeField(null=False, editable=False, default=now)
+
 
 class App_Analysis(models.Model):
     product = models.ForeignKey(Product)
@@ -1401,6 +1432,7 @@ class App_Analysis(models.Model):
     website_found = models.URLField(max_length=400, null=True, blank=True)
     created = models.DateTimeField(null=False, editable=False, default=now)
 
+
 class Objects_Review(models.Model):
     name = models.CharField(max_length=100, null=True)
     created = models.DateTimeField(null=False, editable=False, default=now)
@@ -1408,28 +1440,33 @@ class Objects_Review(models.Model):
     def __unicode__(self):
         return self.name
 
+
 class Objects(models.Model):
     product = models.ForeignKey(Product)
     name = models.CharField(max_length=100, null=True, blank=True)
-    path = models.CharField(max_length=600, verbose_name='Full file path', null=True, blank=True)
-    folder = models.CharField(max_length=400, verbose_name='Folder', null=True, blank=True)
-    artifact = models.CharField(max_length=400, verbose_name='Artifact', null=True, blank=True)
+    path = models.CharField(max_length=600, verbose_name='Full file path',
+                            null=True, blank=True)
+    folder = models.CharField(max_length=400, verbose_name='Folder',
+                              null=True, blank=True)
+    artifact = models.CharField(max_length=400, verbose_name='Artifact',
+                                null=True, blank=True)
     review_status = models.ForeignKey(Objects_Review)
     created = models.DateTimeField(null=False, editable=False, default=now)
 
     def __unicode__(self):
         name = None
-        if self.path != None:
+        if self.path is not None:
             name = self.path
-        elif self.folder != None:
+        elif self.folder is not None:
             name = self.folder
-        elif self.artifact != None:
+        elif self.artifact is not None:
             name = self.artifact
 
         return name
 
     class Meta:
         unique_together = [('product', 'path')]
+
 
 class Objects_Engagement(models.Model):
     engagement = models.ForeignKey(Engagement)
@@ -1451,6 +1488,7 @@ class Objects_Engagement(models.Model):
 
         return data + " | " + self.engagement.name + " | " + str(self.engagement.id)
 
+
 class Testing_Guide_Category(models.Model):
     name = models.CharField(max_length=300)
     created = models.DateTimeField(null=False, editable=False, default=now)
@@ -1461,6 +1499,7 @@ class Testing_Guide_Category(models.Model):
 
     def __unicode__(self):
         return self.name
+
 
 class Testing_Guide(models.Model):
     testing_guide_category = models.ForeignKey(Testing_Guide_Category)
@@ -1476,20 +1515,23 @@ class Testing_Guide(models.Model):
     def __unicode__(self):
         return self.testing_guide_category.name + ': ' + self.name
 
+
 class Benchmark_Type(models.Model):
     name = models.CharField(max_length=300)
     version = models.CharField(max_length=15)
     source = (('PCI', 'PCI'),
-                    ('OWASP ASVS', 'OWASP ASVS'),
-                    ('OWASP Mobile ASVS', 'OWASP Mobile ASVS'))
+              ('OWASP ASVS', 'OWASP ASVS'),
+              ('OWASP Mobile ASVS', 'OWASP Mobile ASVS'))
     benchmark_source = models.CharField(max_length=20, blank=False,
-                                             null=True, choices=source,
-                                             default='OWASP ASVS')
+                                        null=True, choices=source,
+                                        default='OWASP ASVS')
     created = models.DateTimeField(null=False, editable=False, default=now)
     updated = models.DateTimeField(editable=False, default=now)
     enabled = models.BooleanField(default=True)
+
     def __unicode__(self):
         return self.name + " " + self.version
+
 
 class Benchmark_Category(models.Model):
     type = models.ForeignKey(Benchmark_Type, verbose_name='Benchmark Type')
@@ -1505,6 +1547,7 @@ class Benchmark_Category(models.Model):
 
     def __unicode__(self):
         return self.name + ': ' + self.type.name
+
 
 class Benchmark_Requirement(models.Model):
     category = models.ForeignKey(Benchmark_Category)
@@ -1523,11 +1566,14 @@ class Benchmark_Requirement(models.Model):
     def __unicode__(self):
         return str(self.objective_number) + ': ' + self.category.name
 
+
 class Benchmark_Product(models.Model):
     product = models.ForeignKey(Product)
     control = models.ForeignKey(Benchmark_Requirement)
-    pass_fail = models.BooleanField(default=False, verbose_name='Pass', help_text='Does the product meet the requirement?')
-    enabled = models.BooleanField(default=True, help_text='Applicable for this specific product.')
+    pass_fail = models.BooleanField(default=False, verbose_name='Pass',
+                                    help_text='Does the product meet the requirement?')
+    enabled = models.BooleanField(default=True,
+                                  help_text='Applicable for this specific product.')
     notes = models.ManyToManyField(Notes, blank=True, editable=False)
     created = models.DateTimeField(null=False, editable=False, default=now)
     updated = models.DateTimeField(editable=False, default=now)
@@ -1538,6 +1584,7 @@ class Benchmark_Product(models.Model):
     class Meta:
         unique_together = [('product', 'control')]
 
+
 class Benchmark_Product_Summary(models.Model):
     product = models.ForeignKey(Product)
     benchmark_type = models.ForeignKey(Benchmark_Type)
@@ -1545,11 +1592,11 @@ class Benchmark_Product_Summary(models.Model):
                     ('Level 2', 'Level 2'),
                     ('Level 3', 'Level 3'))
     desired_level = models.CharField(max_length=15,
-                                             null=False, choices=asvs_level,
-                                             default='Level 1')
+                                     null=False, choices=asvs_level,
+                                     default='Level 1')
     current_level = models.CharField(max_length=15, blank=True,
-                                             null=True, choices=asvs_level,
-                                             default='None')
+                                     null=True, choices=asvs_level,
+                                     default='None')
     asvs_level_1_benchmark = models.IntegerField(null=False, default=0, help_text="Total number of active benchmarks for this application.")
     asvs_level_1_score = models.IntegerField(null=False, default=0, help_text="ASVS Level 1 Score")
     asvs_level_2_benchmark = models.IntegerField(null=False, default=0, help_text="Total number of active benchmarks for this application.")
@@ -1565,6 +1612,7 @@ class Benchmark_Product_Summary(models.Model):
 
     class Meta:
         unique_together = [('product', 'benchmark_type')]
+
 
 # Register for automatic logging to database
 auditlog.register(Dojo_User)
@@ -1587,14 +1635,14 @@ tag_register(Finding_Template)
 tag_register(App_Analysis)
 tag_register(Objects)
 
-#Benchmarks
+# Benchmarks
 admin.site.register(Benchmark_Type)
 admin.site.register(Benchmark_Requirement)
 admin.site.register(Benchmark_Category)
 admin.site.register(Benchmark_Product)
 admin.site.register(Benchmark_Product_Summary)
 
-#Testing
+# Testing
 admin.site.register(Testing_Guide_Category)
 admin.site.register(Testing_Guide)
 
