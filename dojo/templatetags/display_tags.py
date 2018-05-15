@@ -29,6 +29,7 @@ def markdown_render(value):
         return mark_safe(markdown.markdown(value, extensions=[EscapeHtml(), 'markdown.extensions.codehilite', 'markdown.extensions.toc']))
 
 
+
 @register.filter(name='ports_open')
 def ports_open(value):
     count = 0

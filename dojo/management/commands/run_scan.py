@@ -10,7 +10,7 @@ from nmap import PortScannerAsync, PortScannerError
 from pytz import timezone
 
 from dojo.models import Scan, Product, ScanSettings, IPScan
-import dojo.settings as settings
+from django.conf import settings
 from dojo.utils import get_system_setting
 
 locale = timezone(get_system_setting('time_zone'))
