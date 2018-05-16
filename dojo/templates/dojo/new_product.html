@@ -9,7 +9,7 @@
     width: 70% !important;
     }
     .chosen-container.chosen-container-multi {
-    width: 70% !important; 
+    width: 70% !important;
     }
 {% endblock %}
 
@@ -42,7 +42,9 @@
                 }
 
                 var mde = new SimpleMDE({
+                    spellChecker: false,
                     element: elem,
+                    spellChecker: false,
                     autofocus: false,
                     forceSync: true,
                     hideIcons: ["side-by-side", "fullscreen"]

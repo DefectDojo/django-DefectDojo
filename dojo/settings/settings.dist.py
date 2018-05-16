@@ -203,6 +203,7 @@ INSTALLED_APPS = (
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_swagger',
+    'dbbackup',
 )
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
