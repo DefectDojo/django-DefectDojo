@@ -32,7 +32,7 @@ def webhook(request):
             if jissue.finding is not None:
                 finding = jissue.finding
                 resolved = True
-                if parsed['issue']['fields']['resolution'] is not None:
+                if parsed['issue']['fields']['resolution'] is None:
                     resolved = False
                 if finding.active == resolved:
                     if finding.active:
