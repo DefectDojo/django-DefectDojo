@@ -273,7 +273,7 @@
                         <td>
                             <div class="btn-group">
                                 <a class="btn btn-sm btn-warning"
-                                   href="{% url 'edit_finding' finding.id %}">Edit</a>&nbsp;
+                                   href="{% url 'edit_finding' finding.id %}">Edit</a>
                                 <form method="post" action="{% url 'delete_finding' finding.id %}"
                                      style="display: inline" class="form-inline form">
                                    {% csrf_token %}
