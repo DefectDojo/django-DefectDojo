@@ -73,7 +73,7 @@
                                 </li>
                             <li role="separator" class="divider"></li>
                             <li role="presentation">
-                                <a href="{% url 'view_product_findings' prod.id %}">
+                                <a href="{% url 'open_findings' %}?test__engagement__product={{ prod.id }}">
                                     <i class="fa fa-bug"></i> View Open Findings
                                 </a>
                             </li>
@@ -521,15 +521,18 @@
                             <tr>
                                 <th>Name</th>
                                 <th>Lead</th>
-                                <th>Start Date</th>
-                                <th>End Date</th>
+                                <th>Date</th>
+                                <th>Length</th>
+                                <th>Tests</th>
+                                <th>Findings</th>
+                                <th>Duplicate Findings</th>
                                 <th>Actions</th>
                             </tr>
                             </thead>
                             <tbody>
                             {% for eng in engs %}
                                 <tr>
-                                <td>{{ eng.name | default:"N/A" }}
+                                <td><a href="{% url 'view_engagement' eng.id %}">{{ eng.name | default:"N/A" }}</a>
                                 {% if eng.tags %}
                                     <sup>
                                         {% for tag in eng.tags %}
@@ -539,11 +542,31 @@
                                 {% endif %}
                                 </td>
                                 <td>{{ eng.lead }}</td>
-                                <td>{{ eng.target_start }}</td>
-                                <td>{{ eng.target_end }}</td>
+                                <td>{{ eng.target_start }} - {{ eng.target_end }}</td>
+                                <td>{{ eng.target_start|datediff_time:eng.target_end }}
+                                  {% if eng.target_end|overdue %}
+                                  <sup>
+                                    <div class="btn btn-sm btn-overdue">
+                                      {{ eng.target_end|overdue }} overdue
+                                    </div>
+                                  </sup>
+                                  {% endif %}
+                                </td>
+                                <td>{{ eng.test_set.all|length }}</td>
+                                <td>{{ eng.test_set.all|count_findings_eng|finding_status:False|length }}</td>
+                                <td>{{ eng.test_set.all|count_findings_eng|finding_status:True|length }}</td>
                                 <td>
-                                <a class="btn btn-sm btn-primary" href="{% url 'view_engagement' eng.id %}">View
-                                    Details</a>
+                                  <div class="btn-group">
+                                      <a class="btn btn-sm btn-primary"
+                                             href="{% url 'close_engagement' eng.id %}">Close</a>
+                                      <a class="btn btn-sm btn-warning"
+                                         href="{% url 'edit_engagement' eng.id %}">Edit</a>
+                                      <a class="btn btn-danger btn-sm"
+                                         href="{% url 'delete_engagement' eng.id %}">
+                                           Delete
+                                         </a>
+                                  </div>
+                                </td>
                             {% endfor %}
                             </tbody>
                         </table>
@@ -712,22 +735,38 @@
                     <table class="tablesorter-bootstrap table table-condensed table-striped table-hover">
                         <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Lead</th>
-                            <th>Start Date</th>
-                            <th>End Date</th>
-                            <th>Actions</th>
+                          <th>Name</th>
+                          <th>Lead</th>
+                          <th>Date</th>
+                          <th>Length</th>
+                          <th>Tests</th>
+                          <th>Findings</th>
+                          <th>Duplicate Findings</th>
+                          <th>Actions</th>
                         </tr>
                         </thead>
                         <tbody>
                         {% for eng in i_engs %}
                             <tr>
-                            <td>{% if eng.name %}{{ eng.name }}{% else %} N/A {% endif %}</td>
+                            <td><a href="{% url 'view_engagement' eng.id %}">{{ eng.name | default:"N/A" }}</a></td>
                             <td>{{ eng.lead }}</td>
-                            <td>{{ eng.target_start }}</td>
-                            <td>{{ eng.target_end }}</td>
+                            <td>{{ eng.target_start }} - {{ eng.target_end }}</td>
+                            <td>{{ eng.target_start|datediff_time:eng.target_end }}</td>
+                            <td>{{ eng.test_set.all|length }}</td>
+                            <td>{{ eng.test_set.all|count_findings_eng|finding_status:False|length }}</td>
+                            <td>{{ eng.test_set.all|count_findings_eng|finding_status:True|length }}</td>
                             <td>
-                            <a class="btn btn-sm btn-primary" href="{% url 'view_engagement' eng.id %}">View Details</a>
+                              <div class="btn-group">
+                                  <a class="btn btn-sm btn-primary"
+                                         href="{% url 'reopen_engagement' eng.id %}">Reopen</a>
+                                  <a class="btn btn-sm btn-warning"
+                                     href="{% url 'edit_engagement' eng.id %}">Edit</a>
+                                  <a class="btn btn-danger btn-sm"
+                                     href="{% url 'delete_engagement' eng.id %}">
+                                       Delete
+                                     </a>
+                              </div>
+                            </td>
                         {% endfor %}
                         </tbody>
                     </table>

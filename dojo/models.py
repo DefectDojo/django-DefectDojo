@@ -1266,6 +1266,7 @@ NOTIFICATION_CHOICES = (
 
 
 class Notifications(models.Model):
+    product_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     engagement_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     test_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     results_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
