@@ -26,7 +26,7 @@ class EscapeHtml(Extension):
 @register.filter
 def markdown_render(value):
     if value:
-        return mark_safe(markdown.markdown(value, extensions=[EscapeHtml(), 'markdown.extensions.codehilite', 'markdown.extensions.toc']))
+        return mark_safe(markdown.markdown(value, extensions=[EscapeHtml(), 'markdown.extensions.codehilite', 'markdown.extensions.toc', 'markdown.extensions.tables']))
 
 
 
