@@ -60,7 +60,13 @@
                                   {% endif %}
                                 </td>
                                 <td><a href="{% url 'view_product' e.product.id %}">{{ e.product }}</a></td>
-                                <td class="text-center">{{ e.finding_count }}</td>
+                                <td class="text-center">
+                                  {% if e.finding_count > 0 %}
+                                  <a href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.finding_count }}</a>
+                                  {% else %}
+                                  {{ e.finding_count }}
+                                  {% endif %}
+                                </td>
                             </tr>
                         {% endfor %}
                     </table>

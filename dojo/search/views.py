@@ -6,7 +6,8 @@ from tagging.models import TaggedItem, Tag
 from watson import search as watson
 
 from dojo.forms import SimpleSearchForm
-from dojo.models import Finding, Finding_Template, Product, Test, Endpoint, Engagement
+from dojo.models import Finding, Finding_Template, Product, Test, Endpoint, Engagement, Languages, \
+    App_Analysis
 from dojo.utils import add_breadcrumb
 
 logger = logging.getLogger(__name__)
@@ -32,6 +33,11 @@ def simple_search(request):
     tagged_products = None
     tagged_endpoints = None
     tagged_engagements = None
+    tagged_finding_templates = None
+    engagements = None
+    endpoints = None
+    languages = None
+    app_analysis = None
     clean_query = ''
     cookie = False
     terms = ''
@@ -57,8 +63,16 @@ def simple_search(request):
                                                                   tags)
                 tagged_endpoints = TaggedItem.objects.get_by_model(Endpoint,
                                                                    tags)
+                endpoints = watson.search(clean_query, models=(Endpoint,))
+                # endpoints = Endpoints.objects.filter(name__icontains=clean_query)
+
                 tagged_engagements = TaggedItem.objects.get_by_model(
                     Engagement, tags)
+
+                engagements = watson.search(clean_query, models=(Engagement,))
+                languages = Languages.objects.filter(language__language__icontains=clean_query)
+                app_analysis = App_Analysis.objects.filter(name__icontains=clean_query)
+
             else:
                 findings = watson.search(clean_query, models=(
                     Finding.objects.filter(
@@ -103,6 +117,8 @@ def simple_search(request):
 
     response = render(request, 'dojo/simple_search.html', {
         'clean_query': clean_query,
+        'languages': languages,
+        'app_analysis': app_analysis,
         'tests': tests,
         'findings': findings,
         'finding_templates': finding_templates,
@@ -113,6 +129,8 @@ def simple_search(request):
         'tagged_products': tagged_products,
         'tagged_endpoints': tagged_endpoints,
         'tagged_engagements': tagged_engagements,
+        'engagements': engagements,
+        'endpoints': endpoints,
         'name': 'Simple Search',
         'metric': False,
         'user': request.user,
