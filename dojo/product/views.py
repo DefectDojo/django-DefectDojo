@@ -274,6 +274,50 @@ def view_product(request, pid):
                    'authorized': auth})
 
 
+def view_product_details(request, pid):
+    prod = get_object_or_404(Product, id=pid)
+    scan_sets = ScanSettings.objects.filter(product=prod)
+    tools = Tool_Product_Settings.objects.filter(product=prod).order_by('name')
+    auth = request.user.is_staff or request.user in prod.authorized_users.all()
+    creds = Cred_Mapping.objects.filter(product=prod).select_related('cred_id').order_by('cred_id')
+    langSummary = Languages.objects.filter(product=prod).aggregate(Sum('files'), Sum('code'), Count('files'))
+    languages = Languages.objects.filter(product=prod).order_by('-code')
+    app_analysis = App_Analysis.objects.filter(product=prod).order_by('name')
+    benchmark_type = Benchmark_Type.objects.filter(enabled=True).order_by('name')
+    benchmarks = Benchmark_Product_Summary.objects.filter(product=prod, publish=True, benchmark_type__enabled=True).order_by('benchmark_type__name')
+    system_settings = System_Settings.objects.get()
+
+    if not auth:
+        # will render 403
+        raise PermissionDenied
+
+    ct = ContentType.objects.get_for_model(prod)
+    product_cf = CustomField.objects.filter(content_type=ct)
+    product_metadata = {}
+
+    for cf in product_cf:
+        cfv = CustomFieldValue.objects.filter(field=cf, object_id=prod.id)
+        if len(cfv):
+            product_metadata[cf.name] = cfv[0].value
+
+    add_breadcrumb(parent=product, title="Details", top_level=False, request=request)
+    return render(request,
+                  'dojo/view_product_details.html',
+                  {'prod': prod,
+                   'benchmark_type': benchmark_type,
+                   'benchmarks': benchmarks,
+                   'product_metadata': product_metadata,
+                   'scan_sets': scan_sets,
+                   'tools': tools,
+                   'creds': creds,
+                   'user': request.user,
+                   'languages': languages,
+                   'langSummary': langSummary,
+                   'app_analysis': app_analysis,
+                   'system_settings': system_settings,
+                   'authorized': auth})
+
+
 @user_passes_test(lambda u: u.is_staff)
 def new_product(request):
     jform = None
@@ -359,7 +403,7 @@ def edit_product(request, pid):
                                             'JIRA information updated successfully.',
                                             extra_tags='alert-success')
 
-            return HttpResponseRedirect(reverse('view_product', args=(pid,)))
+            return HttpResponseRedirect(reverse('view_product_details', args=(pid,)))
     else:
         form = ProductForm(instance=prod,
                            initial={'auth_users': prod.authorized_users.all(),
@@ -529,7 +573,7 @@ def add_meta_data(request, pid):
             if 'add_another' in request.POST:
                 return HttpResponseRedirect(reverse('add_meta_data', args=(pid,)))
             else:
-                return HttpResponseRedirect(reverse('view_product', args=(pid,)))
+                return HttpResponseRedirect(reverse('view_product_details', args=(pid,)))
     else:
         form = ProductMetaDataForm(initial={'content_type': prod})
 
