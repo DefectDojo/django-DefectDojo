@@ -17,6 +17,8 @@ ignore =
     F841
     # May be undefined
     F405
+    # list comprehension redefines
+    F812
 
 exclude =
     # No need to traverse our git directory
