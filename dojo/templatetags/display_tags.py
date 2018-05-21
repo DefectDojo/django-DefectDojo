@@ -13,6 +13,8 @@ from dojo.models import Check_List, FindingImageAccessToken, Finding, System_Set
 import markdown
 from django.utils import timezone
 from markdown.extensions import Extension
+import dateutil.relativedelta
+import datetime
 
 register = template.Library()
 
@@ -27,7 +29,6 @@ class EscapeHtml(Extension):
 def markdown_render(value):
     if value:
         return mark_safe(markdown.markdown(value, extensions=[EscapeHtml(), 'markdown.extensions.codehilite', 'markdown.extensions.toc']))
-
 
 
 @register.filter(name='ports_open')
@@ -156,6 +157,17 @@ def version_num(value):
     return version
 
 
+@register.filter(name='count_findings_eng')
+def count_findings_eng(tests):
+    findings = None
+    for test in tests:
+        if findings:
+            findings = findings | test.finding_set.all()
+        else:
+            findings = test.finding_set.all()
+    return findings
+
+
 @register.filter(name='product_grade')
 def product_grade(product):
     grade = ""
@@ -188,7 +200,10 @@ def display_index(data, index):
 
 @register.filter
 def finding_status(finding, duplicate):
-    return finding.filter(duplicate=duplicate)
+    findingFilter = None
+    if finding:
+        findingFilter = finding.filter(duplicate=duplicate)
+    return findingFilter
 
 
 @register.simple_tag
@@ -221,6 +236,29 @@ def random_value():
     import string
     import random
     return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(12))
+
+
+@register.filter(name='datediff_time')
+def datediff_time(date1, date2):
+    date_str = ""
+    diff = dateutil.relativedelta.relativedelta(date2, date1)
+    attrs = ['years', 'months', 'days']
+    human_readable = lambda delta: ['%d %s' % (getattr(delta, attr), getattr(delta, attr) > 1 and attr or attr[:-1])
+                                    for attr in attrs if getattr(delta, attr)]
+    human_date = human_readable(diff)
+    for date_part in human_date:
+        date_str = date_str + date_part + " "
+
+    return date_str
+
+
+@register.filter(name='overdue')
+def overdue(date1):
+    date_str = ""
+    if date1 < datetime.datetime.now().date():
+        date_str = datediff_time(date1, datetime.datetime.now().date())
+
+    return date_str
 
 
 @register.tag
