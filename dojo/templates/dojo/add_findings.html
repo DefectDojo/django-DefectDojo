@@ -50,15 +50,33 @@
     </div>
 {% endblock %}
 {% block postscript %}
+    <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
     <script type="application/javascript" src="{% static "simplemde/dist/simplemde.min.js" %}"></script>
     <script type="text/javascript" src="{% static "admin/js/jquery.init.js" %}"></script>
     <script type="application/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>
     <script type="application/javascript">
         $ = django.jQuery;
+        $.hotkeys.options.filterInputAcceptingElements = false;
+        $.hotkeys.options.filterTextInputs = false;
+
         $('#add_id_endpoints').attr('href', "{% url 'add_endpoint' test.engagement.product.id %}?_popup");
         {% if not form_error %}
             $('#id_endpoints').find('option').remove();
         {% endif %}
+
+        $(document).bind('keydown', 'ctrl+s', function (event) {
+            if (event.preventDefault) {
+                event.preventDefault();
+            } else {
+                // internet explorer
+                event.returnValue = false;
+            }
+            {% if temp %}
+                $("form#add_finding").submit();
+            {% else %}
+                $("input[name='_Finished']").trigger('click');
+            {% endif %}
+        });
 
         $(function () {
             $("textarea").each(function (index, elem) {

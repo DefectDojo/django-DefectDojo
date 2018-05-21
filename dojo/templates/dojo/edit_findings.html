@@ -49,14 +49,17 @@
 
 {% endblock %}
 {% block postscript %}
+    <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
     <script type="application/javascript" src="{% static "chosen/chosen.jquery.min.js" %}"></script>
     <script type="application/javascript" src="{% static "simplemde/dist/simplemde.min.js" %}"></script>
-
     <script type="text/javascript" src="{% static "admin/js/jquery.init.js" %}"></script>
     <script type="application/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>
 
     <script type="application/javascript">
         $ = django.jQuery;
+        $.hotkeys.options.filterInputAcceptingElements = false;
+        $.hotkeys.options.filterTextInputs = false;
+
         $('#add_id_endpoints').attr('href', '/endpoints/{{ finding.test.engagement.product.id }}/add?_popup');
         $(function () {
             $('#id_tags').chosen({
@@ -73,6 +76,16 @@
                     $('#id_tags').focus();
                     return false;
                 }
+            });
+
+            $(document).bind('keydown', 'ctrl+s', function (event) {
+                if (event.preventDefault) {
+                    event.preventDefault();
+                } else {
+                    // internet explorer
+                    event.returnValue = false;
+                }
+                $("form#add_finding").submit();
             });
 
             $("textarea").each(function (index, elem) {

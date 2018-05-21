@@ -15,10 +15,11 @@
 {% endblock %}
 {% block content %}
     <h3> Apply template to a Finding</h3>
-    <form id="add_finding" class="form-horizontal" name="apply_template" action="{% url 'apply_template_to_finding' finding.id template.id %}" method="post">
+    <form id="add_finding" class="form-horizontal" name="apply_template"
+          action="{% url 'apply_template_to_finding' finding.id template.id %}" method="post">
         {% csrf_token %}
         {% include "dojo/apply_finding_template_form_fields.html" with form=form template=template %}
-        {%  if jform %}
+        {% if jform %}
             {% include "dojo/apply_finding_template_form_fields.html" with form=jform template=template %}
         {% endif %}
         <div class="form-group">
@@ -35,7 +36,12 @@
     <script type="application/javascript" src="{% static "simplemde/dist/simplemde.min.js" %}"></script>
     <script type="application/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>
     <script type="application/javascript" src="{% static "chosen/chosen.jquery.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "admin/js/jquery.init.js" %}"></script>
     <script type="application/javascript">
+        $ = django.jQuery;
+        $.hotkeys.options.filterInputAcceptingElements = false;
+        $.hotkeys.options.filterTextInputs = false;
+
         $(function () {
             $('#id_tags').chosen({
                 'placeholder_text_multiple': 'Select or add some tags...',
@@ -55,7 +61,7 @@
 
             $("textarea").each(function (index, elem) {
 
-                 if (elem.hasAttribute("required")) {
+                if (elem.hasAttribute("required")) {
                     elem.removeAttribute("required");
                     elem.id = "req"
                 }
@@ -69,6 +75,16 @@
                 });
                 mde.render();
             });
+        });
+
+        $(document).bind('keydown', 'ctrl+s', function (event) {
+            if (event.preventDefault) {
+                event.preventDefault();
+            } else {
+                // internet explorer
+                event.returnValue = false;
+            }
+            $("input[name='_Finished']").trigger('click');
         });
 
         $("#add_finding").submit(function () {
