@@ -4,7 +4,7 @@ import re
 from django.shortcuts import render
 from tagging.models import TaggedItem, Tag
 from watson import search as watson
-
+from django.db.models import Q
 from dojo.forms import SimpleSearchForm
 from dojo.models import Finding, Finding_Template, Product, Test, Endpoint, Engagement, Languages, \
     App_Analysis
@@ -63,8 +63,8 @@ def simple_search(request):
                                                                   tags)
                 tagged_endpoints = TaggedItem.objects.get_by_model(Endpoint,
                                                                    tags)
-                endpoints = watson.search(clean_query, models=(Endpoint,))
-                # endpoints = Endpoints.objects.filter(name__icontains=clean_query)
+                # endpoints = watson.search(clean_query, models=(Endpoint,))
+                endpoints = Endpoint.objects.filter(Q(host__icontains=clean_query) | Q(path__icontains=clean_query) | Q(fqdn__icontains=clean_query) | Q(protocol__icontains=clean_query))
 
                 tagged_engagements = TaggedItem.objects.get_by_model(
                     Engagement, tags)
