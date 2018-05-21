@@ -77,12 +77,19 @@ def open_findings(request):
     add_breadcrumb(
         title="Open findings", top_level=not len(request.GET), request=request)
 
+    found_by = None
+    try:
+        found_by = findings.found_by.all().distinct()
+    except:
+        found_by = None
+        pass
+
     return render(
         request, 'dojo/open_findings.html', {
             "findings": paged_findings,
             "filtered": findings,
             "title_words": title_words,
-            'found_by': finding.found_by.all().distinct()
+            'found_by': found_by
         })
 
 
