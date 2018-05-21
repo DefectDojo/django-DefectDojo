@@ -1,13 +1,11 @@
 # #  product
 import calendar as tcalendar
 import logging
-import sys
 from collections import OrderedDict
 from datetime import datetime, date, timedelta
 from math import ceil
 
 from dateutil.relativedelta import relativedelta
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
@@ -20,14 +18,13 @@ from django.db.models import Sum, Count
 
 from dojo.filters import ProductFilter, ProductFindingFilter, EngagementFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, ProductMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm
-from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, \
-    Tool_Product_Settings, Cred_User, Cred_Mapping, Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary
+from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, Finding_Template, \
+    Tool_Product_Settings, Cred_Mapping, Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint
 from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, get_system_setting, create_notification
 from custom_field.models import CustomFieldValue, CustomField
 from dojo.tasks import add_epic_task, add_issue_task
 from tagging.models import Tag
 from tagging.utils import get_tag_list
-from tagging.views import TaggedItem
 
 logger = logging.getLogger(__name__)
 
@@ -277,6 +274,50 @@ def view_product(request, pid):
                    'authorized': auth})
 
 
+def view_product_details(request, pid):
+    prod = get_object_or_404(Product, id=pid)
+    scan_sets = ScanSettings.objects.filter(product=prod)
+    tools = Tool_Product_Settings.objects.filter(product=prod).order_by('name')
+    auth = request.user.is_staff or request.user in prod.authorized_users.all()
+    creds = Cred_Mapping.objects.filter(product=prod).select_related('cred_id').order_by('cred_id')
+    langSummary = Languages.objects.filter(product=prod).aggregate(Sum('files'), Sum('code'), Count('files'))
+    languages = Languages.objects.filter(product=prod).order_by('-code')
+    app_analysis = App_Analysis.objects.filter(product=prod).order_by('name')
+    benchmark_type = Benchmark_Type.objects.filter(enabled=True).order_by('name')
+    benchmarks = Benchmark_Product_Summary.objects.filter(product=prod, publish=True, benchmark_type__enabled=True).order_by('benchmark_type__name')
+    system_settings = System_Settings.objects.get()
+
+    if not auth:
+        # will render 403
+        raise PermissionDenied
+
+    ct = ContentType.objects.get_for_model(prod)
+    product_cf = CustomField.objects.filter(content_type=ct)
+    product_metadata = {}
+
+    for cf in product_cf:
+        cfv = CustomFieldValue.objects.filter(field=cf, object_id=prod.id)
+        if len(cfv):
+            product_metadata[cf.name] = cfv[0].value
+
+    add_breadcrumb(parent=product, title="Details", top_level=False, request=request)
+    return render(request,
+                  'dojo/view_product_details.html',
+                  {'prod': prod,
+                   'benchmark_type': benchmark_type,
+                   'benchmarks': benchmarks,
+                   'product_metadata': product_metadata,
+                   'scan_sets': scan_sets,
+                   'tools': tools,
+                   'creds': creds,
+                   'user': request.user,
+                   'languages': languages,
+                   'langSummary': langSummary,
+                   'app_analysis': app_analysis,
+                   'system_settings': system_settings,
+                   'authorized': auth})
+
+
 @user_passes_test(lambda u: u.is_staff)
 def new_product(request):
     jform = None
@@ -306,7 +347,7 @@ def new_product(request):
                                                  messages.SUCCESS,
                                                  'JIRA information added successfully.',
                                                  extra_tags='alert-success')
-
+            create_notification(event='product_added', title=product.name, url=request.build_absolute_uri(reverse('view_product', args=(product.id,))))
             return HttpResponseRedirect(reverse('view_product', args=(product.id,)))
     else:
         form = ProductForm()
@@ -324,7 +365,7 @@ def new_product(request):
 def edit_product(request, pid):
     prod = Product.objects.get(pk=pid)
     system_settings = System_Settings.objects.get()
-    jira_enabled =  system_settings.enable_jira
+    jira_enabled = system_settings.enable_jira
     jira_inst = None
     jform = None
     try:
@@ -346,14 +387,14 @@ def edit_product(request, pid):
 
             if get_system_setting('enable_jira') and jira_inst:
                 jform = JIRAPKeyForm(request.POST, instance=jira_inst)
-                #need to handle delete
+                # need to handle delete
                 try:
                     jform.save()
                 except:
                     pass
-            else:
+            elif get_system_setting('enable_jira'):
                 jform = JIRAPKeyForm(request.POST)
-                if  jform.is_valid():
+                if jform.is_valid():
                     new_conf = jform.save(commit=False)
                     new_conf.product_id = pid
                     new_conf.save()
@@ -362,14 +403,14 @@ def edit_product(request, pid):
                                             'JIRA information updated successfully.',
                                             extra_tags='alert-success')
 
-            return HttpResponseRedirect(reverse('view_product', args=(pid,)))
+            return HttpResponseRedirect(reverse('view_product_details', args=(pid,)))
     else:
         form = ProductForm(instance=prod,
                            initial={'auth_users': prod.authorized_users.all(),
                                     'tags': get_tag_list(Tag.objects.get_for_object(prod))})
 
-        if jira_enabled and (jira_inst != None):
-            if jira_inst != None:
+        if jira_enabled and (jira_inst is not None):
+            if jira_inst is not None:
                 jform = JIRAPKeyForm(instance=jira_inst)
             else:
                 jform = JIRAPKeyForm()
@@ -427,6 +468,7 @@ Greg
 Status: in production
 """
 
+
 def all_product_findings(request, pid):
     p = get_object_or_404(Product, id=pid)
     auth = request.user.is_staff or request.user in p.authorized_users.all()
@@ -459,23 +501,31 @@ def new_eng_for_app(request, pid):
         form = EngForm(request.POST)
         if form.is_valid():
             new_eng = form.save(commit=False)
+            new_eng.threat_model = False
+            new_eng.api_test = False
+            new_eng.pen_test = False
+            new_eng.check_list = False
+
             new_eng.product = prod
             if new_eng.threat_model:
                 new_eng.progress = 'threat_model'
             else:
                 new_eng.progress = 'other'
+
             new_eng.save()
+            tags = request.POST.getlist('tags')
+            t = ", ".join(tags)
+            new_eng.tags = t
             if get_system_setting('enable_jira'):
-                    #Test to make sure there is a Jira project associated the product
+                    # Test to make sure there is a Jira project associated the product
                     try:
-                        jform = JIRAFindingForm(request.POST, prefix='jiraform',
-                                            enabled=JIRA_PKey.objects.get(product=prod).push_all_issues)
+                        jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=JIRA_PKey.objects.get(product=prod).push_all_issues)
                         if jform.is_valid():
                             add_epic_task.delay(new_eng, jform.cleaned_data.get('push_to_jira'))
                     except JIRA_PKey.DoesNotExist:
                         pass
 
-            #else:
+            # else:
             #    print >>sys.stderr, 'no prefix is found'
 
             messages.add_message(request,
@@ -483,14 +533,14 @@ def new_eng_for_app(request, pid):
                                  'Engagement added successfully.',
                                  extra_tags='alert-success')
 
-            create_notification(event='engagement_added', title='Engagement added', engagement=new_eng, url=request.build_absolute_uri(reverse('view_engagement', args=(new_eng.id,))), objowner=new_eng.lead)
+            create_notification(event='engagement_added', title=new_eng.name + " for " + prod.name, engagement=new_eng, url=request.build_absolute_uri(reverse('view_engagement', args=(new_eng.id,))), objowner=new_eng.lead)
 
             if "_Add Tests" in request.POST:
                 return HttpResponseRedirect(reverse('add_tests', args=(new_eng.id,)))
             else:
                 return HttpResponseRedirect(reverse('view_engagement', args=(new_eng.id,)))
     else:
-        form = EngForm(initial={})
+        form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(), 'target_end': timezone.now().date() + timedelta(days=7)})
         if(get_system_setting('enable_jira')):
                 if JIRA_PKey.objects.filter(product=prod).count() != 0:
                     jform = JIRAFindingForm(prefix='jiraform', enabled=JIRA_PKey.objects.get(product=prod).push_all_issues)
@@ -510,12 +560,9 @@ def add_meta_data(request, pid):
     if request.method == 'POST':
         form = ProductMetaDataForm(request.POST)
         if form.is_valid():
-            cf, created = CustomField.objects.get_or_create(name=form.cleaned_data['name'],
-                                                   content_type=ct,
-                                                   field_type='a')
+            cf, created = CustomField.objects.get_or_create(name=form.cleaned_data['name'], content_type=ct, field_type='a')
             cf.save()
-            cfv, created = CustomFieldValue.objects.get_or_create(field=cf,
-                                                         object_id=prod.id)
+            cfv, created = CustomFieldValue.objects.get_or_create(field=cf, object_id=prod.id)
             cfv.value = form.cleaned_data['value']
             cfv.clean()
             cfv.save()
@@ -526,7 +573,7 @@ def add_meta_data(request, pid):
             if 'add_another' in request.POST:
                 return HttpResponseRedirect(reverse('add_meta_data', args=(pid,)))
             else:
-                return HttpResponseRedirect(reverse('view_product', args=(pid,)))
+                return HttpResponseRedirect(reverse('view_product_details', args=(pid,)))
     else:
         form = ProductMetaDataForm(initial={'content_type': prod})
 
@@ -675,7 +722,7 @@ def ad_hoc_finding(request, pid):
     return render(request, 'dojo/ad_hoc_findings.html',
                   {'form': form,
                    'temp': False,
-                   'tid' : test.id,
+                   'tid': test.id,
                    'pid': pid,
                    'form_error': form_error,
                    'jform': jform,

@@ -1,9 +1,17 @@
 {% extends "base.html" %}
 {% load event_tags %}
 {% load static from staticfiles %}
+{% block add_css %}
+    <link rel="stylesheet" href="{% static "simplemde/dist/simplemde.min.css" %}">
+{% endblock %}
+{% block add_styles %}
+    .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
+    width: 70% !important;
+    }
+{% endblock %}
 {% block content %}
     <div>
-        <h3> Add findings to a test</h3>
+        <h3> Add Findings to a Test</h3>
     </div>
     <div>
         <form class="form-horizontal" action="{% url 'ad_hoc_finding' pid %}" method="post">
@@ -25,9 +33,28 @@
 {% endblock %}
 {% block postscript %}
     <script type="text/javascript" src="{% static "admin/js/jquery.init.js"%}"></script>
+    <script type="application/javascript" src="{% static "simplemde/dist/simplemde.min.js" %}"></script>
     <script type="application/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>
     <script type="application/javascript">
         $ = django.jQuery;
+        $(function () {
+            $("textarea").each(function (index, elem) {
+
+                if (elem.hasAttribute("required")) {
+                    elem.removeAttribute("required");
+                    elem.id = "req"
+                }
+
+                var mde = new SimpleMDE({
+                    spellChecker: false,
+                    element: elem,
+                    autofocus: false,
+                    forceSync: true,
+                    hideIcons: ["side-by-side", "fullscreen"]
+                });
+                mde.render();
+            });
+        });
         $('#add_id_endpoints').attr('href', "{% url 'add_endpoint' pid %}?_popup");
         {% if not form_error %}
             $('#id_endpoints').find('option').remove();
