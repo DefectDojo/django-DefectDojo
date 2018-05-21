@@ -8,21 +8,7 @@
                     <h3 class="has-filters">
                         Active Engagements
                         <div class="dropdown pull-right">
-                            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
-                                    data-toggle="dropdown" aria-expanded="true">
-                                <span class="fa fa-wrench"></span>
-                                <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-right" role="menu"
-                                aria-labelledby="dropdownMenu1">
-                                {% if request.user.is_staff %}
-                                    <li role="presentation">
-                                        <a href="{% url 'new_eng' %}">
-                                            <i class="fa fa-plus"></i> New Engagement
-                                        </a>
-                                    </li>
-                                {% endif %}
-                            </ul>
+
                         </div>
                     </h3>
                 </div>
@@ -43,6 +29,9 @@
                             <th class="prod_name">{% dojo_sort request 'Product' 'name' 'asc' %}</th>
                             <th class="prod_name">{% dojo_sort request 'Product Type' 'prod_type__name' %}</th>
                             <th>Active Engagements</th>
+                            {% if user.is_staff %}
+                                <th> Engagement</th>
+                            {% endif %}
                         </tr>
 
                         {% for p in products %}
@@ -81,6 +70,13 @@
                                         {% endif %}
                                     {% endfor %}
                                 </td>
+                                {% if user.is_staff %}
+                                    <td>
+                                        <a class="btn btn-sm btn-success" href="{% url 'new_eng_for_prod' p.id %}">
+                                            <i class="fa fa-plus"></i> Add
+                                        </a>
+                                    </td>
+                                {% endif %}
                             </tr>
                         {% endfor %}
                     </table>
