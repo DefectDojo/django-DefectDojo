@@ -41,7 +41,7 @@
                         <tr>
                             <th>{% dojo_sort request 'Endpoint' 'host' %}</th>
                             <th>{% dojo_sort request 'Product' 'product' 'asc' %}</th>
-                            <th nowrap="nowrap">Number of <br/> Open Findings</th>
+                            <th nowrap="nowrap">Open Findings</th>
                         </tr>
 
                         {% for e in endpoints %}
@@ -60,11 +60,11 @@
                                   {% endif %}
                                 </td>
                                 <td><a href="{% url 'view_product' e.product.id %}">{{ e.product }}</a></td>
-                                <td class="text-center">
+                                <td>
                                   {% if e.finding_count > 0 %}
-                                  <a href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.finding_count }}</a>
+                                  <a href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.finding_count_endpoint }}</a>
                                   {% else %}
-                                  {{ e.finding_count }}
+                                  No Open, Active Findings
                                   {% endif %}
                                 </td>
                             </tr>
