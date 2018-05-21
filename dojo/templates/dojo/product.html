@@ -74,7 +74,7 @@
                                 </td>
                                 <td>
                                     {% if prod.findings_count %}
-                                        <a href="{% url 'view_product_findings' prod.id %}"><b>{{ prod.findings_count }}</b></a>
+                                        <a href="{% url 'open_findings' %}?test__engagement__product={{ prod.id }}"><b>{{ prod.findings_count }}</b></a>
                                     {% else %}
                                         {{ prod.findings_count }}
                                     {% endif %}

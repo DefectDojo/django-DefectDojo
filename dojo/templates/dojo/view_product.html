@@ -40,9 +40,6 @@
 
                 <div class="dropdown pull-right">
                     <div class="btn-group">
-                        <button class="btn btn-primary clickable panel-collapsed">
-                            <span><i class="fa fa-bar-chart"></i></span>
-                        </button>
                         <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                 data-toggle="dropdown" aria-expanded="true">
                             <span class="fa fa-bars"></span>
@@ -53,6 +50,11 @@
                                 <li role="presentation">
                                     <a class="" href="{% url 'edit_product' prod.id %}">
                                         <i class="fa fa-pencil-square-o"></i> Edit
+                                    </a>
+                                </li>
+                                <li role="presentation">
+                                    <a class="" href="{% url 'view_product_details' prod.id %}">
+                                        <i class="fa fa-list-alt"></i> View Product Details
                                     </a>
                                 </li>
                                 <li role="separator" class="divider"></li>
@@ -73,7 +75,12 @@
                                 </li>
                             <li role="separator" class="divider"></li>
                             <li role="presentation">
-                                <a href="{% url 'view_product_findings' prod.id %}">
+                                <a href="{% url 'endpoints' %}?product={{ prod.id }}">
+                                    <i class="fa fa-sitemap"></i> View Endpoints
+                                </a>
+                            </li>
+                            <li role="presentation">
+                                <a href="{% url 'open_findings' %}?test__engagement__product={{ prod.id }}">
                                     <i class="fa fa-bug"></i> View Open Findings
                                 </a>
                             </li>
@@ -96,7 +103,7 @@
                                     <i class="fa fa-file-text-o"></i> Product Report
                                 </a>
                             </li>
-                            {% if system_settings.enable_benchmark %}
+                            {% if system_settings.enable_benchmark and benchmark_type %}
                             <li role="separator" class="divider"></li>
                             {% for bt in benchmark_type %}
                             <li role="presentation">
@@ -125,7 +132,7 @@
                 </div>
             </div>
         </div>
-        <div class="panel-body product-graphs">
+        <div class="panel-body product-graphs-overview">
             <div class="col-md-3">
                 <div class="panel panel-default">
                     <div class="panel-heading">
@@ -235,6 +242,26 @@
                     </div>
                 </div>
             </div>
+          </div>
+      </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading tight">
+            <div class="clearfix">
+                <h3 class="pull-left">
+                    Detailed Metrics
+                </h3>
+
+                <div class="dropdown pull-right">
+                    <div class="btn-group">
+                        <button class="btn btn-primary clickable panel-collapsed">
+                            <span><i class="fa fa-bar-chart"></i></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+      <div class="panel-body product-graphs">
             <div class="col-md-6">
                 <div class="panel panel-default">
                     <div class="panel-heading">
@@ -372,140 +399,7 @@
             </div>
         </div>
     </div>
-
-
-
     <div class="row">
-        <div class="col-md-12">
-            <div class="panel panel-default table-responsive">
-                <div class="panel-heading">
-                    <h4>Details</h4>
-                </div>
-
-                <table class="table-striped table table-condensed table-hover centered">
-                    <tr>
-                        <th>Product Type</th>
-                        <th>Team Manager</th>
-                        <th>Product Manager</th>
-                        <th>Technical Contact</th>
-                        <th>Authorized Users</th>
-                    </tr>
-                    <tr>
-                        <td>{{ prod.prod_type }}</td>
-                        <td>{{ prod.manager | default:"Unknown" }}</td>
-                        <td>{{ prod.prod_manager | default:"Unknown" }}</td>
-                        <td>{{ prod.tech_contact | default:"Unknown" }}</td>
-                        <td>
-                            {% if prod.authorized_users.all %}
-                                <ul class="no-bullets">
-                                    {% for au in prod.authorized_users.all %}
-                                        <li class="">{{ au }}</li>
-                                    {% endfor %}
-                                </ul>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% if languages %}
-                    <tr>
-                        <td colspan="5" align="left">
-                            <div class="product-detailed-info">
-                              <ol class="product-detailed-info-numbers">
-                                  <li>
-                                      <strong>Code Composition</strong>
-                                  </li>
-                                  <li>
-                                      <span class="color-block language-color" style="background-color:#4b0ba0"></span>
-                                  <strong>Total Files</strong>
-                                  {{ langSummary.files__sum|intcomma }}
-                                  </li>
-                                  <li>
-                                      <span class="color-block language-color" style="background-color:#21aec6"></span>
-                                  <strong>Lines of Code</strong>
-                                  {{ langSummary.code__sum|intcomma }}
-                                  </li>
-                            {% for lang in languages %}
-                            <li>
-                                <span class="color-block language-color" style="background-color:{{ lang.language.color }}"></span>
-                            <strong>{{ lang.language.language }}</strong>
-                            {{ lang.files|percentage:langSummary.files__sum }}
-                            </li>
-                        </span>
-                        {% endfor %}
-                        </ol>
-                      </div>
-                        </td>
-                    </tr>
-                    {% endif %}
-                    {% if app_analysis %}
-                    <tr>
-                        <td colspan="5" align="left">
-                            <div class="product-detailed-info">
-                              <ol class="product-detailed-info-numbers">
-                                  <li>
-                                      <strong>Technologies</strong>
-                                  </li>
-                            {% for app in app_analysis %}
-                            <li>
-                                <span class="color-block language-color" style="background-color:{% random_html %}"></span>
-                            <strong><a href="{{ app.website }}"  target="_blank" alt="{{ app.name }}, Confidence: {{ app.confidence }}">{{ app.name }}</a></strong>
-                            {{ app.version|version_num }}
-                            </li>
-                        </span>
-                        {% endfor %}
-                        </ol>
-                      </div>
-                        </td>
-                    </tr>
-                    {% endif %}
-                </table>
-
-            </div>
-        </div>
-    </div>
-    {% if product_metadata %}
-        <div class="row">
-            <div class="col-md-12">
-                <div class="panel panel-default table-responsive">
-                    <div class="panel-heading">
-                        <h4>Additional Information
-                            <div class="btn-group pull-right">
-                                <a title="Edit Information" class="btn btn-sm btn-primary"
-                                   href="{% url 'edit_meta_data' prod.id %}">
-                                    <span class="fa fa-pencil-square-o"></span>
-                                </a>
-                                <a title="Add Information" class="btn btn-sm btn-primary"
-                                   href="{% url 'add_meta_data' prod.id %}">
-                                    <span class="fa fa-plus"></span>
-                                </a>
-                            </div>
-                        </h4>
-                    </div>
-
-                    <div class="panel-body">
-                        <div id="meta_accordion">
-                            {% for key, value in product_metadata.items %}
-                                <h3>{{ key }}</h3>
-                                <div>
-                                    {{ value }}
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% endif %}
-    <div class="row">
-        <div class="col-md-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4>Description</h4>
-                </div>
-                <div class="panel-body">
-                    {{ prod.description|markdown_render }}
-                </div>
-            </div>
-        </div>
         {% if user.is_staff or authorized %}
 
             <div class="col-md-12">
@@ -521,15 +415,18 @@
                             <tr>
                                 <th>Name</th>
                                 <th>Lead</th>
-                                <th>Start Date</th>
-                                <th>End Date</th>
+                                <th>Date</th>
+                                <th>Length</th>
+                                <th>Tests</th>
+                                <th>Findings</th>
+                                <th>Duplicate Findings</th>
                                 <th>Actions</th>
                             </tr>
                             </thead>
                             <tbody>
                             {% for eng in engs %}
                                 <tr>
-                                <td>{{ eng.name | default:"N/A" }}
+                                <td><a href="{% url 'view_engagement' eng.id %}">{{ eng.name | default:"N/A" }}</a>
                                 {% if eng.tags %}
                                     <sup>
                                         {% for tag in eng.tags %}
@@ -539,11 +436,31 @@
                                 {% endif %}
                                 </td>
                                 <td>{{ eng.lead }}</td>
-                                <td>{{ eng.target_start }}</td>
-                                <td>{{ eng.target_end }}</td>
+                                <td>{{ eng.target_start }} - {{ eng.target_end }}</td>
+                                <td>{{ eng.target_start|datediff_time:eng.target_end }}
+                                  {% if eng.target_end|overdue %}
+                                  <sup>
+                                    <div class="btn btn-sm btn-overdue">
+                                      {{ eng.target_end|overdue }} overdue
+                                    </div>
+                                  </sup>
+                                  {% endif %}
+                                </td>
+                                <td>{{ eng.test_set.all|length }}</td>
+                                <td>{{ eng.test_set.all|count_findings_eng|finding_status:False|length }}</td>
+                                <td>{{ eng.test_set.all|count_findings_eng|finding_status:True|length }}</td>
                                 <td>
-                                <a class="btn btn-sm btn-primary" href="{% url 'view_engagement' eng.id %}">View
-                                    Details</a>
+                                  <div class="btn-group">
+                                      <a class="btn btn-sm btn-primary"
+                                             href="{% url 'close_engagement' eng.id %}">Close</a>
+                                      <a class="btn btn-sm btn-warning"
+                                         href="{% url 'edit_engagement' eng.id %}">Edit</a>
+                                      <a class="btn btn-danger btn-sm"
+                                         href="{% url 'delete_engagement' eng.id %}">
+                                           Delete
+                                         </a>
+                                  </div>
+                                </td>
                             {% endfor %}
                             </tbody>
                         </table>
@@ -555,151 +472,6 @@
                 </div>
             </div>
         {% endif %}
-
-        {% if False %}
-            <div class="col-md-12">
-                <div class="panel panel-default table-responsive">
-                    <div class="panel-heading">
-                        <h4>Scans
-                            <a title="Add New Scan" class="pull-right btn btn-primary btn-sm"
-                               href="{% url 'gmap' prod.id %}"><span class="fa fa-plus"></span></a>
-                        </h4>
-                    </div>
-                    {% if scan_sets %}
-                        <table class="tablesorter-bootstrap table table-condensed table-striped table-hover">
-                            <thead>
-                            <tr>
-                                <th>Creator</th>
-                                <th>Date</th>
-                                <th>Frequency</th>
-                                <th>Protocol</th>
-                                <th>Actions</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {% for scan in scan_sets %}
-                                <tr>
-                                    <td>{{ scan.user }}</td>
-                                    <td>{{ scan.date }}</td>
-                                    <td>{{ scan.frequency }}</td>
-                                    <td>{{ scan.protocol }}</td>
-                                    <td><a class="btn btn-sm btn-primary"
-                                           href="{% url 'view_scan_settings' scan.product.id scan.id %}"> View
-                                        Details </a></td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    {% else %}
-                        <div class="panel-body">
-                            <p>No scans configured.</p>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-        {% endif %}
-        <div class="col-md-12">
-            <div class="panel panel-default table-responsive">
-                <div class="panel-heading">
-                    <h4>Credentials
-                        <a title="Add New Credential" class="pull-right btn btn-primary btn-sm"
-                           href="{% url 'new_cred_product' prod.id %}"><span class="fa fa-plus"></span></a>
-                    </h4>
-                </div>
-                {% if creds %}
-                    <table class="tablesorter-bootstrap table table-condensed table-striped table-hover">
-                        <thead>
-                        <tr>
-                          <th>Name</th>
-                          <th>Username</th>
-                          <th>Role</th>
-                          <th>Environment</th>
-                          <th>Authentication Provider</th>
-                          <th>Login Valid</th>
-                          <th>Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for cred in creds %}
-                            <tr>
-                              <td>
-                                  <a href="{{ cred.cred_id.url }}" target="_blank">{{ cred.cred_id.name }}</a>
-                              </td>
-                              <td>{{ cred.cred_id.username }}</td>
-                              <td>{{ cred.cred_id.role }}</td>
-                              <td>{{ cred.cred_id.environment }}</td>
-                              <td>{{ cred.is_authn_provider }}</td>
-                              <td>{{ cred.cred_id.is_valid }}</td>
-                              <td>
-                                  <div class="btn-group">
-                                      <a class="btn btn-sm btn-primary"
-                                         href="{% url 'view_cred_product' cred.product.id cred.id  %}">View</a>
-                                      <a class="btn btn-sm btn-warning"
-                                         href="{% url 'edit_cred_product' cred.product.id cred.id  %}">Edit</a>
-                                      <a class="btn btn-sm btn-danger delete-finding"
-                                         href="{% url 'delete_cred_product' cred.product.id cred.id  %}">Delete</a>
-                                  </div>
-                              </td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                {% else %}
-                    <div class="panel-body">
-                        <p>No credentials configured.</p>
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-            <div class="col-md-12">
-                <div class="panel panel-default table-responsive">
-                    <div class="panel-heading">
-                        <h4>Tools
-                            <a title="Add New Tool" class="pull-right btn btn-primary btn-sm"
-                               href="{% url 'new_tool_product' prod.id %}"><span class="fa fa-plus"></span></a>
-                        </h4>
-                    </div>
-                    {% if tools %}
-                        <table class="tablesorter-bootstrap table table-condensed table-striped table-hover">
-                            <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>ID</th>
-                                <th>Type</th>
-                                <th>Category</th>
-                                <th>Actions</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {% for tool in tools %}
-                                <tr>
-                                  <td><a href="{{ tool.url }}" target="_blank">
-                                    {{ tool.name }}</a></td>
-                                    <td>{{ tool.tool_project_id }}</td>
-                                    <td><a href="{{ tool.tool_configuration.url }}" target="_blank">
-                                      {{ tool.tool_configuration.name }}</a></td>
-                                    <td>{{ tool.tool_configuration.tool_type.name }}</td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <a class="btn btn-sm btn-primary"
-                                               href="{% url 'view_tool_product' tool.product.id tool.id  %}">View</a>
-                                            <a class="btn btn-sm btn-warning"
-                                               href="{% url 'edit_tool_product' tool.product.id tool.id  %}">Edit</a>
-                                            <a class="btn btn-sm btn-danger delete-finding"
-                                               href="{% url 'delete_tool_product' tool.product.id tool.id  %}">Delete</a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    {% else %}
-                        <div class="panel-body">
-                            <p>No tools configured.</p>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
         {% if user.is_staff and i_engs %}
             <div class="col-md-12">
               <div class="clearfix">
@@ -712,22 +484,38 @@
                     <table class="tablesorter-bootstrap table table-condensed table-striped table-hover">
                         <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Lead</th>
-                            <th>Start Date</th>
-                            <th>End Date</th>
-                            <th>Actions</th>
+                          <th>Name</th>
+                          <th>Lead</th>
+                          <th>Date</th>
+                          <th>Length</th>
+                          <th>Tests</th>
+                          <th>Findings</th>
+                          <th>Duplicate Findings</th>
+                          <th>Actions</th>
                         </tr>
                         </thead>
                         <tbody>
                         {% for eng in i_engs %}
                             <tr>
-                            <td>{% if eng.name %}{{ eng.name }}{% else %} N/A {% endif %}</td>
+                            <td><a href="{% url 'view_engagement' eng.id %}">{{ eng.name | default:"N/A" }}</a></td>
                             <td>{{ eng.lead }}</td>
-                            <td>{{ eng.target_start }}</td>
-                            <td>{{ eng.target_end }}</td>
+                            <td>{{ eng.target_start }} - {{ eng.target_end }}</td>
+                            <td>{{ eng.target_start|datediff_time:eng.target_end }}</td>
+                            <td>{{ eng.test_set.all|length }}</td>
+                            <td>{{ eng.test_set.all|count_findings_eng|finding_status:False|length }}</td>
+                            <td>{{ eng.test_set.all|count_findings_eng|finding_status:True|length }}</td>
                             <td>
-                            <a class="btn btn-sm btn-primary" href="{% url 'view_engagement' eng.id %}">View Details</a>
+                              <div class="btn-group">
+                                  <a class="btn btn-sm btn-primary"
+                                         href="{% url 'reopen_engagement' eng.id %}">Reopen</a>
+                                  <a class="btn btn-sm btn-warning"
+                                     href="{% url 'edit_engagement' eng.id %}">Edit</a>
+                                  <a class="btn btn-danger btn-sm"
+                                     href="{% url 'delete_engagement' eng.id %}">
+                                       Delete
+                                     </a>
+                              </div>
+                            </td>
                         {% endfor %}
                         </tbody>
                     </table>

@@ -163,7 +163,7 @@
                         </span>
                     </td>
                     <td> {% if finding.under_review %}Under Review, {% endif %}{{ finding.status }}
-                        {% if finding.duplicate %} <a href="{% url 'view_finding' finding.duplicate_finding.id%}">Original
+                        {% if finding.duplicate_finding.id %} <a href="{% url 'view_finding' finding.duplicate_finding.id%}">Original
                         {% endif %}</a></td>
                     {% if finding.risk_acceptance_set.all %}
                         <td>

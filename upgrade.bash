@@ -82,8 +82,8 @@ python manage.py dbbackup --output-path $DBPATH$DB_BACKUP_NAME --compress
 printf "\n==============================================================================\n"
 printf "Pulling the latest version from master.\n"
 printf "==============================================================================\n\n"
-#git checkout master
-#git pull
+git checkout master
+git pull
 
 printf "==============================================================================\n"
 printf "Upgrading the pip installs.\n"

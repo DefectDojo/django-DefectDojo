@@ -1266,6 +1266,7 @@ NOTIFICATION_CHOICES = (
 
 
 class Notifications(models.Model):
+    product_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     engagement_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     test_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     results_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
@@ -1409,6 +1410,9 @@ class Language_Type(models.Model):
     language = models.CharField(max_length=100, null=False)
     color = models.CharField(max_length=7, null=True, verbose_name='HTML color')
 
+    def __unicode__(self):
+        return self.language
+
 
 class Languages(models.Model):
     language = models.ForeignKey(Language_Type)
@@ -1419,6 +1423,9 @@ class Languages(models.Model):
     comment = models.IntegerField(blank=True, null=True, verbose_name='Number of comment lines')
     code = models.IntegerField(blank=True, null=True, verbose_name='Number of code lines')
     created = models.DateTimeField(null=False, editable=False, default=now)
+
+    def __unicode__(self):
+        return self.language.language
 
 
 class App_Analysis(models.Model):
@@ -1432,6 +1439,8 @@ class App_Analysis(models.Model):
     website_found = models.URLField(max_length=400, null=True, blank=True)
     created = models.DateTimeField(null=False, editable=False, default=now)
 
+    def __unicode__(self):
+        return self.name + " | " + self.product.name
 
 class Objects_Review(models.Model):
     name = models.CharField(max_length=100, null=True)
@@ -1688,3 +1697,6 @@ watson.register(Product)
 watson.register(Test)
 watson.register(Finding)
 watson.register(Finding_Template)
+watson.register(Endpoint)
+watson.register(Engagement)
+watson.register(App_Analysis)

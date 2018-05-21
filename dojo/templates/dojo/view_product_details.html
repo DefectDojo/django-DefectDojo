@@ -40,9 +40,6 @@
 
                 <div class="dropdown pull-right">
                     <div class="btn-group">
-                        <button class="btn btn-primary clickable panel-collapsed">
-                            <span><i class="fa fa-bar-chart"></i></span>
-                        </button>
                         <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                 data-toggle="dropdown" aria-expanded="true">
                             <span class="fa fa-bars"></span>
@@ -53,6 +50,11 @@
                                 <li role="presentation">
                                     <a class="" href="{% url 'edit_product' prod.id %}">
                                         <i class="fa fa-pencil-square-o"></i> Edit
+                                    </a>
+                                </li>
+                                <li role="presentation">
+                                    <a href="{% url 'view_product' prod.id %}">
+                                        <i class="fa fa-list-alt"></i> View Product
                                     </a>
                                 </li>
                                 <li role="separator" class="divider"></li>
@@ -73,13 +75,13 @@
                                 </li>
                             <li role="separator" class="divider"></li>
                             <li role="presentation">
-                                <a href="{% url 'view_product_findings' prod.id %}">
-                                    <i class="fa fa-bug"></i> View Open Findings
+                                <a href="{% url 'endpoints' %}?product={{ prod.id }}">
+                                    <i class="fa fa-sitemap"></i> View Endpoints
                                 </a>
                             </li>
                             <li role="presentation">
-                                <a href="{% url 'view_product_details' prod.id %}">
-                                    <i class="fa fa-history"></i> View Product Details
+                                <a href="{% url 'open_findings' %}?test__engagement__product={{ prod.id }}">
+                                    <i class="fa fa-bug"></i> View Open Findings
                                 </a>
                             </li>
                             <li role="presentation">
@@ -101,7 +103,7 @@
                                     <i class="fa fa-file-text-o"></i> Product Report
                                 </a>
                             </li>
-                            {% if system_settings.enable_benchmark %}
+                            {% if system_settings.enable_benchmark and benchmark_type %}
                             <li role="separator" class="divider"></li>
                             {% for bt in benchmark_type %}
                             <li role="presentation">
@@ -130,65 +132,9 @@
                 </div>
             </div>
         </div>
-
-    {% if user.is_staff or authorized %}
-    <div class="row">
-        <div class="col-md-12">
-            <div class="panel panel-default table-responsive">
-                <div class="panel-heading">
-                    <h4> Active Engagements <a title="Add New Engagement" class="pull-right btn btn-sm btn-primary"
-                                               href="{% url 'new_eng_for_prod' prod.id %}"><span
-                            class="fa fa-plus"></span> </a></h4>
-                </div>
-                {% if engs %}
-                    <table class="tablesorter-bootstrap table table-condensed table-striped table-hover">
-                        <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Lead</th>
-                            <th>Start Date</th>
-                            <th>End Date</th>
-                            <th>Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for eng in engs %}
-                            <tr>
-                            <td>{{ eng.name | default:"N/A" }}
-                            {% if eng.tags %}
-                                <sup>
-                                    {% for tag in eng.tags %}
-                                    <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
-                                    {% endfor %}
-                                </sup>
-                            {% endif %}
-                            </td>
-                            <td>{{ eng.lead }}</td>
-                            <td>{{ eng.target_start }}</td>
-                            <td>{{ eng.target_end }}</td>
-                            <td>
-                            <a class="btn btn-sm btn-primary" href="{% url 'view_engagement' eng.id %}">View
-                                Details</a>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                {% else %}
-                    <div class="panel-body">
-                        <p class="text-center">No active engagements found.</p>
-                    </div>
-                {% endif %}
-            </div>
+        <div class="panel-body">
+            {{ prod.description|markdown_render }}
         </div>
-      </div>
-    {% endif %}
-
-    <div class="row">
-        <div class="col-md-12">
-            <div class="panel panel-default table-responsive">
-                <div class="panel-heading">
-                    <h4>Details</h4>
-                </div>
-
                 <table class="table-striped table table-condensed table-hover centered">
                     <tr>
                         <th>Product Type</th>
@@ -199,9 +145,9 @@
                     </tr>
                     <tr>
                         <td>{{ prod.prod_type }}</td>
-                        <td>{{ prod.manager | default:"Unknown" }}</td>
-                        <td>{{ prod.prod_manager | default:"Unknown" }}</td>
-                        <td>{{ prod.tech_contact | default:"Unknown" }}</td>
+                        <td>{% if prod.manager != "0" %}{{ prod.manager | default:"Unknown" }}{% else %}Unkown{% endif %}</td>
+                        <td>{% if prod.prod_manager != "0" %}{{ prod.prod_manager | default:"Unknown" }}{% else %}Unkown{% endif %}</td>
+                        <td>{% if prod.tech_contact != "0" %}{{ prod.tech_contact | default:"Unknown" }}{% else %}Unkown{% endif %}</td>
                         <td>
                             {% if prod.authorized_users.all %}
                                 <ul class="no-bullets">
@@ -209,6 +155,8 @@
                                         <li class="">{{ au }}</li>
                                     {% endfor %}
                                 </ul>
+                            {% else %}
+                            Unknown
                             {% endif %}
                         </td>
                     </tr>
@@ -303,16 +251,6 @@
         </div>
     {% endif %}
     <div class="row">
-        <div class="col-md-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4>Description</h4>
-                </div>
-                <div class="panel-body">
-                    {{ prod.description|markdown_render }}
-                </div>
-            </div>
-        </div>
         {% if False %}
             <div class="col-md-12">
                 <div class="panel panel-default table-responsive">
@@ -438,8 +376,6 @@
                                     <td>{{ tool.tool_configuration.tool_type.name }}</td>
                                     <td>
                                         <div class="btn-group">
-                                            <a class="btn btn-sm btn-primary"
-                                               href="{% url 'view_tool_product' tool.product.id tool.id  %}">View</a>
                                             <a class="btn btn-sm btn-warning"
                                                href="{% url 'edit_tool_product' tool.product.id tool.id  %}">Edit</a>
                                             <a class="btn btn-sm btn-danger delete-finding"
@@ -457,45 +393,7 @@
                     {% endif %}
                 </div>
             </div>
-        {% if user.is_staff and i_engs %}
-            <div class="col-md-12">
-              <div class="clearfix">
-                  {% include "dojo/paging_snippet.html" with page=i_engs page_size=True %}
-              </div>
-                <div class="panel panel-default table-responsive">
-                    <div class="panel-heading">
-                        <h4> Closed Engagements </h4>
-                    </div>
-                    <table class="tablesorter-bootstrap table table-condensed table-striped table-hover">
-                        <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Lead</th>
-                            <th>Start Date</th>
-                            <th>End Date</th>
-                            <th>Tests</th>
-                            <th>Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for eng in i_engs %}
-                            <tr>
-                            <td>{% if eng.name %}{{ eng.name }}{% else %} N/A {% endif %}</td>
-                            <td>{{ eng.lead }}</td>
-                            <td>{{ eng.target_start }}</td>
-                            <td>{{ eng.target_end }}</td>
-                            <td> {{eng.tests.count }}
-                            <td>
-                            <a class="btn btn-sm btn-primary" href="{% url 'view_engagement' eng.id %}">View Details</a>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                <div class="clearfix">
-                    {% include "dojo/paging_snippet.html" with page=i_engs page_size=True %}
-                </div>
-            </div>
-        {% endif %}
+
 
 
     </div>
@@ -535,14 +433,13 @@
             }
 
             $(document).on('click', '.panel-heading button.clickable', function (e) {
-                var $this = $(".product-graphs");
-
+                var $this = $(this);
                 if (!$this.hasClass('panel-collapsed')) {
-                    $this.slideUp();
+                    $this.parents('.panel').find('.panel-body').slideUp();
                     $this.addClass('panel-collapsed');
                     $this.find('i').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
                 } else {
-                    $this.slideDown();
+                    $this.parents('.panel').find('.panel-body').slideDown();
                     $this.removeClass('panel-collapsed');
                     $this.find('i').removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
                 }
@@ -558,7 +455,6 @@
             test_type();
             finding_age();
             $(".product-graphs").hide();
-            $(".product-graphs").addClass('panel-collapsed');
             $("#meta_accordion").accordion();
         });
 

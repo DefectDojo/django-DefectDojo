@@ -6,6 +6,8 @@ urlpatterns = [
     #  findings
     url(r'^finding$', views.open_findings,
         name='findings'),
+    url(r'^finding/bulk$', views.finding_bulk_update_all,
+        name='findings_bulk_all'),
     url(r'^finding/open$', views.open_findings,
         name='open_findings'),
     url(r'^finding/closed$', views.closed_findings,
