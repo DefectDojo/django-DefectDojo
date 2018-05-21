@@ -7,6 +7,8 @@ urlpatterns = [
     url(r'^product$', views.product, name='product'),
     url(r'^product/(?P<pid>\d+)$', views.view_product,
         name='view_product'),
+    url(r'^product/(?P<pid>\d+)/details$', views.view_product_details,
+        name='view_product_details'),
     url(r'^product/(?P<pid>\d+)/edit$', views.edit_product,
         name='edit_product'),
     url(r'^product/(?P<pid>\d+)/delete$', views.delete_product,
