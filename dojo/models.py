@@ -638,6 +638,14 @@ class Endpoint(models.Model):
                                       duplicate=False).distinct().order_by(
             'numerical_severity')
 
+    def finding_count_endpoint(self):
+        findings = Finding.objects.filter(endpoints=self,
+                                          active=True,
+                                          verified=True,
+                                          out_of_scope=False).distinct()
+
+        return findings.count()
+
     def get_breadcrumbs(self):
         bc = self.product.get_breadcrumbs()
         bc += [{'title': self.host_no_port,

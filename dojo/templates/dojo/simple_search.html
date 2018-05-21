@@ -7,6 +7,7 @@
     <p>This simple search function will return results whose findings or finding templates
         title, URL, description, endpoints, tags, references, languages or technologies contain the search query and products whose
         name, tags or description contain the search query.</p>
+    <p>Advanced search operators: (Restrict results to a certain type) product:, engagement:, finding:, endpoint:, tag:, langugage: or technology:
     <div role="tabpanel">
 
         <!-- Nav tabs -->
@@ -245,14 +246,14 @@
                         <tr>
                             <th>Endpoint</th>
                             <th>Product</th>
-                            <th>Number of Open Findings</th>
+                            <th>Open Findings</th>
                         </tr>
                         </thead>
                         <tbody>
                         {% for e in endpoints %}
                             <tr>
-                                <td><a href="{% url 'view_endpoint' e.id %}">{{ e }}
-                                  {% if e.object.tags %}
+                                <td><a href="{% url 'view_endpoint' e.id %}">{{ e }}</a>
+                                  {% if e.tags %}
                                       <sup>
                                           {% for tag in e.tags %}
                                           <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
@@ -261,11 +262,11 @@
                                   {% endif %}
                                 </td>
                                 <td><a href="{% url 'view_product' e.product.id %}">{{ e.product.name }}</a></td>
-                                <td class="text-center">
-                                  {% if e.object.finding_count > 0 %}
-                                  <a href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.finding_count }}</a>
+                                <td>
+                                  {% if e.finding_count_endpoint > 0 %}
+                                  <a href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.finding_count_endpoint }}</a>
                                   {% else %}
-                                  {{ e.finding_count }}
+                                  No Open, Active Findings
                                   {% endif %}
                                 </td>
                             </tr>
