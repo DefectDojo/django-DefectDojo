@@ -12,8 +12,7 @@
                     {% if finding.tags %}
                         <sup>
                             {% for tag in finding.tags %}
-                                <a title="Search {{ tag }}" class="btn btn-tag btn-primary"
-                                   href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                            <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                             {% endfor %}
                         </sup>
                     {% endif %}
@@ -266,42 +265,41 @@
         </div>
     {% endif %}
     {% if  finding.static_finding != True %}
-        <div class="row to_highlight">
-            <div class="col-md-12">
-                <div class="panel panel-default endpoints table-responsive">
-                    <div class="panel-heading">
-                        <h4>Affected Endpoints / Systems
-                            <span class="pull-right"><a data-toggle="collapse" href="#vuln_endpoints"><i
-                                    class="glyphicon glyphicon-chevron-up"></i></a></span>
-                        </h4>
-                    </div>
+    <div class="row to_highlight">
+        <div class="col-md-12">
+            <div class="panel panel-default endpoints table-responsive">
+                <div class="panel-heading">
+                    <h4>Affected Endpoints / Systems
+                        <span class="pull-right"><a data-toggle="collapse" href="#vuln_endpoints"><i
+                                class="glyphicon glyphicon-chevron-up"></i></a></span>
+                    </h4>
+                </div>
 
-                    {% if  finding.endpoints.all %}
-                        {% colgroup finding.endpoints.all into 3 cols as grouped_items %}
-                        <table id="vuln_endpoints"
-                               class="collapse in table-striped table table table-condensed table-hover finding-endpoints">
-                            {% for row in grouped_items %}
-                                <tr>
-                                    {% for item in row %}
-                                        <td>{% if item %}<i class="fa fa-circle"></i> <a title="View endpoint details"
-                                                                                         href="{% url 'view_endpoint' item.id %}">{{ item }}</a>
-                                            {% if item.tags %}
-                                                <sup>
-                                                    {% for tag in item.tags %}
-                                                        <a title="Search {{ tag }}" class="btn btn-tag btn-primary"
-                                                           href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
-                                                    {% endfor %}
-                                                </sup>
-                                            {% endif %}
-                                        {% endif %}
-                                        </td>
-                                    {% endfor %}
-                                </tr>
-                            {% endfor %}
-                        </table>
-                    {% else %}
-                        <div id="vuln_endpoints" class="panel-body endpoint-panel table-responsive collapse in">
-                            No endpoints.
+                {% if  finding.endpoints.all %}
+                    {% colgroup finding.endpoints.all into 3 cols as grouped_items %}
+                    <table id="vuln_endpoints"
+                           class="collapse in table-striped table table table-condensed table-hover finding-endpoints">
+                        {% for row in grouped_items %}
+                            <tr>
+                                {% for item in row %}
+                                    <td>{% if item %}<i class="fa fa-circle"></i> <a title="View endpoint details"
+                                                                                     href="{% url 'view_endpoint' item.id %}">{{ item }}</a>
+                                   {% if item.tags %}
+                                       <sup>
+                                           {% for tag in item.tags %}
+                                           <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                           {% endfor %}
+                                       </sup>
+                                      {% endif %}
+                                   {% endif %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% else %}
+                    <div id="vuln_endpoints" class="panel-body endpoint-panel table-responsive collapse in">
+                        No endpoints.
                         </div>
                     {% endif %}
 

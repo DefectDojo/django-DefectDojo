@@ -44,18 +44,19 @@
                 </div>
                 <div class="panel panel-default table-responsive">
                     <table id="products"
-                           class="tablesorter-bootstrap table table-bordered table-condensed table-striped">
+                           class="tablesorter-bootstrap table table-condensed table-striped">
                         <thead>
                         <tr>
                             <th>{% dojo_sort request 'Product' 'name' 'asc' %}</th>
-                            <th> Engagements</th>
-                            <th> Last Engagement Date</th>
-                            <th> Findings</th>
-                            <th> Endpoints</th>
+                            <th> Criticality</th>
+                            <th> Metadata
+                            <th> Engagement</th>
                             {% if "enable_jira"|get_system_setting %}
                             <th>Jira</th>
                             {% endif %}
-                            <th> Contacts</th>
+                            <th> Finding</th>
+                            <th> Endpoint</th>
+                            <th> Contact</th>
                             <th>{% dojo_sort request 'Product Type' 'prod_type__name' %}</th>
                             {% if user.is_staff %}
                                 <th> Engagement</th>
@@ -69,55 +70,62 @@
                                     <a href="{% url 'view_product' prod.id %}"><b>{{ prod.name }}</b></a>
                                     {% with grade=prod|product_grade %}
                                       {% if grade %}
-                                        <div class="btn btn-tag {{ grade }}">{{ grade }}</div>
+                                        <sup><div class="tag-label {{ grade }}">{{ grade }}</div></sup>
                                       {% endif %}
                                     {% endwith %}
                                     <sup>
                                     {% for tag in prod.tags %}
-                                        &nbsp;<a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                      <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                     {% endfor %}
                                   </sup>
                                 </td>
+                                <td class="text-center">{{ prod.business_criticality|business_criticality_icon }}</td>
                                 <td>
-                                  {{ prod.active_engagement_count }} Active,
-                                  {{ prod.closed_engagement_count }} Closed
+                                  {{ prod.platform|platform_icon }}
+                                  {{ prod.lifecycle|lifecycle_icon }}
+                                  {{ prod.origin|origin_icon }}
+                                  {{ prod.external_audience|external_audience_icon }}
+                                  {{ prod.internet_accessible|internet_accessible_icon }}
                                 </td>
-                                <td>
+                                <td class="text-center">
                                   {% if prod.last_engagement_date %}
-                                    {{ prod.last_engagement_date.target_end }}
+                                    <i class="fa fa-bullseye happy-green-color has-popover" title="<i class='fa fa-bullseye'></i> <b>Engagements</b>" data-trigger="hover" data-placement="bottom" data-html="true"
+                                    data-content="{{ prod.active_engagement_count }} Active,
+                                    {{ prod.closed_engagement_count }} Closed<br>
+                                    <b>Last Assessed:</b> {{ prod.last_engagement_date.target_end }}"></i>
                                   {% else %}
-                                      Not Assessed 
+                                    <i class="fa fa-bullseye text-danger has-popover" title="<i class='fa fa-bullseye'></i> <b>Engagements</b>" data-trigger="hover" data-placement="bottom" data-html="true"
+                                    data-content="No Engagements Exist"></i>
                                   {% endif %}
                                 </td>
-                                <td>
+                                {% if "enable_jira"|get_system_setting %}
+                                <td class="text-center">
+                                {% for jira in prod.id|get_jira_conf %}
+                                <i class="fa fa-bug has-popover" title="<i class='fa fa-bug'></i> <b>Jira Configuration</b>" data-trigger="hover" data-html="true" data-placement="bottom"
+                                  data-content="<b>Jira:</b> {{ jira.conf }}<br/>
+                                  <b>Project Key:</b> {{ jira.project_key }}<br/>
+                                  <b>Component:</b> {{ jira.component }}<br/>
+                                  <b>Push All Issues:</b> {{ jira.push_all_issues }}<br/>
+                                  <b>Engagement Epic Mapping:</b> {{ jira.enable_engagement_epic_mapping }}<br/>
+                                  <b>Push Notes:</b> {{ jira.push_notes }}">
+                                </i>
+                                {% endfor %}
+                                </td>
+                                {% endif %}
+                                <td class="text-center">
                                     {% if prod.findings_count %}
                                         <a href="{% url 'open_findings' %}?test__engagement__product={{ prod.id }}"><b>{{ prod.findings_count }}</b></a>
                                     {% else %}
                                         0
                                     {% endif %}
                                 </td>
-                                <td>
+                                <td class="text-center">
                                   {% if prod.findings_count %}
                                     <a href="{% url 'vulnerable_endpoints' %}?product={{ prod.id }}"><b>{{ prod.endpoint_count }}</b></a>
                                   {% else %}
                                       0
                                   {% endif %}
                                 </td>
-                                {% if "enable_jira"|get_system_setting %}
-                                <td>
-                                {% for jira in prod.id|get_jira_conf %}
-                                Enabled
-                                <i class="fa fa-bug has-popover" data-trigger="hover" data-html="true"
-                                  data-content="<b>Jira:</b> {{ jira.conf }}<br/>
-                                  <b>Project Key:</b> {{ jira.project_key }}<br/>
-                                  <b>Component:</b> {{ jira.component }}<br/>
-                                  <b>Push All Issues:</b> {{ jira.push_all_issues }}<br/>
-                                  <b>Engagement Epic Mapping:</b> {{ jira.enable_engagement_epic_mapping }}<br/>
-                                  <b>Push Notes:</b> {{ jira.push_notes }}"
-                                </i>
-                                {% endfor %}
-                                </td>
-                                {% endif %}
                                 <td>
                                   {% if prod.prod_manager %}
                                     {% if prod.prod_manager != "0" %}
@@ -138,7 +146,7 @@
                                 </td>
                                 <td> {{ prod.prod_type.name }}</td>
                                 {% if user.is_staff %}
-                                    <td>
+                                    <td class="text-center">
                                         <a class="btn btn-sm btn-success" href="{% url 'new_eng_for_prod' prod.id %}">
                                             <i class="fa fa-plus"></i> Add
                                         </a>
