@@ -9,7 +9,7 @@ from django.utils.text import normalize_newlines
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from dojo.utils import prepare_for_view, get_system_setting
-from dojo.models import Check_List, FindingImageAccessToken, Finding, System_Settings
+from dojo.models import Check_List, FindingImageAccessToken, Finding, System_Settings, JIRA_PKey
 import markdown
 from django.utils import timezone
 from markdown.extensions import Extension
@@ -146,6 +146,13 @@ def asvs_level(benchmark_score):
         level = "(" + level + ")"
 
     return "ASVS " + str(benchmark_score.desired_level) + " " + level + " Pass: " + str(total_pass) + " Total:  " + total
+
+
+@register.filter(name='get_jira_conf')
+def get_jira_conf(product):
+    jira_conf = JIRA_PKey.objects.filter(product=product)
+
+    return jira_conf
 
 
 @register.filter(name='version_num')

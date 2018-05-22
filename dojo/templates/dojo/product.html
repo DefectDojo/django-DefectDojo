@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
 {% load display_tags %}
+{% load get_system_setting %}
 {% block content %}
     <div class="row">
         <div class="col-md-12">
@@ -38,7 +39,6 @@
                 </div>
             </div>
             {% if prod_list %}
-
                 <div class="clearfix">
                     {% include "dojo/paging_snippet.html" with page=prod_list page_size=True %}
                 </div>
@@ -48,8 +48,14 @@
                         <thead>
                         <tr>
                             <th>{% dojo_sort request 'Product' 'name' 'asc' %}</th>
-                            <th> Active<br/>findings</th>
-                            <th> Vulnerable<br/>endpoints</th>
+                            <th> Engagements</th>
+                            <th> Last Engagement Date</th>
+                            <th> Findings</th>
+                            <th> Endpoints</th>
+                            {% if "enable_jira"|get_system_setting %}
+                            <th>Jira</th>
+                            {% endif %}
+                            <th> Contacts</th>
                             <th>{% dojo_sort request 'Product Type' 'prod_type__name' %}</th>
                             {% if user.is_staff %}
                                 <th> Engagement</th>
@@ -73,14 +79,62 @@
                                   </sup>
                                 </td>
                                 <td>
+                                  {{ prod.active_engagement_count }} Active,
+                                  {{ prod.closed_engagement_count }} Closed
+                                </td>
+                                <td>
+                                  {% if prod.last_engagement_date %}
+                                    {{ prod.last_engagement_date.target_end }}
+                                  {% else %}
+                                      Not Assessed 
+                                  {% endif %}
+                                </td>
+                                <td>
                                     {% if prod.findings_count %}
                                         <a href="{% url 'open_findings' %}?test__engagement__product={{ prod.id }}"><b>{{ prod.findings_count }}</b></a>
                                     {% else %}
-                                        {{ prod.findings_count }}
+                                        0
                                     {% endif %}
                                 </td>
                                 <td>
+                                  {% if prod.findings_count %}
                                     <a href="{% url 'vulnerable_endpoints' %}?product={{ prod.id }}"><b>{{ prod.endpoint_count }}</b></a>
+                                  {% else %}
+                                      0
+                                  {% endif %}
+                                </td>
+                                {% if "enable_jira"|get_system_setting %}
+                                <td>
+                                {% for jira in prod.id|get_jira_conf %}
+                                Enabled
+                                <i class="fa fa-bug has-popover" data-trigger="hover" data-html="true"
+                                  data-content="<b>Jira:</b> {{ jira.conf }}<br/>
+                                  <b>Project Key:</b> {{ jira.project_key }}<br/>
+                                  <b>Component:</b> {{ jira.component }}<br/>
+                                  <b>Push All Issues:</b> {{ jira.push_all_issues }}<br/>
+                                  <b>Engagement Epic Mapping:</b> {{ jira.enable_engagement_epic_mapping }}<br/>
+                                  <b>Push Notes:</b> {{ jira.push_notes }}"
+                                </i>
+                                {% endfor %}
+                                </td>
+                                {% endif %}
+                                <td>
+                                  {% if prod.prod_manager %}
+                                    {% if prod.prod_manager != "0" %}
+                                      {{ prod.prod_manager }}, <i>Manager</i>
+                                        {% if prod.tech_contact or prod.technical_contact %}<br>{% endif %}
+                                    {% endif %}
+                                  {% endif %}
+                                  {% if prod.tech_contact %}
+                                    {% if prod.tech_contact != "0" %}
+                                      {{ prod.tech_contact }}, <i>Technical</i>
+                                    {% endif %}
+                                  {% endif %}
+                                  {% if prod.technical_contact %}
+                                    {% if prod.technical_contact != "0" %}
+                                      {{ prod.technical_contact }}, <i>Technical</i>
+                                    {% endif %}
+                                  {% endif %}
                                 </td>
                                 <td> {{ prod.prod_type.name }}</td>
                                 {% if user.is_staff %}
