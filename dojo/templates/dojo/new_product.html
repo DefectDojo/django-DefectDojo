@@ -44,10 +44,14 @@
                 var mde = new SimpleMDE({
                     spellChecker: false,
                     element: elem,
-                    spellChecker: false,
                     autofocus: false,
                     forceSync: true,
-                    hideIcons: ["side-by-side", "fullscreen"]
+                    toolbar: ["bold", "italic", "heading", "|",
+                        "quote", "unordered-list", "ordered-list", "|",
+                        "link", "image", "|",
+                        "table", "horizontal-rule", "code", "|",
+                        "guide"
+                    ]
                 });
                 mde.render();
             });
