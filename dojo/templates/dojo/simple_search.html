@@ -88,7 +88,7 @@
                                        href="{% url 'view_product' product.object.id %}">{{ product.object.name }}</a>
                                     <sup>
                                         {% for tag in product.object.tags %}
-                                            <a title="Search {{ tag }}" class="btn btn-tag btn-primary"
+                                            <a title="Search {{ tag }}" class="tag-label tag-color"
                                                href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                         {% endfor %}
                                     </sup>
@@ -124,7 +124,7 @@
                                        href="{% url 'view_finding' finding.object.id %}">{{ finding.object.title }}</a>
                                     <sup>
                                         {% for tag in finding.object.tags %}
-                                            <a title="Search {{ tag }}" class="btn btn-tag btn-primary"
+                                            <a title="Search {{ tag }}" class="tag-label tag-color"
                                                href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                         {% endfor %}
                                     </sup>
@@ -133,7 +133,7 @@
                                 <td><a href="{% url 'view_product' finding.object.test.engagement.product.id %}">{{ finding.object.test.engagement.product.name }}</a>
                                   <sup>
                                       {% for tag in finding.object.test.engagement.product.tags %}
-                                          <a title="Search {{ tag }}" class="btn btn-tag btn-primary"
+                                          <a title="Search {{ tag }}" class="tag-label tag-color"
                                              href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                       {% endfor %}
                                   </sup>
@@ -162,7 +162,7 @@
                                        href="{% url 'edit_template' finding_template.object.id %}">{{ finding_template.object.title }}</a>
                                     <sup>
                                         {% for tag in finding_template.object.tags %}
-                                            <a title="Search {{ tag }}" class="btn btn-tag btn-primary"
+                                            <a title="Search {{ tag }}" class="tag-label tag-color"
                                                href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                         {% endfor %}
                                     </sup>
@@ -194,7 +194,7 @@
                                        href="{% url 'view_engagement' engagement.object.id %}">{{ engagement.object.name }}</a>
                                     <sup>
                                         {% for tag in engagement.object.tags %}
-                                            <a title="Search {{ tag }}" class="btn btn-tag btn-primary"
+                                            <a title="Search {{ tag }}" class="tag-label tag-color"
                                                href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                         {% endfor %}
                                     </sup>
@@ -202,7 +202,7 @@
                                 <td><a href="{% url 'view_product' engagement.object.product.id %}">{{ engagement.object.product.name }}</a>
                                   <sup>
                                       {% for tag in engagement.object.product.tags %}
-                                          <a title="Search {{ tag }}" class="btn btn-tag btn-primary"
+                                          <a title="Search {{ tag }}" class="tag-label tag-color"
                                              href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                       {% endfor %}
                                   </sup>
@@ -236,7 +236,7 @@
                                        href="{% url 'view_test' test.object.id %}">{{ test.object.test_type }}</a>
                                     <sup>
                                         {% for tag in test.object.tags %}
-                                            <a title="Search {{ tag }}" class="btn btn-tag btn-primary"
+                                            <a title="Search {{ tag }}" class="tag-label tag-color"
                                                href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                         {% endfor %}
                                     </sup>
@@ -244,7 +244,7 @@
                                 <td><a href="{% url 'view_product' test.object.engagement.product.id %}">{{ test.object.engagement.product.name }}</a>
                                   <sup>
                                       {% for tag in test.object.engagement.product.tags %}
-                                          <a title="Search {{ tag }}" class="btn btn-tag btn-primary"
+                                          <a title="Search {{ tag }}" class="tag-label tag-color"
                                              href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                       {% endfor %}
                                   </sup>
@@ -252,7 +252,7 @@
                                 <td><a href="{% url 'view_engagement' test.object.engagement.id %}">{{ test.object.engagement.name }}</a>
                                   <sup>
                                       {% for tag in test.object.engagement.tags %}
-                                          <a title="Search {{ tag }}" class="btn btn-tag btn-primary"
+                                          <a title="Search {{ tag }}" class="tag-label tag-color"
                                              href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                       {% endfor %}
                                   </sup>
@@ -284,7 +284,7 @@
                                   {% if e.tags %}
                                       <sup>
                                           {% for tag in e.tags %}
-                                          <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                          <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                           {% endfor %}
                                       </sup>
                                   {% endif %}
@@ -292,7 +292,7 @@
                                 <td><a href="{% url 'view_product' e.product.id %}">{{ e.product.name }}</a>
                                   <sup>
                                       {% for tag in e.product.tags %}
-                                          <a title="Search {{ tag }}" class="btn btn-tag btn-primary"
+                                          <a title="Search {{ tag }}" class="tag-label tag-color"
                                              href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                       {% endfor %}
                                   </sup>
@@ -329,7 +329,7 @@
                                        href="{% url 'view_product' lang.product.id %}">{{ lang.product.name }}</a>
                                     <sup>
                                         {% for tag in lang.product.tags %}
-                                            <a title="Search {{ tag }}" class="btn btn-tag btn-primary"
+                                            <a title="Search {{ tag }}" class="tag-label tag-color"
                                                href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                         {% endfor %}
                                     </sup>
@@ -359,7 +359,7 @@
                                        href="{% url 'view_product' app.product.id %}">{{ app.product.name }}</a>
                                     <sup>
                                         {% for tag in app.product.tags %}
-                                            <a title="Search {{ tag }}" class="btn btn-tag btn-primary"
+                                            <a title="Search {{ tag }}" class="tag-label tag-color"
                                                href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                         {% endfor %}
                                     </sup>
@@ -389,7 +389,7 @@
                                            href="{% url 'view_test' test.id %}">{{ test.test_type }}</a>
                                         <sup>
                                             {% for tag in test.tags %}
-                                                <a title="Search {{ tag }}" class="btn btn-tag btn-primary"
+                                                <a title="Search {{ tag }}" class="tag-label tag-color"
                                                    href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                             {% endfor %}
                                         </sup>
@@ -402,13 +402,6 @@
                             <tr>
                                 <td><a class="search-finding"
                                        href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a>
-                                       {{ finding.test.engagement.product.name }}asdf
-                                    <sup>
-                                        {% for tag in finding.tags %}
-                                            <a title="Search {{ tag }}" class="btn btn-tag btn-primary"
-                                               href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
-                                        {% endfor %}
-                                    </sup>
                                 </td>
                                 <td>Finding</td>
                             </tr>
@@ -419,7 +412,7 @@
                                        href="{% url 'edit_template' finding_template.id %}">{{ finding_template.title }}</a>
                                     <sup>
                                         {% for tag in finding_template.tags %}
-                                            <a title="Search {{ tag }}" class="btn btn-tag btn-primary"
+                                            <a title="Search {{ tag }}" class="tag-label tag-color"
                                                href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                         {% endfor %}
                                     </sup>
@@ -433,7 +426,7 @@
                                        href="{% url 'view_product' product.id %}">{{ product.name }}</a>
                                     <sup>
                                         {% for tag in product.tags %}
-                                            <a title="Search {{ tag }}" class="btn btn-tag btn-primary"
+                                            <a title="Search {{ tag }}" class="tag-label tag-color"
                                                href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                         {% endfor %}
                                     </sup>
@@ -447,7 +440,7 @@
                                        href="{% url 'view_endpoint' endpoint.id %}">{{ endpoint }}</a>
                                     <sup>
                                         {% for tag in endpoint.tags %}
-                                            <a title="Search {{ tag }}" class="btn btn-tag btn-primary"
+                                            <a title="Search {{ tag }}" class="tag-label tag-color"
                                                href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                         {% endfor %}
                                     </sup>
@@ -461,7 +454,7 @@
                                        href="{% url 'view_engagement' eng.id %}">{{ eng }}</a>
                                     <sup>
                                         {% for tag in eng.tags %}
-                                            <a title="Search {{ tag }}" class="btn btn-tag btn-primary"
+                                            <a title="Search {{ tag }}" class="tag-label tag-color"
                                                href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                         {% endfor %}
                                     </sup>
