@@ -341,6 +341,18 @@ class Product(models.Model):
                                       test__engagement__product=self).count()
 
     @property
+    def active_engagement_count(self):
+        return Engagement.objects.filter(active=True, product=self).count()
+
+    @property
+    def closed_engagement_count(self):
+        return Engagement.objects.filter(active=False, product=self).count()
+
+    @property
+    def last_engagement_date(self):
+        return Engagement.objects.filter(product=self).first()
+
+    @property
     def endpoint_count(self):
         endpoints = Endpoint.objects.filter(
             finding__test__engagement__product=self,
