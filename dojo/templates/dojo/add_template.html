@@ -15,7 +15,7 @@
 {% block content %}
     <h3> {{ name }} {{ template }}</h3>
 
-    <form id="add_finding" class="form-horizontal" method="post">{% csrf_token %}
+    <form id="add_template" class="form-horizontal" method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
@@ -24,7 +24,7 @@
         </div>
     </form>
     {% if template %}
-        <form id="add_finding" class="form-horizontal" method="post"
+        <form class="form-horizontal" method="post"
               action="{% url 'delete_template' template.id %}">{% csrf_token %}
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
@@ -36,9 +36,25 @@
     {% endif %}
 {% endblock %}
 {% block postscript %}
+    <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
     <script type="application/javascript" src="{% static "chosen/chosen.jquery.min.js" %}"></script>
     <script type="application/javascript" src="{% static "simplemde/dist/simplemde.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "admin/js/jquery.init.js" %}"></script>
     <script type="application/javascript">
+        $ = django.jQuery;
+        $.hotkeys.options.filterInputAcceptingElements = false;
+        $.hotkeys.options.filterTextInputs = false;
+
+        $(document).bind('keydown', 'ctrl+s', function (event) {
+            if (event.preventDefault) {
+                event.preventDefault();
+            } else {
+                // internet explorer
+                event.returnValue = false;
+            }
+            $("form#add_template").submit();
+        });
+
         $(function () {
             $('#id_tags').chosen({
                 'placeholder_text_multiple': 'Select or add some tags...',
@@ -68,7 +84,12 @@
                     element: elem,
                     autofocus: false,
                     forceSync: true,
-                    hideIcons: ["side-by-side", "fullscreen"]
+                    toolbar: ["bold", "italic", "heading", "|",
+                        "quote", "unordered-list", "ordered-list", "|",
+                        "link", "image", "|",
+                        "table", "horizontal-rule", "code", "|",
+                        "guide"
+                    ]
                 });
                 mde.render();
             });

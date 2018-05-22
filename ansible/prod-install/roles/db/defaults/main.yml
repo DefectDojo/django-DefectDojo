@@ -1,9 +1,0 @@
-# Database settings.
-# db_type can have either MySQL or PostgreSQL
-db_type: 'PostgreSQL'
-db_user: "{{ application_name }}"
-db_name: "dojodb"
-db_host: "localhost"
-db_password: "Cu3zehoh7eegoogohdoh1the"
-db_mysql_port: 3306
-db_postgresql_port: 5432
