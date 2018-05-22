@@ -378,7 +378,7 @@ form ul#id_accepted_findings input {
 }
 
 .severity {
-    font-size: 100%;
+    font-size: 80%;
 }
 
 .severity-Info {
@@ -1164,6 +1164,12 @@ hr.report-page-break:before {
     text-decoration: none;
 }
 
+.tag-all {
+    background: #3498db;
+    text-decoration: none;
+}
+
+
 .A {
     background: #4ec83d;
 }
@@ -1181,9 +1187,51 @@ hr.report-page-break:before {
 }
 
 div.tags .label {
-    font-size: 90%;
+    font-size: 90;
     display: inline-block;
     padding: .6em .3em;
+}
+
+.tag-label {
+    display: inline;
+    padding: .2em .6em .4em;
+    font-size: 11px;
+    color: #fff;
+    border-radius: .25em;
+    text-decoration: none;
+    text-decoration-style: solid;
+}
+
+.tag-color {
+    background: #556270;
+}
+
+.happy-green-color {
+    color: green;
+}
+
+.warning-color {
+    background: red;
+}
+
+.tag-label:link {
+    color: white;
+    text-decoration: none;
+}
+
+.tag-label:hover {
+    color: white;
+    text-decoration: none;
+}
+
+.tag-label:active {
+    color: white;
+    text-decoration: none;
+}
+
+.tag-label:visited {
+    color: white;
+    text-decoration: none;
 }
 
 @media (min-width: 768px) {

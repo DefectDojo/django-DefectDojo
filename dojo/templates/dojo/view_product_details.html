@@ -20,13 +20,13 @@
                     {% endif %}
                     {% with grade=prod|product_grade %}
                       {% if grade %}
-                        <div class="btn btn-tag {{ grade }}">{{ grade }}</div>
+                        <sup><div class="tag-label {{ grade }}">{{ grade }}</div></sup>
                       {% endif %}
                     {% endwith %}
                     {% if prod.tags %}
                       <sup>
                           {% for tag in prod.tags %}
-                          <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                          <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                           {% endfor %}
                       </sup>
                     {% endif %}
@@ -145,9 +145,9 @@
                     </tr>
                     <tr>
                         <td>{{ prod.prod_type }}</td>
-                        <td>{% if prod.manager != "0" %}{{ prod.manager | default:"Unknown" }}{% else %}Unkown{% endif %}</td>
-                        <td>{% if prod.prod_manager != "0" %}{{ prod.prod_manager | default:"Unknown" }}{% else %}Unkown{% endif %}</td>
-                        <td>{% if prod.tech_contact != "0" %}{{ prod.tech_contact | default:"Unknown" }}{% else %}Unkown{% endif %}</td>
+                        <td>{% if prod.manager != "0" %}{{ prod.manager | default:"Unknown" }}{% else %}Unknown{% endif %}</td>
+                        <td>{% if prod.prod_manager != "0" %}{{ prod.prod_manager | default:"Unknown" }}{% else %}Unknown{% endif %}</td>
+                        <td>{% if prod.tech_contact != "0" %}{{ prod.tech_contact | default:"Unknown" }}{% else %}Unknown{% endif %}</td>
                         <td>
                             {% if prod.authorized_users.all %}
                                 <ul class="no-bullets">
