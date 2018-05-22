@@ -59,7 +59,14 @@
                                       </sup>
                                   {% endif %}
                                 </td>
-                                <td><a href="{% url 'view_product' e.product.id %}">{{ e.product }}</a></td>
+                                <td><a href="{% url 'view_product' e.product.id %}">{{ e.product }}</a>
+                                  <sup>
+                                      {% for tag in e.product.tags %}
+                                          <a title="Search {{ tag }}" class="btn btn-tag btn-primary"
+                                             href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                      {% endfor %}
+                                  </sup>
+                                </td>
                                 <td>
                                   {% if e.finding_count > 0 %}
                                   <a href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.finding_count_endpoint }}</a>

@@ -137,6 +137,7 @@
                                       " data-placement="right" data-container="body" data-original-title="" title="">
                                     {% endif %}
                                   {% endif %}
+                                  </i>
                                     <sup>
                                         {% for tag in finding.tags %}
                                         <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
@@ -162,6 +163,12 @@
                                 <td><a
                                         href="{% url 'view_product' finding.test.engagement.product.id %}"
                                         title="{{ finding.test.engagement.product }}">{{ finding.test.engagement.product }}</a>
+                                        <sup>
+                                            {% for tag in finding.test.engagement.product.tags %}
+                                                <a title="Search {{ tag }}" class="btn btn-tag btn-primary"
+                                                   href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                            {% endfor %}
+                                        </sup>
                                 </td>
                                 <td>
                                     <div class="btn-group">
