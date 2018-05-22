@@ -20,13 +20,13 @@
                     {% endif %}
                     {% with grade=prod|product_grade %}
                       {% if grade %}
-                        <div class="btn btn-tag {{ grade }}">{{ grade }}</div>
+                        <sup><div class="tag-label {{ grade }}">{{ grade }}</div></sup>
                       {% endif %}
                     {% endwith %}
                     {% if prod.tags %}
                       <sup>
                           {% for tag in prod.tags %}
-                          <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                          <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                           {% endfor %}
                       </sup>
                     {% endif %}
@@ -401,8 +401,7 @@
     </div>
     <div class="row">
         {% if user.is_staff or authorized %}
-
-            <div class="col-md-12">
+          <div class="col-md-12">
                 <div class="panel panel-default table-responsive">
                     <div class="panel-heading">
                         <h4> Active Engagements <a title="Add New Engagement" class="pull-right btn btn-sm btn-primary"
@@ -430,7 +429,7 @@
                                 {% if eng.tags %}
                                     <sup>
                                         {% for tag in eng.tags %}
-                                        <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                        <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                         {% endfor %}
                                     </sup>
                                 {% endif %}
@@ -440,7 +439,7 @@
                                 <td>{{ eng.target_start|datediff_time:eng.target_end }}
                                   {% if eng.target_end|overdue %}
                                   <sup>
-                                    <div class="btn btn-sm btn-overdue">
+                                    <div class="tag-label warning-color">
                                       {{ eng.target_end|overdue }} overdue
                                     </div>
                                   </sup>

@@ -9,7 +9,7 @@ from django.utils.text import normalize_newlines
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from dojo.utils import prepare_for_view, get_system_setting
-from dojo.models import Check_List, FindingImageAccessToken, Finding, System_Settings, JIRA_PKey
+from dojo.models import Check_List, FindingImageAccessToken, Finding, System_Settings, JIRA_PKey, Product
 import markdown
 from django.utils import timezone
 from markdown.extensions import Extension
@@ -360,3 +360,102 @@ def tracked_object_type(current_object):
         value = "Artifact"
 
     return value
+
+
+def icon(name, tooltip):
+    return '<i class="fa fa-' + name + ' has-popover" data-trigger="hover" data-placement="bottom" data-content="' + tooltip + '"></i>'
+
+
+def not_specified_icon(tooltip):
+    return '<i class="fa fa-question fa-fw text-danger has-popover" aria-hidden="true" data-trigger="hover" data-placement="bottom" data-content="' + tooltip + '"></i>'
+
+
+def stars(filled, total, tooltip):
+    code = '<i class="has-popover" data-placement="bottom" data-content="' + tooltip + '">'
+    for i in range(0, total):
+        if i < filled:
+            code += '<i class="fa fa-star has-popover" aria-hidden="true"></span>'
+        else:
+            code += '<i class="fa fa-star-o text-muted has-popover" aria-hidden="true"></span>'
+    code += '</i>'
+    return code
+
+
+@register.filter
+def business_criticality_icon(value):
+    if value == Product.VERY_HIGH_CRITICALITY:
+        return mark_safe(stars(5, 5, 'Very High'))
+    if value == Product.HIGH_CRITICALITY:
+        return mark_safe(stars(4, 5, 'High'))
+    if value == Product.MEDIUM_CRITICALITY:
+        return mark_safe(stars(3, 5, 'Medium'))
+    if value == Product.LOW_CRITICALITY:
+        return mark_safe(stars(2, 5, 'Low'))
+    if value == Product.VERY_LOW_CRITICALITY:
+        return mark_safe(stars(1, 5, 'Very Low'))
+    if value == Product.NONE_CRITICALITY:
+        return mark_safe(stars(0, 5, 'None'))
+    else:
+        return ""  # mark_safe(not_specified_icon('Business Criticality Not Specified'))
+
+
+@register.filter
+def platform_icon(value):
+    if value == Product.WEB_PLATFORM:
+        return mark_safe(icon('list-alt', 'Web'))
+    elif value == Product.DESKTOP_PLATFORM:
+        return mark_safe(icon('desktop', 'Desktop'))
+    elif value == Product.MOBILE_PLATFORM:
+        return mark_safe(icon('mobile', 'Mobile'))
+    elif value == Product.WEB_SERVICE_PLATFORM:
+        return mark_safe(icon('plug', 'Web Service'))
+    elif value == Product.IOT:
+        return mark_safe(icon('random', 'Internet of Things'))
+    else:
+        return ""  # mark_safe(not_specified_icon('Platform Not Specified'))
+
+
+@register.filter
+def lifecycle_icon(value):
+    if value == Product.CONSTRUCTION:
+        return mark_safe(icon('compass', 'Explore'))
+    if value == Product.PRODUCTION:
+        return mark_safe(icon('ship', 'Sustain'))
+    if value == Product.RETIREMENT:
+        return mark_safe(icon('moon-o', 'Retire'))
+    else:
+        return ""  # mark_safe(not_specified_icon('Lifecycle Not Specified'))
+
+
+@register.filter
+def origin_icon(value):
+    if value == Product.THIRD_PARTY_LIBRARY_ORIGIN:
+        return mark_safe(icon('book', 'Third-Party Library'))
+    if value == Product.PURCHASED_ORIGIN:
+        return mark_safe(icon('money', 'Purchased'))
+    if value == Product.CONTRACTOR_ORIGIN:
+        return mark_safe(icon('suitcase', 'Contractor Developed'))
+    if value == Product.INTERNALLY_DEVELOPED_ORIGIN:
+        return mark_safe(icon('home', 'Internally Developed'))
+    if value == Product.OPEN_SOURCE_ORIGIN:
+        return mark_safe(icon('code', 'Open Source'))
+    if value == Product.OUTSOURCED_ORIGIN:
+        return mark_safe(icon('globe', 'Outsourced'))
+    else:
+        return ""  # mark_safe(not_specified_icon('Origin Not Specified'))
+
+
+@register.filter
+def external_audience_icon(value):
+    if value:
+        return mark_safe(icon('users', 'External Audience'))
+    else:
+        return ''
+
+
+@register.filter
+def internet_accessible_icon(value):
+    if value:
+        return mark_safe(icon('cloud', 'Internet Accessible'))
+    else:
+        return ''

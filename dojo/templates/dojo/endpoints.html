@@ -54,7 +54,7 @@
                                   {% if e.tags %}
                                       <sup>
                                           {% for tag in e.tags %}
-                                          <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                          <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                           {% endfor %}
                                       </sup>
                                   {% endif %}
@@ -62,7 +62,7 @@
                                 <td><a href="{% url 'view_product' e.product.id %}">{{ e.product }}</a>
                                   <sup>
                                       {% for tag in e.product.tags %}
-                                          <a title="Search {{ tag }}" class="btn btn-tag btn-primary"
+                                          <a title="Search {{ tag }}" class="tag-label tag-color"
                                              href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                       {% endfor %}
                                   </sup>

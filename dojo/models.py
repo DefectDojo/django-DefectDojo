@@ -6,7 +6,6 @@ import re
 from datetime import datetime
 from uuid import uuid4
 from django.conf import settings
-
 from watson import search as watson
 from auditlog.registry import auditlog
 from django.contrib import admin
@@ -23,6 +22,7 @@ from pytz import all_timezones
 from tagging.registry import register as tag_register
 from multiselectfield import MultiSelectField
 from django import forms
+from django.utils.translation import gettext as _
 
 fmt = getattr(settings, 'LOG_FORMAT', None)
 lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
@@ -294,6 +294,58 @@ class Test_Type(models.Model):
 
 
 class Product(models.Model):
+    WEB_PLATFORM = 'web'
+    IOT = 'iot'
+    DESKTOP_PLATFORM = 'desktop'
+    MOBILE_PLATFORM = 'mobile'
+    WEB_SERVICE_PLATFORM = 'web service'
+    PLATFORM_CHOICES = (
+        (WEB_SERVICE_PLATFORM, _('API')),
+        (DESKTOP_PLATFORM, _('Desktop')),
+        (IOT, _('Internet of Things')),
+        (MOBILE_PLATFORM, _('Mobile')),
+        (WEB_PLATFORM, _('Web')),
+    )
+
+    CONSTRUCTION = 'construction'
+    PRODUCTION = 'production'
+    RETIREMENT = 'retirement'
+    LIFECYCLE_CHOICES = (
+        (CONSTRUCTION, _('Construction')),
+        (PRODUCTION, _('Production')),
+        (RETIREMENT, _('Retirement')),
+    )
+
+    THIRD_PARTY_LIBRARY_ORIGIN = 'third party library'
+    PURCHASED_ORIGIN = 'purchased'
+    CONTRACTOR_ORIGIN = 'contractor'
+    INTERNALLY_DEVELOPED_ORIGIN = 'internal'
+    OPEN_SOURCE_ORIGIN = 'open source'
+    OUTSOURCED_ORIGIN = 'outsourced'
+    ORIGIN_CHOICES = (
+        (THIRD_PARTY_LIBRARY_ORIGIN, _('Third Party Library')),
+        (PURCHASED_ORIGIN, _('Purchased')),
+        (CONTRACTOR_ORIGIN, _('Contractor Developed')),
+        (INTERNALLY_DEVELOPED_ORIGIN, _('Internally Developed')),
+        (OPEN_SOURCE_ORIGIN, _('Open Source')),
+        (OUTSOURCED_ORIGIN, _('Outsourced')),
+    )
+
+    VERY_HIGH_CRITICALITY = 'very high'
+    HIGH_CRITICALITY = 'high'
+    MEDIUM_CRITICALITY = 'medium'
+    LOW_CRITICALITY = 'low'
+    VERY_LOW_CRITICALITY = 'very low'
+    NONE_CRITICALITY = 'none'
+    BUSINESS_CRITICALITY_CHOICES = (
+        (VERY_HIGH_CRITICALITY, _('Very High')),
+        (HIGH_CRITICALITY, _('High')),
+        (MEDIUM_CRITICALITY, _('Medium')),
+        (LOW_CRITICALITY, _('Low')),
+        (VERY_LOW_CRITICALITY, _('Very Low')),
+        (NONE_CRITICALITY, _('None')),
+    )
+
     name = models.CharField(max_length=255)
     description = models.CharField(max_length=4000)
 
@@ -324,6 +376,16 @@ class Product(models.Model):
     tid = models.IntegerField(default=0, editable=False)
     authorized_users = models.ManyToManyField(User, blank=True)
     prod_numeric_grade = models.IntegerField(null=True, blank=True)
+
+    # Metadata
+    business_criticality = models.CharField(max_length=9, choices=BUSINESS_CRITICALITY_CHOICES, blank=True, null=True)
+    platform = models.CharField(max_length=11, choices=PLATFORM_CHOICES, blank=True, null=True)
+    lifecycle = models.CharField(max_length=12, choices=LIFECYCLE_CHOICES, blank=True, null=True)
+    origin = models.CharField(max_length=19, choices=ORIGIN_CHOICES, blank=True, null=True)
+    user_records = models.PositiveIntegerField(blank=True, null=True, help_text=_('Estimate the number of user records within the application.'))
+    revenue = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True, help_text=_('Estimate the application\'s revenue.'))
+    external_audience = models.BooleanField(default=False, help_text=_('Specify if the application is used by people outside the organization.'))
+    internet_accessible = models.BooleanField(default=False, help_text=_('Specify if the application is accessible from the public internet.'))
 
     def __unicode__(self):
         return self.name
