@@ -1,7 +1,0 @@
----
-- name: DefectDojo
-  hosts: servers
-  roles:
-    - webserver
-  vars_files:
-    - vars.yml

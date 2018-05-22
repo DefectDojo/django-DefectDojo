@@ -1,5 +1,0 @@
-[hosts]
-# If running this Ansible locally, uncomment the line below and run the playbook as root
-# 127.0.0.1 ansible_connection=local 
-# If running this Ansible to connect as a user over SSH to a host, use the line below as an example:
-# 10.1.1.111 ansible_connection=ssh ansible_ssh_user=example ansible_ssh_pass=dojo-rockx ansible_become_pass=dojo-rockx
