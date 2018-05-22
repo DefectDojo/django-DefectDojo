@@ -50,13 +50,13 @@
                             <th>{% dojo_sort request 'Product' 'name' 'asc' %}</th>
                             <th> Criticality</th>
                             <th> Metadata
-                            <th> Engagements</th>
+                            <th> Engagement</th>
                             {% if "enable_jira"|get_system_setting %}
                             <th>Jira</th>
                             {% endif %}
-                            <th> Findings</th>
-                            <th> Endpoints</th>
-                            <th> Contacts</th>
+                            <th> Finding</th>
+                            <th> Endpoint</th>
+                            <th> Contact</th>
                             <th>{% dojo_sort request 'Product Type' 'prod_type__name' %}</th>
                             {% if user.is_staff %}
                                 <th> Engagement</th>
