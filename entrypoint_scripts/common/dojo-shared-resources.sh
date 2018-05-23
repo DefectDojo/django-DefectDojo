@@ -469,8 +469,7 @@ function install_app(){
             sudo -H pip install .[mysql]
         else
             sudo -H pip install .
-        fisudo -H pip install -U pip
-        sudo -H pip install .
+        fi
     fi
     python manage.py makemigrations dojo
     python manage.py makemigrations --merge --noinput
