@@ -331,7 +331,7 @@ function install_os_dependencies() {
     if [[ ! -z "$YUM_CMD" ]]; then
         sudo yum install wget epel-release
         curl -sL https://rpm.nodesource.com/setup | sudo bash -
-        wget https://dl.yarnpkg.com/rpm/yarn.repo -O /etc/yum.repos.d/yarn.repo
+        sudo wget https://dl.yarnpkg.com/rpm/yarn.repo -O /etc/yum.repos.d/yarn.repo
         sudo yum install gcc python-devel python-setuptools python-pip nodejs yarn wkhtmltopdf
         sudo yum groupinstall 'Development Tools'
     elif [[ ! -z "$APT_GET_CMD" ]]; then
