@@ -13,7 +13,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <title>
-        {% if request.session.dojo_breadcrumbs %}
+        {% if request.session.dojo_breadcrumbs and not active_tab %}
             {% with request.session.dojo_breadcrumbs|last as last %}
                 {{ last.title }}
             {% endwith %}
@@ -281,6 +281,101 @@
     <!-- Page Content -->
     <div id="page-wrapper">
         <div class="container-fluid">
+            <!-- start of tabs -->
+            {% if active_tab %}
+            <div class="row">
+              <div class="col-md-12">
+                <h3 class="no-margin-top">
+                    {{ tab_product }}
+                    {% if system_settings.enable_benchmark %}
+                      {% for benchmark in tab_benchmarks%}
+                        <sup><span class="fa fa-bookmark has-popover" data-trigger="hover" data-content="{{ benchmark|asvs_level }}"></label></span>
+                        {{ benchmark.desired_level }}</sup>
+                      {% endfor %}
+                    {% endif %}
+                    {% with grade=tab_product|product_grade %}
+                      {% if grade %}
+                        <sup><div class="tag-label {{ grade }}">{{ grade }}</div></sup>
+                      {% endif %}
+                    {% endwith %}
+                    {% if tab_product.tags %}
+                      <sup>
+                          {% for tag in tab_product.tags %}
+                          <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                          {% endfor %}
+                      </sup>
+                    {% endif %}
+                    <!--
+                    <small>{{ prod.endpoint_count }}
+                        <a href="{% url 'vulnerable_endpoints' %}?product={{ prod.id }}">
+                            affected endpoint{{ prod.endpoint_count|pluralize }}
+                            <i class="fa fa-arrow-circle-right"></i></a>
+                    </small>-->
+                </h3>
+                <br>
+                <ul class="nav nav-tabs horizontal-bar">
+                  <li role="presentation"{% if active_tab == 'overview' %} class="active"{% endif %}><a href="{% url 'view_product' tab_product.id %}"><span class="fa fa-globe" aria-hidden="true"></span><span class="hidden-xs"> Overview</span></a></li>
+                  <li role="presentation"{% if active_tab == 'metrics' %} class="active"{% endif %}><a href="{% url 'view_product_metrics' tab_product.id %}"><span class="fa fa-bar-chart" aria-hidden="true"></span><span class="hidden-xs"> Metrics</span></a></li>
+                  <li role="presentation" class="dropdown{% if active_tab == 'engagements' %} active{% endif %}">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href=""><span class="fa fa-calendar" aria-hidden="true"></span>
+                      <span class="hidden-xs"> Engagements{% if tab_engagements.all|length > 0 %} <span class="badge">{{ tab_engagements.all|length }}</span>{% endif %}</span>
+                    <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                      <li><a href="{% url 'view_engagements' tab_product.id %}">View Engagements</a></li>
+                      <li><a href="{% url 'new_eng_for_prod' tab_product.id %}">Add New Engagement</a></li>
+                    </ul>
+                  </li>
+                  <li role="presentation"{% if active_tab == 'findings' %} class="active"{% endif %}><a href=""><span class="fa fa-bug" aria-hidden="true"></span><span class="hidden-xs"> Findings {% if tab_findings|length > 0 %} <span class="badge">{{ tab_findings|length }}</span>{% endif %}</span></a>
+
+                  </li>
+                  <li role="presentation"{% if active_tab == 'endpoints' %} class="active"{% endif %}><a href=""><span class="fa fa-sitemap" aria-hidden="true"></span><span class="hidden-xs"> Endpoints {% if tab_endpoints > 0 %} <span class="badge">{{ tab_endpoints }}</span>{% endif %}</span></a>
+
+                  </li>
+                  {% if system_settings.enable_benchmark %}
+                  <li role="presentation"{% if active_tab == 'benchmarks' %} class="active"{% endif %}><a href=""><span class="fa fa-balance-scale" aria-hidden="true"></span><span class="hidden-xs"> Benchmarks</span></a>
+                  </li>
+                  {% endif %}
+                  <li role="presentation" class="dropdown{% if active_tab == 'settings' %} active{% endif %}">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href=""><span class="fa fa-cogs" aria-hidden="true"></span>
+                      <span class="hidden-xs"> Settings</span>
+                    <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                      {% if user.is_staff %}
+                        <li role="presentation">
+                            <a class="" href="{% url 'edit_product' tab_product.id %}">
+                                <i class="fa fa-pencil-square-o"></i> Edit
+                            </a>
+                        </li>
+                        <li role="presentation">
+                            <a class="" href="{% url 'add_meta_data' tab_product.id %}">
+                                <i class="fa fa-list-alt"></i> Add Metadata
+                            </a>
+                        </li>
+                        <li role="presentation">
+                            <a class="" href="{% url 'new_object' tab_product.id %}">
+                                <i class="fa fa-list-alt"></i> Add Product Tracking Files
+                            </a>
+                        </li>
+                        <li role="separator" class="divider"></li>
+                        <li role="presentation">
+                            <a href="{% url 'action_history' tab_product|content_type tab_product.id %}">
+                                <i class="fa fa-history"></i> View History
+                            </a>
+                        </li>
+                            <li role="separator" class="divider"></li>
+                            <li role="presentation">
+                                <a class="text-danger" href="{% url 'delete_product' tab_product.id %}">
+                                    <i class="fa fa-trash"></i> Delete
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                  </li>
+
+                </ul>
+              </div>
+            </div>
+            {% else %}
             <div class="row hidden-xs">
                 <div class="col-lg-12">
                     {% if request.session.dojo_breadcrumbs %}
@@ -294,9 +389,9 @@
                         </ul>
                     {% endif %}
                 </div>
-                <!-- /.col-lg-12 -->
             </div>
-            <!-- /.row -->
+            {% endif %}
+            <!-- end of tabs -->
             <div class="row">
                 <div class="col-lg-12">
                     {% if messages %}

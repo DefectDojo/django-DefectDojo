@@ -190,7 +190,9 @@ class DeleteProductForm(forms.ModelForm):
         model = Product
         exclude = ['name', 'description', 'prod_manager', 'tech_contact', 'manager', 'created',
                    'prod_type', 'updated', 'tid', 'authorized_users', 'product_manager',
-                   'technical_contact', 'team_manager', 'prod_numeric_grade']
+                   'technical_contact', 'team_manager', 'prod_numeric_grade', 'business_criticality',
+                   'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience',
+                   'internet_accessible']
 
 
 class ProductMetaDataForm(forms.ModelForm):
