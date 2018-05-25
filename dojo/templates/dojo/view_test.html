@@ -75,8 +75,7 @@
                 <tr>
                     <th>Environment</th>
                     <th>Engagement</th>
-                    <th>Target Start Date</th>
-                    <th>Target End Date</th>
+                    <th>Date</th>
                     {% if test.percent_complete > 0 %}
                         <th>Progress</th>
                     {% endif %}
@@ -91,8 +90,7 @@
                         {% endif %}
                     </td>
                     <td><a href="{% url 'view_engagement' test.engagement.id %}">{{ test.engagement }}</a></td>
-                    <td>{{ test.target_start.date }}</td>
-                    <td>{{ test.target_end.date }}</td>
+                    <td>{{ test.target_start.date }} - {{ test.target_end.date }}</td>
                     {% if test.percent_complete > 0 %}
                         <td>
                             <div class="progress">
@@ -187,7 +185,7 @@
 
         </div>
         {% if findings %}
-            <table id="test_findings" class="table-bordered table table-condensed table-hover">
+            <table id="test_findings" class="table table-condensed table-hover">
                 <thead>
                 <tr>
                     <th class="hidden-sm centered" title="Select all visible findings.">
