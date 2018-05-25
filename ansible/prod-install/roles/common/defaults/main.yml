@@ -1,4 +1,0 @@
----
-
-ansible_python_interpreter: /usr/bin/python
-base_python_package: "{{ ansible_python_interpreter | default('/usr/bin/python') | basename }}"

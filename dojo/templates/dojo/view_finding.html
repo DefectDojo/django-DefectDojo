@@ -12,7 +12,7 @@
                     {% if finding.tags %}
                         <sup>
                             {% for tag in finding.tags %}
-                            <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                            <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                             {% endfor %}
                         </sup>
                     {% endif %}
@@ -90,14 +90,14 @@
                             </li>
                             <li role="separator" class="divider"></li>
                             <li role="presentation">
-                            <a class="text-danger delete-finding" href="#">
-                                <i class="fa fa-trash"></i> Delete Finding
-                            </a>
+                                <a class="text-danger delete-finding" href="#">
+                                    <i class="fa fa-trash"></i> Delete Finding
+                                </a>
                             </li>
-                              <form id="delete-finding-form" method="post" action="{% url 'delete_finding' finding.id %}">
-                                 {% csrf_token %}
-                                 <input type="hidden" name="id" value="{{ finding.id }}"/>
-                              </form>
+                            <form id="delete-finding-form" method="post" action="{% url 'delete_finding' finding.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="id" value="{{ finding.id }}"/>
+                            </form>
                             </li>
                         </ul>
                     </div>
@@ -127,8 +127,9 @@
                                 <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
                                 Alert: Please review this finding to verify if the defect is remediated.
                             </span>
-                                [<a title="Review Finding for Closure" class="text-primary" style="display: inline !important;"
-                                    href="{% url 'defect_finding_review' finding.id %}">Review Finding for Closure</a>]
+                            [<a title="Review Finding for Closure" class="text-primary"
+                                style="display: inline !important;"
+                                href="{% url 'defect_finding_review' finding.id %}">Review Finding for Closure</a>]
                         </th>
                     </tr>
                 {% endif %}
@@ -163,7 +164,8 @@
                         </span>
                     </td>
                     <td> {% if finding.under_review %}Under Review, {% endif %}{{ finding.status }}
-                        {% if finding.duplicate %} <a href="{% url 'view_finding' finding.duplicate_finding.id%}">Original
+                        {% if finding.duplicate_finding.id %}
+                            <a href="{% url 'view_finding' finding.duplicate_finding.id %}">Original
                         {% endif %}</a></td>
                     {% if finding.risk_acceptance_set.all %}
                         <td>
@@ -172,11 +174,11 @@
                         </td>
                     {% endif %}
                     <td>
-                      {% if finding.static_finding or finding.line > 0 %}
-                        Static
-                      {% else %}
-                        Dynamic
-                      {% endif %}
+                        {% if finding.static_finding or finding.line > 0 %}
+                            Static
+                        {% else %}
+                            Dynamic
+                        {% endif %}
                     </td>
                     <td>{{ finding.date }}</td>
                     <td>{{ finding.age }} days</td>
@@ -193,22 +195,22 @@
                         </td>
                     {% endif %}
                     <td> {% for scanner in found_by %}
-                         {{scanner}}
-                         {% endfor %}</td>
+                        {{ scanner }}
+                    {% endfor %}</td>
 
                 </tr>
             </table>
         </div>
     </div>
     {% if finding.static_finding or finding.line > 0 %}
-    <div class="panel panel-default">
+        <div class="panel panel-default">
             <table id="error_notes" class="table-striped table table-condensed table-hover centered">
                 <tr>
                     <th>Location</th>
                     <th>Line Number</th>
                 </tr>
                 <tr>
-                   <td>
+                    <td>
                         <span>
                            {{ finding.file_path }}
                         </span>
@@ -220,11 +222,11 @@
                     </td>
                 </tr>
             </table>
-    </div>
+        </div>
     {% endif %}
     {% if finding.param or finding.payload %}
-    <div class="panel panel-default">
-        <table id="error_notes" class="table-striped table table-condensed table-hover centered">
+        <div class="panel panel-default">
+            <table id="error_notes" class="table-striped table table-condensed table-hover centered">
                 <tr>
                     <th>Parameters</th>
                     <th>Payload</th>
@@ -241,25 +243,26 @@
                         </span>
                     </td>
                 </tr>
-        </table>
-    </div>
+            </table>
+        </div>
     {% endif %}
- {% if jissue and jconf %}
-    <div class="row to_highlight">
-        <div class="col-md-12">
-            <div class="panel panel-default endpoints table-responsive">
-                <div class="panel-heading">
-                    <h4>JIRA Link
-                        <span class="pull-right"><a data-toggle="collapse" href="#jira_link"><i
-                                class="glyphicon glyphicon-chevron-up"></i></a></span>
-                    </h4>
-                </div>
-                    <div id="jira_link" class="panel-body endpoint-panel table-responsive collapse in">
-                      <a href="{{jconf.url}}/browse/{{jissue.jira_key}}" target="_blank"> {{jconf.url}}/browse/{{jissue.jira_key}} </a>
+    {% if jissue and jconf %}
+        <div class="row to_highlight">
+            <div class="col-md-12">
+                <div class="panel panel-default endpoints table-responsive">
+                    <div class="panel-heading">
+                        <h4>JIRA Link
+                            <span class="pull-right"><a data-toggle="collapse" href="#jira_link"><i
+                                    class="glyphicon glyphicon-chevron-up"></i></a></span>
+                        </h4>
                     </div>
+                    <div id="jira_link" class="panel-body endpoint-panel table-responsive collapse in">
+                        <a href="{{ jconf.url }}/browse/{{ jissue.jira_key }}"
+                           target="_blank"> {{ jconf.url }}/browse/{{ jissue.jira_key }} </a>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
     {% endif %}
     {% if  finding.static_finding != True %}
     <div class="row to_highlight">
@@ -284,7 +287,7 @@
                                    {% if item.tags %}
                                        <sup>
                                            {% for tag in item.tags %}
-                                           <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                           <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                            {% endfor %}
                                        </sup>
                                       {% endif %}
@@ -297,13 +300,13 @@
                 {% else %}
                     <div id="vuln_endpoints" class="panel-body endpoint-panel table-responsive collapse in">
                         No endpoints.
-                    </div>
-                {% endif %}
+                        </div>
+                    {% endif %}
 
 
+                </div>
             </div>
         </div>
-    </div>
     {% endif %}
 
     <div class="view-finding to_highlight">
@@ -434,113 +437,118 @@
                         class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
             </div>
             <div id="vuln_refs" class="panel-body collapse in">
-                <pre>{{ finding.references|markdown_render  }}</pre>
+                <pre>{{ finding.references|markdown_render }}</pre>
             </div>
         </div>
 
         <!--Cred Begin-->
-        {% if  finding.static_finding != True and cred_finding%}
-        <div class="row">
-        <div class="col-md-12" id="cred">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4>Credential
-                      {% if not cred_finding %}
-                           {% if cred_engagement or creds %}
-                        <a title="Add New Credential" class="pull-right btn btn-primary btn-sm"
-                           href="{% url 'new_cred_finding' finding.id %}"><span class="fa fa-plus"></span></a>
-                           {% endif %}
-                      {% endif %}
-                    </h4>
-                </div>
-                {% if cred_finding or creds %}
-                    <table class="tablesorter-bootstrap table table-condensed table-striped table-hover">
-                        <thead>
-                        <tr>
-                          <th>Name</th>
-                          <th>Username</th>
-                          <th>Role</th>
-                          <th>Environment</th>
-                          <th>Authentication Provider</th>
-                          <th>Login Valid</th>
-                          <th>Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                          {% if cred_finding %}
-                          <tr>
-                            <td colspan="7">
-                              Credential Configured for this <strong>Finding</strong>
-                              {% if not cred_finding %}
-                                <br/><center>None configured</center>
-                              {% endif %}
-                            </td>
-                          </tr>
+        {% if  finding.static_finding != True and cred_finding %}
+            <div class="row">
+                <div class="col-md-12" id="cred">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4>Credential
+                                {% if not cred_finding %}
+                                    {% if cred_engagement or creds %}
+                                        <a title="Add New Credential" class="pull-right btn btn-primary btn-sm"
+                                           href="{% url 'new_cred_finding' finding.id %}"><span
+                                                class="fa fa-plus"></span></a>
+                                    {% endif %}
+                                {% endif %}
+                            </h4>
+                        </div>
+                        {% if cred_finding or creds %}
+                            <table class="tablesorter-bootstrap table table-condensed table-striped table-hover">
+                                <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Username</th>
+                                    <th>Role</th>
+                                    <th>Environment</th>
+                                    <th>Authentication Provider</th>
+                                    <th>Login Valid</th>
+                                    <th>Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% if cred_finding %}
+                                    <tr>
+                                        <td colspan="7">
+                                            Credential Configured for this <strong>Finding</strong>
+                                            {% if not cred_finding %}
+                                                <br/>
+                                                <center>None configured</center>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
 
-                          {% for cred in cred_finding %}
-                              <tr>
-                                <td>
-                                    <a href="{{ cred.cred_id.url }}" target="_blank">{{ cred.cred_id.name }}</a>
-                                </td>
-                                <td>{{ cred.cred_id.username }}</td>
-                                <td>{{ cred.cred_id.role }}</td>
-                                <td>{{ cred.cred_id.environment }}</td>
-                                <td>{{ cred.is_authn_provider }}</td>
-                                <td>{{ cred.cred_id.is_valid }}</td>
-                                <td>
-                                    <div class="btn-group">
-                                        <a class="btn btn-sm btn-primary"
-                                           href="{% url 'view_cred_finding' cred.finding.id cred.id  %}">View</a>
-                                        <a class="btn btn-sm btn-danger delete"
-                                           href="{% url 'delete_cred_finding' cred.finding.id cred.id  %}">Delete</a>
-                                    </div>
-                                </td>
-                              </tr>
-                          {% endfor %}
-                          {% endif %}
-                        {% if not cred_finding %}
-                          <tr>
-                            <td colspan="7">
-                              Credentials Inherited from <strong>Test: {{ finding.test }}</strong>
-                            </td>
-                          </tr>
-                          {% for cred in creds %}
-                              <tr>
-                                <td>
-                                    <a href="{{ cred.cred_id.url }}" target="_blank">{{ cred.cred_id.name }}</a>
-                                </td>
-                                <td>{{ cred.cred_id.username }}</td>
-                                <td>{{ cred.cred_id.role }}</td>
-                                <td>{{ cred.cred_id.environment }}</td>
-                                <td>{{ cred.is_authn_provider }}</td>
-                                <td>{{ cred.cred_id.is_valid }}</td>
-                                <td>
-                                    <div class="btn-group">
-                                        <a class="btn btn-sm btn-primary"
-                                           href="{% url 'view_cred_engagement_test' cred.test.id cred.id  %}">View</a>
-                                    </div>
-                                </td>
-                              </tr>
-                          {% endfor %}
+                                    {% for cred in cred_finding %}
+                                        <tr>
+                                            <td>
+                                                <a href="{{ cred.cred_id.url }}"
+                                                   target="_blank">{{ cred.cred_id.name }}</a>
+                                            </td>
+                                            <td>{{ cred.cred_id.username }}</td>
+                                            <td>{{ cred.cred_id.role }}</td>
+                                            <td>{{ cred.cred_id.environment }}</td>
+                                            <td>{{ cred.is_authn_provider }}</td>
+                                            <td>{{ cred.cred_id.is_valid }}</td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <a class="btn btn-sm btn-primary"
+                                                       href="{% url 'view_cred_finding' cred.finding.id cred.id %}">View</a>
+                                                    <a class="btn btn-sm btn-danger delete"
+                                                       href="{% url 'delete_cred_finding' cred.finding.id cred.id %}">Delete</a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% endif %}
+                                {% if not cred_finding %}
+                                    <tr>
+                                        <td colspan="7">
+                                            Credentials Inherited from <strong>Test: {{ finding.test }}</strong>
+                                        </td>
+                                    </tr>
+                                    {% for cred in creds %}
+                                        <tr>
+                                            <td>
+                                                <a href="{{ cred.cred_id.url }}"
+                                                   target="_blank">{{ cred.cred_id.name }}</a>
+                                            </td>
+                                            <td>{{ cred.cred_id.username }}</td>
+                                            <td>{{ cred.cred_id.role }}</td>
+                                            <td>{{ cred.cred_id.environment }}</td>
+                                            <td>{{ cred.is_authn_provider }}</td>
+                                            <td>{{ cred.cred_id.is_valid }}</td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <a class="btn btn-sm btn-primary"
+                                                       href="{% url 'view_cred_engagement_test' cred.test.id cred.id %}">View</a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% endif %}
+
+
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <div class="panel-body">
+                                <p>No credentials configured.
+                                    {% if not cred_engagement %}
+                                        Configure engagement credentials first, then add a credential to the test or
+                                        finding.
+                                    {% endif %}
+                                </p>
+                            </div>
                         {% endif %}
-
-
-                        </tbody>
-                    </table>
-                {% else %}
-                    <div class="panel-body">
-                        <p>No credentials configured.
-                          {% if not cred_engagement %}
-                            Configure engagement credentials first, then add a credential to the test or finding.
-                          {% endif %}
-                        </p>
                     </div>
-                {% endif %}
+                </div>
             </div>
-        </div>
-    </div>
-    <!--Cred end -->
-    {% endif %}
+            <!--Cred end -->
+        {% endif %}
     </div>
 
     <div class="panel panel-default to_highlight table-responsive">
@@ -597,6 +605,7 @@
     </div>
 {% endblock %}
 {% block postscript %}
+    <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
     <script type="text/javascript">
         if (document.referrer.indexOf('simple_search') > 0) {
@@ -619,10 +628,13 @@
             })
         });
 
+        $(document).on('keypress', null, 'e', function () {
+            window.location.assign('{% url 'edit_finding' finding.id %}');
+        });
+
         $('a.delete-finding').on('click', function (e) {
-            if (confirm('Are you sure you want to delete this finding?'))
-            {
-              $( "form#delete-finding-form" ).submit();
+            if (confirm('Are you sure you want to delete this finding?')) {
+                $("form#delete-finding-form").submit();
             }
 
         });
@@ -655,5 +667,5 @@
                 }
             });
         });
-      </script>
+    </script>
 {% endblock %}

@@ -3,18 +3,23 @@
 {% load static from staticfiles %}
 {% block add_css %}
     <link rel="stylesheet" href="{% static "chosen-bootstrap/chosen.bootstrap.min.css" %}">
+    <link rel="stylesheet" href="{% static "simplemde/dist/simplemde.min.css" %}">
 {% endblock %}
 {% block add_styles %}
     .chosen-container {
     width: 70% !important;
     }
+    .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
+    width: 70% !important;
+    }
 {% endblock %}
 {% block content %}
     <h3> Apply template to a Finding</h3>
-    <form class="form-horizontal" name="apply_template" action="{% url 'apply_template_to_finding' finding.id template.id %}" method="post">
+    <form id="add_finding" class="form-horizontal" name="apply_template"
+          action="{% url 'apply_template_to_finding' finding.id template.id %}" method="post">
         {% csrf_token %}
         {% include "dojo/apply_finding_template_form_fields.html" with form=form template=template %}
-        {%  if jform %}
+        {% if jform %}
             {% include "dojo/apply_finding_template_form_fields.html" with form=jform template=template %}
         {% endif %}
         <div class="form-group">
@@ -28,9 +33,15 @@
     <script type="application/javascript">
         $('#add_id_endpoints').attr('href', '/endpoints/{{ finding.test.engagement.product.id }}/add?_popup');
     </script>
+    <script type="application/javascript" src="{% static "simplemde/dist/simplemde.min.js" %}"></script>
     <script type="application/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>
     <script type="application/javascript" src="{% static "chosen/chosen.jquery.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "admin/js/jquery.init.js" %}"></script>
     <script type="application/javascript">
+        $ = django.jQuery;
+        $.hotkeys.options.filterInputAcceptingElements = false;
+        $.hotkeys.options.filterTextInputs = false;
+
         $(function () {
             $('#id_tags').chosen({
                 'placeholder_text_multiple': 'Select or add some tags...',
@@ -47,6 +58,56 @@
                     return false;
                 }
             });
+
+            $("textarea").each(function (index, elem) {
+
+                if (elem.hasAttribute("required")) {
+                    elem.removeAttribute("required");
+                    elem.id = "req"
+                }
+
+                var mde = new SimpleMDE({
+                    spellChecker: false,
+                    element: elem,
+                    autofocus: false,
+                    forceSync: true,
+                    toolbar: ["bold", "italic", "heading", "|",
+                        "quote", "unordered-list", "ordered-list", "|",
+                        "link", "image", "|",
+                        "table", "horizontal-rule", "code", "|",
+                        "guide"
+                    ]
+                });
+                mde.render();
+            });
+        });
+
+        $(document).bind('keydown', 'ctrl+s', function (event) {
+            if (event.preventDefault) {
+                event.preventDefault();
+            } else {
+                // internet explorer
+                event.returnValue = false;
+            }
+            $("input[name='_Finished']").trigger('click');
+        });
+
+        $("#add_finding").submit(function () {
+            var isFormValid = true;
+
+            $("textarea#req").each(function () {
+                if ($.trim($(this).val()).length == 0) {
+                    $(this).addClass("highlight");
+                    isFormValid = false;
+                }
+                else {
+                    $(this).removeClass("highlight");
+                }
+            });
+
+            if (!isFormValid) alert("Please fill in all the required fields (indicated by *)");
+
+            return isFormValid;
         });
     </script>
 

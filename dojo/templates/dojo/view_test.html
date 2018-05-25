@@ -15,7 +15,7 @@
                 {% if test.tags %}
                     <sup>
                         {% for tag in test.tags %}
-                        <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                        <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                         {% endfor %}
                     </sup>
                 {% endif %}
@@ -188,8 +188,6 @@
         </div>
         {% if findings %}
             <table id="test_findings" class="table-bordered table table-condensed table-hover">
-
-
                 <thead>
                 <tr>
                     <th class="hidden-sm centered" title="Select all visible findings.">
@@ -212,13 +210,12 @@
                             </ul>
                         </div>
                     </th>
-                    <th>Name</th>
-                    <th>Reporter</th>
-                    <th>Mitigation Date</th>
                     <th>Severity</th>
-                    <th>Verified</th>
-                    <th>Active</th>
-                    <th>Duplicate</th>
+                    <th>Name</th>
+                    <th>Date</th>
+                    <th>Age</th>
+                    <th>Reporter</th>
+                    <th>Status</th>
                     {% if "enable_jira"|get_system_setting %}
                     <th>Jira</th>
                     {% endif %}
@@ -233,6 +230,11 @@
                                 <input type="checkbox" name="select_{{ finding.id }}" id="{{ finding.id }}"
                                        class="select_one {{ finding.severity }}"/>
                             </form>
+                        </td>
+                        <td>
+                            <span class="label severity severity-{{ finding.severity }}">
+                                {{ finding.severity_display }}
+                            </span>
                         </td>
                         <td><a href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a>
                           {% if finding.file_path %}
@@ -250,25 +252,19 @@
                           {% if finding.tags %}
                               <sup>
                                   {% for tag in finding.tags %}
-                                  <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                  <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                   {% endfor %}
                               </sup>
                           {% endif %}
                         </td>
+                        <td class="nowrap">{{ finding.date }}</td>
+                        <td>{{ finding.age }}</td>
                         <td>{{ finding.reporter.username }}</td>
-                        <td>{{ finding.mitigated }}</td>
-                        <td>
-                            <span class="label severity severity-{{ finding.severity }}">
-                                {{ finding.severity_display }}
-                            </span>
-                        </td>
-                        <td>{{ finding.verified }}</td>
-                        <td>{{ finding.active }}</td>
-                        {% if finding.duplicate %}
-                        <td><a href="{% url 'view_finding' finding.duplicate_finding.id%}">Original</a></td>
-                        {% else %}
-                            <td>False</td>
+                        <td>{% if finding.under_review %}Under Review, {% endif %}{{ finding.status }}</td>
+                        {% if finding.duplicate_finding.id %}
+                            <a href="{% url 'view_finding' finding.duplicate_finding.id%}">Original</a>
                         {% endif %}
+                        </td>
                         {% if "enable_jira"|get_system_setting %}
                         <td>
                         <a href="{{finding.jira_conf.url}}/browse/{{finding.jira.jira_key}}" target="_blank"> {{finding.jira.jira_key}} </a>
@@ -276,8 +272,6 @@
                         {% endif %}
                         <td>
                             <div class="btn-group">
-                                <a class="btn btn-sm btn-primary"
-                                   href="{% url 'view_finding' finding.id %}">View</a>
                                 <a class="btn btn-sm btn-warning"
                                    href="{% url 'edit_finding' finding.id %}">Edit</a>
                                 <form method="post" action="{% url 'delete_finding' finding.id %}"

@@ -8,7 +8,7 @@
     h3 { margin-top: 5px; margin-bottom: 5px; font-size: 20px; line-height: 22px;}
 {% endblock %}
 {% block content %}
-    <!-- start status bread crums -->
+    <!-- start status bread crums
     <ul id="progress-crumbs" class="breadcrumb">
         {% if eng.threat_model %}
             <li><a href="#threat-model">Threat Model</a></li>
@@ -27,7 +27,7 @@
         {% endif %}
         <li class="active">{{ eng.status }}</li>
     </ul>
-    <!-- end breadcrums //-->
+     end breadcrums //-->
     <div class="panel panel-default">
         <div class="panel-heading">
             <div class="clearfix">
@@ -41,10 +41,15 @@
                     {% if eng.tags %}
                         <sup>
                             {% for tag in eng.tags %}
-                            <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                            <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                             {% endfor %}
                         </sup>
                     {% endif %}
+                    <span class="text-muted">({{ eng.target_start }} - {{ eng.target_end }}) Lead: {% if eng.lead.get_full_name and eng.lead.get_full_name.strip %}
+                        {{ eng.lead.get_full_name }}
+                    {% else %}
+                        {{ eng.lead }}
+                    {% endif %}</span>
                 </h3>
 
                 <div class="dropdown pull-right">
@@ -95,6 +100,27 @@
                                     <i class="fa fa-history"></i> View History
                                 </a>
                             </li>
+                            <li role="separator" class="divider"></li>
+                            <li role="presentation">
+                                {% if eng.test_strategy %}
+                                    <a target="_blank" href="{{ eng.test_strategy }}"><i class="fa fa-file-text-o"></i> View Test
+                                        Strategy </a>
+                                {% else %}
+                                    <a href="{% url 'edit_engagement' eng.id %}"><i class="fa fa-file-text-o"></i> Add a Test Strategy</a>
+                                {% endif %}
+                            </li>
+                            {% if threat != 'none' %}
+                            <li role="presentation">
+                                    <a href="{% url 'view_threatmodel' eng.id %}"><i class="fa fa-file-text-o"></i> Download Threat Model</a>
+                            </li>
+                            <li role="presentation">
+                                    <a href="{% url 'upload_threatmodel' eng.id %}"><i class="fa fa-file-text-o"></i> Upload Threat Model</a>
+                            </li>
+                            {% else %}
+                            <li role="presentation">
+                                <a href="{% url 'upload_threatmodel' eng.id %}"><i class="fa fa-file-text-o"></i> Upload Threat Model</a>
+                            </li>
+                           {% endif %}
                             <li role="separator" class="divider"></li>
                             <li role="presentation">
                                 <a class="text-danger" href="{% url 'delete_engagement' eng.id %}">
@@ -219,74 +245,6 @@
         </div>
     </div>
 
-    <div class="row same-height-panel-row">
-        <div class="col-md-4">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4>Testing Lead:
-                        {% if eng.lead.get_full_name and eng.lead.get_full_name.strip %}
-                            {{ eng.lead.get_full_name }}
-                        {% else %}
-                            {{ eng.lead }}
-                        {% endif %}
-                    </h4>
-                </div>
-                <div class="panel-body">
-                    {% if not eng.lead %}
-                        <p><b><i><sub><a class="" href="{% url 'edit_engagement' eng.id %}"> Edit </a> this
-                            engagement
-                            to
-                            add a
-                            lead.</sub></i></b></p>
-                    {% endif %}
-                    {% if eng.name %}
-                        <p> Engagement Name: {{ eng.name }} </p>
-                    {% endif %}
-                    <p> Target Start Date: {{ eng.target_start }} </p>
-
-                    <p> Target End Date: {{ eng.target_end }} </p>
-                </div>
-            </div>
-        </div>
-        <div id="test-strategy" class="col-md-4">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4> Test Strategy </h4>
-                </div>
-                <div class="panel-body text-center">
-                    {% if eng.test_strategy %}
-                        <a class="btn btn-sm btn-primary" target="_blank" href="{{ eng.test_strategy }}"> View Test
-                            Strategy </a>
-                    {% else %}
-                        <p><b><i><sub><a class="" href="{% url 'edit_engagement' eng.id %}"> Edit </a> this
-                            engagement
-                            to
-                            add a
-                            test strategy.</sub></i></b></p>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-        <div id="threat-model" class="col-md-4">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4> Threat Model </h4>
-                </div>
-                <div class="panel-body text-center">
-                    {% if threat != 'none' %}
-                        <div class="btn-group">
-                            <a class="btn btn-sm btn-primary" href="{% url 'view_threatmodel' eng.id %}"> Download
-                                Model</a>
-                            <a class="btn btn-sm btn-warning" href="{% url 'upload_threatmodel' eng.id %}"> Edit</a>
-                        </div>
-                    {% else %}
-                        <a class="btn btn-sm btn-primary" href="{% url 'upload_threatmodel' eng.id %}"> Upload
-                            Model</a>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
     {% if jissue and jconf %}
         <div class="row to_highlight">
             <div class="col-md-12">
@@ -342,7 +300,7 @@
                                 <th>Type</th>
                                 <th>Start Date</th>
                                 <th>End Date</th>
-				<th>Lead</th>
+				                        <th>Lead</th>
                                 <th>Findings</th>
                                 <th>Duplicate Findings</th>
                                 <th>Notes</th>
@@ -356,7 +314,7 @@
                                       {% if test.tags %}
                                           <sup>
                                               {% for tag in test.tags %}
-                                              <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                              <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                               {% endfor %}
                                           </sup>
                                       {% endif %}
@@ -400,13 +358,11 @@
                     <h4>Description</h4>
                 </div>
                 <div class="panel-body">
-                    {{ eng.description }}
+                    {{ eng.description|markdown_render }}
                 </div>
             </div>
         </div>
     </div>
-
-    <!--Cred Begin-->
     <div class="row">
     <div class="col-md-12" id="cred">
         <div class="panel panel-default">
@@ -596,7 +552,7 @@
                             <thead>
                             <tr>
                                 <th>Reporter</th>
-                                <th> Date</th>
+                                <th>Date</th>
                                 <th>Findings Accepted</th>
                                 <th>View File</th>
                                 <th>Actions</th>

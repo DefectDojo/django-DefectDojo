@@ -2,11 +2,15 @@
 {% load static from staticfiles %}
 {% block add_css %}
     <link rel="stylesheet" href="{% static "chosen-bootstrap/chosen.bootstrap.min.css" %}">
+    <link rel="stylesheet" href="{% static "simplemde/dist/simplemde.min.css" %}">
 {% endblock %}
 {% block add_styles %}
-.chosen-container {
+    .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
     width: 70% !important;
-}
+    }
+    .chosen-container.chosen-container-multi {
+    width: 70% !important;
+    }
 {% endblock %}
 
 {% block content %}
@@ -26,9 +30,31 @@
     </form>
 {% endblock %}
 {% block postscript %}
+    <script type="application/javascript" src="{% static "simplemde/dist/simplemde.min.js" %}"></script>
     <script type="application/javascript" src="{% static "chosen/chosen.jquery.min.js" %}"></script>
     <script type="application/javascript">
         $(function () {
+            $("textarea").each(function (index, elem) {
+
+                if (elem.hasAttribute("required")) {
+                    elem.removeAttribute("required");
+                    elem.id = "req"
+                }
+
+                var mde = new SimpleMDE({
+                    spellChecker: false,
+                    element: elem,
+                    autofocus: false,
+                    forceSync: true,
+                    toolbar: ["bold", "italic", "heading", "|",
+                        "quote", "unordered-list", "ordered-list", "|",
+                        "link", "image", "|",
+                        "table", "horizontal-rule", "code", "|",
+                        "guide"
+                    ]
+                });
+                mde.render();
+            });
             $('#id_product_manager').chosen({'placeholder_text_single': 'Select a Product Manager...'});
             $('#id_team_manager').chosen({'placeholder_text_single': 'Select a Team Manager...'});
             $('#id_technical_contact').chosen({'placeholder_text_single': 'Select a Technical Contact...'});

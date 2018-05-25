@@ -44,15 +44,23 @@
                         <tr>
                             <th>Endpoint</th>
                             <th>Product</th>
-                            <th nowrap="nowrap">Number of <br/> Open Findings</th>
+                            <th nowrap="nowrap">Open Findings</th>
                         </tr>
 
                         {% for e in endpoints %}
                             <tr>
-                                <td><a href="{% url 'view_endpoint' e.id %}">{{ e|truncatechars:70 }}</a></td>
+                                <td><a href="{% url 'view_endpoint' e.id %}">{{ e|truncatechars:70 }}</a>
+                                  {% if e.tags %}
+                                      <sup>
+                                          {% for tag in e.tags %}
+                                          <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                          {% endfor %}
+                                      </sup>
+                                  {% endif %}
+                                </td>
                                 <td><a href="{% url 'view_product' e.product.id %}">{{ e.product }}</a></td>
-                                <td class="text-center">
-                                    <a href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.finding_count }}</a>
+                                <td>
+                                    <a href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.finding_count_endpoint }}</a>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -73,9 +81,3 @@
 {% block postscript %}
     {% include "dojo/filter_js_snippet.html" %}
 {% endblock %}
-
-
-
-
-
-

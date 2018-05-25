@@ -2,30 +2,33 @@
 {% load static from staticfiles %}
 {% block add_css %}
     <link rel="stylesheet" href="{% static "chosen-bootstrap/chosen.bootstrap.min.css" %}">
+    <link rel="stylesheet" href="{% static "simplemde/dist/simplemde.min.css" %}">
 {% endblock %}
 {% block add_styles %}
-.chosen-container {
+    .chosen-container {
     width: 70% !important;
-}
+    }
+    .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
+    width: 70% !important;
+    }
 {% endblock %}
 {% block content %}
     <h3> {{ name }} {{ template }}</h3>
 
-    <form class="form-horizontal" method="post">{% csrf_token %}
+    <form id="add_template" class="form-horizontal" method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
                 <input class="btn btn-primary" type="submit" name="add_template" value="Save Template"/>
-                &nbsp;&nbsp;
             </div>
         </div>
     </form>
     {% if template %}
-        <form class="form-horizontal" method="post" action="{% url 'delete_template' template.id %}">{% csrf_token %}
+        <form class="form-horizontal" method="post"
+              action="{% url 'delete_template' template.id %}">{% csrf_token %}
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
                     <input class="btn btn-danger" type="submit" name="delete_template" value="Delete Template"/>
-                    &nbsp;&nbsp;
                     <input type="hidden" name="id" value="{{ template.id }}"/>
                 </div>
             </div>
@@ -33,8 +36,25 @@
     {% endif %}
 {% endblock %}
 {% block postscript %}
+    <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
     <script type="application/javascript" src="{% static "chosen/chosen.jquery.min.js" %}"></script>
+    <script type="application/javascript" src="{% static "simplemde/dist/simplemde.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "admin/js/jquery.init.js" %}"></script>
     <script type="application/javascript">
+        $ = django.jQuery;
+        $.hotkeys.options.filterInputAcceptingElements = false;
+        $.hotkeys.options.filterTextInputs = false;
+
+        $(document).bind('keydown', 'ctrl+s', function (event) {
+            if (event.preventDefault) {
+                event.preventDefault();
+            } else {
+                // internet explorer
+                event.returnValue = false;
+            }
+            $("form#add_template").submit();
+        });
+
         $(function () {
             $('#id_tags').chosen({
                 'placeholder_text_multiple': 'Select or add some tags...',
@@ -51,6 +71,47 @@
                     return false;
                 }
             });
+
+            $("textarea").each(function (index, elem) {
+
+                if (elem.hasAttribute("required")) {
+                    elem.removeAttribute("required");
+                    elem.id = "req"
+                }
+
+                var mde = new SimpleMDE({
+                    spellChecker: false,
+                    element: elem,
+                    autofocus: false,
+                    forceSync: true,
+                    toolbar: ["bold", "italic", "heading", "|",
+                        "quote", "unordered-list", "ordered-list", "|",
+                        "link", "image", "|",
+                        "table", "horizontal-rule", "code", "|",
+                        "guide"
+                    ]
+                });
+                mde.render();
+            });
+        });
+
+        $("#add_finding").submit(function () {
+
+            var isFormValid = true;
+
+            $("textarea#req").each(function () {
+                if ($.trim($(this).val()).length == 0) {
+                    $(this).addClass("highlight");
+                    isFormValid = false;
+                }
+                else {
+                    $(this).removeClass("highlight");
+                }
+            });
+
+            if (!isFormValid) alert("Please fill in all the required fields (indicated by *)");
+
+            return isFormValid;
         });
     </script>
 

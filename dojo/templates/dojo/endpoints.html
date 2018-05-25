@@ -41,7 +41,7 @@
                         <tr>
                             <th>{% dojo_sort request 'Endpoint' 'host' %}</th>
                             <th>{% dojo_sort request 'Product' 'product' 'asc' %}</th>
-                            <th nowrap="nowrap">Number of <br/> Open Findings</th>
+                            <th nowrap="nowrap">Open Findings</th>
                         </tr>
 
                         {% for e in endpoints %}
@@ -54,13 +54,26 @@
                                   {% if e.tags %}
                                       <sup>
                                           {% for tag in e.tags %}
-                                          <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                          <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                           {% endfor %}
                                       </sup>
                                   {% endif %}
                                 </td>
-                                <td><a href="{% url 'view_product' e.product.id %}">{{ e.product }}</a></td>
-                                <td class="text-center">{{ e.finding_count }}</td>
+                                <td><a href="{% url 'view_product' e.product.id %}">{{ e.product }}</a>
+                                  <sup>
+                                      {% for tag in e.product.tags %}
+                                          <a title="Search {{ tag }}" class="tag-label tag-color"
+                                             href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                      {% endfor %}
+                                  </sup>
+                                </td>
+                                <td>
+                                  {% if e.finding_count > 0 %}
+                                  <a href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.finding_count_endpoint }}</a>
+                                  {% else %}
+                                  No Open, Active Findings
+                                  {% endif %}
+                                </td>
                             </tr>
                         {% endfor %}
                     </table>

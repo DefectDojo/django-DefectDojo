@@ -9,10 +9,12 @@ from django.utils.text import normalize_newlines
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from dojo.utils import prepare_for_view, get_system_setting
-from dojo.models import Check_List, FindingImageAccessToken, Finding, System_Settings
+from dojo.models import Check_List, FindingImageAccessToken, Finding, System_Settings, JIRA_PKey, Product
 import markdown
 from django.utils import timezone
 from markdown.extensions import Extension
+import dateutil.relativedelta
+import datetime
 
 register = template.Library()
 
@@ -26,8 +28,7 @@ class EscapeHtml(Extension):
 @register.filter
 def markdown_render(value):
     if value:
-        return mark_safe(markdown.markdown(value, extensions=[EscapeHtml(), 'markdown.extensions.codehilite', 'markdown.extensions.toc']))
-
+        return mark_safe(markdown.markdown(value, extensions=[EscapeHtml(), 'markdown.extensions.codehilite', 'markdown.extensions.toc', 'markdown.extensions.tables']))
 
 
 @register.filter(name='ports_open')
@@ -147,6 +148,13 @@ def asvs_level(benchmark_score):
     return "ASVS " + str(benchmark_score.desired_level) + " " + level + " Pass: " + str(total_pass) + " Total:  " + total
 
 
+@register.filter(name='get_jira_conf')
+def get_jira_conf(product):
+    jira_conf = JIRA_PKey.objects.filter(product=product)
+
+    return jira_conf
+
+
 @register.filter(name='version_num')
 def version_num(value):
     version = ""
@@ -154,6 +162,17 @@ def version_num(value):
         version = "v." + value
 
     return version
+
+
+@register.filter(name='count_findings_eng')
+def count_findings_eng(tests):
+    findings = None
+    for test in tests:
+        if findings:
+            findings = findings | test.finding_set.all()
+        else:
+            findings = test.finding_set.all()
+    return findings
 
 
 @register.filter(name='product_grade')
@@ -188,7 +207,10 @@ def display_index(data, index):
 
 @register.filter
 def finding_status(finding, duplicate):
-    return finding.filter(duplicate=duplicate)
+    findingFilter = None
+    if finding:
+        findingFilter = finding.filter(duplicate=duplicate)
+    return findingFilter
 
 
 @register.simple_tag
@@ -221,6 +243,29 @@ def random_value():
     import string
     import random
     return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(12))
+
+
+@register.filter(name='datediff_time')
+def datediff_time(date1, date2):
+    date_str = ""
+    diff = dateutil.relativedelta.relativedelta(date2, date1)
+    attrs = ['years', 'months', 'days']
+    human_readable = lambda delta: ['%d %s' % (getattr(delta, attr), getattr(delta, attr) > 1 and attr or attr[:-1])
+                                    for attr in attrs if getattr(delta, attr)]
+    human_date = human_readable(diff)
+    for date_part in human_date:
+        date_str = date_str + date_part + " "
+
+    return date_str
+
+
+@register.filter(name='overdue')
+def overdue(date1):
+    date_str = ""
+    if date1 < datetime.datetime.now().date():
+        date_str = datediff_time(date1, datetime.datetime.now().date())
+
+    return date_str
 
 
 @register.tag
@@ -315,3 +360,102 @@ def tracked_object_type(current_object):
         value = "Artifact"
 
     return value
+
+
+def icon(name, tooltip):
+    return '<i class="fa fa-' + name + ' has-popover" data-trigger="hover" data-placement="bottom" data-content="' + tooltip + '"></i>'
+
+
+def not_specified_icon(tooltip):
+    return '<i class="fa fa-question fa-fw text-danger has-popover" aria-hidden="true" data-trigger="hover" data-placement="bottom" data-content="' + tooltip + '"></i>'
+
+
+def stars(filled, total, tooltip):
+    code = '<i class="has-popover" data-placement="bottom" data-content="' + tooltip + '">'
+    for i in range(0, total):
+        if i < filled:
+            code += '<i class="fa fa-star has-popover" aria-hidden="true"></span>'
+        else:
+            code += '<i class="fa fa-star-o text-muted has-popover" aria-hidden="true"></span>'
+    code += '</i>'
+    return code
+
+
+@register.filter
+def business_criticality_icon(value):
+    if value == Product.VERY_HIGH_CRITICALITY:
+        return mark_safe(stars(5, 5, 'Very High'))
+    if value == Product.HIGH_CRITICALITY:
+        return mark_safe(stars(4, 5, 'High'))
+    if value == Product.MEDIUM_CRITICALITY:
+        return mark_safe(stars(3, 5, 'Medium'))
+    if value == Product.LOW_CRITICALITY:
+        return mark_safe(stars(2, 5, 'Low'))
+    if value == Product.VERY_LOW_CRITICALITY:
+        return mark_safe(stars(1, 5, 'Very Low'))
+    if value == Product.NONE_CRITICALITY:
+        return mark_safe(stars(0, 5, 'None'))
+    else:
+        return ""  # mark_safe(not_specified_icon('Business Criticality Not Specified'))
+
+
+@register.filter
+def platform_icon(value):
+    if value == Product.WEB_PLATFORM:
+        return mark_safe(icon('list-alt', 'Web'))
+    elif value == Product.DESKTOP_PLATFORM:
+        return mark_safe(icon('desktop', 'Desktop'))
+    elif value == Product.MOBILE_PLATFORM:
+        return mark_safe(icon('mobile', 'Mobile'))
+    elif value == Product.WEB_SERVICE_PLATFORM:
+        return mark_safe(icon('plug', 'Web Service'))
+    elif value == Product.IOT:
+        return mark_safe(icon('random', 'Internet of Things'))
+    else:
+        return ""  # mark_safe(not_specified_icon('Platform Not Specified'))
+
+
+@register.filter
+def lifecycle_icon(value):
+    if value == Product.CONSTRUCTION:
+        return mark_safe(icon('compass', 'Explore'))
+    if value == Product.PRODUCTION:
+        return mark_safe(icon('ship', 'Sustain'))
+    if value == Product.RETIREMENT:
+        return mark_safe(icon('moon-o', 'Retire'))
+    else:
+        return ""  # mark_safe(not_specified_icon('Lifecycle Not Specified'))
+
+
+@register.filter
+def origin_icon(value):
+    if value == Product.THIRD_PARTY_LIBRARY_ORIGIN:
+        return mark_safe(icon('book', 'Third-Party Library'))
+    if value == Product.PURCHASED_ORIGIN:
+        return mark_safe(icon('money', 'Purchased'))
+    if value == Product.CONTRACTOR_ORIGIN:
+        return mark_safe(icon('suitcase', 'Contractor Developed'))
+    if value == Product.INTERNALLY_DEVELOPED_ORIGIN:
+        return mark_safe(icon('home', 'Internally Developed'))
+    if value == Product.OPEN_SOURCE_ORIGIN:
+        return mark_safe(icon('code', 'Open Source'))
+    if value == Product.OUTSOURCED_ORIGIN:
+        return mark_safe(icon('globe', 'Outsourced'))
+    else:
+        return ""  # mark_safe(not_specified_icon('Origin Not Specified'))
+
+
+@register.filter
+def external_audience_icon(value):
+    if value:
+        return mark_safe(icon('users', 'External Audience'))
+    else:
+        return ''
+
+
+@register.filter
+def internet_accessible_icon(value):
+    if value:
+        return mark_safe(icon('cloud', 'Internet Accessible'))
+    else:
+        return ''
