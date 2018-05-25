@@ -18,10 +18,10 @@ from dojo.filters import TemplateFindingFilter
 from dojo.forms import NoteForm, TestForm, FindingForm, \
     DeleteTestForm, AddFindingForm, \
     ImportScanForm, ReImportScanForm, FindingBulkUpdateForm, JIRAFindingForm
-from dojo.models import Finding, Test, Notes, \
+from dojo.models import Finding, Test, Notes, System_Settings, \
     BurpRawRequestResponse, Endpoint, Stub_Finding, Finding_Template, JIRA_PKey, Cred_Mapping, Dojo_User
 from dojo.tools.factory import import_parser_factory
-from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, create_notification
+from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, create_notification, tab_view_count
 from dojo.tasks import add_issue_task
 
 logger = logging.getLogger(__name__)
@@ -40,6 +40,7 @@ def view_test(request, tid):
     stub_findings = Stub_Finding.objects.filter(test=test)
     cred_test = Cred_Mapping.objects.filter(test=test).select_related('cred_id').order_by('cred_id')
     creds = Cred_Mapping.objects.filter(engagement=test.engagement).select_related('cred_id').order_by('cred_id')
+    system_settings = System_Settings.objects.get()
 
     if request.method == 'POST' and request.user.is_staff:
         form = NoteForm(request.POST)
@@ -65,8 +66,16 @@ def view_test(request, tid):
     show_re_upload = any(test.test_type.name in code for code in ImportScanForm.SCAN_TYPE_CHOICES)
 
     add_breadcrumb(parent=test, top_level=False, request=request)
+    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(prod.id)
     return render(request, 'dojo/view_test.html',
                   {'test': test,
+                   'active_tab': 'engagements',
+                   'tab_product': tab_product,
+                   'tab_engagements': tab_engagements,
+                   'tab_findings': tab_findings,
+                   'tab_endpoints': tab_endpoints,
+                   'tab_benchmarks': tab_benchmarks,
+                   'system_settings': system_settings,
                    'findings': fpage,
                    'stub_findings': sfpage,
                    'form': form,

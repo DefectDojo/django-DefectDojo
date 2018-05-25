@@ -1274,3 +1274,31 @@ mark{
     padding: 2px 2px 2px 2px;
     font-size: 90%;
 }
+
+.bg-vuln-critical {
+  background-color:#D43F3A
+}
+.bg-vuln-high {
+  background-color:#D57A1D
+}
+.bg-vuln-medium {
+  background-color:#E4AB18
+}
+.bg-vuln-low {
+  background-color:#4CAE4C
+}
+.bg-vuln-info {
+  background-color:#357ABD
+}
+.bg-muted {
+  background-color:#777
+}
+.vuln-count {
+  color:#fff;
+  font-size:18px;
+  font-weight: 700;
+}
+small {
+  font-size:12px;
+  font-weight:400;
+}
