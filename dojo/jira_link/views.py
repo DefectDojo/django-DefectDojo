@@ -1,31 +1,23 @@
-# #  product
-import logging
-import sys
+# Standard library imports
 import json
-import pprint
-from datetime import datetime
-from math import ceil
+import logging
 
-from dateutil.relativedelta import relativedelta
-from django.conf import settings
+# Third party imports
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
-from django.core.exceptions import PermissionDenied
+from django.contrib.admin.utils import NestedObjects
 from django.core.urlresolvers import reverse
+from django.db import DEFAULT_DB_ALIAS
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404
-from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
-
-from dojo.filters import ProductFilter, ProductFindingFilter
-from dojo.forms import ProductForm, EngForm, DeleteProductForm
-from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, JIRA_Conf
-from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, get_system_setting
-from dojo.models import *
-from dojo.forms import *
+from django.views.decorators.csrf import csrf_exempt
 from jira import JIRA
-from dojo.tasks import *
-from dojo.product import views as ds
+
+# Local application/library imports
+from dojo.forms import JIRAForm, DeleteJIRAConfForm
+from dojo.models import User, JIRA_Conf, JIRA_Issue, Notes
+from dojo.utils import add_breadcrumb
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +32,7 @@ def webhook(request):
             if jissue.finding is not None:
                 finding = jissue.finding
                 resolved = True
-                if parsed['issue']['fields']['resolution'] == None:
+                if parsed['issue']['fields']['resolution'] is None:
                     resolved = False
                 if finding.active == resolved:
                     if finding.active:
@@ -83,18 +75,22 @@ def new_jira(request):
         if jform.is_valid():
             try:
                 jira_server = jform.cleaned_data.get('url').rstrip('/')
-                jira = JIRA(server=jform.cleaned_data.get('url').rstrip('/'),
-                            basic_auth=(jform.cleaned_data.get('username'), jform.cleaned_data.get('password')))
+                jira_username = jform.cleaned_data.get('username')
+                jira_password = jform.cleaned_data.get('password')
+
+                # Instantiate JIRA instance for validating url, username and password
+                JIRA(server=jira_server,
+                     basic_auth=(jira_username, jira_password))
+
                 new_j = jform.save(commit=False)
                 new_j.url = jira_server
                 new_j.save()
                 messages.add_message(request,
                                      messages.SUCCESS,
-
                                      'JIRA Configuration Successfully Created.',
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('jira', ))
-            except:
+            except Exception:
                 messages.add_message(request,
                                      messages.ERROR,
                                      'Unable to authenticate. Please check the URL, username, and password.',
@@ -105,6 +101,7 @@ def new_jira(request):
     return render(request, 'dojo/new_jira.html',
                   {'jform': jform})
 
+
 @user_passes_test(lambda u: u.is_staff)
 def edit_jira(request, jid):
     jira = JIRA_Conf.objects.get(pk=jid)
@@ -113,8 +110,12 @@ def edit_jira(request, jid):
         if jform.is_valid():
             try:
                 jira_server = jform.cleaned_data.get('url').rstrip('/')
-                jira = JIRA(server=jira_server,
-                            basic_auth=(jform.cleaned_data.get('username'), jform.cleaned_data.get('password')))
+                jira_username = jform.cleaned_data.get('username')
+                jira_password = jform.cleaned_data.get('password')
+
+                # Instantiate JIRA instance for validating url, username and password
+                JIRA(server=jira_server,
+                     basic_auth=(jira_username, jira_password))
 
                 new_j = jform.save(commit=False)
                 new_j.url = jira_server
@@ -124,14 +125,14 @@ def edit_jira(request, jid):
                                      'JIRA Configuration Successfully Created.',
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('jira', ))
-            except:
+            except Exception:
                 messages.add_message(request,
                                      messages.ERROR,
                                      'Unable to authenticate. Please check the URL, username, and password.',
                                      extra_tags='alert-danger')
     else:
         jform = JIRAForm(instance=jira)
-    add_breadcrumb(title="Edit JIRA Configuration", top_level=False, request=request)
+        add_breadcrumb(title="Edit JIRA Configuration", top_level=False, request=request)
 
     return render(request,
                   'dojo/edit_jira.html',
@@ -139,12 +140,17 @@ def edit_jira(request, jid):
                       'jform': jform,
                   })
 
+
 @user_passes_test(lambda u: u.is_staff)
 def delete_issue(request, find):
     j_issue = JIRA_Issue.objects.get(finding=find)
-    jira = JIRA(server=jira_conf.url, basic_auth=(jira_conf.username, jira_conf.password))
+    jira_conf = find.jira_conf()
+    jira = JIRA(server=jira_conf.url,
+                basic_auth=(jira_conf.username,
+                            jira_conf.password))
     issue = jira.issue(j_issue.jira_id)
     issue.delete()
+
 
 @user_passes_test(lambda u: u.is_staff)
 def jira(request):
@@ -155,36 +161,33 @@ def jira(request):
                   {'confs': confs,
                    })
 
+
 @user_passes_test(lambda u: u.is_staff)
 def delete_jira(request, tid):
-    inst = get_object_or_404(JIRA_Conf, pk=tid)
-    #eng = test.engagement
-    #TODO Make Form
-    form = DeleteJIRAConfForm(instance=inst)
-
-    from django.contrib.admin.utils import NestedObjects
-    from django.db import DEFAULT_DB_ALIAS
+    jira_instance = get_object_or_404(JIRA_Conf, pk=tid)
+    # eng = test.engagement
+    # TODO Make Form
+    form = DeleteJIRAConfForm(instance=jira_instance)
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-    collector.collect([inst])
+    collector.collect([jira_instance])
     rels = collector.nested()
 
     if request.method == 'POST':
-        if 'id' in request.POST and str(inst.id) == request.POST['id']:
-            form = DeleteJIRAConfForm(request.POST, instance=inst)
+        if 'id' in request.POST and str(jira_instance.id) == request.POST['id']:
+            form = DeleteJIRAConfForm(request.POST, instance=jira_instance)
             if form.is_valid():
-                inst.delete()
+                jira_instance.delete()
                 messages.add_message(request,
                                      messages.SUCCESS,
                                      'JIRA Conf and relationships removed.',
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('jira'))
 
-    add_breadcrumb( title="Delete", top_level=False, request=request)
+    add_breadcrumb(title="Delete", top_level=False, request=request)
     return render(request, 'dojo/delete_jira.html',
-                  {'inst': inst,
+                  {'inst': jira_instance,
                    'form': form,
                    'rels': rels,
                    'deletable_objects': rels,
                    })
-

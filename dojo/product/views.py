@@ -4,7 +4,6 @@ import logging
 from collections import OrderedDict
 from datetime import datetime, date, timedelta
 from math import ceil
-
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
@@ -15,12 +14,11 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 from django.db.models import Sum, Count
-
 from dojo.filters import ProductFilter, ProductFindingFilter, EngagementFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, ProductMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm
 from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, Finding_Template, \
     Tool_Product_Settings, Cred_Mapping, Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint
-from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, get_system_setting, create_notification
+from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, get_system_setting, create_notification, tab_view_count
 from custom_field.models import CustomFieldValue, CustomField
 from dojo.tasks import add_epic_task, add_issue_task
 from tagging.models import Tag
@@ -53,7 +51,6 @@ def product(request):
         tags = request.GET.getlist('tags', [])
         initial_queryset = TaggedItem.objects.get_by_model(initial_queryset, Tag.objects.filter(name__in=tags))
     """
-
     prods = ProductFilter(request.GET, queryset=initial_queryset, user=request.user)
     prod_list = get_page_items(request, prods.qs, 25)
     add_breadcrumb(title="Product List", top_level=not len(request.GET), request=request)
@@ -72,6 +69,108 @@ def iso_to_gregorian(iso_year, iso_week, iso_day):
 
 
 def view_product(request, pid):
+    prod = get_object_or_404(Product, id=pid)
+    engs = Engagement.objects.filter(product=prod, active=True)
+
+    result = EngagementFilter(
+        request.GET,
+        queryset=Engagement.objects.filter(product=prod, active=False).order_by('-target_end'))
+
+    i_engs_page = get_page_items(request, result.qs, 10)
+
+    scan_sets = ScanSettings.objects.filter(product=prod)
+    tools = Tool_Product_Settings.objects.filter(product=prod).order_by('name')
+    auth = request.user.is_staff or request.user in prod.authorized_users.all()
+    creds = Cred_Mapping.objects.filter(product=prod).select_related('cred_id').order_by('cred_id')
+    langSummary = Languages.objects.filter(product=prod).aggregate(Sum('files'), Sum('code'), Count('files'))
+    languages = Languages.objects.filter(product=prod).order_by('-code')
+    app_analysis = App_Analysis.objects.filter(product=prod).order_by('name')
+    benchmark_type = Benchmark_Type.objects.filter(enabled=True).order_by('name')
+    benchmarks = Benchmark_Product_Summary.objects.filter(product=prod, publish=True, benchmark_type__enabled=True).order_by('benchmark_type__name')
+    system_settings = System_Settings.objects.get()
+
+    if not auth:
+        # will render 403
+        raise PermissionDenied
+
+    ct = ContentType.objects.get_for_model(prod)
+    product_cf = CustomField.objects.filter(content_type=ct).order_by('name')
+    product_metadata = {}
+
+    for cf in product_cf:
+        cfv = CustomFieldValue.objects.filter(field=cf, object_id=prod.id)
+        if len(cfv):
+            product_metadata[cf.name] = cfv[0].value
+
+    try:
+        start_date = Finding.objects.filter(test__engagement__product=prod).order_by('date')[:1][0].date
+    except:
+        start_date = timezone.now()
+
+    end_date = timezone.now()
+
+    tests = Test.objects.filter(engagement__product=prod)
+
+    risk_acceptances = Risk_Acceptance.objects.filter(engagement__in=Engagement.objects.filter(product=prod))
+
+    accepted_findings = [finding for ra in risk_acceptances
+                         for finding in ra.accepted_findings.all()]
+
+    verified_findings = Finding.objects.filter(test__engagement__product=prod,
+                                                date__range=[start_date, end_date],
+                                                false_p=False,
+                                                verified=True,
+                                                duplicate=False,
+                                                out_of_scope=False).order_by('numerical_severity').values('severity').annotate(count=Count('severity'))
+
+    critical = 0
+    high = 0
+    medium = 0
+    low = 0
+    info = 0
+
+    for v in verified_findings:
+        if v["severity"] == "Critical":
+            critical = v["count"]
+        elif v["severity"] == "High":
+            high = v["count"]
+        elif v["severity"] == "Medium":
+            medium = v["count"]
+        elif v["severity"] == "Low":
+            low = v["count"]
+        elif v["severity"] == "Info":
+            info = v["count"]
+
+    total = critical + high + medium + low + info
+
+    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(pid)
+    return render(request,
+                  'dojo/view_product_details.html',
+                  {'prod': prod,
+                   'tab_product': tab_product,
+                   'tab_engagements': tab_engagements,
+                   'tab_findings': tab_findings,
+                   'tab_endpoints': tab_endpoints,
+                   'tab_benchmarks': tab_benchmarks,
+                   'active_tab': 'overview',
+                   'product_metadata': product_metadata,
+                   'tools': tools,
+                   'creds': creds,
+                   'critical': critical,
+                   'high': high,
+                   'medium': medium,
+                   'low': low,
+                   'info': info,
+                   'total': total,
+                   'user': request.user,
+                   'languages': languages,
+                   'langSummary': langSummary,
+                   'app_analysis': app_analysis,
+                   'system_settings': system_settings,
+                   'authorized': auth})
+
+
+def view_product_metrics(request, pid):
     prod = get_object_or_404(Product, id=pid)
     engs = Engagement.objects.filter(product=prod, active=True)
 
@@ -240,9 +339,227 @@ def view_product(request, pid):
         else:
             test_data[t.test_type.name] = t.verified_finding_count()
 
+    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(pid)
     return render(request,
-                  'dojo/view_product.html',
+                  'dojo/product_metrics.html',
                   {'prod': prod,
+                   'active_tab': 'metrics',
+                   'tab_product': tab_product,
+                   'tab_engagements': tab_engagements,
+                   'tab_findings': tab_findings,
+                   'tab_endpoints': tab_endpoints,
+                   'tab_benchmarks': tab_benchmarks,
+                   'benchmark_type': benchmark_type,
+                   'benchmarks': benchmarks,
+                   'product_metadata': product_metadata,
+                   'engs': engs,
+                   'i_engs': i_engs_page,
+                   'scan_sets': scan_sets,
+                   'tools': tools,
+                   'creds': creds,
+                   'verified_findings': verified_findings,
+                   'open_findings': open_findings,
+                   'closed_findings': closed_findings,
+                   'accepted_findings': accepted_findings,
+                   'new_findings': new_verified_findings,
+                   'start_date': start_date,
+                   'punchcard': punchcard,
+                   'ticks': ticks,
+                   'highest_count': highest_count,
+                   'open_close_weekly': open_close_weekly,
+                   'severity_weekly': severity_weekly,
+                   'critical_weekly': critical_weekly,
+                   'high_weekly': high_weekly,
+                   'medium_weekly': medium_weekly,
+                   'test_data': test_data,
+                   'user': request.user,
+                   'languages': languages,
+                   'langSummary': langSummary,
+                   'app_analysis': app_analysis,
+                   'system_settings': system_settings,
+                   'authorized': auth})
+
+
+def view_engagements(request, pid):
+    prod = get_object_or_404(Product, id=pid)
+    engs = Engagement.objects.filter(product=prod, active=True)
+
+    result = EngagementFilter(
+        request.GET,
+        queryset=Engagement.objects.filter(product=prod, active=False).order_by('-target_end'))
+
+    i_engs_page = get_page_items(request, result.qs, 10)
+
+    scan_sets = ScanSettings.objects.filter(product=prod)
+    tools = Tool_Product_Settings.objects.filter(product=prod).order_by('name')
+    auth = request.user.is_staff or request.user in prod.authorized_users.all()
+    creds = Cred_Mapping.objects.filter(product=prod).select_related('cred_id').order_by('cred_id')
+    langSummary = Languages.objects.filter(product=prod).aggregate(Sum('files'), Sum('code'), Count('files'))
+    languages = Languages.objects.filter(product=prod).order_by('-code')
+    app_analysis = App_Analysis.objects.filter(product=prod).order_by('name')
+    benchmark_type = Benchmark_Type.objects.filter(enabled=True).order_by('name')
+    benchmarks = Benchmark_Product_Summary.objects.filter(product=prod, publish=True, benchmark_type__enabled=True).order_by('benchmark_type__name')
+    system_settings = System_Settings.objects.get()
+
+    if not auth:
+        # will render 403
+        raise PermissionDenied
+
+    ct = ContentType.objects.get_for_model(prod)
+    product_cf = CustomField.objects.filter(content_type=ct)
+    product_metadata = {}
+
+    for cf in product_cf:
+        cfv = CustomFieldValue.objects.filter(field=cf, object_id=prod.id)
+        if len(cfv):
+            product_metadata[cf.name] = cfv[0].value
+
+    try:
+        start_date = Finding.objects.filter(test__engagement__product=prod).order_by('date')[:1][0].date
+    except:
+        start_date = timezone.now()
+
+    end_date = timezone.now()
+
+    tests = Test.objects.filter(engagement__product=prod)
+
+    risk_acceptances = Risk_Acceptance.objects.filter(engagement__in=Engagement.objects.filter(product=prod))
+
+    accepted_findings = [finding for ra in risk_acceptances
+                         for finding in ra.accepted_findings.all()]
+
+    verified_findings = Finding.objects.filter(test__engagement__product=prod,
+                                               date__range=[start_date, end_date],
+                                               false_p=False,
+                                               verified=True,
+                                               duplicate=False,
+                                               out_of_scope=False).order_by("date")
+
+    week_date = end_date - timedelta(days=7)  # seven days and /newnewer are considered "new"
+
+    new_verified_findings = Finding.objects.filter(test__engagement__product=prod,
+                                                   date__range=[week_date, end_date],
+                                                   false_p=False,
+                                                   verified=True,
+                                                   duplicate=False,
+                                                   out_of_scope=False).order_by("date")
+
+    open_findings = Finding.objects.filter(test__engagement__product=prod,
+                                           date__range=[start_date, end_date],
+                                           false_p=False,
+                                           verified=True,
+                                           duplicate=False,
+                                           out_of_scope=False,
+                                           active=True,
+                                           mitigated__isnull=True)
+
+    closed_findings = Finding.objects.filter(test__engagement__product=prod,
+                                             date__range=[start_date, end_date],
+                                             false_p=False,
+                                             verified=True,
+                                             duplicate=False,
+                                             out_of_scope=False,
+                                             mitigated__isnull=False)
+
+    start_date = timezone.make_aware(datetime.combine(start_date, datetime.min.time()))
+
+    r = relativedelta(end_date, start_date)
+    weeks_between = int(ceil((((r.years * 12) + r.months) * 4.33) + (r.days / 7)))
+    if weeks_between <= 0:
+        weeks_between += 2
+
+    punchcard, ticks, highest_count = get_punchcard_data(verified_findings, weeks_between, start_date)
+    add_breadcrumb(parent=prod, top_level=False, request=request)
+
+    open_close_weekly = OrderedDict()
+    new_weekly = OrderedDict()
+    severity_weekly = OrderedDict()
+    critical_weekly = OrderedDict()
+    high_weekly = OrderedDict()
+    medium_weekly = OrderedDict()
+
+    for v in verified_findings:
+        iso_cal = v.date.isocalendar()
+        x = iso_to_gregorian(iso_cal[0], iso_cal[1], 1)
+        y = x.strftime("<span class='small'>%m/%d<br/>%Y</span>")
+        x = (tcalendar.timegm(x.timetuple()) * 1000)
+        if x not in critical_weekly:
+            critical_weekly[x] = {'count': 0, 'week': y}
+        if x not in high_weekly:
+            high_weekly[x] = {'count': 0, 'week': y}
+        if x not in medium_weekly:
+            medium_weekly[x] = {'count': 0, 'week': y}
+
+        if x in open_close_weekly:
+            if v.mitigated:
+                open_close_weekly[x]['closed'] += 1
+            else:
+                open_close_weekly[x]['open'] += 1
+        else:
+
+            if v.mitigated:
+                open_close_weekly[x] = {'closed': 1, 'open': 0, 'accepted': 0}
+            else:
+                open_close_weekly[x] = {'closed': 0, 'open': 1, 'accepted': 0}
+            open_close_weekly[x]['week'] = y
+
+        if x in severity_weekly:
+            if v.severity in severity_weekly[x]:
+                severity_weekly[x][v.severity] += 1
+            else:
+                severity_weekly[x][v.severity] = 1
+        else:
+            severity_weekly[x] = {'Critical': 0, 'High': 0,
+                                  'Medium': 0, 'Low': 0, 'Info': 0}
+            severity_weekly[x][v.severity] = 1
+            severity_weekly[x]['week'] = y
+
+        if v.severity == 'Critical':
+            if x in critical_weekly:
+                critical_weekly[x]['count'] += 1
+            else:
+                critical_weekly[x] = {'count': 1, 'week': y}
+        elif v.severity == 'High':
+            if x in high_weekly:
+                high_weekly[x]['count'] += 1
+            else:
+                high_weekly[x] = {'count': 1, 'week': y}
+        elif v.severity == 'Medium':
+            if x in medium_weekly:
+                medium_weekly[x]['count'] += 1
+            else:
+                medium_weekly[x] = {'count': 1, 'week': y}
+
+    for a in accepted_findings:
+        iso_cal = a.date.isocalendar()
+        x = iso_to_gregorian(iso_cal[0], iso_cal[1], 1)
+        y = x.strftime("<span class='small'>%m/%d<br/>%Y</span>")
+        x = (tcalendar.timegm(x.timetuple()) * 1000)
+
+        if x in open_close_weekly:
+            open_close_weekly[x]['accepted'] += 1
+        else:
+            open_close_weekly[x] = {'closed': 0, 'open': 0, 'accepted': 1}
+            open_close_weekly[x]['week'] = y
+
+    test_data = {}
+    for t in tests:
+        if t.test_type.name in test_data:
+            test_data[t.test_type.name] += t.verified_finding_count()
+        else:
+            test_data[t.test_type.name] = t.verified_finding_count()
+
+    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(pid)
+
+    return render(request,
+                  'dojo/view_engagements.html',
+                  {'prod': prod,
+                   'active_tab': 'engagements',
+                   'tab_product': tab_product,
+                   'tab_engagements': tab_engagements,
+                   'tab_findings': tab_findings,
+                   'tab_endpoints': tab_endpoints,
+                   'tab_benchmarks': tab_benchmarks,
                    'benchmark_type': benchmark_type,
                    'benchmarks': benchmarks,
                    'product_metadata': product_metadata,
@@ -403,7 +720,7 @@ def edit_product(request, pid):
                                             'JIRA information updated successfully.',
                                             extra_tags='alert-success')
 
-            return HttpResponseRedirect(reverse('view_product_details', args=(pid,)))
+            return HttpResponseRedirect(reverse('view_product', args=(pid,)))
     else:
         form = ProductForm(instance=prod,
                            initial={'auth_users': prod.authorized_users.all(),
@@ -573,7 +890,7 @@ def add_meta_data(request, pid):
             if 'add_another' in request.POST:
                 return HttpResponseRedirect(reverse('add_meta_data', args=(pid,)))
             else:
-                return HttpResponseRedirect(reverse('view_product_details', args=(pid,)))
+                return HttpResponseRedirect(reverse('view_product', args=(pid,)))
     else:
         form = ProductMetaDataForm(initial={'content_type': prod})
 

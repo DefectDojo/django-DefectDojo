@@ -24,10 +24,10 @@ from dojo.forms import CheckForm, \
 from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Type, Notes, \
     Risk_Acceptance, Development_Environment, BurpRawRequestResponse, Endpoint, \
-    JIRA_PKey, JIRA_Issue, Cred_Mapping, Dojo_User
+    JIRA_PKey, JIRA_Issue, Cred_Mapping, Dojo_User, System_Settings
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
-    FileIterWrapper, get_cal_event, message, get_system_setting, create_notification
+    FileIterWrapper, get_cal_event, message, get_system_setting, create_notification, tab_view_count
 from dojo.tasks import update_epic_task, add_epic_task, close_epic_task
 
 logger = logging.getLogger(__name__)
@@ -215,8 +215,7 @@ def delete_engagement(request, eid):
                     messages.SUCCESS,
                     'Engagement and relationships removed.',
                     extra_tags='alert-success')
-                return HttpResponseRedirect(
-                    reverse('view_product', args=(product.id, )))
+                return HttpResponseRedirect(reverse("view_engagements", args=(product.id, )))
 
     add_breadcrumb(
         parent=engagement, title="Delete", top_level=False, request=request)
@@ -230,10 +229,11 @@ def delete_engagement(request, eid):
 
 def view_engagement(request, eid):
     eng = Engagement.objects.get(id=eid)
-    tests = Test.objects.filter(engagement=eng)
+    tests = Test.objects.filter(engagement=eng).order_by('test_type__name')
     prod = eng.product
     auth = request.user.is_staff or request.user in prod.authorized_users.all()
     risks_accepted = eng.risk_acceptance.all()
+    system_settings = System_Settings.objects.get()
     if not auth:
         # will render 403
         raise PermissionDenied
@@ -336,9 +336,17 @@ def view_engagement(request, eid):
         out_of_scope=False,
         mitigated__isnull=False)
 
+    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(prod.id)
     return render(
         request, 'dojo/view_eng.html', {
             'eng': eng,
+            'active_tab': 'engagements',
+            'tab_product': tab_product,
+            'tab_engagements': tab_engagements,
+            'tab_findings': tab_findings,
+            'tab_endpoints': tab_endpoints,
+            'tab_benchmarks': tab_benchmarks,
+            'system_settings': system_settings,
             'tests': tests,
             'findings': fpage,
             'enabled': enabled,
@@ -610,8 +618,7 @@ def close_eng(request, eid):
         messages.SUCCESS,
         'Engagement closed successfully.',
         extra_tags='alert-success')
-    return HttpResponseRedirect(
-        reverse('view_product', args=(eng.product.id, )))
+    return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
 
 
 @user_passes_test(lambda u: u.is_staff)
