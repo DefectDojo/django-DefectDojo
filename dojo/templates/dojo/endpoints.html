@@ -17,7 +17,11 @@
                                 aria-labelledby="dropdownMenu1">
                                 {% if request.user.is_staff %}
                                     <li role="presentation">
+                                      {% if tab_product %}
+                                        <a href="{% url 'add_endpoint' tab_product.id %}">
+                                      {% else %}
                                         <a href="{% url 'add_product_endpoint' %}">
+                                      {% endif %}
                                             <i class="fa fa-plus"></i> New Endpoint
                                         </a>
                                     </li>
@@ -26,7 +30,7 @@
                         </div>
                     </h3>
                 </div>
-                <div id="the-filters" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
+                <div id="the-filters" class="panel-body collapse">
                     {% include "dojo/filter_snippet.html" with form=filtered.form %}
                 </div>
             </div>
@@ -69,7 +73,11 @@
                                 </td>
                                 <td>
                                   {% if e.finding_count > 0 %}
+                                  {% if tab_product %}
+                                  <a href="{% url 'product_open_findings' tab_product.id %}?test__engagement__product={{ tab_product.id }}&endpoints={{ e.id }}">{{ e.finding_count_endpoint }}</a>
+                                  {% else %}
                                   <a href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.finding_count_endpoint }}</a>
+                                  {% endif %}
                                   {% else %}
                                   No Open, Active Findings
                                   {% endif %}

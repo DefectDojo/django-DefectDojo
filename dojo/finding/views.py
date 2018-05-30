@@ -27,10 +27,10 @@ from dojo.forms import NoteForm, CloseFindingForm, FindingForm, PromoteFindingFo
     DefectFindingForm, StubFindingForm, DeleteFindingForm, DeleteStubFindingForm, ApplyFindingTemplateForm, FindingBulkUpdateForm
 from dojo.models import Product_Type, Finding, Notes, \
     Risk_Acceptance, BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, \
-    FindingImageAccessToken, JIRA_Issue, JIRA_PKey, Dojo_User, Cred_Mapping, Test
+    FindingImageAccessToken, JIRA_Issue, JIRA_PKey, Dojo_User, Cred_Mapping, Test, System_Settings
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
-    add_comment, jira_get_resolution_id, \
-    jira_change_resolution_id, get_jira_connection, get_system_setting, create_notification
+    add_comment, jira_get_resolution_id, jira_change_resolution_id, get_jira_connection, \
+    get_system_setting, create_notification, tab_view_count
 
 from dojo.tasks import add_issue_task, update_issue_task, add_comment_task
 
@@ -43,7 +43,7 @@ engineer
 """
 
 
-def open_findings(request):
+def open_findings(request, pid=None):
     findings = Finding.objects.filter(
         mitigated__isnull=True,
         verified=True,
@@ -84,12 +84,31 @@ def open_findings(request):
         found_by = None
         pass
 
+    # Only show product tab view in product
+    tab_product = None
+    tab_engagements = None
+    tab_findings = None
+    tab_endpoints = None
+    tab_benchmarks = None
+    active_tab = None
+    if pid:
+        active_tab = "findings"
+        tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(pid)
+
+    system_settings = System_Settings.objects.get()
     return render(
         request, 'dojo/open_findings.html', {
+            'tab_product': tab_product,
+            'tab_engagements': tab_engagements,
+            'tab_findings': tab_findings,
+            'tab_endpoints': tab_endpoints,
+            'tab_benchmarks': tab_benchmarks,
+            'active_tab': active_tab,
             "findings": paged_findings,
             "filtered": findings,
             "title_words": title_words,
-            'found_by': found_by
+            'found_by': found_by,
+            'system_settings': system_settings
         })
 
 
@@ -144,8 +163,16 @@ def closed_findings(request):
         title="Closed findings",
         top_level=not len(request.GET),
         request=request)
+    system_settings = System_Settings.objects.get()
+    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(pid)
     return render(
         request, 'dojo/closed_findings.html', {
+            'tab_product': tab_product,
+            'tab_engagements': tab_engagements,
+            'tab_findings': tab_findings,
+            'tab_endpoints': tab_endpoints,
+            'tab_benchmarks': tab_benchmarks,
+            'active_tab': 'findings',
             "findings": paged_findings,
             "filtered": findings,
             "title_words": title_words,
@@ -218,8 +245,18 @@ def view_finding(request, fid):
         burp_response = None
 
     add_breadcrumb(parent=finding, top_level=False, request=request)
+    system_settings = System_Settings.objects.get()
+    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(finding.test.engagement.product.id)
+
     return render(
         request, 'dojo/view_finding.html', {
+            'tab_product': tab_product,
+            'tab_engagements': tab_engagements,
+            'tab_findings': tab_findings,
+            'tab_endpoints': tab_endpoints,
+            'tab_benchmarks': tab_benchmarks,
+            'active_tab': 'findings',
+            'system_settings': system_settings,
             'finding': finding,
             'burp_request': burp_request,
             'jissue': jissue,
@@ -272,8 +309,17 @@ def close_finding(request, fid):
 
     add_breadcrumb(
         parent=finding, title="Close", top_level=False, request=request)
+
+    system_settings = System_Settings.objects.get()
+    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(finding.test.engagement.product.id)
     return render(request, 'dojo/close_finding.html', {
         'finding': finding,
+        'tab_product': tab_product,
+        'tab_engagements': tab_engagements,
+        'tab_findings': tab_findings,
+        'tab_endpoints': tab_endpoints,
+        'tab_benchmarks': tab_benchmarks,
+        'active_tab': 'findings',
         'user': request.user,
         'form': form
     })
@@ -346,8 +392,17 @@ def defect_finding_review(request, fid):
         title="Jira Status Review",
         top_level=False,
         request=request)
+    system_settings = System_Settings.objects.get()
+    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(finding.test.engagement.product.id)
     return render(request, 'dojo/defect_finding_review.html', {
         'finding': finding,
+        'tab_product': tab_product,
+        'tab_engagements': tab_engagements,
+        'tab_findings': tab_findings,
+        'tab_endpoints': tab_endpoints,
+        'tab_benchmarks': tab_benchmarks,
+        'active_tab': 'findings',
+        'system_settings': system_settings,
         'user': request.user,
         'form': form
     })
@@ -420,6 +475,9 @@ def edit_finding(request, fid):
 
     if request.method == 'POST':
         form = FindingForm(request.POST, instance=finding)
+        source = request.POST.get("source", "")
+        page = request.POST.get("page", "")
+
         if form.is_valid():
             new_finding = form.save(commit=False)
             new_finding.test = finding.test
@@ -492,8 +550,21 @@ def edit_finding(request, fid):
                         messages.SUCCESS,
                         'A finding template was also created.',
                         extra_tags='alert-success')
-            return HttpResponseRedirect(
-                reverse('view_finding', args=(new_finding.id, )))
+            page_value = ""
+            if page:
+                try:
+                    if int(page):
+                        page_value = "&page=" + str(page)
+                except:
+                    pass
+            if source == "test":
+                return HttpResponseRedirect(reverse('view_test', args=(new_finding.test.id, )))
+            elif source == "product_findings":
+                return HttpResponseRedirect(reverse('product_open_findings', args=(new_finding.test.engagement.product.id, )) + '?test__engagement__product=' + str(new_finding.test.engagement.product.id) + page_value)
+            elif source == "all_product_findings":
+                return HttpResponseRedirect(reverse('open_findings') + '?' + page_value)
+            else:
+                return HttpResponseRedirect(reverse('view_finding', args=(new_finding.id, )))
         else:
             messages.add_message(
                 request,
@@ -509,7 +580,17 @@ def edit_finding(request, fid):
     form.initial['tags'] = [tag.name for tag in finding.tags]
     add_breadcrumb(
         parent=finding, title="Edit", top_level=False, request=request)
+
+    system_settings = System_Settings.objects.get()
+    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(finding.test.engagement.product.id)
     return render(request, 'dojo/edit_findings.html', {
+        'tab_product': tab_product,
+        'tab_engagements': tab_engagements,
+        'tab_findings': tab_findings,
+        'tab_endpoints': tab_endpoints,
+        'tab_benchmarks': tab_benchmarks,
+        'active_tab': 'findings',
+        'system_settings': system_settings,
         'form': form,
         'finding': finding,
         'jform': jform
@@ -571,6 +652,8 @@ def request_finding_review(request, fid):
     else:
         form = ReviewFindingForm()
 
+    system_settings = System_Settings.objects.get()
+    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(finding.test.engagement.product.id)
     add_breadcrumb(
         parent=finding,
         title="Review Finding",
@@ -578,6 +661,12 @@ def request_finding_review(request, fid):
         request=request)
     return render(request, 'dojo/review_finding.html', {
         'finding': finding,
+        'tab_product': tab_product,
+        'tab_engagements': tab_engagements,
+        'tab_findings': tab_findings,
+        'tab_endpoints': tab_endpoints,
+        'tab_benchmarks': tab_benchmarks,
+        'active_tab': 'findings',
         'user': user,
         'form': form
     })
@@ -1128,10 +1217,25 @@ def manage_images(request, fid):
 
         if not error:
             return HttpResponseRedirect(reverse('view_finding', args=(fid, )))
-
+    system_settings = System_Settings.objects.get()
+    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(finding.test.engagement.product.id)
     return render(
         request, 'dojo/manage_images.html', {
+            'tab_product': tab_product,
+            'tab_engagements': tab_engagements,
+            'tab_findings': tab_findings,
+            'tab_endpoints': tab_endpoints,
+            'tab_benchmarks': tab_benchmarks,
+            'active_tab': 'findings',
+            'system_settings': system_settings,
             'images_formset': images_formset,
+            'tab_product': tab_product,
+            'tab_engagements': tab_engagements,
+            'tab_findings': tab_findings,
+            'tab_endpoints': tab_endpoints,
+            'tab_benchmarks': tab_benchmarks,
+            'active_tab': 'findings',
+            'system_settings': system_settings,
             'name': 'Manage Finding Images',
             'finding': finding,
         })
@@ -1182,6 +1286,7 @@ def finding_bulk_update_all(request):
                 finds = Finding.objects.filter(id__in=finding_to_update)
                 if form.cleaned_data['severity']:
                     finds.update(severity=form.cleaned_data['severity'],
+                                 numerical_severity=Finding.get_numerical_severity(form.cleaned_data['severity']),
                                  active=form.cleaned_data['active'],
                                  verified=form.cleaned_data['verified'],
                                  false_p=form.cleaned_data['false_p'],
