@@ -10,6 +10,8 @@ urlpatterns = [
         name='findings_bulk_all'),
     url(r'^finding/open$', views.open_findings,
         name='open_findings'),
+    url(r'^product/(?P<pid>\d+)/finding/open$', views.open_findings,
+        name='product_open_findings'),
     url(r'^finding/closed$', views.closed_findings,
         name='closed_findings'),
     url(r'^finding/accepted', views.accepted_findings,

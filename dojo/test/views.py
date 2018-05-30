@@ -103,14 +103,23 @@ def edit_test(request, tid):
                                  messages.SUCCESS,
                                  'Test saved.',
                                  extra_tags='alert-success')
+            return HttpResponseRedirect(reverse('view_engagement', args=(test.engagement.id,)))
 
     form.initial['target_start'] = test.target_start.date()
     form.initial['target_end'] = test.target_end.date()
     form.initial['tags'] = [tag.name for tag in test.tags]
 
+    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(test.engagement.product.id)
+    system_settings = System_Settings.objects.get()
     add_breadcrumb(parent=test, title="Edit", top_level=False, request=request)
     return render(request, 'dojo/edit_test.html',
                   {'test': test,
+                   'tab_product': tab_product,
+                   'tab_engagements': tab_engagements,
+                   'tab_findings': tab_findings,
+                   'tab_endpoints': tab_endpoints,
+                   'tab_benchmarks': tab_benchmarks,
+                   'active_tab': 'engagements',
                    'form': form,
                    })
 
@@ -141,8 +150,16 @@ def delete_test(request, tid):
                 return HttpResponseRedirect(reverse('view_engagement', args=(eng.id,)))
 
     add_breadcrumb(parent=test, title="Delete", top_level=False, request=request)
+    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(test.engagement.product.id)
+    system_settings = System_Settings.objects.get()
     return render(request, 'dojo/delete_test.html',
                   {'test': test,
+                   'tab_product': tab_product,
+                   'tab_engagements': tab_engagements,
+                   'tab_findings': tab_findings,
+                   'tab_endpoints': tab_endpoints,
+                   'tab_benchmarks': tab_benchmarks,
+                   'active_tab': 'engagements',
                    'form': form,
                    'rels': rels,
                    'deletable_objects': rels,

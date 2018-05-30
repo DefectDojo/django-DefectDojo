@@ -494,6 +494,7 @@ function install_app(){
     python manage.py loaddata benchmark_type
     python manage.py loaddata language_type
     python manage.py loaddata objects_review
+    python manage.py loaddata regulation
 
     python manage.py installwatson
     python manage.py buildwatson
