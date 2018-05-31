@@ -23,6 +23,8 @@ ignore =
 exclude =
     # No need to traverse our git directory
     .git,
+    # Exclude unittests
+    dojo/unittests,
     # There's no value in checking cache directories
     __pycache__,
     # This contains of branch that we don't want to check

@@ -30,6 +30,34 @@ lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
 logging.basicConfig(format=fmt, level=lvl)
 
 
+class Regulation(models.Model):
+    PRIVACY_CATEGORY = 'privacy'
+    FINANCE_CATEGORY = 'finance'
+    EDUCATION_CATEGORY = 'education'
+    MEDICAL_CATEGORY = 'medical'
+    OTHER_CATEGORY = 'other'
+    CATEGORY_CHOICES = (
+        (PRIVACY_CATEGORY, _('Privacy')),
+        (FINANCE_CATEGORY, _('Finance')),
+        (EDUCATION_CATEGORY, _('Education')),
+        (MEDICAL_CATEGORY, _('Medical')),
+        (OTHER_CATEGORY, _('Other')),
+    )
+
+    name = models.CharField(max_length=128, help_text=_('The name of the legislation.'))
+    acronym = models.CharField(max_length=20, unique=True, help_text=_('A shortened representation of the name.'))
+    category = models.CharField(max_length=9, choices=CATEGORY_CHOICES, help_text=_('The subject of the regulation.'))
+    jurisdiction = models.CharField(max_length=64, help_text=_('The territory over which the regulation applies.'))
+    description = models.TextField(blank=True, help_text=_('Information about the regulation\'s purpose.'))
+    reference = models.URLField(blank=True, help_text=_('An external URL for more information.'))
+
+    class Meta:
+        ordering = ['jurisdiction', 'category', 'name']
+
+    def __str__(self):
+        return self.acronym + ' (' + self.jurisdiction + ')'
+
+
 class System_Settings(models.Model):
     enable_deduplication = models.BooleanField(
         default=False,
@@ -386,6 +414,7 @@ class Product(models.Model):
     revenue = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True, help_text=_('Estimate the application\'s revenue.'))
     external_audience = models.BooleanField(default=False, help_text=_('Specify if the application is used by people outside the organization.'))
     internet_accessible = models.BooleanField(default=False, help_text=_('Specify if the application is accessible from the public internet.'))
+    regulations = models.ManyToManyField(Regulation, blank=True)
 
     def __unicode__(self):
         return self.name
@@ -1057,6 +1086,10 @@ class Finding(models.Model):
         res = re.sub(r'\n\s*\n', '\n', res)
         return res
 
+    def get_found_by(self):
+        scanners = self.found_by.all().distinct()
+        return ", ".join([str(scanner) for scanner in scanners])
+
 
 Finding.endpoints.through.__unicode__ = lambda \
     x: "Endpoint: " + x.endpoint.host
@@ -1524,6 +1557,7 @@ class App_Analysis(models.Model):
     def __unicode__(self):
         return self.name + " | " + self.product.name
 
+
 class Objects_Review(models.Model):
     name = models.CharField(max_length=100, null=True)
     created = models.DateTimeField(null=False, editable=False, default=now)
@@ -1773,8 +1807,9 @@ admin.site.register(Cred_User)
 admin.site.register(Cred_Mapping)
 admin.site.register(System_Settings, System_SettingsAdmin)
 admin.site.register(CWE)
+admin.site.register(Regulation)
 
-
+# Watson
 watson.register(Product)
 watson.register(Test)
 watson.register(Finding)

@@ -54,7 +54,7 @@
                             {% if "enable_jira"|get_system_setting %}
                             <th>Jira</th>
                             {% endif %}
-                            <th> Finding</th>
+                            <th> Findings</th>
                             <th> Endpoint</th>
                             <th> Contact</th>
                             <th>{% dojo_sort request 'Product Type' 'prod_type__name' %}</th>
@@ -114,7 +114,7 @@
                                 {% endif %}
                                 <td class="text-center">
                                     {% if prod.findings_count %}
-                                        <a href="{% url 'open_findings' %}?test__engagement__product={{ prod.id }}"><b>{{ prod.findings_count }}</b></a>
+                                        <a href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}"><b>{{ prod.findings_count }}</b></a>
                                     {% else %}
                                         0
                                     {% endif %}

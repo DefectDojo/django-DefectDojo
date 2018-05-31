@@ -9,6 +9,17 @@
 }
 {% endblock %}
 {% block content %}
+    <h3> Add Tests</h3>
+    <form class="form-horizontal" action="" enctype="multipart/form-data" method="post">
+        {% csrf_token %}
+        {% include "dojo/form_fields.html" with form=form %}
+        {% include "dojo/form_fields.html" with form=cred_form %}
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <input class="btn btn-primary" type="submit" value="Upload File"/>
+            </div>
+        </div>
+    </form>
     <div class="well">
         <p>Upload your third party tool scan results and all the findings
             will be imported automatically.</p>
@@ -48,16 +59,6 @@
             </p>
         {% endif %}
     </div>
-    <form class="form-horizontal" action="" enctype="multipart/form-data" method="post">
-        {% csrf_token %}
-        {% include "dojo/form_fields.html" with form=form %}
-        {% include "dojo/form_fields.html" with form=cred_form %}
-        <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-10">
-                <input class="btn btn-primary" type="submit" value="Upload File"/>
-            </div>
-        </div>
-    </form>
 {% endblock %}
 {% block postscript %}
     <script type="application/javascript" src="{% static "chosen/chosen.jquery.min.js" %}"></script>

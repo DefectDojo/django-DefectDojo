@@ -1,6 +1,7 @@
 import sys
 sys.path.append('..')
 from dojo.models import Product
+from dojo.models import System_Settings
 from dojo.models import Endpoint
 from dojo.endpoint import views
 from django.test import TestCase
@@ -11,6 +12,7 @@ from custom_field.models import CustomFieldValue, CustomField
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.http import HttpResponseRedirect
 from django.http import HttpResponse
+from django.core.management import call_command
 
 
 class EndpointMetaDataTestUtil:
@@ -110,6 +112,8 @@ class TestAddEndpointMetaData(TestCase):
         e.host = '127.0.0.1'
         e.save()
 
+        call_command('loaddata', 'dojo/fixtures/system_settings', verbosity=0)
+
     def make_request(self, user_is_staff, id, data=None):
         user = EndpointMetaDataTestUtil.create_user(user_is_staff)
 
@@ -162,7 +166,7 @@ class TestAddEndpointMetaData(TestCase):
         self.assertEqual('TestValue', endpoint_metadata['TestField'])
 
     def test_add_endpoint_meta_data_has_no_impact_on_product_metadata(self):
-        v = self.make_request(True, 1,  {'name': 'TestField', 'value': 'TestValue'})
+        v = self.make_request(True, 1, {'name': 'TestField', 'value': 'TestValue'})
         product_metadata = EndpointMetaDataTestUtil.get_product_metadata(1)
         self.assertEqual(0, len(product_metadata))
 
@@ -275,6 +279,7 @@ class TestViewEndpointMetaData(TestCase):
         self.e.host = '127.0.0.1'
         self.e.save()
 
+        call_command('loaddata', 'dojo/fixtures/system_settings', verbosity=0)
         self.util = EndpointMetaDataTestUtil()
         self.util.save_custom_field(self.e, 'TestField', 'TestValue')
 

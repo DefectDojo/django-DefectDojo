@@ -2,10 +2,16 @@
 .h2,
 .h3,
 h1,
-h2,
-h3 {
+h2 {
     margin-top: 10px;
     margin-bottom: 10px;
+}
+
+h3 {
+  margin-top: 5px;
+  margin-bottom: 5px;
+  font-size: 20px;
+  line-height: 22px;
 }
 
 .navbar-brand {

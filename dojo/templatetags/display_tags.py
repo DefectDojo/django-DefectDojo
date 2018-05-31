@@ -175,11 +175,35 @@ def count_findings_eng(tests):
     return findings
 
 
+@register.filter(name='paginator')
+def paginator(page):
+    page_value = paginator_value(page)
+    if page_value:
+            page_value = "&page=" + page_value
+    return page_value
+
+
+@register.filter(name='paginator_form')
+def paginator_form(page):
+    return paginator_value(page)
+
+
+def paginator_value(page):
+    page_value = ""
+    # isinstance(page, int):
+    try:
+        if int(page):
+            page_value = str(page)
+    except:
+        pass
+    return page_value
+
+
 @register.filter(name='product_grade')
 def product_grade(product):
     grade = ""
     system_settings = System_Settings.objects.get()
-    if system_settings.enable_product_grade:
+    if system_settings.enable_product_grade and product:
         prod_numeric_grade = product.prod_numeric_grade
 
         if prod_numeric_grade is "" or prod_numeric_grade is None:
@@ -255,6 +279,10 @@ def datediff_time(date1, date2):
     human_date = human_readable(diff)
     for date_part in human_date:
         date_str = date_str + date_part + " "
+
+    # Date is for one day
+    if date_str is "":
+        date_str = "1 day"
 
     return date_str
 
