@@ -241,7 +241,10 @@ def edit_endpoint(request, eid):
     form = EditEndpointForm(instance=endpoint)
     form.initial['tags'] = [tag.name for tag in endpoint.tags]
 
-    system_settings = System_Settings.objects.get()
+    try:
+        system_settings = System_Settings.objects.get()
+    except System_Settings.DoesNotExist:
+        system_settings = None
     tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(endpoint.product.id)
 
     return render(request,
