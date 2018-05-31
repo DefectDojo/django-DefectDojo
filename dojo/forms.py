@@ -1059,6 +1059,8 @@ class DeleteEndpointForm(forms.ModelForm):
     class Meta:
         model = Endpoint
         exclude = ('protocol',
+                   'fqdn',
+                   'port',
                    'host',
                    'path',
                    'query',

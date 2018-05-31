@@ -188,7 +188,13 @@
                                    </ul>
                                 </td>
                                 <td>{{ test.target_start.date }} - {{ test.target_end.date }}</td>
-                                <td>{{ test.lead }}</td>
+                                <td>
+                                  {% if eng.lead.get_full_name and eng.lead.get_full_name.strip %}
+                                      {{ eng.lead.get_full_name }}
+                                  {% else %}
+                                      {{ eng.lead }}
+                                  {% endif %}
+                                </td>
                                 <td><a href="{% url 'view_test' test.id %}">{{ test.finding_set.all|finding_status:False|length }}</a></td>
                                 <td>{{ test.finding_set.all|finding_status:True|length }}</td>
                                 <td>{{ test.notes.all|length }}</td>

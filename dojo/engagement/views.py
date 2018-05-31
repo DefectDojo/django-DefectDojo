@@ -184,7 +184,17 @@ def edit_engagement(request, eid):
     form.initial['tags'] = [tag.name for tag in eng.tags]
     add_breadcrumb(
         parent=eng, title="Edit Engagement", top_level=False, request=request)
+    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(eng.product.id)
+    system_settings = System_Settings.objects.get()
+
     return render(request, 'dojo/new_eng.html', {
+        'tab_product': tab_product,
+        'tab_engagements': tab_engagements,
+        'tab_findings': tab_findings,
+        'tab_endpoints': tab_endpoints,
+        'tab_benchmarks': tab_benchmarks,
+        'active_tab': 'engagements',
+        'system_settings': system_settings,
         'form': form,
         'edit': True,
         'jform': jform
@@ -219,8 +229,17 @@ def delete_engagement(request, eid):
 
     add_breadcrumb(
         parent=engagement, title="Delete", top_level=False, request=request)
+    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(product.id)
+    system_settings = System_Settings.objects.get()
 
     return render(request, 'dojo/delete_engagement.html', {
+        'active_tab': 'engagements',
+        'tab_product': tab_product,
+        'tab_engagements': tab_engagements,
+        'tab_findings': tab_findings,
+        'tab_endpoints': tab_endpoints,
+        'tab_benchmarks': tab_benchmarks,
+        'system_settings': system_settings,
         'engagement': engagement,
         'form': form,
         'rels': rels,
@@ -228,7 +247,7 @@ def delete_engagement(request, eid):
 
 
 def view_engagement(request, eid):
-    eng = Engagement.objects.get(id=eid)
+    eng = get_object_or_404(Engagement, id=eid)
     tests = Test.objects.filter(engagement=eng).order_by('test_type__name')
     prod = eng.product
     auth = request.user.is_staff or request.user in prod.authorized_users.all()
@@ -436,7 +455,16 @@ def add_tests(request, eid):
         form.initial['lead'] = request.user
     add_breadcrumb(
         parent=eng, title="Add Tests", top_level=False, request=request)
+    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(eng.product.id)
+    system_settings = System_Settings.objects.get()
     return render(request, 'dojo/add_tests.html', {
+        'active_tab': 'engagements',
+        'tab_product': tab_product,
+        'tab_engagements': tab_engagements,
+        'tab_findings': tab_findings,
+        'tab_endpoints': tab_endpoints,
+        'tab_benchmarks': tab_benchmarks,
+        'system_settings': system_settings,
         'form': form,
         'cred_form': cred_form,
         'eid': eid
@@ -594,8 +622,16 @@ def import_scan_results(request, eid):
         title="Import Scan Results",
         top_level=False,
         request=request)
+    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(engagement.product.id)
+    system_settings = System_Settings.objects.get()
     return render(request, 'dojo/import_scan_results.html', {
         'form': form,
+        'tab_product': tab_product,
+        'tab_engagements': tab_engagements,
+        'tab_findings': tab_findings,
+        'tab_endpoints': tab_endpoints,
+        'tab_benchmarks': tab_benchmarks,
+        'active_tab': 'engagements',
         'eid': engagement.id,
         'cred_form': cred_form,
     })

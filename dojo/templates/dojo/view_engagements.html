@@ -72,7 +72,13 @@
                                      </li>
                                  </ul>
                                 </td>
-                                <td>{{ eng.lead }}</td>
+                                <td>
+                                  {% if eng.lead.get_full_name and eng.lead.get_full_name.strip %}
+                                      {{ eng.lead.get_full_name }}
+                                  {% else %}
+                                      {{ eng.lead }}
+                                  {% endif %}
+                                </td>
                                 <td>{{ eng.target_start }} - {{ eng.target_end }}</td>
                                 <td>{{ eng.target_start|datediff_time:eng.target_end }}
                                   {% if eng.target_end|overdue %}
@@ -150,10 +156,16 @@
                                        </a>
                                     </li>
                                    </ul>
-                                 </li>
-                             </ul>
+                                </li>
+                            </ul>
                             </td>
-                            <td>{{ eng.lead }}</td>
+                            <td>
+                              {% if eng.lead.get_full_name and eng.lead.get_full_name.strip %}
+                                  {{ eng.lead.get_full_name }}
+                              {% else %}
+                                  {{ eng.lead }}
+                              {% endif %}
+                            </td>
                             <td>{{ eng.target_start }} - {{ eng.target_end }}</td>
                             <td>{{ eng.target_start|datediff_time:eng.target_end }}</td>
                             <td>{{ eng.test_set.all|length }}</td>

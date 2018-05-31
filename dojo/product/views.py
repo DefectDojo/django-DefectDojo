@@ -144,30 +144,29 @@ def view_product(request, pid):
     total = critical + high + medium + low + info
 
     tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(pid)
-    return render(request,
-                  'dojo/view_product_details.html',
-                  {'prod': prod,
-                   'tab_product': tab_product,
-                   'tab_engagements': tab_engagements,
-                   'tab_findings': tab_findings,
-                   'tab_endpoints': tab_endpoints,
-                   'tab_benchmarks': tab_benchmarks,
-                   'active_tab': 'overview',
-                   'product_metadata': product_metadata,
-                   'tools': tools,
-                   'creds': creds,
-                   'critical': critical,
-                   'high': high,
-                   'medium': medium,
-                   'low': low,
-                   'info': info,
-                   'total': total,
-                   'user': request.user,
-                   'languages': languages,
-                   'langSummary': langSummary,
-                   'app_analysis': app_analysis,
-                   'system_settings': system_settings,
-                   'authorized': auth})
+    return render(request, 'dojo/view_product_details.html', {
+                  'prod': prod,
+                  'tab_product': tab_product,
+                  'tab_engagements': tab_engagements,
+                  'tab_findings': tab_findings,
+                  'tab_endpoints': tab_endpoints,
+                  'tab_benchmarks': tab_benchmarks,
+                  'active_tab': 'overview',
+                  'product_metadata': product_metadata,
+                  'tools': tools,
+                  'creds': creds,
+                  'critical': critical,
+                  'high': high,
+                  'medium': medium,
+                  'low': low,
+                  'info': info,
+                  'total': total,
+                  'user': request.user,
+                  'languages': languages,
+                  'langSummary': langSummary,
+                  'app_analysis': app_analysis,
+                  'system_settings': system_settings,
+                  'authorized': auth})
 
 
 def view_product_metrics(request, pid):
@@ -772,10 +771,18 @@ def delete_product(request, pid):
                 return HttpResponseRedirect(reverse('product'))
 
     add_breadcrumb(parent=product, title="Delete", top_level=False, request=request)
-
+    system_settings = System_Settings.objects.get()
+    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(pid)
     return render(request, 'dojo/delete_product.html',
                   {'product': product,
                    'form': form,
+                   'tab_product': tab_product,
+                   'tab_engagements': tab_engagements,
+                   'tab_findings': tab_findings,
+                   'tab_endpoints': tab_endpoints,
+                   'tab_benchmarks': tab_benchmarks,
+                   'active_tab': 'findings',
+                   'system_settings': system_settings,
                    'rels': rels,
                    })
 
@@ -842,9 +849,6 @@ def new_eng_for_app(request, pid):
                     except JIRA_PKey.DoesNotExist:
                         pass
 
-            # else:
-            #    print >>sys.stderr, 'no prefix is found'
-
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Engagement added successfully.',
@@ -863,9 +867,17 @@ def new_eng_for_app(request, pid):
                     jform = JIRAFindingForm(prefix='jiraform', enabled=JIRA_PKey.objects.get(product=prod).push_all_issues)
 
     add_breadcrumb(parent=prod, title="New Engagement", top_level=False, request=request)
-
+    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(pid)
+    system_settings = System_Settings.objects.get()
     return render(request, 'dojo/new_eng.html',
                   {'form': form, 'pid': pid,
+                   'tab_product': tab_product,
+                   'tab_engagements': tab_engagements,
+                   'tab_findings': tab_findings,
+                   'tab_endpoints': tab_endpoints,
+                   'tab_benchmarks': tab_benchmarks,
+                   'active_tab': 'engagements',
+                   'system_settings': system_settings,
                    'jform': jform
                    })
 
@@ -1036,8 +1048,17 @@ def ad_hoc_finding(request, pid):
                                  'The form has errors, please correct them below.',
                                  extra_tags='alert-danger')
     add_breadcrumb(parent=prod, title="Add Finding", top_level=False, request=request)
+    system_settings = System_Settings.objects.get()
+    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(pid)
     return render(request, 'dojo/ad_hoc_findings.html',
                   {'form': form,
+                   'tab_product': tab_product,
+                   'tab_engagements': tab_engagements,
+                   'tab_findings': tab_findings,
+                   'tab_endpoints': tab_endpoints,
+                   'tab_benchmarks': tab_benchmarks,
+                   'active_tab': 'findings',
+                   'system_settings': system_settings,
                    'temp': False,
                    'tid': test.id,
                    'pid': pid,
