@@ -1,6 +1,7 @@
 import sys
 sys.path.append('..')
 from dojo.models import Product
+from dojo.models import System_Settings
 from dojo.models import Endpoint
 from dojo.endpoint import views
 from django.test import TestCase
