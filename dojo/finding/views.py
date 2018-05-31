@@ -163,16 +163,8 @@ def closed_findings(request):
         title="Closed findings",
         top_level=not len(request.GET),
         request=request)
-    system_settings = System_Settings.objects.get()
-    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(pid)
     return render(
         request, 'dojo/closed_findings.html', {
-            'tab_product': tab_product,
-            'tab_engagements': tab_engagements,
-            'tab_findings': tab_findings,
-            'tab_endpoints': tab_endpoints,
-            'tab_benchmarks': tab_benchmarks,
-            'active_tab': 'findings',
             "findings": paged_findings,
             "filtered": findings,
             "title_words": title_words,
