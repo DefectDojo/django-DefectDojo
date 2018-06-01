@@ -25,7 +25,7 @@ from jira import JIRA
 from jira.exceptions import JIRAError
 from dojo.models import Finding, Engagement, Finding_Template, \
     Product, JIRA_PKey, JIRA_Issue, Dojo_User, User, \
-    Alerts, System_Settings, Notifications, UserContactInfo, Endpoint, Benchmark_Product_Summary
+    Alerts, System_Settings, Notifications, UserContactInfo, Endpoint, Benchmark_Type
 from asteval import Interpreter
 from requests.auth import HTTPBasicAuth
 """
@@ -1532,5 +1532,6 @@ def tab_view_count(product_id):
                                            active=True,
                                            mitigated__isnull=True)
     endpoints = Endpoint.objects.filter(product=product)
-    benchmarks = Benchmark_Product_Summary.objects.filter(product=product, publish=True, benchmark_type__enabled=True).order_by('benchmark_type__name')
-    return product, engagements, open_findings, endpoints.count(), benchmarks
+    # benchmarks = Benchmark_Product_Summary.objects.filter(product=product, publish=True, benchmark_type__enabled=True).order_by('benchmark_type__name')
+    benchmark_type = Benchmark_Type.objects.filter(enabled=True).order_by('name')
+    return product, engagements, open_findings, endpoints.count(), benchmark_type

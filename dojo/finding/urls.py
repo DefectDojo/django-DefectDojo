@@ -8,6 +8,8 @@ urlpatterns = [
         name='findings'),
     url(r'^finding/bulk$', views.finding_bulk_update_all,
         name='findings_bulk_all'),
+    url(r'^product/(?P<pid>\d+)/finding/bulk_product$', views.finding_bulk_update_all,
+        name='findings_bulk_all_product'),
     url(r'^finding/open$', views.open_findings,
         name='open_findings'),
     url(r'^product/(?P<pid>\d+)/finding/open$', views.open_findings,

@@ -52,7 +52,7 @@ class Regulation(models.Model):
     reference = models.URLField(blank=True, help_text=_('An external URL for more information.'))
 
     class Meta:
-        ordering = ['jurisdiction', 'category', 'name']
+        ordering = ['name']
 
     def __str__(self):
         return self.acronym + ' (' + self.jurisdiction + ')'

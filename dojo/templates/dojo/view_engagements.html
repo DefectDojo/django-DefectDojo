@@ -49,24 +49,24 @@
                                        <ul class="dropdown-menu">
                                          <li>
                                            <a class="" href="{% url 'view_engagement' eng.id %}">
-                                             View
-                                         </li>
-                                         <li>
-                                           </a>
-                                           <a class="" href="{% url 'close_engagement' eng.id %}">
-                                             Close
-                                           </a>
+                                             <i class="fa fa-list-alt"></i> View
                                          </li>
                                          <li>
                                            <a class="" href="{% url 'edit_engagement' eng.id %}">
-                                             Edit
+                                             <i class="fa fa-pencil-square-o"></i> Edit
                                            </a>
+                                        </li>
+                                        <li>
+                                          </a>
+                                          <a class="" href="{% url 'close_engagement' eng.id %}">
+                                            <i class="fa fa-close"></i> Close
+                                          </a>
                                         </li>
                                         <li class="divider"></li>
                                         <li>
-                                           <a class="" href="{% url 'delete_engagement' eng.id %}">
-                                             Delete
-                                           </a>
+                                          <a class="text-danger" href="{% url 'delete_engagement' eng.id %}">
+                                              <i class="fa fa-trash-o"></i> Delete Engagement
+                                          </a>
                                         </li>
                                        </ul>
                                      </li>
@@ -136,24 +136,24 @@
                                    <ul class="dropdown-menu">
                                      <li>
                                        <a class="" href="{% url 'view_engagement' eng.id %}">
-                                         View
+                                         <i class="fa fa-list-alt"></i> View
+                                     </li>
+                                     <li>
+                                       <a class="" href="{% url 'edit_engagement' eng.id %}">
+                                         <i class="fa fa-pencil-square-o"></i> Edit
+                                       </a>
                                      </li>
                                      <li>
                                        </a>
                                        <a class="" href="{% url 'reopen_engagement' eng.id %}">
-                                         Reopen
+                                         <i class="fa fa-undo"></i> Reopen
                                        </a>
                                      </li>
-                                     <li>
-                                       <a class="" href="{% url 'edit_engagement' eng.id %}">
-                                         Edit
-                                       </a>
-                                    </li>
                                     <li class="divider"></li>
                                     <li>
-                                       <a class="" href="{% url 'delete_engagement' eng.id %}">
-                                         Delete
-                                       </a>
+                                      <a class="text-danger" href="{% url 'delete_engagement' eng.id %}">
+                                          <i class="fa fa-trash-o"></i> Delete Engagement
+                                      </a>
                                     </li>
                                    </ul>
                                 </li>
