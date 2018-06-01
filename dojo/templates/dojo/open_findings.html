@@ -30,7 +30,11 @@
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" id="bulk_edit">
                     <li class="dropdown-header">Choose wisely...</li>
                     <li style="padding-left: 8px;">
+                      {% if tab_product %}
+                        <form action="{% url 'findings_bulk_all_product' tab_product.id %}" method="post" id="bulk_change_form">
+                      {% else %}
                         <form action="{% url 'findings_bulk_all' %}" method="post" id="bulk_change_form">
+                      {% endif %}
                             {% csrf_token %}
                             <label style="display: block" for="severity">Severity</label>
                             <select name="severity" id="severity" style="font-size: 80%">
@@ -96,13 +100,15 @@
                             <th class="nowrap">{% dojo_sort request 'Name' 'title' %}</th>
                             <th class="nowrap">{% dojo_sort request 'Date' 'date'%}</th>
                             <th class="nowrap">Age</th>
-                            <th class="nowrap">Reporter</th>
-                            <th class="nowrap">Found By</th>
+                            <th>Reporter</th>
+                            <th>Found By</th>
                             {% if "enable_jira"|get_system_setting %}
                             <th class="nowrap">Jira</th>
                             {% endif %}
                             <th>Status</th>
+                            {% if show_product_column and tab_product is None %}
                             <th class="nowrap">{% dojo_sort request 'Product' 'test__engagement__product__name'%}</th>
+                            {% endif %}
                         </tr>
                         </thead>
                         <tbody>
@@ -254,10 +260,12 @@
                                       <a href="{% url 'view_finding' finding.duplicate_finding.id%}">Original</a>
                                   {% endif %}
                                 </td>
+                                {% if show_product_column and tab_product is None %}
                                 <td><a
                                         href="{% url 'view_product' finding.test.engagement.product.id %}"
                                         title="{{ finding.test.engagement.product }}">{{ finding.test.engagement.product }}</a>
                                 </td>
+                                {% endif %}
                             </tr>
                         {% endfor %}
                         </tbody>
@@ -293,7 +301,7 @@
                   $( form_element ).submit();
               }
             });
-            
+
             var availableTags = [
                 {% for word in title_words %}
                     "{{word}}",

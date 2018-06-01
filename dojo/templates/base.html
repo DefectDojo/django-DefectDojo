@@ -35,12 +35,6 @@
     <!-- Custom Fonts -->
     <link href="{% static "font-awesome/css/font-awesome.min.css" %}" rel="stylesheet" type="text/css">
 
-    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
     {% block add_css %}
     {% endblock %}
     <link rel="stylesheet" href="{% static "jquery-ui/themes/flick/jquery-ui.min.css" %}">
@@ -287,7 +281,7 @@
               <div class="col-md-12">
                 <h3 class="no-margin-top">
                     {{ tab_product }}
-                    {% if system_settings.enable_benchmark %}
+                    {% if system_settings.enable_benchmark == 9 %}
                       {% for benchmark in tab_benchmarks%}
                         <sup><span class="fa fa-bookmark has-popover" data-trigger="hover" data-content="{{ benchmark|asvs_level }}"></label></span>
                         {{ benchmark.desired_level }}</sup>
@@ -340,7 +334,7 @@
                       <li><a href="{% url 'ad_hoc_finding' tab_product.id %}"><i class="fa fa-plus"></i> Add New Finding</a></li>
                     </ul>
                   </li>
-
+                  <!-- Endpoints Tab -->
                   <li role="presentation" class="dropdown{% if active_tab == 'endpoints' %} active{% endif %}">
                     <a class="dropdown-toggle" data-toggle="dropdown" href=""><span class="fa fa-sitemap" aria-hidden="true"></span>
                     <span class="hidden-xs"> Endpoints{% if tab_endpoints > 0 %} <span class="badge">{{ tab_endpoints }}</span>{% endif %}</span>
@@ -354,10 +348,18 @@
                       <li><a href="{% url 'add_endpoint' tab_product.id %}"><i class="fa fa-plus"></i> Add New Endpoint</a></li>
                     </ul>
                   </li>
-
-                  </li>
+                  <!-- Benchmarks Tab -->
                   {% if system_settings.enable_benchmark %}
-                  <li role="presentation"{% if active_tab == 'benchmarks' %} class="active"{% endif %}><a href=""><span class="fa fa-balance-scale" aria-hidden="true"></span><span class="hidden-xs"> Benchmarks</span></a>
+                  <li role="presentation" class="dropdown{% if active_tab == 'benchmarks' %} active{% endif %}">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href=""><span class="fa fa-balance-scale" aria-hidden="true"></span>
+                    <span class="hidden-xs"> Benchmarks{% if tab_endpoints > 0 %} <span class="badge"></span>{% endif %}</span>
+                    <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                      {% for bt in tab_benchmarks %}
+                      <a title="{{ bt.name }}" href="{% url 'view_product_benchmark' tab_product.id bt.id %}">
+                          <li><span class="fa fa-list"></span> {{ bt.name }} {{ bt.version }}</a></li>
+                      {% endfor %}
+                    </ul>
                   </li>
                   {% endif %}
                   <li role="presentation" class="dropdown{% if active_tab == 'settings' %} active{% endif %}">

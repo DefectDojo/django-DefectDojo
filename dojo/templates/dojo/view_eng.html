@@ -164,25 +164,26 @@
                                          <ul class="dropdown-menu">
                                            <li>
                                              <a class="" href="{% url 'view_test' test.id %}">
-                                               View</a>
+                                               <i class="fa fa-list-alt"></i> View</a>
                                           </li>
                                           <li>
                                              <a class="" href="{% url 'edit_test' test.id %}">
-                                               Edit</a>
-                                          </li>
-                                           <li>
-                                             <a class="" href="{% url 'delete_test' test.id %}">
-                                               Delete</a>
+                                              <i class="fa fa-pencil-square-o"></i> Edit</a>
                                           </li>
                                            <li class="divider"></li>
                                            <li>
                                              <a class="" href="{% url 'add_tests' eng.id %}">
-                                               Add Tests
+                                               <i class="fa fa-plus"></i> Add Tests
                                              </a>
                                            </li>
                                            <li><a class="" href="{% url 'import_scan_results' eng.id %}">
-                                               Import Scan Results
+                                               <i class="fa fa-upload"></i> Import Scan Results
                                            </a></li>
+                                           <li class="divider"></li>
+                                           <li>
+                                             <a class="text-danger" href="{% url 'delete_test' test.id %}">
+                                              <i class="fa fa-trash-o"></i> Delete</a>
+                                          </li>
                                          </ul>
                                        </li>
                                    </ul>
