@@ -257,6 +257,23 @@
     </div>
   </div>
 <!-- end contacts -->
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title"><span class="fa fa-gavel" aria-hidden="true"></span> Regulations ({{ prod.regulations.count }})</h3>
+  </div>
+  <ul class="list-group">
+  {% for regulation in prod.regulations.all %}
+    <li class="list-group-item"><span class="badge">{{ regulation.get_category_display }}</span><span data-toggle="tooltip" data-placement="bottom" title="{{ product.regulation.name }}">{{ regulation.acronym }}</span> <small class="text-muted">{{ regulation.jurisdiction }}</small></li>
+  {% empty %}
+    <li class="list-group-item"><small class="text-muted"><em>There are no regulations.</em></small></li>
+  {% endfor %}
+  </ul>
+</div>
+</div>
+
+
+
+
 </div>
 </div>
 {% endblock %}

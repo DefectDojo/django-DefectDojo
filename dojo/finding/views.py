@@ -44,6 +44,7 @@ engineer
 
 
 def open_findings(request, pid=None):
+    show_product_column = True
     findings = Finding.objects.filter(
         mitigated__isnull=True,
         verified=True,
@@ -93,11 +94,13 @@ def open_findings(request, pid=None):
     active_tab = None
     if pid:
         active_tab = "findings"
+        show_product_column = False
         tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(pid)
 
     system_settings = System_Settings.objects.get()
     return render(
         request, 'dojo/open_findings.html', {
+            'show_product_column': show_product_column,
             'tab_product': tab_product,
             'tab_engagements': tab_engagements,
             'tab_findings': tab_findings,
@@ -1265,7 +1268,7 @@ def download_finding_pic(request, token):
 
 
 @user_passes_test(lambda u: u.is_staff)
-def finding_bulk_update_all(request):
+def finding_bulk_update_all(request, pid=None):
     form = FindingBulkUpdateForm(request.POST)
     if request.method == "POST":
         finding_to_update = request.POST.getlist('finding_to_update')
@@ -1300,5 +1303,7 @@ def finding_bulk_update_all(request):
                                      messages.ERROR,
                                      'Unable to process bulk update. Required fields were not selected.',
                                      extra_tags='alert-danger')
-
-    return HttpResponseRedirect(reverse('open_findings', args=()))
+    if pid:
+        return HttpResponseRedirect(reverse('product_open_findings', args=(pid)) + '?test__engagement__product=' + pid)
+    else:
+        return HttpResponseRedirect(reverse('open_findings', args=()))
