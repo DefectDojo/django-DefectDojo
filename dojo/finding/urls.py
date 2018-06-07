@@ -30,6 +30,8 @@ urlpatterns = [
         views.clear_finding_review, name='clear_finding_review'),
     url(r'^finding/(?P<fid>\d+)/delete$',
         views.delete_finding, name='delete_finding'),
+    url(r'^finding/(?P<fid>\d+)/apply_cwe$',
+        views.apply_template_cwe, name='apply_template_cwe'),
     url(r'^finding/(?P<fid>\d+)/mktemplate$', views.mktemplate,
         name='mktemplate'),
     url(r'^finding/(?P<fid>\d+)/find_template_to_apply', views.find_template_to_apply,
@@ -50,6 +52,10 @@ urlpatterns = [
         name='manage_images'),
     url(r'^finding/image/(?P<token>[^/]+)$', views.download_finding_pic,
         name='download_finding_pic'),
+    url(r'^finding/(?P<fid>\d+)/merge$',
+        views.merge_finding_product, name='merge_finding'),
+    url(r'^product/(?P<pid>\d+)/merge$', views.merge_finding_product,
+        name='merge_finding_product'),
 
     # stub findings
     url(r'^stub_finding/(?P<tid>\d+)/add$',

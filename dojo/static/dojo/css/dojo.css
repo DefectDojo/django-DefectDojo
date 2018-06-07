@@ -1192,6 +1192,10 @@ hr.report-page-break:before {
   background: #ef251e;
 }
 
+.white-color {
+  color: #FFFFFF;
+}
+
 div.tags .label {
     font-size: 90;
     display: inline-block;
