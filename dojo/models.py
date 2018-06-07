@@ -162,6 +162,12 @@ class System_Settings(models.Model):
         help_text="Enables Benchmarks such as the OWASP ASVS "
                   "(Application Security Verification Standard)")
 
+    enable_template_match = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name="Enable CWE Template Matching",
+        help_text="Enables matching a finding by CWE to a template for replacing the mitigation, impact and references on a finding. Useful for providing consistent impact and remediation advice regardless of the scanner.")
+
 
 class SystemSettingsFormAdmin(forms.ModelForm):
     product_grade = forms.CharField(widget=forms.Textarea)
@@ -998,6 +1004,11 @@ class Finding(models.Model):
         return long_desc
 
     def save(self, dedupe_option=True, *args, **kwargs):
+        # Make changes to the finding before it's saved to add a CWE template
+        if not self.pk:
+            from dojo.utils import apply_cwe_to_template
+            self = apply_cwe_to_template(self)
+
         super(Finding, self).save(*args, **kwargs)
         self.found_by.add(self.test.test_type)
         self.hash_code = self.get_hash_code()
@@ -1532,7 +1543,7 @@ class Language_Type(models.Model):
 class Languages(models.Model):
     language = models.ForeignKey(Language_Type)
     product = models.ForeignKey(Product)
-    user = models.ForeignKey(User, editable=True)
+    user = models.ForeignKey(User, editable=True, blank=True, null=True)
     files = models.IntegerField(blank=True, null=True, verbose_name='Number of files')
     blank = models.IntegerField(blank=True, null=True, verbose_name='Number of blank lines')
     comment = models.IntegerField(blank=True, null=True, verbose_name='Number of comment lines')

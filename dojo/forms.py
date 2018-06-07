@@ -338,8 +338,7 @@ class UploadRiskForm(forms.ModelForm):
     accepted_findings = forms.ModelMultipleChoiceField(
         queryset=Finding.objects.all(), required=True,
         widget=forms.widgets.CheckboxSelectMultiple(),
-        help_text=('Scroll for additional findings or '
-                   '<a class="accept-all-findings">Check All</a>'))
+        help_text=('Scroll for additional findings.'))
     reporter = forms.ModelChoiceField(
         queryset=User.objects.exclude(username="root"))
     notes = forms.CharField(required=False, max_length=2400,
@@ -349,6 +348,47 @@ class UploadRiskForm(forms.ModelForm):
     class Meta:
         model = Risk_Acceptance
         fields = ['accepted_findings']
+
+
+class MergeFindings(forms.ModelForm):
+    FINDING_ACTION = (('', 'Select an Action'), ('inactive', 'Inactive'), ('delete', 'Delete'))
+
+    append_description = forms.BooleanField(label="Append Description", initial=True, required=False,
+                                            help_text="Description in all findings will be appended into the merged finding.")
+
+    add_endpoints = forms.BooleanField(label="Add Endpoints", initial=True, required=False,
+                                           help_text="Endpoints in all findings will be merged into the merged finding.")
+
+    dynamic_raw = forms.BooleanField(label="Dynamic Scanner Raw Requests", initial=True, required=False,
+                                           help_text="Dynamic scanner raw requests in all findings will be merged into the merged finding.")
+
+    tag_finding = forms.BooleanField(label="Add Tags", initial=True, required=False,
+                                           help_text="Tags in all findings will be merged into the merged finding.")
+
+    finding_action = forms.ChoiceField(
+        required=True,
+        choices=FINDING_ACTION,
+        label="Finding Action",
+        help_text="The action to take on the merged finding. Set the findings to inactive or delete the findings.")
+
+    def __init__(self, *args, **kwargs):
+        finding = kwargs.pop('finding')
+        findings = kwargs.pop('findings')
+        super(MergeFindings, self).__init__(*args, **kwargs)
+
+        self.fields['finding_to_merge_into'] = forms.ModelChoiceField(
+            queryset=findings, initial=0, required="False", label="Finding to Merge Into", help_text="Findings selected below will be merged into this finding.")
+
+        # Exclude the finding to merge into from the findings to merge into
+        self.fields['findings_to_merge'] = forms.ModelMultipleChoiceField(
+            queryset=findings.exclude(pk=finding), required=True, label="Findings to Merge",
+            widget=forms.widgets.SelectMultiple(attrs={'size': 10}),
+            help_text=('Select the findings to merge.'))
+        self.fields.keyOrder = ['finding_to_merge_into', 'findings_to_merge', 'append_description', 'add_endpoints']
+
+    class Meta:
+        model = Finding
+        fields = ['append_description', 'add_endpoints']
 
 
 class ReplaceRiskAcceptanceForm(forms.ModelForm):
@@ -810,6 +850,7 @@ class ApplyFindingTemplateForm(forms.Form):
 
 
 class FindingTemplateForm(forms.ModelForm):
+    apply_to_findings = forms.BooleanField(required=False, help_text="Apply template to all findings that match this CWE. (Update will overwrite mitigation, impact and references for any active, verified findings.)")
     title = forms.CharField(max_length=1000, required=True)
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False,
@@ -822,6 +863,8 @@ class FindingTemplateForm(forms.ModelForm):
         error_messages={
             'required': 'Select valid choice: In Progress, On Hold, Completed',
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
+
+    field_order = ['title', 'cwe', 'severity', 'description', 'mitigation', 'impact', 'references', 'tags', 'apply_to_findings']
 
     def __init__(self, *args, **kwargs):
         tags = Tag.objects.usage_for_model(Finding_Template)
@@ -1315,6 +1358,15 @@ class DeleteReportForm(forms.ModelForm):
 
 
 class DeleteFindingForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = Finding
+        fields = ('id',)
+
+
+class FindingFormID(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())
 

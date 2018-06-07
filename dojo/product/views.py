@@ -70,28 +70,16 @@ def iso_to_gregorian(iso_year, iso_week, iso_day):
 
 def view_product(request, pid):
     prod = get_object_or_404(Product, id=pid)
-    engs = Engagement.objects.filter(product=prod, active=True)
-
-    result = EngagementFilter(
-        request.GET,
-        queryset=Engagement.objects.filter(product=prod, active=False).order_by('-target_end'))
-
-    i_engs_page = get_page_items(request, result.qs, 10)
-
-    scan_sets = ScanSettings.objects.filter(product=prod)
-    tools = Tool_Product_Settings.objects.filter(product=prod).order_by('name')
     auth = request.user.is_staff or request.user in prod.authorized_users.all()
-    creds = Cred_Mapping.objects.filter(product=prod).select_related('cred_id').order_by('cred_id')
+    if not auth:
+        # will render 403
+        raise PermissionDenied
     langSummary = Languages.objects.filter(product=prod).aggregate(Sum('files'), Sum('code'), Count('files'))
     languages = Languages.objects.filter(product=prod).order_by('-code')
     app_analysis = App_Analysis.objects.filter(product=prod).order_by('name')
     benchmark_type = Benchmark_Type.objects.filter(enabled=True).order_by('name')
     benchmarks = Benchmark_Product_Summary.objects.filter(product=prod, publish=True, benchmark_type__enabled=True).order_by('benchmark_type__name')
     system_settings = System_Settings.objects.get()
-
-    if not auth:
-        # will render 403
-        raise PermissionDenied
 
     ct = ContentType.objects.get_for_model(prod)
     product_cf = CustomField.objects.filter(content_type=ct).order_by('name')
@@ -102,24 +90,10 @@ def view_product(request, pid):
         if len(cfv):
             product_metadata[cf.name] = cfv[0].value
 
-    try:
-        start_date = Finding.objects.filter(test__engagement__product=prod).order_by('date')[:1][0].date
-    except:
-        start_date = timezone.now()
-
-    end_date = timezone.now()
-
-    tests = Test.objects.filter(engagement__product=prod)
-
-    risk_acceptances = Risk_Acceptance.objects.filter(engagement__in=Engagement.objects.filter(product=prod))
-
-    accepted_findings = [finding for ra in risk_acceptances
-                         for finding in ra.accepted_findings.all()]
-
     verified_findings = Finding.objects.filter(test__engagement__product=prod,
-                                                date__range=[start_date, end_date],
                                                 false_p=False,
                                                 verified=True,
+                                                active=True,
                                                 duplicate=False,
                                                 out_of_scope=False).order_by('numerical_severity').values('severity').annotate(count=Count('severity'))
 
@@ -153,8 +127,6 @@ def view_product(request, pid):
                   'tab_benchmarks': tab_benchmarks,
                   'active_tab': 'overview',
                   'product_metadata': product_metadata,
-                  'tools': tools,
-                  'creds': creds,
                   'critical': critical,
                   'high': high,
                   'medium': medium,

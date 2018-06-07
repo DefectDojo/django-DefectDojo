@@ -26,7 +26,8 @@
                                 <th>Date</th>
                                 <th>Length</th>
                                 <th>Tests</th>
-                                <th>Findings</th>
+                                <th>Open Findings</th>
+                                <th>All Findings</th>
                                 <th>Duplicate</th>
                             </tr>
                             </thead>
@@ -90,8 +91,9 @@
                                   {% endif %}
                                 </td>
                                 <td>{{ eng.test_set.all|length }}</td>
-                                <td>{{ eng.test_set.all|count_findings_eng|finding_status:False|length }}</td>
-                                <td>{{ eng.test_set.all|count_findings_eng|finding_status:True|length }}</td>
+                                <td>{{ eng|count_findings_eng_open }}</td>
+                                <td>{{ eng|count_findings_eng_all }}</td>
+                                <td>{{ eng|count_findings_eng_duplicate }}</td>
                             {% endfor %}
                             </tbody>
                         </table>
@@ -121,7 +123,8 @@
                           <th>Date</th>
                           <th>Length</th>
                           <th>Tests</th>
-                          <th>Findings</th>
+                          <th>Open Findings</th>
+                          <th>All Findings</th>
                           <th>Duplicate</th>
                         </tr>
                         </thead>
@@ -169,8 +172,9 @@
                             <td>{{ eng.target_start }} - {{ eng.target_end }}</td>
                             <td>{{ eng.target_start|datediff_time:eng.target_end }}</td>
                             <td>{{ eng.test_set.all|length }}</td>
-                            <td>{{ eng.test_set.all|count_findings_eng|finding_status:False|length }}</td>
-                            <td>{{ eng.test_set.all|count_findings_eng|finding_status:True|length }}</td>
+                            <td>{{ eng|count_findings_eng_open }}</td>
+                            <td>{{ eng|count_findings_eng_all }}</td>
+                            <td>{{ eng|count_findings_eng_duplicate }}</td>
                         {% endfor %}
                         </tbody>
                     </table>

@@ -102,11 +102,13 @@ def remove_string(string, value):
 
 @register.filter(name='percentage')
 def percentage(fraction, value):
-    if value > 0:
+    return_value = ''
+    if value > 0 and fraction > 0:
         try:
-            return "%.1f%%" % ((float(fraction) / float(value)) * 100)
+            return_value = "%.1f%%" % ((float(fraction) / float(value)) * 100)
         except ValueError:
-            return ''
+            pass
+    return return_value
 
 
 def asvs_calc_level(benchmark_score):
@@ -173,6 +175,43 @@ def count_findings_eng(tests):
         else:
             findings = test.finding_set.all()
     return findings
+
+
+@register.filter(name='count_findings_eng_open')
+def count_findings_eng_open(engagement):
+    open_findings = Finding.objects.filter(test__engagement=engagement,
+                                           false_p=False,
+                                           verified=True,
+                                           duplicate=False,
+                                           out_of_scope=False,
+                                           active=True,
+                                           mitigated__isnull=True).count()
+    return open_findings
+
+
+@register.filter(name='count_findings_eng_all')
+def count_findings_eng_all(engagement):
+    all_findings = Finding.objects.filter(test__engagement=engagement).count()
+    return all_findings
+
+
+@register.filter(name='count_findings_eng_duplicate')
+def count_findings_eng_duplicate(engagement):
+    duplicate_findings = Finding.objects.filter(test__engagement=engagement,
+                                                duplicate=True).count()
+    return duplicate_findings
+
+
+@register.filter(name='count_findings_test_all')
+def count_findings_test_all(test):
+    open_findings = Finding.objects.filter(test=test).count()
+    return open_findings
+
+
+@register.filter(name='count_findings_test_duplicate')
+def count_findings_test_duplicate(test):
+    duplicate_findings = Finding.objects.filter(test=test, duplicate=True).count()
+    return duplicate_findings
 
 
 @register.filter(name='paginator')

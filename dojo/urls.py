@@ -47,7 +47,6 @@ from dojo.system_settings.urls import urlpatterns as system_settings_urls
 from dojo.notifications.urls import urlpatterns as notifications_urls
 from dojo.object.urls import urlpatterns as object_urls
 from dojo.benchmark.urls import urlpatterns as benchmark_urls
-import sys
 
 admin.autodiscover()
 
@@ -159,3 +158,7 @@ urlpatterns = [
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    import debug_toolbar
+    urlpatterns = [
+        url(r'^__debug__/', include(debug_toolbar.urls)),
+    ] + urlpatterns
