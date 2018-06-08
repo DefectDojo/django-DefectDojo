@@ -1372,6 +1372,10 @@ def merge_finding_product(request, pid):
                         note.save()
                         finding.notes.add(note)
 
+                        # If the merged finding should be tagged as merged-into
+                        if form.cleaned_data['mark_tag_finding']:
+                            Tag.objects.add_tag(finding, "merged-inactive")
+
                 # Update the finding to merge into
                 if finding_descriptions is not '':
                     findings_to_merge_into.description = "{}\n\n{}".format(findings_to_merge_into.description, finding_descriptions)
@@ -1411,6 +1415,10 @@ def merge_finding_product(request, pid):
                 note = Notes(entry=notes_entry, author=request.user)
                 note.save()
                 findings_to_merge_into.notes.add(note)
+
+                # If the finding merged into should be tagged as merged
+                if form.cleaned_data['mark_tag_finding']:
+                    Tag.objects.add_tag(findings_to_merge_into, "merged")
 
                 messages.add_message(
                     request,
