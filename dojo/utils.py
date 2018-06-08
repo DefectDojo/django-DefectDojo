@@ -23,9 +23,9 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from jira import JIRA
 from jira.exceptions import JIRAError
-from dojo.models import Finding, Engagement, Finding_Template, \
-    Product, JIRA_PKey, JIRA_Issue, Dojo_User, User, \
-    Alerts, System_Settings, Notifications, UserContactInfo, Endpoint, Benchmark_Type
+from dojo.models import Finding, Engagement, Finding_Template, Product, JIRA_PKey, JIRA_Issue, \
+    Dojo_User, User, Alerts, System_Settings, Notifications, UserContactInfo, Endpoint, Benchmark_Type, \
+    Language_Type, Languages
 from asteval import Interpreter
 from requests.auth import HTTPBasicAuth
 """
@@ -1521,17 +1521,46 @@ def get_celery_worker_status():
     return d
 
 
+# Used to display the counts and enabled tabs in the product view
 def tab_view_count(product_id):
     product = Product.objects.get(id=product_id)
-    engagements = Engagement.objects.filter(product=product, active=True)
+    engagements = Engagement.objects.filter(product=product, active=True).count()
     open_findings = Finding.objects.filter(test__engagement__product=product,
                                            false_p=False,
                                            verified=True,
                                            duplicate=False,
                                            out_of_scope=False,
                                            active=True,
-                                           mitigated__isnull=True)
-    endpoints = Endpoint.objects.filter(product=product)
+                                           mitigated__isnull=True).count()
+    endpoints = Endpoint.objects.filter(product=product).count()
     # benchmarks = Benchmark_Product_Summary.objects.filter(product=product, publish=True, benchmark_type__enabled=True).order_by('benchmark_type__name')
     benchmark_type = Benchmark_Type.objects.filter(enabled=True).order_by('name')
-    return product, engagements, open_findings, endpoints.count(), benchmark_type
+    return product, engagements, open_findings, endpoints, benchmark_type
+
+
+# Will add a lanaguage to product
+def add_language(product, language):
+    prod_language = Languages.objects.filter(language__language__iexact=language, product=product)
+
+    if not prod_language:
+        try:
+            language_type = Language_Type.objects.get(language__iexact=language)
+
+            if language_type:
+                lang = Languages(language=language_type, product=product)
+                lang.save()
+        except Language_Type.DoesNotExist:
+            pass
+
+
+# Apply finding template data by matching CWE
+def apply_cwe_to_template(finding, override=False):
+    if System_Settings.objects.get().enable_template_match or override:
+        template = Finding_Template.objects.filter(cwe=finding.cwe).first()
+
+        if template:
+            finding.mitigation = template.mitigation
+            finding.impact = template.impact
+            finding.references = template.references
+
+    return finding

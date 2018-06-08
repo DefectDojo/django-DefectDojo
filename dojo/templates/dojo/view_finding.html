@@ -41,6 +41,7 @@
                                     <i class="fa fa-file-image-o"></i> Manage Images
                                 </a>
                             </li>
+                            <li role="separator" class="divider"></li>
                             {% if finding.under_review and dojo_user in finding.reviewers.all or dojo_user == finding.review_requested_by and finding.under_review %}
                                 <li role="presentation">
                                     <a href="{% url 'clear_finding_review' finding.id %}">
@@ -60,28 +61,47 @@
                                     <i class="fa fa-clock-o"></i> Touch Finding
                                 </a>
                             </li>
+                            <li role="separator" class="divider"></li>
                             <li role="presentation">
                                 <a href="{% url 'mktemplate' finding.id %}">
                                     <i class="fa fa-copy"></i> Make Finding a Template
                                 </a>
                             </li>
+                              {% if cwe_template.cwe %}
+                              <li role="presentation">
+                                <a class="apply-cwe-finding" href="#">
+                                    <i class="fa fa-copy"></i> Apply CWE Template Remediation to Finding
+                                </a>
+                              </li>
+                            <form id="apply-cwe-finding-form" method="post" action="{% url 'apply_template_cwe' finding.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="id" value="{{ finding.id }}"/>
+                            </form>
+                            {% else %}
+                            <li role="presentation">
+                              <a href="{% url 'add_template' %}">
+                              <i class="fa fa-copy"></i> Create a CWE Remediation Template
+                            </a>
+                            </li>
+                            {% endif %}
                             <li role="presentation">
                                 <a href="{% url 'find_template_to_apply' finding.id %}">
                                     <i class="fa fa-copy"></i> Apply Template to Finding
                                 </a>
                             </li>
-                            {% if finding.active %}
-                                <li role="presentation">
-                                    <a href="{% url 'close_finding' finding.id %}">
-                                        <i class="fa fa-fire-extinguisher"></i> Close Finding
-                                    </a>
-                                </li>
-                            {% else %}
+                            <li role="separator" class="divider"></li>
+                            {% if finding.mitigated %}
                                 <li role="presentation">
                                     <a href="{% url 'reopen_finding' finding.id %}">
                                         <i class="fa fa-bug"></i> Open Finding
                                     </a>
                                 </li>
+                            {% else %}
+                              <li role="presentation">
+                                  <a href="{% url 'close_finding' finding.id %}">
+                                      <i class="fa fa-fire-extinguisher"></i> Close Finding
+                                  </a>
+                              </li>
                             {% endif %}
                             <li role="presentation">
                                 <a href="{% url 'action_history' finding|content_type finding.id %}">
@@ -264,7 +284,7 @@
             </div>
         </div>
     {% endif %}
-    {% if  finding.static_finding != True %}
+    {% if finding.endpoints.all %}
     <div class="row to_highlight">
         <div class="col-md-12">
             <div class="panel panel-default endpoints table-responsive">
@@ -635,6 +655,13 @@
         $('a.delete-finding').on('click', function (e) {
             if (confirm('Are you sure you want to delete this finding?')) {
                 $("form#delete-finding-form").submit();
+            }
+
+        });
+
+        $('a.apply-cwe-finding').on('click', function (e) {
+            if (confirm('Apply CWE template to this finding? (This will overwrite mitigation, impact and references.)')) {
+                $("form#apply-cwe-finding-form").submit();
             }
 
         });

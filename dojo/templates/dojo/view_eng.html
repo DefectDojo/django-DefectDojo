@@ -196,8 +196,8 @@
                                       {{ eng.lead }}
                                   {% endif %}
                                 </td>
-                                <td><a href="{% url 'view_test' test.id %}">{{ test.finding_set.all|finding_status:False|length }}</a></td>
-                                <td>{{ test.finding_set.all|finding_status:True|length }}</td>
+                                <td><a href="{% url 'view_test' test.id %}">{{ test|count_findings_test_all }}</a></td>
+                                <td>{{ test|count_findings_test_duplicate }}</td>
                                 <td>{{ test.notes.all|length }}</td>
                             </tr>
                         {% endfor %}
