@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load navigation_tags %}
+{% block content %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading tight">
+                    <h3 class="has-filters">
+                        Rules Framework
+                        <div class="dropdown pull-right">
+                            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                                    data-toggle="dropdown" aria-expanded="true">
+                                <span class="fa fa-wrench"></span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu"
+                                aria-labelledby="dropdownMenu1">
+                                {% if request.user.is_staff %}
+                                    <li role="presentation">
+                                        <a href="{% url 'add_rule' %}">
+                                            <i class="fa fa-plus"></i> Add Rule
+                                        </a>
+                                    </li>
+                                {% endif %}
+
+                            </ul>
+                        </div>
+                    </h3>
+                </div>
+                <div id="the-filters" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
+                    {% include "dojo/filter_snippet.html" with form=rules.form %}
+                </div>
+            </div>
+
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=rules page_size=True %}
+                </div>
+
+                <div class="panel panel-default table-responsive">
+                    <table id="rules"
+                           class="tablesorter-bootstrap table table-condensed table-striped">
+                        <thead>
+                        <tr>
+                            <th>{% dojo_sort request 'Rule' 'text' 'asc' %}</th>
+                            <th> operation </th>
+                            <th> model object</th>
+                            <th> applies to</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for rule in rules %}
+                            <tr>
+                                <td><a href="{% url 'view_rule' rule.id %}"> {{ rule.text }} </a></td>
+                                <td>{{ rule.operator }}</td>
+                                <td> {{ rule.model_object }} </td>
+                                <td> {{ rule.applies_to }} </td>
+                                {% if user.is_staff %}
+                                    <td>
+                                        <div class="centered">
+                                            <div class="btn-group" role="group">
+                                                <a class="btn btn-sm btn-success"
+                                                   href="{% url 'add_rule'  %}">
+                                                    <i class="fa fa-plus"></i> Add Rule
+                                                </a>
+                                                <a class="btn btn-sm btn-warning"
+                                                   href="{% url 'edit_product_type' rule.id %}">
+                                                    <i class="fa fa-pencil"></i> Edit Rule
+                                                </a>
+
+                                            </div>
+                                        </div>
+                                    </td>
+                                {% endif %}
+
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=rules page_size=True %}
+                </div>
+            {% else %}
+                <p class="text-center">No rules found.</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+    {% include "dojo/filter_js_snippet.html" %}
+{% endblock %}

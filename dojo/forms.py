@@ -1544,6 +1544,11 @@ class NotificationsForm(forms.ModelForm):
         model = Notifications
         exclude = ['']
 
+class RuleForm(forms.ModelForm):
+
+    class Meta:
+        model = Rule
+        exclude = ['']
 
 class CredUserForm(forms.ModelForm):
     # selenium_script = forms.FileField(widget=forms.widgets.FileInput(
