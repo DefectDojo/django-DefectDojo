@@ -238,7 +238,7 @@ class ImportScanForm(forms.Form):
                          ("Qualys Webapp Scan", "Qualys Webapp Scan"),
                          ("OpenVAS CSV", "OpenVAS CSV"),
                          ("Snyk Scan", "Snyk Scan"),
-                         ("Generic Findings Import", "Generic Findings Import"),
+                         ("Generic Findings Import", "Generic Findings Import"),("Trustwave Scan (CSV)","Trustwave Scan (CSV)"),
                          ("SKF Scan", "SKF Scan"), ("Bandit Scan", "Bandit Scan"), ("SSL Labs Scan", "SSL Labs Scan"))
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
 
