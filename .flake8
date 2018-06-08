@@ -19,6 +19,8 @@ ignore =
     F405
     # list comprehension redefines
     F812
+    # module level imports
+    E402
 
 exclude =
     # No need to traverse our git directory
