@@ -365,6 +365,9 @@ class MergeFindings(forms.ModelForm):
     tag_finding = forms.BooleanField(label="Add Tags", initial=True, required=False,
                                            help_text="Tags in all findings will be merged into the merged finding.")
 
+    mark_tag_finding = forms.BooleanField(label="Tag Merged Finding", initial=True, required=False,
+                                           help_text="Creates a tag titled 'merged' for the finding that will be merged. If the 'Finding Action' is set to 'inactive' the inactive findings will be tagged with 'merged-inactive'.")
+
     finding_action = forms.ChoiceField(
         required=True,
         choices=FINDING_ACTION,
