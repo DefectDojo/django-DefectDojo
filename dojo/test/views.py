@@ -36,7 +36,7 @@ def view_test(request, tid):
         raise PermissionDenied
     notes = test.notes.all()
     person = request.user.username
-    findings = Finding.objects.filter(test=test).order_by('severity')
+    findings = Finding.objects.filter(test=test).order_by('numerical_severity')
     stub_findings = Stub_Finding.objects.filter(test=test)
     cred_test = Cred_Mapping.objects.filter(test=test).select_related('cred_id').order_by('cred_id')
     creds = Cred_Mapping.objects.filter(engagement=test.engagement).select_related('cred_id').order_by('cred_id')

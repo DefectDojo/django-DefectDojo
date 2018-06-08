@@ -299,12 +299,6 @@
                           {% endfor %}
                       </sup>
                     {% endif %}
-                    <!--
-                    <small>{{ prod.endpoint_count }}
-                        <a href="{% url 'vulnerable_endpoints' %}?product={{ prod.id }}">
-                            affected endpoint{{ prod.endpoint_count|pluralize }}
-                            <i class="fa fa-arrow-circle-right"></i></a>
-                    </small>-->
                 </h3>
                 <br>
                 <ul class="nav nav-tabs horizontal-bar">
@@ -313,7 +307,7 @@
 
                   <li role="presentation" class="dropdown{% if active_tab == 'engagements' %} active{% endif %}">
                     <a class="dropdown-toggle" data-toggle="dropdown" href=""><span class="fa fa-calendar" aria-hidden="true"></span>
-                    <span class="hidden-xs"> Engagements{% if tab_engagements.all|length > 0 %} <span class="badge">{{ tab_engagements.all|length }}</span>{% endif %}</span>
+                    <span class="hidden-xs"> Engagements{% if tab_engagements > 0 %} <span class="badge">{{ tab_engagements }}</span>{% endif %}</span>
                     <span class="caret"></span></a>
                     <ul class="dropdown-menu">
                       <li><a href="{% url 'view_engagements' tab_product.id %}"><i class="fa fa-calendar"></i> View Engagements</a></li>
@@ -324,7 +318,7 @@
 
                   <li role="presentation" class="dropdown{% if active_tab == 'findings' %} active{% endif %}">
                     <a class="dropdown-toggle" data-toggle="dropdown" href=""><span class="fa fa-bug" aria-hidden="true"></span>
-                    <span class="hidden-xs"> Findings{% if tab_findings|length > 0 %} <span class="badge">{{ tab_findings.all|length }}</span>{% endif %}</span>
+                    <span class="hidden-xs"> Findings{% if tab_findings > 0 %} <span class="badge">{{ tab_findings }}</span>{% endif %}</span>
                     <span class="caret"></span></a>
                     <ul class="dropdown-menu">
                       <li><a href="{% url 'product_open_findings' tab_product.id %}?test__engagement__product={{ tab_product.id }}"><i class="fa fa-list-alt"></i> View Open Findings</a></li>
