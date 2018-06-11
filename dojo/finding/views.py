@@ -1322,103 +1322,120 @@ def merge_finding_product(request, pid):
     if (request.GET.get('merge_findings') or request.method == 'POST') and finding_to_update:
         finding = Finding.objects.filter(id=finding_to_update[0], test__engagement__product=product)
         findings = Finding.objects.filter(id__in=finding_to_update, test__engagement__product=product)
-        form = MergeFindings(finding=finding, findings=findings)
+        form = MergeFindings(finding=finding, findings=findings, initial={'finding_to_merge_into': finding_to_update[0]})
 
         if request.method == 'POST':
             form = MergeFindings(request.POST, finding=finding, findings=findings)
             if form.is_valid():
-                findings_to_merge_into = form.cleaned_data['finding_to_merge_into']
+                finding_to_merge_into = form.cleaned_data['finding_to_merge_into']
+                findings_to_merge = form.cleaned_data['findings_to_merge']
                 finding_descriptions = ''
                 notes_entry = ''
                 static = False
                 dynamic = False
-                findings_to_merge = form.cleaned_data['findings_to_merge']
 
-                for finding in findings_to_merge.exclude(pk=findings_to_merge_into.pk):
-                    notes_entry = "{} ID: {}, {},".format(notes_entry, finding.id, finding.title)
-                    if finding.static_finding:
+                if finding_to_merge_into not in findings_to_merge:
+                    for finding in findings_to_merge.exclude(pk=finding_to_merge_into.pk):
+                        notes_entry = "{} {} ({}),".format(notes_entry, finding.title, finding.id)
+                        if finding.static_finding:
+                            static = finding.static_finding
+
+                        if finding.dynamic_finding:
+                            dynamic = finding.dynamic_finding
+
+                        if finding.line:
+                            line = finding.line
+
+                        if finding.file_path:
+                            file_path = finding.file_path
+
+                        # If checked merge the descriptions
+                        if form.cleaned_data['append_description']:
+                            finding_descriptions = "{}\n{}".format(finding_descriptions, finding.description)
+                            # Workaround until file path is one to many
+                            if finding.file_path:
+                                finding_descriptions = "{}\n**File Path:** {}\n".format(finding_descriptions, finding.file_path)
+
+                        # if checked merge the endpoints
+                        if form.cleaned_data['add_endpoints']:
+                            finding_to_merge_into.endpoints.add(*finding.endpoints.all())
+
+                        # if checked merge the tags
+                        if form.cleaned_data['tag_finding']:
+                            for tag in finding.tags:
+                                Tag.objects.add_tag(finding_to_merge_into, tag)
+
+                        # if checked re-assign the burp requests to the merged finding
+                        if form.cleaned_data['dynamic_raw']:
+                            BurpRawRequestResponse.objects.filter(finding=finding).update(finding=finding_to_merge_into)
+
+                        # Add merge finding information to the note if set to inactive
+                        if form.cleaned_data['finding_action'] == "inactive":
+                            single_finding_notes_entry = "Finding has been set to inactive and merged with the finding: {}.".format(finding_to_merge_into.title)
+                            note = Notes(entry=single_finding_notes_entry, author=request.user)
+                            note.save()
+                            finding.notes.add(note)
+
+                            # If the merged finding should be tagged as merged-into
+                            if form.cleaned_data['mark_tag_finding']:
+                                Tag.objects.add_tag(finding, "merged-inactive")
+
+                    # Update the finding to merge into
+                    if finding_descriptions is not '':
+                        finding_to_merge_into.description = "{}\n\n{}".format(finding_to_merge_into.description, finding_descriptions)
+
+                    if finding_to_merge_into.static_finding:
                         static = finding.static_finding
 
-                    if finding.dynamic_finding:
+                    if finding_to_merge_into.dynamic_finding:
                         dynamic = finding.dynamic_finding
 
-                    if finding.line:
-                        line = finding.line
+                    if finding_to_merge_into.line is None:
+                        finding_to_merge_into.line = line
 
-                    if finding.file_path:
-                        file_path = finding.file_path
+                    if finding_to_merge_into.file_path is None:
+                        finding_to_merge_into.file_path = file_path
 
-                    # If checked merge the descriptions
-                    if form.cleaned_data['append_description']:
-                        finding_descriptions = "{}\n\n{}".format(finding_descriptions, finding.description)
+                    finding_to_merge_into.static_finding = static
+                    finding_to_merge_into.dynamic_finding = dynamic
 
-                    # if checked merge the endpoints
-                    if form.cleaned_data['add_endpoints']:
-                        findings_to_merge_into.endpoints.add(*finding.endpoints.all())
+                    # Update the timestamp
+                    finding_to_merge_into.last_reviewed = timezone.now()
+                    finding_to_merge_into.last_reviewed_by = request.user
 
-                    # if checked merge the tags
-                    if form.cleaned_data['tag_finding']:
-                        for tag in finding.tags:
-                            Tag.objects.add_tag(findings_to_merge_into, tag)
+                    # Save the data to the merged finding
+                    finding_to_merge_into.save()
 
-                    # if checked re-assign the burp requests to the merged finding
-                    if form.cleaned_data['dynamic_raw']:
-                        BurpRawRequestResponse.objects.filter(finding=finding).update(finding=findings_to_merge_into)
+                    # If the finding merged into should be tagged as merged
+                    if form.cleaned_data['mark_tag_finding']:
+                        Tag.objects.add_tag(finding_to_merge_into, "merged")
 
-                    # Add merge finding information to the note if set to inactive
+                    finding_action = ""
+                    # Take action on the findings
                     if form.cleaned_data['finding_action'] == "inactive":
-                        single_finding_notes_entry = "Finding has been set to inactive and merged with the finding: {}.".format(findings_to_merge_into.title)
-                        note = Notes(entry=single_finding_notes_entry, author=request.user)
-                        note.save()
-                        finding.notes.add(note)
+                        finding_action = "inactivated"
+                        findings_to_merge.exclude(pk=finding_to_merge_into.pk).update(active=False, last_reviewed=timezone.now(), last_reviewed_by=request.user)
+                    elif form.cleaned_data['finding_action'] == "delete":
+                        finding_action = "deleted"
+                        findings_to_merge.delete()
 
-                # Update the finding to merge into
-                if finding_descriptions is not '':
-                    findings_to_merge_into.description = "{}\n\n{}".format(findings_to_merge_into.description, finding_descriptions)
+                    notes_entry = "Finding consists of merged findings from the following findings: {} which have been {}.".format(notes_entry[:-1], finding_action)
+                    note = Notes(entry=notes_entry, author=request.user)
+                    note.save()
+                    finding_to_merge_into.notes.add(note)
 
-                if findings_to_merge_into.static_finding:
-                    static = finding.static_finding
-
-                if findings_to_merge_into.dynamic_finding:
-                    dynamic = finding.dynamic_finding
-
-                if findings_to_merge_into.line is None:
-                    findings_to_merge_into.line = line
-
-                if findings_to_merge_into.file_path is None:
-                    findings_to_merge_into.file_path = file_path
-
-                findings_to_merge_into.static_finding = static
-                findings_to_merge_into.dynamic_finding = dynamic
-
-                # Update the timestamp
-                findings_to_merge_into.last_reviewed = timezone.now()
-                findings_to_merge_into.last_reviewed_by = request.user
-
-                # Save the data to the merged finding
-                findings_to_merge_into.save()
-
-                finding_action = ""
-                # Take action on the findings
-                if form.cleaned_data['finding_action'] == "inactive":
-                    finding_action = "inactivated"
-                    findings_to_merge.exclude(pk=findings_to_merge_into.pk).update(active=False, last_reviewed=timezone.now(), last_reviewed_by=request.user)
-                elif form.cleaned_data['finding_action'] == "delete":
-                    finding_action = "deleted"
-                    findings_to_merge.delete()
-
-                notes_entry = "Finding consists of merged findings from the following findings: {} which have been {}.".format(notes_entry[:-1], finding_action)
-                note = Notes(entry=notes_entry, author=request.user)
-                note.save()
-                findings_to_merge_into.notes.add(note)
-
-                messages.add_message(
-                    request,
-                    messages.SUCCESS,
-                    'Findings merged',
-                    extra_tags='alert-success')
-                return HttpResponseRedirect(
-                    reverse('edit_finding', args=(finding_to_update[0], )))
+                    messages.add_message(
+                        request,
+                        messages.SUCCESS,
+                        'Findings merged',
+                        extra_tags='alert-success')
+                    return HttpResponseRedirect(
+                        reverse('edit_finding', args=(finding_to_merge_into.id, )))
+                else:
+                    messages.add_message(request,
+                                         messages.ERROR,
+                                         'Unable to merge findings. Findings to merge contained in finding to merge into.',
+                                         extra_tags='alert-danger')
             else:
                 messages.add_message(request,
                                      messages.ERROR,

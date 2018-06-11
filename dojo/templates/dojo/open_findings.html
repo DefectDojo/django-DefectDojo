@@ -89,6 +89,7 @@
                            class="tablesorter-bootstrap table table-condensed table-striped table-hover">
                         <thead>
                         <tr>
+                          {% if user.is_staff %}
                           <th class="hidden-sm centered" title="Select all visible findings.">
                               <div class="dropdown">
                                   <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
@@ -108,8 +109,9 @@
                                       <li><a id="None">None</a></li>
                                   </ul>
                               </div>
-                          </th>
+                            </th>
                             <th></th>
+                            {% endif %}
                             <th class="nowrap">{% dojo_sort request 'Severity' 'numerical_severity' 'asc' %}</th>
                             <th class="nowrap">{% dojo_sort request 'Name' 'title' %}</th>
                             <th class="nowrap">{% dojo_sort request 'Date' 'date'%}</th>
@@ -128,6 +130,7 @@
                         <tbody>
                         {% for finding in findings %}
                             <tr class="{% if finding.active %}active_finding{% else %}inactive_finding{% endif %}">
+                                {% if user.is_staff %}
                                 <td class="hidden-sm centered">
                                     <form action="#">
                                         <input type="checkbox" name="select_{{ finding.id }}" id="{{ finding.id }}"
@@ -135,92 +138,93 @@
                                     </form>
                                 </td>
                                 <td>
-                                    <ul>
-                                     <li class="dropdown" style="list-style:none;">
-                                           <a href="#" class="dropdown-toggle" data-toggle="dropdown">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
-                                           <ul class="dropdown-menu">
-                                             <li>
-                                               <a class="" href="{% url 'view_finding' finding.id %}">
-                                                 <i class="fa fa-arrow-circle-right"></i> View
+                                  <div class="pull-left">
+                                    <div class="dropdown">
+                                      <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                      <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                                        <li>
+                                          <a class="" href="{% url 'view_finding' finding.id %}">
+                                            <i class="fa fa-arrow-circle-right"></i> View
+                                          </a>
+                                       </li>
+                                        <li>
+                                          {% if tab_product %}
+                                             <a class="" href="{% url 'edit_finding' finding.id %}?source=product_findings{{ request.GET.page|paginator }}">
+                                          {% else %}
+                                             <a class="" href="{% url 'edit_finding' finding.id %}?source=all_product_findings{{ request.GET.page|paginator }}">
+                                          {% endif %}
+                                            <i class="fa fa-pencil-square-o"></i> Edit
+                                          </a>
+                                       </li>
+                                       <li class="divider"></li>
+                                       <li role="presentation">
+                                           <a href="{% url 'manage_images' finding.id %}">
+                                               <i class="fa fa-file-image-o"></i> Manage Images
+                                           </a>
+                                       </li>
+                                       {% if finding.under_review and dojo_user in finding.reviewers.all or dojo_user == finding.review_requested_by and finding.under_review %}
+                                           <li role="presentation">
+                                               <a href="{% url 'clear_finding_review' finding.id %}">
+                                                   <i class="icon-user-check"></i> Clear Review
                                                </a>
-                                            </li>
-                                             <li>
-                                               {% if tab_product %}
-                                                  <a class="" href="{% url 'edit_finding' finding.id %}?source=product_findings{{ request.GET.page|paginator }}">
-                                               {% else %}
-                                                  <a class="" href="{% url 'edit_finding' finding.id %}?source=all_product_findings{{ request.GET.page|paginator }}">
-                                               {% endif %}
-                                                 <i class="fa fa-pencil-square-o"></i> Edit
+                                           </li>
+                                       {% elif not finding.under_review %}
+                                           <li role="presentation">
+                                               <a href="{% url 'request_finding_review' finding.id %}">
+                                                   <i class="icon-user-check"></i> Request Peer Review
                                                </a>
-                                            </li>
-                                            <li class="divider"></li>
-                                            <li role="presentation">
-                                                <a href="{% url 'manage_images' finding.id %}">
-                                                    <i class="fa fa-file-image-o"></i> Manage Images
-                                                </a>
-                                            </li>
-                                            {% if finding.under_review and dojo_user in finding.reviewers.all or dojo_user == finding.review_requested_by and finding.under_review %}
-                                                <li role="presentation">
-                                                    <a href="{% url 'clear_finding_review' finding.id %}">
-                                                        <i class="icon-user-check"></i> Clear Review
-                                                    </a>
-                                                </li>
-                                            {% elif not finding.under_review %}
-                                                <li role="presentation">
-                                                    <a href="{% url 'request_finding_review' finding.id %}">
-                                                        <i class="icon-user-check"></i> Request Peer Review
-                                                    </a>
-                                                </li>
-                                            {% endif %}
+                                           </li>
+                                       {% endif %}
 
-                                            <li role="presentation">
-                                                <a href="{% url 'touch_finding' finding.id %}">
-                                                    <i class="fa fa-clock-o"></i> Touch Finding
-                                                </a>
-                                            </li>
-                                            <li role="presentation">
-                                                <a href="{% url 'mktemplate' finding.id %}">
-                                                    <i class="fa fa-copy"></i> Make Finding a Template
-                                                </a>
-                                            </li>
-                                            <li role="presentation">
-                                                <a href="{% url 'find_template_to_apply' finding.id %}">
-                                                    <i class="fa fa-copy"></i> Apply Template to Finding
-                                                </a>
-                                            </li>
-                                            {% if finding.active %}
-                                                <li role="presentation">
-                                                    <a href="{% url 'close_finding' finding.id %}">
-                                                        <i class="fa fa-fire-extinguisher"></i> Close Finding
-                                                    </a>
-                                                </li>
-                                            {% else %}
-                                                <li role="presentation">
-                                                    <a href="{% url 'reopen_finding' finding.id %}">
-                                                        <i class="fa fa-bug"></i> Open Finding
-                                                    </a>
-                                                </li>
-                                            {% endif %}
-                                            <li role="presentation">
-                                                <a href="{% url 'action_history' finding|content_type finding.id %}">
-                                                    <i class="fa fa-history"></i> View History
-                                                </a>
-                                            </li>
-                                            <li class="divider"></li>
-                                            <li>
-                                              <form method="post" action="{% url 'delete_finding' finding.id %}"
-                                                   style="display: inline" class="form-inline form" id="delete-finding-menu-{{ finding.id }}-form">
-                                                 {% csrf_token %}
-                                                 <input type="hidden" name="id" value="{{ finding.id }}"/>
-                                              </form>
-                                              <a class="text-danger delete-finding" id="delete-finding-menu-{{ finding.id }}" href="#">
-                                                <i class="fa fa-trash"></i> Delete
-                                              </a>
-                                            </li>
-                                           </ul>
-                                         </li>
-                                     </ul>
+                                       <li role="presentation">
+                                           <a href="{% url 'touch_finding' finding.id %}">
+                                               <i class="fa fa-clock-o"></i> Touch Finding
+                                           </a>
+                                       </li>
+                                       <li role="presentation">
+                                           <a href="{% url 'mktemplate' finding.id %}">
+                                               <i class="fa fa-copy"></i> Make Finding a Template
+                                           </a>
+                                       </li>
+                                       <li role="presentation">
+                                           <a href="{% url 'find_template_to_apply' finding.id %}">
+                                               <i class="fa fa-copy"></i> Apply Template to Finding
+                                           </a>
+                                       </li>
+                                       {% if finding.active %}
+                                           <li role="presentation">
+                                               <a href="{% url 'close_finding' finding.id %}">
+                                                   <i class="fa fa-fire-extinguisher"></i> Close Finding
+                                               </a>
+                                           </li>
+                                       {% else %}
+                                           <li role="presentation">
+                                               <a href="{% url 'reopen_finding' finding.id %}">
+                                                   <i class="fa fa-bug"></i> Open Finding
+                                               </a>
+                                           </li>
+                                       {% endif %}
+                                       <li role="presentation">
+                                           <a href="{% url 'action_history' finding|content_type finding.id %}">
+                                               <i class="fa fa-history"></i> View History
+                                           </a>
+                                       </li>
+                                       <li class="divider"></li>
+                                       <li>
+                                         <form method="post" action="{% url 'delete_finding' finding.id %}"
+                                              style="display: inline" class="form-inline form" id="delete-finding-menu-{{ finding.id }}-form">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="id" value="{{ finding.id }}"/>
+                                         </form>
+                                         <a class="text-danger delete-finding" id="delete-finding-menu-{{ finding.id }}" href="#">
+                                           <i class="fa fa-trash"></i> Delete
+                                         </a>
+                                       </li>
+                                      </ul>
+                                    </div>
+                                   </div>
                                 </td>
+                                {% endif %}
                                 <td>
                                   <span class="label severity severity-{{ finding.severity }}">
                                       {{ finding.severity_display }}
@@ -285,7 +289,7 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="clearfix">
+                <div class="clearfix pull-right">
                     {% include "dojo/paging_snippet.html" with page=findings page_size=True%}
                 </div>
             {% else %}
@@ -299,7 +303,24 @@
 {% block postscript %}
     <script>
         var checkbox_count = 0;
+        function check_checked_finding()
+        {
+          var checkbox_values = $("input[type=checkbox][name^='select_']");
+
+          for (var i = 0; i < checkbox_values.length; i++) {
+            if ($(checkbox_values[i]).prop("checked")) {
+              if (checkbox_values[i].name != 'select_all') {
+                checkbox_count++;
+              }
+            }
+          }
+          if (checkbox_count > 0)
+          {
+              $('div#bulk_edit_menu').removeClass('hidden');
+          }
+        }
         $(function () {
+            check_checked_finding();
             //Ensures dropdown has proper zindex
             $('.table-responsive').on('show.bs.dropdown', function () {
               $('.table-responsive').css( "overflow", "inherit" );
@@ -333,12 +354,19 @@
             });
 
             $('input[type="checkbox"]').change(function () {
+              checkbox_count = 0;
               finding = $(this).attr("name");
               if (finding.indexOf("select_") >= 0)
               {
+                var checkbox_values = $("input[type=checkbox][name^='select_']");
+                for (var i = 0; i < checkbox_values.length; i++) {
+                  if ($(checkbox_values[i]).prop("checked")) {
+                    checkbox_count++;
+                  }
+                }
+
                 if ($(this).prop("checked")) {
                   $('div#bulk_edit_menu').removeClass('hidden');
-                  checkbox_count++;
                 } else {
                   checkbox_count--;
                   var checkbox_values = $("input[type=checkbox][name^='select_']");
@@ -366,6 +394,7 @@
             $('input#select_all').on('click', function (e) {
                 if ($(this).is(":checked")) {
                     $('input.select_one').prop('checked', true);
+                    console.log($('input.select_one').prop('checked', true));
                     $('div#bulk_edit_menu').removeClass('hidden');
                 }
                 else {

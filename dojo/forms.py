@@ -365,6 +365,9 @@ class MergeFindings(forms.ModelForm):
     tag_finding = forms.BooleanField(label="Add Tags", initial=True, required=False,
                                            help_text="Tags in all findings will be merged into the merged finding.")
 
+    mark_tag_finding = forms.BooleanField(label="Tag Merged Finding", initial=True, required=False,
+                                           help_text="Creates a tag titled 'merged' for the finding that will be merged. If the 'Finding Action' is set to 'inactive' the inactive findings will be tagged with 'merged-inactive'.")
+
     finding_action = forms.ChoiceField(
         required=True,
         choices=FINDING_ACTION,
@@ -381,7 +384,7 @@ class MergeFindings(forms.ModelForm):
 
         # Exclude the finding to merge into from the findings to merge into
         self.fields['findings_to_merge'] = forms.ModelMultipleChoiceField(
-            queryset=findings.exclude(pk=finding), required=True, label="Findings to Merge",
+            queryset=findings, required=True, label="Findings to Merge",
             widget=forms.widgets.SelectMultiple(attrs={'size': 10}),
             help_text=('Select the findings to merge.'))
         self.fields.keyOrder = ['finding_to_merge_into', 'findings_to_merge', 'append_description', 'add_endpoints']
