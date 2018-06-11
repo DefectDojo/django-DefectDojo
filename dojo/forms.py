@@ -384,7 +384,7 @@ class MergeFindings(forms.ModelForm):
 
         # Exclude the finding to merge into from the findings to merge into
         self.fields['findings_to_merge'] = forms.ModelMultipleChoiceField(
-            queryset=findings.exclude(pk=finding), required=True, label="Findings to Merge",
+            queryset=findings, required=True, label="Findings to Merge",
             widget=forms.widgets.SelectMultiple(attrs={'size': 10}),
             help_text=('Select the findings to merge.'))
         self.fields.keyOrder = ['finding_to_merge_into', 'findings_to_merge', 'append_description', 'add_endpoints']

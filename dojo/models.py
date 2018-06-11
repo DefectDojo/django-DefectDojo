@@ -774,7 +774,7 @@ class Endpoint(models.Model):
 
 
 class Notes(models.Model):
-    entry = models.CharField(max_length=2400)
+    entry = models.TextField()
     date = models.DateTimeField(null=False, editable=False,
                                 default=get_current_datetime)
     author = models.ForeignKey(User, editable=False)
