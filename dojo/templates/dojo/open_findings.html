@@ -289,7 +289,7 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="clearfix">
+                <div class="clearfix pull-right">
                     {% include "dojo/paging_snippet.html" with page=findings page_size=True%}
                 </div>
             {% else %}
@@ -306,9 +306,12 @@
         function check_checked_finding()
         {
           var checkbox_values = $("input[type=checkbox][name^='select_']");
+
           for (var i = 0; i < checkbox_values.length; i++) {
             if ($(checkbox_values[i]).prop("checked")) {
-              checkbox_count++;
+              if (checkbox_values[i].name != 'select_all') {
+                checkbox_count++;
+              }
             }
           }
           if (checkbox_count > 0)
