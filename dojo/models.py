@@ -1742,24 +1742,24 @@ class Rule(models.Model):
     # add UI notification to let people know what rules were applied
     name = models.CharField(max_length=200)
     text = models.CharField(max_length=200)
-    operator_options = (('Matches', 'Matches')
+    operator_options = (('Matches', 'Matches'),
                         ('Contains', 'Contains'))
-    operator = models.CharField(max_lenght=30, choices=operator_options)
+    operator = models.CharField(max_length=30, choices=operator_options)
     model_object_options = (('Product', 'Product'),
                             ('Engagement', 'Engagement'), ('Test', 'Test'),
                             ('Finding','Finding'), ('Endpoint', 'Endpoint'),
-                            ('Product_Type', 'Product_Type'))
+                            ('Product_Type', 'Product_Type'), ('Test Type', 'Test Type'))
     model_object = models.CharField(max_length=30, choices=model_object_options)
     applies_to = models.CharField(max_length=30, choices=model_object_options)
-    or_rules = models.ManyToManyField(Rule)
-    and_rules = models.ManyToManyField(Rule)
+    or_rules = models.ManyToManyField('self')
+    and_rules = models.ManyToManyField('self')
     match_field = models.CharField(max_length=200)
 
 class FieldRule(models.Model):
     field = models.CharField(max_length=200)
-    update_options = (('Append', 'Append')
+    update_options = (('Append', 'Append'),
                         ('Replace', 'Replace'))
-    update_type = models.CharField(max_lenght=30, choices=update_options)
+    update_type = models.CharField(max_length=30, choices=update_options)
     text = models.CharField(max_length=200)
 
 # Register for automatic logging to database

@@ -17,7 +17,7 @@
                                 aria-labelledby="dropdownMenu1">
                                 {% if request.user.is_staff %}
                                     <li role="presentation">
-                                        <a href="{% url 'add_rule' %}">
+                                        <a href="{% url 'Add Rule' %}">
                                             <i class="fa fa-plus"></i> Add Rule
                                         </a>
                                     </li>
@@ -32,6 +32,7 @@
                 </div>
             </div>
 
+            {% if rules %}
                 <div class="clearfix">
                     {% include "dojo/paging_snippet.html" with page=rules page_size=True %}
                 </div>
@@ -50,7 +51,7 @@
                         <tbody>
                         {% for rule in rules %}
                             <tr>
-                                <td><a href="{% url 'view_rule' rule.id %}"> {{ rule.text }} </a></td>
+                                <td><a href="{% url 'Edit Rule' rule.id %}"> {{ rule.text }} </a></td>
                                 <td>{{ rule.operator }}</td>
                                 <td> {{ rule.model_object }} </td>
                                 <td> {{ rule.applies_to }} </td>
@@ -59,7 +60,7 @@
                                         <div class="centered">
                                             <div class="btn-group" role="group">
                                                 <a class="btn btn-sm btn-success"
-                                                   href="{% url 'add_rule'  %}">
+                                                   href="{% url 'Add Rule'  %}">
                                                     <i class="fa fa-plus"></i> Add Rule
                                                 </a>
                                                 <a class="btn btn-sm btn-warning"
@@ -85,6 +86,5 @@
             {% endif %}
         </div>
     </div>
-{% endblock %}
     {% include "dojo/filter_js_snippet.html" %}
 {% endblock %}

@@ -18,7 +18,7 @@ from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
     Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
     JIRA_Issue, JIRA_PKey, JIRA_Conf, UserContactInfo, Tool_Type, Tool_Configuration, Tool_Product_Settings, \
     Cred_User, Cred_Mapping, System_Settings, Notifications, Languages, Language_Type, App_Analysis, Objects, \
-    Benchmark_Product, Benchmark_Requirement, Benchmark_Product_Summary
+    Benchmark_Product, Benchmark_Requirement, Benchmark_Product_Summary, Rule
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
 
@@ -1545,6 +1545,12 @@ class NotificationsForm(forms.ModelForm):
         exclude = ['']
 
 class RuleForm(forms.ModelForm):
+    match_field = forms.ModelChoiceField(queryset=Finding.objects.none())
+    class Meta:
+        model = Rule
+        exclude = ['']
+
+class DeleteRuleForm(forms.ModelForm):
 
     class Meta:
         model = Rule
