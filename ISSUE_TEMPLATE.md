@@ -18,9 +18,6 @@ Please include the version number (ex: Ubuntu 16.04)
 - [ ] setup.bash
 - [ ] docker
 
-### DefectDojo Version
-
-
 ### Steps to Reproduce
 
 ### Sample Scan File (if applicable)
