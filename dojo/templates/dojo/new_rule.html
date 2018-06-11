@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+    <h3> Add a New Rule </h3>
+    <form class="form-horizontal" action="{%  url 'Add Rule' %}" method="post">{% csrf_token %}
+        {% include "dojo/form_fields.html" with form=form %}
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <input class="btn btn-primary" type="submit" value="Submit"/>
+            </div>
+        </div>
+    </form>
+<script type="application/javascript">
+   $(function(){
+    $('#id_applies_to').change(function(){
+        var match_field  = $('#id_match_field')
+        match_field.attr('value', 'TESTING');
+    });
+});
+</script>
+{% endblock %}

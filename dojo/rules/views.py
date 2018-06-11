@@ -10,23 +10,33 @@ from django.core.urlresolvers import reverse
 from django.db import DEFAULT_DB_ALIAS
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404
-from django.utils import tab_view_count
 from django.views.decorators.csrf import csrf_exempt
 from jira import JIRA
 
 # Local application/library imports
-from dojo.forms import RuleForm
-from dojo.models import User, JIRA_Conf, JIRA_Issue, Notes, Rule, System_Settings
+from dojo.forms import RuleForm, DeleteRuleForm
+from dojo.models import User, JIRA_Conf, JIRA_Issue, Notes, Rule,\
+    System_Settings, Finding, Test, Test_Type, Engagement, \
+    Product, Product_Type
+
 from dojo.utils import add_breadcrumb
 
 logger = logging.getLogger(__name__)
 
+#Fields for each model ruleset
+finding_fields = Finding._meta.fields
+test_fields = Test._meta.fields
+test_type_fields = Test_Type._meta.fields
+engagement_fields = Engagement._meta.fields
+product_fields = Product._meta.fields
+product_type_fields = Product_Type._meta.fields
+
+#Add Scan Type
 def rules(request):
     initial_queryset = Rule.objects.all().order_by('name')
-
     add_breadcrumb(title="Rules", top_level=True, request=request)
-    return render(request, 'dojo/product_type.html', {
-        'name': 'Product Type List',
+    return render(request, 'dojo/rules.html', {
+        'name': 'Rules List',
         'metric': False,
         'user': request.user,
         'rules': initial_queryset})
@@ -43,12 +53,15 @@ def new_rule(request):
                      'Rule created successfully.',
                      extra_tags='alert-success')
             return HttpResponseRedirect(reverse('rules'))
-
-    else:
-        form = RuleForm()
-        add_breadcrumb(title="New Dojo Rule", top_level=False, request=request)
+    form = RuleForm()
+    add_breadcrumb(title="New Dojo Rule", top_level=False, request=request)
     return render(request, 'dojo/new_rule.html',
-                  {'form': form})
+                  {'form': form,
+                   'finding_fields': finding_fields,
+                   'test_fields': test_fields,
+                   'engagement_fields': engagement_fields,
+                   'product_fields': product_fields,
+                   'product_type_fields': product_type_fields})
 
 @user_passes_test(lambda u: u.is_staff)
 def edit_rule(request, ptid):
@@ -72,7 +85,7 @@ def edit_rule(request, ptid):
         'pt': pt})
 
 @user_passes_test(lambda u: u.is_staff)
-def delete_product(request, pid):
+def delete_rule(request, pid):
     product = get_object_or_404(Rule, pk=pid)
     form = DeleteRuleForm(instance=product)
 
@@ -96,15 +109,9 @@ def delete_product(request, pid):
 
     add_breadcrumb(parent=product, title="Delete", top_level=False, request=request)
     system_settings = System_Settings.objects.get()
-    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(pid)
     return render(request, 'dojo/delete_product.html',
                   {'product': product,
                    'form': form,
-                   'tab_product': tab_product,
-                   'tab_engagements': tab_engagements,
-                   'tab_findings': tab_findings,
-                   'tab_endpoints': tab_endpoints,
-                   'tab_benchmarks': tab_benchmarks,
                    'active_tab': 'findings',
                    'system_settings': system_settings,
                    'rels': rels,
