@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load get_attribute %}
 {% block content %}
     <h3> Add a New Rule </h3>
     <form class="form-horizontal" action="{%  url 'Add Rule' %}" method="post">{% csrf_token %}
@@ -9,12 +10,24 @@
             </div>
         </div>
     </form>
+{% endblock %}
+{% block postscript %}
 <script type="application/javascript">
-   $(function(){
-    $('#id_applies_to').change(function(){
-        var match_field  = $('#id_match_field')
-        match_field.attr('value', 'TESTING');
-    });
-});
+  $( document ).ready(function() {
+        $(function () {
+          $('#id_applies_to').change(function(){
+            var field_dict = jQuery.parseJSON('{{field_dictionary|safe}}');
+            var applies = $('#id_applies_to').val();
+            var selected = $('#id_match_field').val();
+            $("#id_match_field option[value='" + selected + "']").remove();
+            for (i = 0; i < field_dict[applies].length; i++) {
+            $('#id_match_field').append($('<option>', {
+                value: field_dict[applies][i],
+                text:  field_dict[applies][i]
+            }));
+           }
+          });
+        });
+        });
 </script>
 {% endblock %}

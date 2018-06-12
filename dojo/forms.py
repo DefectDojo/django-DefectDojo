@@ -1339,6 +1339,7 @@ class AddFindingImageForm(forms.ModelForm):
 
 
 FindingImageFormSet = modelformset_factory(FindingImage, extra=3, max_num=10, exclude=[''], can_delete=True)
+RuleFormSet = modelformset_factory(Rule, extra=1, max_num=10, exclude=[''], can_delete=True)
 
 
 class JIRA_IssueForm(forms.ModelForm):

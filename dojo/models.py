@@ -1741,7 +1741,7 @@ class Benchmark_Product_Summary(models.Model):
 class Rule(models.Model):
     # add UI notification to let people know what rules were applied
     name = models.CharField(max_length=200)
-    text = models.CharField(max_length=200)
+    text = models.TextField()
     operator_options = (('Matches', 'Matches'),
                         ('Contains', 'Contains'))
     operator = models.CharField(max_length=30, choices=operator_options)
@@ -1751,7 +1751,7 @@ class Rule(models.Model):
                             ('Product_Type', 'Product_Type'), ('Test Type', 'Test Type'))
     model_object = models.CharField(max_length=30, choices=model_object_options)
     applies_to = models.CharField(max_length=30, choices=model_object_options)
-    or_rules = models.ManyToManyField('self')
+    #TODO: Add or ?
     and_rules = models.ManyToManyField('self')
     match_field = models.CharField(max_length=200)
 
