@@ -1,6 +1,7 @@
 # Standard library imports
 import json
 import logging
+import sys
 
 # Third party imports
 from django.contrib import messages
@@ -12,9 +13,11 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from jira import JIRA
+from django.http import JsonResponse
+from django.forms.models import model_to_dict
 
 # Local application/library imports
-from dojo.forms import RuleForm, DeleteRuleForm
+from dojo.forms import RuleForm, DeleteRuleForm, RuleFormSet
 from dojo.models import User, JIRA_Conf, JIRA_Issue, Notes, Rule,\
     System_Settings, Finding, Test, Test_Type, Engagement, \
     Product, Product_Type
@@ -24,12 +27,20 @@ from dojo.utils import add_breadcrumb
 logger = logging.getLogger(__name__)
 
 #Fields for each model ruleset
-finding_fields = Finding._meta.fields
-test_fields = Test._meta.fields
-test_type_fields = Test_Type._meta.fields
-engagement_fields = Engagement._meta.fields
-product_fields = Product._meta.fields
-product_type_fields = Product_Type._meta.fields
+
+finding_fields = [f.name for f in Finding._meta.fields]
+test_fields = [f.name for f in Test._meta.fields]
+test_type_fields = [f.name for f in Test_Type._meta.fields]
+engagement_fields = [f.name for f in Engagement._meta.fields]
+product_fields = [f.name for f in Product._meta.fields]
+product_type_fields = [f.name for f in Product_Type._meta.fields]
+field_dictionary = {}
+field_dictionary['Finding'] = finding_fields
+field_dictionary['Test Type'] = test_type_fields
+field_dictionary['Test'] = test_fields
+field_dictionary['Engagement'] = engagement_fields
+field_dictionary['Product'] = product_fields
+field_dictionary['Product Type'] = product_type_fields
 
 #Add Scan Type
 def rules(request):
@@ -45,7 +56,7 @@ def rules(request):
 @user_passes_test(lambda u: u.is_staff)
 def new_rule(request):
     if request.method == 'POST':
-        form = RuleForm(request.POST)
+        form = RuleFormSet(request.POST)
         if form.is_valid():
             form.save()
             messages.add_message(request,
@@ -53,7 +64,7 @@ def new_rule(request):
                      'Rule created successfully.',
                      extra_tags='alert-success')
             return HttpResponseRedirect(reverse('rules'))
-    form = RuleForm()
+    form = RuleFormSet()
     add_breadcrumb(title="New Dojo Rule", top_level=False, request=request)
     return render(request, 'dojo/new_rule.html',
                   {'form': form,
@@ -61,7 +72,8 @@ def new_rule(request):
                    'test_fields': test_fields,
                    'engagement_fields': engagement_fields,
                    'product_fields': product_fields,
-                   'product_type_fields': product_type_fields})
+                   'product_type_fields': product_type_fields,
+                   'field_dictionary': json.dumps(field_dictionary)})
 
 @user_passes_test(lambda u: u.is_staff)
 def edit_rule(request, ptid):
