@@ -377,7 +377,7 @@
           <tr>
             <td><strong>Length</strong></td>
             <td>{{ eng.target_start|datediff_time:eng.target_end }}
-              {% if eng.target_end|overdue %}
+              {% if eng.target_end|overdue and eng.status != 'Completed'%}
               <sup>
                 <div class="tag-label warning-color">
                   {{ eng.target_end|overdue }} overdue

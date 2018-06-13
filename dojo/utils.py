@@ -28,11 +28,10 @@ from dojo.models import Finding, Engagement, Finding_Template, Product, JIRA_PKe
     Language_Type, Languages
 from asteval import Interpreter
 from requests.auth import HTTPBasicAuth
+
+
 """
-Michael & Fatima:
-Helper function for metrics
-Counts the number of findings and the count for the products for each level of
-severity for a given finding querySet
+Helper functions for DefectDojo
 """
 
 
@@ -875,10 +874,10 @@ def log_jira_message(text, finding):
 
 # Adds labels to a Jira issue
 def add_labels(find, issue):
-    # Update Label with Security
+    # Update Label with system setttings label
     system_settings = System_Settings.objects.get()
     labels = system_settings.jira_labels.split()
-    if labels is not None:
+    if len(labels) > 0:
         for label in labels:
             issue.fields.labels.append(label)
     # Update the label with the product name (underscore)
@@ -1503,22 +1502,14 @@ def calculate_grade(product):
 
 
 def get_celery_worker_status():
-    ERROR_KEY = "ERROR"
+    from tasks import celery_status
+    res = celery_status.apply_async()
+
+    # Wait 15 seconds for a response from Celery
     try:
-        from celery.task.control import inspect
-        insp = inspect()
-        d = insp.stats()
-        if not d:
-            d = {ERROR_KEY: 'No running Celery workers were found.'}
-    except IOError as e:
-        from errno import errorcode
-        msg = "Error connecting to the backend: " + str(e)
-        if len(e.args) > 0 and errorcode.get(e.args[0]) == 'ECONNREFUSED':
-            msg += ' Check that the RabbitMQ server is running.'
-        d = {ERROR_KEY: msg}
-    except ImportError as e:
-        d = {ERROR_KEY: str(e)}
-    return d
+        return res.get(timeout=15)
+    except:
+        return False
 
 
 # Used to display the counts and enabled tabs in the product view
