@@ -343,9 +343,9 @@
                               {{ finding.reporter }}
                           {% endif %}
                         </td>
-                        <td>{% if finding.under_review %}Under Review, {% endif %}{{ finding.status }}</td>
+                        <td>{% if finding.under_review %}Under Review, {% endif %}{{ finding.status }}
                         {% if finding.duplicate_finding.id %}
-                            <a href="{% url 'view_finding' finding.duplicate_finding.id%}">Original</a>
+                             <a href="{% url 'view_finding' finding.duplicate_finding.id%}">Original</a>
                         {% endif %}
                         </td>
                         {% if "enable_jira"|get_system_setting %}
