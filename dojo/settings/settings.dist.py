@@ -223,6 +223,7 @@ TEAM_NAME = 'Security Engineering'
 # Celery settings
 CELERY_BROKER_URL = 'sqla+sqlite:///dojo.celerydb.sqlite'
 CELERY_TASK_IGNORE_RESULT = True
+CELERY_RESULT_BACKEND = 'db+sqlite:///dojo.celeryresults.sqlite'
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_RESULT_EXPIRES = 86400
 CELERY_BEAT_SCHEDULE_FILENAME = DOJO_ROOT + '/dojo.celery.beat.db'

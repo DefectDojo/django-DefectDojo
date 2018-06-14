@@ -178,7 +178,7 @@ class ProductForm(forms.ModelForm):
 
     class Meta:
         model = Product
-        fields = ['name', 'description', 'tags', 'prod_manager', 'tech_contact', 'manager', 'prod_type',
+        fields = ['name', 'description', 'tags', 'prod_manager', 'tech_contact', 'manager', 'prod_type', 'regulations',
                   'authorized_users', 'business_criticality', 'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience', 'internet_accessible']
 
 
@@ -192,7 +192,7 @@ class DeleteProductForm(forms.ModelForm):
                    'prod_type', 'updated', 'tid', 'authorized_users', 'product_manager',
                    'technical_contact', 'team_manager', 'prod_numeric_grade', 'business_criticality',
                    'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience',
-                   'internet_accessible']
+                   'internet_accessible', 'regulations']
 
 
 class ProductMetaDataForm(forms.ModelForm):
@@ -1574,6 +1574,7 @@ class CredMappingFormProd(forms.ModelForm):
 
 
 class SystemSettingsForm(forms.ModelForm):
+
     class Meta:
         model = System_Settings
         exclude = ['product_grade']

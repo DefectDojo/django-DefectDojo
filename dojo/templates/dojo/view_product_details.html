@@ -137,8 +137,14 @@
       <ul class="list-group">
       {% if languages %}
         <li class="list-group-item">
-          <strong>Total Files: </strong>{{ langSummary.files__sum|intcomma }}
-          <strong>Lines of Code: </strong>{{ langSummary.code__sum|intcomma }}
+          <strong>Total Files: </strong>
+          {%  if langSummary.files__sum > 0 %}
+          {{ langSummary.files__sum|intcomma }}
+          {% endif %}
+          <strong>Lines of Code: </strong>
+          {%  if langSummary.code__sum %}
+          {{ langSummary.code__sum|intcomma }}
+          {% endif %}
         </li>
       {% for lang in languages %}
         <li class="list-group-item">
@@ -167,31 +173,39 @@
         <tbody>
           <tr>
             <td><strong>Business Criticality</strong></td>
-            <td>{{ prod.get_business_criticality_display }}</td>
+            <td>{{ prod.get_business_criticality_display|default:"" }}</td>
           </tr>
           <tr>
             <td><strong>Product Type</strong></td>
-            <td>{{ prod.prod_type }}</td>
+            <td>{{ prod.prod_type|default:"" }}</td>
           </tr>
           <tr>
             <td><strong>Platform</strong></td>
-            <td>{{ prod.get_platform_display }}</td>
+            <td>{{ prod.get_platform_display|default:"" }}</td>
           </tr>
           <tr>
             <td><strong>Lifecycle</strong></td>
-            <td>{{ prod.get_lifecycle_display }}</td>
+            <td>{{ prod.get_lifecycle_display|default:"" }}</td>
           </tr>
           <tr>
             <td><strong>Origin</strong></td>
-            <td>{{ prod.get_origin_display }}</td>
+            <td>{{ prod.get_origin_display|default_if_none:"" }}</td>
           </tr>
           <tr>
             <td><strong>User Records</strong></td>
-            <td>{{ prod.user_records|intcomma }}</td>
+            <td>
+              {%  if prod.user_records > 0 %}
+              {{ prod.user_records|intcomma }}
+              {% endif %}
+            </td>
           </tr>
           <tr>
             <td><strong>Revenue</strong></td>
-            <td>{% if application.revenue < 1000000 %}{{ prod.revenue|intcomma }}{% else %}{{ prod.revenue|intword }}{% endif %}</td>
+            <td>
+              {%  if prod.revenue > 0 %}
+                {% if prod.revenue < 1000000 %}{{ prod.revenue|intcomma }}{% else %}{{ prod.revenue|intword }}{% endif %}
+              {% endif %}
+            </td>
           </tr>
         </tbody>
       </table>
