@@ -442,6 +442,7 @@ def finding_bulk_update(request, tid):
                 finds = Finding.objects.filter(test=test, id__in=finding_to_update)
                 if form.cleaned_data['severity']:
                     finds.update(severity=form.cleaned_data['severity'],
+                                 numerical_severity=Finding.get_numerical_severity(form.cleaned_data['severity']),
                                  active=form.cleaned_data['active'],
                                  verified=form.cleaned_data['verified'],
                                  false_p=form.cleaned_data['false_p'],

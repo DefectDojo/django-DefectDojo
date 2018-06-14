@@ -1391,10 +1391,10 @@ def merge_finding_product(request, pid):
                         dynamic = finding.dynamic_finding
 
                     if finding_to_merge_into.line is None:
-                        finding_to_merge_into.line = line
+                        line = finding_to_merge_into.line
 
                     if finding_to_merge_into.file_path is None:
-                        finding_to_merge_into.file_path = file_path
+                        file_path = finding_to_merge_into.file_path
 
                     finding_to_merge_into.static_finding = static
                     finding_to_merge_into.dynamic_finding = dynamic

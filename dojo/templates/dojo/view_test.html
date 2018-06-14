@@ -118,9 +118,20 @@
                         Bulk Edit
                         <span class="caret"></span>
                     </button>
-                    <a class="text-danger delete-bulk" href="#" alt="Delete Findings">
-                        <i class="fa fa-trash"></i>
-                    </a>
+                    <div class="btn-group mr-2" role="group" aria-label="Bulk Actions">
+                      {% if tab_product %}
+                      <button type="button" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Merge Findings">
+                        <a class="white-color merge" href="#" alt="Merge Findings">
+                          <i class="fa fa-compress"></i>
+                        </a>
+                      </button>
+                      {% endif %}
+                      <button type="button" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Delete Findings">
+                        <a class="white-color delete-bulk" href="#" alt="Delete Findings">
+                          <i class="fa fa-trash"></i>
+                        </a>
+                      </button>
+                    </div>
                     <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" id="bulk_edit">
                         <li class="dropdown-header">Choose wisely...</li>
                         <li style="padding-left: 8px;">
@@ -207,6 +218,7 @@
                     <th></th>
                     <th>Severity</th>
                     <th>Name</th>
+                    <th>CWE</th>
                     <th>Date</th>
                     <th>Age</th>
                     <th>Reporter</th>
@@ -315,14 +327,14 @@
                         </td>
                         <td><a href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a>
                           {% if finding.file_path %}
-                          <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="{{ finding.file_path }}" data-placement="right" data-container="body" data-original-title="" title="">
+                          <i class="fa fa-file has-popover" data-trigger="hover" data-content="{{ finding.file_path }}" data-placement="right" data-container="body" data-original-title="Files" title="">
                             {% else %}
                               {% if finding.endpoints.all %}
-                                <i class="fa fa-question-circle has-popover" data-html="true" data-trigger="hover" data-content="
+                                <i class="fa fa-sitemap has-popover" data-html="true" data-trigger="hover" data-content="
                                 {% for endpoint in finding.endpoints.all %}
                                   {{ endpoint }}<br/>
                                 {% endfor %}
-                                " data-placement="right" data-container="body" data-original-title="" title="">
+                                " data-placement="right" data-container="body" data-original-title="Endpoints" title="">
                               {% endif %}
                             {% endif %}
                         </i>
@@ -333,6 +345,13 @@
                                   {% endfor %}
                               </sup>
                           {% endif %}
+                        </td>
+                        <td class="nowrap">
+                        {% if finding.cwe > 0 %}
+                          <a target="_blank" href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
+                              <i class="fa fa-external-link"></i> {{ finding.cwe }}
+                          </a>
+                        {% endif %}
                         </td>
                         <td class="nowrap">{{ finding.date }}</td>
                         <td>{{ finding.age }}</td>
@@ -345,7 +364,7 @@
                         </td>
                         <td>{% if finding.under_review %}Under Review, {% endif %}{{ finding.status }}
                         {% if finding.duplicate_finding.id %}
-                             <a href="{% url 'view_finding' finding.duplicate_finding.id%}">Original</a>
+                             , <a href="{% url 'view_finding' finding.duplicate_finding.id%}">Original</a>
                         {% endif %}
                         </td>
                         {% if "enable_jira"|get_system_setting %}
@@ -600,7 +619,25 @@
 {% block postscript %}
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
     <script type="text/javascript">
+        var checkbox_count = 0;
+        function check_checked_finding()
+        {
+          var checkbox_values = $("input[type=checkbox][name^='select_']");
+
+          for (var i = 0; i < checkbox_values.length; i++) {
+            if ($(checkbox_values[i]).prop("checked")) {
+              if (checkbox_values[i].name != 'select_all') {
+                checkbox_count++;
+              }
+            }
+          }
+          if (checkbox_count > 0)
+          {
+              $('div#bulk_edit_menu').removeClass('hidden');
+          }
+        }
         $(function () {
+            check_checked_finding();
             //Ensures dropdown has proper zindex
             $('.table-responsive').on('show.bs.dropdown', function () {
               $('.table-responsive').css( "overflow", "inherit" );
@@ -610,14 +647,24 @@
               $('.table-responsive').css( "overflow", "auto" );
             })
             $('input[type="checkbox"]').change(function () {
+              checkbox_count = 0;
               finding = $(this).attr("name");
               if (finding.indexOf("select_") >= 0)
               {
+                var checkbox_values = $("input[type=checkbox][name^='select_']");
+                for (var i = 0; i < checkbox_values.length; i++) {
+                  if ($(checkbox_values[i]).prop("checked")) {
+                    checkbox_count++;
+                  }
+                }
+
                 if ($(this).prop("checked")) {
                   $('div#bulk_edit_menu').removeClass('hidden');
                 } else {
+                  checkbox_count--;
                   var checkbox_values = $("input[type=checkbox][name^='select_']");
                   var checked = false;
+
                   for (var i = 0; i < checkbox_values.length; i++) {
                     if ($(checkbox_values[i]).prop("checked")) {
                       checked = true;
@@ -628,6 +675,18 @@
                   }
                 }
 
+              }
+            });
+            $('a.merge').on('click', function (e) {
+              if (checkbox_count > 1)
+              {
+                var hidden_input = $('<input type="hidden" value="merge_findings" name="merge_findings">')
+                $("form#bulk_change_form").attr("action", "{% url 'merge_finding_product' tab_product.id %}");
+                $("form#bulk_change_form").attr("method", "get");
+                $('form#bulk_change_form').append(hidden_input);
+                $( "form#bulk_change_form" ).submit();
+              } else {
+                alert("Please select at least two findings before merging.");
               }
             });
             $('form#bulk_change_form').on('submit', function(e){
