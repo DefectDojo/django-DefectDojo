@@ -1744,16 +1744,25 @@ class Rule(models.Model):
     text = models.TextField()
     operator_options = (('Matches', 'Matches'),
                         ('Contains', 'Contains'))
+    application_options = (('Append', 'Append'),
+                        ('Replace', 'Replace'))
+    blank_options = (('', ''),)
     operator = models.CharField(max_length=30, choices=operator_options)
     model_object_options = (('Product', 'Product'),
                             ('Engagement', 'Engagement'), ('Test', 'Test'),
                             ('Finding','Finding'), ('Endpoint', 'Endpoint'),
-                            ('Product_Type', 'Product_Type'), ('Test Type', 'Test Type'))
+                            ('Product Type', 'Product_Type'), ('Test Type', 'Test_Type'))
     model_object = models.CharField(max_length=30, choices=model_object_options)
-    applies_to = models.CharField(max_length=30, choices=model_object_options)
+    match_field = models.CharField(max_length=200, choices=blank_options)
+    match_text = models.TextField()
+    application = models.CharField(max_length=200, choices=application_options)
+    applies_to = models.CharField(max_length=30, choices=blank_options)
     #TODO: Add or ?
-    and_rules = models.ManyToManyField('self')
-    match_field = models.CharField(max_length=200)
+    #and_rules = models.ManyToManyField('self')
+    applied_field = models.CharField(max_length=200, choices=())
+    child_rules  = models.ManyToManyField('self', editable=False)
+    parent_rule = models.ForeignKey('self', editable=False)
+
 
 class FieldRule(models.Model):
     field = models.CharField(max_length=200)

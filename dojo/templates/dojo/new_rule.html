@@ -3,18 +3,28 @@
 {% block content %}
     <h3> Add a New Rule </h3>
     <form class="form-horizontal" action="{%  url 'Add Rule' %}" method="post">{% csrf_token %}
-        {% include "dojo/form_fields.html" with form=form %}
-        <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-10">
-                <input class="btn btn-primary" type="submit" value="Submit"/>
+        {% for f in form %}
+        <fieldset>
+        {% include "dojo/form_fields.html" with form=f %}
+        </fieldset>
+        {% endfor %}
+        <fieldset>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    {{ form.management_form }}
+                    <button class="btn btn-success">Save</button>
+                </div>
             </div>
-        </div>
+        </fieldset>
     </form>
 {% endblock %}
 {% block postscript %}
 <script type="application/javascript">
   $( document ).ready(function() {
         $(function () {
+        $.each([‘match’], function (index, value) {
+  console.log(index + ' ' + value);
+            });
           $('#id_applies_to').change(function(){
             var field_dict = jQuery.parseJSON('{{field_dictionary|safe}}');
             var applies = $('#id_applies_to').val();

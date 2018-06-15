@@ -142,7 +142,6 @@ class Product_TypeForm(forms.ModelForm):
 class Test_TypeForm(forms.ModelForm):
     class Meta:
         model = Test_Type
-        fields = ['name']
 
 
 class Development_EnvironmentForm(forms.ModelForm):
@@ -1339,7 +1338,6 @@ class AddFindingImageForm(forms.ModelForm):
 
 
 FindingImageFormSet = modelformset_factory(FindingImage, extra=3, max_num=10, exclude=[''], can_delete=True)
-RuleFormSet = modelformset_factory(Rule, extra=1, max_num=10, exclude=[''], can_delete=True)
 
 
 class JIRA_IssueForm(forms.ModelForm):
@@ -1550,6 +1548,8 @@ class RuleForm(forms.ModelForm):
     class Meta:
         model = Rule
         exclude = ['']
+
+RuleFormSet = modelformset_factory(Rule, extra=2, max_num=10, exclude=[''], can_delete=True)
 
 class DeleteRuleForm(forms.ModelForm):
 

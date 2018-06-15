@@ -15,6 +15,7 @@ import requests
 from dateutil.relativedelta import relativedelta, MO
 from django.conf import settings
 from django.core.mail import send_mail
+from django.db.models.loading import get_model
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import get_resolver, reverse
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
@@ -25,7 +26,8 @@ from jira import JIRA
 from jira.exceptions import JIRAError
 from dojo.models import Finding, Engagement, Finding_Template, \
     Product, JIRA_PKey, JIRA_Issue, Dojo_User, User, \
-    Alerts, System_Settings, Notifications, UserContactInfo, Endpoint, Benchmark_Type
+    Alerts, System_Settings, Notifications, UserContactInfo, Endpoint,\
+    Benchmark_Type, Rule
 from asteval import Interpreter
 from requests.auth import HTTPBasicAuth
 """
@@ -61,7 +63,7 @@ def sync_dedupe(new_finding, *args, **kwargs):
         static_finding=new_finding.static_finding,
         dynamic_finding=new_finding.dynamic_finding,
         date__lte=new_finding.date).exclude(id=new_finding.id).exclude(
-            cwe=None).exclude(duplicate=True)
+            cwe=None).exclude(duplicate=True).exclude(cwe=0)
     eng_findings_title = Finding.objects.filter(
         test__engagement__product=new_finding.test.engagement.product,
         title=new_finding.title,
@@ -97,6 +99,51 @@ def sync_dedupe(new_finding, *args, **kwargs):
             super(Finding, new_finding).save(*args, **kwargs)
 
         calculate_grade(find.test.engagement.product)
+
+def sync_rule(new_finding, *args, **kwargs):
+    rules = Rule.objects.filter(applies_to='Finding', parent_rule=None)
+    for rule in rules:
+        child_val = True
+        child_list = rule.child_rules
+        while (len(child_list) != 0):
+            child_val = child_val and child_rule(child_list.pop())
+        if child_val:
+            if rule.operator == 'Matches':
+               if getattr(get_model(rule.model_object), rule.match_field)  == rule.match_text:
+                   if rule.applied_field != 'Severity':
+                       if rule.application == 'Append':
+                           setattr(new_finding, rule.applied_field, (getattr(new_finding, rule.applied_field) + rule.text))
+                       else:
+                           setattr(new_finding, rule.applied_field, rule.text)
+                        new_finding.save(dedupe_option=False)
+            else:
+                if rule.match_text in getattr(get_model(rule.model_object), rule.match_field):
+                   if rule.applied_field != 'Severity':
+                       if rule.application == 'Append':
+                           setattr(new_finding, rule.applied_field, (getattr(new_finding, rule.applied_field) + rule.text))
+                       else:
+                           setattr(new_finding, rule.applied_field, rule.text)
+                        new_finding.save(dedupe_option=False)
+
+
+def child_rule(rule):
+    child_val = True
+    child_list = rule.child_rules
+    while (len(child_list) != 0):
+        child_val = child_val and child_rule(child_list.pop())
+    if child_val:
+        if rule.operator == 'Matches':
+           if getattr(get_model(rule.model_object), rule.match_field)  == rule.match_text:
+               return True
+           else:
+               return False
+        else:
+            if rule.match_text in getattr(get_model(rule.model_object), rule.match_field):
+                return True
+            else:
+                return False
+    else:
+        return False
 
 
 def count_findings(findings):
