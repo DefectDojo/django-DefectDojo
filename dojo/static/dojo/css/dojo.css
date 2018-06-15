@@ -383,6 +383,10 @@ form ul#id_accepted_findings input {
     white-space: nowrap;
 }
 
+.dojo-sup {
+  font-size: smaller;
+  vertical-align: super;
+}
 .Fail {
     background-color: #b94a48;
 }

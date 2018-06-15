@@ -1544,10 +1544,14 @@ def add_language(product, language):
             pass
 
 
-# Apply finding template data by matching CWE
+# Apply finding template data by matching CWE + Title or CWE
 def apply_cwe_to_template(finding, override=False):
     if System_Settings.objects.get().enable_template_match or override:
-        template = Finding_Template.objects.filter(cwe=finding.cwe).first()
+        # Attempt to match on CWE and Title First
+        template = Finding_Template.objects.filter(cwe=finding.cwe, title__icontains=finding.title, template_match=True).first()
+
+        # If none then match on CWE
+        template = Finding_Template.objects.filter(cwe=finding.cwe, template_match=True).first()
 
         if template:
             finding.mitigation = template.mitigation

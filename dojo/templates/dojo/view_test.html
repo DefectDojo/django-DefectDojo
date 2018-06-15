@@ -325,12 +325,12 @@
                                 {{ finding.severity_display }}
                             </span>
                         </td>
-                        <td><a href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a>
+                        <td class="nowrap"><a href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a>
                           {% if finding.file_path %}
-                          <i class="fa fa-file has-popover" data-trigger="hover" data-content="{{ finding.file_path }}" data-placement="right" data-container="body" data-original-title="Files" title="">
+                          <i class="fa dojo-sup fa-code has-popover" data-trigger="hover" data-content="{{ finding.file_path }}" data-placement="right" data-container="body" data-original-title="Files" title="">
                             {% else %}
                               {% if finding.endpoints.all %}
-                                <i class="fa fa-sitemap has-popover" data-html="true" data-trigger="hover" data-content="
+                                <i class="fa dojo-sup fa-sitemap has-popover" data-html="true" data-trigger="hover" data-content="
                                 {% for endpoint in finding.endpoints.all %}
                                   {{ endpoint }}<br/>
                                 {% endfor %}
@@ -362,9 +362,7 @@
                               {{ finding.reporter }}
                           {% endif %}
                         </td>
-                        <td>{% if finding.under_review %}Under Review, {% endif %}{{ finding.status }}
-                        {% if finding.duplicate_finding.id %}
-                             , <a href="{% url 'view_finding' finding.duplicate_finding.id%}">Original</a>
+                        <td>{% if finding.under_review %}Under Review, {% endif %}{{ finding.status }}{% if finding.duplicate_finding.id %}, <a href="{% url 'view_finding' finding.duplicate_finding.id%}">Original</a>
                         {% endif %}
                         </td>
                         {% if "enable_jira"|get_system_setting %}
