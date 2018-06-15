@@ -19,6 +19,7 @@ from django.utils import formats
 from django.utils.safestring import mark_safe
 from django.utils import timezone
 from tagging.models import Tag
+from itertools import chain
 
 from dojo.filters import OpenFindingFilter, \
     OpenFingingSuperFilter, AcceptedFingingSuperFilter, \
@@ -35,6 +36,7 @@ from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_
     get_system_setting, create_notification, tab_view_count, apply_cwe_to_template
 
 from dojo.tasks import add_issue_task, update_issue_task, add_comment_task
+from django.template.defaultfilters import pluralize
 
 logger = logging.getLogger(__name__)
 """
@@ -1066,24 +1068,55 @@ def templates(request):
         })
 
 
+def apply_cwe_mitigation(apply_to_findings, template, update=True):
+    count = 0
+    if apply_to_findings and template.template_match and template.cwe is not None:
+        # Update active, verified findings with the CWE template
+        # If CWE only match only update issues where there isn't a CWE + Title match
+        if template.template_match_title:
+            count = Finding.objects.filter(active=True, verified=True, cwe=template.cwe, title__icontains=template.title).update(mitigation=template.mitigation, impact=template.impact, references=template.references)
+        else:
+            finding_templates = Finding_Template.objects.filter(cwe=template.cwe, template_match=True, template_match_title=True)
+
+            finding_ids = None
+            result_list = None
+            for title_template in finding_templates:
+                finding_ids = Finding.objects.filter(active=True, verified=True, cwe=title_template.cwe, title__icontains=title_template.title).values_list('id', flat=True)
+                if result_list is None:
+                    result_list = finding_ids
+                else:
+                    result_list = list(chain(result_list, finding_ids))
+
+            count = Finding.objects.filter(active=True, verified=True, cwe=template.cwe).exclude(id__in=result_list)
+
+            if update:
+                # MySQL won't allow an 'update in satement' so loop will have to do
+                for finding in count:
+                    finding.mitigation = template.mitigation
+                    finding.impact = template.impact
+                    finding.references = template.references
+                    finding.save()
+
+            count = count.count()
+    return count
+
+
 @user_passes_test(lambda u: u.is_staff)
 def add_template(request):
     form = FindingTemplateForm()
     if request.method == 'POST':
         form = FindingTemplateForm(request.POST)
         if form.is_valid():
+            apply_message = ""
             template = form.save(commit=False)
-            template.numerical_severity = Finding.get_numerical_severity(
-                template.severity)
+            template.numerical_severity = Finding.get_numerical_severity(template.severity)
             template.save()
             tags = request.POST.getlist('tags')
             t = ", ".join(tags)
             template.tags = t
-            if form.cleaned_data["apply_to_findings"] and template.cwe is not None:
-                # Update active, verified findings to the template CWE
-                Finding.objects.filter(active=True, verified=True, cwe=template.cwe).update(mitigation=template.mitigation, impact=template.impact, references=template.references)
-                count = Finding.objects.filter(active=True, verified=True, cwe=template.cwe).count()
-                apply_message = str(count) + " findings were updated."
+            count = apply_cwe_mitigation(form.cleaned_data["apply_to_findings"], template)
+            if count > 0:
+                apply_message = " and " + str(count) + pluralize(count, 'finding,findings') + " "
 
             messages.add_message(
                 request,
@@ -1108,21 +1141,19 @@ def add_template(request):
 def edit_template(request, tid):
     template = get_object_or_404(Finding_Template, id=tid)
     form = FindingTemplateForm(instance=template)
-    count = Finding.objects.filter(active=True, verified=True, cwe=template.cwe).count()
+
     apply_message = ""
     if request.method == 'POST':
         form = FindingTemplateForm(request.POST, instance=template)
         if form.is_valid():
             template = form.save(commit=False)
-            template.numerical_severity = Finding.get_numerical_severity(
-                template.severity)
+            template.numerical_severity = Finding.get_numerical_severity(template.severity)
             template.save()
 
-            if form.cleaned_data["apply_to_findings"] and template.cwe is not None:
-                # Update active, verified findings to the template CWE
-                Finding.objects.filter(active=True, verified=True, cwe=template.cwe).update(mitigation=template.mitigation, impact=template.impact, references=template.references)
-                count = Finding.objects.filter(active=True, verified=True, cwe=template.cwe).count()
-                apply_message = " and " + str(count) + " findings "
+            count = apply_cwe_mitigation(form.cleaned_data["apply_to_findings"], template)
+            if count > 0:
+                apply_message = " and " + str(count) + " " + pluralize(count, 'finding,findings') + " "
+
             tags = request.POST.getlist('tags')
             t = ", ".join(tags)
             template.tags = t
@@ -1138,6 +1169,9 @@ def edit_template(request, tid):
                 messages.ERROR,
                 'Template form has error, please revise and try again.',
                 extra_tags='alert-danger')
+    else:
+        count = apply_cwe_mitigation(True, template, False)
+
     form.initial['tags'] = [tag.name for tag in template.tags]
     add_breadcrumb(title="Edit Template", top_level=False, request=request)
     return render(request, 'dojo/add_template.html', {

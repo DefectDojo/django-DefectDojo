@@ -138,10 +138,10 @@
                                                class="select_one {{ finding.severity }}"/>
                                     </form>
                                 </td>
-                                <td>
-                                  <div class="pull-left">
+                                <td class="nowrap">
+                                  <div class="align-top">
                                     <div class="dropdown">
-                                      <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                      <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown">&nbsp;<i class="fa fa-ellipsis-v"></i>&nbsp;</a>
                                       <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
                                         <li>
                                           <a class="" href="{% url 'view_finding' finding.id %}">
@@ -240,10 +240,10 @@
                                                       href="{% url 'view_finding' finding.id %}">{{ finding.id }}</a>
                                   {% endif %}
                                   {% if finding.file_path %}
-                                  <i class="fa fa-file has-popover" data-trigger="hover" data-content="{{ finding.file_path }}" data-placement="right" data-container="body" data-original-title="Files" title="">
+                                  <i class="fa dojo-sup fa-code has-popover" data-trigger="hover" data-content="{{ finding.file_path }}" data-placement="right" data-container="body" data-original-title="Files" title="">
                                   {% else %}
                                     {% if finding.endpoints.all %}
-                                      <i class="fa fa-sitemap has-popover" data-html="true" data-trigger="hover" data-content="
+                                      <i class="fa dojo-sup fa-sitemap has-popover" data-html="true" data-trigger="hover" data-content="
                                       {% for endpoint in finding.endpoints.all %}
                                         {{ endpoint }}<br/>
                                       {% endfor %}
