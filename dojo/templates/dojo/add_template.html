@@ -20,7 +20,7 @@
         <div class="form-group">
           {% if count > 0 %}
             <div class="col-sm-offset-2 col-sm-10">
-                <p>{{ count }} active, verified findings have this CWE.</p>
+                <p>{{ count }} active, verified finding{{ count|pluralize }}  match this template.</p>
             </div>
           {% endif %}
             <div class="col-sm-offset-2 col-sm-10">

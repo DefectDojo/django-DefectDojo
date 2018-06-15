@@ -125,7 +125,7 @@ class System_Settings(models.Model):
                                       'places, whereas if turned off '
                                       'Critical, High, Medium, etc will '
                                       'be displayed.')
-    false_positive_history = models.BooleanField(default=False)
+    false_positive_history = models.BooleanField(default=False, help_text="DefectDojo will automatically mark the finding as a false positive if the finding has been previously marked as a false positive.")
 
     url_prefix = models.CharField(max_length=300, default='', blank=True, help_text="URL prefix if DefectDojo is installed in it's own virtual subdirectory.")
     team_name = models.CharField(max_length=100, default='', blank=True)
@@ -165,8 +165,8 @@ class System_Settings(models.Model):
     enable_template_match = models.BooleanField(
         default=False,
         blank=False,
-        verbose_name="Enable CWE Template Matching",
-        help_text="Enables matching a finding by CWE to a template for replacing the mitigation, impact and references on a finding. Useful for providing consistent impact and remediation advice regardless of the scanner.")
+        verbose_name="Enable Remediation Advice",
+        help_text="Enables global remediation advice and matching on CWE and Title. The text will be replaced for mitigation, impact and references on a finding. Useful for providing consistent impact and remediation advice regardless of the scanner.")
 
 
 class SystemSettingsFormAdmin(forms.ModelForm):
@@ -1135,8 +1135,9 @@ class Finding_Template(models.Model):
     mitigation = models.TextField(null=True, blank=True)
     impact = models.TextField(null=True, blank=True)
     references = models.TextField(null=True, blank=True, db_column="refs")
-    numerical_severity = models.CharField(max_length=4, null=True, blank=True,
-                                          editable=False)
+    numerical_severity = models.CharField(max_length=4, null=True, blank=True, editable=False)
+    template_match = models.BooleanField(default=False, verbose_name='Template Match Enabled', help_text="Enables this template on matching for global advice.")
+    template_match_title = models.BooleanField(default=False, verbose_name='Match Template by Title and CWE', help_text="Matches by title text (contains search) and CWE.")
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
