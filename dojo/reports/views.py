@@ -25,14 +25,14 @@ from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
 from dojo.reports.widgets import CoverPage, PageBreak, TableOfContents, WYSIWYGContent, FindingList, EndpointList, \
     CustomReportJsonForm, ReportOptions, report_widget_factory
 from dojo.tasks import async_pdf_report, async_custom_pdf_report
-from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_system_setting, get_period_counts_legacy
+from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, get_period_counts_legacy, Product_Tab
 
 logger = logging.getLogger(__name__)
 
 
 def report_url_resolver(request):
     try:
-        url_resolver = request.META['HTTP_X_FORWARDED_PROTO'] + "://" +  request.META['HTTP_X_FORWARDED_FOR']
+        url_resolver = request.META['HTTP_X_FORWARDED_PROTO'] + "://" + request.META['HTTP_X_FORWARDED_FOR']
     except:
         hostname = request.META['HTTP_HOST']
         port_index = hostname.find(":")
@@ -513,10 +513,12 @@ def product_endpoint_report(request, pid):
         else:
             raise Http404()
 
+    product_tab = Product_Tab(product.id, "Product Endpoint Report", tab="endpoints")
     return render(request,
                   'dojo/request_endpoint_report.html',
                   {"endpoints": paged_endpoints,
                    "filtered": endpoints,
+                   "product_tab": product_tab,
                    'report_form': report_form,
                    "name": "Vulnerable Product Endpoints",
                    })
@@ -598,8 +600,8 @@ def generate_report(request, obj):
         months_between += 1
 
         endpoint_monthly_counts = get_period_counts_legacy(findings.qs, findings.qs, None,
-                                                    months_between, start_date,
-                                                    relative_delta='months')
+                                                            months_between, start_date,
+                                                            relative_delta='months')
 
         context = {'product_type': product_type,
                    'products': products,
@@ -840,9 +842,23 @@ def generate_report(request, obj):
         else:
             raise Http404()
     paged_findings = get_page_items(request, findings.qs, 25)
+
+    product_tab = None
+    if engagement:
+        product_tab = Product_Tab(engagement.product.id, title="Engagement Report", tab="engagements")
+        product_tab.setEngagement(engagement)
+    elif test:
+        product_tab = Product_Tab(test.engagement.product.id, title="Test Report", tab="engagements")
+        product_tab.setEngagement(test.engagement)
+    elif product:
+        product_tab = Product_Tab(product.id, title="Product Report", tab="findings")
+    elif endpoints:
+        product_tab = Product_Tab(endpoint.product.id, title="Endpoint Report", tab="endpoints")
+
     return render(request, 'dojo/request_report.html',
                   {'product_type': product_type,
                    'product': product,
+                   'product_tab': product_tab,
                    'engagement': engagement,
                    'test': test,
                    'endpoint': endpoint,

@@ -679,7 +679,7 @@
               if (checkbox_count > 1)
               {
                 var hidden_input = $('<input type="hidden" value="merge_findings" name="merge_findings">')
-                $("form#bulk_change_form").attr("action", "{% url 'merge_finding_product' tab_product.id %}");
+                $("form#bulk_change_form").attr("action", "{% url 'merge_finding_product' product_tab.product.id %}");
                 $("form#bulk_change_form").attr("method", "get");
                 $('form#bulk_change_form').append(hidden_input);
                 $( "form#bulk_change_form" ).submit();

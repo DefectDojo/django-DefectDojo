@@ -27,7 +27,7 @@ from dojo.models import Finding, Product, Engagement, Test, \
     JIRA_PKey, JIRA_Issue, Cred_Mapping, Dojo_User, System_Settings
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
-    FileIterWrapper, get_cal_event, message, get_system_setting, create_notification, tab_view_count
+    FileIterWrapper, get_cal_event, message, get_system_setting, create_notification, Product_Tab
 from dojo.tasks import update_epic_task, add_epic_task, close_epic_task
 
 logger = logging.getLogger(__name__)
@@ -182,22 +182,15 @@ def edit_engagement(request, eid):
             jform = None
 
     form.initial['tags'] = [tag.name for tag in eng.tags]
-    add_breadcrumb(
-        parent=eng, title="Edit Engagement", top_level=False, request=request)
-    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(eng.product.id)
-    system_settings = System_Settings.objects.get()
 
+    product_tab = Product_Tab(eng.product.id, title="Edit Engagement", tab="engagements")
+    product_tab.setEngagement(eng)
     return render(request, 'dojo/new_eng.html', {
-        'tab_product': tab_product,
-        'tab_engagements': tab_engagements,
-        'tab_findings': tab_findings,
-        'tab_endpoints': tab_endpoints,
-        'tab_benchmarks': tab_benchmarks,
-        'active_tab': 'engagements',
-        'system_settings': system_settings,
+        'product_tab': product_tab,
         'form': form,
         'edit': True,
-        'jform': jform
+        'jform': jform,
+        'eng': eng
     })
 
 
@@ -227,19 +220,10 @@ def delete_engagement(request, eid):
                     extra_tags='alert-success')
                 return HttpResponseRedirect(reverse("view_engagements", args=(product.id, )))
 
-    add_breadcrumb(
-        parent=engagement, title="Delete", top_level=False, request=request)
-    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(product.id)
-    system_settings = System_Settings.objects.get()
-
+    product_tab = Product_Tab(product.id, title="Delete Engagement", tab="engagements")
+    product_tab.setEngagement(engagement)
     return render(request, 'dojo/delete_engagement.html', {
-        'active_tab': 'engagements',
-        'tab_product': tab_product,
-        'tab_engagements': tab_engagements,
-        'tab_findings': tab_findings,
-        'tab_endpoints': tab_endpoints,
-        'tab_benchmarks': tab_benchmarks,
-        'system_settings': system_settings,
+        'product_tab': product_tab,
         'engagement': engagement,
         'form': form,
         'rels': rels,
@@ -355,16 +339,12 @@ def view_engagement(request, eid):
         out_of_scope=False,
         mitigated__isnull=False)
 
-    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(prod.id)
+    product_tab = Product_Tab(prod.id, title="View Engagement", tab="engagements")
+    product_tab.setEngagement(eng)
     return render(
         request, 'dojo/view_eng.html', {
             'eng': eng,
-            'active_tab': 'engagements',
-            'tab_product': tab_product,
-            'tab_engagements': tab_engagements,
-            'tab_findings': tab_findings,
-            'tab_endpoints': tab_endpoints,
-            'tab_benchmarks': tab_benchmarks,
+            'product_tab': product_tab,
             'system_settings': system_settings,
             'tests': tests,
             'findings': fpage,
@@ -455,19 +435,14 @@ def add_tests(request, eid):
         form.initial['lead'] = request.user
     add_breadcrumb(
         parent=eng, title="Add Tests", top_level=False, request=request)
-    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(eng.product.id)
-    system_settings = System_Settings.objects.get()
+    product_tab = Product_Tab(eng.product.id, title="Add Tests", tab="engagements")
+    product_tab.setEngagement(eng)
     return render(request, 'dojo/add_tests.html', {
-        'active_tab': 'engagements',
-        'tab_product': tab_product,
-        'tab_engagements': tab_engagements,
-        'tab_findings': tab_findings,
-        'tab_endpoints': tab_endpoints,
-        'tab_benchmarks': tab_benchmarks,
-        'system_settings': system_settings,
+        'product_tab': product_tab,
         'form': form,
         'cred_form': cred_form,
-        'eid': eid
+        'eid': eid,
+        'eng': eng
     })
 
 
@@ -617,22 +592,13 @@ def import_scan_results(request, eid):
                     'There appears to be an error in the XML report, please check and try again.',
                     extra_tags='alert-danger')
 
-    add_breadcrumb(
-        parent=engagement,
-        title="Import Scan Results",
-        top_level=False,
-        request=request)
-    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(engagement.product.id)
-    system_settings = System_Settings.objects.get()
+    product_tab = Product_Tab(engagement.product.id, title="Import Scan Results", tab="engagements")
+    product_tab.setEngagement(engagement)
     return render(request, 'dojo/import_scan_results.html', {
         'form': form,
-        'tab_product': tab_product,
-        'tab_engagements': tab_engagements,
-        'tab_findings': tab_findings,
-        'tab_endpoints': tab_endpoints,
-        'tab_benchmarks': tab_benchmarks,
-        'active_tab': 'engagements',
+        'product_tab': product_tab,
         'eid': engagement.id,
+        'engagement': engagement,
         'cred_form': cred_form,
     })
 
@@ -715,8 +681,11 @@ def complete_checklist(request, eid):
         findings = Finding.objects.filter(test__in=tests).all()
         form = CheckForm(findings=findings)
 
+    product_tab = Product_Tab(eng.product.id, title="Checklist", tab="engagements")
+    product_tab.setEngagement(eng)
     return render(request, 'dojo/checklist.html', {
         'form': form,
+        'product_tab': product_tab,
         'eid': eng.id,
         'findings': findings,
     })
@@ -883,11 +852,12 @@ def view_risk(request, eid, raid):
 
     authorized = (request.user == risk_approval.reporter.username or request.user.is_staff)
 
-    add_breadcrumb(parent=risk_approval, top_level=False, request=request)
-
+    product_tab = Product_Tab(eng.product.id, title="Risk Approval", tab="engagements")
+    product_tab.setEngagement(eng)
     return render(
         request, 'dojo/view_risk.html', {
             'risk_approval': risk_approval,
+            'product_tab': product_tab,
             'accepted_findings': fpage,
             'notes': risk_approval.notes.all(),
             'a_file': a_file,
@@ -983,8 +953,10 @@ def upload_threatmodel(request, eid):
                 reverse('view_engagement', args=(eid, )))
     else:
         form = UploadThreatForm()
+    product_tab = Product_Tab(eng.product.id, title="Upload Threat Model", tab="engagements")
     return render(request, 'dojo/up_threat.html', {
         'form': form,
+        'product_tab': product_tab,
         'eng': eng,
     })
 
