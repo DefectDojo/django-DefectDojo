@@ -181,4 +181,3 @@ class TrustwaveUploadCsvParser(object):
                     self.dupes[key] = finding
 
         self.items = self.dupes.values()
-
