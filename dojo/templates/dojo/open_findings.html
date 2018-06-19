@@ -28,8 +28,8 @@
                     <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" id="bulk_edit">
                         <li class="dropdown-header">Choose wisely...</li>
                         <li style="padding-left: 8px;">
-                          {% if tab_product %}
-                            <form action="{% url 'findings_bulk_all_product' tab_product.id %}" method="post" id="bulk_change_form">
+                          {% if product_tab %}
+                            <form action="{% url 'findings_bulk_all_product' product_tab.product.id %}" method="post" id="bulk_change_form">
                           {% else %}
                             <form action="{% url 'findings_bulk_all' %}" method="post" id="bulk_change_form">
                           {% endif %}
@@ -66,7 +66,7 @@
                     </ul>
                   </div>
                   <div class="btn-group mr-2" role="group" aria-label="Bulk Actions">
-                    {% if tab_product %}
+                    {% if product_tab %}
                     <button type="button" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Merge Findings">
                       <a class="white-color merge" href="#" alt="Merge Findings">
                         <i class="fa fa-compress"></i>
@@ -123,7 +123,7 @@
                             <th class="nowrap">Jira</th>
                             {% endif %}
                             <th>Status</th>
-                            {% if show_product_column and tab_product is None %}
+                            {% if show_product_column and product_tab is None %}
                             <th class="nowrap">{% dojo_sort request 'Product' 'test__engagement__product__name'%}</th>
                             {% endif %}
                         </tr>
@@ -149,7 +149,7 @@
                                           </a>
                                        </li>
                                         <li>
-                                          {% if tab_product %}
+                                          {% if product_tab %}
                                              <a class="" href="{% url 'edit_finding' finding.id %}?source=product_findings{{ request.GET.page|paginator }}">
                                           {% else %}
                                              <a class="" href="{% url 'edit_finding' finding.id %}?source=all_product_findings{{ request.GET.page|paginator }}">
@@ -286,7 +286,7 @@
                                       <a href="{% url 'view_finding' finding.duplicate_finding.id%}">Original</a>
                                   {% endif %}
                                 </td>
-                                {% if show_product_column and tab_product is None %}
+                                {% if show_product_column and product_tab is None %}
                                 <td><a
                                         href="{% url 'view_product' finding.test.engagement.product.id %}"
                                         title="{{ finding.test.engagement.product }}">{{ finding.test.engagement.product }}</a>
@@ -440,12 +440,12 @@
                 }
             });
 
-            {% if tab_product %}
+            {% if product_tab %}
             $('a.merge').on('click', function (e) {
               if (checkbox_count > 1)
               {
                 var hidden_input = $('<input type="hidden" value="merge_findings" name="merge_findings">')
-                $("form#bulk_change_form").attr("action", "{% url 'merge_finding_product' tab_product.id %}");
+                $("form#bulk_change_form").attr("action", "{% url 'merge_finding_product' product_tab.product.id %}");
                 $("form#bulk_change_form").attr("method", "get");
                 $('form#bulk_change_form').append(hidden_input);
                 $( "form#bulk_change_form" ).submit();

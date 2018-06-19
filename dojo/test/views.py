@@ -21,7 +21,7 @@ from dojo.forms import NoteForm, TestForm, FindingForm, \
 from dojo.models import Finding, Test, Notes, System_Settings, \
     BurpRawRequestResponse, Endpoint, Stub_Finding, Finding_Template, JIRA_PKey, Cred_Mapping, Dojo_User
 from dojo.tools.factory import import_parser_factory
-from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, create_notification, tab_view_count
+from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, create_notification, tab_view_count, Product_Tab
 from dojo.tasks import add_issue_task
 
 logger = logging.getLogger(__name__)
@@ -40,7 +40,6 @@ def view_test(request, tid):
     stub_findings = Stub_Finding.objects.filter(test=test)
     cred_test = Cred_Mapping.objects.filter(test=test).select_related('cred_id').order_by('cred_id')
     creds = Cred_Mapping.objects.filter(engagement=test.engagement).select_related('cred_id').order_by('cred_id')
-    system_settings = System_Settings.objects.get()
 
     if request.method == 'POST' and request.user.is_staff:
         form = NoteForm(request.POST)
@@ -65,17 +64,11 @@ def view_test(request, tid):
     sfpage = get_page_items(request, stub_findings, 25)
     show_re_upload = any(test.test_type.name in code for code in ImportScanForm.SCAN_TYPE_CHOICES)
 
-    add_breadcrumb(parent=test, top_level=False, request=request)
-    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(prod.id)
+    product_tab = Product_Tab(prod.id, title="Test", tab="engagements")
+    product_tab.setEngagement(test.engagement)
     return render(request, 'dojo/view_test.html',
                   {'test': test,
-                   'active_tab': 'engagements',
-                   'tab_product': tab_product,
-                   'tab_engagements': tab_engagements,
-                   'tab_findings': tab_findings,
-                   'tab_endpoints': tab_endpoints,
-                   'tab_benchmarks': tab_benchmarks,
-                   'system_settings': system_settings,
+                   'product_tab': product_tab,
                    'findings': fpage,
                    'stub_findings': sfpage,
                    'form': form,
@@ -109,17 +102,11 @@ def edit_test(request, tid):
     form.initial['target_end'] = test.target_end.date()
     form.initial['tags'] = [tag.name for tag in test.tags]
 
-    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(test.engagement.product.id)
-    system_settings = System_Settings.objects.get()
-    add_breadcrumb(parent=test, title="Edit", top_level=False, request=request)
+    product_tab = Product_Tab(test.engagement.product.id, title="Edit Test", tab="engagements")
+    product_tab.setEngagement(test.engagement)
     return render(request, 'dojo/edit_test.html',
                   {'test': test,
-                   'tab_product': tab_product,
-                   'tab_engagements': tab_engagements,
-                   'tab_findings': tab_findings,
-                   'tab_endpoints': tab_endpoints,
-                   'tab_benchmarks': tab_benchmarks,
-                   'active_tab': 'engagements',
+                   'product_tab': product_tab,
                    'form': form,
                    })
 
@@ -149,17 +136,11 @@ def delete_test(request, tid):
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('view_engagement', args=(eng.id,)))
 
-    add_breadcrumb(parent=test, title="Delete", top_level=False, request=request)
-    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(test.engagement.product.id)
-    system_settings = System_Settings.objects.get()
+    product_tab = Product_Tab(test.engagement.product.id, title="Delete Test", tab="engagements")
+    product_tab.setEngagement(test.engagement)
     return render(request, 'dojo/delete_test.html',
                   {'test': test,
-                   'tab_product': tab_product,
-                   'tab_engagements': tab_engagements,
-                   'tab_findings': tab_findings,
-                   'tab_endpoints': tab_endpoints,
-                   'tab_benchmarks': tab_benchmarks,
-                   'active_tab': 'engagements',
+                   'product_tab': product_tab,
                    'form': form,
                    'rels': rels,
                    'deletable_objects': rels,
@@ -297,9 +278,11 @@ def add_findings(request, tid):
                                  messages.ERROR,
                                  'The form has errors, please correct them below.',
                                  extra_tags='alert-danger')
-    add_breadcrumb(parent=test, title="Add Finding", top_level=False, request=request)
+    product_tab = Product_Tab(test.engagement.product.id, title="Add Finding", tab="engagements")
+    product_tab.setEngagement(test.engagement)
     return render(request, 'dojo/add_findings.html',
                   {'form': form,
+                   'product_tab': product_tab,
                    'test': test,
                    'temp': False,
                    'tid': tid,
@@ -394,9 +377,11 @@ def add_temp_finding(request, tid, fid):
         else:
             jform = None
 
-    add_breadcrumb(parent=test, title="Add Finding", top_level=False, request=request)
+    product_tab = Product_Tab(test.engagement.product.id, title="Add Finding", tab="engagements")
+    product_tab.setEngagement(test.engagement)
     return render(request, 'dojo/add_findings.html',
                   {'form': form,
+                   'product_tab': product_tab,
                    'jform': jform,
                    'findings': findings,
                    'temp': True,
@@ -630,10 +615,12 @@ def re_import_scan_results(request, tid):
                                      'There appears to be an error in the XML report, please check and try again.',
                                      extra_tags='alert-danger')
 
-    add_breadcrumb(parent=t, title="Re-upload a %s" % scan_type, top_level=False, request=request)
+    product_tab = Product_Tab(engagement.product.id, title="Re-upload a %s" % scan_type, tab="engagements")
+    product_tab.setEngagement(engagement)
     return render(request,
                   'dojo/import_scan_results.html',
                   {'form': form,
+                   'product_tab': product_tab,
                    'eid': engagement.id,
                    'additional_message': additional_message,
                    })

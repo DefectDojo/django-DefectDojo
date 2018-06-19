@@ -8,7 +8,7 @@ from django.forms import modelformset_factory
 from django.db.models import Count, Q
 from dojo.forms import Benchmark_Product_SummaryForm, DeleteBenchmarkForm
 from dojo.models import Benchmark_Type, Benchmark_Category, Benchmark_Requirement, Benchmark_Product, Product, Benchmark_Product_Summary, System_Settings
-from dojo.utils import add_breadcrumb, tab_view_count
+from dojo.utils import add_breadcrumb, Product_Tab
 
 logger = logging.getLogger(__name__)
 
@@ -121,17 +121,13 @@ def benchmark_view(request, pid, type, cat=None):
         benchmark_formset = Benchmark_ProductFormSet(queryset=Benchmark_Product.objects.filter(product=product.id, control__category__enabled=True, control__category__type=type, control__enabled=True).all().order_by('control__category__name', 'control__objective_number'))
 
     benchmark_summary_form = Benchmark_Product_SummaryForm(instance=benchmark_product_summary)
-    system_settings = System_Settings.objects.get()
-    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(pid)
+
+    product_tab = Product_Tab(pid, title="Benchmarks", tab="benchmarks")
+
     return render(request, 'dojo/benchmark.html',
                   {'benchmarks': benchmarks,
                    'active_tab': 'benchmarks',
-                   'tab_product': tab_product,
-                   'tab_engagements': tab_engagements,
-                   'tab_findings': tab_findings,
-                   'tab_endpoints': tab_endpoints,
-                   'tab_benchmarks': tab_benchmarks,
-                   'system_settings': system_settings,
+                   'product_tab': product_tab,
                    'benchmark_product_summary': benchmark_product_summary,
                    'benchmark_summary_form': benchmark_summary_form,
                    'benchmark_formset': benchmark_formset,
@@ -161,9 +157,9 @@ def delete(request, pid, type):
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('product'))
 
-    add_breadcrumb(parent=product, title="Delete Benchmarks", top_level=False, request=request)
-
+    product_tab = Product_Tab(pid, title="Delete Benchmarks", tab="benchmarks")
     return render(request, 'dojo/delete_benchmark.html',
                   {'product': product,
-                   'form': form
+                   'form': form,
+                   'product_tab': product_tab
                    })

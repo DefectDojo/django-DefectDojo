@@ -1513,6 +1513,58 @@ def get_celery_worker_status():
 
 
 # Used to display the counts and enabled tabs in the product view
+class Product_Tab():
+    def __init__(self, product_id, title=None, tab=None):
+        self.product = Product.objects.get(id=product_id)
+        self.title = title
+        self.tab = tab
+        self.engagement_count = Engagement.objects.filter(product=self.product, active=True).count()
+        self.open_findings_count = Finding.objects.filter(test__engagement__product=self.product,
+                                                           false_p=False,
+                                                           verified=True,
+                                                           duplicate=False,
+                                                           out_of_scope=False,
+                                                           active=True,
+                                                           mitigated__isnull=True).count()
+        self.endpoints_count = Endpoint.objects.filter(product=self.product).count()
+        self.benchmark_type = Benchmark_Type.objects.filter(enabled=True).order_by('name')
+        self.engagement = None
+
+    def setTab(self, tab):
+        self.tab = tab
+
+    def setEngagement(self, engagement):
+        self.engagement = engagement
+
+    def engagement(self):
+        return self.engagement
+
+    def tab(self):
+        return self.tab
+
+    def setTitle(self, title):
+        self.title = title
+
+    def title(self):
+        return self.title
+
+    def product(self):
+        return self.product
+
+    def engagements(self):
+        return self.engagement_count
+
+    def findings(self):
+        return self.open_findings_count
+
+    def endpoints(self):
+        return self.endpoints_count
+
+    def benchmark_type(self):
+        return self.benchmark_type
+
+
+# Used to display the counts and enabled tabs in the product view
 def tab_view_count(product_id):
     product = Product.objects.get(id=product_id)
     engagements = Engagement.objects.filter(product=product, active=True).count()
