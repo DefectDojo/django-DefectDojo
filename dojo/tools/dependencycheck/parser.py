@@ -10,7 +10,6 @@ logger = logging.getLogger(__name__)
 
 
 class DependencyCheckParser(object):
-
     def get_field_value(self, parent_node, field_name):
         field_node = parent_node.find(self.namespace + field_name)
         field_value = '' if field_node is None else field_node.text
@@ -32,26 +31,23 @@ class DependencyCheckParser(object):
 
         if references_node is not None:
             reference_detail = ''
-            for reference_node in references_node.findall(
-                    self.namespace + 'reference'):
+            for reference_node in references_node.findall(self.namespace +
+                                                          'reference'):
                 reference_detail += 'name: {0}\n' \
                                     'source: {1}\n' \
-                                    'url: {2}\n\n'.format(
-                    self.get_field_value(reference_node, 'name'),
-                    self.get_field_value(reference_node, 'source'),
-                    self.get_field_value(reference_node, 'url'))
+                                    'url: {2}\n\n'.format(self.get_field_value(reference_node, 'name'), self.get_field_value(reference_node, 'source'), self.get_field_value(reference_node, 'url'))
 
         return Finding(
             title=title,
             file_path=filename,
             test=test,
+            cwe=1035,  # Vulnerable Third Party Component
             active=False,
             verified=False,
             description=finding_detail,
             severity=severity,
             numerical_severity=Finding.get_numerical_severity(severity),
-            references=reference_detail
-        )
+            references=reference_detail)
 
     def __init__(self, filename, test):
         self.dupes = dict()
@@ -74,12 +70,12 @@ class DependencyCheckParser(object):
         dependencies = scan.find(self.namespace + 'dependencies')
 
         if dependencies:
-            for dependency in dependencies.findall(
-                    self.namespace + 'dependency'):
+            for dependency in dependencies.findall(self.namespace +
+                                                   'dependency'):
                 dependency_filename = self.get_filename_from_dependency(
                     dependency)
-                vulnerabilities = dependency.find(
-                    self.namespace + 'vulnerabilities')
+                vulnerabilities = dependency.find(self.namespace +
+                                                  'vulnerabilities')
                 if vulnerabilities is not None:
                     for vulnerability in vulnerabilities.findall(
                             self.namespace + 'vulnerability'):
@@ -87,9 +83,9 @@ class DependencyCheckParser(object):
                             vulnerability, dependency_filename, test)
 
                         if finding is not None:
-                            key = hashlib.md5(
-                                finding.severity + '|' + finding.title + '|' +
-                                finding.description).hexdigest()
+                            key = hashlib.md5(finding.severity + '|' +
+                                              finding.title + '|' +
+                                              finding.description).hexdigest()
 
                             if key not in self.dupes:
                                 self.dupes[key] = finding
