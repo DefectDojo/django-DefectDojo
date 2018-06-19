@@ -8,6 +8,7 @@
                 <div class="panel-heading tight">
                     <h3 class="has-filters">
                         Credential Manager
+                        {% if "DB_KEY"|get_config_setting == True %}
                         <div class="dropdown pull-right">
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
@@ -23,6 +24,7 @@
                                     </li>
                             </ul>
                         </div>
+                        {% endif %}
                     </h3>
                 </div>
 
@@ -77,7 +79,7 @@
                 <p class="text-center">No credentials configured.</p>
             {% endif %}
             {% if "DB_KEY"|get_config_setting == False %}
-            <p class="text-center"><strong>Please configure a randomly generated key called DB_KEY and add to settings.py.</strong></p></br>
+            <p class="text-center"><strong>Please configure a randomly generated key called DB_KEY and add to settings.py in dojo/settings/.</strong></p></br>
             {% endif %}
         </div>
     </div>
