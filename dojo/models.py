@@ -1038,10 +1038,14 @@ class Finding(models.Model):
             if system_settings.false_positive_history:
                 from dojo.tasks import async_false_history
                 from dojo.utils import sync_false_history
-                if self.reporter.usercontactinfo.block_execution:
-                    sync_false_history(self, *args, **kwargs)
-                else:
+                try:
+                    if self.reporter.usercontactinfo.block_execution:
+                        sync_false_history(self, *args, **kwargs)
+                    else:
+                        async_false_history.delay(self, *args, **kwargs)
+                except:
                     async_false_history.delay(self, *args, **kwargs)
+                    pass
 
     def delete(self, *args, **kwargs):
         super(Finding, self).delete(*args, **kwargs)
@@ -1213,10 +1217,11 @@ class BurpRawRequestResponse(models.Model):
     burpResponseBase64 = models.BinaryField()
 
     def get_request(self):
-        return base64.b64decode(self.burpRequestBase64).decode("utf-8")
+        return unicode(base64.b64decode(self.burpRequestBase64), errors='ignore')
 
     def get_response(self):
-        res = base64.b64decode(self.burpResponseBase64).decode("utf-8")
+        res = unicode(base64.b64decode(self.burpResponseBase64), errors='ignore')
+        print res
         # Removes all blank lines
         res = re.sub(r'\n\s*\n', '\n', res)
         return res
