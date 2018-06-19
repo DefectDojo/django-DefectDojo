@@ -1591,7 +1591,7 @@ def tab_view_count(product_id):
     return product, engagements, open_findings, endpoints, benchmark_type
 
 
-# Will add a lanaguage to product
+# Add a lanaguage to product
 def add_language(product, language):
     prod_language = Languages.objects.filter(language__language__iexact=language, product=product)
 

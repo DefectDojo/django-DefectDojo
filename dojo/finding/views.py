@@ -6,6 +6,7 @@ import mimetypes
 import os
 import shutil
 
+from collections import OrderedDict
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
@@ -39,16 +40,12 @@ from dojo.tasks import add_issue_task, update_issue_task, add_comment_task
 from django.template.defaultfilters import pluralize
 
 logger = logging.getLogger(__name__)
-"""
-Greg
-Status: in prod
-on the nav menu open findings returns all the open findings for a given
-engineer
-"""
 
 
 def open_findings(request, pid=None):
     show_product_column = True
+    title = None
+    custom_breadcrumb = None
     findings = Finding.objects.filter(
         mitigated__isnull=True,
         verified=True,
@@ -79,8 +76,16 @@ def open_findings(request, pid=None):
         if len(p) == 1:
             product_type = get_object_or_404(Product_Type, id=p[0])
 
-    add_breadcrumb(
-        title="Open findings", top_level=not len(request.GET), request=request)
+    endpoint = None
+    if 'endpoints' in request.GET:
+        print "endpoint"
+        endpoints = request.GET.getlist('endpoints', [])
+        if len(endpoints) == 1:
+            endpoint = endpoints[0]
+            endpoint = get_object_or_404(Endpoint, id=endpoint)
+            pid = endpoint.product.id
+            title = "Vulnerable Endpoints"
+            custom_breadcrumb = OrderedDict([("Endpoints", reverse('vulnerable_endpoints')), (endpoint, reverse('view_endpoint', args=(endpoint.id, )))])
 
     found_by = None
     try:
@@ -91,10 +96,13 @@ def open_findings(request, pid=None):
 
     product_tab = None
     active_tab = None
+
     # Only show product tab view in product
     if pid:
         show_product_column = False
         product_tab = Product_Tab(pid, title="Open Findings", tab="findings")
+    else:
+        add_breadcrumb(title="Open findings", top_level=not len(request.GET), request=request)
 
     return render(
         request, 'dojo/open_findings.html', {
@@ -103,7 +111,9 @@ def open_findings(request, pid=None):
             "findings": paged_findings,
             "filtered": findings,
             "title_words": title_words,
-            'found_by': found_by
+            'found_by': found_by,
+            'custom_breadcrumb': custom_breadcrumb,
+            'title': title
         })
 
 
