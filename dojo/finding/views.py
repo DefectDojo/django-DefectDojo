@@ -140,11 +140,8 @@ def accepted_findings(request):
     title_words = sorted(set(title_words))
     paged_findings = get_page_items(request, findings.qs, 25)
 
-    product_tab = Product_Tab(finding.test.engagement.product.id, title="Accepted Findings", tab="findings")
-
     return render(
         request, 'dojo/accepted_findings.html', {
-            "product_tab": product_tab,
             "findings": paged_findings,
             "filtered": findings,
             "title_words": title_words,
