@@ -15,7 +15,7 @@ from dojo.filters import EndpointFilter
 from dojo.forms import EditEndpointForm, \
     DeleteEndpointForm, AddEndpointForm, EndpointMetaDataForm
 from dojo.models import Product, Endpoint, Finding, System_Settings
-from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_system_setting, tab_view_count, Product_Tab
+from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_system_setting, Product_Tab
 from django.contrib.contenttypes.models import ContentType
 from custom_field.models import CustomFieldValue, CustomField
 

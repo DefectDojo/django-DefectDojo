@@ -324,16 +324,17 @@ def defect_finding_review(request, fid):
                 finding.last_reviewed_by = request.user
                 finding.endpoints.clear()
                 jira = get_jira_connection(finding)
-                j_issue = JIRA_Issue.objects.get(finding=finding)
-                issue = jira.issue(j_issue.jira_id)
-                # If the issue id is closed jira will return Reopen Issue
-                resolution_id = jira_get_resolution_id(jira, issue,
-                                                       "Reopen Issue")
-                if resolution_id is None:
-                    resolution_id = jira_get_resolution_id(
-                        jira, issue, "Resolve Issue")
-                    jira_change_resolution_id(jira, issue, resolution_id)
-                    new_note.entry = new_note.entry + "\nJira issue set to resolved."
+                if jira:
+                    j_issue = JIRA_Issue.objects.get(finding=finding)
+                    issue = jira.issue(j_issue.jira_id)
+                    # If the issue id is closed jira will return Reopen Issue
+                    resolution_id = jira_get_resolution_id(jira, issue,
+                                                           "Reopen Issue")
+                    if resolution_id is None:
+                        resolution_id = jira_get_resolution_id(
+                            jira, issue, "Resolve Issue")
+                        jira_change_resolution_id(jira, issue, resolution_id)
+                        new_note.entry = new_note.entry + "\nJira issue set to resolved."
             else:
                 # Re-open finding with notes stating why re-open
                 jira = get_jira_connection(finding)
