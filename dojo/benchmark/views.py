@@ -7,7 +7,7 @@ from django.shortcuts import render, get_object_or_404
 from django.forms import modelformset_factory
 from django.db.models import Count, Q
 from dojo.forms import Benchmark_Product_SummaryForm, DeleteBenchmarkForm
-from dojo.models import Benchmark_Type, Benchmark_Category, Benchmark_Requirement, Benchmark_Product, Product, Benchmark_Product_Summary, System_Settings
+from dojo.models import Benchmark_Type, Benchmark_Category, Benchmark_Requirement, Benchmark_Product, Product, Benchmark_Product_Summary
 from dojo.utils import add_breadcrumb, Product_Tab
 
 logger = logging.getLogger(__name__)

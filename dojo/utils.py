@@ -812,14 +812,19 @@ def handle_uploaded_selenium(f, cred):
 
 # Gets a connection to a Jira server based on the finding
 def get_jira_connection(finding):
+    jira = None
     prod = Product.objects.get(
         engagement=Engagement.objects.get(test=finding.test))
-    jpkey = JIRA_PKey.objects.get(product=prod)
-    jira_conf = jpkey.conf
 
-    jira = JIRA(
-        server=jira_conf.url,
-        basic_auth=(jira_conf.username, jira_conf.password))
+    try:
+        jpkey = JIRA_PKey.objects.get(product=prod)
+        jira_conf = jpkey.conf
+        if jira_conf is not None:
+            jira = JIRA(
+                server=jira_conf.url,
+                basic_auth=(jira_conf.username, jira_conf.password))
+    except JIRA_PKey.DoesNotExist:
+        pass
     return jira
 
 
@@ -1139,20 +1144,25 @@ def add_epic(eng, push_to_jira):
 def add_comment(find, note, force_push=False):
     prod = Product.objects.get(
         engagement=Engagement.objects.get(test=find.test))
-    jpkey = JIRA_PKey.objects.get(product=prod)
-    jira_conf = jpkey.conf
-    if jpkey.push_notes or force_push is True:
-        try:
-            jira = JIRA(
-                server=jira_conf.url,
-                basic_auth=(jira_conf.username, jira_conf.password))
-            j_issue = JIRA_Issue.objects.get(finding=find)
-            jira.add_comment(
-                j_issue.jira_id,
-                '(%s): %s' % (note.author.get_full_name(), note.entry))
-        except Exception as e:
-            log_jira_generic_alert('Jira Add Comment Error', str(e))
-            pass
+
+    try:
+        jpkey = JIRA_PKey.objects.get(product=prod)
+        jira_conf = jpkey.conf
+
+        if jpkey.push_notes or force_push is True:
+            try:
+                jira = JIRA(
+                    server=jira_conf.url,
+                    basic_auth=(jira_conf.username, jira_conf.password))
+                j_issue = JIRA_Issue.objects.get(finding=find)
+                jira.add_comment(
+                    j_issue.jira_id,
+                    '(%s): %s' % (note.author.get_full_name(), note.entry))
+            except Exception as e:
+                log_jira_generic_alert('Jira Add Comment Error', str(e))
+                pass
+    except JIRA_PKey.DoesNotExist:
+        pass
 
 
 def send_review_email(request, user, finding, users, new_note):
