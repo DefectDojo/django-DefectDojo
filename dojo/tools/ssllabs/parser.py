@@ -4,6 +4,7 @@ from dojo.models import Endpoint, Finding
 from datetime import datetime
 import json
 
+
 class SSLlabsParser(object):
     def __init__(self, filename, test):
         data = json.load(filename)
@@ -12,11 +13,14 @@ class SSLlabsParser(object):
         dupes = {}
 
         for host in data:
-            for endpoints in host["endpoints"]:
+            ssl_endpoints = []
+            if "endpoints" in host:
+                ssl_endpoints = host["endpoints"]
+            for endpoints in ssl_endpoints:
                 categories = ''
                 language = ''
-                mitigation = ''
-                impact = ''
+                mitigation = 'N/A'
+                impact = 'N/A'
                 references = ''
                 findingdetail = ''
                 title = ''
@@ -142,6 +146,7 @@ class SSLlabsParser(object):
                         find.description += description
                 else:
                     find = Finding(title=title,
+                                   cwe=310,  # Cryptographic Issues
                                    test=test,
                                    active=False,
                                    verified=False,
@@ -161,9 +166,9 @@ class SSLlabsParser(object):
 
             self.items = dupes.values()
 
-    #Criticality rating
-    #Grades: https://github.com/ssllabs/research/wiki/SSL-Server-Rating-Guide
-    #A - Info, B - Medium, C - High, D/F/M/T - Critical
+    # Criticality rating
+    # Grades: https://github.com/ssllabs/research/wiki/SSL-Server-Rating-Guide
+    # A - Info, B - Medium, C - High, D/F/M/T - Critical
     def getCriticalityRating(self, rating):
         criticality = "Info"
         if "A" in rating:

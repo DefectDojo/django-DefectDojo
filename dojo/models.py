@@ -1008,6 +1008,8 @@ class Finding(models.Model):
         if not self.pk:
             from dojo.utils import apply_cwe_to_template
             self = apply_cwe_to_template(self)
+            # Assign the numerical severity for correct sorting order
+            self.numerical_severity = Finding.get_numerical_severity(self.severity)
 
         super(Finding, self).save(*args, **kwargs)
         self.found_by.add(self.test.test_type)
