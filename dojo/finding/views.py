@@ -181,7 +181,11 @@ def view_finding(request, fid):
         engagement=finding.test.engagement.id).select_related(
             'cred_id').order_by('cred_id')
     user = request.user
-    cwe_template = Finding_Template.objects.filter(cwe=finding.cwe).first()
+    cwe_template = None
+    try:
+        cwe_template = Finding_Template.objects.filter(cwe=finding.cwe).first()
+    except Finding_Template.DoesNotExist:
+        pass
 
     try:
         jissue = JIRA_Issue.objects.get(finding=finding)
