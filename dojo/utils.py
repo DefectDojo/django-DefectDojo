@@ -812,14 +812,19 @@ def handle_uploaded_selenium(f, cred):
 
 # Gets a connection to a Jira server based on the finding
 def get_jira_connection(finding):
+    jira = None
     prod = Product.objects.get(
         engagement=Engagement.objects.get(test=finding.test))
-    jpkey = JIRA_PKey.objects.get(product=prod)
-    jira_conf = jpkey.conf
 
-    jira = JIRA(
-        server=jira_conf.url,
-        basic_auth=(jira_conf.username, jira_conf.password))
+    try:
+        jpkey = JIRA_PKey.objects.get(product=prod)
+        jira_conf = jpkey.conf
+        if jira_conf is not None:
+            jira = JIRA(
+                server=jira_conf.url,
+                basic_auth=(jira_conf.username, jira_conf.password))
+    except JIRA_PKey.DoesNotExist:
+        pass
     return jira
 
 
@@ -1139,20 +1144,25 @@ def add_epic(eng, push_to_jira):
 def add_comment(find, note, force_push=False):
     prod = Product.objects.get(
         engagement=Engagement.objects.get(test=find.test))
-    jpkey = JIRA_PKey.objects.get(product=prod)
-    jira_conf = jpkey.conf
-    if jpkey.push_notes or force_push is True:
-        try:
-            jira = JIRA(
-                server=jira_conf.url,
-                basic_auth=(jira_conf.username, jira_conf.password))
-            j_issue = JIRA_Issue.objects.get(finding=find)
-            jira.add_comment(
-                j_issue.jira_id,
-                '(%s): %s' % (note.author.get_full_name(), note.entry))
-        except Exception as e:
-            log_jira_generic_alert('Jira Add Comment Error', str(e))
-            pass
+
+    try:
+        jpkey = JIRA_PKey.objects.get(product=prod)
+        jira_conf = jpkey.conf
+
+        if jpkey.push_notes or force_push is True:
+            try:
+                jira = JIRA(
+                    server=jira_conf.url,
+                    basic_auth=(jira_conf.username, jira_conf.password))
+                j_issue = JIRA_Issue.objects.get(finding=find)
+                jira.add_comment(
+                    j_issue.jira_id,
+                    '(%s): %s' % (note.author.get_full_name(), note.entry))
+            except Exception as e:
+                log_jira_generic_alert('Jira Add Comment Error', str(e))
+                pass
+    except JIRA_PKey.DoesNotExist:
+        pass
 
 
 def send_review_email(request, user, finding, users, new_note):
@@ -1510,6 +1520,58 @@ def get_celery_worker_status():
         return res.get(timeout=15)
     except:
         return False
+
+
+# Used to display the counts and enabled tabs in the product view
+class Product_Tab():
+    def __init__(self, product_id, title=None, tab=None):
+        self.product = Product.objects.get(id=product_id)
+        self.title = title
+        self.tab = tab
+        self.engagement_count = Engagement.objects.filter(product=self.product, active=True).count()
+        self.open_findings_count = Finding.objects.filter(test__engagement__product=self.product,
+                                                           false_p=False,
+                                                           verified=True,
+                                                           duplicate=False,
+                                                           out_of_scope=False,
+                                                           active=True,
+                                                           mitigated__isnull=True).count()
+        self.endpoints_count = Endpoint.objects.filter(product=self.product).count()
+        self.benchmark_type = Benchmark_Type.objects.filter(enabled=True).order_by('name')
+        self.engagement = None
+
+    def setTab(self, tab):
+        self.tab = tab
+
+    def setEngagement(self, engagement):
+        self.engagement = engagement
+
+    def engagement(self):
+        return self.engagement
+
+    def tab(self):
+        return self.tab
+
+    def setTitle(self, title):
+        self.title = title
+
+    def title(self):
+        return self.title
+
+    def product(self):
+        return self.product
+
+    def engagements(self):
+        return self.engagement_count
+
+    def findings(self):
+        return self.open_findings_count
+
+    def endpoints(self):
+        return self.endpoints_count
+
+    def benchmark_type(self):
+        return self.benchmark_type
 
 
 # Used to display the counts and enabled tabs in the product view

@@ -17,8 +17,8 @@
                                 aria-labelledby="dropdownMenu1">
                                 {% if request.user.is_staff %}
                                     <li role="presentation">
-                                      {% if tab_product %}
-                                        <a href="{% url 'add_endpoint' tab_product.id %}">
+                                      {% if product_tab %}
+                                        <a href="{% url 'add_endpoint' product_tab.product.id %}">
                                       {% else %}
                                         <a href="{% url 'add_product_endpoint' %}">
                                       {% endif %}

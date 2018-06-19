@@ -73,6 +73,7 @@
 
         $('#add_id_endpoints').attr('href', '/endpoints/{{ finding.test.engagement.product.id }}/add?_popup');
         $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
             $('#id_tags').chosen({
                 'placeholder_text_multiple': 'Select or add some tags...',
                 'no_results_text': "Tag not found, press TAB key to add.",

@@ -18,7 +18,7 @@ from dojo.filters import ProductFilter, ProductFindingFilter, EngagementFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, ProductMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm
 from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, Finding_Template, \
     Tool_Product_Settings, Cred_Mapping, Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint
-from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, get_system_setting, create_notification, tab_view_count
+from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, get_system_setting, create_notification, Product_Tab
 from custom_field.models import CustomFieldValue, CustomField
 from dojo.tasks import add_epic_task, add_issue_task
 from tagging.models import Tag
@@ -117,15 +117,11 @@ def view_product(request, pid):
 
     total = critical + high + medium + low + info
 
-    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(pid)
+    product_tab = Product_Tab(pid, title="Product", tab="overview")
+
     return render(request, 'dojo/view_product_details.html', {
                   'prod': prod,
-                  'tab_product': tab_product,
-                  'tab_engagements': tab_engagements,
-                  'tab_findings': tab_findings,
-                  'tab_endpoints': tab_endpoints,
-                  'tab_benchmarks': tab_benchmarks,
-                  'active_tab': 'overview',
+                  'product_tab': product_tab,
                   'product_metadata': product_metadata,
                   'critical': critical,
                   'high': high,
@@ -152,15 +148,7 @@ def view_product_metrics(request, pid):
     i_engs_page = get_page_items(request, result.qs, 10)
 
     scan_sets = ScanSettings.objects.filter(product=prod)
-    tools = Tool_Product_Settings.objects.filter(product=prod).order_by('name')
     auth = request.user.is_staff or request.user in prod.authorized_users.all()
-    creds = Cred_Mapping.objects.filter(product=prod).select_related('cred_id').order_by('cred_id')
-    langSummary = Languages.objects.filter(product=prod).aggregate(Sum('files'), Sum('code'), Count('files'))
-    languages = Languages.objects.filter(product=prod).order_by('-code')
-    app_analysis = App_Analysis.objects.filter(product=prod).order_by('name')
-    benchmark_type = Benchmark_Type.objects.filter(enabled=True).order_by('name')
-    benchmarks = Benchmark_Product_Summary.objects.filter(product=prod, publish=True, benchmark_type__enabled=True).order_by('benchmark_type__name')
-    system_settings = System_Settings.objects.get()
 
     if not auth:
         # will render 403
@@ -310,24 +298,15 @@ def view_product_metrics(request, pid):
         else:
             test_data[t.test_type.name] = t.verified_finding_count()
 
-    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(pid)
+    product_tab = Product_Tab(pid, title="Product", tab="metrics")
     return render(request,
                   'dojo/product_metrics.html',
                   {'prod': prod,
-                   'active_tab': 'metrics',
-                   'tab_product': tab_product,
-                   'tab_engagements': tab_engagements,
-                   'tab_findings': tab_findings,
-                   'tab_endpoints': tab_endpoints,
-                   'tab_benchmarks': tab_benchmarks,
-                   'benchmark_type': benchmark_type,
-                   'benchmarks': benchmarks,
+                   'product_tab': product_tab,
                    'product_metadata': product_metadata,
                    'engs': engs,
                    'i_engs': i_engs_page,
                    'scan_sets': scan_sets,
-                   'tools': tools,
-                   'creds': creds,
                    'verified_findings': verified_findings,
                    'open_findings': open_findings,
                    'closed_findings': closed_findings,
@@ -344,10 +323,6 @@ def view_product_metrics(request, pid):
                    'medium_weekly': medium_weekly,
                    'test_data': test_data,
                    'user': request.user,
-                   'languages': languages,
-                   'langSummary': langSummary,
-                   'app_analysis': app_analysis,
-                   'system_settings': system_settings,
                    'authorized': auth})
 
 
@@ -365,11 +340,6 @@ def view_engagements(request, pid):
     tools = Tool_Product_Settings.objects.filter(product=prod).order_by('name')
     auth = request.user.is_staff or request.user in prod.authorized_users.all()
     creds = Cred_Mapping.objects.filter(product=prod).select_related('cred_id').order_by('cred_id')
-    langSummary = Languages.objects.filter(product=prod).aggregate(Sum('files'), Sum('code'), Count('files'))
-    languages = Languages.objects.filter(product=prod).order_by('-code')
-    app_analysis = App_Analysis.objects.filter(product=prod).order_by('name')
-    benchmark_type = Benchmark_Type.objects.filter(enabled=True).order_by('name')
-    benchmarks = Benchmark_Product_Summary.objects.filter(product=prod, publish=True, benchmark_type__enabled=True).order_by('benchmark_type__name')
     system_settings = System_Settings.objects.get()
 
     if not auth:
@@ -520,19 +490,11 @@ def view_engagements(request, pid):
         else:
             test_data[t.test_type.name] = t.verified_finding_count()
 
-    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(pid)
-
+    product_tab = Product_Tab(pid, title="Engagements", tab="engagements")
     return render(request,
                   'dojo/view_engagements.html',
                   {'prod': prod,
-                   'active_tab': 'engagements',
-                   'tab_product': tab_product,
-                   'tab_engagements': tab_engagements,
-                   'tab_findings': tab_findings,
-                   'tab_endpoints': tab_endpoints,
-                   'tab_benchmarks': tab_benchmarks,
-                   'benchmark_type': benchmark_type,
-                   'benchmarks': benchmarks,
+                   'product_tab': product_tab,
                    'product_metadata': product_metadata,
                    'engs': engs,
                    'i_engs': i_engs_page,
@@ -555,9 +517,6 @@ def view_engagements(request, pid):
                    'medium_weekly': medium_weekly,
                    'test_data': test_data,
                    'user': request.user,
-                   'languages': languages,
-                   'langSummary': langSummary,
-                   'app_analysis': app_analysis,
                    'system_settings': system_settings,
                    'authorized': auth})
 
@@ -707,11 +666,11 @@ def edit_product(request, pid):
         else:
             jform = None
     form.initial['tags'] = [tag.name for tag in prod.tags]
-    add_breadcrumb(parent=prod, title="Edit", top_level=False, request=request)
-
+    product_tab = Product_Tab(pid, title="Edit Product", tab="settings")
     return render(request,
                   'dojo/edit_product.html',
                   {'form': form,
+                   'product_tab': product_tab,
                    'jform': jform,
                    'product': prod
                    })
@@ -742,19 +701,11 @@ def delete_product(request, pid):
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('product'))
 
-    add_breadcrumb(parent=product, title="Delete", top_level=False, request=request)
-    system_settings = System_Settings.objects.get()
-    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(pid)
+    product_tab = Product_Tab(pid, title="Product", tab="settings")
     return render(request, 'dojo/delete_product.html',
                   {'product': product,
                    'form': form,
-                   'tab_product': tab_product,
-                   'tab_engagements': tab_engagements,
-                   'tab_findings': tab_findings,
-                   'tab_endpoints': tab_endpoints,
-                   'tab_benchmarks': tab_benchmarks,
-                   'active_tab': 'findings',
-                   'system_settings': system_settings,
+                   'product_tab': product_tab,
                    'rels': rels,
                    })
 
@@ -838,18 +789,10 @@ def new_eng_for_app(request, pid):
                 if JIRA_PKey.objects.filter(product=prod).count() != 0:
                     jform = JIRAFindingForm(prefix='jiraform', enabled=JIRA_PKey.objects.get(product=prod).push_all_issues)
 
-    add_breadcrumb(parent=prod, title="New Engagement", top_level=False, request=request)
-    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(pid)
-    system_settings = System_Settings.objects.get()
+    product_tab = Product_Tab(pid, title="New Engagement", tab="engagements")
     return render(request, 'dojo/new_eng.html',
                   {'form': form, 'pid': pid,
-                   'tab_product': tab_product,
-                   'tab_engagements': tab_engagements,
-                   'tab_findings': tab_findings,
-                   'tab_endpoints': tab_endpoints,
-                   'tab_benchmarks': tab_benchmarks,
-                   'active_tab': 'engagements',
-                   'system_settings': system_settings,
+                   'product_tab': product_tab,
                    'jform': jform
                    })
 
@@ -878,11 +821,12 @@ def add_meta_data(request, pid):
     else:
         form = ProductMetaDataForm(initial={'content_type': prod})
 
-    add_breadcrumb(parent=prod, title="Add Metadata", top_level=False, request=request)
+    product_tab = Product_Tab(pid, title="Add Custom Fields", tab="settings")
 
     return render(request,
                   'dojo/add_product_meta_data.html',
                   {'form': form,
+                   'product_tab': product_tab,
                    'product': prod,
                    })
 
@@ -918,11 +862,11 @@ def edit_meta_data(request, pid):
                              extra_tags='alert-success')
         return HttpResponseRedirect(reverse('view_product', args=(pid,)))
 
-    add_breadcrumb(parent=prod, title="Edit Metadata", top_level=False, request=request)
-
+    product_tab = Product_Tab(pid, title="Edit Custom Fields", tab="settings")
     return render(request,
                   'dojo/edit_product_meta_data.html',
                   {'product': prod,
+                   'product_tab': product_tab,
                    'product_metadata': product_metadata,
                    })
 
@@ -1019,18 +963,11 @@ def ad_hoc_finding(request, pid):
                                  messages.ERROR,
                                  'The form has errors, please correct them below.',
                                  extra_tags='alert-danger')
-    add_breadcrumb(parent=prod, title="Add Finding", top_level=False, request=request)
-    system_settings = System_Settings.objects.get()
-    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(pid)
+    product_tab = Product_Tab(pid, title="Add Finding", tab="engagements")
+    product_tab.setEngagement(eng)
     return render(request, 'dojo/ad_hoc_findings.html',
                   {'form': form,
-                   'tab_product': tab_product,
-                   'tab_engagements': tab_engagements,
-                   'tab_findings': tab_findings,
-                   'tab_endpoints': tab_endpoints,
-                   'tab_benchmarks': tab_benchmarks,
-                   'active_tab': 'findings',
-                   'system_settings': system_settings,
+                   'product_tab': product_tab,
                    'temp': False,
                    'tid': test.id,
                    'pid': pid,
