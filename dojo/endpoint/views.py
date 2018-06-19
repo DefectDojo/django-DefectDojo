@@ -15,7 +15,7 @@ from dojo.filters import EndpointFilter
 from dojo.forms import EditEndpointForm, \
     DeleteEndpointForm, AddEndpointForm, EndpointMetaDataForm
 from dojo.models import Product, Endpoint, Finding, System_Settings
-from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_system_setting, tab_view_count
+from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_system_setting, tab_view_count, Product_Tab
 from django.contrib.contenttypes.models import ContentType
 from custom_field.models import CustomFieldValue, CustomField
 
@@ -49,26 +49,13 @@ def vulnerable_endpoints(request):
 
     system_settings = System_Settings.objects.get()
 
-    tab_product = None
-    tab_engagements = None
-    tab_findings = None
-    tab_endpoints = None
-    tab_benchmarks = None
-    active_tab = None
+    product_tab = None
     view_name = "All Endpoints"
     if product:
-        active_tab = "endpoints"
-        tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(product.id)
-
+        product_tab = Product_Tab(product.id, "Vulnerable Endpoints", tab="endpoints")
     return render(
         request, 'dojo/endpoints.html', {
-            'tab_product': tab_product,
-            'tab_engagements': tab_engagements,
-            'tab_findings': tab_findings,
-            'tab_endpoints': tab_endpoints,
-            'tab_benchmarks': tab_benchmarks,
-            'active_tab': active_tab,
-            'system_settings': system_settings,
+            'product_tab': product_tab,
             "endpoints": paged_endpoints,
             "filtered": endpoints,
             "name": "Vulnerable Endpoints",
@@ -103,29 +90,15 @@ def all_endpoints(request):
         paged_endpoints = get_page_items(request, endpoints.qs, 25)
     add_breadcrumb(title="All Endpoints", top_level=not len(request.GET), request=request)
 
-    system_settings = System_Settings.objects.get()
-
-    tab_product = None
-    tab_engagements = None
-    tab_findings = None
-    tab_endpoints = None
-    tab_benchmarks = None
-    active_tab = None
+    product_tab = None
     view_name = "All Endpoints"
     if product:
         view_name = "Endpoints"
-        active_tab = "endpoints"
-        tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(product.id)
+        product_tab = Product_Tab(product.id, "Endpoints", tab="endpoints")
 
     return render(
         request, 'dojo/endpoints.html', {
-            'tab_product': tab_product,
-            'tab_engagements': tab_engagements,
-            'tab_findings': tab_findings,
-            'tab_endpoints': tab_endpoints,
-            'tab_benchmarks': tab_benchmarks,
-            'active_tab': active_tab,
-            'system_settings': system_settings,
+            'product_tab': product_tab,
             "endpoints": paged_endpoints,
             "filtered": endpoints,
             "name": view_name,
@@ -199,19 +172,11 @@ def view_endpoint(request, eid):
     if active_findings.count() != 0:
         vulnerable = True
 
-    system_settings = System_Settings.objects.get()
-    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(endpoint.product.id)
-    add_breadcrumb(parent=endpoint, top_level=False, request=request)
+    product_tab = Product_Tab(endpoint.product.id, "Endpoint", tab="endpoints")
     return render(request,
                   "dojo/view_endpoint.html",
                   {"endpoint": endpoint,
-                   'tab_product': tab_product,
-                   'tab_engagements': tab_engagements,
-                   'tab_findings': tab_findings,
-                   'tab_endpoints': tab_endpoints,
-                   'tab_benchmarks': tab_benchmarks,
-                   'active_tab': "endpoints",
-                   'system_settings': system_settings,
+                   'product_tab': product_tab,
                    "endpoints": endpoints,
                    "findings": paged_findings,
                    'all_findings': all_findings,
@@ -241,19 +206,12 @@ def edit_endpoint(request, eid):
     form = EditEndpointForm(instance=endpoint)
     form.initial['tags'] = [tag.name for tag in endpoint.tags]
 
-    system_settings = System_Settings.objects.get()
-    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(endpoint.product.id)
+    product_tab = Product_Tab(endpoint.product.id, "Endpoint", tab="endpoints")
 
     return render(request,
                   "dojo/edit_endpoint.html",
                   {"endpoint": endpoint,
-                   'tab_product': tab_product,
-                   'tab_engagements': tab_engagements,
-                   'tab_findings': tab_findings,
-                   'tab_endpoints': tab_endpoints,
-                   'tab_benchmarks': tab_benchmarks,
-                   'active_tab': "endpoints",
-                   'system_settings': system_settings,
+                   'product_tab': product_tab,
                    "form": form,
                    })
 
@@ -282,19 +240,12 @@ def delete_endpoint(request, eid):
                                      'Endpoint and relationships removed.',
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('view_endpoint', args=(product.id,)))
-    add_breadcrumb(parent=endpoint, title="Delete", top_level=False, request=request)
 
-    system_settings = System_Settings.objects.get()
-    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(endpoint.product.id)
+    product_tab = Product_Tab(endpoint.product.id, "Delete Endpoint", tab="endpoints")
 
     return render(request, 'dojo/delete_endpoint.html',
                   {'endpoint': endpoint,
-                   'tab_product': tab_product,
-                   'tab_engagements': tab_engagements,
-                   'tab_findings': tab_findings,
-                   'tab_endpoints': tab_endpoints,
-                   'tab_benchmarks': tab_benchmarks,
-                   'active_tab': "endpoints",
+                   'product_tab': product_tab,
                    'form': form,
                    'rels': rels,
                    })
@@ -306,8 +257,6 @@ def add_endpoint(request, pid):
     template = 'dojo/add_endpoint.html'
     if '_popup' in request.GET:
         template = 'dojo/add_related.html'
-    else:
-        add_breadcrumb(parent=product, title="Add Endpoint", top_level=False, request=request)
 
     form = AddEndpointForm(product=product)
     if request.method == 'POST':
@@ -332,28 +281,11 @@ def add_endpoint(request, pid):
             else:
                 return HttpResponseRedirect(reverse('endpoints') + "?product=" + pid)
 
-    system_settings = System_Settings.objects.get()
-
-    tab_product = None
-    tab_engagements = None
-    tab_findings = None
-    tab_endpoints = None
-    tab_benchmarks = None
-    active_tab = None
-
     if '_popup' not in request.GET:
-        view_name = "Endpoints"
-        active_tab = "endpoints"
-        tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(pid)
+        product_tab = Product_Tab(product.id, "Add Endpoint", tab="endpoints")
 
     return render(request, template, {
-        'tab_product': tab_product,
-        'tab_engagements': tab_engagements,
-        'tab_findings': tab_findings,
-        'tab_endpoints': tab_endpoints,
-        'tab_benchmarks': tab_benchmarks,
-        'active_tab': 'endpoints',
-        'system_settings': system_settings,
+        'product_tab': product_tab,
         'name': 'Add Endpoint',
         'form': form})
 
@@ -411,10 +343,11 @@ def add_meta_data(request, eid):
         form = EndpointMetaDataForm(initial={'content_type': endpoint})
 
     add_breadcrumb(parent=endpoint, title="Add Metadata", top_level=False, request=request)
-
+    product_tab = Product_Tab(endpoint.product.id, "Add Metadata", tab="endpoints")
     return render(request,
                   'dojo/add_endpoint_meta_data.html',
                   {'form': form,
+                   'product_tab': product_tab,
                    'endpoint': endpoint,
                    })
 
@@ -451,10 +384,10 @@ def edit_meta_data(request, eid):
                              extra_tags='alert-success')
         return HttpResponseRedirect(reverse('view_endpoint', args=(eid,)))
 
-    add_breadcrumb(parent=endpoint, title="Edit Metadata", top_level=False, request=request)
-
+    product_tab = Product_Tab(endpoint.product.id, "Edit Metadata", tab="endpoints")
     return render(request,
                   'dojo/edit_endpoint_meta_data.html',
                   {'endpoint': endpoint,
+                   'product_tab': product_tab,
                    'endpoint_metadata': endpoint_metadata,
                    })

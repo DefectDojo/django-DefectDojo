@@ -906,8 +906,8 @@ class Finding(models.Model):
         ordering = ('numerical_severity', '-date', 'title')
 
     def get_hash_code(self):
-        hash_string = self.title + self.description + str(self.line) + str(
-            self.file_path)
+        hash_string = self.title + self.description + str(self.line) + str(self.file_path)
+        hash_string = hash_string.decode('utf-8').strip()
         return hashlib.sha256(hash_string.encode('utf-8')).hexdigest()
 
     @staticmethod

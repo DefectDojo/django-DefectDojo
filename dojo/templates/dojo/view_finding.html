@@ -3,7 +3,6 @@
 {% load humanize %}
 {% load static from staticfiles %}
 {% block content %}
-
     <div class="panel panel-default">
         <div class="panel-heading">
             <div class="clearfix">
@@ -183,9 +182,7 @@
                             {% endif %}
                         </span>
                     </td>
-                    <td> {% if finding.under_review %}Under Review, {% endif %}{{ finding.status }}
-                        {% if finding.duplicate_finding.id %}
-                            <a href="{% url 'view_finding' finding.duplicate_finding.id %}">Original
+                    <td> {% if finding.under_review %}Under Review, {% endif %}{{ finding.status }}{% if finding.duplicate_finding.id %}, <a href="{% url 'view_finding' finding.duplicate_finding.id %}">Original
                         {% endif %}</a></td>
                     {% if finding.risk_acceptance_set.all %}
                         <td>
@@ -646,6 +643,7 @@
                 var i = $($(this).find('i').get(0));
                 i.toggleClass('glyphicon-chevron-up').toggleClass('glyphicon-chevron-down');
             })
+            $('[data-toggle="tooltip"]').tooltip()
         });
 
         $(document).on('keypress', null, 'e', function () {
