@@ -60,7 +60,7 @@ def sync_dedupe(new_finding, *args, **kwargs):
         static_finding=new_finding.static_finding,
         dynamic_finding=new_finding.dynamic_finding,
         date__lte=new_finding.date).exclude(id=new_finding.id).exclude(
-            cwe=None).exclude(duplicate=True)
+            cwe=None).exclude(duplicate=True).exclude(cwe=0)
     eng_findings_title = Finding.objects.filter(
         test__engagement__product=new_finding.test.engagement.product,
         title=new_finding.title,
