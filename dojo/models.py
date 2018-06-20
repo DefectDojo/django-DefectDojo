@@ -1008,17 +1008,16 @@ class Finding(models.Model):
         if not self.pk:
             from dojo.utils import apply_cwe_to_template
             self = apply_cwe_to_template(self)
-            # Assign the numerical severity for correct sorting order
-            self.numerical_severity = Finding.get_numerical_severity(self.severity)
+            self.hash_code = self.get_hash_code()
 
         super(Finding, self).save(*args, **kwargs)
         self.found_by.add(self.test.test_type)
-        self.hash_code = self.get_hash_code()
         if self.test.test_type.static_tool:
             self.static_finding = True
         else:
             self.dyanmic_finding = True
-
+        # Assign the numerical severity for correct sorting order
+        self.numerical_severity = Finding.get_numerical_severity(self.severity)
         from dojo.utils import calculate_grade
         calculate_grade(self.test.engagement.product)
 

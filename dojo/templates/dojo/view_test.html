@@ -146,21 +146,18 @@
                                     <option value="High">High</option>
                                     <option value="Critical">Critical</option>
                                 </select><br/><br/>
-                                <b>Status</b><br/>
+                                <b>Status</b> <input id="id_status" name="status" type="checkbox" alt="Select to enable"/><br/>
                                 <label style="font-size: 80%; font-weight: normal; display: block">
-                                    <input id="id_active" name="active" type="checkbox"/> <span>Active</span>
+                                    <input id="id_active" name="active" type="checkbox" disabled/> <span>Active</span>
                                 </label>
                                 <label style="font-size: 80%; font-weight: normal; display: block">
-                                    <input id="id_verified" name="verified" type="checkbox"/> <span>Verified</span>
+                                    <input id="id_verified" name="verified" type="checkbox" disabled/> <span>Verified</span>
                                 </label>
                                 <label style="font-size: 80%; font-weight: normal; display: block">
-                                    <input id="id_false_p" name="false_p" type="checkbox"/> <span>False Positive</span>
+                                    <input id="id_false_p" name="false_p" type="checkbox" disabled/> <span>False Positive</span>
                                 </label>
                                 <label style="font-size: 80%; font-weight: normal; display: block">
-                                    <input id="id_duplicate" name="duplicate" type="checkbox"/> <span>Duplicate</span>
-                                </label>
-                                <label style="font-size: 80%; font-weight: normal; display: block">
-                                    <input id="id_out_of_scope" name="out_of_scope" type="checkbox"/>
+                                    <input id="id_out_of_scope" name="out_of_scope" type="checkbox" disabled/>
                                     <span>Out of scope</span>
                                 </label>
                                 <input type="submit" class="btn btn-sm btn-primary" value="Submit"/>
@@ -636,6 +633,13 @@
         }
         $(function () {
             check_checked_finding();
+            $('#id_status').on('click', function (e) {
+                var checked = this.checked;
+                $('#id_active').prop('disabled', !checked);
+                $('#id_verified').prop('disabled', !checked);
+                $('#id_false_p').prop('disabled', !checked);
+                $('#id_out_of_scope').prop('disabled', !checked);
+            })
             //Ensures dropdown has proper zindex
             $('.table-responsive').on('show.bs.dropdown', function () {
               $('.table-responsive').css( "overflow", "inherit" );

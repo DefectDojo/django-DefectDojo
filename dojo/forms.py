@@ -892,6 +892,8 @@ class DeleteFindingTemplateForm(forms.ModelForm):
 
 
 class FindingBulkUpdateForm(forms.ModelForm):
+    status = forms.BooleanField(required=False)
+
     def __init__(self, *args, **kwargs):
         super(FindingBulkUpdateForm, self).__init__(*args, **kwargs)
         self.fields['severity'].required = False
