@@ -51,7 +51,7 @@ def open_findings(request, pid=None):
         verified=True,
         false_p=False,
         duplicate=False,
-        out_of_scope=False)
+        out_of_scope=False).order_by('numerical_severity')
 
     if request.user.is_staff:
         findings = OpenFingingSuperFilter(
@@ -78,7 +78,6 @@ def open_findings(request, pid=None):
 
     endpoint = None
     if 'endpoints' in request.GET:
-        print "endpoint"
         endpoints = request.GET.getlist('endpoints', [])
         if len(endpoints) == 1:
             endpoint = endpoints[0]
@@ -1442,21 +1441,26 @@ def finding_bulk_update_all(request, pid=None):
         else:
             if form.is_valid() and finding_to_update:
                 finding_to_update = request.POST.getlist('finding_to_update')
-                finds = Finding.objects.filter(id__in=finding_to_update)
+                finds = Finding.objects.filter(id__in=finding_to_update).order_by("finding__test__engagement__product__id")
                 if form.cleaned_data['severity']:
                     finds.update(severity=form.cleaned_data['severity'],
                                  numerical_severity=Finding.get_numerical_severity(form.cleaned_data['severity']),
-                                 active=form.cleaned_data['active'],
-                                 verified=form.cleaned_data['verified'],
-                                 false_p=form.cleaned_data['false_p'],
-                                 duplicate=form.cleaned_data['duplicate'],
-                                 out_of_scope=form.cleaned_data['out_of_scope'])
-                else:
+                                 last_reviewed=timezone.now(),
+                                 last_reviewed_by=request.user)
+                    from dojo.utils import calculate_grade
+                    prev_prod = None
+                    for finding in finds:
+                        if prev_prod != finding.test.engagement.product.id:
+                            # Update the grade as bulk edits don't go through save
+                            calculate_grade(finds[0].test.engagement.product)
+                            prev_prod = finding.test.engagement.product.id
+                if form.cleaned_data['status']:
                     finds.update(active=form.cleaned_data['active'],
                                  verified=form.cleaned_data['verified'],
                                  false_p=form.cleaned_data['false_p'],
-                                 duplicate=form.cleaned_data['duplicate'],
-                                 out_of_scope=form.cleaned_data['out_of_scope'])
+                                 out_of_scope=form.cleaned_data['out_of_scope'],
+                                 last_reviewed=timezone.now(),
+                                 last_reviewed_by=request.user)
 
                 messages.add_message(request,
                                      messages.SUCCESS,
