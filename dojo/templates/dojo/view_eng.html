@@ -170,6 +170,12 @@
                                              <a class="" href="{% url 'edit_test' test.id %}">
                                               <i class="fa fa-pencil-square-o"></i> Edit</a>
                                           </li>
+                                          <li class="divider"></li>
+                                          <li>
+                                            <a class="" href="{% url 'add_findings' test.id %}">
+                                              <i class="fa fa-plus"></i> Add Finding to Test
+                                            </a>
+                                          </li>
                                            <li class="divider"></li>
                                            <li>
                                              <a class="" href="{% url 'add_tests' eng.id %}">
@@ -235,6 +241,8 @@
                         <tr>
                             <th>Reporter</th>
                             <th>Date</th>
+                            <th>Date Expires</th>
+                            <th>Accepted by</th>
                             <th>Findings Accepted</th>
                             <th>View File</th>
                             <th>Actions</th>
@@ -244,6 +252,8 @@
                             <tr>
                                 <td>{{ risk.reporter }}</td>
                                 <td>{{ risk.created }}</td>
+                                <td>{{ risk.accepted_by|default_if_none:"" }}</td>
+                                <td>{{ risk.compensating_control|default_if_none:"" }}</td>
                                 <td>{{ risk.accepted_findings.all|length }}</td>
                                 <td><a href="{% url 'download_risk' eng.id risk.id %}">{{ risk.filename }}</a></td>
                                 <td>
@@ -400,6 +410,15 @@
             <td><a href="{{ jconf.url }}/browse/{{ jissue.jira_key }}">Jira Epic</a></td>
           </tr>
           {% endif %}
+          <tr>
+            <td><strong>Updated</strong></td>
+            <td>{{ eng.updated|naturaltime|default_if_none:"" }}</td>
+          </tr>
+          <tr>
+            <td><strong>Created</strong></td>
+            <td>{{ eng.created|naturaltime|default_if_none:"" }}</td>
+          </tr>
+
         </tbody>
       </table>
     </div>

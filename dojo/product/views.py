@@ -752,7 +752,6 @@ def new_eng_for_app(request, pid):
             new_eng.api_test = False
             new_eng.pen_test = False
             new_eng.check_list = False
-
             new_eng.product = prod
             if new_eng.threat_model:
                 new_eng.progress = 'threat_model'

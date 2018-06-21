@@ -1339,9 +1339,9 @@ class ImportScanResource(MultipartResource, Resource):
 
         try:
             t.full_clean()
-        except ValidationError:
+        except ValidationError as e:
             print "Error Validating Test Object"
-            print ValidationError
+            print e
 
         t.save()
         t.tags = bundle.data['tags']

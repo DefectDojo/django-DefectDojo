@@ -1447,13 +1447,6 @@ def finding_bulk_update_all(request, pid=None):
                                  numerical_severity=Finding.get_numerical_severity(form.cleaned_data['severity']),
                                  last_reviewed=timezone.now(),
                                  last_reviewed_by=request.user)
-                    from dojo.utils import calculate_grade
-                    prev_prod = None
-                    for finding in finds:
-                        if prev_prod != finding.test.engagement.product.id:
-                            # Update the grade as bulk edits don't go through save
-                            calculate_grade(finds[0].test.engagement.product)
-                            prev_prod = finding.test.engagement.product.id
                 if form.cleaned_data['status']:
                     finds.update(active=form.cleaned_data['active'],
                                  verified=form.cleaned_data['verified'],
@@ -1461,6 +1454,14 @@ def finding_bulk_update_all(request, pid=None):
                                  out_of_scope=form.cleaned_data['out_of_scope'],
                                  last_reviewed=timezone.now(),
                                  last_reviewed_by=request.user)
+                # Update the grade as bulk edits don't go through save
+                if form.cleaned_data['severity'] or form.cleaned_data['status']:
+                    from dojo.utils import calculate_grade
+                    prev_prod = None
+                    for finding in finds:
+                        if prev_prod != finding.test.engagement.product.id:
+                            calculate_grade(finds[0].test.engagement.product)
+                            prev_prod = finding.test.engagement.product.id
 
                 messages.add_message(request,
                                      messages.SUCCESS,

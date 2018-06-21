@@ -168,6 +168,18 @@ class System_Settings(models.Model):
         verbose_name="Enable Remediation Advice",
         help_text="Enables global remediation advice and matching on CWE and Title. The text will be replaced for mitigation, impact and references on a finding. Useful for providing consistent impact and remediation advice regardless of the scanner.")
 
+    engagement_auto_close = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name="Enable Engagement Auto-Close",
+        help_text="Closes an engagement after 3 days (default) past due date including last update.")
+
+    engagement_auto_close_days = models.IntegerField(
+        default=3,
+        blank=False,
+        verbose_name="Engagement Auto-Close Days",
+        help_text="Closes an engagement after the specified number of days past due date including last update.")
+
 
 class SystemSettingsFormAdmin(forms.ModelForm):
     product_grade = forms.CharField(widget=forms.Textarea)
@@ -246,6 +258,8 @@ class Product_Type(models.Model):
     name = models.CharField(max_length=300)
     critical_product = models.BooleanField(default=False)
     key_product = models.BooleanField(default=False)
+    updated = models.DateTimeField(auto_now=True, null=True)
+    created = models.DateTimeField(auto_now_add=True, null=True)
 
     def critical_present(self):
         c_findings = Finding.objects.filter(
@@ -609,7 +623,8 @@ class Engagement(models.Model):
     reason = models.CharField(max_length=2000, null=True, blank=True)
     report_type = models.ForeignKey(Report_Type, null=True, blank=True)
     product = models.ForeignKey(Product)
-    updated = models.DateTimeField(editable=False, null=True, blank=True)
+    updated = models.DateTimeField(auto_now=True, null=True)
+    created = models.DateTimeField(auto_now_add=True, null=True)
     active = models.BooleanField(default=True, editable=False)
     test_strategy = models.URLField(editable=True, blank=True, null=True)
     threat_model = models.BooleanField(default=True)
@@ -812,6 +827,9 @@ class Test(models.Model):
     environment = models.ForeignKey(Development_Environment, null=True,
                                     blank=False)
 
+    updated = models.DateTimeField(auto_now=True, null=True)
+    created = models.DateTimeField(auto_now_add=True, null=True)
+
     def __unicode__(self):
         return "%s (%s)" % (self.test_type,
                             self.target_start.strftime("%b %d, %Y"))
@@ -898,6 +916,7 @@ class Finding(models.Model):
     found_by = models.ManyToManyField(Test_Type, editable=False)
     static_finding = models.BooleanField(default=False)
     dynamic_finding = models.BooleanField(default=False)
+    created = models.DateTimeField(auto_now_add=True, null=True)
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
@@ -1233,10 +1252,13 @@ class Risk_Acceptance(models.Model):
                             editable=False, null=False,
                             blank=False, verbose_name="Risk Acceptance File")
     accepted_findings = models.ManyToManyField(Finding)
+    expiration_date = models.DateTimeField(default=None, null=True, blank=True)
+    accepted_by = models.CharField(max_length=200, default=None, null=True, blank=True, verbose_name='Accepted By', help_text="The entity or person that accepts the risk.")
     reporter = models.ForeignKey(User, editable=False)
     notes = models.ManyToManyField(Notes, editable=False)
-    created = models.DateTimeField(null=False, editable=False,
-                                   default=now)
+    compensating_control = models.TextField(default=None, blank=True, null=True, help_text="If a compensating control exists to mitigate the finding or reduce risk, then list the compensating control(s).")
+    created = models.DateTimeField(null=False, editable=False, default=now)
+    updated = models.DateTimeField(editable=False, default=now)
 
     def __unicode__(self):
         return "Risk Acceptance added on %s" % self.created.strftime(
@@ -1406,6 +1428,8 @@ class Notifications(models.Model):
     report_created = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     jira_update = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     upcoming_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    stale_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    auto_close_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     user_mentioned = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     code_review = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     review_requested = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)

@@ -2,6 +2,7 @@
 {% load display_tags %}
 {% load get_system_setting %}
 {% load static from staticfiles %}
+{% load humanize %}
 {% block add_styles %}
     ul#select_by_severity a:hover, ul#bulk_edit a:hover {
     cursor: pointer;
@@ -19,7 +20,8 @@
                         {% endfor %}
                     </sup>
                 {% endif %}
-              </h3>
+                <small>Updated {{ test.updated|naturaltime|default_if_none:"" }}, Created {{ test.created|naturaltime|default_if_none:"" }}</small>
+                </h3>
                 <div id="test-pulldown" class="dropdown pull-right">
                     <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                             data-toggle="dropdown" aria-expanded="true">
@@ -79,10 +81,9 @@
                     {% if test.percent_complete > 0 %}
                         <th>Progress</th>
                     {% endif %}
-
                 </tr>
                 <tr>
-                    <td><a href="{% url 'view_engagement' test.engagement.id %}">{{ test.engagement }}</a></td>
+                    <td><a href="{% url 'view_engagement' test.engagement.id %}">{{ test.engagement.name }}</a></td>
                     <td>
                         {% if test.environment %}
                             {{ test.environment }}
@@ -102,7 +103,6 @@
                             </div>
                         </td>
                     {% endif %}
-
                 </tr>
             </table>
         </div>
@@ -234,11 +234,10 @@
                                        class="select_one {{ finding.severity }}"/>
                             </form>
                         </td>
-                        <td>
-                            <ul>
-                             <li class="dropdown" style="list-style:none;">
-                                   <a href="#" class="dropdown-toggle" data-toggle="dropdown">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
-                                   <ul class="dropdown-menu">
+                        <td class="nowrap">
+                          <div class="align-top">
+                            <div class="dropdown">
+                              <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown">&nbsp;<i class="fa fa-ellipsis-v"></i>&nbsp;</a>                                   <ul class="dropdown-menu">
                                      <li>
                                        <a class="" href="{% url 'view_finding' finding.id %}">
                                          <i class="fa fa-arrow-circle-right"></i> View

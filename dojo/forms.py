@@ -331,26 +331,6 @@ class UploadThreatForm(forms.Form):
         label="Select Threat Model")
 
 
-class UploadRiskForm(forms.ModelForm):
-    path = forms.FileField(label="Select File",
-                           required=True,
-                           widget=forms.widgets.FileInput(
-                               attrs={"accept": ".jpg,.png,.pdf"}))
-    accepted_findings = forms.ModelMultipleChoiceField(
-        queryset=Finding.objects.all(), required=True,
-        widget=forms.widgets.CheckboxSelectMultiple(),
-        help_text=('Scroll for additional findings.'))
-    reporter = forms.ModelChoiceField(
-        queryset=User.objects.exclude(username="root"))
-    notes = forms.CharField(required=False, max_length=2400,
-                            widget=forms.Textarea,
-                            label='Notes:')
-
-    class Meta:
-        model = Risk_Acceptance
-        fields = ['accepted_findings']
-
-
 class MergeFindings(forms.ModelForm):
     FINDING_ACTION = (('', 'Select an Action'), ('inactive', 'Inactive'), ('delete', 'Delete'))
 
@@ -395,6 +375,29 @@ class MergeFindings(forms.ModelForm):
         fields = ['append_description', 'add_endpoints']
 
 
+class UploadRiskForm(forms.ModelForm):
+    path = forms.FileField(label="Select File",
+                           required=False,
+                           widget=forms.widgets.FileInput(
+                               attrs={"accept": ".jpg,.png,.pdf"}))
+    accepted_findings = forms.ModelMultipleChoiceField(
+        queryset=Finding.objects.all(), required=True,
+        widget=forms.widgets.SelectMultiple(attrs={'size': 10}),
+        help_text=('Select to add findings.'))
+    reporter = forms.ModelChoiceField(
+        queryset=User.objects.exclude(username="root"))
+    accepted_by = forms.CharField(help_text="The entity or person that accepts the risk.", required=False)
+    expiration_date = forms.DateTimeField(label='Date Risk Exception Expires', required=False, widget=forms.TextInput(attrs={'class': 'datepicker'}))
+    compensating_control = forms.CharField(label='Compensating Control', help_text="Compensating control (if applicable) for this risk exception", required=False, max_length=2400, widget=forms.Textarea)
+    notes = forms.CharField(required=False, max_length=2400,
+                            widget=forms.Textarea,
+                            label='Notes')
+
+    class Meta:
+        model = Risk_Acceptance
+        fields = ['accepted_findings']
+
+
 class ReplaceRiskAcceptanceForm(forms.ModelForm):
     path = forms.FileField(label="Select File",
                            required=True,
@@ -409,12 +412,12 @@ class ReplaceRiskAcceptanceForm(forms.ModelForm):
 class AddFindingsRiskAcceptanceForm(forms.ModelForm):
     accepted_findings = forms.ModelMultipleChoiceField(
         queryset=Finding.objects.all(), required=True,
-        widget=forms.CheckboxSelectMultiple(),
-        label="")
+        widget=forms.widgets.SelectMultiple(attrs={'size': 10}),
+        help_text=('Select to add findings.'))
 
     class Meta:
         model = Risk_Acceptance
-        exclude = ('reporter', 'path', 'notes')
+        exclude = ('reporter', 'path', 'notes', 'accepted_by', 'expiration_date', 'compensating_control')
 
 
 class ScanSettingsForm(forms.ModelForm):

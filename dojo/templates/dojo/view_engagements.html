@@ -29,6 +29,7 @@
                                 <th>Open Findings</th>
                                 <th>All Findings</th>
                                 <th>Duplicate</th>
+                                <th>Updated</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -43,11 +44,11 @@
                                     </sup>
                                 {% endif %}
                                 </td>
-                                <td>
-                                <ul>
-                                 <li class="dropdown" style="list-style:none;">
-                                       <a href="#" class="dropdown-toggle" data-toggle="dropdown">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
-                                       <ul class="dropdown-menu">
+                                <td class="nowrap">
+                                  <div class="align-top">
+                                    <div class="dropdown">
+                                      <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown">&nbsp;<i class="fa fa-ellipsis-v"></i>&nbsp;</a>
+                                      <ul class="dropdown-menu">
                                          <li>
                                            <a class="" href="{% url 'view_engagement' eng.id %}">
                                              <i class="fa fa-list-alt"></i> View
@@ -90,10 +91,19 @@
                                   </sup>
                                   {% endif %}
                                 </td>
-                                <td>{{ eng.test_set.all|length }}</td>
+                                <td><a class="" href="{% url 'view_engagement' eng.id %}">{{ eng.test_set.all|length }}</a>
+                                {% if eng.test_set.all|length %}
+                                  <i class="fa dojo-sup fa-list has-popover" data-html="true" data-trigger="hover" data-content="
+                                  {% for test in eng.test_set.all %}
+                                    {{test.test_type}}<br/>
+                                  {% endfor %}
+                                  " data-placement="right" data-container="body" data-original-title="Tests" title="">
+                                {% endif %}
+                                </td>
                                 <td>{{ eng|count_findings_eng_open }}</td>
                                 <td>{{ eng|count_findings_eng_all }}</td>
                                 <td>{{ eng|count_findings_eng_duplicate }}</td>
+                                <td>{{ eng.updated|naturaltime|default_if_none:"" }}</td>
                             {% endfor %}
                             </tbody>
                         </table>
@@ -126,16 +136,17 @@
                           <th>Open Findings</th>
                           <th>All Findings</th>
                           <th>Duplicate</th>
+                          <th>Updated</th>
                         </tr>
                         </thead>
                         <tbody>
                         {% for eng in i_engs %}
                             <tr>
                             <td><a href="{% url 'view_engagement' eng.id %}">{{ eng.name | default:"N/A" }}</a></td>
-                            <td>
-                            <ul>
-                             <li class="dropdown" style="list-style:none;">
-                                   <a href="#" class="dropdown-toggle" data-toggle="dropdown">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                            <td class="nowrap">
+                              <div class="align-top">
+                                <div class="dropdown">
+                                  <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown">&nbsp;<i class="fa fa-ellipsis-v"></i>&nbsp;</a>
                                    <ul class="dropdown-menu">
                                      <li>
                                        <a class="" href="{% url 'view_engagement' eng.id %}">
@@ -171,10 +182,19 @@
                             </td>
                             <td>{{ eng.target_start }} - {{ eng.target_end }}</td>
                             <td>{{ eng.target_start|datediff_time:eng.target_end }}</td>
-                            <td>{{ eng.test_set.all|length }}</td>
+                            <td><a class="" href="{% url 'view_engagement' eng.id %}">{{ eng.test_set.all|length }}</a>
+                            {% if eng.test_set.all|length %}
+                              <i class="fa dojo-sup fa-list has-popover" data-html="true" data-trigger="hover" data-content="
+                              {% for test in eng.test_set.all %}
+                                {{test.test_type}}<br/>
+                              {% endfor %}
+                              " data-placement="right" data-container="body" data-original-title="Tests" title="">
+                            {% endif %}
+                            </td>
                             <td>{{ eng|count_findings_eng_open }}</td>
                             <td>{{ eng|count_findings_eng_all }}</td>
                             <td>{{ eng|count_findings_eng_duplicate }}</td>
+                            <td>{{ eng.updated|naturaltime|default_if_none:"" }}</td>
                         {% endfor %}
                         </tbody>
                     </table>
