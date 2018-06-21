@@ -16,11 +16,12 @@
                         </sup>
                     {% endif %}
                     {% if finding.last_reviewed %}
-                        <small>Last reviewed {{ finding.last_reviewed | naturalday }}
+                        <small>Last Reviewed {{ finding.last_reviewed | naturalday }},
                             by {{ finding.last_reviewed_by }}</small>
                     {% else %}
-                        <small>Last reviewed {{ finding.date | naturalday }} by {{ finding.reporter }}</small>
+                        <small>Last Reviewed {{ finding.date | naturalday }} by {{ finding.reporter }}, </small>
                     {% endif %}
+                    <small>Created {{ finding.created | naturalday }}</small>
                 </h3>
                 {% if user.is_staff %}
                     <div class="dropdown pull-right">

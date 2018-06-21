@@ -718,6 +718,9 @@ def upload_risk(request, eid):
                 finding.save()
             risk = form.save(commit=False)
             risk.reporter = form.cleaned_data['reporter']
+            risk.expiration_date = form.cleaned_data['expiration_date']
+            risk.accepted_by = form.cleaned_data['accepted_by']
+            risk.compensating_control = form.cleaned_data['compensating_control']
             risk.path = form.cleaned_data['path']
             risk.save()  # have to save before findings can be added
             risk.accepted_findings = findings
@@ -735,7 +738,7 @@ def upload_risk(request, eid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                'Risk acceptance saved.',
+                'Risk exception saved.',
                 extra_tags='alert-success')
             return HttpResponseRedirect(
                 reverse('view_engagement', args=(eid, )))
@@ -743,12 +746,14 @@ def upload_risk(request, eid):
         form = UploadRiskForm(initial={'reporter': request.user})
 
     form.fields["accepted_findings"].queryset = eng_findings
-    add_breadcrumb(
-        parent=eng,
-        title="Upload Risk Acceptance",
-        top_level=False,
-        request=request)
-    return render(request, 'dojo/up_risk.html', {'eng': eng, 'form': form})
+    product_tab = Product_Tab(eng.product.id, title="Upload Risk Exception", tab="engagements")
+    product_tab.setEngagement(eng)
+
+    return render(request, 'dojo/up_risk.html', {
+                  'eng': eng,
+                  'product_tab': product_tab,
+                  'form': form
+                  })
 
 
 def view_risk(request, eid, raid):
@@ -852,7 +857,7 @@ def view_risk(request, eid, raid):
 
     authorized = (request.user == risk_approval.reporter.username or request.user.is_staff)
 
-    product_tab = Product_Tab(eng.product.id, title="Risk Approval", tab="engagements")
+    product_tab = Product_Tab(eng.product.id, title="Risk Exception", tab="engagements")
     product_tab.setEngagement(eng)
     return render(
         request, 'dojo/view_risk.html', {

@@ -341,7 +341,11 @@ class OpenFindingFilter(DojoFilter):
         # tuple-mapping retains order
         fields=(
             ('numerical_severity', 'numerical_severity'),
+            ('date', 'date'),
+            ('last_reviewed', 'last_reviewed'),
             ('title', 'title'),
+            ('test__engagement__product__name',
+             'test__engagement__product__name'),
         ),
 
     )
