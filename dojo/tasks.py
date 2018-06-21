@@ -13,6 +13,7 @@ from celery.utils.log import get_task_logger
 from celery.decorators import task
 from dojo.models import Finding, Engagement, System_Settings
 from django.utils import timezone
+from django.db.models import Q
 
 import pdfkit
 from dojo.celery import app
@@ -56,6 +57,24 @@ def add_alerts(self, runinterval):
                             description='The engagement "%s" is stale. Target end was %s.' % (eng.name, eng.target_end.strftime("%b. %d, %Y")),
                             url=reverse('view_engagement', args=(eng.id,)),
                             recipients=[eng.lead])
+
+    system_settings = System_Settings.objects.get()
+    if system_settings.engagement_auto_close:
+        # Close Engagements Older than 3 days and updated older than 3 days (default) or is null
+        close_days = system_settings.engagement_auto_close_days
+        unclosed_engagements = Engagement.objects.filter(
+            Q(updated__lt=now + timedelta(days=close_days)) | Q(updated__isnull=True),
+            target_end__lt=now + timedelta(days=close_days),
+            status='In Progress').order_by('-target_end')
+
+        for eng in unclosed_engagements:
+            create_notification(event='auto_close_engagement',
+                                title='Auto-Closed Engagement: %s' % eng.name,
+                                description='The engagement "%s" has auto-closed. Target end was %s.' % (eng.name, eng.target_end.strftime("%b. %d, %Y")),
+                                url=reverse('view_engagement', args=(eng.id,)),
+                                recipients=[eng.lead])
+
+        unclosed_engagements.update(status="Completed", active=False, updated=timezone.now())
 
 
 @app.task(bind=True)
