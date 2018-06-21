@@ -15,7 +15,7 @@ import requests
 from dateutil.relativedelta import relativedelta, MO
 from django.conf import settings
 from django.core.mail import send_mail
-from django.db.models.loading import get_model
+from django.apps import apps
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import get_resolver, reverse
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
@@ -109,21 +109,21 @@ def sync_rule(new_finding, *args, **kwargs):
             child_val = child_val and child_rule(child_list.pop())
         if child_val:
             if rule.operator == 'Matches':
-               if getattr(get_model(rule.model_object), rule.match_field)  == rule.match_text:
+               if getattr(apps.get_model('dojo', rule.model_object), rule.match_field)  == rule.match_text:
                    if rule.applied_field != 'Severity':
                        if rule.application == 'Append':
                            setattr(new_finding, rule.applied_field, (getattr(new_finding, rule.applied_field) + rule.text))
                        else:
                            setattr(new_finding, rule.applied_field, rule.text)
-                        new_finding.save(dedupe_option=False)
+                       new_finding.save(dedupe_option=False)
             else:
-                if rule.match_text in getattr(get_model(rule.model_object), rule.match_field):
+                if rule.match_text in getattr(apps.get_model('dojo',rule.model_object), rule.match_field):
                    if rule.applied_field != 'Severity':
                        if rule.application == 'Append':
                            setattr(new_finding, rule.applied_field, (getattr(new_finding, rule.applied_field) + rule.text))
                        else:
                            setattr(new_finding, rule.applied_field, rule.text)
-                        new_finding.save(dedupe_option=False)
+                       new_finding.save(dedupe_option=False)
 
 
 def child_rule(rule):
@@ -133,12 +133,12 @@ def child_rule(rule):
         child_val = child_val and child_rule(child_list.pop())
     if child_val:
         if rule.operator == 'Matches':
-           if getattr(get_model(rule.model_object), rule.match_field)  == rule.match_text:
+           if getattr(apps.get_model('dojo',rule.model_object), rule.match_field)  == rule.match_text:
                return True
            else:
                return False
         else:
-            if rule.match_text in getattr(get_model(rule.model_object), rule.match_field):
+            if rule.match_text in getattr(apps.get_model('dojo', rule.model_object), rule.match_field):
                 return True
             else:
                 return False

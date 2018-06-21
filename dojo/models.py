@@ -1756,10 +1756,10 @@ class Rule(models.Model):
     match_field = models.CharField(max_length=200, choices=blank_options)
     match_text = models.TextField()
     application = models.CharField(max_length=200, choices=application_options)
-    applies_to = models.CharField(max_length=30, choices=blank_options)
+    applies_to = models.CharField(max_length=30, choices=model_object_options)
     #TODO: Add or ?
     #and_rules = models.ManyToManyField('self')
-    applied_field = models.CharField(max_length=200, choices=())
+    applied_field = models.CharField(max_length=200, choices=(blank_options))
     child_rules  = models.ManyToManyField('self', editable=False)
     parent_rule = models.ForeignKey('self', editable=False)
 

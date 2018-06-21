@@ -142,6 +142,7 @@ class Product_TypeForm(forms.ModelForm):
 class Test_TypeForm(forms.ModelForm):
     class Meta:
         model = Test_Type
+        exclude = ['']
 
 
 class Development_EnvironmentForm(forms.ModelForm):
@@ -1543,8 +1544,14 @@ class NotificationsForm(forms.ModelForm):
         model = Notifications
         exclude = ['']
 
+class AjaxChoiceField(forms.ChoiceField):
+    def valid_value(self, value):
+        return True
+
 class RuleForm(forms.ModelForm):
-    match_field = forms.ModelChoiceField(queryset=Finding.objects.none())
+    match_field = AjaxChoiceField(choices=Finding.objects.none())
+    applies_to = AjaxChoiceField(choices=Finding.objects.none())
+
     class Meta:
         model = Rule
         exclude = ['']

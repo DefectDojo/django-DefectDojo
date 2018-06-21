@@ -57,6 +57,9 @@ def rules(request):
 def new_rule(request):
     if request.method == 'POST':
         form = RuleFormSet(request.POST)
+        print >>sys.stderr, 'DEBUGGING'
+        print >>sys.stderr, form.is_valid()
+        print >>sys.stderr, form.errors
         if form.is_valid():
             form.save()
             messages.add_message(request,
