@@ -1549,8 +1549,6 @@ class AjaxChoiceField(forms.ChoiceField):
         return True
 
 class RuleForm(forms.ModelForm):
-    match_field = AjaxChoiceField(choices=Finding.objects.none())
-    applies_to = AjaxChoiceField(choices=Finding.objects.none())
 
     class Meta:
         model = Rule

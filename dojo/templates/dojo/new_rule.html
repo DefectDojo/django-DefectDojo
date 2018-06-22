@@ -21,6 +21,8 @@
 {% block postscript %}
 <script type="application/javascript">
     $(document).ready(function() {
+        $('#id_applied_field).empty();
+        $('#id_match_field).empty();
         $('.has-popover').popover({'trigger':'hover'});
         $('.dropdown-toggle').click(function() { get_alerts(); });
 

@@ -57,6 +57,8 @@ def rules(request):
 def new_rule(request):
     if request.method == 'POST':
         form = RuleFormSet(request.POST)
+        match_f = request.POST.get('match_field')
+        apply_f = request.POST.get('applied_field')
         print >>sys.stderr, 'DEBUGGING'
         print >>sys.stderr, form.is_valid()
         print >>sys.stderr, form.errors
