@@ -34,7 +34,7 @@ from dojo.models import Product_Type, Finding, Notes, \
     FindingImageAccessToken, JIRA_Issue, JIRA_PKey, Dojo_User, Cred_Mapping, Test, Product
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
     add_comment, jira_get_resolution_id, jira_change_resolution_id, get_jira_connection, \
-    get_system_setting, create_notification, apply_cwe_to_template, Product_Tab
+    get_system_setting, create_notification, apply_cwe_to_template, Product_Tab, calculate_grade
 
 from dojo.tasks import add_issue_task, update_issue_task, add_comment_task
 from django.template.defaultfilters import pluralize
@@ -429,14 +429,14 @@ def apply_template_cwe(request, fid):
 def delete_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
 
-    form = DeleteFindingForm(instance=finding)
-
     if request.method == 'POST':
         form = DeleteFindingForm(request.POST, instance=finding)
         if form.is_valid():
             tid = finding.test.id
+            product = finding.test.engagement.product
             del finding.tags
             finding.delete()
+            calculate_grade(product)
             messages.add_message(
                 request,
                 messages.SUCCESS,
@@ -1437,7 +1437,10 @@ def finding_bulk_update_all(request, pid=None):
         finding_to_update = request.POST.getlist('finding_to_update')
         if request.POST.get('delete_bulk_findings') and finding_to_update:
             finds = Finding.objects.filter(id__in=finding_to_update)
+            product_calc = list(Product.objects.filter(engagement__test__finding__id__in=finding_to_update).distinct())
             finds.delete()
+            for prod in product_calc:
+                calculate_grade(prod)
         else:
             if form.is_valid() and finding_to_update:
                 finding_to_update = request.POST.getlist('finding_to_update')
@@ -1456,11 +1459,10 @@ def finding_bulk_update_all(request, pid=None):
                                  last_reviewed_by=request.user)
                 # Update the grade as bulk edits don't go through save
                 if form.cleaned_data['severity'] or form.cleaned_data['status']:
-                    from dojo.utils import calculate_grade
                     prev_prod = None
                     for finding in finds:
                         if prev_prod != finding.test.engagement.product.id:
-                            calculate_grade(finds[0].test.engagement.product)
+                            calculate_grade(finding.test.engagement.product)
                             prev_prod = finding.test.engagement.product.id
 
                 messages.add_message(request,

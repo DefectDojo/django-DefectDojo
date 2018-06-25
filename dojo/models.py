@@ -606,6 +606,44 @@ class IPScan(models.Model):
     scan = models.ForeignKey(Scan, default=1, editable=False)
 
 
+class Tool_Type(models.Model):
+    name = models.CharField(max_length=200)
+    description = models.CharField(max_length=2000, null=True)
+
+    class Meta:
+        ordering = ['name']
+
+    def __unicode__(self):
+        return self.name
+
+
+class Tool_Configuration(models.Model):
+    name = models.CharField(max_length=200, null=False)
+    description = models.CharField(max_length=2000, null=True, blank=True)
+    url = models.CharField(max_length=2000, null=True)
+    tool_type = models.ForeignKey(Tool_Type, related_name='tool_type')
+    authentication_type = models.CharField(max_length=15,
+                                           choices=(
+                                               ('API', 'API Key'),
+                                               ('Password',
+                                                'Username/Password'),
+                                               ('SSH', 'SSH')),
+                                           null=True, blank=True)
+    username = models.CharField(max_length=200, null=True, blank=True)
+    password = models.CharField(max_length=600, null=True, blank=True)
+    auth_title = models.CharField(max_length=200, null=True, blank=True,
+                                  verbose_name="Title for SSH/API Key")
+    ssh = models.CharField(max_length=6000, null=True, blank=True)
+    api_key = models.CharField(max_length=600, null=True, blank=True,
+                               verbose_name="API Key")
+
+    class Meta:
+        ordering = ['name']
+
+    def __unicode__(self):
+        return self.name
+
+
 class Engagement_Type(models.Model):
     name = models.CharField(max_length=200)
 
@@ -647,6 +685,18 @@ class Engagement(models.Model):
                                              editable=False,
                                              blank=True)
     done_testing = models.BooleanField(default=False, editable=False)
+    engagement_type = models.CharField(editable=True, max_length=30, default='Interactive',
+                                       null=True,
+                                       choices=(('Interactive', 'Interactive'),
+                                                ('CI/CD', 'CI/CD')))
+    build_id = models.CharField(editable=True, max_length=150,
+                                   null=True, blank=True, help_text="Build ID for CI/CD test", verbose_name="Build ID")
+    branch_tag = models.CharField(editable=True, max_length=150,
+                                   null=True, blank=True, help_text="Tag or branch for CI/CD test", verbose_name="Branch/Tag")
+    build_server = models.ForeignKey(Tool_Configuration, verbose_name="Build Server", help_text="Build server responsible for CI/CD test", null=True, blank=True, related_name='build_server')
+    source_code_management_server = models.ForeignKey(Tool_Configuration, null=True, blank=True, verbose_name="SCM Server", help_text="Source code server for CI/CD test", related_name='source_code_management_server')
+    source_code_management_uri = models.CharField(max_length=600, null=True, blank=True, verbose_name="Repo", help_text="Resource link to source code")
+    orchestration_engine = models.ForeignKey(Tool_Configuration, verbose_name="Orchestration Engine", help_text="Orchestration service responsible for CI/CD test", null=True, blank=True, related_name='orchestration')
 
     class Meta:
         ordering = ['-target_start']
@@ -766,6 +816,7 @@ class Endpoint(models.Model):
         findings = Finding.objects.filter(endpoints=self,
                                           active=True,
                                           verified=True,
+                                          duplicate=False,
                                           out_of_scope=False).distinct()
 
         return findings.count()
@@ -917,6 +968,7 @@ class Finding(models.Model):
     static_finding = models.BooleanField(default=False)
     dynamic_finding = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True, null=True)
+    scanner_confidence = models.IntegerField(default=None, editable=False, help_text="Confidence level of vulnerability which is supplied by the scannner.")
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
@@ -928,6 +980,22 @@ class Finding(models.Model):
         hash_string = self.title + self.description + str(self.line) + str(self.file_path)
         hash_string = hash_string.decode('utf-8').strip()
         return hashlib.sha256(hash_string.encode('utf-8')).hexdigest()
+
+    def duplicate_finding_set(self):
+        return self.duplicate_list.all().order_by('title')
+
+    def get_scanner_confidence_text(self):
+        scanner_confidence_text = ""
+        scanner_confidence = self.scanner_confidence
+        if scanner_confidence:
+            if scanner_confidence <= 2:
+                scanner_confidence_text = "Certain"
+            elif scanner_confidence >= 3 and scanner_confidence <= 5:
+                scanner_confidence_text = "Firm"
+            elif scanner_confidence >= 6:
+                scanner_confidence_text = "Tentative"
+
+        return scanner_confidence_text
 
     @staticmethod
     def get_numerical_severity(severity):
@@ -1037,8 +1105,6 @@ class Finding(models.Model):
             self.dyanmic_finding = True
         # Assign the numerical severity for correct sorting order
         self.numerical_severity = Finding.get_numerical_severity(self.severity)
-        from dojo.utils import calculate_grade
-        calculate_grade(self.test.engagement.product)
 
         super(Finding, self).save()
         if (dedupe_option):
@@ -1066,6 +1132,9 @@ class Finding(models.Model):
                 except:
                     async_false_history.delay(self, *args, **kwargs)
                     pass
+
+        from dojo.utils import calculate_grade
+        calculate_grade(self.test.engagement.product)
 
     def delete(self, *args, **kwargs):
         super(Finding, self).delete(*args, **kwargs)
@@ -1241,7 +1310,6 @@ class BurpRawRequestResponse(models.Model):
 
     def get_response(self):
         res = unicode(base64.b64decode(self.burpResponseBase64), errors='ignore')
-        print res
         # Removes all blank lines
         res = re.sub(r'\n\s*\n', '\n', res)
         return res
@@ -1435,44 +1503,6 @@ class Notifications(models.Model):
     review_requested = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     other = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     user = models.ForeignKey(User, default=None, null=True, editable=False)
-
-
-class Tool_Type(models.Model):
-    name = models.CharField(max_length=200)
-    description = models.CharField(max_length=2000, null=True)
-
-    class Meta:
-        ordering = ['name']
-
-    def __unicode__(self):
-        return self.name
-
-
-class Tool_Configuration(models.Model):
-    name = models.CharField(max_length=200, null=False)
-    description = models.CharField(max_length=2000, null=True, blank=True)
-    url = models.CharField(max_length=2000, null=True)
-    tool_type = models.ForeignKey(Tool_Type, related_name='tool_type')
-    authentication_type = models.CharField(max_length=15,
-                                           choices=(
-                                               ('API', 'API Key'),
-                                               ('Password',
-                                                'Username/Password'),
-                                               ('SSH', 'SSH')),
-                                           null=True, blank=True)
-    username = models.CharField(max_length=200, null=True, blank=True)
-    password = models.CharField(max_length=600, null=True, blank=True)
-    auth_title = models.CharField(max_length=200, null=True, blank=True,
-                                  verbose_name="Title for SSH/API Key")
-    ssh = models.CharField(max_length=6000, null=True, blank=True)
-    api_key = models.CharField(max_length=600, null=True, blank=True,
-                               verbose_name="API Key")
-
-    class Meta:
-        ordering = ['name']
-
-    def __unicode__(self):
-        return self.name
 
 
 class Tool_Product_Settings(models.Model):

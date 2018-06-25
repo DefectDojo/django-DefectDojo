@@ -326,199 +326,54 @@ def view_product_metrics(request, pid):
                    'authorized': auth})
 
 
-def view_engagements(request, pid):
+def view_engagements(request, pid, engagement_type="Interactive"):
     prod = get_object_or_404(Product, id=pid)
-    engs = Engagement.objects.filter(product=prod, active=True)
-
-    result = EngagementFilter(
-        request.GET,
-        queryset=Engagement.objects.filter(product=prod, active=False).order_by('-target_end'))
-
-    i_engs_page = get_page_items(request, result.qs, 10)
-
-    scan_sets = ScanSettings.objects.filter(product=prod)
-    tools = Tool_Product_Settings.objects.filter(product=prod).order_by('name')
     auth = request.user.is_staff or request.user in prod.authorized_users.all()
-    creds = Cred_Mapping.objects.filter(product=prod).select_related('cred_id').order_by('cred_id')
-    system_settings = System_Settings.objects.get()
-
     if not auth:
         # will render 403
         raise PermissionDenied
 
-    ct = ContentType.objects.get_for_model(prod)
-    product_cf = CustomField.objects.filter(content_type=ct)
-    product_metadata = {}
+    engs = Engagement.objects.filter(product=prod, active=True)
+    default_page_num = 10
 
-    for cf in product_cf:
-        cfv = CustomFieldValue.objects.filter(field=cf, object_id=prod.id)
-        if len(cfv):
-            product_metadata[cf.name] = cfv[0].value
+    result_engs = EngagementFilter(
+        request.GET,
+        queryset=Engagement.objects.filter(product=prod, active=True, engagement_type=engagement_type).order_by('-target_end'))
 
-    try:
-        start_date = Finding.objects.filter(test__engagement__product=prod).order_by('date')[:1][0].date
-    except:
-        start_date = timezone.now()
+    engs = get_page_items(request, result_engs.qs, default_page_num, param_name="engs")
 
-    end_date = timezone.now()
+    result = EngagementFilter(
+        request.GET,
+        queryset=Engagement.objects.filter(product=prod, active=False, engagement_type=engagement_type).order_by('-target_end'))
 
-    tests = Test.objects.filter(engagement__product=prod)
+    i_engs_page = get_page_items(request, result.qs, default_page_num, param_name="i_engs")
 
-    risk_acceptances = Risk_Acceptance.objects.filter(engagement__in=Engagement.objects.filter(product=prod))
+    title = "All Engagements"
+    if engagement_type == "CI/CD":
+        title = "CI/CD Engagements"
 
-    accepted_findings = [finding for ra in risk_acceptances
-                         for finding in ra.accepted_findings.all()]
-
-    verified_findings = Finding.objects.filter(test__engagement__product=prod,
-                                               date__range=[start_date, end_date],
-                                               false_p=False,
-                                               verified=True,
-                                               duplicate=False,
-                                               out_of_scope=False).order_by("date")
-
-    week_date = end_date - timedelta(days=7)  # seven days and /newnewer are considered "new"
-
-    new_verified_findings = Finding.objects.filter(test__engagement__product=prod,
-                                                   date__range=[week_date, end_date],
-                                                   false_p=False,
-                                                   verified=True,
-                                                   duplicate=False,
-                                                   out_of_scope=False).order_by("date")
-
-    open_findings = Finding.objects.filter(test__engagement__product=prod,
-                                           date__range=[start_date, end_date],
-                                           false_p=False,
-                                           verified=True,
-                                           duplicate=False,
-                                           out_of_scope=False,
-                                           active=True,
-                                           mitigated__isnull=True)
-
-    closed_findings = Finding.objects.filter(test__engagement__product=prod,
-                                             date__range=[start_date, end_date],
-                                             false_p=False,
-                                             verified=True,
-                                             duplicate=False,
-                                             out_of_scope=False,
-                                             mitigated__isnull=False)
-
-    start_date = timezone.make_aware(datetime.combine(start_date, datetime.min.time()))
-
-    r = relativedelta(end_date, start_date)
-    weeks_between = int(ceil((((r.years * 12) + r.months) * 4.33) + (r.days / 7)))
-    if weeks_between <= 0:
-        weeks_between += 2
-
-    punchcard, ticks, highest_count = get_punchcard_data(verified_findings, weeks_between, start_date)
-    add_breadcrumb(parent=prod, top_level=False, request=request)
-
-    open_close_weekly = OrderedDict()
-    new_weekly = OrderedDict()
-    severity_weekly = OrderedDict()
-    critical_weekly = OrderedDict()
-    high_weekly = OrderedDict()
-    medium_weekly = OrderedDict()
-
-    for v in verified_findings:
-        iso_cal = v.date.isocalendar()
-        x = iso_to_gregorian(iso_cal[0], iso_cal[1], 1)
-        y = x.strftime("<span class='small'>%m/%d<br/>%Y</span>")
-        x = (tcalendar.timegm(x.timetuple()) * 1000)
-        if x not in critical_weekly:
-            critical_weekly[x] = {'count': 0, 'week': y}
-        if x not in high_weekly:
-            high_weekly[x] = {'count': 0, 'week': y}
-        if x not in medium_weekly:
-            medium_weekly[x] = {'count': 0, 'week': y}
-
-        if x in open_close_weekly:
-            if v.mitigated:
-                open_close_weekly[x]['closed'] += 1
-            else:
-                open_close_weekly[x]['open'] += 1
-        else:
-
-            if v.mitigated:
-                open_close_weekly[x] = {'closed': 1, 'open': 0, 'accepted': 0}
-            else:
-                open_close_weekly[x] = {'closed': 0, 'open': 1, 'accepted': 0}
-            open_close_weekly[x]['week'] = y
-
-        if x in severity_weekly:
-            if v.severity in severity_weekly[x]:
-                severity_weekly[x][v.severity] += 1
-            else:
-                severity_weekly[x][v.severity] = 1
-        else:
-            severity_weekly[x] = {'Critical': 0, 'High': 0,
-                                  'Medium': 0, 'Low': 0, 'Info': 0}
-            severity_weekly[x][v.severity] = 1
-            severity_weekly[x]['week'] = y
-
-        if v.severity == 'Critical':
-            if x in critical_weekly:
-                critical_weekly[x]['count'] += 1
-            else:
-                critical_weekly[x] = {'count': 1, 'week': y}
-        elif v.severity == 'High':
-            if x in high_weekly:
-                high_weekly[x]['count'] += 1
-            else:
-                high_weekly[x] = {'count': 1, 'week': y}
-        elif v.severity == 'Medium':
-            if x in medium_weekly:
-                medium_weekly[x]['count'] += 1
-            else:
-                medium_weekly[x] = {'count': 1, 'week': y}
-
-    for a in accepted_findings:
-        iso_cal = a.date.isocalendar()
-        x = iso_to_gregorian(iso_cal[0], iso_cal[1], 1)
-        y = x.strftime("<span class='small'>%m/%d<br/>%Y</span>")
-        x = (tcalendar.timegm(x.timetuple()) * 1000)
-
-        if x in open_close_weekly:
-            open_close_weekly[x]['accepted'] += 1
-        else:
-            open_close_weekly[x] = {'closed': 0, 'open': 0, 'accepted': 1}
-            open_close_weekly[x]['week'] = y
-
-    test_data = {}
-    for t in tests:
-        if t.test_type.name in test_data:
-            test_data[t.test_type.name] += t.verified_finding_count()
-        else:
-            test_data[t.test_type.name] = t.verified_finding_count()
-
-    product_tab = Product_Tab(pid, title="Engagements", tab="engagements")
+    product_tab = Product_Tab(pid, title=title, tab="engagements")
     return render(request,
                   'dojo/view_engagements.html',
                   {'prod': prod,
                    'product_tab': product_tab,
-                   'product_metadata': product_metadata,
+                   'engagement_type': engagement_type,
                    'engs': engs,
+                   'engs_count': result_engs.qs.count(),
                    'i_engs': i_engs_page,
-                   'scan_sets': scan_sets,
-                   'tools': tools,
-                   'creds': creds,
-                   'verified_findings': verified_findings,
-                   'open_findings': open_findings,
-                   'closed_findings': closed_findings,
-                   'accepted_findings': accepted_findings,
-                   'new_findings': new_verified_findings,
-                   'start_date': start_date,
-                   'punchcard': punchcard,
-                   'ticks': ticks,
-                   'highest_count': highest_count,
-                   'open_close_weekly': open_close_weekly,
-                   'severity_weekly': severity_weekly,
-                   'critical_weekly': critical_weekly,
-                   'high_weekly': high_weekly,
-                   'medium_weekly': medium_weekly,
-                   'test_data': test_data,
+                   'i_engs_count': result.qs.count(),
                    'user': request.user,
-                   'system_settings': system_settings,
                    'authorized': auth})
+
+
+def view_engagements_cicd(request, pid):
+    return view_engagements(request, pid, engagement_type="CI/CD")
+
+
+@user_passes_test(lambda u: u.is_staff)
+def import_scan_results_prod(request, pid=None):
+    from dojo.engagement.views import import_scan_results
+    return import_scan_results(request, pid=pid)
 
 
 def view_product_details(request, pid):
@@ -741,11 +596,11 @@ def all_product_findings(request, pid):
 
 
 @user_passes_test(lambda u: u.is_staff)
-def new_eng_for_app(request, pid):
+def new_eng_for_app(request, pid, cicd=False):
     jform = None
     prod = Product.objects.get(id=pid)
     if request.method == 'POST':
-        form = EngForm(request.POST)
+        form = EngForm(request.POST, cicd=cicd)
         if form.is_valid():
             new_eng = form.save(commit=False)
             new_eng.threat_model = False
@@ -757,6 +612,9 @@ def new_eng_for_app(request, pid):
                 new_eng.progress = 'threat_model'
             else:
                 new_eng.progress = 'other'
+            if cicd:
+                new_eng.engagement_type = 'CI/CD'
+                new_eng.status = "In Progress"
 
             new_eng.save()
             tags = request.POST.getlist('tags')
@@ -780,10 +638,12 @@ def new_eng_for_app(request, pid):
 
             if "_Add Tests" in request.POST:
                 return HttpResponseRedirect(reverse('add_tests', args=(new_eng.id,)))
+            elif "_Import Scan Results" in request.POST:
+                return HttpResponseRedirect(reverse('import_scan_results', args=(new_eng.id,)))
             else:
                 return HttpResponseRedirect(reverse('view_engagement', args=(new_eng.id,)))
     else:
-        form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(), 'target_end': timezone.now().date() + timedelta(days=7)})
+        form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(), 'target_end': timezone.now().date() + timedelta(days=7)}, cicd=cicd)
         if(get_system_setting('enable_jira')):
                 if JIRA_PKey.objects.filter(product=prod).count() != 0:
                     jform = JIRAFindingForm(prefix='jiraform', enabled=JIRA_PKey.objects.get(product=prod).push_all_issues)
@@ -794,6 +654,11 @@ def new_eng_for_app(request, pid):
                    'product_tab': product_tab,
                    'jform': jform
                    })
+
+
+@user_passes_test(lambda u: u.is_staff)
+def new_eng_for_app_cicd(request, pid):
+    return new_eng_for_app(request, pid, True)
 
 
 @user_passes_test(lambda u: u.is_staff)
