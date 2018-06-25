@@ -54,48 +54,56 @@ def sync_false_history(new_finding, *args, **kwargs):
 
 
 def sync_dedupe(new_finding, *args, **kwargs):
-    eng_findings_cwe = Finding.objects.filter(
+    eng_hash_code = Finding.objects.filter(
         test__engagement__product=new_finding.test.engagement.product,
-        cwe=new_finding.cwe,
-        static_finding=new_finding.static_finding,
-        dynamic_finding=new_finding.dynamic_finding,
-        date__lte=new_finding.date).exclude(id=new_finding.id).exclude(
-            cwe=None).exclude(duplicate=True).exclude(cwe=0)
-    eng_findings_title = Finding.objects.filter(
-        test__engagement__product=new_finding.test.engagement.product,
-        title=new_finding.title,
-        static_finding=new_finding.static_finding,
-        dynamic_finding=new_finding.dynamic_finding,
-        date__lte=new_finding.date).exclude(id=new_finding.id).exclude(
-            duplicate=True)
-    total_findings = eng_findings_cwe | eng_findings_title
-    # total_findings = total_findings.order_by('date')
-    for find in total_findings:
-        if find.endpoints.count() != 0 and new_finding.endpoints.count() != 0:
-            list1 = new_finding.endpoints.all()
-            list2 = find.endpoints.all()
-            if all(x in list1 for x in list2):
+        hash_code=new_finding.hash_code, duplicate=False).exclude(id=new_finding.id)
+    for find in eng_hash_code:
+        new_finding.duplicate = True
+        new_finding.active = False
+        new_finding.verified = False
+        new_finding.duplicate_finding = find
+        find.duplicate_list.add(new_finding)
+        find.found_by.add(new_finding.test.test_type)
+        super(Finding, new_finding).save(*args, **kwargs)
+    else:
+        eng_findings_cwe = Finding.objects.filter(
+            test__engagement__product=new_finding.test.engagement.product,
+            cwe=new_finding.cwe,
+            static_finding=new_finding.static_finding,
+            dynamic_finding=new_finding.dynamic_finding,
+            date__lte=new_finding.date).exclude(id=new_finding.id).exclude(
+                cwe=0).exclude(duplicate=True)
+        eng_findings_title = Finding.objects.filter(
+            test__engagement__product=new_finding.test.engagement.product,
+            title=new_finding.title,
+            static_finding=new_finding.static_finding,
+            dynamic_finding=new_finding.dynamic_finding,
+            date__lte=new_finding.date).exclude(id=new_finding.id).exclude(
+                duplicate=True)
+        total_findings = eng_findings_cwe | eng_findings_title
+        # total_findings = total_findings.order_by('date')
+        for find in total_findings:
+            if find.endpoints.count() != 0 and new_finding.endpoints.count() != 0:
+                list1 = new_finding.endpoints.all()
+                list2 = find.endpoints.all()
+                if all(x in list1 for x in list2):
+                    new_finding.duplicate = True
+                    new_finding.active = False
+                    new_finding.verified = False
+                    new_finding.duplicate_finding = find
+                    find.duplicate_list.add(new_finding)
+                    find.found_by.add(new_finding.test.test_type)
+                    super(Finding, new_finding).save(*args, **kwargs)
+                    break
+            elif find.line == new_finding.line and find.file_path == new_finding.file_path and new_finding.static_finding and len(
+                    new_finding.file_path) > 0:
                 new_finding.duplicate = True
+                new_finding.active = False
+                new_finding.verified = False
                 new_finding.duplicate_finding = find
                 find.duplicate_list.add(new_finding)
                 find.found_by.add(new_finding.test.test_type)
                 super(Finding, new_finding).save(*args, **kwargs)
-                break
-        elif find.line == new_finding.line and find.file_path == new_finding.file_path and new_finding.static_finding and len(
-                new_finding.file_path) > 0:
-            new_finding.duplicate = True
-            new_finding.duplicate_finding = find
-            find.duplicate_list.add(new_finding)
-            find.found_by.add(new_finding.test.test_type)
-            super(Finding, new_finding).save(*args, **kwargs)
-        elif find.get_hash_code() == new_finding.get_hash_code():
-            new_finding.duplicate = True
-            new_finding.duplicate_finding = find
-            find.duplicate_list.add(new_finding)
-            find.found_by.add(new_finding.test.test_type)
-            super(Finding, new_finding).save(*args, **kwargs)
-
-        calculate_grade(find.test.engagement.product)
 
 
 def count_findings(findings):
@@ -776,6 +784,7 @@ def get_page_items(request, items, page_size, param_name='page'):
     size = request.GET.get('page_size', page_size)
     paginator = Paginator(items, size)
     page = request.GET.get(param_name)
+
     try:
         page = paginator.page(page)
     except PageNotAnInteger:
@@ -1290,7 +1299,7 @@ def prepare_for_view(encrypted_value):
 
     key = None
     decrypted_value = ""
-    if encrypted_value is not NotImplementedError:
+    if encrypted_value is not NotImplementedError and encrypted_value is not None:
         key = get_db_key()
         encrypted_values = encrypted_value.split(":")
 
@@ -1504,9 +1513,7 @@ def calculate_grade(product):
         if severity_values:
             aeval = Interpreter()
             aeval(system_settings.product_grade)
-            grade_product = "grade_product(%s, %s, %s, %s)" % (critical, high,
-                                                               medium, low)
-            # prod = Product.objects.get(id=finding.test.engagement.product.id)
+            grade_product = "grade_product(%s, %s, %s, %s)" % (critical, high, medium, low)
             product.prod_numeric_grade = aeval(grade_product)
             product.save()
 

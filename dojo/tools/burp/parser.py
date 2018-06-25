@@ -7,8 +7,10 @@ See the file 'doc/LICENSE' for the license information
 from __future__ import with_statement
 
 import re
-from defusedxml import ElementTree as ET
+# from defusedxml import ElementTree as ET
+from lxml import etree
 import html2text
+import string
 
 from dojo.models import Finding, Endpoint
 
@@ -40,12 +42,12 @@ class BurpXmlParser(object):
         self.host = None
 
         tree = self.parse_xml(xml_output)
-        if tree:
+        if tree is not None:
             self.items = [data for data in self.get_items(tree, test)]
         else:
             self.items = []
 
-    def parse_xml(self, xml_output):
+    def parse_xml(self, xml_file):
         """
         Open and parse an xml file.
 
@@ -54,10 +56,17 @@ class BurpXmlParser(object):
 
         @return xml_tree An xml tree instance. None if error.
         """
+
+        tree = None
         try:
-            tree = ET.parse(xml_output)
-        except SyntaxError as se:
-            raise se
+            tree = etree.parse(xml_file)
+        except Exception, e:
+            # Solution to remove unicode characters in xml, tried several
+            xml_file.seek(0)
+            data = xml_file.read()
+            printable = set(string.printable)
+            data = filter(lambda x: x in printable, data)
+            tree = etree.fromstring(data, etree.XMLParser(encoding='ISO-8859-1', ns_clean=True, recover=True))
 
         return tree
 
@@ -72,9 +81,10 @@ class BurpXmlParser(object):
             item = get_item(node, test)
             dupe_key = str(item.url) + item.severity + item.title
             if dupe_key in items:
-                item
-                items[dupe_key].unsaved_endpoints = items[dupe_key].unsaved_endpoints + item.unsaved_endpoints
-                items[dupe_key].unsaved_req_resp = items[dupe_key].unsaved_req_resp + item.unsaved_req_resp
+                items[
+                    dupe_key].unsaved_endpoints = items[dupe_key].unsaved_endpoints + item.unsaved_endpoints
+                items[
+                    dupe_key].unsaved_req_resp = items[dupe_key].unsaved_req_resp + item.unsaved_req_resp
 
                 # make sure only unique endpoints are retained
                 unique_objs = []
@@ -86,10 +96,10 @@ class BurpXmlParser(object):
                     unique_objs.append(o.__unicode__())
 
                 items[dupe_key].unsaved_endpoints = new_list
-                print new_list
 
                 # Description details of the finding are added
-                items[dupe_key].description = item.description + items[dupe_key].description
+                items[
+                    dupe_key].description = item.description + items[dupe_key].description
             else:
                 items[dupe_key] = item
 
@@ -107,7 +117,8 @@ def get_attrib_from_subnode(xml_node, subnode_xpath_expr, attrib_name):
 
     if ETREE_VERSION[0] <= 1 and ETREE_VERSION[1] < 3:
 
-        match_obj = re.search("([^\@]+?)\[\@([^=]*?)=\'([^\']*?)\'", subnode_xpath_expr)
+        match_obj = re.search("([^\@]+?)\[\@([^=]*?)=\'([^\']*?)\'",
+                              subnode_xpath_expr)
         if match_obj is not None:
             node_to_find = match_obj.group(1)
             xpath_attrib = match_obj.group(2)
@@ -143,8 +154,8 @@ def get_item(item_node, test):
     url_host = host_node.text
 
     rhost = re.search(
-            "(http|https|ftp)\://([a-zA-Z0-9\.\-]+(\:[a-zA-Z0-9\.&amp;%\$\-]+)*@)*((25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])|localhost|([a-zA-Z0-9\-]+\.)*[a-zA-Z0-9\-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))[\:]*([0-9]+)*([/]*($|[a-zA-Z0-9\.\,\?\'\\\+&amp;%\$#\=~_\-]+)).*?$",
-            url_host)
+        "(http|https|ftp)\://([a-zA-Z0-9\.\-]+(\:[a-zA-Z0-9\.&amp;%\$\-]+)*@)*((25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])|localhost|([a-zA-Z0-9\-]+\.)*[a-zA-Z0-9\-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))[\:]*([0-9]+)*([/]*($|[a-zA-Z0-9\.\,\?\'\\\+&amp;%\$#\=~_\-]+)).*?$",
+        url_host)
     protocol = rhost.group(1)
     host = rhost.group(4)
 
@@ -161,9 +172,9 @@ def get_item(item_node, test):
     location = item_node.findall('location')[0].text
 
     request = item_node.findall('./requestresponse/request')[0].text if len(
-            item_node.findall('./requestresponse/request')) > 0 else None
+        item_node.findall('./requestresponse/request')) > 0 else None
     response = item_node.findall('./requestresponse/response')[0].text if len(
-            item_node.findall('./requestresponse/response')) > 0 else None
+        item_node.findall('./requestresponse/response')) > 0 else None
 
     unsaved_req_resp = list()
 
@@ -171,38 +182,44 @@ def get_item(item_node, test):
         unsaved_req_resp.append({"req": request, "resp": response})
 
     try:
-        dupe_endpoint = Endpoint.objects.get(protocol=protocol,
-                                             host=host + (":" + port) if port is not None else "",
-                                             path=path,
-                                             query=None,
-                                             fragment=None,
-                                             product=test.engagement.product)
+        dupe_endpoint = Endpoint.objects.get(
+            protocol=protocol,
+            host=host + (":" + port) if port is not None else "",
+            path=path,
+            query=None,
+            fragment=None,
+            product=test.engagement.product)
     except:
         dupe_endpoint = None
 
     if not dupe_endpoint:
-        endpoint = Endpoint(protocol=protocol,
-                            host=host + (":" + str(port)) if port is not None else "",
-                            path=path,
-                            query=None,
-                            fragment=None,
-                            product=test.engagement.product)
+        endpoint = Endpoint(
+            protocol=protocol,
+            host=host + (":" + str(port)) if port is not None else "",
+            path=path,
+            query=None,
+            fragment=None,
+            product=test.engagement.product)
     else:
         endpoint = dupe_endpoint
 
     if ip:
         try:
-            dupe_endpoint = Endpoint.objects.get(protocol=None,
-                                                 host=ip,
-                                                 path=None,
-                                                 query=None,
-                                                 fragment=None,
-                                                 product=test.engagement.product)
+            dupe_endpoint = Endpoint.objects.get(
+                protocol=None,
+                host=ip,
+                path=None,
+                query=None,
+                fragment=None,
+                product=test.engagement.product)
         except:
             dupe_endpoint = None
 
         if not dupe_endpoint:
-            endpoints = [endpoint, Endpoint(host=ip, product=test.engagement.product)]
+            endpoints = [
+                endpoint,
+                Endpoint(host=ip, product=test.engagement.product)
+            ]
         else:
             endpoints = [endpoint, dupe_endpoint]
 
@@ -221,29 +238,44 @@ def get_item(item_node, test):
     if remediation:
         remediation = text_maker.handle(remediation)
 
+    remediation_detail = do_clean(item_node.findall('remediationDetail'))
+    if remediation_detail:
+        remediation = text_maker.handle(remediation_detail + "\n") + remediation
+
     references = do_clean(item_node.findall('references'))
     if references:
         references = text_maker.handle(references)
 
     severity = item_node.findall('severity')[0].text
 
+    scanner_confidence = item_node.findall('confidence')[0].text
+    if scanner_confidence:
+        if scanner_confidence == "Certain":
+            scanner_confidence = 1
+        elif scanner_confidence == "Firm":
+            scanner_confidence = 4
+        elif scanner_confidence == "Tentative":
+            scanner_confidence = 7
+
     # Finding and Endpoint objects returned have not been saved to the database
-    finding = Finding(title=item_node.findall('name')[0].text,
-                      url=url,
-                      test=test,
-                      severity=severity,
-                      description="URL: " + url_host + path + "\n\n" + detail + "\n",
-                      mitigation=remediation,
-                      references=references,
-                      active=False,
-                      verified=False,
-                      false_p=False,
-                      duplicate=False,
-                      out_of_scope=False,
-                      mitigated=None,
-                      dynamic_finding=True,
-                      impact=background,
-                      numerical_severity=Finding.get_numerical_severity(severity))
+    finding = Finding(
+        title=item_node.findall('name')[0].text,
+        url=url,
+        test=test,
+        severity=severity,
+        scanner_confidence=scanner_confidence,
+        description="URL: " + url_host + path + "\n\n" + detail + "\n",
+        mitigation=remediation,
+        references=references,
+        active=False,
+        verified=False,
+        false_p=False,
+        duplicate=False,
+        out_of_scope=False,
+        mitigated=None,
+        dynamic_finding=True,
+        impact=background,
+        numerical_severity=Finding.get_numerical_severity(severity))
     finding.unsaved_endpoints = endpoints
     finding.unsaved_req_resp = unsaved_req_resp
 
