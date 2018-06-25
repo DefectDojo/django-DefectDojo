@@ -528,10 +528,25 @@ class EngForm(forms.ModelForm):
     test_strategy = forms.URLField(required=False, label="Test Strategy URL")
 
     def __init__(self, *args, **kwargs):
+        cicd = False
+        if 'cicd' in kwargs:
+            cicd = kwargs.pop('cicd')
+
         tags = Tag.objects.usage_for_model(Engagement)
         t = [(tag.name, tag.name) for tag in tags]
         super(EngForm, self).__init__(*args, **kwargs)
         self.fields['tags'].widget.choices = t
+        # Don't show CICD fields on a interactive engagement
+        if cicd is False:
+            del self.fields['build_id']
+            del self.fields['branch_tag']
+            del self.fields['build_server']
+            del self.fields['source_code_management_server']
+            del self.fields['source_code_management_uri']
+            del self.fields['orchestration_engine']
+        else:
+            del self.fields['test_strategy']
+            del self.fields['status']
 
     def is_valid(self):
         valid = super(EngForm, self).is_valid()
@@ -549,7 +564,7 @@ class EngForm(forms.ModelForm):
         model = Engagement
         exclude = ('first_contacted', 'version', 'eng_type', 'real_start',
                    'real_end', 'requester', 'reason', 'updated', 'report_type',
-                   'product', 'threat_model', 'api_test', 'pen_test', 'check_list')
+                   'product', 'threat_model', 'api_test', 'pen_test', 'check_list', 'engagement_type')
 
 
 class EngForm2(forms.ModelForm):

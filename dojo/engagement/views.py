@@ -15,6 +15,7 @@ from django.http import HttpResponseRedirect, StreamingHttpResponse, Http404, Ht
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.cache import cache_page
 from django.utils import timezone
+from time import strftime
 
 from dojo.filters import EngagementFilter
 from dojo.forms import CheckForm, \
@@ -132,9 +133,12 @@ def new_engagement(request):
 @user_passes_test(lambda u: u.is_staff)
 def edit_engagement(request, eid):
     eng = Engagement.objects.get(pk=eid)
+    ci_cd_form = False
+    if eng.engagement_type == "CI/CD":
+        ci_cd_form = True
     jform = None
     if request.method == 'POST':
-        form = EngForm(request.POST, instance=eng)
+        form = EngForm(request.POST, instance=eng, cicd=ci_cd_form)
         if 'jiraform-push_to_jira' in request.POST:
             jform = JIRAFindingForm(
                 request.POST, prefix='jiraform', enabled=True)
@@ -167,7 +171,7 @@ def edit_engagement(request, eid):
                 return HttpResponseRedirect(
                     reverse('view_engagement', args=(eng.id, )))
     else:
-        form = EngForm(instance=eng)
+        form = EngForm(instance=eng, cicd=ci_cd_form)
         try:
             # jissue = JIRA_Issue.objects.get(engagement=eng)
             enabled = True
@@ -183,7 +187,10 @@ def edit_engagement(request, eid):
 
     form.initial['tags'] = [tag.name for tag in eng.tags]
 
-    product_tab = Product_Tab(eng.product.id, title="Edit Engagement", tab="engagements")
+    title = ""
+    if eng.engagement_type == "CI/CD":
+        title = " CI/CD"
+    product_tab = Product_Tab(eng.product.id, title="Edit" + title + " Engagement", tab="engagements")
     product_tab.setEngagement(eng)
     return render(request, 'dojo/new_eng.html', {
         'product_tab': product_tab,
@@ -339,7 +346,10 @@ def view_engagement(request, eid):
         out_of_scope=False,
         mitigated__isnull=False)
 
-    product_tab = Product_Tab(prod.id, title="View Engagement", tab="engagements")
+    title = ""
+    if eng.engagement_type == "CI/CD":
+        title = " CI/CD"
+    product_tab = Product_Tab(prod.id, title="View" + title + " Engagement", tab="engagements")
     product_tab.setEngagement(eng)
     return render(
         request, 'dojo/view_eng.html', {
@@ -447,13 +457,15 @@ def add_tests(request, eid):
 
 
 @user_passes_test(lambda u: u.is_staff)
-def import_scan_results(request, eid):
-    engagement = get_object_or_404(Engagement, id=eid)
-    finding_count = 0
+def import_scan_results(request, eid=None, pid=None):
+    engagement = None
     form = ImportScanForm()
     cred_form = CredMappingForm()
-    cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(
-        engagement=engagement).order_by('cred_id')
+    finding_count = 0
+
+    if eid:
+        engagement = get_object_or_404(Engagement, id=eid)
+        cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(engagement=engagement).order_by('cred_id')
 
     if request.method == "POST":
         form = ImportScanForm(request.POST, request.FILES)
@@ -461,6 +473,21 @@ def import_scan_results(request, eid):
         cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(
             engagement=engagement).order_by('cred_id')
         if form.is_valid():
+            # Allows for a test to be imported with an engagement created on the fly
+            if engagement is None:
+                engagement = Engagement()
+                product = get_object_or_404(Product, id=pid)
+                engagement.name = "AdHoc Import - " + strftime("%a, %d %b %Y %X", timezone.now().timetuple())
+                engagement.threat_model = False
+                engagement.api_test = False
+                engagement.pen_test = False
+                engagement.check_list = False
+                engagement.target_start = timezone.now().date()
+                engagement.target_end = timezone.now().date()
+                engagement.product = product
+                engagement.active = True
+                engagement.status = 'In Progress'
+                engagement.save()
             file = request.FILES['file']
             scan_date = form.cleaned_data['scan_date']
             min_sev = form.cleaned_data['minimum_severity']
@@ -591,14 +618,23 @@ def import_scan_results(request, eid):
                     messages.ERROR,
                     'There appears to be an error in the XML report, please check and try again.',
                     extra_tags='alert-danger')
+    prod_id = None
+    custom_breadcrumb = None
+    title = "Import Scan Results"
+    if engagement:
+        prod_id = engagement.product.id
+        product_tab = Product_Tab(prod_id, title=title, tab="engagements")
+        product_tab.setEngagement(engagement)
+    else:
+        prod_id = pid
+        custom_breadcrumb = {"", ""}
+        product_tab = Product_Tab(prod_id, title=title, tab="findings")
 
-    product_tab = Product_Tab(engagement.product.id, title="Import Scan Results", tab="engagements")
-    product_tab.setEngagement(engagement)
     return render(request, 'dojo/import_scan_results.html', {
         'form': form,
         'product_tab': product_tab,
-        'eid': engagement.id,
-        'engagement': engagement,
+        'custom_breadcrumb': custom_breadcrumb,
+        'title': title,
         'cred_form': cred_form,
     })
 

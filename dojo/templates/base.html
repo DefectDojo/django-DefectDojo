@@ -312,8 +312,10 @@
                     <span class="caret"></span></a>
                     <ul class="dropdown-menu">
                       <li><a href="{% url 'view_engagements' product_tab.product.id %}"><i class="fa fa-calendar"></i> View Engagements</a></li>
-                      <li role="separator" class="divider"></li>
                       <li><a href="{% url 'new_eng_for_prod' product_tab.product.id %}"><i class="fa fa-plus"></i> Add New Engagement</a></li>
+                      <li role="separator" class="divider"></li>
+                      <li><a href="{% url 'view_engagements_cicd' product_tab.product.id %}"><i class="fa fa-calendar"></i> View CI/CD Engagements</a></li>
+                      <li><a href="{% url 'new_eng_for_prod_cicd' product_tab.product.id %}"><i class="fa fa-plus"></i> Add New CI/CD Engagement</a></li>
                     </ul>
                   </li>
                   <!-- Findings Tab -->
@@ -322,11 +324,12 @@
                     <span class="hidden-xs"> Findings{% if product_tab.findings > 0 %} <span class="badge">{{ product_tab.findings }}</span>{% endif %}</span>
                     <span class="caret"></span></a>
                     <ul class="dropdown-menu">
-                      <li><a href="{% url 'product_open_findings' product_tab.product.id %}?test__engagement__product={{ product_tab.product.id }}"><i class="fa fa-list-alt"></i> View Open Findings</a></li>
+                      <li><a href="{% url 'product_open_findings' product_tab.product.id %}?test__engagement__product={{ product_tab.product.id }}"><i class="fa fa-list-alt"></i> View Active Findings</a></li>
                       <li><a href="{% url 'product_open_findings' product_tab.product.id %}?test__engagement__product={{ product_tab.product.id }}&severity=Critical"><i class="fa fa-exclamation-triangle"></i> View Critical Findings</a></li>
-                      <li><a href="{% url 'product_open_findings' product_tab.product.id %}?test__engagement__product={{ product_tab.product.id }}&date=1"><i class="fa fa-calendar"></i> View Last 7 Days Findings</a></li>
+                      <li><a href="{% url 'product_open_findings' product_tab.product.id %}?test__engagement__product={{ product_tab.product.id }}&date=2"><i class="fa fa-calendar"></i> View Findings from Last 7 Days </a></li>
                       <li role="separator" class="divider"></li>
                       <li><a href="{% url 'ad_hoc_finding' product_tab.product.id %}"><i class="fa fa-plus"></i> Add New Finding</a></li>
+                      <li><a href="{% url 'import_scan_results_prod' product_tab.product.id %}"><i class="fa fa-upload"></i> Import Scan Results</a></li>
                     </ul>
                   </li>
                   <!-- Endpoints Tab -->
