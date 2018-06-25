@@ -968,7 +968,7 @@ class Finding(models.Model):
     static_finding = models.BooleanField(default=False)
     dynamic_finding = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True, null=True)
-    scanner_confidence = models.IntegerField(default=None, editable=False, help_text="Confidence level of vulnerability which is supplied by the scannner.")
+    scanner_confidence = models.IntegerField(null=True, blank=True, default=None, editable=False, help_text="Confidence level of vulnerability which is supplied by the scannner.")
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
