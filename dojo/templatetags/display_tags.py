@@ -11,6 +11,7 @@ from django.contrib.auth.models import User
 from dojo.utils import prepare_for_view, get_system_setting
 from dojo.models import Check_List, FindingImageAccessToken, Finding, System_Settings, JIRA_PKey, Product
 import markdown
+from django.db.models import Sum, Case, When, IntegerField, Value
 from django.utils import timezone
 from markdown.extensions import Extension
 import dateutil.relativedelta
@@ -526,3 +527,136 @@ def internet_accessible_icon(value):
         return mark_safe(icon('cloud', 'Internet Accessible'))
     else:
         return ''
+
+
+@register.filter
+def get_severity_count(id, table):
+    if table == "test":
+        counts = Finding.objects.filter(test=id). \
+            prefetch_related('test__engagement__product').aggregate(
+            total=Sum(
+                Case(When(severity__in=('Critical', 'High', 'Medium', 'Low'),
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            critical=Sum(
+                Case(When(severity='Critical',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            high=Sum(
+                Case(When(severity='High',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            medium=Sum(
+                Case(When(severity='Medium',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            low=Sum(
+                Case(When(severity='Low',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            info=Sum(
+                Case(When(severity='Info',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+        )
+    elif table == "engagement":
+        counts = Finding.objects.filter(test__engagement=id, active=True, verified=True, duplicate=False). \
+            prefetch_related('test__engagement__product').aggregate(
+            total=Sum(
+                Case(When(severity__in=('Critical', 'High', 'Medium', 'Low'),
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            critical=Sum(
+                Case(When(severity='Critical',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            high=Sum(
+                Case(When(severity='High',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            medium=Sum(
+                Case(When(severity='Medium',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            low=Sum(
+                Case(When(severity='Low',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            info=Sum(
+                Case(When(severity='Info',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+        )
+    elif table == "product":
+        counts = Finding.objects.filter(test__engagement__product=id). \
+            prefetch_related('test__engagement__product').aggregate(
+            total=Sum(
+                Case(When(severity__in=('Critical', 'High', 'Medium', 'Low'),
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            critical=Sum(
+                Case(When(severity='Critical',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            high=Sum(
+                Case(When(severity='High',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            medium=Sum(
+                Case(When(severity='Medium',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            low=Sum(
+                Case(When(severity='Low',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            info=Sum(
+                Case(When(severity='Info',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+        )
+    critical = 0
+    high = 0
+    medium = 0
+    low = 0
+    info = 0
+    if counts["info"]:
+        info = counts["info"]
+
+    if counts["low"]:
+        low = counts["low"]
+
+    if counts["medium"]:
+        medium = counts["medium"]
+
+    if counts["high"]:
+        high = counts["high"]
+
+    if counts["critical"]:
+        critical = counts["critical"]
+
+    total = critical + high + medium + low + info
+    display_counts = []
+
+    if critical:
+        display_counts.append("Critical: " + str(critical))
+    if high:
+        display_counts.append("High: " + str(high))
+    if medium:
+        display_counts.append("Medium: " + str(medium))
+    if low:
+        display_counts.append("Low: " + str(low))
+    if info:
+        display_counts.append("Info: " + str(info))
+
+    if total > 0:
+        if table == "test":
+            display_counts.append("Total: " + str(total) + " Findings")
+        elif table == "engagement":
+            display_counts.append("Total: " + str(total) + " Active, Verified Findings")
+        elif table == "product":
+            display_counts.append("Total: " + str(total) + " Active Findings")
+
+    display_counts = ", ".join([str(item) for item in display_counts])
+
+    return display_counts

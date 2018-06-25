@@ -110,7 +110,8 @@
     <div class="panel panel-default to_highlight table-responsive">
         <div class="panel-heading">
             <div class="clearfix">
-                <h4 class="pull-left"> Findings &nbsp;&nbsp;</h4>
+                <h4 class="pull-left"> Findings ({{findings_count}}) <small>{{ test.id|get_severity_count:"test" }}</small>
+                </h4>
 
                 <div class="dropdown pull-left hidden" id="bulk_edit_menu">
                     <button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="dropdownMenu2"

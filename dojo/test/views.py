@@ -18,9 +18,9 @@ from dojo.filters import TemplateFindingFilter
 from dojo.forms import NoteForm, TestForm, FindingForm, \
     DeleteTestForm, AddFindingForm, \
     ImportScanForm, ReImportScanForm, FindingBulkUpdateForm, JIRAFindingForm
-from dojo.models import Finding, Test, Notes, BurpRawRequestResponse, Endpoint, Stub_Finding, Finding_Template, JIRA_PKey, Cred_Mapping, Dojo_User
+from dojo.models import Product, Finding, Test, Notes, BurpRawRequestResponse, Endpoint, Stub_Finding, Finding_Template, JIRA_PKey, Cred_Mapping, Dojo_User
 from dojo.tools.factory import import_parser_factory
-from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, create_notification, Product_Tab
+from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, create_notification, Product_Tab, calculate_grade
 from dojo.tasks import add_issue_task
 
 logger = logging.getLogger(__name__)
@@ -69,6 +69,7 @@ def view_test(request, tid):
                   {'test': test,
                    'product_tab': product_tab,
                    'findings': fpage,
+                   'findings_count': findings.count(),
                    'stub_findings': sfpage,
                    'form': form,
                    'notes': notes,
@@ -413,13 +414,15 @@ def search(request, tid):
 @user_passes_test(lambda u: u.is_staff)
 def finding_bulk_update(request, tid):
     test = get_object_or_404(Test, id=tid)
-    # finding = test.finding_set.all()[0]
     form = FindingBulkUpdateForm(request.POST)
+
     if request.method == "POST":
         finding_to_update = request.POST.getlist('finding_to_update')
         if request.POST.get('delete_bulk_findings') and finding_to_update:
             finds = Finding.objects.filter(test=test, id__in=finding_to_update)
+            product = Product.objects.get(engagement__test=test)
             finds.delete()
+            calculate_grade(product)
         else:
             if form.is_valid() and finding_to_update:
                 finding_to_update = request.POST.getlist('finding_to_update')
@@ -427,17 +430,19 @@ def finding_bulk_update(request, tid):
                 if form.cleaned_data['severity']:
                     finds.update(severity=form.cleaned_data['severity'],
                                  numerical_severity=Finding.get_numerical_severity(form.cleaned_data['severity']),
-                                 active=form.cleaned_data['active'],
-                                 verified=form.cleaned_data['verified'],
-                                 false_p=form.cleaned_data['false_p'],
-                                 duplicate=form.cleaned_data['duplicate'],
-                                 out_of_scope=form.cleaned_data['out_of_scope'])
-                else:
+                                 last_reviewed=timezone.now(),
+                                 last_reviewed_by=request.user)
+                if form.cleaned_data['status']:
                     finds.update(active=form.cleaned_data['active'],
                                  verified=form.cleaned_data['verified'],
                                  false_p=form.cleaned_data['false_p'],
-                                 duplicate=form.cleaned_data['duplicate'],
-                                 out_of_scope=form.cleaned_data['out_of_scope'])
+                                 out_of_scope=form.cleaned_data['out_of_scope'],
+                                 last_reviewed=timezone.now(),
+                                 last_reviewed_by=request.user)
+
+                # Update the grade as bulk edits don't go through save
+                if form.cleaned_data['severity'] or form.cleaned_data['status']:
+                    calculate_grade(test.engagement.product)
 
                 messages.add_message(request,
                                      messages.SUCCESS,
@@ -492,6 +497,7 @@ def re_import_scan_results(request, tid):
                     sev = item.severity
                     if sev == 'Information' or sev == 'Informational':
                         sev = 'Info'
+                        item.severity = sev
 
                     if Finding.SEVERITIES[sev] > Finding.SEVERITIES[min_sev]:
                         continue
