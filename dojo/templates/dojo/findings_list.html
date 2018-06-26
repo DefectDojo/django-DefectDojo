@@ -8,7 +8,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading tight">
                     <h3 class="has-filters">
-                        Open Findings
+                        {{filter_name }} Findings
                         <div class="dropdown pull-right"></div>
                     </h3>
                 </div>
@@ -278,9 +278,7 @@
                                 <a href="{{finding.jira_conf.url}}/browse/{{finding.jira.jira_key}}" target="_blank"> {{finding.jira.jira_key}} </a>
                                 </td>
                                 {% endif %}
-                                <td>{% if finding.under_review %}Under Review, {% endif %}{{ finding.status }}
-                                  {% if finding.duplicate_finding.id %}
-                                      <a href="{% url 'view_finding' finding.duplicate_finding.id%}">Original</a>
+                                <td>{% if finding.under_review %}Under Review, {% endif %}{{ finding.status }}{% if finding.duplicate_finding.id %}, <a href="{% url 'view_finding' finding.duplicate_finding.id%}">Original</a>
                                   {% endif %}
                                 </td>
                                 {% if show_product_column and product_tab is None %}

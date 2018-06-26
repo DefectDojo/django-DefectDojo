@@ -46,21 +46,20 @@ def open_findings(request, pid=None):
     show_product_column = True
     title = None
     custom_breadcrumb = None
-    findings = Finding.objects.filter(
-        mitigated__isnull=True,
-        verified=True,
-        false_p=False,
-        duplicate=False,
-        out_of_scope=False).order_by('numerical_severity')
+
+    if pid:
+        findings = Finding.objects.filter(test__engagement__product__id=pid, active=True, duplicate=False).order_by('numerical_severity')
+    else:
+        findings = Finding.objects.filter(active=True, duplicate=False).order_by('numerical_severity')
 
     if request.user.is_staff:
         findings = OpenFingingSuperFilter(
-            request.GET, queryset=findings, user=request.user)
+            request.GET, queryset=findings, user=request.user, pid=pid)
     else:
         findings = findings.filter(
             test__engagement__product__authorized_users__in=[request.user])
         findings = OpenFindingFilter(
-            request.GET, queryset=findings, user=request.user)
+            request.GET, queryset=findings, user=request.user, pid=pid)
 
     title_words = [
         word for finding in findings.qs for word in finding.title.split()
@@ -99,12 +98,12 @@ def open_findings(request, pid=None):
     # Only show product tab view in product
     if pid:
         show_product_column = False
-        product_tab = Product_Tab(pid, title="Open Findings", tab="findings")
+        product_tab = Product_Tab(pid, title="Findings", tab="findings")
     else:
-        add_breadcrumb(title="Open findings", top_level=not len(request.GET), request=request)
+        add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
 
     return render(
-        request, 'dojo/open_findings.html', {
+        request, 'dojo/findings_list.html', {
             'show_product_column': show_product_column,
             "product_tab": product_tab,
             "findings": paged_findings,
@@ -112,20 +111,18 @@ def open_findings(request, pid=None):
             "title_words": title_words,
             'found_by': found_by,
             'custom_breadcrumb': custom_breadcrumb,
+            'filter_name': "Open",
             'title': title
         })
 
 
 """
-Greg, Jay
-Status: in prod
-on the nav menu accepted findings returns all the accepted findings for a given
-engineer
+Accepted findings returns all the accepted findings for all products or a specific product
 """
 
 
 @user_passes_test(lambda u: u.is_staff)
-def accepted_findings(request):
+def accepted_findings(request, pid=None):
     # user = request.user
 
     findings = Finding.objects.filter(risk_acceptance__isnull=False)
@@ -139,16 +136,22 @@ def accepted_findings(request):
     title_words = sorted(set(title_words))
     paged_findings = get_page_items(request, findings.qs, 25)
 
+    product_tab = None
+    if pid:
+        product_tab = Product_Tab(pid, title="Closed Findings", tab="findings")
+
     return render(
-        request, 'dojo/accepted_findings.html', {
+        request, 'dojo/findings_list.html', {
             "findings": paged_findings,
+            "product_tab": product_tab,
+            "filter_name": "Accepted",
             "filtered": findings,
             "title_words": title_words,
         })
 
 
 @user_passes_test(lambda u: u.is_staff)
-def closed_findings(request):
+def closed_findings(request, pid=None):
     findings = Finding.objects.filter(mitigated__isnull=False)
     findings = ClosedFingingSuperFilter(request.GET, queryset=findings)
     title_words = [
@@ -159,13 +162,16 @@ def closed_findings(request):
     title_words = sorted(set(title_words))
     paged_findings = get_page_items(request, findings.qs, 25)
 
-    product_tab = Product_Tab(finding.test.engagement.product.id, title="Closed Findings", tab="findings")
+    product_tab = None
+    if pid:
+        product_tab = Product_Tab(pid, title="Closed Findings", tab="findings")
 
     return render(
-        request, 'dojo/closed_findings.html', {
+        request, 'dojo/findings_list.html', {
             "findings": paged_findings,
             "product_tab": product_tab,
             "filtered": findings,
+            "filter_name": "Closed",
             "title_words": title_words,
         })
 
