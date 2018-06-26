@@ -256,6 +256,11 @@ div#upload-risk form select[multiple="multiple"] {
     text-align: center;
 }
 
+.protip {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
 .control-group input[type="file"] {
     display: inline-block;
     width: 0;

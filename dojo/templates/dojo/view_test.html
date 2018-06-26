@@ -107,65 +107,69 @@
             </table>
         </div>
     </div>
+    <div class="row">
+      <div class="col-md-12" id="cred">
+          <div class="dropdown pull-left hidden" style="padding-bottom: 5px;" id="bulk_edit_menu">
+          <button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="dropdownMenu2"
+                  data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+              Bulk Edit
+              <span class="caret"></span>
+          </button>
+          <div class="btn-group mr-2" role="group" aria-label="Bulk Actions">
+            {% if tab_product %}
+            <button type="button" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Merge Findings">
+              <a class="white-color merge" href="#" alt="Merge Findings">
+                <i class="fa fa-compress"></i>
+              </a>
+            </button>
+            {% endif %}
+            <button type="button" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Delete Findings">
+              <a class="white-color delete-bulk" href="#" alt="Delete Findings">
+                <i class="fa fa-trash"></i>
+              </a>
+            </button>
+          </div>
+          <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" id="bulk_edit">
+              <li class="dropdown-header">Choose wisely...</li>
+              <li style="padding-left: 8px;">
+                  <form action="{% url 'finding_bulk_update' test.id %}" method="post" id="bulk_change_form">
+                      {% csrf_token %}
+                      <label style="display: block" for="severity">Severity</label>
+                      <select name="severity" id="severity" style="font-size: 80%">
+                          <option value="">Choose...</option>
+                          <option value="Info">Info</option>
+                          <option value="Low">Low</option>
+                          <option value="Medium">Medium</option>
+                          <option value="High">High</option>
+                          <option value="Critical">Critical</option>
+                      </select><br/><br/>
+                      <b>Status</b> <input id="id_status" name="status" type="checkbox" alt="Select to enable"/><br/>
+                      <label style="font-size: 80%; font-weight: normal; display: block">
+                          <input id="id_active" name="active" type="checkbox" disabled/> <span>Active</span>
+                      </label>
+                      <label style="font-size: 80%; font-weight: normal; display: block">
+                          <input id="id_verified" name="verified" type="checkbox" disabled/> <span>Verified</span>
+                      </label>
+                      <label style="font-size: 80%; font-weight: normal; display: block">
+                          <input id="id_false_p" name="false_p" type="checkbox" disabled/> <span>False Positive</span>
+                      </label>
+                      <label style="font-size: 80%; font-weight: normal; display: block">
+                          <input id="id_out_of_scope" name="out_of_scope" type="checkbox" disabled/>
+                          <span>Out of scope</span>
+                      </label>
+                      <input type="submit" class="btn btn-sm btn-primary" value="Submit"/>
+                  </form>
+              </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
     <div class="panel panel-default to_highlight table-responsive">
         <div class="panel-heading">
             <div class="clearfix">
                 <h4 class="pull-left"> Findings ({{findings_count}}) <small>{{ test.id|get_severity_count:"test" }}</small>
                 </h4>
-
-                <div class="dropdown pull-left hidden" id="bulk_edit_menu">
-                    <button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="dropdownMenu2"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                        Bulk Edit
-                        <span class="caret"></span>
-                    </button>
-                    <div class="btn-group mr-2" role="group" aria-label="Bulk Actions">
-                      {% if tab_product %}
-                      <button type="button" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Merge Findings">
-                        <a class="white-color merge" href="#" alt="Merge Findings">
-                          <i class="fa fa-compress"></i>
-                        </a>
-                      </button>
-                      {% endif %}
-                      <button type="button" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Delete Findings">
-                        <a class="white-color delete-bulk" href="#" alt="Delete Findings">
-                          <i class="fa fa-trash"></i>
-                        </a>
-                      </button>
-                    </div>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" id="bulk_edit">
-                        <li class="dropdown-header">Choose wisely...</li>
-                        <li style="padding-left: 8px;">
-                            <form action="{% url 'finding_bulk_update' test.id %}" method="post" id="bulk_change_form">
-                                {% csrf_token %}
-                                <label style="display: block" for="severity">Severity</label>
-                                <select name="severity" id="severity" style="font-size: 80%">
-                                    <option value="">Choose...</option>
-                                    <option value="Info">Info</option>
-                                    <option value="Low">Low</option>
-                                    <option value="Medium">Medium</option>
-                                    <option value="High">High</option>
-                                    <option value="Critical">Critical</option>
-                                </select><br/><br/>
-                                <b>Status</b> <input id="id_status" name="status" type="checkbox" alt="Select to enable"/><br/>
-                                <label style="font-size: 80%; font-weight: normal; display: block">
-                                    <input id="id_active" name="active" type="checkbox" disabled/> <span>Active</span>
-                                </label>
-                                <label style="font-size: 80%; font-weight: normal; display: block">
-                                    <input id="id_verified" name="verified" type="checkbox" disabled/> <span>Verified</span>
-                                </label>
-                                <label style="font-size: 80%; font-weight: normal; display: block">
-                                    <input id="id_false_p" name="false_p" type="checkbox" disabled/> <span>False Positive</span>
-                                </label>
-                                <label style="font-size: 80%; font-weight: normal; display: block">
-                                    <input id="id_out_of_scope" name="out_of_scope" type="checkbox" disabled/>
-                                    <span>Out of scope</span>
-                                </label>
-                                <input type="submit" class="btn btn-sm btn-primary" value="Submit"/>
-                            </form>
-                        </li>
-                    </ul>
-                </div>
                 <div id="test-pulldown" class="dropdown pull-right">
                     <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                             data-toggle="dropdown" aria-expanded="true">
@@ -610,6 +614,9 @@
         <br/>
         <br/>
     </div>
+    <div class="protip">
+       <i class="fa fa-lightbulb-o"></i> <strong>ProTip!</strong> Type <kbd>e</kbd> to edit this test. Type <kbd>a</kbd> to add a finding to this test.
+    </div>
 {% endblock %}
 {% block postscript %}
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
@@ -632,6 +639,14 @@
           }
         }
         $(function () {
+            $(document).on('keypress', function(e) {
+                var key = String.fromCharCode(e.which);
+            if (key =='e') {
+                window.location.assign('{% url 'edit_test' test.id %}');
+            } else if (key === 'a') {
+                window.location.assign('{% url 'add_findings' test.id %}');
+            }
+            });
             check_checked_finding();
             $('#id_status').on('click', function (e) {
                 var checked = this.checked;
