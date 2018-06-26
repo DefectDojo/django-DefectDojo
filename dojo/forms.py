@@ -142,7 +142,7 @@ class Product_TypeForm(forms.ModelForm):
 class Test_TypeForm(forms.ModelForm):
     class Meta:
         model = Test_Type
-        fields = ['name']
+        exclude = ['']
 
 
 class Development_EnvironmentForm(forms.ModelForm):
