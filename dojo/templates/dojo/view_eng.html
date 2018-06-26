@@ -5,6 +5,9 @@
 {% load static from staticfiles %}
 {% block add_styles %}
     h3 { margin-top: 5px; margin-bottom: 5px; font-size: 20px; line-height: 22px;}
+    .tooltip-inner {
+      max-width: 350px;
+    }
 {% endblock %}
 {% block content %}
 
@@ -252,8 +255,8 @@
                             <tr>
                                 <td>{{ risk.reporter }}</td>
                                 <td>{{ risk.created }}</td>
+                                <td>{{ risk.expiration_date|default_if_none:"" }}</td>
                                 <td>{{ risk.accepted_by|default_if_none:"" }}</td>
-                                <td>{{ risk.compensating_control|default_if_none:"" }}</td>
                                 <td>{{ risk.accepted_findings.all|length }}</td>
                                 <td><a href="{% url 'download_risk' eng.id risk.id %}">{{ risk.filename }}</a></td>
                                 <td>
@@ -440,13 +443,17 @@
               <td>{{ eng.build_id }}</td>
             </tr>
             <tr>
+              <td><strong>Commit Hash</strong></td>
+              <td>{{ eng.commit_hash }}</td>
+            </tr>
+            <tr>
               <td><strong>Branch/Tag</strong></td>
               <td>{{ eng.branch_tag }}</td>
             </tr>
             <tr>
               <td><strong>Repo</strong></td>
               <td>{% if eng.source_code_management_uri %}
-                <a target="_blank" href="{{ eng.source_code_management_uri }}">
+                <a target="_blank" data-toggle="tooltip" data-placement="top" title="{{ eng.source_code_management_uri }}" href="{{ eng.source_code_management_uri }}">
                   <i class="fa fa-external-link"></i> View
                 </a>{% endif %}
               </td>
@@ -567,11 +574,27 @@
 
 </div>
 </div>
+<div class="protip">
+   <i class="fa fa-lightbulb-o"></i> <strong>ProTip!</strong> Type <kbd>e</kbd> to edit this engagement. Type <kbd>i</kbd> to import scan results or <kbd>a</kbd> to add tests.
+</div>
 {% endblock %}
 {% block postscript %}
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
         <script type="text/javascript">
         $(function () {
+            $(document).on('keypress', function(e) {
+                var key = String.fromCharCode(e.which);
+                if (key =='e') {
+                  window.location.assign('{% url 'edit_engagement' eng.id %}');
+                } else if (key === 'a') {
+                  window.location.assign('{% url 'add_tests' eng.id %}');
+                } else if (key === 'i') {
+                  window.location.assign('{% url 'import_scan_results' eng.id %}');
+                }
+            });
+            $(document).ready(function(){
+              $('[data-toggle="tooltip"]').tooltip();
+            });
             //Ensures dropdown has proper zindex
             $('.table-responsive').on('show.bs.dropdown', function () {
               $('.table-responsive').css( "overflow", "inherit" );
