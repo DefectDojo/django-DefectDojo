@@ -43,9 +43,9 @@
                         <thead>
                         <tr>
                             <th>{% dojo_sort request 'Rule' 'text' 'asc' %}</th>
-                            <th> operation </th>
-                            <th> model object</th>
-                            <th> applies to</th>
+                            <th> Operation </th>
+                            <th> Match</th>
+                            <th> Applies</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -53,18 +53,14 @@
                             <tr>
                                 <td><a href="{% url 'Edit Rule' rule.id %}"> {{ rule.text }} </a></td>
                                 <td>{{ rule.operator }}</td>
-                                <td> {{ rule.model_object }} </td>
-                                <td> {{ rule.applies_to }} </td>
+                                <td> {{ rule.model_object }}:{{rule.match_field}} </td>
+                                <td> {{ rule.applies_to }}:{{rule.applied_field}} </td>
                                 {% if user.is_staff %}
                                     <td>
                                         <div class="centered">
                                             <div class="btn-group" role="group">
-                                                <a class="btn btn-sm btn-success"
-                                                   href="{% url 'Add Rule'  %}">
-                                                    <i class="fa fa-plus"></i> Add Rule
-                                                </a>
                                                 <a class="btn btn-sm btn-warning"
-                                                   href="{% url 'edit_product_type' rule.id %}">
+                                                   href="{% url 'Edit Rule' rule.id %}">
                                                     <i class="fa fa-pencil"></i> Edit Rule
                                                 </a>
 

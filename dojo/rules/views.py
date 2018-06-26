@@ -69,7 +69,7 @@ def new_rule(request):
                      'Rule created successfully.',
                      extra_tags='alert-success')
             return HttpResponseRedirect(reverse('rules'))
-    form = RuleFormSet()
+    form = RuleFormSet(queryset=Rule.objects.none())
     add_breadcrumb(title="New Dojo Rule", top_level=False, request=request)
     return render(request, 'dojo/new_rule.html',
                   {'form': form,
@@ -81,25 +81,28 @@ def new_rule(request):
                    'field_dictionary': json.dumps(field_dictionary)})
 
 @user_passes_test(lambda u: u.is_staff)
-def edit_rule(request, ptid):
-    pt = get_object_or_404(Rule, pk=ptid)
-    form = RuleForm(instance=pt)
+def edit_rule(request, pid):
+    pt = get_object_or_404(Rule, pk=pid)
+    children = Rule.objects.filter(parent_rule=pt)
+    all_rules = children | Rule.objects.filter(pk=pid)
+    form = RuleFormSet(queryset=all_rules)
     if request.method == 'POST':
-        form = Rule(request.POST, instance=pt)
+        form = RuleFormSet(request.POST)
         if form.is_valid():
             pt = form.save()
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Rule updated successfully.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('Rules'))
+            return HttpResponseRedirect(reverse('rules'))
     add_breadcrumb(title="Edit Rule", top_level=False, request=request)
-    return render(request, 'dojo/edit_rule.html', {
+    return render(request, 'dojo/edit_rule2.html', {
         'name': 'Edit Rule',
         'metric': False,
         'user': request.user,
         'form': form,
-        'pt': pt})
+        'field_dictionary': json.dumps(field_dictionary),
+        'pt': pt,})
 
 @user_passes_test(lambda u: u.is_staff)
 def delete_rule(request, pid):
