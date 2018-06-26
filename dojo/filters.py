@@ -352,18 +352,26 @@ class OpenFindingFilter(DojoFilter):
 
     class Meta:
         model = Finding
-        exclude = ['url', 'description', 'mitigation', 'impact',
+        exclude = ['url', 'description', 'mitigation', 'impact', 'active',
                    'endpoint', 'references', 'test', 'is_template',
-                   'active', 'verified', 'out_of_scope', 'false_p',
-                    'thread_id', 'mitigated', 'notes',
+                   'thread_id', 'notes', 'scanner_confidence', 'mitigated',
                    'numerical_severity', 'reporter', 'last_reviewed', 'line',
-                   'duplicate_list', 'duplicate_finding', 'hash_code', 'images', 'line_number', 'reviewers', 'mitigated_by', 'sourcefile']
+                   'duplicate_list', 'duplicate_finding', 'hash_code', 'images',
+                   'line_number', 'reviewers', 'mitigated_by', 'sourcefile']
 
     def __init__(self, *args, **kwargs):
         self.user = None
+        self.pid = None
         if 'user' in kwargs:
             self.user = kwargs.pop('user')
+
+        if 'pid' in kwargs:
+            self.pid = kwargs.pop('pid')
         super(OpenFindingFilter, self).__init__(*args, **kwargs)
+
+        # Don't show the product filter on the product finding view
+        if self.pid:
+            del self.form.fields['test__engagement__product']
         cwe = dict()
         cwe = dict([finding.cwe, finding.cwe]
                    for finding in self.queryset.distinct()
@@ -436,7 +444,8 @@ class ClosedFindingFilter(DojoFilter):
                    'active', 'verified', 'out_of_scope', 'false_p',
                    'duplicate', 'thread_id', 'date', 'notes',
                    'numerical_severity', 'reporter', 'endpoints',
-                   'last_reviewed']
+                   'last_reviewed', 'review_requested_by', 'defect_review_requested_by',
+                   'last_reviewed_by', 'created']
 
     def __init__(self, *args, **kwargs):
         super(ClosedFindingFilter, self).__init__(*args, **kwargs)

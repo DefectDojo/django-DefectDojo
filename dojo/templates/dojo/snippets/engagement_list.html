@@ -3,9 +3,15 @@
 <div class="col-md-12">
     <div class="panel panel-default table-responsive">
         <div class="panel-heading">
-            <h4> {% if status == "open" %}Active{% else %}Closed{% endif %} {% if type == "CI/CD" %}CI/CD{% endif %} Engagements ({{ count }})<a title="Add New Engagement" class="pull-right btn btn-sm btn-primary"
-                                       href="{% url 'new_eng_for_prod' prod.id %}"><span
-                    class="fa fa-plus"></span> </a></h4>
+            <h4> {% if status == "open" %}Active{% else %}Closed{% endif %} {% if type == "CI/CD" %}CI/CD{% endif %} Engagements ({{ count }})
+              {% if type == "CI/CD" %}
+              <a title="Add New Engagement" class="pull-right btn btn-sm btn-primary" href="{% url 'new_eng_for_prod_cicd' prod.id %}"><span
+                    class="fa fa-plus"></span> </a>
+              {% else %}
+              <a title="Add New Engagement" class="pull-right btn btn-sm btn-primary" href="{% url 'new_eng_for_prod' prod.id %}"><span
+                    class="fa fa-plus"></span> </a>
+              {% endif %}
+              </h4>
         </div>
         {% if engs %}
             <table class="tablesorter-bootstrap table table-condensed table-striped table-hover">
@@ -62,6 +68,17 @@
                               </a>
                             </li>
                             <li class="divider"></li>
+                            <li role="presentation">
+                                <a class="" href="{% url 'add_tests' eng.id %}">
+                                    <i class="fa fa-plus"></i> Add Tests
+                                </a>
+                            </li>
+                            <li role="presentation">
+                                <a class="" href="{% url 'import_scan_results' eng.id %}">
+                                    <i class="fa fa-upload"></i> Import Scan Results
+                                </a>
+                            </li>
+                            <li class="divider"></li>
                             <li>
                               <a class="text-danger" href="{% url 'delete_engagement' eng.id %}">
                                   <i class="fa fa-trash-o"></i> Delete Engagement
@@ -75,7 +92,7 @@
                       {% if eng.lead.get_full_name and eng.lead.get_full_name.strip %}
                           {{ eng.lead.get_full_name }}
                       {% else %}
-                          {{ eng.lead|default_if_none:""}}
+                          {{ eng.lead |default_if_none:""}}
                       {% endif %}
                     </td>
                     <td>{{ eng.target_start }} - {{ eng.target_end }}</td>
@@ -90,14 +107,25 @@
                         {% endif %}
                       {% endif %}
                     </td>
-                    <td><a class="" href="{% url 'view_engagement' eng.id %}">{{ eng.test_set.all|length }}</a>
-                    {% if eng.test_set.all|length %}
-                      <i class="fa dojo-sup fa-list has-popover" data-html="true" data-trigger="hover" data-content="
-                      {% for test in eng.test_set.all %}
-                        {{test.test_type}}<br/>
-                      {% endfor %}
-                      " data-placement="right" data-container="body" data-original-title="Tests" title="">
-                    {% endif %}
+                    <td class="nowrap">
+                      <div class="align-top">
+                      {% if eng.test_set.all|length %}
+                      <div class="dropdown">
+                        <a class="" href="{% url 'view_engagement' eng.id %}">{{ eng.test_set.all|length }}</a>
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">&nbsp;<i class="fa fa-ellipsis-v"></i>&nbsp;</a>
+                        <ul class="dropdown-menu">
+                          {% for test in eng.test_set.all %}
+                               <li>
+                                 <a class="" href="{% url 'view_test' test.id %}">
+                                   <i class="fa fa-list-alt"></i> {{test.test_type}}, {{test.created}}
+                               </li>
+                            {% endfor %}
+                        </ul>
+                      </div>
+                      {% else %}
+                      <a class="" href="{% url 'view_engagement' eng.id %}">{{ eng.test_set.all|length }}</a>
+                      {% endif %}
+                      </div>
                     </td>
                     <td>{{ eng|count_findings_eng_open }}</td>
                     <td>{{ eng|count_findings_eng_all }}</td>

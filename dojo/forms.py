@@ -383,7 +383,7 @@ class UploadRiskForm(forms.ModelForm):
     accepted_findings = forms.ModelMultipleChoiceField(
         queryset=Finding.objects.all(), required=True,
         widget=forms.widgets.SelectMultiple(attrs={'size': 10}),
-        help_text=('Select to add findings.'))
+        help_text=('Active, verified findings listed, please select to add findings.'))
     reporter = forms.ModelChoiceField(
         queryset=User.objects.exclude(username="root"))
     accepted_by = forms.CharField(help_text="The entity or person that accepts the risk.", required=False)
@@ -539,6 +539,7 @@ class EngForm(forms.ModelForm):
         # Don't show CICD fields on a interactive engagement
         if cicd is False:
             del self.fields['build_id']
+            del self.fields['commit_hash']
             del self.fields['branch_tag']
             del self.fields['build_server']
             del self.fields['source_code_management_server']

@@ -691,6 +691,8 @@ class Engagement(models.Model):
                                                 ('CI/CD', 'CI/CD')))
     build_id = models.CharField(editable=True, max_length=150,
                                    null=True, blank=True, help_text="Build ID for CI/CD test", verbose_name="Build ID")
+    commit_hash = models.CharField(editable=True, max_length=150,
+                                   null=True, blank=True, help_text="Commit hash from repo", verbose_name="Commit Hash")
     branch_tag = models.CharField(editable=True, max_length=150,
                                    null=True, blank=True, help_text="Tag or branch for CI/CD test", verbose_name="Branch/Tag")
     build_server = models.ForeignKey(Tool_Configuration, verbose_name="Build Server", help_text="Build server responsible for CI/CD test", null=True, blank=True, related_name='build_server')

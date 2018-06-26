@@ -656,7 +656,10 @@ def close_eng(request, eid):
         messages.SUCCESS,
         'Engagement closed successfully.',
         extra_tags='alert-success')
-    return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
+    if eng.engagement_type == 'CI/CD':
+        return HttpResponseRedirect(reverse("view_engagements_cicd", args=(eng.product.id, )))
+    else:
+        return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -670,7 +673,10 @@ def reopen_eng(request, eid):
         messages.SUCCESS,
         'Engagement reopened successfully.',
         extra_tags='alert-success')
-    return HttpResponseRedirect(reverse('view_engagement', args=(eid, )))
+    if eng.engagement_type == 'CI/CD':
+        return HttpResponseRedirect(reverse("view_engagements_cicd", args=(eng.product.id, )))
+    else:
+        return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
 
 
 """
@@ -742,7 +748,7 @@ def upload_risk(request, eid):
         finding.id for ra in eng.risk_acceptance.all()
         for finding in ra.accepted_findings.all()
     ]
-    eng_findings = Finding.objects.filter(test__in=eng.test_set.all()) \
+    eng_findings = Finding.objects.filter(active="True", verified="True", duplicate="False", test__in=eng.test_set.all()) \
         .exclude(id__in=exclude_findings).order_by('title')
 
     if request.method == 'POST':
