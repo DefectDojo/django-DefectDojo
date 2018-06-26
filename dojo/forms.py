@@ -1552,7 +1552,7 @@ class RuleForm(forms.ModelForm):
 
     class Meta:
         model = Rule
-        exclude = ['']
+        exclude = ['key_product']
 
 RuleFormSet = modelformset_factory(Rule, extra=2, max_num=10, exclude=[''], can_delete=True)
 

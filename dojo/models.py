@@ -997,7 +997,7 @@ class Finding(models.Model):
         long_desc += '*References*:' + self.references
         return long_desc
 
-    def save(self, dedupe_option=True, *args, **kwargs):
+    def save(self, dedupe_option=True, rules_option=True, *args, **kwargs):
         super(Finding, self).save(*args, **kwargs)
         self.found_by.add(self.test.test_type)
         self.hash_code = self.get_hash_code()
@@ -1006,6 +1006,13 @@ class Finding(models.Model):
         else:
             self.dyanmic_finding = True
 
+        if rules_option:
+            from dojo.tasks import async_rules
+            from dojo.utils import sync_rules
+            if self.reporter.usercontactinfo.block_execution:
+                sync_rules(self, *args, **kwargs)
+            else:
+                async_rules(self, *args, **kwargs)
         from dojo.utils import calculate_grade
         calculate_grade(self.test.engagement.product)
 
@@ -1738,27 +1745,30 @@ class Benchmark_Product_Summary(models.Model):
     class Meta:
         unique_together = [('product', 'benchmark_type')]
 
+product_opts = [ f.name for f in Product._meta.fields ]
+test_opts = [ f.name for f in Test._meta.fields ]
+test_type_opts = [ f.name for f in Test_Type._meta.fields ]
+finding_opts = [ f.name for f in Finding._meta.fields ]
+endpoint_opts = [ f.name for f in Endpoint._meta.fields ]
+engagement_opts = [ f.name for f in Engagement._meta.fields ]
+product_type_opts = [ f.name for f in Product_Type._meta.fields ]
+single_options = product_opts + test_opts + test_type_opts + finding_opts + \
+                endpoint_opts + engagement_opts + product_type_opts
+all_options = []
+for x in single_options:
+    all_options.append((x , x))
+operator_options = (('Matches', 'Matches'),
+                    ('Contains', 'Contains'))
+application_options = (('Append', 'Append'),
+                    ('Replace', 'Replace'))
+blank_options = (('', ''),)
+
 class Rule(models.Model):
     # add UI notification to let people know what rules were applied
-    product_opts = [ f.name for f in Product._meta.fields ]
-    test_opts = [ f.name for f in Test._meta.fields ]
-    test_type_opts = [ f.name for f in Test_Type._meta.fields ]
-    finding_opts = [ f.name for f in Finding._meta.fields ]
-    endpoint_opts = [ f.name for f in Endpoint._meta.fields ]
-    engagement_opts = [ f.name for f in Engagement._meta.fields ]
-    product_type_opts = [ f.name for f in Product_Type._meta.fields ]
-    single_options = product_opts + test_opts + test_type_opts + finding_opts + \
-                    endpoint_opts + engagement_opts + product_type_opts
-    all_options = []
-    for x in single_options:
-        all_options.append((x , x))
+
     name = models.CharField(max_length=200)
+    enabled = models.BooleanField(default=True)
     text = models.TextField()
-    operator_options = (('Matches', 'Matches'),
-                        ('Contains', 'Contains'))
-    application_options = (('Append', 'Append'),
-                        ('Replace', 'Replace'))
-    blank_options = (('', ''),)
     operator = models.CharField(max_length=30, choices=operator_options)
     model_object_options = (('Product', 'Product'),
                             ('Engagement', 'Engagement'), ('Test', 'Test'),

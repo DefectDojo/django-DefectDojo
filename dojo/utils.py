@@ -100,45 +100,43 @@ def sync_dedupe(new_finding, *args, **kwargs):
 
         calculate_grade(find.test.engagement.product)
 
-def sync_rule(new_finding, *args, **kwargs):
+def sync_rules(new_finding, *args, **kwargs):
     rules = Rule.objects.filter(applies_to='Finding', parent_rule=None)
     for rule in rules:
         child_val = True
-        child_list = rule.child_rules
+        child_list = [val for val in rule.child_rules.all()]
         while (len(child_list) != 0):
-            child_val = child_val and child_rule(child_list.pop())
+            child_val = child_val and child_rule(child_list.pop(),new_finding)
         if child_val:
             if rule.operator == 'Matches':
-               if getattr(apps.get_model('dojo', rule.model_object), rule.match_field)  == rule.match_text:
-                   if rule.applied_field != 'Severity':
+               if getattr(new_finding, rule.match_field)  == rule.match_text:
                        if rule.application == 'Append':
                            setattr(new_finding, rule.applied_field, (getattr(new_finding, rule.applied_field) + rule.text))
                        else:
                            setattr(new_finding, rule.applied_field, rule.text)
-                       new_finding.save(dedupe_option=False)
+                       new_finding.save(dedupe_option=False, rules_option=False)
             else:
-                if rule.match_text in getattr(apps.get_model('dojo',rule.model_object), rule.match_field):
-                   if rule.applied_field != 'Severity':
+                if rule.match_text in getattr(new_finding, rule.match_field):
                        if rule.application == 'Append':
                            setattr(new_finding, rule.applied_field, (getattr(new_finding, rule.applied_field) + rule.text))
                        else:
                            setattr(new_finding, rule.applied_field, rule.text)
-                       new_finding.save(dedupe_option=False)
+                       new_finding.save(dedupe_option=False, rules_option=False)
 
 
-def child_rule(rule):
+def child_rule(rule, new_finding):
     child_val = True
-    child_list = rule.child_rules
+    child_list = [val for val in rule.child_rules.all()]
     while (len(child_list) != 0):
-        child_val = child_val and child_rule(child_list.pop())
+        child_val = child_val and child_rule(child_list.pop(), new_finding)
     if child_val:
         if rule.operator == 'Matches':
-           if getattr(apps.get_model('dojo',rule.model_object), rule.match_field)  == rule.match_text:
+           if getattr(new_finding, rule.match_field)  == rule.match_text:
                return True
            else:
                return False
         else:
-            if rule.match_text in getattr(apps.get_model('dojo', rule.model_object), rule.match_field):
+            if rule.match_text in getattr(new_finding, rule.match_field):
                 return True
             else:
                 return False
