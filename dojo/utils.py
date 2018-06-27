@@ -113,15 +113,15 @@ def sync_rules(new_finding, *args, **kwargs):
         child_val = True
         child_list = [val for val in rule.child_rules.all()]
         while (len(child_list) != 0):
-            child_val = child_val and child_rule(child_list.pop(),new_finding)
+            child_val = child_val and child_rule(child_list.pop(), new_finding)
         if child_val:
             if rule.operator == 'Matches':
-                if getattr(new_finding, rule.match_field)  == rule.match_text:
+                if getattr(new_finding, rule.match_field) == rule.match_text:
                     if rule.application == 'Append':
-                           setattr(new_finding, rule.applied_field, (getattr(new_finding, rule.applied_field) + rule.text))
-                       else:
-                           setattr(new_finding, rule.applied_field, rule.text)
-                       new_finding.save(dedupe_option=False, rules_option=False)
+                        setattr(new_finding, rule.applied_field, (getattr(new_finding, rule.applied_field) + rule.text))
+                    else:
+                        setattr(new_finding, rule.applied_field, rule.text)
+                        new_finding.save(dedupe_option=False, rules_option=False)
             else:
                 if rule.match_text in getattr(new_finding, rule.match_field):
                        if rule.application == 'Append':
