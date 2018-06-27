@@ -10,8 +10,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 
 # Local application/library imports
-from dojo.forms import RuleForm, DeleteRuleForm, RuleFormSet
-from dojo.models import User, JIRA_Conf, JIRA_Issue, Notes, Rule,\
+from dojo.models import Rule,\
     System_Settings, Finding, Test, Test_Type, Engagement, \
     Product, Product_Type
 
