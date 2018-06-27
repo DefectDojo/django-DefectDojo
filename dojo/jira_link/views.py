@@ -61,7 +61,7 @@ def webhook(request):
             finding = jissue.finding
             new_note = Notes()
             new_note.entry = '(%s): %s' % (commentor, comment_text)
-            new_note.author = User.objects.get(username='JIRA')
+            new_note.author, created = User.objects.get_or_create(username='JIRA')
             new_note.save()
             finding.notes.add(new_note)
             finding.save()

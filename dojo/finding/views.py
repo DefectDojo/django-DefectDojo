@@ -6,6 +6,7 @@ import mimetypes
 import os
 import shutil
 
+from collections import OrderedDict
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
@@ -18,48 +19,47 @@ from django.shortcuts import render, get_object_or_404
 from django.utils import formats
 from django.utils.safestring import mark_safe
 from django.utils import timezone
+from tagging.models import Tag
+from itertools import chain
 
 from dojo.filters import OpenFindingFilter, \
     OpenFingingSuperFilter, AcceptedFingingSuperFilter, \
     ClosedFingingSuperFilter, TemplateFindingFilter
 from dojo.forms import NoteForm, CloseFindingForm, FindingForm, PromoteFindingForm, FindingTemplateForm, \
     DeleteFindingTemplateForm, FindingImageFormSet, JIRAFindingForm, ReviewFindingForm, ClearFindingReviewForm, \
-    DefectFindingForm, StubFindingForm, DeleteFindingForm, DeleteStubFindingForm, ApplyFindingTemplateForm, FindingBulkUpdateForm
+    DefectFindingForm, StubFindingForm, DeleteFindingForm, DeleteStubFindingForm, ApplyFindingTemplateForm, \
+    FindingFormID, FindingBulkUpdateForm, MergeFindings
 from dojo.models import Product_Type, Finding, Notes, \
     Risk_Acceptance, BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, \
-    FindingImageAccessToken, JIRA_Issue, JIRA_PKey, Dojo_User, Cred_Mapping, Test, System_Settings
+    FindingImageAccessToken, JIRA_Issue, JIRA_PKey, Dojo_User, Cred_Mapping, Test, Product
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
     add_comment, jira_get_resolution_id, jira_change_resolution_id, get_jira_connection, \
-    get_system_setting, create_notification, tab_view_count
+    get_system_setting, create_notification, apply_cwe_to_template, Product_Tab, calculate_grade
 
 from dojo.tasks import add_issue_task, update_issue_task, add_comment_task
+from django.template.defaultfilters import pluralize
 
 logger = logging.getLogger(__name__)
-"""
-Greg
-Status: in prod
-on the nav menu open findings returns all the open findings for a given
-engineer
-"""
 
 
 def open_findings(request, pid=None):
     show_product_column = True
-    findings = Finding.objects.filter(
-        mitigated__isnull=True,
-        verified=True,
-        false_p=False,
-        duplicate=False,
-        out_of_scope=False)
+    title = None
+    custom_breadcrumb = None
+
+    if pid:
+        findings = Finding.objects.filter(test__engagement__product__id=pid, active=True, duplicate=False).order_by('numerical_severity')
+    else:
+        findings = Finding.objects.filter(active=True, duplicate=False).order_by('numerical_severity')
 
     if request.user.is_staff:
         findings = OpenFingingSuperFilter(
-            request.GET, queryset=findings, user=request.user)
+            request.GET, queryset=findings, user=request.user, pid=pid)
     else:
         findings = findings.filter(
             test__engagement__product__authorized_users__in=[request.user])
         findings = OpenFindingFilter(
-            request.GET, queryset=findings, user=request.user)
+            request.GET, queryset=findings, user=request.user, pid=pid)
 
     title_words = [
         word for finding in findings.qs for word in finding.title.split()
@@ -75,8 +75,15 @@ def open_findings(request, pid=None):
         if len(p) == 1:
             product_type = get_object_or_404(Product_Type, id=p[0])
 
-    add_breadcrumb(
-        title="Open findings", top_level=not len(request.GET), request=request)
+    endpoint = None
+    if 'endpoints' in request.GET:
+        endpoints = request.GET.getlist('endpoints', [])
+        if len(endpoints) == 1:
+            endpoint = endpoints[0]
+            endpoint = get_object_or_404(Endpoint, id=endpoint)
+            pid = endpoint.product.id
+            title = "Vulnerable Endpoints"
+            custom_breadcrumb = OrderedDict([("Endpoints", reverse('vulnerable_endpoints')), (endpoint, reverse('view_endpoint', args=(endpoint.id, )))])
 
     found_by = None
     try:
@@ -85,46 +92,37 @@ def open_findings(request, pid=None):
         found_by = None
         pass
 
-    # Only show product tab view in product
-    tab_product = None
-    tab_engagements = None
-    tab_findings = None
-    tab_endpoints = None
-    tab_benchmarks = None
+    product_tab = None
     active_tab = None
-    if pid:
-        active_tab = "findings"
-        show_product_column = False
-        tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(pid)
 
-    system_settings = System_Settings.objects.get()
+    # Only show product tab view in product
+    if pid:
+        show_product_column = False
+        product_tab = Product_Tab(pid, title="Findings", tab="findings")
+    else:
+        add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
+
     return render(
-        request, 'dojo/open_findings.html', {
+        request, 'dojo/findings_list.html', {
             'show_product_column': show_product_column,
-            'tab_product': tab_product,
-            'tab_engagements': tab_engagements,
-            'tab_findings': tab_findings,
-            'tab_endpoints': tab_endpoints,
-            'tab_benchmarks': tab_benchmarks,
-            'active_tab': active_tab,
+            "product_tab": product_tab,
             "findings": paged_findings,
             "filtered": findings,
             "title_words": title_words,
             'found_by': found_by,
-            'system_settings': system_settings
+            'custom_breadcrumb': custom_breadcrumb,
+            'filter_name': "Open",
+            'title': title
         })
 
 
 """
-Greg, Jay
-Status: in prod
-on the nav menu accpted findings returns all the accepted findings for a given
-engineer
+Accepted findings returns all the accepted findings for all products or a specific product
 """
 
 
 @user_passes_test(lambda u: u.is_staff)
-def accepted_findings(request):
+def accepted_findings(request, pid=None):
     # user = request.user
 
     findings = Finding.objects.filter(risk_acceptance__isnull=False)
@@ -138,21 +136,22 @@ def accepted_findings(request):
     title_words = sorted(set(title_words))
     paged_findings = get_page_items(request, findings.qs, 25)
 
-    add_breadcrumb(
-        title="Accepted findings",
-        top_level=not len(request.GET),
-        request=request)
+    product_tab = None
+    if pid:
+        product_tab = Product_Tab(pid, title="Closed Findings", tab="findings")
 
     return render(
-        request, 'dojo/accepted_findings.html', {
+        request, 'dojo/findings_list.html', {
             "findings": paged_findings,
+            "product_tab": product_tab,
+            "filter_name": "Accepted",
             "filtered": findings,
             "title_words": title_words,
         })
 
 
 @user_passes_test(lambda u: u.is_staff)
-def closed_findings(request):
+def closed_findings(request, pid=None):
     findings = Finding.objects.filter(mitigated__isnull=False)
     findings = ClosedFingingSuperFilter(request.GET, queryset=findings)
     title_words = [
@@ -162,14 +161,17 @@ def closed_findings(request):
 
     title_words = sorted(set(title_words))
     paged_findings = get_page_items(request, findings.qs, 25)
-    add_breadcrumb(
-        title="Closed findings",
-        top_level=not len(request.GET),
-        request=request)
+
+    product_tab = None
+    if pid:
+        product_tab = Product_Tab(pid, title="Closed Findings", tab="findings")
+
     return render(
-        request, 'dojo/closed_findings.html', {
+        request, 'dojo/findings_list.html', {
             "findings": paged_findings,
+            "product_tab": product_tab,
             "filtered": findings,
+            "filter_name": "Closed",
             "title_words": title_words,
         })
 
@@ -184,6 +186,12 @@ def view_finding(request, fid):
         engagement=finding.test.engagement.id).select_related(
             'cred_id').order_by('cred_id')
     user = request.user
+    cwe_template = None
+    try:
+        cwe_template = Finding_Template.objects.filter(cwe=finding.cwe).first()
+    except Finding_Template.DoesNotExist:
+        pass
+
     try:
         jissue = JIRA_Issue.objects.get(finding=finding)
     except:
@@ -239,19 +247,11 @@ def view_finding(request, fid):
         burp_request = None
         burp_response = None
 
-    add_breadcrumb(parent=finding, top_level=False, request=request)
-    system_settings = System_Settings.objects.get()
-    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(finding.test.engagement.product.id)
+    product_tab = Product_Tab(finding.test.engagement.product.id, title="View Finding", tab="findings")
 
     return render(
         request, 'dojo/view_finding.html', {
-            'tab_product': tab_product,
-            'tab_engagements': tab_engagements,
-            'tab_findings': tab_findings,
-            'tab_endpoints': tab_endpoints,
-            'tab_benchmarks': tab_benchmarks,
-            'active_tab': 'findings',
-            'system_settings': system_settings,
+            'product_tab': product_tab,
             'finding': finding,
             'burp_request': burp_request,
             'jissue': jissue,
@@ -264,6 +264,7 @@ def view_finding(request, fid):
             'user': user,
             'notes': notes,
             'form': form,
+            'cwe_template': cwe_template,
             'found_by': finding.found_by.all().distinct()
         })
 
@@ -302,18 +303,11 @@ def close_finding(request, fid):
     else:
         form = CloseFindingForm()
 
-    add_breadcrumb(
-        parent=finding, title="Close", top_level=False, request=request)
+    product_tab = Product_Tab(finding.test.engagement.product.id, title="Close", tab="findings")
 
-    system_settings = System_Settings.objects.get()
-    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(finding.test.engagement.product.id)
     return render(request, 'dojo/close_finding.html', {
         'finding': finding,
-        'tab_product': tab_product,
-        'tab_engagements': tab_engagements,
-        'tab_findings': tab_findings,
-        'tab_endpoints': tab_endpoints,
-        'tab_benchmarks': tab_benchmarks,
+        'product_tab': product_tab,
         'active_tab': 'findings',
         'user': request.user,
         'form': form
@@ -346,16 +340,17 @@ def defect_finding_review(request, fid):
                 finding.last_reviewed_by = request.user
                 finding.endpoints.clear()
                 jira = get_jira_connection(finding)
-                j_issue = JIRA_Issue.objects.get(finding=finding)
-                issue = jira.issue(j_issue.jira_id)
-                # If the issue id is closed jira will return Reopen Issue
-                resolution_id = jira_get_resolution_id(jira, issue,
-                                                       "Reopen Issue")
-                if resolution_id is None:
-                    resolution_id = jira_get_resolution_id(
-                        jira, issue, "Resolve Issue")
-                    jira_change_resolution_id(jira, issue, resolution_id)
-                    new_note.entry = new_note.entry + "\nJira issue set to resolved."
+                if jira:
+                    j_issue = JIRA_Issue.objects.get(finding=finding)
+                    issue = jira.issue(j_issue.jira_id)
+                    # If the issue id is closed jira will return Reopen Issue
+                    resolution_id = jira_get_resolution_id(jira, issue,
+                                                           "Reopen Issue")
+                    if resolution_id is None:
+                        resolution_id = jira_get_resolution_id(
+                            jira, issue, "Resolve Issue")
+                        jira_change_resolution_id(jira, issue, resolution_id)
+                        new_note.entry = new_note.entry + "\nJira issue set to resolved."
             else:
                 # Re-open finding with notes stating why re-open
                 jira = get_jira_connection(finding)
@@ -382,22 +377,11 @@ def defect_finding_review(request, fid):
     else:
         form = DefectFindingForm()
 
-    add_breadcrumb(
-        parent=finding,
-        title="Jira Status Review",
-        top_level=False,
-        request=request)
-    system_settings = System_Settings.objects.get()
-    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(finding.test.engagement.product.id)
+    product_tab = Product_Tab(finding.test.engagement.product.id, title="Jira Status Review", tab="findings")
+
     return render(request, 'dojo/defect_finding_review.html', {
         'finding': finding,
-        'tab_product': tab_product,
-        'tab_engagements': tab_engagements,
-        'tab_findings': tab_findings,
-        'tab_endpoints': tab_endpoints,
-        'tab_benchmarks': tab_benchmarks,
-        'active_tab': 'findings',
-        'system_settings': system_settings,
+        'product_tab': product_tab,
         'user': request.user,
         'form': form
     })
@@ -416,23 +400,49 @@ def reopen_finding(request, fid):
     messages.add_message(
         request,
         messages.SUCCESS,
-        'Finding closed.',
+        'Finding Reopened.',
         extra_tags='alert-success')
     return HttpResponseRedirect(reverse('view_finding', args=(finding.id, )))
 
 
 @user_passes_test(lambda u: u.is_staff)
-def delete_finding(request, fid):
+def apply_template_cwe(request, fid):
     finding = get_object_or_404(Finding, id=fid)
 
-    form = DeleteFindingForm(instance=finding)
+    form = FindingFormID(instance=finding)
+
+    if request.method == 'POST':
+        form = FindingFormID(request.POST, instance=finding)
+        if form.is_valid():
+            finding = apply_cwe_to_template(finding)
+            finding.save()
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Finding CWE template applied successfully.',
+                extra_tags='alert-success')
+            return HttpResponseRedirect(reverse('view_finding', args=(fid, )))
+        else:
+            messages.add_message(
+                request,
+                messages.ERROR,
+                'Unable to apply CWE template finding, please try again.',
+                extra_tags='alert-danger')
+    else:
+        return HttpResponseForbidden()
+
+
+def delete_finding(request, fid):
+    finding = get_object_or_404(Finding, id=fid)
 
     if request.method == 'POST':
         form = DeleteFindingForm(request.POST, instance=finding)
         if form.is_valid():
             tid = finding.test.id
+            product = finding.test.engagement.product
             del finding.tags
             finding.delete()
+            calculate_grade(product)
             messages.add_message(
                 request,
                 messages.SUCCESS,
@@ -573,19 +583,10 @@ def edit_finding(request, fid):
     else:
         form.fields['endpoints'].queryset = finding.endpoints.all()
     form.initial['tags'] = [tag.name for tag in finding.tags]
-    add_breadcrumb(
-        parent=finding, title="Edit", top_level=False, request=request)
 
-    system_settings = System_Settings.objects.get()
-    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(finding.test.engagement.product.id)
+    product_tab = Product_Tab(finding.test.engagement.product.id, title="Edit Finding", tab="findings")
     return render(request, 'dojo/edit_findings.html', {
-        'tab_product': tab_product,
-        'tab_engagements': tab_engagements,
-        'tab_findings': tab_findings,
-        'tab_endpoints': tab_endpoints,
-        'tab_benchmarks': tab_benchmarks,
-        'active_tab': 'findings',
-        'system_settings': system_settings,
+        'product_tab': product_tab,
         'form': form,
         'finding': finding,
         'jform': jform
@@ -647,21 +648,11 @@ def request_finding_review(request, fid):
     else:
         form = ReviewFindingForm()
 
-    system_settings = System_Settings.objects.get()
-    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(finding.test.engagement.product.id)
-    add_breadcrumb(
-        parent=finding,
-        title="Review Finding",
-        top_level=False,
-        request=request)
+    product_tab = Product_Tab(finding.test.engagement.product.id, title="Review Finding", tab="findings")
+
     return render(request, 'dojo/review_finding.html', {
         'finding': finding,
-        'tab_product': tab_product,
-        'tab_engagements': tab_engagements,
-        'tab_findings': tab_findings,
-        'tab_endpoints': tab_endpoints,
-        'tab_benchmarks': tab_benchmarks,
-        'active_tab': 'findings',
+        'product_tab': product_tab,
         'user': user,
         'form': form
     })
@@ -712,13 +703,11 @@ def clear_finding_review(request, fid):
     else:
         form = ClearFindingReviewForm(instance=finding)
 
-    add_breadcrumb(
-        parent=finding,
-        title="Clear Finding Review",
-        top_level=False,
-        request=request)
+    product_tab = Product_Tab(finding.test.engagement.product.id, title="Clear Finding Review", tab="findings")
+
     return render(request, 'dojo/clear_finding_review.html', {
         'finding': finding,
+        'product_tab': product_tab,
         'user': user,
         'form': form
     })
@@ -770,14 +759,11 @@ def find_template_to_apply(request, fid):
     ]
 
     title_words = sorted(set(title_words))
-    add_breadcrumb(
-        parent=test,
-        title="Apply Template to Finding",
-        top_level=False,
-        request=request)
+    product_tab = Product_Tab(test.engagement.product.id, title="Apply Template to Finding", tab="findings")
     return render(
         request, 'dojo/templates.html', {
             'templates': paged_templates,
+            'product_tab': product_tab,
             'filtered': templates,
             'title_words': title_words,
             'tid': test.id,
@@ -793,8 +779,10 @@ def choose_finding_template_options(request, tid, fid):
     template = get_object_or_404(Finding_Template, id=tid)
     form = ApplyFindingTemplateForm(data=finding.__dict__, template=template)
 
+    product_tab = Product_Tab(finding.test.engagement.product.id, title="Finding Template Options", tab="findings")
     return render(request, 'dojo/apply_finding_template.html', {
         'finding': finding,
+        'product_tab': product_tab,
         'template': template,
         'form': form,
     })
@@ -827,9 +815,10 @@ def apply_template_to_finding(request, fid, tid):
                 'There appears to be errors on the form, please correct below.',
                 extra_tags='alert-danger')
             # form_error = True
-
+            product_tab = Product_Tab(finding.test.engagement.product.id, title="Apply Finding Template", tab="findings")
             return render(request, 'dojo/apply_finding_template.html', {
                 'finding': finding,
+                'product_tab': product_tab,
                 'template': template,
                 'form': form,
             })
@@ -945,9 +934,12 @@ def promote_to_finding(request, fid):
     else:
         jform = None
 
+    product_tab = Product_Tab(finding.test.engagement.product.id, title="Promote Finding", tab="findings")
+
     form = PromoteFindingForm(
         initial={
             'title': finding.title,
+            'product_tab': product_tab,
             'date': finding.date,
             'severity': finding.severity,
             'description': finding.description,
@@ -1004,11 +996,11 @@ def promote_to_finding(request, fid):
                 messages.ERROR,
                 'The form has errors, please correct them below.',
                 extra_tags='alert-danger')
-    add_breadcrumb(
-        parent=test, title="Promote Finding", top_level=False, request=request)
+
     return render(
         request, 'dojo/promote_to_finding.html', {
             'form': form,
+            'product_tab': product_tab,
             'test': test,
             'stub_finding': finding,
             'form_error': form_error,
@@ -1017,7 +1009,7 @@ def promote_to_finding(request, fid):
 
 @user_passes_test(lambda u: u.is_staff)
 def templates(request):
-    templates = Finding_Template.objects.all()
+    templates = Finding_Template.objects.all().order_by('cwe')
     templates = TemplateFindingFilter(request.GET, queryset=templates)
     paged_templates = get_page_items(request, templates.qs, 25)
     title_words = [
@@ -1027,6 +1019,7 @@ def templates(request):
 
     title_words = sorted(set(title_words))
     add_breadcrumb(title="Template Listing", top_level=True, request=request)
+
     return render(
         request, 'dojo/templates.html', {
             'templates': paged_templates,
@@ -1035,23 +1028,60 @@ def templates(request):
         })
 
 
+def apply_cwe_mitigation(apply_to_findings, template, update=True):
+    count = 0
+    if apply_to_findings and template.template_match and template.cwe is not None:
+        # Update active, verified findings with the CWE template
+        # If CWE only match only update issues where there isn't a CWE + Title match
+        if template.template_match_title:
+            count = Finding.objects.filter(active=True, verified=True, cwe=template.cwe, title__icontains=template.title).update(mitigation=template.mitigation, impact=template.impact, references=template.references)
+        else:
+            finding_templates = Finding_Template.objects.filter(cwe=template.cwe, template_match=True, template_match_title=True)
+
+            finding_ids = None
+            result_list = None
+            for title_template in finding_templates:
+                finding_ids = Finding.objects.filter(active=True, verified=True, cwe=title_template.cwe, title__icontains=title_template.title).values_list('id', flat=True)
+                if result_list is None:
+                    result_list = finding_ids
+                else:
+                    result_list = list(chain(result_list, finding_ids))
+
+            count = Finding.objects.filter(active=True, verified=True, cwe=template.cwe).exclude(id__in=result_list)
+
+            if update:
+                # MySQL won't allow an 'update in satement' so loop will have to do
+                for finding in count:
+                    finding.mitigation = template.mitigation
+                    finding.impact = template.impact
+                    finding.references = template.references
+                    finding.save()
+
+            count = count.count()
+    return count
+
+
 @user_passes_test(lambda u: u.is_staff)
 def add_template(request):
     form = FindingTemplateForm()
     if request.method == 'POST':
         form = FindingTemplateForm(request.POST)
         if form.is_valid():
+            apply_message = ""
             template = form.save(commit=False)
-            template.numerical_severity = Finding.get_numerical_severity(
-                template.severity)
+            template.numerical_severity = Finding.get_numerical_severity(template.severity)
             template.save()
             tags = request.POST.getlist('tags')
             t = ", ".join(tags)
             template.tags = t
+            count = apply_cwe_mitigation(form.cleaned_data["apply_to_findings"], template)
+            if count > 0:
+                apply_message = " and " + str(count) + pluralize(count, 'finding,findings') + " "
+
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                'Template created successfully.',
+                'Template created successfully. ' + apply_message,
                 extra_tags='alert-success')
             return HttpResponseRedirect(reverse('templates'))
         else:
@@ -1071,20 +1101,26 @@ def add_template(request):
 def edit_template(request, tid):
     template = get_object_or_404(Finding_Template, id=tid)
     form = FindingTemplateForm(instance=template)
+
+    apply_message = ""
     if request.method == 'POST':
         form = FindingTemplateForm(request.POST, instance=template)
         if form.is_valid():
             template = form.save(commit=False)
-            template.numerical_severity = Finding.get_numerical_severity(
-                template.severity)
+            template.numerical_severity = Finding.get_numerical_severity(template.severity)
             template.save()
+
+            count = apply_cwe_mitigation(form.cleaned_data["apply_to_findings"], template)
+            if count > 0:
+                apply_message = " and " + str(count) + " " + pluralize(count, 'finding,findings') + " "
+
             tags = request.POST.getlist('tags')
             t = ", ".join(tags)
             template.tags = t
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                'Template updated successfully.',
+                'Template ' + apply_message + 'updated successfully.',
                 extra_tags='alert-success')
             return HttpResponseRedirect(reverse('templates'))
         else:
@@ -1093,10 +1129,14 @@ def edit_template(request, tid):
                 messages.ERROR,
                 'Template form has error, please revise and try again.',
                 extra_tags='alert-danger')
+    else:
+        count = apply_cwe_mitigation(True, template, False)
+
     form.initial['tags'] = [tag.name for tag in template.tags]
     add_breadcrumb(title="Edit Template", top_level=False, request=request)
     return render(request, 'dojo/add_template.html', {
         'form': form,
+        'count': count,
         'name': 'Edit Template',
         'template': template,
     })
@@ -1212,25 +1252,12 @@ def manage_images(request, fid):
 
         if not error:
             return HttpResponseRedirect(reverse('view_finding', args=(fid, )))
-    system_settings = System_Settings.objects.get()
-    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(finding.test.engagement.product.id)
+    product_tab = Product_Tab(finding.test.engagement.product.id, title="Manage Finding Images", tab="findings")
     return render(
         request, 'dojo/manage_images.html', {
-            'tab_product': tab_product,
-            'tab_engagements': tab_engagements,
-            'tab_findings': tab_findings,
-            'tab_endpoints': tab_endpoints,
-            'tab_benchmarks': tab_benchmarks,
-            'active_tab': 'findings',
-            'system_settings': system_settings,
+            'product_tab': product_tab,
             'images_formset': images_formset,
-            'tab_product': tab_product,
-            'tab_engagements': tab_engagements,
-            'tab_findings': tab_findings,
-            'tab_endpoints': tab_endpoints,
-            'tab_benchmarks': tab_benchmarks,
             'active_tab': 'findings',
-            'system_settings': system_settings,
             'name': 'Manage Finding Images',
             'finding': finding,
         })
@@ -1268,31 +1295,181 @@ def download_finding_pic(request, token):
 
 
 @user_passes_test(lambda u: u.is_staff)
+def merge_finding_product(request, pid):
+    product = get_object_or_404(Product, pk=pid)
+    finding_to_update = request.GET.getlist('finding_to_update')
+    findings = None
+
+    if (request.GET.get('merge_findings') or request.method == 'POST') and finding_to_update:
+        finding = Finding.objects.get(id=finding_to_update[0], test__engagement__product=product)
+        findings = Finding.objects.filter(id__in=finding_to_update, test__engagement__product=product)
+        form = MergeFindings(finding=finding, findings=findings, initial={'finding_to_merge_into': finding_to_update[0]})
+
+        if request.method == 'POST':
+            form = MergeFindings(request.POST, finding=finding, findings=findings)
+            if form.is_valid():
+                finding_to_merge_into = form.cleaned_data['finding_to_merge_into']
+                findings_to_merge = form.cleaned_data['findings_to_merge']
+                finding_descriptions = ''
+                notes_entry = ''
+                static = False
+                dynamic = False
+
+                if finding_to_merge_into not in findings_to_merge:
+                    for finding in findings_to_merge.exclude(pk=finding_to_merge_into.pk):
+                        notes_entry = "{} {} ({}),".format(notes_entry, finding.title, finding.id)
+                        if finding.static_finding:
+                            static = finding.static_finding
+
+                        if finding.dynamic_finding:
+                            dynamic = finding.dynamic_finding
+
+                        if finding.line:
+                            line = finding.line
+
+                        if finding.file_path:
+                            file_path = finding.file_path
+
+                        # If checked merge the descriptions
+                        if form.cleaned_data['append_description']:
+                            finding_descriptions = "{}\n{}".format(finding_descriptions, finding.description)
+                            # Workaround until file path is one to many
+                            if finding.file_path:
+                                finding_descriptions = "{}\n**File Path:** {}\n".format(finding_descriptions, finding.file_path)
+
+                        # if checked merge the endpoints
+                        if form.cleaned_data['add_endpoints']:
+                            finding_to_merge_into.endpoints.add(*finding.endpoints.all())
+
+                        # if checked merge the tags
+                        if form.cleaned_data['tag_finding']:
+                            for tag in finding.tags:
+                                Tag.objects.add_tag(finding_to_merge_into, tag)
+
+                        # if checked re-assign the burp requests to the merged finding
+                        if form.cleaned_data['dynamic_raw']:
+                            BurpRawRequestResponse.objects.filter(finding=finding).update(finding=finding_to_merge_into)
+
+                        # Add merge finding information to the note if set to inactive
+                        if form.cleaned_data['finding_action'] == "inactive":
+                            single_finding_notes_entry = "Finding has been set to inactive and merged with the finding: {}.".format(finding_to_merge_into.title)
+                            note = Notes(entry=single_finding_notes_entry, author=request.user)
+                            note.save()
+                            finding.notes.add(note)
+
+                            # If the merged finding should be tagged as merged-into
+                            if form.cleaned_data['mark_tag_finding']:
+                                Tag.objects.add_tag(finding, "merged-inactive")
+
+                    # Update the finding to merge into
+                    if finding_descriptions is not '':
+                        finding_to_merge_into.description = "{}\n\n{}".format(finding_to_merge_into.description, finding_descriptions)
+
+                    if finding_to_merge_into.static_finding:
+                        static = finding.static_finding
+
+                    if finding_to_merge_into.dynamic_finding:
+                        dynamic = finding.dynamic_finding
+
+                    if finding_to_merge_into.line is None:
+                        line = finding_to_merge_into.line
+
+                    if finding_to_merge_into.file_path is None:
+                        file_path = finding_to_merge_into.file_path
+
+                    finding_to_merge_into.static_finding = static
+                    finding_to_merge_into.dynamic_finding = dynamic
+
+                    # Update the timestamp
+                    finding_to_merge_into.last_reviewed = timezone.now()
+                    finding_to_merge_into.last_reviewed_by = request.user
+
+                    # Save the data to the merged finding
+                    finding_to_merge_into.save()
+
+                    # If the finding merged into should be tagged as merged
+                    if form.cleaned_data['mark_tag_finding']:
+                        Tag.objects.add_tag(finding_to_merge_into, "merged")
+
+                    finding_action = ""
+                    # Take action on the findings
+                    if form.cleaned_data['finding_action'] == "inactive":
+                        finding_action = "inactivated"
+                        findings_to_merge.exclude(pk=finding_to_merge_into.pk).update(active=False, last_reviewed=timezone.now(), last_reviewed_by=request.user)
+                    elif form.cleaned_data['finding_action'] == "delete":
+                        finding_action = "deleted"
+                        findings_to_merge.delete()
+
+                    notes_entry = "Finding consists of merged findings from the following findings: {} which have been {}.".format(notes_entry[:-1], finding_action)
+                    note = Notes(entry=notes_entry, author=request.user)
+                    note.save()
+                    finding_to_merge_into.notes.add(note)
+
+                    messages.add_message(
+                        request,
+                        messages.SUCCESS,
+                        'Findings merged',
+                        extra_tags='alert-success')
+                    return HttpResponseRedirect(
+                        reverse('edit_finding', args=(finding_to_merge_into.id, )))
+                else:
+                    messages.add_message(request,
+                                         messages.ERROR,
+                                         'Unable to merge findings. Findings to merge contained in finding to merge into.',
+                                         extra_tags='alert-danger')
+            else:
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     'Unable to merge findings. Required fields were not selected.',
+                                     extra_tags='alert-danger')
+
+    product_tab = Product_Tab(finding.test.engagement.product.id, title="Merge Findings", tab="findings")
+    custom_breadcrumb = {"Open Findings": reverse('product_open_findings', args=(finding.test.engagement.product.id, )) + '?test__engagement__product=' + str(finding.test.engagement.product.id)}
+
+    return render(request, 'dojo/merge_findings.html', {
+        'form': form,
+        'name': 'Merge Findings',
+        'finding': finding,
+        'product_tab': product_tab,
+        'title': product_tab.title,
+        'custom_breadcrumb': custom_breadcrumb
+    })
+
+
+@user_passes_test(lambda u: u.is_staff)
 def finding_bulk_update_all(request, pid=None):
     form = FindingBulkUpdateForm(request.POST)
     if request.method == "POST":
         finding_to_update = request.POST.getlist('finding_to_update')
         if request.POST.get('delete_bulk_findings') and finding_to_update:
             finds = Finding.objects.filter(id__in=finding_to_update)
+            product_calc = list(Product.objects.filter(engagement__test__finding__id__in=finding_to_update).distinct())
             finds.delete()
+            for prod in product_calc:
+                calculate_grade(prod)
         else:
             if form.is_valid() and finding_to_update:
                 finding_to_update = request.POST.getlist('finding_to_update')
-                finds = Finding.objects.filter(id__in=finding_to_update)
+                finds = Finding.objects.filter(id__in=finding_to_update).order_by("finding__test__engagement__product__id")
                 if form.cleaned_data['severity']:
                     finds.update(severity=form.cleaned_data['severity'],
                                  numerical_severity=Finding.get_numerical_severity(form.cleaned_data['severity']),
-                                 active=form.cleaned_data['active'],
-                                 verified=form.cleaned_data['verified'],
-                                 false_p=form.cleaned_data['false_p'],
-                                 duplicate=form.cleaned_data['duplicate'],
-                                 out_of_scope=form.cleaned_data['out_of_scope'])
-                else:
+                                 last_reviewed=timezone.now(),
+                                 last_reviewed_by=request.user)
+                if form.cleaned_data['status']:
                     finds.update(active=form.cleaned_data['active'],
                                  verified=form.cleaned_data['verified'],
                                  false_p=form.cleaned_data['false_p'],
-                                 duplicate=form.cleaned_data['duplicate'],
-                                 out_of_scope=form.cleaned_data['out_of_scope'])
+                                 out_of_scope=form.cleaned_data['out_of_scope'],
+                                 last_reviewed=timezone.now(),
+                                 last_reviewed_by=request.user)
+                # Update the grade as bulk edits don't go through save
+                if form.cleaned_data['severity'] or form.cleaned_data['status']:
+                    prev_prod = None
+                    for finding in finds:
+                        if prev_prod != finding.test.engagement.product.id:
+                            calculate_grade(finding.test.engagement.product)
+                            prev_prod = finding.test.engagement.product.id
 
                 messages.add_message(request,
                                      messages.SUCCESS,
@@ -1304,6 +1481,6 @@ def finding_bulk_update_all(request, pid=None):
                                      'Unable to process bulk update. Required fields were not selected.',
                                      extra_tags='alert-danger')
     if pid:
-        return HttpResponseRedirect(reverse('product_open_findings', args=(pid)) + '?test__engagement__product=' + pid)
+        return HttpResponseRedirect(reverse('product_open_findings', args=(pid, )) + '?test__engagement__product=' + pid)
     else:
         return HttpResponseRedirect(reverse('open_findings', args=()))

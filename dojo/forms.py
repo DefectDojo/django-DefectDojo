@@ -178,7 +178,7 @@ class ProductForm(forms.ModelForm):
 
     class Meta:
         model = Product
-        fields = ['name', 'description', 'tags', 'prod_manager', 'tech_contact', 'manager', 'prod_type',
+        fields = ['name', 'description', 'tags', 'prod_manager', 'tech_contact', 'manager', 'prod_type', 'regulations',
                   'authorized_users', 'business_criticality', 'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience', 'internet_accessible']
 
 
@@ -192,7 +192,7 @@ class DeleteProductForm(forms.ModelForm):
                    'prod_type', 'updated', 'tid', 'authorized_users', 'product_manager',
                    'technical_contact', 'team_manager', 'prod_numeric_grade', 'business_criticality',
                    'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience',
-                   'internet_accessible']
+                   'internet_accessible', 'regulations']
 
 
 class ProductMetaDataForm(forms.ModelForm):
@@ -244,6 +244,7 @@ class ImportScanForm(forms.Form):
                          ("OpenVAS CSV", "OpenVAS CSV"),
                          ("Snyk Scan", "Snyk Scan"),
                          ("Generic Findings Import", "Generic Findings Import"),
+                         ("Trustwave Scan (CSV)", "Trustwave Scan (CSV)"),
                          ("SKF Scan", "SKF Scan"),
                          ("Bandit Scan", "Bandit Scan"),
                          ("SSL Labs Scan", "SSL Labs Scan"))
@@ -330,21 +331,67 @@ class UploadThreatForm(forms.Form):
         label="Select Threat Model")
 
 
+class MergeFindings(forms.ModelForm):
+    FINDING_ACTION = (('', 'Select an Action'), ('inactive', 'Inactive'), ('delete', 'Delete'))
+
+    append_description = forms.BooleanField(label="Append Description", initial=True, required=False,
+                                            help_text="Description in all findings will be appended into the merged finding.")
+
+    add_endpoints = forms.BooleanField(label="Add Endpoints", initial=True, required=False,
+                                           help_text="Endpoints in all findings will be merged into the merged finding.")
+
+    dynamic_raw = forms.BooleanField(label="Dynamic Scanner Raw Requests", initial=True, required=False,
+                                           help_text="Dynamic scanner raw requests in all findings will be merged into the merged finding.")
+
+    tag_finding = forms.BooleanField(label="Add Tags", initial=True, required=False,
+                                           help_text="Tags in all findings will be merged into the merged finding.")
+
+    mark_tag_finding = forms.BooleanField(label="Tag Merged Finding", initial=True, required=False,
+                                           help_text="Creates a tag titled 'merged' for the finding that will be merged. If the 'Finding Action' is set to 'inactive' the inactive findings will be tagged with 'merged-inactive'.")
+
+    finding_action = forms.ChoiceField(
+        required=True,
+        choices=FINDING_ACTION,
+        label="Finding Action",
+        help_text="The action to take on the merged finding. Set the findings to inactive or delete the findings.")
+
+    def __init__(self, *args, **kwargs):
+        finding = kwargs.pop('finding')
+        findings = kwargs.pop('findings')
+        super(MergeFindings, self).__init__(*args, **kwargs)
+
+        self.fields['finding_to_merge_into'] = forms.ModelChoiceField(
+            queryset=findings, initial=0, required="False", label="Finding to Merge Into", help_text="Findings selected below will be merged into this finding.")
+
+        # Exclude the finding to merge into from the findings to merge into
+        self.fields['findings_to_merge'] = forms.ModelMultipleChoiceField(
+            queryset=findings, required=True, label="Findings to Merge",
+            widget=forms.widgets.SelectMultiple(attrs={'size': 10}),
+            help_text=('Select the findings to merge.'))
+        self.fields.keyOrder = ['finding_to_merge_into', 'findings_to_merge', 'append_description', 'add_endpoints']
+
+    class Meta:
+        model = Finding
+        fields = ['append_description', 'add_endpoints']
+
+
 class UploadRiskForm(forms.ModelForm):
     path = forms.FileField(label="Select File",
-                           required=True,
+                           required=False,
                            widget=forms.widgets.FileInput(
                                attrs={"accept": ".jpg,.png,.pdf"}))
     accepted_findings = forms.ModelMultipleChoiceField(
         queryset=Finding.objects.all(), required=True,
-        widget=forms.widgets.CheckboxSelectMultiple(),
-        help_text=('Scroll for additional findings or '
-                   '<a class="accept-all-findings">Check All</a>'))
+        widget=forms.widgets.SelectMultiple(attrs={'size': 10}),
+        help_text=('Active, verified findings listed, please select to add findings.'))
     reporter = forms.ModelChoiceField(
         queryset=User.objects.exclude(username="root"))
+    accepted_by = forms.CharField(help_text="The entity or person that accepts the risk.", required=False)
+    expiration_date = forms.DateTimeField(label='Date Risk Exception Expires', required=False, widget=forms.TextInput(attrs={'class': 'datepicker'}))
+    compensating_control = forms.CharField(label='Compensating Control', help_text="Compensating control (if applicable) for this risk exception", required=False, max_length=2400, widget=forms.Textarea)
     notes = forms.CharField(required=False, max_length=2400,
                             widget=forms.Textarea,
-                            label='Notes:')
+                            label='Notes')
 
     class Meta:
         model = Risk_Acceptance
@@ -365,12 +412,12 @@ class ReplaceRiskAcceptanceForm(forms.ModelForm):
 class AddFindingsRiskAcceptanceForm(forms.ModelForm):
     accepted_findings = forms.ModelMultipleChoiceField(
         queryset=Finding.objects.all(), required=True,
-        widget=forms.CheckboxSelectMultiple(),
-        label="")
+        widget=forms.widgets.SelectMultiple(attrs={'size': 10}),
+        help_text=('Select to add findings.'))
 
     class Meta:
         model = Risk_Acceptance
-        exclude = ('reporter', 'path', 'notes')
+        exclude = ('reporter', 'path', 'notes', 'accepted_by', 'expiration_date', 'compensating_control')
 
 
 class ScanSettingsForm(forms.ModelForm):
@@ -481,10 +528,26 @@ class EngForm(forms.ModelForm):
     test_strategy = forms.URLField(required=False, label="Test Strategy URL")
 
     def __init__(self, *args, **kwargs):
+        cicd = False
+        if 'cicd' in kwargs:
+            cicd = kwargs.pop('cicd')
+
         tags = Tag.objects.usage_for_model(Engagement)
         t = [(tag.name, tag.name) for tag in tags]
         super(EngForm, self).__init__(*args, **kwargs)
         self.fields['tags'].widget.choices = t
+        # Don't show CICD fields on a interactive engagement
+        if cicd is False:
+            del self.fields['build_id']
+            del self.fields['commit_hash']
+            del self.fields['branch_tag']
+            del self.fields['build_server']
+            del self.fields['source_code_management_server']
+            del self.fields['source_code_management_uri']
+            del self.fields['orchestration_engine']
+        else:
+            del self.fields['test_strategy']
+            del self.fields['status']
 
     def is_valid(self):
         valid = super(EngForm, self).is_valid()
@@ -502,7 +565,7 @@ class EngForm(forms.ModelForm):
         model = Engagement
         exclude = ('first_contacted', 'version', 'eng_type', 'real_start',
                    'real_end', 'requester', 'reason', 'updated', 'report_type',
-                   'product', 'threat_model', 'api_test', 'pen_test', 'check_list')
+                   'product', 'threat_model', 'api_test', 'pen_test', 'check_list', 'engagement_type')
 
 
 class EngForm2(forms.ModelForm):
@@ -810,6 +873,7 @@ class ApplyFindingTemplateForm(forms.Form):
 
 
 class FindingTemplateForm(forms.ModelForm):
+    apply_to_findings = forms.BooleanField(required=False, help_text="Apply template to all findings that match this CWE. (Update will overwrite mitigation, impact and references for any active, verified findings.)")
     title = forms.CharField(max_length=1000, required=True)
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False,
@@ -822,6 +886,8 @@ class FindingTemplateForm(forms.ModelForm):
         error_messages={
             'required': 'Select valid choice: In Progress, On Hold, Completed',
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
+
+    field_order = ['title', 'cwe', 'severity', 'description', 'mitigation', 'impact', 'references', 'tags', 'template_match', 'template_match_cwe', 'template_match_title', 'apply_to_findings']
 
     def __init__(self, *args, **kwargs):
         tags = Tag.objects.usage_for_model(Finding_Template)
@@ -845,6 +911,8 @@ class DeleteFindingTemplateForm(forms.ModelForm):
 
 
 class FindingBulkUpdateForm(forms.ModelForm):
+    status = forms.BooleanField(required=False)
+
     def __init__(self, *args, **kwargs):
         super(FindingBulkUpdateForm, self).__init__(*args, **kwargs)
         self.fields['severity'].required = False
@@ -1323,6 +1391,15 @@ class DeleteFindingForm(forms.ModelForm):
         fields = ('id',)
 
 
+class FindingFormID(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = Finding
+        fields = ('id',)
+
+
 class DeleteStubFindingForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())
@@ -1519,6 +1596,7 @@ class CredMappingFormProd(forms.ModelForm):
 
 
 class SystemSettingsForm(forms.ModelForm):
+
     class Meta:
         model = System_Settings
         exclude = ['product_grade']

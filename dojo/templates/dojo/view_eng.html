@@ -5,6 +5,9 @@
 {% load static from staticfiles %}
 {% block add_styles %}
     h3 { margin-top: 5px; margin-bottom: 5px; font-size: 20px; line-height: 22px;}
+    .tooltip-inner {
+      max-width: 350px;
+    }
 {% endblock %}
 {% block content %}
 
@@ -107,7 +110,7 @@
             <div class="panel-heading">
                 <div class="clearfix">
                     <h4 class="pull-left">
-                        Tests
+                        Tests ({{tests.count}}) <small>{{ eng.id|get_severity_count:"engagement" }}</small>
                     </h4>
 
                     <div class="dropdown pull-right">
@@ -170,6 +173,12 @@
                                              <a class="" href="{% url 'edit_test' test.id %}">
                                               <i class="fa fa-pencil-square-o"></i> Edit</a>
                                           </li>
+                                          <li class="divider"></li>
+                                          <li>
+                                            <a class="" href="{% url 'add_findings' test.id %}">
+                                              <i class="fa fa-plus"></i> Add Finding to Test
+                                            </a>
+                                          </li>
                                            <li class="divider"></li>
                                            <li>
                                              <a class="" href="{% url 'add_tests' eng.id %}">
@@ -196,8 +205,8 @@
                                       {{ eng.lead }}
                                   {% endif %}
                                 </td>
-                                <td><a href="{% url 'view_test' test.id %}">{{ test.finding_set.all|finding_status:False|length }}</a></td>
-                                <td>{{ test.finding_set.all|finding_status:True|length }}</td>
+                                <td><a href="{% url 'view_test' test.id %}">{{ test|count_findings_test_all }}</a></td>
+                                <td>{{ test|count_findings_test_duplicate }}</td>
                                 <td>{{ test.notes.all|length }}</td>
                             </tr>
                         {% endfor %}
@@ -235,6 +244,8 @@
                         <tr>
                             <th>Reporter</th>
                             <th>Date</th>
+                            <th>Date Expires</th>
+                            <th>Accepted by</th>
                             <th>Findings Accepted</th>
                             <th>View File</th>
                             <th>Actions</th>
@@ -244,6 +255,8 @@
                             <tr>
                                 <td>{{ risk.reporter }}</td>
                                 <td>{{ risk.created }}</td>
+                                <td>{{ risk.expiration_date|default_if_none:"" }}</td>
+                                <td>{{ risk.accepted_by|default_if_none:"" }}</td>
                                 <td>{{ risk.accepted_findings.all|length }}</td>
                                 <td><a href="{% url 'download_risk' eng.id risk.id %}">{{ risk.filename }}</a></td>
                                 <td>
@@ -267,7 +280,7 @@
     </div>
 
 </div>
-
+{% if eng.engagement_type == "Interactive" %}
 <div class="row">
     <div id="checklist" class="col-md-12">
         <div class="panel panel-default">
@@ -342,7 +355,7 @@
     </div>
 
 </div>
-
+{% endif %}
 
 <!-- Sidebar -->
 </div>
@@ -377,7 +390,7 @@
           <tr>
             <td><strong>Length</strong></td>
             <td>{{ eng.target_start|datediff_time:eng.target_end }}
-              {% if eng.target_end|overdue %}
+              {% if eng.target_end|overdue and eng.status != 'Completed'%}
               <sup>
                 <div class="tag-label warning-color">
                   {{ eng.target_end|overdue }} overdue
@@ -387,7 +400,8 @@
             </td>
           </tr>
           <tr>
-            <td><strong>Lead</strong></td>
+            <td><strong>
+              {% if eng.engagement_type == "Interactive" %}Lead{% else %}Service Account {% endif %}</strong></td>
             <td>{% if eng.lead.get_full_name and eng.lead.get_full_name.strip %}
                 {{ eng.lead.get_full_name }}
             {% else %}
@@ -400,21 +414,81 @@
             <td><a href="{{ jconf.url }}/browse/{{ jissue.jira_key }}">Jira Epic</a></td>
           </tr>
           {% endif %}
+          <tr>
+            <td><strong>Updated</strong></td>
+            <td>{{ eng.updated|naturaltime|default_if_none:"" }}</td>
+          </tr>
+          <tr>
+            <td><strong>Created</strong></td>
+            <td>{{ eng.created|naturaltime|default_if_none:"" }}</td>
+          </tr>
+
         </tbody>
       </table>
     </div>
   </div>
-
+  {% if eng.engagement_type == "CI/CD" %}
   <div>
     <div class="panel panel-default">
       <div class="panel-heading">
-        <h3 class="panel-title"><span class="fa fa-key" aria-hidden="true"></span>
+        <h3 class="panel-title"><span class="fa fa-server" aria-hidden="true"></span>
+          CI/CD Engagement Details
+      </h3>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <tbody>
+            <tr>
+              <td><strong>Build ID</strong></td>
+              <td>{{ eng.build_id }}</td>
+            </tr>
+            <tr>
+              <td><strong>Commit Hash</strong></td>
+              <td>{{ eng.commit_hash }}</td>
+            </tr>
+            <tr>
+              <td><strong>Branch/Tag</strong></td>
+              <td>{{ eng.branch_tag }}</td>
+            </tr>
+            <tr>
+              <td><strong>Repo</strong></td>
+              <td>{% if eng.source_code_management_uri %}
+                <a target="_blank" data-toggle="tooltip" data-placement="top" title="{{ eng.source_code_management_uri }}" href="{{ eng.source_code_management_uri }}">
+                  <i class="fa fa-external-link"></i> View
+                </a>{% endif %}
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Orchestration</strong></td>
+              <td><a href="{% url 'edit_tool_config' eng.orchestration_engine.id %}">{{ eng.orchestration_engine.name }}</a>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>SCM Server</strong></td>
+              <td><a href="{% url 'edit_tool_config' eng.orchestration_engine.id %}">{{ eng.source_code_management_server.name }}</a>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Build Server</strong></td>
+              <td><a href="{% url 'edit_tool_config' eng.orchestration_engine.id %}">{{ eng.build_server.name }}</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+</div>
+{% endif %}
+  <div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4><span class="fa fa-key" aria-hidden="true"></span>
           Credentials
         {% if creds %}
-          <a title="Add New Credential" class="pull-right btn btn-primary btn-sm"
+          <a title="Add New Credential" class="pull-right btn btn-sm btn-primary"
              href="{% url 'new_cred_product_engagement' eng.id %}"><span class="fa fa-plus"></span></a>
         {% endif %}
-      </h3>
+      </h4>
       </div>
       <div class="table-responsive">
         <table class="table table-striped">
@@ -500,11 +574,27 @@
 
 </div>
 </div>
+<div class="protip">
+   <i class="fa fa-lightbulb-o"></i> <strong>ProTip!</strong> Type <kbd>e</kbd> to edit this engagement. Type <kbd>i</kbd> to import scan results or <kbd>a</kbd> to add tests.
+</div>
 {% endblock %}
 {% block postscript %}
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
         <script type="text/javascript">
         $(function () {
+            $(document).on('keypress', function(e) {
+                var key = String.fromCharCode(e.which);
+                if (key =='e') {
+                  window.location.assign('{% url 'edit_engagement' eng.id %}');
+                } else if (key === 'a') {
+                  window.location.assign('{% url 'add_tests' eng.id %}');
+                } else if (key === 'i') {
+                  window.location.assign('{% url 'import_scan_results' eng.id %}');
+                }
+            });
+            $(document).ready(function(){
+              $('[data-toggle="tooltip"]').tooltip();
+            });
             //Ensures dropdown has proper zindex
             $('.table-responsive').on('show.bs.dropdown', function () {
               $('.table-responsive').css( "overflow", "inherit" );

@@ -1,7 +1,6 @@
 import sys
 sys.path.append('..')
 from dojo.models import Product
-from dojo.models import System_Settings
 from dojo.models import Endpoint
 from dojo.endpoint import views
 from django.test import TestCase
@@ -197,6 +196,8 @@ class TestEditEndpointMetaData(TestCase):
 
         EndpointMetaDataTestUtil.save_custom_field(e, 'TestField', 'TestValue')
         EndpointMetaDataTestUtil.save_custom_field(p, 'TestProductField', 'TestProductValue')
+
+        call_command('loaddata', 'dojo/fixtures/system_settings', verbosity=0)
 
     def make_request(self, user_is_staff, id, data=None):
         user = EndpointMetaDataTestUtil.create_user(user_is_staff)
