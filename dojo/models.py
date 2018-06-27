@@ -1831,7 +1831,7 @@ single_options = product_opts + test_opts + test_type_opts + finding_opts + \
                     endpoint_opts + engagement_opts + product_type_opts
 all_options = []
 for x in single_options:
-    all_options.append((x , x))
+    all_options.append((x, x))
 operator_options = (('Matches', 'Matches'),
                     ('Contains', 'Contains'))
 application_options = (('Append', 'Append'),
@@ -1854,8 +1854,8 @@ class Rule(models.Model):
     match_text = models.TextField()
     application = models.CharField(max_length=200, choices=application_options)
     applies_to = models.CharField(max_length=30, choices=model_object_options)
-    #TODO: Add or ?
-    #and_rules = models.ManyToManyField('self')
+    ## TODO: Add or ?
+    ## and_rules = models.ManyToManyField('self')
     applied_field = models.CharField(max_length=200, choices=(all_options))
     child_rules  = models.ManyToManyField('self', editable=False, null=True)
     parent_rule = models.ForeignKey('self', editable=False, null=True)

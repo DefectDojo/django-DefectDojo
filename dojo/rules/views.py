@@ -13,12 +13,12 @@ from django.shortcuts import render, get_object_or_404
 from dojo.models import Rule,\
     System_Settings, Finding, Test, Test_Type, Engagement, \
     Product, Product_Type
-
+from dojo.forms import RuleFormSet, DeleteRuleForm
 from dojo.utils import add_breadcrumb
 
 logger = logging.getLogger(__name__)
 
-#Fields for each model ruleset
+## Fields for each model ruleset
 
 finding_fields = [f.name for f in Finding._meta.fields]
 test_fields = [f.name for f in Test._meta.fields]
@@ -34,7 +34,7 @@ field_dictionary['Engagement'] = engagement_fields
 field_dictionary['Product'] = product_fields
 field_dictionary['Product Type'] = product_type_fields
 
-#Add Scan Type
+
 def rules(request):
     initial_queryset = Rule.objects.all().order_by('name')
     add_breadcrumb(title="Rules", top_level=True, request=request)
@@ -91,7 +91,7 @@ def edit_rule(request, pid):
         'user': request.user,
         'form': form,
         'field_dictionary': json.dumps(field_dictionary),
-        'pt': pt,})
+        'pt': pt, })
 
 @user_passes_test(lambda u: u.is_staff)
 def delete_rule(request, pid):
