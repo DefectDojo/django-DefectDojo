@@ -182,6 +182,9 @@
                                             <a href="{% url 'accepted_findings' %}">Accepted Findings</a>
                                         </li>
                                         <li>
+                                            <a href="{% url 'all_findings' %}">All Findings</a>
+                                        </li>
+                                        <li>
                                             <a href="{% url 'closed_findings' %}">Closed Findings</a>
                                         </li>
                                         <li>
@@ -328,6 +331,7 @@
                       <li><a href="{% url 'product_open_findings' product_tab.product.id %}?active=2&verified=2&false_p=3&duplicate=2&out_of_scope=1&test__engagement__product={{ product_tab.product.id }}&date=2"><i class="fa fa-calendar"></i> View Findings from Last 7 Days </a></li>
                       <li role="separator" class="divider"></li>
                       <li><a href="{% url 'product_accepted_findings' product_tab.product.id %}?test__engagement__product={{ product_tab.product.id }}"><i class="fa fa-check"></i> View Accepted Findings</a></li>
+                      <li><a href="{% url 'product_all_findings' product_tab.product.id %}?test__engagement__product={{ product_tab.product.id }}"><i class="fa fa-search"></i> View All Findings</a></li>
                       <li><a href="{% url 'product_closed_findings' product_tab.product.id %}?test__engagement__product={{ product_tab.product.id }}"><i class="fa fa-fire-extinguisher"></i>&nbsp;&nbsp;View Closed Findings </a></li>
                       <li role="separator" class="divider"></li>
                       <li><a href="{% url 'ad_hoc_finding' product_tab.product.id %}"><i class="fa fa-plus"></i> Add New Finding</a></li>

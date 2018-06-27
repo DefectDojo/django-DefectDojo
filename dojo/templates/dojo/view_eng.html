@@ -444,7 +444,7 @@
             </tr>
             <tr>
               <td><strong>Commit Hash</strong></td>
-              <td>{{ eng.commit_hash }}</td>
+              <td>{{ eng.commit_hash|truncatechars:10 }}</td>
             </tr>
             <tr>
               <td><strong>Branch/Tag</strong></td>

@@ -31,11 +31,21 @@ class SSLlabsParser(object):
                 ipAddress = ''
                 protocol = ''
 
-                grade = endpoints["grade"]
-                hostName = host["host"]
-                port = host["port"]
-                ipAddress = endpoints["ipAddress"]
-                protocol = host["protocol"]
+                grade = ""
+                if "grade" in endpoints:
+                    grade = endpoints["grade"]
+                hostName = ""
+                if "hostName" in host:
+                    hostName = host["host"]
+                port = ""
+                if "port" in host:
+                    port = host["port"]
+                ipAddress = ""
+                if "ipAddress" in endpoints:
+                    ipAddress = endpoints["ipAddress"]
+                protocol = ""
+                if "protocol" in host:
+                    protocol = host["protocol"]
 
                 title = "TLS Grade '%s' for %s" % (grade, hostName)
                 cert = endpoints["details"]["cert"]

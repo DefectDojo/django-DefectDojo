@@ -363,7 +363,7 @@
                               {{ finding.reporter }}
                           {% endif %}
                         </td>
-                        <td>{% if finding.under_review %}Under Review, {% endif %}{{ finding.status }}{% if finding.duplicate_finding.id %}, <a href="{% url 'view_finding' finding.duplicate_finding.id%}">Original</a>
+                        <td>{% if finding.under_review %}Under Review, {% endif %}{{ finding.status }}{% if finding.duplicate_finding.id %}, <a href="{% url 'view_finding' finding.duplicate_finding.id%}" data-toggle="tooltip" data-placement="top" title="{{ finding.title }}, {{ finding.created }}">Original</a>
                         {% endif %}
                         </td>
                         {% if "enable_jira"|get_system_setting %}
@@ -639,6 +639,9 @@
           }
         }
         $(function () {
+            $(document).ready(function(){
+              $('[data-toggle="tooltip"]').tooltip();
+            });
             $(document).on('keypress', function(e) {
                 var key = String.fromCharCode(e.which);
             if (key =='e') {

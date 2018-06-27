@@ -42,15 +42,23 @@ from django.template.defaultfilters import pluralize
 logger = logging.getLogger(__name__)
 
 
-def open_findings(request, pid=None):
+def open_findings(request, pid=None, view=None):
     show_product_column = True
     title = None
     custom_breadcrumb = None
-
+    filter_name = "Open"
     if pid:
-        findings = Finding.objects.filter(test__engagement__product__id=pid, active=True, duplicate=False).order_by('numerical_severity')
+        if view == "All":
+            filter_name = "All"
+            findings = Finding.objects.filter(test__engagement__product__id=pid).order_by('numerical_severity')
+        else:
+            findings = Finding.objects.filter(test__engagement__product__id=pid, active=True, duplicate=False).order_by('numerical_severity')
     else:
-        findings = Finding.objects.filter(active=True, duplicate=False).order_by('numerical_severity')
+        if view == "All":
+            filter_name = "All"
+            findings = Finding.objects.all().order_by('numerical_severity')
+        else:
+            findings = Finding.objects.filter(active=True, duplicate=False).order_by('numerical_severity')
 
     if request.user.is_staff:
         findings = OpenFingingSuperFilter(
@@ -111,7 +119,7 @@ def open_findings(request, pid=None):
             "title_words": title_words,
             'found_by': found_by,
             'custom_breadcrumb': custom_breadcrumb,
-            'filter_name': "Open",
+            'filter_name': filter_name,
             'title': title
         })
 
