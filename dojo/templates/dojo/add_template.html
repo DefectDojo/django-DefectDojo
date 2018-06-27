@@ -18,6 +18,11 @@
     <form id="add_template" class="form-horizontal" method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
         <div class="form-group">
+          {% if count > 0 %}
+            <div class="col-sm-offset-2 col-sm-10">
+                <p>{{ count }} active, verified finding{{ count|pluralize }}  match this template.</p>
+            </div>
+          {% endif %}
             <div class="col-sm-offset-2 col-sm-10">
                 <input class="btn btn-primary" type="submit" name="add_template" value="Save Template"/>
             </div>

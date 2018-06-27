@@ -15,6 +15,7 @@ from django.http import HttpResponseRedirect, StreamingHttpResponse, Http404, Ht
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.cache import cache_page
 from django.utils import timezone
+from time import strftime
 
 from dojo.filters import EngagementFilter
 from dojo.forms import CheckForm, \
@@ -27,7 +28,7 @@ from dojo.models import Finding, Product, Engagement, Test, \
     JIRA_PKey, JIRA_Issue, Cred_Mapping, Dojo_User, System_Settings
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
-    FileIterWrapper, get_cal_event, message, get_system_setting, create_notification, tab_view_count
+    FileIterWrapper, get_cal_event, message, get_system_setting, create_notification, Product_Tab
 from dojo.tasks import update_epic_task, add_epic_task, close_epic_task
 
 logger = logging.getLogger(__name__)
@@ -132,9 +133,12 @@ def new_engagement(request):
 @user_passes_test(lambda u: u.is_staff)
 def edit_engagement(request, eid):
     eng = Engagement.objects.get(pk=eid)
+    ci_cd_form = False
+    if eng.engagement_type == "CI/CD":
+        ci_cd_form = True
     jform = None
     if request.method == 'POST':
-        form = EngForm(request.POST, instance=eng)
+        form = EngForm(request.POST, instance=eng, cicd=ci_cd_form)
         if 'jiraform-push_to_jira' in request.POST:
             jform = JIRAFindingForm(
                 request.POST, prefix='jiraform', enabled=True)
@@ -167,7 +171,7 @@ def edit_engagement(request, eid):
                 return HttpResponseRedirect(
                     reverse('view_engagement', args=(eng.id, )))
     else:
-        form = EngForm(instance=eng)
+        form = EngForm(instance=eng, cicd=ci_cd_form)
         try:
             # jissue = JIRA_Issue.objects.get(engagement=eng)
             enabled = True
@@ -182,22 +186,18 @@ def edit_engagement(request, eid):
             jform = None
 
     form.initial['tags'] = [tag.name for tag in eng.tags]
-    add_breadcrumb(
-        parent=eng, title="Edit Engagement", top_level=False, request=request)
-    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(eng.product.id)
-    system_settings = System_Settings.objects.get()
 
+    title = ""
+    if eng.engagement_type == "CI/CD":
+        title = " CI/CD"
+    product_tab = Product_Tab(eng.product.id, title="Edit" + title + " Engagement", tab="engagements")
+    product_tab.setEngagement(eng)
     return render(request, 'dojo/new_eng.html', {
-        'tab_product': tab_product,
-        'tab_engagements': tab_engagements,
-        'tab_findings': tab_findings,
-        'tab_endpoints': tab_endpoints,
-        'tab_benchmarks': tab_benchmarks,
-        'active_tab': 'engagements',
-        'system_settings': system_settings,
+        'product_tab': product_tab,
         'form': form,
         'edit': True,
-        'jform': jform
+        'jform': jform,
+        'eng': eng
     })
 
 
@@ -227,19 +227,10 @@ def delete_engagement(request, eid):
                     extra_tags='alert-success')
                 return HttpResponseRedirect(reverse("view_engagements", args=(product.id, )))
 
-    add_breadcrumb(
-        parent=engagement, title="Delete", top_level=False, request=request)
-    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(product.id)
-    system_settings = System_Settings.objects.get()
-
+    product_tab = Product_Tab(product.id, title="Delete Engagement", tab="engagements")
+    product_tab.setEngagement(engagement)
     return render(request, 'dojo/delete_engagement.html', {
-        'active_tab': 'engagements',
-        'tab_product': tab_product,
-        'tab_engagements': tab_engagements,
-        'tab_findings': tab_findings,
-        'tab_endpoints': tab_endpoints,
-        'tab_benchmarks': tab_benchmarks,
-        'system_settings': system_settings,
+        'product_tab': product_tab,
         'engagement': engagement,
         'form': form,
         'rels': rels,
@@ -355,16 +346,15 @@ def view_engagement(request, eid):
         out_of_scope=False,
         mitigated__isnull=False)
 
-    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(prod.id)
+    title = ""
+    if eng.engagement_type == "CI/CD":
+        title = " CI/CD"
+    product_tab = Product_Tab(prod.id, title="View" + title + " Engagement", tab="engagements")
+    product_tab.setEngagement(eng)
     return render(
         request, 'dojo/view_eng.html', {
             'eng': eng,
-            'active_tab': 'engagements',
-            'tab_product': tab_product,
-            'tab_engagements': tab_engagements,
-            'tab_findings': tab_findings,
-            'tab_endpoints': tab_endpoints,
-            'tab_benchmarks': tab_benchmarks,
+            'product_tab': product_tab,
             'system_settings': system_settings,
             'tests': tests,
             'findings': fpage,
@@ -455,30 +445,27 @@ def add_tests(request, eid):
         form.initial['lead'] = request.user
     add_breadcrumb(
         parent=eng, title="Add Tests", top_level=False, request=request)
-    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(eng.product.id)
-    system_settings = System_Settings.objects.get()
+    product_tab = Product_Tab(eng.product.id, title="Add Tests", tab="engagements")
+    product_tab.setEngagement(eng)
     return render(request, 'dojo/add_tests.html', {
-        'active_tab': 'engagements',
-        'tab_product': tab_product,
-        'tab_engagements': tab_engagements,
-        'tab_findings': tab_findings,
-        'tab_endpoints': tab_endpoints,
-        'tab_benchmarks': tab_benchmarks,
-        'system_settings': system_settings,
+        'product_tab': product_tab,
         'form': form,
         'cred_form': cred_form,
-        'eid': eid
+        'eid': eid,
+        'eng': eng
     })
 
 
 @user_passes_test(lambda u: u.is_staff)
-def import_scan_results(request, eid):
-    engagement = get_object_or_404(Engagement, id=eid)
-    finding_count = 0
+def import_scan_results(request, eid=None, pid=None):
+    engagement = None
     form = ImportScanForm()
     cred_form = CredMappingForm()
-    cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(
-        engagement=engagement).order_by('cred_id')
+    finding_count = 0
+
+    if eid:
+        engagement = get_object_or_404(Engagement, id=eid)
+        cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(engagement=engagement).order_by('cred_id')
 
     if request.method == "POST":
         form = ImportScanForm(request.POST, request.FILES)
@@ -486,6 +473,21 @@ def import_scan_results(request, eid):
         cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(
             engagement=engagement).order_by('cred_id')
         if form.is_valid():
+            # Allows for a test to be imported with an engagement created on the fly
+            if engagement is None:
+                engagement = Engagement()
+                product = get_object_or_404(Product, id=pid)
+                engagement.name = "AdHoc Import - " + strftime("%a, %d %b %Y %X", timezone.now().timetuple())
+                engagement.threat_model = False
+                engagement.api_test = False
+                engagement.pen_test = False
+                engagement.check_list = False
+                engagement.target_start = timezone.now().date()
+                engagement.target_end = timezone.now().date()
+                engagement.product = product
+                engagement.active = True
+                engagement.status = 'In Progress'
+                engagement.save()
             file = request.FILES['file']
             scan_date = form.cleaned_data['scan_date']
             min_sev = form.cleaned_data['minimum_severity']
@@ -616,23 +618,23 @@ def import_scan_results(request, eid):
                     messages.ERROR,
                     'There appears to be an error in the XML report, please check and try again.',
                     extra_tags='alert-danger')
+    prod_id = None
+    custom_breadcrumb = None
+    title = "Import Scan Results"
+    if engagement:
+        prod_id = engagement.product.id
+        product_tab = Product_Tab(prod_id, title=title, tab="engagements")
+        product_tab.setEngagement(engagement)
+    else:
+        prod_id = pid
+        custom_breadcrumb = {"", ""}
+        product_tab = Product_Tab(prod_id, title=title, tab="findings")
 
-    add_breadcrumb(
-        parent=engagement,
-        title="Import Scan Results",
-        top_level=False,
-        request=request)
-    tab_product, tab_engagements, tab_findings, tab_endpoints, tab_benchmarks = tab_view_count(engagement.product.id)
-    system_settings = System_Settings.objects.get()
     return render(request, 'dojo/import_scan_results.html', {
         'form': form,
-        'tab_product': tab_product,
-        'tab_engagements': tab_engagements,
-        'tab_findings': tab_findings,
-        'tab_endpoints': tab_endpoints,
-        'tab_benchmarks': tab_benchmarks,
-        'active_tab': 'engagements',
-        'eid': engagement.id,
+        'product_tab': product_tab,
+        'custom_breadcrumb': custom_breadcrumb,
+        'title': title,
         'cred_form': cred_form,
     })
 
@@ -654,7 +656,10 @@ def close_eng(request, eid):
         messages.SUCCESS,
         'Engagement closed successfully.',
         extra_tags='alert-success')
-    return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
+    if eng.engagement_type == 'CI/CD':
+        return HttpResponseRedirect(reverse("view_engagements_cicd", args=(eng.product.id, )))
+    else:
+        return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -668,7 +673,10 @@ def reopen_eng(request, eid):
         messages.SUCCESS,
         'Engagement reopened successfully.',
         extra_tags='alert-success')
-    return HttpResponseRedirect(reverse('view_engagement', args=(eid, )))
+    if eng.engagement_type == 'CI/CD':
+        return HttpResponseRedirect(reverse("view_engagements_cicd", args=(eng.product.id, )))
+    else:
+        return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
 
 
 """
@@ -715,8 +723,11 @@ def complete_checklist(request, eid):
         findings = Finding.objects.filter(test__in=tests).all()
         form = CheckForm(findings=findings)
 
+    product_tab = Product_Tab(eng.product.id, title="Checklist", tab="engagements")
+    product_tab.setEngagement(eng)
     return render(request, 'dojo/checklist.html', {
         'form': form,
+        'product_tab': product_tab,
         'eid': eng.id,
         'findings': findings,
     })
@@ -737,7 +748,7 @@ def upload_risk(request, eid):
         finding.id for ra in eng.risk_acceptance.all()
         for finding in ra.accepted_findings.all()
     ]
-    eng_findings = Finding.objects.filter(test__in=eng.test_set.all()) \
+    eng_findings = Finding.objects.filter(active="True", verified="True", duplicate="False", test__in=eng.test_set.all()) \
         .exclude(id__in=exclude_findings).order_by('title')
 
     if request.method == 'POST':
@@ -749,6 +760,9 @@ def upload_risk(request, eid):
                 finding.save()
             risk = form.save(commit=False)
             risk.reporter = form.cleaned_data['reporter']
+            risk.expiration_date = form.cleaned_data['expiration_date']
+            risk.accepted_by = form.cleaned_data['accepted_by']
+            risk.compensating_control = form.cleaned_data['compensating_control']
             risk.path = form.cleaned_data['path']
             risk.save()  # have to save before findings can be added
             risk.accepted_findings = findings
@@ -766,7 +780,7 @@ def upload_risk(request, eid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                'Risk acceptance saved.',
+                'Risk exception saved.',
                 extra_tags='alert-success')
             return HttpResponseRedirect(
                 reverse('view_engagement', args=(eid, )))
@@ -774,12 +788,14 @@ def upload_risk(request, eid):
         form = UploadRiskForm(initial={'reporter': request.user})
 
     form.fields["accepted_findings"].queryset = eng_findings
-    add_breadcrumb(
-        parent=eng,
-        title="Upload Risk Acceptance",
-        top_level=False,
-        request=request)
-    return render(request, 'dojo/up_risk.html', {'eng': eng, 'form': form})
+    product_tab = Product_Tab(eng.product.id, title="Upload Risk Exception", tab="engagements")
+    product_tab.setEngagement(eng)
+
+    return render(request, 'dojo/up_risk.html', {
+                  'eng': eng,
+                  'product_tab': product_tab,
+                  'form': form
+                  })
 
 
 def view_risk(request, eid, raid):
@@ -883,11 +899,12 @@ def view_risk(request, eid, raid):
 
     authorized = (request.user == risk_approval.reporter.username or request.user.is_staff)
 
-    add_breadcrumb(parent=risk_approval, top_level=False, request=request)
-
+    product_tab = Product_Tab(eng.product.id, title="Risk Exception", tab="engagements")
+    product_tab.setEngagement(eng)
     return render(
         request, 'dojo/view_risk.html', {
             'risk_approval': risk_approval,
+            'product_tab': product_tab,
             'accepted_findings': fpage,
             'notes': risk_approval.notes.all(),
             'a_file': a_file,
@@ -983,8 +1000,10 @@ def upload_threatmodel(request, eid):
                 reverse('view_engagement', args=(eid, )))
     else:
         form = UploadThreatForm()
+    product_tab = Product_Tab(eng.product.id, title="Upload Threat Model", tab="engagements")
     return render(request, 'dojo/up_threat.html', {
         'form': form,
+        'product_tab': product_tab,
         'eng': eng,
     })
 
