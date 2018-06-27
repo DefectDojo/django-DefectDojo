@@ -33,7 +33,7 @@ setup(
         'lxml',
         'pdfkit==0.6.1',
         'Pillow',
-        'psycopg2',
+        'psycopg2-binary',
         'pycrypto',
         'python-nmap>=0.3.4',
         'pytz>=2013.9',
