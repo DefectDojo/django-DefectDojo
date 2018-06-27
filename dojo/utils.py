@@ -138,10 +138,10 @@ def child_rule(rule, new_finding):
         child_val = child_val and child_rule(child_list.pop(), new_finding)
     if child_val:
         if rule.operator == 'Matches':
-           if getattr(new_finding, rule.match_field)  == rule.match_text:
-               return True
-           else:
-               return False
+            if getattr(new_finding, rule.match_field)  == rule.match_text:
+                return True
+            else:
+                return False
         else:
             if rule.match_text in getattr(new_finding, rule.match_field):
                 return True
