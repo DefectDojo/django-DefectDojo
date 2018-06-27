@@ -1622,9 +1622,11 @@ class NotificationsForm(forms.ModelForm):
         model = Notifications
         exclude = ['']
 
+
 class AjaxChoiceField(forms.ChoiceField):
     def valid_value(self, value):
         return True
+
 
 class RuleForm(forms.ModelForm):
 
@@ -1632,13 +1634,16 @@ class RuleForm(forms.ModelForm):
         model = Rule
         exclude = ['key_product']
 
+
 RuleFormSet = modelformset_factory(Rule, extra=2, max_num=10, exclude=[''], can_delete=True)
+
 
 class DeleteRuleForm(forms.ModelForm):
 
     class Meta:
         model = Rule
         exclude = ['']
+
 
 class CredUserForm(forms.ModelForm):
     # selenium_script = forms.FileField(widget=forms.widgets.FileInput(

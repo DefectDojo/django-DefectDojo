@@ -1,20 +1,13 @@
 # Standard library imports
 import json
 import logging
-import sys
 
 # Third party imports
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
-from django.contrib.admin.utils import NestedObjects
 from django.core.urlresolvers import reverse
-from django.db import DEFAULT_DB_ALIAS
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
-from django.views.decorators.csrf import csrf_exempt
-from jira import JIRA
-from django.http import JsonResponse
-from django.forms.models import model_to_dict
 
 # Local application/library imports
 from dojo.forms import RuleForm, DeleteRuleForm, RuleFormSet
@@ -59,9 +52,6 @@ def new_rule(request):
         form = RuleFormSet(request.POST)
         match_f = request.POST.get('match_field')
         apply_f = request.POST.get('applied_field')
-        print >>sys.stderr, 'DEBUGGING'
-        print >>sys.stderr, form.is_valid()
-        print >>sys.stderr, form.errors
         if form.is_valid():
             form.save()
             messages.add_message(request,
