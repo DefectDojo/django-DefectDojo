@@ -116,8 +116,8 @@ def sync_rules(new_finding, *args, **kwargs):
             child_val = child_val and child_rule(child_list.pop(),new_finding)
         if child_val:
             if rule.operator == 'Matches':
-               if getattr(new_finding, rule.match_field)  == rule.match_text:
-                       if rule.application == 'Append':
+                if getattr(new_finding, rule.match_field)  == rule.match_text:
+                    if rule.application == 'Append':
                            setattr(new_finding, rule.applied_field, (getattr(new_finding, rule.applied_field) + rule.text))
                        else:
                            setattr(new_finding, rule.applied_field, rule.text)
