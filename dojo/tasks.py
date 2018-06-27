@@ -20,7 +20,7 @@ from dojo.celery import app
 from dojo.utils import sync_dedupe, sync_false_history
 from dojo.reports.widgets import report_widget_factory
 from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, \
-                        close_epic, get_system_setting, create_notification, sync_rules
+                       close_epic, get_system_setting, create_notification, sync_rules
 
 import logging
 fmt = getattr(settings, 'LOG_FORMAT', None)
@@ -260,6 +260,7 @@ def add_comment_task(find, note):
 def async_dedupe(new_finding, *args, **kwargs):
     logger.info("running deduplication")
     sync_dedupe(new_finding, *args, **kwargs)
+
 
 @app.task(name='applying rules')
 def async_rules(new_finding, *args, **kwargs):
