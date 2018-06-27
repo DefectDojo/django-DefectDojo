@@ -23,9 +23,10 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from jira import JIRA
 from jira.exceptions import JIRAError
+
 from dojo.models import Finding, Engagement, Finding_Template, Product, JIRA_PKey, JIRA_Issue, \
     Dojo_User, User, Alerts, System_Settings, Notifications, UserContactInfo, Endpoint, Benchmark_Type, \
-    Language_Type, Languages
+    Language_Type, Languages, Rule
 from asteval import Interpreter
 from requests.auth import HTTPBasicAuth
 
@@ -104,6 +105,50 @@ def sync_dedupe(new_finding, *args, **kwargs):
                 find.duplicate_list.add(new_finding)
                 find.found_by.add(new_finding.test.test_type)
                 super(Finding, new_finding).save(*args, **kwargs)
+
+
+def sync_rules(new_finding, *args, **kwargs):
+    rules = Rule.objects.filter(applies_to='Finding', parent_rule=None)
+    for rule in rules:
+        child_val = True
+        child_list = [val for val in rule.child_rules.all()]
+        while (len(child_list) != 0):
+            child_val = child_val and child_rule(child_list.pop(), new_finding)
+        if child_val:
+            if rule.operator == 'Matches':
+                if getattr(new_finding, rule.match_field) == rule.match_text:
+                    if rule.application == 'Append':
+                        setattr(new_finding, rule.applied_field, (getattr(new_finding, rule.applied_field) + rule.text))
+                    else:
+                        setattr(new_finding, rule.applied_field, rule.text)
+                        new_finding.save(dedupe_option=False, rules_option=False)
+            else:
+                if rule.match_text in getattr(new_finding, rule.match_field):
+                    if rule.application == 'Append':
+                        setattr(new_finding, rule.applied_field, (getattr(new_finding, rule.applied_field) + rule.text))
+                    else:
+                        setattr(new_finding, rule.applied_field, rule.text)
+                        new_finding.save(dedupe_option=False, rules_option=False)
+
+
+def child_rule(rule, new_finding):
+    child_val = True
+    child_list = [val for val in rule.child_rules.all()]
+    while (len(child_list) != 0):
+        child_val = child_val and child_rule(child_list.pop(), new_finding)
+    if child_val:
+        if rule.operator == 'Matches':
+            if getattr(new_finding, rule.match_field) == rule.match_text:
+                return True
+            else:
+                return False
+        else:
+            if rule.match_text in getattr(new_finding, rule.match_field):
+                return True
+            else:
+                return False
+    else:
+        return False
 
 
 def count_findings(findings):
