@@ -1828,7 +1828,7 @@ endpoint_opts = [f.name for f in Endpoint._meta.fields]
 engagement_opts = [f.name for f in Engagement._meta.fields]
 product_type_opts = [f.name for f in Product_Type._meta.fields]
 single_options = product_opts + test_opts + test_type_opts + finding_opts + \
-                endpoint_opts + engagement_opts + product_type_opts
+                    endpoint_opts + engagement_opts + product_type_opts
 all_options = []
 for x in single_options:
     all_options.append((x , x))
