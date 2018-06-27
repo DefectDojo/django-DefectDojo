@@ -1819,13 +1819,14 @@ class Benchmark_Product_Summary(models.Model):
     class Meta:
         unique_together = [('product', 'benchmark_type')]
 
-product_opts = [ f.name for f in Product._meta.fields ]
-test_opts = [ f.name for f in Test._meta.fields ]
-test_type_opts = [ f.name for f in Test_Type._meta.fields ]
-finding_opts = [ f.name for f in Finding._meta.fields ]
-endpoint_opts = [ f.name for f in Endpoint._meta.fields ]
-engagement_opts = [ f.name for f in Engagement._meta.fields ]
-product_type_opts = [ f.name for f in Product_Type._meta.fields ]
+
+product_opts = [f.name for f in Product._meta.fields]
+test_opts = [f.name for f in Test._meta.fields]
+test_type_opts = [f.name for f in Test_Type._meta.fields]
+finding_opts = [f.name for f in Finding._meta.fields]
+endpoint_opts = [f.name for f in Endpoint._meta.fields]
+engagement_opts = [f.name for f in Engagement._meta.fields]
+product_type_opts = [f.name for f in Product_Type._meta.fields]
 single_options = product_opts + test_opts + test_type_opts + finding_opts + \
                 endpoint_opts + engagement_opts + product_type_opts
 all_options = []

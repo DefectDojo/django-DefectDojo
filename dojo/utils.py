@@ -15,7 +15,6 @@ import requests
 from dateutil.relativedelta import relativedelta, MO
 from django.conf import settings
 from django.core.mail import send_mail
-from django.apps import apps
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import get_resolver, reverse
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
@@ -106,6 +105,7 @@ def sync_dedupe(new_finding, *args, **kwargs):
                 find.duplicate_list.add(new_finding)
                 find.found_by.add(new_finding.test.test_type)
                 super(Finding, new_finding).save(*args, **kwargs)
+
 
 def sync_rules(new_finding, *args, **kwargs):
     rules = Rule.objects.filter(applies_to='Finding', parent_rule=None)
