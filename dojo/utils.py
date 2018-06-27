@@ -124,11 +124,11 @@ def sync_rules(new_finding, *args, **kwargs):
                         new_finding.save(dedupe_option=False, rules_option=False)
             else:
                 if rule.match_text in getattr(new_finding, rule.match_field):
-                       if rule.application == 'Append':
-                           setattr(new_finding, rule.applied_field, (getattr(new_finding, rule.applied_field) + rule.text))
-                       else:
-                           setattr(new_finding, rule.applied_field, rule.text)
-                       new_finding.save(dedupe_option=False, rules_option=False)
+                    if rule.application == 'Append':
+                        setattr(new_finding, rule.applied_field, (getattr(new_finding, rule.applied_field) + rule.text))
+                    else:
+                        setattr(new_finding, rule.applied_field, rule.text)
+                        new_finding.save(dedupe_option=False, rules_option=False)
 
 
 def child_rule(rule, new_finding):

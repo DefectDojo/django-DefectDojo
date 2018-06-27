@@ -1848,7 +1848,7 @@ class Rule(models.Model):
     operator = models.CharField(max_length=30, choices=operator_options)
     model_object_options = (('Product', 'Product'),
                             ('Engagement', 'Engagement'), ('Test', 'Test'),
-                            ('Finding','Finding'), ('Endpoint', 'Endpoint'),
+                            ('Finding', 'Finding'), ('Endpoint', 'Endpoint'),
                             ('Product Type', 'Product_Type'), ('Test Type', 'Test_Type'))
     model_object = models.CharField(max_length=30, choices=model_object_options)
     match_field = models.CharField(max_length=200, choices=all_options)
