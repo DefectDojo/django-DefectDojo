@@ -18,7 +18,7 @@ from dojo.utils import add_breadcrumb
 
 logger = logging.getLogger(__name__)
 
-## Fields for each model ruleset
+# Fields for each model ruleset
 
 finding_fields = [f.name for f in Finding._meta.fields]
 test_fields = [f.name for f in Test._meta.fields]
@@ -54,9 +54,9 @@ def new_rule(request):
         if form.is_valid():
             form.save()
             messages.add_message(request,
-                     messages.SUCCESS,
-                     'Rule created successfully.',
-                     extra_tags='alert-success')
+                                 messages.SUCCESS,
+                                 'Rule created successfully.',
+                                 extra_tags='alert-success')
             return HttpResponseRedirect(reverse('rules'))
     form = RuleFormSet(queryset=Rule.objects.none())
     add_breadcrumb(title="New Dojo Rule", top_level=False, request=request)
@@ -68,6 +68,7 @@ def new_rule(request):
                    'product_fields': product_fields,
                    'product_type_fields': product_type_fields,
                    'field_dictionary': json.dumps(field_dictionary)})
+
 
 @user_passes_test(lambda u: u.is_staff)
 def edit_rule(request, pid):
@@ -92,6 +93,7 @@ def edit_rule(request, pid):
         'form': form,
         'field_dictionary': json.dumps(field_dictionary),
         'pt': pt, })
+
 
 @user_passes_test(lambda u: u.is_staff)
 def delete_rule(request, pid):
