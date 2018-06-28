@@ -440,15 +440,15 @@
           <tbody>
             <tr>
               <td><strong>Build ID</strong></td>
-              <td>{{ eng.build_id }}</td>
+              <td>{{ eng.build_id|default_if_none:"" }}</td>
             </tr>
             <tr>
               <td><strong>Commit Hash</strong></td>
-              <td>{{ eng.commit_hash }}</td>
+              <td>{{ eng.commit_hash|default_if_none:""|truncatechars:10 }}</td>
             </tr>
             <tr>
               <td><strong>Branch/Tag</strong></td>
-              <td>{{ eng.branch_tag }}</td>
+              <td>{{ eng.branch_tag|default_if_none:"" }}</td>
             </tr>
             <tr>
               <td><strong>Repo</strong></td>
@@ -460,17 +460,23 @@
             </tr>
             <tr>
               <td><strong>Orchestration</strong></td>
-              <td><a href="{% url 'edit_tool_config' eng.orchestration_engine.id %}">{{ eng.orchestration_engine.name }}</a>
+              <td>{% if eng.orchestration_engine.id %}
+                  <a href="{% url 'edit_tool_config' eng.orchestration_engine.id %}">{{ eng.orchestration_engine.name }}</a>
+                  {% endif %}
               </td>
             </tr>
             <tr>
               <td><strong>SCM Server</strong></td>
-              <td><a href="{% url 'edit_tool_config' eng.orchestration_engine.id %}">{{ eng.source_code_management_server.name }}</a>
+              <td>{% if eng.source_code_management_server.id %}
+                <a href="{% url 'edit_tool_config' eng.source_code_management_server.id %}">{{ eng.source_code_management_server.name }}</a>
+                {% endif %}
               </td>
             </tr>
             <tr>
               <td><strong>Build Server</strong></td>
-              <td><a href="{% url 'edit_tool_config' eng.orchestration_engine.id %}">{{ eng.build_server.name }}</a>
+              <td>{% if eng.build_server.id %}
+                <a href="{% url 'edit_tool_config' eng.build_server.id %}">{{ eng.build_server.name }}</a>
+                {% endif %}
               </td>
             </tr>
           </tbody>
