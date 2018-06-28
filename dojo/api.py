@@ -391,7 +391,6 @@ class ProductResource(BaseModelResource):
         return bundle
 
 
-
 """
     /api/v1/tool_configurations/
     GET [/id/], DELETE [/id/]
