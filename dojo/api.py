@@ -22,7 +22,7 @@ from dojo.models import Product, Engagement, Test, Finding, \
     BurpRawRequestResponse, Endpoint, Notes, JIRA_PKey, JIRA_Conf, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Languages, Language_Type, App_Analysis
-from dojo.forms import ProductForm, EngForm2, TestForm, \
+from dojo.forms import ProductForm, EngForm, TestForm, \
     ScanSettingsForm, FindingForm, StubFindingForm, FindingTemplateForm, \
     ImportScanForm, SEVERITY_CHOICES, JIRAForm, JIRA_PKeyForm, EditEndpointForm, \
     JIRA_IssueForm, ToolConfigForm, ToolProductSettingsForm, \
@@ -392,6 +392,78 @@ class ProductResource(BaseModelResource):
 
 
 """
+    /api/v1/tool_configurations/
+    GET [/id/], DELETE [/id/]
+    Expects: no params or id
+    Returns Tool_ConfigurationResource
+    Relevant apply filter ?test_type=?, ?id=?
+
+    POST, PUT, DLETE [/id/]
+"""
+
+
+class Tool_TypeResource(BaseModelResource):
+
+    class Meta:
+        resource_name = 'tool_types'
+        list_allowed_methods = ['get', 'post', 'put', 'delete']
+        detail_allowed_methods = ['get', 'post', 'put', 'delete']
+        queryset = Tool_Type.objects.all()
+        include_resource_uri = True
+        filtering = {
+            'id': ALL,
+            'name': ALL,
+            'description': ALL,
+        }
+        authentication = DojoApiKeyAuthentication()
+        authorization = DjangoAuthorization()
+        serializer = Serializer(formats=['json'])
+
+        @property
+        def validation(self):
+            return ModelFormValidation(form_class=ToolTypeForm, resource=Tool_TypeResource)
+
+
+"""
+    /api/v1/tool_configurations/
+    GET [/id/], DELETE [/id/]
+    Expects: no params or id
+    Returns Tool_ConfigurationResource
+    Relevant apply filter ?test_type=?, ?id=?
+
+    POST, PUT, DLETE [/id/]
+"""
+
+
+class Tool_ConfigurationResource(BaseModelResource):
+
+    tool_type = fields.ForeignKey(Tool_TypeResource, 'tool_type', full=False, null=False)
+
+    class Meta:
+        resource_name = 'tool_configurations'
+        list_allowed_methods = ['get', 'post', 'put', 'delete']
+        detail_allowed_methods = ['get', 'post', 'put', 'delete']
+        queryset = Tool_Configuration.objects.all()
+        include_resource_uri = True
+        filtering = {
+            'id': ALL,
+            'name': ALL,
+            'tool_type': ALL_WITH_RELATIONS,
+            'name': ALL,
+            'tool_project_id': ALL,
+            'url': ALL,
+            'authentication_type': ALL,
+        }
+        authentication = DojoApiKeyAuthentication()
+        authorization = DjangoAuthorization()
+        serializer = Serializer(formats=['json'])
+
+        @property
+        def validation(self):
+            return ModelFormValidation(form_class=ToolConfigForm, resource=Tool_ConfigurationResource)
+
+
+"""
     POST, PUT [/id/]
     Expects *product *target_start, *target_end, *status[In Progress, On Hold,
     Completed], threat_model, pen_test, api_test, check_list
@@ -403,12 +475,18 @@ class EngagementResource(BaseModelResource):
                                 full=False, null=False)
     lead = fields.ForeignKey(UserResource, 'lead',
                              full=False, null=True)
+    source_code_management_server = fields.ForeignKey(Tool_ConfigurationResource, 'source_code_management_server',
+                            full=False, null=False)
+    build_server = fields.ForeignKey(Tool_ConfigurationResource, 'build_server',
+                            full=False, null=False)
+    orchestration_engine = fields.ForeignKey(Tool_ConfigurationResource, 'orchestration_engine',
+                            full=False, null=False)
 
     class Meta:
         resource_name = 'engagements'
-        list_allowed_methods = ['get', 'post']
+        list_allowed_methods = ['get', 'post', 'patch']
         # disabled delete for /id/
-        detail_allowed_methods = ['get', 'post', 'put']
+        detail_allowed_methods = ['get', 'post', 'put', 'patch']
         queryset = Engagement.objects.all()
         include_resource_uri = True
         filtering = {
@@ -425,6 +503,7 @@ class EngagementResource(BaseModelResource):
             'pen_test': ALL,
             'status': ALL,
             'product': ALL,
+            'tool_configuration': ALL_WITH_RELATIONS,
         }
         authentication = DojoApiKeyAuthentication()
         authorization = DjangoAuthorization()
@@ -432,7 +511,7 @@ class EngagementResource(BaseModelResource):
 
         @property
         def validation(self):
-            return ModelFormValidation(form_class=EngForm2, resource=EngagementResource)
+            return ModelFormValidation(form_class=EngForm, resource=EngagementResource)
 
     def dehydrate(self, bundle):
         if bundle.obj.eng_type is not None:
@@ -562,78 +641,6 @@ class LanguagesResource(BaseModelResource):
         @property
         def validation(self):
             return ModelFormValidation(form_class=LanguagesTypeForm, resource=LanguagesResource)
-
-
-"""
-    /api/v1/tool_configurations/
-    GET [/id/], DELETE [/id/]
-    Expects: no params or id
-    Returns Tool_ConfigurationResource
-    Relevant apply filter ?test_type=?, ?id=?
-
-    POST, PUT, DLETE [/id/]
-"""
-
-
-class Tool_TypeResource(BaseModelResource):
-
-    class Meta:
-        resource_name = 'tool_types'
-        list_allowed_methods = ['get', 'post', 'put', 'delete']
-        detail_allowed_methods = ['get', 'post', 'put', 'delete']
-        queryset = Tool_Type.objects.all()
-        include_resource_uri = True
-        filtering = {
-            'id': ALL,
-            'name': ALL,
-            'description': ALL,
-        }
-        authentication = DojoApiKeyAuthentication()
-        authorization = DjangoAuthorization()
-        serializer = Serializer(formats=['json'])
-
-        @property
-        def validation(self):
-            return ModelFormValidation(form_class=ToolTypeForm, resource=Tool_TypeResource)
-
-
-"""
-    /api/v1/tool_configurations/
-    GET [/id/], DELETE [/id/]
-    Expects: no params or id
-    Returns Tool_ConfigurationResource
-    Relevant apply filter ?test_type=?, ?id=?
-
-    POST, PUT, DLETE [/id/]
-"""
-
-
-class Tool_ConfigurationResource(BaseModelResource):
-
-    tool_type = fields.ForeignKey(Tool_TypeResource, 'tool_type', full=False, null=False)
-
-    class Meta:
-        resource_name = 'tool_configurations'
-        list_allowed_methods = ['get', 'post', 'put', 'delete']
-        detail_allowed_methods = ['get', 'post', 'put', 'delete']
-        queryset = Tool_Configuration.objects.all()
-        include_resource_uri = True
-        filtering = {
-            'id': ALL,
-            'name': ALL,
-            'tool_type': ALL_WITH_RELATIONS,
-            'name': ALL,
-            'tool_project_id': ALL,
-            'url': ALL,
-            'authentication_type': ALL,
-        }
-        authentication = DojoApiKeyAuthentication()
-        authorization = DjangoAuthorization()
-        serializer = Serializer(formats=['json'])
-
-        @property
-        def validation(self):
-            return ModelFormValidation(form_class=ToolConfigForm, resource=Tool_ConfigurationResource)
 
 
 """

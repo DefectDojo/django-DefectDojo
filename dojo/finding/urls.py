@@ -4,6 +4,8 @@ from dojo.finding import views
 
 urlpatterns = [
     #  findings
+    url(r'^finding$', views.open_findings, {'view': 'All'},
+        name='all_findings'),
     url(r'^finding$', views.open_findings,
         name='findings'),
     url(r'^finding/bulk$', views.finding_bulk_update_all,
@@ -14,6 +16,8 @@ urlpatterns = [
         name='open_findings'),
     url(r'^product/(?P<pid>\d+)/finding/open$', views.open_findings,
         name='product_open_findings'),
+    url(r'^product/(?P<pid>\d+)/finding/all$', views.open_findings, {'view': 'All'},
+        name='product_all_findings'),
     url(r'^product/(?P<pid>\d+)/finding/closed$', views.closed_findings,
         name='product_closed_findings'),
     url(r'^product/(?P<pid>\d+)/finding/accepted$', views.accepted_findings,

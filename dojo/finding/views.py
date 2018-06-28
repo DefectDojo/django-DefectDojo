@@ -31,7 +31,7 @@ from dojo.forms import NoteForm, CloseFindingForm, FindingForm, PromoteFindingFo
     FindingFormID, FindingBulkUpdateForm, MergeFindings
 from dojo.models import Product_Type, Finding, Notes, \
     Risk_Acceptance, BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, \
-    FindingImageAccessToken, JIRA_Issue, JIRA_PKey, Dojo_User, Cred_Mapping, Test, Product
+    FindingImageAccessToken, JIRA_Issue, JIRA_PKey, Dojo_User, Cred_Mapping, Test, Product, User
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
     add_comment, jira_get_resolution_id, jira_change_resolution_id, get_jira_connection, \
     get_system_setting, create_notification, apply_cwe_to_template, Product_Tab, calculate_grade
@@ -42,15 +42,23 @@ from django.template.defaultfilters import pluralize
 logger = logging.getLogger(__name__)
 
 
-def open_findings(request, pid=None):
+def open_findings(request, pid=None, view=None):
     show_product_column = True
     title = None
     custom_breadcrumb = None
-
+    filter_name = "Open"
     if pid:
-        findings = Finding.objects.filter(test__engagement__product__id=pid, active=True, duplicate=False).order_by('numerical_severity')
+        if view == "All":
+            filter_name = "All"
+            findings = Finding.objects.filter(test__engagement__product__id=pid).order_by('numerical_severity')
+        else:
+            findings = Finding.objects.filter(test__engagement__product__id=pid, active=True, duplicate=False).order_by('numerical_severity')
     else:
-        findings = Finding.objects.filter(active=True, duplicate=False).order_by('numerical_severity')
+        if view == "All":
+            filter_name = "All"
+            findings = Finding.objects.all().order_by('numerical_severity')
+        else:
+            findings = Finding.objects.filter(active=True, duplicate=False).order_by('numerical_severity')
 
     if request.user.is_staff:
         findings = OpenFingingSuperFilter(
@@ -111,7 +119,7 @@ def open_findings(request, pid=None):
             "title_words": title_words,
             'found_by': found_by,
             'custom_breadcrumb': custom_breadcrumb,
-            'filter_name': "Open",
+            'filter_name': filter_name,
             'title': title
         })
 
@@ -1040,6 +1048,7 @@ def apply_cwe_mitigation(apply_to_findings, template, update=True):
 
             finding_ids = None
             result_list = None
+            # Exclusion list
             for title_template in finding_templates:
                 finding_ids = Finding.objects.filter(active=True, verified=True, cwe=title_template.cwe, title__icontains=title_template.title).values_list('id', flat=True)
                 if result_list is None:
@@ -1047,14 +1056,23 @@ def apply_cwe_mitigation(apply_to_findings, template, update=True):
                 else:
                     result_list = list(chain(result_list, finding_ids))
 
-            count = Finding.objects.filter(active=True, verified=True, cwe=template.cwe).exclude(id__in=result_list)
+            # If result_list is None the filter exclude won't work
+            if result_list:
+                count = Finding.objects.filter(active=True, verified=True, cwe=template.cwe).exclude(id__in=result_list)
+            else:
+                count = Finding.objects.filter(active=True, verified=True, cwe=template.cwe)
 
             if update:
-                # MySQL won't allow an 'update in satement' so loop will have to do
+                # MySQL won't allow an 'update in statement' so loop will have to do
                 for finding in count:
                     finding.mitigation = template.mitigation
                     finding.impact = template.impact
                     finding.references = template.references
+                    new_note = Notes()
+                    new_note.entry = 'CWE remediation text applied to finding for CWE: %s using template: %s.' % (template.cwe, template.title)
+                    new_note.author, created = User.objects.get_or_create(username='System')
+                    new_note.save()
+                    finding.notes.add(new_note)
                     finding.save()
 
             count = count.count()

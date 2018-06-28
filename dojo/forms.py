@@ -625,7 +625,9 @@ class DeleteEngagementForm(forms.ModelForm):
         exclude = ['name', 'version', 'eng_type', 'first_contacted', 'target_start',
                    'target_end', 'lead', 'requester', 'reason', 'report_type',
                    'product', 'test_strategy', 'threat_model', 'api_test', 'pen_test',
-                   'check_list', 'status', 'description']
+                   'check_list', 'status', 'description', 'engagement_type', 'build_id',
+                   'commit_hash', 'branch_tag', 'build_server', 'source_code_management_server',
+                   'source_code_management_uri', 'orchestration_engine']
 
 
 class TestForm(forms.ModelForm):
