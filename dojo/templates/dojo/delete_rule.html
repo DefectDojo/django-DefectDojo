@@ -1,8 +1,8 @@
 delete_product.html{% extends "base.html" %}
 {% block content %}
-    <h3> Delete Product {{ product }}</h3>
+    <h3> Delete Rule {{ rule }}</h3>
     <p>
-        Deleting this Product will remove any related objects associated
+        Deleting this rule will remove any related objects associated
         with it. These relationships are listed below:
     </p>
     <div class="danger-zone panel panel-danger">
@@ -19,7 +19,7 @@ delete_product.html{% extends "base.html" %}
             {{ form }}
 
             <div class="form-group">
-                <button class="btn btn-danger" type="submit" name="delete_name" value="delete_test">Delete Product</button>
+                <button class="btn btn-danger" type="submit" name="delete_name" value="delete_test">Delete Rule</button>
             </div>
         </form>
     </div>

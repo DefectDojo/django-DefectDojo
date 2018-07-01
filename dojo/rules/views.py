@@ -1,6 +1,7 @@
 # Standard library imports
 import json
 import logging
+import sys
 
 # Third party imports
 from django.contrib import messages
@@ -13,7 +14,7 @@ from django.shortcuts import render, get_object_or_404
 from dojo.models import Rule,\
     System_Settings, Finding, Test, Test_Type, Engagement, \
     Product, Product_Type
-from dojo.forms import RuleFormSet, DeleteRuleForm
+from dojo.forms import RuleFormSet, DeleteRuleForm, RuleForm
 from dojo.utils import add_breadcrumb
 
 logger = logging.getLogger(__name__)
@@ -44,15 +45,39 @@ def rules(request):
         'user': request.user,
         'rules': initial_queryset})
 
-
-@user_passes_test(lambda u: u.is_staff)
 def new_rule(request):
     if request.method == 'POST':
-        form = RuleFormSet(request.POST)
-        match_f = request.POST.get('match_field')
-        apply_f = request.POST.get('applied_field')
+        form = RuleForm(request.POST)
         if form.is_valid():
-            form.save()
+            rule = form.save()
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Rule created successfully.',
+                                 extra_tags='alert-success')
+            if "_Add Child" in request.POST:
+                return HttpResponseRedirect(reverse('Add Child', args=(rule.id,)))
+            return HttpResponseRedirect(reverse('rules'))
+    form = RuleForm()
+    add_breadcrumb(title="New Dojo Rule", top_level=False, request=request)
+    return render(request, 'dojo/new_rule2.html',
+                  {'form': form,
+                   'finding_fields': finding_fields,
+                   'test_fields': test_fields,
+                   'engagement_fields': engagement_fields,
+                   'product_fields': product_fields,
+                   'product_type_fields': product_type_fields,
+                   'field_dictionary': json.dumps(field_dictionary)})
+
+
+@user_passes_test(lambda u: u.is_staff)
+def add_child(request, pid):
+    if request.method == 'POST':
+        form = RuleFormSet(request.POST)
+        if form.is_valid():
+            child_rule = form.save(commit=False)
+            rule = get_object_or_404(Rule, pk=pid)
+            child_rule.parent_rule = rule
+            child_rule.save()
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Rule created successfully.',
@@ -75,18 +100,20 @@ def edit_rule(request, pid):
     pt = get_object_or_404(Rule, pk=pid)
     children = Rule.objects.filter(parent_rule=pt)
     all_rules = children | Rule.objects.filter(pk=pid)
-    form = RuleFormSet(queryset=all_rules)
+    form = RuleForm(instance = pt)
     if request.method == 'POST':
-        form = RuleFormSet(request.POST)
+        form = RuleForm(request.POST, instance = pt)
         if form.is_valid():
             pt = form.save()
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Rule updated successfully.',
                                  extra_tags='alert-success')
+            if "_Add Child" in request.POST:
+                return HttpResponseRedirect(reverse('Add Child', args=(pt.id,)))
             return HttpResponseRedirect(reverse('rules'))
     add_breadcrumb(title="Edit Rule", top_level=False, request=request)
-    return render(request, 'dojo/edit_rule2.html', {
+    return render(request, 'dojo/edit_rule.html', {
         'name': 'Edit Rule',
         'metric': False,
         'user': request.user,
@@ -96,32 +123,39 @@ def edit_rule(request, pid):
 
 
 @user_passes_test(lambda u: u.is_staff)
-def delete_rule(request, pid):
-    product = get_object_or_404(Rule, pk=pid)
-    form = DeleteRuleForm(instance=product)
+def delete_rule(request, tid):
+    rule = get_object_or_404(Rule, pk=tid)
+    form = DeleteRuleForm(instance=rule)
 
     from django.contrib.admin.utils import NestedObjects
     from django.db import DEFAULT_DB_ALIAS
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-    collector.collect([product])
+    collector.collect([rule])
     rels = collector.nested()
 
     if request.method == 'POST':
-        if 'id' in request.POST and str(product.id) == request.POST['id']:
-            form = DeleteRuleForm(request.POST, instance=product)
-            if form.is_valid():
-                product.delete()
-                messages.add_message(request,
-                                     messages.SUCCESS,
-                                     'Rule deleted.',
-                                     extra_tags='alert-success')
-                return HttpResponseRedirect(reverse('Rules'))
+        print >> sys.stderr, 'id' in request.POST
+        print >> sys.stderr, str(rule.id) == request.POST['id']
+        print >> sys.stderr, str(rule.id) == request.POST['id']
+        #if 'id' in request.POST and str(rule.id) == request.POST['id']:
+        form = DeleteRuleForm(request.POST, instance=rule)
+        print >> sys.stderr, form.is_valid()
+        print >> sys.stderr, form.errors
+        print >> sys.stderr, form.non_field_errors()
+        print >> sys.stderr, 'id' in request.POST
+        if form.is_valid():
+            rule.delete()
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Rule deleted.',
+                                 extra_tags='alert-success')
+            return HttpResponseRedirect(reverse('rules'))
 
-    add_breadcrumb(parent=product, title="Delete", top_level=False, request=request)
+    add_breadcrumb(parent=rule, title="Delete", top_level=False, request=request)
     system_settings = System_Settings.objects.get()
-    return render(request, 'dojo/delete_product.html',
-                  {'product': product,
+    return render(request, 'dojo/delete_rule.html',
+                  {'rule': rule,
                    'form': form,
                    'active_tab': 'findings',
                    'system_settings': system_settings,

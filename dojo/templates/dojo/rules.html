@@ -64,9 +64,12 @@
                                             <div class="btn-group" role="group">
                                                 <a class="btn btn-sm btn-warning"
                                                    href="{% url 'Edit Rule' rule.id %}">
-                                                    <i class="fa fa-pencil"></i> Edit Rule
+                                                    <i class="fa fa-pencil"></i> Edit
                                                 </a>
-
+                                                <a class="btn btn-sm btn-danger"
+                                                   href="{% url 'Delete Rule' rule.id %}">
+                                                    <i class="fa fa-pencil"></i> Delete
+                                                </a>
                                             </div>
                                         </div>
                                     </td>
