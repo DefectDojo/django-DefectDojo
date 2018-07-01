@@ -118,37 +118,37 @@ def sync_rules(new_finding, *args, **kwargs):
             if rule.operator == 'Matches':
                 if getattr(new_finding, rule.match_field) == rule.match_text:
                     if rule.application == 'Append':
-                        setattr(new_finding, rule.applied_field, (getattr(new_finding, rule.applied_field) + rule.text))
+                        set_attribute_rule(new_finding, rule, (getattr(new_finding, rule.applied_field) + rule.text))
                     else:
-                        setattr(new_finding, rule.applied_field, rule.text)
+                        set_attribute_rule(new_finding, rule, rule.text)
                         new_finding.save(dedupe_option=False, rules_option=False)
             else:
                 if rule.match_text in getattr(new_finding, rule.match_field):
                     if rule.application == 'Append':
-                        setattr(new_finding, rule.applied_field, (getattr(new_finding, rule.applied_field) + rule.text))
+                        set_attribute_rule(new_finding, rule, (getattr(new_finding, rule.applied_field) + rule.text))
                     else:
-                        setattr(new_finding, rule.applied_field, rule.text)
+                        set_attribute_rule(new_finding, rule, rule.text)
                         new_finding.save(dedupe_option=False, rules_option=False)
 
+def set_attribute_rule(new_finding, rule, value):
+    if rule.text == "True":
+        setattr(new_finding, rule.applied_field, True)
+    elif rule.text == "False":
+        setattr(new_finding, rule.applied_field, False)
+    else:
+        setattr(new_finding, rule.applied_field, value)
 
 def child_rule(rule, new_finding):
-    child_val = True
-    child_list = [val for val in rule.child_rules.all()]
-    while (len(child_list) != 0):
-        child_val = child_val and child_rule(child_list.pop(), new_finding)
-    if child_val:
-        if rule.operator == 'Matches':
-            if getattr(new_finding, rule.match_field) == rule.match_text:
-                return True
-            else:
-                return False
+    if rule.operator == 'Matches':
+        if getattr(new_finding, rule.match_field) == rule.match_text:
+            return True
         else:
-            if rule.match_text in getattr(new_finding, rule.match_field):
-                return True
-            else:
-                return False
+            return False
     else:
-        return False
+        if rule.match_text in getattr(new_finding, rule.match_field):
+            return True
+        else:
+            return False
 
 
 def count_findings(findings):

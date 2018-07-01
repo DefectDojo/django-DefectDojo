@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load get_attribute %}
 {% block content %}
-    <h3> Add a New Rule </h3>
+    <h3> Add Child Rules </h3>
     <form class="form-horizontal" action="{%  url 'Add Rule' %}" method="post">{% csrf_token %}
         {% for f in form %}
         <fieldset>
