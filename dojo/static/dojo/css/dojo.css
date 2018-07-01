@@ -1241,6 +1241,10 @@ div.tags .label {
     background: red;
 }
 
+.amber-color {
+  background: #ffc107
+}
+
 .tag-label:link {
     color: white;
     text-decoration: none;

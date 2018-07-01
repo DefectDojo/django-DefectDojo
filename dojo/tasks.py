@@ -11,16 +11,16 @@ from django.template.loader import render_to_string
 from django.utils.http import urlencode
 from celery.utils.log import get_task_logger
 from celery.decorators import task
-from dojo.models import Finding, Engagement, System_Settings
+from dojo.models import Product, Finding, Engagement, System_Settings
 from django.utils import timezone
 from django.db.models import Q
 
 import pdfkit
 from dojo.celery import app
-from dojo.utils import sync_dedupe, sync_false_history
+from dojo.utils import sync_dedupe, sync_false_history, calculate_grade
 from dojo.reports.widgets import report_widget_factory
 from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, \
-                       close_epic, get_system_setting, create_notification, sync_rules
+                       close_epic, create_notification, sync_rules
 
 import logging
 fmt = getattr(settings, 'LOG_FORMAT', None)
@@ -76,6 +76,12 @@ def add_alerts(self, runinterval):
                                 recipients=[eng.lead])
 
         unclosed_engagements.update(status="Completed", active=False, updated=timezone.now())
+
+    # Calculate grade
+    if system_settings.enable_product_grade:
+        products = Product.objects.all()
+        for product in products:
+            calculate_grade(product)
 
 
 @app.task(bind=True)

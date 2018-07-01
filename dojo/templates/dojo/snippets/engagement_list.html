@@ -96,12 +96,26 @@
                       {% endif %}
                     </td>
                     <td>{{ eng.target_start }} - {{ eng.target_end }}</td>
-                    <td>{{ eng.target_start|datediff_time:eng.target_end }}
+                    <td class="nowrap">{{ eng.target_start|datediff_time:eng.target_end }}
                       {% if status == "open" %}
                         {% if eng.target_end|overdue %}
                         <sup>
                           <div class="tag-label warning-color">
                             {{ eng.target_end|overdue }} overdue
+                          </div>
+                        </sup>
+                        {% endif %}
+                        {% if eng.test_set.all|length == 0 %}
+                        &nbsp;<sup>
+                          <div class="tag-label amber-color">
+                            no tests
+                          </div>
+                        </sup>
+                        {% endif %}
+                        {% if eng|count_findings_eng_all == 0 %}
+                        &nbsp;<sup>
+                          <div class="tag-label amber-color">
+                            no findings
                           </div>
                         </sup>
                         {% endif %}
