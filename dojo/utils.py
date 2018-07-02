@@ -130,6 +130,7 @@ def sync_rules(new_finding, *args, **kwargs):
                         set_attribute_rule(new_finding, rule, rule.text)
                         new_finding.save(dedupe_option=False, rules_option=False)
 
+
 def set_attribute_rule(new_finding, rule, value):
     if rule.text == "True":
         setattr(new_finding, rule.applied_field, True)
@@ -137,6 +138,7 @@ def set_attribute_rule(new_finding, rule, value):
         setattr(new_finding, rule.applied_field, False)
     else:
         setattr(new_finding, rule.applied_field, value)
+
 
 def child_rule(rule, new_finding):
     if rule.operator == 'Matches':

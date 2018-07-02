@@ -45,6 +45,7 @@ def rules(request):
         'user': request.user,
         'rules': initial_queryset})
 
+
 def new_rule(request):
     if request.method == 'POST':
         form = RuleForm(request.POST)
@@ -102,9 +103,9 @@ def edit_rule(request, pid):
     pt = get_object_or_404(Rule, pk=pid)
     children = Rule.objects.filter(parent_rule=pt)
     all_rules = children | Rule.objects.filter(pk=pid)
-    form = RuleForm(instance = pt)
+    form = RuleForm(instance=pt)
     if request.method == 'POST':
-        form = RuleForm(request.POST, instance = pt)
+        form = RuleForm(request.POST, instance=pt)
         if form.is_valid():
             pt = form.save()
             messages.add_message(request,
@@ -140,7 +141,7 @@ def delete_rule(request, tid):
         print >> sys.stderr, 'id' in request.POST
         print >> sys.stderr, str(rule.id) == request.POST['id']
         print >> sys.stderr, str(rule.id) == request.POST['id']
-        #if 'id' in request.POST and str(rule.id) == request.POST['id']:
+        # if 'id' in request.POST and str(rule.id) == request.POST['id']:
         form = DeleteRuleForm(request.POST, instance=rule)
         print >> sys.stderr, form.is_valid()
         print >> sys.stderr, form.errors
