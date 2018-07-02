@@ -1641,6 +1641,7 @@ class ChildRuleForm(forms.ModelForm):
         model = Child_Rule
         exclude = ['key_product']
 
+
 RuleFormSet = modelformset_factory(Child_Rule, extra=2, max_num=10, exclude=[''], can_delete=True)
 
 
