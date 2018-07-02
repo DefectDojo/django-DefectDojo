@@ -2,10 +2,18 @@
 {% load get_attribute %}
 {% block content %}
     <h3> Add Child Rules </h3>
-    <form class="form-horizontal" action="{%  url 'Add Rule' %}" method="post">{% csrf_token %}
+    <form class="form-horizontal" action="{%  url 'Add Child' pid %}" method="post">{% csrf_token %}
         {% for f in form %}
         <fieldset>
+            {% if forloop.first %}
+            <br>
+            <h3> Child Rule</h3>
         {% include "dojo/form_fields.html" with form=f %}
+            {% else %}
+            <hr>
+            <h3> Child Rule</h3>
+            {% include "dojo/form_fields.html" with form=f %}
+            {% endif %}
         </fieldset>
         {% endfor %}
         <fieldset>

@@ -1868,8 +1868,6 @@ class Rule(models.Model):
 
 class Child_Rule(models.Model):
     # add UI notification to let people know what rules were applied
-    name = models.CharField(max_length=200)
-    enabled = models.BooleanField(default=True)
     operator = models.CharField(max_length=30, choices=operator_options)
     """
     model_object_options = (('Product', 'Product'),
@@ -1883,7 +1881,7 @@ class Child_Rule(models.Model):
     match_text = models.TextField()
     # TODO: Add or ?
     # and_rules = models.ManyToManyField('self')
-    parent_rule = models.ForeignKey('self', editable=False, null=True)
+    parent_rule = models.ForeignKey(Rule, editable=False, null=True)
 
 class FieldRule(models.Model):
     field = models.CharField(max_length=200)
