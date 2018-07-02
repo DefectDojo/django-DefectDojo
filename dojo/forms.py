@@ -1636,6 +1636,7 @@ class RuleForm(forms.ModelForm):
 
 class ChildRuleForm(forms.ModelForm):
 
+
     class Meta:
         model = Child_Rule
         exclude = ['key_product']
@@ -1647,6 +1648,7 @@ RuleFormSet = modelformset_factory(Child_Rule, extra=2, max_num=10, exclude=['']
 class DeleteRuleForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())
+
     class Meta:
         model = Rule
         fields = ('id',)
