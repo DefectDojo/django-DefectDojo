@@ -13,7 +13,7 @@ from django.shortcuts import render, get_object_or_404
 # Local application/library imports
 from dojo.models import Rule,\
     System_Settings, Finding, Test, Test_Type, Engagement, \
-    Product, Product_Type
+    Product, Product_Type, Child_Rule
 from dojo.forms import RuleFormSet, DeleteRuleForm, RuleForm
 from dojo.utils import add_breadcrumb
 
@@ -71,22 +71,24 @@ def new_rule(request):
 
 @user_passes_test(lambda u: u.is_staff)
 def add_child(request, pid):
+    rule = get_object_or_404(Rule, pk=pid)
     if request.method == 'POST':
-        form = RuleFormSet(request.POST)
-        if form.is_valid():
-            child_rule = form.save(commit=False)
-            rule = get_object_or_404(Rule, pk=pid)
-            child_rule.parent_rule = rule
-            child_rule.save()
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 'Rule created successfully.',
-                                 extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('rules'))
-    form = RuleFormSet(queryset=Rule.objects.none())
+        forms = RuleFormSet(request.POST)
+        for form in forms:
+            if form.is_valid():
+                cr = form.save(commit=False)
+                cr.parent_rule = rule
+                cr.save()
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'Rule created successfully.',
+                                     extra_tags='alert-success')
+                return HttpResponseRedirect(reverse('rules'))
+    form = RuleFormSet(queryset=Child_Rule.objects.filter(parent_rule=rule))
     add_breadcrumb(title="New Dojo Rule", top_level=False, request=request)
     return render(request, 'dojo/new_rule.html',
                   {'form': form,
+                   'pid': pid,
                    'finding_fields': finding_fields,
                    'test_fields': test_fields,
                    'engagement_fields': engagement_fields,

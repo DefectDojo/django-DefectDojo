@@ -1637,7 +1637,7 @@ class RuleForm(forms.ModelForm):
 class ChildRuleForm(forms.ModelForm):
 
     class Meta:
-        model = Rule
+        model = Child_Rule
         exclude = ['key_product']
 
 
