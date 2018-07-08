@@ -109,7 +109,7 @@ Proceeds are used for testing, infrastructure, etc.
 
 [![Xing](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/XING_logo.png)](https://corporate.xing.com/en/about-xing/security/)
 
-Interested in becoming a sponsor and having your logo displayed? Please review our [sponsorship information](sponsoring.md) or email greg.anderson@owasp.org
+Interested in becoming a sponsor and having your logo displayed? Please review our [sponsorship information](SPONSORING.md) or email greg.anderson@owasp.org
 
 # License
 
