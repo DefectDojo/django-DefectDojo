@@ -5,6 +5,16 @@
 {% load event_tags %}
 {% block content %}
     <div class="container">
+        <div class="row">
+          <div class="col-lg-12">
+              <h3 id="product">Test Security Report for {{ test.engagement.product.name }}</h3>
+              <p>
+                <strong>Engagement:</strong> {{ test.engagement.name }}
+                <br><strong>Test:</strong> {{ test.test_type }}
+                <br><strong>Generated:</strong> {% display_date %}
+              </p>
+          </div>
+        </div>
         {% if include_executive_summary %}
             <div class="row">
                 <div class="col-lg-12">
@@ -122,6 +132,7 @@
         {% endif %}
         <div class="row">
             <div class="col-lg-12">
+                {% if include_finding_notes %}
                 <h3>Test Notes</h3>
                 {% if test.notes.all %}
                     {% for note in test.notes.all %}
@@ -129,6 +140,7 @@
                     {% endfor %}
                 {% else %}
                     <p>No notes found.</p>
+                {% endif %}
                 {% endif %}
                 {% if test.engagement.risk_acceptance.count > 0 %}
                     <h3 id="risk_acceptance">Accepted Findings</h3>
@@ -170,7 +182,7 @@
                         <div class="panel-heading finding-title">
                             <div class="clearfix">
                                 <h5>
-                                    Finding {{ finding.id }}: {{ finding.title }}
+                                    Finding {{ forloop.counter }}: {{ finding.title }}
                                 </h5>
                             </div>
                         </div>
