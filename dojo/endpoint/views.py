@@ -281,6 +281,7 @@ def add_endpoint(request, pid):
             else:
                 return HttpResponseRedirect(reverse('endpoints') + "?product=" + pid)
 
+    product_tab = None
     if '_popup' not in request.GET:
         product_tab = Product_Tab(product.id, "Add Endpoint", tab="endpoints")
 

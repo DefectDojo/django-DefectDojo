@@ -765,7 +765,9 @@ class Endpoint(models.Model):
         fragment = self.fragment
 
         if port:
-            netloc += ':%s' % port
+            # If http or https on standard ports then don't tack on the port number
+            if (port != 443 and scheme == "https") or (port != 80 and scheme == "http"):
+                netloc += ':%s' % port
 
         if netloc or (scheme and scheme in uses_netloc and url[:2] != '//'):
             if url and url[:1] != '/':
