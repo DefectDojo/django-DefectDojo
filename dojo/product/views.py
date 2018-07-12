@@ -338,7 +338,7 @@ def view_engagements(request, pid, engagement_type="Interactive"):
 
     result_engs = EngagementFilter(
         request.GET,
-        queryset=Engagement.objects.filter(product=prod, active=True, engagement_type=engagement_type).order_by('-target_end'))
+        queryset=Engagement.objects.filter(product=prod, active=True, engagement_type=engagement_type).order_by('-updated'))
 
     engs = get_page_items(request, result_engs.qs, default_page_num, param_name="engs")
 

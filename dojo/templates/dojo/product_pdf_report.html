@@ -5,12 +5,17 @@
 {% load event_tags %}
 {% block content %}
     <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+            <h3 id="product">Product Security Report for {{ product.name }}</h3>
+            <p><strong>Generated:</strong> {% display_date %}</p>
+        </div>
+      </div>
         {% if include_executive_summary %}
             <div class="row pretty-graphs">
                 <div class="col-lg-12">
                     <h3 id="executive">Executive Summary for {{ product.name }}</h3>
                     <h4>Assessment Details</h4>
-                    <strong>Date Generated:</strong> {% display_date %}</br>
                     <strong>Assessed by:</strong> {% if product.engagement_set.all.0.lead.first_name|length > 0 %} {{ product.engagement_set.all.0.lead.first_name }} {{ product.engagement_set.all.0.lead.last_name }} {%else%} product.engagement_set.all.0.lead {% endif %}</br>
                     <strong>Scope:</strong> {{ product.name }}</br>
                 </div>
@@ -277,7 +282,7 @@
                         {% endif %}
 
                     <h6>Impact</h6>
-                    <pre>{{ finding.impact }}</pre>
+                    <pre>{{ finding.impact|markdown_render }}</pre>
                     {% if finding.references %}
                     <h6>References</h6>
                     <pre>{{ finding.references|markdown_render }}</pre>

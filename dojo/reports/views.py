@@ -140,7 +140,7 @@ def report_findings(request):
                    for word in finding.title.split() if len(word) > 2]
 
     title_words = sorted(set(title_words))
-    paged_findings = get_page_items(request, findings.qs, 25)
+    paged_findings = get_page_items(request, findings.qs.order_by('numerical_severity'), 25)
 
     product_type = None
     if 'test__engagement__product__prod_type' in request.GET:
@@ -599,7 +599,7 @@ def generate_report(request, obj):
         # include current month
         months_between += 1
 
-        endpoint_monthly_counts = get_period_counts_legacy(findings.qs, findings.qs, None,
+        endpoint_monthly_counts = get_period_counts_legacy(findings.qs.order_by('numerical_severity'), findings.qs.order_by('numerical_severity'), None,
                                                             months_between, start_date,
                                                             relative_delta='months')
 
@@ -610,8 +610,8 @@ def generate_report(request, obj):
                    'report_name': report_name,
                    'endpoint_opened_per_month': endpoint_monthly_counts[
                        'opened_per_period'] if endpoint_monthly_counts is not None else [],
-                   'endpoint_active_findings': findings.qs,
-                   'findings': findings.qs,
+                   'endpoint_active_findings': findings.qs.order_by('numerical_severity'),
+                   'findings': findings.qs.order_by('numerical_severity'),
                    'include_finding_notes': include_finding_notes,
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
@@ -641,7 +641,7 @@ def generate_report(request, obj):
                    'engagements': engagements,
                    'tests': tests,
                    'report_name': report_name,
-                   'findings': findings.qs,
+                   'findings': findings.qs.order_by('numerical_severity'),
                    'include_finding_notes': include_finding_notes,
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
@@ -671,7 +671,7 @@ def generate_report(request, obj):
         context = {'engagement': engagement,
                    'tests': tests,
                    'report_name': report_name,
-                   'findings': findings.qs,
+                   'findings': findings.qs.order_by('numerical_severity'),
                    'include_finding_notes': include_finding_notes,
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
@@ -696,7 +696,7 @@ def generate_report(request, obj):
 
         context = {'test': test,
                    'report_name': report_name,
-                   'findings': findings.qs,
+                   'findings': findings.qs.order_by('numerical_severity'),
                    'include_finding_notes': include_finding_notes,
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
@@ -727,7 +727,7 @@ def generate_report(request, obj):
         context = {'endpoint': endpoint,
                    'endpoints': endpoints,
                    'report_name': report_name,
-                   'findings': findings.qs,
+                   'findings': findings.qs.order_by('numerical_severity'),
                    'include_finding_notes': include_finding_notes,
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
@@ -750,7 +750,7 @@ def generate_report(request, obj):
         report_title = "Finding Report"
         report_subtitle = ''
 
-        context = {'findings': findings.qs,
+        context = {'findings': findings.qs.order_by('numerical_severity'),
                    'report_name': report_name,
                    'include_finding_notes': include_finding_notes,
                    'include_finding_images': include_finding_images,
@@ -776,7 +776,7 @@ def generate_report(request, obj):
                            'engagement': engagement,
                            'test': test,
                            'endpoint': endpoint,
-                           'findings': findings.qs,
+                           'findings': findings.qs.order_by('numerical_severity'),
                            'include_finding_notes': include_finding_notes,
                            'include_finding_images': include_finding_images,
                            'include_executive_summary': include_executive_summary,
@@ -827,7 +827,7 @@ def generate_report(request, obj):
                            'engagement': engagement,
                            'test': test,
                            'endpoint': endpoint,
-                           'findings': findings.qs.order_by('severity'),
+                           'findings': findings.qs.order_by('numerical_severity'),
                            'include_finding_notes': include_finding_notes,
                            'include_finding_images': include_finding_images,
                            'include_executive_summary': include_executive_summary,
@@ -841,7 +841,7 @@ def generate_report(request, obj):
 
         else:
             raise Http404()
-    paged_findings = get_page_items(request, findings.qs, 25)
+    paged_findings = get_page_items(request, findings.qs.order_by('numerical_severity'), 25)
 
     product_tab = None
     if engagement:
