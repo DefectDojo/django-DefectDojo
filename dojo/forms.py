@@ -18,7 +18,7 @@ from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
     Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
     JIRA_Issue, JIRA_PKey, JIRA_Conf, UserContactInfo, Tool_Type, Tool_Configuration, Tool_Product_Settings, \
     Cred_User, Cred_Mapping, System_Settings, Notifications, Languages, Language_Type, App_Analysis, Objects, \
-    Benchmark_Product, Benchmark_Requirement, Benchmark_Product_Summary, Rule
+    Benchmark_Product, Benchmark_Requirement, Benchmark_Product_Summary, Rule, Child_Rule
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
 
@@ -1637,15 +1637,23 @@ class RuleForm(forms.ModelForm):
         exclude = ['key_product']
 
 
-RuleFormSet = modelformset_factory(Rule, extra=2, max_num=10, exclude=[''], can_delete=True)
+class ChildRuleForm(forms.ModelForm):
+
+    class Meta:
+        model = Child_Rule
+        exclude = ['key_product']
+
+
+RuleFormSet = modelformset_factory(Child_Rule, extra=2, max_num=10, exclude=[''], can_delete=True)
 
 
 class DeleteRuleForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
 
     class Meta:
         model = Rule
-        exclude = ['']
-
+        fields = ('id',)
 
 class CredUserForm(forms.ModelForm):
     # selenium_script = forms.FileField(widget=forms.widgets.FileInput(
