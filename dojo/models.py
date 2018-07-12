@@ -1100,7 +1100,6 @@ class Finding(models.Model):
             self.hash_code = self.get_hash_code()
         super(Finding, self).save(*args, **kwargs)
         self.found_by.add(self.test.test_type)
-        super(Finding, self).save(*args, **kwargs)
         if self.test.test_type.static_tool:
             self.static_finding = True
         else:
