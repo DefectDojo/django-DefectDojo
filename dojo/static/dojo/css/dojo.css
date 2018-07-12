@@ -1,3 +1,69 @@
+.btn,
+input,
+textarea,
+.progress,
+.tag-label,
+.label,
+.badge,
+.pagination-sm > li:first-child > a,
+.pagination-sm > li:first-child > span,
+.pagination-sm > li:last-child > a,
+.pagination-sm > li:last-child > span,
+.panel,
+.panel-heading,
+.nav-pills > li > a,
+.breadcrumb,
+.panel > table:last-child,
+.panel > .table:first-child  {
+    border-radius: 0!important;
+}
+
+.table-condensed > tbody > tr > td,
+.table-condensed > tbody > tr > th,
+.table-condensed > tfoot > tr > td,
+.table-condensed > tfoot > tr > th,
+.table-condensed > thead > tr > td,
+.table-condensed > thead > tr > th {
+	padding-top: 12px;
+}
+
+.table-condensed > tbody > tr > td:first-child,
+.table-condensed > tbody > tr > th:first-child,
+.table-condensed > tfoot > tr > td:first-child,
+.table-condensed > tfoot > tr > th:first-child,
+.table-condensed > thead > tr > td:first-child,
+.table-condensed > thead > tr > th:first-child {
+	padding-left: 15px;
+}
+
+.btn-group .btn:not(:first-child) {
+    margin-left: 6px;
+}
+
+a {
+  color: #546474;
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: #546474!important;
+	  border-style: none!important;
+}
+
+.btn-primary:hover {
+    background-color: #38434d!important;
+}
+
+.btn-primary.active.focus, .btn-primary.active:focus, .btn-primary.active:hover, .btn-primary:active.focus, .btn-primary:active:focus, .btn-primary:active:hover, .open > .dropdown-toggle.btn-primary.focus, .open > .dropdown-toggle.btn-primary:focus, .open > .dropdown-toggle.btn-primary:hover {
+    background-color: transparent!important;
+    border-style: none!important;
+}
+
+.btn-primary.focus, .btn-primary:focus {
+    background-color: transparent!important;
+    border-style: none!important;
+}
+
 .h1,
 .h2,
 .h3,
@@ -20,6 +86,36 @@ a {
 
 a:hover {
   text-decoration: none;
+}
+
+.nav-tabs {
+    border-bottom: 1px solid rgb(148, 168, 187);
+}
+
+
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:focus,
+.nav-tabs > li.active > a:hover {
+    color: #fff;
+    background-color: #73879c;
+    border: 1px solid #73879c;
+
+}
+.nav-tabs > li > a {
+    margin-right: 2px;
+    line-height: 1.42857143;
+    border: 1px solid transparent;
+    border-radius: 0;
+}
+
+.nav-tabs .dropdown .badge{
+    color: #fff;
+    background-color: #546474;
+}
+
+.nav-tabs .active-color .badge{
+    color: #72879b;
+    background-color: #ffffff;
 }
 
 .navbar-brand {
@@ -716,7 +812,17 @@ span.endpoint_product {
 }
 
 .dropdown-menu > li > a.text-danger {
-    color: #a94442;
+    color: #a94442!important;;
+}
+
+.dropdown-menu  {
+	background-color: #fff;
+}
+
+.dropdown-menu a {
+	text-decoration: none!important;
+	letter-spacing: 0.04em;
+  color: #000000!important;;
 }
 
 th .fa-sort-asc {
@@ -956,17 +1062,86 @@ div.custom-search-form {
 }
 
 .panel-default {
-    border-color: #A1C0D7;
+    border: 1px solid #dddedf;
 }
 
 .panel-default > .panel-heading {
-    color: #333;
-    background-color: #EBF4FB;
+    color: white;
+    font-size: 16px;
+    background-color: rgba(32, 166, 216, 0.75);
     border-color: #A1C0D7;
 }
 
-.panel-body {
-    border-radius: inherit;
+.panel-default > .panel-heading a,
+.panel-default > .panel-heading small{
+	color: #fff;
+}
+
+.panel-default > .panel-heading a{
+	text-decoration: underline;
+}
+
+.panel-default > .panel-heading a:hover{
+	color: #546474;
+}
+
+.panel-default-secondary{
+	border: 1px solid #dddedf;
+	border-top-style: none;
+}
+
+.panel-default-secondary > .panel-heading {
+    color: white;
+    background-color: #546474;
+	border-style: solid;
+	border-color: #536473;
+}
+
+.panel-heading .text-muted {
+    color: #4b4b4b;
+}
+
+.panel-body.product-graphs {
+	padding-left: 0;
+	padding-right: 0;
+	background-color: #f8f9f8;
+}
+
+.product-graphs .panel-body {
+	border-right: 1px solid #dcdedf;
+	border-left: 1px solid #dcdedf;
+}
+
+.panel-footer {
+    padding: 10px 15px;
+    background-color: #dddedf;
+    border-top: 1px solid #ddd;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.panel-footer small{
+	color: #246c91;
+}
+
+table#product_types .btn-success{
+	background-color: #546474;
+	border-color: #546474;
+}
+
+table#product_types .btn-success:hover{
+	background-color: #3d4a58;
+	border-color: #3d4a58;
+}
+
+table#product_types .btn-warning{
+	background-color: #149b7e;
+	border-color: #149b7e;
+}
+
+table#product_types .btn-warning:hover{
+	background-color: #11876e;
+	border-color: #11876e;
 }
 
 span.pull-right.clickable i.glyphicon-chevron-up, span.pull-right.clickable i.glyphicon-chevron-down {

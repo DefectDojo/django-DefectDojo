@@ -305,11 +305,11 @@
                       </sup>
                     {% endif %}
                 </h3>
-                <ul class="nav nav-tabs horizontal-bar">
+                <ul class="nav nav-tabs horizontal-bar in">
                   <li role="presentation"{% if product_tab.tab == 'overview' %} class="active"{% endif %}><a href="{% url 'view_product' product_tab.product.id %}"><span class="fa fa-globe" aria-hidden="true"></span><span class="hidden-xs"> Overview</span></a></li>
                   <li role="presentation"{% if product_tab.tab == 'metrics' %} class="active"{% endif %}><a href="{% url 'view_product_metrics' product_tab.product.id %}"><span class="fa fa-bar-chart" aria-hidden="true"></span><span class="hidden-xs"> Metrics</span></a></li>
                   <!-- Engagements Tab -->
-                  <li role="presentation" class="dropdown{% if product_tab.tab == 'engagements' %} active{% endif %}">
+                  <li role="presentation" class="dropdown{% if product_tab.tab == 'engagements' %} active active-color{% endif %}">
                     <a class="dropdown-toggle" data-toggle="dropdown" href=""><span class="fa fa-calendar" aria-hidden="true"></span>
                     <span class="hidden-xs">Engagements{% if product_tab.engagements > 0 %} <span class="badge">{{ product_tab.engagements }}</span>{% endif %}</span>
                     <span class="caret"></span></a>
@@ -322,7 +322,7 @@
                     </ul>
                   </li>
                   <!-- Findings Tab -->
-                  <li role="presentation" class="dropdown{% if product_tab.tab == 'findings' %} active{% endif %}">
+                  <li role="presentation" class="dropdown{% if product_tab.tab == 'findings' %} active active-color{% endif %}">
                     <a class="dropdown-toggle" data-toggle="dropdown" href=""><span class="fa fa-bug" aria-hidden="true"></span>
                     <span class="hidden-xs"> Findings{% if product_tab.findings > 0 %} <span class="badge">{{ product_tab.findings }}</span>{% endif %}</span>
                     <span class="caret"></span></a>
@@ -340,7 +340,7 @@
                     </ul>
                   </li>
                   <!-- Endpoints Tab -->
-                  <li role="presentation" class="dropdown{% if product_tab.tab == 'endpoints' %} active{% endif %}">
+                  <li role="presentation" class="dropdown{% if product_tab.tab == 'endpoints' %} active active-color{% endif %}">
                     <a class="dropdown-toggle" data-toggle="dropdown" href=""><span class="fa fa-sitemap" aria-hidden="true"></span>
                     <span class="hidden-xs"> Endpoints{% if product_tab.endpoints > 0 %} <span class="badge">{{ product_tab.endpoints }}</span>{% endif %}</span>
                     <span class="caret"></span></a>
