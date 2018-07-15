@@ -18,7 +18,7 @@ class GoastScannerParser(object):
             group = ''
             status = ''
 
-            title = "Vulnerabiliy: " + item["details"] + " RuleID: " + item["rule_id"]
+            title = item["details"] + "- " + item["rule_id"]
 
             ###### Finding details information ######
             findingdetail += "Filename: " + item["file"] + "\n"
