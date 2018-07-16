@@ -531,6 +531,7 @@ def generate_report(request, obj):
     engagement = None
     test = None
     endpoint = None
+    endpoints = None
     endpoint_all_findings = None
     endpoint_monthly_counts = None
     endpoint_active_findings = None
@@ -636,7 +637,8 @@ def generate_report(request, obj):
         ids = set(finding.id for finding in findings.qs)
         engagements = Engagement.objects.filter(test__finding__id__in=ids).distinct()
         tests = Test.objects.filter(finding__id__in=ids).distinct()
-
+        ids = get_endpoint_ids(Endpoint.objects.filter(product=product).distinct())
+        endpoints = Endpoint.objects.filter(id__in=ids)
         context = {'product': product,
                    'engagements': engagements,
                    'tests': tests,
@@ -649,6 +651,7 @@ def generate_report(request, obj):
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': 'Generate Report',
+                   'endpoints': endpoints,
                    'host': report_url_resolver(request),
                    'user_id': request.user.id}
 
@@ -667,7 +670,8 @@ def generate_report(request, obj):
 
         ids = set(finding.id for finding in findings.qs)
         tests = Test.objects.filter(finding__id__in=ids).distinct()
-
+        ids = get_endpoint_ids(Endpoint.objects.filter(product=engagement.product).distinct())
+        endpoints = Endpoint.objects.filter(id__in=ids)
         context = {'engagement': engagement,
                    'tests': tests,
                    'report_name': report_name,
@@ -680,7 +684,8 @@ def generate_report(request, obj):
                    'team_name': settings.TEAM_NAME,
                    'title': 'Generate Report',
                    'host': report_url_resolver(request),
-                   'user_id': request.user.id}
+                   'user_id': request.user.id,
+                   'endpoints': endpoints}
 
     elif type(obj).__name__ == "Test":
         test = obj
@@ -825,8 +830,10 @@ def generate_report(request, obj):
                           {'product_type': product_type,
                            'product': product,
                            'engagement': engagement,
+                           'report_name': report_name,
                            'test': test,
                            'endpoint': endpoint,
+                           'endpoints': endpoints,
                            'findings': findings.qs.order_by('numerical_severity'),
                            'include_finding_notes': include_finding_notes,
                            'include_finding_images': include_finding_images,

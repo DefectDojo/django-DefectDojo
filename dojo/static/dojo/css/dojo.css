@@ -44,16 +44,33 @@ a {
   color: #546474;
 }
 
+.progress-bar {
+  background-color: #546474;
+}
+
+.panel-default .btn-primary {
+    background-color: transparent!important;
+    border-style: none!important;
+    color: #546474!important;
+    border: 1px solid #546474!important;
+}
+
+.panel-default .btn-primary:hover {
+    background-color: transparent!important;
+    color: #36404a!important;
+    border: 1px solid #546474!important;
+}
+
 .btn-primary {
     color: #fff;
-    background-color: #546474!important;
-	  border-style: none!important;
+    background-color: #546474;
+	  /*border-style: none!important;*/
 }
 
 .btn-primary:hover {
     background-color: #38434d!important;
 }
-
+/*
 .btn-primary.active.focus, .btn-primary.active:focus, .btn-primary.active:hover, .btn-primary:active.focus, .btn-primary:active:focus, .btn-primary:active:hover, .open > .dropdown-toggle.btn-primary.focus, .open > .dropdown-toggle.btn-primary:focus, .open > .dropdown-toggle.btn-primary:hover {
     background-color: transparent!important;
     border-style: none!important;
@@ -62,6 +79,12 @@ a {
 .btn-primary.focus, .btn-primary:focus {
     background-color: transparent!important;
     border-style: none!important;
+}
+*/
+
+.secondary-color {
+  background-color: #546474!important;
+  color: white;
 }
 
 .h1,
@@ -75,9 +98,9 @@ h2 {
 
 h3 {
   margin-top: 5px;
-  margin-bottom: 5px;
-  font-size: 20px;
-  line-height: 22px;
+  margin-bottom: 2px;
+  font-size: 18px;
+  line-height: 18px;
 }
 
 a {
@@ -505,7 +528,7 @@ form ul#id_accepted_findings input {
 }
 
 .severity-Low {
-    background-color: #337ab7;
+    background-color: #546474;
 }
 
 .severity-Medium {
@@ -529,6 +552,12 @@ form ul#id_accepted_findings input {
 
 .pagination {
     margin: 10px 0 15px;
+}
+
+.pagination>.active>a, .pagination>.active>a:focus, .pagination>.active>a:hover, .pagination>.active>span, .pagination>.active>span:focus, .pagination>.active>span:hover
+{
+  background-color: #546474;
+  border-color: #546474;
 }
 
 #risk_acceptance table form {
@@ -720,7 +749,7 @@ table.centered th {
 }
 
 .text-low {
-    color: #337ab7
+    color: #546474
 }
 
 input[type="checkbox"] {
@@ -1065,6 +1094,19 @@ div.custom-search-form {
     border: 1px solid #dddedf;
 }
 
+.panel-heading h2,
+.panel-heading h3,
+.panel-heading h4,
+.panel-heading h5 {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+.panel-heading .btn {
+	padding-top: 0;
+	padding-bottom: 0;
+}
+
 .panel-default > .panel-heading {
     color: white;
     font-size: 16px;
@@ -1113,7 +1155,6 @@ div.custom-search-form {
 }
 
 .panel-footer {
-    padding: 10px 15px;
     background-color: #dddedf;
     border-top: 1px solid #ddd;
     border-bottom-right-radius: 0;
@@ -1145,7 +1186,7 @@ table#product_types .btn-warning:hover{
 }
 
 span.pull-right.clickable i.glyphicon-chevron-up, span.pull-right.clickable i.glyphicon-chevron-down {
-    color: #337ab7;
+    color: #546474;
 }
 
 table.finding-endpoints {

@@ -7,6 +7,15 @@
     ul#select_by_severity a:hover, ul#bulk_edit a:hover {
     cursor: pointer;
     }
+    .btn-success {
+      color: #fff;
+      background-color: #546474!important;
+      border-color: #546474;
+    }
+
+    .btn-success:hover {
+        background-color: #546474!important;
+    }
 {% endblock %}
 {% block content %}
     <div class="panel panel-default">
@@ -47,7 +56,7 @@
                             </a>
                         </li>
                         <li role="presentation">
-                            <a href="{% url 'test_report' test.id %}">
+                            <a href="{% url 'test_report' test.id %}?title=&active=1&verified=1&false_p=2&duplicate=2">
                                 <i class="fa fa-file-text-o"></i> Report
                             </a>
                         </li>
