@@ -43,7 +43,7 @@ def vulnerable_endpoints(request):
             product = get_object_or_404(Product, id=p[0])
 
     ids = get_endpoint_ids(EndpointFilter(request.GET, queryset=endpoints, user=request.user).qs)
-    endpoints = EndpointFilter(request.GET, queryset=endpoints.filter(id__in=ids), user=request.user)
+    endpoints = EndpointFilter(request.GET, queryset=endpoints.filter(id__in=ids), user=request.user).order_by('host')
     paged_endpoints = get_page_items(request, endpoints.qs, 25)
     add_breadcrumb(title="Vulnerable Endpoints", top_level=not len(request.GET), request=request)
 

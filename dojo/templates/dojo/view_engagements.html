@@ -2,10 +2,6 @@
 {% load humanize %}
 {% load display_tags %}
 {% load static from staticfiles %}
-{% block add_styles %}
-    .graph {min-height: 158px;}
-    h3 { margin-top: 5px; margin-bottom: 5px; font-size: 20px; line-height: 22px;}
-{% endblock %}
 {% block content %}
     <div class="row">
       {% if user.is_staff or authorized %}

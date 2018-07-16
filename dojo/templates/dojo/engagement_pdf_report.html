@@ -19,9 +19,8 @@
                 <div class="col-lg-12">
                     <h3 id="executive">Executive Summary</h3>
                     <p>
-                        This report represents a security audit performed by the {{ team_name }} team.
-                        It contains confidential information about the state of your network and applications.
-                        Access to this information by unauthorized personnel may allow them to compromise your network.
+                        This report represents a security assessment performed by the {{ team_name }} team including
+                        confidential information about the state of your network and applications.
                     </p>
                 </div>
                 <div class="col-lg-12">
@@ -59,18 +58,23 @@
                                         - {{ engagement.lead }}
                                     </td>
                                 </tr>
+                                {% if engagement.description %}
+                                <tr>
+                                    <td colspan="4">
+                                        {{ engagement.description|markdown_render }}
+                                    </td>
+                                </tr>
+                                {% endif %}
                             </table>
                         </div>
                     </div>
 
                     {% if engagement.test_set %}
-                        <p>The engagement also included the following tests which may be reported here:</p>
+                        <p>The engagement included the following tests:</p>
                         <ul>
                             {% for t in engagement.test_set.all %}
-                                {% if t in tests %}
-                                    <li>{{ t.test_type.name }}
-                                        ({{ t.environment.name|default:"unknown" }}): {{ t.target_start|date:"SHORT_DATE_FORMAT" }}</li>
-                                {% endif %}
+                                  <li>{{ t.test_type.name }}
+                                      ({{ t.environment.name|default:"unknown" }}): {{ t.target_start|date:"SHORT_DATE_FORMAT" }}</li>
                             {% endfor %}
                         </ul>
                     {% endif %}
@@ -80,6 +84,33 @@
                             <a href="{{ engagement.test_strategy }}">{{ engagement.test_strategy }}</a>
                         </p>
                     {% endif %}
+                    <div class="row">
+                      <div class="col-md-12">
+                      <div class="panel panel-default">
+                          <div class="panel-heading finding-title">
+                              <div class="clearfix">
+                                  <h5>
+                                      Endpoints
+                                  </h5>
+                              </div>
+                          </div>
+                            <div class="panel panel-info endpoints table-responsive">
+                                {% colgroup endpoints into 2 cols as grouped_items %}
+                                <table class="table-striped table table table-condensed table-hover finding-endpoints">
+                                    {% for row in grouped_items %}
+                                        <tr>
+                                            {% for item in row %}
+                                                <td>{% if item %}<i class="fa fa-circle"></i>
+                                                    {{ item }}{% endif %}
+                                                </td>
+                                            {% endfor %}
+                                        </tr>
+                                    {% endfor %}
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                  </div>
                     <p>
                         A total of {{ findings|length|apnumber }} finding{{ findings|length|pluralize }} of varying
                         severity are represented in this report.

@@ -58,10 +58,38 @@
                         {% else %}
                             <p>No engagements found for {{ product.name }}</p>
                         {% endif %}
+                        <div class="row">
+                          <div class="col-md-12">
+                          <div class="panel panel-default">
+                              <div class="panel-heading finding-title">
+                                  <div class="clearfix">
+                                      <h5>
+                                          Endpoints
+                                      </h5>
+                                  </div>
+                              </div>
+                                <div class="panel panel-info endpoints table-responsive">
+                                    {% colgroup endpoints into 2 cols as grouped_items %}
+                                    <table class="table-striped table table table-condensed table-hover finding-endpoints">
+                                        {% for row in grouped_items %}
+                                            <tr>
+                                                {% for item in row %}
+                                                    <td>{% if item %}<i class="fa fa-circle"></i>
+                                                        {{ item }}{% endif %}
+                                                    </td>
+                                                {% endfor %}
+                                            </tr>
+                                        {% endfor %}
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                      </div>
                         <h4>Product Metrics</h4>
 
                     {% endif %}
                 </div>
+
                 <div class="col-lg-12">
                     <p>
                         A total of {{ findings|length|apnumber }} finding{{ findings|length|pluralize }} of varying
