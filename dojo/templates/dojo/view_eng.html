@@ -45,7 +45,7 @@
                               {% endif %}
                           </li>
                           <li role="presentation">
-                              <a href="{% url 'engagement_report' eng.id %}">
+                              <a href="{% url 'engagement_report' eng.id %}?title=&active=1&verified=1&false_p=2&duplicate=2">
                                   <i class="fa fa-file-text-o"></i> Report
                               </a>
                           </li>
@@ -189,6 +189,12 @@
                                                <i class="fa fa-upload"></i> Import Scan Results
                                            </a></li>
                                            <li class="divider"></li>
+                                           <li role="presentation">
+                                               <a href="{% url 'test_report' test.id %}?title=&active=1&verified=1&false_p=2&duplicate=2">
+                                                   <i class="fa fa-file-text-o"></i> Test Report
+                                               </a>
+                                           </li>
+                                           <li class="divider"></li>
                                            <li>
                                              <a class="text-danger" href="{% url 'delete_test' test.id %}">
                                               <i class="fa fa-trash-o"></i> Delete</a>
@@ -201,7 +207,7 @@
                                 <td>
                                   {% if eng.lead.get_full_name and eng.lead.get_full_name.strip %}
                                       {{ eng.lead.get_full_name }}
-                                  {% else %}
+                                  {% elif eng.lead %}
                                       {{ eng.lead }}
                                   {% endif %}
                                 </td>
@@ -360,7 +366,7 @@
 <!-- Sidebar -->
 </div>
 <div class="col-md-4">
-  <div class="panel panel-default">
+  <div class="panel panel-default-secondary">
     <div class="panel-heading">
       <h3 class="panel-title"><span class="fa fa-info-circle fa-fw" aria-hidden="true"></span> {% if eng.name %}
           {{ eng.name }}
@@ -404,8 +410,10 @@
               {% if eng.engagement_type == "Interactive" %}Lead{% else %}Service Account {% endif %}</strong></td>
             <td>{% if eng.lead.get_full_name and eng.lead.get_full_name.strip %}
                 {{ eng.lead.get_full_name }}
-            {% else %}
+            {% elif eng.lead %}
                 {{ eng.lead }}
+            {% else %}
+                None Assigned
             {% endif %}</td>
           </tr>
           {% if jissue and jconf %}
@@ -486,7 +494,7 @@
 </div>
 {% endif %}
   <div>
-    <div class="panel panel-default">
+    <div class="panel panel-default-secondary">
       <div class="panel-heading">
         <h4><span class="fa fa-key" aria-hidden="true"></span>
           Credentials
