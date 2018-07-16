@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load navigation_tags %}
+{% load get_config_setting %}
+{% block content %}
+    <div class="row">
+          <div class="col-md-12">
+              <div class="panel panel-default table-responsive">
+                  <div class="panel-heading">
+                      <h4>Tools
+                          <a title="Add New Tool" class="pull-right btn btn-primary btn-sm"
+                             href="{% url 'new_tool_product' prod.id %}"><span class="fa fa-plus"></span></a>
+                      </h4>
+                  </div>
+                  {% if tools %}
+                      <table class="tablesorter-bootstrap table table-condensed table-striped table-hover">
+                          <thead>
+                          <tr>
+                              <th>Name</th>
+                              <th>ID</th>
+                              <th>Type</th>
+                              <th>Category</th>
+                              <th>Actions</th>
+                          </tr>
+                          </thead>
+                          <tbody>
+                          {% for tool in tools %}
+                              <tr>
+                                <td><a href="{{ tool.url }}" target="_blank">
+                                  {{ tool.name }}</a></td>
+                                  <td>{{ tool.tool_project_id }}</td>
+                                  <td><a href="{{ tool.tool_configuration.url }}" target="_blank">
+                                    {{ tool.tool_configuration.name }}</a></td>
+                                  <td>{{ tool.tool_configuration.tool_type.name }}</td>
+                                  <td>
+                                      <div class="btn-group"><!--
+                                          <a class="btn btn-sm btn-primary"
+                                             href="{% url 'view_tool_product' tool.product.id tool.id  %}">View</a>-->
+                                          <a class="btn btn-sm btn-warning"
+                                             href="{% url 'edit_tool_product' tool.product.id tool.id  %}">Edit</a>
+                                          <a class="btn btn-sm btn-danger delete-finding"
+                                             href="{% url 'delete_tool_product' tool.product.id tool.id  %}">Delete</a>
+                                      </div>
+                                  </td>
+                              </tr>
+                          {% endfor %}
+                          </tbody>
+                      </table>
+                  {% else %}
+                      <div class="panel-body">
+                          <p>No tools configured.</p>
+                      </div>
+                  {% endif %}
+              </div>
+          </div>
+    </div>
+{% endblock %}
+{% block postscript %}
+    {% include "dojo/filter_js_snippet.html" %}
+{% endblock %}

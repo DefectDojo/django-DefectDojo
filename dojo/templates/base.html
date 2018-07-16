@@ -390,6 +390,28 @@
                         </li>
                         <li role="separator" class="divider"></li>
                         <li role="presentation">
+                            <a href="{% url 'new_cred_product' product_tab.product.id %}">
+                                <i class="fa fa-plus"></i> Add Credentials
+                            </a>
+                        </li>
+                        <li role="presentation">
+                            <a href="{% url 'all_cred_product' product_tab.product.id %}">
+                                <i class="fa fa-plus"></i> View Credentials
+                            </a>
+                        </li>
+                        <li role="separator" class="divider"></li>
+                        <li role="presentation">
+                            <a href="{% url 'new_tool_product' product_tab.product.id %}">
+                                <i class="fa fa-plus"></i> Add Tools
+                            </a>
+                        </li>
+                        <li role="presentation">
+                            <a href="{% url 'all_tool_product' product_tab.product.id %}">
+                                <i class="fa fa-plus"></i> View Tools
+                            </a>
+                        </li>
+                        <li role="separator" class="divider"></li>
+                        <li role="presentation">
                             <a href="{% url 'action_history' product_tab.product|content_type product_tab.product.id %}">
                                 <i class="fa fa-history"></i> View History
                             </a>

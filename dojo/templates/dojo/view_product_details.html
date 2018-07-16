@@ -3,8 +3,9 @@
 {% load display_tags %}
 {% load static from staticfiles %}
 {% block add_styles %}
-  .graph {min-height: 158px;}
-  h3 { margin-top: 5px; margin-bottom: 5px; font-size: 20px; line-height: 22px;}
+  th, td {
+    width: 100px;
+  }
 {% endblock %}
 {% block content %}
 <div class="row">
@@ -54,7 +55,7 @@
                 {% endif %}
                 <li role="separator" class="divider"></li>
                 <li role="presentation">
-                  <a href="{% url 'product_report' prod.id %}">
+                  <a href="{% url 'product_report' prod.id %}?title=&active=1&verified=1&false_p=2&duplicate=2">
                                     <i class="fa fa-file-text-o"></i> Product Report
                                 </a>
                 </li>

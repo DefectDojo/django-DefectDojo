@@ -8,7 +8,7 @@ from django.utils import timezone
 from dojo.forms import DeleteToolProductSettingsForm, ToolProductSettingsForm, NoteForm
 from dojo.models import Product, Tool_Product_Settings
 from django.http import HttpResponseRedirect
-from dojo.utils import add_breadcrumb
+from dojo.utils import add_breadcrumb, Product_Tab
 
 logger = logging.getLogger(__name__)
 
@@ -30,16 +30,26 @@ def new_tool_product(request, pid):
                 'Product Tool Configuration Successfully Created.',
                 extra_tags='alert-success')
             return HttpResponseRedirect(
-                reverse('view_product_details', args=(pid, )))
+                reverse('all_tool_product', args=(pid, )))
     else:
         tform = ToolProductSettingsForm()
-        add_breadcrumb(
-            title="New Product Tool Configuration",
-            top_level=False,
-            request=request)
+    product_tab = Product_Tab(pid, title="Tool Configurations", tab="settings")
     return render(request, 'dojo/new_tool_product.html', {
         'tform': tform,
+        'product_tab': product_tab,
         'pid': pid
+    })
+
+
+@user_passes_test(lambda u: u.is_staff)
+def all_tool_product(request, pid):
+    prod = get_object_or_404(Product, id=pid)
+    tools = Tool_Product_Settings.objects.filter(product=prod).order_by('name')
+    product_tab = Product_Tab(prod.id, title="Tool Configurations", tab="settings")
+    return render(request, 'dojo/view_tool_product_all.html', {
+        'prod': prod,
+        'tools': tools,
+        'product_tab': product_tab
     })
 
 
@@ -82,6 +92,7 @@ def view_tool_product(request, pid, ttid):
 
 @user_passes_test(lambda u: u.is_staff)
 def edit_tool_product(request, pid, ttid):
+    prod = get_object_or_404(Product, id=pid)
     tool_product = Tool_Product_Settings.objects.get(pk=ttid)
 
     if request.method == 'POST':
@@ -93,24 +104,21 @@ def edit_tool_product(request, pid, ttid):
                 messages.SUCCESS,
                 'Tool Product Configuration Successfully Updated.',
                 extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('view_product_details', args=(pid, )))
+            return HttpResponseRedirect(reverse('all_tool_product', args=(pid, )))
     else:
         tform = ToolProductSettingsForm(instance=tool_product)
 
-    add_breadcrumb(
-        title="Edit Product Tool Configuration",
-        top_level=False,
-        request=request)
-
+    product_tab = Product_Tab(pid, title="Edit Product Tool Configuration", tab="settings")
     return render(request, 'dojo/edit_tool_product.html', {
         'tform': tform,
+        'product_tab': product_tab
     })
 
 
 @user_passes_test(lambda u: u.is_staff)
 def delete_tool_product(request, pid, ttid):
     tool_product = Tool_Product_Settings.objects.get(pk=ttid)
-
+    prod = get_object_or_404(Product, id=pid)
     if request.method == 'POST':
         tform = DeleteToolProductSettingsForm(
             request.POST, instance=tool_product)
@@ -120,17 +128,15 @@ def delete_tool_product(request, pid, ttid):
             messages.SUCCESS,
             'Tool Product Successfully Deleted.',
             extra_tags='alert-success')
-        return HttpResponseRedirect(reverse('view_product_details', args=(pid, )))
+        return HttpResponseRedirect(reverse('all_tool_product', args=(pid, )))
     else:
         tform = ToolProductSettingsForm(instance=tool_product)
 
-    add_breadcrumb(
-        title="Delete Product Tool Configuration",
-        top_level=False,
-        request=request)
+    product_tab = Product_Tab(pid, title="Delete Product Tool Configuration", tab="settings")
 
     return render(request, 'dojo/delete_tool_product.html', {
         'tform': tform,
+        'product_tab': product_tab
     })
 
 
