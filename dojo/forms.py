@@ -246,7 +246,9 @@ class ImportScanForm(forms.Form):
                          ("Generic Findings Import", "Generic Findings Import"),
                          ("SKF Scan", "SKF Scan"),
                          ("Bandit Scan", "Bandit Scan"),
-                         ("SSL Labs Scan", "SSL Labs Scan"))
+                         ("SSL Labs Scan", "SSL Labs Scan"),q
+                         ("GoAST Scanner", "GoAST Scanner"))
+
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
 
     scan_date = forms.DateTimeField(

@@ -195,4 +195,12 @@
     "model": "dojo.test_type",
     "pk": 27
   }
+    {
+      "fields": {
+	"name": "GoAST Scanner"
+      },
+      "model": "dojo.test_type",
+      "pk":28
+}
+
 ]
