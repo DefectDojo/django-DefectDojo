@@ -3,8 +3,9 @@
 {% load display_tags %}
 {% load static from staticfiles %}
 {% block add_styles %}
-  .graph {min-height: 158px;}
-  h3 { margin-top: 5px; margin-bottom: 5px; font-size: 20px; line-height: 22px;}
+  th, td {
+    width: 100px;
+  }
 {% endblock %}
 {% block content %}
 <div class="row">
@@ -54,7 +55,7 @@
                 {% endif %}
                 <li role="separator" class="divider"></li>
                 <li role="presentation">
-                  <a href="{% url 'product_report' prod.id %}">
+                  <a href="{% url 'product_report' prod.id %}?title=&active=1&verified=1&false_p=2&duplicate=2">
                                     <i class="fa fa-file-text-o"></i> Product Report
                                 </a>
                 </li>
@@ -137,8 +138,14 @@
       <ul class="list-group">
       {% if languages %}
         <li class="list-group-item">
-          <strong>Total Files: </strong>{{ langSummary.files__sum|intcomma }}
-          <strong>Lines of Code: </strong>{{ langSummary.code__sum|intcomma }}
+          <strong>Total Files: </strong>
+          {%  if langSummary.files__sum > 0 %}
+          {{ langSummary.files__sum|intcomma }}
+          {% endif %}
+          <strong>Lines of Code: </strong>
+          {%  if langSummary.code__sum %}
+          {{ langSummary.code__sum|intcomma }}
+          {% endif %}
         </li>
       {% for lang in languages %}
         <li class="list-group-item">
@@ -158,7 +165,7 @@
 
 <!-- Meta Data -->
 <div class="col-md-4">
-  <div class="panel panel-default">
+  <div class="panel panel-default panel-default-secondary">
     <div class="panel-heading">
       <h3 class="panel-title"><span class="fa fa-info-circle fa-fw" aria-hidden="true"></span> Metadata</h3>
     </div>
@@ -167,31 +174,39 @@
         <tbody>
           <tr>
             <td><strong>Business Criticality</strong></td>
-            <td>{{ prod.get_business_criticality_display }}</td>
+            <td>{{ prod.get_business_criticality_display|default:"" }}</td>
           </tr>
           <tr>
             <td><strong>Product Type</strong></td>
-            <td>{{ prod.prod_type }}</td>
+            <td>{{ prod.prod_type|default:"" }}</td>
           </tr>
           <tr>
             <td><strong>Platform</strong></td>
-            <td>{{ prod.get_platform_display }}</td>
+            <td>{{ prod.get_platform_display|default:"" }}</td>
           </tr>
           <tr>
             <td><strong>Lifecycle</strong></td>
-            <td>{{ prod.get_lifecycle_display }}</td>
+            <td>{{ prod.get_lifecycle_display|default:"" }}</td>
           </tr>
           <tr>
             <td><strong>Origin</strong></td>
-            <td>{{ prod.get_origin_display }}</td>
+            <td>{{ prod.get_origin_display|default_if_none:"" }}</td>
           </tr>
           <tr>
             <td><strong>User Records</strong></td>
-            <td>{{ prod.user_records|intcomma }}</td>
+            <td>
+              {%  if prod.user_records > 0 %}
+              {{ prod.user_records|intcomma }}
+              {% endif %}
+            </td>
           </tr>
           <tr>
             <td><strong>Revenue</strong></td>
-            <td>{% if application.revenue < 1000000 %}{{ prod.revenue|intcomma }}{% else %}{{ prod.revenue|intword }}{% endif %}</td>
+            <td>
+              {%  if prod.revenue > 0 %}
+                {% if prod.revenue < 1000000 %}{{ prod.revenue|intcomma }}{% else %}{{ prod.revenue|intword }}{% endif %}
+              {% endif %}
+            </td>
           </tr>
         </tbody>
       </table>
@@ -201,7 +216,7 @@
 <!-- End metadata -->
 <!-- Custom fields -->
 {% if product_metadata %}
-  <div class="panel panel-default">
+  <div class="panel panel-default panel-default-secondary">
     <div class="panel-heading">
       <h3 class="panel-title"><span class="fa fa-magic fa-fw" aria-hidden="true"></span> Custom Fields</h3>
     </div>
@@ -221,7 +236,7 @@
 {% endif %}
 <!-- end custom fields -->
 <!-- Contacts -->
-  <div class="panel panel-default">
+  <div class="panel panel-default panel-default-secondary">
     <div class="panel-heading">
       <h3 class="panel-title"><span class="fa fa-users fa-fw" aria-hidden="true"></span> Contacts</h3>
     </div>
@@ -257,7 +272,7 @@
     </div>
   </div>
 <!-- end contacts -->
-<div class="panel panel-default">
+<div class="panel panel-default panel-default-secondary">
   <div class="panel-heading">
     <h3 class="panel-title"><span class="fa fa-gavel" aria-hidden="true"></span> Regulations ({{ prod.regulations.count }})</h3>
   </div>
@@ -270,6 +285,7 @@
   </ul>
 </div>
 </div>
+
 
 
 
