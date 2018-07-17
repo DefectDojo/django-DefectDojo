@@ -1,6 +1,6 @@
-from dateutil import parser
 import json
 from dojo.models import Finding
+
 
 class GoastScannerParser(object):
     def __init__(self, filename, test):
@@ -28,10 +28,10 @@ class GoastScannerParser(object):
             findingdetail += item["code"] + "\n"
 
             sev = item["severity"]
-            #mitigation = item["issue_text"]
+#            mitigation = item["issue_text"]
             mitigation = "coming soon"
-            #references = item["test_id"]
-            referencesxs= "coming soon"
+#            references = item["test_id"]
+            referencesxs = "coming soon"
 
             dupe_key = title + item["file"] + str(item["line"])
 
@@ -45,13 +45,13 @@ class GoastScannerParser(object):
                                active=False,
                                verified=False,
                                description=findingdetail,
-                               severity= sev.title(),
+                               severity=sev.title(),
                                numerical_severity=Finding.get_numerical_severity(sev),
                                mitigation=mitigation,
                                impact=impact,
                                references=references,
-                               file_path = item["file"],
-                              # line = item["line"],
+                               file_path=item["file"],
+#                               line = item["line"],
                                url='N/A',
                                static_finding=True)
 
@@ -59,4 +59,3 @@ class GoastScannerParser(object):
                 findingdetail = ''
 
         self.items = dupes.values()
-    
