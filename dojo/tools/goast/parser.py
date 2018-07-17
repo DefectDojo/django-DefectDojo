@@ -20,7 +20,7 @@ class GoastScannerParser(object):
 
             title = item["details"] + "- " + item["rule_id"]
 
-            ###### Finding details information ######
+#           Finding details information
             findingdetail += "Filename: " + item["file"] + "\n"
             findingdetail += "Line number: " + str(item["line"]) + "\n"
             findingdetail += "Issue Confidence: " + item["confidence"] + "\n\n"
