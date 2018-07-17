@@ -17,6 +17,7 @@ from dojo.tools.generic.parser import GenericFindingUploadCsvParser
 from dojo.tools.qualys.parser import QualysParser
 from dojo.tools.qualyswebapp.parser import QualysWebAppParser
 from dojo.tools.snyk.parser import SnykParser
+from dojo.tools.goast.parser import GoastScannerParser
 from dojo.tools.openvas_csv.parser import OpenVASUploadCsvParser
 from dojo.tools.skf.parser import SKFCsvParser
 from dojo.tools.ssllabs.parser import SSLlabsParser
@@ -83,6 +84,8 @@ def import_parser_factory(file, test, scan_type=None):
         parser = SSLlabsParser(file, test)
     elif scan_type == 'Trufflehog Scan':
         parser = TruffleHogJSONParser(file, test)
+    elif scan_type == 'GoAST Scanner':
+        parser = GoastScannerParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 
