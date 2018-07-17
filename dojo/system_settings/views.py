@@ -1,26 +1,15 @@
 # #  product
 import logging
-import sys
-import json
-import pprint
-from datetime import datetime
-from math import ceil
-
-from dateutil.relativedelta import relativedelta
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
-from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect, StreamingHttpResponse, Http404, HttpResponse
-from django.shortcuts import render, get_object_or_404
-from django.views.decorators.csrf import csrf_exempt
-from dojo.filters import ProductFilter, ProductFindingFilter
-from dojo.forms import ProductForm, EngForm, DeleteProductForm
+from django.shortcuts import render
 from dojo.models import System_Settings
 from dojo.utils import (add_breadcrumb,
                         get_celery_worker_status)
 from dojo.forms import SystemSettingsForm
+from django.conf import settings
+from django.http import HttpResponseRedirect
 
 logger = logging.getLogger(__name__)
 
@@ -31,12 +20,23 @@ def system_settings(request):
         system_settings_obj = System_Settings.objects.get()
     except:
         system_settings_obj = System_Settings()
-    celery_status = get_celery_worker_status()
-    celery_bool = True
-    celery_stat = celery_status.keys()[0]
-    celery_msg = celery_status.values()[0]
-    if celery_status.keys()[0] == 'ERROR':
+
+    # Celery needs to be set with the setting: CELERY_RESULT_BACKEND = 'db+sqlite:///dojo.celeryresults.sqlite'
+    if hasattr(settings, 'CELERY_RESULT_BACKEND'):
+        # Check the status of Celery by sending calling a celery task
+        celery_bool = get_celery_worker_status()
+
+        if celery_bool:
+            celery_msg = "Celery is processing tasks."
+            celery_status = "Running"
+        else:
+            celery_msg = "Celery does not appear to be up and running. Please ensure celery is running."
+            celery_status = "Not Running"
+    else:
         celery_bool = False
+        celery_msg = "Celery needs to have the setting CELERY_RESULT_BACKEND = 'db+sqlite:///dojo.celeryresults.sqlite' set in settings.py."
+        celery_status = "Unkown"
+
     """
     **** To be Finished JIRA Status info ****
     jira_bool = True
@@ -81,4 +81,4 @@ def system_settings(request):
                   {'form': form,
                    'celery_bool': celery_bool,
                    'celery_msg': celery_msg,
-                   'celery_status': celery_stat})
+                   'celery_status': celery_status})

@@ -1,31 +1,17 @@
-# #  product
 import logging
-import sys
-import json
-import pprint
-from datetime import datetime
-from math import ceil
-
-from dateutil.relativedelta import relativedelta
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
-from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
-from django.views.decorators.csrf import csrf_exempt
-from django.utils import timezone
-
-from dojo.filters import ProductFilter, ProductFindingFilter
-from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, get_system_setting
-from dojo.models import *
-from dojo.forms import *
-from dojo.product import views as ds
+from dojo.models import Product, Objects, Objects_Engagement, Engagement
+from tagging.models import Tag
+from dojo.forms import ObjectSettingsForm, DeleteObjectsSettingsForm
 from tagging.utils import get_tag_list
-from tagging.views import TaggedItem
+from dojo.utils import Product_Tab
 
 logger = logging.getLogger(__name__)
+
 
 @user_passes_test(lambda u: u.is_staff)
 def new_object(request, pid):
@@ -48,24 +34,27 @@ def new_object(request, pid):
             return HttpResponseRedirect(reverse('view_objects', args=(pid,)))
     else:
         tform = ObjectSettingsForm()
-        add_breadcrumb(title="Add Tracked Files to a Product", top_level=False, request=request)
+        product_tab = Product_Tab(pid, title="Add Tracked Files to a Product", tab="settings")
 
-    return render(request, 'dojo/new_object.html',
-                  {'tform': tform,
-                  'pid': prod.id})
+        return render(request, 'dojo/new_object.html',
+                      {'tform': tform,
+                       'product_tab': product_tab,
+                       'pid': prod.id})
+
 
 @user_passes_test(lambda u: u.is_staff)
 def view_objects(request, pid):
     object_queryset = Objects.objects.filter(product=pid).order_by('path', 'folder', 'artifact')
 
-    add_breadcrumb(title="Tracked Product Files, Paths and Artifacts", top_level=False, request=request)
-
+    product_tab = Product_Tab(pid, title="Tracked Product Files, Paths and Artifacts", tab="settings")
     return render(request,
                   'dojo/view_objects.html',
                   {
                       'object_queryset': object_queryset,
+                      'product_tab': product_tab,
                       'pid': pid
                   })
+
 
 @user_passes_test(lambda u: u.is_staff)
 def edit_object(request, pid, ttid):
@@ -87,15 +76,17 @@ def edit_object(request, pid, ttid):
             return HttpResponseRedirect(reverse('view_objects', args=(pid,)))
     else:
         tform = ObjectSettingsForm(instance=object,
-        initial={'tags': get_tag_list(Tag.objects.get_for_object(object))})
+                                    initial={'tags': get_tag_list(Tag.objects.get_for_object(object))})
 
     tform.initial['tags'] = [tag.name for tag in object.tags]
-    add_breadcrumb(title="Edit Tracked Files", top_level=False, request=request)
+    product_tab = Product_Tab(pid, title="Edit Tracked Files", tab="settings")
     return render(request,
                   'dojo/edit_object.html',
                   {
                       'tform': tform,
+                      'product_tab': product_tab
                   })
+
 
 @user_passes_test(lambda u: u.is_staff)
 def delete_object(request, pid, ttid):
@@ -112,23 +103,25 @@ def delete_object(request, pid, ttid):
     else:
         tform = DeleteObjectsSettingsForm(instance=object)
 
-    add_breadcrumb(title="Delete Product Tool Configuration", top_level=False, request=request)
-
+    product_tab = Product_Tab(pid, title="Delete Product Tool Configuration", tab="settings")
     return render(request,
                   'dojo/delete_object.html',
                   {
                       'tform': tform,
+                      'product_tab': product_tab
                   })
+
 
 @user_passes_test(lambda u: u.is_staff)
 def view_object_eng(request, id):
     object_queryset = Objects_Engagement.objects.filter(engagement=id).order_by('object_id__path', 'object_id__folder', 'object_id__artifact')
-
-    add_breadcrumb(title="Tracked Files, Folders and Artifacts on a Product", top_level=False, request=request)
-
+    engagement = Engagement.objects.get(id=id)
+    product_tab = Product_Tab(engagement.product.id, title="Tracked Files, Folders and Artifacts on a Product", tab="engagements")
+    product_tab.setEngagement(engagement)
     return render(request,
                   'dojo/view_objects_eng.html',
                   {
                       'object_queryset': object_queryset,
+                      'product_tab': product_tab,
                       'id': id
                   })

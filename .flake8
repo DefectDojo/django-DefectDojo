@@ -21,6 +21,8 @@ ignore =
     F812
     # module level imports
     E402
+    E126
+    E128
 
 exclude =
     # No need to traverse our git directory

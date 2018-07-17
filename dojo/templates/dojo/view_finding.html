@@ -3,7 +3,6 @@
 {% load humanize %}
 {% load static from staticfiles %}
 {% block content %}
-
     <div class="panel panel-default">
         <div class="panel-heading">
             <div class="clearfix">
@@ -17,11 +16,18 @@
                         </sup>
                     {% endif %}
                     {% if finding.last_reviewed %}
-                        <small>Last reviewed {{ finding.last_reviewed | naturalday }}
+                        <small>Last Reviewed {{ finding.last_reviewed | naturalday }},
                             by {{ finding.last_reviewed_by }}</small>
                     {% else %}
-                        <small>Last reviewed {{ finding.date | naturalday }} by {{ finding.reporter }}</small>
+                        <small>Last Reviewed {{ finding.date | naturalday }} by {{ finding.reporter }}, </small>
                     {% endif %}
+                    <small>Created
+                    {% if finding.last_reviewed > finding.created %}
+                      {{ finding.created | naturalday }}
+                    {% else %}
+                      {{ finding.date | naturalday }}
+                    {% endif %}
+                    </small>
                 </h3>
                 {% if user.is_staff %}
                     <div class="dropdown pull-right">
@@ -155,12 +161,17 @@
                 {% endif %}
                 <tr>
                     <th>Severity</th>
+                    {% if finding.scanner_confidence %}
+                    <th>Scanner Confidence</th>
+                    {% endif %}
                     <th>Status</th>
                     {% if finding.risk_acceptance_set.all %}
                         <th>Acceptance</th>
                     {% endif %}
+                    {% if finding.duplicate_finding_set %}
+                    <th>Parent</th>
+                    {% endif %}
                     <th>Type</th>
-                    <!--<th>Build ID</th>-->
                     <th>Date discovered</th>
                     <th>Age</th>
                     <th>Reporter</th>
@@ -183,10 +194,29 @@
                             {% endif %}
                         </span>
                     </td>
-                    <td> {% if finding.under_review %}Under Review, {% endif %}{{ finding.status }}
-                        {% if finding.duplicate_finding.id %}
-                            <a href="{% url 'view_finding' finding.duplicate_finding.id %}">Original
+                    {% if finding.scanner_confidence %}
+                    <td> {{finding.get_scanner_confidence_text}}</td>
+                    {% endif %}
+                    <td>{% if finding.under_review %}Under Review, {% endif %}{{ finding.status }}{% if finding.duplicate_finding.id %}, <a href="{% url 'view_finding' finding.duplicate_finding.id %}">Original
                         {% endif %}</a></td>
+                    {% if finding.duplicate_finding_set %}
+                    <td>
+                        <div class="align-top">
+                        <div class="dropdown">
+                          Duplicate List <a href="#" data-toggle="dropdown">&nbsp;<i class="fa fa-ellipsis-v"></i>&nbsp;</a>
+                          <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                          {% for duplicate in finding.duplicate_finding_set %}
+                              <li>
+                                <a class="" href="{% url 'view_finding' duplicate.id %}">
+                                  <i class="fa fa-bug"></i> {{ duplicate.title }}, <i>{{ duplicate.date }}</i>
+                                </a>
+                              </li>
+                          {%  endfor %}
+                            </ul>
+                          </div>
+                      </div>
+                    </td>
+                    {% endif %}
                     {% if finding.risk_acceptance_set.all %}
                         <td>
                             <a href="{% url 'view_risk' finding.test.engagement.id finding.risk_acceptance_set.all.0.id %}">
@@ -623,6 +653,9 @@
             </form>
         </div>
     </div>
+    <div class="protip">
+       <i class="fa fa-lightbulb-o"></i> <strong>ProTip!</strong> Type <kbd>e</kbd> to edit any finding.
+    </div>
 {% endblock %}
 {% block postscript %}
     <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
@@ -642,10 +675,19 @@
         }
 
         $(document).ready(function () {
+            //Ensures dropdown has proper zindex
+            $('.table-responsive').on('show.bs.dropdown', function () {
+              $('.table-responsive').css( "overflow", "inherit" );
+            });
+
+            $('.table-responsive').on('hide.bs.dropdown', function () {
+              $('.table-responsive').css( "overflow", "auto" );
+            })
             $("a[data-toggle='collapse']").on('click', function () {
                 var i = $($(this).find('i').get(0));
                 i.toggleClass('glyphicon-chevron-up').toggleClass('glyphicon-chevron-down');
             })
+            $('[data-toggle="tooltip"]').tooltip()
         });
 
         $(document).on('keypress', null, 'e', function () {

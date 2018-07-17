@@ -25,14 +25,14 @@ from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
 from dojo.reports.widgets import CoverPage, PageBreak, TableOfContents, WYSIWYGContent, FindingList, EndpointList, \
     CustomReportJsonForm, ReportOptions, report_widget_factory
 from dojo.tasks import async_pdf_report, async_custom_pdf_report
-from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_system_setting, get_period_counts_legacy
+from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, get_period_counts_legacy, Product_Tab
 
 logger = logging.getLogger(__name__)
 
 
 def report_url_resolver(request):
     try:
-        url_resolver = request.META['HTTP_X_FORWARDED_PROTO'] + "://" +  request.META['HTTP_X_FORWARDED_FOR']
+        url_resolver = request.META['HTTP_X_FORWARDED_PROTO'] + "://" + request.META['HTTP_X_FORWARDED_FOR']
     except:
         hostname = request.META['HTTP_HOST']
         port_index = hostname.find(":")
@@ -140,7 +140,7 @@ def report_findings(request):
                    for word in finding.title.split() if len(word) > 2]
 
     title_words = sorted(set(title_words))
-    paged_findings = get_page_items(request, findings.qs, 25)
+    paged_findings = get_page_items(request, findings.qs.order_by('numerical_severity'), 25)
 
     product_type = None
     if 'test__engagement__product__prod_type' in request.GET:
@@ -513,10 +513,12 @@ def product_endpoint_report(request, pid):
         else:
             raise Http404()
 
+    product_tab = Product_Tab(product.id, "Product Endpoint Report", tab="endpoints")
     return render(request,
                   'dojo/request_endpoint_report.html',
                   {"endpoints": paged_endpoints,
                    "filtered": endpoints,
+                   "product_tab": product_tab,
                    'report_form': report_form,
                    "name": "Vulnerable Product Endpoints",
                    })
@@ -529,6 +531,7 @@ def generate_report(request, obj):
     engagement = None
     test = None
     endpoint = None
+    endpoints = None
     endpoint_all_findings = None
     endpoint_monthly_counts = None
     endpoint_active_findings = None
@@ -597,9 +600,9 @@ def generate_report(request, obj):
         # include current month
         months_between += 1
 
-        endpoint_monthly_counts = get_period_counts_legacy(findings.qs, findings.qs, None,
-                                                    months_between, start_date,
-                                                    relative_delta='months')
+        endpoint_monthly_counts = get_period_counts_legacy(findings.qs.order_by('numerical_severity'), findings.qs.order_by('numerical_severity'), None,
+                                                            months_between, start_date,
+                                                            relative_delta='months')
 
         context = {'product_type': product_type,
                    'products': products,
@@ -608,8 +611,8 @@ def generate_report(request, obj):
                    'report_name': report_name,
                    'endpoint_opened_per_month': endpoint_monthly_counts[
                        'opened_per_period'] if endpoint_monthly_counts is not None else [],
-                   'endpoint_active_findings': findings.qs,
-                   'findings': findings.qs,
+                   'endpoint_active_findings': findings.qs.order_by('numerical_severity'),
+                   'findings': findings.qs.order_by('numerical_severity'),
                    'include_finding_notes': include_finding_notes,
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
@@ -634,12 +637,13 @@ def generate_report(request, obj):
         ids = set(finding.id for finding in findings.qs)
         engagements = Engagement.objects.filter(test__finding__id__in=ids).distinct()
         tests = Test.objects.filter(finding__id__in=ids).distinct()
-
+        ids = get_endpoint_ids(Endpoint.objects.filter(product=product).distinct())
+        endpoints = Endpoint.objects.filter(id__in=ids)
         context = {'product': product,
                    'engagements': engagements,
                    'tests': tests,
                    'report_name': report_name,
-                   'findings': findings.qs,
+                   'findings': findings.qs.order_by('numerical_severity'),
                    'include_finding_notes': include_finding_notes,
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
@@ -647,6 +651,7 @@ def generate_report(request, obj):
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': 'Generate Report',
+                   'endpoints': endpoints,
                    'host': report_url_resolver(request),
                    'user_id': request.user.id}
 
@@ -665,11 +670,12 @@ def generate_report(request, obj):
 
         ids = set(finding.id for finding in findings.qs)
         tests = Test.objects.filter(finding__id__in=ids).distinct()
-
+        ids = get_endpoint_ids(Endpoint.objects.filter(product=engagement.product).distinct())
+        endpoints = Endpoint.objects.filter(id__in=ids)
         context = {'engagement': engagement,
                    'tests': tests,
                    'report_name': report_name,
-                   'findings': findings.qs,
+                   'findings': findings.qs.order_by('numerical_severity'),
                    'include_finding_notes': include_finding_notes,
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
@@ -678,7 +684,8 @@ def generate_report(request, obj):
                    'team_name': settings.TEAM_NAME,
                    'title': 'Generate Report',
                    'host': report_url_resolver(request),
-                   'user_id': request.user.id}
+                   'user_id': request.user.id,
+                   'endpoints': endpoints}
 
     elif type(obj).__name__ == "Test":
         test = obj
@@ -694,7 +701,7 @@ def generate_report(request, obj):
 
         context = {'test': test,
                    'report_name': report_name,
-                   'findings': findings.qs,
+                   'findings': findings.qs.order_by('numerical_severity'),
                    'include_finding_notes': include_finding_notes,
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
@@ -725,7 +732,7 @@ def generate_report(request, obj):
         context = {'endpoint': endpoint,
                    'endpoints': endpoints,
                    'report_name': report_name,
-                   'findings': findings.qs,
+                   'findings': findings.qs.order_by('numerical_severity'),
                    'include_finding_notes': include_finding_notes,
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
@@ -748,7 +755,7 @@ def generate_report(request, obj):
         report_title = "Finding Report"
         report_subtitle = ''
 
-        context = {'findings': findings.qs,
+        context = {'findings': findings.qs.order_by('numerical_severity'),
                    'report_name': report_name,
                    'include_finding_notes': include_finding_notes,
                    'include_finding_images': include_finding_images,
@@ -774,7 +781,7 @@ def generate_report(request, obj):
                            'engagement': engagement,
                            'test': test,
                            'endpoint': endpoint,
-                           'findings': findings.qs,
+                           'findings': findings.qs.order_by('numerical_severity'),
                            'include_finding_notes': include_finding_notes,
                            'include_finding_images': include_finding_images,
                            'include_executive_summary': include_executive_summary,
@@ -823,9 +830,11 @@ def generate_report(request, obj):
                           {'product_type': product_type,
                            'product': product,
                            'engagement': engagement,
+                           'report_name': report_name,
                            'test': test,
                            'endpoint': endpoint,
-                           'findings': findings.qs.order_by('severity'),
+                           'endpoints': endpoints,
+                           'findings': findings.qs.order_by('numerical_severity'),
                            'include_finding_notes': include_finding_notes,
                            'include_finding_images': include_finding_images,
                            'include_executive_summary': include_executive_summary,
@@ -839,10 +848,24 @@ def generate_report(request, obj):
 
         else:
             raise Http404()
-    paged_findings = get_page_items(request, findings.qs, 25)
+    paged_findings = get_page_items(request, findings.qs.order_by('numerical_severity'), 25)
+
+    product_tab = None
+    if engagement:
+        product_tab = Product_Tab(engagement.product.id, title="Engagement Report", tab="engagements")
+        product_tab.setEngagement(engagement)
+    elif test:
+        product_tab = Product_Tab(test.engagement.product.id, title="Test Report", tab="engagements")
+        product_tab.setEngagement(test.engagement)
+    elif product:
+        product_tab = Product_Tab(product.id, title="Product Report", tab="findings")
+    elif endpoints:
+        product_tab = Product_Tab(endpoint.product.id, title="Endpoint Report", tab="endpoints")
+
     return render(request, 'dojo/request_report.html',
                   {'product_type': product_type,
                    'product': product,
+                   'product_tab': product_tab,
                    'engagement': engagement,
                    'test': test,
                    'endpoint': endpoint,
