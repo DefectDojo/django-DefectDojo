@@ -91,3 +91,6 @@ dojo/media
 .venv/
 venv/
 ENV/
+
+# setup
+setupcomplete
