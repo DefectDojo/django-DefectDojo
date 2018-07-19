@@ -1447,6 +1447,7 @@ div.tags .label {
 
 .tag-color {
     background: #556270;
+    border: 1px solid #fff!important;
 }
 
 .happy-green-color {
@@ -1514,7 +1515,7 @@ mark{
 }
 
 .btn-overdue {
-    border-radius: 2px;
+    border-radius: 0px;
     border-color: #ddd;
     color: #ffffff;
     background: #ef251e;
