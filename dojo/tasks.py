@@ -13,7 +13,6 @@ from celery.utils.log import get_task_logger
 from celery.decorators import task
 from dojo.models import Product, Finding, Engagement, System_Settings
 from django.utils import timezone
-from django.db.models import Q
 
 import pdfkit
 from dojo.celery import app
