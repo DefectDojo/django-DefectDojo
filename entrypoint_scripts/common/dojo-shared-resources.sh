@@ -246,8 +246,7 @@ function ensure_mysql_application_db() {
 
     if mysql -fs --protocol=TCP -h "$SQLHOST" -P "$SQLPORT" -u"$SQLUSER" -p"$SQLPWD" "$DBNAME" >/dev/null 2>&1 </dev/null; then
         echo "Database $DBNAME already exists!"
-        echo
-        if [ "$AUTO_DOCKER" == "yes" ]; then
+        if [[ "${AUTO_DOCKER}" == "yes" ]]; then
             if [ -z "$FLUSHDB" ]; then
                 DELETE="yes"
             else
@@ -256,7 +255,8 @@ function ensure_mysql_application_db() {
         else
             read -p "Drop database $DBNAME? [Y/n] " DELETE
         fi
-        if [[ ! $DELETE =~ ^[nN]$ ]]; then
+        echo "DELETE is set to ${DELETE}"
+        if [[ ! ${DELETE} =~ ^[nN]$ ]]; then
             mysqladmin -f --protocol=TCP --host="$SQLHOST" --port="$SQLPORT" --user="$SQLUSER" --password="$SQLPWD" drop "$DBNAME"
             mysqladmin    --protocol=TCP --host="$SQLHOST" --port="$SQLPORT" --user="$SQLUSER" --password="$SQLPWD" create "$DBNAME"
         fi
@@ -289,7 +289,7 @@ function ensure_postgres_application_db() {
         echo "Database $DBNAME already exists!"
         echo
         read -p "Drop database $DBNAME? [Y/n] " DELETE
-        if [[ ! $DELETE =~ ^[nN]$ ]]; then
+        if [[ ! ${DELETE} =~ ^[nN]$ ]]; then
             PGPASSWORD=$SQLPWD dropdb $DBNAME -h $SQLHOST -p $SQLPORT -U $SQLUSER
             PGPASSWORD=$SQLPWD createdb $DBNAME -h $SQLHOST -p $SQLPORT -U $SQLUSER
         else
