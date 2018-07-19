@@ -1,0 +1,46 @@
+version: "3"
+services:
+  dojo:
+    restart: always
+    build: 
+      context: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mysqldb
+    volumes: 
+      - .:/django-DefectDojo
+      - /tmp/django-DefectDojo/media:/opt/django-DefectDojo/media
+      - /tmp/django-DefectDojo/static:/opt/django-DefectDojo/static
+    command: bash /django-DefectDojo/docker/docker-startup.bash
+  mysqldb:
+    restart: always
+    image: mysql:8
+    ports:
+      - "3306:3306"
+    env_file:
+        - .env_mysql
+    environment:
+      max_allowed_packet: "16M"
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - mysqldata:/var/lib/mysqldata/data/
+#  nginx:
+#    restart: always
+#    build: ./nginx/
+#    ports:
+#      - "80:80"
+#      - "443:443"
+#    expose:
+#      - "80"
+#      - "443"
+#    environment:
+#     - DH_SIZE=512
+#    volumes_from:
+#      - dojo
+#    volumes:
+#      - nginxdata:/etc/nginx/external/
+#    depends_on:
+#      - dojo
+volumes:
+  mysqldata:
