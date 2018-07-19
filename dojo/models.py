@@ -1625,6 +1625,9 @@ class Languages(models.Model):
     def __unicode__(self):
         return self.language.language
 
+    class Meta:
+        unique_together = [('language', 'product')]
+
 
 class App_Analysis(models.Model):
     product = models.ForeignKey(Product)
