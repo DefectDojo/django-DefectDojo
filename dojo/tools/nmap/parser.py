@@ -1,12 +1,9 @@
 from xml.dom import NamespaceErr
 import lxml.etree as le
-import os
-import csv
-import re
 from dojo.models import Endpoint, Finding
-from pprint import pprint
 
 __author__ = 'patriknordlen'
+
 
 class NmapXMLParser(object):
     def __init__(self, file, test):
@@ -26,12 +23,13 @@ class NmapXMLParser(object):
             for os in root.iter("os"):
                 if ip is not None:
                     hostInfo += "IP Address: %s\n" % ip
-                if  fqdn is not None:
-                    fqdn += "FQDN: %s\n" % ip     
-                if 'name' in os.find('osmatch').attrib:
-                    hostInfo += "Host OS: %s\n" % os.find('osmatch').attrib['name']
-                if 'accuracy' in os.find('osmatch').attrib:
-                    hostInfo += "Accuracy: {0}%\n".format(os.find('osmatch').attrib['accuracy'])
+                if fqdn is not None:
+                    fqdn += "FQDN: %s\n" % ip
+                if os.find('osmatch') is not None:
+                    if 'name' in os.find('osmatch').attrib:
+                        hostInfo += "Host OS: %s\n" % os.find('osmatch').attrib['name']
+                    if 'accuracy' in os.find('osmatch').attrib:
+                        hostInfo += "Accuracy: {0}%\n".format(os.find('osmatch').attrib['accuracy'])
 
                 hostInfo += "\n"
 

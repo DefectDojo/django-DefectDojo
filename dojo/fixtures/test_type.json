@@ -183,16 +183,23 @@
   },
   {
     "fields": {
+      "name": "Trustwave"
+    },
+    "model": "dojo.test_type",
+    "pk": 27
+  },
+  {
+    "fields": {
       "name": "VCG Scan"
     },
     "model": "dojo.test_type",
-    "pk": 26
+    "pk": 28
   },
   {
     "fields": {
       "name": "Manual Code Review"
     },
     "model": "dojo.test_type",
-    "pk": 27
+    "pk": 29
   }
 ]

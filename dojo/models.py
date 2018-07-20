@@ -1,12 +1,11 @@
 import base64
+import hashlib
 import logging
 import os
 import re
 from datetime import datetime
 from uuid import uuid4
-
 from django.conf import settings
-
 from watson import search as watson
 from auditlog.registry import auditlog
 from django.contrib import admin
@@ -22,13 +21,41 @@ from django.utils import timezone
 from pytz import all_timezones
 from tagging.registry import register as tag_register
 from multiselectfield import MultiSelectField
-import hashlib
 from django import forms
+from django.utils.translation import gettext as _
 
 fmt = getattr(settings, 'LOG_FORMAT', None)
 lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
 
 logging.basicConfig(format=fmt, level=lvl)
+
+
+class Regulation(models.Model):
+    PRIVACY_CATEGORY = 'privacy'
+    FINANCE_CATEGORY = 'finance'
+    EDUCATION_CATEGORY = 'education'
+    MEDICAL_CATEGORY = 'medical'
+    OTHER_CATEGORY = 'other'
+    CATEGORY_CHOICES = (
+        (PRIVACY_CATEGORY, _('Privacy')),
+        (FINANCE_CATEGORY, _('Finance')),
+        (EDUCATION_CATEGORY, _('Education')),
+        (MEDICAL_CATEGORY, _('Medical')),
+        (OTHER_CATEGORY, _('Other')),
+    )
+
+    name = models.CharField(max_length=128, help_text=_('The name of the legislation.'))
+    acronym = models.CharField(max_length=20, unique=True, help_text=_('A shortened representation of the name.'))
+    category = models.CharField(max_length=9, choices=CATEGORY_CHOICES, help_text=_('The subject of the regulation.'))
+    jurisdiction = models.CharField(max_length=64, help_text=_('The territory over which the regulation applies.'))
+    description = models.TextField(blank=True, help_text=_('Information about the regulation\'s purpose.'))
+    reference = models.URLField(blank=True, help_text=_('An external URL for more information.'))
+
+    class Meta:
+        ordering = ['name']
+
+    def __str__(self):
+        return self.acronym + ' (' + self.jurisdiction + ')'
 
 
 class System_Settings(models.Model):
@@ -98,7 +125,7 @@ class System_Settings(models.Model):
                                       'places, whereas if turned off '
                                       'Critical, High, Medium, etc will '
                                       'be displayed.')
-    false_positive_history = models.BooleanField(default=False)
+    false_positive_history = models.BooleanField(default=False, help_text="DefectDojo will automatically mark the finding as a false positive if the finding has been previously marked as a false positive.")
 
     url_prefix = models.CharField(max_length=300, default='', blank=True, help_text="URL prefix if DefectDojo is installed in it's own virtual subdirectory.")
     team_name = models.CharField(max_length=100, default='', blank=True)
@@ -108,23 +135,64 @@ class System_Settings(models.Model):
     display_endpoint_uri = models.BooleanField(default=False, verbose_name="Display Endpoint Full URI", help_text="Displays the full endpoint URI in the endpoint view.")
     enable_product_grade = models.BooleanField(default=False, verbose_name="Enable Product Grading", help_text="Displays a grade letter next to a product to show the overall health.")
     product_grade = models.CharField(max_length=800, blank=True)
-    product_grade_a = models.IntegerField(default=90, verbose_name="Grade A", help_text="Percentage score for an 'A' >=")
-    product_grade_b = models.IntegerField(default=80, verbose_name="Grade B", help_text="Percentage score for a 'B' >=")
-    product_grade_c = models.IntegerField(default=70, verbose_name="Grade C", help_text="Percentage score for a 'C' >=")
-    product_grade_d = models.IntegerField(default=60, verbose_name="Grade D", help_text="Percentage score for a 'D' >=")
-    product_grade_f = models.IntegerField(default=59, verbose_name="Grade F", help_text="Percentage score for an 'F' <=")
-    enable_benchmark = models.BooleanField(default=True, blank=False, verbose_name="Enable Benchmarks",
-                            help_text='Enables Benchmarks such as the OWASP ASVS (Application Security Verification Standard)')
+    product_grade_a = models.IntegerField(default=90,
+                                          verbose_name="Grade A",
+                                          help_text="Percentage score for an "
+                                                    "'A' >=")
+    product_grade_b = models.IntegerField(default=80,
+                                          verbose_name="Grade B",
+                                          help_text="Percentage score for a "
+                                                    "'B' >=")
+    product_grade_c = models.IntegerField(default=70,
+                                          verbose_name="Grade C",
+                                          help_text="Percentage score for a "
+                                                    "'C' >=")
+    product_grade_d = models.IntegerField(default=60,
+                                          verbose_name="Grade D",
+                                          help_text="Percentage score for a "
+                                                    "'D' >=")
+    product_grade_f = models.IntegerField(default=59,
+                                          verbose_name="Grade F",
+                                          help_text="Percentage score for an "
+                                                    "'F' <=")
+    enable_benchmark = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name="Enable Benchmarks",
+        help_text="Enables Benchmarks such as the OWASP ASVS "
+                  "(Application Security Verification Standard)")
+
+    enable_template_match = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name="Enable Remediation Advice",
+        help_text="Enables global remediation advice and matching on CWE and Title. The text will be replaced for mitigation, impact and references on a finding. Useful for providing consistent impact and remediation advice regardless of the scanner.")
+
+    engagement_auto_close = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name="Enable Engagement Auto-Close",
+        help_text="Closes an engagement after 3 days (default) past due date including last update.")
+
+    engagement_auto_close_days = models.IntegerField(
+        default=3,
+        blank=False,
+        verbose_name="Engagement Auto-Close Days",
+        help_text="Closes an engagement after the specified number of days past due date including last update.")
+
 
 class SystemSettingsFormAdmin(forms.ModelForm):
-    product_grade = forms.CharField( widget=forms.Textarea )
+    product_grade = forms.CharField(widget=forms.Textarea)
+
     class Meta:
         model = System_Settings
         fields = ['product_grade']
 
+
 class System_SettingsAdmin(admin.ModelAdmin):
     form = SystemSettingsFormAdmin
     fields = ('product_grade',)
+
 
 def get_current_date():
     return timezone.now().date()
@@ -190,6 +258,8 @@ class Product_Type(models.Model):
     name = models.CharField(max_length=300)
     critical_product = models.BooleanField(default=False)
     key_product = models.BooleanField(default=False)
+    updated = models.DateTimeField(auto_now=True, null=True)
+    created = models.DateTimeField(auto_now_add=True, null=True)
 
     def critical_present(self):
         c_findings = Finding.objects.filter(
@@ -254,7 +324,7 @@ class Product_Line(models.Model):
 
 
 class Report_Type(models.Model):
-    name = models.CharField(max_length=300)
+    name = models.CharField(max_length=255)
 
 
 class Test_Type(models.Model):
@@ -272,7 +342,59 @@ class Test_Type(models.Model):
 
 
 class Product(models.Model):
-    name = models.CharField(max_length=300)
+    WEB_PLATFORM = 'web'
+    IOT = 'iot'
+    DESKTOP_PLATFORM = 'desktop'
+    MOBILE_PLATFORM = 'mobile'
+    WEB_SERVICE_PLATFORM = 'web service'
+    PLATFORM_CHOICES = (
+        (WEB_SERVICE_PLATFORM, _('API')),
+        (DESKTOP_PLATFORM, _('Desktop')),
+        (IOT, _('Internet of Things')),
+        (MOBILE_PLATFORM, _('Mobile')),
+        (WEB_PLATFORM, _('Web')),
+    )
+
+    CONSTRUCTION = 'construction'
+    PRODUCTION = 'production'
+    RETIREMENT = 'retirement'
+    LIFECYCLE_CHOICES = (
+        (CONSTRUCTION, _('Construction')),
+        (PRODUCTION, _('Production')),
+        (RETIREMENT, _('Retirement')),
+    )
+
+    THIRD_PARTY_LIBRARY_ORIGIN = 'third party library'
+    PURCHASED_ORIGIN = 'purchased'
+    CONTRACTOR_ORIGIN = 'contractor'
+    INTERNALLY_DEVELOPED_ORIGIN = 'internal'
+    OPEN_SOURCE_ORIGIN = 'open source'
+    OUTSOURCED_ORIGIN = 'outsourced'
+    ORIGIN_CHOICES = (
+        (THIRD_PARTY_LIBRARY_ORIGIN, _('Third Party Library')),
+        (PURCHASED_ORIGIN, _('Purchased')),
+        (CONTRACTOR_ORIGIN, _('Contractor Developed')),
+        (INTERNALLY_DEVELOPED_ORIGIN, _('Internally Developed')),
+        (OPEN_SOURCE_ORIGIN, _('Open Source')),
+        (OUTSOURCED_ORIGIN, _('Outsourced')),
+    )
+
+    VERY_HIGH_CRITICALITY = 'very high'
+    HIGH_CRITICALITY = 'high'
+    MEDIUM_CRITICALITY = 'medium'
+    LOW_CRITICALITY = 'low'
+    VERY_LOW_CRITICALITY = 'very low'
+    NONE_CRITICALITY = 'none'
+    BUSINESS_CRITICALITY_CHOICES = (
+        (VERY_HIGH_CRITICALITY, _('Very High')),
+        (HIGH_CRITICALITY, _('High')),
+        (MEDIUM_CRITICALITY, _('Medium')),
+        (LOW_CRITICALITY, _('Low')),
+        (VERY_LOW_CRITICALITY, _('Very Low')),
+        (NONE_CRITICALITY, _('None')),
+    )
+
+    name = models.CharField(max_length=255)
     description = models.CharField(max_length=4000)
 
     '''
@@ -303,6 +425,17 @@ class Product(models.Model):
     authorized_users = models.ManyToManyField(User, blank=True)
     prod_numeric_grade = models.IntegerField(null=True, blank=True)
 
+    # Metadata
+    business_criticality = models.CharField(max_length=9, choices=BUSINESS_CRITICALITY_CHOICES, blank=True, null=True)
+    platform = models.CharField(max_length=11, choices=PLATFORM_CHOICES, blank=True, null=True)
+    lifecycle = models.CharField(max_length=12, choices=LIFECYCLE_CHOICES, blank=True, null=True)
+    origin = models.CharField(max_length=19, choices=ORIGIN_CHOICES, blank=True, null=True)
+    user_records = models.PositiveIntegerField(blank=True, null=True, help_text=_('Estimate the number of user records within the application.'))
+    revenue = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True, help_text=_('Estimate the application\'s revenue.'))
+    external_audience = models.BooleanField(default=False, help_text=_('Specify if the application is used by people outside the organization.'))
+    internet_accessible = models.BooleanField(default=False, help_text=_('Specify if the application is accessible from the public internet.'))
+    regulations = models.ManyToManyField(Regulation, blank=True)
+
     def __unicode__(self):
         return self.name
 
@@ -317,6 +450,18 @@ class Product(models.Model):
                                       duplicate=False,
                                       out_of_scope=False,
                                       test__engagement__product=self).count()
+
+    @property
+    def active_engagement_count(self):
+        return Engagement.objects.filter(active=True, product=self).count()
+
+    @property
+    def closed_engagement_count(self):
+        return Engagement.objects.filter(active=False, product=self).count()
+
+    @property
+    def last_engagement_date(self):
+        return Engagement.objects.filter(product=self).first()
 
     @property
     def endpoint_count(self):
@@ -393,6 +538,10 @@ class Product(models.Model):
                'url': reverse('view_product', args=(self.id,))}]
         return bc
 
+    @property
+    def get_product_type(self):
+        return self.prod_type if self.prod_type is not None else 'unknown'
+
 
 class ScanSettings(models.Model):
     product = models.ForeignKey(Product, default=1, editable=False)
@@ -457,6 +606,44 @@ class IPScan(models.Model):
     scan = models.ForeignKey(Scan, default=1, editable=False)
 
 
+class Tool_Type(models.Model):
+    name = models.CharField(max_length=200)
+    description = models.CharField(max_length=2000, null=True)
+
+    class Meta:
+        ordering = ['name']
+
+    def __unicode__(self):
+        return self.name
+
+
+class Tool_Configuration(models.Model):
+    name = models.CharField(max_length=200, null=False)
+    description = models.CharField(max_length=2000, null=True, blank=True)
+    url = models.CharField(max_length=2000, null=True)
+    tool_type = models.ForeignKey(Tool_Type, related_name='tool_type')
+    authentication_type = models.CharField(max_length=15,
+                                           choices=(
+                                               ('API', 'API Key'),
+                                               ('Password',
+                                                'Username/Password'),
+                                               ('SSH', 'SSH')),
+                                           null=True, blank=True)
+    username = models.CharField(max_length=200, null=True, blank=True)
+    password = models.CharField(max_length=600, null=True, blank=True)
+    auth_title = models.CharField(max_length=200, null=True, blank=True,
+                                  verbose_name="Title for SSH/API Key")
+    ssh = models.CharField(max_length=6000, null=True, blank=True)
+    api_key = models.CharField(max_length=600, null=True, blank=True,
+                               verbose_name="API Key")
+
+    class Meta:
+        ordering = ['name']
+
+    def __unicode__(self):
+        return self.name
+
+
 class Engagement_Type(models.Model):
     name = models.CharField(max_length=200)
 
@@ -474,7 +661,8 @@ class Engagement(models.Model):
     reason = models.CharField(max_length=2000, null=True, blank=True)
     report_type = models.ForeignKey(Report_Type, null=True, blank=True)
     product = models.ForeignKey(Product)
-    updated = models.DateTimeField(editable=False, null=True, blank=True)
+    updated = models.DateTimeField(auto_now=True, null=True)
+    created = models.DateTimeField(auto_now_add=True, null=True)
     active = models.BooleanField(default=True, editable=False)
     test_strategy = models.URLField(editable=True, blank=True, null=True)
     threat_model = models.BooleanField(default=True)
@@ -497,6 +685,20 @@ class Engagement(models.Model):
                                              editable=False,
                                              blank=True)
     done_testing = models.BooleanField(default=False, editable=False)
+    engagement_type = models.CharField(editable=True, max_length=30, default='Interactive',
+                                       null=True,
+                                       choices=(('Interactive', 'Interactive'),
+                                                ('CI/CD', 'CI/CD')))
+    build_id = models.CharField(editable=True, max_length=150,
+                                   null=True, blank=True, help_text="Build ID for CI/CD test", verbose_name="Build ID")
+    commit_hash = models.CharField(editable=True, max_length=150,
+                                   null=True, blank=True, help_text="Commit hash from repo", verbose_name="Commit Hash")
+    branch_tag = models.CharField(editable=True, max_length=150,
+                                   null=True, blank=True, help_text="Tag or branch for CI/CD test", verbose_name="Branch/Tag")
+    build_server = models.ForeignKey(Tool_Configuration, verbose_name="Build Server", help_text="Build server responsible for CI/CD test", null=True, blank=True, related_name='build_server')
+    source_code_management_server = models.ForeignKey(Tool_Configuration, null=True, blank=True, verbose_name="SCM Server", help_text="Source code server for CI/CD test", related_name='source_code_management_server')
+    source_code_management_uri = models.CharField(max_length=600, null=True, blank=True, verbose_name="Repo", help_text="Resource link to source code")
+    orchestration_engine = models.ForeignKey(Tool_Configuration, verbose_name="Orchestration Engine", help_text="Orchestration service responsible for CI/CD test", null=True, blank=True, related_name='orchestration')
 
     class Meta:
         ordering = ['-target_start']
@@ -523,7 +725,7 @@ class Endpoint_Params(models.Model):
     param = models.CharField(max_length=150)
     value = models.CharField(max_length=150)
     method_type = (('GET', 'GET'),
-                    ('POST', 'POST'))
+                   ('POST', 'POST'))
     method = models.CharField(max_length=20, blank=False, null=True, choices=method_type)
 
 
@@ -556,7 +758,6 @@ class Endpoint(models.Model):
         from urlparse import uses_netloc
 
         netloc = self.host
-        fqdn = self.fqdn
         port = self.port
         scheme = self.protocol
         url = self.path if self.path else ''
@@ -564,10 +765,13 @@ class Endpoint(models.Model):
         fragment = self.fragment
 
         if port:
-            netloc += ':%s' % port
+            # If http or https on standard ports then don't tack on the port number
+            if (port != 443 and scheme == "https") or (port != 80 and scheme == "http"):
+                netloc += ':%s' % port
 
         if netloc or (scheme and scheme in uses_netloc and url[:2] != '//'):
-            if url and url[:1] != '/': url = '/' + url
+            if url and url[:1] != '/':
+                url = '/' + url
             if scheme and scheme in uses_netloc and url[:2] != '//':
                 url = '//' + (netloc or '') + url
             else:
@@ -612,6 +816,15 @@ class Endpoint(models.Model):
                                       duplicate=False).distinct().order_by(
             'numerical_severity')
 
+    def finding_count_endpoint(self):
+        findings = Finding.objects.filter(endpoints=self,
+                                          active=True,
+                                          verified=True,
+                                          duplicate=False,
+                                          out_of_scope=False).distinct()
+
+        return findings.count()
+
     def get_breadcrumbs(self):
         bc = self.product.get_breadcrumbs()
         bc += [{'title': self.host_no_port,
@@ -631,7 +844,7 @@ class Endpoint(models.Model):
 
 
 class Notes(models.Model):
-    entry = models.CharField(max_length=2400)
+    entry = models.TextField()
     date = models.DateTimeField(null=False, editable=False,
                                 default=get_current_datetime)
     author = models.ForeignKey(User, editable=False)
@@ -668,6 +881,9 @@ class Test(models.Model):
                                    editable=False)
     environment = models.ForeignKey(Development_Environment, null=True,
                                     blank=False)
+
+    updated = models.DateTimeField(auto_now=True, null=True)
+    created = models.DateTimeField(auto_now_add=True, null=True)
 
     def __unicode__(self):
         return "%s (%s)" % (self.test_type,
@@ -721,12 +937,11 @@ class Finding(models.Model):
     under_review = models.BooleanField(default=False)
     review_requested_by = models.ForeignKey(Dojo_User, null=True, blank=True,
                                             related_name='review_requested_by')
-    reviewers = models.ManyToManyField(Dojo_User, blank=True)
+    reviewers = models.ManyToManyField(User, blank=True)
 
     # Defect Tracking Review
     under_defect_review = models.BooleanField(default=False)
-    defect_review_requested_by = models.ForeignKey(Dojo_User, null=True,
-                                                   blank=True,
+    defect_review_requested_by = models.ForeignKey(Dojo_User, null=True, blank=True,
                                                    related_name='defect_review_requested_by')
 
     thread_id = models.IntegerField(default=0, editable=False)
@@ -756,6 +971,8 @@ class Finding(models.Model):
     found_by = models.ManyToManyField(Test_Type, editable=False)
     static_finding = models.BooleanField(default=False)
     dynamic_finding = models.BooleanField(default=False)
+    created = models.DateTimeField(auto_now_add=True, null=True)
+    scanner_confidence = models.IntegerField(null=True, blank=True, default=None, editable=False, help_text="Confidence level of vulnerability which is supplied by the scannner.")
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
@@ -764,9 +981,25 @@ class Finding(models.Model):
         ordering = ('numerical_severity', '-date', 'title')
 
     def get_hash_code(self):
-        hash_string = self.title + self.description + str(self.line) + str(
-            self.file_path)
+        hash_string = self.title + self.description + str(self.line) + str(self.file_path)
+        hash_string = hash_string.decode('utf-8').strip()
         return hashlib.sha256(hash_string.encode('utf-8')).hexdigest()
+
+    def duplicate_finding_set(self):
+        return self.duplicate_list.all().order_by('title')
+
+    def get_scanner_confidence_text(self):
+        scanner_confidence_text = ""
+        scanner_confidence = self.scanner_confidence
+        if scanner_confidence:
+            if scanner_confidence <= 2:
+                scanner_confidence_text = "Certain"
+            elif scanner_confidence >= 3 and scanner_confidence <= 5:
+                scanner_confidence_text = "Firm"
+            elif scanner_confidence >= 6:
+                scanner_confidence_text = "Tentative"
+
+        return scanner_confidence_text
 
     @staticmethod
     def get_numerical_severity(severity):
@@ -861,19 +1094,30 @@ class Finding(models.Model):
         long_desc += '*References*:' + self.references
         return long_desc
 
-    def save(self, dedupe_option=True, *args, **kwargs):
+    def save(self, dedupe_option=True, rules_option=True, *args, **kwargs):
+        # Make changes to the finding before it's saved to add a CWE template
+        if not self.pk:
+            from dojo.utils import apply_cwe_to_template
+            self = apply_cwe_to_template(self)
+            self.hash_code = self.get_hash_code()
         super(Finding, self).save(*args, **kwargs)
-        self.hash_code = self.get_hash_code()
+        self.found_by.add(self.test.test_type)
         if self.test.test_type.static_tool:
             self.static_finding = True
         else:
             self.dyanmic_finding = True
-        self.found_by.add(self.test.test_type)
-
+        if rules_option:
+            from dojo.tasks import async_rules
+            from dojo.utils import sync_rules
+            if self.reporter.usercontactinfo.block_execution:
+                sync_rules(self, *args, **kwargs)
+            else:
+                async_rules(self, *args, **kwargs)
         from dojo.utils import calculate_grade
         calculate_grade(self.test.engagement.product)
-
-        super(Finding, self).save(*args, **kwargs)
+        # Assign the numerical severity for correct sorting order
+        self.numerical_severity = Finding.get_numerical_severity(self.severity)
+        super(Finding, self).save()
         if (dedupe_option):
             system_settings = System_Settings.objects.get()
             if system_settings.enable_deduplication:
@@ -891,10 +1135,17 @@ class Finding(models.Model):
             if system_settings.false_positive_history:
                 from dojo.tasks import async_false_history
                 from dojo.utils import sync_false_history
-                if self.reporter.usercontactinfo.block_execution:
-                    sync_false_history(self, *args, **kwargs)
-                else:
+                try:
+                    if self.reporter.usercontactinfo.block_execution:
+                        sync_false_history(self, *args, **kwargs)
+                    else:
+                        async_false_history.delay(self, *args, **kwargs)
+                except:
                     async_false_history.delay(self, *args, **kwargs)
+                    pass
+
+        from dojo.utils import calculate_grade
+        calculate_grade(self.test.engagement.product)
 
     def delete(self, *args, **kwargs):
         super(Finding, self).delete(*args, **kwargs)
@@ -950,9 +1201,13 @@ class Finding(models.Model):
         res = re.sub(r'\n\s*\n', '\n', res)
         return res
 
+    def get_found_by(self):
+        scanners = self.found_by.all().distinct()
+        return ", ".join([str(scanner) for scanner in scanners])
+
 
 Finding.endpoints.through.__unicode__ = lambda \
-        x: "Endpoint: " + x.endpoint.host
+    x: "Endpoint: " + x.endpoint.host
 
 
 class Stub_Finding(models.Model):
@@ -984,8 +1239,9 @@ class Finding_Template(models.Model):
     mitigation = models.TextField(null=True, blank=True)
     impact = models.TextField(null=True, blank=True)
     references = models.TextField(null=True, blank=True, db_column="refs")
-    numerical_severity = models.CharField(max_length=4, null=True, blank=True,
-                                          editable=False)
+    numerical_severity = models.CharField(max_length=4, null=True, blank=True, editable=False)
+    template_match = models.BooleanField(default=False, verbose_name='Template Match Enabled', help_text="Enables this template for matching remediation advice. Match will be applied to all active, verified findings by CWE.")
+    template_match_title = models.BooleanField(default=False, verbose_name='Match Template by Title and CWE', help_text="Matches by title text (contains search) and CWE.")
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
@@ -1061,10 +1317,10 @@ class BurpRawRequestResponse(models.Model):
     burpResponseBase64 = models.BinaryField()
 
     def get_request(self):
-        return base64.b64decode(self.burpRequestBase64).decode("utf-8")
+        return unicode(base64.b64decode(self.burpRequestBase64), errors='ignore')
 
     def get_response(self):
-        res = base64.b64decode(self.burpResponseBase64).decode("utf-8")
+        res = unicode(base64.b64decode(self.burpResponseBase64), errors='ignore')
         # Removes all blank lines
         res = re.sub(r'\n\s*\n', '\n', res)
         return res
@@ -1075,10 +1331,13 @@ class Risk_Acceptance(models.Model):
                             editable=False, null=False,
                             blank=False, verbose_name="Risk Acceptance File")
     accepted_findings = models.ManyToManyField(Finding)
+    expiration_date = models.DateTimeField(default=None, null=True, blank=True)
+    accepted_by = models.CharField(max_length=200, default=None, null=True, blank=True, verbose_name='Accepted By', help_text="The entity or person that accepts the risk.")
     reporter = models.ForeignKey(User, editable=False)
     notes = models.ManyToManyField(Notes, editable=False)
-    created = models.DateTimeField(null=False, editable=False,
-                                   default=now)
+    compensating_control = models.TextField(default=None, blank=True, null=True, help_text="If a compensating control exists to mitigate the finding or reduce risk, then list the compensating control(s).")
+    created = models.DateTimeField(null=False, editable=False, default=now)
+    updated = models.DateTimeField(editable=False, default=now)
 
     def __unicode__(self):
         return "Risk Acceptance added on %s" % self.created.strftime(
@@ -1139,7 +1398,7 @@ class FindingImage(models.Model):
                                  options={'quality': 100})
 
     def __unicode__(self):
-        return self.image.name
+        return self.image.name or u'No Image'
 
 
 class FindingImageAccessToken(models.Model):
@@ -1241,55 +1500,20 @@ NOTIFICATION_CHOICES = (
 
 
 class Notifications(models.Model):
+    product_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     engagement_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     test_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     results_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     report_created = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     jira_update = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     upcoming_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    stale_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    auto_close_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     user_mentioned = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     code_review = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     review_requested = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     other = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     user = models.ForeignKey(User, default=None, null=True, editable=False)
-
-
-class Tool_Type(models.Model):
-    name = models.CharField(max_length=200)
-    description = models.CharField(max_length=2000, null=True)
-
-    class Meta:
-        ordering = ['name']
-
-    def __unicode__(self):
-        return self.name
-
-
-class Tool_Configuration(models.Model):
-    name = models.CharField(max_length=200, null=False)
-    description = models.CharField(max_length=2000, null=True, blank=True)
-    url = models.CharField(max_length=2000, null=True)
-    tool_type = models.ForeignKey(Tool_Type, related_name='tool_type')
-    authentication_type = models.CharField(max_length=15,
-                                           choices=(
-                                               ('API', 'API Key'),
-                                               ('Password',
-                                                'Username/Password'),
-                                               ('SSH', 'SSH')),
-                                           null=True, blank=True)
-    username = models.CharField(max_length=200, null=True, blank=True)
-    password = models.CharField(max_length=600, null=True, blank=True)
-    auth_title = models.CharField(max_length=200, null=True, blank=True,
-                                  verbose_name="Title for SSH/API Key")
-    ssh = models.CharField(max_length=6000, null=True, blank=True)
-    api_key = models.CharField(max_length=600, null=True, blank=True,
-                               verbose_name="API Key")
-
-    class Meta:
-        ordering = ['name']
-
-    def __unicode__(self):
-        return self.name
 
 
 class Tool_Product_Settings(models.Model):
@@ -1379,19 +1603,31 @@ class Cred_Mapping(models.Model):
     def __unicode__(self):
         return self.cred_id.name + " (" + self.cred_id.role + ")"
 
+
 class Language_Type(models.Model):
     language = models.CharField(max_length=100, null=False)
     color = models.CharField(max_length=7, null=True, verbose_name='HTML color')
 
+    def __unicode__(self):
+        return self.language
+
+
 class Languages(models.Model):
     language = models.ForeignKey(Language_Type)
     product = models.ForeignKey(Product)
-    user = models.ForeignKey(User, editable=True)
+    user = models.ForeignKey(User, editable=True, blank=True, null=True)
     files = models.IntegerField(blank=True, null=True, verbose_name='Number of files')
     blank = models.IntegerField(blank=True, null=True, verbose_name='Number of blank lines')
     comment = models.IntegerField(blank=True, null=True, verbose_name='Number of comment lines')
     code = models.IntegerField(blank=True, null=True, verbose_name='Number of code lines')
     created = models.DateTimeField(null=False, editable=False, default=now)
+
+    def __unicode__(self):
+        return self.language.language
+
+    class Meta:
+        unique_together = [('language', 'product')]
+
 
 class App_Analysis(models.Model):
     product = models.ForeignKey(Product)
@@ -1404,6 +1640,10 @@ class App_Analysis(models.Model):
     website_found = models.URLField(max_length=400, null=True, blank=True)
     created = models.DateTimeField(null=False, editable=False, default=now)
 
+    def __unicode__(self):
+        return self.name + " | " + self.product.name
+
+
 class Objects_Review(models.Model):
     name = models.CharField(max_length=100, null=True)
     created = models.DateTimeField(null=False, editable=False, default=now)
@@ -1411,28 +1651,33 @@ class Objects_Review(models.Model):
     def __unicode__(self):
         return self.name
 
+
 class Objects(models.Model):
     product = models.ForeignKey(Product)
     name = models.CharField(max_length=100, null=True, blank=True)
-    path = models.CharField(max_length=600, verbose_name='Full file path', null=True, blank=True)
-    folder = models.CharField(max_length=400, verbose_name='Folder', null=True, blank=True)
-    artifact = models.CharField(max_length=400, verbose_name='Artifact', null=True, blank=True)
+    path = models.CharField(max_length=600, verbose_name='Full file path',
+                            null=True, blank=True)
+    folder = models.CharField(max_length=400, verbose_name='Folder',
+                              null=True, blank=True)
+    artifact = models.CharField(max_length=400, verbose_name='Artifact',
+                                null=True, blank=True)
     review_status = models.ForeignKey(Objects_Review)
     created = models.DateTimeField(null=False, editable=False, default=now)
 
     def __unicode__(self):
         name = None
-        if self.path != None:
+        if self.path is not None:
             name = self.path
-        elif self.folder != None:
+        elif self.folder is not None:
             name = self.folder
-        elif self.artifact != None:
+        elif self.artifact is not None:
             name = self.artifact
 
         return name
 
     class Meta:
         unique_together = [('product', 'path')]
+
 
 class Objects_Engagement(models.Model):
     engagement = models.ForeignKey(Engagement)
@@ -1454,6 +1699,7 @@ class Objects_Engagement(models.Model):
 
         return data + " | " + self.engagement.name + " | " + str(self.engagement.id)
 
+
 class Testing_Guide_Category(models.Model):
     name = models.CharField(max_length=300)
     created = models.DateTimeField(null=False, editable=False, default=now)
@@ -1464,6 +1710,7 @@ class Testing_Guide_Category(models.Model):
 
     def __unicode__(self):
         return self.name
+
 
 class Testing_Guide(models.Model):
     testing_guide_category = models.ForeignKey(Testing_Guide_Category)
@@ -1479,20 +1726,23 @@ class Testing_Guide(models.Model):
     def __unicode__(self):
         return self.testing_guide_category.name + ': ' + self.name
 
+
 class Benchmark_Type(models.Model):
     name = models.CharField(max_length=300)
     version = models.CharField(max_length=15)
     source = (('PCI', 'PCI'),
-                    ('OWASP ASVS', 'OWASP ASVS'),
-                    ('OWASP Mobile ASVS', 'OWASP Mobile ASVS'))
+              ('OWASP ASVS', 'OWASP ASVS'),
+              ('OWASP Mobile ASVS', 'OWASP Mobile ASVS'))
     benchmark_source = models.CharField(max_length=20, blank=False,
-                                             null=True, choices=source,
-                                             default='OWASP ASVS')
+                                        null=True, choices=source,
+                                        default='OWASP ASVS')
     created = models.DateTimeField(null=False, editable=False, default=now)
     updated = models.DateTimeField(editable=False, default=now)
     enabled = models.BooleanField(default=True)
+
     def __unicode__(self):
         return self.name + " " + self.version
+
 
 class Benchmark_Category(models.Model):
     type = models.ForeignKey(Benchmark_Type, verbose_name='Benchmark Type')
@@ -1508,6 +1758,7 @@ class Benchmark_Category(models.Model):
 
     def __unicode__(self):
         return self.name + ': ' + self.type.name
+
 
 class Benchmark_Requirement(models.Model):
     category = models.ForeignKey(Benchmark_Category)
@@ -1526,11 +1777,14 @@ class Benchmark_Requirement(models.Model):
     def __unicode__(self):
         return str(self.objective_number) + ': ' + self.category.name
 
+
 class Benchmark_Product(models.Model):
     product = models.ForeignKey(Product)
     control = models.ForeignKey(Benchmark_Requirement)
-    pass_fail = models.BooleanField(default=False, verbose_name='Pass', help_text='Does the product meet the requirement?')
-    enabled = models.BooleanField(default=True, help_text='Applicable for this specific product.')
+    pass_fail = models.BooleanField(default=False, verbose_name='Pass',
+                                    help_text='Does the product meet the requirement?')
+    enabled = models.BooleanField(default=True,
+                                  help_text='Applicable for this specific product.')
     notes = models.ManyToManyField(Notes, blank=True, editable=False)
     created = models.DateTimeField(null=False, editable=False, default=now)
     updated = models.DateTimeField(editable=False, default=now)
@@ -1541,6 +1795,7 @@ class Benchmark_Product(models.Model):
     class Meta:
         unique_together = [('product', 'control')]
 
+
 class Benchmark_Product_Summary(models.Model):
     product = models.ForeignKey(Product)
     benchmark_type = models.ForeignKey(Benchmark_Type)
@@ -1548,11 +1803,11 @@ class Benchmark_Product_Summary(models.Model):
                     ('Level 2', 'Level 2'),
                     ('Level 3', 'Level 3'))
     desired_level = models.CharField(max_length=15,
-                                             null=False, choices=asvs_level,
-                                             default='Level 1')
+                                     null=False, choices=asvs_level,
+                                     default='Level 1')
     current_level = models.CharField(max_length=15, blank=True,
-                                             null=True, choices=asvs_level,
-                                             default='None')
+                                     null=True, choices=asvs_level,
+                                     default='None')
     asvs_level_1_benchmark = models.IntegerField(null=False, default=0, help_text="Total number of active benchmarks for this application.")
     asvs_level_1_score = models.IntegerField(null=False, default=0, help_text="ASVS Level 1 Score")
     asvs_level_2_benchmark = models.IntegerField(null=False, default=0, help_text="Total number of active benchmarks for this application.")
@@ -1568,6 +1823,77 @@ class Benchmark_Product_Summary(models.Model):
 
     class Meta:
         unique_together = [('product', 'benchmark_type')]
+
+
+# product_opts = [f.name for f in Product._meta.fields]
+# test_opts = [f.name for f in Test._meta.fields]
+# test_type_opts = [f.name for f in Test_Type._meta.fields]
+finding_opts = [f.name for f in Finding._meta.fields]
+# endpoint_opts = [f.name for f in Endpoint._meta.fields]
+# engagement_opts = [f.name for f in Engagement._meta.fields]
+# product_type_opts = [f.name for f in Product_Type._meta.fields]
+# single_options = product_opts + test_opts + test_type_opts + finding_opts + \
+#                  endpoint_opts + engagement_opts + product_type_opts
+all_options = []
+for x in finding_opts:
+    all_options.append((x, x))
+operator_options = (('Matches', 'Matches'),
+                    ('Contains', 'Contains'))
+application_options = (('Append', 'Append'),
+                      ('Replace', 'Replace'))
+blank_options = (('', ''),)
+
+
+class Rule(models.Model):
+    # add UI notification to let people know what rules were applied
+
+    name = models.CharField(max_length=200)
+    enabled = models.BooleanField(default=True)
+    text = models.TextField()
+    operator = models.CharField(max_length=30, choices=operator_options)
+    """
+    model_object_options = (('Product', 'Product'),
+                            ('Engagement', 'Engagement'), ('Test', 'Test'),
+                            ('Finding', 'Finding'), ('Endpoint', 'Endpoint'),
+                            ('Product Type', 'Product_Type'), ('Test Type', 'Test_Type'))
+    """
+    model_object_options = (('Finding', 'Finding'),)
+    model_object = models.CharField(max_length=30, choices=model_object_options)
+    match_field = models.CharField(max_length=200, choices=all_options)
+    match_text = models.TextField()
+    application = models.CharField(max_length=200, choices=application_options)
+    applies_to = models.CharField(max_length=30, choices=model_object_options)
+    # TODO: Add or ?
+    # and_rules = models.ManyToManyField('self')
+    applied_field = models.CharField(max_length=200, choices=(all_options))
+    child_rules = models.ManyToManyField('self', editable=False)
+    parent_rule = models.ForeignKey('self', editable=False, null=True)
+
+
+class Child_Rule(models.Model):
+    # add UI notification to let people know what rules were applied
+    operator = models.CharField(max_length=30, choices=operator_options)
+    """
+    model_object_options = (('Product', 'Product'),
+                            ('Engagement', 'Engagement'), ('Test', 'Test'),
+                            ('Finding', 'Finding'), ('Endpoint', 'Endpoint'),
+                            ('Product Type', 'Product_Type'), ('Test Type', 'Test_Type'))
+    """
+    model_object_options = (('Finding', 'Finding'),)
+    model_object = models.CharField(max_length=30, choices=model_object_options)
+    match_field = models.CharField(max_length=200, choices=all_options)
+    match_text = models.TextField()
+    # TODO: Add or ?
+    # and_rules = models.ManyToManyField('self')
+    parent_rule = models.ForeignKey(Rule, editable=False, null=True)
+
+
+class FieldRule(models.Model):
+    field = models.CharField(max_length=200)
+    update_options = (('Append', 'Append'),
+                        ('Replace', 'Replace'))
+    update_type = models.CharField(max_length=30, choices=update_options)
+    text = models.CharField(max_length=200)
 
 # Register for automatic logging to database
 auditlog.register(Dojo_User)
@@ -1590,14 +1916,14 @@ tag_register(Finding_Template)
 tag_register(App_Analysis)
 tag_register(Objects)
 
-#Benchmarks
+# Benchmarks
 admin.site.register(Benchmark_Type)
 admin.site.register(Benchmark_Requirement)
 admin.site.register(Benchmark_Category)
 admin.site.register(Benchmark_Product)
 admin.site.register(Benchmark_Product_Summary)
 
-#Testing
+# Testing
 admin.site.register(Testing_Guide_Category)
 admin.site.register(Testing_Guide)
 
@@ -1637,9 +1963,13 @@ admin.site.register(Cred_User)
 admin.site.register(Cred_Mapping)
 admin.site.register(System_Settings, System_SettingsAdmin)
 admin.site.register(CWE)
+admin.site.register(Regulation)
 
-
+# Watson
 watson.register(Product)
 watson.register(Test)
 watson.register(Finding)
 watson.register(Finding_Template)
+watson.register(Endpoint)
+watson.register(Engagement)
+watson.register(App_Analysis)

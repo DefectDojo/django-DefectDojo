@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name='DefectDojo',
-    version='1.3.0',
+    version='1.3.1',
     author='Greg Anderson',
     description="Tool for managing vulnerability engagements",
     install_requires=[
@@ -18,20 +18,22 @@ setup(
         'django-multiselectfield',
         'django-overextends==0.4.3',  # Required for extensions
         'django-polymorphic==1.2',
+        'django-rest-swagger==2.1.2',
         'django-slack',
         'django-tagging',
         'django-tastypie-swagger',
         'django-tastypie>=0.12.2',
         'django-watson==1.3.1',
+        'django-rest-swagger==2.1.2',
+        'djangorestframework==3.7.7',
         'gunicorn>=19.1.1',
         'html2text',
         'humanize',
         'jira',
         'lxml',
-        'mysqlclient==1.3.12',
         'pdfkit==0.6.1',
         'Pillow',
-        'psycopg2',
+        'psycopg2-binary',
         'pycrypto',
         'python-nmap>=0.3.4',
         'pytz>=2013.9',
@@ -57,11 +59,15 @@ setup(
         'psycopg2',
         'django-multiselectfield',
         'pbr',
-	    'django-slack',
+        'django-slack',
         'asteval',
         'Markdown>=2.6.11',
         'pandas>=0.22.0',
+        'django-dbbackup>=3.2.0',
+        'django-markdownx>=2.0.23',
     ],
+
+    extras_require={'mysql': ['mysqlclient==1.3.12']},
 
     dependency_links=[
         "https://github.com/grendel513/python-pdfkit/tarball/master#egg=pdfkit-0.5.0",

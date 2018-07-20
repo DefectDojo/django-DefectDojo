@@ -1,9 +1,8 @@
 import json
-from itertools import chain
 import hashlib
 
-from dojo.models import Finding, Endpoint
-from django.utils.encoding import smart_text, force_str
+from dojo.models import Finding
+
 
 class RetireJsParser(object):
     def __init__(self, json_output, test):
@@ -46,17 +45,18 @@ def get_item(item_node, test, file):
     title = ""
 
     if 'summary' in item_node['identifiers']:
-        title=item_node['identifiers']['summary']
+        title = item_node['identifiers']['summary']
     elif 'CVE' in item_node['identifiers']:
-        title="".join(item_node['identifiers']['CVE'])
+        title = "".join(item_node['identifiers']['CVE'])
     elif 'osvdb' in item_node['identifiers']:
-        title="".join(item_node['identifiers']['osvdb'])
+        title = "".join(item_node['identifiers']['osvdb'])
 
     finding = Finding(title=title,
                       test=test,
+                      cwe=1035,  # Vulnerable Third Party Component
                       severity=item_node['severity'].title(),
                       description=title + "\n\n Affected File - " + file,
-                      file_path = file,
+                      file_path=file,
                       mitigation="No Mitigation Provided",
                       references="\n\n".join(item_node['info']),
                       active=False,

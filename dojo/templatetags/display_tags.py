@@ -9,10 +9,13 @@ from django.utils.text import normalize_newlines
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from dojo.utils import prepare_for_view, get_system_setting
-from dojo.models import Check_List, FindingImageAccessToken, Finding, System_Settings
+from dojo.models import Check_List, FindingImageAccessToken, Finding, System_Settings, JIRA_PKey, Product
 import markdown
+from django.db.models import Sum, Case, When, IntegerField, Value
 from django.utils import timezone
 from markdown.extensions import Extension
+import dateutil.relativedelta
+import datetime
 
 register = template.Library()
 
@@ -26,8 +29,7 @@ class EscapeHtml(Extension):
 @register.filter
 def markdown_render(value):
     if value:
-        return mark_safe(markdown.markdown(value, extensions=[EscapeHtml(), 'markdown.extensions.codehilite', 'markdown.extensions.toc']))
-
+        return mark_safe(markdown.markdown(value, extensions=[EscapeHtml(), 'markdown.extensions.codehilite', 'markdown.extensions.toc', 'markdown.extensions.tables']))
 
 
 @register.filter(name='ports_open')
@@ -101,11 +103,13 @@ def remove_string(string, value):
 
 @register.filter(name='percentage')
 def percentage(fraction, value):
-    if value > 0:
+    return_value = ''
+    if value > 0 and fraction > 0:
         try:
-            return "%.1f%%" % ((float(fraction) / float(value)) * 100)
+            return_value = "%.1f%%" % ((float(fraction) / float(value)) * 100)
         except ValueError:
-            return ''
+            pass
+    return return_value
 
 
 def asvs_calc_level(benchmark_score):
@@ -147,6 +151,13 @@ def asvs_level(benchmark_score):
     return "ASVS " + str(benchmark_score.desired_level) + " " + level + " Pass: " + str(total_pass) + " Total:  " + total
 
 
+@register.filter(name='get_jira_conf')
+def get_jira_conf(product):
+    jira_conf = JIRA_PKey.objects.filter(product=product)
+
+    return jira_conf
+
+
 @register.filter(name='version_num')
 def version_num(value):
     version = ""
@@ -156,11 +167,83 @@ def version_num(value):
     return version
 
 
+@register.filter(name='count_findings_eng')
+def count_findings_eng(tests):
+    findings = None
+    for test in tests:
+        if findings:
+            findings = findings | test.finding_set.all()
+        else:
+            findings = test.finding_set.all()
+    return findings
+
+
+@register.filter(name='count_findings_eng_open')
+def count_findings_eng_open(engagement):
+    open_findings = Finding.objects.filter(test__engagement=engagement,
+                                           false_p=False,
+                                           verified=True,
+                                           duplicate=False,
+                                           out_of_scope=False,
+                                           active=True,
+                                           mitigated__isnull=True).count()
+    return open_findings
+
+
+@register.filter(name='count_findings_eng_all')
+def count_findings_eng_all(engagement):
+    all_findings = Finding.objects.filter(test__engagement=engagement).count()
+    return all_findings
+
+
+@register.filter(name='count_findings_eng_duplicate')
+def count_findings_eng_duplicate(engagement):
+    duplicate_findings = Finding.objects.filter(test__engagement=engagement,
+                                                duplicate=True).count()
+    return duplicate_findings
+
+
+@register.filter(name='count_findings_test_all')
+def count_findings_test_all(test):
+    open_findings = Finding.objects.filter(test=test).count()
+    return open_findings
+
+
+@register.filter(name='count_findings_test_duplicate')
+def count_findings_test_duplicate(test):
+    duplicate_findings = Finding.objects.filter(test=test, duplicate=True).count()
+    return duplicate_findings
+
+
+@register.filter(name='paginator')
+def paginator(page):
+    page_value = paginator_value(page)
+    if page_value:
+            page_value = "&page=" + page_value
+    return page_value
+
+
+@register.filter(name='paginator_form')
+def paginator_form(page):
+    return paginator_value(page)
+
+
+def paginator_value(page):
+    page_value = ""
+    # isinstance(page, int):
+    try:
+        if int(page):
+            page_value = str(page)
+    except:
+        pass
+    return page_value
+
+
 @register.filter(name='product_grade')
 def product_grade(product):
     grade = ""
     system_settings = System_Settings.objects.get()
-    if system_settings.enable_product_grade:
+    if system_settings.enable_product_grade and product:
         prod_numeric_grade = product.prod_numeric_grade
 
         if prod_numeric_grade is "" or prod_numeric_grade is None:
@@ -188,7 +271,10 @@ def display_index(data, index):
 
 @register.filter
 def finding_status(finding, duplicate):
-    return finding.filter(duplicate=duplicate)
+    findingFilter = None
+    if finding:
+        findingFilter = finding.filter(duplicate=duplicate)
+    return findingFilter
 
 
 @register.simple_tag
@@ -221,6 +307,33 @@ def random_value():
     import string
     import random
     return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(12))
+
+
+@register.filter(name='datediff_time')
+def datediff_time(date1, date2):
+    date_str = ""
+    diff = dateutil.relativedelta.relativedelta(date2, date1)
+    attrs = ['years', 'months', 'days']
+    human_readable = lambda delta: ['%d %s' % (getattr(delta, attr), getattr(delta, attr) > 1 and attr or attr[:-1])
+                                    for attr in attrs if getattr(delta, attr)]
+    human_date = human_readable(diff)
+    for date_part in human_date:
+        date_str = date_str + date_part + " "
+
+    # Date is for one day
+    if date_str is "":
+        date_str = "1 day"
+
+    return date_str
+
+
+@register.filter(name='overdue')
+def overdue(date1):
+    date_str = ""
+    if date1 < datetime.datetime.now().date():
+        date_str = datediff_time(date1, datetime.datetime.now().date())
+
+    return date_str
 
 
 @register.tag
@@ -315,3 +428,235 @@ def tracked_object_type(current_object):
         value = "Artifact"
 
     return value
+
+
+def icon(name, tooltip):
+    return '<i class="fa fa-' + name + ' has-popover" data-trigger="hover" data-placement="bottom" data-content="' + tooltip + '"></i>'
+
+
+def not_specified_icon(tooltip):
+    return '<i class="fa fa-question fa-fw text-danger has-popover" aria-hidden="true" data-trigger="hover" data-placement="bottom" data-content="' + tooltip + '"></i>'
+
+
+def stars(filled, total, tooltip):
+    code = '<i class="has-popover" data-placement="bottom" data-content="' + tooltip + '">'
+    for i in range(0, total):
+        if i < filled:
+            code += '<i class="fa fa-star has-popover" aria-hidden="true"></span>'
+        else:
+            code += '<i class="fa fa-star-o text-muted has-popover" aria-hidden="true"></span>'
+    code += '</i>'
+    return code
+
+
+@register.filter
+def business_criticality_icon(value):
+    if value == Product.VERY_HIGH_CRITICALITY:
+        return mark_safe(stars(5, 5, 'Very High'))
+    if value == Product.HIGH_CRITICALITY:
+        return mark_safe(stars(4, 5, 'High'))
+    if value == Product.MEDIUM_CRITICALITY:
+        return mark_safe(stars(3, 5, 'Medium'))
+    if value == Product.LOW_CRITICALITY:
+        return mark_safe(stars(2, 5, 'Low'))
+    if value == Product.VERY_LOW_CRITICALITY:
+        return mark_safe(stars(1, 5, 'Very Low'))
+    if value == Product.NONE_CRITICALITY:
+        return mark_safe(stars(0, 5, 'None'))
+    else:
+        return ""  # mark_safe(not_specified_icon('Business Criticality Not Specified'))
+
+
+@register.filter
+def platform_icon(value):
+    if value == Product.WEB_PLATFORM:
+        return mark_safe(icon('list-alt', 'Web'))
+    elif value == Product.DESKTOP_PLATFORM:
+        return mark_safe(icon('desktop', 'Desktop'))
+    elif value == Product.MOBILE_PLATFORM:
+        return mark_safe(icon('mobile', 'Mobile'))
+    elif value == Product.WEB_SERVICE_PLATFORM:
+        return mark_safe(icon('plug', 'Web Service'))
+    elif value == Product.IOT:
+        return mark_safe(icon('random', 'Internet of Things'))
+    else:
+        return ""  # mark_safe(not_specified_icon('Platform Not Specified'))
+
+
+@register.filter
+def lifecycle_icon(value):
+    if value == Product.CONSTRUCTION:
+        return mark_safe(icon('compass', 'Explore'))
+    if value == Product.PRODUCTION:
+        return mark_safe(icon('ship', 'Sustain'))
+    if value == Product.RETIREMENT:
+        return mark_safe(icon('moon-o', 'Retire'))
+    else:
+        return ""  # mark_safe(not_specified_icon('Lifecycle Not Specified'))
+
+
+@register.filter
+def origin_icon(value):
+    if value == Product.THIRD_PARTY_LIBRARY_ORIGIN:
+        return mark_safe(icon('book', 'Third-Party Library'))
+    if value == Product.PURCHASED_ORIGIN:
+        return mark_safe(icon('money', 'Purchased'))
+    if value == Product.CONTRACTOR_ORIGIN:
+        return mark_safe(icon('suitcase', 'Contractor Developed'))
+    if value == Product.INTERNALLY_DEVELOPED_ORIGIN:
+        return mark_safe(icon('home', 'Internally Developed'))
+    if value == Product.OPEN_SOURCE_ORIGIN:
+        return mark_safe(icon('code', 'Open Source'))
+    if value == Product.OUTSOURCED_ORIGIN:
+        return mark_safe(icon('globe', 'Outsourced'))
+    else:
+        return ""  # mark_safe(not_specified_icon('Origin Not Specified'))
+
+
+@register.filter
+def external_audience_icon(value):
+    if value:
+        return mark_safe(icon('users', 'External Audience'))
+    else:
+        return ''
+
+
+@register.filter
+def internet_accessible_icon(value):
+    if value:
+        return mark_safe(icon('cloud', 'Internet Accessible'))
+    else:
+        return ''
+
+
+@register.filter
+def get_severity_count(id, table):
+    if table == "test":
+        counts = Finding.objects.filter(test=id). \
+            prefetch_related('test__engagement__product').aggregate(
+            total=Sum(
+                Case(When(severity__in=('Critical', 'High', 'Medium', 'Low'),
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            critical=Sum(
+                Case(When(severity='Critical',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            high=Sum(
+                Case(When(severity='High',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            medium=Sum(
+                Case(When(severity='Medium',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            low=Sum(
+                Case(When(severity='Low',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            info=Sum(
+                Case(When(severity='Info',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+        )
+    elif table == "engagement":
+        counts = Finding.objects.filter(test__engagement=id, active=True, verified=True, duplicate=False). \
+            prefetch_related('test__engagement__product').aggregate(
+            total=Sum(
+                Case(When(severity__in=('Critical', 'High', 'Medium', 'Low'),
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            critical=Sum(
+                Case(When(severity='Critical',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            high=Sum(
+                Case(When(severity='High',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            medium=Sum(
+                Case(When(severity='Medium',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            low=Sum(
+                Case(When(severity='Low',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            info=Sum(
+                Case(When(severity='Info',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+        )
+    elif table == "product":
+        counts = Finding.objects.filter(test__engagement__product=id). \
+            prefetch_related('test__engagement__product').aggregate(
+            total=Sum(
+                Case(When(severity__in=('Critical', 'High', 'Medium', 'Low'),
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            critical=Sum(
+                Case(When(severity='Critical',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            high=Sum(
+                Case(When(severity='High',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            medium=Sum(
+                Case(When(severity='Medium',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            low=Sum(
+                Case(When(severity='Low',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+            info=Sum(
+                Case(When(severity='Info',
+                          then=Value(1)),
+                     output_field=IntegerField())),
+        )
+    critical = 0
+    high = 0
+    medium = 0
+    low = 0
+    info = 0
+    if counts["info"]:
+        info = counts["info"]
+
+    if counts["low"]:
+        low = counts["low"]
+
+    if counts["medium"]:
+        medium = counts["medium"]
+
+    if counts["high"]:
+        high = counts["high"]
+
+    if counts["critical"]:
+        critical = counts["critical"]
+
+    total = critical + high + medium + low + info
+    display_counts = []
+
+    if critical:
+        display_counts.append("Critical: " + str(critical))
+    if high:
+        display_counts.append("High: " + str(high))
+    if medium:
+        display_counts.append("Medium: " + str(medium))
+    if low:
+        display_counts.append("Low: " + str(low))
+    if info:
+        display_counts.append("Info: " + str(info))
+
+    if total > 0:
+        if table == "test":
+            display_counts.append("Total: " + str(total) + " Findings")
+        elif table == "engagement":
+            display_counts.append("Total: " + str(total) + " Active, Verified Findings")
+        elif table == "product":
+            display_counts.append("Total: " + str(total) + " Active Findings")
+
+    display_counts = ", ".join([str(item) for item in display_counts])
+
+    return display_counts
