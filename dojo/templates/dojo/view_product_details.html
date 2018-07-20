@@ -117,7 +117,7 @@
   <div class="col-md-6">
     <div class="panel panel-default">
       <div class="panel-heading">
-        <h3 class="panel-title"><span class="fa fa-bolt" aria-hidden="true"></span> Technologies</h3>
+        <h3 class="panel-title"><span class="fa fa-bolt" aria-hidden="true"></span> Technologies {%if app_analysis%}({{ app_analysis.count }}){%endif%}</h3>
       </div>
       <ul class="list-group">
       {% for app in app_analysis %}
@@ -131,7 +131,7 @@
   <div class="col-md-6">
     <div class="panel panel-default">
       <div class="panel-heading">
-        <h3 class="panel-title"><span class="fa fa-gavel" aria-hidden="true"></span> Regulations ({{ prod.regulations.count }})</h3>
+        <h3 class="panel-title"><span class="fa fa-gavel" aria-hidden="true"></span> Regulations {% if prod.regulations.count > 0%}({{ prod.regulations.count }}){%endif%}</h3>
       </div>
       <ul class="list-group">
       {% for regulation in prod.regulations.all %}
@@ -201,7 +201,7 @@
 {% if languages %}
   <div class="panel panel-default panel-default-secondary">
     <div class="panel-heading">
-      <h3 class="panel-title"><span class="fa fa-language" aria-hidden="true"></span> Languages</h3>
+      <h3 class="panel-title"><span class="fa fa-language" aria-hidden="true"></span> Languages ({{ languages.count }})</h3>
     </div>
     <div class="panel-body">
         <div class="chart" id="donut-lang"></div>
@@ -264,11 +264,12 @@
             <td><strong>Authorized Users</strong></td>
             <td>
               {% if prod.authorized_users.all %}
-              <ul class="no-bullets">
                 {% for au in prod.authorized_users.all %}
-                <li class="">{{ au }}</li>
+                {{ au }}<br>
                 {% endfor %}
               </ul>
+              {% else %}
+                None specified
               {% endif %}
             </td>
           </tr>
@@ -310,11 +311,13 @@
       function severity_pie() {
           var data = [
           {% for lang in languages %}
+            {% if lang.files %}
             {
                 label: "&nbsp;{{lang}}",
                 color: "{{lang.language.color }}",
                 data: {{lang.files}}
             },
+            {% endif %}
           {% endfor %}
           ];
 
