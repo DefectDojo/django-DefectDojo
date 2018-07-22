@@ -206,13 +206,11 @@
     <div class="panel-body">
         <div class="chart" id="donut-lang"></div>
         <div style="text-align: center;padding-top: 10px;">
-            <strong>Total Files: </strong>
             {%  if langSummary.files__sum > 0 %}
-            {{ langSummary.files__sum|intcomma }}
+            <strong>{{ langSummary.files__sum|intcomma }}</strong> files {%  if langSummary.code__sum %} and {%endif%}
             {% endif %}
-            <strong>Lines of Code: </strong>
             {%  if langSummary.code__sum %}
-            {{ langSummary.code__sum|intcomma }}
+            <strong>{{ langSummary.code__sum|intcomma }}</strong> lines of code
             {% endif %}
         </div>
     </div>

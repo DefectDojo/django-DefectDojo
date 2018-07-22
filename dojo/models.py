@@ -180,6 +180,27 @@ class System_Settings(models.Model):
         verbose_name="Engagement Auto-Close Days",
         help_text="Closes an engagement after the specified number of days past due date including last update.")
 
+    enable_finding_sla = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name="Enable Finding SLA's",
+        help_text="Enables Finding SLA's for time to remediate.")
+
+    sla_critical = models.IntegerField(default=7,
+                                          verbose_name="Crital Finding SLA Days",
+                                          help_text="# of days to remediate a critical finding.")
+
+    sla_high = models.IntegerField(default=30,
+                                          verbose_name="High Finding SLA Days",
+                                          help_text="# of days to remediate a high finding.")
+    sla_medium = models.IntegerField(default=90,
+                                          verbose_name="Medium Finding SLA Days",
+                                          help_text="# of days to remediate a medium finding.")
+
+    sla_low = models.IntegerField(default=120,
+                                          verbose_name="Low Finding SLA Days",
+                                          help_text="# of days to remediate a low finding.")
+
 
 class SystemSettingsFormAdmin(forms.ModelForm):
     product_grade = forms.CharField(widget=forms.Textarea)
@@ -1064,6 +1085,12 @@ class Finding(models.Model):
 
         return days if days > 0 else 0
 
+    def sla(self):
+        severity = self.severity
+        from dojo.utils import get_system_setting
+        sla_age = get_system_setting('sla_' + self.severity.lower())
+        return sla_age - self.age()
+
     def jira(self):
         try:
             jissue = JIRA_Issue.objects.get(finding=self)
@@ -1675,9 +1702,6 @@ class Objects(models.Model):
 
         return name
 
-    class Meta:
-        unique_together = [('product', 'path')]
-
 
 class Objects_Engagement(models.Model):
     engagement = models.ForeignKey(Engagement)
@@ -1894,6 +1918,7 @@ class FieldRule(models.Model):
                         ('Replace', 'Replace'))
     update_type = models.CharField(max_length=30, choices=update_options)
     text = models.CharField(max_length=200)
+
 
 # Register for automatic logging to database
 auditlog.register(Dojo_User)

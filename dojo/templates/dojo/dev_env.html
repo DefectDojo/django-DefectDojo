@@ -6,7 +6,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading tight">
                     <h3 class="has-filters">
-                        Development Environment List
+                        Environment List
                         <div class="dropdown pull-right">
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
@@ -18,7 +18,7 @@
                                 {% if request.user.is_staff %}
                                     <li role="presentation">
                                         <a href="{%  url 'add_dev_env' %}">
-                                            <i class="fa fa-plus"></i> New Dev Environment </a>
+                                            <i class="fa fa-plus"></i> New Environment </a>
                                     </li>
                                 {% endif %}
                             </ul>
@@ -38,7 +38,7 @@
                            class="tablesorter-bootstrap table table-bordered table-condensed table-striped">
                         <thead>
                         <tr>
-                            <th>{% dojo_sort request 'Development Environment' 'name' 'asc' %}</th>
+                            <th>{% dojo_sort request 'Environment' 'name' 'asc' %}</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -58,7 +58,7 @@
                     {% include "dojo/paging_snippet.html" with page=devs page_size=True%}
                 </div>
             {% else %}
-                <p class="text-center">No development environments found.</p>
+                <p class="text-center">No environments found.</p>
             {% endif %}
         </div>
 
@@ -79,11 +79,3 @@
     </script>
     {% include "dojo/filter_js_snippet.html" %}
 {% endblock %}
-
-
-
-
-
-
-
-
