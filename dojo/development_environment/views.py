@@ -23,9 +23,9 @@ def dev_env(request):
                   initial_queryset]
     devs = DevelopmentEnvironmentFilter(request.GET, queryset=initial_queryset)
     dev_page = get_page_items(request, devs.qs, 25)
-    add_breadcrumb(title="Development Environment List", top_level=True, request=request)
+    add_breadcrumb(title="Environment List", top_level=True, request=request)
     return render(request, 'dojo/dev_env.html', {
-        'name': 'Development Environment List',
+        'name': 'Environment',
         'metric': False,
         'user': request.user,
         'devs': dev_page,
@@ -42,12 +42,12 @@ def add_dev_env(request):
             form.save()
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 'Development environment added successfully.',
+                                 'Environment added successfully.',
                                  extra_tags='alert-success')
             return HttpResponseRedirect(reverse('dev_env'))
-    add_breadcrumb(title="Add Development Environment", top_level=False, request=request)
+    add_breadcrumb(title="Add Environment", top_level=False, request=request)
     return render(request, 'dojo/new_dev_env.html', {
-        'name': 'Add Development Environment',
+        'name': 'Add Environment',
         'metric': False,
         'user': request.user,
         'form': form,
@@ -65,12 +65,12 @@ def edit_dev_env(request, deid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                'Development environment updated successfully.',
+                'Environment updated successfully.',
                 extra_tags='alert-success')
             return HttpResponseRedirect(reverse('dev_env'))
-    add_breadcrumb(title="Edit Development Environment", top_level=False, request=request)
+    add_breadcrumb(title="Edit Environment", top_level=False, request=request)
     return render(request, 'dojo/edit_dev_env.html', {
-        'name': 'Edit Development Environment',
+        'name': 'Edit Environment',
         'metric': False,
         'user': request.user,
         'form': form,

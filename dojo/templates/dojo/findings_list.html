@@ -114,6 +114,9 @@
                             <th>CWE</th>
                             <th class="nowrap">{% dojo_sort request 'Date' 'date'%}</th>
                             <th class="nowrap">Age</th>
+                            {% if 'enable_finding_sla'|fetch_system_setting %}
+                            <th>SLA</th>
+                            {% endif %}
                             <th>Reporter</th>
                             <th>Found By</th>
                             {% if "enable_jira"|get_system_setting %}
@@ -263,6 +266,11 @@
                                 </td>
                                 <td class="nowrap">{{ finding.date }}</td>
                                 <td>{{ finding.age }}</td>
+                                {% if 'enable_finding_sla'|fetch_system_setting %}
+                                <td>
+                                  {{ finding|finding_sla }}
+                                </td>
+                                {% endif %}
                                 <td>
                                   {% if finding.reporter.get_full_name and finding.reporter.get_full_name.strip %}
                                       {{ finding.reporter.get_full_name }}
