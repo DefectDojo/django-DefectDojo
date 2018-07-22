@@ -232,6 +232,9 @@
                     <th>CWE</th>
                     <th>Date</th>
                     <th>Age</th>
+                    {% if 'enable_finding_sla'|fetch_system_setting %}
+                    <th>SLA</th>
+                    {% endif %}
                     <th>Reporter</th>
                     <th>Status</th>
                     {% if "enable_jira"|get_system_setting %}
@@ -365,6 +368,11 @@
                         </td>
                         <td class="nowrap">{{ finding.date }}</td>
                         <td>{{ finding.age }}</td>
+                        {% if 'enable_finding_sla'|fetch_system_setting %}
+                        <td>
+                          {{ finding|finding_sla }}
+                        </td>
+                        {% endif %}
                         <td>
                           {% if finding.reporter.get_full_name and finding.reporter.get_full_name.strip %}
                               {{ finding.reporter.get_full_name }}

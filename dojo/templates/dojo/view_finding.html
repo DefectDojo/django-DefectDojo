@@ -161,6 +161,9 @@
                 {% endif %}
                 <tr>
                     <th>Severity</th>
+                    {% if 'enable_finding_sla'|fetch_system_setting %}
+                    <th>SLA</th>
+                    {% endif %}
                     {% if finding.scanner_confidence %}
                     <th>Scanner Confidence</th>
                     {% endif %}
@@ -194,6 +197,11 @@
                             {% endif %}
                         </span>
                     </td>
+                    {% if 'enable_finding_sla'|fetch_system_setting %}
+                    <td>
+                      {{ finding|finding_sla }}
+                    </td>
+                    {% endif %}
                     {% if finding.scanner_confidence %}
                     <td> {{finding.get_scanner_confidence_text}}</td>
                     {% endif %}
