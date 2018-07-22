@@ -1,4 +1,5 @@
 celery==4.1.0
+coverage==4.5.1
 defusedxml==0.5.0
 Django==1.11.11
 django-auditlog==0.4.5
@@ -9,10 +10,13 @@ django-multiselectfield==0.1.8
 django-overextends==0.4.3  # Required for extensions
 django-polymorphic==1.2
 django-slack==5.11.1
+django-rest-swagger==2.1.2
 django-tagging==0.4.6
 django-tastypie==0.14.0
 django-tastypie-swagger==0.1.4
 django-watson==1.5.2
+django-rest-swagger==2.1.2
+djangorestframework==3.7.7
 gunicorn==19.7.1
 html2text==2018.1.9
 humanize==0.5.1
@@ -34,3 +38,5 @@ vobject==0.9.5
 asteval==0.9.12
 Markdown>=2.6.11
 pandas>=0.22.0
+django-dbbackup>=3.2.0
+django-markdownx>=2.0.23

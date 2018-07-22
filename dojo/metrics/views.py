@@ -451,7 +451,6 @@ def product_type_counts(request):
 
             oip = opened_in_period(start_date, end_date, pt)
 
-
             # trending data - 12 months
             for x in range(12, 0, -1):
                 opened_in_period_list.append(

@@ -85,8 +85,12 @@ def issue_r(raw_row, vuln):
 
     # FQDN
     issue_row['fqdn'] =raw_row.findtext('DNS')
-    fqdn_parts = urlparse(issue_row['fqdn'])
-    ep = Endpoint(host=fqdn_parts.netloc, path=fqdn_parts.path, query=fqdn_parts.query, fragment=fqdn_parts.fragment)
+
+    # Create Endpoint
+    if issue_row['fqdn']:
+        ep = Endpoint(host=issue_row['fqdn'])
+    else:
+        ep = Endpoint(host=issue_row['ip_address'])
 
     # OS NAME
     issue_row['os'] = raw_row.findtext('OPERATING_SYSTEM')

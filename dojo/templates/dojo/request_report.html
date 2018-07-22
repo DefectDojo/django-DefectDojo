@@ -24,7 +24,7 @@
                     </h3>
                 </div>
 
-                <div id="the-filters" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
+                <div id="the-filters" class="panel-body {% if request.META.QUERY_STRING %}in{% endif %}">
                     <div class="dojo-filter-heading">Filters</div>
                     <div class="filter-set">
 
@@ -53,9 +53,7 @@
             {% if findings %}
                 <div class="well">
                     <p>
-                        The {{ findings|length|apnumber }} finding{{ findings|length|pluralize }} listed below will be
-                        included in the report. Use filters above to fine
-                        tune the findings to be used.
+                        The findings listed below will be included in the report. Use the filters above to fine tune the results.
                     </p>
                 </div>
                 <div class="clearfix">

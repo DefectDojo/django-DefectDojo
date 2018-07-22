@@ -329,9 +329,10 @@ function install_os_dependencies() {
     BREW_CMD=$(which brew)
 
     if [[ ! -z "$YUM_CMD" ]]; then
+        sudo yum install wget epel-release
         curl -sL https://rpm.nodesource.com/setup | sudo bash -
-        wget https://dl.yarnpkg.com/rpm/yarn.repo -O /etc/yum.repos.d/yarn.repo
-        sudo yum install gcc python-devel python-setuptools python-pip nodejs yarn wkhtmltopdf npm
+        sudo wget https://dl.yarnpkg.com/rpm/yarn.repo -O /etc/yum.repos.d/yarn.repo
+        sudo yum install gcc python-devel python-setuptools python-pip nodejs yarn wkhtmltopdf
         sudo yum groupinstall 'Development Tools'
     elif [[ ! -z "$APT_GET_CMD" ]]; then
         sudo apt-get install -y curl apt-transport-https
@@ -359,10 +360,10 @@ function install_db() {
     if [[ ! -z "$YUM_CMD" ]]; then
         if [ "$DBTYPE" == $MYSQL ]; then
             echo "Installing MySQL client (and server if not already installed)"
-            sudo yum install libmysqlclient-dev mysql-server mysql-devel
+            sudo yum install mariadb-server mysql-devel
         elif [ "$DBTYPE" == $POSTGRES ]; then
             echo "Installing Postgres client (and server if not already installed)"
-            sudo yum install libpq-dev postgresql postgresql-contrib libmysqlclient-dev
+            sudo yum install postgresql-devel postgresql postgresql-contrib 
         fi
     elif [[ ! -z "$APT_GET_CMD" ]]; then
         if [ "$DBTYPE" == $MYSQL ]; then
@@ -457,10 +458,18 @@ function install_app(){
 
     if [ "$VENV_ACTIVE" == "0" ]; then
         pip install -U pip
-        pip install .
+        if [ "$DBTYPE" == "$MYSQL" ]; then
+            pip install .[mysql]
+        else
+            pip install .
+        fi
+
     else
-        sudo -H pip install -U pip
-        sudo -H pip install .
+        if [ "$DBTYPE" == "$MYSQL" ]; then
+            sudo -H pip install .[mysql]
+        else
+            sudo -H pip install .
+        fi
     fi
     python manage.py makemigrations dojo
     python manage.py makemigrations --merge --noinput
@@ -489,6 +498,13 @@ function install_app(){
     python manage.py loaddata test_type
     python manage.py loaddata development_environment
     python manage.py loaddata system_settings
+    python manage.py loaddata benchmark_type
+    python manage.py loaddata benchmark_category
+    python manage.py loaddata benchmark_requirement
+    python manage.py loaddata language_type
+    python manage.py loaddata objects_review
+    python manage.py loaddata regulation
+
     python manage.py installwatson
     python manage.py buildwatson
 

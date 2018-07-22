@@ -1,56 +1,123 @@
 {% extends "base.html" %}
 {% load event_tags %}
 {% load static from staticfiles %}
+{% block add_css %}
+    <link rel="stylesheet" href="{% static "simplemde/dist/simplemde.min.css" %}">
+{% endblock %}
+{% block add_styles %}
+    .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
+    width: 70% !important;
+    }
+{% endblock %}
 {% block content %}
     <div>
-        <h3> Add findings to a test</h3>
+        <h3> Add Findings to a Test</h3>
     </div>
     <div>
-    {% if temp %}
-        <form class="form-horizontal" action="{% url 'add_temp_finding' tid fid %}" method="post">
-            {% csrf_token %}
-            {% include "dojo/form_fields.html" with form=form %}
-            {%  if jform %}
-                <h4> JIRA </h4>
-                <h4>
-                {% include "dojo/form_fields.html" with form=jform %}
-            {% endif %}
-            <div class="form-group">
-                <div class="col-sm-offset-2 col-sm-10">
-                    <input class="btn btn-primary" type="submit" value="Add Another Finding"/>
-                    <input class="btn btn-primary" type="submit" value="Finished"/>
+        {% if temp %}
+            <form id="add_finding" class="form-horizontal" action="{% url 'add_temp_finding' tid fid %}" method="post">
+                {% csrf_token %}
+                {% include "dojo/form_fields.html" with form=form %}
+                {% if jform %}
+                    <h4> JIRA </h4>
+                    <h4>
+                    {% include "dojo/form_fields.html" with form=jform %}
+                {% endif %}
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <input class="btn btn-primary" type="submit" value="Add Another Finding"/>
+                        <input class="btn btn-primary" type="submit" value="Finished"/>
+                    </div>
                 </div>
-            </div>
-        </form>
-    {% else %}
-        <form class="form-horizontal" action="{% url 'add_findings' tid %}" method="post">
-            {% csrf_token %}
-            {% include "dojo/form_fields.html" with form=form %}
-            {%  if jform %}
-                <h4> JIRA </h4>
-                <hr>
-                {% include "dojo/form_fields.html" with form=jform %}
-            {% endif %}
-            <div class="form-group">
-                <div class="col-sm-offset-2 col-sm-10">
-                    <input class="btn btn-primary" type="submit" value="Add Another Finding"/>
-                    <input class="btn btn-primary" name="_Finished" type="submit" value="Finished"/>
+            </form>
+        {% else %}
+            <form id="add_finding" class="form-horizontal" action="{% url 'add_findings' tid %}" method="post">
+                {% csrf_token %}
+                {% include "dojo/form_fields.html" with form=form %}
+                {% if jform %}
+                    <h4> JIRA </h4>
+                    <hr>
+                    {% include "dojo/form_fields.html" with form=jform %}
+                {% endif %}
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <input class="btn btn-primary" type="submit" value="Add Another Finding"/>
+                        <input class="btn btn-primary" name="_Finished" type="submit" value="Finished"/>
+                    </div>
                 </div>
-            </div>
-        </form>
-    {% endif %}
+            </form>
+        {% endif %}
     </div>
 {% endblock %}
 {% block postscript %}
-    <script type="text/javascript" src="{% static "admin/js/jquery.init.js"%}"></script>
+    <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
+    <script type="application/javascript" src="{% static "simplemde/dist/simplemde.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "admin/js/jquery.init.js" %}"></script>
     <script type="application/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>
     <script type="application/javascript">
         $ = django.jQuery;
+        $.hotkeys.options.filterInputAcceptingElements = false;
+        $.hotkeys.options.filterTextInputs = false;
+
         $('#add_id_endpoints').attr('href', "{% url 'add_endpoint' test.engagement.product.id %}?_popup");
         {% if not form_error %}
             $('#id_endpoints').find('option').remove();
         {% endif %}
+
+        $(document).bind('keydown', 'ctrl+s', function (event) {
+            if (event.preventDefault) {
+                event.preventDefault();
+            } else {
+                // internet explorer
+                event.returnValue = false;
+            }
+            {% if temp %}
+                $("form#add_finding").submit();
+            {% else %}
+                $("input[name='_Finished']").trigger('click');
+            {% endif %}
+        });
+
+        $(function () {
+            $("textarea").each(function (index, elem) {
+
+                if (elem.hasAttribute("required")) {
+                    elem.removeAttribute("required");
+                    elem.id = "req"
+                }
+
+                var mde = new SimpleMDE({
+                    spellChecker: false,
+                    element: elem,
+                    autofocus: false,
+                    forceSync: true,
+                    toolbar: ["bold", "italic", "heading", "|",
+                        "quote", "unordered-list", "ordered-list", "|",
+                        "link", "image", "|",
+                        "table", "horizontal-rule", "code", "|",
+                        "guide"
+                    ]
+                });
+                mde.render();
+            });
+        });
+
+        $("#add_finding").submit(function () {
+            var isFormValid = true;
+
+            $("textarea#req").each(function () {
+                if ($.trim($(this).val()).length == 0) {
+                    $(this).addClass("highlight");
+                    isFormValid = false;
+                }
+                else {
+                    $(this).removeClass("highlight");
+                }
+            });
+
+            if (!isFormValid) alert("Please fill in all the required fields (indicated by *)");
+
+            return isFormValid;
+        });
     </script>
-
-
 {% endblock %}
