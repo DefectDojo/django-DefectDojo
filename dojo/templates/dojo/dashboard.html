@@ -2,18 +2,20 @@
 {% load static from staticfiles %}
 {% block add_styles %}
     .chart {height: 300px}
-    .status .panel {min-height: 185px;background-color: #f5f5f5;}
+    .status .panel {min-height: 140px;background-color: #f5f5f5;}
     #punchcard {height: 350px}
 {% endblock %}
 {% block content %}
+    <!--
     {% if request.user.is_superuser %}
         <h3>Team Dashboard</h3>
     {% else %}
         <h3>Dashboard for {{ request.user.get_full_name }}</h3>
     {% endif %}
+  -->
     <div class="row status">
         <div class="col-lg-3 col-md-6">
-            <div class="panel panel-primary">
+            <div class="panel secondary-color">
                 <div class="panel-heading">
                     <div class="row">
                         <div class="col-xs-3">
@@ -31,9 +33,8 @@
                     <a href="{% url 'engagement' %}?engagement__lead={{ request.user.id }}">
                 {% endif %}
                 <div class="panel-footer">
-                    <span class="pull-left">View Details</span>
+                    <span class="pull-left">View Engagement Details</span>
                     <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
-
                     <div class="clearfix"></div>
                 </div>
                 </a>
@@ -48,7 +49,7 @@
                         </div>
                         <div class="col-xs-9 text-right">
                             <div class="huge">{{ finding_count }}</div>
-                            <div>Findings In Last Seven Days</div>
+                            <div>Last Seven Days</div>
                         </div>
                     </div>
                 </div>
@@ -58,7 +59,7 @@
                     <a href="{% url 'open_findings' %}?date=2&reporter={{ request.user.id }}&o=numerical_severity">
                 {% endif %}
                     <div class="panel-footer">
-                        <span class="pull-left">View Details</span>
+                        <span class="pull-left">View Finding Details</span>
                         <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
 
                         <div class="clearfix"></div>
@@ -75,7 +76,7 @@
                         </div>
                         <div class="col-xs-9 text-right">
                             <div class="huge">{{ mitigated_count }}</div>
-                            <div>Findings Closed In Last Seven Days</div>
+                            <div>Closed In Last Seven Days</div>
                         </div>
                     </div>
                 </div>
@@ -85,7 +86,7 @@
                     <a href="{% url 'closed_findings' %}?mitigated=2&mitigated_by={{ request.user.id }}&o=numerical_severity">
                 {% endif %}
                     <div class="panel-footer">
-                        <span class="pull-left">View Details</span>
+                        <span class="pull-left">View Finding Details</span>
                         <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
 
                         <div class="clearfix"></div>
@@ -102,7 +103,7 @@
                         </div>
                         <div class="col-xs-9 text-right">
                             <div class="huge">{{ accepted_count }}</div>
-                            <div>Findings Accepted In Last Seven Days</div>
+                            <div>Accepted In Last Seven Days</div>
                         </div>
                     </div>
                 </div>
@@ -112,7 +113,7 @@
                     <a href="{% url 'accepted_findings' %}?test__engagement__risk_acceptance__created=2&test__engagement__risk_acceptance__reporter={{ request.user.id }}">
                 {% endif %}
                     <div class="panel-footer">
-                        <span class="pull-left">View Details</span>
+                        <span class="pull-left">View Finding Details</span>
                         <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
 
                         <div class="clearfix"></div>
@@ -279,7 +280,7 @@
                             show: true,
                             radius: 1,
                             label: {
-                                show: true,
+                                show: false,
                                 radius: 2 / 3,
                                 formatter: function (label, series) {
                                     return '<div style="font-size:8pt;text-align:center;padding:2px;color:black;z-index:9999;">' + label + '<br/>' + series.data[0][1] + '</div>';

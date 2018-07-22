@@ -1,13 +1,10 @@
 # #  product
 import calendar as tcalendar
 import logging
-import sys
 from collections import OrderedDict
 from datetime import datetime, date, timedelta
 from math import ceil
-
 from dateutil.relativedelta import relativedelta
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
@@ -17,17 +14,15 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 from django.db.models import Sum, Count
-
 from dojo.filters import ProductFilter, ProductFindingFilter, EngagementFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, ProductMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm
-from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, \
-    Tool_Product_Settings, Cred_User, Cred_Mapping, Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary
-from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, get_system_setting, create_notification
+from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, Finding_Template, \
+    Tool_Product_Settings, Cred_Mapping, Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint
+from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, get_system_setting, create_notification, Product_Tab
 from custom_field.models import CustomFieldValue, CustomField
 from dojo.tasks import add_epic_task, add_issue_task
 from tagging.models import Tag
 from tagging.utils import get_tag_list
-from tagging.views import TaggedItem
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +51,6 @@ def product(request):
         tags = request.GET.getlist('tags', [])
         initial_queryset = TaggedItem.objects.get_by_model(initial_queryset, Tag.objects.filter(name__in=tags))
     """
-
     prods = ProductFilter(request.GET, queryset=initial_queryset, user=request.user)
     prod_list = get_page_items(request, prods.qs, 25)
     add_breadcrumb(title="Product List", top_level=not len(request.GET), request=request)
@@ -76,6 +70,75 @@ def iso_to_gregorian(iso_year, iso_week, iso_day):
 
 def view_product(request, pid):
     prod = get_object_or_404(Product, id=pid)
+    auth = request.user.is_staff or request.user in prod.authorized_users.all()
+    if not auth:
+        # will render 403
+        raise PermissionDenied
+    langSummary = Languages.objects.filter(product=prod).aggregate(Sum('files'), Sum('code'), Count('files'))
+    languages = Languages.objects.filter(product=prod).order_by('-code')
+    app_analysis = App_Analysis.objects.filter(product=prod).order_by('name')
+    benchmark_type = Benchmark_Type.objects.filter(enabled=True).order_by('name')
+    benchmarks = Benchmark_Product_Summary.objects.filter(product=prod, publish=True, benchmark_type__enabled=True).order_by('benchmark_type__name')
+    system_settings = System_Settings.objects.get()
+
+    ct = ContentType.objects.get_for_model(prod)
+    product_cf = CustomField.objects.filter(content_type=ct).order_by('name')
+    product_metadata = {}
+
+    for cf in product_cf:
+        cfv = CustomFieldValue.objects.filter(field=cf, object_id=prod.id)
+        if len(cfv):
+            product_metadata[cf.name] = cfv[0].value
+
+    verified_findings = Finding.objects.filter(test__engagement__product=prod,
+                                                false_p=False,
+                                                verified=True,
+                                                active=True,
+                                                duplicate=False,
+                                                out_of_scope=False).order_by('numerical_severity').values('severity').annotate(count=Count('severity'))
+
+    critical = 0
+    high = 0
+    medium = 0
+    low = 0
+    info = 0
+
+    for v in verified_findings:
+        if v["severity"] == "Critical":
+            critical = v["count"]
+        elif v["severity"] == "High":
+            high = v["count"]
+        elif v["severity"] == "Medium":
+            medium = v["count"]
+        elif v["severity"] == "Low":
+            low = v["count"]
+        elif v["severity"] == "Info":
+            info = v["count"]
+
+    total = critical + high + medium + low + info
+
+    product_tab = Product_Tab(pid, title="Product", tab="overview")
+
+    return render(request, 'dojo/view_product_details.html', {
+                  'prod': prod,
+                  'product_tab': product_tab,
+                  'product_metadata': product_metadata,
+                  'critical': critical,
+                  'high': high,
+                  'medium': medium,
+                  'low': low,
+                  'info': info,
+                  'total': total,
+                  'user': request.user,
+                  'languages': languages,
+                  'langSummary': langSummary,
+                  'app_analysis': app_analysis,
+                  'system_settings': system_settings,
+                  'authorized': auth})
+
+
+def view_product_metrics(request, pid):
+    prod = get_object_or_404(Product, id=pid)
     engs = Engagement.objects.filter(product=prod, active=True)
 
     result = EngagementFilter(
@@ -85,15 +148,7 @@ def view_product(request, pid):
     i_engs_page = get_page_items(request, result.qs, 10)
 
     scan_sets = ScanSettings.objects.filter(product=prod)
-    tools = Tool_Product_Settings.objects.filter(product=prod).order_by('name')
     auth = request.user.is_staff or request.user in prod.authorized_users.all()
-    creds = Cred_Mapping.objects.filter(product=prod).select_related('cred_id').order_by('cred_id')
-    langSummary = Languages.objects.filter(product=prod).aggregate(Sum('files'), Sum('code'), Count('files'))
-    languages = Languages.objects.filter(product=prod).order_by('-code')
-    app_analysis = App_Analysis.objects.filter(product=prod).order_by('name')
-    benchmark_type = Benchmark_Type.objects.filter(enabled=True).order_by('name')
-    benchmarks = Benchmark_Product_Summary.objects.filter(product=prod, publish=True, benchmark_type__enabled=True).order_by('benchmark_type__name')
-    system_settings = System_Settings.objects.get()
 
     if not auth:
         # will render 403
@@ -243,17 +298,15 @@ def view_product(request, pid):
         else:
             test_data[t.test_type.name] = t.verified_finding_count()
 
+    product_tab = Product_Tab(pid, title="Product", tab="metrics")
     return render(request,
-                  'dojo/view_product.html',
+                  'dojo/product_metrics.html',
                   {'prod': prod,
-                   'benchmark_type': benchmark_type,
-                   'benchmarks': benchmarks,
+                   'product_tab': product_tab,
                    'product_metadata': product_metadata,
                    'engs': engs,
                    'i_engs': i_engs_page,
                    'scan_sets': scan_sets,
-                   'tools': tools,
-                   'creds': creds,
                    'verified_findings': verified_findings,
                    'open_findings': open_findings,
                    'closed_findings': closed_findings,
@@ -269,6 +322,96 @@ def view_product(request, pid):
                    'high_weekly': high_weekly,
                    'medium_weekly': medium_weekly,
                    'test_data': test_data,
+                   'user': request.user,
+                   'authorized': auth})
+
+
+def view_engagements(request, pid, engagement_type="Interactive"):
+    prod = get_object_or_404(Product, id=pid)
+    auth = request.user.is_staff or request.user in prod.authorized_users.all()
+    if not auth:
+        # will render 403
+        raise PermissionDenied
+
+    engs = Engagement.objects.filter(product=prod, active=True)
+    default_page_num = 10
+
+    result_engs = EngagementFilter(
+        request.GET,
+        queryset=Engagement.objects.filter(product=prod, active=True, engagement_type=engagement_type).order_by('-updated'))
+
+    engs = get_page_items(request, result_engs.qs, default_page_num, param_name="engs")
+
+    result = EngagementFilter(
+        request.GET,
+        queryset=Engagement.objects.filter(product=prod, active=False, engagement_type=engagement_type).order_by('-target_end'))
+
+    i_engs_page = get_page_items(request, result.qs, default_page_num, param_name="i_engs")
+
+    title = "All Engagements"
+    if engagement_type == "CI/CD":
+        title = "CI/CD Engagements"
+
+    product_tab = Product_Tab(pid, title=title, tab="engagements")
+    return render(request,
+                  'dojo/view_engagements.html',
+                  {'prod': prod,
+                   'product_tab': product_tab,
+                   'engagement_type': engagement_type,
+                   'engs': engs,
+                   'engs_count': result_engs.qs.count(),
+                   'i_engs': i_engs_page,
+                   'i_engs_count': result.qs.count(),
+                   'user': request.user,
+                   'authorized': auth})
+
+
+def view_engagements_cicd(request, pid):
+    return view_engagements(request, pid, engagement_type="CI/CD")
+
+
+@user_passes_test(lambda u: u.is_staff)
+def import_scan_results_prod(request, pid=None):
+    from dojo.engagement.views import import_scan_results
+    return import_scan_results(request, pid=pid)
+
+
+def view_product_details(request, pid):
+    prod = get_object_or_404(Product, id=pid)
+    scan_sets = ScanSettings.objects.filter(product=prod)
+    tools = Tool_Product_Settings.objects.filter(product=prod).order_by('name')
+    auth = request.user.is_staff or request.user in prod.authorized_users.all()
+    creds = Cred_Mapping.objects.filter(product=prod).select_related('cred_id').order_by('cred_id')
+    langSummary = Languages.objects.filter(product=prod).aggregate(Sum('files'), Sum('code'), Count('files'))
+    languages = Languages.objects.filter(product=prod).order_by('-code')
+    app_analysis = App_Analysis.objects.filter(product=prod).order_by('name')
+    benchmark_type = Benchmark_Type.objects.filter(enabled=True).order_by('name')
+    benchmarks = Benchmark_Product_Summary.objects.filter(product=prod, publish=True, benchmark_type__enabled=True).order_by('benchmark_type__name')
+    system_settings = System_Settings.objects.get()
+
+    if not auth:
+        # will render 403
+        raise PermissionDenied
+
+    ct = ContentType.objects.get_for_model(prod)
+    product_cf = CustomField.objects.filter(content_type=ct)
+    product_metadata = {}
+
+    for cf in product_cf:
+        cfv = CustomFieldValue.objects.filter(field=cf, object_id=prod.id)
+        if len(cfv):
+            product_metadata[cf.name] = cfv[0].value
+
+    add_breadcrumb(parent=product, title="Details", top_level=False, request=request)
+    return render(request,
+                  'dojo/view_product_details.html',
+                  {'prod': prod,
+                   'benchmark_type': benchmark_type,
+                   'benchmarks': benchmarks,
+                   'product_metadata': product_metadata,
+                   'scan_sets': scan_sets,
+                   'tools': tools,
+                   'creds': creds,
                    'user': request.user,
                    'languages': languages,
                    'langSummary': langSummary,
@@ -306,7 +449,7 @@ def new_product(request):
                                                  messages.SUCCESS,
                                                  'JIRA information added successfully.',
                                                  extra_tags='alert-success')
-
+            create_notification(event='product_added', title=product.name, url=request.build_absolute_uri(reverse('view_product', args=(product.id,))))
             return HttpResponseRedirect(reverse('view_product', args=(product.id,)))
     else:
         form = ProductForm()
@@ -324,7 +467,7 @@ def new_product(request):
 def edit_product(request, pid):
     prod = Product.objects.get(pk=pid)
     system_settings = System_Settings.objects.get()
-    jira_enabled =  system_settings.enable_jira
+    jira_enabled = system_settings.enable_jira
     jira_inst = None
     jform = None
     try:
@@ -346,14 +489,14 @@ def edit_product(request, pid):
 
             if get_system_setting('enable_jira') and jira_inst:
                 jform = JIRAPKeyForm(request.POST, instance=jira_inst)
-                #need to handle delete
+                # need to handle delete
                 try:
                     jform.save()
                 except:
                     pass
-            else:
+            elif get_system_setting('enable_jira'):
                 jform = JIRAPKeyForm(request.POST)
-                if  jform.is_valid():
+                if jform.is_valid():
                     new_conf = jform.save(commit=False)
                     new_conf.product_id = pid
                     new_conf.save()
@@ -368,8 +511,8 @@ def edit_product(request, pid):
                            initial={'auth_users': prod.authorized_users.all(),
                                     'tags': get_tag_list(Tag.objects.get_for_object(prod))})
 
-        if jira_enabled and (jira_inst != None):
-            if jira_inst != None:
+        if jira_enabled and (jira_inst is not None):
+            if jira_inst is not None:
                 jform = JIRAPKeyForm(instance=jira_inst)
             else:
                 jform = JIRAPKeyForm()
@@ -378,11 +521,11 @@ def edit_product(request, pid):
         else:
             jform = None
     form.initial['tags'] = [tag.name for tag in prod.tags]
-    add_breadcrumb(parent=prod, title="Edit", top_level=False, request=request)
-
+    product_tab = Product_Tab(pid, title="Edit Product", tab="settings")
     return render(request,
                   'dojo/edit_product.html',
                   {'form': form,
+                   'product_tab': product_tab,
                    'jform': jform,
                    'product': prod
                    })
@@ -413,11 +556,11 @@ def delete_product(request, pid):
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('product'))
 
-    add_breadcrumb(parent=product, title="Delete", top_level=False, request=request)
-
+    product_tab = Product_Tab(pid, title="Product", tab="settings")
     return render(request, 'dojo/delete_product.html',
                   {'product': product,
                    'form': form,
+                   'product_tab': product_tab,
                    'rels': rels,
                    })
 
@@ -426,6 +569,7 @@ def delete_product(request, pid):
 Greg
 Status: in production
 """
+
 
 def all_product_findings(request, pid):
     p = get_object_or_404(Product, id=pid)
@@ -452,55 +596,69 @@ def all_product_findings(request, pid):
 
 
 @user_passes_test(lambda u: u.is_staff)
-def new_eng_for_app(request, pid):
+def new_eng_for_app(request, pid, cicd=False):
     jform = None
     prod = Product.objects.get(id=pid)
     if request.method == 'POST':
-        form = EngForm(request.POST)
+        form = EngForm(request.POST, cicd=cicd)
         if form.is_valid():
             new_eng = form.save(commit=False)
+            new_eng.threat_model = False
+            new_eng.api_test = False
+            new_eng.pen_test = False
+            new_eng.check_list = False
             new_eng.product = prod
             if new_eng.threat_model:
                 new_eng.progress = 'threat_model'
             else:
                 new_eng.progress = 'other'
+            if cicd:
+                new_eng.engagement_type = 'CI/CD'
+                new_eng.status = "In Progress"
+
             new_eng.save()
+            tags = request.POST.getlist('tags')
+            t = ", ".join(tags)
+            new_eng.tags = t
             if get_system_setting('enable_jira'):
-                    #Test to make sure there is a Jira project associated the product
+                    # Test to make sure there is a Jira project associated the product
                     try:
-                        jform = JIRAFindingForm(request.POST, prefix='jiraform',
-                                            enabled=JIRA_PKey.objects.get(product=prod).push_all_issues)
+                        jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=JIRA_PKey.objects.get(product=prod).push_all_issues)
                         if jform.is_valid():
                             add_epic_task.delay(new_eng, jform.cleaned_data.get('push_to_jira'))
                     except JIRA_PKey.DoesNotExist:
                         pass
-
-            #else:
-            #    print >>sys.stderr, 'no prefix is found'
 
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Engagement added successfully.',
                                  extra_tags='alert-success')
 
-            create_notification(event='engagement_added', title='Engagement added', engagement=new_eng, url=request.build_absolute_uri(reverse('view_engagement', args=(new_eng.id,))), objowner=new_eng.lead)
+            create_notification(event='engagement_added', title=new_eng.name + " for " + prod.name, engagement=new_eng, url=request.build_absolute_uri(reverse('view_engagement', args=(new_eng.id,))), objowner=new_eng.lead)
 
             if "_Add Tests" in request.POST:
                 return HttpResponseRedirect(reverse('add_tests', args=(new_eng.id,)))
+            elif "_Import Scan Results" in request.POST:
+                return HttpResponseRedirect(reverse('import_scan_results', args=(new_eng.id,)))
             else:
                 return HttpResponseRedirect(reverse('view_engagement', args=(new_eng.id,)))
     else:
-        form = EngForm(initial={})
+        form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(), 'target_end': timezone.now().date() + timedelta(days=7)}, cicd=cicd)
         if(get_system_setting('enable_jira')):
                 if JIRA_PKey.objects.filter(product=prod).count() != 0:
                     jform = JIRAFindingForm(prefix='jiraform', enabled=JIRA_PKey.objects.get(product=prod).push_all_issues)
 
-    add_breadcrumb(parent=prod, title="New Engagement", top_level=False, request=request)
-
+    product_tab = Product_Tab(pid, title="New Engagement", tab="engagements")
     return render(request, 'dojo/new_eng.html',
                   {'form': form, 'pid': pid,
+                   'product_tab': product_tab,
                    'jform': jform
                    })
+
+
+@user_passes_test(lambda u: u.is_staff)
+def new_eng_for_app_cicd(request, pid):
+    return new_eng_for_app(request, pid, True)
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -510,12 +668,9 @@ def add_meta_data(request, pid):
     if request.method == 'POST':
         form = ProductMetaDataForm(request.POST)
         if form.is_valid():
-            cf, created = CustomField.objects.get_or_create(name=form.cleaned_data['name'],
-                                                   content_type=ct,
-                                                   field_type='a')
+            cf, created = CustomField.objects.get_or_create(name=form.cleaned_data['name'], content_type=ct, field_type='a')
             cf.save()
-            cfv, created = CustomFieldValue.objects.get_or_create(field=cf,
-                                                         object_id=prod.id)
+            cfv, created = CustomFieldValue.objects.get_or_create(field=cf, object_id=prod.id)
             cfv.value = form.cleaned_data['value']
             cfv.clean()
             cfv.save()
@@ -530,11 +685,12 @@ def add_meta_data(request, pid):
     else:
         form = ProductMetaDataForm(initial={'content_type': prod})
 
-    add_breadcrumb(parent=prod, title="Add Metadata", top_level=False, request=request)
+    product_tab = Product_Tab(pid, title="Add Custom Fields", tab="settings")
 
     return render(request,
                   'dojo/add_product_meta_data.html',
                   {'form': form,
+                   'product_tab': product_tab,
                    'product': prod,
                    })
 
@@ -570,11 +726,11 @@ def edit_meta_data(request, pid):
                              extra_tags='alert-success')
         return HttpResponseRedirect(reverse('view_product', args=(pid,)))
 
-    add_breadcrumb(parent=prod, title="Edit Metadata", top_level=False, request=request)
-
+    product_tab = Product_Tab(pid, title="Edit Custom Fields", tab="settings")
     return render(request,
                   'dojo/edit_product_meta_data.html',
                   {'product': prod,
+                   'product_tab': product_tab,
                    'product_metadata': product_metadata,
                    })
 
@@ -671,11 +827,13 @@ def ad_hoc_finding(request, pid):
                                  messages.ERROR,
                                  'The form has errors, please correct them below.',
                                  extra_tags='alert-danger')
-    add_breadcrumb(parent=prod, title="Add Finding", top_level=False, request=request)
+    product_tab = Product_Tab(pid, title="Add Finding", tab="engagements")
+    product_tab.setEngagement(eng)
     return render(request, 'dojo/ad_hoc_findings.html',
                   {'form': form,
+                   'product_tab': product_tab,
                    'temp': False,
-                   'tid' : test.id,
+                   'tid': test.id,
                    'pid': pid,
                    'form_error': form_error,
                    'jform': jform,

@@ -49,6 +49,7 @@
                         <thead>
                         <tr>
                             <th nowrap="nowrap">{% dojo_sort request 'CWE' 'cwe' 'asc' %}</th>
+                            <th nowrap="nowrap">Match Enabled</th>
                             <th nowrap="nowrap">{% dojo_sort request 'Name' 'title' %}</th>
                             <th nowrap="nowrap">{% dojo_sort request 'Severity' 'numerical_severity' %}</th>
                             <th nowrap="nowrap">Actions</th>
@@ -63,11 +64,9 @@
                                            href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
                                             <i class="fa fa-external-link"></i> {{ finding.cwe }}
                                         </a>
-                                    {% else %}
-                                        {{ finding.cwe }}
                                     {% endif %}
                                 </td>
-
+                                <td>{{ finding.template_match }}</td>
                                 <td>
                                     {% if add_from_template %}
                                         <a href="{% url 'add_temp_finding' tid finding.id %}"
@@ -77,7 +76,7 @@
                                             {{ finding.title }}
                                             <sup>
                                                 {% for tag in finding.tags %}
-                                                <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                                <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                                 {% endfor %}
                                             </sup>
                                         </a>
@@ -89,7 +88,7 @@
                                             {{ finding.title }}
                                             <sup>
                                                 {% for tag in finding.tags %}
-                                                    <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                                    <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                                 {% endfor %}
                                             </sup>
                                         </a>
@@ -98,7 +97,7 @@
                                             {{ finding.title }}
                                             <sup>
                                                 {% for tag in finding.tags %}
-                                                <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                                <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                                 {% endfor %}
                                             </sup>
                                         </a>

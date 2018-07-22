@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'^cred/(?P<ttid>\d+)/selenium$', views.view_selenium, name='view_selenium'),
     url(r'^cred$', views.cred, name='cred'),
     url(r'^product/(?P<pid>\d+)/cred/add$', views.new_cred_product, name='new_cred_product'),
+    url(r'^product/(?P<pid>\d+)/cred/all$', views.all_cred_product, name='all_cred_product'),
     url(r'^product/(?P<pid>\d+)/cred/(?P<ttid>\d+)/edit$', views.edit_cred_product, name='edit_cred_product'),
     url(r'^product/(?P<pid>\d+)/cred/(?P<ttid>\d+)/view$', views.view_cred_product, name='view_cred_product'),
     url(r'^product/(?P<pid>\d+)/cred/(?P<ttid>\d+)/delete$', views.delete_cred_product, name='delete_cred_product'),
