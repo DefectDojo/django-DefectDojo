@@ -18,19 +18,6 @@ $ ./run_dojo.bash
 
 navigate to `127.0.0.1:8000`
 
-# Demo
-
-If you'd like to check out a demo of DefectDojo before installing it, you can
-check out our [PythonAnywhere demo site](https://defectdojo.pythonanywhere.com/).
-
-You can log in as an administrator like so:
-
-![Admin](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/admin.png)
-
-You can also log in as a product owner / non-staff user:
-
-![Product owner](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/owner.png)
-
 # Additional Documentation
 
 For additional documentation you can visit our [Read the Docs site](https://defectdojo.readthedocs.io/).
