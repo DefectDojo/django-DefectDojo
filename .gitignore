@@ -97,6 +97,6 @@ setupcomplete
 
 # 
 data_persistence/nginx/*
-data_persistence/dojo/staic/*
+data_persistence/dojo/static/*
 data_persistence/dojo/media/*
-data_persistence/mysql
+data_persistence/mysql/*
