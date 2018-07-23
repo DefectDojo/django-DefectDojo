@@ -91,3 +91,11 @@ dojo/media
 .venv/
 venv/
 ENV/
+
+# setup
+setupcomplete
+
+# 
+data_persistence/dojo/static/*
+data_persistence/dojo/media/*
+data_persistence/mysql/*
