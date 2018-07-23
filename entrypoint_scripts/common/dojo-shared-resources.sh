@@ -316,6 +316,7 @@ function ensure_application_db() {
     # Setup the application DB
     echo "Ensure application DB is present"
     if [ "$DBTYPE" == $MYSQL ]; then
+        echo "trying mysql db ensure" 
         ensure_mysql_application_db
     elif [ "$DBTYPE" == $POSTGRES ]; then
         ensure_postgres_application_db

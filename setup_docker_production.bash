@@ -21,7 +21,9 @@ source .env_dojo
 verify_cwd
 
 # Create the application DB or recreate it, if it's already present
-ensure_application_db
+# we're opionated here and we only mysql
+ensure_mysql_application_db
+ensure_mysql_application_db
 
 # Adjust the settings.py file
 # we skip this in favor of envfile format

@@ -15,7 +15,7 @@ services:
     command: bash /django-DefectDojo/docker/docker-startup.bash
   mysqldb:
     restart: always
-    image: mysql:8
+    image: mysql:5.6.40
     ports:
       - "3306:3306"
     env_file:

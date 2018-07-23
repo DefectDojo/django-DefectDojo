@@ -12,6 +12,7 @@ try:
     h['dojo_static'] = os.environ['DOJOSTATICLOC']
     h['dojo_secret'] = os.environ['DOJOSECRET']
     h['dojo_dir'] = os.environ['DOJODIR']
+    h['allowed_hosts'] = os.environ['ALLOWED_HOSTS'].split(',')
 
 except KeyError:
     print("it looks like you're missing one or more env vars!") 
