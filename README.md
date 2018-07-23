@@ -6,6 +6,7 @@ Things to know:
   * note: yeah I know I should fix this
 * most important setting...FLUSHDB in .env_dojo you probably only want this set to y once and on subsequent docker-compose up's, set it to "n"
 * lots of clean up work needs to transpire, to get this to 100% awesome I'd need to work with upstream which could take looots of time and arguing
+* I used jinja2 instead of sed inasnity to template out settings.py, yes I know django has a template engine, but this was just faster and cleaner
 
 
 
