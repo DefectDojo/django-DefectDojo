@@ -96,7 +96,6 @@ ENV/
 setupcomplete
 
 # 
-data_persistence/nginx/*
 data_persistence/dojo/static/*
 data_persistence/dojo/media/*
 data_persistence/mysql/*

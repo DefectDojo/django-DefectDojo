@@ -17,7 +17,7 @@ services:
     restart: always
     image: mysql:5.6.40
     ports:
-      - "3306"
+      - "127.0.0.1:3306:3306"
     env_file:
         - .env_mysql
     environment:
@@ -35,5 +35,8 @@ services:
      - DH_SIZE=512
     volumes:
       - ./data_persistence/nginx:/etc/nginx/conf.d
+      - ./data_persistence/dojo/media:/opt/django-DefectDojo/media
+      - ./data_persistence/dojo/static:/opt/django-DefectDojo/static
+      - ./wsgi_params:/opt/django-DefectDojo/wsgi_params
     depends_on:
       - dojo

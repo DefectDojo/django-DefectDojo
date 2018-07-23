@@ -11,6 +11,7 @@ echo "Flushdb is ${FLUSHDB}"
 if [[ "${FLUSHDB}" =~ ^[yY]$ ]]; then
   # Create the application DB or recreate it, if it's already present
   # we're opionated here and we only mysql
+  wait-for-it/wait-for-it.sh -h mysqldb -p 3306 -t 30
   ensure_mysql_application_db
   
   # Adjust the settings.py file
