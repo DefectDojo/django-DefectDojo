@@ -1,3 +1,23 @@
+# Running "producion-like docker" instance
+
+Things to know:
+* we use the directory you're working in (which should get this one on your machine) to mount and create most of the data we need
+* edit .env_dojo and .env_mysql to fit your needs, DONT CHECK THEM IN WITH YOUR EDITS
+  * note: yeah I know I should fix this
+* most important setting...FLUSHDB in .env_dojo you probably only want this set to y once and on subsequent docker-compose up's, set it to "n"
+* lots of clean up work needs to transpire, to get this to 100% awesome I'd need to work with upstream which could take looots of time and arguing
+
+
+
+Questions: 
+* why did you do this? 
+  * needed to make this run in "prod" for someone, the repo makes it kinda hard to do that with docker
+* wouldn't you like to be a pepper to? 
+  * sometimes
+* can/will you make this more better? Depends on if there's a lot of demand for it, the orginal intent here was to get something running 
+then revist this once we're confident this thing fits the bill. 
+ 
+
 # Description
 
 ![Screenshot of DefectDojo](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/screenshot1.png)
