@@ -933,10 +933,12 @@ class Finding(models.Model):
     date = models.DateField(default=get_current_date)
     cwe = models.IntegerField(default=0, null=True, blank=True)
     url = models.TextField(null=True, blank=True, editable=False)
-    severity = models.CharField(max_length=200)
+    severity = models.CharField(max_length=200, help_text="The severity level of this flaw (Critical, High, Medium, Low, Informational)")
     description = models.TextField()
     mitigation = models.TextField()
     impact = models.TextField()
+    steps_to_reproduce = models.TextField(null=True, blank=True)
+    severity_justification = models.TextField(null=True, blank=True)
     endpoints = models.ManyToManyField(Endpoint, blank=True, )
     unsaved_endpoints = []
     unsaved_request = None
@@ -1086,10 +1088,19 @@ class Finding(models.Model):
         return days if days > 0 else 0
 
     def sla(self):
+        sla_calculation = None
         severity = self.severity
         from dojo.utils import get_system_setting
         sla_age = get_system_setting('sla_' + self.severity.lower())
-        return sla_age - self.age()
+        if sla_age and self.active:
+            sla_calculation = sla_age - self.age()
+        elif sla_age and self.mitigated:
+            age = self.age()
+            if age < sla_age:
+                sla_calculation = 0
+            else:
+                sla_calculation = sla_age - age
+        return sla_calculation
 
     def jira(self):
         try:
