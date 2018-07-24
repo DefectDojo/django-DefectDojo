@@ -495,7 +495,7 @@
                         class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
             </div>
             <div id="vuln_refs" class="panel-body collapse in">
-                <pre>{{ finding.steps_to_reproduce|markdown_render }}</pre>
+                <pre>{{ finding.steps_to_reproduce|markdown_render|default_if_none:"" }}</pre>
             </div>
         </div>
 
@@ -505,7 +505,7 @@
                         class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
             </div>
             <div id="vuln_refs" class="panel-body collapse in">
-                <pre>{{ finding.severity_justification|markdown_render }}</pre>
+                <pre>{{ finding.severity_justification|markdown_render|default_if_none:"" }}</pre>
             </div>
         </div>
 
