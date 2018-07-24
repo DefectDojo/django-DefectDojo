@@ -201,7 +201,7 @@
     },
     "model": "dojo.test_type",
     "pk": 29
-  }
+  },
     {
       "fields": {
 	"name": "GoAST Scanner"
