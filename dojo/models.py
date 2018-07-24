@@ -1004,7 +1004,13 @@ class Finding(models.Model):
         ordering = ('numerical_severity', '-date', 'title')
 
     def get_hash_code(self):
-        hash_string = self.title + self.description + str(self.line) + str(self.file_path)
+        hash_string = self.title + str(self.cwe) + str(self.line) + str(self.file_path)
+
+        if self.dynamic_finding:
+            endpoint_str = ""
+            for e in self.endpoints.all():
+                endpoint_str += str(e)
+            hash_string = endpoint_str
         hash_string = hash_string.decode('utf-8').strip()
         return hashlib.sha256(hash_string.encode('utf-8')).hexdigest()
 
@@ -1137,8 +1143,8 @@ class Finding(models.Model):
         if not self.pk:
             from dojo.utils import apply_cwe_to_template
             self = apply_cwe_to_template(self)
-            self.hash_code = self.get_hash_code()
         super(Finding, self).save(*args, **kwargs)
+        self.hash_code = self.get_hash_code()
         self.found_by.add(self.test.test_type)
         if self.test.test_type.static_tool:
             self.static_finding = True
