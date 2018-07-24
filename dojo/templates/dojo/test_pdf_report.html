@@ -312,6 +312,14 @@
 
                     <h6>Impact</h6>
                     <pre>{{ finding.impact|markdown_render }}</pre>
+                    {% if finding.steps_to_reproduce %}
+                    <h6>Steps to Reproduce</h6>
+                    <pre>{{ finding.steps_to_reproduce|markdown_render }}</pre>
+                    {% endif %}
+                    {% if finding.severity_justification %}
+                    <h6>Severity Justification</h6>
+                    <pre>{{ finding.severity_justification|markdown_render }}</pre>
+                    {% endif %}
                     <h6>References</h6>
                     <pre>{{ finding.references|markdown_render }}</pre>
                     {% if include_finding_images %}
