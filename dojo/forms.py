@@ -247,7 +247,9 @@ class ImportScanForm(forms.Form):
                          ("Trustwave Scan (CSV)", "Trustwave Scan (CSV)"),
                          ("SKF Scan", "SKF Scan"),
                          ("Bandit Scan", "Bandit Scan"),
-                         ("SSL Labs Scan", "SSL Labs Scan"))
+                         ("SSL Labs Scan", "SSL Labs Scan"),
+                         ("GoAST Scanner", "GoAST Scanner"))
+
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
 
     scan_date = forms.DateTimeField(
