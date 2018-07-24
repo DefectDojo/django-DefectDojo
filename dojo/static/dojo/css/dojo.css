@@ -551,6 +551,14 @@ form ul#id_accepted_findings input {
     background-color: green;
 }
 
+.age-blue {
+    background-color: blue;
+}
+
+.age-orange {
+    background-color: #EE7600;
+}
+
 .dojo-search {
     clear: right !important;
     display: inline-block !important;
