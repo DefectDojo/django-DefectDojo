@@ -4,7 +4,6 @@
 {% load humanize %}
 {% load static from staticfiles %}
 {% block add_styles %}
-    h3 { margin-top: 5px; margin-bottom: 5px; font-size: 20px; line-height: 22px;}
     .tooltip-inner {
       max-width: 350px;
     }
@@ -437,7 +436,7 @@
   </div>
   {% if eng.engagement_type == "CI/CD" %}
   <div>
-    <div class="panel panel-default">
+    <div class="panel panel-default-secondary">
       <div class="panel-heading">
         <h3 class="panel-title"><span class="fa fa-server" aria-hidden="true"></span>
           CI/CD Engagement Details
@@ -594,18 +593,21 @@
 {% endblock %}
 {% block postscript %}
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
+    <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
         <script type="text/javascript">
         $(function () {
-            $(document).on('keypress', function(e) {
-                var key = String.fromCharCode(e.which);
-                if (key =='e') {
-                  window.location.assign('{% url 'edit_engagement' eng.id %}');
-                } else if (key === 'a') {
-                  window.location.assign('{% url 'add_tests' eng.id %}');
-                } else if (key === 'i') {
-                  window.location.assign('{% url 'import_scan_results' eng.id %}');
-                }
+            $(document).on('keypress', null, 'e', function () {
+              window.location.assign('{% url 'edit_engagement' eng.id %}');
             });
+
+            $(document).on('keypress', null, 'a', function () {
+                window.location.assign('{% url 'add_tests' eng.id %}');
+            });
+
+            $(document).on('keypress', null, 'i', function () {
+                window.location.assign('{% url 'import_scan_results' eng.id %}');
+            });
+
             $(document).ready(function(){
               $('[data-toggle="tooltip"]').tooltip();
             });

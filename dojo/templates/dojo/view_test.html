@@ -232,6 +232,9 @@
                     <th>CWE</th>
                     <th>Date</th>
                     <th>Age</th>
+                    {% if 'enable_finding_sla'|fetch_system_setting %}
+                    <th>SLA</th>
+                    {% endif %}
                     <th>Reporter</th>
                     <th>Status</th>
                     {% if "enable_jira"|get_system_setting %}
@@ -365,6 +368,11 @@
                         </td>
                         <td class="nowrap">{{ finding.date }}</td>
                         <td>{{ finding.age }}</td>
+                        {% if 'enable_finding_sla'|fetch_system_setting %}
+                        <td>
+                          {{ finding|finding_sla }}
+                        </td>
+                        {% endif %}
                         <td>
                           {% if finding.reporter.get_full_name and finding.reporter.get_full_name.strip %}
                               {{ finding.reporter.get_full_name }}
@@ -628,6 +636,7 @@
     </div>
 {% endblock %}
 {% block postscript %}
+    <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
     <script type="text/javascript">
         var checkbox_count = 0;
@@ -647,18 +656,20 @@
               $('div#bulk_edit_menu').removeClass('hidden');
           }
         }
+
+        $(document).on('keypress', null, 'e', function () {
+            window.location.assign('{% url 'edit_test' test.id %}');
+        });
+
+        $(document).on('keypress', null, 'a', function () {
+            window.location.assign('{% url 'add_findings' test.id %}');
+        });
+
         $(function () {
             $(document).ready(function(){
               $('[data-toggle="tooltip"]').tooltip();
             });
-            $(document).on('keypress', function(e) {
-                var key = String.fromCharCode(e.which);
-            if (key =='e') {
-                window.location.assign('{% url 'edit_test' test.id %}');
-            } else if (key === 'a') {
-                window.location.assign('{% url 'add_findings' test.id %}');
-            }
-            });
+
             check_checked_finding();
             $('#id_status').on('click', function (e) {
                 var checked = this.checked;

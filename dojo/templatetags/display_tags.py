@@ -196,6 +196,11 @@ def count_findings_eng_all(engagement):
     return all_findings
 
 
+@register.filter(name='fetch_system_setting')
+def fetch_system_setting(name):
+    return get_system_setting(name)
+
+
 @register.filter(name='count_findings_eng_duplicate')
 def count_findings_eng_duplicate(engagement):
     duplicate_findings = Finding.objects.filter(test__engagement=engagement,
@@ -237,6 +242,37 @@ def paginator_value(page):
     except:
         pass
     return page_value
+
+
+@register.filter(name='finding_sla')
+def finding_sla(finding):
+    if not get_system_setting('enable_finding_sla'):
+        return ""
+
+    title = ""
+    severity = finding.severity
+    find_sla = finding.sla()
+    sla_age = get_system_setting('sla_' + severity.lower())
+    if finding.mitigated:
+        status = "blue"
+        status_text = 'Remediated within SLA for ' + severity.lower() + ' findings (' + str(sla_age) + ' days)'
+        if find_sla and find_sla < 0:
+            status = "orange"
+            find_sla = abs(find_sla)
+            status_text = 'Out of SLA: Remediatied ' + str(find_sla) + ' days past SLA for ' + severity.lower() + ' findings (' + str(sla_age) + ' days)'
+    else:
+        status = "green"
+        status_text = 'Remediation for ' + severity.lower() + ' findings in ' + str(sla_age) + ' days or less'
+        if find_sla and find_sla < 0:
+            status = "red"
+            find_sla = abs(find_sla)
+            status_text = 'Overdue: Remediation for ' + severity.lower() + ' findings in ' + str(sla_age) + ' days or less'
+
+    if find_sla is not None:
+        title = '<a data-toggle="tooltip" data-placement="bottom" title="" href="#" data-original-title="' + status_text + '">' \
+                '<span class="label severity age-' + status + '">' + str(find_sla) + '</span></a>'
+
+    return mark_safe(title)
 
 
 @register.filter(name='product_grade')

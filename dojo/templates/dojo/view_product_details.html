@@ -1,11 +1,9 @@
 {% extends "base.html" %}
+{% load static from staticfiles %}
 {% load humanize %}
 {% load display_tags %}
-{% load static from staticfiles %}
 {% block add_styles %}
-  th, td {
-    width: 100px;
-  }
+  .chart {height: 150px}
 {% endblock %}
 {% block content %}
 <div class="row">
@@ -119,7 +117,7 @@
   <div class="col-md-6">
     <div class="panel panel-default">
       <div class="panel-heading">
-        <h3 class="panel-title"><span class="fa fa-bolt" aria-hidden="true"></span> Technologies</h3>
+        <h3 class="panel-title"><span class="fa fa-bolt" aria-hidden="true"></span> Technologies {%if app_analysis%}({{ app_analysis.count }}){%endif%}</h3>
       </div>
       <ul class="list-group">
       {% for app in app_analysis %}
@@ -133,31 +131,16 @@
   <div class="col-md-6">
     <div class="panel panel-default">
       <div class="panel-heading">
-        <h3 class="panel-title"><span class="fa fa-language" aria-hidden="true"></span> Languages</h3>
+        <h3 class="panel-title"><span class="fa fa-gavel" aria-hidden="true"></span> Regulations {% if prod.regulations.count > 0%}({{ prod.regulations.count }}){%endif%}</h3>
       </div>
       <ul class="list-group">
-      {% if languages %}
-        <li class="list-group-item">
-          <strong>Total Files: </strong>
-          {%  if langSummary.files__sum > 0 %}
-          {{ langSummary.files__sum|intcomma }}
-          {% endif %}
-          <strong>Lines of Code: </strong>
-          {%  if langSummary.code__sum %}
-          {{ langSummary.code__sum|intcomma }}
-          {% endif %}
-        </li>
-      {% for lang in languages %}
-        <li class="list-group-item">
-          <span class="color-block language-color" style="background-color:#800000"></span>
-            <strong>{{ lang.language.language }}</strong>
-            {{ lang.files|percentage:langSummary.files__sum }}
-        </li>
+      {% for regulation in prod.regulations.all %}
+        <li class="list-group-item"><span class="badge">{{ regulation.get_category_display }}</span><span data-toggle="tooltip" data-placement="bottom" title="{{ product.regulation.name }}">{{ regulation.acronym }}</span> <small class="text-muted">{{ regulation.jurisdiction }}</small></li>
+      {% empty %}
+        <li class="list-group-item"><small class="text-muted"><em>There are no regulations.</em></small></li>
       {% endfor %}
-      {% else %}
-        <li class="list-group-item"><small class="text-muted"><em>There are no langauges.</em></small></li>
-      {% endif %}
       </ul>
+
     </div>
   </div>
 </div>
@@ -170,10 +153,10 @@
       <h3 class="panel-title"><span class="fa fa-info-circle fa-fw" aria-hidden="true"></span> Metadata</h3>
     </div>
     <div class="table-responsive">
-      <table class="table table-striped">
+      <table class="table table-striped" id="set-width">
         <tbody>
           <tr>
-            <td><strong>Business Criticality</strong></td>
+            <td style="width: 150px;"><strong>Business Criticality</strong></td>
             <td>{{ prod.get_business_criticality_display|default:"" }}</td>
           </tr>
           <tr>
@@ -214,6 +197,26 @@
   </div>
 
 <!-- End metadata -->
+<!-- Lang -->
+{% if languages %}
+  <div class="panel panel-default panel-default-secondary">
+    <div class="panel-heading">
+      <h3 class="panel-title"><span class="fa fa-language" aria-hidden="true"></span> Languages ({{ languages.count }})</h3>
+    </div>
+    <div class="panel-body">
+        <div class="chart" id="donut-lang"></div>
+        <div style="text-align: center;padding-top: 10px;">
+            {%  if langSummary.files__sum > 0 %}
+            <strong>{{ langSummary.files__sum|intcomma }}</strong> files {%  if langSummary.code__sum %} and {%endif%}
+            {% endif %}
+            {%  if langSummary.code__sum %}
+            <strong>{{ langSummary.code__sum|intcomma }}</strong> lines of code
+            {% endif %}
+        </div>
+    </div>
+  </div>
+{% endif %}
+<!-- end lang  -->
 <!-- Custom fields -->
 {% if product_metadata %}
   <div class="panel panel-default panel-default-secondary">
@@ -225,7 +228,7 @@
         <tbody>
           {% for key, value in product_metadata.items %}
           <tr>
-            <td><strong>{{ key }}</strong></td>
+            <td style="width: 150px;"><strong>{{ key }}</strong></td>
             <td>{{ value }}</td>
           </tr>
           {% endfor %}
@@ -244,7 +247,7 @@
       <table class="table table-striped">
         <tbody>
           <tr>
-            <td><strong>Team Manager</strong></td>
+            <td style="width: 150px;"><strong>Team Manager</strong></td>
             <td>{% if prod.manager != "0" %}{{ prod.manager | default:"Unknown" }}{% endif %}</td>
           </tr>
           <tr>
@@ -259,11 +262,12 @@
             <td><strong>Authorized Users</strong></td>
             <td>
               {% if prod.authorized_users.all %}
-              <ul class="no-bullets">
                 {% for au in prod.authorized_users.all %}
-                <li class="">{{ au }}</li>
+                {{ au }}<br>
                 {% endfor %}
               </ul>
+              {% else %}
+                None specified
               {% endif %}
             </td>
           </tr>
@@ -272,29 +276,20 @@
     </div>
   </div>
 <!-- end contacts -->
-<div class="panel panel-default panel-default-secondary">
-  <div class="panel-heading">
-    <h3 class="panel-title"><span class="fa fa-gavel" aria-hidden="true"></span> Regulations ({{ prod.regulations.count }})</h3>
-  </div>
-  <ul class="list-group">
-  {% for regulation in prod.regulations.all %}
-    <li class="list-group-item"><span class="badge">{{ regulation.get_category_display }}</span><span data-toggle="tooltip" data-placement="bottom" title="{{ product.regulation.name }}">{{ regulation.acronym }}</span> <small class="text-muted">{{ regulation.jurisdiction }}</small></li>
-  {% empty %}
-    <li class="list-group-item"><small class="text-muted"><em>There are no regulations.</em></small></li>
-  {% endfor %}
-  </ul>
-</div>
-</div>
-
-
-
-
 
 </div>
 </div>
 {% endblock %}
 {% block postscript %}
   <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
+  <!-- Flot Charts JavaScript -->
+  <script src="{% static "flot/excanvas.min.js" %}"></script>
+  <script src="{% static "flot/jquery.flot.js" %}"></script>
+  <script src="{% static "flot/jquery.flot.pie.js" %}"></script>
+  <script src="{% static "flot/jquery.flot.time.js" %}"></script>
+  <script src="{% static "flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
+  <script src="{% static "flot/jquery.flot.stack.js" %}"></script>
+  <script src="{% static "flot/jquery.flot.resize.js" %}"></script>
   <script type="text/javascript">
     $(function() {
       if (document.referrer.indexOf('simple_search') > 0) {
@@ -310,7 +305,37 @@
         $('input#simple_search').val(terms);
       }
 
-    })
+      severity_pie();
+      function severity_pie() {
+          var data = [
+          {% for lang in languages %}
+            {% if lang.files %}
+            {
+                label: "&nbsp;{{lang}}",
+                color: "{{lang.language.color }}",
+                data: {{lang.files}}
+            },
+            {% endif %}
+          {% endfor %}
+          ];
+
+          var plotObj = $.plot($("#donut-lang"), data, {
+              series: {
+                  pie: {
+                      innerRadius: 0.5,
+                      show: true,
+                      radius: 1,
+                  }
+              },
+              legend: {
+                  show: true
+              },
+              grid: {
+                  hoverable: true,
+              },
+          });
+        }
+    });
 
   </script>
   {% endblock %}

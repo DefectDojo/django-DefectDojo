@@ -180,6 +180,27 @@ class System_Settings(models.Model):
         verbose_name="Engagement Auto-Close Days",
         help_text="Closes an engagement after the specified number of days past due date including last update.")
 
+    enable_finding_sla = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name="Enable Finding SLA's",
+        help_text="Enables Finding SLA's for time to remediate.")
+
+    sla_critical = models.IntegerField(default=7,
+                                          verbose_name="Crital Finding SLA Days",
+                                          help_text="# of days to remediate a critical finding.")
+
+    sla_high = models.IntegerField(default=30,
+                                          verbose_name="High Finding SLA Days",
+                                          help_text="# of days to remediate a high finding.")
+    sla_medium = models.IntegerField(default=90,
+                                          verbose_name="Medium Finding SLA Days",
+                                          help_text="# of days to remediate a medium finding.")
+
+    sla_low = models.IntegerField(default=120,
+                                          verbose_name="Low Finding SLA Days",
+                                          help_text="# of days to remediate a low finding.")
+
 
 class SystemSettingsFormAdmin(forms.ModelForm):
     product_grade = forms.CharField(widget=forms.Textarea)
@@ -912,10 +933,12 @@ class Finding(models.Model):
     date = models.DateField(default=get_current_date)
     cwe = models.IntegerField(default=0, null=True, blank=True)
     url = models.TextField(null=True, blank=True, editable=False)
-    severity = models.CharField(max_length=200)
+    severity = models.CharField(max_length=200, help_text="The severity level of this flaw (Critical, High, Medium, Low, Informational)")
     description = models.TextField()
     mitigation = models.TextField()
     impact = models.TextField()
+    steps_to_reproduce = models.TextField(null=True, blank=True)
+    severity_justification = models.TextField(null=True, blank=True)
     endpoints = models.ManyToManyField(Endpoint, blank=True, )
     unsaved_endpoints = []
     unsaved_request = None
@@ -981,7 +1004,13 @@ class Finding(models.Model):
         ordering = ('numerical_severity', '-date', 'title')
 
     def get_hash_code(self):
-        hash_string = self.title + self.description + str(self.line) + str(self.file_path)
+        hash_string = self.title + str(self.cwe) + str(self.line) + str(self.file_path)
+
+        if self.dynamic_finding:
+            endpoint_str = ""
+            for e in self.endpoints.all():
+                endpoint_str += str(e)
+            hash_string = endpoint_str
         hash_string = hash_string.decode('utf-8').strip()
         return hashlib.sha256(hash_string.encode('utf-8')).hexdigest()
 
@@ -1064,6 +1093,21 @@ class Finding(models.Model):
 
         return days if days > 0 else 0
 
+    def sla(self):
+        sla_calculation = None
+        severity = self.severity
+        from dojo.utils import get_system_setting
+        sla_age = get_system_setting('sla_' + self.severity.lower())
+        if sla_age and self.active:
+            sla_calculation = sla_age - self.age()
+        elif sla_age and self.mitigated:
+            age = self.age()
+            if age < sla_age:
+                sla_calculation = 0
+            else:
+                sla_calculation = sla_age - age
+        return sla_calculation
+
     def jira(self):
         try:
             jissue = JIRA_Issue.objects.get(finding=self)
@@ -1099,8 +1143,8 @@ class Finding(models.Model):
         if not self.pk:
             from dojo.utils import apply_cwe_to_template
             self = apply_cwe_to_template(self)
-            self.hash_code = self.get_hash_code()
         super(Finding, self).save(*args, **kwargs)
+        self.hash_code = self.get_hash_code()
         self.found_by.add(self.test.test_type)
         if self.test.test_type.static_tool:
             self.static_finding = True
@@ -1625,6 +1669,9 @@ class Languages(models.Model):
     def __unicode__(self):
         return self.language.language
 
+    class Meta:
+        unique_together = [('language', 'product')]
+
 
 class App_Analysis(models.Model):
     product = models.ForeignKey(Product)
@@ -1671,9 +1718,6 @@ class Objects(models.Model):
             name = self.artifact
 
         return name
-
-    class Meta:
-        unique_together = [('product', 'path')]
 
 
 class Objects_Engagement(models.Model):
@@ -1891,6 +1935,7 @@ class FieldRule(models.Model):
                         ('Replace', 'Replace'))
     update_type = models.CharField(max_length=30, choices=update_options)
     text = models.CharField(max_length=200)
+
 
 # Register for automatic logging to database
 auditlog.register(Dojo_User)

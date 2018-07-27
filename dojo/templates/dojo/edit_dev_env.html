@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-    <h3> Edit Development Environment {{ pt.name }}</h3>
+    <h3> Edit Environment {{ pt.name }}</h3>
     <form class="form-horizontal" action="{% url 'edit_dev_env' de.id %}" method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
         <div class="form-group">
