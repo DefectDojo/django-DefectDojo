@@ -543,6 +543,22 @@ form ul#id_accepted_findings input {
     background-color: #d9534f;
 }
 
+.age-red {
+    background-color: #d9534f;
+}
+
+.age-green {
+    background-color: green;
+}
+
+.age-blue {
+    background-color: blue;
+}
+
+.age-orange {
+    background-color: #EE7600;
+}
+
 .dojo-search {
     clear: right !important;
     display: inline-block !important;
@@ -1447,6 +1463,7 @@ div.tags .label {
 
 .tag-color {
     background: #556270;
+    border: 1px solid #fff!important;
 }
 
 .happy-green-color {
@@ -1514,7 +1531,7 @@ mark{
 }
 
 .btn-overdue {
-    border-radius: 2px;
+    border-radius: 0px;
     border-color: #ddd;
     color: #ffffff;
     background: #ef251e;

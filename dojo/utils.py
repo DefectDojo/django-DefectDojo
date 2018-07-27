@@ -58,14 +58,15 @@ def sync_dedupe(new_finding, *args, **kwargs):
     eng_hash_code = Finding.objects.filter(
         test__engagement__product=new_finding.test.engagement.product,
         hash_code=new_finding.hash_code, duplicate=False).exclude(id=new_finding.id)
-    for find in eng_hash_code:
-        new_finding.duplicate = True
-        new_finding.active = False
-        new_finding.verified = False
-        new_finding.duplicate_finding = find
-        find.duplicate_list.add(new_finding)
-        find.found_by.add(new_finding.test.test_type)
-        super(Finding, new_finding).save(*args, **kwargs)
+    if eng_hash_code.count() > 0:
+        for find in eng_hash_code:
+            new_finding.duplicate = True
+            new_finding.active = False
+            new_finding.verified = False
+            new_finding.duplicate_finding = find
+            find.duplicate_list.add(new_finding)
+            find.found_by.add(new_finding.test.test_type)
+            super(Finding, new_finding).save(*args, **kwargs)
     else:
         eng_findings_cwe = Finding.objects.filter(
             test__engagement__product=new_finding.test.engagement.product,

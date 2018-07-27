@@ -161,6 +161,9 @@
                 {% endif %}
                 <tr>
                     <th>Severity</th>
+                    {% if 'enable_finding_sla'|fetch_system_setting %}
+                    <th>SLA</th>
+                    {% endif %}
                     {% if finding.scanner_confidence %}
                     <th>Scanner Confidence</th>
                     {% endif %}
@@ -194,6 +197,11 @@
                             {% endif %}
                         </span>
                     </td>
+                    {% if 'enable_finding_sla'|fetch_system_setting %}
+                    <td>
+                      {{ finding|finding_sla }}
+                    </td>
+                    {% endif %}
                     {% if finding.scanner_confidence %}
                     <td> {{finding.get_scanner_confidence_text}}</td>
                     {% endif %}
@@ -478,6 +486,26 @@
             </div>
             <div id="vuln_impact" class="panel-body collapse in">
                 <pre>{{ finding.impact|markdown_render }}</pre>
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Steps To Reproduce <span class="pull-right"><a data-toggle="collapse" href="#vuln_refs"><i
+                        class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
+            </div>
+            <div id="vuln_refs" class="panel-body collapse in">
+                <pre>{{ finding.steps_to_reproduce|markdown_render|default_if_none:"" }}</pre>
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Severity Justification <span class="pull-right"><a data-toggle="collapse" href="#vuln_refs"><i
+                        class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
+            </div>
+            <div id="vuln_refs" class="panel-body collapse in">
+                <pre>{{ finding.severity_justification|markdown_render|default_if_none:"" }}</pre>
             </div>
         </div>
 

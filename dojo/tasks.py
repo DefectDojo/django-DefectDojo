@@ -13,7 +13,6 @@ from celery.utils.log import get_task_logger
 from celery.decorators import task
 from dojo.models import Product, Finding, Engagement, System_Settings
 from django.utils import timezone
-from django.db.models import Q
 
 import pdfkit
 from dojo.celery import app
@@ -61,11 +60,10 @@ def add_alerts(self, runinterval):
 
     system_settings = System_Settings.objects.get()
     if system_settings.engagement_auto_close:
-        # Close Engagements Older than 3 days and updated older than 3 days (default) or is null
+        # Close Engagements older than user defined days
         close_days = system_settings.engagement_auto_close_days
         unclosed_engagements = Engagement.objects.filter(
-            Q(updated__lt=now + timedelta(days=close_days)) | Q(updated__isnull=True),
-            target_end__lt=now + timedelta(days=close_days),
+            target_end__gt=now + timedelta(days=close_days),
             status='In Progress').order_by('-target_end')
 
         for eng in unclosed_engagements:
