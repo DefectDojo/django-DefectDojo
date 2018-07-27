@@ -23,16 +23,16 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from jira import JIRA
 from jira.exceptions import JIRAError
+
 from dojo.models import Finding, Engagement, Finding_Template, Product, JIRA_PKey, JIRA_Issue, \
     Dojo_User, User, Alerts, System_Settings, Notifications, UserContactInfo, Endpoint, Benchmark_Type, \
-    Language_Type, Languages
+    Language_Type, Languages, Rule
 from asteval import Interpreter
 from requests.auth import HTTPBasicAuth
+
+
 """
-Michael & Fatima:
-Helper function for metrics
-Counts the number of findings and the count for the products for each level of
-severity for a given finding querySet
+Helper functions for DefectDojo
 """
 
 
@@ -55,48 +55,102 @@ def sync_false_history(new_finding, *args, **kwargs):
 
 
 def sync_dedupe(new_finding, *args, **kwargs):
-    eng_findings_cwe = Finding.objects.filter(
+    eng_hash_code = Finding.objects.filter(
         test__engagement__product=new_finding.test.engagement.product,
-        cwe=new_finding.cwe,
-        static_finding=new_finding.static_finding,
-        dynamic_finding=new_finding.dynamic_finding,
-        date__lte=new_finding.date).exclude(id=new_finding.id).exclude(
-            cwe=None).exclude(duplicate=True)
-    eng_findings_title = Finding.objects.filter(
-        test__engagement__product=new_finding.test.engagement.product,
-        title=new_finding.title,
-        static_finding=new_finding.static_finding,
-        dynamic_finding=new_finding.dynamic_finding,
-        date__lte=new_finding.date).exclude(id=new_finding.id).exclude(
-            duplicate=True)
-    total_findings = eng_findings_cwe | eng_findings_title
-    # total_findings = total_findings.order_by('date')
-    for find in total_findings:
-        if find.endpoints.count() != 0 and new_finding.endpoints.count() != 0:
-            list1 = new_finding.endpoints.all()
-            list2 = find.endpoints.all()
-            if all(x in list1 for x in list2):
+        hash_code=new_finding.hash_code, duplicate=False).exclude(id=new_finding.id)
+    for find in eng_hash_code:
+        new_finding.duplicate = True
+        new_finding.active = False
+        new_finding.verified = False
+        new_finding.duplicate_finding = find
+        find.duplicate_list.add(new_finding)
+        find.found_by.add(new_finding.test.test_type)
+        super(Finding, new_finding).save(*args, **kwargs)
+    else:
+        eng_findings_cwe = Finding.objects.filter(
+            test__engagement__product=new_finding.test.engagement.product,
+            cwe=new_finding.cwe,
+            static_finding=new_finding.static_finding,
+            dynamic_finding=new_finding.dynamic_finding,
+            date__lte=new_finding.date).exclude(id=new_finding.id).exclude(
+                cwe=0).exclude(duplicate=True)
+        eng_findings_title = Finding.objects.filter(
+            test__engagement__product=new_finding.test.engagement.product,
+            title=new_finding.title,
+            static_finding=new_finding.static_finding,
+            dynamic_finding=new_finding.dynamic_finding,
+            date__lte=new_finding.date).exclude(id=new_finding.id).exclude(
+                duplicate=True)
+        total_findings = eng_findings_cwe | eng_findings_title
+        # total_findings = total_findings.order_by('date')
+        for find in total_findings:
+            if find.endpoints.count() != 0 and new_finding.endpoints.count() != 0:
+                list1 = new_finding.endpoints.all()
+                list2 = find.endpoints.all()
+                if all(x in list1 for x in list2):
+                    new_finding.duplicate = True
+                    new_finding.active = False
+                    new_finding.verified = False
+                    new_finding.duplicate_finding = find
+                    find.duplicate_list.add(new_finding)
+                    find.found_by.add(new_finding.test.test_type)
+                    super(Finding, new_finding).save(*args, **kwargs)
+                    break
+            elif find.line == new_finding.line and find.file_path == new_finding.file_path and new_finding.static_finding and len(
+                    new_finding.file_path) > 0:
                 new_finding.duplicate = True
+                new_finding.active = False
+                new_finding.verified = False
                 new_finding.duplicate_finding = find
                 find.duplicate_list.add(new_finding)
                 find.found_by.add(new_finding.test.test_type)
                 super(Finding, new_finding).save(*args, **kwargs)
-                break
-        elif find.line == new_finding.line and find.file_path == new_finding.file_path and new_finding.static_finding and len(
-                new_finding.file_path) > 0:
-            new_finding.duplicate = True
-            new_finding.duplicate_finding = find
-            find.duplicate_list.add(new_finding)
-            find.found_by.add(new_finding.test.test_type)
-            super(Finding, new_finding).save(*args, **kwargs)
-        elif find.get_hash_code() == new_finding.get_hash_code():
-            new_finding.duplicate = True
-            new_finding.duplicate_finding = find
-            find.duplicate_list.add(new_finding)
-            find.found_by.add(new_finding.test.test_type)
-            super(Finding, new_finding).save(*args, **kwargs)
 
-        calculate_grade(find.test.engagement.product)
+
+def sync_rules(new_finding, *args, **kwargs):
+    rules = Rule.objects.filter(applies_to='Finding', parent_rule=None)
+    for rule in rules:
+        child_val = True
+        child_list = [val for val in rule.child_rules.all()]
+        while (len(child_list) != 0):
+            child_val = child_val and child_rule(child_list.pop(), new_finding)
+        if child_val:
+            if rule.operator == 'Matches':
+                if getattr(new_finding, rule.match_field) == rule.match_text:
+                    if rule.application == 'Append':
+                        set_attribute_rule(new_finding, rule, (getattr(new_finding, rule.applied_field) + rule.text))
+                    else:
+                        set_attribute_rule(new_finding, rule, rule.text)
+                        new_finding.save(dedupe_option=False, rules_option=False)
+            else:
+                if rule.match_text in getattr(new_finding, rule.match_field):
+                    if rule.application == 'Append':
+                        set_attribute_rule(new_finding, rule, (getattr(new_finding, rule.applied_field) + rule.text))
+                    else:
+                        set_attribute_rule(new_finding, rule, rule.text)
+                        new_finding.save(dedupe_option=False, rules_option=False)
+
+
+def set_attribute_rule(new_finding, rule, value):
+    if rule.text == "True":
+        setattr(new_finding, rule.applied_field, True)
+    elif rule.text == "False":
+        setattr(new_finding, rule.applied_field, False)
+    else:
+        setattr(new_finding, rule.applied_field, value)
+
+
+def child_rule(rule, new_finding):
+    if rule.operator == 'Matches':
+        if getattr(new_finding, rule.match_field) == rule.match_text:
+            return True
+        else:
+            return False
+    else:
+        if rule.match_text in getattr(new_finding, rule.match_field):
+            return True
+        else:
+            return False
 
 
 def count_findings(findings):
@@ -777,6 +831,7 @@ def get_page_items(request, items, page_size, param_name='page'):
     size = request.GET.get('page_size', page_size)
     paginator = Paginator(items, size)
     page = request.GET.get(param_name)
+
     try:
         page = paginator.page(page)
     except PageNotAnInteger:
@@ -813,14 +868,19 @@ def handle_uploaded_selenium(f, cred):
 
 # Gets a connection to a Jira server based on the finding
 def get_jira_connection(finding):
+    jira = None
     prod = Product.objects.get(
         engagement=Engagement.objects.get(test=finding.test))
-    jpkey = JIRA_PKey.objects.get(product=prod)
-    jira_conf = jpkey.conf
 
-    jira = JIRA(
-        server=jira_conf.url,
-        basic_auth=(jira_conf.username, jira_conf.password))
+    try:
+        jpkey = JIRA_PKey.objects.get(product=prod)
+        jira_conf = jpkey.conf
+        if jira_conf is not None:
+            jira = JIRA(
+                server=jira_conf.url,
+                basic_auth=(jira_conf.username, jira_conf.password))
+    except JIRA_PKey.DoesNotExist:
+        pass
     return jira
 
 
@@ -875,10 +935,10 @@ def log_jira_message(text, finding):
 
 # Adds labels to a Jira issue
 def add_labels(find, issue):
-    # Update Label with Security
+    # Update Label with system setttings label
     system_settings = System_Settings.objects.get()
     labels = system_settings.jira_labels.split()
-    if labels is not None:
+    if len(labels) > 0:
         for label in labels:
             issue.fields.labels.append(label)
     # Update the label with the product name (underscore)
@@ -1140,20 +1200,25 @@ def add_epic(eng, push_to_jira):
 def add_comment(find, note, force_push=False):
     prod = Product.objects.get(
         engagement=Engagement.objects.get(test=find.test))
-    jpkey = JIRA_PKey.objects.get(product=prod)
-    jira_conf = jpkey.conf
-    if jpkey.push_notes or force_push is True:
-        try:
-            jira = JIRA(
-                server=jira_conf.url,
-                basic_auth=(jira_conf.username, jira_conf.password))
-            j_issue = JIRA_Issue.objects.get(finding=find)
-            jira.add_comment(
-                j_issue.jira_id,
-                '(%s): %s' % (note.author.get_full_name(), note.entry))
-        except Exception as e:
-            log_jira_generic_alert('Jira Add Comment Error', str(e))
-            pass
+
+    try:
+        jpkey = JIRA_PKey.objects.get(product=prod)
+        jira_conf = jpkey.conf
+
+        if jpkey.push_notes or force_push is True:
+            try:
+                jira = JIRA(
+                    server=jira_conf.url,
+                    basic_auth=(jira_conf.username, jira_conf.password))
+                j_issue = JIRA_Issue.objects.get(finding=find)
+                jira.add_comment(
+                    j_issue.jira_id,
+                    '(%s): %s' % (note.author.get_full_name(), note.entry))
+            except Exception as e:
+                log_jira_generic_alert('Jira Add Comment Error', str(e))
+                pass
+    except JIRA_PKey.DoesNotExist:
+        pass
 
 
 def send_review_email(request, user, finding, users, new_note):
@@ -1281,7 +1346,7 @@ def prepare_for_view(encrypted_value):
 
     key = None
     decrypted_value = ""
-    if encrypted_value is not NotImplementedError:
+    if encrypted_value is not NotImplementedError and encrypted_value is not None:
         key = get_db_key()
         encrypted_values = encrypted_value.split(":")
 
@@ -1495,30 +1560,72 @@ def calculate_grade(product):
         if severity_values:
             aeval = Interpreter()
             aeval(system_settings.product_grade)
-            grade_product = "grade_product(%s, %s, %s, %s)" % (critical, high,
-                                                               medium, low)
-            # prod = Product.objects.get(id=finding.test.engagement.product.id)
+            grade_product = "grade_product(%s, %s, %s, %s)" % (critical, high, medium, low)
             product.prod_numeric_grade = aeval(grade_product)
             product.save()
 
 
 def get_celery_worker_status():
-    ERROR_KEY = "ERROR"
+    from tasks import celery_status
+    res = celery_status.apply_async()
+
+    # Wait 15 seconds for a response from Celery
     try:
-        from celery.task.control import inspect
-        insp = inspect()
-        d = insp.stats()
-        if not d:
-            d = {ERROR_KEY: 'No running Celery workers were found.'}
-    except IOError as e:
-        from errno import errorcode
-        msg = "Error connecting to the backend: " + str(e)
-        if len(e.args) > 0 and errorcode.get(e.args[0]) == 'ECONNREFUSED':
-            msg += ' Check that the RabbitMQ server is running.'
-        d = {ERROR_KEY: msg}
-    except ImportError as e:
-        d = {ERROR_KEY: str(e)}
-    return d
+        return res.get(timeout=15)
+    except:
+        return False
+
+
+# Used to display the counts and enabled tabs in the product view
+class Product_Tab():
+    def __init__(self, product_id, title=None, tab=None):
+        self.product = Product.objects.get(id=product_id)
+        self.title = title
+        self.tab = tab
+        self.engagement_count = Engagement.objects.filter(product=self.product, active=True).count()
+        self.open_findings_count = Finding.objects.filter(test__engagement__product=self.product,
+                                                           false_p=False,
+                                                           verified=True,
+                                                           duplicate=False,
+                                                           out_of_scope=False,
+                                                           active=True,
+                                                           mitigated__isnull=True).count()
+        self.endpoints_count = Endpoint.objects.filter(product=self.product).count()
+        self.benchmark_type = Benchmark_Type.objects.filter(enabled=True).order_by('name')
+        self.engagement = None
+
+    def setTab(self, tab):
+        self.tab = tab
+
+    def setEngagement(self, engagement):
+        self.engagement = engagement
+
+    def engagement(self):
+        return self.engagement
+
+    def tab(self):
+        return self.tab
+
+    def setTitle(self, title):
+        self.title = title
+
+    def title(self):
+        return self.title
+
+    def product(self):
+        return self.product
+
+    def engagements(self):
+        return self.engagement_count
+
+    def findings(self):
+        return self.open_findings_count
+
+    def endpoints(self):
+        return self.endpoints_count
+
+    def benchmark_type(self):
+        return self.benchmark_type
 
 
 # Used to display the counts and enabled tabs in the product view
@@ -1538,7 +1645,7 @@ def tab_view_count(product_id):
     return product, engagements, open_findings, endpoints, benchmark_type
 
 
-# Will add a lanaguage to product
+# Add a lanaguage to product
 def add_language(product, language):
     prod_language = Languages.objects.filter(language__language__iexact=language, product=product)
 
@@ -1553,10 +1660,14 @@ def add_language(product, language):
             pass
 
 
-# Apply finding template data by matching CWE
+# Apply finding template data by matching CWE + Title or CWE
 def apply_cwe_to_template(finding, override=False):
     if System_Settings.objects.get().enable_template_match or override:
-        template = Finding_Template.objects.filter(cwe=finding.cwe).first()
+        # Attempt to match on CWE and Title First
+        template = Finding_Template.objects.filter(cwe=finding.cwe, title__icontains=finding.title, template_match=True).first()
+
+        # If none then match on CWE
+        template = Finding_Template.objects.filter(cwe=finding.cwe, template_match=True).first()
 
         if template:
             finding.mitigation = template.mitigation

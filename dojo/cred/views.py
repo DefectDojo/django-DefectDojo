@@ -7,7 +7,7 @@ from django.http import HttpResponseRedirect, StreamingHttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from dojo.models import Finding, Product, Engagement, Cred_User, Cred_Mapping, Test
-from dojo.utils import add_breadcrumb
+from dojo.utils import add_breadcrumb, Product_Tab
 from dojo.forms import CredUserForm, NoteForm, CredMappingFormProd, CredMappingForm
 
 from dojo.utils import dojo_crypto_encrypt, prepare_for_view, FileIterWrapper
@@ -36,6 +36,15 @@ def new_cred(request):
         add_breadcrumb(
             title="New Credential", top_level=False, request=request)
     return render(request, 'dojo/new_cred.html', {'tform': tform})
+
+
+@user_passes_test(lambda u: u.is_staff)
+def all_cred_product(request, pid):
+    prod = get_object_or_404(Product, id=pid)
+    creds = Cred_Mapping.objects.filter(product=prod).order_by('cred_id__name')
+
+    product_tab = Product_Tab(prod.id, title="Credentials", tab="settings")
+    return render(request, 'dojo/view_cred_prod.html', {'product_tab': product_tab, 'creds': creds, 'prod': prod})
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -337,6 +346,8 @@ def view_cred_finding(request, fid, ttid):
 def edit_cred_product(request, pid, ttid):
     cred = get_object_or_404(
         Cred_Mapping.objects.select_related('cred_id'), id=ttid)
+
+    prod = get_object_or_404(Product, pk=pid)
     if request.method == 'POST':
         tform = CredMappingFormProd(request.POST, instance=cred)
         if tform.is_valid():
@@ -346,17 +357,14 @@ def edit_cred_product(request, pid, ttid):
                 messages.SUCCESS,
                 'Credential Successfully Updated.',
                 extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('view_product_details', args=(pid, )))
+            return HttpResponseRedirect(reverse('all_cred_product', args=(pid, )))
     else:
         tform = CredMappingFormProd(instance=cred)
 
-    add_breadcrumb(
-        title="Edit Credential Configuration",
-        top_level=False,
-        request=request)
-
+    product_tab = Product_Tab(prod.id, title="Edit Product Credential", tab="settings")
     return render(request, 'dojo/edit_cred_all.html', {
         'tform': tform,
+        'product_tab': product_tab,
         'cred_type': "Product"
     })
 
@@ -396,7 +404,7 @@ def edit_cred_product_engagement(request, eid, ttid):
 
 @user_passes_test(lambda u: u.is_staff)
 def new_cred_product(request, pid):
-
+    prod = get_object_or_404(Product, pk=pid)
     if request.method == 'POST':
         tform = CredMappingFormProd(request.POST)
         if tform.is_valid():
@@ -416,16 +424,16 @@ def new_cred_product(request, pid):
 
             messages.add_message(
                 request, messages.SUCCESS, message, extra_tags=status_tag)
-            return HttpResponseRedirect(reverse('view_product_details', args=(pid, )))
+            return HttpResponseRedirect(reverse('all_cred_product', args=(pid, )))
     else:
         tform = CredMappingFormProd()
 
-    add_breadcrumb(
-        title="Add Credential Configuration", top_level=False, request=request)
+    product_tab = Product_Tab(pid, title="Add Credential Configuration", tab="settings")
 
     return render(request, 'dojo/new_cred_product.html', {
         'tform': tform,
-        'pid': pid
+        'pid': pid,
+        'product_tab': product_tab
     })
 
 
@@ -609,7 +617,7 @@ def delete_cred_controller(request, destination_url, id, ttid):
                 message = "Credential is associated with product(s). Remove the credential from the product(s) before this credential can be deleted."
                 if cred_lookup.exists() is False:
                     delete_cred = True
-        elif destination_url == "view_product_details":
+        elif destination_url == "all_cred_product":
             cred_lookup = Cred_Mapping.objects.filter(
                 cred_id=cred.cred_id).exclude(engagement__isnull=True)
             message = "Credential is associated with engagement(s). Remove the credential from the engagement(s) before this credential can be deleted."
@@ -655,9 +663,12 @@ def delete_cred_controller(request, destination_url, id, ttid):
         tform = CredMappingForm(instance=cred)
 
     add_breadcrumb(title="Delete Credential", top_level=False, request=request)
-
+    product_tab = None
+    if id:
+        product_tab = Product_Tab(id, title="Delete Credential Mapping", tab="settings")
     return render(request, 'dojo/delete_cred_all.html', {
         'tform': tform,
+        'product_tab': product_tab
     })
 
 
@@ -668,7 +679,7 @@ def delete_cred(request, ttid):
 
 @user_passes_test(lambda u: u.is_staff)
 def delete_cred_product(request, pid, ttid):
-    return delete_cred_controller(request, "view_product_details", pid, ttid)
+    return delete_cred_controller(request, "all_cred_product", pid, ttid)
 
 
 @user_passes_test(lambda u: u.is_staff)
