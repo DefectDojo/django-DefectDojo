@@ -197,6 +197,8 @@ class TestEditEndpointMetaData(TestCase):
         EndpointMetaDataTestUtil.save_custom_field(e, 'TestField', 'TestValue')
         EndpointMetaDataTestUtil.save_custom_field(p, 'TestProductField', 'TestProductValue')
 
+        call_command('loaddata', 'dojo/fixtures/system_settings', verbosity=0)
+
     def make_request(self, user_is_staff, id, data=None):
         user = EndpointMetaDataTestUtil.create_user(user_is_staff)
 
