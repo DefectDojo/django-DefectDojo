@@ -1118,14 +1118,13 @@ class Finding(models.Model):
 
         return ", ".join([str(s) for s in status])
 
+    @property
     def age(self):
         if self.mitigated:
-            days = (self.mitigated.date() - datetime.combine(self.date,
-                                                             datetime.min.time()).date()).days
+            diff = self.mitigated.date() - self.date
         else:
-            days = (get_current_date() - datetime.combine(self.date,
-                                                          datetime.min.time()).date()).days
-
+            diff = get_current_date() - self.date
+        days = diff.days
         return days if days > 0 else 0
 
     def sla(self):
@@ -1134,7 +1133,7 @@ class Finding(models.Model):
         from dojo.utils import get_system_setting
         sla_age = get_system_setting('sla_' + self.severity.lower())
         if sla_age and self.active:
-            sla_calculation = sla_age - self.age()
+            sla_calculation = sla_age - self.age
         elif sla_age and self.mitigated:
             age = self.age()
             if age < sla_age:
