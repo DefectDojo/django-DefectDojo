@@ -372,6 +372,13 @@ def overdue(date1):
     return date_str
 
 
+@register.filter(name='notspecified')
+def notspecified(text):
+    if text:
+        return text
+    else:
+        return mark_safe("<em class=\"text-muted\">Not Specified</em>")
+
 @register.tag
 def colgroup(parser, token):
     """
@@ -501,6 +508,14 @@ def business_criticality_icon(value):
         return mark_safe(stars(0, 5, 'None'))
     else:
         return ""  # mark_safe(not_specified_icon('Business Criticality Not Specified'))
+
+
+@register.filter
+def last_value(value):
+    if "/" in value:
+        return value.rsplit("/")[-1:][0]
+    else:
+        return value
 
 
 @register.filter

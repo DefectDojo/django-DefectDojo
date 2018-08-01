@@ -34,4 +34,12 @@ urlpatterns = [
         name='edit_meta_data'),
     url(r'^product/(?P<pid>\d+)/ad_hoc_finding', views.ad_hoc_finding,
         name='ad_hoc_finding'),
+    url(r'^product/(?P<pid>\d+)/engagement_presets$', views.engagement_presets,
+        name='engagement_presets'),
+    url(r'^product/(?P<pid>\d+)/engagement_presets/(?P<eid>\d+)/edit', views.edit_engagement_presets,
+        name='edit_engagement_presets'),
+    url(r'^product/(?P<pid>\d+)/engagement_presets/add', views.add_engagement_presets,
+        name='add_engagement_presets'),
+    url(r'^product/(?P<pid>\d+)/engagement_presets/(?P<eid>\d+)/delete', views.delete_engagement_presets,
+        name='delete_engagement_presets'),
 ]

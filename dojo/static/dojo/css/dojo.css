@@ -781,7 +781,7 @@ input[type="checkbox"] {
 .navbar-top-links .dropdown-messages,
 .navbar-top-links .dropdown-tasks,
 .navbar-top-links .dropdown-alerts {
-    width: 415px;
+    width: 500px;
     min-width: 0;
 }
 
@@ -1463,6 +1463,11 @@ div.tags .label {
 
 .tag-color {
     background: #556270;
+    border: 1px solid #fff!important;
+}
+
+.tag-version {
+    background: rgba(32, 166, 216, 0.7);
     border: 1px solid #fff!important;
 }
 

@@ -412,6 +412,17 @@
                         </li>
                         <li role="separator" class="divider"></li>
                         <li role="presentation">
+                            <a href="{% url 'add_engagement_presets' product_tab.product.id %}">
+                                <i class="fa fa-plus"></i> Add Engagement Presets
+                            </a>
+                        </li>
+                        <li role="presentation">
+                            <a href="{% url 'engagement_presets' product_tab.product.id %}">
+                                <i class="fa fa-plus"></i> View Engagement Presets
+                            </a>
+                        </li>
+                        <li role="separator" class="divider"></li>
+                        <li role="presentation">
                             <a href="{% url 'action_history' product_tab.product|content_type product_tab.product.id %}">
                                 <i class="fa fa-history"></i> View History
                             </a>
