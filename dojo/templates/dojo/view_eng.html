@@ -102,7 +102,85 @@
               {% endif %}
             </div>
         </div>
+        {% if eng.preset %}
+        <div class="row">
+            <div id="tests" class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="clearfix">
+                            <h4 class="pull-left">
+                            Engagement Presets <small>{{ eng.preset.title|truncatechars:60 }}</small>
+                            </h4>
+                            <div class="dropdown pull-right">
+                                <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                                        data-toggle="dropdown" aria-expanded="true">
+                                    <span class="fa fa-bars"></span>
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                                    <li role="presentation">
+                                        <a class="" href="{% url 'add_engagement_presets' eng.product.id %}">
+                                            <i class="fa fa-plus"></i> Add Engagement Preset
+                                        </a>
+                                    </li>
+                                    <li role="presentation">
+                                        <a class="" href="{% url 'edit_engagement_presets' eng.product.id eng.preset.id %}">
+                                            <i class="fa fa-edit"></i> Edit Engagement Preset
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                        <div class="table-responsive">
+                            <table class="tablesorter-bootstrap table table-condensed table-striped">
+                                <thead>
+                                <tr>
+                                    <th>Test Type</th>
+                                    <th>Network</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                          {% if preset_test_type.count > 1 %}
+                                            {% for test in preset_test_type %}
+                                               {{test.name}}{%if not forloop.last%},{%endif%}
+                                            {% endfor %}
+                                          {% else %}
+                                            {{ preset_test_type.0.name }}
+                                          {% endif %}
+                                        </td>
+                                        <td>
+                                          {% if network.count > 1 %}
+                                            {% for net in network %}
+                                               {{ net.location }}{%if not forloop.last%},{%endif%}
+                                            {% endfor %}
+                                          {% else %}
+                                            {{ network.0.location }}
+                                          {% endif %}
+                                        </td>
+                                    </tr>
 
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="panel-body">
+                          {% if eng.preset.notes %}
+                            <strong>Notes: </strong>{{ eng.preset.notes|markdown_render }}
+                          {% else %}
+                            <small class="text-muted"><em>No test notes found.</em></small>
+                          {% endif %}
+                          {% if eng.preset.scope %}
+                            <strong>Scope: </strong>{{ eng.preset.scope|markdown_render }}
+                          {% else %}
+                            <small class="text-muted"><em>Testing scope not specified.</em></small>
+                          {% endif %}
+                        </div>
+                </div>
+            </div>
+</div>
+{% endif %}
 <div class="row">
     <div id="tests" class="col-md-12">
         <div class="panel panel-default">
@@ -179,13 +257,8 @@
                                             </a>
                                           </li>
                                            <li class="divider"></li>
-                                           <li>
-                                             <a class="" href="{% url 'add_tests' eng.id %}">
-                                               <i class="fa fa-plus"></i> Add Tests
-                                             </a>
-                                           </li>
-                                           <li><a class="" href="{% url 'import_scan_results' eng.id %}">
-                                               <i class="fa fa-upload"></i> Import Scan Results
+                                           <li><a class="" href="{% url 're_import_scan_results' test.id %}">
+                                               <i class="fa fa-upload"></i> Re-Upload Scan Results
                                            </a></li>
                                            <li class="divider"></li>
                                            <li role="presentation">
@@ -372,6 +445,12 @@
       {% else %}
           Engagement for <a href="{% url 'view_product' eng.product.id %}">{{ eng.product }}</a>
       {% endif %}
+      {% if eng.version %}
+          <sup>
+                <a target="_blank" class="tag-label tag-version" data-toggle="tooltip" data-placement="bottom" title="Product Version: {{ eng.version }}">
+                {{ eng.version }}</a>
+          </sup>
+      {% endif %}
       {% if eng.tags %}
           <sup>
               {% for tag in eng.tags %}
@@ -385,7 +464,7 @@
       <table class="table table-striped">
         <tbody>
           <tr>
-            <td><strong>Status</strong></td>
+            <td style="width: 150px;"><strong>Status</strong></td>
             <td>{{ eng.status }}</td>
           </tr>
           <tr>
@@ -415,19 +494,44 @@
                 None Assigned
             {% endif %}</td>
           </tr>
+          <tr>
+            <td><strong>Tracker</strong></td>
+            <td>
+              {% if eng.tracker %}
+                <a target="_blank" data-toggle="tooltip" data-placement="top" title="{{ eng.tracker }}" href="{{ eng.tracker }}" alt="Development epic or ticket for development requirements.">
+                <i class="fa fa-external-link"></i> {{ eng.tracker|last_value }}</a>
+              {% else %}
+                {{ eng.tracker|notspecified}}
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <td><strong>Repo</strong></td>
+            <td>
+              {% if eng.source_code_management_uri %}
+                <a target="_blank" data-toggle="tooltip" data-placement="top" title="{{ eng.source_code_management_uri }}" href="{{ eng.source_code_management_uri }}">
+                  <i class="fa fa-external-link"></i> {{ eng.source_code_management_uri|last_value }}
+                </a>
+              {% else %}
+                {{ eng.source_code_management_uri|notspecified}}
+              {% endif %}
+            </td>
+          </tr>
           {% if jissue and jconf %}
           <tr>
             <td><strong>Jira</strong></td>
-            <td><a href="{{ jconf.url }}/browse/{{ jissue.jira_key }}">Jira Epic</a></td>
+            <td><a href="{{ jconf.url }}/browse/{{ jissue.jira_key }}" target="_blank"><i class="fa fa-external-link"></i> Jira Epic</a></td>
           </tr>
           {% endif %}
           <tr>
             <td><strong>Updated</strong></td>
-            <td>{{ eng.updated|naturaltime|default_if_none:"" }}</td>
+            <td><a target="_blank" data-toggle="tooltip" data-placement="bottom" title="{{ eng.updated|default_if_none:"" }}">
+            {{ eng.updated|naturaltime|default_if_none:"" }}</a></td>
           </tr>
           <tr>
             <td><strong>Created</strong></td>
-            <td>{{ eng.created|naturaltime|default_if_none:"" }}</td>
+            <td><a target="_blank" data-toggle="tooltip" data-placement="bottom" title="{{ eng.created|default_if_none:"" }}">
+            {{ eng.created|naturaltime|default_if_none:"" }}</a></td>
           </tr>
 
         </tbody>
@@ -446,29 +550,23 @@
         <table class="table table-striped">
           <tbody>
             <tr>
-              <td><strong>Build ID</strong></td>
-              <td>{{ eng.build_id|default_if_none:"" }}</td>
+              <td style="width: 150px;"><strong>Build ID</strong></td>
+              <td>{{ eng.build_id|notspecified }}</td>
             </tr>
             <tr>
               <td><strong>Commit Hash</strong></td>
-              <td>{{ eng.commit_hash|default_if_none:""|truncatechars:10 }}</td>
+              <td>{{ eng.commit_hash|notspecified|truncatechars:13 }}</td>
             </tr>
             <tr>
               <td><strong>Branch/Tag</strong></td>
-              <td>{{ eng.branch_tag|default_if_none:"" }}</td>
-            </tr>
-            <tr>
-              <td><strong>Repo</strong></td>
-              <td>{% if eng.source_code_management_uri %}
-                <a target="_blank" data-toggle="tooltip" data-placement="top" title="{{ eng.source_code_management_uri }}" href="{{ eng.source_code_management_uri }}">
-                  <i class="fa fa-external-link"></i> View
-                </a>{% endif %}
-              </td>
+              <td>{{ eng.branch_tag|notspecified }}</td>
             </tr>
             <tr>
               <td><strong>Orchestration</strong></td>
               <td>{% if eng.orchestration_engine.id %}
                   <a href="{% url 'edit_tool_config' eng.orchestration_engine.id %}">{{ eng.orchestration_engine.name }}</a>
+                  {% else %}
+                    {{ eng.orchestration_engine.name|notspecified }}
                   {% endif %}
               </td>
             </tr>
@@ -476,6 +574,8 @@
               <td><strong>SCM Server</strong></td>
               <td>{% if eng.source_code_management_server.id %}
                 <a href="{% url 'edit_tool_config' eng.source_code_management_server.id %}">{{ eng.source_code_management_server.name }}</a>
+                {% else %}
+                  {{ eng.source_code_management_server.name|notspecified }}
                 {% endif %}
               </td>
             </tr>
@@ -483,6 +583,8 @@
               <td><strong>Build Server</strong></td>
               <td>{% if eng.build_server.id %}
                 <a href="{% url 'edit_tool_config' eng.build_server.id %}">{{ eng.build_server.name }}</a>
+                {% else %}
+                  {{ eng.build_server.name|notspecified }}
                 {% endif %}
               </td>
             </tr>

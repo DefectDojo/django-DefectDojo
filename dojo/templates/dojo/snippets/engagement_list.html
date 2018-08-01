@@ -3,7 +3,7 @@
 <div class="col-md-12">
     <div class="panel panel-default table-responsive">
         <div class="panel-heading">
-            <h4> {% if status == "open" %}Active{% else %}Closed{% endif %} {% if type == "CI/CD" %}CI/CD{% endif %} Engagements ({{ count }})
+            <h4> {% if status == "open" %}Active{% elif status == "paused" %}Paused {% else %}Closed{% endif %} {% if type == "CI/CD" %}CI/CD{% endif %} Engagements ({{ count }})
               {% if type == "CI/CD" %}
               <a title="Add New Engagement" class="pull-right btn btn-sm btn-primary" href="{% url 'new_eng_for_prod_cicd' prod.id %}"><span
                     class="fa fa-plus"></span> </a>
@@ -27,12 +27,23 @@
                     <th>All</th>
                     <th>Duplicate</th>
                     <th>Updated</th>
+                    {% if status == "paused" or status == "closed" %}
+                      <th>Status</th>
+                    {% endif %}
                 </tr>
                 </thead>
                 <tbody>
                 {% for eng in engs %}
                     <tr>
-                    <td><a href="{% url 'view_engagement' eng.id %}">{{ eng.name | default:"N/A" }}</a>
+                    <td style="width: 250px;">
+                    <a href="{% url 'view_engagement' eng.id %}" data-toggle="tooltip" data-placement="bottom" title="{{ eng.name|default:"N/A" }}">
+                    {{ eng.name|truncatechars:35|default:"N/A" }}</a>
+                    {% if eng.version %}
+                        <sup>
+                              <a target="_blank" class="tag-label tag-version" data-toggle="tooltip" data-placement="bottom" title="Product Version: {{ eng.version }}">
+                              {{ eng.version }}</a>
+                        </sup>
+                    {% endif %}
                     {% if eng.tags %}
                         <sup>
                             {% for tag in eng.tags %}
@@ -57,7 +68,7 @@
                             </li>
                             <li>
                               </a>
-                              {% if status == "open" %}
+                              {% if status == "open" or status == "paused" %}
                               <a class="" href="{% url 'close_engagement' eng.id %}">
                                 <i class="fa fa-close"></i> Close
                               {% else %}
@@ -94,14 +105,18 @@
                          </li>
                      </ul>
                     </td>
-                    <td>
+                    <td style="width: 150px;">
                       {% if eng.lead.get_full_name and eng.lead.get_full_name.strip %}
                           {{ eng.lead.get_full_name }}
                       {% else %}
                           {{ eng.lead |default_if_none:""}}
                       {% endif %}
                     </td>
-                    <td>{{ eng.target_start }} - {{ eng.target_end }}</td>
+                    <td style="width: 200px;">
+                      <a target="#" data-toggle="tooltip" data-placement="bottom" title="{{ eng.target_start }} - {{ eng.target_end }}">
+                      {{ eng.target_start|date:"jS F" }} - {{ eng.target_end|date:"jS F" }}
+                    </a>
+                    </td>
                     <td class="nowrap">{{ eng.target_start|datediff_time:eng.target_end }}
                       {% if status == "open" %}
                         {% if eng.target_end|overdue %}
@@ -150,13 +165,18 @@
                     <td>{{ eng|count_findings_eng_open }}</td>
                     <td>{{ eng|count_findings_eng_all }}</td>
                     <td>{{ eng|count_findings_eng_duplicate }}</td>
-                    <td>{{ eng.updated|naturaltime|default_if_none:"" }}</td>
+                    <td><a target="_blank" data-toggle="tooltip" data-placement="bottom" title="{{ eng.updated|default_if_none:"" }}">
+                    {{ eng.updated|naturaltime|default_if_none:"" }}</a>
+                    </td>
+                    {% if status == "paused" or status == "closed" %}
+                    <td>{{ eng.status }}</td>
+                    {% endif %}
                 {% endfor %}
                 </tbody>
             </table>
         {% else %}
             <div class="panel-body">
-                <p class="text-center">No {% if status == "open" %}active{% else %}closed{% endif %} engagements found.</p>
+                <p class="text-muted">No {% if status == "open" %}active{% elif status == "paused" %}paused{% else %}closed{% endif %} engagements found.</p>
             </div>
         {% endif %}
     </div>

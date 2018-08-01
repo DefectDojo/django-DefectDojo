@@ -157,19 +157,19 @@
         <tbody>
           <tr>
             <td style="width: 150px;"><strong>Business Criticality</strong></td>
-            <td>{{ prod.get_business_criticality_display|default:"" }}</td>
+            <td>{{ prod.get_business_criticality_display|notspecified }}</td>
           </tr>
           <tr>
             <td><strong>Product Type</strong></td>
-            <td>{{ prod.prod_type|default:"" }}</td>
+            <td>{{ prod.prod_type|notspecified }}</td>
           </tr>
           <tr>
             <td><strong>Platform</strong></td>
-            <td>{{ prod.get_platform_display|default:"" }}</td>
+            <td>{{ prod.get_platform_display|notspecified }}</td>
           </tr>
           <tr>
             <td><strong>Lifecycle</strong></td>
-            <td>{{ prod.get_lifecycle_display|default:"" }}</td>
+            <td>{{ prod.get_lifecycle_display|notspecified }}</td>
           </tr>
           <tr>
             <td><strong>Origin</strong></td>
@@ -262,12 +262,15 @@
             <td><strong>Authorized Users</strong></td>
             <td>
               {% if prod.authorized_users.all %}
-                {% for au in prod.authorized_users.all %}
-                {{ au }}<br>
-                {% endfor %}
-              </ul>
+                {% if prod.authorized_users.all.count > 1 %}
+                  {% for au in prod.authorized_users.all %}
+                     {{au}}{%if not forloop.last%},{%endif%}
+                  {% endfor %}
+                {% else %}
+                  {{ prod.authorized_users.all.0 }}
+                {% endif %}
               {% else %}
-                None specified
+                {{ prod.authorized_users.all|notspecified }}
               {% endif %}
             </td>
           </tr>
