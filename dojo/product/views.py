@@ -13,11 +13,13 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
-from django.db.models import Sum, Count
+from django.db.models import Sum, Count, Q
 from dojo.filters import ProductFilter, ProductFindingFilter, EngagementFilter
-from dojo.forms import ProductForm, EngForm, DeleteProductForm, ProductMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm
+from dojo.forms import ProductForm, EngForm, DeleteProductForm, ProductMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm, \
+                       EngagementPresetsForm, DeleteEngagementPresetsForm
 from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, Finding_Template, \
-    Tool_Product_Settings, Cred_Mapping, Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint
+    Tool_Product_Settings, Cred_Mapping, Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, \
+    Endpoint, Engagement_Presets
 from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, get_system_setting, create_notification, Product_Tab
 from custom_field.models import CustomFieldValue, CustomField
 from dojo.tasks import add_epic_task, add_issue_task
@@ -330,18 +332,25 @@ def view_engagements(request, pid, engagement_type="Interactive"):
     prod = get_object_or_404(Product, id=pid)
     auth = request.user.is_staff or request.user in prod.authorized_users.all()
     if not auth:
-        # will render 403
         raise PermissionDenied
 
-    engs = Engagement.objects.filter(product=prod, active=True)
     default_page_num = 10
 
+    # In Progress Engagements
     result_engs = EngagementFilter(
         request.GET,
-        queryset=Engagement.objects.filter(product=prod, active=True, engagement_type=engagement_type).order_by('-updated'))
+        queryset=Engagement.objects.filter(product=prod, active=True, status="In Progress", engagement_type=engagement_type).order_by('-updated'))
 
     engs = get_page_items(request, result_engs.qs, default_page_num, param_name="engs")
 
+    # Engagements that are queued because they haven't started or paused
+    queued_engs = EngagementFilter(
+        request.GET,
+        queryset=Engagement.objects.filter(~Q(status="In Progress"), product=prod, active=True, engagement_type=engagement_type).order_by('-updated'))
+
+    result_queued_engs = get_page_items(request, queued_engs.qs, default_page_num, param_name="queued_engs")
+
+    # Cancelled or Completed Engagements
     result = EngagementFilter(
         request.GET,
         queryset=Engagement.objects.filter(product=prod, active=False, engagement_type=engagement_type).order_by('-target_end'))
@@ -360,6 +369,8 @@ def view_engagements(request, pid, engagement_type="Interactive"):
                    'engagement_type': engagement_type,
                    'engs': engs,
                    'engs_count': result_engs.qs.count(),
+                   'queued_engs': result_queued_engs,
+                   'queued_engs_count': queued_engs.qs.count(),
                    'i_engs': i_engs_page,
                    'i_engs_count': result.qs.count(),
                    'user': request.user,
@@ -565,12 +576,6 @@ def delete_product(request, pid):
                    })
 
 
-"""
-Greg
-Status: in production
-"""
-
-
 def all_product_findings(request, pid):
     p = get_object_or_404(Product, id=pid)
     auth = request.user.is_staff or request.user in p.authorized_users.all()
@@ -603,6 +608,8 @@ def new_eng_for_app(request, pid, cicd=False):
         form = EngForm(request.POST, cicd=cicd)
         if form.is_valid():
             new_eng = form.save(commit=False)
+            if not new_eng.name:
+                new_eng.name = str(new_eng.target_start)
             new_eng.threat_model = False
             new_eng.api_test = False
             new_eng.pen_test = False
@@ -643,7 +650,7 @@ def new_eng_for_app(request, pid, cicd=False):
             else:
                 return HttpResponseRedirect(reverse('view_engagement', args=(new_eng.id,)))
     else:
-        form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(), 'target_end': timezone.now().date() + timedelta(days=7)}, cicd=cicd)
+        form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(), 'target_end': timezone.now().date() + timedelta(days=7)}, cicd=cicd, product=prod.id)
         if(get_system_setting('enable_jira')):
                 if JIRA_PKey.objects.filter(product=prod).count() != 0:
                     jform = JIRAFindingForm(prefix='jiraform', enabled=JIRA_PKey.objects.get(product=prod).push_all_issues)
@@ -837,4 +844,99 @@ def ad_hoc_finding(request, pid):
                    'pid': pid,
                    'form_error': form_error,
                    'jform': jform,
+                   })
+
+
+@user_passes_test(lambda u: u.is_staff)
+def engagement_presets(request, pid):
+    prod = get_object_or_404(Product, id=pid)
+    presets = Engagement_Presets.objects.filter(product=prod).all()
+
+    product_tab = Product_Tab(prod.id, title="Engagement Presets", tab="settings")
+
+    return render(request, 'dojo/view_presets.html',
+                  {'product_tab': product_tab,
+                   'presets': presets,
+                   'prod': prod})
+
+
+@user_passes_test(lambda u: u.is_staff)
+def edit_engagement_presets(request, pid, eid):
+    prod = get_object_or_404(Product, id=pid)
+    preset = get_object_or_404(Engagement_Presets, id=eid)
+
+    product_tab = Product_Tab(prod.id, title="Edit Engagement Preset", tab="settings")
+
+    if request.method == 'POST':
+        tform = EngagementPresetsForm(request.POST, instance=preset)
+        if tform.is_valid():
+            tform.save()
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Engagement Preset Successfully Updated.',
+                extra_tags='alert-success')
+            return HttpResponseRedirect(reverse('engagement_presets', args=(pid,)))
+    else:
+        tform = EngagementPresetsForm(instance=preset)
+
+    return render(request, 'dojo/edit_presets.html',
+                  {'product_tab': product_tab,
+                   'tform': tform,
+                   'prod': prod})
+
+
+@user_passes_test(lambda u: u.is_staff)
+def add_engagement_presets(request, pid):
+    prod = get_object_or_404(Product, id=pid)
+    if request.method == 'POST':
+        tform = EngagementPresetsForm(request.POST)
+        if tform.is_valid():
+            form_copy = tform.save(commit=False)
+            form_copy.product = prod
+            form_copy.save()
+            tform.save_m2m()
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Engagement Preset Successfully Created.',
+                extra_tags='alert-success')
+            return HttpResponseRedirect(reverse('engagement_presets', args=(pid,)))
+    else:
+        tform = EngagementPresetsForm()
+
+    product_tab = Product_Tab(pid, title="New Engagement Preset", tab="settings")
+    return render(request, 'dojo/new_params.html', {'tform': tform, 'pid': pid, 'product_tab': product_tab})
+
+
+@user_passes_test(lambda u: u.is_staff)
+def delete_engagement_presets(request, pid, eid):
+    prod = get_object_or_404(Product, id=pid)
+    preset = get_object_or_404(Engagement_Presets, id=eid)
+    form = DeleteEngagementPresetsForm(instance=preset)
+
+    from django.contrib.admin.utils import NestedObjects
+    from django.db import DEFAULT_DB_ALIAS
+
+    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+    collector.collect([preset])
+    rels = collector.nested()
+
+    if request.method == 'POST':
+        if 'id' in request.POST:
+            form = DeleteEngagementPresetsForm(request.POST, instance=preset)
+            if form.is_valid():
+                preset.delete()
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'Engagement presets and engagement relationships removed.',
+                                     extra_tags='alert-success')
+                return HttpResponseRedirect(reverse('engagement_presets', args=(pid,)))
+
+    product_tab = Product_Tab(pid, title="Delete Engagement Preset", tab="settings")
+    return render(request, 'dojo/delete_presets.html',
+                  {'product': product,
+                   'form': form,
+                   'product_tab': product_tab,
+                   'rels': rels,
                    })

@@ -1,7 +1,7 @@
 # #  engagements
 import logging
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 import operator
 
 from django.contrib.auth.models import User
@@ -138,7 +138,7 @@ def edit_engagement(request, eid):
         ci_cd_form = True
     jform = None
     if request.method == 'POST':
-        form = EngForm(request.POST, instance=eng, cicd=ci_cd_form)
+        form = EngForm(request.POST, instance=eng, cicd=ci_cd_form, product=eng.product.id)
         if 'jiraform-push_to_jira' in request.POST:
             jform = JIRAFindingForm(
                 request.POST, prefix='jiraform', enabled=True)
@@ -155,7 +155,12 @@ def edit_engagement(request, eid):
                     add_epic_task.delay(eng,
                                         jform.cleaned_data.get('push_to_jira'))
                     pass
-            form.save()
+            temp_form = form.save(commit=False)
+            if (temp_form.status == "Cancelled" or temp_form.status == "Completed"):
+                temp_form.active = False
+            elif(temp_form.active is False):
+                temp_form.active = True
+            temp_form.save()
             tags = request.POST.getlist('tags')
             t = ", ".join(tags)
             eng.tags = t
@@ -171,7 +176,7 @@ def edit_engagement(request, eid):
                 return HttpResponseRedirect(
                     reverse('view_engagement', args=(eng.id, )))
     else:
-        form = EngForm(instance=eng, cicd=ci_cd_form)
+        form = EngForm(instance=eng, cicd=ci_cd_form, product=eng.product.id)
         try:
             # jissue = JIRA_Issue.objects.get(engagement=eng)
             enabled = True
@@ -243,6 +248,11 @@ def view_engagement(request, eid):
     prod = eng.product
     auth = request.user.is_staff or request.user in prod.authorized_users.all()
     risks_accepted = eng.risk_acceptance.all()
+    preset_test_type = None
+    network = None
+    if eng.preset:
+        preset_test_type = eng.preset.test_type.all()
+        network = eng.preset.network_locations.all()
     system_settings = System_Settings.objects.get()
     if not auth:
         # will render 403
@@ -316,36 +326,6 @@ def view_engagement(request, eid):
         for finding in ra.accepted_findings.all()
     ]
 
-    week_date = end_date - timedelta(
-        days=7)  # seven days and /newer are considered "new"
-
-    new_verified_findings = Finding.objects.filter(
-        test__engagement__product=eng.product,
-        date__range=[week_date, end_date],
-        false_p=False,
-        verified=True,
-        duplicate=False,
-        out_of_scope=False).order_by("date")
-
-    open_findings = Finding.objects.filter(
-        test__engagement__product=eng.product,
-        date__range=[start_date, end_date],
-        false_p=False,
-        verified=True,
-        duplicate=False,
-        out_of_scope=False,
-        active=True,
-        mitigated__isnull=True)
-
-    closed_findings = Finding.objects.filter(
-        test__engagement__product=eng.product,
-        date__range=[start_date, end_date],
-        false_p=False,
-        verified=True,
-        duplicate=False,
-        out_of_scope=False,
-        mitigated__isnull=False)
-
     title = ""
     if eng.engagement_type == "CI/CD":
         title = " CI/CD"
@@ -367,13 +347,12 @@ def view_engagement(request, eid):
             'can_add_risk': len(eng_findings),
             'jissue': jissue,
             'jconf': jconf,
-            'open_findings': open_findings,
-            'closed_findings': closed_findings,
             'accepted_findings': accepted_findings,
-            'new_findings': new_verified_findings,
             'start_date': start_date,
             'creds': creds,
-            'cred_eng': cred_eng
+            'cred_eng': cred_eng,
+            'network': network,
+            'preset_test_type': preset_test_type
         })
 
 
@@ -397,6 +376,12 @@ def add_tests(request, eid):
             except:
                 new_test.lead = None
                 pass
+
+            # Set status to in progress if a test is added
+            if eng.status != "In Progress" and eng.active is True:
+                eng.status = "In Progress"
+                eng.save()
+
             new_test.save()
             tags = request.POST.getlist('tags')
             t = ", ".join(tags)
@@ -731,13 +716,6 @@ def complete_checklist(request, eid):
         'eid': eng.id,
         'findings': findings,
     })
-
-
-"""
-Greg
-status: in produciton
-upload accepted risk at the engagement
-"""
 
 
 @user_passes_test(lambda u: u.is_staff)
