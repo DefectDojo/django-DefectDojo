@@ -320,7 +320,8 @@ def add_temp_finding(request, tid, fid):
             new_finding.save()
             if 'jiraform-push_to_jira' in request.POST:
                     jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=True)
-                    add_issue_task.delay(new_finding, jform.cleaned_data.get('push_to_jira'))
+                    if jform.is_valid():
+                        add_issue_task.delay(new_finding, jform.cleaned_data.get('push_to_jira'))
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Finding from template added successfully.',
