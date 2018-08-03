@@ -121,7 +121,8 @@ class EngagementTest(BaseClass.RESTEndpointTest):
             "target_end": '1937-01-01',
             "reason": "",
             "test_strategy": "",
-            "product": "http://testserver/api/v2/products/1/"
+            "product": "http://testserver/api/v2/products/1/",
+            "tags": ["mytag"]
         }
         self.update_fields = {'version': 'latest'}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
@@ -274,7 +275,8 @@ class ProductTest(BaseClass.RESTEndpointTest):
                 "http://testserver/api/v2/users/3/"],
             "prod_type": 1,
             "name": "Test Product",
-            "description": "test product"
+            "description": "test product",
+            "tags": ["mytag"]
         }
         self.update_fields = {'prod_type': 2}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)

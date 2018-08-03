@@ -143,6 +143,11 @@
                                 {% endif %}
                                 {% if request.user.is_staff %}
                                     <ul class="nav nav-second-level">
+                                      {% if request.user.is_staff %}
+                                        <li>
+                                            <a href="{% url 'new_product' %}"> Add Product</a>
+                                        </li>
+                                      {% endif %}
                                         <li>
                                             <a href="{% url 'product' %}"> All Products</a>
                                         </li>
