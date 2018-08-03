@@ -497,7 +497,6 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
             "active": False,
             "verified": True,
             "scan_type": 'ZAP Scan',
-            "tags": "test",
             "file": open('tests/zap_sample.xml'),
             "engagement": 'http://testserver/api/v2/engagements/1/',
             "lead": 'http://testserver/api/v2/users/2/'
@@ -523,7 +522,6 @@ class ReimportScanTest(APITestCase):
                 "active": True,
                 "verified": True,
                 "scan_type": 'ZAP Scan',
-                "tags": "test",
                 "file": open('tests/zap_sample.xml'),
                 "test": 'http://testserver/api/v2/tests/3/'})
         self.assertEqual(length, Test.objects.all().count())

@@ -724,11 +724,12 @@ class Engagement(models.Model):
     status = models.CharField(editable=True, max_length=2000, default='',
                               null=True,
                               choices=(('Not Started', 'Not Started'),
+                                       ('Blocked', 'Blocked'),
+                                       ('Cancelled', 'Cancelled'),
+                                       ('Completed', 'Completed'),
                                        ('In Progress', 'In Progress'),
                                        ('On Hold', 'On Hold'),
-                                       ('Waiting for Resource', 'Waiting for Resource'),
-                                       ('Cancelled', 'Cancelled'),
-                                       ('Completed', 'Completed')))
+                                       ('Waiting for Resource', 'Waiting for Resource')))
     progress = models.CharField(max_length=100,
                                 default='threat_model', editable=False)
     tmodel_path = models.CharField(max_length=1000, default='none',
