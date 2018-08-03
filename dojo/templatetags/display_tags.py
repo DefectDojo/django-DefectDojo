@@ -379,6 +379,7 @@ def notspecified(text):
     else:
         return mark_safe("<em class=\"text-muted\">Not Specified</em>")
 
+
 @register.tag
 def colgroup(parser, token):
     """

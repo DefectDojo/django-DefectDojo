@@ -430,9 +430,9 @@ class Product(models.Model):
     from these fields to their replacements.
     ./manage.py migrate_product_contacts
     '''
-    prod_manager = models.CharField(default=0, max_length=200)  # unused
-    tech_contact = models.CharField(default=0, max_length=200)  # unused
-    manager = models.CharField(default=0, max_length=200)  # unused
+    prod_manager = models.CharField(default=0, max_length=200, null=True, blank=True)  # unused
+    tech_contact = models.CharField(default=0, max_length=200, null=True, blank=True)  # unused
+    manager = models.CharField(default=0, max_length=200, null=True, blank=True)  # unused
 
     product_manager = models.ForeignKey(Dojo_User, null=True, blank=True,
                                         related_name='product_manager')

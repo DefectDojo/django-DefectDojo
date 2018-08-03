@@ -40,7 +40,7 @@ class TagList(list):
             return json.dumps(self)
 
 
-class TagListSerializerField(serializers.Field):
+class TagListSerializerField(serializers.ListField):
     child = serializers.CharField()
     default_error_messages = {
         'not_a_list': _(
@@ -141,15 +141,15 @@ class ProductSerializer(TaggitSerializer, serializers.HyperlinkedModelSerializer
     product_manager = serializers.HyperlinkedRelatedField(
         queryset=User.objects.all(),
         view_name='user-detail',
-        format='html')
+        format='html', required=False)
     technical_contact = serializers.HyperlinkedRelatedField(
         queryset=User.objects.all(),
         view_name='user-detail',
-        format='html')
+        format='html', required=False)
     team_manager = serializers.HyperlinkedRelatedField(
         queryset=User.objects.all(),
         view_name='user-detail',
-        format='html')
+        format='html', required=False)
     authorized_users = serializers.HyperlinkedRelatedField(
         many=True,
         queryset=User.objects.exclude(is_staff=True).exclude(is_active=False),
