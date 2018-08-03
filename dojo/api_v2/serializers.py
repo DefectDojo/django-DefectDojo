@@ -3,15 +3,131 @@ from dojo.models import Product, Engagement_Type, Engagement, Test, Finding, \
     Finding_Template, Test_Type, Development_Environment, Report_Type, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Product_Type, JIRA_Conf, Endpoint, BurpRawRequestResponse, JIRA_PKey, \
-    Notes, Dojo_User
+    Notes, Dojo_User, Regulation
 from dojo.forms import ImportScanForm, SEVERITY_CHOICES
 from dojo.tools.factory import import_parser_factory
 from django.core.validators import URLValidator, validate_ipv46_address
-
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 import datetime
+import six
+from django.utils.translation import ugettext_lazy as _
+import json
+
+
+class TagList(list):
+    def __init__(self, *args, **kwargs):
+        pretty_print = kwargs.pop("pretty_print", True)
+        list.__init__(self, *args, **kwargs)
+        self.pretty_print = pretty_print
+
+    def __add__(self, rhs):
+        return TagList(list.__add__(self, rhs))
+
+    def __getitem__(self, item):
+        result = list.__getitem__(self, item)
+        try:
+            return TagList(result)
+        except TypeError:
+            return result
+
+    def __str__(self):
+        if self.pretty_print:
+            return json.dumps(
+                self, sort_keys=True, indent=4, separators=(',', ': '))
+        else:
+            return json.dumps(self)
+
+
+class TagListSerializerField(serializers.Field):
+    child = serializers.CharField()
+    default_error_messages = {
+        'not_a_list': _(
+            'Expected a list of items but got type "{input_type}".'),
+        'invalid_json': _('Invalid json list. A tag list submitted in string'
+                          ' form must be valid json.'),
+        'not_a_str': _('All list items must be of string type.')
+    }
+    order_by = None
+
+    def __init__(self, **kwargs):
+        pretty_print = kwargs.pop("pretty_print", True)
+
+        style = kwargs.pop("style", {})
+        kwargs["style"] = {'base_template': 'textarea.html'}
+        kwargs["style"].update(style)
+
+        super(TagListSerializerField, self).__init__(**kwargs)
+
+        self.pretty_print = pretty_print
+
+    def to_internal_value(self, value):
+        if isinstance(value, six.string_types):
+            if not value:
+                value = "[]"
+            try:
+                value = json.loads(value)
+            except ValueError:
+                self.fail('invalid_json')
+
+        if not isinstance(value, list):
+            self.fail('not_a_list', input_type=type(value).__name__)
+
+        for s in value:
+            if not isinstance(s, six.string_types):
+                self.fail('not_a_str')
+
+            self.child.run_validation(s)
+
+        return value
+
+    def to_representation(self, value):
+        if not isinstance(value, TagList):
+            if not isinstance(value, list):
+                if self.order_by:
+                    tags = value.all().order_by(*self.order_by)
+                else:
+                    tags = value.all()
+                value = [tag.name for tag in tags]
+            value = TagList(value, pretty_print=self.pretty_print)
+
+        return value
+
+
+class TaggitSerializer(serializers.Serializer):
+    def create(self, validated_data):
+        to_be_tagged, validated_data = self._pop_tags(validated_data)
+
+        tag_object = super(TaggitSerializer, self).create(validated_data)
+
+        return self._save_tags(tag_object, to_be_tagged)
+
+    def update(self, instance, validated_data):
+        to_be_tagged, validated_data = self._pop_tags(validated_data)
+
+        tag_object = super(TaggitSerializer, self).update(
+            instance, validated_data)
+
+        return self._save_tags(tag_object, to_be_tagged)
+
+    def _save_tags(self, tag_object, tags):
+        for key in tags.keys():
+            tag_values = tags.get(key)
+            tag_object.tags = ", ".join(tag_values)
+
+        return tag_object
+
+    def _pop_tags(self, validated_data):
+        to_be_tagged = {}
+
+        for key in self.fields.keys():
+            field = self.fields[key]
+            if isinstance(field, TagListSerializerField):
+                if key in validated_data:
+                    to_be_tagged[key] = validated_data.pop(key)
+
+        return (to_be_tagged, validated_data)
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -20,7 +136,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('url', 'username', 'first_name', 'last_name', 'last_login')
 
 
-class ProductSerializer(serializers.HyperlinkedModelSerializer):
+class ProductSerializer(TaggitSerializer, serializers.HyperlinkedModelSerializer):
     findings_count = serializers.SerializerMethodField()
     product_manager = serializers.HyperlinkedRelatedField(
         queryset=User.objects.all(),
@@ -38,9 +154,12 @@ class ProductSerializer(serializers.HyperlinkedModelSerializer):
         many=True,
         queryset=User.objects.exclude(is_staff=True).exclude(is_active=False),
         view_name='user-detail',
-        format='html')
+        format='html', required=False)
     prod_type = serializers.PrimaryKeyRelatedField(
         queryset=Product_Type.objects.all())
+    regulations = serializers.PrimaryKeyRelatedField(
+        queryset=Regulation.objects.all(), many=True, required=False)
+    tags = TagListSerializerField(required=False)
 
     class Meta:
         model = Product
@@ -51,11 +170,12 @@ class ProductSerializer(serializers.HyperlinkedModelSerializer):
         return obj.findings_count
 
 
-class EngagementSerializer(serializers.HyperlinkedModelSerializer):
+class EngagementSerializer(TaggitSerializer, serializers.HyperlinkedModelSerializer):
     eng_type = serializers.PrimaryKeyRelatedField(
-        queryset=Engagement_Type.objects.all())
+        queryset=Engagement_Type.objects.all(), required=False)
     report_type = serializers.PrimaryKeyRelatedField(
-        queryset=Report_Type.objects.all())
+        queryset=Report_Type.objects.all(), required=False)
+    tags = TagListSerializerField(required=False)
 
     class Meta:
         model = Engagement
@@ -95,7 +215,8 @@ class ToolProductSettingsSerializer(serializers.HyperlinkedModelSerializer):
         fields = '__all__'
 
 
-class EndpointSerializer(serializers.HyperlinkedModelSerializer):
+class EndpointSerializer(TaggitSerializer, serializers.HyperlinkedModelSerializer):
+    tags = TagListSerializerField(required=False)
 
     class Meta:
         model = Endpoint
@@ -204,7 +325,7 @@ class JIRASerializer(serializers.HyperlinkedModelSerializer):
         fields = '__all__'
 
 
-class TestSerializer(serializers.HyperlinkedModelSerializer):
+class TestSerializer(TaggitSerializer, serializers.HyperlinkedModelSerializer):
     engagement = serializers.HyperlinkedRelatedField(
         read_only=True,
         view_name='engagement-detail',
@@ -213,13 +334,17 @@ class TestSerializer(serializers.HyperlinkedModelSerializer):
         queryset=Test_Type.objects.all())
     environment = serializers.PrimaryKeyRelatedField(
         queryset=Development_Environment.objects.all())
+    notes = serializers.PrimaryKeyRelatedField(
+        queryset=Notes.objects.all(),
+        many=True)
+    tags = TagListSerializerField(required=False)
 
     class Meta:
         model = Test
         fields = '__all__'
 
 
-class TestCreateSerializer(serializers.HyperlinkedModelSerializer):
+class TestCreateSerializer(TaggitSerializer, serializers.HyperlinkedModelSerializer):
     test_type = serializers.PrimaryKeyRelatedField(
         queryset=Test_Type.objects.all())
     environment = serializers.PrimaryKeyRelatedField(
@@ -233,6 +358,7 @@ class TestCreateSerializer(serializers.HyperlinkedModelSerializer):
     notes = serializers.PrimaryKeyRelatedField(
         queryset=Notes.objects.all(),
         many=True)
+    tags = TagListSerializerField(required=False)
 
     class Meta:
         model = Test
@@ -245,7 +371,7 @@ class RiskAcceptanceSerializer(serializers.HyperlinkedModelSerializer):
         fields = '__all__'
 
 
-class FindingSerializer(serializers.HyperlinkedModelSerializer):
+class FindingSerializer(TaggitSerializer, serializers.HyperlinkedModelSerializer):
     review_requested_by = serializers.HyperlinkedRelatedField(
         queryset=Dojo_User.objects.all(),
         view_name='user-detail',
@@ -274,6 +400,7 @@ class FindingSerializer(serializers.HyperlinkedModelSerializer):
         source='url',
         read_only=True)
     url = serializers.HyperlinkedIdentityField(view_name='finding-detail')
+    tags = TagListSerializerField(required=False)
 
     class Meta:
         model = Finding
@@ -299,7 +426,7 @@ class FindingSerializer(serializers.HyperlinkedModelSerializer):
         return data
 
 
-class FindingCreateSerializer(serializers.HyperlinkedModelSerializer):
+class FindingCreateSerializer(TaggitSerializer, serializers.HyperlinkedModelSerializer):
     review_requested_by = serializers.HyperlinkedRelatedField(
         queryset=Dojo_User.objects.all(),
         view_name='user-detail',
@@ -330,6 +457,7 @@ class FindingCreateSerializer(serializers.HyperlinkedModelSerializer):
         queryset=Test_Type.objects.all(),
         many=True)
     url = serializers.CharField()
+    tags = TagListSerializerField(required=False)
 
     class Meta:
         model = Finding
@@ -418,7 +546,7 @@ class ScanSerializer(serializers.HyperlinkedModelSerializer):
         fields = '__all__'
 
 
-class ImportScanSerializer(serializers.Serializer):
+class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
     scan_date = serializers.DateField()
     minimum_severity = serializers.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -427,7 +555,6 @@ class ImportScanSerializer(serializers.Serializer):
     verified = serializers.BooleanField(default=True)
     scan_type = serializers.ChoiceField(
         choices=ImportScanForm.SCAN_TYPE_CHOICES)
-    tags = serializers.CharField()
     file = serializers.FileField()
     engagement = serializers.HyperlinkedRelatedField(
         view_name='engagement-detail',
@@ -435,6 +562,7 @@ class ImportScanSerializer(serializers.Serializer):
     lead = serializers.HyperlinkedRelatedField(
         view_name='user-detail',
         queryset=User.objects.all())
+    tags = TagListSerializerField(required=False)
 
     def save(self):
         data = self.validated_data
@@ -456,8 +584,6 @@ class ImportScanSerializer(serializers.Serializer):
             pass
 
         test.save()
-        test.tags = data['tags']
-
         try:
             parser = import_parser_factory(data['file'],
                                            test,
@@ -516,8 +642,8 @@ class ImportScanSerializer(serializers.Serializer):
 
                     item.endpoints.add(ep)
 
-                if item.unsaved_tags is not None:
-                    item.tags = item.unsaved_tags
+                # if item.unsaved_tags is not None:
+                #    item.tags = item.unsaved_tags
         except SyntaxError:
             raise Exception('Parser SyntaxError')
 
@@ -530,7 +656,7 @@ class ImportScanSerializer(serializers.Serializer):
         return value
 
 
-class ReImportScanSerializer(serializers.Serializer):
+class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     scan_date = serializers.DateField()
     minimum_severity = serializers.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -539,7 +665,7 @@ class ReImportScanSerializer(serializers.Serializer):
     verified = serializers.BooleanField(default=True)
     scan_type = serializers.ChoiceField(
         choices=ImportScanForm.SCAN_TYPE_CHOICES)
-    tags = serializers.CharField()
+    tags = TagListSerializerField(required=False)
     file = serializers.FileField()
     test = serializers.HyperlinkedRelatedField(
         view_name='test-detail',
@@ -650,8 +776,8 @@ class ReImportScanSerializer(serializers.Serializer):
                             product=test.engagement.product)
                         finding.endpoints.add(ep)
 
-                    if item.unsaved_tags:
-                        finding.tags = item.unsaved_tags
+                    # if item.unsaved_tags:
+                    #    finding.tags = item.unsaved_tags
 
             to_mitigate = set(original_items) - set(new_items)
             for finding in to_mitigate:

@@ -465,11 +465,23 @@
         <tbody>
           <tr>
             <td style="width: 150px;"><strong>Status</strong></td>
-            <td>{{ eng.status }}</td>
+            <td>
+              {% if eng.status == "Blocked" %}
+              <em class="text-danger">
+              {% elif eng.status == "On Hold" %}
+              <em class="text-warning">
+              {% else %}
+              <em>
+              {% endif %}
+              {{ eng.status }}
+            </em>
+            </td>
           </tr>
           <tr>
             <td><strong>Dates</strong></td>
-            <td>{{ eng.target_start }} - {{ eng.target_end }}</td>
+            <td><a target="#" data-toggle="tooltip" data-placement="bottom" title="{{ eng.target_start|date:"l, jS F Y" }} - {{ eng.target_end|date:"l, jS F Y" }}">
+            {{ eng.target_start|date:"jS F" }} - {{ eng.target_end|date:"jS F" }}
+          </a></td>
           </tr>
           <tr>
             <td><strong>Length</strong></td>
