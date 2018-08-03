@@ -1077,7 +1077,7 @@ def update_issue(find, old_status, push_to_jira):
                 log_jira_alert(
                     "Component not updated, exists in Jira already. Update from Jira instead.",
                     find)
-            else:
+            elif jpkey.component:
                 # Add component to the Jira issue
                 component = [
                     {
