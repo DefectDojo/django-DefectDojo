@@ -143,6 +143,11 @@
                                 {% endif %}
                                 {% if request.user.is_staff %}
                                     <ul class="nav nav-second-level">
+                                      {% if request.user.is_staff %}
+                                        <li>
+                                            <a href="{% url 'new_product' %}"> Add Product</a>
+                                        </li>
+                                      {% endif %}
                                         <li>
                                             <a href="{% url 'product' %}"> All Products</a>
                                         </li>
@@ -408,6 +413,17 @@
                         <li role="presentation">
                             <a href="{% url 'all_tool_product' product_tab.product.id %}">
                                 <i class="fa fa-plus"></i> View Tools
+                            </a>
+                        </li>
+                        <li role="separator" class="divider"></li>
+                        <li role="presentation">
+                            <a href="{% url 'add_engagement_presets' product_tab.product.id %}">
+                                <i class="fa fa-plus"></i> Add Engagement Presets
+                            </a>
+                        </li>
+                        <li role="presentation">
+                            <a href="{% url 'engagement_presets' product_tab.product.id %}">
+                                <i class="fa fa-plus"></i> View Engagement Presets
                             </a>
                         </li>
                         <li role="separator" class="divider"></li>
