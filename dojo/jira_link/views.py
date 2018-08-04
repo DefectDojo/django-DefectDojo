@@ -28,7 +28,7 @@ def webhook(request):
         parsed = json.loads(request.body)
         if 'issue' in parsed.keys():
             jid = parsed['issue']['id']
-            jissue = JIRA_Issue.objects.get(jira_id=jid)
+            jissue = get_object_or_404(JIRA_Issue, jira_id=jid)
             if jissue.finding is not None:
                 finding = jissue.finding
                 resolved = True

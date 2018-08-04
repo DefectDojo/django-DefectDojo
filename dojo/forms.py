@@ -18,7 +18,7 @@ from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
     Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
     JIRA_Issue, JIRA_PKey, JIRA_Conf, UserContactInfo, Tool_Type, Tool_Configuration, Tool_Product_Settings, \
     Cred_User, Cred_Mapping, System_Settings, Notifications, Languages, Language_Type, App_Analysis, Objects, \
-    Benchmark_Product, Benchmark_Requirement, Benchmark_Product_Summary, Rule, Child_Rule
+    Benchmark_Product, Benchmark_Requirement, Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
 
@@ -248,7 +248,7 @@ class ImportScanForm(forms.Form):
                          ("SKF Scan", "SKF Scan"),
                          ("Bandit Scan", "Bandit Scan"),
                          ("SSL Labs Scan", "SSL Labs Scan"),
-                         ("GoAST Scanner", "GoAST Scanner"))
+                         ("Gosec Scanner", "Gosec Scanner"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
 
@@ -512,7 +512,7 @@ class EngForm(forms.ModelForm):
                   "Without a name the target start date will be used in " +
                   "listings.")
     description = forms.CharField(widget=forms.Textarea(attrs={}),
-                                  required=False)
+                                  required=False, help_text="Description of the engagement and details regarding the engagement.")
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False,
                            help_text="Add tags that help describe this engagement.  "
@@ -521,9 +521,6 @@ class EngForm(forms.ModelForm):
         attrs={'class': 'datepicker'}))
     target_end = forms.DateField(widget=forms.TextInput(
         attrs={'class': 'datepicker'}))
-    # threat_model = forms.BooleanField(required=False)
-    # api_test = forms.BooleanField(required=False, label='API Test')
-    # pen_test = forms.BooleanField(required=False)
     lead = forms.ModelChoiceField(
         queryset=User.objects.exclude(is_staff=False),
         required=True, label="Testing Lead")
@@ -531,13 +528,19 @@ class EngForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         cicd = False
+        product = None
         if 'cicd' in kwargs:
             cicd = kwargs.pop('cicd')
+
+        if 'product' in kwargs:
+            product = kwargs.pop('product')
 
         tags = Tag.objects.usage_for_model(Engagement)
         t = [(tag.name, tag.name) for tag in tags]
         super(EngForm, self).__init__(*args, **kwargs)
         self.fields['tags'].widget.choices = t
+        if product:
+            self.fields['preset'] = forms.ModelChoiceField(help_text="Settings and notes for performing this engagement.", required=False, queryset=Engagement_Presets.objects.filter(product=product))
         # Don't show CICD fields on a interactive engagement
         if cicd is False:
             del self.fields['build_id']
@@ -545,7 +548,7 @@ class EngForm(forms.ModelForm):
             del self.fields['branch_tag']
             del self.fields['build_server']
             del self.fields['source_code_management_server']
-            del self.fields['source_code_management_uri']
+            # del self.fields['source_code_management_uri']
             del self.fields['orchestration_engine']
         else:
             del self.fields['test_strategy']
@@ -565,7 +568,7 @@ class EngForm(forms.ModelForm):
 
     class Meta:
         model = Engagement
-        exclude = ('first_contacted', 'version', 'eng_type', 'real_start',
+        exclude = ('first_contacted', 'eng_type', 'real_start',
                    'real_end', 'requester', 'reason', 'updated', 'report_type',
                    'product', 'threat_model', 'api_test', 'pen_test', 'check_list', 'engagement_type')
 
@@ -629,7 +632,7 @@ class DeleteEngagementForm(forms.ModelForm):
                    'product', 'test_strategy', 'threat_model', 'api_test', 'pen_test',
                    'check_list', 'status', 'description', 'engagement_type', 'build_id',
                    'commit_hash', 'branch_tag', 'build_server', 'source_code_management_server',
-                   'source_code_management_uri', 'orchestration_engine']
+                   'source_code_management_uri', 'orchestration_engine', 'preset', 'tracker']
 
 
 class TestForm(forms.ModelForm):
@@ -1599,6 +1602,28 @@ class CredMappingFormProd(forms.ModelForm):
         exclude = ['product', 'finding', 'engagement', 'test']
 
 
+class EngagementPresetsForm(forms.ModelForm):
+
+    notes = forms.CharField(widget=forms.Textarea(attrs={}),
+                                  required=False, help_text="Description of what needs to be tested or setting up environment for testing")
+
+    scope = forms.CharField(widget=forms.Textarea(attrs={}),
+                                  required=False, help_text="Scope of Engagement testing, IP's/Resources/URL's)")
+
+    class Meta:
+        model = Engagement_Presets
+        exclude = ['product']
+
+
+class DeleteEngagementPresetsForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = Engagement_Presets
+        fields = ['id']
+
+
 class SystemSettingsForm(forms.ModelForm):
 
     class Meta:
@@ -1656,6 +1681,7 @@ class DeleteRuleForm(forms.ModelForm):
     class Meta:
         model = Rule
         fields = ('id',)
+
 
 class CredUserForm(forms.ModelForm):
     # selenium_script = forms.FileField(widget=forms.widgets.FileInput(

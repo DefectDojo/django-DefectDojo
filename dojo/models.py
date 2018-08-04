@@ -356,6 +356,9 @@ class Test_Type(models.Model):
     def __unicode__(self):
         return self.name
 
+    class Meta:
+        ordering = ('name',)
+
     def get_breadcrumbs(self):
         bc = [{'title': self.__unicode__(),
                'url': None}]
@@ -427,9 +430,9 @@ class Product(models.Model):
     from these fields to their replacements.
     ./manage.py migrate_product_contacts
     '''
-    prod_manager = models.CharField(default=0, max_length=200)  # unused
-    tech_contact = models.CharField(default=0, max_length=200)  # unused
-    manager = models.CharField(default=0, max_length=200)  # unused
+    prod_manager = models.CharField(default=0, max_length=200, null=True, blank=True)  # unused
+    tech_contact = models.CharField(default=0, max_length=200, null=True, blank=True)  # unused
+    manager = models.CharField(default=0, max_length=200, null=True, blank=True)  # unused
 
     product_manager = models.ForeignKey(Dojo_User, null=True, blank=True,
                                         related_name='product_manager')
@@ -665,26 +668,54 @@ class Tool_Configuration(models.Model):
         return self.name
 
 
+class Network_Locations(models.Model):
+    location = models.CharField(max_length=500, help_text="Location of network testing: Examples: VPN, Internet or Internal.")
+
+    def __unicode__(self):
+        return self.location
+
+
+class Engagement_Presets(models.Model):
+    title = models.CharField(max_length=500, default=None, help_text="Brief description of preset.")
+    test_type = models.ManyToManyField(Test_Type, default=None, blank=True)
+    network_locations = models.ManyToManyField(Network_Locations, default=None, blank=True)
+    notes = models.CharField(max_length=2000, help_text="Description of what needs to be tested or setting up environment for testing", null=True, blank=True)
+    scope = models.CharField(max_length=800, help_text="Scope of Engagement testing, IP's/Resources/URL's)", default=None, blank=True)
+    product = models.ForeignKey(Product)
+    created = models.DateTimeField(auto_now_add=True, null=False)
+
+    def __unicode__(self):
+        return self.title
+
+    class Meta:
+        ordering = ['title']
+
+
 class Engagement_Type(models.Model):
     name = models.CharField(max_length=200)
+
+    def __unicode__(self):
+        return self.name
 
 
 class Engagement(models.Model):
     name = models.CharField(max_length=300, null=True, blank=True)
     description = models.CharField(max_length=2000, null=True, blank=True)
-    version = models.CharField(max_length=100, null=True, blank=True)
+    version = models.CharField(max_length=100, null=True, blank=True, help_text="Version of the product the engagement tested.")
     eng_type = models.ForeignKey(Engagement_Type, null=True, blank=True)
     first_contacted = models.DateField(null=True, blank=True)
     target_start = models.DateField(null=False, blank=False)
     target_end = models.DateField(null=False, blank=False)
     lead = models.ForeignKey(User, editable=True, null=True)
     requester = models.ForeignKey(Contact, null=True, blank=True)
+    preset = models.ForeignKey(Engagement_Presets, null=True, blank=True, help_text="Settings and notes for performing this engagement.")
     reason = models.CharField(max_length=2000, null=True, blank=True)
     report_type = models.ForeignKey(Report_Type, null=True, blank=True)
     product = models.ForeignKey(Product)
     updated = models.DateTimeField(auto_now=True, null=True)
     created = models.DateTimeField(auto_now_add=True, null=True)
     active = models.BooleanField(default=True, editable=False)
+    tracker = models.URLField(max_length=200, help_text="Link to epic or ticket system with changes to version.", editable=True, blank=True, null=True)
     test_strategy = models.URLField(editable=True, blank=True, null=True)
     threat_model = models.BooleanField(default=True)
     api_test = models.BooleanField(default=True)
@@ -692,9 +723,13 @@ class Engagement(models.Model):
     check_list = models.BooleanField(default=True)
     status = models.CharField(editable=True, max_length=2000, default='',
                               null=True,
-                              choices=(('In Progress', 'In Progress'),
+                              choices=(('Not Started', 'Not Started'),
+                                       ('Blocked', 'Blocked'),
+                                       ('Cancelled', 'Cancelled'),
+                                       ('Completed', 'Completed'),
+                                       ('In Progress', 'In Progress'),
                                        ('On Hold', 'On Hold'),
-                                       ('Completed', 'Completed')))
+                                       ('Waiting for Resource', 'Waiting for Resource')))
     progress = models.CharField(max_length=100,
                                 default='threat_model', editable=False)
     tmodel_path = models.CharField(max_length=1000, default='none',
@@ -711,11 +746,11 @@ class Engagement(models.Model):
                                        choices=(('Interactive', 'Interactive'),
                                                 ('CI/CD', 'CI/CD')))
     build_id = models.CharField(editable=True, max_length=150,
-                                   null=True, blank=True, help_text="Build ID for CI/CD test", verbose_name="Build ID")
+                                   null=True, blank=True, help_text="Build ID of the product the engagement tested.", verbose_name="Build ID")
     commit_hash = models.CharField(editable=True, max_length=150,
                                    null=True, blank=True, help_text="Commit hash from repo", verbose_name="Commit Hash")
     branch_tag = models.CharField(editable=True, max_length=150,
-                                   null=True, blank=True, help_text="Tag or branch for CI/CD test", verbose_name="Branch/Tag")
+                                   null=True, blank=True, help_text="Tag or branch of the product the engagement tested.", verbose_name="Branch/Tag")
     build_server = models.ForeignKey(Tool_Configuration, verbose_name="Build Server", help_text="Build server responsible for CI/CD test", null=True, blank=True, related_name='build_server')
     source_code_management_server = models.ForeignKey(Tool_Configuration, null=True, blank=True, verbose_name="SCM Server", help_text="Source code server for CI/CD test", related_name='source_code_management_server')
     source_code_management_uri = models.CharField(max_length=600, null=True, blank=True, verbose_name="Repo", help_text="Resource link to source code")
@@ -1513,6 +1548,14 @@ class JIRA_Issue(models.Model):
     finding = models.OneToOneField(Finding, null=True, blank=True)
     engagement = models.OneToOneField(Engagement, null=True, blank=True)
 
+    def __unicode__(self):
+        text = ""
+        if self.finding:
+            text = self.finding.test.engagement.product.name + " | Finding: " + self.finding.title + ", ID: " + str(self.finding.id)
+        elif self.engagement:
+            text = self.engagement.product.name + " | Engagement: " + self.engagement.name + ", ID: " + str(self.engagement.id)
+        return text + " | Jira Key: " + str(self.jira_key)
+
 
 class JIRA_Clone(models.Model):
     jira_id = models.CharField(max_length=200)
@@ -1969,6 +2012,8 @@ admin.site.register(Benchmark_Product_Summary)
 admin.site.register(Testing_Guide_Category)
 admin.site.register(Testing_Guide)
 
+admin.site.register(Engagement_Presets)
+admin.site.register(Network_Locations)
 admin.site.register(Objects)
 admin.site.register(Objects_Review)
 admin.site.register(Objects_Engagement)
