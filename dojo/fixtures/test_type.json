@@ -146,7 +146,6 @@
     "model": "dojo.test_type",
     "pk": 20
   },
-
   {
     "fields": {
       "name": "Qualys Scan"
