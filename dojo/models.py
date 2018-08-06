@@ -1580,6 +1580,9 @@ class JIRA_PKey(models.Model):
                                                          blank=True)
     push_notes = models.BooleanField(default=False, blank=True)
 
+    def __unicode__(self):
+        return self.product.name + " | " + self.project_key
+
 
 NOTIFICATION_CHOICES = (
     ("slack", "slack"), ("hipchat", "hipchat"), ("mail", "mail"),
