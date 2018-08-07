@@ -239,6 +239,7 @@ class ImportScanForm(forms.Form):
                          ("Dependency Check Scan", "Dependency Check Scan"),
                          ("Retire.js Scan", "Retire.js Scan"),
                          ("Node Security Platform Scan", "Node Security Platform Scan"),
+                         ("NPM Audit Scan", "NPM Audit Scan"),
                          ("Qualys Scan", "Qualys Scan"),
                          ("Qualys Webapp Scan", "Qualys Webapp Scan"),
                          ("OpenVAS CSV", "OpenVAS CSV"),
