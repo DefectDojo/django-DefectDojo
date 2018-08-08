@@ -25,6 +25,7 @@ from dojo.tools.skf.parser import SKFCsvParser
 from dojo.tools.ssllabs.parser import SSLlabsParser
 from dojo.tools.nikto.parser import NiktoXMLParser
 from dojo.tools.trufflehog.parser import TruffleHogJSONParser
+from dojo.tools.clair.parser import ClairParser
 
 __author__ = 'Jay Paz'
 
@@ -42,6 +43,8 @@ def import_parser_factory(file, test, scan_type=None):
             parser = NessusCSVParser(file, test)
         elif filename.endswith("xml") or filename.endswith("nessus"):
             parser = NessusXMLParser(file, test)
+    elif scan_type == "Clair Scan":
+        parser = ClairParser(file, test)
     elif scan_type == "Nmap Scan":
         parser = NmapXMLParser(file, test)
     elif scan_type == "Nikto Scan":
