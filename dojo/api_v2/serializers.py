@@ -339,6 +339,8 @@ class TestCreateSerializer(TaggitSerializer, serializers.HyperlinkedModelSeriali
         view_name='engagement-detail',
         format='html')
     notes = serializers.PrimaryKeyRelatedField(
+        allow_null=True,
+        default=[],
         queryset=Notes.objects.all(),
         many=True)
     tags = TagListSerializerField(required=False)
@@ -402,16 +404,20 @@ class FindingCreateSerializer(TaggitSerializer, serializers.HyperlinkedModelSeri
     notes = serializers.SlugRelatedField(
         read_only=True,
         slug_field='entry',
+        allow_null=True,
+        default=[],
         many=True)
     test = serializers.HyperlinkedRelatedField(
         queryset=Test.objects.all(),
         view_name='test-detail',
         format='html')
-    thread_id = serializers.IntegerField()
+    thread_id = serializers.IntegerField(default=0)
     found_by = serializers.PrimaryKeyRelatedField(
         queryset=Test_Type.objects.all(),
         many=True)
-    url = serializers.CharField()
+    url = serializers.CharField(
+        allow_null=True,
+        default=None)
     tags = TagListSerializerField(required=False)
 
     class Meta:
@@ -523,6 +529,8 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         queryset=Engagement.objects.all())
     lead = serializers.HyperlinkedRelatedField(
         view_name='user-detail',
+        allow_null=True,
+        default=None,
         queryset=User.objects.all())
     tags = TagListSerializerField(required=False)
 
