@@ -119,10 +119,8 @@
                             {% endif %}
                             <th>Reporter</th>
                             <th>Found By</th>
-                            {% if "enable_jira"|get_system_setting %}
-                            <th class="nowrap">Jira</th>
-                            {% endif %}
                             <th>Status</th>
+                            <th></th>
                             {% if show_product_column and product_tab is None %}
                             <th class="nowrap">{% dojo_sort request 'Product' 'test__engagement__product__name'%}</th>
                             {% endif %}
@@ -281,12 +279,19 @@
                                 <td>
                                      {{ finding.get_found_by }}
                                 </td>
-                                {% if "enable_jira"|get_system_setting %}
-                                <td>
-                                <a href="{{finding.jira_conf.url}}/browse/{{finding.jira.jira_key}}" target="_blank"> {{finding.jira.jira_key}} </a>
-                                </td>
-                                {% endif %}
                                 <td>{% if finding.under_review %}Under Review, {% endif %}{{ finding.status }}{% if finding.duplicate_finding.id %}, <a href="{% url 'view_finding' finding.duplicate_finding.id%}" data-toggle="tooltip" data-placement="top" title="{{ finding.title }}, {{ finding.created }}">Original</a>
+                                  {% endif %}
+                                </td>
+                                <td class="nowrap">
+                                  {% if "enable_jira"|get_system_setting %}
+                                    {% if finding.jira.jira_key %}
+                                      <a href="{{finding.jira_conf.url}}/browse/{{finding.jira.jira_key}}" target="_blank" alt="Jira Bug - {{finding.jira.jira_key}}"><i class="fa fa-bug fa-fw"></i></a>
+                                    {% endif %}
+                                    {% if finding.notes.count %}
+                                      <a href="{% url 'view_finding' finding.id %}#vuln_notes" alt="{{ finding.notes.count }} comment{{ finding.notes.count|pluralize }}">
+                                        <span class="glyphicon glyphicon-comment"></span> {{ finding.notes.count }}
+                                      </a>
+                                    {% endif %}
                                   {% endif %}
                                 </td>
                                 {% if show_product_column and product_tab is None %}
