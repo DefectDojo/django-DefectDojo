@@ -138,23 +138,6 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
 class ProductSerializer(TaggitSerializer, serializers.HyperlinkedModelSerializer):
     findings_count = serializers.SerializerMethodField()
-    product_manager = serializers.HyperlinkedRelatedField(
-        queryset=User.objects.all(),
-        view_name='user-detail',
-        format='html', required=False)
-    technical_contact = serializers.HyperlinkedRelatedField(
-        queryset=User.objects.all(),
-        view_name='user-detail',
-        format='html', required=False)
-    team_manager = serializers.HyperlinkedRelatedField(
-        queryset=User.objects.all(),
-        view_name='user-detail',
-        format='html', required=False)
-    authorized_users = serializers.HyperlinkedRelatedField(
-        many=True,
-        queryset=User.objects.exclude(is_staff=True).exclude(is_active=False),
-        view_name='user-detail',
-        format='html', required=False)
     prod_type = serializers.PrimaryKeyRelatedField(
         queryset=Product_Type.objects.all())
     regulations = serializers.PrimaryKeyRelatedField(
@@ -165,6 +148,12 @@ class ProductSerializer(TaggitSerializer, serializers.HyperlinkedModelSerializer
         model = Product
         exclude = ('tid', 'manager', 'prod_manager', 'tech_contact',
                    'updated')
+        extra_kwargs = {
+            'product_manager': {'view_name': 'user-detail'},
+            'technical_contact': {'view_name': 'user-detail'},
+            'team_manager': {'view_name': 'user-detail'},
+            'authorized_users': {'queryset': User.objects.exclude(is_staff=True).exclude(is_active=False)}
+        }
 
     def get_findings_count(self, obj):
         return obj.findings_count
@@ -326,10 +315,6 @@ class JIRASerializer(serializers.HyperlinkedModelSerializer):
 
 
 class TestSerializer(TaggitSerializer, serializers.HyperlinkedModelSerializer):
-    engagement = serializers.HyperlinkedRelatedField(
-        read_only=True,
-        view_name='engagement-detail',
-        format='html')
     test_type = serializers.PrimaryKeyRelatedField(
         queryset=Test_Type.objects.all())
     environment = serializers.PrimaryKeyRelatedField(
@@ -353,8 +338,6 @@ class TestCreateSerializer(TaggitSerializer, serializers.HyperlinkedModelSeriali
         queryset=Engagement.objects.all(),
         view_name='engagement-detail',
         format='html')
-    estimated_time = serializers.TimeField()
-    actual_time = serializers.TimeField()
     notes = serializers.PrimaryKeyRelatedField(
         queryset=Notes.objects.all(),
         many=True)
@@ -372,23 +355,6 @@ class RiskAcceptanceSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class FindingSerializer(TaggitSerializer, serializers.HyperlinkedModelSerializer):
-    review_requested_by = serializers.HyperlinkedRelatedField(
-        queryset=Dojo_User.objects.all(),
-        view_name='user-detail',
-        format='html')
-    reviewers = serializers.HyperlinkedRelatedField(
-        queryset=Dojo_User.objects.all(),
-        view_name='user-detail',
-        format='html',
-        many=True)
-    reporter = serializers.HyperlinkedRelatedField(
-        read_only=True,
-        view_name='user-detail',
-        format='html')
-    defect_review_requested_by = serializers.HyperlinkedRelatedField(
-        queryset=Dojo_User.objects.all(),
-        view_name='user-detail',
-        format='html')
     notes = serializers.SlugRelatedField(
         read_only=True,
         slug_field='entry',
@@ -405,6 +371,12 @@ class FindingSerializer(TaggitSerializer, serializers.HyperlinkedModelSerializer
     class Meta:
         model = Finding
         fields = '__all__'
+        extra_kwargs = {
+            'review_requested_by': {'view_name': 'user-detail'},
+            'reviewers': {'view_name': 'user-detail'},
+            'reporter': {'view_name': 'user-detail'},
+            'defect_review_requested_by': {'view_name': 'user-detail'},
+        }
 
     def validate(self, data):
         if self.context['request'].method == 'PATCH':
@@ -427,19 +399,6 @@ class FindingSerializer(TaggitSerializer, serializers.HyperlinkedModelSerializer
 
 
 class FindingCreateSerializer(TaggitSerializer, serializers.HyperlinkedModelSerializer):
-    review_requested_by = serializers.HyperlinkedRelatedField(
-        queryset=Dojo_User.objects.all(),
-        view_name='user-detail',
-        format='html')
-    reviewers = serializers.HyperlinkedRelatedField(
-        queryset=Dojo_User.objects.all(),
-        view_name='user-detail',
-        format='html',
-        many=True)
-    defect_review_requested_by = serializers.HyperlinkedRelatedField(
-        queryset=Dojo_User.objects.all(),
-        view_name='user-detail',
-        format='html')
     notes = serializers.SlugRelatedField(
         read_only=True,
         slug_field='entry',
@@ -449,10 +408,6 @@ class FindingCreateSerializer(TaggitSerializer, serializers.HyperlinkedModelSeri
         view_name='test-detail',
         format='html')
     thread_id = serializers.IntegerField()
-    reporter = serializers.HyperlinkedRelatedField(
-        queryset=Dojo_User.objects.all(),
-        format='html',
-        view_name='user-detail')
     found_by = serializers.PrimaryKeyRelatedField(
         queryset=Test_Type.objects.all(),
         many=True)
@@ -462,6 +417,13 @@ class FindingCreateSerializer(TaggitSerializer, serializers.HyperlinkedModelSeri
     class Meta:
         model = Finding
         fields = '__all__'
+        extra_kwargs = {
+            'review_requested_by': {'view_name': 'user-detail'},
+            'reporter': {
+                'default': serializers.CurrentUserDefault()
+            },
+            'defect_review_requested_by': {'view_name': 'user-detail'},
+        }
 
     def validate(self, data):
         if ((data['active'] or data['verified']) and data['duplicate']):
@@ -486,9 +448,6 @@ class StubFindingSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class StubFindingCreateSerializer(serializers.HyperlinkedModelSerializer):
-    reporter = serializers.HyperlinkedRelatedField(
-        queryset=User.objects.all(),
-        view_name='user-detail')
     test = serializers.HyperlinkedRelatedField(
         queryset=Test.objects.all(),
         view_name='test-detail')
@@ -496,6 +455,9 @@ class StubFindingCreateSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Stub_Finding
         fields = '__all__'
+        extra_kwargs = {
+            'reporter': {'default': serializers.CurrentUserDefault()},
+        }
 
 
 class ScanSettingsSerializer(serializers.HyperlinkedModelSerializer):
