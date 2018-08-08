@@ -80,7 +80,7 @@ class System_Settings(models.Model):
                                       verbose_name='Enable JIRA integration',
                                       blank=False)
     enable_jira_web_hook = models.BooleanField(default=False,
-                                      verbose_name='Enable JIRA web hook. Please note: It is recommended the Jira server is whitelisted against this endpoint using a proxy such as Nginx.',
+                                      verbose_name='Enable JIRA web hook. Please note: It is strongly recommended to whitelist the Jira server using a proxy such as Nginx.',
                                       blank=False)
     jira_choices = (('Critical', 'Critical'),
                     ('High', 'High'),
