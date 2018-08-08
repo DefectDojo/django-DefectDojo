@@ -144,7 +144,6 @@ class FindingsTest(BaseClass.RESTEndpointTest):
             "test": "http://testserver/api/v2/tests/3/",
             "url": "http://www.example.com",
             "thread_id": 1,
-            "reporter": "http://testserver/api/v2/users/2/",
             "found_by": [],
             "title": "DUMMY FINDING",
             "date": "2017-12-31",
