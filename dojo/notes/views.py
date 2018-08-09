@@ -12,7 +12,7 @@ from django.core.exceptions import PermissionDenied
 
 # Local application/library imports
 from dojo.forms import DeleteNoteForm
-from dojo.models import User, Notes, Test, Finding
+from dojo.models import Notes, Test, Finding
 
 logger = logging.getLogger(__name__)
 
