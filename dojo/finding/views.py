@@ -839,22 +839,6 @@ def apply_template_to_finding(request, fid, tid):
 
 
 @user_passes_test(lambda u: u.is_staff)
-def delete_finding_note(request, tid, nid):
-    note = get_object_or_404(Notes, id=nid)
-    if note.author == request.user:
-        finding = get_object_or_404(Finding, id=tid)
-        finding.notes.remove(note)
-        note.delete()
-        messages.add_message(
-            request,
-            messages.SUCCESS,
-            'Note removed.',
-            extra_tags='alert-success')
-        return view_finding(request, tid)
-    return HttpResponseForbidden()
-
-
-@user_passes_test(lambda u: u.is_staff)
 def add_stub_finding(request, tid):
     test = get_object_or_404(Test, id=tid)
     form = StubFindingForm()
