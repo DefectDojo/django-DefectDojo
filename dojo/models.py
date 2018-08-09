@@ -79,6 +79,9 @@ class System_Settings(models.Model):
     enable_jira = models.BooleanField(default=False,
                                       verbose_name='Enable JIRA integration',
                                       blank=False)
+    enable_jira_web_hook = models.BooleanField(default=False,
+                                      verbose_name='Enable JIRA web hook. Please note: It is strongly recommended to whitelist the Jira server using a proxy such as Nginx.',
+                                      blank=False)
     jira_choices = (('Critical', 'Critical'),
                     ('High', 'High'),
                     ('Medium', 'Medium'),
@@ -1579,6 +1582,9 @@ class JIRA_PKey(models.Model):
     enable_engagement_epic_mapping = models.BooleanField(default=False,
                                                          blank=True)
     push_notes = models.BooleanField(default=False, blank=True)
+
+    def __unicode__(self):
+        return self.product.name + " | " + self.project_key
 
 
 NOTIFICATION_CHOICES = (
