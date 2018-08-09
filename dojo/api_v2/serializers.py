@@ -152,6 +152,12 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
         return obj.findings_count
 
 
+class ProductTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product_Type
+        fields = '__all__'
+
+
 class EngagementSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
 
