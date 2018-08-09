@@ -239,6 +239,7 @@ class ImportScanForm(forms.Form):
                          ("Dependency Check Scan", "Dependency Check Scan"),
                          ("Retire.js Scan", "Retire.js Scan"),
                          ("Node Security Platform Scan", "Node Security Platform Scan"),
+                         ("NPM Audit Scan", "NPM Audit Scan"),
                          ("Qualys Scan", "Qualys Scan"),
                          ("Qualys Webapp Scan", "Qualys Webapp Scan"),
                          ("OpenVAS CSV", "OpenVAS CSV"),
@@ -248,7 +249,8 @@ class ImportScanForm(forms.Form):
                          ("SKF Scan", "SKF Scan"),
                          ("Bandit Scan", "Bandit Scan"),
                          ("SSL Labs Scan", "SSL Labs Scan"),
-                         ("Gosec Scanner", "Gosec Scanner"))
+                         ("Gosec Scanner", "Gosec Scanner"),
+                         ("Clair Scan", "Clair Scan"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
 

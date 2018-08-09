@@ -279,7 +279,7 @@ class Contact(models.Model):
 
 
 class Product_Type(models.Model):
-    name = models.CharField(max_length=300)
+    name = models.CharField(max_length=300, unique=True)
     critical_product = models.BooleanField(default=False)
     key_product = models.BooleanField(default=False)
     updated = models.DateTimeField(auto_now=True, null=True)
@@ -352,7 +352,7 @@ class Report_Type(models.Model):
 
 
 class Test_Type(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, unique=True)
     static_tool = models.BooleanField(default=False)
     dynamic_tool = models.BooleanField(default=False)
 
@@ -421,7 +421,7 @@ class Product(models.Model):
         (NONE_CRITICALITY, _('None')),
     )
 
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=4000)
 
     '''
@@ -761,6 +761,7 @@ class Engagement(models.Model):
 
     class Meta:
         ordering = ['-target_start']
+        unique_together = ('name', 'target_start', 'product')
 
     def __unicode__(self):
         return "Engagement: %s (%s)" % (self.name if self.name else '',
@@ -800,7 +801,7 @@ class Endpoint(models.Model):
     path = models.CharField(null=True, blank=True, max_length=500,
                             help_text="The location of the resource, it should start with a '/'. For example"
                                       "/endpoint/420/edit")
-    query = models.CharField(null=True, blank=True, max_length=5000,
+    query = models.CharField(null=True, blank=True, max_length=1000,
                              help_text="The query string, the question mark should be omitted."
                                        "For example 'group=4&team=8'")
     fragment = models.CharField(null=True, blank=True, max_length=500,
@@ -812,6 +813,7 @@ class Endpoint(models.Model):
 
     class Meta:
         ordering = ['product', 'protocol', 'host', 'path', 'query', 'fragment']
+        unique_together = ('protocol', 'host', 'path', 'query', 'fragment', 'product')
 
     def __unicode__(self):
         from urlparse import uses_netloc
@@ -1546,7 +1548,7 @@ class JIRA_Conf(models.Model):
 
 
 class JIRA_Issue(models.Model):
-    jira_id = models.CharField(max_length=200)
+    jira_id = models.CharField(max_length=200, unique=True)
     jira_key = models.CharField(max_length=200)
     finding = models.OneToOneField(Finding, null=True, blank=True)
     engagement = models.OneToOneField(Engagement, null=True, blank=True)
