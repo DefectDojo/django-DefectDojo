@@ -97,7 +97,7 @@ else
       echo
       #Start gunicorn
       cd $DOJO_ROOT_DIR
-      gunicorn --env DJANGO_SETTINGS_MODULE=dojo.settings dojo.wsgi:application --bind 0.0.0.0:$PORT --workers 3 & celery -A dojo worker -l info --concurrency 3
+      gunicorn --env DJANGO_SETTINGS_MODULE=dojo.settings.settings dojo.wsgi:application --bind 0.0.0.0:$PORT --workers 3 & celery -A dojo worker -l info --concurrency 3
     else
       echo "MySQL server is down or dojo can't access mysql"
       echo "Exiting startup script..."

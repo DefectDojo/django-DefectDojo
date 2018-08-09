@@ -2,7 +2,7 @@ import json
 from dojo.models import Finding
 
 
-class GoastScannerParser(object):
+class GosecScannerParser(object):
     def __init__(self, filename, test):
         data = json.load(filename)
         dupes = dict()
@@ -18,7 +18,7 @@ class GoastScannerParser(object):
             group = ''
             status = ''
 
-            title = item["details"] + "- " + item["rule_id"]
+            title = item["details"] + "-" + item["rule_id"]
 
 #           Finding details information
             findingdetail += "Filename: " + item["file"] + "\n"
