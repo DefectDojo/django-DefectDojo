@@ -201,10 +201,10 @@
     },
     "model": "dojo.test_type",
     "pk": 29
-  }
+  },
     {
       "fields": {
-	"name": "GoAST Scanner"
+	"name": "Gosec Scanner"
       },
       "model": "dojo.test_type",
       "pk":28
