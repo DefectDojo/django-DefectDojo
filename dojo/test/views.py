@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.db.models import Q
-from django.http import HttpResponseRedirect, HttpResponseForbidden, Http404, HttpResponse
+from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.cache import cache_page
 from django.utils import timezone
@@ -145,21 +145,6 @@ def delete_test(request, tid):
                    'rels': rels,
                    'deletable_objects': rels,
                    })
-
-
-@user_passes_test(lambda u: u.is_staff)
-def delete_test_note(request, tid, nid):
-    note = Notes.objects.get(id=nid)
-    test = Test.objects.get(id=tid)
-    if note.author == request.user:
-        test.notes.remove(note)
-        note.delete()
-        messages.add_message(request,
-                             messages.SUCCESS,
-                             'Note removed.',
-                             extra_tags='alert-success')
-        return view_test(request, tid)
-    return HttpResponseForbidden()
 
 
 @user_passes_test(lambda u: u.is_staff)
