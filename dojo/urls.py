@@ -48,6 +48,7 @@ from dojo.notifications.urls import urlpatterns as notifications_urls
 from dojo.object.urls import urlpatterns as object_urls
 from dojo.benchmark.urls import urlpatterns as benchmark_urls
 from dojo.rules.urls import urlpatterns as rule_urls
+from dojo.notes.urls import urlpatterns as notes_urls
 
 admin.autodiscover()
 
@@ -126,6 +127,7 @@ ur += notifications_urls
 ur += object_urls
 ur += benchmark_urls
 ur += rule_urls
+ur += notes_urls
 
 swagger_urls = [
     url(r'^$', SwaggerView.as_view(), name='index'),

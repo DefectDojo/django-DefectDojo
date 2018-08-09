@@ -146,12 +146,6 @@
                         </td>
                         <td>
                             {{ note }}
-                            {% ifequal person note.author.username %}
-                                <a href="{% url 'delete_test_note' test.id note.id %}" class="btn btn-danger btn-xs"
-                                   title="Delete">
-                                    <i class="fa fa-trash" aria-hidden="true"></i>
-                                </a>
-                            {% endifequal %}
                         </td>
                     </tr>
                 {% endfor %}

@@ -1153,7 +1153,7 @@ class EndpointMetaDataForm(forms.ModelForm):
 
 
 class NoteForm(forms.ModelForm):
-    entry = forms.CharField(max_length=2400, widget=forms.Textarea,
+    entry = forms.CharField(max_length=2400, widget=forms.Textarea(attrs={'rows': 4, 'cols': 15}),
                             label='Notes:')
 
     class Meta:
@@ -1317,6 +1317,15 @@ class AddDojoUserForm(forms.ModelForm):
                   'is_staff', 'is_superuser']
         exclude = ['password', 'last_login', 'groups',
                    'date_joined', 'user_permissions']
+
+
+class DeleteNoteForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = Notes
+        fields = ('id',)
 
 
 class DeleteUserForm(forms.ModelForm):
