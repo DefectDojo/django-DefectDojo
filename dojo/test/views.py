@@ -6,7 +6,7 @@ from datetime import datetime
 
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404, HttpResponse
@@ -204,6 +204,20 @@ def add_findings(request, tid):
 
     if request.method == 'POST':
         form = AddFindingForm(request.POST)
+        if form['active'].value() is False or form['verified'].value() is False and 'jiraform-push_to_jira' in request.POST:
+            error = ValidationError('Findings must be active and verified to be pushed to JIRA',
+                                    code='not_active_or_verified')
+            if form['active'].value() is False:
+                form.add_error('active', error)
+            if form['verified'].value() is False:
+                form.add_error('verified', error)
+            messages.add_message(request,
+                                 messages.ERROR,
+                                 'Findings must be active and verified to be pushed to JIRA',
+                                 extra_tags='alert-danger')
+        if form['severity'].value() == 'Info' and 'jiraform-push_to_jira' in request.POST:
+            error = ValidationError('Findings with Informational severity cannot be pushed to JIRA.',
+                                    code='info-severity-to-jira')
         if form.is_valid():
             new_finding = form.save(commit=False)
             new_finding.test = test
