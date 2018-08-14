@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from django.db.models import Count, Q
+from django.db.models import Count
 
 from dojo.models import Product, Product_Type, Tool_Type, JIRA_Issue
 
