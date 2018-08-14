@@ -761,7 +761,6 @@ class Engagement(models.Model):
 
     class Meta:
         ordering = ['-target_start']
-        unique_together = ('name', 'target_start', 'product')
 
     def __unicode__(self):
         return "Engagement: %s (%s)" % (self.name if self.name else '',
@@ -813,7 +812,6 @@ class Endpoint(models.Model):
 
     class Meta:
         ordering = ['product', 'protocol', 'host', 'path', 'query', 'fragment']
-        unique_together = ('protocol', 'host', 'path', 'query', 'fragment', 'product')
 
     def __unicode__(self):
         from urlparse import uses_netloc
