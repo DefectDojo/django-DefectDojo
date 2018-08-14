@@ -792,19 +792,19 @@ class Endpoint_Params(models.Model):
 class Endpoint(models.Model):
     protocol = models.CharField(null=True, blank=True, max_length=10,
                                 help_text="The communication protocol such as 'http', 'ftp', etc.")
-    host = models.CharField(null=True, blank=True, max_length=500,
+    host = models.CharField(null=True, blank=True, max_length=200,
                             help_text="The host name or IP address, you can also include the port number. For example"
                                       "'127.0.0.1', '127.0.0.1:8080', 'localhost', 'yourdomain.com'.")
-    fqdn = models.CharField(null=True, blank=True, max_length=500)
+    fqdn = models.CharField(null=True, blank=True, max_length=200)
     port = models.IntegerField(null=True, blank=True,
                                help_text="The network port associated with the endpoint.")
-    path = models.CharField(null=True, blank=True, max_length=500,
+    path = models.CharField(null=True, blank=True, max_length=250,
                             help_text="The location of the resource, it should start with a '/'. For example"
                                       "/endpoint/420/edit")
-    query = models.CharField(null=True, blank=True, max_length=1000,
+    query = models.CharField(null=True, blank=True, max_length=250,
                              help_text="The query string, the question mark should be omitted."
                                        "For example 'group=4&team=8'")
-    fragment = models.CharField(null=True, blank=True, max_length=500,
+    fragment = models.CharField(null=True, blank=True, max_length=100,
                                 help_text="The fragment identifier which follows the hash mark. The hash mark should "
                                           "be omitted. For example 'section-13', 'paragraph-2'.")
     product = models.ForeignKey(Product, null=True, blank=True, )
