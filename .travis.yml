@@ -17,7 +17,6 @@ matrix:
     - env: TEST=smoke-test
     - env: TEST=bandit
     - env: TEST=sourceclear
-    - env: TEST=flake8-complete
 
 services:
   - docker
