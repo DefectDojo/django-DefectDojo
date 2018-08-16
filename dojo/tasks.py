@@ -231,7 +231,7 @@ def add_issue_task(find, push_to_jira):
 
 @task(name='update_issue_task')
 def update_issue_task(find, old_status, push_to_jira):
-    logger.info("add issue task")
+    logger.info("update issue task")
     update_issue(find, old_status, push_to_jira)
 
 
