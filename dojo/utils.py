@@ -982,7 +982,7 @@ def add_issue(find, push_to_jira):
                             ],
                             description=jira_long_description(
                                 find.long_desc(), find.id,
-                                jira_conf.finding_ftext),
+                                jira_conf.finding_text),
                             issuetype={'name': jira_conf.default_issue_type},
                             priority={
                                 'name': jira_conf.get_priority(find.severity)
