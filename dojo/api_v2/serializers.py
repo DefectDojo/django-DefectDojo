@@ -493,6 +493,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
             pass
 
         test.save()
+        test.tags = u' '.join(data['tags'])
         try:
             parser = import_parser_factory(data['file'],
                                            test,
