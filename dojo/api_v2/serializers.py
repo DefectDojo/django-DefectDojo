@@ -456,7 +456,7 @@ class ScanSerializer(serializers.ModelSerializer):
 
 
 class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
-    scan_date = serializers.DateField()
+    scan_date = serializers.DateField(default=datetime.date.today)
     minimum_severity = serializers.ChoiceField(
         choices=SEVERITY_CHOICES,
         default='Info')
@@ -493,6 +493,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
             pass
 
         test.save()
+        test.tags = u' '.join(data['tags'])
         try:
             parser = import_parser_factory(data['file'],
                                            test,
