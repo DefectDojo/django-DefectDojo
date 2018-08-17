@@ -1262,10 +1262,10 @@ class DateRangeMetrics(forms.Form):
 class MetricsFilterForm(forms.Form):
     start_date = forms.DateField(required=False,
                                  label="To",
-                                 widget=forms.TextInput(attrs={'class':'datepicker', 'autocomplete': 'off'}))
+                                 widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     end_date = forms.DateField(required=False,
                                label="From",
-                               widget=forms.TextInput(attrs={'class':'datepicker', 'autocomplete': 'off'}))
+                               widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     finding_status = forms.MultipleChoiceField(
         required=False,
         widget=forms.CheckboxSelectMultiple,
