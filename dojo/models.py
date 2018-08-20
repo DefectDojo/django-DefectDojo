@@ -1045,11 +1045,11 @@ class Finding(models.Model):
         hash_string = self.title + str(self.cwe) + str(self.line) + str(self.file_path)
 
         if self.dynamic_finding:
-            endpoint_str = ""
+            endpoint_str = u''
             for e in self.endpoints.all():
                 endpoint_str += str(e)
             hash_string = endpoint_str
-        hash_string = hash_string.decode('utf-8').strip()
+        hash_string = hash_string.strip()
         return hashlib.sha256(hash_string.encode('utf-8')).hexdigest()
 
     def duplicate_finding_set(self):
