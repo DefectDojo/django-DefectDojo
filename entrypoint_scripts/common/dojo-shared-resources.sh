@@ -329,11 +329,11 @@ function install_os_dependencies() {
     BREW_CMD=$(which brew)
 
     if [[ ! -z "$YUM_CMD" ]]; then
-        sudo yum install wget epel-release
+        sudo yum install -y wget epel-release
         curl -sL https://rpm.nodesource.com/setup | sudo bash -
         sudo wget https://dl.yarnpkg.com/rpm/yarn.repo -O /etc/yum.repos.d/yarn.repo
-        sudo yum install gcc python-devel python-setuptools python-pip nodejs yarn wkhtmltopdf
-        sudo yum groupinstall 'Development Tools'
+        sudo yum install -y gcc python-devel python-setuptools python-pip nodejs yarn wkhtmltopdf
+        sudo yum groupinstall -y 'Development Tools'
     elif [[ ! -z "$APT_GET_CMD" ]]; then
         sudo apt-get install -y curl apt-transport-https
         #Yarn
@@ -360,10 +360,10 @@ function install_db() {
     if [[ ! -z "$YUM_CMD" ]]; then
         if [ "$DBTYPE" == $MYSQL ]; then
             echo "Installing MySQL client (and server if not already installed)"
-            sudo yum install mariadb-server mysql-devel
+            sudo yum install -y mariadb-server mysql-devel
         elif [ "$DBTYPE" == $POSTGRES ]; then
             echo "Installing Postgres client (and server if not already installed)"
-            sudo yum install postgresql-devel postgresql postgresql-contrib 
+            sudo yum install -y postgresql-devel postgresql postgresql-contrib
         fi
     elif [[ ! -z "$APT_GET_CMD" ]]; then
         if [ "$DBTYPE" == $MYSQL ]; then
