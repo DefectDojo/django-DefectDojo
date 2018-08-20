@@ -3,6 +3,7 @@
 {% load humanize %}
 {% load static from staticfiles %}
 {% block content %}
+<div id="test">
     <div class="panel panel-default">
         <div class="panel-heading">
             <div class="clearfix">
@@ -489,22 +490,22 @@
             </div>
         </div>
 
-        <div class="panel panel-default">
+        <div class="panel panel-default" id="steps">
             <div class="panel-heading">
-                <h4>Steps To Reproduce <span class="pull-right"><a data-toggle="collapse" href="#vuln_refs"><i
+                <h4>Steps To Reproduce <span class="pull-right"><a data-toggle="collapse" href="#vuln_reproduce"><i
                         class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
             </div>
-            <div id="vuln_refs" class="panel-body collapse in">
+            <div id="vuln_reproduce" class="panel-body collapse in">
                 <pre>{{ finding.steps_to_reproduce|markdown_render|default_if_none:"" }}</pre>
             </div>
         </div>
 
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h4>Severity Justification <span class="pull-right"><a data-toggle="collapse" href="#vuln_refs"><i
+                <h4>Severity Justification <span class="pull-right"><a data-toggle="collapse" href="#sev_just"><i
                         class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
             </div>
-            <div id="vuln_refs" class="panel-body collapse in">
+            <div id="sev_just" class="panel-body collapse in">
                 <pre>{{ finding.severity_justification|markdown_render|default_if_none:"" }}</pre>
             </div>
         </div>
@@ -629,58 +630,8 @@
         {% endif %}
     </div>
 
-    <div class="panel panel-default to_highlight table-responsive">
-        <div class="panel-heading">
-            <h4>Notes <span class="pull-right"><a data-toggle="collapse" href="#vuln_notes"><i
-                    class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
-        </div>
-        <div id="vuln_notes" class="panel-body collapse in">
-            {% if notes %}
-                <table id="notes" class="tablesorter-bootstrap table table-condensed table-striped">
-                    <thead>
-                    <tr>
-                        <th>User</th>
-                        <th>Date</th>
-                        <th>Note</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for note in notes %}
-                        <tr>
-                            <td>
-                                {{ note.author.username }}
-                            </td>
-                            <td>
-                                {{ note.date }}
-                            </td>
-                            <td>
-                                {{ note }}
-                                {% ifequal user.username note.author.username %}
-                                    <a href="{% url 'delete_finding_note' finding.id note.id %}"
-                                       class="btn btn-danger btn-xs" title="Delete">
-                                        <i class="fa fa-trash" aria-hidden="true"></i>
-                                    </a>
-                                {% endifequal %}
-                            </td>
-                        </tr>
-                    {% endfor %}
+    {% include "dojo/snippets/comments.html" with notes=notes object=finding destination="finding" %}
 
-                    </tbody>
-                </table>
-            {% else %}
-                <p class="text-center">No notes saved.</p>
-            {% endif %}
-            <hr/>
-            <form class="form-horizontal" action="{% url 'view_finding' finding.id %}" method="post">{% csrf_token %}
-                {% include "dojo/form_fields.html" with form=form %}
-                <div class="form-group">
-                    <div class="col-sm-offset-2 col-sm-10">
-                        <input class="btn" type="submit" value="Add Note"/>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
     <div class="protip">
        <i class="fa fa-lightbulb-o"></i> <strong>ProTip!</strong> Type <kbd>e</kbd> to edit any finding.
     </div>
@@ -703,6 +654,7 @@
         }
 
         $(document).ready(function () {
+            new ClipboardJS('.btn');
             //Ensures dropdown has proper zindex
             $('.table-responsive').on('show.bs.dropdown', function () {
               $('.table-responsive').css( "overflow", "inherit" );
