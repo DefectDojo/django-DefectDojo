@@ -21,7 +21,7 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     JiraIssuesViewSet, JiraViewSet, ProductViewSet, ScanSettingsViewSet, \
     ScansViewSet, StubFindingsViewSet, TestsViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
-    UsersViewSet, ImportScanView, ReImportScanView
+    UsersViewSet, ImportScanView, ReImportScanView, ProductTypeViewSet
 
 from dojo.utils import get_system_setting
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
@@ -48,6 +48,7 @@ from dojo.notifications.urls import urlpatterns as notifications_urls
 from dojo.object.urls import urlpatterns as object_urls
 from dojo.benchmark.urls import urlpatterns as benchmark_urls
 from dojo.rules.urls import urlpatterns as rule_urls
+from dojo.notes.urls import urlpatterns as notes_urls
 
 admin.autodiscover()
 
@@ -89,6 +90,7 @@ v2_api.register(r'jira_configurations', JiraConfigurationsViewSet)
 v2_api.register(r'jira_finding_mappings', JiraIssuesViewSet)
 v2_api.register(r'jira_product_configurations', JiraViewSet)
 v2_api.register(r'products', ProductViewSet)
+v2_api.register(r'product_types', ProductTypeViewSet)
 v2_api.register(r'scan_settings', ScanSettingsViewSet)
 v2_api.register(r'scans', ScansViewSet)
 v2_api.register(r'stub_findings', StubFindingsViewSet)
@@ -126,6 +128,7 @@ ur += notifications_urls
 ur += object_urls
 ur += benchmark_urls
 ur += rule_urls
+ur += notes_urls
 
 swagger_urls = [
     url(r'^$', SwaggerView.as_view(), name='index'),
