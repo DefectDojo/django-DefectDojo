@@ -332,8 +332,8 @@ function install_os_dependencies() {
         sudo yum install -y wget epel-release
         curl -sL https://rpm.nodesource.com/setup | sudo bash -
         sudo wget https://dl.yarnpkg.com/rpm/yarn.repo -O /etc/yum.repos.d/yarn.repo
-        sudo yum install -y gcc python-devel python-setuptools python-pip nodejs yarn wkhtmltopdf
-        sudo yum groupinstall -y 'Development Tools'
+        sudo yum install gcc python-devel python-setuptools python-pip nodejs yarn wkhtmltopdf expect
+        sudo yum groupinstall 'Development Tools'
     elif [[ ! -z "$APT_GET_CMD" ]]; then
         sudo apt-get install -y curl apt-transport-https
         #Yarn
@@ -341,9 +341,10 @@ function install_os_dependencies() {
         echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
         #Node
         curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash
-        sudo apt-get update && sudo apt-get install -y apt-transport-https libjpeg-dev gcc libssl-dev python-dev python-pip nodejs yarn wkhtmltopdf build-essential
+        sudo apt-get update && sudo apt-get install -y apt-transport-https libjpeg-dev gcc libssl-dev python-dev python-pip nodejs yarn wkhtmltopdf build-essential 
+        
     elif [[ ! -z "$BREW_CMD" ]]; then
-        brew install gcc openssl python node npm yarn Caskroom/cask/wkhtmltopdf
+        brew install gcc openssl python node npm yarn Caskroom/cask/wkhtmltopdf expect
     else
         echo "ERROR! OS not supported. Try the Vagrant option."
         exit 1;
