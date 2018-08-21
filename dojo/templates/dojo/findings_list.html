@@ -279,7 +279,7 @@
                                 <td>
                                      {{ finding.get_found_by }}
                                 </td>
-                                <td>{% if finding.under_review %}Under Review, {% endif %}{{ finding.status }}{% if finding.duplicate_finding.id %}, <a href="{% url 'view_finding' finding.duplicate_finding.id%}" data-toggle="tooltip" data-placement="top" title="{{ finding.title }}, {{ finding.created }}">Original</a>
+                                <td>{% if finding.under_review %}Under Review, {% endif %}{{ finding.status }}{% if finding.duplicate_finding.id %}, <a href="{% url 'view_finding' finding.duplicate_finding.id%}" data-toggle="tooltip" data-placement="top" title="{{ finding.duplicate_finding.title }}, {{ finding.duplicate_finding.created }}">Original</a>
                                   {% endif %}
                                 </td>
                                 <td class="nowrap">
