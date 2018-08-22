@@ -7,7 +7,8 @@ See the file 'doc/LICENSE' for the license information
 from __future__ import with_statement
 
 import re
-from defusedxml import ElementTree as etree
+# from defusedxml import ElementTree as etree
+from lxml import etree
 import html2text
 import string
 
@@ -58,14 +59,14 @@ class BurpXmlParser(object):
 
         tree = None
         try:
-            tree = etree.parse(xml_file)
+            tree = etree.parse(xml_file, etree.XMLParser(resolve_entities=False))
         except Exception, e:
             # Solution to remove unicode characters in xml, tried several
             xml_file.seek(0)
             data = xml_file.read()
             printable = set(string.printable)
             data = filter(lambda x: x in printable, data)
-            tree = etree.fromstring(data, etree.XMLParser(encoding='ISO-8859-1', ns_clean=True, recover=True))
+            tree = etree.fromstring(data, etree.XMLParser(encoding='ISO-8859-1', ns_clean=True, recover=True, resolve_entities=False))
 
         return tree
 

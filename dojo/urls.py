@@ -7,6 +7,7 @@ from tastypie.api import Api
 from tastypie_swagger.views import SwaggerView, ResourcesView, SchemaView
 from rest_framework.routers import DefaultRouter
 from rest_framework.authtoken import views as tokenviews
+from django.http import HttpResponse
 
 from dojo import views
 from dojo.api import UserResource, ProductResource, EngagementResource, \
@@ -140,8 +141,6 @@ swagger_urls = [
 schema_view = get_swagger_view(title='Defect Dojo API v2')
 
 urlpatterns = [
-    #  django admin
-    url(r'^%sadmin/' % get_system_setting('url_prefix'), include(admin.site.urls)),
     #  tastypie api
     url(r'^%sapi/' % get_system_setting('url_prefix'), include(v1_api.urls)),
     #  Django Rest Framework API v2
@@ -159,7 +158,14 @@ urlpatterns = [
     url(r'^%s' % get_system_setting('url_prefix'), include(ur)),
     url(r'^api/v2/api-token-auth/', tokenviews.obtain_auth_token),
     url(r'^api/v2/doc/', schema_view, name="api_v2_schema"),
+    url(r'^robots.txt', lambda x: HttpResponse("User-Agent: *\nDisallow: /", content_type="text/plain"), name="robots_file"),
+
 ]
+
+if hasattr(settings, 'DJANGO_ADMIN_ENABLED'):
+    if settings.DJANGO_ADMIN_ENABLED:
+        #  django admin
+        urlpatterns += [url(r'^%sadmin/' % get_system_setting('url_prefix'), include(admin.site.urls))]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

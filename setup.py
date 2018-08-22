@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name='DefectDojo',
-    version='1.5.2',
+    version='1.5.3',
     author='Greg Anderson',
     description="Tool for managing vulnerability engagements",
     install_requires=[
@@ -26,6 +26,7 @@ setup(
         'django-watson==1.3.1',
         'django-rest-swagger==2.1.2',
         'djangorestframework==3.7.7',
+        'django-environ==0.4.5',
         'gunicorn>=19.1.1',
         'html2text',
         'humanize',
@@ -65,6 +66,9 @@ setup(
         'pandas>=0.22.0',
         'django-dbbackup>=3.2.0',
         'django-markdownx>=2.0.23',
+        'django-taggit-serializer==0.1.7',
+        'whitenoise==4.0',
+        'django-environ==0.4.5',
     ],
 
     extras_require={'mysql': ['mysqlclient==1.3.12']},
@@ -72,5 +76,5 @@ setup(
     dependency_links=[
         "https://github.com/grendel513/python-pdfkit/tarball/master#egg=pdfkit-0.5.0",
     ],
-    url='https://github.com/owasp/django-DefectDojo'
+    url='https://github.com/DefectDojo/django-DefectDojo'
 )
