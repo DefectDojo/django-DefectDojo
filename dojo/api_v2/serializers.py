@@ -130,51 +130,35 @@ class TaggitSerializer(serializers.Serializer):
         return (to_be_tagged, validated_data)
 
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('url', 'username', 'first_name', 'last_name', 'last_login')
+        fields = ('id', 'username', 'first_name', 'last_name', 'last_login')
 
 
-class ProductSerializer(TaggitSerializer, serializers.HyperlinkedModelSerializer):
+class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
     findings_count = serializers.SerializerMethodField()
-    product_manager = serializers.HyperlinkedRelatedField(
-        queryset=User.objects.all(),
-        view_name='user-detail',
-        format='html', required=False)
-    technical_contact = serializers.HyperlinkedRelatedField(
-        queryset=User.objects.all(),
-        view_name='user-detail',
-        format='html', required=False)
-    team_manager = serializers.HyperlinkedRelatedField(
-        queryset=User.objects.all(),
-        view_name='user-detail',
-        format='html', required=False)
-    authorized_users = serializers.HyperlinkedRelatedField(
-        many=True,
-        queryset=User.objects.exclude(is_staff=True).exclude(is_active=False),
-        view_name='user-detail',
-        format='html', required=False)
-    prod_type = serializers.PrimaryKeyRelatedField(
-        queryset=Product_Type.objects.all())
-    regulations = serializers.PrimaryKeyRelatedField(
-        queryset=Regulation.objects.all(), many=True, required=False)
     tags = TagListSerializerField(required=False)
 
     class Meta:
         model = Product
         exclude = ('tid', 'manager', 'prod_manager', 'tech_contact',
                    'updated')
+        extra_kwargs = {
+            'authorized_users': {'queryset': User.objects.exclude(is_staff=True).exclude(is_active=False)}
+        }
 
     def get_findings_count(self, obj):
         return obj.findings_count
 
 
-class EngagementSerializer(TaggitSerializer, serializers.HyperlinkedModelSerializer):
-    eng_type = serializers.PrimaryKeyRelatedField(
-        queryset=Engagement_Type.objects.all(), required=False)
-    report_type = serializers.PrimaryKeyRelatedField(
-        queryset=Report_Type.objects.all(), required=False)
+class ProductTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product_Type
+        fields = '__all__'
+
+
+class EngagementSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
 
     class Meta:
@@ -189,33 +173,29 @@ class EngagementSerializer(TaggitSerializer, serializers.HyperlinkedModelSeriali
         return data
 
 
-class ToolTypeSerializer(serializers.HyperlinkedModelSerializer):
+class ToolTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tool_Type
         fields = '__all__'
 
 
-class ToolConfigurationSerializer(serializers.HyperlinkedModelSerializer):
+class ToolConfigurationSerializer(serializers.ModelSerializer):
     configuration_url = serializers.CharField(source='url')
-    url = serializers.HyperlinkedIdentityField(
-        view_name='tool_configuration-detail')
 
     class Meta:
         model = Tool_Configuration
         fields = '__all__'
 
 
-class ToolProductSettingsSerializer(serializers.HyperlinkedModelSerializer):
+class ToolProductSettingsSerializer(serializers.ModelSerializer):
     setting_url = serializers.CharField(source='url')
-    url = serializers.HyperlinkedIdentityField(
-        view_name='tool_product_settings-detail')
 
     class Meta:
         model = Tool_Product_Settings
         fields = '__all__'
 
 
-class EndpointSerializer(TaggitSerializer, serializers.HyperlinkedModelSerializer):
+class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
 
     class Meta:
@@ -301,40 +281,38 @@ class EndpointSerializer(TaggitSerializer, serializers.HyperlinkedModelSerialize
         return data
 
 
-class JIRAIssueSerializer(serializers.HyperlinkedModelSerializer):
+class JIRAIssueSerializer(serializers.ModelSerializer):
     class Meta:
         model = JIRA_Issue
         fields = '__all__'
 
 
-class JIRAConfSerializer(serializers.HyperlinkedModelSerializer):
-    url = serializers.HyperlinkedIdentityField(
-        view_name='jira_conf-detail')
-    jira_url = serializers.CharField(
-        source='url')
-
+class JIRAConfSerializer(serializers.ModelSerializer):
     class Meta:
         model = JIRA_Conf
         fields = '__all__'
 
 
-class JIRASerializer(serializers.HyperlinkedModelSerializer):
-
+class JIRASerializer(serializers.ModelSerializer):
     class Meta:
         model = JIRA_PKey
         fields = '__all__'
 
 
-class TestSerializer(TaggitSerializer, serializers.HyperlinkedModelSerializer):
-    engagement = serializers.HyperlinkedRelatedField(
-        read_only=True,
-        view_name='engagement-detail',
-        format='html')
-    test_type = serializers.PrimaryKeyRelatedField(
-        queryset=Test_Type.objects.all())
-    environment = serializers.PrimaryKeyRelatedField(
-        queryset=Development_Environment.objects.all())
+class TestSerializer(TaggitSerializer, serializers.ModelSerializer):
+    tags = TagListSerializerField(required=False)
+
+    class Meta:
+        model = Test
+        fields = '__all__'
+
+
+class TestCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
+    engagement = serializers.PrimaryKeyRelatedField(
+        queryset=Engagement.objects.all())
     notes = serializers.PrimaryKeyRelatedField(
+        allow_null=True,
+        default=[],
         queryset=Notes.objects.all(),
         many=True)
     tags = TagListSerializerField(required=False)
@@ -344,62 +322,13 @@ class TestSerializer(TaggitSerializer, serializers.HyperlinkedModelSerializer):
         fields = '__all__'
 
 
-class TestCreateSerializer(TaggitSerializer, serializers.HyperlinkedModelSerializer):
-    test_type = serializers.PrimaryKeyRelatedField(
-        queryset=Test_Type.objects.all())
-    environment = serializers.PrimaryKeyRelatedField(
-        queryset=Development_Environment.objects.all())
-    engagement = serializers.HyperlinkedRelatedField(
-        queryset=Engagement.objects.all(),
-        view_name='engagement-detail',
-        format='html')
-    estimated_time = serializers.TimeField()
-    actual_time = serializers.TimeField()
-    notes = serializers.PrimaryKeyRelatedField(
-        queryset=Notes.objects.all(),
-        many=True)
-    tags = TagListSerializerField(required=False)
-
-    class Meta:
-        model = Test
-        fields = '__all__'
-
-
-class RiskAcceptanceSerializer(serializers.HyperlinkedModelSerializer):
+class RiskAcceptanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Risk_Acceptance
         fields = '__all__'
 
 
-class FindingSerializer(TaggitSerializer, serializers.HyperlinkedModelSerializer):
-    review_requested_by = serializers.HyperlinkedRelatedField(
-        queryset=Dojo_User.objects.all(),
-        view_name='user-detail',
-        format='html')
-    reviewers = serializers.HyperlinkedRelatedField(
-        queryset=Dojo_User.objects.all(),
-        view_name='user-detail',
-        format='html',
-        many=True)
-    reporter = serializers.HyperlinkedRelatedField(
-        read_only=True,
-        view_name='user-detail',
-        format='html')
-    defect_review_requested_by = serializers.HyperlinkedRelatedField(
-        queryset=Dojo_User.objects.all(),
-        view_name='user-detail',
-        format='html')
-    notes = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='entry',
-        many=True)
-    found_by = serializers.PrimaryKeyRelatedField(
-        read_only=True,
-        many=True)
-    finding_url = serializers.CharField(
-        source='url',
-        read_only=True)
-    url = serializers.HyperlinkedIdentityField(view_name='finding-detail')
+class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
 
     class Meta:
@@ -426,42 +355,29 @@ class FindingSerializer(TaggitSerializer, serializers.HyperlinkedModelSerializer
         return data
 
 
-class FindingCreateSerializer(TaggitSerializer, serializers.HyperlinkedModelSerializer):
-    review_requested_by = serializers.HyperlinkedRelatedField(
-        queryset=Dojo_User.objects.all(),
-        view_name='user-detail',
-        format='html')
-    reviewers = serializers.HyperlinkedRelatedField(
-        queryset=Dojo_User.objects.all(),
-        view_name='user-detail',
-        format='html',
-        many=True)
-    defect_review_requested_by = serializers.HyperlinkedRelatedField(
-        queryset=Dojo_User.objects.all(),
-        view_name='user-detail',
-        format='html')
-    notes = serializers.SlugRelatedField(
+class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
+    notes = serializers.PrimaryKeyRelatedField(
         read_only=True,
-        slug_field='entry',
+        allow_null=True,
+        default=[],
         many=True)
-    test = serializers.HyperlinkedRelatedField(
-        queryset=Test.objects.all(),
-        view_name='test-detail',
-        format='html')
-    thread_id = serializers.IntegerField()
-    reporter = serializers.HyperlinkedRelatedField(
-        queryset=Dojo_User.objects.all(),
-        format='html',
-        view_name='user-detail')
+    test = serializers.PrimaryKeyRelatedField(
+        queryset=Test.objects.all())
+    thread_id = serializers.IntegerField(default=0)
     found_by = serializers.PrimaryKeyRelatedField(
         queryset=Test_Type.objects.all(),
         many=True)
-    url = serializers.CharField()
+    url = serializers.CharField(
+        allow_null=True,
+        default=None)
     tags = TagListSerializerField(required=False)
 
     class Meta:
         model = Finding
         fields = '__all__'
+        extra_kwargs = {
+            'reporter': {'default': serializers.CurrentUserDefault()},
+        }
 
     def validate(self, data):
         if ((data['active'] or data['verified']) and data['duplicate']):
@@ -473,44 +389,41 @@ class FindingCreateSerializer(TaggitSerializer, serializers.HyperlinkedModelSeri
         return data
 
 
-class FindingTemplateSerializer(serializers.HyperlinkedModelSerializer):
+class FindingTemplateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Finding_Template
         fields = '__all__'
 
 
-class StubFindingSerializer(serializers.HyperlinkedModelSerializer):
+class StubFindingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Stub_Finding
         fields = '__all__'
 
 
-class StubFindingCreateSerializer(serializers.HyperlinkedModelSerializer):
-    reporter = serializers.HyperlinkedRelatedField(
-        queryset=User.objects.all(),
-        view_name='user-detail')
-    test = serializers.HyperlinkedRelatedField(
-        queryset=Test.objects.all(),
-        view_name='test-detail')
+class StubFindingCreateSerializer(serializers.ModelSerializer):
+    test = serializers.PrimaryKeyRelatedField(
+        queryset=Test.objects.all())
 
     class Meta:
         model = Stub_Finding
         fields = '__all__'
+        extra_kwargs = {
+            'reporter': {'default': serializers.CurrentUserDefault()},
+        }
 
 
-class ScanSettingsSerializer(serializers.HyperlinkedModelSerializer):
+class ScanSettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ScanSettings
         fields = '__all__'
 
 
-class ScanSettingsCreateSerializer(serializers.HyperlinkedModelSerializer):
-    user = serializers.HyperlinkedRelatedField(
-        queryset=User.objects.all(),
-        view_name='user-detail')
-    product = serializers.HyperlinkedRelatedField(
-        queryset=Product.objects.all(),
-        view_name='product-detail')
+class ScanSettingsCreateSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all())
+    product = serializers.PrimaryKeyRelatedField(
+        queryset=Product.objects.all())
     data = serializers.DateTimeField(required=False)
 
     class Meta:
@@ -518,28 +431,24 @@ class ScanSettingsCreateSerializer(serializers.HyperlinkedModelSerializer):
         fields = '__all__'
 
 
-class IPScanSerializer(serializers.HyperlinkedModelSerializer):
+class IPScanSerializer(serializers.ModelSerializer):
     class Meta:
         model = IPScan
         fields = '__all__'
 
 
-class ScanSerializer(serializers.HyperlinkedModelSerializer):
-    # scan_settings_link = serializers.HyperlinkedRelatedField(
+class ScanSerializer(serializers.ModelSerializer):
+    # scan_settings_link = serializers.PrimaryKeyRelatedField(
     #     read_only=True,
-    #     source='scan_settings',
-    #     view_name='scan_settings-detail',
-    #     format='html')
+    #     source='scan_settings')
     # scan_settings = serializers.PrimaryKeyRelatedField(
     #     queryset=ScanSettings.objects.all(),
     #     write_only=True,
     #     )
-    # ipscan_links = serializers.HyperlinkedRelatedField(
+    # ipscan_links = serializers.PrimaryKeyRelatedField(
     #     read_only=True,
     #     many=True,
-    #     source='ipscan_set',
-    #     view_name='ipscan-detail',
-    #     format='html')
+    #     source='ipscan_set')
 
     class Meta:
         model = Scan
@@ -547,7 +456,7 @@ class ScanSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
-    scan_date = serializers.DateField()
+    scan_date = serializers.DateField(default=datetime.date.today)
     minimum_severity = serializers.ChoiceField(
         choices=SEVERITY_CHOICES,
         default='Info')
@@ -556,11 +465,11 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
     scan_type = serializers.ChoiceField(
         choices=ImportScanForm.SCAN_TYPE_CHOICES)
     file = serializers.FileField()
-    engagement = serializers.HyperlinkedRelatedField(
-        view_name='engagement-detail',
+    engagement = serializers.PrimaryKeyRelatedField(
         queryset=Engagement.objects.all())
-    lead = serializers.HyperlinkedRelatedField(
-        view_name='user-detail',
+    lead = serializers.PrimaryKeyRelatedField(
+        allow_null=True,
+        default=None,
         queryset=User.objects.all())
     tags = TagListSerializerField(required=False)
 
@@ -584,6 +493,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
             pass
 
         test.save()
+        test.tags = u' '.join(data['tags'])
         try:
             parser = import_parser_factory(data['file'],
                                            test,
@@ -667,8 +577,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         choices=ImportScanForm.SCAN_TYPE_CHOICES)
     tags = TagListSerializerField(required=False)
     file = serializers.FileField()
-    test = serializers.HyperlinkedRelatedField(
-        view_name='test-detail',
+    test = serializers.PrimaryKeyRelatedField(
         queryset=Test.objects.all())
 
     def save(self):
