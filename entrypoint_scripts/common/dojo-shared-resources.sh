@@ -518,7 +518,7 @@ function install_app(){
       docker/setup-superuser.expect
     elif [ "$BATCH_MODE" == "yes" ]; then
       python manage.py createsuperuser --noinput --username=$DEFECTDOJO_ADMIN_USER --email='ed@example.com'
-      docker/setup-superuser.expect $DEFECTDOJO_ADMIN_USER $DEFECTDOJO_ADMIN_PASSWORD
+      batch_mode-setup-superuser.expect $DEFECTDOJO_ADMIN_USER $DEFECTDOJO_ADMIN_PASSWORD
     else
       echo -e "${GREEN}${BOLD}Create Dojo superuser:"
       tput sgr0
@@ -555,4 +555,11 @@ function start_local_mysql_db_server() {
 
 function stop_local_mysql_db_server() {
     sudo service mysql stop
+}
+
+# Added for BATCH_MODE to modify ALLOWED_HOSTS.
+function modify_allowed_hosts() {
+    if [ "$BATCH_MODE" == "yes" ]; then
+       sed -i "s/ALLOWED_HOSTS = \[]/ALLOWED_HOSTS = $ALLOWED_HOSTS/g" dojo/settings/settings.py
+    fi
 }

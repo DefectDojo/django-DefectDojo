@@ -66,6 +66,11 @@ if [ "$AUTO_DOCKER" == "yes" ]; then
     stop_local_mysql_db_server
 fi
 
+# Added for BATCH_MODE to modify allowed hosts based on parameter ALLOWED_HOSTS.
+if [ "$BATCH_MODE" == "yes" ];then
+    modify_allowed_hosts
+fi
+
 echo "=============================================================================="
 echo
 echo "SUCCESS! Now edit your settings.py file in the 'dojo/settings/' directory to complete the installation."
