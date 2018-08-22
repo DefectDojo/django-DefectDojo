@@ -16,6 +16,7 @@ from django.utils import timezone
 from markdown.extensions import Extension
 import dateutil.relativedelta
 import datetime
+from ast import literal_eval
 
 register = template.Library()
 
@@ -36,7 +37,7 @@ def markdown_render(value):
 def ports_open(value):
     count = 0
     for ipscan in value.ipscan_set.all():
-        count += len(eval(ipscan.services))
+        count += len(literal_eval(ipscan.services))
     return count
 
 

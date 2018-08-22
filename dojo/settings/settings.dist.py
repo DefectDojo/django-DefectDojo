@@ -310,3 +310,7 @@ LOGGING = {
         }
     }
 }
+
+# As we require `innodb_large_prefix = ON` for MySQL, we can silence the
+# warning about large varchar with unique indices.
+SILENCED_SYSTEM_CHECKS = ['mysql.E001']
