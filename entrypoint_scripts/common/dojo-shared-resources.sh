@@ -512,23 +512,17 @@ function install_app(){
     python manage.py makemigrations --merge --noinput
     python manage.py migrate
 
-    if [ "$VENV_ACTIVE" == "0" ]; then
-        # If a virtualenv is active...
-        echo -e "${GREEN}${BOLD}Create Dojo superuser:"
-        tput sgr0
-        python manage.py createsuperuser
+    #Added BATCH_MODE logic and rewrite old logic(Old logic was checking for virtual env which was not required.)
+    if [ "$AUTO_DOCKER" == "yes" ]; then
+      python manage.py createsuperuser --noinput --username=admin --email='ed@example.com'
+      docker/setup-superuser.expect
+    elif [ "$BATCH_MODE" == "yes" ]; then
+      python manage.py createsuperuser --noinput --username=$DEFECTDOJO_ADMIN_USER --email='ed@example.com'
+      docker/setup-superuser.expect $DEFECTDOJO_ADMIN_USER $DEFECTDOJO_ADMIN_PASSWORD
     else
-        # Allow script to be called non-interactively using:
-        # export AUTO_DOCKER=yes && /opt/django-DefectDojo/setup.bash
-        if [ "$AUTO_DOCKER" != "yes" ]; then
-            echo -e "${GREEN}${BOLD}Create Dojo superuser:"
-            tput sgr0
-            python manage.py createsuperuser
-        else
-            # non-interactively setup the superuser
-            python manage.py createsuperuser --noinput --username=admin --email='ed@example.com'
-            docker/setup-superuser.expect
-        fi
+      echo -e "${GREEN}${BOLD}Create Dojo superuser:"
+      tput sgr0
+      python manage.py createsuperuser
     fi
 
     python manage.py loaddata product_type
