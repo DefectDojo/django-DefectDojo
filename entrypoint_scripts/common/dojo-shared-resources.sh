@@ -17,7 +17,7 @@ function help() {
 TARGET_DIR=
 AUTO_DOCKER=
 
-while getopts 'hry' opt; do
+while getopts 'hryb' opt; do
     case $opt in
         h)
             help
