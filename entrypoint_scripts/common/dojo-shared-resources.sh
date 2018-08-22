@@ -10,6 +10,7 @@ function help() {
     echo "$0 usage:"
     echo "  -h      Display this help message and exit with a status code of 0"
     echo "  -y      Disable interactivity (i.e. useful for Dockerfile usage)"
+    echo "  -b      Batch mode (i.e useful for automation purpose)"
     echo ""
 }
 
@@ -24,6 +25,9 @@ while getopts 'hry' opt; do
             ;;
         y)
             AUTO_DOCKER="yes"
+            ;;
+        b)
+            BATCH_MODE="yes"
             ;;
         ?)
             help
@@ -363,7 +367,7 @@ function install_db() {
             sudo yum install mariadb-server mysql-devel
         elif [ "$DBTYPE" == $POSTGRES ]; then
             echo "Installing Postgres client (and server if not already installed)"
-            sudo yum install postgresql-devel postgresql postgresql-contrib 
+            sudo yum install postgresql-devel postgresql postgresql-contrib
         fi
     elif [[ ! -z "$APT_GET_CMD" ]]; then
         if [ "$DBTYPE" == $MYSQL ]; then
