@@ -10,13 +10,14 @@ function help() {
     echo "$0 usage:"
     echo "  -h      Display this help message and exit with a status code of 0"
     echo "  -y      Disable interactivity (i.e. useful for Dockerfile usage)"
+    echo "  -b      Batch mode (i.e useful for automation purpose)"
     echo ""
 }
 
 TARGET_DIR=
 AUTO_DOCKER=
 
-while getopts 'hry' opt; do
+while getopts 'hryb' opt; do
     case $opt in
         h)
             help
@@ -24,6 +25,9 @@ while getopts 'hry' opt; do
             ;;
         y)
             AUTO_DOCKER="yes"
+            ;;
+        b)
+            BATCH_MODE="yes"
             ;;
         ?)
             help
@@ -215,16 +219,8 @@ function prompt_db_type() {
 function ensure_mysql_application_db() {
     # Allow script to be called non-interactively using:
     # export AUTO_DOCKER=yes && /opt/django-DefectDojo/setup.bash
-    if [ "$AUTO_DOCKER" != "yes" ]; then
-        # Run interactively
-        read -p "MySQL host: " SQLHOST
-        read -p "MySQL port: " SQLPORT
-        read -p "MySQL user (should already exist): " SQLUSER
-        stty -echo
-        read -p "Password for user: " SQLPWD; echo
-        stty echo
-        read -p "Database name (should NOT exist): " DBNAME
-    else
+    # Added BATCH_MODE condition and rewrite old negate logic.
+    if [ "$AUTO_DOCKER" == "yes" ] || [ "$BATCH_MODE" == "yes" ]; then
         # Default values for a automated Docker install if not provided
         echo "Setting values for MySQL install"
         if [ -z "$SQLHOST" ]; then
@@ -242,12 +238,21 @@ function ensure_mysql_application_db() {
         if [ -z "$DBNAME" ]; then
             DBNAME="dojodb"
         fi
+    else
+        # Run interactively
+        read -p "MySQL host: " SQLHOST
+        read -p "MySQL port: " SQLPORT
+        read -p "MySQL user (should already exist): " SQLUSER
+        stty -echo
+        read -p "Password for user: " SQLPWD; echo
+        stty echo
+        read -p "Database name (should NOT exist): " DBNAME
     fi
 
     if mysql -fs --protocol=TCP -h "$SQLHOST" -P "$SQLPORT" -u"$SQLUSER" -p"$SQLPWD" "$DBNAME" >/dev/null 2>&1 </dev/null; then
         echo "Database $DBNAME already exists!"
         echo
-        if [ "$AUTO_DOCKER" == "yes" ]; then
+        if [ "$AUTO_DOCKER" == "yes" ] || [ "$BATCH_MODE" == "yes" ]; then
             if [ -z "$FLUSHDB" ]; then
                 DELETE="yes"
             else
@@ -276,19 +281,51 @@ function ensure_mysql_application_db() {
 
 # Ensures the Postgres application DB is present
 function ensure_postgres_application_db() {
-    read -p "Postgres host: " SQLHOST
-    read -p "Postgres port: " SQLPORT
-    read -p "Postgres user (should already exist): " SQLUSER
-    stty -echo
-    read -p "Password for user: " SQLPWD; echo
-    stty echo
-    read -p "Database name (should NOT exist): " DBNAME
+    # Added BATCH_MODE condition and rewrite old negate logic.
+    if [ "$BATCH_MODE" == "yes" ]; then
+      # Default values for a automated Docker install if not provided
+      echo "Setting values for POSTGRES install"
+      if [ -z "$SQLHOST" ]; then
+          SQLHOST="localhost"
+      fi
+      if [ -z "$SQLPORT" ]; then
+          SQLPORT="5432"
+      fi
+      if [ -z "$SQLUSER" ]; then
+          SQLUSER="root"
+      fi
+      if [ -z "$SQLPWD" ]; then
+          SQLPWD="Cu3zehoh7eegoogohdoh1the"
+      fi
+      if [ -z "$DBNAME" ]; then
+          DBNAME="dojodb"
+      fi
+    else
+      read -p "Postgres host: " SQLHOST
+      read -p "Postgres port: " SQLPORT
+      read -p "Postgres user (should already exist): " SQLUSER
+      stty -echo
+      read -p "Password for user: " SQLPWD; echo
+      stty echo
+      read -p "Database name (should NOT exist): " DBNAME
+    fi
 
     if [ "$( PGPASSWORD=$SQLPWD psql -h $SQLHOST -p $SQLPORT -U $SQLUSER -tAc "SELECT 1 FROM pg_database WHERE datname='$DBNAME'" )" = '1' ]
     then
         echo "Database $DBNAME already exists!"
         echo
-        read -p "Drop database $DBNAME? [Y/n] " DELETE
+
+        # Added BATCH_MODE condition.
+        if [ "$AUTO_DOCKER" == "yes" ] || [ "$BATCH_MODE" == "yes" ]; then
+            if [ -z "$FLUSHDB" ]; then
+                DELETE="yes"
+            else
+                DELETE="$FLUSHDB"
+            fi
+        else
+            read -p "Drop database $DBNAME? [Y/n] " DELETE
+        fi
+
         if [[ ! $DELETE =~ ^[nN]$ ]]; then
             PGPASSWORD=$SQLPWD dropdb $DBNAME -h $SQLHOST -p $SQLPORT -U $SQLUSER
             PGPASSWORD=$SQLPWD createdb $DBNAME -h $SQLHOST -p $SQLPORT -U $SQLUSER
@@ -476,23 +513,17 @@ function install_app(){
     python manage.py makemigrations --merge --noinput
     python manage.py migrate
 
-    if [ "$VENV_ACTIVE" == "0" ]; then
-        # If a virtualenv is active...
-        echo -e "${GREEN}${BOLD}Create Dojo superuser:"
-        tput sgr0
-        python manage.py createsuperuser
+    #Added BATCH_MODE logic and rewrite old logic(Old logic was checking for virtual env which was not required.)
+    if [ "$AUTO_DOCKER" == "yes" ]; then
+      python manage.py createsuperuser --noinput --username=admin --email='ed@example.com'
+      docker/setup-superuser.expect
+    elif [ "$BATCH_MODE" == "yes" ]; then
+      python manage.py createsuperuser --noinput --username=$DEFECTDOJO_ADMIN_USER --email='ed@example.com'
+      batch_mode/setup-superuser.expect $DEFECTDOJO_ADMIN_USER $DEFECTDOJO_ADMIN_PASSWORD
     else
-        # Allow script to be called non-interactively using:
-        # export AUTO_DOCKER=yes && /opt/django-DefectDojo/setup.bash
-        if [ "$AUTO_DOCKER" != "yes" ]; then
-            echo -e "${GREEN}${BOLD}Create Dojo superuser:"
-            tput sgr0
-            python manage.py createsuperuser
-        else
-            # non-interactively setup the superuser
-            python manage.py createsuperuser --noinput --username=admin --email='ed@example.com'
-            docker/setup-superuser.expect
-        fi
+      echo -e "${GREEN}${BOLD}Create Dojo superuser:"
+      tput sgr0
+      python manage.py createsuperuser
     fi
 
     python manage.py loaddata product_type
@@ -525,4 +556,11 @@ function start_local_mysql_db_server() {
 
 function stop_local_mysql_db_server() {
     sudo service mysql stop
+}
+
+# Added for BATCH_MODE to modify ALLOWED_HOSTS.
+function modify_allowed_hosts() {
+    if [ "$BATCH_MODE" == "yes" ]; then
+       sed -i "s/ALLOWED_HOSTS = \[]/ALLOWED_HOSTS = $ALLOWED_HOSTS/g" dojo/settings/settings.py
+    fi
 }
