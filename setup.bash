@@ -17,6 +17,8 @@ echo
 
 # Initialize variables and functions
 source entrypoint_scripts/common/dojo-shared-resources.sh
+# Initialize batch mode properties
+source batch_mode.properties
 
 # This function invocation ensures we're running the script at the right place
 verify_cwd
@@ -26,6 +28,9 @@ verify_cwd
 if [ "$AUTO_DOCKER" == "yes" ]; then
     # Default to MySQL install
     DBTYPE=$MYSQL
+elif [ "$BATCH_MODE" == "yes" ]; then
+    # Batch mode
+    echo "Installing the script in batch mode. Please make sure 'database' is up and running."
 else
     prompt_db_type
 fi
