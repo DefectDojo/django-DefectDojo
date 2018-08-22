@@ -219,16 +219,8 @@ function prompt_db_type() {
 function ensure_mysql_application_db() {
     # Allow script to be called non-interactively using:
     # export AUTO_DOCKER=yes && /opt/django-DefectDojo/setup.bash
-    if [ "$AUTO_DOCKER" != "yes" ]; then
-        # Run interactively
-        read -p "MySQL host: " SQLHOST
-        read -p "MySQL port: " SQLPORT
-        read -p "MySQL user (should already exist): " SQLUSER
-        stty -echo
-        read -p "Password for user: " SQLPWD; echo
-        stty echo
-        read -p "Database name (should NOT exist): " DBNAME
-    else
+    # Added BATCH_MODE condition And rewriting old negate logic.
+    if [ "$AUTO_DOCKER" == "yes" ] || [ "$BATCH_MODE" == "yes" ]; then
         # Default values for a automated Docker install if not provided
         echo "Setting values for MySQL install"
         if [ -z "$SQLHOST" ]; then
@@ -246,12 +238,21 @@ function ensure_mysql_application_db() {
         if [ -z "$DBNAME" ]; then
             DBNAME="dojodb"
         fi
+    else
+        # Run interactively
+        read -p "MySQL host: " SQLHOST
+        read -p "MySQL port: " SQLPORT
+        read -p "MySQL user (should already exist): " SQLUSER
+        stty -echo
+        read -p "Password for user: " SQLPWD; echo
+        stty echo
+        read -p "Database name (should NOT exist): " DBNAME
     fi
 
     if mysql -fs --protocol=TCP -h "$SQLHOST" -P "$SQLPORT" -u"$SQLUSER" -p"$SQLPWD" "$DBNAME" >/dev/null 2>&1 </dev/null; then
         echo "Database $DBNAME already exists!"
         echo
-        if [ "$AUTO_DOCKER" == "yes" ]; then
+        if [ "$AUTO_DOCKER" == "yes" ] || [ "$BATCH_MODE" == "yes" ]; then
             if [ -z "$FLUSHDB" ]; then
                 DELETE="yes"
             else
