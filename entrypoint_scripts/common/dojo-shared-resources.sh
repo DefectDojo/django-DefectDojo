@@ -219,7 +219,7 @@ function prompt_db_type() {
 function ensure_mysql_application_db() {
     # Allow script to be called non-interactively using:
     # export AUTO_DOCKER=yes && /opt/django-DefectDojo/setup.bash
-    # Added BATCH_MODE condition And rewriting old negate logic.
+    # Added BATCH_MODE condition and rewrite old negate logic.
     if [ "$AUTO_DOCKER" == "yes" ] || [ "$BATCH_MODE" == "yes" ]; then
         # Default values for a automated Docker install if not provided
         echo "Setting values for MySQL install"
@@ -281,19 +281,51 @@ function ensure_mysql_application_db() {
 
 # Ensures the Postgres application DB is present
 function ensure_postgres_application_db() {
-    read -p "Postgres host: " SQLHOST
-    read -p "Postgres port: " SQLPORT
-    read -p "Postgres user (should already exist): " SQLUSER
-    stty -echo
-    read -p "Password for user: " SQLPWD; echo
-    stty echo
-    read -p "Database name (should NOT exist): " DBNAME
+    # Added BATCH_MODE condition and rewrite old negate logic.
+    if [ "$BATCH_MODE" == "yes" ]; then
+      # Default values for a automated Docker install if not provided
+      echo "Setting values for POSTGRES install"
+      if [ -z "$SQLHOST" ]; then
+          SQLHOST="localhost"
+      fi
+      if [ -z "$SQLPORT" ]; then
+          SQLPORT="5432"
+      fi
+      if [ -z "$SQLUSER" ]; then
+          SQLUSER="root"
+      fi
+      if [ -z "$SQLPWD" ]; then
+          SQLPWD="Cu3zehoh7eegoogohdoh1the"
+      fi
+      if [ -z "$DBNAME" ]; then
+          DBNAME="dojodb"
+      fi
+    else
+      read -p "Postgres host: " SQLHOST
+      read -p "Postgres port: " SQLPORT
+      read -p "Postgres user (should already exist): " SQLUSER
+      stty -echo
+      read -p "Password for user: " SQLPWD; echo
+      stty echo
+      read -p "Database name (should NOT exist): " DBNAME
+    fi
 
     if [ "$( PGPASSWORD=$SQLPWD psql -h $SQLHOST -p $SQLPORT -U $SQLUSER -tAc "SELECT 1 FROM pg_database WHERE datname='$DBNAME'" )" = '1' ]
     then
         echo "Database $DBNAME already exists!"
         echo
-        read -p "Drop database $DBNAME? [Y/n] " DELETE
+
+        # Added BATCH_MODE condition.
+        if [ "$AUTO_DOCKER" == "yes" ] || [ "$BATCH_MODE" == "yes" ]; then
+            if [ -z "$FLUSHDB" ]; then
+                DELETE="yes"
+            else
+                DELETE="$FLUSHDB"
+            fi
+        else
+            read -p "Drop database $DBNAME? [Y/n] " DELETE
+        fi
+
         if [[ ! $DELETE =~ ^[nN]$ ]]; then
             PGPASSWORD=$SQLPWD dropdb $DBNAME -h $SQLHOST -p $SQLPORT -U $SQLUSER
             PGPASSWORD=$SQLPWD createdb $DBNAME -h $SQLHOST -p $SQLPORT -U $SQLUSER
