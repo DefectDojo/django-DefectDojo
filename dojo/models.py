@@ -1041,7 +1041,7 @@ class Finding(models.Model):
     class Meta:
         ordering = ('numerical_severity', '-date', 'title')
 
-    def get_hash_code(self):
+    def compute_hash_code(self):
         hash_string = self.title + str(self.cwe) + str(self.line) + str(self.file_path)
 
         if self.dynamic_finding:
@@ -1178,11 +1178,12 @@ class Finding(models.Model):
 
     def save(self, dedupe_option=True, rules_option=True, *args, **kwargs):
         # Make changes to the finding before it's saved to add a CWE template
-        if not self.pk:
+        if self.pk is None:
             from dojo.utils import apply_cwe_to_template
             self = apply_cwe_to_template(self)
+            # Only compute hash code for new findings.
+            self.hash_code = self.compute_hash_code()
         super(Finding, self).save(*args, **kwargs)
-        self.hash_code = self.get_hash_code()
         self.found_by.add(self.test.test_type)
         if self.test.test_type.static_tool:
             self.static_finding = True
