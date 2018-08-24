@@ -27,8 +27,6 @@ For detailed documentation you can visit [Read the Docs](https://defectdojo.read
 
 ### [Docker](https://defectdojo.readthedocs.io/en/latest/getting-started.html#docker-local-install)
 
-### [Ansible](https://raw.githubusercontent.com/DefectDojo/Documentation/master/ansible/prod-install)
-
 # Getting Started
 
 We recommend checking out the [about](https://defectdojo.readthedocs.io/en/latest/about.html) document to learn the
