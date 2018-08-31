@@ -67,10 +67,14 @@ Realtime discussion is done in the OWASP Slack Channel, #defectdojo. [Get Access
 DefectDojo is maintained by:
 
 - [Greg Anderson](https://www.linkedin.com/in/g-anderson/)
-- Aaron Weaver ([@weavera](https://twitter.com/weavera))
-- Matt Tesauro ([@matt_tesauro](https://twitter.com/matt_tesauro))
-- Charles Neill ([@ccneill](https://twitter.com/ccneill))
-- Jay Paz ([@jjpaz](https://twitter.com/jjpaz))
+- [Aaron Weaver](https://www.linkedin.com/in/aweaver/) ([@weavera](https://twitter.com/weavera))
+- [Matt Tesauro](https://www.linkedin.com/in/matttesauro/) ([@matt_tesauro](https://twitter.com/matt_tesauro))
+
+
+# Hall of Fame
+
+- Charles Neill ([@ccneill](https://twitter.com/ccneill)) - Charles served as a DefectDojo Maintainer for years and wrote some of Dojo's core functionality.
+- Jay Paz ([@jjpaz](https://twitter.com/jjpaz)) - Jay was a DefectDojo maintainer for years. He performed Dojo's first UI overhaul, optomized code structure/features, and added numerous enhancements.
 
 # Contributing
 
