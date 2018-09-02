@@ -12,12 +12,12 @@ env:
   - TEST=flake8-complete
   - TEST=flake8
   - TEST=safety
+  - TEST=smoke-test
 
 matrix:
   allow_failures:
-    - env: TEST=smoke-test
+
     - env: TEST=bandit
-    - env: TEST=sourceclear
 
 services:
   - docker
@@ -45,10 +45,6 @@ script:
         travis_fold start "integration-test"
         bash entrypoint_scripts/test/travis-integration-test.sh || exit 1
         travis_fold end "integration-test"
-        ;;
-      sourceclear)
-        ## Run the SRC:CLR Scan
-        curl -sSL https://download.sourceclear.com/ci.sh | bash
         ;;
       bandit)
         # install bandit
