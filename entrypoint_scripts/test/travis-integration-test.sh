@@ -5,9 +5,9 @@ set -ex
 export DOJO_ADMIN_USER='admin'
 export DOJO_ADMIN_PASSWORD='admin'
 export CONTAINER_NAME=dojo
-docker build -t $REPO .
+docker build --target dev-mysql-self-contained -t $REPO .
 # - docker run -e DOJO_ADMIN_USER=$DOJO_ADMIN_USER -e DOJO_ADMIN_PASSWORD=$DOJO_ADMIN_PASSWORD --name dojo -d -p 127.0.0.1:8000:8000 $REPO:${TRAVIS_COMMIT::8} bash /django-DefectDojo/docker/docker-startup.bash
-docker run -d -p 127.0.0.1:8000:8000 --name=$CONTAINER_NAME $REPO
+docker run -e DOJO_ADMIN_PASSWORD=$DOJO_ADMIN_PASSWORD -d -p 127.0.0.1:8000:8000 --name=$CONTAINER_NAME $REPO
 docker logs $CONTAINER_NAME
 # Turn off Zap tests while re-configuring how they run
 #- docker run -d --name zap --link $CONTAINER_NAME -p 127.0.0.1:8080:8080 -i owasp/zap2docker-stable zap.sh -daemon -host 0.0.0.0 -port 8080 -config api.disablekey=true

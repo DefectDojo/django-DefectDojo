@@ -57,7 +57,6 @@ setup(
         'jira',
         'pycrypto',
         'lxml',
-        'psycopg2',
         'django-multiselectfield',
         'pbr',
         'django-slack',

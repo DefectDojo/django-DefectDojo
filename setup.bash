@@ -4,7 +4,6 @@
 # setup.bash covers the following cases (and types of environments):
 # - Fresh installs on non-transient environments (physical or virtual OS)
 # - Fresh installs on transient environment blueprints (containerized environments)
-# - Fresh installs on transient VMs (Vagrant and the like)
 # - Updates on non-transient environments
 #
 # Not (yet) addressed:
@@ -17,20 +16,12 @@ echo
 
 # Initialize variables and functions
 source entrypoint_scripts/common/dojo-shared-resources.sh
-# Initialize batch mode properties
-source batch_mode.properties
 
 # This function invocation ensures we're running the script at the right place
 verify_cwd
 
-# Allow script to be called non-interactively using:
-# export AUTO_DOCKER=yes && /opt/django-DefectDojo/setup.bash
-if [ "$AUTO_DOCKER" == "yes" ]; then
-    # Default to MySQL install
-    DBTYPE=$MYSQL
-elif [ "$BATCH_MODE" == "yes" ]; then
-    # Batch mode
-    echo "Installing the script in batch mode. Please make sure 'database' is up and running."
+if [ "$BATCH_MODE" == "yes" ]; then
+    setup_batch_mode
 else
     prompt_db_type
 fi
@@ -38,38 +29,28 @@ fi
 echo
 echo "NEED SUDO PRIVILEGES FOR NEXT STEPS!"
 echo
-echo "Attempting to install required packages..."
+echo "Installing required packages..."
 echo
 
 # Install OS dependencies like DB client, further package managers, etc.
 install_os_dependencies
+
 # Install database-related packages
 install_db
-
-if [ "$AUTO_DOCKER" == "yes" ]; then
-    start_local_mysql_db_server
-fi
 
 # Create the application DB or recreate it, if it's already present
 ensure_application_db
 
-# Adjust the settings.py file
-prepare_settings_file
+if [ -z "$BATCH_MODE" ]; then
+  # Adjust the settings.py file
+  prepare_settings_file
+fi
 
 # Ensure, we're running on a supported python version
 verify_python_version
 
 # Install the actual application
 install_app
-
-if [ "$AUTO_DOCKER" == "yes" ]; then
-    stop_local_mysql_db_server
-fi
-
-# Added for BATCH_MODE to modify allowed hosts based on parameter ALLOWED_HOSTS.
-if [ "$BATCH_MODE" == "yes" ];then
-    modify_allowed_hosts
-fi
 
 echo "=============================================================================="
 echo

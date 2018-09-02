@@ -2,7 +2,7 @@
 DD_DEBUG=off
 
 # Enables Django Admin
-DD_DJANGO_ADMIN_ENABLED=off
+DD_DJANGO_ADMIN_ENABLED=on
 
 # A secret key for a particular Django installation.
 DD_SECRET_KEY=#DD_SECRET_KEY#
@@ -16,6 +16,11 @@ DD_DATABASE_URL=#DD_DATABASE_URL#
 # Hosts/domain names that are valid for this site;
 DD_ALLOWED_HOSTS=#DD_ALLOWED_HOSTS#
 
+# WhiteNoise allows your web app to serve its own static files,
+# making it a self-contained unit that can be deployed anywhere without relying on nginx,
+# if using nginx then disable Whitenoise
+DD_WHITENOISE=on
+
 # -------------------------------------------------------
 # Additional Settings / Override defaults in settings.py
 # -------------------------------------------------------
@@ -23,12 +28,8 @@ DD_ALLOWED_HOSTS=#DD_ALLOWED_HOSTS#
 # Timezone
 # DD_TIME_ZONE=America/New_York
 
-# WhiteNoise allows your web app to serve its own static files,
-# making it a self-contained unit that can be deployed anywhere without relying on nginx
-# DD_WHITENOISE=off
-
 # Track migrations through source control rather than making migrations locally
-# DD_TRACK_MIGRATIONS=off
+# DD_TRACK_MIGRATIONS=on
 
 # Whether to use HTTPOnly flag on the session cookie.
 # DD_SESSION_COOKIE_HTTPONLY=on
@@ -67,4 +68,4 @@ DD_ALLOWED_HOSTS=#DD_ALLOWED_HOSTS#
 # DD_PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST=['email@localhost']
 
 # Port scan source
-# DD_PORT_SCAN_SOURCE_IP=127.0.0.1'
+# DD_PORT_SCAN_SOURCE_IP=127.0.0.1

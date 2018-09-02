@@ -38,7 +38,7 @@ def log_generic_alert(source, title, description):
 @app.task(bind=True)
 def add_alerts(self, runinterval):
     now = timezone.now()
-    """
+
     upcoming_engagements = Engagement.objects.filter(target_start__gt=now + timedelta(days=3), target_start__lt=now + timedelta(days=3) + runinterval).order_by('target_start')
     for engagement in upcoming_engagements:
         create_notification(event='upcoming_engagement',
@@ -57,7 +57,7 @@ def add_alerts(self, runinterval):
                             description='The engagement "%s" is stale. Target end was %s.' % (eng.name, eng.target_end.strftime("%b. %d, %Y")),
                             url=reverse('view_engagement', args=(eng.id,)),
                             recipients=[eng.lead])
-    """
+
     system_settings = System_Settings.objects.get()
     if system_settings.engagement_auto_close:
         # Close Engagements older than user defined days
