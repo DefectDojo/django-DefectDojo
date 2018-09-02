@@ -8,6 +8,7 @@ RUN adduser --disabled-password --gecos "DefectDojo" dojo
 
 # Add the application files and start the setup
 ADD --chown=dojo:dojo . /opt/django-DefectDojo
+RUN sudo chmod -R u+rw /opt/django-DefectDojo/settings
 WORKDIR /opt/django-DefectDojo
 
 # Update and install basic requirements

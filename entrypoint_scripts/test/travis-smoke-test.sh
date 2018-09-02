@@ -10,9 +10,6 @@ set -x
 EXIT_STATUS=0
 
 # Build the actual container
-export DOJO_ADMIN_USER='admin'
-export DOJO_ADMIN_PASSWORD='admin'
-export CONTAINER_NAME=dojo
 docker build --target dev-mysql-self-contained -t $REPO .
 
 # Launch one container per service
