@@ -482,7 +482,7 @@ function prepare_settings_file() {
     sudo chmod -R u+rw /opt/django-DefectDojo/django_app.log
 
     # Copy settings file
-    cp dojo/settings/settings.dist.py ${TARGET_SETTINGS_FILE}
+    sudo cp dojo/settings/settings.dist.py ${TARGET_SETTINGS_FILE}
 
     # Copy env file
     cp dojo/settings/template-env ${ENV_SETTINGS_FILE}
