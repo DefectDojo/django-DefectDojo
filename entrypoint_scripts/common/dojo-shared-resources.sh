@@ -477,8 +477,10 @@ function prepare_settings_file() {
     TARGET_SETTINGS_FILE=dojo/settings/settings.py
     ENV_SETTINGS_FILE=dojo/settings/.env.prod
 
-    sudo chmod -R u+rw /opt/django-DefectDojo/settings
-    
+    sudo chmod -R u+rw /opt/django-DefectDojo/dojo/settings
+    sudo touch /opt/django-DefectDojo/django_app.log
+    sudo chmod -R u+rw /opt/django-DefectDojo/django_app.log
+
     # Copy settings file
     cp dojo/settings/settings.dist.py ${TARGET_SETTINGS_FILE}
 
