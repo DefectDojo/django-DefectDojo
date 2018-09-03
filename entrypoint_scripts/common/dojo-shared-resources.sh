@@ -476,10 +476,13 @@ function prepare_settings_file() {
     AES_PASSPHRASE=`cat /dev/urandom | LC_CTYPE=C tr -dc "a-zA-Z0-9" | head -c 128`
     TARGET_SETTINGS_FILE=dojo/settings/settings.py
     ENV_SETTINGS_FILE=dojo/settings/.env.prod
-
+    echo "before"
+    ls -l /opt/django-DefectDojo/dojo/
     sudo chmod -R u+rw /opt/django-DefectDojo/dojo/settings
-    sudo touch /opt/django-DefectDojo/django_app.log
-    sudo chmod -R u+rw /opt/django-DefectDojo/django_app.log
+    echo "after"
+    ls -l /opt/django-DefectDojo/dojo/
+    sudo touch django_app.log
+    sudo chmod u+rw django_app.log
 
     # Copy settings file
     sudo cp dojo/settings/settings.dist.py ${TARGET_SETTINGS_FILE}
