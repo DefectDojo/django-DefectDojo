@@ -20,6 +20,8 @@ jobs:
       script: bash entrypoint_scripts/test/travis-smoke-test.sh || exit 1
     - script: bash entrypoint_scripts/test/travis-unit-test.sh || exit 1
       name: unit-test
+    - script: bash entrypoint_scripts/test/travis-integration-test.sh || exit 1
+      name: integration-test
 
 after_success:
   #Push to docker repo
