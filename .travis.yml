@@ -2,21 +2,6 @@ sudo: required
 language: python
 install: true
 
-env:
-  - TEST=smoke-test
-  - TEST=integration-test
-  - TEST=unit-test
-  - TEST=bandit
-  - TEST=docker-bench-security
-  - TEST=flake8-complete
-  - TEST=flake8
-  - TEST=safety
-
-matrix:
-  allow_failures:
-
-    - env: TEST=bandit
-
 services:
   - docker
 
