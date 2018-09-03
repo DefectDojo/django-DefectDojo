@@ -12,7 +12,6 @@ env:
   - TEST=flake8-complete
   - TEST=flake8
   - TEST=safety
-  - TEST=smoke-test
 
 matrix:
   allow_failures:

@@ -1,6 +1,12 @@
 #!/bin/bash
 set -ex
 
+travis_fold() {
+  local action=$1
+  local name=$2
+  echo -en "travis_fold:${action}:${name}\r"
+}
+
 # Docker Build
 export DOJO_ADMIN_USER='admin'
 export DOJO_ADMIN_PASSWORD='admin'
@@ -22,8 +28,11 @@ rm ~/chromedriver_linux64.zip
 sudo mv -f ~/chromedriver /usr/local/share/
 sudo chmod +x /usr/local/share/chromedriver
 sudo ln -s /usr/local/share/chromedriver /usr/local/bin/chromedriver
+sleep 20
 docker ps -a
+travis_fold start container_log
 docker logs $CONTAINER_NAME
+travis_fold end container_log
 echo "Checking to see if dojo is running"
 
 # Check whether the container is running and came up as expected
