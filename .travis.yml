@@ -17,21 +17,8 @@ jobs:
       - docker build --target dev-mysql-self-contained -t $REPO .
     - stage: Test
       name: smoke-test
-      script:
-        - |
-          travis_fold start "smoke-test"
-          bash entrypoint_scripts/test/travis-smoke-test.sh || exit 1
-          travis_fold end "smoke-test"
-          ;;
-          esac
-      script:
-        - |
-          unit-test)
-          travis_fold start "unit-test"
-          bash entrypoint_scripts/test/travis-unit-test.sh || exit 1
-          travis_fold end "unit-test"
-          ;;
-          escac
+      script: bash entrypoint_scripts/test/travis-smoke-test.sh || exit 1
+      script: bash entrypoint_scripts/test/travis-unit-test.sh || exit 1
       name: unit-test
 
 after_success:
