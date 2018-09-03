@@ -22,6 +22,7 @@ ADD ./docker/etc/dojo_sudo /etc/sudoers.d/
 CMD entrypoint_scripts/run/startup-docker.bash
 
 ########## Stage: release ##########
-FROM base as release
+FROM dev-mysql-self-contained as release
+RUN ./setup-docker.bash -y release
 USER dojo
 CMD gunicorn --bind 0.0.0.0:$PORT wsgi

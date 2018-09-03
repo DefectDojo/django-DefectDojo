@@ -25,59 +25,64 @@ before_script:
   - export REPO=appsecpipeline/django-defectdojo
   - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH ; fi`
 
-script:
-  - |
-    echo "Running test=$TEST"
-    case "$TEST" in
-      smoke-test)
-        travis_fold start "smoke-test"
-        bash entrypoint_scripts/test/travis-smoke-test.sh || exit 1
-        travis_fold end "smoke-test"
-        ;;
-      unit-test)
-        travis_fold start "unit-test"
-        bash entrypoint_scripts/test/travis-unit-test.sh || exit 1
-        travis_fold end "unit-test"
-        ;;
-      integration-test)
-        travis_fold start "integration-test"
-        bash entrypoint_scripts/test/travis-integration-test.sh || exit 1
-        travis_fold end "integration-test"
-        ;;
-      bandit)
-        # install bandit
-        pip install bandit
+jobs:
+  include:
+    - stage: Build Docker Image
+      script: docker build --target dev-mysql-self-contained -t $REPO .
+    - stage: Test
+      script:
+        - |
+          echo "Running test=$TEST"
+          case "$TEST" in
+            smoke-test)
+              travis_fold start "smoke-test"
+              bash entrypoint_scripts/test/travis-smoke-test.sh || exit 1
+              travis_fold end "smoke-test"
+              ;;
+            unit-test)
+              travis_fold start "unit-test"
+              bash entrypoint_scripts/test/travis-unit-test.sh || exit 1
+              travis_fold end "unit-test"
+              ;;
+            integration-test)
+              travis_fold start "integration-test"
+              bash entrypoint_scripts/test/travis-integration-test.sh || exit 1
+              travis_fold end "integration-test"
+              ;;
+            bandit)
+              # install bandit
+              pip install bandit
 
-        ## Run Bandit python static code
-        bandit -r * -x venv,tests,ansible
-        ;;
-      docker-bench-security)
-        ## Run Docker Bench for Security
-        git clone https://github.com/docker/docker-bench-security.git
-        cd docker-bench-security
-        sh docker-bench-security.sh
-        ;;
-      pep8)
-        pip install flake8
-        flake8 .
-        ;;
-      safety)
-        pip install safety
-        safety check -i 35015
-        ;;
-      flake8)
-        echo "$TRAVIS_BRANCH"
-        if [ "$TRAVIS_BRANCH" == "dev" ]
-        then
-            echo "Running Flake8 tests on dev branch aka pull requests"
-            # We need to checkout dev for flake8-diff to work properly
-            git checkout dev
-            pip install pep8 flake8 flake8-diff
-            flake8-diff
-        else
-            echo "true"
-        fi
-    esac
+              ## Run Bandit python static code
+              bandit -r * -x venv,tests,ansible
+              ;;
+            docker-bench-security)
+              ## Run Docker Bench for Security
+              git clone https://github.com/docker/docker-bench-security.git
+              cd docker-bench-security
+              sh docker-bench-security.sh
+              ;;
+            pep8)
+              pip install flake8
+              flake8 .
+              ;;
+            safety)
+              pip install safety
+              safety check -i 35015
+              ;;
+            flake8)
+              echo "$TRAVIS_BRANCH"
+              if [ "$TRAVIS_BRANCH" == "dev" ]
+              then
+                  echo "Running Flake8 tests on dev branch aka pull requests"
+                  # We need to checkout dev for flake8-diff to work properly
+                  git checkout dev
+                  pip install pep8 flake8 flake8-diff
+                  flake8-diff
+              else
+                  echo "true"
+              fi
+          esac
 
 after_success:
   #Push to docker repo

@@ -13,7 +13,7 @@ travis_fold start travis_integration_install
 export DOJO_ADMIN_USER='admin'
 export DOJO_ADMIN_PASSWORD='admin'
 export CONTAINER_NAME=defect_dojo_integration
-docker build --target dev-mysql-self-contained -t $REPO .
+#docker build --target dev-mysql-self-contained -t $REPO .
 # - docker run -e DOJO_ADMIN_USER=$DOJO_ADMIN_USER -e DOJO_ADMIN_PASSWORD=$DOJO_ADMIN_PASSWORD --name dojo -d -p 127.0.0.1:8000:8000 $REPO:${TRAVIS_COMMIT::8} bash /django-DefectDojo/docker/docker-startup.bash
 docker run -e DOJO_ADMIN_PASSWORD=$DOJO_ADMIN_PASSWORD -e ACTION=p -d -p 127.0.0.1:8000:8000 --name=$CONTAINER_NAME $REPO
 docker logs $CONTAINER_NAME

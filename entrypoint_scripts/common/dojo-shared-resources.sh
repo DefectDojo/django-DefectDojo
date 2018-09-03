@@ -428,7 +428,7 @@ function install_db() {
             fi
         elif [ "$DBTYPE" == $POSTGRES ]; then
             echo "Installing Postgres client (and server if not already installed)"
-            sudo apt-get install -y libpq-dev postgresql postgresql-contrib libmysqlclient-dev
+            sudo apt-get install -y libpq-dev postgresql postgresql-contrib
         fi
     elif [[ ! -z "$BREW_CMD" ]]; then
         if [ "$DBTYPE" == $MYSQL ]; then
@@ -482,7 +482,7 @@ function prepare_settings_file() {
 
     # Copy env file
     cp dojo/settings/template-env ${ENV_SETTINGS_FILE}
-    
+
     # DD_DATABASE_URL can be set as an environment variable, if not construct
     if [ "$DBTYPE" == "$SQLITE" ]; then
         DD_DATABASE_URL="sqlite:///defectdojo.db"
@@ -599,6 +599,17 @@ function set_random_mysql_db_pwd() {
 }
 
 function upgrade() {
+  apt-get upgrade
+  apt-get clean all
+}
+
+function remove_install_artifacts() {
+  sudo deluser dojo sudo
+  apt-get remove -y mysql-server nodejs yarn autoremove
+}
+
+function install_postgres_client() {
+  apt-get install -y postgresql postgresql-contrib
   apt-get upgrade
   apt-get clean all
 }

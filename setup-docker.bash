@@ -1,11 +1,12 @@
 #!/bin/bash
-# setup.bash bootstraps DefectDojo Docker
 #
+
 travis_fold() {
   local action=$1
   local name=$2
   echo -en "travis_fold:${action}:${name}\r"
 }
+
 travis_fold start dojo_container_build
 echo
 echo "DefectDojo Docker Install"
@@ -29,31 +30,35 @@ elif [ "$FUNCTION" == "db" ]; then
   echo
   install_db
 
+  echo
+  echo "Create the application DB or recreate it, if it's already present"
+  echo
+  ensure_application_db
 
-echo
-echo "Create the application DB or recreate it, if it's already present"
-echo
-ensure_application_db
+  echo
+  echo "Adjust the settings.py and .env.prod file"
+  echo
+  prepare_settings_file
 
-echo
-echo "Adjust the settings.py and .env.prod file"
-echo
-prepare_settings_file
+  echo
+  echo "Install DefectDojo"
+  echo
+  install_app
 
-echo
-echo "Install DefectDojo"
-echo
-install_app
+  if [ "$DBTYPE" == "$MYSQL" ]; then
+    stop_local_mysql_db_server
+    set_random_mysql_db_pwd
+  fi
 
-if [ "$DBTYPE" == "$MYSQL" ]; then
-  stop_local_mysql_db_server
-  set_random_mysql_db_pwd
+  echo
+  echo "Running OS upgrade"
+  echo
+  upgrade
+
+elif [ "$FUNCTION" == "release" ]; then
+  remove_install_artifacts
+  install_postgres_client
 fi
-fi
-echo
-echo "Running upgrade"
-echo
-#upgrade
 
 echo
 echo "Docker build complete"
