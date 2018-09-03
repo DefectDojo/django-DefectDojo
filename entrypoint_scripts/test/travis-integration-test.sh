@@ -4,7 +4,7 @@ set -ex
 # Docker Build
 export DOJO_ADMIN_USER='admin'
 export DOJO_ADMIN_PASSWORD='admin'
-export CONTAINER_NAME=dojo
+export CONTAINER_NAME=defect_dojo_integration
 docker build --target dev-mysql-self-contained -t $REPO .
 # - docker run -e DOJO_ADMIN_USER=$DOJO_ADMIN_USER -e DOJO_ADMIN_PASSWORD=$DOJO_ADMIN_PASSWORD --name dojo -d -p 127.0.0.1:8000:8000 $REPO:${TRAVIS_COMMIT::8} bash /django-DefectDojo/docker/docker-startup.bash
 docker run -e DOJO_ADMIN_PASSWORD=$DOJO_ADMIN_PASSWORD -e ACTION=p -d -p 127.0.0.1:8000:8000 --name=$CONTAINER_NAME $REPO
@@ -16,7 +16,6 @@ pip install selenium
 pip install requests
 pip install python-owasp-zap-v2.4
 pip install prettytable
-pip install bandit
 wget -N https://chromedriver.storage.googleapis.com/2.37/chromedriver_linux64.zip -P ~/
 unzip ~/chromedriver_linux64.zip -d ~/
 rm ~/chromedriver_linux64.zip

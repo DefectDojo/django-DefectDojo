@@ -59,9 +59,6 @@ script:
         cd docker-bench-security
         sh docker-bench-security.sh
         ;;
-      ansible)
-        true
-        ;;
       pep8)
         pip install flake8
         flake8 .

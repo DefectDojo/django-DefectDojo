@@ -481,8 +481,8 @@ function prepare_settings_file() {
     sudo chmod -R u+rw /opt/django-DefectDojo/dojo/settings
     echo "after"
     ls -l /opt/django-DefectDojo/dojo/
-    sudo touch django_app.log
-    sudo chmod u+rw django_app.log
+    sudo touch /opt/django-DefectDojo/django_app.log
+    sudo chmod u+rw /opt/django-DefectDojo/django_app.log
 
     # Copy settings file
     sudo cp dojo/settings/settings.dist.py ${TARGET_SETTINGS_FILE}
