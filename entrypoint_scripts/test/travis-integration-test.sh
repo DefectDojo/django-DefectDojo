@@ -7,6 +7,8 @@ travis_fold() {
   echo -en "travis_fold:${action}:${name}\r"
 }
 
+travis_fold start travis_integration_install
+
 # Docker Build
 export DOJO_ADMIN_USER='admin'
 export DOJO_ADMIN_PASSWORD='admin'
@@ -30,7 +32,7 @@ sudo chmod +x /usr/local/share/chromedriver
 sudo ln -s /usr/local/share/chromedriver /usr/local/bin/chromedriver
 sleep 10
 docker ps -a
-travis_fold start container_log
+
 docker logs $CONTAINER_NAME
 travis_fold end container_log
 echo "Checking to see if dojo is running"
@@ -59,8 +61,15 @@ sh -e /etc/init.d/xvfb start
 sleep 3 # give xvfb some time to start
 whereis chromedriver
 export PATH=$PATH:/usr/local/bin/
+
+travis_fold end travis_integration_install
+
+travis_fold start travis_integration_tests
+
 python tests/check_status.py -v
 python tests/smoke_test.py
+
+travis_fold end travis_integration_tests
 # python tests/zap.py
 
 set +ex
