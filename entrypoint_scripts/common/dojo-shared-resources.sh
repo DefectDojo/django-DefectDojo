@@ -485,7 +485,8 @@ function prepare_settings_file() {
     sudo cp dojo/settings/settings.dist.py ${TARGET_SETTINGS_FILE}
 
     # Copy env file
-    cp dojo/settings/template-env ${ENV_SETTINGS_FILE}
+    sudo cp dojo/settings/template-env ${ENV_SETTINGS_FILE}
+    sudo chmod -R u+rw ${ENV_SETTINGS_FILE}
 
     # DD_DATABASE_URL can be set as an environment variable, if not construct
     if [ "$DBTYPE" == "$SQLITE" ]; then
