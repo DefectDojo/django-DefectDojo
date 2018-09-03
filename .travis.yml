@@ -16,6 +16,18 @@ jobs:
       script:
       - docker build --target dev-mysql-self-contained -t $REPO .
     - stage: Test
+      env:
+        - TEST=smoke-test
+        - TEST=integration-test
+        - TEST=unit-test
+        - TEST=bandit
+        - TEST=docker-bench-security
+        - TEST=flake8-complete
+        - TEST=flake8
+        - TEST=safety
+      matrix:
+        allow_failures:
+          - env: TEST=bandit
       script:
         - |
           echo "Running test=$TEST"
