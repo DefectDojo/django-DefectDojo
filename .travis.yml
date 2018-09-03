@@ -8,7 +8,6 @@ env:
   - TEST=unit-test
   - TEST=bandit
   - TEST=docker-bench-security
-  - TEST=ansible
   - TEST=flake8-complete
   - TEST=flake8
   - TEST=safety
