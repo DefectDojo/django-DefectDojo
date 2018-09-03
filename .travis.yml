@@ -23,17 +23,17 @@ jobs:
           bash entrypoint_scripts/test/travis-smoke-test.sh || exit 1
           travis_fold end "smoke-test"
           ;;
-        esac
+          esac
       script:
         - |
           unit-test)
-            travis_fold start "unit-test"
-            bash entrypoint_scripts/test/travis-unit-test.sh || exit 1
-            travis_fold end "unit-test"
-            ;;
-        escac
+          travis_fold start "unit-test"
+          bash entrypoint_scripts/test/travis-unit-test.sh || exit 1
+          travis_fold end "unit-test"
+          ;;
+          escac
       name: unit-test
-      
+
 after_success:
   #Push to docker repo
   - |
