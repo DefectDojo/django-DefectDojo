@@ -17,8 +17,7 @@ if cat dojo/settings/.env.prod | grep -q "mysql://root:@localhost:3306/dojodb"; 
 	echo "=============================================================================="
 	echo
 	source entrypoint_scripts/common/dojo-shared-resources.sh
-	ls -l
-	whoami
+
 	# Reset mysql password
 	set_random_mysql_db_pwd
 	DBTYPE=1

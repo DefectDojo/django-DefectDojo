@@ -476,21 +476,13 @@ function prepare_settings_file() {
     AES_PASSPHRASE=`cat /dev/urandom | LC_CTYPE=C tr -dc "a-zA-Z0-9" | head -c 128`
     TARGET_SETTINGS_FILE=dojo/settings/settings.py
     ENV_SETTINGS_FILE=dojo/settings/.env.prod
-    echo "before"
-    ls -l /opt/django-DefectDojo/dojo/
-    sudo chmod -R u+rw /opt/django-DefectDojo/dojo/settings
-    echo "after"
-    ls -l /opt/django-DefectDojo/dojo/
-    sudo touch /opt/django-DefectDojo/django_app.log
-    sudo chmod u+rw /opt/django-DefectDojo/django_app.log
 
     # Copy settings file
-    sudo cp dojo/settings/settings.dist.py ${TARGET_SETTINGS_FILE}
+    cp dojo/settings/settings.dist.py ${TARGET_SETTINGS_FILE}
 
     # Copy env file
-    sudo cp dojo/settings/template-env ${ENV_SETTINGS_FILE}
-    sudo chmod -R u+rw ${ENV_SETTINGS_FILE}
-
+    cp dojo/settings/template-env ${ENV_SETTINGS_FILE}
+    
     # DD_DATABASE_URL can be set as an environment variable, if not construct
     if [ "$DBTYPE" == "$SQLITE" ]; then
         DD_DATABASE_URL="sqlite:///defectdojo.db"

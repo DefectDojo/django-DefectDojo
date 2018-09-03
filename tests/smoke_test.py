@@ -42,8 +42,7 @@ class DojoTests(unittest.TestCase):
     def test_login(self):
         driver = self.login_page()
         loginTxt = driver.find_element_by_tag_name("BODY").text
-        #print loginTxt
-        self.assertTrue(re.search(r'Team Dashboard', loginTxt))
+        self.assertTrue(re.search(r'Active Engagements', loginTxt))
 
     def test_create_product(self):
         driver = self.login_page()

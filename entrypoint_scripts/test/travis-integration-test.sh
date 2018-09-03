@@ -28,7 +28,7 @@ rm ~/chromedriver_linux64.zip
 sudo mv -f ~/chromedriver /usr/local/share/
 sudo chmod +x /usr/local/share/chromedriver
 sudo ln -s /usr/local/share/chromedriver /usr/local/bin/chromedriver
-sleep 20
+sleep 10
 docker ps -a
 travis_fold start container_log
 docker logs $CONTAINER_NAME
