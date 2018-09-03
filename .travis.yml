@@ -13,8 +13,10 @@ before_script:
 jobs:
   include:
     - stage: build docker image
-      script:
-      - docker build --target dev-mysql-self-contained -t $REPO .
+      name: dev-mysql-docker
+      script: docker build --target dev-mysql-self-contained -t $REPO .
+      script: docker build --target release -t $REPO:release .
+      name: release
     - stage: Test
       name: smoke-test
       script: bash entrypoint_scripts/test/travis-smoke-test.sh || exit 1
@@ -22,6 +24,13 @@ jobs:
       name: unit-test
     - script: bash entrypoint_scripts/test/travis-integration-test.sh || exit 1
       name: integration-test
+    - script:
+      - |
+       pip install flake8
+       flake8 .
+       ;;
+      esac
+      name: flake8
 
 after_success:
   #Push to docker repo
