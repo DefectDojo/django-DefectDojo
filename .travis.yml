@@ -28,7 +28,8 @@ before_script:
 jobs:
   include:
     - stage: Build Docker Image
-      script: docker build --target dev-mysql-self-contained -t $REPO .
+      script:
+      - docker build --target dev-mysql-self-contained -t $REPO .
     - stage: Test
       script:
         - |
