@@ -1,7 +1,12 @@
 #!/bin/bash
 # setup.bash bootstraps DefectDojo Docker
 #
-
+travis_fold() {
+  local action=$1
+  local name=$2
+  echo -en "travis_fold:${action}:${name}\r"
+}
+travis_fold start dojo_container_build
 echo
 echo "DefectDojo Docker Install"
 echo
@@ -53,3 +58,4 @@ echo
 echo
 echo "Docker build complete"
 echo
+travis_fold end dojo_container_build

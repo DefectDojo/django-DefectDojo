@@ -11,6 +11,7 @@ from contextlib import contextmanager
 from selenium.webdriver.common.proxy import *
 import unittest, time, re
 import os
+import sys
 
 class DojoTests(unittest.TestCase):
     def setUp(self):
@@ -144,4 +145,6 @@ def suite():
 
 if __name__ == "__main__":
     runner = unittest.TextTestRunner(descriptions=True, failfast=True)
-    runner.run(suite())
+    ret = not runner.run(suite()).wasSuccessful()
+    # ret = not runner.run(test_suite).wasSuccessful()
+    sys.exit(ret)
