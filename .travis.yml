@@ -24,12 +24,10 @@ jobs:
       name: unit-test
     - script: bash entrypoint_scripts/test/travis-integration-test.sh || exit 1
       name: integration-test
-    - script:
+    script:
       - |
-       pip install flake8
-       flake8 .
-       ;;
-      esac
+        pip install flake8
+        flake8 .
       name: flake8
 
 after_success:
