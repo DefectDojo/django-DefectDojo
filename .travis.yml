@@ -10,47 +10,92 @@ before_script:
   - export REPO=appsecpipeline/django-defectdojo
   - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH ; fi`
 
-jobs:
-  include:
-    - stage: build docker image
-      name: dev-mysql-docker
-      script: docker build --target dev-mysql-self-contained -t $REPO .
-    - script: docker build --target release -t $REPO:release .
-      name: release-docker
-    - stage: tests
-      name: smoke-test
-      script: bash entrypoint_scripts/test/travis-smoke-test.sh || exit 1
-    - script: bash entrypoint_scripts/test/travis-unit-test.sh || exit 1
-      name: unit-test
-    - script: bash entrypoint_scripts/test/travis-integration-test.sh || exit 1
-      name: integration-test
-    - script:
-        - |
-          if [ "$TRAVIS_BRANCH" == "dev" ]
-          then
-              echo "Running Flake8 tests on dev branch aka pull requests"
-              # We need to checkout dev for flake8-diff to work properly
-              git checkout dev
-              pip install pep8 flake8 flake8-diff
-              flake8-diff
-          else
+env:
+  - TEST=smoke-test
+  - TEST=integration-test
+  - TEST=unit-test
+  - TEST=bandit
+  - TEST=docker-bench-security
+  - TEST=ansible
+  - TEST=flake8-complete
+  - TEST=flake8
+
+matrix:
+  allow_failures:
+    - env: TEST=bandit
+    - env: TEST=flake8-complete
+
+script:
+  - |
+    echo "Running test=$TEST"
+    case "$TEST" in
+      smoke-test)
+        travis_fold start "smoke-test"
+        bash entrypoint_scripts/test/travis-smoke-test.sh || exit 1
+        travis_fold end "smoke-test"
+        ;;
+      unit-test)
+        travis_fold start "unit-test"
+        bash entrypoint_scripts/test/travis-unit-test.sh || exit 1
+        travis_fold end "unit-test"
+        ;;
+      integration-test)
+        travis_fold start "integration-test"
+        bash entrypoint_scripts/test/travis-integration-test.sh || exit 1
+        travis_fold end "integration-test"
+        ;;
+      bandit)
+        # install bandit
+        pip install bandit
+
+        ## Run Bandit python static code
+        bandit -r * -x venv,tests,ansible
+        ;;
+      docker-bench-security)
+        ## Run Docker Bench for Security
+        git clone https://github.com/docker/docker-bench-security.git
+        cd docker-bench-security
+        sh docker-bench-security.sh
+        ;;
+      flake8-complete)
+        pip install flake8
+        flake8 .
+        ;;
+      flake8)
+        echo "$TRAVIS_BRANCH"
+        if [ "$TRAVIS_BRANCH" == "dev" ]
+        then
+            echo "Running Flake8 tests on dev branch aka pull requests"
+            # We need to checkout dev for flake8-diff to work properly
+            git checkout dev
+            pip install pep8 flake8 flake8-diff
+            flake8-diff
+        else
             echo "true"
-            fi
-      name: flake8
-    - script:
-        - |
-          git clone https://github.com/docker/docker-bench-security.git
-          cd docker-bench-security
-          sh docker-bench-security.sh
-      name: docker-bench-security
+        fi
+    esac
 
 after_success:
   #Push to docker repo
   - |
-    if [ "$TRAVIS_TAG" != "" ] && [ "$DOCKER_USER" != "" ] && [  "$DOCKER_PASS" != "" ]; then
-      docker tag $REPO $REPO:$TRAVIS_TAG
-      docker login -u "$DOCKER_USER" -p "$DOCKER_PASS";
-      docker push $REPO ;
+    if [ "$TRAVIS_BRANCH" == "master" ] |  [ "$TRAVIS_BRANCH" == "dev" ]
+      if [ "$DOCKER_USER" != "" ] && [  "$DOCKER_PASS" != "" ]; then
+        if [ "$TRAVIS_BRANCH" == "dev" ]
+          export BRANCH_TAG="devel-"
+        fi
+        docker tag $REPO "$REPO:$BRANCH_TAG$TRAVIS_TAG-mysql-self-contained"
+        if [ "$TRAVIS_BRANCH" == "master" ]
+          docker tag $REPO "$REPO:latest"
+        fi
+        docker login -u "$DOCKER_USER" -p "$DOCKER_PASS";
+        docker push $REPO;
+
+        export REPO=appsecpipeline/django-defectdojo
+        docker build --target release -t $REPO:slim .
+        docker tag $REPO "$REPO:$BRANCH_TAG$TRAVIS_TAG-slim"
+        docker login -u "$DOCKER_USER" -p "$DOCKER_PASS";
+        docker push $REPO;
+      fi
     fi
 
 notifications:
