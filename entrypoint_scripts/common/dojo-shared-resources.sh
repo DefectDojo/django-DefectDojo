@@ -552,7 +552,7 @@ function install_app(){
     fi
 
     if [ "$AUTO_DOCKER" == "yes" ]; then
-      python manage.py loaddata dojo/fixtures/*
+      python manage.py loaddata dojo/fixtures/defect_dojo_sample_data.json
     else
       python manage.py loaddata product_type
       python manage.py loaddata test_type
