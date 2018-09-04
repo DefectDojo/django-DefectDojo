@@ -14,9 +14,9 @@ jobs:
   include:
     - stage: build docker image
       name: dev-mysql-docker
-    - script: docker build --target dev-mysql-self-contained -t $REPO .
+      script: docker build --target dev-mysql-self-contained -t $REPO .
     - script: docker build --target release -t $REPO:release .
-      name: release
+      name: release-docker
     - stage: tests
       name: smoke-test
       script: bash entrypoint_scripts/test/travis-smoke-test.sh || exit 1
@@ -37,6 +37,12 @@ jobs:
             echo "true"
             fi
       name: flake8
+    - script:
+        - |
+          git clone https://github.com/docker/docker-bench-security.git
+          cd docker-bench-security
+          sh docker-bench-security.sh
+      name: docker-bench-security
 
 after_success:
   #Push to docker repo
