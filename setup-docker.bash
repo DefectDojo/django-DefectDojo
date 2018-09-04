@@ -58,6 +58,7 @@ elif [ "$FUNCTION" == "db" ]; then
 elif [ "$FUNCTION" == "release" ]; then
   remove_install_artifacts
   install_postgres_client
+  slim_defect_dojo_settings
 fi
 
 echo

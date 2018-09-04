@@ -78,13 +78,13 @@ script:
 after_success:
   #Push to docker repo
   - |
-    if [ "$TRAVIS_BRANCH" == "master" ] |  [ "$TRAVIS_BRANCH" == "dev" ]
-      if [ "$DOCKER_USER" != "" ] && [  "$DOCKER_PASS" != "" ]; then
-        if [ "$TRAVIS_BRANCH" == "dev" ]
+    if [ "$TRAVIS_BRANCH" == "master" ] |  [ "$TRAVIS_BRANCH" == "dev" ] ; then
+      if [ "$DOCKER_USER" != "" ] && [  "$DOCKER_PASS" != "" ] ; then
+        if [ "$TRAVIS_BRANCH" == "dev" ] ; then
           export BRANCH_TAG="devel-"
         fi
         docker tag $REPO "$REPO:$BRANCH_TAG$TRAVIS_TAG-mysql-self-contained"
-        if [ "$TRAVIS_BRANCH" == "master" ]
+        if [ "$TRAVIS_BRANCH" == "master" ] ; then
           docker tag $REPO "$REPO:latest"
         fi
         docker login -u "$DOCKER_USER" -p "$DOCKER_PASS";

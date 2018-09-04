@@ -24,5 +24,5 @@ CMD entrypoint_scripts/run/startup-docker.bash
 ########## Stage: release ##########
 FROM dev-mysql-self-contained as release
 RUN ./setup-docker.bash -y release
-USER dojo
+# USER dojo
 CMD gunicorn --bind 0.0.0.0:$PORT wsgi

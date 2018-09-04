@@ -38,7 +38,7 @@ if cat dojo/settings/.env.prod | grep -q "mysql://root:@localhost:3306/dojodb"; 
 	entrypoint_scripts/common/setup-superuser.expect admin "$DOJO_ADMIN_PASSWORD"
 
 	DB_ROOT_PASS_USER=`pwgen -scn $DB_ROOT_PASS_LEN 1`
-	entrypoint_scripts/common/setup-superuser.expect user1 "$DB_ROOT_PASS_USER"
+	entrypoint_scripts/common/setup-superuser.expect product_manager "$DB_ROOT_PASS_USER"
 
 	DB_ROOT_PASS_USER=`pwgen -scn $DB_ROOT_PASS_LEN 1`
 	entrypoint_scripts/common/setup-superuser.expect user2 "$DB_ROOT_PASS_USER"
