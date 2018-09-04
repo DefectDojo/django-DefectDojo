@@ -25,10 +25,18 @@ jobs:
     - script: bash entrypoint_scripts/test/travis-integration-test.sh || exit 1
       name: integration-test
     - script:
-      - | git clone https://github.com/docker/docker-bench-security.git
-        cd docker-bench-security
-        sh docker-bench-security.sh
-      name: docker-security
+        - |
+          if [ "$TRAVIS_BRANCH" == "dev" ]
+          then
+              echo "Running Flake8 tests on dev branch aka pull requests"
+              # We need to checkout dev for flake8-diff to work properly
+              git checkout dev
+              pip install pep8 flake8 flake8-diff
+              flake8-diff
+          else
+            echo "true"
+            fi
+      name: flake8
 
 after_success:
   #Push to docker repo
