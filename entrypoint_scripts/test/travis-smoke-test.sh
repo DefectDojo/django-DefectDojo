@@ -10,7 +10,7 @@ set -x
 EXIT_STATUS=0
 
 # Build the actual container
-docker build --target dev-mysql-self-contained -t $REPO .
+# docker build --target dev-mysql-self-contained -t $REPO .
 
 # Launch one container per service
 container_id_worker=$(docker run -e ACTION=c -d $REPO)

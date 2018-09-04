@@ -26,11 +26,6 @@ jobs:
       name: integration-test
     - script:
       - |
-        pip install flake8
-        flake8 .
-      name: flake8
-    - script:
-      - |
         if [ "$TRAVIS_BRANCH" == "dev" ]
         then
             echo "Running Flake8 tests on dev branch aka pull requests"
@@ -41,7 +36,7 @@ jobs:
         else
             echo "true"
         fi
-      name: flake8-dev-branch
+      name: flake8
     - script:
       - | git clone https://github.com/docker/docker-bench-security.git
         cd docker-bench-security
