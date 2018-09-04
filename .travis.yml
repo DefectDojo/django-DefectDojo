@@ -17,26 +17,13 @@ jobs:
     - script: docker build --target dev-mysql-self-contained -t $REPO .
     - script: docker build --target release -t $REPO:release .
       name: release
-    - stage: Test
+    - stage: tests
       name: smoke-test
       script: bash entrypoint_scripts/test/travis-smoke-test.sh || exit 1
     - script: bash entrypoint_scripts/test/travis-unit-test.sh || exit 1
       name: unit-test
     - script: bash entrypoint_scripts/test/travis-integration-test.sh || exit 1
       name: integration-test
-    - script:
-      - |
-        if [ "$TRAVIS_BRANCH" == "dev" ]
-        then
-            echo "Running Flake8 tests on dev branch aka pull requests"
-            # We need to checkout dev for flake8-diff to work properly
-            git checkout dev
-            pip install pep8 flake8 flake8-diff
-            flake8-diff
-        else
-            echo "true"
-        fi
-      name: flake8
     - script:
       - | git clone https://github.com/docker/docker-bench-security.git
         cd docker-bench-security
