@@ -248,7 +248,8 @@ class ImportScanForm(forms.Form):
                          ("SKF Scan", "SKF Scan"),
                          ("Bandit Scan", "Bandit Scan"),
                          ("SSL Labs Scan", "SSL Labs Scan"),
-                         ("Gosec Scanner", "Gosec Scanner"))
+                         ("Gosec Scanner", "Gosec Scanner"),
+                         ("SonarQube Scan", "SonarQube Scan"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
 
@@ -270,7 +271,7 @@ class ImportScanForm(forms.Form):
                            help_text="Add tags that help describe this scan.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
     file = forms.FileField(widget=forms.widgets.FileInput(
-        attrs={"accept": ".xml, .csv, .nessus, .json"}),
+        attrs={"accept": ".xml, .csv, .nessus, .json, .html"}),
         label="Choose report file",
         required=True)
 
@@ -305,7 +306,7 @@ class ReImportScanForm(forms.Form):
                            help_text="Add tags that help describe this scan.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
     file = forms.FileField(widget=forms.widgets.FileInput(
-        attrs={"accept": ".xml, .csv, .nessus, .json"}),
+        attrs={"accept": ".xml, .csv, .nessus, .json, .html"}),
         label="Choose report file",
         required=True)
 
