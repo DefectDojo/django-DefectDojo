@@ -367,6 +367,11 @@ class Test_Type(models.Model):
                'url': None}]
         return bc
 
+class DojoMeta(models.Model):
+    name = models.CharField(max_length=120)
+    value = models.CharField(max_length=300)
+    model_name = models.CharField(editable=False, max_length=30)
+    model_id = models.IntegerField(editable=False)
 
 class Product(models.Model):
     WEB_PLATFORM = 'web'
@@ -462,6 +467,8 @@ class Product(models.Model):
     external_audience = models.BooleanField(default=False, help_text=_('Specify if the application is used by people outside the organization.'))
     internet_accessible = models.BooleanField(default=False, help_text=_('Specify if the application is accessible from the public internet.'))
     regulations = models.ManyToManyField(Regulation, blank=True)
+    product_meta = models.ManyToManyField(DojoMeta)
+
 
     def __unicode__(self):
         return self.name
@@ -809,6 +816,7 @@ class Endpoint(models.Model):
     product = models.ForeignKey(Product, null=True, blank=True, )
     endpoint_params = models.ManyToManyField(Endpoint_Params, blank=True,
                                              editable=False)
+    endpoint_meta = models.ManyToManyField(DojoMeta, editable=False)
 
     class Meta:
         ordering = ['product', 'protocol', 'host', 'path', 'query', 'fragment']
