@@ -373,6 +373,15 @@ class DojoMeta(models.Model):
     model_name = models.CharField(editable=False, max_length=30)
     model_id = models.IntegerField(editable=False)
 
+    def save(self, *args, **kwargs):
+        super(Finding, self).save(*args, **kwargs)
+        if self.model_name.lower() == "product":
+            prod = Product.objects.get(id=self.model_id)
+            prod.product_meta.add(self)
+        else:
+            ep = Endpoint.objects.get(id=self.model_id)
+            ep.product_meta.add(self)
+
 class Product(models.Model):
     WEB_PLATFORM = 'web'
     IOT = 'iot'
