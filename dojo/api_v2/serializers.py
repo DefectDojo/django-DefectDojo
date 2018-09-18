@@ -10,6 +10,7 @@ from django.core.validators import URLValidator, validate_ipv46_address
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.db.models import Q
 import datetime
 import six
 from django.utils.translation import ugettext_lazy as _
@@ -472,9 +473,11 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         default=None,
         queryset=User.objects.all())
     tags = TagListSerializerField(required=False)
+    skip_duplicates = serializers.BooleanField(required=False, default=False)
 
     def save(self):
         data = self.validated_data
+        skip_duplicates = data['skip_duplicates']
         test_type, created = Test_Type.objects.get_or_create(
             name=data['scan_type'])
         environment, created = Development_Environment.objects.get_or_create(
@@ -503,6 +506,12 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
 
         try:
             for item in parser.items:
+                if skip_duplicates and \
+                   Finding.objects.filter(Q(active=True) | Q(false_p=True),
+                                          test__engagement__product=test.engagement.product,
+                                          hash_code=item.compute_hash_code()).exists():
+                    continue
+
                 sev = item.severity
                 if sev == 'Information' or sev == 'Informational':
                     sev = 'Info'
