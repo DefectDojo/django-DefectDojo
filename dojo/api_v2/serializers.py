@@ -474,10 +474,12 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         queryset=User.objects.all())
     tags = TagListSerializerField(required=False)
     skip_duplicates = serializers.BooleanField(required=False, default=False)
+    close_old_findings = serializers.BooleanField(required=False, default=False)
 
     def save(self):
         data = self.validated_data
         skip_duplicates = data['skip_duplicates']
+        close_old_findings = data['close_old_findings']
         test_type, created = Test_Type.objects.get_or_create(
             name=data['scan_type'])
         environment, created = Development_Environment.objects.get_or_create(
@@ -565,6 +567,19 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 #    item.tags = item.unsaved_tags
         except SyntaxError:
             raise Exception('Parser SyntaxError')
+
+        if close_old_findings:
+            # Close old active findings that are not reported by this scan.
+            new_hash_codes = test.finding_set.values('hash_code')
+            for old_finding in Finding.objects.exclude(test=test) \
+                               .filter(~Q(hash_code__in=new_hash_codes),
+                                       test__engagement__product=test.engagement.product,
+                                       active=True):
+                old_finding.active = False
+                old_finding.notes.create(author=self.context['request'].user,
+                                         entry="This finding has been automatically closed" \
+                                         " as it is not present anymore in recent scans.")
+                old_finding.save()
 
         return test
 
