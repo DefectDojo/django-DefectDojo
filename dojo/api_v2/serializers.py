@@ -130,12 +130,12 @@ class TaggitSerializer(serializers.Serializer):
 
         return (to_be_tagged, validated_data)
 
+"""
 class ProductMetaSerializer(serializers.ModelSerializer):
     product_meta = serializers.DictField(read_only=True)
     product_meta_write = serializers.DictField(write_only=True)
     class Meta:
         model = DojoMeta
-        exclude = ('model_name', 'model_id')
 
     def create(self, validated_data):
         product_meta_data = validated_data.pop('product_meta_write')
@@ -150,8 +150,19 @@ class ProductMetaSerializer(serializers.ModelSerializer):
 
 
 
-
     def to_representation(self, value):
+"""
+
+class MetaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DojoMeta
+        fields = '__all__'
+
+class ProductMetaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DojoMeta
+        fields = ('name', 'value')
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -161,7 +172,7 @@ class UserSerializer(serializers.ModelSerializer):
 class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
     findings_count = serializers.SerializerMethodField()
     tags = TagListSerializerField(required=False)
-    product_meta = ProductMetaSerializer(required=False, many=True, read_only=False )
+    product_meta  = ProductMetaSerializer(read_only=True, many=True)
 
     class Meta:
         model = Product

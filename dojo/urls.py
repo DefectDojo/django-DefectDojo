@@ -21,7 +21,7 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     JiraIssuesViewSet, JiraViewSet, ProductViewSet, ScanSettingsViewSet, \
     ScansViewSet, StubFindingsViewSet, TestsViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
-    UsersViewSet, ImportScanView, ReImportScanView, ProductTypeViewSet
+    UsersViewSet, ImportScanView, ReImportScanView, ProductTypeViewSet, DojoMetaViewSet
 
 from dojo.utils import get_system_setting
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
@@ -101,6 +101,7 @@ v2_api.register(r'tool_types', ToolTypesViewSet)
 v2_api.register(r'users', UsersViewSet)
 v2_api.register(r'import-scan', ImportScanView, base_name='importscan')
 v2_api.register(r'reimport-scan', ReImportScanView, base_name='reimportscan')
+v2_api.register(r'metadata', DojoMetaViewSet, base_name='metadata')
 
 
 ur = []
