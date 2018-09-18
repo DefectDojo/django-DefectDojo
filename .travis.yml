@@ -71,8 +71,8 @@ script:
         flake8 .
         ;;
       safety)
-	pip install safety
-	safety check -i 35015
+        pip install safety
+        safety check -i 35015
 	;;
       flake8)
         echo "$TRAVIS_BRANCH"
