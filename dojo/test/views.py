@@ -6,10 +6,10 @@ from datetime import datetime
 
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.urlresolvers import reverse
 from django.db.models import Q
-from django.http import HttpResponseRedirect, HttpResponseForbidden, Http404, HttpResponse
+from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.cache import cache_page
 from django.utils import timezone
@@ -148,21 +148,6 @@ def delete_test(request, tid):
 
 
 @user_passes_test(lambda u: u.is_staff)
-def delete_test_note(request, tid, nid):
-    note = Notes.objects.get(id=nid)
-    test = Test.objects.get(id=tid)
-    if note.author == request.user:
-        test.notes.remove(note)
-        note.delete()
-        messages.add_message(request,
-                             messages.SUCCESS,
-                             'Note removed.',
-                             extra_tags='alert-success')
-        return view_test(request, tid)
-    return HttpResponseForbidden()
-
-
-@user_passes_test(lambda u: u.is_staff)
 @cache_page(60 * 5)  # cache for 5 minutes
 def test_calendar(request):
     if 'lead' not in request.GET or '0' in request.GET.getlist('lead'):
@@ -219,6 +204,20 @@ def add_findings(request, tid):
 
     if request.method == 'POST':
         form = AddFindingForm(request.POST)
+        if form['active'].value() is False or form['verified'].value() is False and 'jiraform-push_to_jira' in request.POST:
+            error = ValidationError('Findings must be active and verified to be pushed to JIRA',
+                                    code='not_active_or_verified')
+            if form['active'].value() is False:
+                form.add_error('active', error)
+            if form['verified'].value() is False:
+                form.add_error('verified', error)
+            messages.add_message(request,
+                                 messages.ERROR,
+                                 'Findings must be active and verified to be pushed to JIRA',
+                                 extra_tags='alert-danger')
+        if form['severity'].value() == 'Info' and 'jiraform-push_to_jira' in request.POST:
+            error = ValidationError('Findings with Informational severity cannot be pushed to JIRA.',
+                                    code='info-severity-to-jira')
         if form.is_valid():
             new_finding = form.save(commit=False)
             new_finding.test = test

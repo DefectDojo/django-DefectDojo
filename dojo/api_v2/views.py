@@ -2,7 +2,7 @@ from rest_framework import viewsets, mixins
 from rest_framework.permissions import DjangoModelPermissions
 from django_filters.rest_framework import DjangoFilterBackend
 
-from dojo.models import Product, Engagement, Test, Finding, \
+from dojo.models import Product, Product_Type, Engagement, Test, Finding, \
     User, ScanSettings, Scan, Stub_Finding, Finding_Template, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Endpoint, JIRA_PKey, JIRA_Conf
@@ -127,6 +127,15 @@ class ProductViewSet(mixins.ListModelMixin,
                 authorized_users__in=[self.request.user])
         else:
             return Product.objects.all()
+
+
+class ProductTypeViewSet(mixins.ListModelMixin,
+                         mixins.RetrieveModelMixin,
+                         viewsets.GenericViewSet):
+    serializer_class = serializers.ProductTypeSerializer
+    queryset = Product_Type.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'name', 'critical_product', 'key_product', 'created', 'updated')
 
 
 class ScanSettingsViewSet(mixins.ListModelMixin,

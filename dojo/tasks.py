@@ -231,7 +231,7 @@ def add_issue_task(find, push_to_jira):
 
 @task(name='update_issue_task')
 def update_issue_task(find, old_status, push_to_jira):
-    logger.info("add issue task")
+    logger.info("update issue task")
     update_issue(find, old_status, push_to_jira)
 
 
@@ -283,9 +283,13 @@ def async_dupe_delete(*args, **kwargs):
     system_settings = System_Settings.objects.get()
     if system_settings.delete_dupulicates:
         dupe_max = system_settings.max_dupes
-        findings = Finding.objects.all().annotate(num_dupes=Count('duplicate_list')).filter(num_dupes__gt=dupe_max)
+        findings = Finding.objects \
+                .filter(duplicate_list__duplicate=True) \
+                .annotate(num_dupes=Count('duplicate_list')) \
+                .filter(num_dupes__gt=dupe_max)
         for finding in findings:
-            duplicate_list = finding.duplicate_list.all().order_by('date').all()
+            duplicate_list = finding.duplicate_list \
+                    .filter(duplicate=True).order_by('date')
             dupe_count = len(duplicate_list) - dupe_max
             for finding in duplicate_list:
                 finding.delete()

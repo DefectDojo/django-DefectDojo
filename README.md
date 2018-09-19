@@ -1,6 +1,6 @@
 # DefectDojo [![OWASP Flagship](https://img.shields.io/badge/owasp-flagship%20project-orange.svg)](https://www.owasp.org/index.php/OWASP_DefectDojo_Project) [![GitHub release](https://img.shields.io/github/release/DefectDojo/django-DefectDojo.svg)](https://github.com/DefectDojo/django-DefectDojo) [![YouTube Subscribe](https://img.shields.io/badge/youtube-subscribe-%23c4302b.svg)](https://www.youtube.com/channel/UCWw9qzqptiIvTqSqhOFuCuQ) ![Twitter Follow](https://img.shields.io/twitter/follow/defectdojo.svg?style=social&label=Follow)
 
-[![Documentation Status](https://readthedocs.org/projects/defectdojo/badge/?version=latest)](https://defectdojo.readthedocs.io/en/latest/?badge=latest) [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/2098/badge)](https://bestpractices.coreinfrastructure.org/projects/2098) 
+[![Build Status](https://travis-ci.org/DefectDojo/django-DefectDojo.svg?branch=master)](https://travis-ci.org/DefectDojo/django-DefectDojo) [![Documentation Status](https://readthedocs.org/projects/defectdojo/badge/?version=latest)](https://defectdojo.readthedocs.io/en/latest/?badge=latest) [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/2098/badge)](https://bestpractices.coreinfrastructure.org/projects/2098)
 
 ![Screenshot of DefectDojo](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/screenshot1.png)
 
@@ -31,8 +31,6 @@ For detailed documentation you can visit [Read the Docs](https://defectdojo.read
 ### [Debian, Ubuntu (16.04.2+) or RHEL-based Install Script](https://defectdojo.readthedocs.io/en/latest/getting-started.html#install-script)
 
 ### [Docker](https://defectdojo.readthedocs.io/en/latest/getting-started.html#docker-local-install)
-
-### [Ansible](https://raw.githubusercontent.com/DefectDojo/Documentation/master/ansible/prod-install)
 
 # Getting Started
 
@@ -74,10 +72,14 @@ Realtime discussion is done in the OWASP Slack Channel, #defectdojo. [Get Access
 DefectDojo is maintained by:
 
 - [Greg Anderson](https://www.linkedin.com/in/g-anderson/)
-- Aaron Weaver ([@weavera](https://twitter.com/weavera))
-- Matt Tesauro ([@matt_tesauro](https://twitter.com/matt_tesauro))
-- Charles Neill ([@ccneill](https://twitter.com/ccneill))
-- Jay Paz ([@jjpaz](https://twitter.com/jjpaz))
+- [Aaron Weaver](https://www.linkedin.com/in/aweaver/) ([@weavera](https://twitter.com/weavera))
+- [Matt Tesauro](https://www.linkedin.com/in/matttesauro/) ([@matt_tesauro](https://twitter.com/matt_tesauro))
+
+
+# Hall of Fame
+
+- Charles Neill ([@ccneill](https://twitter.com/ccneill)) - Charles served as a DefectDojo Maintainer for years and wrote some of Dojo's core functionality.
+- Jay Paz ([@jjpaz](https://twitter.com/jjpaz)) - Jay was a DefectDojo maintainer for years. He performed Dojo's first UI overhaul, optomized code structure/features, and added numerous enhancements.
 
 # Contributing
 
