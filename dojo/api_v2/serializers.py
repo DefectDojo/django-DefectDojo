@@ -10,6 +10,7 @@ from django.core.validators import URLValidator, validate_ipv46_address
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.db.models import Q
 import datetime
 import six
 from django.utils.translation import ugettext_lazy as _
@@ -472,9 +473,13 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         default=None,
         queryset=User.objects.all())
     tags = TagListSerializerField(required=False)
+    skip_duplicates = serializers.BooleanField(required=False, default=False)
+    close_old_findings = serializers.BooleanField(required=False, default=False)
 
     def save(self):
         data = self.validated_data
+        skip_duplicates = data['skip_duplicates']
+        close_old_findings = data['close_old_findings']
         test_type, created = Test_Type.objects.get_or_create(
             name=data['scan_type'])
         environment, created = Development_Environment.objects.get_or_create(
@@ -503,6 +508,12 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
 
         try:
             for item in parser.items:
+                if skip_duplicates and \
+                   Finding.objects.filter(Q(active=True) | Q(false_p=True),
+                                          test__engagement__product=test.engagement.product,
+                                          hash_code=item.compute_hash_code()).exists():
+                    continue
+
                 sev = item.severity
                 if sev == 'Information' or sev == 'Informational':
                     sev = 'Info'
@@ -556,6 +567,19 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 #    item.tags = item.unsaved_tags
         except SyntaxError:
             raise Exception('Parser SyntaxError')
+
+        if close_old_findings:
+            # Close old active findings that are not reported by this scan.
+            new_hash_codes = test.finding_set.values('hash_code')
+            for old_finding in Finding.objects.exclude(test=test) \
+                               .filter(~Q(hash_code__in=new_hash_codes),
+                                       test__engagement__product=test.engagement.product,
+                                       active=True):
+                old_finding.active = False
+                old_finding.notes.create(author=self.context['request'].user,
+                                         entry="This finding has been automatically closed" \
+                                         " as it is not present anymore in recent scans.")
+                old_finding.save()
 
         return test
 
