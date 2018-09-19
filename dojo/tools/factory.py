@@ -13,6 +13,7 @@ from dojo.tools.vcg.parser import VCGParser
 from dojo.tools.dependencycheck.parser import DependencyCheckParser
 from dojo.tools.retirejs.parser import RetireJsParser
 from dojo.tools.nsp.parser import NspParser
+from dojo.tools.npmaudit.parser import NpmAuditParser
 from dojo.tools.generic.parser import GenericFindingUploadCsvParser
 from dojo.tools.qualys.parser import QualysParser
 from dojo.tools.qualyswebapp.parser import QualysWebAppParser
@@ -25,6 +26,7 @@ from dojo.tools.ssllabs.parser import SSLlabsParser
 from dojo.tools.nikto.parser import NiktoXMLParser
 from dojo.tools.trufflehog.parser import TruffleHogJSONParser
 from dojo.tools.sonarqube.parser import SonarQubeHtmlParser
+from dojo.tools.clair.parser import ClairParser
 
 __author__ = 'Jay Paz'
 
@@ -42,6 +44,8 @@ def import_parser_factory(file, test, scan_type=None):
             parser = NessusCSVParser(file, test)
         elif filename.endswith("xml") or filename.endswith("nessus"):
             parser = NessusXMLParser(file, test)
+    elif scan_type == "Clair Scan":
+        parser = ClairParser(file, test)
     elif scan_type == "Nmap Scan":
         parser = NmapXMLParser(file, test)
     elif scan_type == "Nikto Scan":
@@ -70,6 +74,8 @@ def import_parser_factory(file, test, scan_type=None):
         parser = RetireJsParser(file, test)
     elif scan_type == 'Node Security Platform Scan':
         parser = NspParser(file, test)
+    elif scan_type == 'NPM Audit Scan':
+        parser = NpmAuditParser(file, test)
     elif scan_type == 'Generic Findings Import':
         parser = GenericFindingUploadCsvParser(file, test)
     elif scan_type == 'Qualys Scan':
