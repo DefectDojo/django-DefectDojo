@@ -6,6 +6,11 @@
 
 [DefectDojo](https://www.defectdojo.org/) is a security program and vulnerability management tool. DefectDojo allows you to manage your application security program, maintain product and application information, schedule scans, triage vulnerabilities and push findings into defect trackers. Consolidate your findings into one source of truth with DefectDojo.
 
+# Demo
+Try out DefectDojo in our [testing environment](https://defectdojo.herokuapp.com/).
+* admin / defectdojo@demo#appsec
+* product_manager / defectdojo@demo#product
+
 # Quick Start
 
 ```bash
