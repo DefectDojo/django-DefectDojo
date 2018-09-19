@@ -79,6 +79,9 @@ class System_Settings(models.Model):
     enable_jira = models.BooleanField(default=False,
                                       verbose_name='Enable JIRA integration',
                                       blank=False)
+    enable_jira_web_hook = models.BooleanField(default=False,
+                                      verbose_name='Enable JIRA web hook. Please note: It is strongly recommended to whitelist the Jira server using a proxy such as Nginx.',
+                                      blank=False)
     jira_choices = (('Critical', 'Critical'),
                     ('High', 'High'),
                     ('Medium', 'Medium'),
@@ -276,7 +279,7 @@ class Contact(models.Model):
 
 
 class Product_Type(models.Model):
-    name = models.CharField(max_length=300)
+    name = models.CharField(max_length=300, unique=True)
     critical_product = models.BooleanField(default=False)
     key_product = models.BooleanField(default=False)
     updated = models.DateTimeField(auto_now=True, null=True)
@@ -349,7 +352,7 @@ class Report_Type(models.Model):
 
 
 class Test_Type(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, unique=True)
     static_tool = models.BooleanField(default=False)
     dynamic_tool = models.BooleanField(default=False)
 
@@ -418,7 +421,7 @@ class Product(models.Model):
         (NONE_CRITICALITY, _('None')),
     )
 
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=4000)
 
     '''
@@ -797,7 +800,7 @@ class Endpoint(models.Model):
     path = models.CharField(null=True, blank=True, max_length=500,
                             help_text="The location of the resource, it should start with a '/'. For example"
                                       "/endpoint/420/edit")
-    query = models.CharField(null=True, blank=True, max_length=5000,
+    query = models.CharField(null=True, blank=True, max_length=1000,
                              help_text="The query string, the question mark should be omitted."
                                        "For example 'group=4&team=8'")
     fragment = models.CharField(null=True, blank=True, max_length=500,
@@ -1038,15 +1041,15 @@ class Finding(models.Model):
     class Meta:
         ordering = ('numerical_severity', '-date', 'title')
 
-    def get_hash_code(self):
+    def compute_hash_code(self):
         hash_string = self.title + str(self.cwe) + str(self.line) + str(self.file_path)
 
         if self.dynamic_finding:
-            endpoint_str = ""
+            endpoint_str = u''
             for e in self.endpoints.all():
                 endpoint_str += str(e)
             hash_string = endpoint_str
-        hash_string = hash_string.decode('utf-8').strip()
+        hash_string = hash_string.strip()
         return hashlib.sha256(hash_string.encode('utf-8')).hexdigest()
 
     def duplicate_finding_set(self):
@@ -1175,11 +1178,12 @@ class Finding(models.Model):
 
     def save(self, dedupe_option=True, rules_option=True, *args, **kwargs):
         # Make changes to the finding before it's saved to add a CWE template
-        if not self.pk:
+        if self.pk is None:
             from dojo.utils import apply_cwe_to_template
             self = apply_cwe_to_template(self)
+            # Only compute hash code for new findings.
+            self.hash_code = self.compute_hash_code()
         super(Finding, self).save(*args, **kwargs)
-        self.hash_code = self.get_hash_code()
         self.found_by.add(self.test.test_type)
         if self.test.test_type.static_tool:
             self.static_finding = True
@@ -1543,7 +1547,7 @@ class JIRA_Conf(models.Model):
 
 
 class JIRA_Issue(models.Model):
-    jira_id = models.CharField(max_length=200)
+    jira_id = models.CharField(max_length=200, unique=True)
     jira_key = models.CharField(max_length=200)
     finding = models.OneToOneField(Finding, null=True, blank=True)
     engagement = models.OneToOneField(Engagement, null=True, blank=True)
@@ -1579,6 +1583,9 @@ class JIRA_PKey(models.Model):
     enable_engagement_epic_mapping = models.BooleanField(default=False,
                                                          blank=True)
     push_notes = models.BooleanField(default=False, blank=True)
+
+    def __unicode__(self):
+        return self.product.name + " | " + self.project_key
 
 
 NOTIFICATION_CHOICES = (
