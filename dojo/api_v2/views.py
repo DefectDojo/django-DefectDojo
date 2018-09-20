@@ -108,6 +108,7 @@ class JiraViewSet(mixins.ListModelMixin,
 
 class DojoMetaViewSet(mixins.ListModelMixin,
                      mixins.RetrieveModelMixin,
+                     mixins.DestroyModelMixin,
                      mixins.CreateModelMixin,
                      mixins.UpdateModelMixin,
                      viewsets.GenericViewSet):

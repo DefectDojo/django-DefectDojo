@@ -201,7 +201,7 @@ class DojoMetaDataForm(forms.ModelForm):
 
     class Meta:
         model = DojoMeta
-        exclude = []
+        exclude = ('model_name', 'model_id')
 
 
 class Product_TypeProductForm(forms.ModelForm):
@@ -777,6 +777,7 @@ class PromoteFindingForm(forms.ModelForm):
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'active', 'false_p', 'verified', 'is_template',
                    'duplicate', 'out_of_scope', 'images', 'under_review', 'reviewers', 'review_requested_by')
+
 
 
 class FindingForm(forms.ModelForm):
