@@ -518,16 +518,14 @@ def edit_finding(request, fid):
                 jform = JIRAFindingForm(
                     request.POST, prefix='jiraform', enabled=enabled)
                 if jform.is_valid():
-                    try:
-                        # jissue = JIRA_Issue.objects.get(finding=new_finding)
+                    if JIRA_Issue.objects.filter(finding=new_finding).exists():
                         update_issue_task.delay(
                             new_finding, old_status,
                             jform.cleaned_data.get('push_to_jira'))
-                    except:
+                    else:
                         add_issue_task.delay(
                             new_finding,
                             jform.cleaned_data.get('push_to_jira'))
-                        pass
             tags = request.POST.getlist('tags')
             t = ", ".join(tags)
             new_finding.tags = t
