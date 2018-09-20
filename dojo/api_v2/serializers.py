@@ -130,28 +130,6 @@ class TaggitSerializer(serializers.Serializer):
 
         return (to_be_tagged, validated_data)
 
-"""
-class ProductMetaSerializer(serializers.ModelSerializer):
-    product_meta = serializers.DictField(read_only=True)
-    product_meta_write = serializers.DictField(write_only=True)
-    class Meta:
-        model = DojoMeta
-
-    def create(self, validated_data):
-        product_meta_data = validated_data.pop('product_meta_write')
-        dojo_m = super(ProductMetaSerializer, self).create(validated_data)
-        for key, val in product_meta_data.items():
-            DojoMeta.objects.create(name=key, obj=dojo_m, value=val)
-        return dojo_m
-
-    def to_internal_value(self, data):
-        if not isinstance(data, dict):
-            raise serializers.ValidationError('Metadata must be a dictionary.')
-
-
-
-    def to_representation(self, value):
-"""
 
 class MetaSerializer(serializers.ModelSerializer):
     class Meta:
