@@ -139,9 +139,9 @@ def view_endpoint(request, eid):
     endpoint_metadata = {}
 
     for cf in endpoint_cf.all():
-        cfv = cf.value()
+        cfv = cf.value
         if len(cfv):
-            endpoint_metadata[cf] = cfv
+            endpoint_metadata[cf.name] = cfv
 
     all_findings = Finding.objects.filter(endpoints__in=endpoints).distinct()
 

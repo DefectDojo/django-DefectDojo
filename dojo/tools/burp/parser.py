@@ -148,6 +148,7 @@ def do_clean(value):
 
 
 def get_item(item_node, test):
+    endpoints = []
     host_node = item_node.findall('host')[0]
 
     url_host = host_node.text

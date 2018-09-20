@@ -370,17 +370,17 @@ class Test_Type(models.Model):
 class DojoMeta(models.Model):
     name = models.CharField(max_length=120)
     value = models.CharField(max_length=300)
-    model_name = models.CharField(editable=False, max_length=30)
-    model_id = models.IntegerField(editable=False)
+    model_name = models.CharField(max_length=30)
+    model_id = models.IntegerField()
 
     def save(self, *args, **kwargs):
-        super(Finding, self).save(*args, **kwargs)
+        super(DojoMeta, self).save(*args, **kwargs)
         if self.model_name.lower() == "product":
             prod = Product.objects.get(id=self.model_id)
             prod.product_meta.add(self)
         else:
             ep = Endpoint.objects.get(id=self.model_id)
-            ep.product_meta.add(self)
+            ep.endpoint_meta.add(self)
 
 class Product(models.Model):
     WEB_PLATFORM = 'web'
@@ -1199,7 +1199,8 @@ class Finding(models.Model):
             from dojo.utils import apply_cwe_to_template
             self = apply_cwe_to_template(self)
             # Only compute hash code for new findings.
-            self.hash_code = self.compute_hash_code()
+        super(Finding, self).save(*args, **kwargs)
+        self.hash_code = self.compute_hash_code()
         super(Finding, self).save(*args, **kwargs)
         self.found_by.add(self.test.test_type)
         if self.test.test_type.static_tool:
