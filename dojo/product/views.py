@@ -1,6 +1,5 @@
 # #  product
 import calendar as tcalendar
-import sys
 import logging
 from collections import OrderedDict
 from datetime import datetime, date, timedelta
@@ -85,18 +84,12 @@ def view_product(request, pid):
     system_settings = System_Settings.objects.get()
 
     product_cf = prod.product_meta.order_by('name')
-    print  >> sys.stderr, "product_cf "
-    print  >> sys.stderr, product_cf
     product_metadata = {}
 
     for cf in product_cf:
         cfv = cf.value
-        print  >> sys.stderr, "cfv"
-        print  >> sys.stderr, cfv
         if len(cfv):
             product_metadata[cf.name] = cfv
-    print >> sys.stderr,  "product metadata"
-    print >> sys.stderr,  product_metadata
 
     verified_findings = Finding.objects.filter(test__engagement__product=prod,
                                                 false_p=False,
@@ -715,8 +708,6 @@ def edit_meta_data(request, pid):
         cfv = cf.value
         if len(cfv):
             product_metadata[cf] = cfv
-    print >> sys.stderr, ("product metadata in edit")
-    print >> sys.stderr,  product_metadata
     if request.method == 'POST':
         for key, value in request.POST.iteritems():
             if key.startswith('cfv_'):
