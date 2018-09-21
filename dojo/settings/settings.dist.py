@@ -144,9 +144,9 @@ MIDDLEWARE_CLASSES = (
     'dojo.middleware.TimezoneMiddleware'
 )
 
-##AUTHENTICATION_BACKENDS = [
-##'axes.backends.AxesModelBackend',
-##]
+# AUTHENTICATION_BACKENDS = [
+# 'axes.backends.AxesModelBackend',
+# ]
 
 ROOT_URLCONF = 'dojo.urls'
 LOGIN_URL = '/login'
