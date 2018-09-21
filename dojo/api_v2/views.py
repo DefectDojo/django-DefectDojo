@@ -106,6 +106,7 @@ class JiraViewSet(mixins.ListModelMixin,
                      'push_all_issues', 'enable_engagement_epic_mapping',
                      'push_notes')
 
+
 class DojoMetaViewSet(mixins.ListModelMixin,
                      mixins.RetrieveModelMixin,
                      mixins.DestroyModelMixin,
@@ -129,6 +130,7 @@ class ProductViewSet(mixins.ListModelMixin,
                           DjangoModelPermissions)
     # TODO: findings count field
     filter_fields = ('id', 'name', 'prod_type', 'created', 'authorized_users')
+
 
     def get_queryset(self):
         if not self.request.user.is_staff:

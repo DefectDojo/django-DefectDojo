@@ -1,4 +1,3 @@
-import csv
 
 from django.core.management.base import BaseCommand
 from django.contrib.contenttypes.models import ContentType
@@ -9,6 +8,7 @@ from dojo.models import DojoMeta, Product, Endpoint
 from dojo.utils import get_system_setting
 
 locale = timezone(get_system_setting('time_zone'))
+
 
 class Command(BaseCommand):
     help = 'No input commands for dedupe findings.'

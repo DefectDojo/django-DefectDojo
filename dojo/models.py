@@ -367,6 +367,7 @@ class Test_Type(models.Model):
                'url': None}]
         return bc
 
+
 class DojoMeta(models.Model):
     name = models.CharField(max_length=120)
     value = models.CharField(max_length=300)
