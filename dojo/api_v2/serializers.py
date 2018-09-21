@@ -137,10 +137,12 @@ class MetaSerializer(serializers.ModelSerializer):
         model = DojoMeta
         fields = '__all__'
 
+
 class ProductMetaSerializer(serializers.ModelSerializer):
     class Meta:
         model = DojoMeta
         fields = ('name', 'value')
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -151,7 +153,7 @@ class UserSerializer(serializers.ModelSerializer):
 class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
     findings_count = serializers.SerializerMethodField()
     tags = TagListSerializerField(required=False)
-    product_meta  = ProductMetaSerializer(read_only=True, many=True)
+    product_meta = ProductMetaSerializer(read_only=True, many=True)
 
     class Meta:
         model = Product
@@ -589,7 +591,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                        active=True):
                 old_finding.active = False
                 old_finding.notes.create(author=self.context['request'].user,
-                                         entry="This finding has been automatically closed" \
+                                         entry="This finding has been automatically closed"
                                          " as it is not present anymore in recent scans.")
                 old_finding.save()
 

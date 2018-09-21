@@ -672,7 +672,7 @@ def add_meta_data(request, pid):
     if request.method == 'POST':
         form = DojoMetaDataForm(request.POST)
         if form.is_valid():
-            cf, created = DojoMeta.objects.get_or_create(name=form.cleaned_data['name'], model_name='Product', model_id = prod.id,
+            cf, created = DojoMeta.objects.get_or_create(name=form.cleaned_data['name'], model_name='Product', model_id=prod.id,
                                                          value=form.cleaned_data['value'])
             cf.save()
             prod.product_meta.add(cf)
