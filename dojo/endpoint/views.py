@@ -351,7 +351,7 @@ def add_meta_data(request, eid):
 def edit_meta_data(request, eid):
 
     endpoint = Endpoint.objects.get(id=eid)
-    endpoint_cf = endpoint.endpoint
+    endpoint_cf = endpoint.endpoint_meta
     endpoint_metadata = {}
 
     for cf in endpoint_cf:
