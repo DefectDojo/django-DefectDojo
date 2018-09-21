@@ -18,7 +18,7 @@ from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
     Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
     JIRA_Issue, JIRA_PKey, JIRA_Conf, UserContactInfo, Tool_Type, Tool_Configuration, Tool_Product_Settings, \
     Cred_User, Cred_Mapping, System_Settings, Notifications, Languages, Language_Type, App_Analysis, Objects, \
-    Benchmark_Product, Benchmark_Requirement, Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets
+    Benchmark_Product, Benchmark_Requirement, Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
 
@@ -195,13 +195,13 @@ class DeleteProductForm(forms.ModelForm):
                    'internet_accessible', 'regulations']
 
 
-class ProductMetaDataForm(forms.ModelForm):
+class DojoMetaDataForm(forms.ModelForm):
     value = forms.CharField(widget=forms.Textarea(attrs={}),
                             required=True)
 
     class Meta:
-        model = CustomField
-        exclude = ['field_type', 'content_type', 'default_value', 'is_required', 'field_choices']
+        model = DojoMeta
+        exclude = ('model_name', 'model_id')
 
 
 class Product_TypeProductForm(forms.ModelForm):
@@ -779,6 +779,7 @@ class PromoteFindingForm(forms.ModelForm):
                    'duplicate', 'out_of_scope', 'images', 'under_review', 'reviewers', 'review_requested_by')
 
 
+
 class FindingForm(forms.ModelForm):
     title = forms.CharField(max_length=1000)
     date = forms.DateField(required=True,
@@ -1140,15 +1141,6 @@ class DeleteEndpointForm(forms.ModelForm):
                    'query',
                    'fragment',
                    'product')
-
-
-class EndpointMetaDataForm(forms.ModelForm):
-    value = forms.CharField(widget=forms.Textarea(attrs={}),
-                            required=True)
-
-    class Meta:
-        model = CustomField
-        exclude = ['field_type', 'content_type', 'default_value', 'is_required', 'field_choices']
 
 
 class NoteForm(forms.ModelForm):

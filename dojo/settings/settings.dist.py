@@ -144,6 +144,10 @@ MIDDLEWARE_CLASSES = (
     'dojo.middleware.TimezoneMiddleware'
 )
 
+# AUTHENTICATION_BACKENDS = [
+# 'axes.backends.AxesModelBackend',
+# ]
+
 ROOT_URLCONF = 'dojo.urls'
 LOGIN_URL = '/login'
 LOGIN_EXEMPT_URLS = (
@@ -204,6 +208,7 @@ INSTALLED_APPS = (
     'rest_framework.authtoken',
     'rest_framework_swagger',
     'dbbackup',
+    # 'axes'
 )
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
