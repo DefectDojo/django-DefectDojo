@@ -3,7 +3,7 @@ from dojo.models import Product, Engagement_Type, Engagement, Test, Finding, \
     Finding_Template, Test_Type, Development_Environment, Report_Type, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Product_Type, JIRA_Conf, Endpoint, BurpRawRequestResponse, JIRA_PKey, \
-    Notes, Dojo_User, Regulation
+    Notes, Dojo_User, Regulation, DojoMeta
 from dojo.forms import ImportScanForm, SEVERITY_CHOICES
 from dojo.tools.factory import import_parser_factory
 from django.core.validators import URLValidator, validate_ipv46_address
@@ -15,6 +15,7 @@ import datetime
 import six
 from django.utils.translation import ugettext_lazy as _
 import json
+
 
 
 class TagList(list):
@@ -131,6 +132,16 @@ class TaggitSerializer(serializers.Serializer):
         return (to_be_tagged, validated_data)
 
 
+class MetaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DojoMeta
+        fields = '__all__'
+
+class ProductMetaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DojoMeta
+        fields = ('name', 'value')
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -140,6 +151,7 @@ class UserSerializer(serializers.ModelSerializer):
 class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
     findings_count = serializers.SerializerMethodField()
     tags = TagListSerializerField(required=False)
+    product_meta  = ProductMetaSerializer(read_only=True, many=True)
 
     class Meta:
         model = Product
