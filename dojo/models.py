@@ -1202,7 +1202,6 @@ class Finding(models.Model):
             # Only compute hash code for new findings.
         super(Finding, self).save(*args, **kwargs)
         self.hash_code = self.compute_hash_code()
-        super(Finding, self).save(*args, **kwargs)
         self.found_by.add(self.test.test_type)
         if self.test.test_type.static_tool:
             self.static_finding = True
