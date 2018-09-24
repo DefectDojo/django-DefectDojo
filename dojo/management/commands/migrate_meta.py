@@ -21,10 +21,10 @@ class Command(BaseCommand):
 
         for cf in legacy_meta_prod:
             cfv = CustomFieldValue.objects.filter(field=cf,)
-            dm = DojoMeta(name=cf.name, value=cfv.value, model_name='Product', model_id=cfv.object_id)
+            dm = DojoMeta(name=cf.name, value=cfv.first().value, model_name='Product', model_id=cfv.first().object_id)
             dm.save()
 
         for cf in legacy_meta_ep:
             cfv = CustomFieldValue.objects.filter(field=cf,)
-            dm = DojoMeta(name=cf.name, value=cfv.value, model_name='Endpoint', model_id=cfv.object_id)
+            dm = DojoMeta(name=cf.name, value=cfv.first().value, model_name='Endpoint', model_id=cfv.first().object_id)
             dm.save()
