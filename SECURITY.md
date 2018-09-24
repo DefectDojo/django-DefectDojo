@@ -12,7 +12,7 @@ While researching, we'd like to ask you to refrain from:
 * Denial of service 
 * Spamming 
 * Social engineering (including phishing) of DefectDojo staff or contractors 
-* Any physical attempts against DefectDojo property or cloud hosteed environments 
+* Any physical attempts against DefectDojo property or cloud hosted environments 
 
 # Safe Harbor 
 Any activities conducted in a manner consistent with this policy will be considered authorized conduct and we will not initiate legal action against you. If legal action is initiated by a third party against you in connection with activities conducted under this policy, we will take steps to make it known that your actions were conducted in compliance with this policy. 
