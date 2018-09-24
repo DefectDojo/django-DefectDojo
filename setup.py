@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name='DefectDojo',
-    version='1.5.2',
+    version='1.5.3',
     author='Greg Anderson',
     description="Tool for managing vulnerability engagements",
     install_requires=[
@@ -61,7 +61,7 @@ setup(
         'pbr',
         'django-slack',
         'asteval',
-        'Markdown>=2.6.11',
+        'Markdown==2.6.11',
         'pandas>=0.22.0',
         'django-dbbackup>=3.2.0',
         'django-markdownx>=2.0.23',
