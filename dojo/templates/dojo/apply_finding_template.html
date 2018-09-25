@@ -110,5 +110,13 @@
             return isFormValid;
         });
     </script>
-
+    <script>
+        $("#template_set_all_options button").click(function () {
+            $("#template_set_all_options button").removeClass("btn-primary");
+            $(this).addClass("btn-primary");
+            var option = $(this).data('option');
+            $("#add_finding select option[value='" + option + "']").prop("selected", true).change();
+            return false;
+        });
+    </script>
 {% endblock %}
