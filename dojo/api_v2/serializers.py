@@ -590,6 +590,10 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                        test__engagement__product=test.engagement.product,
                                        active=True):
                 old_finding.active = False
+                old_finding.mitigated = datetime.datetime.combine(
+                    test.target_start,
+                    timezone.now().time())
+                old_finding.mitigated_by = self.context['request'].user
                 old_finding.notes.create(author=self.context['request'].user,
                                          entry="This finding has been automatically closed"
                                          " as it is not present anymore in recent scans.")
