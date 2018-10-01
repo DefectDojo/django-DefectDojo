@@ -60,7 +60,7 @@ docs/_build/
 *.crt
 *.csr
 *.key
-dojo/migrations
+dojo/migrations/*.pyc
 dojo/static/img/threat/*
 dojo/uploads/risk/*
 dojo/uploads/reports/*
