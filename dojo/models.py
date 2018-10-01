@@ -775,6 +775,7 @@ class Engagement(models.Model):
     source_code_management_server = models.ForeignKey(Tool_Configuration, null=True, blank=True, verbose_name="SCM Server", help_text="Source code server for CI/CD test", related_name='source_code_management_server')
     source_code_management_uri = models.CharField(max_length=600, null=True, blank=True, verbose_name="Repo", help_text="Resource link to source code")
     orchestration_engine = models.ForeignKey(Tool_Configuration, verbose_name="Orchestration Engine", help_text="Orchestration service responsible for CI/CD test", null=True, blank=True, related_name='orchestration')
+    deduplication_level =  models.CharField(max_length=10,default='product', choices=(('product', 'product'),('engagement', 'engagement')))
 
     class Meta:
         ordering = ['-target_start']
@@ -1155,12 +1156,7 @@ class Finding(models.Model):
         sla_age = get_system_setting('sla_' + self.severity.lower())
         if sla_age and self.active:
             sla_calculation = sla_age - self.age
-        elif sla_age and self.mitigated:
-            age = self.age()
-            if age < sla_age:
-                sla_calculation = 0
-            else:
-                sla_calculation = sla_age - age
+
         return sla_calculation
 
     def jira(self):
