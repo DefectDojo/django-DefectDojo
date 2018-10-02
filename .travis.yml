@@ -16,7 +16,6 @@ env:
   - TEST=unit-test
   - TEST=bandit
   - TEST=docker-bench-security
-  - TEST=ansible
   - TEST=flake8-complete
   - TEST=flake8
 
@@ -49,7 +48,7 @@ script:
         pip install bandit
 
         ## Run Bandit python static code
-        bandit -r * -x venv,tests,ansible
+        bandit -r * -x venv,tests
         ;;
       docker-bench-security)
         ## Run Docker Bench for Security
@@ -93,6 +92,7 @@ after_success:
         export REPO=appsecpipeline/django-defectdojo
         docker build --target release -t $REPO:slim .
         docker tag $REPO "$REPO:$BRANCH_TAG$TRAVIS_TAG-slim"
+        docker tag $REPO:slim slim
         docker login -u "$DOCKER_USER" -p "$DOCKER_PASS";
         docker push $REPO;
       fi

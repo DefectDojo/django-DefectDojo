@@ -1,3 +1,4 @@
 .git
 .gitignore
 *.md
+.env*
