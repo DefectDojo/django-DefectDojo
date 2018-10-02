@@ -11,7 +11,7 @@ setup(
         'celery>=4.1',
         'defusedxml',
         'Django==1.11.11',
-        'django-auditlog',
+        'django-auditlog==0.4.0',
         'django-custom-field',
         'django-filter==1.0.4',
         'django-imagekit',
@@ -32,7 +32,6 @@ setup(
         'humanize',
         'jira',
         'lxml',
-        'pdfkit==0.6.1',
         'Pillow',
         'psycopg2-binary',
         'pycrypto',
@@ -61,7 +60,7 @@ setup(
         'pbr',
         'django-slack',
         'asteval',
-        'Markdown>=2.6.11',
+        'Markdown==2.6.11',
         'pandas>=0.22.0',
         'django-dbbackup>=3.2.0',
         'django-markdownx>=2.0.23',
@@ -73,7 +72,7 @@ setup(
     extras_require={'mysql': ['mysqlclient==1.3.12']},
 
     dependency_links=[
-        "https://github.com/grendel513/python-pdfkit/tarball/master#egg=pdfkit-0.5.0",
+        "https://github.com/grendel513/python-pdfkit/tarball/master#egg=pdfkit-0.5.0"
     ],
     url='https://github.com/DefectDojo/django-DefectDojo'
 )

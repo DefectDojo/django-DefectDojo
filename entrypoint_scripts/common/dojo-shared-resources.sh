@@ -242,8 +242,9 @@ function ensure_mysql_application_db() {
         if [ -z "$SQLUSER" ]; then
             SQLUSER="root"
         fi
-        if [ -z "$SQLPWD" ]; then
-            SQLPWD=""
+        if [ -z "$SQLPWD" -a  "$BATCH_MODE" == "yes" ]; then
+            echo "SQL Password not provided, exiting"
+            exit 1
         fi
         if [ -z "$DBNAME" ]; then
             DBNAME="dojodb"
@@ -293,7 +294,6 @@ function ensure_mysql_application_db() {
 function ensure_postgres_application_db() {
     # Added BATCH_MODE condition and rewrite old negate logic.
     if [ "$BATCH_MODE" == "yes" ]; then
-      # Default values for a automated Docker install if not provided
       echo "Setting values for POSTGRES install"
       if [ -z "$SQLHOST" ]; then
           SQLHOST="localhost"
@@ -305,7 +305,8 @@ function ensure_postgres_application_db() {
           SQLUSER="root"
       fi
       if [ -z "$SQLPWD" ]; then
-          SQLPWD="Cu3zehoh7eegoogohdoh1the"
+          echo "SQL Password not provided, exiting"
+          exit 1
       fi
       if [ -z "$DBNAME" ]; then
           DBNAME="dojodb"

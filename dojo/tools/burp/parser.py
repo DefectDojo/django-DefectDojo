@@ -81,11 +81,8 @@ class BurpXmlParser(object):
             item = get_item(node, test)
             dupe_key = str(item.url) + item.severity + item.title
             if dupe_key in items:
-                items[
-                    dupe_key].unsaved_endpoints = items[dupe_key].unsaved_endpoints + item.unsaved_endpoints
-                items[
-                    dupe_key].unsaved_req_resp = items[dupe_key].unsaved_req_resp + item.unsaved_req_resp
-
+                items[dupe_key].unsaved_endpoints = items[dupe_key].unsaved_endpoints + item.unsaved_endpoints
+                items[dupe_key].unsaved_req_resp = items[dupe_key].unsaved_req_resp + item.unsaved_req_resp
                 # make sure only unique endpoints are retained
                 unique_objs = []
                 new_list = []
@@ -98,8 +95,11 @@ class BurpXmlParser(object):
                 items[dupe_key].unsaved_endpoints = new_list
 
                 # Description details of the finding are added
-                items[
-                    dupe_key].description = item.description + items[dupe_key].description
+                items[dupe_key].description = item.description + items[dupe_key].description
+
+                # Parameters of the finding are added
+                if items[dupe_key].param and items[dupe_key].param:
+                    items[dupe_key].param = item.param + ", " + items[dupe_key].param
             else:
                 items[dupe_key] = item
 
@@ -149,6 +149,7 @@ def do_clean(value):
 
 
 def get_item(item_node, test):
+    endpoints = []
     host_node = item_node.findall('host')[0]
 
     url_host = host_node.text
@@ -170,15 +171,15 @@ def get_item(item_node, test):
     url = item_node.get('url')
     path = item_node.findall('path')[0].text
     location = item_node.findall('location')[0].text
-
-    request = item_node.findall('./requestresponse/request')[0].text if len(
-        item_node.findall('./requestresponse/request')) > 0 else None
-    response = item_node.findall('./requestresponse/response')[0].text if len(
-        item_node.findall('./requestresponse/response')) > 0 else None
+    rparameter = re.search("(?<=\[)(.*)(\])", location)
+    parameter = None
+    if rparameter:
+        parameter = rparameter.group(1)
 
     unsaved_req_resp = list()
-
-    if request is not None and response is not None:
+    for request_response in item_node.findall('./requestresponse'):
+        request = request_response.findall('request')[0].text
+        response = request_response.findall('response')[0].text
         unsaved_req_resp.append({"req": request, "resp": response})
 
     try:
@@ -223,6 +224,9 @@ def get_item(item_node, test):
         else:
             endpoints = [endpoint, dupe_endpoint]
 
+    if len(endpoints) is 0:
+        endpoints = [endpoint]
+
     text_maker = html2text.HTML2Text()
     text_maker.body_width = 0
 
@@ -263,6 +267,7 @@ def get_item(item_node, test):
         url=url,
         test=test,
         severity=severity,
+        param=parameter,
         scanner_confidence=scanner_confidence,
         description="URL: " + url_host + path + "\n\n" + detail + "\n",
         mitigation=remediation,

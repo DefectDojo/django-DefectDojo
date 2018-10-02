@@ -12,6 +12,8 @@ env = environ.Env(
     DD_SESSION_COOKIE_HTTPONLY=(bool, True),
     DD_CSRF_COOKIE_HTTPONLY=(bool, True),
     DD_SECURE_SSL_REDIRECT=(bool, False),
+    DD_SECURE_HSTS_INCLUDE_SUBDOMAINS=(bool, False),
+    DD_SECURE_HSTS_SECONDS=(str, '31536000'),  # One year expiration
     DD_CSRF_COOKIE_SECURE=(bool, False),
     DD_SECURE_BROWSER_XSS_FILTER=(bool, False),
     DD_TIME_ZONE=(str, 'UTC'),
@@ -25,6 +27,7 @@ env = environ.Env(
     DD_PORT_SCAN_SOURCE_IP=(str, '127.0.0.1'),
     DD_WHITENOISE=(bool, False),
     DD_TRACK_MIGRATIONS=(bool, False),
+    DD_SECURE_PROXY_SSL_HEADER=(bool, False),
 )
 
 # Read .env file as default or from the command line, DD_ENV_PATH
@@ -155,7 +158,6 @@ LOGIN_EXEMPT_URLS = (
     r'^%sstatic/' % URL_PREFIX,
     r'^%swebhook/' % URL_PREFIX,
     r'^%sapi/v1/' % URL_PREFIX,
-    r'^%sajax/v1/' % URL_PREFIX,
     r'^%sreports/cover$' % URL_PREFIX,
     r'^%sfinding/image/(?P<token>[^/]+)$' % URL_PREFIX,
     r'^%sapi/v2/' % URL_PREFIX,
@@ -186,7 +188,13 @@ CSRF_COOKIE_HTTPONLY = env('DD_CSRF_COOKIE_HTTPONLY')
 # cookie is only sent with an HTTPS connection.
 CSRF_COOKIE_SECURE = env('DD_CSRF_COOKIE_SECURE')
 
-# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+if env('DD_SECURE_PROXY_SSL_HEADER'):
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+if env('DD_SECURE_HSTS_INCLUDE_SUBDOMAINS'):
+    SECURE_HSTS_SECONDS = env('DD_SECURE_HSTS_SECONDS')
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = env('DD_SECURE_HSTS_INCLUDE_SUBDOMAINS')
 
 # ------------------------------------------------------------------------------
 # DEFECTDOJO SPECIFIC
