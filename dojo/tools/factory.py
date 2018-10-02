@@ -25,6 +25,7 @@ from dojo.tools.skf.parser import SKFCsvParser
 from dojo.tools.ssllabs.parser import SSLlabsParser
 from dojo.tools.nikto.parser import NiktoXMLParser
 from dojo.tools.trufflehog.parser import TruffleHogJSONParser
+from dojo.tools.sonarqube.parser import SonarQubeHtmlParser
 from dojo.tools.clair.parser import ClairParser
 from dojo.tools.mobsf.parser import MobSFParser
 
@@ -93,6 +94,8 @@ def import_parser_factory(file, test, scan_type=None):
         parser = GosecScannerParser(file, test)
     elif scan_type == 'Trustwave Scan (CSV)':
         parser = TrustwaveUploadCsvParser(file, test)
+    elif scan_type == 'SonarQube Scan':
+        parser = SonarQubeHtmlParser(file, test)
     elif scan_type == 'MobSF Scan':
         parser = MobSFParser(file, test)
     else:

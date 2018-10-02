@@ -27,6 +27,7 @@ setup(
         'django-rest-swagger==2.1.2',
         'djangorestframework==3.7.7',
         'django-environ==0.4.5',
+        'django-axes',
         'gunicorn>=19.1.1',
         'html2text',
         'humanize',

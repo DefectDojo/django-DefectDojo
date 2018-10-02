@@ -368,6 +368,21 @@ class Test_Type(models.Model):
         return bc
 
 
+class DojoMeta(models.Model):
+    name = models.CharField(max_length=120)
+    value = models.CharField(max_length=300)
+    model_name = models.CharField(max_length=30)
+    model_id = models.IntegerField()
+
+    def save(self, *args, **kwargs):
+        super(DojoMeta, self).save(*args, **kwargs)
+        if self.model_name.lower() == "product":
+            prod = Product.objects.get(id=self.model_id)
+            prod.product_meta.add(self)
+        else:
+            ep = Endpoint.objects.get(id=self.model_id)
+            ep.endpoint_meta.add(self)
+
 class Product(models.Model):
     WEB_PLATFORM = 'web'
     IOT = 'iot'
@@ -462,6 +477,8 @@ class Product(models.Model):
     external_audience = models.BooleanField(default=False, help_text=_('Specify if the application is used by people outside the organization.'))
     internet_accessible = models.BooleanField(default=False, help_text=_('Specify if the application is accessible from the public internet.'))
     regulations = models.ManyToManyField(Regulation, blank=True)
+    product_meta = models.ManyToManyField(DojoMeta)
+
 
     def __unicode__(self):
         return self.name
@@ -809,6 +826,7 @@ class Endpoint(models.Model):
     product = models.ForeignKey(Product, null=True, blank=True, )
     endpoint_params = models.ManyToManyField(Endpoint_Params, blank=True,
                                              editable=False)
+    endpoint_meta = models.ManyToManyField(DojoMeta, editable=False)
 
     class Meta:
         ordering = ['product', 'protocol', 'host', 'path', 'query', 'fragment']
@@ -1042,7 +1060,7 @@ class Finding(models.Model):
     class Meta:
         ordering = ('numerical_severity', '-date', 'title')
 
-    def get_hash_code(self):
+    def compute_hash_code(self):
         hash_string = self.title + str(self.cwe) + str(self.line) + str(self.file_path)
 
         if self.dynamic_finding:
@@ -1122,14 +1140,13 @@ class Finding(models.Model):
 
         return ", ".join([str(s) for s in status])
 
+    @property
     def age(self):
         if self.mitigated:
-            days = (self.mitigated.date() - datetime.combine(self.date,
-                                                             datetime.min.time()).date()).days
+            diff = self.mitigated.date() - self.date
         else:
-            days = (get_current_date() - datetime.combine(self.date,
-                                                          datetime.min.time()).date()).days
-
+            diff = get_current_date() - self.date
+        days = diff.days
         return days if days > 0 else 0
 
     def sla(self):
@@ -1138,7 +1155,7 @@ class Finding(models.Model):
         from dojo.utils import get_system_setting
         sla_age = get_system_setting('sla_' + self.severity.lower())
         if sla_age and self.active:
-            sla_calculation = sla_age - self.age()
+            sla_calculation = sla_age - self.age
         elif sla_age and self.mitigated:
             age = self.age()
             if age < sla_age:
@@ -1179,11 +1196,12 @@ class Finding(models.Model):
 
     def save(self, dedupe_option=True, rules_option=True, *args, **kwargs):
         # Make changes to the finding before it's saved to add a CWE template
-        if not self.pk:
+        if self.pk is None:
             from dojo.utils import apply_cwe_to_template
             self = apply_cwe_to_template(self)
+            # Only compute hash code for new findings.
         super(Finding, self).save(*args, **kwargs)
-        self.hash_code = self.get_hash_code()
+        self.hash_code = self.compute_hash_code()
         self.found_by.add(self.test.test_type)
         if self.test.test_type.static_tool:
             self.static_finding = True

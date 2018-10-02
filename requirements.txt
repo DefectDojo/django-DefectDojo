@@ -44,3 +44,4 @@ django-environ==0.4.5
 django-taggit-serializer==0.1.7
 whitenoise>=4.0
 django-environ==0.4.5
+pygments==2.2.0

@@ -137,8 +137,12 @@ FILE_UPLOAD_HANDLERS = (
 # ------------------------------------------------------------------------------
 # URLS
 # ------------------------------------------------------------------------------
-
 # https://docs.djangoproject.com/en/dev/ref/settings/#root-urlconf
+
+# AUTHENTICATION_BACKENDS = [
+# 'axes.backends.AxesModelBackend',
+# ]
+
 ROOT_URLCONF = 'dojo.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
@@ -310,6 +314,7 @@ INSTALLED_APPS = (
     'rest_framework_swagger',
     'dbbackup',
     'taggit_serializer',
+    # 'axes'
 )
 
 # ------------------------------------------------------------------------------

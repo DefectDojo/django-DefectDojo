@@ -7,6 +7,9 @@
     max-width: 650px;
   }
 {% endblock %}
+{% block add_css_before %}
+<!-- Source Code Highlight CSS -->
+<link rel="stylesheet" href="{% static "dojo/css/highlight.css" %}">
 {% block content %}
 <div id="test">
     <div class="panel panel-default">
