@@ -2,6 +2,10 @@
 {% load display_tags %}
 {% load humanize %}
 {% load static from staticfiles %}
+{% block add_css_before %}
+<!-- Source Code Highlight CSS -->
+<link rel="stylesheet" href="{% static "dojo/css/highlight.css" %}">
+{% endblock %}
 {% block content %}
 <div id="test">
     <div class="panel panel-default">

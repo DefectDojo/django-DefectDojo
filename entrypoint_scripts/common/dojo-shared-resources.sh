@@ -433,7 +433,8 @@ function install_db() {
     elif [[ ! -z "$BREW_CMD" ]]; then
         if [ "$DBTYPE" == $MYSQL ]; then
             echo "Installing MySQL client"
-            brew install mysql
+            brew install mysql@5.7
+	    brew link mysql@5.7 --force
         elif [ "$DBTYPE" == $POSTGRES ]; then
             echo "Installing Postgres client"
             brew install postgresql

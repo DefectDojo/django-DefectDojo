@@ -6,6 +6,11 @@
 
 [DefectDojo](https://www.defectdojo.org/) is a security program and vulnerability management tool. DefectDojo allows you to manage your application security program, maintain product and application information, schedule scans, triage vulnerabilities and push findings into defect trackers. Consolidate your findings into one source of truth with DefectDojo.
 
+# Demo
+Try out DefectDojo in our [testing environment](https://defectdojo.herokuapp.com/).
+* admin / defectdojo@demo#appsec
+* product_manager / defectdojo@demo#product
+
 # Quick Start
 
 ```bash
@@ -26,8 +31,6 @@ For detailed documentation you can visit [Read the Docs](https://defectdojo.read
 ### [Debian, Ubuntu (16.04.2+) or RHEL-based Install Script](https://defectdojo.readthedocs.io/en/latest/getting-started.html#install-script)
 
 ### [Docker](https://defectdojo.readthedocs.io/en/latest/getting-started.html#docker-local-install)
-
-### [Ansible](https://raw.githubusercontent.com/DefectDojo/Documentation/master/ansible/prod-install)
 
 # Getting Started
 
@@ -69,10 +72,14 @@ Realtime discussion is done in the OWASP Slack Channel, #defectdojo. [Get Access
 DefectDojo is maintained by:
 
 - [Greg Anderson](https://www.linkedin.com/in/g-anderson/)
-- Aaron Weaver ([@weavera](https://twitter.com/weavera))
-- Matt Tesauro ([@matt_tesauro](https://twitter.com/matt_tesauro))
-- Charles Neill ([@ccneill](https://twitter.com/ccneill))
-- Jay Paz ([@jjpaz](https://twitter.com/jjpaz))
+- [Aaron Weaver](https://www.linkedin.com/in/aweaver/) ([@weavera](https://twitter.com/weavera))
+- [Matt Tesauro](https://www.linkedin.com/in/matttesauro/) ([@matt_tesauro](https://twitter.com/matt_tesauro))
+
+
+# Hall of Fame
+
+- Charles Neill ([@ccneill](https://twitter.com/ccneill)) - Charles served as a DefectDojo Maintainer for years and wrote some of Dojo's core functionality.
+- Jay Paz ([@jjpaz](https://twitter.com/jjpaz)) - Jay was a DefectDojo maintainer for years. He performed Dojo's first UI overhaul, optomized code structure/features, and added numerous enhancements.
 
 # Contributing
 

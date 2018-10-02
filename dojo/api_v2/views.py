@@ -5,7 +5,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from dojo.models import Product, Product_Type, Engagement, Test, Finding, \
     User, ScanSettings, Scan, Stub_Finding, Finding_Template, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
-    Endpoint, JIRA_PKey, JIRA_Conf
+    Endpoint, JIRA_PKey, JIRA_Conf, DojoMeta
 
 from dojo.api_v2 import serializers, permissions
 
@@ -107,6 +107,16 @@ class JiraViewSet(mixins.ListModelMixin,
                      'push_notes')
 
 
+class DojoMetaViewSet(mixins.ListModelMixin,
+                     mixins.RetrieveModelMixin,
+                     mixins.DestroyModelMixin,
+                     mixins.CreateModelMixin,
+                     mixins.UpdateModelMixin,
+                     viewsets.GenericViewSet):
+
+    serializer_class = serializers.MetaSerializer
+    queryset = DojoMeta.objects.all()
+
 class ProductViewSet(mixins.ListModelMixin,
                      mixins.RetrieveModelMixin,
                      mixins.CreateModelMixin,
@@ -120,6 +130,7 @@ class ProductViewSet(mixins.ListModelMixin,
                           DjangoModelPermissions)
     # TODO: findings count field
     filter_fields = ('id', 'name', 'prod_type', 'created', 'authorized_users')
+
 
     def get_queryset(self):
         if not self.request.user.is_staff:

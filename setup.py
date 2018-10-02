@@ -26,7 +26,11 @@ setup(
         'django-watson==1.3.1',
         'django-rest-swagger==2.1.2',
         'djangorestframework==3.7.7',
+<<<<<<< HEAD
         'django-environ==0.4.5',
+=======
+        'django-axes',
+>>>>>>> 511084c374b3a9526cb0df700d25c7bdb5f6d37d
         'gunicorn>=19.1.1',
         'html2text',
         'humanize',
