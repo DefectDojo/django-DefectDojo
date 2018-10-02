@@ -523,7 +523,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         try:
             for item in parser.items:
                 if skip_duplicates and \
-                   Finding.objects.filter(Q(active=True) | Q(false_p=True),
+                   Finding.objects.filter(Q(active=True) | Q(false_p=True) | Q(duplicate=True),
                                           test__engagement__product=test.engagement.product,
                                           hash_code=item.compute_hash_code()).exists():
                     continue
