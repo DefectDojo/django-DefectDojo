@@ -1,9 +1,9 @@
-from dojo.models import Product, Engagement_Type, Engagement, Test, Finding, \
+from dojo.models import Product, Engagement, Test, Finding, \
     User, ScanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance, \
-    Finding_Template, Test_Type, Development_Environment, Report_Type, \
+    Finding_Template, Test_Type, Development_Environment, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Product_Type, JIRA_Conf, Endpoint, BurpRawRequestResponse, JIRA_PKey, \
-    Notes, Dojo_User, Regulation, DojoMeta
+    Notes, DojoMeta
 from dojo.forms import ImportScanForm, SEVERITY_CHOICES
 from dojo.tools.factory import import_parser_factory
 from django.core.validators import URLValidator, validate_ipv46_address
@@ -15,7 +15,6 @@ import datetime
 import six
 from django.utils.translation import ugettext_lazy as _
 import json
-
 
 
 class TagList(list):
