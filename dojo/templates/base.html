@@ -68,6 +68,7 @@
             <!-- /.navbar-header -->
 
             <ul class="nav navbar-top-links navbar-right">
+              {% if request.user.is_authenticated %}
                 <li>
                     <div class="custom-search-form">
                         <form role="search" method="get" action="{% url 'simple_search' %}">
@@ -84,7 +85,6 @@
                     </div>
                     <!-- /input-group -->
                 </li>
-                {% if request.user.is_authenticated %}
                     <li class="dropdown">
                         <a class="dropdown-toggle dropdown-toggle-h{% alert_count %}" data-toggle="dropdown" href="#">
                             <i class="fa fa-bell fa-fw"></i><span
@@ -138,7 +138,7 @@
                                 {% if request.user.is_staff %}
                                     <a href="#"><i class="fa fa-list fa-fw"></i> <span>Products</span>
                                         <span class="glyphicon arrow"></span></a>
-                                {% else %}
+                                {% elif request.user.is_authenticated %}
                                     <a href="{% url 'product' %}" title="Product Listing"><i class="fa fa-list fa-fw"></i> <span>Products</span></a>
                                 {% endif %}
                                 {% if request.user.is_staff %}
@@ -213,6 +213,7 @@
                                     </ul>
                                 </li>
                             {% endif %}
+                            {% if request.user.is_authenticated %}
                             <li>
                                 <a href="{% url 'reports' %}"><i class="fa fa-file-text-o fa-fw"></i> <span>Reports</span><span
                                         class="glyphicon arrow"></span></a>
@@ -238,6 +239,7 @@
                                 </ul>
                                 <!-- /.nav-second-level -->
                             </li>
+                            {% endif %}
                             {% if request.user.is_staff %}
                                 <li>
                                     <a href="{% url 'users' %}"><i class="fa fa-user fa-fw"></i> <span>Users</span></a>
@@ -551,12 +553,12 @@
 <script type="application/javascript">
     $(document).ready(function() {
         $('.has-popover').popover({'trigger':'hover'});
+        {% if request.user.is_authenticated %}
         $('.dropdown-toggle').click(function() { get_alerts(); });
-
         setInterval(function() {
             update_alertcount();
         }, 10000);
-
+        {% endif %}
         function update_alertcount() {
             $.get("{% url 'alertcount' %}", function (data) {
                 if (data.count != $('#alert_count').text()) {
