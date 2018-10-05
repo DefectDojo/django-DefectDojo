@@ -1157,7 +1157,7 @@ class Finding(models.Model):
         if sla_age and self.active:
             sla_calculation = sla_age - self.age
         elif sla_age and self.mitigated:
-            age = self.age()
+            age = self.age
             if age < sla_age:
                 sla_calculation = 0
             else:
