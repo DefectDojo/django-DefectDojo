@@ -1,10 +1,11 @@
 #!/bin/bash
+
 if [ "$DOCKER_USER" != "" ] && [  "$DOCKER_PASS" != "" ] ; then
-  if [ "$TRAVIS_BRANCH" == "dev" ] ; then
+  if [ "$TRAVIS_BRANCH" == "master" ] ; then
+    export REPO=appsecpipeline/django-defectdojo
+  else
     BRANCH_TAG="devel-"
-    export HUB_REPO=appsecpipeline/django-defectdojo-dev
-  elif [ "$TRAVIS_BRANCH" == "master" ] ; then
-    export HUB_REPO=appsecpipeline/django-defectdojo
+    export REPO=appsecpipeline/django-defectdojo-dev
   fi
 
   docker tag $REPO "$REPO:$BRANCH_TAG$TRAVIS_TAG-mysql-self-contained"
