@@ -1,9 +1,9 @@
-from dojo.models import Product, Engagement_Type, Engagement, Test, Finding, \
+from dojo.models import Product, Engagement, Test, Finding, \
     User, ScanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance, \
-    Finding_Template, Test_Type, Development_Environment, Report_Type, \
+    Finding_Template, Test_Type, Development_Environment, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Product_Type, JIRA_Conf, Endpoint, BurpRawRequestResponse, JIRA_PKey, \
-    Notes, Dojo_User, Regulation, DojoMeta
+    Notes, DojoMeta
 from dojo.forms import ImportScanForm, SEVERITY_CHOICES
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import create_notification
@@ -17,7 +17,6 @@ import datetime
 import six
 from django.utils.translation import ugettext_lazy as _
 import json
-
 
 
 class TagList(list):
@@ -527,7 +526,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
             for item in parser.items:
                 if skip_duplicates:
                     hash_code = item.compute_hash_code()
-                    if Finding.objects.filter(Q(active=True) | Q(false_p=True),
+                    if Finding.objects.filter(Q(active=True) | Q(false_p=True) | Q(duplicate=True),
                                               test__engagement__product=test.engagement.product,
                                               hash_code=hash_code).exists():
                         skipped_hashcodes.append(hash_code)
@@ -597,6 +596,10 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                        test__test_type=test_type,
                                        active=True):
                 old_finding.active = False
+                old_finding.mitigated = datetime.datetime.combine(
+                    test.target_start,
+                    timezone.now().time())
+                old_finding.mitigated_by = self.context['request'].user
                 old_finding.notes.create(author=self.context['request'].user,
                                          entry="This finding has been automatically closed"
                                          " as it is not present anymore in recent scans.")

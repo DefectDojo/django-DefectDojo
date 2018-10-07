@@ -51,6 +51,7 @@ class DependencyCheckParser(object):
             description=finding_detail,
             severity=severity,
             numerical_severity=Finding.get_numerical_severity(severity),
+            static_finding=True,
             references=reference_detail)
 
     def __init__(self, filename, test):
