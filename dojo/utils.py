@@ -102,6 +102,7 @@ def sync_dedupe(new_finding, *args, **kwargs):
                 find.found_by.add(new_finding.test.test_type)
                 super(Finding, new_finding).save(*args, **kwargs)
 
+
 def sync_rules(new_finding, *args, **kwargs):
     rules = Rule.objects.filter(applies_to='Finding', parent_rule=None)
     for rule in rules:
