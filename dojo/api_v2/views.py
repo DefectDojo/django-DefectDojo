@@ -117,6 +117,7 @@ class DojoMetaViewSet(mixins.ListModelMixin,
     serializer_class = serializers.MetaSerializer
     queryset = DojoMeta.objects.all()
 
+
 class ProductViewSet(mixins.ListModelMixin,
                      mixins.RetrieveModelMixin,
                      mixins.CreateModelMixin,
@@ -130,7 +131,6 @@ class ProductViewSet(mixins.ListModelMixin,
                           DjangoModelPermissions)
     # TODO: findings count field
     filter_fields = ('id', 'name', 'prod_type', 'created', 'authorized_users')
-
 
     def get_queryset(self):
         if not self.request.user.is_staff:

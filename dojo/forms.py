@@ -2,7 +2,7 @@ import re
 from datetime import datetime, date
 from urlparse import urlsplit, urlunsplit
 
-from custom_field.models import CustomField
+
 from dateutil.relativedelta import relativedelta
 from django import forms
 from django.core import validators
@@ -251,6 +251,9 @@ class ImportScanForm(forms.Form):
                          ("SSL Labs Scan", "SSL Labs Scan"),
                          ("Gosec Scanner", "Gosec Scanner"),
                          ("SonarQube Scan", "SonarQube Scan"),
+                         ("MobSF Scan", "MobSF Scan"),
+                         ("Trufflehog Scan", "Trufflehog Scan"),
+                         ("Nikto Scan", "Nikto Scan"),
                          ("Clair Scan", "Clair Scan"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
@@ -777,7 +780,6 @@ class PromoteFindingForm(forms.ModelForm):
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'active', 'false_p', 'verified', 'is_template',
                    'duplicate', 'out_of_scope', 'images', 'under_review', 'reviewers', 'review_requested_by')
-
 
 
 class FindingForm(forms.ModelForm):
