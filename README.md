@@ -1,3 +1,26 @@
+# Running "producion-like docker" instance
+
+Things to know:
+* we use the directory you're working in (which should get this one on your machine) to mount and create most of the data we need
+* edit .env_dojo and .env_mysql to fit your needs, DONT CHECK THEM IN WITH YOUR EDITS
+  * note: yeah I know I should fix this
+* most important setting...FLUSHDB in .env_dojo you probably only want this set to y once and on subsequent docker-compose up's, set it to "n"
+* lots of clean up work needs to transpire, to get this to 100% awesome I'd need to work with upstream which could take looots of time and arguing
+* I used jinja2 instead of sed inasnity to template out settings.py, yes I know django has a template engine, but this was just faster and cleaner
+
+
+
+Questions: 
+* why did you do this? 
+  * needed to make this run in "prod" for someone, the repo makes it kinda hard to do that with docker
+* wouldn't you like to be a pepper to? 
+  * sometimes
+* can/will you make this more better? Depends on if there's a lot of demand for it, the orginal intent here was to get something running 
+then revist this once we're confident this thing fits the bill. 
+ 
+
+# Description
+=======
 # DefectDojo [![OWASP Flagship](https://img.shields.io/badge/owasp-flagship%20project-orange.svg)](https://www.owasp.org/index.php/OWASP_DefectDojo_Project) [![GitHub release](https://img.shields.io/github/release/DefectDojo/django-DefectDojo.svg)](https://github.com/DefectDojo/django-DefectDojo) [![YouTube Subscribe](https://img.shields.io/badge/youtube-subscribe-%23c4302b.svg)](https://www.youtube.com/channel/UCWw9qzqptiIvTqSqhOFuCuQ) ![Twitter Follow](https://img.shields.io/twitter/follow/defectdojo.svg?style=social&label=Follow)
 
 [![Documentation Status](https://readthedocs.org/projects/defectdojo/badge/?version=latest)](https://defectdojo.readthedocs.io/en/latest/?badge=latest) [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/2098/badge)](https://bestpractices.coreinfrastructure.org/projects/2098) 
