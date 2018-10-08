@@ -1,0 +1,196 @@
+{% load humanize %}
+{% load display_tags %}
+<div class="col-md-12">
+    <div class="panel panel-default table-responsive">
+        <div class="panel-heading">
+            <h4> {% if status == "open" %}Active{% elif status == "paused" %}Paused {% else %}Closed{% endif %} {% if type == "CI/CD" %}CI/CD{% endif %} Engagements ({{ count }})
+              {% if type == "CI/CD" %}
+              <a title="Add New Engagement" class="pull-right btn btn-sm btn-primary" href="{% url 'new_eng_for_prod_cicd' prod.id %}"><span
+                    class="fa fa-plus"></span> </a>
+              {% else %}
+              <a title="Add New Engagement" class="pull-right btn btn-sm btn-primary" href="{% url 'new_eng_for_prod' prod.id %}"><span
+                    class="fa fa-plus"></span> </a>
+              {% endif %}
+              </h4>
+        </div>
+        {% if engs %}
+            <table class="tablesorter-bootstrap table table-condensed table-striped table-hover">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th></th>
+                    <th>Lead</th>
+                    <th>Date</th>
+                    <th>Length</th>
+                    <th>Tests</th>
+                    <th>Open</th>
+                    <th>All</th>
+                    <th>Duplicate</th>
+                    <th>Updated</th>
+                    {% if status == "paused" or status == "closed" %}
+                      <th>Status</th>
+                    {% endif %}
+                </tr>
+                </thead>
+                <tbody>
+                {% for eng in engs %}
+                    <tr>
+                    <td style="width: 250px;">
+                    <a href="{% url 'view_engagement' eng.id %}" data-toggle="tooltip" data-placement="bottom" title="{{ eng.name|default:"N/A" }}">
+                    {{ eng.name|truncatechars:35|default:"N/A" }}</a>
+                    {% if eng.version %}
+                        <sup>
+                              <a target="_blank" class="tag-label tag-version" data-toggle="tooltip" data-placement="bottom" title="Product Version: {{ eng.version }}">
+                              {{ eng.version }}</a>
+                        </sup>
+                    {% endif %}
+                    {% if eng.tags %}
+                        <sup>
+                            {% for tag in eng.tags %}
+                            <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                            {% endfor %}
+                        </sup>
+                    {% endif %}
+                    </td>
+                    <td class="nowrap">
+                      <div class="align-top">
+                        <div class="dropdown">
+                          <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown">&nbsp;<i class="fa fa-ellipsis-v"></i>&nbsp;</a>
+                          <ul class="dropdown-menu">
+                             <li>
+                               <a class="" href="{% url 'view_engagement' eng.id %}">
+                                 <i class="fa fa-list-alt"></i> View
+                             </li>
+                             <li>
+                               <a class="" href="{% url 'edit_engagement' eng.id %}">
+                                 <i class="fa fa-pencil-square-o"></i> Edit
+                               </a>
+                            </li>
+                            <li>
+                              </a>
+                              {% if status == "open" or status == "paused" %}
+                              <a class="" href="{% url 'close_engagement' eng.id %}">
+                                <i class="fa fa-close"></i> Close
+                              {% else %}
+                              <a class="" href="{% url 'reopen_engagement' eng.id %}">
+                                <i class="fa fa-undo"></i> Reopen
+                              </a>
+                              {% endif %}
+                              </a>
+                            </li>
+                            <li class="divider"></li>
+                            <li role="presentation">
+                                <a class="" href="{% url 'add_tests' eng.id %}">
+                                    <i class="fa fa-plus"></i> Add Tests
+                                </a>
+                            </li>
+                            <li role="presentation">
+                                <a class="" href="{% url 'import_scan_results' eng.id %}">
+                                    <i class="fa fa-upload"></i> Import Scan Results
+                                </a>
+                            </li>
+                            <li class="divider"></li>
+                            <li role="presentation">
+                              <a href="{% url 'engagement_report' eng.id %}?title=&active=1&verified=1&false_p=2&duplicate=2">
+                                  <i class="fa fa-file-text-o"></i> Engagement Report
+                              </a>
+                            </li>
+                            <li class="divider"></li>
+                            <li>
+                              <a class="text-danger" href="{% url 'delete_engagement' eng.id %}">
+                                  <i class="fa fa-trash-o"></i> Delete Engagement
+                              </a>
+                            </li>
+                           </ul>
+                         </li>
+                     </ul>
+                    </td>
+                    <td style="width: 150px;">
+                      {% if eng.lead.get_full_name and eng.lead.get_full_name.strip %}
+                          {{ eng.lead.get_full_name }}
+                      {% else %}
+                          {{ eng.lead |default_if_none:""}}
+                      {% endif %}
+                    </td>
+                    <td style="width: 200px;">
+                      <a target="#" data-toggle="tooltip" data-placement="bottom" title="{{ eng.target_start|date:"l, jS F Y" }} - {{ eng.target_end|date:"l, jS F Y" }}">
+                      {{ eng.target_start|date:"jS F" }} {% if eng.target_start|datediff_time:eng.target_end != "1 day" %} - {{ eng.target_end|date:"jS F" }}{% endif %}
+                    </a>
+                    </td>
+                    <td class="nowrap">{{ eng.target_start|datediff_time:eng.target_end }}
+                      {% if status == "open" %}
+                        {% if eng.target_end|overdue %}
+                        <sup>
+                          <div class="tag-label warning-color">
+                            {{ eng.target_end|overdue }} overdue
+                          </div>
+                        </sup>
+                        {% endif %}
+                        {% if eng.test_set.all|length == 0 %}
+                        &nbsp;<sup>
+                          <div class="tag-label amber-color">
+                            no tests
+                          </div>
+                        </sup>
+                        {% endif %}
+                        {% if eng|count_findings_eng_all == 0 %}
+                        &nbsp;<sup>
+                          <div class="tag-label amber-color">
+                            no findings
+                          </div>
+                        </sup>
+                        {% endif %}
+                      {% endif %}
+                    </td>
+                    <td class="nowrap">
+                      <div class="align-top">
+                      {% if eng.test_set.all|length %}
+                      <div class="dropdown">
+                        <a class="" href="{% url 'view_engagement' eng.id %}">{{ eng.test_set.all|length }}</a>
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">&nbsp;<i class="fa fa-ellipsis-v"></i>&nbsp;</a>
+                        <ul class="dropdown-menu">
+                          {% for test in eng.test_set.all %}
+                               <li>
+                                 <a class="" href="{% url 'view_test' test.id %}">
+                                   <i class="fa fa-list-alt"></i> {{test.test_type}}, {{test.created}}
+                               </li>
+                            {% endfor %}
+                        </ul>
+                      </div>
+                      {% else %}
+                      <a class="" href="{% url 'view_engagement' eng.id %}">{{ eng.test_set.all|length }}</a>
+                      {% endif %}
+                      </div>
+                    </td>
+                    <td>{{ eng|count_findings_eng_open }}</td>
+                    <td>{{ eng|count_findings_eng_all }}</td>
+                    <td>{{ eng|count_findings_eng_duplicate }}</td>
+                    <td><a target="_blank" data-toggle="tooltip" data-placement="bottom" title="{{ eng.updated|default_if_none:"" }}">
+                    {{ eng.updated|naturaltime|default_if_none:"" }}</a>
+                    </td>
+                    {% if status == "paused" or status == "closed" %}
+                    <td>
+                      {% if eng.status == "Blocked" %}
+                      <em class="text-danger">
+                      {% elif eng.status == "On Hold" %}
+                      <em class="text-warning">
+                      {% else %}
+                      <em>
+                      {% endif %}
+                      {{ eng.status }}
+                    </em>
+                    </td>
+                    {% endif %}
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="panel-body">
+                <p class="text-muted">No {% if status == "open" %}active{% elif status == "paused" %}paused{% else %}closed{% endif %} engagements found.</p>
+            </div>
+        {% endif %}
+    </div>
+    <div class="clearfix">
+        {% include "dojo/paging_snippet.html" with page=engs parm_name=parm_name page_size=True %}
+    </div>
+</div>

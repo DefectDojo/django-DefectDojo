@@ -166,9 +166,9 @@ class NessusXMLParser(object):
 
                     description = ""
                     plugin_output = None
-                    if item.find("synopsis") is not None:
+                    if item.findtext("synopsis"):
                         description = item.find("synopsis").text + "\n\n"
-                    if item.find("plugin_output") is not None:
+                    if item.findtext("plugin_output"):
                         plugin_output = "Plugin Output: " + ip + (
                             (":" + port) if port is not None else "") + " " + item.find("plugin_output").text + "\n\n"
                         description += plugin_output
@@ -177,11 +177,11 @@ class NessusXMLParser(object):
                     severity = get_text_severity(nessus_severity_id)
 
                     impact = item.find("description").text + "\n\n"
-                    if item.find("cvss_vector") is not None:
+                    if item.findtext("cvss_vector"):
                         impact += "CVSS Vector: " + item.find("cvss_vector").text + "\n"
-                    if item.find("cvss_base_score") is not None:
+                    if item.findtext("cvss_base_score"):
                         impact += "CVSS Base Score: " + item.find("cvss_base_score").text + "\n"
-                    if item.find("cvss_temporal_score") is not None:
+                    if item.findtext("cvss_temporal_score"):
                         impact += "CVSS Temporal Score: " + item.find("cvss_temporal_score").text + "\n"
 
                     mitigation = item.find("solution").text if item.find("solution") is not None else "N/A"
@@ -195,7 +195,7 @@ class NessusXMLParser(object):
                         references += xref.text + "\n"
 
                     cwe = None
-                    if item.find("cwe") is not None:
+                    if item.findtext("cwe"):
                         cwe = item.find("cwe").text
                     title = item.attrib["pluginName"]
                     dupe_key = severity + title

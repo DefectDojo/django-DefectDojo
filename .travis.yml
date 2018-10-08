@@ -6,18 +6,18 @@ env:
   - TEST=smoke-test
   - TEST=integration-test
   - TEST=unit-test
-  - TEST=sourceclear
   - TEST=bandit
   - TEST=docker-bench-security
   - TEST=ansible
-  - TEST=pep8
+  - TEST=flake8-complete
   - TEST=flake8
 
 matrix:
   allow_failures:
+    - env: TEST=smoke-test
     - env: TEST=bandit
     - env: TEST=sourceclear
-    - env: TEST=pep8
+    - env: TEST=flake8-complete
 
 services:
   - docker
@@ -67,13 +67,13 @@ script:
         true
         ;;
       pep8)
-        pip install pep8
-        pep8 .
+        pip install flake8
+        flake8 .
         ;;
       flake8)
         echo "$TRAVIS_BRANCH"
         if [ "$TRAVIS_BRANCH" == "dev" ]
-        then 
+        then
             echo "Running Flake8 tests on dev branch aka pull requests"
             # We need to checkout dev for flake8-diff to work properly
             git checkout dev

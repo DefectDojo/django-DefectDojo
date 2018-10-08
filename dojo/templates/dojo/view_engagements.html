@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% load display_tags %}
+{% load static from staticfiles %}
+{% block add_styles %}
+    .tooltip-inner {
+      max-width: 350px;
+    }
+{% endblock %}
+{% block content %}
+    <div class="row">
+      {% if user.is_staff or authorized %}
+          {% include "dojo/snippets/engagement_list.html" with engs=engs count=engs_count parm_name="engs" status="open" type=engagement_type %}
+          {% include "dojo/snippets/engagement_list.html" with engs=queued_engs count=queued_engs_count parm_name="queued_engs_count" status="paused" type=engagement_type %}
+          {% include "dojo/snippets/engagement_list.html" with engs=i_engs count=i_engs_count parm_name="i_engs" status="closed" type=engagement_type %}
+      {% endif %}
+    </div>
+    <div class="protip">
+       <i class="fa fa-lightbulb-o"></i> <strong>ProTip!</strong> Type <kbd>a</kbd> to add a new engagement.
+    </div>
+{% endblock %}
+{% block postscript %}
+    <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
+    <script type="text/javascript">
+        $(function () {
+            $(document).on('keypress', function(e) {
+                var key = String.fromCharCode(e.which);
+                if (key =='a') {
+                  {% if engagement_type == "CI/CD" %}
+                  window.location.assign('{% url 'new_eng_for_prod_cicd' prod.id %}');
+                  {% else %}
+                  window.location.assign('{% url 'new_eng_for_prod' prod.id %}');
+                  {% endif %}
+                }
+            });
+            $('[data-toggle="tooltip"]').tooltip();
+            //Ensures dropdown has proper zindex
+            $('.table-responsive').on('show.bs.dropdown', function () {
+              $('.table-responsive').css( "overflow", "inherit" );
+            });
+            if (document.referrer.indexOf('simple_search') > 0) {
+                var terms = '';
+                if ($.cookie('highlight')) {
+                    terms = $.cookie('highlight').split(' ');
+
+                    for (var i = 0; i < terms.length; i++) {
+                        $('body').highlight(terms[i]);
+                    }
+                }
+
+                $('input#simple_search').val(terms);
+            }
+          });
+    </script>
+{% endblock %}

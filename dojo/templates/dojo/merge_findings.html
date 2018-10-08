@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load event_tags %}
+{% load display_tags %}
+{% load static from staticfiles %}
+{% block add_css %}
+    <link rel="stylesheet" href="{% static "chosen-bootstrap/chosen.bootstrap.min.css" %}">
+    <link rel="stylesheet" href="{% static "simplemde/dist/simplemde.min.css" %}">
+{% endblock %}
+{% block add_styles %}
+    .chosen-container {
+    width: 70% !important;
+    }
+    .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
+    width: 70% !important;
+    }
+{% endblock %}
+{% block content %}
+    <h3> Merge Findings</h3>
+    <div id="merge">
+        <p>
+        </p>
+
+        <form id="add_finding" class="form-horizontal" method="post">
+            {% csrf_token %}
+            {% include "dojo/form_fields.html" with form=form %}
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <input class="btn btn-primary" type="submit" value="Merge Findings"/>
+                </div>
+            </div>
+            <br/><br/>
+        </form>
+    </div>
+{% endblock %}
+{% block postscript %}
+    <script>
+        var prior_select_val, prior_select_text;
+
+        $( document ).ready(function() {
+          //Remove the finding to merge into from the merge into select dropdown-menu
+          var selected = $('#id_finding_to_merge_into').val();
+          $("#id_findings_to_merge option[value='" + selected + "']").remove();
+          //Select all value in findings to merge
+          $('#id_findings_to_merge option').prop('selected', true);
+          prior_select_val = $('#id_finding_to_merge_into option:selected').val();
+          prior_select_text = $('#id_finding_to_merge_into option:selected').text();
+        });
+
+        $(function () {
+          $('#id_finding_to_merge_into').change(function(){
+            var selected = $('#id_finding_to_merge_into').val();
+
+            $("#id_findings_to_merge option[value='" + selected + "']").remove();
+
+            $('#id_findings_to_merge').append($('<option>', {
+                value: prior_select_val,
+                text: prior_select_text
+            }));
+
+            prior_select_val = $('#id_finding_to_merge_into option:selected').val();
+            prior_select_text = $('#id_finding_to_merge_into option:selected').text();
+          });
+        });
+    </script>
+{% endblock %}

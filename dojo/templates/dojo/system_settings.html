@@ -16,13 +16,13 @@
    <div id="test-strategy" class="col-md-4">
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        {%if celery_bool%}
+                        {% if celery_bool %}
                         <h4> Celery <span class="label label-success">{{celery_status}}</span> </h4>
                         {% else %}
                         <h4> Celery <span class="label label-danger">{{celery_status}}</span> </h4>
                         {% endif %}
                     </div>
-                    <div class="panel-body text-center">
+                    <div class="panel-body text-left">
                         {{celery_msg}}
                     </div>
                 </div>
@@ -44,7 +44,7 @@
 {% block postscript %}
     <script>
         function updatenotificationsgroup(group) {
-            if ($('#id_enable_' + group + "_notifications").is(':checked')) {
+           if ($('#id_enable_' + group + "_notifications").is(':checked')) {
                 $("[id^='id_" + group + "']").closest('.form-group').show();
             } else {
                 $("[id^='id_" + group + "']").closest('.form-group').hide();
@@ -52,7 +52,7 @@
         }
 
         $(function () {
-            $.each(['slack','hipchat','mail'], function (index, value) {
+            $.each(['slack','hipchat','mail', 'grade'], function (index, value) {
                 updatenotificationsgroup(value);
                 $('#id_enable_' + value + '_notifications').change(function() { updatenotificationsgroup(value)});
             });

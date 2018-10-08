@@ -4,54 +4,193 @@
 {% load humanize %}
 {% load static from staticfiles %}
 {% block add_styles %}
-    .graph {min-height: 158px;}
-    h3 { margin-top: 5px; margin-bottom: 5px; font-size: 20px; line-height: 22px;}
+    .tooltip-inner {
+      max-width: 350px;
+    }
 {% endblock %}
 {% block content %}
-    <!-- start status bread crums -->
-    <ul id="progress-crumbs" class="breadcrumb">
-        {% if eng.threat_model %}
-            <li><a href="#threat-model">Threat Model</a></li>
-        {% endif %}
-        {% if eng.test_strategy %}
-            <li><a href="#test-strategy">Test Strategy</a></li>
-        {% endif %}
-        {% if eng.test_set.count %}
-            <li><a href="#tests">Tests</a></li>
-        {% endif %}
-        {% if eng.eng_for_check.count %}
-            <li><a href="#checklist">Check List</a></li>
-        {% endif %}
-        {% if eng.risk_acceptance.count %}
-            <li><a href="#risk">Risk Acceptace</a></li>
-        {% endif %}
-        <li class="active">{{ eng.status }}</li>
-    </ul>
-    <!-- end breadcrums //-->
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <div class="clearfix">
-                <h3 class="pull-left">
-                    {% if eng.name %}
-                        {{ eng.name }}
-                    {% else %}
-                        Engagement for <a href="{% url 'view_product' eng.product.id %}">{{ eng.product }}</a>
-                    {% endif %}
-                    <span class="text-muted">{{ eng.status }}</span>
-                    {% if eng.tags %}
-                        <sup>
-                            {% for tag in eng.tags %}
-                            <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
-                            {% endfor %}
-                        </sup>
-                    {% endif %}
-                </h3>
 
-                <div class="dropdown pull-right">
-                    <div class="btn-group">
-                        <button class="btn btn-primary clickable panel-collapsed">
-                            <span><i class="fa fa-bar-chart"></i></span>
-                        </button>
+<div class="row">
+  <div id="tests" class="col-md-8">
+      <div class="panel panel-default">
+          <div class="panel-heading">
+              <div class="clearfix">
+                  <h4 class="pull-left">
+                      Description
+                  </h4>
+
+                  <div class="dropdown pull-right">
+                      <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                              data-toggle="dropdown" aria-expanded="true">
+                          <span class="fa fa-bars"></span>
+                          <span class="caret"></span>
+                      </button>
+                      <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                          <li role="presentation">
+                              <a class="" href="{% url 'edit_engagement' eng.id %}">
+                                  <i class="fa fa-pencil-square-o"></i> Edit Engagement
+                              </a>
+                          </li>
+
+                          <li role="presentation">
+                              {% if eng.active %}
+                                  <a class="" href="{% url 'close_engagement' eng.id %}">
+                                      <i class="fa fa-close"></i> Close Engagement
+                                  </a>
+                              {% else %}
+                                  <a class="" href="{% url 'reopen_engagement' eng.id %}">
+                                      <i class="fa fa-undo"></i> Reopen Engagement
+                                  </a>
+                              {% endif %}
+                          </li>
+                          <li role="presentation">
+                              <a href="{% url 'engagement_report' eng.id %}?title=&active=1&verified=1&false_p=2&duplicate=2">
+                                  <i class="fa fa-file-text-o"></i> Report
+                              </a>
+                          </li>
+                          <li role="presentation">
+                              <a href="{% url 'engagement_ics' eng.id %}">
+                                  <i class="fa fa-calendar-plus-o"></i> Add To Calendar
+                              </a>
+                          </li>
+                          <li role="presentation">
+                              <a href="{% url 'view_object_eng' eng.id %}">
+                                  <i class="fa fa-file-text-o"></i> View Files for this Build
+                              </a>
+                          </li>
+                          <li role="presentation">
+                              <a href="{% url 'action_history' eng|content_type eng.id %}">
+                                  <i class="fa fa-history"></i> View History
+                              </a>
+                          </li>
+                          <li role="separator" class="divider"></li>
+                          <li role="presentation">
+                              {% if eng.test_strategy %}
+                                  <a target="_blank" href="{{ eng.test_strategy }}"><i class="fa fa-file-text-o"></i> View Test
+                                      Strategy </a>
+                              {% else %}
+                                  <a href="{% url 'edit_engagement' eng.id %}"><i class="fa fa-file-text-o"></i> Add a Test Strategy</a>
+                              {% endif %}
+                          </li>
+                          {% if threat != 'none' %}
+                          <li role="presentation">
+                                  <a href="{% url 'view_threatmodel' eng.id %}"><i class="fa fa-file-text-o"></i> Download Threat Model</a>
+                          </li>
+                          <li role="presentation">
+                                  <a href="{% url 'upload_threatmodel' eng.id %}"><i class="fa fa-file-text-o"></i> Upload Threat Model</a>
+                          </li>
+                          {% else %}
+                          <li role="presentation">
+                              <a href="{% url 'upload_threatmodel' eng.id %}"><i class="fa fa-file-text-o"></i> Upload Threat Model</a>
+                          </li>
+                         {% endif %}
+                          <li role="separator" class="divider"></li>
+                          <li role="presentation">
+                              <a class="text-danger" href="{% url 'delete_engagement' eng.id %}">
+                                  <i class="fa fa-trash-o"></i> Delete Engagement
+                              </a>
+                          </li>
+                      </ul>
+                  </div>
+              </div>
+          </div>
+            <div class="panel-body">
+              {% if eng.description %}
+                {{ eng.description|markdown_render }}
+              {% else %}
+                <small class="text-muted"><em>There is no description.</em></small>
+              {% endif %}
+            </div>
+        </div>
+        {% if eng.preset %}
+        <div class="row">
+            <div id="tests" class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="clearfix">
+                            <h4 class="pull-left">
+                            Engagement Presets <small>{{ eng.preset.title|truncatechars:60 }}</small>
+                            </h4>
+                            <div class="dropdown pull-right">
+                                <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                                        data-toggle="dropdown" aria-expanded="true">
+                                    <span class="fa fa-bars"></span>
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                                    <li role="presentation">
+                                        <a class="" href="{% url 'add_engagement_presets' eng.product.id %}">
+                                            <i class="fa fa-plus"></i> Add Engagement Preset
+                                        </a>
+                                    </li>
+                                    <li role="presentation">
+                                        <a class="" href="{% url 'edit_engagement_presets' eng.product.id eng.preset.id %}">
+                                            <i class="fa fa-edit"></i> Edit Engagement Preset
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                        <div class="table-responsive">
+                            <table class="tablesorter-bootstrap table table-condensed table-striped">
+                                <thead>
+                                <tr>
+                                    <th>Test Type</th>
+                                    <th>Network</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                          {% if preset_test_type.count > 1 %}
+                                            {% for test in preset_test_type %}
+                                               {{test.name}}{%if not forloop.last%},{%endif%}
+                                            {% endfor %}
+                                          {% else %}
+                                            {{ preset_test_type.0.name }}
+                                          {% endif %}
+                                        </td>
+                                        <td>
+                                          {% if network.count > 1 %}
+                                            {% for net in network %}
+                                               {{ net.location }}{%if not forloop.last%},{%endif%}
+                                            {% endfor %}
+                                          {% else %}
+                                            {{ network.0.location }}
+                                          {% endif %}
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="panel-body">
+                          {% if eng.preset.notes %}
+                            <strong>Notes: </strong>{{ eng.preset.notes|markdown_render }}
+                          {% else %}
+                            <small class="text-muted"><em>No test notes found.</em></small>
+                          {% endif %}
+                          {% if eng.preset.scope %}
+                            <strong>Scope: </strong>{{ eng.preset.scope|markdown_render }}
+                          {% else %}
+                            <small class="text-muted"><em>Testing scope not specified.</em></small>
+                          {% endif %}
+                        </div>
+                </div>
+            </div>
+</div>
+{% endif %}
+<div class="row">
+    <div id="tests" class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div class="clearfix">
+                    <h4 class="pull-left">
+                        Tests ({{tests.count}}) <small>{{ eng.id|get_severity_count:"engagement" }}</small>
+                    </h4>
+
+                    <div class="dropdown pull-right">
                         <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                 data-toggle="dropdown" aria-expanded="true">
                             <span class="fa fa-bars"></span>
@@ -59,662 +198,541 @@
                         </button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                             <li role="presentation">
-                                <a class="" href="{% url 'edit_engagement' eng.id %}">
-                                    <i class="fa fa-pencil-square-o"></i> Edit Engagement
-                                </a>
-                            </li>
-
-                            <li role="presentation">
-                                {% if eng.active %}
-                                    <a class="" href="{% url 'close_engagement' eng.id %}">
-                                        <i class="fa fa-close"></i> Close Engagement
-                                    </a>
-                                {% else %}
-                                    <a class="" href="{% url 'reopen_engagement' eng.id %}">
-                                        <i class="fa fa-undo"></i> Reopen Engagement
-                                    </a>
-                                {% endif %}
-                            </li>
-                            <li role="presentation">
-                                <a href="{% url 'engagement_report' eng.id %}">
-                                    <i class="fa fa-file-text-o"></i> Report
+                                <a class="" href="{% url 'add_tests' eng.id %}">
+                                    <i class="fa fa-plus"></i> Add Tests
                                 </a>
                             </li>
                             <li role="presentation">
-                                <a href="{% url 'engagement_ics' eng.id %}">
-                                    <i class="fa fa-calendar-plus-o"></i> Add To Calendar
-                                </a>
-                            </li>
-                            <li role="presentation">
-                                <a href="{% url 'view_object_eng' eng.id %}">
-                                    <i class="fa fa-file-text-o"></i> View Files for this Build
-                                </a>
-                            </li>
-                            <li role="presentation">
-                                <a href="{% url 'action_history' eng|content_type eng.id %}">
-                                    <i class="fa fa-history"></i> View History
-                                </a>
-                            </li>
-                            <li role="separator" class="divider"></li>
-                            <li role="presentation">
-                                <a class="text-danger" href="{% url 'delete_engagement' eng.id %}">
-                                    <i class="fa fa-trash-o"></i> Delete Engagement
+                                <a class="" href="{% url 'import_scan_results' eng.id %}">
+                                    <i class="fa fa-upload"></i> Import Scan Results
                                 </a>
                             </li>
                         </ul>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="panel-body product-graphs">
-            <div class="col-md-3">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <div class="row">
-                            <div class="col-xs-12">
-                                <i class="fa fa-bug fa-2x"></i>
-
-                                <div class="pull-right inline-block text-right">
-                                    <span class=" fa-2x">{{ open_findings|length }}</span>
-                                    <span><a href="{% url 'open_findings' %}?test__engagement__product={{ eng.product.id }}">open
-                                        finding{{ open_findings|length|pluralize }} <i
-                                                class="fa fa-arrow-circle-right"></i></a>
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="panel-body">
-                        <div id="open_findings" class="graph"></div>
-                    </div>
-                    <div class="panel-footer">
-                        <i title="Accepted since {{ start_date }}"
-                           class="text-info fa fa-info-circle"></i>
-                        <small>Opened since {{ start_date|date:"D., M. d, Y" }}</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <div class="row">
-                            <div class="col-xs-12">
-                                <i class="fa fa-fire-extinguisher fa-2x"></i>
-
-                                <div class="text-right pull-right">
-                                    <span class="fa-2x">{{ closed_findings|length }}</span>
-                                    <span><a href="{% url 'closed_findings' %}?test__engagement__product={{ eng.product.id }}">closed
-                                        finding{{ closed_findings|length|pluralize }}. <i
-                                                class="fa fa-arrow-circle-right"></i></a>
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="panel-body">
-                        <div id="closed_findings" class="graph"></div>
-                    </div>
-                    <div class="panel-footer">
-                        <i title="Accepted since {{ start_date }}"
-                           class="text-info fa fa-info-circle"></i>
-                        <small>Closed since {{ start_date|date:"D., M. d, Y" }}</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <div class="row">
-                            <div class="col-xs-12">
-                                <i class="fa fa-check fa-2x"></i>
-
-                                <div class="pull-right text-right">
-                                    <span class="fa-2x">{{ accepted_findings|length }}</span>
-                                    <span><a
-                                            href="{% url 'accepted_findings' %}?test__engagement__product={{ eng.product.id }}">Accepted
-                                    findings. <i class="fa fa-arrow-circle-right"></i></a>
-                                </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="panel-body">
-                        <div id="reported_findings" class="graph"></div>
-                    </div>
-                    <div class="panel-footer">
-                        <i title="Accepted since {{ start_date }}"
-                           class="text-info fa fa-info-circle"></i>
-                        <small>Accepted since {{ start_date|date:"D., M. d, Y" }}</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <div class="row">
-                            <div class="col-xs-12">
-                                <i class="fa fa-crosshairs fa-2x"></i>
-
-                                <div class="pull-right inline-block text-right">
-                                    <span class=" fa-2x">{{ new_findings|length }}</span>
-                                    <span><a
-                                            href="{% url 'open_findings' %}?test__engagement__product={{ eng.product.id }}&amp;date=2">new
-                                        finding{{ new_findings|length|pluralize }} <i
-                                                class="fa fa-arrow-circle-right"></i></a>
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="panel-body">
-                        <div id="new_findings" class="graph"></div>
-                    </div>
-                    <div class="panel-footer">
-                        <i title="Found in the last 7 days."
-                           class="text-info fa fa-info-circle"></i>
-                        <small>Found in the last 7 days.</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row same-height-panel-row">
-        <div class="col-md-4">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4>Testing Lead:
-                        {% if eng.lead.get_full_name and eng.lead.get_full_name.strip %}
-                            {{ eng.lead.get_full_name }}
-                        {% else %}
-                            {{ eng.lead }}
-                        {% endif %}
-                    </h4>
-                </div>
-                <div class="panel-body">
-                    {% if not eng.lead %}
-                        <p><b><i><sub><a class="" href="{% url 'edit_engagement' eng.id %}"> Edit </a> this
-                            engagement
-                            to
-                            add a
-                            lead.</sub></i></b></p>
-                    {% endif %}
-                    {% if eng.name %}
-                        <p> Engagement Name: {{ eng.name }} </p>
-                    {% endif %}
-                    <p> Target Start Date: {{ eng.target_start }} </p>
-
-                    <p> Target End Date: {{ eng.target_end }} </p>
-                </div>
-            </div>
-        </div>
-        <div id="test-strategy" class="col-md-4">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4> Test Strategy </h4>
-                </div>
-                <div class="panel-body text-center">
-                    {% if eng.test_strategy %}
-                        <a class="btn btn-sm btn-primary" target="_blank" href="{{ eng.test_strategy }}"> View Test
-                            Strategy </a>
-                    {% else %}
-                        <p><b><i><sub><a class="" href="{% url 'edit_engagement' eng.id %}"> Edit </a> this
-                            engagement
-                            to
-                            add a
-                            test strategy.</sub></i></b></p>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-        <div id="threat-model" class="col-md-4">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4> Threat Model </h4>
-                </div>
-                <div class="panel-body text-center">
-                    {% if threat != 'none' %}
-                        <div class="btn-group">
-                            <a class="btn btn-sm btn-primary" href="{% url 'view_threatmodel' eng.id %}"> Download
-                                Model</a>
-                            <a class="btn btn-sm btn-warning" href="{% url 'upload_threatmodel' eng.id %}"> Edit</a>
-                        </div>
-                    {% else %}
-                        <a class="btn btn-sm btn-primary" href="{% url 'upload_threatmodel' eng.id %}"> Upload
-                            Model</a>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-    {% if jissue and jconf %}
-        <div class="row to_highlight">
-            <div class="col-md-12">
-                <div class="panel panel-default endpoints table-responsive">
-                    <div class="panel-heading">
-                        <h4>JIRA Link
-                            <span class="pull-right"><a data-toggle="collapse" href="#jira_link"><i
-                                    class="glyphicon glyphicon-chevron-up"></i></a></span>
-                        </h4>
-                    </div>
-                    <div id="jira_link" class="panel-body endpoint-panel table-responsive collapse in">
-                        <a href="{{ jconf.url }}/browse/{{ jissue.jira_key }}"> {{ jconf.url }}/browse/{{ jissue.jira_key }} </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% endif %}
-    <div class="row">
-        <div id="tests" class="col-md-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <div class="clearfix">
-                        <h4 class="pull-left">
-                            Tests
-                        </h4>
-
-                        <div class="dropdown pull-right">
-                            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
-                                    data-toggle="dropdown" aria-expanded="true">
-                                <span class="fa fa-bars"></span>
-                                <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                                <li role="presentation">
-                                    <a class="" href="{% url 'add_tests' eng.id %}">
-                                        <i class="fa fa-plus"></i> Add Tests
-                                    </a>
-                                </li>
-                                <li role="presentation">
-                                    <a class="" href="{% url 'import_scan_results' eng.id %}">
-                                        <i class="fa fa-upload"></i> Import Scan Results
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                {% if tests %}
-                    <div class="table-responsive">
-                        <table class="tablesorter-bootstrap table table-condensed table-striped">
-                            <thead>
-                            <tr>
-                                <th>Type</th>
-                                <th>Start Date</th>
-                                <th>End Date</th>
-				<th>Lead</th>
-                                <th>Findings</th>
-                                <th>Duplicate Findings</th>
-                                <th>Notes</th>
-                                <th>Actions</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {% for test in tests %}
-                                <tr>
-                                    <td>{{ test.test_type }}
-                                      {% if test.tags %}
-                                          <sup>
-                                              {% for tag in test.tags %}
-                                              <a title="Search {{ tag }}" class="btn btn-tag btn-primary" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
-                                              {% endfor %}
-                                          </sup>
-                                      {% endif %}
-                                    </td>
-                                    <td>{{ test.target_start.date }}</td>
-                                    <td>{{ test.target_end.date }}</td>
-				                    <td>{{ test.lead }}</td>
-                                    <td>{{ test.finding_set.all|finding_status:False|length }}</td>
-                                    <td>{{ test.finding_set.all|finding_status:True|length }}</td>
-                                    <td>{{ test.notes.all|length }}</td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <a class="btn btn-sm btn-primary"
-                                               href="{% url 'view_test' test.id %}">View</a>
-                                            <a class="btn btn-sm btn-warning"
-                                               href="{% url 'edit_test' test.id %}">Edit</a>
-                                            <a class="btn btn-sm btn-danger"
-                                               href="{% url 'delete_test' test.id %}">Delete</a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                {% else %}
-                    <div class="panel-body">
-                        <p class="text-center">No tests found.</p>
-                    </div>
-                {% endif %}
-            </div>
-
-        </div>
-
-    </div>
-
-    <div class="row">
-        <div class="col-md-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4>Description</h4>
-                </div>
-                <div class="panel-body">
-                    {{ eng.description }}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!--Cred Begin-->
-    <div class="row">
-    <div class="col-md-12" id="cred">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h4>Credentials
-                  {% if creds %}
-                    <a title="Add New Credential" class="pull-right btn btn-primary btn-sm"
-                       href="{% url 'new_cred_product_engagement' eng.id %}"><span class="fa fa-plus"></span></a>
-                  {% endif %}
-                </h4>
-            </div>
-            {% if creds %}
-                <table class="tablesorter-bootstrap table table-condensed table-striped table-hover">
-                    <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Username</th>
-                      <th>Role</th>
-                      <th>Environment</th>
-                      <th>Authentication Provider</th>
-                      <th>Login Valid</th>
-                      <th>Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td colspan="7">
-                          Credentials Configured for this <strong>Engagement</strong>
-                          {% if not cred_eng %}
-                            <br/><center>None configured</center>
-                          {% endif %}
-                        </td>
-                      </tr>
-
-                      {% for cred in cred_eng %}
-                          <tr>
-                            <td>
-                                <a href="{{ cred.cred_id.url }}" target="_blank">{{ cred.cred_id.name }}</a>
-                            </td>
-                            <td>{{ cred.cred_id.username }}</td>
-                            <td>{{ cred.cred_id.role }}</td>
-                            <td>{{ cred.cred_id.environment }}</td>
-                            <td>{{ cred.is_authn_provider }}</td>
-                            <td>{{ cred.cred_id.is_valid }}</td>
-                            <td>
-                                <div class="btn-group">
-                                    <a class="btn btn-sm btn-primary"
-                                       href="{% url 'view_cred_product_engagement' cred.engagement.id cred.id  %}">View</a>
-                                    <a class="btn btn-sm btn-danger delete-finding"
-                                       href="{% url 'delete_cred_engagement' cred.engagement.id cred.id  %}">Delete</a>
-                                </div>
-                            </td>
-                          </tr>
-                      {% endfor %}
-                      <tr>
-                        <td colspan="7">
-                          Credentials Configured for this <strong>Product</strong>
-                        </td>
-                      </tr>
-                    {% for cred in creds %}
+            {% if tests %}
+                <div class="table-responsive">
+                    <table class="tablesorter-bootstrap table table-condensed table-striped">
+                        <thead>
                         <tr>
-                          <td>
-                              <a href="{{ cred.cred_id.url }}" target="_blank">{{ cred.cred_id.name }}</a>
-                          </td>
-                          <td>{{ cred.cred_id.username }}</td>
-                          <td>{{ cred.cred_id.role }}</td>
-                          <td>{{ cred.cred_id.environment }}</td>
-                          <td>{{ cred.is_authn_provider }}</td>
-                          <td>{{ cred.cred_id.is_valid }}</td>
-                          <td>
-                              <div class="btn-group">
-                                  <a class="btn btn-sm btn-primary"
-                                     href="{% url 'view_cred_product' cred.product.id cred.id  %}">View</a>
-                              </div>
-                          </td>
+                            <th>Type</th>
+                            <th></th>
+                            <th>Date</th>
+                            <th>Lead</th>
+                            <th>Findings</th>
+                            <th>Duplicate</th>
+                            <th>Notes</th>
                         </tr>
-                    {% endfor %}
-
-
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                        {% for test in tests %}
+                            <tr>
+                                <td><a href="{% url 'view_test' test.id %}">{{ test.test_type }}</a>
+                                  {% if test.tags %}
+                                      <sup>
+                                          {% for tag in test.tags %}
+                                          <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                          {% endfor %}
+                                      </sup>
+                                  {% endif %}
+                                </td>
+                                <td>
+                                  <ul>
+                                   <li class="dropdown" style="list-style:none;">
+                                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                         <ul class="dropdown-menu">
+                                           <li>
+                                             <a class="" href="{% url 'view_test' test.id %}">
+                                               <i class="fa fa-list-alt"></i> View</a>
+                                          </li>
+                                          <li>
+                                             <a class="" href="{% url 'edit_test' test.id %}">
+                                              <i class="fa fa-pencil-square-o"></i> Edit</a>
+                                          </li>
+                                          <li class="divider"></li>
+                                          <li>
+                                            <a class="" href="{% url 'add_findings' test.id %}">
+                                              <i class="fa fa-plus"></i> Add Finding to Test
+                                            </a>
+                                          </li>
+                                           <li class="divider"></li>
+                                           <li><a class="" href="{% url 're_import_scan_results' test.id %}">
+                                               <i class="fa fa-upload"></i> Re-Upload Scan Results
+                                           </a></li>
+                                           <li class="divider"></li>
+                                           <li role="presentation">
+                                               <a href="{% url 'test_report' test.id %}?title=&active=1&verified=1&false_p=2&duplicate=2">
+                                                   <i class="fa fa-file-text-o"></i> Test Report
+                                               </a>
+                                           </li>
+                                           <li class="divider"></li>
+                                           <li>
+                                             <a class="text-danger" href="{% url 'delete_test' test.id %}">
+                                              <i class="fa fa-trash-o"></i> Delete</a>
+                                          </li>
+                                         </ul>
+                                       </li>
+                                   </ul>
+                                </td>
+                                <td>{{ test.target_start.date }} - {{ test.target_end.date }}</td>
+                                <td>
+                                  {% if eng.lead.get_full_name and eng.lead.get_full_name.strip %}
+                                      {{ eng.lead.get_full_name }}
+                                  {% elif eng.lead %}
+                                      {{ eng.lead }}
+                                  {% endif %}
+                                </td>
+                                <td><a href="{% url 'view_test' test.id %}">{{ test|count_findings_test_all }}</a></td>
+                                <td>{{ test|count_findings_test_duplicate }}</td>
+                                <td>{{ test.notes.all|length }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             {% else %}
                 <div class="panel-body">
-                    <p>No credentials configured.
-                      {% if not creds %}
-                        Configure product credentials first, then add credentials to the engagement.
-                      {% endif %}
-                    </p>
+                    <small class="text-muted"><em>No tests found.</em></small>
                 </div>
             {% endif %}
         </div>
+
+    </div>
+
+</div>
+
+<div class="row">
+    <div id="risk" class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4> Risk Acceptance
+                    {% if can_add_risk %}
+                        <a title="Add Risk Acceptance" class="pull-right btn btn-sm btn-primary"
+                           href="{% url 'upload_risk_acceptance$' eng.id %}"><span class="fa fa-plus"></span></a>
+                        </a>
+                    {% endif %}
+                </h4>
+            </div>
+            {% if risks_accepted %}
+                <div class="table-responsive">
+                    <table id="open_findings"
+                           class="tablesorter-bootstrap table table-condensed table-striped">
+                        <thead>
+                        <tr>
+                            <th>Reporter</th>
+                            <th>Date</th>
+                            <th>Date Expires</th>
+                            <th>Accepted by</th>
+                            <th>Findings Accepted</th>
+                            <th>View File</th>
+                            <th>Actions</th>
+                        </thead>
+                        <tbody>
+                        {% for risk in risks_accepted %}
+                            <tr>
+                                <td>{{ risk.reporter }}</td>
+                                <td>{{ risk.created }}</td>
+                                <td>{{ risk.expiration_date|default_if_none:"" }}</td>
+                                <td>{{ risk.accepted_by|default_if_none:"" }}</td>
+                                <td>{{ risk.accepted_findings.all|length }}</td>
+                                <td><a href="{% url 'download_risk' eng.id risk.id %}">{{ risk.filename }}</a></td>
+                                <td>
+                                    <a class="btn btn-sm btn-primary" href="{% url 'view_risk' eng.id risk.id %}">
+                                        View
+                                        Approval</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="panel-body">
+                    <small class="text-muted"><em>No Risk Acceptances found.</em></small>
+                </div>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+{% if eng.engagement_type == "Interactive" %}
+<div class="row">
+    <div id="checklist" class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4> Check List
+                    {% if check %}
+                        <a title="Edit Checklist" class="btn btn-primary pull-right"
+                           href="{% url 'complete_checklist' eng.id %}">
+                            <span class="fa fa-edit"></span></a>
+                    {% else %}
+                        <a title="Complete Check List" class="btn btn-sm btn-primary pull-right"
+                           href="{% url 'complete_checklist' eng.id %}">
+                            <span class="fa fa-edit"></span></a></a>
+                    {% endif %}
+                </h4>
+            </div>
+
+            {% if check %}
+                <div class="table-responsive">
+                    <table class="tablesorter-bootstrap table table-condensed table-striped">
+                        <thead>
+                        <tr>
+                            <th>Session</th>
+                            <th>Encryption</th>
+                            <th>Configuration</th>
+                            <th>Authentication</th>
+                            <th>Authorization</th>
+                            <th>Data Input</th>
+                            <th>Sensitive Data</th>
+                            <th>Other</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td><span
+                                    class="label label-{{ check.session_management|checklist_status }}">{{ check.session_management }}</span>
+                            </td>
+                            <td><span
+                                    class="label label-{{ check.encryption_crypto|checklist_status }}">{{ check.encryption_crypto }}</span>
+                            </td>
+                            <td><span
+                                    class="label label-{{ check.configuration_management|checklist_status }}">{{ check.configuration_management }}</span>
+                            </td>
+                            <td><span
+                                    class="label label-{{ check.authentication|checklist_status }}">{{ check.authentication }}</span>
+                            </td>
+                            <td><span
+                                    class="label label-{{ check.authorization_and_access_control|checklist_status }}">{{ check.authorization_and_access_control }}</span>
+                            </td>
+                            <td><span
+                                    class="label label-{{ check.data_input_sanitization_validation|checklist_status }}">{{ check.data_input_sanitization_validation }}</span>
+                            </td>
+                            <td><span
+                                    class="label label-{{ check.sensitive_data|checklist_status }}">{{ check.sensitive_data }}</span>
+                            </td>
+                            <td><span
+                                    class="label label-{{ check.other|checklist_status }}">{{ check.other }}</span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="panel-body">
+                    <small class="text-muted"><em>Checklist has not been completed.</em></small>
+                </div>
+            {% endif %}
+
+
+        </div>
+
+    </div>
+
+</div>
+{% endif %}
+
+<!-- Sidebar -->
+</div>
+<div class="col-md-4">
+  <div class="panel panel-default-secondary">
+    <div class="panel-heading">
+      <h3 class="panel-title"><span class="fa fa-info-circle fa-fw" aria-hidden="true"></span> {% if eng.name %}
+          {{ eng.name }}
+      {% else %}
+          Engagement for <a href="{% url 'view_product' eng.product.id %}">{{ eng.product }}</a>
+      {% endif %}
+      {% if eng.version %}
+          <sup>
+                <a target="_blank" class="tag-label tag-version" data-toggle="tooltip" data-placement="bottom" title="Product Version: {{ eng.version }}">
+                {{ eng.version }}</a>
+          </sup>
+      {% endif %}
+      {% if eng.tags %}
+          <sup>
+              {% for tag in eng.tags %}
+              <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+              {% endfor %}
+          </sup>
+      {% endif %}
+      </h3>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <tbody>
+          <tr>
+            <td style="width: 150px;"><strong>Status</strong></td>
+            <td>
+              {% if eng.status == "Blocked" %}
+              <em class="text-danger">
+              {% elif eng.status == "On Hold" %}
+              <em class="text-warning">
+              {% else %}
+              <em>
+              {% endif %}
+              {{ eng.status }}
+            </em>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>Dates</strong></td>
+            <td><a target="#" data-toggle="tooltip" data-placement="bottom" title="{{ eng.target_start|date:"l, jS F Y" }} - {{ eng.target_end|date:"l, jS F Y" }}">
+            {{ eng.target_start|date:"jS F" }} - {{ eng.target_end|date:"jS F" }}
+          </a></td>
+          </tr>
+          <tr>
+            <td><strong>Length</strong></td>
+            <td>{{ eng.target_start|datediff_time:eng.target_end }}
+              {% if eng.target_end|overdue and eng.status != 'Completed'%}
+              <sup>
+                <div class="tag-label warning-color">
+                  {{ eng.target_end|overdue }} overdue
+                </div>
+              </sup>
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <td><strong>
+              {% if eng.engagement_type == "Interactive" %}Lead{% else %}Service Account {% endif %}</strong></td>
+            <td>{% if eng.lead.get_full_name and eng.lead.get_full_name.strip %}
+                {{ eng.lead.get_full_name }}
+            {% elif eng.lead %}
+                {{ eng.lead }}
+            {% else %}
+                None Assigned
+            {% endif %}</td>
+          </tr>
+          <tr>
+            <td><strong>Tracker</strong></td>
+            <td>
+              {% if eng.tracker %}
+                <a target="_blank" data-toggle="tooltip" data-placement="top" title="{{ eng.tracker }}" href="{{ eng.tracker }}" alt="Development epic or ticket for development requirements.">
+                <i class="fa fa-external-link"></i> {{ eng.tracker|last_value }}</a>
+              {% else %}
+                {{ eng.tracker|notspecified}}
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <td><strong>Repo</strong></td>
+            <td>
+              {% if eng.source_code_management_uri %}
+                <a target="_blank" data-toggle="tooltip" data-placement="top" title="{{ eng.source_code_management_uri }}" href="{{ eng.source_code_management_uri }}">
+                  <i class="fa fa-external-link"></i> {{ eng.source_code_management_uri|last_value }}
+                </a>
+              {% else %}
+                {{ eng.source_code_management_uri|notspecified}}
+              {% endif %}
+            </td>
+          </tr>
+          {% if jissue and jconf %}
+          <tr>
+            <td><strong>Jira</strong></td>
+            <td><a href="{{ jconf.url }}/browse/{{ jissue.jira_key }}" target="_blank"><i class="fa fa-external-link"></i> Jira Epic</a></td>
+          </tr>
+          {% endif %}
+          <tr>
+            <td><strong>Updated</strong></td>
+            <td><a target="_blank" data-toggle="tooltip" data-placement="bottom" title="{{ eng.updated|default_if_none:"" }}">
+            {{ eng.updated|naturaltime|default_if_none:"" }}</a></td>
+          </tr>
+          <tr>
+            <td><strong>Created</strong></td>
+            <td><a target="_blank" data-toggle="tooltip" data-placement="bottom" title="{{ eng.created|default_if_none:"" }}">
+            {{ eng.created|naturaltime|default_if_none:"" }}</a></td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% if eng.engagement_type == "CI/CD" %}
+  <div>
+    <div class="panel panel-default-secondary">
+      <div class="panel-heading">
+        <h3 class="panel-title"><span class="fa fa-server" aria-hidden="true"></span>
+          CI/CD Engagement Details
+      </h3>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <tbody>
+            <tr>
+              <td style="width: 150px;"><strong>Build ID</strong></td>
+              <td>{{ eng.build_id|notspecified }}</td>
+            </tr>
+            <tr>
+              <td><strong>Commit Hash</strong></td>
+              <td>{{ eng.commit_hash|notspecified|truncatechars:13 }}</td>
+            </tr>
+            <tr>
+              <td><strong>Branch/Tag</strong></td>
+              <td>{{ eng.branch_tag|notspecified }}</td>
+            </tr>
+            <tr>
+              <td><strong>Orchestration</strong></td>
+              <td>{% if eng.orchestration_engine.id %}
+                  <a href="{% url 'edit_tool_config' eng.orchestration_engine.id %}">{{ eng.orchestration_engine.name }}</a>
+                  {% else %}
+                    {{ eng.orchestration_engine.name|notspecified }}
+                  {% endif %}
+              </td>
+            </tr>
+            <tr>
+              <td><strong>SCM Server</strong></td>
+              <td>{% if eng.source_code_management_server.id %}
+                <a href="{% url 'edit_tool_config' eng.source_code_management_server.id %}">{{ eng.source_code_management_server.name }}</a>
+                {% else %}
+                  {{ eng.source_code_management_server.name|notspecified }}
+                {% endif %}
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Build Server</strong></td>
+              <td>{% if eng.build_server.id %}
+                <a href="{% url 'edit_tool_config' eng.build_server.id %}">{{ eng.build_server.name }}</a>
+                {% else %}
+                  {{ eng.build_server.name|notspecified }}
+                {% endif %}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 </div>
-<!--Cred end -->
-
-    <div class="row">
-        <div id="checklist" class="col-md-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4> Check List
-                        {% if check %}
-                            <a title="Edit Checklist" class="btn btn-primary pull-right"
-                               href="{% url 'complete_checklist' eng.id %}">
-                                <span class="fa fa-edit"></span></a>
-                        {% else %}
-                            <a title="Complete Check List" class="btn btn-sm btn-primary pull-right"
-                               href="{% url 'complete_checklist' eng.id %}">
-                                <span class="fa fa-edit"></span></a></a>
-                        {% endif %}
-                    </h4>
-                </div>
-
-                {% if check %}
-                    <div class="table-responsive">
-                        <table class="tablesorter-bootstrap table table-condensed table-striped">
-                            <thead>
-                            <tr>
-                                <th>Session</th>
-                                <th>Encryption</th>
-                                <th>Configuration</th>
-                                <th>Authentication</th>
-                                <th>Authorization</th>
-                                <th>Data Input</th>
-                                <th>Sensitive Data</th>
-                                <th>Other</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <td><span
-                                        class="label label-{{ check.session_management|checklist_status }}">{{ check.session_management }}</span>
-                                </td>
-                                <td><span
-                                        class="label label-{{ check.encryption_crypto|checklist_status }}">{{ check.encryption_crypto }}</span>
-                                </td>
-                                <td><span
-                                        class="label label-{{ check.configuration_management|checklist_status }}">{{ check.configuration_management }}</span>
-                                </td>
-                                <td><span
-                                        class="label label-{{ check.authentication|checklist_status }}">{{ check.authentication }}</span>
-                                </td>
-                                <td><span
-                                        class="label label-{{ check.authorization_and_access_control|checklist_status }}">{{ check.authorization_and_access_control }}</span>
-                                </td>
-                                <td><span
-                                        class="label label-{{ check.data_input_sanitization_validation|checklist_status }}">{{ check.data_input_sanitization_validation }}</span>
-                                </td>
-                                <td><span
-                                        class="label label-{{ check.sensitive_data|checklist_status }}">{{ check.sensitive_data }}</span>
-                                </td>
-                                <td><span
-                                        class="label label-{{ check.other|checklist_status }}">{{ check.other }}</span>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
+{% endif %}
+  <div>
+    <div class="panel panel-default-secondary">
+      <div class="panel-heading">
+        <h4><span class="fa fa-key" aria-hidden="true"></span>
+          Credentials
+        {% if creds %}
+          <a title="Add New Credential" class="pull-right btn btn-sm btn-primary"
+             href="{% url 'new_cred_product_engagement' eng.id %}"><span class="fa fa-plus"></span></a>
+        {% endif %}
+      </h4>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead>
+          <tr>
+            <th>Name</th>
+            <th></th>
+            <th>Username</th>
+          </tr>
+          </thead>
+          <tbody>
+            {% if creds %}
+            <tr><td colspan="3">
+              <small class="text-muted"><em>
+                {% if cred_eng %}
+                Credentials Configured for this <strong>Engagement</strong>
                 {% else %}
-                    <div class="panel-body">
-                        <p>Checklist has not been completed.</p>
-                    </div>
+                No Credentials Configured for this <strong>Engagement</strong>
                 {% endif %}
-
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <div class="row">
-        <div id="risk" class="col-md-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4> Risk Acceptance
-                        {% if can_add_risk %}
-                            <a title="Add Risk Acceptance" class="pull-right btn btn-sm btn-primary"
-                               href="{% url 'upload_risk_acceptance$' eng.id %}"><span class="fa fa-plus"></span></a>
-                            </a>
-                        {% endif %}
-                    </h4>
-                </div>
-                {% if risks_accepted %}
-                    <div class="table-responsive">
-                        <table id="open_findings"
-                               class="tablesorter-bootstrap table table-condensed table-striped">
-                            <thead>
-                            <tr>
-                                <th>Reporter</th>
-                                <th> Date</th>
-                                <th>Findings Accepted</th>
-                                <th>View File</th>
-                                <th>Actions</th>
-                            </thead>
-                            <tbody>
-                            {% for risk in risks_accepted %}
-                                <tr>
-                                    <td>{{ risk.reporter }}</td>
-                                    <td>{{ risk.created }}</td>
-                                    <td>{{ risk.accepted_findings.all|length }}</td>
-                                    <td><a href="{% url 'download_risk' eng.id risk.id %}">{{ risk.filename }}</a></td>
-                                    <td>
-                                        <a class="btn btn-sm btn-primary" href="{% url 'view_risk' eng.id risk.id %}">
-                                            View
-                                            Approval</a>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+              </em></small></td>
+            </tr>
+            {% endif %}
+            {% for cred in cred_eng %}
+                <tr>
+                  <td>
+                      <a href="{% url 'view_cred_product_engagement' cred.engagement.id cred.id  %}">{{ cred.cred_id.name }}</a>
+                  </td>
+                  <td>
+                    <ul>
+                     <li class="dropdown" style="list-style:none;">
+                           <a href="#" class="dropdown-toggle" data-toggle="dropdown">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                           <ul class="dropdown-menu">
+                             <li>
+                               <a class="" href="{% url 'view_cred_product_engagement' cred.engagement.id cred.id %}">
+                                 View</a>
+                            </li>
+                            <li>
+                               <a class="" href="{% url 'delete_cred_engagement' cred.engagement.id cred.id %}">
+                                 Delete</a>
+                            </li>
+                           </ul>
+                         </li>
+                     </ul>
+                  </td>
+                  <td>{{ cred.cred_id.username }}</td>
+                </tr>
+            {% endfor %}
+            <tr><td colspan="3">
+              <small class="text-muted"><em>
+                {% if creds %}
+                Credentials Configured for this <strong>Product</strong>
                 {% else %}
-                    <div class="panel-body">
-                        <p class="text-center">No Risk Acceptances found.</p>
-                    </div>
+                No Credentials Configured for this <strong>Product</strong>
                 {% endif %}
-
-            </div>
-
-        </div>
-
+              </em></small></td>
+            </tr>
+            {% for cred in creds %}
+                <tr>
+                  <td>
+                      <a href="{% url 'view_cred_product' cred.product.id cred.id  %}">{{ cred.cred_id.name }}</a>
+                  </td>
+                  <td>
+                    <ul>
+                     <li class="dropdown" style="list-style:none;">
+                           <a href="#" class="dropdown-toggle" data-toggle="dropdown">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                           <ul class="dropdown-menu">
+                             <li>
+                               <a class="" href="{% url 'view_cred_product' cred.product.id cred.id %}">
+                                 View</a>
+                            </li>
+                           </ul>
+                         </li>
+                     </ul>
+                  </td>
+                  <td>{{ cred.cred_id.username }}</td>
+                </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
-    {% if enabled %}
-        <div class="row">
-            <div id="finding" class="col-md-12">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h4> Findings</h4>
-                    </div>
-                    {% if findings %}
-                        <table id="test_findings" class="table-bordered table table-condensed table-hover">
+</div>
 
-
-                            <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Severity</th>
-                                <th>Reporter</th>
-                                <th>Mitigation Date</th>
-                                <th>Verified</th>
-                                <th>Active</th>
-                                {% if "enable_jira"|get_system_setting %}
-                                    <th>Jira</th>
-                                {% endif %}
-                                <th>Actions</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {% for finding in findings %}
-                                <tr class="{% if finding.active %}active_finding{% else %}inactive_finding{% endif %}">
-                                    <td><a href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a></td>
-                                    <td>
-                                        <span class="label severity severity-{{ finding.severity }}">
-                                            {{ finding.severity_display }}
-                                        </span>
-                                    </td>
-                                    <td>{{ finding.reporter.username }}</td>
-                                    <td>{{ finding.mitigated }}</td>
-                                    <td>{{ finding.verified }}</td>
-                                    <td>{{ finding.active }}</td>
-                                    {% if "enable_jira"|get_system_setting %}
-                                        <td>
-                                            <a href="{{ finding.jira_conf.url }}/browse/{{ finding.jira.jira_key }}"
-                                               target="_blank"> {{ finding.jira.jira_key }} </a>
-                                        </td>
-                                    {% endif %}
-                                    <td>
-                                        <div class="btn-group">
-                                            <a class="btn btn-sm btn-primary"
-                                               href="{% url 'view_finding' finding.id %}">View</a>
-                                            <a class="btn btn-sm btn-warning"
-                                               href="{% url 'edit_finding' finding.id %}">Edit</a>
-                                            <a class="btn btn-sm btn-danger delete-finding"
-                                               href="{% url 'delete_finding' finding.id %}">Delete</a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                        <div class="panel-body {% if findings %}show{% else %}hidden{% endif %}">
-                            {% include "dojo/paging_snippet.html" with page=findings %}
-                        </div>
-                    {% else %}
-                        <div class="panel-body">
-                            <p class="text-center">No findings found.</p>
-                        </div>
-                    {% endif %}
-                </div>
-
-            </div>
-
-        </div>
-    {% endif %}
+</div>
+</div>
+<div class="protip">
+   <i class="fa fa-lightbulb-o"></i> <strong>ProTip!</strong> Type <kbd>e</kbd> to edit this engagement. Type <kbd>i</kbd> to import scan results or <kbd>a</kbd> to add tests.
+</div>
 {% endblock %}
 {% block postscript %}
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
-    <!-- Flot Charts JavaScript -->
-    <script src="{% static "flot/excanvas.min.js" %}"></script>
-    <script src="{% static "flot/jquery.flot.js" %}"></script>
-    <script src="{% static "flot/jquery.flot.pie.js" %}"></script>
-    <script src="{% static "flot/jquery.flot.resize.js" %}"></script>
-    <script src="{% static "flot/jquery.flot.categories.js" %}"></script>
-    <script src="{% static "flot-axis/jquery.flot.axislabels.js" %}"></script>
-    <script src="{% static "flot/jquery.flot.time.js" %}"></script>
-    <script src="{% static "flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
-    <script type="text/javascript">
+    <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
+        <script type="text/javascript">
         $(function () {
+            $(document).on('keypress', null, 'e', function () {
+              window.location.assign('{% url 'edit_engagement' eng.id %}');
+            });
+
+            $(document).on('keypress', null, 'a', function () {
+                window.location.assign('{% url 'add_tests' eng.id %}');
+            });
+
+            $(document).on('keypress', null, 'i', function () {
+                window.location.assign('{% url 'import_scan_results' eng.id %}');
+            });
+
+            $(document).ready(function(){
+              $('[data-toggle="tooltip"]').tooltip();
+            });
+            //Ensures dropdown has proper zindex
+            $('.table-responsive').on('show.bs.dropdown', function () {
+              $('.table-responsive').css( "overflow", "inherit" );
+            });
+
+            $('.table-responsive').on('hide.bs.dropdown', function () {
+              $('.table-responsive').css( "overflow", "auto" );
+            })
             if (document.referrer.indexOf('simple_search') > 0) {
                 var terms = '';
                 if ($.cookie('highlight')) {
@@ -727,552 +745,9 @@
 
                 $('input#simple_search').val(terms);
             }
-
-            $(document).on('click', '.panel-heading button.clickable', function (e) {
-                var $this = $(this);
-                if (!$this.hasClass('panel-collapsed')) {
-                    $this.parents('.panel').find('.panel-body').slideUp();
-                    $this.addClass('panel-collapsed');
-                    $this.find('i').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
-                } else {
-                    $this.parents('.panel').find('.panel-body').slideDown();
-                    $this.removeClass('panel-collapsed');
-                    $this.find('i').removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
-                }
-            });
-
-            accepted_findings();
-            open_findings();
-            closed_findings();
-            new_findings();
-
-            $(".product-graphs").hide();
-
         });
 
-        function accepted_findings() {
-            var critical = 0;
-            var high = 0;
-            var medium = 0;
-            var low = 0;
-            var info = 0;
-            var ticks = [
-                [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
-            ];
 
-            {% for f in accepted_findings %}
-                {% if f.severity == 'Critical' %}
-                    critical += 1;
-                {% elif f.severity == 'High' %}
-                    high += 1;
-                {% elif f.severity == 'Medium' %}
-                    medium += 1;
-                {% elif f.severity == 'Low' %}
-                    low += 1;
-                {% elif f.severity == 'Info' %}
-                    info += 1;
-                {% endif %}
-            {% endfor %}
 
-            var d1 = [
-                [0, critical],
-            ];
-            var d2 = [
-                [1, high],
-            ];
-            var d3 = [
-                [2, medium],
-            ];
-            var d4 = [
-                [3, low],
-            ];
-            var d5 = [
-                [4, info],
-            ];
-
-            var data = [
-                {
-                    label: "Critical",
-                    data: d1,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 1,
-                        fillColor: "#d9534f"
-                    },
-                    color: "#d9534f"
-                },
-                {
-                    label: "High",
-                    data: d2,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 2,
-                        fillColor: "#f0ad4e"
-                    },
-                    color: "#f0ad4e"
-                },
-                {
-                    label: "Medium",
-                    data: d3,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 3,
-                        fillColor: "#f0de28"
-                    },
-                    color: "#f0de28"
-                },
-                {
-                    label: "Low",
-                    data: d4,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#337ab7"
-                    },
-                    color: "#337ab7"
-                },
-                {
-                    label: "info",
-                    data: d5,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#80699B"
-                    },
-                    color: "#80699B"
-                }
-            ];
-
-            $.plot("#reported_findings", data, {
-                series: {
-                    stack: true,
-                    bars: {
-                        show: true,
-                        barWidth: .9,
-                        'align': "center",
-                    },
-
-                },
-                grid: {
-                    hoverable: false,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
-
-                },
-                tooltip: false,
-                legend: {
-                    show: false,
-                    position: "ne"
-                },
-                xaxis: {
-                    ticks: ticks,
-                },
-
-            });
-        }
-        ;
-        function open_findings() {
-            var critical = 0;
-            var high = 0;
-            var medium = 0;
-            var low = 0;
-            var info = 0;
-            var ticks = [
-                [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
-            ];
-
-            {% for f in open_findings %}
-                {% if f.severity == 'Critical' %}
-                    critical += 1;
-                {% elif f.severity == 'High' %}
-                    high += 1;
-                {% elif f.severity == 'Medium' %}
-                    medium += 1;
-                {% elif f.severity == 'Low' %}
-                    low += 1;
-                {% elif f.severity == 'Info' %}
-                    info += 1;
-                {% endif %}
-            {% endfor %}
-
-            var d1 = [
-                [0, critical],
-            ];
-            var d2 = [
-                [1, high],
-            ];
-            var d3 = [
-                [2, medium],
-            ];
-            var d4 = [
-                [3, low],
-            ];
-            var d5 = [
-                [4, info],
-            ];
-
-            var data = [
-                {
-                    label: "Critical",
-                    data: d1,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 1,
-                        fillColor: "#d9534f"
-                    },
-                    color: "#d9534f"
-                },
-                {
-                    label: "High",
-                    data: d2,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 2,
-                        fillColor: "#f0ad4e"
-                    },
-                    color: "#f0ad4e"
-                },
-                {
-                    label: "Medium",
-                    data: d3,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 3,
-                        fillColor: "#f0de28"
-                    },
-                    color: "#f0de28"
-                },
-                {
-                    label: "Low",
-                    data: d4,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#337ab7"
-                    },
-                    color: "#337ab7"
-                },
-                {
-                    label: "info",
-                    data: d5,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#80699B"
-                    },
-                    color: "#80699B"
-                }
-            ];
-
-            $.plot("#open_findings", data, {
-                series: {
-                    stack: true,
-                    bars: {
-                        show: true,
-                        barWidth: .9,
-                        'align': "center",
-                    },
-
-                },
-                grid: {
-                    hoverable: false,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
-
-                },
-                tooltip: false,
-                legend: {
-                    show: false,
-                    position: "ne"
-                },
-                xaxis: {
-                    ticks: ticks,
-                },
-
-            });
-        }
-        ;
-        function closed_findings() {
-            var critical = 0;
-            var high = 0;
-            var medium = 0;
-            var low = 0;
-            var info = 0;
-            var ticks = [
-                [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
-            ];
-
-            {% for f in closed_findings %}
-                {% if f.severity == 'Critical' %}
-                    critical += 1;
-                {% elif f.severity == 'High' %}
-                    high += 1;
-                {% elif f.severity == 'Medium' %}
-                    medium += 1;
-                {% elif f.severity == 'Low' %}
-                    low += 1;
-                {% elif f.severity == 'Info' %}
-                    info += 1;
-                {% endif %}
-            {% endfor %}
-
-            var d1 = [
-                [0, critical],
-            ];
-            var d2 = [
-                [1, high],
-            ];
-            var d3 = [
-                [2, medium],
-            ];
-            var d4 = [
-                [3, low],
-            ];
-            var d5 = [
-                [4, info],
-            ];
-
-            var data = [
-                {
-                    label: "Critical",
-                    data: d1,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 1,
-                        fillColor: "#d9534f"
-                    },
-                    color: "#d9534f"
-                },
-                {
-                    label: "High",
-                    data: d2,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 2,
-                        fillColor: "#f0ad4e"
-                    },
-                    color: "#f0ad4e"
-                },
-                {
-                    label: "Medium",
-                    data: d3,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 3,
-                        fillColor: "#f0de28"
-                    },
-                    color: "#f0de28"
-                },
-                {
-                    label: "Low",
-                    data: d4,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#337ab7"
-                    },
-                    color: "#337ab7"
-                },
-                {
-                    label: "info",
-                    data: d5,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#80699B"
-                    },
-                    color: "#80699B"
-                }
-            ];
-
-            $.plot("#closed_findings", data, {
-                series: {
-                    stack: true,
-                    bars: {
-                        show: true,
-                        barWidth: .9,
-                        'align': "center",
-                    },
-
-                },
-                grid: {
-                    hoverable: false,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
-
-                },
-                tooltip: false,
-                legend: {
-                    show: false,
-                    position: "ne"
-                },
-                xaxis: {
-                    ticks: ticks,
-                },
-
-            });
-        }
-        ;
-        function new_findings() {
-            var critical = 0;
-            var high = 0;
-            var medium = 0;
-            var low = 0;
-            var info = 0;
-            var ticks = [
-                [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
-            ];
-
-            {% for f in new_findings %}
-                {% if f.severity == 'Critical' %}
-                    critical += 1;
-                {% elif f.severity == 'High' %}
-                    high += 1;
-                {% elif f.severity == 'Medium' %}
-                    medium += 1;
-                {% elif f.severity == 'Low' %}
-                    low += 1;
-                {% elif f.severity == 'Info' %}
-                    info += 1;
-                {% endif %}
-            {% endfor %}
-
-            var d1 = [
-                [0, critical],
-            ];
-            var d2 = [
-                [1, high],
-            ];
-            var d3 = [
-                [2, medium],
-            ];
-            var d4 = [
-                [3, low],
-            ];
-            var d5 = [
-                [4, info],
-            ];
-
-            var data = [
-                {
-                    label: "Critical",
-                    data: d1,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 1,
-                        fillColor: "#d9534f"
-                    },
-                    color: "#d9534f"
-                },
-                {
-                    label: "High",
-                    data: d2,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 2,
-                        fillColor: "#f0ad4e"
-                    },
-                    color: "#f0ad4e"
-                },
-                {
-                    label: "Medium",
-                    data: d3,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 3,
-                        fillColor: "#f0de28"
-                    },
-                    color: "#f0de28"
-                },
-                {
-                    label: "Low",
-                    data: d4,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#337ab7"
-                    },
-                    color: "#337ab7"
-                },
-                {
-                    label: "info",
-                    data: d5,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#80699B"
-                    },
-                    color: "#80699B"
-                }
-            ];
-
-            $.plot("#new_findings", data, {
-                series: {
-                    stack: true,
-                    bars: {
-                        show: true,
-                        barWidth: .9,
-                        'align': "center",
-                    },
-
-                },
-                grid: {
-                    hoverable: false,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
-
-                },
-                tooltip: false,
-                legend: {
-                    show: false,
-                    position: "ne"
-                },
-                xaxis: {
-                    ticks: ticks,
-                },
-
-            });
-        }
-        ;
     </script>
 {% endblock %}

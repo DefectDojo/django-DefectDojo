@@ -2,26 +2,24 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 
 import tempfile
-from datetime import datetime, timedelta
-
+from datetime import timedelta
 from django.db.models import Count
 from django.conf import settings
 from django.core.files.base import ContentFile
-from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
 from django.utils.http import urlencode
 from celery.utils.log import get_task_logger
 from celery.decorators import task
-from dojo.models import Finding, Test, Engagement, System_Settings
+from dojo.models import Product, Finding, Engagement, System_Settings
 from django.utils import timezone
 
 import pdfkit
 from dojo.celery import app
-from dojo.utils import sync_dedupe, sync_false_history
+from dojo.utils import sync_dedupe, sync_false_history, calculate_grade
 from dojo.reports.widgets import report_widget_factory
 from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, \
-                        close_epic, get_system_setting, create_notification
+                       close_epic, create_notification, sync_rules
 
 import logging
 fmt = getattr(settings, 'LOG_FORMAT', None)
@@ -30,33 +28,57 @@ logging.basicConfig(format=fmt, level=lvl)
 
 logger = get_task_logger(__name__)
 
+
 # Logs the error to the alerts table, which appears in the notification toolbar
 def log_generic_alert(source, title, description):
     create_notification(event='other', title=title, description=description,
-                       icon='bullseye', source=source)
+                        icon='bullseye', source=source)
+
 
 @app.task(bind=True)
 def add_alerts(self, runinterval):
     now = timezone.now()
-
-    upcoming_engagements = Engagement.objects.filter(target_start__gt=now+timedelta(days=3),target_start__lt=now+timedelta(days=3)+runinterval).order_by('target_start')
+    """
+    upcoming_engagements = Engagement.objects.filter(target_start__gt=now + timedelta(days=3), target_start__lt=now + timedelta(days=3) + runinterval).order_by('target_start')
     for engagement in upcoming_engagements:
         create_notification(event='upcoming_engagement',
-                           title='Upcoming engagement: %s' % engagement.name,
-                           engagement=engagement,
-                           recipients=[engagement.lead],
-                           url=request.build_absolute_uri(reverse('view_engagement', args=(engagement.id,))))
+                            title='Upcoming engagement: %s' % engagement.name,
+                            engagement=engagement,
+                            recipients=[engagement.lead],
+                            url=reverse('view_engagement', args=(engagement.id,)))
 
     stale_engagements = Engagement.objects.filter(
-        target_start__gt=now-runinterval,
+        target_start__gt=now - runinterval,
         target_end__lt=now,
         status='In Progress').order_by('-target_end')
     for eng in stale_engagements:
         create_notification(event='stale_engagement',
-                           title='Stale Engagement: %s' % eng.name,
-                           description='The engagement "%s" is stale. Target end was %s.' % (eng.name, eng.target_end.strftime("%b. %d, %Y")),
-                           url=reverse('view_engagement', args=(eng.id,)),
-                           recipients=[eng.lead])
+                            title='Stale Engagement: %s' % eng.name,
+                            description='The engagement "%s" is stale. Target end was %s.' % (eng.name, eng.target_end.strftime("%b. %d, %Y")),
+                            url=reverse('view_engagement', args=(eng.id,)),
+                            recipients=[eng.lead])
+    """
+    system_settings = System_Settings.objects.get()
+    if system_settings.engagement_auto_close:
+        # Close Engagements older than user defined days
+        close_days = system_settings.engagement_auto_close_days
+        unclosed_engagements = Engagement.objects.filter(target_end__lte=now - timedelta(days=close_days),
+                                                        status='In Progress').order_by('target_end')
+
+        for eng in unclosed_engagements:
+            create_notification(event='auto_close_engagement',
+                                title=eng.name,
+                                description='The engagement "%s" has auto-closed. Target end was %s.' % (eng.name, eng.target_end.strftime("%b. %d, %Y")),
+                                url=reverse('view_engagement', args=(eng.id,)),
+                                recipients=[eng.lead])
+
+        unclosed_engagements.update(status="Completed", active=False, updated=timezone.now())
+
+    # Calculate grade
+    if system_settings.enable_product_grade:
+        products = Product.objects.all()
+        for product in products:
+            calculate_grade(product)
 
 
 @app.task(bind=True)
@@ -153,11 +175,11 @@ def async_custom_pdf_report(self,
                    'xsl-style-sheet': temp.name}
 
         # default the cover to not come first by default
-        cover_first_val=False
+        cover_first_val = False
 
         cover = None
         if 'cover-page' in selected_widgets:
-            cover_first_val=True
+            cover_first_val = True
             cp = selected_widgets['cover-page']
             x = urlencode({'title': cp.title,
                            'subtitle': cp.sub_heading,
@@ -191,7 +213,7 @@ def async_custom_pdf_report(self,
         report.status = 'error'
         report.save()
         # email_requester(report, uri, error=e)
-        #raise e
+        # raise e
         log_generic_alert("PDF Report", "Report Creation Failure", "Make sure WKHTMLTOPDF is installed. " + str(e))
     finally:
         if temp is not None:
@@ -200,45 +222,60 @@ def async_custom_pdf_report(self,
 
     return True
 
+
 @task(name='add_issue_task')
-def add_issue_task( find, push_to_jira):
+def add_issue_task(find, push_to_jira):
     logger.info("add issue task")
     add_issue(find, push_to_jira)
+
 
 @task(name='update_issue_task')
 def update_issue_task(find, old_status, push_to_jira):
     logger.info("add issue task")
     update_issue(find, old_status, push_to_jira)
 
+
 @task(name='add_epic_task')
 def add_epic_task(eng, push_to_jira):
     logger.info("add epic task")
     add_epic(eng, push_to_jira)
+
 
 @task(name='update_epic_task')
 def update_epic_task(eng, push_to_jira):
     logger.info("update epic task")
     update_epic(eng, push_to_jira)
 
+
 @task(name='close_epic_task')
 def close_epic_task(eng, push_to_jira):
     logger.info("close epic task")
     close_epic(eng, push_to_jira)
+
 
 @task(name='add comment')
 def add_comment_task(find, note):
     logger.info("add comment")
     add_comment(find, note)
 
+
 @app.task(name='async_dedupe')
 def async_dedupe(new_finding, *args, **kwargs):
     logger.info("running deduplication")
     sync_dedupe(new_finding, *args, **kwargs)
 
+
+@app.task(name='applying rules')
+def async_rules(new_finding, *args, **kwargs):
+    logger.info("applying rules")
+    sync_rules(new_finding, *args, **kwargs)
+
+
 @app.task(name='async_false_history')
 def async_false_history(new_finding, *args, **kwargs):
     logger.info("running false_history")
     sync_false_history(new_finding, *args, **kwargs)
+
 
 @app.task(bind=True)
 def async_dupe_delete(*args, **kwargs):
@@ -249,9 +286,14 @@ def async_dupe_delete(*args, **kwargs):
         findings = Finding.objects.all().annotate(num_dupes=Count('duplicate_list')).filter(num_dupes__gt=dupe_max)
         for finding in findings:
             duplicate_list = finding.duplicate_list.all().order_by('date').all()
-            dupe_count =  len(duplicate_list) - dupe_max
+            dupe_count = len(duplicate_list) - dupe_max
             for finding in duplicate_list:
                 finding.delete()
                 dupe_count = dupe_count - 1
                 if dupe_count == 0:
                     break
+
+
+@task(name='celery_status', ignore_result=False)
+def celery_status():
+    return True

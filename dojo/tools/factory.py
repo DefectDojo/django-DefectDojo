@@ -17,7 +17,9 @@ from dojo.tools.generic.parser import GenericFindingUploadCsvParser
 from dojo.tools.qualys.parser import QualysParser
 from dojo.tools.qualyswebapp.parser import QualysWebAppParser
 from dojo.tools.snyk.parser import SnykParser
+from dojo.tools.gosec.parser import GosecScannerParser
 from dojo.tools.openvas_csv.parser import OpenVASUploadCsvParser
+from dojo.tools.trustwave_csv.parser import TrustwaveUploadCsvParser
 from dojo.tools.skf.parser import SKFCsvParser
 from dojo.tools.ssllabs.parser import SSLlabsParser
 from dojo.tools.nikto.parser import NiktoXMLParser
@@ -25,10 +27,11 @@ from dojo.tools.trufflehog.parser import TruffleHogJSONParser
 
 __author__ = 'Jay Paz'
 
-#Modified by dkade to use OpenVASUploadCsvParser
-#Modified by martin.marsicano added SKFCsvParser
+# Modified by dkade to use OpenVASUploadCsvParser
+# Modified by martin.marsicano added SKFCsvParser
 
-def import_parser_factory(file, test):
+
+def import_parser_factory(file, test, scan_type=None):
     scan_type = test.test_type.name
     if scan_type == "Burp Scan":
         parser = BurpXmlParser(file, test)
@@ -82,6 +85,10 @@ def import_parser_factory(file, test):
         parser = SSLlabsParser(file, test)
     elif scan_type == 'Trufflehog Scan':
         parser = TruffleHogJSONParser(file, test)
+    elif scan_type == 'Gosec Scanner':
+        parser = GosecScannerParser(file, test)
+    elif scan_type == 'Trustwave Scan (CSV)':
+        parser = TrustwaveUploadCsvParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 

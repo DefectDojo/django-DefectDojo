@@ -16,6 +16,31 @@ URL_PREFIX = ''
 # SESSION_COOKIE_SECURE = True
 # CSRF_COOKIE_SECURE = True
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.DjangoModelPermissions',
+    ),
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+    ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 25
+}
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'api_key': {
+            'type': 'apiKey',
+            'in': 'header',
+            'name': 'Authorization'
+        }
+    },
+}
+
 ADMINS = (
     ('Your Name', 'your.name@yourdomain')
 )
@@ -123,15 +148,11 @@ ROOT_URLCONF = 'dojo.urls'
 LOGIN_URL = '/login'
 LOGIN_EXEMPT_URLS = (
     r'^%sstatic/' % URL_PREFIX,
-    r'^%swebhook/' % URL_PREFIX,
-    r'^%smetrics/all$' % URL_PREFIX,
-    r'^%smetrics$' % URL_PREFIX,
-    r'^%smetrics/product/type/(?P<mtype>\d+)$' % URL_PREFIX,
-    r'^%smetrics/simple$' % URL_PREFIX,
     r'^%sapi/v1/' % URL_PREFIX,
     r'^%sajax/v1/' % URL_PREFIX,
     r'^%sreports/cover$' % URL_PREFIX,
-    r'^%sfinding/image/(?P<token>[^/]+)$' % URL_PREFIX
+    r'^%sfinding/image/(?P<token>[^/]+)$' % URL_PREFIX,
+    r'^%sapi/v2/' % URL_PREFIX,
 )
 
 # Python dotted path to the WSGI application used by Django's runserver.
@@ -173,7 +194,11 @@ INSTALLED_APPS = (
     'tagging',
     'custom_field',
     'imagekit',
-    'multiselectfield'
+    'multiselectfield',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'rest_framework_swagger',
+    'dbbackup',
 )
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -193,6 +218,7 @@ TEAM_NAME = 'Security Engineering'
 # Celery settings
 CELERY_BROKER_URL = 'sqla+sqlite:///dojo.celerydb.sqlite'
 CELERY_TASK_IGNORE_RESULT = True
+CELERY_RESULT_BACKEND = 'db+sqlite:///dojo.celeryresults.sqlite'
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_RESULT_EXPIRES = 86400
 CELERY_BEAT_SCHEDULE_FILENAME = DOJO_ROOT + '/dojo.celery.beat.db'
@@ -202,12 +228,12 @@ CELERY_TASK_SERIALIZER = "pickle"
 # Celery beat scheduled tasks
 CELERY_BEAT_SCHEDULE = {
     'add-alerts': {
-        'task':'dojo.tasks.add_alerts',
+        'task': 'dojo.tasks.add_alerts',
         'schedule': timedelta(hours=1),
         'args': [timedelta(hours=1)]
     },
-        'dedupe-delete': {
-        'task':'dojo.tasks.async_dupe_delete',
+    'dedupe-delete': {
+        'task': 'dojo.tasks.async_dupe_delete',
         'schedule': timedelta(hours=24),
         'args': [timedelta(hours=24)]
     },

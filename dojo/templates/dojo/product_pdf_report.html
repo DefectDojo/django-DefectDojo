@@ -5,12 +5,17 @@
 {% load event_tags %}
 {% block content %}
     <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+            <h3 id="product">Product Security Report for {{ product.name }}</h3>
+            <p><strong>Generated:</strong> {% display_date %}</p>
+        </div>
+      </div>
         {% if include_executive_summary %}
             <div class="row pretty-graphs">
                 <div class="col-lg-12">
                     <h3 id="executive">Executive Summary for {{ product.name }}</h3>
                     <h4>Assessment Details</h4>
-                    <strong>Date Generated:</strong> {% display_date %}</br>
                     <strong>Assessed by:</strong> {% if product.engagement_set.all.0.lead.first_name|length > 0 %} {{ product.engagement_set.all.0.lead.first_name }} {{ product.engagement_set.all.0.lead.last_name }} {%else%} product.engagement_set.all.0.lead {% endif %}</br>
                     <strong>Scope:</strong> {{ product.name }}</br>
                 </div>
@@ -53,10 +58,38 @@
                         {% else %}
                             <p>No engagements found for {{ product.name }}</p>
                         {% endif %}
+                        <div class="row">
+                          <div class="col-md-12">
+                          <div class="panel panel-default">
+                              <div class="panel-heading finding-title">
+                                  <div class="clearfix">
+                                      <h5>
+                                          Endpoints
+                                      </h5>
+                                  </div>
+                              </div>
+                                <div class="panel panel-info endpoints table-responsive">
+                                    {% colgroup endpoints into 2 cols as grouped_items %}
+                                    <table class="table-striped table table table-condensed table-hover finding-endpoints">
+                                        {% for row in grouped_items %}
+                                            <tr>
+                                                {% for item in row %}
+                                                    <td>{% if item %}<i class="fa fa-circle"></i>
+                                                        {{ item }}{% endif %}
+                                                    </td>
+                                                {% endfor %}
+                                            </tr>
+                                        {% endfor %}
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                      </div>
                         <h4>Product Metrics</h4>
 
                     {% endif %}
                 </div>
+
                 <div class="col-lg-12">
                     <p>
                         A total of {{ findings|length|apnumber }} finding{{ findings|length|pluralize }} of varying
@@ -277,7 +310,15 @@
                         {% endif %}
 
                     <h6>Impact</h6>
-                    <pre>{{ finding.impact }}</pre>
+                    <pre>{{ finding.impact|markdown_render }}</pre>
+                    {% if finding.steps_to_reproduce %}
+                    <h6>Steps to Reproduce</h6>
+                    <pre>{{ finding.steps_to_reproduce|markdown_render }}</pre>
+                    {% endif %}
+                    {% if finding.severity_justification %}
+                    <h6>Severity Justification</h6>
+                    <pre>{{ finding.severity_justification|markdown_render }}</pre>
+                    {% endif %}
                     {% if finding.references %}
                     <h6>References</h6>
                     <pre>{{ finding.references|markdown_render }}</pre>
