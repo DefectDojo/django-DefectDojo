@@ -949,6 +949,7 @@ class Test(models.Model):
     engagement = models.ForeignKey(Engagement, editable=False)
     lead = models.ForeignKey(User, editable=True, null=True)
     test_type = models.ForeignKey(Test_Type)
+    description = models.TextField(null=True, blank=True)
     target_start = models.DateTimeField()
     target_end = models.DateTimeField()
     estimated_time = models.TimeField(null=True, blank=True, editable=False)
@@ -1156,7 +1157,12 @@ class Finding(models.Model):
         sla_age = get_system_setting('sla_' + self.severity.lower())
         if sla_age and self.active:
             sla_calculation = sla_age - self.age
-
+        elif sla_age and self.mitigated:
+            age = self.age
+            if age < sla_age:
+                sla_calculation = 0
+            else:
+                sla_calculation = sla_age - age
         return sla_calculation
 
     def jira(self):
@@ -1201,14 +1207,18 @@ class Finding(models.Model):
         if self.test.test_type.static_tool:
             self.static_finding = True
         else:
-            self.dyanmic_finding = True
+            self.dynamic_finding = True
         if rules_option:
             from dojo.tasks import async_rules
             from dojo.utils import sync_rules
-            if self.reporter.usercontactinfo.block_execution:
-                sync_rules(self, *args, **kwargs)
-            else:
+            try:
+                if self.reporter.usercontactinfo.block_execution:
+                    sync_rules(self, *args, **kwargs)
+                else:
+                    async_rules(self, *args, **kwargs)
+            except UserContactInfo.DoesNotExist:
                 async_rules(self, *args, **kwargs)
+                pass
         from dojo.utils import calculate_grade
         calculate_grade(self.test.engagement.product)
         # Assign the numerical severity for correct sorting order

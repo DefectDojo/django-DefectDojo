@@ -27,11 +27,9 @@ from dojo.tools.nikto.parser import NiktoXMLParser
 from dojo.tools.trufflehog.parser import TruffleHogJSONParser
 from dojo.tools.sonarqube.parser import SonarQubeHtmlParser
 from dojo.tools.clair.parser import ClairParser
+from dojo.tools.mobsf.parser import MobSFParser
 
 __author__ = 'Jay Paz'
-
-# Modified by dkade to use OpenVASUploadCsvParser
-# Modified by martin.marsicano added SKFCsvParser
 
 
 def import_parser_factory(file, test, scan_type=None):
@@ -98,6 +96,8 @@ def import_parser_factory(file, test, scan_type=None):
         parser = TrustwaveUploadCsvParser(file, test)
     elif scan_type == 'SonarQube Scan':
         parser = SonarQubeHtmlParser(file, test)
+    elif scan_type == 'MobSF Scan':
+        parser = MobSFParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 

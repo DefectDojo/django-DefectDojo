@@ -369,9 +369,6 @@ class OpenFindingFilter(DojoFilter):
             self.pid = kwargs.pop('pid')
         super(OpenFindingFilter, self).__init__(*args, **kwargs)
 
-        # Don't show the product filter on the product finding view
-        if self.pid:
-            del self.form.fields['test__engagement__product']
         cwe = dict()
         cwe = dict([finding.cwe, finding.cwe]
                    for finding in self.queryset.distinct()
@@ -389,6 +386,10 @@ class OpenFindingFilter(DojoFilter):
                 authorized_users__in=[self.user])
             self.form.fields['endpoints'].queryset = Endpoint.objects.filter(
                 product__authorized_users__in=[self.user]).distinct()
+
+        # Don't show the product filter on the product finding view
+        if self.pid:
+            del self.form.fields['test__engagement__product']
 
 
 class OpenFingingSuperFilter(OpenFindingFilter):

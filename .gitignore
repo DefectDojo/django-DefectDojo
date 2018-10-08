@@ -70,6 +70,7 @@ dojo/uploads/threat/*
 *.sqlite
 *.db
 celerybeat.pid
+*.env*
 
 weekly.txt
 Monthly.txt
@@ -91,3 +92,4 @@ dojo/media
 .venv/
 venv/
 ENV/
+quick.bash
