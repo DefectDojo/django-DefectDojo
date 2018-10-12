@@ -3,7 +3,6 @@ import hashlib
 import logging
 import os
 import re
-from datetime import datetime
 from uuid import uuid4
 from django.conf import settings
 from watson import search as watson
@@ -383,6 +382,7 @@ class DojoMeta(models.Model):
             ep = Endpoint.objects.get(id=self.model_id)
             ep.endpoint_meta.add(self)
 
+
 class Product(models.Model):
     WEB_PLATFORM = 'web'
     IOT = 'iot'
@@ -478,7 +478,6 @@ class Product(models.Model):
     internet_accessible = models.BooleanField(default=False, help_text=_('Specify if the application is accessible from the public internet.'))
     regulations = models.ManyToManyField(Regulation, blank=True)
     product_meta = models.ManyToManyField(DojoMeta)
-
 
     def __unicode__(self):
         return self.name
@@ -1044,7 +1043,7 @@ class Finding(models.Model):
     sourcefile = models.TextField(null=True, blank=True, editable=False)
     param = models.TextField(null=True, blank=True, editable=False)
     payload = models.TextField(null=True, blank=True, editable=False)
-    hash_code = models.TextField(null=True, blank=True, editable=False)
+    hash_code = models.TextField(null=True, blank=True, editable=True)
 
     line = models.IntegerField(null=True, blank=True,
                                verbose_name="Line number")
@@ -1063,7 +1062,6 @@ class Finding(models.Model):
 
     def compute_hash_code(self):
         hash_string = self.title + str(self.cwe) + str(self.line) + str(self.file_path)
-
         if self.dynamic_finding:
             endpoint_str = u''
             for e in self.endpoints.all():
@@ -1201,8 +1199,8 @@ class Finding(models.Model):
             from dojo.utils import apply_cwe_to_template
             self = apply_cwe_to_template(self)
             # Only compute hash code for new findings.
+            self.hash_code = self.compute_hash_code()
         super(Finding, self).save(*args, **kwargs)
-        self.hash_code = self.compute_hash_code()
         self.found_by.add(self.test.test_type)
         if self.test.test_type.static_tool:
             self.static_finding = True
