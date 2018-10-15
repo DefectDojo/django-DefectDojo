@@ -51,8 +51,9 @@ def url_shortner(value):
         return_value = url.path
         if len(return_value) == 1:
             return_value = value
-    if len(return_value) > 50:
-        return_value = "..." + return_value[50:]
+    if return_value:
+        if len(return_value) > 50:
+            return_value = "..." + return_value[50:]
 
     return return_value
 
