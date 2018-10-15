@@ -380,6 +380,6 @@ class TestDependencyCheckParser(TestCase):
         self.assertEqual('testfile.jar | CVE-0000-0001', finding.title)
         self.assertEqual('High', finding.severity)
         self.assertEqual(
-                'CWE-00 Bad Vulnerability\n\nDescription of a bad vulnerability.',
+                'Description of a bad vulnerability.',
                 finding.description)
         self.assertEqual(expected_references, finding.references)
