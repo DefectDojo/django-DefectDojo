@@ -160,7 +160,6 @@ LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/login'
 LOGIN_EXEMPT_URLS = (
     r'^%sstatic/' % URL_PREFIX,
-    r'^%swebhook/' % URL_PREFIX,
     r'^%sapi/v1/' % URL_PREFIX,
     r'^%sreports/cover$' % URL_PREFIX,
     r'^%sfinding/image/(?P<token>[^/]+)$' % URL_PREFIX,
