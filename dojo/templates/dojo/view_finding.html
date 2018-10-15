@@ -2,7 +2,17 @@
 {% load display_tags %}
 {% load humanize %}
 {% load static from staticfiles %}
+{% block add_styles %}
+  .tooltip-inner {
+    max-width: 650px;
+  }
+{% endblock %}
+{% block add_css_before %}
+<!-- Source Code Highlight CSS -->
+<link rel="stylesheet" href="{% static "dojo/css/highlight.css" %}">
+{% endblock %}
 {% block content %}
+<div id="test">
     <div class="panel panel-default">
         <div class="panel-heading">
             <div class="clearfix">
@@ -284,22 +294,26 @@
     {% endif %}
     {% if finding.param or finding.payload %}
         <div class="panel panel-default">
-            <table id="error_notes" class="table-striped table table-condensed table-hover centered">
+            <table id="error_notes" class="table-striped table table-condensed table-hover">
                 <tr>
-                    <th>Parameters</th>
+                    <th>Injected Parameter(s)</th>
+                    {% if finding.payload %}
                     <th>Payload</th>
+                    {% endif %}
                 </tr>
                 <tr>
                     <td>
                         <span>
-                             {{ finding.param }}
+                             {{ finding.param|default_if_none:"" }}
                         </span>
                     </td>
+                    {% if finding.payload %}
                     <td>
                         <span>
-                             {{ finding.payload }}
+                             {{ finding.payload|default_if_none:"" }}
                         </span>
                     </td>
+                    {% endif %}
                 </tr>
             </table>
         </div>
@@ -332,16 +346,14 @@
                                 class="glyphicon glyphicon-chevron-up"></i></a></span>
                     </h4>
                 </div>
-
-                {% if  finding.endpoints.all %}
+                {% if finding.endpoints.all %}
                     {% colgroup finding.endpoints.all into 3 cols as grouped_items %}
-                    <table id="vuln_endpoints"
-                           class="collapse in table-striped table table table-condensed table-hover finding-endpoints">
+                    <table id="vuln_endpoints" class="table-striped table table-condensed table-hover finding-endpoints">
                         {% for row in grouped_items %}
                             <tr>
                                 {% for item in row %}
-                                    <td>{% if item %}<i class="fa fa-circle"></i> <a title="View endpoint details"
-                                                                                     href="{% url 'view_endpoint' item.id %}">{{ item }}</a>
+                                    <td>{% if item %}<i class="fa fa-circle"></i>
+                                      <a data-toggle="tooltip" data-placement="top" data-original-title="{{ item }}" href="{% url 'view_endpoint' item.id %}">{{ item|url_shortner }}</a>
                                    {% if item.tags %}
                                        <sup>
                                            {% for tag in item.tags %}
@@ -440,16 +452,16 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h4>Mitigation <span class="pull-right"><a data-toggle="collapse" href="#vuln_mitigation"><i
-                        class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
+                        class="glyphicon glyphicon-chevron-{% if finding.mitigation %}up{%else%}down{%endif%}"></i></a></span></h4>
             </div>
-            <div id="vuln_mitigation" class="panel-body collapse in">
-                <pre>{{ finding.mitigation|markdown_render }}</pre>
+            <div id="vuln_mitigation" class="panel-body collapse {% if finding.mitigation %}in{%endif%}">
+                <pre>{{ finding.mitigation|markdown_render|default_if_none:"" }}</pre>
             </div>
         </div>
         {% if finding.burprawrequestresponse_set.all %}
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h4>Request Response Pairs <span class="pull-right"><a data-toggle="collapse" href="#vuln_req_res">
+                    <h4>Request / Response Pairs <span class="pull-right"><a data-toggle="collapse" href="#vuln_req_res">
                         <i class="glyphicon glyphicon-chevron-down"></i></a></span></h4>
                 </div>
                 <div id="vuln_req_res" class="panel-body collapse">
@@ -482,29 +494,29 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h4>Impact <span class="pull-right"><a data-toggle="collapse" href="#vuln_impact"><i
-                        class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
+                        class="glyphicon glyphicon-chevron-{% if finding.impact %}up{%else%}down{%endif%}"></i></a></span></h4>
             </div>
-            <div id="vuln_impact" class="panel-body collapse in">
-                <pre>{{ finding.impact|markdown_render }}</pre>
+            <div id="vuln_impact" class="panel-body collapse {% if finding.impact %}in{%endif%}">
+                <pre>{{ finding.impact|markdown_render|default_if_none:"" }}</pre>
             </div>
         </div>
 
-        <div class="panel panel-default">
+        <div class="panel panel-default" id="steps">
             <div class="panel-heading">
-                <h4>Steps To Reproduce <span class="pull-right"><a data-toggle="collapse" href="#vuln_refs"><i
-                        class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
+                <h4>Steps To Reproduce <span class="pull-right"><a data-toggle="collapse" href="#vuln_reproduce"><i
+                        class="glyphicon glyphicon-chevron-{% if finding.steps_to_reproduce %}up{%else%}down{%endif%}"></i></a></span></h4>
             </div>
-            <div id="vuln_refs" class="panel-body collapse in">
+            <div id="vuln_reproduce" class="panel-body collapse {% if finding.steps_to_reproduce %}in{%endif%}">
                 <pre>{{ finding.steps_to_reproduce|markdown_render|default_if_none:"" }}</pre>
             </div>
         </div>
 
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h4>Severity Justification <span class="pull-right"><a data-toggle="collapse" href="#vuln_refs"><i
-                        class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
+                <h4>Severity Justification <span class="pull-right"><a data-toggle="collapse" href="#sev_just"><i
+                        class="glyphicon glyphicon-chevron-{% if finding.severity_justification %}up{%else%}down{%endif%}"></i></a></span></h4>
             </div>
-            <div id="vuln_refs" class="panel-body collapse in">
+            <div id="sev_just" class="panel-body collapse {% if finding.severity_justification %}in{%endif%}">
                 <pre>{{ finding.severity_justification|markdown_render|default_if_none:"" }}</pre>
             </div>
         </div>
@@ -512,10 +524,10 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h4>References <span class="pull-right"><a data-toggle="collapse" href="#vuln_refs"><i
-                        class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
+                        class="glyphicon glyphicon-chevron-{% if finding.references %}up{%else%}down{%endif%}"></i></a></span></h4>
             </div>
-            <div id="vuln_refs" class="panel-body collapse in">
-                <pre>{{ finding.references|markdown_render }}</pre>
+            <div id="vuln_refs" class="panel-body collapse {% if finding.references %}in{%endif%}">
+                <pre>{{ finding.references|markdown_render|default_if_none:"" }}</pre>
             </div>
         </div>
 
@@ -629,58 +641,8 @@
         {% endif %}
     </div>
 
-    <div class="panel panel-default to_highlight table-responsive">
-        <div class="panel-heading">
-            <h4>Notes <span class="pull-right"><a data-toggle="collapse" href="#vuln_notes"><i
-                    class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
-        </div>
-        <div id="vuln_notes" class="panel-body collapse in">
-            {% if notes %}
-                <table id="notes" class="tablesorter-bootstrap table table-condensed table-striped">
-                    <thead>
-                    <tr>
-                        <th>User</th>
-                        <th>Date</th>
-                        <th>Note</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for note in notes %}
-                        <tr>
-                            <td>
-                                {{ note.author.username }}
-                            </td>
-                            <td>
-                                {{ note.date }}
-                            </td>
-                            <td>
-                                {{ note }}
-                                {% ifequal user.username note.author.username %}
-                                    <a href="{% url 'delete_finding_note' finding.id note.id %}"
-                                       class="btn btn-danger btn-xs" title="Delete">
-                                        <i class="fa fa-trash" aria-hidden="true"></i>
-                                    </a>
-                                {% endifequal %}
-                            </td>
-                        </tr>
-                    {% endfor %}
+    {% include "dojo/snippets/comments.html" with notes=notes object=finding destination="finding" %}
 
-                    </tbody>
-                </table>
-            {% else %}
-                <p class="text-center">No notes saved.</p>
-            {% endif %}
-            <hr/>
-            <form class="form-horizontal" action="{% url 'view_finding' finding.id %}" method="post">{% csrf_token %}
-                {% include "dojo/form_fields.html" with form=form %}
-                <div class="form-group">
-                    <div class="col-sm-offset-2 col-sm-10">
-                        <input class="btn" type="submit" value="Add Note"/>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
     <div class="protip">
        <i class="fa fa-lightbulb-o"></i> <strong>ProTip!</strong> Type <kbd>e</kbd> to edit any finding.
     </div>
@@ -689,6 +651,10 @@
     <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
     <script type="text/javascript">
+        //Ensures dropdown has proper zindex
+        $('.table-responsive').on('show.bs.dropdown', function () {
+          $('.table-responsive').css( "overflow", "inherit" );
+        });
         if (document.referrer.indexOf('simple_search') > 0) {
             var terms = '';
             if ($.cookie('highlight')) {

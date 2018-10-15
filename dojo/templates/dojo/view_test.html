@@ -116,6 +116,22 @@
             </table>
         </div>
     </div>
+    {% if test.description %}
+    <div class="row">
+      <div class="col-md-12" id="cred">
+      <div class="panel panel-default">
+          <div class="panel-heading">
+              <h4>Details <span class="pull-right"><a data-toggle="collapse" href="#vuln_desc"><i
+                      class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
+          </div>
+          <div id="vuln_desc" class="panel-body finding-description collapse in">
+              <pre id="description_text">{{ test.description|markdown_render }}</pre>
+          </div>
+      </div>
+      </div>
+    </div>
+    {% endif %}
+
     <div class="row">
       <div class="col-md-12" id="cred">
           <div class="dropdown pull-left hidden" style="padding-bottom: 5px;" id="bulk_edit_menu">
@@ -575,65 +591,11 @@
 </div>
 <!--Cred end -->
 
+{% include "dojo/snippets/comments.html" with notes=notes object=test destination="test" %}
 
-    <div class="panel panel-default to_highlight table-responsive">
-        <div class="panel-heading">
-            <h3>Notes</h3>
-        </div>
-        {% if notes %}
-            <table id="notes" class="table-striped table table-condensed table-hover">
-                <thead>
-                <tr>
-                    <th>User</th>
-                    <th>Date</th>
-                    <th>Note</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for note in notes %}
-                    <tr>
-                        <td>
-                            {{ note.author.username }}
-                        </td>
-                        <td>
-                            {{ note.date }}
-                        </td>
-                        <td>
-                            {{ note }}
-                            {% ifequal person note.author.username %}
-                                <a href="{% url 'delete_test_note' test.id note.id %}" class="btn btn-danger btn-xs"
-                                   title="Delete">
-                                    <i class="fa fa-trash" aria-hidden="true"></i>
-                                </a>
-                            {% endifequal %}
-                        </td>
-                    </tr>
-                {% endfor %}
-
-                </tbody>
-            </table>
-        {% else %}
-
-            <p class="text-center">No notes found.</p>
-        {% endif %}
-        <hr/>
-
-        <form class="form-horizontal" id="add_notes" action="{% url 'view_test' test.id %}"
-              method="post">{% csrf_token %}
-            {% include "dojo/form_fields.html" with form=form %}
-            <div class="form-group">
-                <div class="col-sm-offset-2 col-sm-10">
-                    <input class="btn btn-primary" type="submit" value="Add Note"/>
-
-                </div>
-            </div>
-        </form>
-        <br/>
-        <br/>
-    </div>
-    <div class="protip">
-       <i class="fa fa-lightbulb-o"></i> <strong>ProTip!</strong> Type <kbd>e</kbd> to edit this test. Type <kbd>a</kbd> to add a finding to this test.
-    </div>
+<div class="protip">
+    <i class="fa fa-lightbulb-o"></i> <strong>ProTip!</strong> Type <kbd>e</kbd> to edit this test. Type <kbd>a</kbd> to add a finding to this test.
+</div>
 {% endblock %}
 {% block postscript %}
     <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
