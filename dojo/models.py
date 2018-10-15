@@ -1065,7 +1065,8 @@ class Finding(models.Model):
             endpoint_str = u''
             for e in self.endpoints.all():
                 endpoint_str += str(e)
-            hash_string = endpoint_str
+            if endpoint_str:
+                hash_string = hash_string + endpoint_str
         hash_string = hash_string.strip()
         return hashlib.sha256(hash_string.encode('utf-8')).hexdigest()
 
