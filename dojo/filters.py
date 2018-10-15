@@ -8,7 +8,8 @@ from django.contrib.auth.models import User
 from django.utils import six
 from django.utils.translation import ugettext_lazy as _
 from django_filters import FilterSet, CharFilter, OrderingFilter, \
-    ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter
+    ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter, \
+    BooleanFilter
 from django_filters.filters import ChoiceFilter, _truncate, DateTimeFilter
 from pytz import timezone
 
@@ -336,6 +337,11 @@ class OpenFindingFilter(DojoFilter):
     test__engagement__product = ModelMultipleChoiceFilter(
         queryset=Product.objects.all(),
         label="Product")
+    if get_system_setting('enable_jira'):
+        jira_issue = BooleanFilter(name='jira_issue',
+                                   lookup_expr='isnull',
+                                   exclude=True,
+                                   label='JIRA issue')
 
     o = OrderingFilter(
         # tuple-mapping retains order
