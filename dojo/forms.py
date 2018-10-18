@@ -192,7 +192,7 @@ class DeleteProductForm(forms.ModelForm):
                    'prod_type', 'updated', 'tid', 'authorized_users', 'product_manager',
                    'technical_contact', 'team_manager', 'prod_numeric_grade', 'business_criticality',
                    'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience',
-                   'internet_accessible', 'regulations']
+                   'internet_accessible', 'regulations', 'product_meta']
 
 
 class DojoMetaDataForm(forms.ModelForm):
@@ -681,6 +681,7 @@ class DeleteTestForm(forms.ModelForm):
                    'target_end',
                    'engagement',
                    'percent_complete',
+                   'description',
                    'lead')
 
 
