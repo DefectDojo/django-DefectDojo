@@ -60,7 +60,7 @@ class SpotbugsXMLParser(object):
                     active=False,
                     verified=False,
                     numerical_severity=Finding.get_numerical_severity(severity),
-                    dynamic_finding=True
+                    static_finding=True
                     )
                 dupes[dupe_key] = finding
             
