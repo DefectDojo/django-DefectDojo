@@ -25,6 +25,7 @@ class EndPointViewSet(mixins.ListModelMixin,
 class EngagementViewSet(mixins.ListModelMixin,
                         mixins.RetrieveModelMixin,
                         mixins.UpdateModelMixin,
+                        mixins.DestroyModelMixin,
                         mixins.CreateModelMixin,
                         viewsets.GenericViewSet):
     serializer_class = serializers.EngagementSerializer
@@ -51,6 +52,7 @@ class FindingTemplatesViewSet(mixins.ListModelMixin,
 class FindingViewSet(mixins.ListModelMixin,
                      mixins.RetrieveModelMixin,
                      mixins.UpdateModelMixin,
+                     mixins.DestroyModelMixin,
                      mixins.CreateModelMixin,
                      viewsets.GenericViewSet):
     serializer_class = serializers.FindingSerializer
@@ -215,6 +217,7 @@ class StubFindingsViewSet(mixins.ListModelMixin,
 class TestsViewSet(mixins.ListModelMixin,
                    mixins.RetrieveModelMixin,
                    mixins.UpdateModelMixin,
+                   mixins.DestroyModelMixin,
                    mixins.CreateModelMixin,
                    viewsets.GenericViewSet):
     serializer_class = serializers.TestSerializer
