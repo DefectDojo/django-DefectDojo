@@ -28,6 +28,7 @@ from dojo.tools.trufflehog.parser import TruffleHogJSONParser
 from dojo.tools.sonarqube.parser import SonarQubeHtmlParser
 from dojo.tools.clair.parser import ClairParser
 from dojo.tools.mobsf.parser import MobSFParser
+from dojo.tools.brakeman.parser import BrakemanScanParser
 
 __author__ = 'Jay Paz'
 
@@ -98,6 +99,8 @@ def import_parser_factory(file, test, scan_type=None):
         parser = SonarQubeHtmlParser(file, test)
     elif scan_type == 'MobSF Scan':
         parser = MobSFParser(file, test)
+    elif scan_type == 'Brakeman Scan':
+        parser = BrakemanScanParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 

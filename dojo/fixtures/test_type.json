@@ -222,5 +222,12 @@
     },
     "model": "dojo.test_type",
     "pk": 32
+  },
+  {
+    "fields": {
+      "name": "Brakeman Scan"
+    },
+    "model": "dojo.test_type",
+    "pk": 33
   }
 ]

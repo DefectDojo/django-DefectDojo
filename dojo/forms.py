@@ -254,7 +254,8 @@ class ImportScanForm(forms.Form):
                          ("MobSF Scan", "MobSF Scan"),
                          ("Trufflehog Scan", "Trufflehog Scan"),
                          ("Nikto Scan", "Nikto Scan"),
-                         ("Clair Scan", "Clair Scan"))
+                         ("Clair Scan", "Clair Scan"),
+                         ("Brakeman Scan", "Brakeman Scan"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
 
