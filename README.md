@@ -6,6 +6,11 @@
 
 [DefectDojo](https://www.defectdojo.org/) is a security program and vulnerability management tool. DefectDojo allows you to manage your application security program, maintain product and application information, schedule scans, triage vulnerabilities and push findings into defect trackers. Consolidate your findings into one source of truth with DefectDojo.
 
+# Demo
+Try out DefectDojo in our [testing environment](https://defectdojo.herokuapp.com/).
+* admin / defectdojo@demo#appsec
+* product_manager / defectdojo@demo#product
+
 # Quick Start
 
 ```bash
@@ -39,13 +44,13 @@ that should give you an idea of how to use DefectDojo for your own team.
 
 - DefectDojo Python API: `pip install defectdojo_api` or clone the [repository](https://github.com/aaronweaver/defectdojo_api).
 
-- Browse the API on [SwaggerHub](https://app.swaggerhub.com/apis/DefectDojo/defect-dojo_api_v_2/1.0.0). [![Swagger Status](http://online.swagger.io/validator?url=https://api.swaggerhub.com/apis/DefectDojo/defect-dojo_api_v_2/1.0.0)](https://app.swaggerhub.com/apis/DefectDojo/defect-dojo_api_v_2/1.0.0) 
+- Browse the API on [SwaggerHub](https://app.swaggerhub.com/apis/DefectDojo/defect-dojo_api_v_2/1.0.0). [![Swagger Status](http://online.swagger.io/validator?url=https://api.swaggerhub.com/apis/DefectDojo/defect-dojo_api_v_2/1.0.0)](https://app.swaggerhub.com/apis/DefectDojo/defect-dojo_api_v_2/1.0.0)
 
 # Getting Involved
 
 ![Slack](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/slack_rgb.png)
 
-Realtime discussion is done in the OWASP Slack Channel, #defectdojo. [Get Access.](https://owasp.herokuapp.com/)   
+Realtime discussion is done in the OWASP Slack Channel, #defectdojo. [Get Access.](http://owaspslack.com/)   
 
 ![Twitter](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/Twitter_Logo.png)
 

@@ -5,7 +5,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from dojo.models import Product, Product_Type, Engagement, Test, Finding, \
     User, ScanSettings, Scan, Stub_Finding, Finding_Template, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
-    Endpoint, JIRA_PKey, JIRA_Conf
+    Endpoint, JIRA_PKey, JIRA_Conf, DojoMeta
 
 from dojo.api_v2 import serializers, permissions
 
@@ -25,6 +25,7 @@ class EndPointViewSet(mixins.ListModelMixin,
 class EngagementViewSet(mixins.ListModelMixin,
                         mixins.RetrieveModelMixin,
                         mixins.UpdateModelMixin,
+                        mixins.DestroyModelMixin,
                         mixins.CreateModelMixin,
                         viewsets.GenericViewSet):
     serializer_class = serializers.EngagementSerializer
@@ -51,6 +52,7 @@ class FindingTemplatesViewSet(mixins.ListModelMixin,
 class FindingViewSet(mixins.ListModelMixin,
                      mixins.RetrieveModelMixin,
                      mixins.UpdateModelMixin,
+                     mixins.DestroyModelMixin,
                      mixins.CreateModelMixin,
                      viewsets.GenericViewSet):
     serializer_class = serializers.FindingSerializer
@@ -105,6 +107,17 @@ class JiraViewSet(mixins.ListModelMixin,
     filter_fields = ('id', 'conf', 'product', 'component', 'project_key',
                      'push_all_issues', 'enable_engagement_epic_mapping',
                      'push_notes')
+
+
+class DojoMetaViewSet(mixins.ListModelMixin,
+                     mixins.RetrieveModelMixin,
+                     mixins.DestroyModelMixin,
+                     mixins.CreateModelMixin,
+                     mixins.UpdateModelMixin,
+                     viewsets.GenericViewSet):
+
+    serializer_class = serializers.MetaSerializer
+    queryset = DojoMeta.objects.all()
 
 
 class ProductViewSet(mixins.ListModelMixin,
@@ -204,6 +217,7 @@ class StubFindingsViewSet(mixins.ListModelMixin,
 class TestsViewSet(mixins.ListModelMixin,
                    mixins.RetrieveModelMixin,
                    mixins.UpdateModelMixin,
+                   mixins.DestroyModelMixin,
                    mixins.CreateModelMixin,
                    viewsets.GenericViewSet):
     serializer_class = serializers.TestSerializer

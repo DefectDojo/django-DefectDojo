@@ -145,16 +145,14 @@ def edit_engagement(request, eid):
 
         if (form.is_valid() and jform is None) or (form.is_valid() and jform and jform.is_valid()):
             if 'jiraform-push_to_jira' in request.POST:
-                try:
-                    # jissue = JIRA_Issue.objects.get(engagement=eng)
+                if JIRA_Issue.objects.filter(engagement=eng).exists():
                     update_epic_task.delay(
                         eng, jform.cleaned_data.get('push_to_jira'))
                     enabled = True
-                except:
+                else:
                     enabled = False
                     add_epic_task.delay(eng,
                                         jform.cleaned_data.get('push_to_jira'))
-                    pass
             temp_form = form.save(commit=False)
             if (temp_form.status == "Cancelled" or temp_form.status == "Completed"):
                 temp_form.active = False

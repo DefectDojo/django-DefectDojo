@@ -7,6 +7,7 @@ import re
 from urlparse import urlparse
 import socket
 
+
 class ColumnMappingStrategy(object):
 
     mapped_column = None
@@ -92,7 +93,7 @@ class UrlColumnMappingStrategy(ColumnMappingStrategy):
         ParseResult(scheme='http', netloc='www.cwi.nl:80', path='/%7Eguido/Python.html',
                     params='', query='', fragment='')
         """
-        if self.is_valid_ipv4_address(url) == False:
+        if self.is_valid_ipv4_address(url) is False:
             rhost = re.search(
                 "(http|https|ftp)\://([a-zA-Z0-9\.\-]+(\:[a-zA-Z0-9\.&amp;%\$\-]+)*@)*((25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])|localhost|([a-zA-Z0-9\-]+\.)*[a-zA-Z0-9\-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))[\:]*([0-9]+)*([/]*($|[a-zA-Z0-9\.\,\?\'\\\+&amp;%\$#\=~_\-]+)).*?$",
                 url)
@@ -138,8 +139,8 @@ class UrlColumnMappingStrategy(ColumnMappingStrategy):
 
                 finding.unsaved_endpoints = endpoints
 
-        #URL is an IP so save as an IP endpoint
-        elif self.is_valid_ipv4_address(url) == True:
+        # URL is an IP so save as an IP endpoint
+        elif self.is_valid_ipv4_address(url) is True:
             try:
                 dupe_endpoint = Endpoint.objects.get(protocol=None,
                                                      host=url,
@@ -156,8 +157,6 @@ class UrlColumnMappingStrategy(ColumnMappingStrategy):
                 endpoints = [dupe_endpoint]
 
             finding.unsaved_endpoints = endpoints
-
-
 
 
 class SeverityColumnMappingStrategy(ColumnMappingStrategy):
