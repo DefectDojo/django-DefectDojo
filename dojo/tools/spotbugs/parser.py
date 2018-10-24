@@ -18,7 +18,7 @@ class SpotbugsXMLParser(object):
         SEVERITY = {
             '1': 'High',
             '2': 'Medium',
-            '3': 'Low' 
+            '3': 'Low'
         }
 
         tree = ET.parse(filename)
@@ -29,21 +29,19 @@ class SpotbugsXMLParser(object):
             bug_patterns[pattern.get('type')] = plain_pattern
 
         for bug in root.findall('BugInstance'):
-            
             desc = ''
-            for message in bug.itertext(): 
-                desc+=message
+            for message in bug.itertext():
+                desc += message
 
             dupe_key = bug.get('instanceHash')
 
             title = bug.find('ShortMessage').text
-            cwe = bug.get('cweid',default=0)
+            cwe = bug.get('cweid', default=0)
             severity = SEVERITY[bug.get('priority')]
             description = desc
             mitigation = bug_patterns[bug.get('type')]
             impact = 'N/A'
             references = 'N/A'
-           
 
             if dupe_key in dupes:
                 finding = dupes[dupe_key]
@@ -61,7 +59,7 @@ class SpotbugsXMLParser(object):
                     verified=False,
                     numerical_severity=Finding.get_numerical_severity(severity),
                     static_finding=True
-                    )
+                )
                 dupes[dupe_key] = finding
-            
+
         self.items = dupes.values()
