@@ -21,11 +21,17 @@ class DependencyCheckParser(object):
     def get_finding_from_vulnerability(self, vulnerability, filename, test):
         name = self.get_field_value(vulnerability, 'name')
         severity = self.get_field_value(vulnerability, 'severity')
-        cwe = self.get_field_value(vulnerability, 'cwe')
+        cwe_field = self.get_field_value(vulnerability, 'cwe')
         description = self.get_field_value(vulnerability, 'description')
 
         title = u'{0} | {1}'.format(filename, name)
-        finding_detail = u'{0}\n\n{1}'.format(cwe, description)
+
+        # Use CWE-1035 as fallback
+        cwe = 1035  # Vulnerable Third Party Component
+        if cwe_field:
+            m = re.match(r"^(CWE-)?(\d+)", cwe_field)
+            if m:
+                cwe = int(m.group(2))
 
         reference_detail = None
         references_node = vulnerability.find(self.namespace + 'references')
@@ -45,12 +51,13 @@ class DependencyCheckParser(object):
             title=title,
             file_path=filename,
             test=test,
-            cwe=1035,  # Vulnerable Third Party Component
+            cwe=cwe,
             active=False,
             verified=False,
-            description=finding_detail,
+            description=description,
             severity=severity,
             numerical_severity=Finding.get_numerical_severity(severity),
+            static_finding=True,
             references=reference_detail)
 
     def __init__(self, filename, test):

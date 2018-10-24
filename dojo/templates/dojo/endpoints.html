@@ -7,6 +7,7 @@
                 <div class="panel-heading tight">
                     <h3 class="has-filters">
                         {{ name }}
+                        {% if request.user.is_staff %}
                         <div class="dropdown pull-right">
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
@@ -15,7 +16,6 @@
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu"
                                 aria-labelledby="dropdownMenu1">
-                                {% if request.user.is_staff %}
                                     <li role="presentation">
                                       {% if product_tab %}
                                         <a href="{% url 'add_endpoint' product_tab.product.id %}">
@@ -25,9 +25,9 @@
                                             <i class="fa fa-plus"></i> New Endpoint
                                         </a>
                                     </li>
-                                {% endif %}
                             </ul>
                         </div>
+                        {% endif %}
                     </h3>
                 </div>
                 <div id="the-filters" class="panel-body collapse">

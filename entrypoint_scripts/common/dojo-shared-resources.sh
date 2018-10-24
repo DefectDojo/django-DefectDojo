@@ -17,7 +17,12 @@ function help() {
 TARGET_DIR=
 AUTO_DOCKER=
 
-while getopts 'hryb' opt; do
+# Supported databases
+export SQLITE=0
+export MYSQL=1
+export POSTGRES=2
+
+while getopts 'hr:y:b:d:' opt; do
     case $opt in
         h)
             help
@@ -25,6 +30,16 @@ while getopts 'hryb' opt; do
             ;;
         y)
             AUTO_DOCKER="yes"
+            FUNCTION=$OPTARG
+            ;;
+        d)
+            if [[ "$OPTARG" == "MYSQL" ]]; then
+                DBTYPE=$MYSQL
+            elif [[ "$OPTARG" == "POSTGRES" ]]; then
+                DBTYPE=$POSTGRES
+            else
+                DBTYPE=$SQLITE
+            fi
             ;;
         b)
             BATCH_MODE="yes"
@@ -46,11 +61,6 @@ export CYAN='\033[01;36m'
 export WHITE='\033[01;37m'
 export BOLD='\033[1m'
 export UNDERLINE='\033[4m'
-
-# Supported databases
-export SQLITE=0
-export MYSQL=1
-export POSTGRES=2
 
 # Main DefectDojo directory
 export DOJO_ROOT_DIR=$PWD
@@ -210,7 +220,7 @@ function prompt_db_type() {
         || [ "$DBTYPE" == "$POSTGRES" ] ; then
     	echo "Setting up database"
     else
-        echo "Please enter 1 or 2"
+        echo "Please enter 0, 1 or 2"
         prompt_db_type
     fi
 }
@@ -232,8 +242,9 @@ function ensure_mysql_application_db() {
         if [ -z "$SQLUSER" ]; then
             SQLUSER="root"
         fi
-        if [ -z "$SQLPWD" ]; then
-            SQLPWD="Cu3zehoh7eegoogohdoh1the"
+        if [ -z "$SQLPWD" -a  "$BATCH_MODE" == "yes" ]; then
+            echo "SQL Password not provided, exiting"
+            exit 1
         fi
         if [ -z "$DBNAME" ]; then
             DBNAME="dojodb"
@@ -283,7 +294,6 @@ function ensure_mysql_application_db() {
 function ensure_postgres_application_db() {
     # Added BATCH_MODE condition and rewrite old negate logic.
     if [ "$BATCH_MODE" == "yes" ]; then
-      # Default values for a automated Docker install if not provided
       echo "Setting values for POSTGRES install"
       if [ -z "$SQLHOST" ]; then
           SQLHOST="localhost"
@@ -295,7 +305,8 @@ function ensure_postgres_application_db() {
           SQLUSER="root"
       fi
       if [ -z "$SQLPWD" ]; then
-          SQLPWD="Cu3zehoh7eegoogohdoh1the"
+          echo "SQL Password not provided, exiting"
+          exit 1
       fi
       if [ -z "$DBNAME" ]; then
           DBNAME="dojodb"
@@ -352,9 +363,9 @@ function ensure_postgres_application_db() {
 function ensure_application_db() {
     # Setup the application DB
     echo "Ensure application DB is present"
-    if [ "$DBTYPE" == $MYSQL ]; then
+    if [ "$DBTYPE" == "$MYSQL" ]; then
         ensure_mysql_application_db
-    elif [ "$DBTYPE" == $POSTGRES ]; then
+    elif [ "$DBTYPE" == "$POSTGRES" ]; then
         ensure_postgres_application_db
     fi
 }
@@ -372,18 +383,22 @@ function install_os_dependencies() {
         sudo yum install gcc python-devel python-setuptools python-pip nodejs yarn wkhtmltopdf expect
         sudo yum groupinstall 'Development Tools'
     elif [[ ! -z "$APT_GET_CMD" ]]; then
-        sudo apt-get install -y curl apt-transport-https
+        if [ "$AUTO_DOCKER" == "yes" ]; then
+          apt-get update && apt-get install -y sudo git nano
+        fi
+        sudo apt-get update && sudo apt-get install -y curl apt-transport-https expect
         #Yarn
         curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
         echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
         #Node
         curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash
-        sudo apt-get update && sudo apt-get install -y apt-transport-https libjpeg-dev gcc libssl-dev python-dev python-pip nodejs yarn wkhtmltopdf build-essential 
-        
+
+        sudo apt-get install -y apt-transport-https libjpeg-dev gcc libssl-dev python-dev python-pip nodejs yarn wkhtmltopdf build-essential
+
     elif [[ ! -z "$BREW_CMD" ]]; then
         brew install gcc openssl python node npm yarn Caskroom/cask/wkhtmltopdf expect
     else
-        echo "ERROR! OS not supported. Try the Vagrant option."
+        echo "ERROR! OS not supported, please try Docker. https://hub.docker.com/r/appsecpipeline/django-defectdojo/"
         exit 1;
     fi
 
@@ -406,15 +421,21 @@ function install_db() {
     elif [[ ! -z "$APT_GET_CMD" ]]; then
         if [ "$DBTYPE" == $MYSQL ]; then
             echo "Installing MySQL client (and server if not already installed)"
-            sudo apt-get install -y libmysqlclient-dev mysql-server
+            if [ "$AUTO_DOCKER" == "yes" ]; then
+              DEBIAN_FRONTEND=noninteractive apt-get install -y mysql-server pwgen libmysqlclient-dev
+              sudo service mysql start
+            else
+              sudo apt-get install -y libmysqlclient-dev mysql-server
+            fi
         elif [ "$DBTYPE" == $POSTGRES ]; then
             echo "Installing Postgres client (and server if not already installed)"
-            sudo apt-get install -y libpq-dev postgresql postgresql-contrib libmysqlclient-dev
+            sudo apt-get install -y libpq-dev postgresql postgresql-contrib
         fi
     elif [[ ! -z "$BREW_CMD" ]]; then
         if [ "$DBTYPE" == $MYSQL ]; then
             echo "Installing MySQL client"
-            brew install mysql
+            brew install mysql@5.7
+	    brew link mysql@5.7 --force
         elif [ "$DBTYPE" == $POSTGRES ]; then
             echo "Installing Postgres client"
             brew install postgresql
@@ -422,9 +443,29 @@ function install_db() {
     fi
 }
 
+function setup_batch_mode() {
+  # Batch mode
+  echo "Installing DefectDojo in batch mode."
+  if [[ -z "$DD_ENV_PATH" ]]; then
+    echo "Please set the env file to use. (DD_ENV)"
+  fi
+  source "dojo/settings/$DD_ENV_PATH"
+  PARSE_DB_URL="$(python entrypoint_scripts/misc/url_db.py $DD_DATABASE_URL)"
+  echo
+  IFS=":"
+  read DBTYPE DBNAME SQLUSER SQLPWD SQLHOST SQLPORT<<<"$PARSE_DB_URL"
+  if [ $DBTYPE=="mysql" ]; then
+    DBTYPE=$MYSQL
+  elif [ $DBTYPE=="postgres" ]; then
+    DBTYPE=$POSTGRES
+  else
+    DBTYPE=$SQLITE
+  fi
+}
+
 function prepare_settings_file() {
     echo "=============================================================================="
-    echo "Creating dojo/settings/settings.py file"
+    echo "Creating dojo/settings/settings.py and .env file"
     echo "=============================================================================="
     echo
     unset HISTFILE
@@ -434,67 +475,56 @@ function prepare_settings_file() {
     fi
 
     SECRET=`cat /dev/urandom | LC_CTYPE=C tr -dc "a-zA-Z0-9" | head -c 128`
+    AES_PASSPHRASE=`cat /dev/urandom | LC_CTYPE=C tr -dc "a-zA-Z0-9" | head -c 128`
     TARGET_SETTINGS_FILE=dojo/settings/settings.py
+    ENV_SETTINGS_FILE=dojo/settings/.env.prod
 
-    # Save MySQL details in settings file
+    # Copy settings file
     cp dojo/settings/settings.dist.py ${TARGET_SETTINGS_FILE}
+
+    # Copy env file
+    cp dojo/settings/template-env ${ENV_SETTINGS_FILE}
+
+    # DD_DATABASE_URL can be set as an environment variable, if not construct
+    if [ "$DBTYPE" == "$SQLITE" ]; then
+        DD_DATABASE_URL="sqlite:///defectdojo.db"
+    elif [ "$DBTYPE" == "$MYSQL" ]; then
+        DD_DATABASE_URL="mysql://$SQLUSER:$SQLPWD@$SQLHOST:$SQLPORT/$DBNAME"
+    elif [ "$DBTYPE" == "$POSTGRES" ]; then
+        DD_DATABASE_URL="postgres://$SQLUSER:$SQLPWD@$SQLHOST:$SQLPORT/$DBNAME"
+    fi
+
+    if [[ -z $DD_ALLOWED_HOSTS ]]; then
+        DD_ALLOWED_HOSTS="localhost"
+    fi
 
     # Test whether we're running on a "brew"-system, like Mac OS X; then use
     # BSD-style sed;
     # By default, use GNU-style sed
     BREW_CMD=$(which brew)
     if [[ ! -z $BREW_CMD ]]; then
-        sed -i '' -e "s/MYSQLHOST/$SQLHOST/g" \
-                -e "s/MYSQLPORT/$SQLPORT/g" \
-                -e "s/MYSQLUSER/$SQLUSER/g" \
-                -e "s/MYSQLPWD/$SQLPWD/g" \
-                -e "s/MYSQLDB/$DBNAME/g" \
-                -e "s#DOJODIR#$PWD/dojo#g" \
-                -e "s/DOJOSECRET/$SECRET/g" \
-                -e "s#DOJO_MEDIA_ROOT#$PWD/media/#g" \
-                -e "s#DOJO_STATIC_ROOT#$PWD/static/#g" \
-                ${TARGET_SETTINGS_FILE}
-        if [ "$DBTYPE" == "$SQLITE" ]; then
-            sed -i '' -e "s/BACKENDDB/django.db.backends.sqlite3/g" \
-                      -e "s/MYSQLDB/db.sqlite3/g" \
-                      ${TARGET_SETTINGS_FILE}
-        elif [ "$DBTYPE" == "$MYSQL" ]; then
-            sed -i '' -e "s/BACKENDDB/django.db.backends.mysql/g" ${TARGET_SETTINGS_FILE}
-        elif [ "$DBTYPE" == "$POSTGRES" ]; then
-            sed -i '' -e "s/BACKENDDB/django.db.backends.postgresql_psycopg2/g" ${TARGET_SETTINGS_FILE}
-        fi
+        sed -i '' -e 's%#DD_DATABASE_URL#%'$DD_DATABASE_URL'%' \
+                -e "s/#DD_SECRET_KEY#/$SECRET/g" \
+                -e "s%#ALLOWED_HOSTS#%$DD_ALLOWED_HOSTS%" \
+                -e "s/#DD_CREDENTIAL_AES_256_KEY#/$AES_PASSPHRASE/g" \
+                ${ENV_SETTINGS_FILE}
     else
         # Apply sed GNU-style wise
-        sed -i -e "s/MYSQLHOST/$SQLHOST/g" \
-               -e "s/MYSQLPORT/$SQLPORT/g" \
-               -e "s/MYSQLUSER/$SQLUSER/g" \
-               -e "s/MYSQLPWD/$SQLPWD/g" \
-               -e "s/MYSQLDB/$DBNAME/g" \
-               -e "s#DOJODIR#$PWD/dojo#g" \
-               -e "s/DOJOSECRET/$SECRET/g" \
-               -e "s#DOJO_MEDIA_ROOT#$PWD/media/#g" \
-               -e "s#DOJO_STATIC_ROOT#$PWD/static/#g" \
-               ${TARGET_SETTINGS_FILE}
-        if [ "$DBTYPE" == "$SQLITE" ]; then
-            sed -i -e "s/BACKENDDB/django.db.backends.sqlite3/g" \
-                   -e "s/MYSQLDB/db.sqlite3/g" \
-                   ${TARGET_SETTINGS_FILE}
-        elif [ "$DBTYPE" == "$MYSQL" ]; then
-            sed -i -e "s/BACKENDDB/django.db.backends.mysql/g" ${TARGET_SETTINGS_FILE}
-        elif [ "$DBTYPE" == "$POSTGRES" ]; then
-            sed -i -e "s/BACKENDDB/django.db.backends.postgresql_psycopg2/g" ${TARGET_SETTINGS_FILE}
-        fi
+        sed -i -e 's%#DD_DATABASE_URL#%'$DD_DATABASE_URL'%' ${ENV_SETTINGS_FILE}
+        sed -i -e "s/#DD_SECRET_KEY#/$SECRET/g" ${ENV_SETTINGS_FILE}
+        sed -i -e "s%#DD_ALLOWED_HOSTS#%$DD_ALLOWED_HOSTS%" ${ENV_SETTINGS_FILE}
+        sed -i -e "s/#DD_CREDENTIAL_AES_256_KEY#/$AES_PASSPHRASE/g" ${ENV_SETTINGS_FILE}
     fi
 }
 
 function install_app(){
     # Install the app, apply migrations and load data
-
     # Detect if we're in a a virtualenv
     python -c 'import sys; print sys.real_prefix' 2>/dev/null
     VENV_ACTIVE=$?
 
     if [ "$VENV_ACTIVE" == "0" ]; then
+        pip install --upgrade pip
         pip install -U pip
         if [ "$DBTYPE" == "$MYSQL" ]; then
             pip install .[mysql]
@@ -503,6 +533,7 @@ function install_app(){
         fi
 
     else
+        sudo pip install --upgrade pip
         if [ "$DBTYPE" == "$MYSQL" ]; then
             sudo -H pip install .[mysql]
         else
@@ -513,29 +544,29 @@ function install_app(){
     python manage.py makemigrations --merge --noinput
     python manage.py migrate
 
-    #Added BATCH_MODE logic and rewrite old logic(Old logic was checking for virtual env which was not required.)
-    if [ "$AUTO_DOCKER" == "yes" ]; then
-      python manage.py createsuperuser --noinput --username=admin --email='ed@example.com'
-      docker/setup-superuser.expect
-    elif [ "$BATCH_MODE" == "yes" ]; then
-      python manage.py createsuperuser --noinput --username=$DEFECTDOJO_ADMIN_USER --email='ed@example.com'
-      batch_mode/setup-superuser.expect $DEFECTDOJO_ADMIN_USER $DEFECTDOJO_ADMIN_PASSWORD
-    else
+    if [ "$BATCH_MODE" == "yes" ]; then
+      python manage.py createsuperuser --noinput --username=$DEFECTDOJO_ADMIN_USER --email='admin@defectdojo.org'
+      entrypoint_scripts/common/setup-superuser.expect $DEFECTDOJO_ADMIN_USER $DEFECTDOJO_ADMIN_PASSWORD
+    elif [ -z "$AUTO_DOCKER" ]; then
       echo -e "${GREEN}${BOLD}Create Dojo superuser:"
       tput sgr0
       python manage.py createsuperuser
     fi
 
-    python manage.py loaddata product_type
-    python manage.py loaddata test_type
-    python manage.py loaddata development_environment
-    python manage.py loaddata system_settings
-    python manage.py loaddata benchmark_type
-    python manage.py loaddata benchmark_category
-    python manage.py loaddata benchmark_requirement
-    python manage.py loaddata language_type
-    python manage.py loaddata objects_review
-    python manage.py loaddata regulation
+    if [ "$AUTO_DOCKER" == "yes" ]; then
+      python manage.py loaddata dojo/fixtures/defect_dojo_sample_data.json
+    else
+      python manage.py loaddata product_type
+      python manage.py loaddata test_type
+      python manage.py loaddata development_environment
+      python manage.py loaddata system_settings
+      python manage.py loaddata benchmark_type
+      python manage.py loaddata benchmark_category
+      python manage.py loaddata benchmark_requirement
+      python manage.py loaddata language_type
+      python manage.py loaddata objects_review
+      python manage.py loaddata regulation
+    fi
 
     python manage.py installwatson
     python manage.py buildwatson
@@ -556,11 +587,38 @@ function start_local_mysql_db_server() {
 
 function stop_local_mysql_db_server() {
     sudo service mysql stop
+    sudo chown -R mysql:mysql /var/lib/mysql /var/run/mysqld
 }
 
-# Added for BATCH_MODE to modify ALLOWED_HOSTS.
-function modify_allowed_hosts() {
-    if [ "$BATCH_MODE" == "yes" ]; then
-       sed -i "s/ALLOWED_HOSTS = \[]/ALLOWED_HOSTS = $ALLOWED_HOSTS/g" dojo/settings/settings.py
-    fi
+function set_random_mysql_db_pwd() {
+  sudo chown -R mysql:mysql /var/lib/mysql /var/run/mysqld
+  sudo mysqld_safe --skip-grant-tables >/dev/null 2>&1 &
+  sleep 5
+  DB_ROOT_PASS_LEN=`shuf -i 50-60 -n 1`
+  DB_ROOT_PASS=`pwgen -scn $DB_ROOT_PASS_LEN 1`
+
+  mysql mysql -e "UPDATE user SET authentication_string=PASSWORD('$DB_ROOT_PASS') WHERE User='root';FLUSH PRIVILEGES;"
+}
+
+function upgrade() {
+  apt-get upgrade
+  apt-get clean all
+}
+
+function remove_install_artifacts() {
+  sudo deluser dojo sudo
+  apt-get remove -y mysql-server nodejs yarn autoremove
+}
+
+function install_postgres_client() {
+  apt-get install -y postgresql postgresql-contrib
+  apt-get upgrade
+  apt-get clean all
+}
+
+function slim_defect_dojo_settings() {
+  # Copy settings file
+  ENV_SETTINGS_FILE=dojo/settings/.env.prod
+  cp dojo/settings/template-env ${ENV_SETTINGS_FILE}
+  sed -i'' "s&# DD_TRACK_MIGRATIONS=on&#DD_TRACK_MIGRATIONS=on&g" ${ENV_SETTINGS_FILE}
 }

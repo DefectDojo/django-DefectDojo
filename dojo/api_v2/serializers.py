@@ -1,15 +1,18 @@
-from dojo.models import Product, Engagement_Type, Engagement, Test, Finding, \
+from dojo.models import Product, Engagement, Test, Finding, \
     User, ScanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance, \
-    Finding_Template, Test_Type, Development_Environment, Report_Type, \
+    Finding_Template, Test_Type, Development_Environment, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Product_Type, JIRA_Conf, Endpoint, BurpRawRequestResponse, JIRA_PKey, \
-    Notes, Dojo_User, Regulation
+    Notes, DojoMeta
 from dojo.forms import ImportScanForm, SEVERITY_CHOICES
 from dojo.tools.factory import import_parser_factory
+from dojo.utils import create_notification
 from django.core.validators import URLValidator, validate_ipv46_address
+from django.core.urlresolvers import reverse
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.db.models import Q
 import datetime
 import six
 from django.utils.translation import ugettext_lazy as _
@@ -130,6 +133,18 @@ class TaggitSerializer(serializers.Serializer):
         return (to_be_tagged, validated_data)
 
 
+class MetaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DojoMeta
+        fields = '__all__'
+
+
+class ProductMetaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DojoMeta
+        fields = ('name', 'value')
+
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -139,6 +154,7 @@ class UserSerializer(serializers.ModelSerializer):
 class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
     findings_count = serializers.SerializerMethodField()
     tags = TagListSerializerField(required=False)
+    product_meta = ProductMetaSerializer(read_only=True, many=True)
 
     class Meta:
         model = Product
@@ -472,9 +488,13 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         default=None,
         queryset=User.objects.all())
     tags = TagListSerializerField(required=False)
+    skip_duplicates = serializers.BooleanField(required=False, default=False)
+    close_old_findings = serializers.BooleanField(required=False, default=False)
 
     def save(self):
         data = self.validated_data
+        skip_duplicates = data['skip_duplicates']
+        close_old_findings = data['close_old_findings']
         test_type, created = Test_Type.objects.get_or_create(
             name=data['scan_type'])
         environment, created = Development_Environment.objects.get_or_create(
@@ -501,8 +521,17 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         except ValueError:
             raise Exception('FileParser ValueError')
 
+        skipped_hashcodes = []
         try:
             for item in parser.items:
+                if skip_duplicates:
+                    hash_code = item.compute_hash_code()
+                    if Finding.objects.filter(Q(active=True) | Q(false_p=True) | Q(duplicate=True),
+                                              test__engagement__product=test.engagement.product,
+                                              hash_code=hash_code).exists():
+                        skipped_hashcodes.append(hash_code)
+                        continue
+
                 sev = item.severity
                 if sev == 'Information' or sev == 'Informational':
                     sev = 'Info'
@@ -556,6 +585,35 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 #    item.tags = item.unsaved_tags
         except SyntaxError:
             raise Exception('Parser SyntaxError')
+
+        if close_old_findings:
+            # Close old active findings that are not reported by this scan.
+            new_hash_codes = test.finding_set.values('hash_code')
+            for old_finding in Finding.objects.exclude(test=test) \
+                                              .exclude(hash_code__in=new_hash_codes) \
+                                              .exclude(hash_code__in=skipped_hashcodes) \
+                               .filter(test__engagement__product=test.engagement.product,
+                                       test__test_type=test_type,
+                                       active=True):
+                old_finding.active = False
+                old_finding.mitigated = datetime.datetime.combine(
+                    test.target_start,
+                    timezone.now().time())
+                old_finding.mitigated_by = self.context['request'].user
+                old_finding.notes.create(author=self.context['request'].user,
+                                         entry="This finding has been automatically closed"
+                                         " as it is not present anymore in recent scans.")
+                old_finding.save()
+                title = 'An old finding has been closed for "{}".' \
+                        .format(test.engagement.product.name)
+                description = 'See <a href="{}">{}</a>' \
+                        .format(reverse('view_finding', args=(old_finding.id, )),
+                                old_finding.title)
+                create_notification(event='other',
+                                    title=title,
+                                    description=description,
+                                    icon='bullseye',
+                                    objowner=self.context['request'].user)
 
         return test
 

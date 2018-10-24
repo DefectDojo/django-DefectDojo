@@ -25,13 +25,13 @@ from dojo.tools.skf.parser import SKFCsvParser
 from dojo.tools.ssllabs.parser import SSLlabsParser
 from dojo.tools.nikto.parser import NiktoXMLParser
 from dojo.tools.trufflehog.parser import TruffleHogJSONParser
+from dojo.tools.sonarqube.parser import SonarQubeHtmlParser
 from dojo.tools.clair.parser import ClairParser
+from dojo.tools.mobsf.parser import MobSFParser
+from dojo.tools.brakeman.parser import BrakemanScanParser
 from dojo.tools.spotbugs.parser import SpotbugsXMLParser
 
 __author__ = 'Jay Paz'
-
-# Modified by dkade to use OpenVASUploadCsvParser
-# Modified by martin.marsicano added SKFCsvParser
 
 
 def import_parser_factory(file, test, scan_type=None):
@@ -96,6 +96,12 @@ def import_parser_factory(file, test, scan_type=None):
         parser = GosecScannerParser(file, test)
     elif scan_type == 'Trustwave Scan (CSV)':
         parser = TrustwaveUploadCsvParser(file, test)
+    elif scan_type == 'SonarQube Scan':
+        parser = SonarQubeHtmlParser(file, test)
+    elif scan_type == 'MobSF Scan':
+        parser = MobSFParser(file, test)
+    elif scan_type == 'Brakeman Scan':
+        parser = BrakemanScanParser(file, test)
     elif scan_type == 'SpotBugs Scan':
         parser = SpotbugsXMLParser(file, test)
     else:

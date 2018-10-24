@@ -2,7 +2,7 @@ import re
 from datetime import datetime, date
 from urlparse import urlsplit, urlunsplit
 
-from custom_field.models import CustomField
+
 from dateutil.relativedelta import relativedelta
 from django import forms
 from django.core import validators
@@ -18,7 +18,7 @@ from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
     Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
     JIRA_Issue, JIRA_PKey, JIRA_Conf, UserContactInfo, Tool_Type, Tool_Configuration, Tool_Product_Settings, \
     Cred_User, Cred_Mapping, System_Settings, Notifications, Languages, Language_Type, App_Analysis, Objects, \
-    Benchmark_Product, Benchmark_Requirement, Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets
+    Benchmark_Product, Benchmark_Requirement, Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
 
@@ -192,16 +192,16 @@ class DeleteProductForm(forms.ModelForm):
                    'prod_type', 'updated', 'tid', 'authorized_users', 'product_manager',
                    'technical_contact', 'team_manager', 'prod_numeric_grade', 'business_criticality',
                    'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience',
-                   'internet_accessible', 'regulations']
+                   'internet_accessible', 'regulations', 'product_meta']
 
 
-class ProductMetaDataForm(forms.ModelForm):
+class DojoMetaDataForm(forms.ModelForm):
     value = forms.CharField(widget=forms.Textarea(attrs={}),
                             required=True)
 
     class Meta:
-        model = CustomField
-        exclude = ['field_type', 'content_type', 'default_value', 'is_required', 'field_choices']
+        model = DojoMeta
+        exclude = ('model_name', 'model_id')
 
 
 class Product_TypeProductForm(forms.ModelForm):
@@ -250,7 +250,12 @@ class ImportScanForm(forms.Form):
                          ("Bandit Scan", "Bandit Scan"),
                          ("SSL Labs Scan", "SSL Labs Scan"),
                          ("Gosec Scanner", "Gosec Scanner"),
+                         ("SonarQube Scan", "SonarQube Scan"),
+                         ("MobSF Scan", "MobSF Scan"),
+                         ("Trufflehog Scan", "Trufflehog Scan"),
+                         ("Nikto Scan", "Nikto Scan"),
                          ("Clair Scan", "Clair Scan"),
+                         ("Brakeman Scan", "Brakeman Scan"),
                          ("SpotBugs Scan","SpotBugs Scan"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
@@ -273,7 +278,7 @@ class ImportScanForm(forms.Form):
                            help_text="Add tags that help describe this scan.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
     file = forms.FileField(widget=forms.widgets.FileInput(
-        attrs={"accept": ".xml, .csv, .nessus, .json"}),
+        attrs={"accept": ".xml, .csv, .nessus, .json, .html"}),
         label="Choose report file",
         required=True)
 
@@ -308,7 +313,7 @@ class ReImportScanForm(forms.Form):
                            help_text="Add tags that help describe this scan.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
     file = forms.FileField(widget=forms.widgets.FileInput(
-        attrs={"accept": ".xml, .csv, .nessus, .json"}),
+        attrs={"accept": ".xml, .csv, .nessus, .json, .html"}),
         label="Choose report file",
         required=True)
 
@@ -678,6 +683,7 @@ class DeleteTestForm(forms.ModelForm):
                    'target_end',
                    'engagement',
                    'percent_complete',
+                   'description',
                    'lead')
 
 
@@ -1140,15 +1146,6 @@ class DeleteEndpointForm(forms.ModelForm):
                    'query',
                    'fragment',
                    'product')
-
-
-class EndpointMetaDataForm(forms.ModelForm):
-    value = forms.CharField(widget=forms.Textarea(attrs={}),
-                            required=True)
-
-    class Meta:
-        model = CustomField
-        exclude = ['field_type', 'content_type', 'default_value', 'is_required', 'field_choices']
 
 
 class NoteForm(forms.ModelForm):
