@@ -256,7 +256,7 @@ class ImportScanForm(forms.Form):
                          ("Nikto Scan", "Nikto Scan"),
                          ("Clair Scan", "Clair Scan"),
                          ("Brakeman Scan", "Brakeman Scan"),
-                         ("SpotBugs Scan","SpotBugs Scan"))
+                         ("SpotBugs Scan", "SpotBugs Scan"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
 
