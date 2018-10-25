@@ -317,6 +317,7 @@ class JIRASerializer(serializers.ModelSerializer):
 
 class TestSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
+    test_type_name = serializers.ReadOnlyField()
 
     class Meta:
         model = Test
