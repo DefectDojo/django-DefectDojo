@@ -962,6 +962,9 @@ class Test(models.Model):
     updated = models.DateTimeField(auto_now=True, null=True)
     created = models.DateTimeField(auto_now_add=True, null=True)
 
+    def test_type_name(self):
+        return self.test_type.name
+
     def __unicode__(self):
         return "%s (%s)" % (self.test_type,
                             self.target_start.strftime("%b %d, %Y"))
