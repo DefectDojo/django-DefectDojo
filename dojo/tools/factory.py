@@ -28,8 +28,12 @@ from dojo.tools.trufflehog.parser import TruffleHogJSONParser
 from dojo.tools.sonarqube.parser import SonarQubeHtmlParser
 from dojo.tools.clair.parser import ClairParser
 from dojo.tools.mobsf.parser import MobSFParser
+<<<<<<< HEAD
 from dojo.tools.awsscout2.parser import AWSScout2Parser
 from dojo.tools.awsprowler.parser import AWSProwlerParser
+=======
+from dojo.tools.brakeman.parser import BrakemanScanParser
+>>>>>>> ffd4d192b405e4e574a91f514745e514bc5a7273
 
 __author__ = 'Jay Paz'
 
@@ -100,10 +104,15 @@ def import_parser_factory(file, test, scan_type=None):
         parser = SonarQubeHtmlParser(file, test)
     elif scan_type == 'MobSF Scan':
         parser = MobSFParser(file, test)
+<<<<<<< HEAD
     elif scan_type == 'AWS Scout2 Scan':
         parser = AWSScout2Parser(file, test)
     elif scan_type == 'AWS Prowler Scan':
         parser = AWSProwlerParser(file, test)
+=======
+    elif scan_type == 'Brakeman Scan':
+        parser = BrakemanScanParser(file, test)
+>>>>>>> ffd4d192b405e4e574a91f514745e514bc5a7273
     else:
         raise ValueError('Unknown Test Type')
 
