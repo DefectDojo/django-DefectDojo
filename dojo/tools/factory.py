@@ -28,6 +28,8 @@ from dojo.tools.trufflehog.parser import TruffleHogJSONParser
 from dojo.tools.sonarqube.parser import SonarQubeHtmlParser
 from dojo.tools.clair.parser import ClairParser
 from dojo.tools.mobsf.parser import MobSFParser
+from dojo.tools.awsscout2.parser import AWSScout2Parser
+from dojo.tools.awsprowler.parser import AWSProwlerParser
 
 __author__ = 'Jay Paz'
 
@@ -98,6 +100,10 @@ def import_parser_factory(file, test, scan_type=None):
         parser = SonarQubeHtmlParser(file, test)
     elif scan_type == 'MobSF Scan':
         parser = MobSFParser(file, test)
+    elif scan_type == 'AWS Scout2 Scan':
+        parser = AWSScout2Parser(file, test)
+    elif scan_type == 'AWS Prowler Scan':
+        parser = AWSProwlerParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 
