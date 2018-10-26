@@ -256,7 +256,8 @@ class ImportScanForm(forms.Form):
                          ("Nikto Scan", "Nikto Scan"),
                          ("Clair Scan", "Clair Scan"),
                          ("AWS Scout2 Scan", "AWS Scout2 Scan"),
-                         ("AWS Prowler Scan", "AWS Prowler Scan"))
+                         ("AWS Prowler Scan", "AWS Prowler Scan"),
+                         ("Brakeman Scan", "Brakeman Scan"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
 
