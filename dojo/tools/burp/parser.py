@@ -117,7 +117,7 @@ def get_attrib_from_subnode(xml_node, subnode_xpath_expr, attrib_name):
 
     if ETREE_VERSION[0] <= 1 and ETREE_VERSION[1] < 3:
 
-        match_obj = re.search("([^\@]+?)\[\@([^=]*?)=\'([^\']*?)\'",
+        match_obj = re.search(r"([^\@]+?)\[\@([^=]*?)=\'([^\']*?)\'",
                               subnode_xpath_expr)
         if match_obj is not None:
             node_to_find = match_obj.group(1)
@@ -171,7 +171,7 @@ def get_item(item_node, test):
     url = item_node.get('url')
     path = item_node.findall('path')[0].text
     location = item_node.findall('location')[0].text
-    rparameter = re.search("(?<=\[)(.*)(\])", location)
+    rparameter = re.search(r"(?<=\[)(.*)(\])", location)
     parameter = None
     if rparameter:
         parameter = rparameter.group(1)
