@@ -26,7 +26,7 @@ class AWSProwlerParser(object):
             scored = df.ix[i, 'SCORED']
             level = df.ix[i, 'LEVEL']
             title_text = df.ix[i, 'TITLE_TEXT']
-            title_text = re.sub('\[.*\]\s', '', title_text)
+            title_text = re.sub(r'\[.*\]\s', '', title_text)
             title_text_trunc = Truncator(title_text).words(8)
             notes = df.ix[i, 'NOTES']
 
