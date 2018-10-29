@@ -1,6 +1,5 @@
 __author__ = 'feeltheajf'
 
-from datetime import datetime
 from dateutil import parser
 import json
 from dojo.models import Finding
@@ -25,7 +24,7 @@ class BrakemanScanParser(object):
 
             title = item['warning_type'] + '. ' + item['message']
 
-            ###### Finding details information ######
+            # Finding details information
             findingdetail += 'Filename: ' + item['file'] + '\n'
             findingdetail += 'Line number: ' + str(item['line'] or '') + '\n'
             findingdetail += 'Issue Confidence: ' + item['confidence'] + '\n\n'
@@ -63,4 +62,3 @@ class BrakemanScanParser(object):
                 dupes[dupe_key] = find
 
         self.items = dupes.values()
-
