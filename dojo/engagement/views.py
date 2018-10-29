@@ -513,10 +513,7 @@ def import_scan_results(request, eid=None, pid=None):
                     new_f.cred_id = cred_user.cred_id
                     new_f.save()
 
-            try:
-                parser = import_parser_factory(file, t)
-            except ValueError:
-                raise Http404()
+            parser = import_parser_factory(file, t)
 
             try:
                 for item in parser.items:
