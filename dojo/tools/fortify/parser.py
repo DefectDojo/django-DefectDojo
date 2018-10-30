@@ -4,36 +4,36 @@ __author__ = 'Rajarshi333'
 
 from defusedxml import ElementTree
 from dateutil import parser
-import ntpath
 import re
-from dojo.utils import add_language
 from dojo.models import Finding
+
 
 class FortifyXMLParser(object):
     language_list = []
+
     def __init__(self, filename, test):
         Fortifyscan = ElementTree.parse(filename)
         root = Fortifyscan.getroot()
 
-        ##Get Date##
+        # Get Date
         date_string = root.getchildren()[5].getchildren()[1].getchildren()[2].text
         date_list = date_string.split()[1:4]
         date_act = "".join(date_list)
         find_date = parser.parse(date_act)
 
-        ##Get Language##
+        # Get Language
         lang_string = root[8][4][2].text
-        lang_need_string = re.findall("^.*com.fortify.sca.Phase0HigherOrder.Languages.*$",lang_string,re.MULTILINE)
+        lang_need_string = re.findall("^.*com.fortify.sca.Phase0HigherOrder.Languages.*$", lang_string, re.MULTILINE)
         lang_my_string = lang_need_string[0]
         language = lang_my_string.split('=')[1]
         if language not in self.language_list:
             self.language_list.append(language)
 
-        ##Get Finding Details##
+        # Get Finding Details
         dupes = dict()
 
         for ReportSection in root.findall('ReportSection'):
-            if ReportSection.findtext('Title')=="Results Outline":
+            if ReportSection.findtext('Title') == "Results Outline":
                 kingdom = ''
                 category = ''
                 mitigation = 'N/A'
@@ -42,12 +42,10 @@ class FortifyXMLParser(object):
                 findingdetail = ''
                 title = ''
                 filename = ''
-                cwe = ''
                 filepath = ''
                 linestart = ''
                 dupe_key = ''
                 filename = ''
-                snipet = ''
                 linestart = ''
 
             for GroupingSection in ReportSection.iter('GroupingSection'):
@@ -65,29 +63,29 @@ class FortifyXMLParser(object):
                     sev = Friority.text
 
                 for Category in GroupingSection.iter('Category'):
-				    category = Category.text
+                    category = Category.text
 
                 for Kingdom in GroupingSection.iter('Kingdom'):
                     kingdom = Kingdom.text
 
                 for LineStart in GroupingSection.iter('LineStart'):
-                    linestart=LineStart.text
+                    linestart = LineStart.text
                     if linestart is not None:
-                        findingdetail += "**Line Start:**" + linestart +'\n'
+                        findingdetail += "**Line Start:**" + linestart + '\n'
 
                 for Snippet in GroupingSection.iter('Snippet'):
-                    snippet=Snippet.text
+                    snippet = Snippet.text
                     if snippet is not None:
-				        findingdetail += "\n**Code:**\n'''\n" + snippet +"\n'''\n"
+                        findingdetail += "\n**Code:**\n'''\n" + snippet + "\n\n"
 
                     for FileName in GroupingSection.iter('FileName'):
-    				    filename = FileName.text
-    				    if filename is not None:
-    					    findingdetail += "**FileName:**" + filename +'\n'
+                        filename = FileName.text
+                        if filename is not None:
+                            findingdetail += "**FileName:**" + filename + '\n'
                     for FilePath in GroupingSection.iter('FilePath'):
-                        filepath=FilePath.text
+                        filepath = FilePath.text
                         if filepath is not None:
-                            findingdetail += "**Filepath:**" + filepath +'\n'
+                            findingdetail += "**Filepath:**" + filepath + '\n'
 
                     title = category + " " + kingdom
                     dupe_key = (title + sev + cwe_id)
@@ -95,14 +93,14 @@ class FortifyXMLParser(object):
                     if dupe_key in dupes:
                         find = dupes[dupe_key]
                     else:
-                        dupes[dupe_key]=True
+                        dupes[dupe_key] = True
                         find = Finding(title=title,
                                         cwe=cwe_id,
                                         test=test,
                                         active=False,
                                         verified=False,
-                						description=findingdetail,
-                						severity=sev,
+                                        description=findingdetail,
+                                        severity=sev,
                                         numerical_severity=Finding.get_numerical_severity(sev),
                                         mitigation=mitigation,
                                         impact=impact,
