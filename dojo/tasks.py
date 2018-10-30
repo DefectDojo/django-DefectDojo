@@ -269,7 +269,7 @@ def async_dedupe(new_finding, *args, **kwargs):
 @app.task(name='applying rules')
 def async_rules(new_finding, *args, **kwargs):
     logger.info("applying rules")
-    sync_rules(new_finding, *args, **kwargs)
+    #sync_rules(new_finding, *args, **kwargs)
 
 
 @app.task(name='async_false_history')
