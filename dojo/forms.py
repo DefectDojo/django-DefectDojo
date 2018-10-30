@@ -256,7 +256,9 @@ class ImportScanForm(forms.Form):
                          ("Nikto Scan", "Nikto Scan"),
                          ("Clair Scan", "Clair Scan"),
                          ("Brakeman Scan", "Brakeman Scan"),
-                         ("SpotBugs Scan", "SpotBugs Scan"))
+                         ("SpotBugs Scan", "SpotBugs Scan"),
+                         ("AWS Scout2 Scan", "AWS Scout2 Scan"),
+                         ("AWS Prowler Scan", "AWS Prowler Scan"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
 
@@ -278,7 +280,7 @@ class ImportScanForm(forms.Form):
                            help_text="Add tags that help describe this scan.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
     file = forms.FileField(widget=forms.widgets.FileInput(
-        attrs={"accept": ".xml, .csv, .nessus, .json, .html"}),
+        attrs={"accept": ".xml, .csv, .nessus, .json, .html, .js"}),
         label="Choose report file",
         required=True)
 
