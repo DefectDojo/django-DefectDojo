@@ -7,7 +7,6 @@ See the file 'doc/LICENSE' for the license information
 from __future__ import with_statement
 
 from defusedxml import ElementTree as ET
-#from lxml import etree as ET
 
 import html2text
 
@@ -123,7 +122,6 @@ class NexposeFullXmlParser(object):
                 last = attr
 
         return ret
-
 
     def parse_tests_type(self, node, vulnsDefinitions):
         """
@@ -277,7 +275,6 @@ class NexposeFullXmlParser(object):
                                        dynamic_finding=True)
                         find.unsaved_endpoints = list()
                         dupes[dupe_key] = find
-
 
                     find.unsaved_endpoints.append(Endpoint(host=item['name'], product=test.engagement.product))
                     for hostname in item['hostnames']:

@@ -201,13 +201,33 @@
     },
     "model": "dojo.test_type",
     "pk": 29
+  },
+  {
+    "fields": {
+      "name": "Gosec Scanner"
+    },
+    "model": "dojo.test_type",
+    "pk": 30
+  },
+  {
+    "fields": {
+      "name": "NPM Audit Scan"
+    },
+    "model": "dojo.test_type",
+    "pk": 31
+  },
+  {
+    "fields": {
+      "name": "Clair Scan"
+    },
+    "model": "dojo.test_type",
+    "pk": 32
+  },
+  {
+    "fields": {
+      "name": "Brakeman Scan"
+    },
+    "model": "dojo.test_type",
+    "pk": 33
   }
-    {
-      "fields": {
-	"name": "GoAST Scanner"
-      },
-      "model": "dojo.test_type",
-      "pk":28
-}
-
 ]

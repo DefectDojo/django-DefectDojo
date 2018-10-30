@@ -13,11 +13,12 @@ from dojo.tools.vcg.parser import VCGParser
 from dojo.tools.dependencycheck.parser import DependencyCheckParser
 from dojo.tools.retirejs.parser import RetireJsParser
 from dojo.tools.nsp.parser import NspParser
+from dojo.tools.npmaudit.parser import NpmAuditParser
 from dojo.tools.generic.parser import GenericFindingUploadCsvParser
 from dojo.tools.qualys.parser import QualysParser
 from dojo.tools.qualyswebapp.parser import QualysWebAppParser
 from dojo.tools.snyk.parser import SnykParser
-from dojo.tools.goast.parser import GoastScannerParser
+from dojo.tools.gosec.parser import GosecScannerParser
 from dojo.tools.openvas_csv.parser import OpenVASUploadCsvParser
 from dojo.tools.trustwave_csv.parser import TrustwaveUploadCsvParser
 from dojo.tools.skf.parser import SKFCsvParser
@@ -25,11 +26,14 @@ from dojo.tools.ssllabs.parser import SSLlabsParser
 from dojo.tools.nikto.parser import NiktoXMLParser
 from dojo.tools.trufflehog.parser import TruffleHogJSONParser
 from dojo.tools.fortify.parser import FortifyXMLParser
+from dojo.tools.sonarqube.parser import SonarQubeHtmlParser
+from dojo.tools.clair.parser import ClairParser
+from dojo.tools.mobsf.parser import MobSFParser
+from dojo.tools.awsscout2.parser import AWSScout2Parser
+from dojo.tools.awsprowler.parser import AWSProwlerParser
+from dojo.tools.brakeman.parser import BrakemanScanParser
 
 __author__ = 'Jay Paz'
-
-# Modified by dkade to use OpenVASUploadCsvParser
-# Modified by martin.marsicano added SKFCsvParser
 
 
 def import_parser_factory(file, test, scan_type=None):
@@ -42,6 +46,8 @@ def import_parser_factory(file, test, scan_type=None):
             parser = NessusCSVParser(file, test)
         elif filename.endswith("xml") or filename.endswith("nessus"):
             parser = NessusXMLParser(file, test)
+    elif scan_type == "Clair Scan":
+        parser = ClairParser(file, test)
     elif scan_type == "Nmap Scan":
         parser = NmapXMLParser(file, test)
     elif scan_type == "Nikto Scan":
@@ -70,6 +76,8 @@ def import_parser_factory(file, test, scan_type=None):
         parser = RetireJsParser(file, test)
     elif scan_type == 'Node Security Platform Scan':
         parser = NspParser(file, test)
+    elif scan_type == 'NPM Audit Scan':
+        parser = NpmAuditParser(file, test)
     elif scan_type == 'Generic Findings Import':
         parser = GenericFindingUploadCsvParser(file, test)
     elif scan_type == 'Qualys Scan':
@@ -86,12 +94,22 @@ def import_parser_factory(file, test, scan_type=None):
         parser = SSLlabsParser(file, test)
     elif scan_type == 'Trufflehog Scan':
         parser = TruffleHogJSONParser(file, test)
-    elif scan_type == 'GoAST Scanner':
-        parser = GoastScannerParser(file, test)
+    elif scan_type == 'Gosec Scanner':
+        parser = GosecScannerParser(file, test)
     elif scan_type == 'Trustwave Scan (CSV)':
         parser = TrustwaveUploadCsvParser(file, test)
     elif scan_type == 'Fortify Scan':
         parser = FortifyXMLParser(file, test)
+    elif scan_type == 'SonarQube Scan':
+        parser = SonarQubeHtmlParser(file, test)
+    elif scan_type == 'MobSF Scan':
+        parser = MobSFParser(file, test)
+    elif scan_type == 'AWS Scout2 Scan':
+        parser = AWSScout2Parser(file, test)
+    elif scan_type == 'AWS Prowler Scan':
+        parser = AWSProwlerParser(file, test)
+    elif scan_type == 'Brakeman Scan':
+        parser = BrakemanScanParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 
