@@ -13,8 +13,8 @@ from django.utils.html import escape
 from django.utils import timezone
 from dojo.filters import EndpointFilter
 from dojo.forms import EditEndpointForm, \
-    DeleteEndpointForm, AddEndpointForm, EndpointMetaDataForm
-from dojo.models import Product, Endpoint, Finding, System_Settings
+    DeleteEndpointForm, AddEndpointForm, DojoMetaDataForm
+from dojo.models import Product, Endpoint, Finding, System_Settings, DojoMeta
 from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_system_setting, Product_Tab
 from django.contrib.contenttypes.models import ContentType
 from custom_field.models import CustomFieldValue, CustomField
@@ -43,8 +43,9 @@ def vulnerable_endpoints(request):
             product = get_object_or_404(Product, id=p[0])
 
     ids = get_endpoint_ids(EndpointFilter(request.GET, queryset=endpoints, user=request.user).qs)
-    endpoints = EndpointFilter(request.GET, queryset=endpoints.filter(id__in=ids), user=request.user).order_by('host')
-    paged_endpoints = get_page_items(request, endpoints.qs, 25)
+    endpoints = EndpointFilter(request.GET, queryset=endpoints.filter(id__in=ids), user=request.user)
+    endpoints_query = endpoints.qs.order_by('host')
+    paged_endpoints = get_page_items(request, endpoints_query, 25)
     add_breadcrumb(title="Vulnerable Endpoints", top_level=not len(request.GET), request=request)
 
     system_settings = System_Settings.objects.get()
@@ -134,14 +135,13 @@ def view_endpoint(request, eid):
     else:
         raise PermissionDenied
 
-    ct = ContentType.objects.get_for_model(endpoint)
-    endpoint_cf = CustomField.objects.filter(content_type=ct)
+    endpoint_cf = endpoint.endpoint_meta
     endpoint_metadata = {}
 
-    for cf in endpoint_cf:
-        cfv = CustomFieldValue.objects.filter(field=cf, object_id=endpoint.id)
+    for cf in endpoint_cf.all():
+        cfv = cf.value
         if len(cfv):
-            endpoint_metadata[cf] = cfv[0]
+            endpoint_metadata[cf.name] = cfv
 
     all_findings = Finding.objects.filter(endpoints__in=endpoints).distinct()
 
@@ -306,7 +306,7 @@ def add_product_endpoint(request):
                                  messages.SUCCESS,
                                  'Endpoint added successfully.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('view_endpoint'))
+            return HttpResponseRedirect(reverse('endpoints') + "?product=%s" % form.product.id)
     add_breadcrumb(title="Add Endpoint", top_level=False, request=request)
     return render(request,
                   'dojo/add_endpoint.html',
@@ -318,20 +318,14 @@ def add_product_endpoint(request):
 @user_passes_test(lambda u: u.is_staff)
 def add_meta_data(request, eid):
     endpoint = Endpoint.objects.get(id=eid)
-    ct = ContentType.objects.get_for_model(endpoint)
-
     if request.method == 'POST':
-        form = EndpointMetaDataForm(request.POST)
+        form = DojoMetaDataForm(request.POST)
         if form.is_valid():
-            cf, created = CustomField.objects.get_or_create(name=form.cleaned_data['name'],
-                                                            content_type=ct,
-                                                            field_type='a')
+            cf, created = DojoMeta.objects.get_or_create(name=form.cleaned_data['name'],
+                                                         model_name='Endpoint',
+                                                         model_id=endpoint.id,
+                                                         value=form.cleaned_data['value'])
             cf.save()
-            cfv, created = CustomFieldValue.objects.get_or_create(field=cf,
-                                                                  object_id=endpoint.id)
-            cfv.value = form.cleaned_data['value']
-            cfv.clean()
-            cfv.save()
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Metadata added successfully.',
@@ -341,7 +335,7 @@ def add_meta_data(request, eid):
             else:
                 return HttpResponseRedirect(reverse('view_endpoint', args=(eid,)))
     else:
-        form = EndpointMetaDataForm(initial={'content_type': endpoint})
+        form = DojoMetaDataForm(initial={'content_type': endpoint})
 
     add_breadcrumb(parent=endpoint, title="Add Metadata", top_level=False, request=request)
     product_tab = Product_Tab(endpoint.product.id, "Add Metadata", tab="endpoints")
@@ -357,15 +351,13 @@ def add_meta_data(request, eid):
 def edit_meta_data(request, eid):
 
     endpoint = Endpoint.objects.get(id=eid)
-    ct = ContentType.objects.get_for_model(endpoint)
-
-    endpoint_cf = CustomField.objects.filter(content_type=ct)
+    endpoint_cf = endpoint.endpoint_meta.all()
     endpoint_metadata = {}
 
     for cf in endpoint_cf:
-        cfv = CustomFieldValue.objects.filter(field=cf, object_id=endpoint.id)
+        cfv = cf.value
         if len(cfv):
-            endpoint_metadata[cf] = cfv[0]
+            endpoint_metadata[cf] = cfv
 
     if request.method == 'POST':
         for key, value in request.POST.iteritems():

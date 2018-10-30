@@ -1,20 +1,242 @@
-# Django settings for dojo project.
+# Django settings for DefectDojo
 import os
 from datetime import timedelta
 
-DEBUG = True
-LOGIN_REDIRECT_URL = '/'
-# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-# SECURE_SSL_REDIRECT = True
-# SECURE_BROWSER_XSS_FILTER = True
-SESSION_COOKIE_HTTPONLY = True
-CSRF_COOKIE_HTTPONLY = True
+import environ
+root = environ.Path(__file__) - 3  # Three folders back
+
+env = environ.Env(
+    # Set casting and default values
+    DD_DEBUG=(bool, False),
+    DD_DJANGO_ADMIN_ENABLED=(bool, False),
+    DD_SESSION_COOKIE_HTTPONLY=(bool, True),
+    DD_CSRF_COOKIE_HTTPONLY=(bool, True),
+    DD_SECURE_SSL_REDIRECT=(bool, False),
+    DD_SECURE_HSTS_INCLUDE_SUBDOMAINS=(bool, False),
+    DD_SECURE_HSTS_SECONDS=(str, '31536000'),  # One year expiration
+    DD_CSRF_COOKIE_SECURE=(bool, False),
+    DD_SECURE_BROWSER_XSS_FILTER=(bool, False),
+    DD_TIME_ZONE=(str, 'UTC'),
+    DD_LANG=(str, 'en-us'),
+    DD_WKHTMLTOPDF=(str, '/usr/local/bin/wkhtmltopdf'),
+    DD_TEAM_NAME=(str, 'Security'),
+    DD_ADMINS=(str, 'Aaron:aaron@localhost,Greg:greg@localhost'),
+    DD_PORT_SCAN_CONTACT_EMAIL=(str, 'email@localhost'),
+    DD_PORT_SCAN_RESULT_EMAIL_FROM=(str, 'email@localhost'),
+    DD_PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST=(str, ['email@localhost']),
+    DD_PORT_SCAN_SOURCE_IP=(str, '127.0.0.1'),
+    DD_WHITENOISE=(bool, False),
+    DD_TRACK_MIGRATIONS=(bool, False),
+    DD_SECURE_PROXY_SSL_HEADER=(bool, False),
+)
+
+# Read .env file as default or from the command line, DD_ENV_PATH
+env.read_env(root('dojo/settings/' + env.str('DD_ENV_PATH', '.env.prod')))
+
+# ------------------------------------------------------------------------------
+# GENERAL
+# ------------------------------------------------------------------------------
+
+# False if not in os.environ
+DEBUG = env('DD_DEBUG')
+
+# Hosts/domain names that are valid for this site; required if DEBUG is False
+# See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
+ALLOWED_HOSTS = tuple(env.list('DD_ALLOWED_HOSTS', default=[]))
+
+# Raises django's ImproperlyConfigured exception if SECRET_KEY not in os.environ
+SECRET_KEY = env('DD_SECRET_KEY')
+
+# Local time zone for this installation. Choices can be found here:
+# http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
+# although not all choices may be available on all operating systems.
+# In a Windows environment this must be set to your system time zone.
+TIME_ZONE = env('DD_TIME_ZONE')
+
+# Language code for this installation. All choices can be found here:
+# http://www.i18nguy.com/unicode/language-identifiers.html
+# LANGUAGE_CODE = env('DD_LANG')
+
+SITE_ID = 1
+
+# If you set this to False, Django will make some optimizations so as not
+# to load the internationalization machinery.
+USE_I18N = True
+
+# If you set this to False, Django will not format dates, numbers and
+# calendars according to the current locale.
+USE_L10N = True
+
+# If you set this to False, Django will not use timezone-aware datetimes.
+USE_TZ = True
+
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+
+# ------------------------------------------------------------------------------
+# DATABASE
+# ------------------------------------------------------------------------------
+
+# Parse database connection url strings like psql://user:pass@127.0.0.1:8458/db
+DATABASES = {
+    'default': env.db('DD_DATABASE_URL')
+}
+
+# Track migrations through source control rather than making migrations locally
+if env('DD_TRACK_MIGRATIONS'):
+    MIGRATION_MODULES = {'dojo': 'dojo.db_migrations'}
+
+# ------------------------------------------------------------------------------
+# MEDIA
+# ------------------------------------------------------------------------------
+
+DOJO_ROOT = root('dojo/')
+
+# Absolute filesystem path to the directory that will hold user-uploaded files.
+# Example: "/var/www/example.com/media/"
+MEDIA_ROOT = root('media')
+
+# URL that handles the media served from MEDIA_ROOT. Make sure to use a
+# trailing slash.
+# Examples: "http://example.com/media/", "http://media.example.com/"
+MEDIA_URL = '/media/'
+
+# ------------------------------------------------------------------------------
+# STATIC
+# ------------------------------------------------------------------------------
+
+# Absolute path to the directory static files should be collected to.
+# Don't put anything in this directory yourself; store your static files
+# in apps' "static/" subdirectories and in STATICFILES_DIRS.
+# Example: "/var/www/example.com/static/"
+STATIC_ROOT = root('static')
+
+# URL prefix for static files.
+# Example: "http://example.com/static/", "http://static.example.com/"
+STATIC_URL = '/static/'
+
+# Additional locations of static files
+STATICFILES_DIRS = (
+    # Put strings here, like "/home/html/static" or "C:/www/django/static".
+    # Always use forward slashes, even on Windows.
+    # Don't forget to use absolute paths, not relative paths.
+    os.path.join(os.path.dirname(DOJO_ROOT), 'components', 'node_modules',
+                 '@yarn_components'),
+)
+
+# List of finder classes that know how to find static files in
+# various locations.
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+)
+
+FILE_UPLOAD_HANDLERS = (
+    "django.core.files.uploadhandler.TemporaryFileUploadHandler",
+)
+
+# ------------------------------------------------------------------------------
+# URLS
+# ------------------------------------------------------------------------------
+# https://docs.djangoproject.com/en/dev/ref/settings/#root-urlconf
+
+# AUTHENTICATION_BACKENDS = [
+# 'axes.backends.AxesModelBackend',
+# ]
+
+ROOT_URLCONF = 'dojo.urls'
+
+# Python dotted path to the WSGI application used by Django's runserver.
+# https://docs.djangoproject.com/en/dev/ref/settings/#wsgi-application
+WSGI_APPLICATION = 'dojo.wsgi.application'
+
 URL_PREFIX = ''
 
-# Uncomment this line if you enable SSL
-# SESSION_COOKIE_SECURE = True
-# CSRF_COOKIE_SECURE = True
+# ------------------------------------------------------------------------------
+# AUTHENTICATION
+# ------------------------------------------------------------------------------
+
+LOGIN_REDIRECT_URL = '/'
+
+LOGIN_URL = '/login'
+LOGIN_EXEMPT_URLS = (
+    r'^%sstatic/' % URL_PREFIX,
+    r'^%sapi/v1/' % URL_PREFIX,
+    r'^%sreports/cover$' % URL_PREFIX,
+    r'^%sfinding/image/(?P<token>[^/]+)$' % URL_PREFIX,
+    r'^%sapi/v2/' % URL_PREFIX,
+)
+
+# ------------------------------------------------------------------------------
+# SECURITY DIRECTIVES
+# ------------------------------------------------------------------------------
+
+# If True, the SecurityMiddleware redirects all non-HTTPS requests to HTTPS
+# (except for those URLs matching a regular expression listed in SECURE_REDIRECT_EXEMPT).
+SECURE_SSL_REDIRECT = env('DD_SECURE_SSL_REDIRECT')
+
+# If True, the SecurityMiddleware sets the X-XSS-Protection: 1;
+# mode=block header on all responses that do not already have it.
+SECURE_BROWSER_XSS_FILTER = env('DD_SECURE_BROWSER_XSS_FILTER')
+
+# Whether to use HTTPOnly flag on the session cookie.
+# If this is set to True, client-side JavaScript will not to be able to access the session cookie.
+SESSION_COOKIE_HTTPONLY = env('DD_SESSION_COOKIE_HTTPONLY')
+
+# Whether to use HttpOnly flag on the CSRF cookie. If this is set to True,
+# client-side JavaScript will not to be able to access the CSRF cookie.
+CSRF_COOKIE_HTTPONLY = env('DD_CSRF_COOKIE_HTTPONLY')
+
+# Whether to use a secure cookie for the CSRF cookie. If this is set to True,
+# the cookie will be marked as secure, which means browsers may ensure that the
+# cookie is only sent with an HTTPS connection.
+CSRF_COOKIE_SECURE = env('DD_CSRF_COOKIE_SECURE')
+
+
+if env('DD_SECURE_PROXY_SSL_HEADER'):
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+if env('DD_SECURE_HSTS_INCLUDE_SUBDOMAINS'):
+    SECURE_HSTS_SECONDS = env('DD_SECURE_HSTS_SECONDS')
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = env('DD_SECURE_HSTS_INCLUDE_SUBDOMAINS')
+
+# ------------------------------------------------------------------------------
+# DEFECTDOJO SPECIFIC
+# ------------------------------------------------------------------------------
+
+# Credential Key
+CREDENTIAL_AES_256_KEY = env('DD_CREDENTIAL_AES_256_KEY')
+
+# wkhtmltopdf settings
+WKHTMLTOPDF_PATH = env('DD_WKHTMLTOPDF')
+
+PORT_SCAN_CONTACT_EMAIL = env('DD_PORT_SCAN_CONTACT_EMAIL')
+PORT_SCAN_RESULT_EMAIL_FROM = env('DD_PORT_SCAN_RESULT_EMAIL_FROM')
+PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST = env('DD_PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST')
+PORT_SCAN_SOURCE_IP = env('DD_PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST')
+
+# Used in a few places to prefix page headings and in email salutations
+TEAM_NAME = env('DD_TEAM_NAME')
+
+# Django-tagging settings
+FORCE_LOWERCASE_TAGS = True
+MAX_TAG_LENGTH = 25
+
+
+# ------------------------------------------------------------------------------
+# ADMIN
+# ------------------------------------------------------------------------------
+
+ADMINS = [x.split(':') for x in env.list('DD_ADMINS')]
+
+# https://docs.djangoproject.com/en/dev/ref/settings/#managers
+MANAGERS = ADMINS
+
+# Django admin enabled
+DJANGO_ADMIN_ENABLED = env('DD_DJANGO_ADMIN_ENABLED')
+
+# ------------------------------------------------------------------------------
+# API V2
+# ------------------------------------------------------------------------------
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -41,134 +263,16 @@ SWAGGER_SETTINGS = {
     },
 }
 
-ADMINS = (
-    ('Your Name', 'your.name@yourdomain')
-)
-
-MANAGERS = ADMINS
-
-DOJO_ROOT = 'DOJODIR'
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'BACKENDDB',
-        # 'django.db.backends.mysql','django.db.backends.sqlite3' or 'django.db.backends.oracle'.
-        'NAME': 'MYSQLDB',  # Or path to database file if using sqlite3.
-        # The following settings are not used with sqlite3:
-        'USER': 'MYSQLUSER',
-        'PASSWORD': 'MYSQLPWD',
-        'HOST': 'MYSQLHOST',  # Empty for localhost through domain sockets
-        # or '127.0.0.1' for localhost through TCP.
-        'PORT': 'MYSQLPORT',  # Set to empty string for default.
-    }
-}
-
-# Hosts/domain names that are valid for this site; required if DEBUG is False
-# See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = []
-
-# Local time zone for this installation. Choices can be found here:
-# http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
-# although not all choices may be available on all operating systems.
-# In a Windows environment this must be set to your system time zone.
-TIME_ZONE = 'America/Chicago'
-
-# Language code for this installation. All choices can be found here:
-# http://www.i18nguy.com/unicode/language-identifiers.html
-LANGUAGE_CODE = 'en-us'
-
-SITE_ID = 1
-
-# If you set this to False, Django will make some optimizations so as not
-# to load the internationalization machinery.
-USE_I18N = True
-
-# If you set this to False, Django will not format dates, numbers and
-# calendars according to the current locale.
-USE_L10N = True
-
-# If you set this to False, Django will not use timezone-aware datetimes.
-USE_TZ = True
-
-# Absolute filesystem path to the directory that will hold user-uploaded files.
-# Example: "/var/www/example.com/media/"
-MEDIA_ROOT = 'DOJO_MEDIA_ROOT'
-
-# URL that handles the media served from MEDIA_ROOT. Make sure to use a
-# trailing slash.
-# Examples: "http://example.com/media/", "http://media.example.com/"
-MEDIA_URL = '/media/'
-
-# Absolute path to the directory static files should be collected to.
-# Don't put anything in this directory yourself; store your static files
-# in apps' "static/" subdirectories and in STATICFILES_DIRS.
-# Example: "/var/www/example.com/static/"
-STATIC_ROOT = "DOJO_STATIC_ROOT"
-
-# URL prefix for static files.
-# Example: "http://example.com/static/", "http://static.example.com/"
-STATIC_URL = '/static/'
-
-# Additional locations of static files
-STATICFILES_DIRS = (
-    # Put strings here, like "/home/html/static" or "C:/www/django/static".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-    os.path.join(os.path.dirname(DOJO_ROOT), 'components', 'node_modules',
-                 '@yarn_components'),
-)
-
-# List of finder classes that know how to find static files in
-# various locations.
-STATICFILES_FINDERS = (
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-)
-
-FILE_UPLOAD_HANDLERS = (
-    "django.core.files.uploadhandler.TemporaryFileUploadHandler",
-)
-
-# Make this unique, and don't share it with anybody.
-SECRET_KEY = 'DOJOSECRET'
-
-MIDDLEWARE_CLASSES = (
-    'django.middleware.common.CommonMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    # 'django.middleware.security.SecurityMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'dojo.middleware.LoginRequiredMiddleware',
-    'dojo.middleware.TimezoneMiddleware'
-)
-
-ROOT_URLCONF = 'dojo.urls'
-LOGIN_URL = '/login'
-LOGIN_EXEMPT_URLS = (
-    r'^%sstatic/' % URL_PREFIX,
-    r'^%swebhook/' % URL_PREFIX,
-    r'^%smetrics/all$' % URL_PREFIX,
-    r'^%smetrics$' % URL_PREFIX,
-    r'^%smetrics/product/type/(?P<mtype>\d+)$' % URL_PREFIX,
-    r'^%smetrics/simple$' % URL_PREFIX,
-    r'^%sapi/v1/' % URL_PREFIX,
-    r'^%sajax/v1/' % URL_PREFIX,
-    r'^%sreports/cover$' % URL_PREFIX,
-    r'^%sfinding/image/(?P<token>[^/]+)$' % URL_PREFIX,
-    r'^%sapi/v2/' % URL_PREFIX,
-)
-
-# Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'dojo.wsgi.application'
+# ------------------------------------------------------------------------------
+# TEMPLATES
+# ------------------------------------------------------------------------------
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'APP_DIRS': True,
         'OPTIONS': {
-            'debug': DEBUG,
+            'debug': env('DD_DEBUG'),
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
@@ -178,6 +282,10 @@ TEMPLATES = [
         },
     },
 ]
+
+# ------------------------------------------------------------------------------
+# APPS
+# ------------------------------------------------------------------------------
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -204,21 +312,46 @@ INSTALLED_APPS = (
     'rest_framework.authtoken',
     'rest_framework_swagger',
     'dbbackup',
+    'taggit_serializer',
+    # 'axes'
 )
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtpout.your_domain.com'
-EMAIL_PORT = '25'
-EMAIL_USE_TLS = True
+# ------------------------------------------------------------------------------
+# MIDDLEWARE
+# ------------------------------------------------------------------------------
+DJANGO_MIDDLEWARE_CLASSES = [
+    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'dojo.middleware.LoginRequiredMiddleware',
+    'dojo.middleware.TimezoneMiddleware'
+]
 
-PORT_SCAN_CONTACT_EMAIL = 'email@your_host'
-PORT_SCAN_RESULT_EMAIL_FROM = 'email@your_host'
-PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST = ['email@your_host']
-PORT_SCAN_SOURCE_IP = '127.0.0.1'
+MIDDLEWARE_CLASSES = DJANGO_MIDDLEWARE_CLASSES
 
-# Used in a few places to prefix page headings and in email
-# salutations
-TEAM_NAME = 'Security Engineering'
+# WhiteNoise allows your web app to serve its own static files,
+# making it a self-contained unit that can be deployed anywhere without relying on nginx
+if env('DD_WHITENOISE'):
+    WHITE_NOISE = [
+        # Simplified static file serving.
+        # https://warehouse.python.org/project/whitenoise/
+        'whitenoise.middleware.WhiteNoiseMiddleware',
+    ]
+    MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES + WHITE_NOISE
+
+EMAIL_CONFIG = env.email_url(
+    'DD_EMAIL_URL', default='smtp://user@:password@localhost:25')
+
+vars().update(EMAIL_CONFIG)
+
+# ------------------------------------------------------------------------------
+# CELERY
+# ------------------------------------------------------------------------------
 
 # Celery settings
 CELERY_BROKER_URL = 'sqla+sqlite:///dojo.celerydb.sqlite'
@@ -239,19 +372,14 @@ CELERY_BEAT_SCHEDULE = {
     },
     'dedupe-delete': {
         'task': 'dojo.tasks.async_dupe_delete',
-        'schedule': timedelta(hours=24),
-        'args': [timedelta(hours=24)]
+        'schedule': timedelta(minutes=1),
+        'args': [timedelta(minutes=1)]
     },
 }
 
-
-# wkhtmltopdf settings
-WKHTMLTOPDF_PATH = '/usr/local/bin/wkhtmltopdf'
-
-# django-tagging settings
-FORCE_LOWERCASE_TAGS = True
-MAX_TAG_LENGTH = 25
-
+# ------------------------------------------------------------------------------
+# LOGGING
+# ------------------------------------------------------------------------------
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
 # the site admins on every HTTP 500 error when DEBUG=False.
@@ -310,3 +438,7 @@ LOGGING = {
         }
     }
 }
+
+# As we require `innodb_large_prefix = ON` for MySQL, we can silence the
+# warning about large varchar with unique indices.
+SILENCED_SYSTEM_CHECKS = ['mysql.E001']

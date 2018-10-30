@@ -16,6 +16,8 @@ from django.utils import timezone
 from markdown.extensions import Extension
 import dateutil.relativedelta
 import datetime
+from ast import literal_eval
+from urlparse import urlparse
 
 register = template.Library()
 
@@ -29,15 +31,30 @@ class EscapeHtml(Extension):
 @register.filter
 def markdown_render(value):
     if value:
-        return mark_safe(markdown.markdown(value, extensions=[EscapeHtml(), 'markdown.extensions.codehilite', 'markdown.extensions.toc', 'markdown.extensions.tables']))
+        return mark_safe(markdown.markdown(value, extensions=['markdown.extensions.nl2br', 'markdown.extensions.sane_lists', 'markdown.extensions.codehilite', 'markdown.extensions.fenced_code', 'markdown.extensions.toc', 'markdown.extensions.tables']))
 
 
 @register.filter(name='ports_open')
 def ports_open(value):
     count = 0
     for ipscan in value.ipscan_set.all():
-        count += len(eval(ipscan.services))
+        count += len(literal_eval(ipscan.services))
     return count
+
+
+@register.filter(name='url_shortner')
+def url_shortner(value):
+    return_value = str(value)
+    url = urlparse(return_value)
+
+    if url.path:
+        return_value = url.path
+        if len(return_value) == 1:
+            return_value = value
+    if len(str(return_value)) > 50:
+            return_value = "..." + return_value[50:]
+
+    return return_value
 
 
 @register.filter(name='get_pwd')
@@ -372,6 +389,14 @@ def overdue(date1):
     return date_str
 
 
+@register.filter(name='notspecified')
+def notspecified(text):
+    if text:
+        return text
+    else:
+        return mark_safe("<em class=\"text-muted\">Not Specified</em>")
+
+
 @register.tag
 def colgroup(parser, token):
     """
@@ -501,6 +526,14 @@ def business_criticality_icon(value):
         return mark_safe(stars(0, 5, 'None'))
     else:
         return ""  # mark_safe(not_specified_icon('Business Criticality Not Specified'))
+
+
+@register.filter
+def last_value(value):
+    if "/" in value:
+        return value.rsplit("/")[-1:][0]
+    else:
+        return value
 
 
 @register.filter

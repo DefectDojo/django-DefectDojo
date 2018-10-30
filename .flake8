@@ -23,6 +23,8 @@ ignore =
     E402
     E126
     E128
+    # line break after binary operator
+    W504
 
 exclude =
     # No need to traverse our git directory

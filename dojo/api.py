@@ -476,11 +476,11 @@ class EngagementResource(BaseModelResource):
     lead = fields.ForeignKey(UserResource, 'lead',
                              full=False, null=True)
     source_code_management_server = fields.ForeignKey(Tool_ConfigurationResource, 'source_code_management_server',
-                            full=False, null=False)
+                            full=False, null=True)
     build_server = fields.ForeignKey(Tool_ConfigurationResource, 'build_server',
-                            full=False, null=False)
+                            full=False, null=True)
     orchestration_engine = fields.ForeignKey(Tool_ConfigurationResource, 'orchestration_engine',
-                            full=False, null=False)
+                            full=False, null=True)
 
     class Meta:
         resource_name = 'engagements'
@@ -503,7 +503,6 @@ class EngagementResource(BaseModelResource):
             'pen_test': ALL,
             'status': ALL,
             'product': ALL,
-            'tool_configuration': ALL_WITH_RELATIONS,
         }
         authentication = DojoApiKeyAuthentication()
         authorization = DjangoAuthorization()
