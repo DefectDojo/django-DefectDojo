@@ -530,13 +530,15 @@ def import_scan_results(request, eid=None, pid=None):
                     new_f.cred_id = cred_user.cred_id
                     new_f.save()
 
-            try:
-                parser = import_parser_factory(file, t)
-            except ValueError:
-                raise Http404()
+            #try:
+            parser = import_parser_factory(file, t)
+            #except ValueError:
+            #    raise Http404()
 
             try:
                 for item in parser.items:
+                    print "item blowup"
+                    print item
                     sev = item.severity
                     if sev == 'Information' or sev == 'Informational':
                         sev = 'Info'
