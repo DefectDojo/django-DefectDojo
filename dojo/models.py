@@ -1150,7 +1150,7 @@ class Finding(models.Model):
             self.static_finding = True
         else:
             self.dyanmic_finding = True
-        """
+
         if rules_option:
             from dojo.tasks import async_rules
             from dojo.utils import sync_rules
@@ -1158,7 +1158,7 @@ class Finding(models.Model):
                 sync_rules(self, *args, **kwargs)
             else:
                 async_rules(self, *args, **kwargs)
-        """
+
         from dojo.utils import calculate_grade
         calculate_grade(self.test.engagement.product)
         # Assign the numerical severity for correct sorting order
