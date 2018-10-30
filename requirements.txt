@@ -30,7 +30,7 @@ pycrypto==2.6.1
 python-dateutil==2.6.1
 python-nmap==0.6.1
 pytz==2017.3
-requests==2.18.4
+requests>=2.2.1
 sqlalchemy  # Required by Celery broker transport
 supervisor==3.3.3
 urllib3==1.22
