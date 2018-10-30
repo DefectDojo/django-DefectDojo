@@ -3,7 +3,6 @@ import hashlib
 import logging
 import os
 import re
-from datetime import datetime
 from uuid import uuid4
 from django.conf import settings
 from watson import search as watson
@@ -78,6 +77,9 @@ class System_Settings(models.Model):
                                               "oldest will be deleted.")
     enable_jira = models.BooleanField(default=False,
                                       verbose_name='Enable JIRA integration',
+                                      blank=False)
+    enable_jira_web_hook = models.BooleanField(default=False,
+                                      verbose_name='Enable JIRA web hook. Please note: It is strongly recommended to whitelist the Jira server using a proxy such as Nginx.',
                                       blank=False)
     jira_choices = (('Critical', 'Critical'),
                     ('High', 'High'),
@@ -276,7 +278,7 @@ class Contact(models.Model):
 
 
 class Product_Type(models.Model):
-    name = models.CharField(max_length=300)
+    name = models.CharField(max_length=300, unique=True)
     critical_product = models.BooleanField(default=False)
     key_product = models.BooleanField(default=False)
     updated = models.DateTimeField(auto_now=True, null=True)
@@ -349,17 +351,36 @@ class Report_Type(models.Model):
 
 
 class Test_Type(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, unique=True)
     static_tool = models.BooleanField(default=False)
     dynamic_tool = models.BooleanField(default=False)
 
     def __unicode__(self):
         return self.name
 
+    class Meta:
+        ordering = ('name',)
+
     def get_breadcrumbs(self):
         bc = [{'title': self.__unicode__(),
                'url': None}]
         return bc
+
+
+class DojoMeta(models.Model):
+    name = models.CharField(max_length=120)
+    value = models.CharField(max_length=300)
+    model_name = models.CharField(max_length=30)
+    model_id = models.IntegerField()
+
+    def save(self, *args, **kwargs):
+        super(DojoMeta, self).save(*args, **kwargs)
+        if self.model_name.lower() == "product":
+            prod = Product.objects.get(id=self.model_id)
+            prod.product_meta.add(self)
+        else:
+            ep = Endpoint.objects.get(id=self.model_id)
+            ep.endpoint_meta.add(self)
 
 
 class Product(models.Model):
@@ -415,7 +436,7 @@ class Product(models.Model):
         (NONE_CRITICALITY, _('None')),
     )
 
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=4000)
 
     '''
@@ -427,9 +448,9 @@ class Product(models.Model):
     from these fields to their replacements.
     ./manage.py migrate_product_contacts
     '''
-    prod_manager = models.CharField(default=0, max_length=200)  # unused
-    tech_contact = models.CharField(default=0, max_length=200)  # unused
-    manager = models.CharField(default=0, max_length=200)  # unused
+    prod_manager = models.CharField(default=0, max_length=200, null=True, blank=True)  # unused
+    tech_contact = models.CharField(default=0, max_length=200, null=True, blank=True)  # unused
+    manager = models.CharField(default=0, max_length=200, null=True, blank=True)  # unused
 
     product_manager = models.ForeignKey(Dojo_User, null=True, blank=True,
                                         related_name='product_manager')
@@ -456,6 +477,7 @@ class Product(models.Model):
     external_audience = models.BooleanField(default=False, help_text=_('Specify if the application is used by people outside the organization.'))
     internet_accessible = models.BooleanField(default=False, help_text=_('Specify if the application is accessible from the public internet.'))
     regulations = models.ManyToManyField(Regulation, blank=True)
+    product_meta = models.ManyToManyField(DojoMeta)
 
     def __unicode__(self):
         return self.name
@@ -665,26 +687,54 @@ class Tool_Configuration(models.Model):
         return self.name
 
 
+class Network_Locations(models.Model):
+    location = models.CharField(max_length=500, help_text="Location of network testing: Examples: VPN, Internet or Internal.")
+
+    def __unicode__(self):
+        return self.location
+
+
+class Engagement_Presets(models.Model):
+    title = models.CharField(max_length=500, default=None, help_text="Brief description of preset.")
+    test_type = models.ManyToManyField(Test_Type, default=None, blank=True)
+    network_locations = models.ManyToManyField(Network_Locations, default=None, blank=True)
+    notes = models.CharField(max_length=2000, help_text="Description of what needs to be tested or setting up environment for testing", null=True, blank=True)
+    scope = models.CharField(max_length=800, help_text="Scope of Engagement testing, IP's/Resources/URL's)", default=None, blank=True)
+    product = models.ForeignKey(Product)
+    created = models.DateTimeField(auto_now_add=True, null=False)
+
+    def __unicode__(self):
+        return self.title
+
+    class Meta:
+        ordering = ['title']
+
+
 class Engagement_Type(models.Model):
     name = models.CharField(max_length=200)
+
+    def __unicode__(self):
+        return self.name
 
 
 class Engagement(models.Model):
     name = models.CharField(max_length=300, null=True, blank=True)
     description = models.CharField(max_length=2000, null=True, blank=True)
-    version = models.CharField(max_length=100, null=True, blank=True)
+    version = models.CharField(max_length=100, null=True, blank=True, help_text="Version of the product the engagement tested.")
     eng_type = models.ForeignKey(Engagement_Type, null=True, blank=True)
     first_contacted = models.DateField(null=True, blank=True)
     target_start = models.DateField(null=False, blank=False)
     target_end = models.DateField(null=False, blank=False)
     lead = models.ForeignKey(User, editable=True, null=True)
     requester = models.ForeignKey(Contact, null=True, blank=True)
+    preset = models.ForeignKey(Engagement_Presets, null=True, blank=True, help_text="Settings and notes for performing this engagement.")
     reason = models.CharField(max_length=2000, null=True, blank=True)
     report_type = models.ForeignKey(Report_Type, null=True, blank=True)
     product = models.ForeignKey(Product)
     updated = models.DateTimeField(auto_now=True, null=True)
     created = models.DateTimeField(auto_now_add=True, null=True)
     active = models.BooleanField(default=True, editable=False)
+    tracker = models.URLField(max_length=200, help_text="Link to epic or ticket system with changes to version.", editable=True, blank=True, null=True)
     test_strategy = models.URLField(editable=True, blank=True, null=True)
     threat_model = models.BooleanField(default=True)
     api_test = models.BooleanField(default=True)
@@ -692,9 +742,13 @@ class Engagement(models.Model):
     check_list = models.BooleanField(default=True)
     status = models.CharField(editable=True, max_length=2000, default='',
                               null=True,
-                              choices=(('In Progress', 'In Progress'),
+                              choices=(('Not Started', 'Not Started'),
+                                       ('Blocked', 'Blocked'),
+                                       ('Cancelled', 'Cancelled'),
+                                       ('Completed', 'Completed'),
+                                       ('In Progress', 'In Progress'),
                                        ('On Hold', 'On Hold'),
-                                       ('Completed', 'Completed')))
+                                       ('Waiting for Resource', 'Waiting for Resource')))
     progress = models.CharField(max_length=100,
                                 default='threat_model', editable=False)
     tmodel_path = models.CharField(max_length=1000, default='none',
@@ -711,11 +765,11 @@ class Engagement(models.Model):
                                        choices=(('Interactive', 'Interactive'),
                                                 ('CI/CD', 'CI/CD')))
     build_id = models.CharField(editable=True, max_length=150,
-                                   null=True, blank=True, help_text="Build ID for CI/CD test", verbose_name="Build ID")
+                                   null=True, blank=True, help_text="Build ID of the product the engagement tested.", verbose_name="Build ID")
     commit_hash = models.CharField(editable=True, max_length=150,
                                    null=True, blank=True, help_text="Commit hash from repo", verbose_name="Commit Hash")
     branch_tag = models.CharField(editable=True, max_length=150,
-                                   null=True, blank=True, help_text="Tag or branch for CI/CD test", verbose_name="Branch/Tag")
+                                   null=True, blank=True, help_text="Tag or branch of the product the engagement tested.", verbose_name="Branch/Tag")
     build_server = models.ForeignKey(Tool_Configuration, verbose_name="Build Server", help_text="Build server responsible for CI/CD test", null=True, blank=True, related_name='build_server')
     source_code_management_server = models.ForeignKey(Tool_Configuration, null=True, blank=True, verbose_name="SCM Server", help_text="Source code server for CI/CD test", related_name='source_code_management_server')
     source_code_management_uri = models.CharField(max_length=600, null=True, blank=True, verbose_name="Repo", help_text="Resource link to source code")
@@ -762,7 +816,7 @@ class Endpoint(models.Model):
     path = models.CharField(null=True, blank=True, max_length=500,
                             help_text="The location of the resource, it should start with a '/'. For example"
                                       "/endpoint/420/edit")
-    query = models.CharField(null=True, blank=True, max_length=5000,
+    query = models.CharField(null=True, blank=True, max_length=1000,
                              help_text="The query string, the question mark should be omitted."
                                        "For example 'group=4&team=8'")
     fragment = models.CharField(null=True, blank=True, max_length=500,
@@ -771,6 +825,7 @@ class Endpoint(models.Model):
     product = models.ForeignKey(Product, null=True, blank=True, )
     endpoint_params = models.ManyToManyField(Endpoint_Params, blank=True,
                                              editable=False)
+    endpoint_meta = models.ManyToManyField(DojoMeta, editable=False)
 
     class Meta:
         ordering = ['product', 'protocol', 'host', 'path', 'query', 'fragment']
@@ -892,6 +947,7 @@ class Test(models.Model):
     engagement = models.ForeignKey(Engagement, editable=False)
     lead = models.ForeignKey(User, editable=True, null=True)
     test_type = models.ForeignKey(Test_Type)
+    description = models.TextField(null=True, blank=True)
     target_start = models.DateTimeField()
     target_end = models.DateTimeField()
     estimated_time = models.TimeField(null=True, blank=True, editable=False)
@@ -986,7 +1042,7 @@ class Finding(models.Model):
     sourcefile = models.TextField(null=True, blank=True, editable=False)
     param = models.TextField(null=True, blank=True, editable=False)
     payload = models.TextField(null=True, blank=True, editable=False)
-    hash_code = models.TextField(null=True, blank=True, editable=False)
+    hash_code = models.TextField(null=True, blank=True, editable=True)
 
     line = models.IntegerField(null=True, blank=True,
                                verbose_name="Line number")
@@ -1003,15 +1059,15 @@ class Finding(models.Model):
     class Meta:
         ordering = ('numerical_severity', '-date', 'title')
 
-    def get_hash_code(self):
+    def compute_hash_code(self):
         hash_string = self.title + str(self.cwe) + str(self.line) + str(self.file_path)
-
         if self.dynamic_finding:
-            endpoint_str = ""
+            endpoint_str = u''
             for e in self.endpoints.all():
                 endpoint_str += str(e)
-            hash_string = endpoint_str
-        hash_string = hash_string.decode('utf-8').strip()
+            if endpoint_str:
+                hash_string = hash_string + endpoint_str
+        hash_string = hash_string.strip()
         return hashlib.sha256(hash_string.encode('utf-8')).hexdigest()
 
     def duplicate_finding_set(self):
@@ -1083,14 +1139,13 @@ class Finding(models.Model):
 
         return ", ".join([str(s) for s in status])
 
+    @property
     def age(self):
         if self.mitigated:
-            days = (self.mitigated.date() - datetime.combine(self.date,
-                                                             datetime.min.time()).date()).days
+            diff = self.mitigated.date() - self.date
         else:
-            days = (get_current_date() - datetime.combine(self.date,
-                                                          datetime.min.time()).date()).days
-
+            diff = get_current_date() - self.date
+        days = diff.days
         return days if days > 0 else 0
 
     def sla(self):
@@ -1099,9 +1154,9 @@ class Finding(models.Model):
         from dojo.utils import get_system_setting
         sla_age = get_system_setting('sla_' + self.severity.lower())
         if sla_age and self.active:
-            sla_calculation = sla_age - self.age()
+            sla_calculation = sla_age - self.age
         elif sla_age and self.mitigated:
-            age = self.age()
+            age = self.age
             if age < sla_age:
                 sla_calculation = 0
             else:
@@ -1140,25 +1195,29 @@ class Finding(models.Model):
 
     def save(self, dedupe_option=True, rules_option=True, *args, **kwargs):
         # Make changes to the finding before it's saved to add a CWE template
-        if not self.pk:
+        if self.pk is None:
             from dojo.utils import apply_cwe_to_template
             self = apply_cwe_to_template(self)
+        else:
+            # Only compute hash code for new findings.
+            self.hash_code = self.compute_hash_code()
         super(Finding, self).save(*args, **kwargs)
-        self.hash_code = self.get_hash_code()
         self.found_by.add(self.test.test_type)
         if self.test.test_type.static_tool:
             self.static_finding = True
         else:
-            self.dyanmic_finding = True
-
+            self.dynamic_finding = True
         if rules_option:
             from dojo.tasks import async_rules
             from dojo.utils import sync_rules
-            if self.reporter.usercontactinfo.block_execution:
-                sync_rules(self, *args, **kwargs)
-            else:
+            try:
+                if self.reporter.usercontactinfo.block_execution:
+                    sync_rules(self, *args, **kwargs)
+                else:
+                    async_rules(self, *args, **kwargs)
+            except UserContactInfo.DoesNotExist:
                 async_rules(self, *args, **kwargs)
-
+                pass
         from dojo.utils import calculate_grade
         calculate_grade(self.test.engagement.product)
         # Assign the numerical severity for correct sorting order
@@ -1510,10 +1569,18 @@ class JIRA_Conf(models.Model):
 
 
 class JIRA_Issue(models.Model):
-    jira_id = models.CharField(max_length=200)
+    jira_id = models.CharField(max_length=200, unique=True)
     jira_key = models.CharField(max_length=200)
     finding = models.OneToOneField(Finding, null=True, blank=True)
     engagement = models.OneToOneField(Engagement, null=True, blank=True)
+
+    def __unicode__(self):
+        text = ""
+        if self.finding:
+            text = self.finding.test.engagement.product.name + " | Finding: " + self.finding.title + ", ID: " + str(self.finding.id)
+        elif self.engagement:
+            text = self.engagement.product.name + " | Engagement: " + self.engagement.name + ", ID: " + str(self.engagement.id)
+        return text + " | Jira Key: " + str(self.jira_key)
 
 
 class JIRA_Clone(models.Model):
@@ -1538,6 +1605,9 @@ class JIRA_PKey(models.Model):
     enable_engagement_epic_mapping = models.BooleanField(default=False,
                                                          blank=True)
     push_notes = models.BooleanField(default=False, blank=True)
+
+    def __unicode__(self):
+        return self.product.name + " | " + self.project_key
 
 
 NOTIFICATION_CHOICES = (
@@ -1971,6 +2041,8 @@ admin.site.register(Benchmark_Product_Summary)
 admin.site.register(Testing_Guide_Category)
 admin.site.register(Testing_Guide)
 
+admin.site.register(Engagement_Presets)
+admin.site.register(Network_Locations)
 admin.site.register(Objects)
 admin.site.register(Objects_Review)
 admin.site.register(Objects_Engagement)

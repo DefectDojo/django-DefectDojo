@@ -5,6 +5,9 @@
 {% block add_styles %}
     .graph {min-height: 158px;}
     h3 { margin-top: 5px; margin-bottom: 5px; font-size: 20px; line-height: 22px;}
+    .tooltip-inner {
+      max-width: 650px;
+    }
 {% endblock %}
 {% block content %}
     <div class="panel panel-default">
@@ -145,7 +148,7 @@
                 {% for row in grouped_items %}
                     <tr>
                         {% for item in row %}
-                            <td>{% if item %}<i class="fa fa-circle"></i> {{ item }}{% endif %}
+                            <td>{% if item %}<i class="fa fa-circle"></i> <a data-toggle="tooltip" data-placement="top" data-original-title="{{ item }}" href="#">{{ item|url_shortner }}</a>{% endif %}
                             </td>
                         {% endfor %}
                     </tr>
@@ -259,6 +262,7 @@
     <script src="{% static "flot-axis/jquery.flot.axislabels.js" %}"></script>
     <script type="text/javascript">
         $(function () {
+            $('[data-toggle="tooltip"]').tooltip();
             $(document).on('click', '.panel-heading button.clickable', function (e) {
                 var $this = $(this);
                 if (!$this.hasClass('panel-collapsed')) {

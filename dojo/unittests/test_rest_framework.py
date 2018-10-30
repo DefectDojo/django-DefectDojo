@@ -39,43 +39,38 @@ class BaseClass():
             token = Token.objects.get(user=testuser)
             self.client = APIClient()
             self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+            self.url = reverse(self.viewname + '-list')
 
         @skipIfNotSubclass('ListModelMixin')
         def test_list(self):
-            response = self.client.get(
-                reverse(self.viewname + '-list'), format='json')
+            response = self.client.get(self.url, format='json')
             self.assertEqual(200, response.status_code)
 
         @skipIfNotSubclass('CreateModelMixin')
         def test_create(self):
             length = self.endpoint_model.objects.count()
-            response = self.client.post(
-                reverse(self.viewname + '-list'),
-                self.payload)
-            self.assertEqual(201, response.status_code)
+            response = self.client.post(self.url, self.payload)
+            self.assertEqual(201, response.status_code, response.data)
             self.assertEqual(self.endpoint_model.objects.count(), length + 1)
 
         @skipIfNotSubclass('RetrieveModelMixin')
         def test_detail(self):
-            current_objects = self.client.get(
-                reverse(self.viewname + '-list'), format='json').data
-            relative_url = urlparse(current_objects['results'][0]['url']).path
+            current_objects = self.client.get(self.url, format='json').data
+            relative_url = self.url + '%s/' % current_objects['results'][0]['id']
             response = self.client.get(relative_url)
             self.assertEqual(200, response.status_code)
 
         @skipIfNotSubclass('DestroyModelMixin')
         def test_delete(self):
-            current_objects = self.client.get(
-                reverse(self.viewname + '-list'), format='json').data
-            relative_url = urlparse(current_objects['results'][0]['url']).path
+            current_objects = self.client.get(self.url, format='json').data
+            relative_url = self.url + '%s/' % current_objects['results'][0]['id']
             response = self.client.delete(relative_url)
             self.assertEqual(204, response.status_code)
 
         @skipIfNotSubclass('UpdateModelMixin')
         def test_update(self):
-            current_objects = self.client.get(
-                reverse(self.viewname + '-list'), format='json').data
-            relative_url = urlparse(current_objects['results'][0]['url']).path
+            current_objects = self.client.get(self.url, format='json').data
+            relative_url = self.url + '%s/' % current_objects['results'][0]['id']
             response = self.client.patch(
                 relative_url, self.update_fields)
             for key, value in self.update_fields.iteritems():
@@ -98,7 +93,7 @@ class EndpointTest(BaseClass.RESTEndpointTest):
             'path': '/',
             'query': 'test=true',
             'fragment': 'test-1',
-            'product': 'http://testserver/api/v2/products/1/'
+            'product': 1,
         }
         self.update_fields = {'protocol': 'ftp'}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
@@ -121,7 +116,8 @@ class EngagementTest(BaseClass.RESTEndpointTest):
             "target_end": '1937-01-01',
             "reason": "",
             "test_strategy": "",
-            "product": "http://testserver/api/v2/products/1/"
+            "product": "1",
+            "tags": ["mytag"]
         }
         self.update_fields = {'version': 'latest'}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
@@ -135,15 +131,12 @@ class FindingsTest(BaseClass.RESTEndpointTest):
         self.viewname = 'finding'
         self.viewset = FindingViewSet
         self.payload = {
-            "review_requested_by": "http://testserver/api/v2/users/2/",
-            "reviewers": [
-                "http://testserver/api/v2/users/2/",
-                "http://testserver/api/v2/users/3/"],
-            "defect_review_requested_by": "http://testserver/api/v2/users/2/",
-            "test": "http://testserver/api/v2/tests/3/",
+            "review_requested_by": 2,
+            "reviewers": [2, 3],
+            "defect_review_requested_by": 2,
+            "test": 3,
             "url": "http://www.example.com",
             "thread_id": 1,
-            "reporter": "http://testserver/api/v2/users/2/",
             "found_by": [],
             "title": "DUMMY FINDING",
             "date": "2017-12-31",
@@ -166,9 +159,7 @@ class FindingsTest(BaseClass.RESTEndpointTest):
             "file_path": "",
             "static_finding": False,
             "dynamic_finding": False,
-            "endpoints": [
-                "http://testserver/api/v2/endpoints/1/",
-                "http://testserver/api/v2/endpoints/2/"],
+            "endpoints": [1, 2],
             "images": []}
         self.update_fields = {'active': True}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
@@ -202,7 +193,7 @@ class JiraConfigurationsTest(BaseClass.RESTEndpointTest):
         self.viewname = 'jira_conf'
         self.viewset = JiraConfigurationsViewSet
         self.payload = {
-            "jira_url": "http://www.example.com",
+            "url": "http://www.example.com",
             "username": "testuser",
             "password": "testuser",
             "default_issue_type": "Story",
@@ -229,11 +220,10 @@ class JiraIssuesTest(BaseClass.RESTEndpointTest):
         self.payload = {
             "jira_id": "JIRA 1",
             "jira_key": "SOME KEY",
-            "finding": "http://testserver/api/v2/findings/2/",
-            "engagement": 'http://testserver/api/v2/engagements/2/'
+            "finding": 2,
+            "engagement": 2,
         }
-        self.update_fields = {
-            'finding': 'http://testserver/api/v2/findings/2/'}
+        self.update_fields = {'finding': 2}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -250,11 +240,10 @@ class JiraTest(BaseClass.RESTEndpointTest):
             "push_all_issues": False,
             "enable_engagement_epic_mapping": False,
             "push_notes": False,
-            "product": 'http://testserver/api/v2/products/1/',
-            "conf": "http://testserver/api/v2/jira_configurations/2/"
+            "product": 1,
+            "conf": 2,
         }
-        self.update_fields = {
-            'conf': "http://testserver/api/v2/jira_configurations/3/"}
+        self.update_fields = {'conf': 3}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -266,15 +255,14 @@ class ProductTest(BaseClass.RESTEndpointTest):
         self.viewname = 'product'
         self.viewset = ProductViewSet
         self.payload = {
-            "product_manager": "http://testserver/api/v2/users/2/",
-            "technical_contact": "http://testserver/api/v2/users/3/",
-            "team_manager": "http://testserver/api/v2/users/2/",
-            "authorized_users": [
-                "http://testserver/api/v2/users/2/",
-                "http://testserver/api/v2/users/3/"],
+            "product_manager": 2,
+            "technical_contact": 3,
+            "team_manager": 2,
+            "authorized_users": [2, 3],
             "prod_type": 1,
             "name": "Test Product",
-            "description": "test product"
+            "description": "test product",
+            "tags": ["mytag"]
         }
         self.update_fields = {'prod_type': 2}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
@@ -292,8 +280,8 @@ class ScanSettingsTest(BaseClass.RESTEndpointTest):
             "frequency": "Weekly",
             "email": "test@dojo.com",
             "protocol": "TCP",
-            "product": "http://testserver/api/v2/products/1/",
-            "user": "http://testserver/api/v2/users/3/"
+            "product": 1,
+            "user": 3,
         }
         self.update_fields = {'protocol': 'ftp'}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
@@ -321,8 +309,8 @@ class StubFindingsTest(BaseClass.RESTEndpointTest):
             "date": "2017-12-31",
             "severity": "HIGH",
             "description": "test stub finding",
-            "reporter": "http://testserver/api/v2/users/3/",
-            "test": "http://testserver/api/v2/tests/3/"
+            "reporter": 3,
+            "test": 3,
         }
         self.update_fields = {'severity': 'LOW'}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
@@ -338,14 +326,14 @@ class TestsTest(BaseClass.RESTEndpointTest):
         self.payload = {
             "test_type": 1,
             "environment": 1,
-            "engagement": "http://testserver/api/v2/engagements/2/",
+            "engagement": 2,
             "estimated_time": "0:30:20",
             "actual_time": "0:20:30",
             "notes": [],
             "target_start": "2017-01-12T00:00",
             "target_end": "2017-01-12T00:00",
             "percent_complete": 0,
-            "lead": "http://testserver/api/v2/users/2/"
+            "lead": 2,
         }
         self.update_fields = {'percent_complete': 100}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
@@ -368,7 +356,7 @@ class ToolConfigurationsTest(BaseClass.RESTEndpointTest):
             "auth_title": "",
             "ssh": "",
             "api_key": "test key",
-            "tool_type": 'http://127.0.0.1:8000/api/v2/tool_types/1/'
+            "tool_type": 1,
         }
         self.update_fields = {'ssh': 'test string'}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
@@ -386,8 +374,7 @@ class ToolProductSettingsTest(BaseClass.RESTEndpointTest):
             "name": "Tool Product Setting",
             "description": "test tool product setting",
             "tool_project_id": "1",
-            "tool_configuration":
-                "http://127.0.0.1:8000/api/v2/tool_configurations/3/"
+            "tool_configuration": 3,
         }
         self.update_fields = {'tool_project_id': '2'}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
@@ -431,9 +418,7 @@ class ProductPermissionTest(APITestCase):
         response = self.client.get(
             reverse('product-list'), format='json')
         for obj in response.data['results']:
-            self.assertNotEqual(
-                obj['url'],
-                'http://testserver/api/v2/products/3/')
+            self.assertNotEqual(obj['id'], 3)
 
     def test_user_should_not_have_access_to_product_3_in_detail(self):
         response = self.client.get('http://testserver/api/v2/products/3/')
@@ -453,9 +438,7 @@ class ScanSettingsPermissionTest(APITestCase):
         response = self.client.get(
             reverse('scansettings-list'), format='json')
         for obj in response.data['results']:
-            self.assertNotEqual(
-                obj['url'],
-                'http://testserver/api/v2/scan_settings/3/')
+            self.assertNotEqual(obj['id'], 3)
 
     def test_user_should_not_have_access_to_setting_3_in_detail(self):
         response = self.client.get('http://testserver/api/v2/scan_settings/3/')
@@ -475,9 +458,7 @@ class ScansPermissionTest(APITestCase):
         response = self.client.get(
             reverse('scan-list'), format='json')
         for obj in response.data['results']:
-            self.assertNotEqual(
-                obj['url'],
-                'http://testserver/api/v2/scans/3/')
+            self.assertNotEqual(obj['id'], 3)
 
     def test_user_should_not_have_access_to_scan_3_in_detail(self):
         response = self.client.get('http://testserver/api/v2/scans/3/')
@@ -497,10 +478,9 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
             "active": False,
             "verified": True,
             "scan_type": 'ZAP Scan',
-            "tags": "test",
             "file": open('tests/zap_sample.xml'),
-            "engagement": 'http://testserver/api/v2/engagements/1/',
-            "lead": 'http://testserver/api/v2/users/2/'
+            "engagement": 1,
+            "lead": 2,
         }
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
@@ -523,8 +503,8 @@ class ReimportScanTest(APITestCase):
                 "active": True,
                 "verified": True,
                 "scan_type": 'ZAP Scan',
-                "tags": "test",
                 "file": open('tests/zap_sample.xml'),
-                "test": 'http://testserver/api/v2/tests/3/'})
+                "test": 3,
+            })
         self.assertEqual(length, Test.objects.all().count())
         self.assertEqual(201, response.status_code)

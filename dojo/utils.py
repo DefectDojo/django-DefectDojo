@@ -55,19 +55,6 @@ def sync_false_history(new_finding, *args, **kwargs):
 
 
 def sync_dedupe(new_finding, *args, **kwargs):
-    eng_hash_code = Finding.objects.filter(
-        test__engagement__product=new_finding.test.engagement.product,
-        hash_code=new_finding.hash_code, duplicate=False).exclude(id=new_finding.id)
-    if eng_hash_code.count() > 0:
-        for find in eng_hash_code:
-            new_finding.duplicate = True
-            new_finding.active = False
-            new_finding.verified = False
-            new_finding.duplicate_finding = find
-            find.duplicate_list.add(new_finding)
-            find.found_by.add(new_finding.test.test_type)
-            super(Finding, new_finding).save(*args, **kwargs)
-    else:
         eng_findings_cwe = Finding.objects.filter(
             test__engagement__product=new_finding.test.engagement.product,
             cwe=new_finding.cwe,
@@ -99,6 +86,14 @@ def sync_dedupe(new_finding, *args, **kwargs):
                     break
             elif find.line == new_finding.line and find.file_path == new_finding.file_path and new_finding.static_finding and len(
                     new_finding.file_path) > 0:
+                new_finding.duplicate = True
+                new_finding.active = False
+                new_finding.verified = False
+                new_finding.duplicate_finding = find
+                find.duplicate_list.add(new_finding)
+                find.found_by.add(new_finding.test.test_type)
+                super(Finding, new_finding).save(*args, **kwargs)
+            elif find.hash_code == new_finding.hash_code:
                 new_finding.duplicate = True
                 new_finding.active = False
                 new_finding.verified = False
@@ -1077,7 +1072,7 @@ def update_issue(find, old_status, push_to_jira):
                 log_jira_alert(
                     "Component not updated, exists in Jira already. Update from Jira instead.",
                     find)
-            else:
+            elif jpkey.component:
                 # Add component to the Jira issue
                 component = [
                     {
