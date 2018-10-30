@@ -517,6 +517,8 @@ def import_scan_results(request, eid=None, pid=None):
 
             try:
                 for item in parser.items:
+                    print "item blowup"
+                    print item
                     sev = item.severity
                     if sev == 'Information' or sev == 'Informational':
                         sev = 'Info'
