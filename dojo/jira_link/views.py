@@ -12,23 +12,30 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
+from django.core.exceptions import PermissionDenied
 from jira import JIRA
 
 # Local application/library imports
 from dojo.forms import JIRAForm, DeleteJIRAConfForm
 from dojo.models import User, JIRA_Conf, JIRA_Issue, Notes
-from dojo.utils import add_breadcrumb
+from dojo.utils import add_breadcrumb, get_system_setting
 
 logger = logging.getLogger(__name__)
 
 
 @csrf_exempt
 def webhook(request):
+    # Webhook shouldn't be active if jira isn't enabled
+    if not get_system_setting('enable_jira'):
+        raise PermissionDenied
+    elif not get_system_setting('enable_jira_web_hook'):
+        raise PermissionDenied
+
     if request.method == 'POST':
         parsed = json.loads(request.body)
         if 'issue' in parsed.keys():
             jid = parsed['issue']['id']
-            jissue = JIRA_Issue.objects.get(jira_id=jid)
+            jissue = get_object_or_404(JIRA_Issue, jira_id=jid)
             if jissue.finding is not None:
                 finding = jissue.finding
                 resolved = True

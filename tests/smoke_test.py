@@ -1,28 +1,15 @@
 from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import NoAlertPresentException
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from contextlib import contextmanager
-from selenium.webdriver.common.proxy import *
-import unittest, time, re
+import unittest
+import re
 import os
+import sys
+
 
 class DojoTests(unittest.TestCase):
     def setUp(self):
-        myProxy = "127.0.0.1:8080"
-
-        proxy = Proxy({
-        'proxyType': ProxyType.MANUAL,
-        'httpProxy': myProxy,
-        'ftpProxy': myProxy,
-        'sslProxy': myProxy,
-        'noProxy':''})
-
         self.driver = webdriver.Chrome('chromedriver')
         self.driver.implicitly_wait(30)
         self.base_url = "http://localhost:8000/"
@@ -42,8 +29,7 @@ class DojoTests(unittest.TestCase):
     def test_login(self):
         driver = self.login_page()
         loginTxt = driver.find_element_by_tag_name("BODY").text
-        #print loginTxt
-        self.assertTrue(re.search(r'Team Dashboard', loginTxt))
+        self.assertTrue(re.search(r'Active Engagements', loginTxt))
 
     def test_create_product(self):
         driver = self.login_page()
@@ -78,24 +64,16 @@ class DojoTests(unittest.TestCase):
         driver.find_element_by_id("id_target_end").send_keys("2016-09-02")
         driver.find_element_by_link_text("15").click()
         Select(driver.find_element_by_id("id_lead")).select_by_value("1")
-        #driver.execute_script("return arguments[0].scrollIntoView();", driver.find_element_by_id("id_check_list"))
-        #driver.execute_script("window.scrollBy(0, 250);")
-        #wait = WebDriverWait(driver, 10)
-        #element = wait.until(EC.element_to_be_clickable((By.ID,'id_pen_test')))
 
         driver.find_element_by_css_selector("input[name=\"_Add Tests\"]").click()
         Select(driver.find_element_by_id("id_test_type")).select_by_visible_text("Pen Test")
         driver.find_element_by_id("id_target_start").clear()
         driver.find_element_by_id("id_target_start").send_keys("2016-09-01")
-        #driver.find_element_by_id("id_target_start").click()
-        #driver.find_element_by_link_text("15").click()
         driver.find_element_by_id("id_target_end").click()
-        #driver.find_element_by_id("id_target_end").send_keys("2016-09-02")
         driver.find_element_by_link_text("22").click()
         Select(driver.find_element_by_id("id_environment")).select_by_visible_text("Development")
         driver.find_element_by_id("id_percent_complete").clear()
         driver.find_element_by_id("id_percent_complete").send_keys("50")
-        #driver.find_element_by_id("id_percent_complete").click()
         driver.find_element_by_css_selector("input[name=\"_Add Findings\"]").click()
 
         driver.find_element_by_id("id_title").clear()
@@ -112,13 +90,17 @@ class DojoTests(unittest.TestCase):
         self.assertTrue(re.search(r'Finding added successfully', findingTxt))
 
     def is_element_present(self, how, what):
-        try: self.driver.find_element(by=how, value=what)
-        except NoSuchElementException as e: return False
+        try:
+            self.driver.find_element(by=how, value=what)
+        except NoSuchElementException as e:
+            return False
         return True
 
     def is_alert_present(self):
-        try: self.driver.switch_to_alert()
-        except NoAlertPresentException as e: return False
+        try:
+            self.driver.switch_to_alert()
+        except NoAlertPresentException as e:
+            return False
         return True
 
     def close_alert_and_get_its_text(self):
@@ -130,19 +112,21 @@ class DojoTests(unittest.TestCase):
             else:
                 alert.dismiss()
             return alert_text
-        finally: self.accept_next_alert = True
+        finally:
+            self.accept_next_alert = True
 
     def tearDown(self):
         self.driver.quit()
         self.assertEqual([], self.verificationErrors)
 
+
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(DojoTests('test_login'))
-    suite.addTest(DojoTests('test_create_product'))
-    #suite.addTest(DojoTests('test_engagement'))
     return suite
+
 
 if __name__ == "__main__":
     runner = unittest.TextTestRunner(descriptions=True, failfast=True)
-    runner.run(suite())
+    ret = not runner.run(suite()).wasSuccessful()
+    sys.exit(ret)

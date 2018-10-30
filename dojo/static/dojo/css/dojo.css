@@ -11,6 +11,7 @@ textarea,
 .pagination-sm > li:last-child > span,
 .panel,
 .panel-heading,
+.panel-comments,
 .nav-pills > li > a,
 .breadcrumb,
 .panel > table:last-child,
@@ -781,7 +782,7 @@ input[type="checkbox"] {
 .navbar-top-links .dropdown-messages,
 .navbar-top-links .dropdown-tasks,
 .navbar-top-links .dropdown-alerts {
-    width: 415px;
+    width: 500px;
     min-width: 0;
 }
 
@@ -1123,6 +1124,15 @@ div.custom-search-form {
 	padding-bottom: 0;
 }
 
+.panel-default > .panel-comments {
+    color: black;
+    font-size: 12px;
+    padding: 10px 10px;
+    background-color: #ECECEC;
+    border-color: #A1C0D7;
+    border: 1px solid #dddedf;
+}
+
 .panel-default > .panel-heading {
     color: white;
     font-size: 16px;
@@ -1149,8 +1159,8 @@ div.custom-search-form {
 }
 
 .panel-default-secondary > .panel-heading {
-    color: white;
-    background-color: #546474;
+  color: white;
+  background-color: #546474;
 	border-style: solid;
 	border-color: #536473;
 }
@@ -1463,6 +1473,11 @@ div.tags .label {
 
 .tag-color {
     background: #556270;
+    border: 1px solid #fff!important;
+}
+
+.tag-version {
+    background: rgba(32, 166, 216, 0.7);
     border: 1px solid #fff!important;
 }
 

@@ -1,4 +1,4 @@
-Please use the following template when submitting issues:
+Please use the following template when submitting issues: (If this is a security issue, then review the [disclosure policy](https://github.com/DefectDojo/django-DefectDojo/blob/master/SECURITY.md) and submit via our security reporting program.
 
 ## Issue Template
 
