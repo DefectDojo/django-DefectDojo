@@ -1150,7 +1150,7 @@ def get_pk_from_uri(uri):
         chomped_uri = chomped_uri[len(prefix) - 1:]
 
     try:
-        view, args, kwargs = resolve(chomped_uri)
+        view, args, kwargs = resolve(chomped_uri.replace('//', '/'))
     except Resolver404:
         raise NotFound("The URL provided '%s' was not a link to a valid resource." % uri)
 

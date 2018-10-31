@@ -1,8 +1,7 @@
 import logging
-import re
 
 from django.shortcuts import render
-from tagging.models import TaggedItem, Tag
+from tagging.models import TaggedItem
 from watson import search as watson
 from django.db.models import Q
 from dojo.forms import SimpleSearchForm
@@ -47,8 +46,7 @@ def simple_search(request):
                 operator = clean_query.split(":")
                 search_operator = operator[0]
                 clean_query = operator[1].lstrip()
-            tag_list = re.findall(r"[\w']+", clean_query)
-            tags = Tag.objects.filter(name__in=tag_list)
+            tags = clean_query
             if request.user.is_staff:
                 if "finding" in search_operator or search_operator is "":
                     findings = watson.search(clean_query, models=(Finding,))
