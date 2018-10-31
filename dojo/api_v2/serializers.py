@@ -339,6 +339,14 @@ class TestCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         fields = '__all__'
 
 
+class TestTypeSerializer(TaggitSerializer, serializers.ModelSerializer):
+    tags = TagListSerializerField(required=False)
+
+    class Meta:
+        model = Test_Type
+        fields = '__all__'
+
+
 class RiskAcceptanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Risk_Acceptance
