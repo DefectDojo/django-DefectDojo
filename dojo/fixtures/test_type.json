@@ -208,6 +208,13 @@
       },
       "model": "dojo.test_type",
       "pk":28
-}
+},
+{
+    "fields": {
+      "name": "Acunetix Scan"
+    },
+    "model": "dojo.test_type",
+    "pk": 30
+  }
 
 ]
