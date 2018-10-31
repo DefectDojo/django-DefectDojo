@@ -25,6 +25,7 @@ from dojo.tools.skf.parser import SKFCsvParser
 from dojo.tools.ssllabs.parser import SSLlabsParser
 from dojo.tools.nikto.parser import NiktoXMLParser
 from dojo.tools.trufflehog.parser import TruffleHogJSONParser
+from dojo.tools.acunetix.parser import AcunetixScannerParser
 from dojo.tools.fortify.parser import FortifyXMLParser
 from dojo.tools.sonarqube.parser import SonarQubeHtmlParser
 from dojo.tools.clair.parser import ClairParser
@@ -99,6 +100,8 @@ def import_parser_factory(file, test, scan_type=None):
         parser = GosecScannerParser(file, test)
     elif scan_type == 'Trustwave Scan (CSV)':
         parser = TrustwaveUploadCsvParser(file, test)
+    elif scan_type == 'Acunetix Scan':
+        parser = AcunetixScannerParser(file, test)
     elif scan_type == 'Fortify Scan':
         parser = FortifyXMLParser(file, test)
     elif scan_type == 'SonarQube Scan':

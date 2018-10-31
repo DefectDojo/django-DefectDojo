@@ -204,6 +204,13 @@
   },
   {
     "fields": {
+      "name": "Acunetix Scan"
+    },
+    "model": "dojo.test_type",
+    "pk": 30
+  }
+  {
+    "fields": {
       "name": "Gosec Scanner"
     },
     "model": "dojo.test_type",
