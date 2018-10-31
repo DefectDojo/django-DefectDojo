@@ -2,23 +2,6 @@ sudo: required
 language: python
 install: true
 
-env:
-  - TEST=smoke-test
-  - TEST=integration-test
-  - TEST=unit-test
-  - TEST=bandit
-  - TEST=docker-bench-security
-  - TEST=ansible
-  - TEST=flake8-complete
-  - TEST=flake8
-
-matrix:
-  allow_failures:
-    - env: TEST=smoke-test
-    - env: TEST=bandit
-    - env: TEST=sourceclear
-    - env: TEST=flake8-complete
-
 services:
   - docker
 
@@ -26,6 +9,20 @@ before_script:
   - export -f travis_fold
   - export REPO=appsecpipeline/django-defectdojo
   - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH ; fi`
+
+env:
+  - TEST=smoke-test
+  - TEST=integration-test
+  - TEST=unit-test
+  - TEST=bandit
+  - TEST=docker-bench-security
+  - TEST=flake8-complete
+  - TEST=flake8
+
+matrix:
+  allow_failures:
+    - env: TEST=bandit
+    - env: TEST=flake8-complete
 
 script:
   - |
@@ -46,16 +43,12 @@ script:
         bash entrypoint_scripts/test/travis-integration-test.sh || exit 1
         travis_fold end "integration-test"
         ;;
-      sourceclear)
-        ## Run the SRC:CLR Scan
-        curl -sSL https://download.sourceclear.com/ci.sh | bash
-        ;;
       bandit)
         # install bandit
         pip install bandit
 
         ## Run Bandit python static code
-        bandit -r * -x venv,tests,ansible
+        bandit -r * -x venv,tests
         ;;
       docker-bench-security)
         ## Run Docker Bench for Security
@@ -63,12 +56,13 @@ script:
         cd docker-bench-security
         sh docker-bench-security.sh
         ;;
-      ansible)
-        true
-        ;;
-      pep8)
+      flake8-complete)
         pip install flake8
         flake8 .
+        ;;
+      safety)
+        pip install safety
+        safety check -i 35015
         ;;
       flake8)
         echo "$TRAVIS_BRANCH"
@@ -86,12 +80,7 @@ script:
 
 after_success:
   #Push to docker repo
-  - |
-    if [ "$TRAVIS_TAG" != "" ] && [ "$DOCKER_USER" != "" ] && [  "$DOCKER_PASS" != "" ]; then
-      docker tag $REPO $REPO:$TRAVIS_TAG
-      docker login -u "$DOCKER_USER" -p "$DOCKER_PASS";
-      docker push $REPO ;
-    fi
+  - bash entrypoint_scripts/deploy/post-action.bash
 
 notifications:
   slack:
