@@ -1201,7 +1201,6 @@ class Finding(models.Model):
         if self.pk is None:
             from dojo.utils import apply_cwe_to_template
             self = apply_cwe_to_template(self)
-        else:
             # Only compute hash code for new findings.
             self.hash_code = self.compute_hash_code()
         super(Finding, self).save(*args, **kwargs)
