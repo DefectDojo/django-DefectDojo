@@ -391,6 +391,10 @@ class DojoMeta(models.Model):
         if self.product_id is not None and self.endpoint_id is not None:
             raise ValidationError('Metadata entries may not have both a product and an endpoint')
 
+    class Meta:
+        unique_together = (('product', 'name'),
+                           ('endpoint', 'name'))
+
 
 class Product(models.Model):
     WEB_PLATFORM = 'web'
