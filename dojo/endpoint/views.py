@@ -326,7 +326,7 @@ def add_meta_data(request, eid):
             else:
                 return HttpResponseRedirect(reverse('view_endpoint', args=(eid,)))
     else:
-        form = DojoMetaDataForm(initial={'content_type': endpoint})
+        form = DojoMetaDataForm()
 
     add_breadcrumb(parent=endpoint, title="Add Metadata", top_level=False, request=request)
     product_tab = Product_Tab(endpoint.product.id, "Add Metadata", tab="endpoints")
@@ -346,7 +346,7 @@ def edit_meta_data(request, eid):
         for key, value in request.POST.iteritems():
             if key.startswith('cfv_'):
                 cfv_id = int(key.split('_')[1])
-                cfv = get_object_or_404(CustomFieldValue, id=cfv_id)
+                cfv = get_object_or_404(DojoMeta, id=cfv_id)
 
                 value = value.strip()
                 if value:
