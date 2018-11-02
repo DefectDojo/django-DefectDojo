@@ -83,13 +83,7 @@ def view_product(request, pid):
     benchmarks = Benchmark_Product_Summary.objects.filter(product=prod, publish=True, benchmark_type__enabled=True).order_by('benchmark_type__name')
     system_settings = System_Settings.objects.get()
 
-    product_cf = prod.product_meta.order_by('name')
-    product_metadata = {}
-
-    for cf in product_cf:
-        cfv = cf.value
-        if len(cfv):
-            product_metadata[cf.name] = cfv
+    product_metadata = dict(prod.product_meta.order_by('name').values_list('name', 'value'))
 
     verified_findings = Finding.objects.filter(test__engagement__product=prod,
                                                 false_p=False,
@@ -403,13 +397,7 @@ def view_product_details(request, pid):
         # will render 403
         raise PermissionDenied
 
-    product_cf = prod.product_meta
-    product_metadata = {}
-
-    for cf in product_cf:
-        cfv = cf.value
-        if len(cfv):
-            product_metadata[cf.name] = cfv[0].value
+    product_metadata = dict(prod.product_meta.values_list('name', 'value'))
 
     add_breadcrumb(parent=product, title="Details", top_level=False, request=request)
     return render(request,
@@ -670,13 +658,10 @@ def new_eng_for_app_cicd(request, pid):
 def add_meta_data(request, pid):
     prod = Product.objects.get(id=pid)
     if request.method == 'POST':
-        form = DojoMetaDataForm(request.POST)
+        form = DojoMetaDataForm(request.POST, instance=DojoMeta(model_name='Product'
+                                                                model_id=prod.id))
         if form.is_valid():
-            cf, created = DojoMeta.objects.get_or_create(name=form.cleaned_data['name'], model_name='Product', model_id=prod.id,
-                                                         value=form.cleaned_data['value'])
-            cf.save()
-            prod.product_meta.add(cf)
-            prod.save()
+            form.save()
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Metadata added successfully.',
@@ -701,13 +686,6 @@ def add_meta_data(request, pid):
 @user_passes_test(lambda u: u.is_staff)
 def edit_meta_data(request, pid):
     prod = Product.objects.get(id=pid)
-    product_cf = prod.product_meta
-    product_metadata = {}
-
-    for cf in product_cf.all():
-        cfv = cf.value
-        if len(cfv):
-            product_metadata[cf] = cfv
     if request.method == 'POST':
         for key, value in request.POST.iteritems():
             if key.startswith('cfv_'):
@@ -730,7 +708,6 @@ def edit_meta_data(request, pid):
                   'dojo/edit_product_meta_data.html',
                   {'product': prod,
                    'product_tab': product_tab,
-                   'product_metadata': product_metadata,
                    })
 
 

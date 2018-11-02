@@ -135,13 +135,7 @@ def view_endpoint(request, eid):
     else:
         raise PermissionDenied
 
-    endpoint_cf = endpoint.endpoint_meta
-    endpoint_metadata = {}
-
-    for cf in endpoint_cf.all():
-        cfv = cf.value
-        if len(cfv):
-            endpoint_metadata[cf.name] = cfv
+    endpoint_metadata = dict(endpoint.endpoint_meta.values_list('name', 'value'))
 
     all_findings = Finding.objects.filter(endpoints__in=endpoints).distinct()
 
@@ -319,13 +313,10 @@ def add_product_endpoint(request):
 def add_meta_data(request, eid):
     endpoint = Endpoint.objects.get(id=eid)
     if request.method == 'POST':
-        form = DojoMetaDataForm(request.POST)
+        form = DojoMetaDataForm(request.POST, instance=DojoMeta(model_name='Endpoint',
+                                                                model_id=endpoint.id))
         if form.is_valid():
-            cf, created = DojoMeta.objects.get_or_create(name=form.cleaned_data['name'],
-                                                         model_name='Endpoint',
-                                                         model_id=endpoint.id,
-                                                         value=form.cleaned_data['value'])
-            cf.save()
+            form.save()
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Metadata added successfully.',
@@ -349,15 +340,7 @@ def add_meta_data(request, eid):
 
 @user_passes_test(lambda u: u.is_staff)
 def edit_meta_data(request, eid):
-
     endpoint = Endpoint.objects.get(id=eid)
-    endpoint_cf = endpoint.endpoint_meta.all()
-    endpoint_metadata = {}
-
-    for cf in endpoint_cf:
-        cfv = cf.value
-        if len(cfv):
-            endpoint_metadata[cf] = cfv
 
     if request.method == 'POST':
         for key, value in request.POST.iteritems():
@@ -382,5 +365,4 @@ def edit_meta_data(request, eid):
                   'dojo/edit_endpoint_meta_data.html',
                   {'endpoint': endpoint,
                    'product_tab': product_tab,
-                   'endpoint_metadata': endpoint_metadata,
                    })
