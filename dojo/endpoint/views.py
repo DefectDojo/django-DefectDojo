@@ -313,8 +313,7 @@ def add_product_endpoint(request):
 def add_meta_data(request, eid):
     endpoint = Endpoint.objects.get(id=eid)
     if request.method == 'POST':
-        form = DojoMetaDataForm(request.POST, instance=DojoMeta(model_name='Endpoint',
-                                                                model_id=endpoint.id))
+        form = DojoMetaDataForm(request.POST, instance=DojoMeta(endpoint=endpoint))
         if form.is_valid():
             form.save()
             messages.add_message(request,

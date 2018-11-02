@@ -658,8 +658,7 @@ def new_eng_for_app_cicd(request, pid):
 def add_meta_data(request, pid):
     prod = Product.objects.get(id=pid)
     if request.method == 'POST':
-        form = DojoMetaDataForm(request.POST, instance=DojoMeta(model_name='Product'
-                                                                model_id=prod.id))
+        form = DojoMetaDataForm(request.POST, instance=DojoMeta(product=prod))
         if form.is_valid():
             form.save()
             messages.add_message(request,

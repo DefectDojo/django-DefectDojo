@@ -19,14 +19,12 @@ class Command(BaseCommand):
 
         for cfv in CustomFieldValue.objects.filter(field__content_type=ctp):
             DojoMeta.objects.create(
-                model_name='Product',
-                model_id=cfv.object_id,
+                product_id=cfv.object_id,
                 name=cfv.field.name,
                 value=cfv.value)
 
         for cfv in CustomFieldValue.objects.filter(field__content_type=cte):
             DojoMeta.objects.create(
-                model_name='Endpoint',
-                model_id=cfv.object_id,
+                endpoint_id=cfv.object_id,
                 name=cfv.field.name,
                 value=cfv.value)
