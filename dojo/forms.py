@@ -201,7 +201,7 @@ class DojoMetaDataForm(forms.ModelForm):
 
     class Meta:
         model = DojoMeta
-        exclude = ('model_name', 'model_id')
+        fields = '__all__'
 
 
 class Product_TypeProductForm(forms.ModelForm):
