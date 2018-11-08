@@ -391,6 +391,9 @@ class DojoMeta(models.Model):
         if self.product_id is not None and self.endpoint_id is not None:
             raise ValidationError('Metadata entries may not have both a product and an endpoint')
 
+    def __unicode__(self):
+        return "%s: %s" % (self.name, self.value)
+
     class Meta:
         unique_together = (('product', 'name'),
                            ('endpoint', 'name'))
