@@ -135,13 +135,7 @@ def view_endpoint(request, eid):
     else:
         raise PermissionDenied
 
-    endpoint_cf = endpoint.endpoint_meta
-    endpoint_metadata = {}
-
-    for cf in endpoint_cf.all():
-        cfv = cf.value
-        if len(cfv):
-            endpoint_metadata[cf.name] = cfv
+    endpoint_metadata = dict(endpoint.endpoint_meta.values_list('name', 'value'))
 
     all_findings = Finding.objects.filter(endpoints__in=endpoints).distinct()
 
@@ -319,13 +313,9 @@ def add_product_endpoint(request):
 def add_meta_data(request, eid):
     endpoint = Endpoint.objects.get(id=eid)
     if request.method == 'POST':
-        form = DojoMetaDataForm(request.POST)
+        form = DojoMetaDataForm(request.POST, instance=DojoMeta(endpoint=endpoint))
         if form.is_valid():
-            cf, created = DojoMeta.objects.get_or_create(name=form.cleaned_data['name'],
-                                                         model_name='Endpoint',
-                                                         model_id=endpoint.id,
-                                                         value=form.cleaned_data['value'])
-            cf.save()
+            form.save()
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Metadata added successfully.',
@@ -335,7 +325,7 @@ def add_meta_data(request, eid):
             else:
                 return HttpResponseRedirect(reverse('view_endpoint', args=(eid,)))
     else:
-        form = DojoMetaDataForm(initial={'content_type': endpoint})
+        form = DojoMetaDataForm()
 
     add_breadcrumb(parent=endpoint, title="Add Metadata", top_level=False, request=request)
     product_tab = Product_Tab(endpoint.product.id, "Add Metadata", tab="endpoints")
@@ -349,21 +339,13 @@ def add_meta_data(request, eid):
 
 @user_passes_test(lambda u: u.is_staff)
 def edit_meta_data(request, eid):
-
     endpoint = Endpoint.objects.get(id=eid)
-    endpoint_cf = endpoint.endpoint_meta.all()
-    endpoint_metadata = {}
-
-    for cf in endpoint_cf:
-        cfv = cf.value
-        if len(cfv):
-            endpoint_metadata[cf] = cfv
 
     if request.method == 'POST':
         for key, value in request.POST.iteritems():
             if key.startswith('cfv_'):
                 cfv_id = int(key.split('_')[1])
-                cfv = get_object_or_404(CustomFieldValue, id=cfv_id)
+                cfv = get_object_or_404(DojoMeta, id=cfv_id)
 
                 value = value.strip()
                 if value:
@@ -382,5 +364,4 @@ def edit_meta_data(request, eid):
                   'dojo/edit_endpoint_meta_data.html',
                   {'endpoint': endpoint,
                    'product_tab': product_tab,
-                   'endpoint_metadata': endpoint_metadata,
                    })

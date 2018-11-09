@@ -134,6 +134,19 @@ class TaggitSerializer(serializers.Serializer):
 
 
 class MetaSerializer(serializers.ModelSerializer):
+    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(),
+                                                 required=False,
+                                                 default=None,
+                                                 allow_null=True)
+    endpoint = serializers.PrimaryKeyRelatedField(queryset=Endpoint.objects.all(),
+                                                  required=False,
+                                                  default=None,
+                                                  allow_null=True)
+
+    def validate(self, data):
+        DojoMeta(**data).clean()
+        return data
+
     class Meta:
         model = DojoMeta
         fields = '__all__'
