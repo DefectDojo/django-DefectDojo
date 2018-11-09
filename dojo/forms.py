@@ -7,6 +7,7 @@ from dateutil.relativedelta import relativedelta
 from django import forms
 from django.core import validators
 from django.core.validators import RegexValidator
+from django.core.exceptions import ValidationError
 from django.forms import modelformset_factory
 from django.forms.widgets import Widget, Select
 from django.utils.dates import MONTHS
@@ -199,9 +200,17 @@ class DojoMetaDataForm(forms.ModelForm):
     value = forms.CharField(widget=forms.Textarea(attrs={}),
                             required=True)
 
+    def full_clean(self):
+        super(DojoMetaDataForm, self).full_clean()
+        try:
+            self.instance.validate_unique()
+        except ValidationError:
+            msg = "A metadata entry with the same name exists already for this object."
+            self.add_error('name', msg)
+
     class Meta:
         model = DojoMeta
-        exclude = ('model_name', 'model_id')
+        fields = '__all__'
 
 
 class Product_TypeProductForm(forms.ModelForm):

@@ -11,6 +11,7 @@ from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.core.validators import RegexValidator
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
 from django.utils.timezone import now
@@ -370,17 +371,32 @@ class Test_Type(models.Model):
 class DojoMeta(models.Model):
     name = models.CharField(max_length=120)
     value = models.CharField(max_length=300)
-    model_name = models.CharField(max_length=30)
-    model_id = models.IntegerField()
+    product = models.ForeignKey('Product',
+                                on_delete=models.CASCADE,
+                                null=True,
+                                editable=False,
+                                related_name='product_meta')
+    endpoint = models.ForeignKey('Endpoint',
+                                 on_delete=models.CASCADE,
+                                 null=True,
+                                 editable=False,
+                                 related_name='endpoint_meta')
 
-    def save(self, *args, **kwargs):
-        super(DojoMeta, self).save(*args, **kwargs)
-        if self.model_name.lower() == "product":
-            prod = Product.objects.get(id=self.model_id)
-            prod.product_meta.add(self)
-        else:
-            ep = Endpoint.objects.get(id=self.model_id)
-            ep.endpoint_meta.add(self)
+    """
+    Verify that this metadata entry belongs only to one object.
+    """
+    def clean(self):
+        if self.product_id is None and self.endpoint_id is None:
+            raise ValidationError('Metadata entries need either a product or an endpoint')
+        if self.product_id is not None and self.endpoint_id is not None:
+            raise ValidationError('Metadata entries may not have both a product and an endpoint')
+
+    def __unicode__(self):
+        return "%s: %s" % (self.name, self.value)
+
+    class Meta:
+        unique_together = (('product', 'name'),
+                           ('endpoint', 'name'))
 
 
 class Product(models.Model):
@@ -477,7 +493,6 @@ class Product(models.Model):
     external_audience = models.BooleanField(default=False, help_text=_('Specify if the application is used by people outside the organization.'))
     internet_accessible = models.BooleanField(default=False, help_text=_('Specify if the application is accessible from the public internet.'))
     regulations = models.ManyToManyField(Regulation, blank=True)
-    product_meta = models.ManyToManyField(DojoMeta)
 
     def __unicode__(self):
         return self.name
@@ -825,7 +840,6 @@ class Endpoint(models.Model):
     product = models.ForeignKey(Product, null=True, blank=True, )
     endpoint_params = models.ManyToManyField(Endpoint_Params, blank=True,
                                              editable=False)
-    endpoint_meta = models.ManyToManyField(DojoMeta, editable=False)
 
     class Meta:
         ordering = ['product', 'protocol', 'host', 'path', 'query', 'fragment']

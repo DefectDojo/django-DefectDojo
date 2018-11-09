@@ -1,7 +1,7 @@
 
 from django.core.management.base import BaseCommand
 from django.contrib.contenttypes.models import ContentType
-from custom_field.models import CustomFieldValue, CustomField
+from custom_field.models import CustomFieldValue
 from pytz import timezone
 
 from dojo.models import DojoMeta, Product, Endpoint
@@ -14,17 +14,17 @@ class Command(BaseCommand):
     help = 'No input commands for dedupe findings.'
 
     def handle(self, *args, **options):
-        ctp = ContentType.objects.get_for_model(Product.objects.all()[0])
-        cte = ContentType.objects.get_for_model(Endpoint.objects.all()[0])
-        legacy_meta_prod = CustomField.objects.filter(content_type=ctp)
-        legacy_meta_ep = CustomField.objects.filter(content_type=cte)
+        ctp = ContentType.objects.get_for_model(Product)
+        cte = ContentType.objects.get_for_model(Endpoint)
 
-        for cf in legacy_meta_prod:
-            cfv = CustomFieldValue.objects.filter(field=cf,)
-            dm = DojoMeta(name=cf.name, value=cfv.first().value, model_name='Product', model_id=cfv.first().object_id)
-            dm.save()
+        for cfv in CustomFieldValue.objects.filter(field__content_type=ctp):
+            DojoMeta.objects.create(
+                product_id=cfv.object_id,
+                name=cfv.field.name,
+                value=cfv.value)
 
-        for cf in legacy_meta_ep:
-            cfv = CustomFieldValue.objects.filter(field=cf,)
-            dm = DojoMeta(name=cf.name, value=cfv.first().value, model_name='Endpoint', model_id=cfv.first().object_id)
-            dm.save()
+        for cfv in CustomFieldValue.objects.filter(field__content_type=cte):
+            DojoMeta.objects.create(
+                endpoint_id=cfv.object_id,
+                name=cfv.field.name,
+                value=cfv.value)
