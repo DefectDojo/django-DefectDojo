@@ -70,8 +70,8 @@ def validate_acunetix_scan_xml_file(filename):
 
     print("Acunetix Scan XML file '{filename}' is valid. It can be uploaded to DefectDojo.".format(filename=filename))
 
+
 if __name__ == "__main__":
     # filename = "acunetix_valid_dummy.xml"
     filename = "acunetix_invalid_xml_file.xml"
     validate_acunetix_scan_xml_file(filename)
-
