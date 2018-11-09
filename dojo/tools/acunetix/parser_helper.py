@@ -50,7 +50,7 @@ def get_scan_node(root):
                      "child of root element '{root_tag_name}'.".format(
                                                         scan_node_tag_name=SCAN_NODE_TAG_NAME,
                                                         root_tag_name=root.tag
-                                                        )
+                                                        	      )
         raise Exception(error_text)
 
 
@@ -191,4 +191,3 @@ def get_defectdojo_findings(filename):
         defectdojo_findings.append(finding)
 
     return defectdojo_findings
-
