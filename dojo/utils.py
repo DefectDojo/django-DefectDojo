@@ -53,9 +53,11 @@ def sync_false_history(new_finding, *args, **kwargs):
         new_finding.false_p = True
         super(Finding, new_finding).save(*args, **kwargs)
 
+def is_deduplication_on_engamgent(new_finding, to_duplicate_finding):
+    return not new_finding.test.engagement.deduplication_on_engagement and to_duplicate_finding.test.engagement.deduplication_on_engagement
 
 def sync_dedupe(new_finding, *args, **kwargs):
-        if new_finding.test.engagement.deduplication_level == "engagement":
+        if new_finding.test.engagement.deduplication_on_engagement:
             eng_findings_cwe = Finding.objects.filter(
                 test__engagement=new_finding.test.engagement,
                 cwe=new_finding.cwe,
@@ -90,7 +92,7 @@ def sync_dedupe(new_finding, *args, **kwargs):
         # total_findings = total_findings.order_by('date')
 
         for find in total_findings:
-            if new_finding.test.engagement.deduplication_level != "engagement" and find.test.engagement.deduplication_level == "engagement":
+            if is_deduplication_on_engamgent(new_finding, find):
                 continue
             if find.endpoints.count() != 0 and new_finding.endpoints.count() != 0:
                 list1 = new_finding.endpoints.all()
