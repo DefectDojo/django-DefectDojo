@@ -20,7 +20,7 @@ from dojo.api import UserResource, ProductResource, EngagementResource, \
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraConfigurationsViewSet, \
     JiraIssuesViewSet, JiraViewSet, ProductViewSet, ScanSettingsViewSet, \
-    ScansViewSet, StubFindingsViewSet, TestsViewSet, \
+    ScansViewSet, StubFindingsViewSet, TestsViewSet, TestTypesViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
     UsersViewSet, ImportScanView, ReImportScanView, ProductTypeViewSet, DojoMetaViewSet
 
@@ -96,6 +96,7 @@ v2_api.register(r'scan_settings', ScanSettingsViewSet)
 v2_api.register(r'scans', ScansViewSet)
 v2_api.register(r'stub_findings', StubFindingsViewSet)
 v2_api.register(r'tests', TestsViewSet)
+v2_api.register(r'test_types', TestTypesViewSet)
 v2_api.register(r'tool_configurations', ToolConfigurationsViewSet)
 v2_api.register(r'tool_product_settings', ToolProductSettingsViewSet)
 v2_api.register(r'tool_types', ToolTypesViewSet)
