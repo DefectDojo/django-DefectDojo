@@ -2,7 +2,7 @@ from rest_framework import viewsets, mixins
 from rest_framework.permissions import DjangoModelPermissions
 from django_filters.rest_framework import DjangoFilterBackend
 
-from dojo.models import Product, Product_Type, Engagement, Test, Finding, \
+from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Finding, \
     User, ScanSettings, Scan, Stub_Finding, Finding_Template, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Endpoint, JIRA_PKey, JIRA_Conf, DojoMeta
@@ -231,6 +231,13 @@ class TestsViewSet(mixins.ListModelMixin,
             return serializers.TestCreateSerializer
         else:
             return serializers.TestSerializer
+
+
+class TestTypesViewSet(mixins.ListModelMixin,
+                       viewsets.GenericViewSet):
+    serializer_class = serializers.TestTypeSerializer
+    queryset = Test_Type.objects.all()
+    filter_backends = (DjangoFilterBackend,)
 
 
 class ToolConfigurationsViewSet(mixins.ListModelMixin,
