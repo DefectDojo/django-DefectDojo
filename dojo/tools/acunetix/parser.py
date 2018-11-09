@@ -7,6 +7,7 @@ __license__ = "MIT"
 __version__ = "1.0.0"
 __status__ = "Development"
 
+
 class AcunetixScannerParser(object):
     """
         This class parse Acunetix XML file using helper methods from 'parser_helper.py'.
@@ -107,5 +108,3 @@ def get_false_positive(false_p):
         return True
     else:
         return False
-
-
