@@ -53,8 +53,10 @@ def sync_false_history(new_finding, *args, **kwargs):
         new_finding.false_p = True
         super(Finding, new_finding).save(*args, **kwargs)
 
+
 def is_deduplication_on_engamgent(new_finding, to_duplicate_finding):
     return not new_finding.test.engagement.deduplication_on_engagement and to_duplicate_finding.test.engagement.deduplication_on_engagement
+
 
 def sync_dedupe(new_finding, *args, **kwargs):
         if new_finding.test.engagement.deduplication_on_engagement:
