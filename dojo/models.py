@@ -1201,9 +1201,11 @@ class Finding(models.Model):
         if self.pk is None:
             from dojo.utils import apply_cwe_to_template
             self = apply_cwe_to_template(self)
+            super(Finding, self).save(*args, **kwargs)
             # Only compute hash code for new findings.
             self.hash_code = self.compute_hash_code()
-        super(Finding, self).save(*args, **kwargs)
+        else:
+            super(Finding, self).save(*args, **kwargs)
         self.found_by.add(self.test.test_type)
         if self.test.test_type.static_tool:
             self.static_finding = True
