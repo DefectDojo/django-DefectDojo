@@ -537,7 +537,7 @@ def import_scan_results(request, eid=None, pid=None):
                     item.last_reviewed_by = request.user
                     item.active = active
                     item.verified = verified
-                    item.save(dedupe_option=False)
+                    item.save(dedupe_option=False, false_history=True)
 
                     if hasattr(item, 'unsaved_req_resp') and len(
                             item.unsaved_req_resp) > 0:
@@ -569,7 +569,7 @@ def import_scan_results(request, eid=None, pid=None):
                             product=t.engagement.product)
 
                         item.endpoints.add(ep)
-                    item.save()
+                    item.save(false_history=True)
 
                     if item.unsaved_tags is not None:
                         item.tags = item.unsaved_tags
