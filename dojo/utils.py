@@ -9,7 +9,6 @@ from Crypto.Cipher import AES
 from calendar import monthrange
 from datetime import date, datetime
 from math import pi, sqrt
-
 import vobject
 import requests
 from dateutil.relativedelta import relativedelta, MO
@@ -37,20 +36,35 @@ Helper functions for DefectDojo
 
 
 def sync_false_history(new_finding, *args, **kwargs):
-    eng_findings_cwe = Finding.objects.filter(
-        test__engagement__product=new_finding.test.engagement.product,
-        cwe=new_finding.cwe,
-        test__test_type=new_finding.test.test_type,
-        false_p=True).exclude(id=new_finding.id).exclude(cwe=None).exclude(
-            endpoints=None)
-    eng_findings_title = Finding.objects.filter(
-        test__engagement__product=new_finding.test.engagement.product,
-        title=new_finding.title,
-        test__test_type=new_finding.test.test_type,
-        false_p=True).exclude(id=new_finding.id).exclude(endpoints=None)
+    if new_finding.endpoints.count() == 0:
+        eng_findings_cwe = Finding.objects.filter(
+            test__engagement__product=new_finding.test.engagement.product,
+            cwe=new_finding.cwe,
+            test__test_type=new_finding.test.test_type,
+            false_p=True, hash_code=new_finding.hash_code).exclude(id=new_finding.id).exclude(cwe=None)
+        eng_findings_title = Finding.objects.filter(
+            test__engagement__product=new_finding.test.engagement.product,
+            title=new_finding.title,
+            test__test_type=new_finding.test.test_type,
+            false_p=True, hash_code=new_finding.hash_code).exclude(id=new_finding.id)
+        total_findings = eng_findings_cwe | eng_findings_title
+    else:
+        eng_findings_cwe = Finding.objects.filter(
+            test__engagement__product=new_finding.test.engagement.product,
+            cwe=new_finding.cwe,
+            test__test_type=new_finding.test.test_type,
+            false_p=True).exclude(id=new_finding.id).exclude(cwe=None).exclude(endpoints=None)
+        eng_findings_title = Finding.objects.filter(
+            test__engagement__product=new_finding.test.engagement.product,
+            title=new_finding.title,
+            test__test_type=new_finding.test.test_type,
+            false_p=True).exclude(id=new_finding.id).exclude(endpoints=None)
     total_findings = eng_findings_cwe | eng_findings_title
+    #total_findings = Finding.objects.filter(hash_code=new_finding.hash_code, test__engagement__product=new_finding.test.engagement.product,)
     if total_findings.count() > 0:
         new_finding.false_p = True
+        new_finding.active = False
+        new_finding.verified = False
         super(Finding, new_finding).save(*args, **kwargs)
 
 
