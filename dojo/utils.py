@@ -60,7 +60,6 @@ def sync_false_history(new_finding, *args, **kwargs):
             test__test_type=new_finding.test.test_type,
             false_p=True).exclude(id=new_finding.id).exclude(endpoints=None)
     total_findings = eng_findings_cwe | eng_findings_title
-    #total_findings = Finding.objects.filter(hash_code=new_finding.hash_code, test__engagement__product=new_finding.test.engagement.product,)
     if total_findings.count() > 0:
         new_finding.false_p = True
         new_finding.active = False
