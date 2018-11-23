@@ -1211,9 +1211,11 @@ class Finding(models.Model):
         long_desc += '*References*:' + self.references
         return long_desc
 
-    def save(self, dedupe_option=True, rules_option=True, *args, **kwargs):
+    def save(self, dedupe_option=True, false_history=False, rules_option=True, *args, **kwargs):
         # Make changes to the finding before it's saved to add a CWE template
+        new_finding = False
         if self.pk is None:
+            false_history = True
             from dojo.utils import apply_cwe_to_template
             self = apply_cwe_to_template(self)
             super(Finding, self).save(*args, **kwargs)
@@ -1242,8 +1244,8 @@ class Finding(models.Model):
         # Assign the numerical severity for correct sorting order
         self.numerical_severity = Finding.get_numerical_severity(self.severity)
         super(Finding, self).save()
+        system_settings = System_Settings.objects.get()
         if (dedupe_option):
-            system_settings = System_Settings.objects.get()
             if system_settings.enable_deduplication:
                 from dojo.tasks import async_dedupe
                 from dojo.utils import sync_dedupe
@@ -1255,8 +1257,7 @@ class Finding(models.Model):
                 except:
                     async_dedupe.delay(self, *args, **kwargs)
                     pass
-
-            if system_settings.false_positive_history:
+        if system_settings.false_positive_history and false_history:
                 from dojo.tasks import async_false_history
                 from dojo.utils import sync_false_history
                 try:
