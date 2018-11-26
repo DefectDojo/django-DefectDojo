@@ -202,12 +202,18 @@
     "model": "dojo.test_type",
     "pk": 29
   },
-    {
-      "fields": {
-	"name": "Gosec Scanner"
-      },
-      "model": "dojo.test_type",
-      "pk":28
-}
-
+  {
+    "fields": {
+      "name": "Gosec Scanner"
+    },
+    "model": "dojo.test_type",
+    "pk":28
+  },
+  {
+	"fields": {
+      "name": "PHP Security Audit v2"
+    },
+    "model": "dojo.test_type",
+    "pk": 34
+  }
 ]
