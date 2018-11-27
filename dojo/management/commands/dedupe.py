@@ -21,7 +21,7 @@ class Command(BaseCommand):
         findings = Finding.objects.all()
         print "######## Updating Hashcodes ########"
         for finding in findings:
-            finding.hash_code = finding.get_hash_code()
+            finding.hash_code = finding.compute_hash_code()
             finding.save()
         findings = findings.filter(verified=True, active=True, duplicate_finding__id=None).order_by('created')
         print "######## Deduping ########"

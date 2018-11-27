@@ -1,216 +1,242 @@
 [
   {
-    "fields": {
-      "name": "API Test"
-    },
-    "model": "dojo.test_type",
-    "pk": 1
-  },
-  {
-    "fields": {
-      "name": "Static Check"
-    },
-    "model": "dojo.test_type",
-    "pk": 2
-  },
-  {
-    "fields": {
-      "name": "Pen Test"
-    },
-    "model": "dojo.test_type",
-    "pk": 3
-  },
-  {
-    "fields": {
-      "name": "Nessus Scan"
-    },
-    "model": "dojo.test_type",
-    "pk": 4
-  },
-  {
-    "fields": {
-      "name": "Web Application Test"
-    },
-    "model": "dojo.test_type",
-    "pk": 5
-  },
-  {
-    "fields": {
-      "name": "Security Research"
-    },
-    "model": "dojo.test_type",
-    "pk": 6
-  },
-  {
-    "fields": {
-      "name": "Threat Modeling"
-    },
-    "model": "dojo.test_type",
-    "pk": 7
-  },
-  {
-    "fields": {
-      "name": "Veracode Scan"
-    },
-    "model": "dojo.test_type",
-    "pk": 8
-  },
-  {
-    "fields": {
-      "name": "Burp Scan"
-    },
-    "model": "dojo.test_type",
-    "pk": 9
-  },
-  {
-    "fields": {
-      "name": "Nexpose Scan"
-    },
-    "model": "dojo.test_type",
-    "pk": 10
-  },
-  {
-    "fields": {
-      "name": "ZAP Scan"
-    },
-    "model": "dojo.test_type",
-    "pk": 11
-  },
-  {
-    "fields": {
-      "name": "Checkmarx Scan"
-    },
-    "model": "dojo.test_type",
-    "pk": 12
-  },
-  {
-    "fields": {
-      "name": "OpenVAS CSV"
-    },
-    "model": "dojo.test_type",
-    "pk": 13
-  },
-  {
-    "fields": {
-      "name": "Bandit Scan"
-    },
-    "model": "dojo.test_type",
-    "pk": 14
-  },
-  {
-    "fields": {
-      "name": "SSL Labs Scan"
-    },
-    "model": "dojo.test_type",
-    "pk": 15
-  },
-  {
-    "fields": {
-      "name": "AppSpider Scan"
-    },
-    "model": "dojo.test_type",
-    "pk": 16
-  },
-  {
-    "fields": {
-      "name": "Arachni Scan"
-    },
-    "model": "dojo.test_type",
-    "pk": 17
-  },
-  {
-    "fields": {
-      "name": "Dependency Check Scan"
-    },
-    "model": "dojo.test_type",
-    "pk": 17
-  },
-  {
-    "fields": {
-      "name": "Generic Findings Import"
-    },
-    "model": "dojo.test_type",
-    "pk": 18
-  },
-  {
-    "fields": {
-      "name": "Nmap Scan"
-    },
-    "model": "dojo.test_type",
-    "pk": 19
-  },
-  {
-    "fields": {
-      "name": "Node Security Platform Scan"
-    },
-    "model": "dojo.test_type",
-    "pk": 20
-  },
-  {
-    "fields": {
-      "name": "Qualys Scan"
-    },
-    "model": "dojo.test_type",
-    "pk": 21
-  },
-  {
-    "fields": {
-      "name": "Qualys Web App Scan"
-    },
-    "model": "dojo.test_type",
-    "pk": 22
-  },
-  {
-    "fields": {
-      "name": "Retire.js Scan"
-    },
-    "model": "dojo.test_type",
-    "pk": 23
-  },
-  {
-    "fields": {
-      "name": "SKF Scan"
-    },
-    "model": "dojo.test_type",
-    "pk": 24
-  },
-  {
-    "fields": {
-      "name": "Snyk Scan"
-    },
-    "model": "dojo.test_type",
-    "pk": 25
-  },
-  {
-    "fields": {
-      "name": "Trustwave"
-    },
-    "model": "dojo.test_type",
-    "pk": 27
-  },
-  {
-    "fields": {
-      "name": "VCG Scan"
-    },
-    "model": "dojo.test_type",
-    "pk": 28
-  },
-  {
-    "fields": {
-      "name": "Manual Code Review"
-    },
-    "model": "dojo.test_type",
-    "pk": 29
-  },
-  {
-    "fields": {
-      "name": "Gosec Scanner"
-    },
-    "model": "dojo.test_type",
-    "pk":28
-  },
-  {
-	"fields": {
+		"fields": {
+			"name": "API Test"
+		},
+		"model": "dojo.test_type",
+		"pk": 1
+	},
+	{
+		"fields": {
+			"name": "Static Check"
+		},
+		"model": "dojo.test_type",
+		"pk": 2
+	},
+	{
+		"fields": {
+			"name": "Pen Test"
+		},
+		"model": "dojo.test_type",
+		"pk": 3
+	},
+	{
+		"fields": {
+			"name": "Nessus Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 4
+	},
+	{
+		"fields": {
+			"name": "Web Application Test"
+		},
+		"model": "dojo.test_type",
+		"pk": 5
+	},
+	{
+		"fields": {
+			"name": "Security Research"
+		},
+		"model": "dojo.test_type",
+		"pk": 6
+	},
+	{
+		"fields": {
+			"name": "Threat Modeling"
+		},
+		"model": "dojo.test_type",
+		"pk": 7
+	},
+	{
+		"fields": {
+			"name": "Veracode Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 8
+	},
+	{
+		"fields": {
+			"name": "Burp Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 9
+	},
+	{
+		"fields": {
+			"name": "Nexpose Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 10
+	},
+	{
+		"fields": {
+			"name": "ZAP Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 11
+	},
+	{
+		"fields": {
+			"name": "Checkmarx Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 12
+	},
+	{
+		"fields": {
+			"name": "OpenVAS CSV"
+		},
+		"model": "dojo.test_type",
+		"pk": 13
+	},
+	{
+		"fields": {
+			"name": "Bandit Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 14
+	},
+	{
+		"fields": {
+			"name": "SSL Labs Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 15
+	},
+	{
+		"fields": {
+			"name": "AppSpider Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 16
+	},
+	{
+		"fields": {
+			"name": "Arachni Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 17
+	},
+	{
+		"fields": {
+			"name": "Dependency Check Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 17
+	},
+	{
+		"fields": {
+			"name": "Generic Findings Import"
+		},
+		"model": "dojo.test_type",
+		"pk": 18
+	},
+	{
+		"fields": {
+			"name": "Nmap Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 19
+	},
+	{
+		"fields": {
+			"name": "Node Security Platform Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 20
+	},
+	{
+		"fields": {
+			"name": "Qualys Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 21
+	},
+	{
+		"fields": {
+			"name": "Qualys Web App Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 22
+	},
+	{
+		"fields": {
+			"name": "Retire.js Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 23
+	},
+	{
+		"fields": {
+			"name": "SKF Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 24
+	},
+	{
+		"fields": {
+			"name": "Snyk Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 25
+	},
+	{
+		"fields": {
+			"name": "Trustwave"
+		},
+		"model": "dojo.test_type",
+		"pk": 27
+	},
+	{
+		"fields": {
+			"name": "VCG Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 28
+	},
+	{
+		"fields": {
+			"name": "Manual Code Review"
+		},
+		"model": "dojo.test_type",
+		"pk": 29
+	},
+	{
+		"fields": {
+			"name": "Acunetix Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 30
+	}, {
+		"fields": {
+			"name": "Gosec Scanner"
+		},
+		"model": "dojo.test_type",
+		"pk": 30
+	},
+	{
+		"fields": {
+			"name": "NPM Audit Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 31
+	},
+	{
+		"fields": {
+			"name": "Clair Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 32
+	},
+	{
+		"fields": {
+			"name": "Brakeman Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 33
+	},
+  "fields": {
       "name": "PHP Security Audit v2"
     },
     "model": "dojo.test_type",
