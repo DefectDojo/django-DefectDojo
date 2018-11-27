@@ -174,10 +174,17 @@ def change_password(request):
     if request.method == 'POST':
         current_pwd = request.POST['current_password']
         new_pwd = request.POST['new_password']
+        confirm_pwd = request.POST['confirm_password']
         user = authenticate(username=request.user.username,
                             password=current_pwd)
         if user is not None:
             if user.is_active:
+                if new_pwd != confirm_pwd:
+                    messages.add_message(request, messages.ERROR, 'Passwords do not match.', extra_tags='alert-danger')
+                    return render(request, 'dojo/change_pwd.html', {'error': ''})
+                if new_pwd == current_pwd:
+                    messages.add_message(request, messages.ERROR, 'New password must be different from current password.', extra_tags='alert-danger')
+                    return render(request, 'dojo/change_pwd.html', {'error': ''})
                 user.set_password(new_pwd)
                 user.save()
                 messages.add_message(request,
