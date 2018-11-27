@@ -1,53 +1,82 @@
 #!/bin/bash
-# setup.bash helps you installing DefectDojo in your current environment
+# setup.bash automates installing DefectDojo for the following install types:
 #
-# setup.bash covers the following cases (and types of environments):
-# - Fresh installs on non-transient environments (physical or virtual OS)
-# - Fresh installs on transient environment blueprints (containerized environments)
-# - Updates on non-transient environments
+# - Single server installs
+# - Dev installs
+# - Stand-alone server installs
+# - Container Single server e.g. Docker
+# - Container Stand-alone server install e.g. Docker
 #
-# Not (yet) addressed:
-# - Updates for transient environments
+# The setup.bash and supported install methods are documented in depth at
+#  https://github.com/DefectDojo/django-DefectDojo/tree/master/entrypoint_scripts
+#
+# Not addressed:
+# - Updates to a new version of DefectDojo
 #
 
-echo
-echo "Welcome to DefectDojo! This is a quick script to get you up and running."
-echo
+# Make sure setup.bash is run from the same directory it is located in
+cd ${0%/*}  # same as `cd "$(dirname "$0")"` without relying on dirname 
+REPO_BASE=`pwd`
 
-# Initialize variables and functions
-source entrypoint_scripts/common/dojo-shared-resources.sh
+# Set install config values and load the 'libraries' needed for install
+LIB_PATH="$REPO_BASE/entrypoint_scripts/common"
+. "$LIB_PATH/config-vars.sh"     # Set install configuration default values
+. "$LIB_PATH/cmd-args.sh"        # Get command-line args and set config values as needed
+. "$LIB_PATH/prompt.sh"          # Prompt for config values if install is interactive
+. "$LIB_PATH/common-os.sh"       # Determine what OS the installer is running on
+. "$LIB_PATH/install-dojo.sh"    # Complete an install of Dojo based on previously run code
 
-# This function invocation ensures we're running the script at the right place
-verify_cwd
+# Read command-line arguments, if any and set/override config defaults as needed
+#   Function in ./entrypoint_scripts/common/cmd-args.sh 
+read_cmd_args 
 
-if [ "$BATCH_MODE" == "yes" ]; then
-    setup_batch_mode
+# Prompt for config values if install is interactive - the default
+#   Function in ./entrypoint_scripts/common/prompt.sh 
+if [ "$PROMPT" = true ] ; then
+    prompt_for_config_vals
 else
-    prompt_db_type
+    init_install_creds
 fi
 
-echo
-echo "NEED SUDO PRIVILEGES FOR NEXT STEPS!"
-echo
-echo "Installing required packages..."
-echo
+# Check for OS installer is running on and that python version is correct
+#   Funcions below in ./entrypoint-scripts/common/common-os.sh
+check_install_os 
+# Bootstrap any programs needed specifically for the installer to run
+bootstrap_install 
+check_python_version
 
-# Install OS dependencies like DB client, further package managers, etc.
-install_os_dependencies
+# Do the install - broken into pieces by OS
+#   Functions below in ./entrypoint-scripts/common/install-dojo.sh
+install_dojo
 
-# Install database-related packages
-install_db
+#echo "Blah is $BLAH"
+#echo "DD_ENV is $DD_ENV"
+echo ""
+echo "DEBUG JUNK:"
+echo "PROMPT is $PROMPT"
+echo "====> "
+echo "INSTALL_OS is $INSTALL_OS"
+echo "INSTALL_DISTRO is $INSTALL_DISTRO"
+echo "INSTALL_OS_VER is $INSTALL_OS_VER"
+echo "DOJO_SOURCE is $DOJO_SOURCE"
+echo ""
+echo "DB_ROOT=$DB_ROOT"
+echo "DB_PASS=$DB_PASS"
+echo "DEV_DB_PASS=$DEV_DB_PASS"
+echo "OS_PASS=$OS_PASS"
+echo "DEV_OS_PASS=$DEV_OS_PASS"
+echo "ADMIN_PASS=$ADMIN_PASS"
+echo "DEV_ADMIN_PASS=$DEV_ADMIN_PASS"
+echo "DB URL is:"
+echo "$DD_DATABASE_URL"
 
-# Create the application DB or recreate it, if it's already present
-ensure_application_db
+echo "End of refactoring"
 
-if [ -z "$BATCH_MODE" ]; then
-  # Adjust the settings.py file
-  prepare_settings_file
-fi
+## Echo out important generated variables/passwords from this install
 
-# Ensure, we're running on a supported python version
-verify_python_version
+exit
+
+#-----------------------[ Old stuff ]-----------------------#
 
 # Install the actual application
 install_app
