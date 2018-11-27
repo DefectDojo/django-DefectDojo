@@ -1,4 +1,5 @@
-[{
+[
+  {
 		"fields": {
 			"name": "API Test"
 		},
@@ -234,5 +235,11 @@
 		},
 		"model": "dojo.test_type",
 		"pk": 33
-	}
+	},
+  "fields": {
+      "name": "PHP Security Audit v2"
+    },
+    "model": "dojo.test_type",
+    "pk": 34
+  }
 ]
