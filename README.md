@@ -103,6 +103,8 @@ Proceeds are used for testing, infrastructure, etc.
 # Sponsors
 
 [![Xing](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/XING_logo.png)](https://corporate.xing.com/en/about-xing/security/)
+[![10Security](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/10Security-logo.png)]
+(https://10security.com/services-by-technology/defectdojo-commercial-support/)
 
 Interested in becoming a sponsor and having your logo displayed? Please review our [sponsorship information](SPONSORING.md) or email greg.anderson@owasp.org
 
