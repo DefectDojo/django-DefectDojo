@@ -91,7 +91,6 @@ We would also like to highlight the contributions from Michael Dong and Fatimah 
 If you fix an issue with the `swag reward` tag,  we'll send you a shirt and some stickers!
 
 ![Dojo tshirt front](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/dojo_tshirt_front.png)
-![Dojo tshirt back](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/dojo_tshirt_back.png)
 
 
 # Support
