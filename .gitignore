@@ -1,3 +1,10 @@
+# Docker container persistent data
+docker/data/
+docker/static/
+
+# VS Code
+.vscode/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -46,7 +53,6 @@ coverage.xml
 # Django stuff:
 *.log
 *.pot
-**/settings.py
 
 # Vim swapfiles
 *.swp

@@ -73,11 +73,11 @@ function createadmin() {
     echo
 
     #setup default admin dojo user
-    if [ -z "$DOJO_ADMIN_USER" ]; then
-        DOJO_ADMIN_USER='admin'
+    if [ -z "$DEFECT_DOJO_ADMIN_NAME" ]; then
+        DEFECT_DOJO_ADMIN_NAME='admin'
     fi
-    if [ -z "$DOJO_ADMIN_EMAIL" ]; then
-        DOJO_ADMIN_EMAIL='admin@localhost.local'
+    if [ -z "$DEFECT_DOJO_ADMIN_EMAIL" ]; then
+        DEFECT_DOJO_ADMIN_EMAIL='root@localhost.local'
     fi
     if [ -z "$DOJO_ADMIN_PASSWORD" ]; then
         DOJO_ADMIN_PASSWORD=`LC_CTYPE=C tr -dc A-Za-z0-9_\!\@\#\$\%\^\&\*\(\)-+ < /dev/urandom | head -c 32 | xargs`
@@ -167,19 +167,6 @@ function setupdojo() {
     pip install .
 
     echo "=============================================================================="
-    echo "Copying settings.py"
-    echo "=============================================================================="
-    echo
-    #Copying setting.py temporarily so that collect static will run correctly
-    cp dojo/settings/settings.dist.py dojo/settings/settings.py
-    sed -i'' "s#DOJO_STATIC_ROOT#$PWD/static/#g" dojo/settings/settings.py
-
-    echo "Setting dojo settings for SQLLITEDB."
-    SQLLITEDB="'NAME': os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'db.sqlite3')"
-    sed -i "s/django.db.backends.mysql/django.db.backends.sqlite3/g" dojo/settings/settings.py
-    sed -i "s/'NAME': 'MYSQLDB'/$SQLLITEDB/g" dojo/settings/settings.py
-
-    echo "=============================================================================="
     echo "Installing yarn"
     echo "=============================================================================="
     echo
@@ -187,12 +174,6 @@ function setupdojo() {
 
     # Setup the DB
     setupdb
-
-    echo "=============================================================================="
-    echo "Removing temporary files"
-    echo "=============================================================================="
-    echo
-    rm dojo/settings/settings.dist.py
 
     echo "=============================================================================="
     echo "SUCCESS!"
@@ -217,35 +198,17 @@ function ensure_mysql_application_db() {
     # export AUTO_DOCKER=yes && /opt/django-DefectDojo/setup.bash
     if [ "$AUTO_DOCKER" != "yes" ]; then
         # Run interactively
-        read -p "MySQL host: " SQLHOST
-        read -p "MySQL port: " SQLPORT
-        read -p "MySQL user (should already exist): " SQLUSER
+        read -p "MySQL host: " DEFECT_DOJO_DEFAULT_DATABASE_HOST
+        read -p "MySQL port: " DEFECT_DOJO_DEFAULT_DATABASE_PORT
+        read -p "MySQL user (should already exist): " DEFECT_DOJO_DEFAULT_DATABASE_USER
         stty -echo
-        read -p "Password for user: " SQLPWD; echo
+        read -p "Password for user: " DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD; echo
         stty echo
-        read -p "Database name (should NOT exist): " DBNAME
-    else
-        # Default values for a automated Docker install if not provided
-        echo "Setting values for MySQL install"
-        if [ -z "$SQLHOST" ]; then
-            SQLHOST="localhost"
-        fi
-        if [ -z "$SQLPORT" ]; then
-            SQLPORT="3306"
-        fi
-        if [ -z "$SQLUSER" ]; then
-            SQLUSER="root"
-        fi
-        if [ -z "$SQLPWD" ]; then
-            SQLPWD="Cu3zehoh7eegoogohdoh1the"
-        fi
-        if [ -z "$DBNAME" ]; then
-            DBNAME="dojodb"
-        fi
+        read -p "Database name (should NOT exist): " DEFECT_DOJO_DEFAULT_DATABASE_NAME
     fi
 
-    if mysql -fs --protocol=TCP -h "$SQLHOST" -P "$SQLPORT" -u"$SQLUSER" -p"$SQLPWD" "$DBNAME" >/dev/null 2>&1 </dev/null; then
-        echo "Database $DBNAME already exists!"
+    if mysql -fs --protocol=TCP -h "$DEFECT_DOJO_DEFAULT_DATABASE_HOST" -P "$DEFECT_DOJO_DEFAULT_DATABASE_PORT" -u"$DEFECT_DOJO_DEFAULT_DATABASE_USER" -p"$DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD" "$DEFECT_DOJO_DEFAULT_DATABASE_NAME" >/dev/null 2>&1 </dev/null; then
+        echo "Database $DEFECT_DOJO_DEFAULT_DATABASE_NAME already exists!"
         echo
         if [ "$AUTO_DOCKER" == "yes" ]; then
             if [ -z "$FLUSHDB" ]; then
@@ -254,20 +217,20 @@ function ensure_mysql_application_db() {
                 DELETE="$FLUSHDB"
             fi
         else
-            read -p "Drop database $DBNAME? [Y/n] " DELETE
+            read -p "Drop database $DEFECT_DOJO_DEFAULT_DATABASE_NAME? [Y/n] " DELETE
         fi
         if [[ ! $DELETE =~ ^[nN]$ ]]; then
-            mysqladmin -f --protocol=TCP --host="$SQLHOST" --port="$SQLPORT" --user="$SQLUSER" --password="$SQLPWD" drop "$DBNAME"
-            mysqladmin    --protocol=TCP --host="$SQLHOST" --port="$SQLPORT" --user="$SQLUSER" --password="$SQLPWD" create "$DBNAME"
+            mysqladmin -f --protocol=TCP --host="$DEFECT_DOJO_DEFAULT_DATABASE_HOST" --port="$DEFECT_DOJO_DEFAULT_DATABASE_PORT" --user="$DEFECT_DOJO_DEFAULT_DATABASE_USER" --password="$DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD" drop "$DEFECT_DOJO_DEFAULT_DATABASE_NAME"
+            mysqladmin    --protocol=TCP --host="$DEFECT_DOJO_DEFAULT_DATABASE_HOST" --port="$DEFECT_DOJO_DEFAULT_DATABASE_PORT" --user="$DEFECT_DOJO_DEFAULT_DATABASE_USER" --password="$DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD" create "$DEFECT_DOJO_DEFAULT_DATABASE_NAME"
         fi
     else
         # Set the root password for mysql - install has it blank
-        mysql -uroot -e "SET PASSWORD = PASSWORD('${SQLPWD}');"
+        mysql -uroot -e "SET PASSWORD = PASSWORD('${DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD}');"
 
-        if mysqladmin --protocol=TCP --host="$SQLHOST" --port="$SQLPORT" --user="$SQLUSER" --password="$SQLPWD" create $DBNAME; then
-            echo "Created database $DBNAME."
+        if mysqladmin --protocol=TCP --host="$DEFECT_DOJO_DEFAULT_DATABASE_HOST" --port="$DEFECT_DOJO_DEFAULT_DATABASE_PORT" --user="$DEFECT_DOJO_DEFAULT_DATABASE_USER" --password="$DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD" create $DEFECT_DOJO_DEFAULT_DATABASE_NAME; then
+            echo "Created database $DEFECT_DOJO_DEFAULT_DATABASE_NAME."
         else
-            echo "Error! Failed to create database $DBNAME. Check your credentials."
+            echo "Error! Failed to create database $DEFECT_DOJO_DEFAULT_DATABASE_NAME. Check your credentials."
             echo
             ensure_mysql_application_db
         fi
@@ -276,22 +239,22 @@ function ensure_mysql_application_db() {
 
 # Ensures the Postgres application DB is present
 function ensure_postgres_application_db() {
-    read -p "Postgres host: " SQLHOST
-    read -p "Postgres port: " SQLPORT
-    read -p "Postgres user (should already exist): " SQLUSER
+    read -p "Postgres host: " DEFECT_DOJO_DEFAULT_DATABASE_HOST
+    read -p "Postgres port: " DEFECT_DOJO_DEFAULT_DATABASE_PORT
+    read -p "Postgres user (should already exist): " DEFECT_DOJO_DEFAULT_DATABASE_USER
     stty -echo
-    read -p "Password for user: " SQLPWD; echo
+    read -p "Password for user: " DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD; echo
     stty echo
-    read -p "Database name (should NOT exist): " DBNAME
+    read -p "Database name (should NOT exist): " DEFECT_DOJO_DEFAULT_DATABASE_NAME
 
-    if [ "$( PGPASSWORD=$SQLPWD psql -h $SQLHOST -p $SQLPORT -U $SQLUSER -tAc "SELECT 1 FROM pg_database WHERE datname='$DBNAME'" )" = '1' ]
+    if [ "$( PGPASSWORD=$DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD psql -h $DEFECT_DOJO_DEFAULT_DATABASE_HOST -p $DEFECT_DOJO_DEFAULT_DATABASE_PORT -U $DEFECT_DOJO_DEFAULT_DATABASE_USER -tAc "SELECT 1 FROM pg_database WHERE datname='$DEFECT_DOJO_DEFAULT_DATABASE_NAME'" )" = '1' ]
     then
-        echo "Database $DBNAME already exists!"
+        echo "Database $DEFECT_DOJO_DEFAULT_DATABASE_NAME already exists!"
         echo
-        read -p "Drop database $DBNAME? [Y/n] " DELETE
+        read -p "Drop database $DEFECT_DOJO_DEFAULT_DATABASE_NAME? [Y/n] " DELETE
         if [[ ! $DELETE =~ ^[nN]$ ]]; then
-            PGPASSWORD=$SQLPWD dropdb $DBNAME -h $SQLHOST -p $SQLPORT -U $SQLUSER
-            PGPASSWORD=$SQLPWD createdb $DBNAME -h $SQLHOST -p $SQLPORT -U $SQLUSER
+            PGPASSWORD=$DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD dropdb $DEFECT_DOJO_DEFAULT_DATABASE_NAME -h $DEFECT_DOJO_DEFAULT_DATABASE_HOST -p $DEFECT_DOJO_DEFAULT_DATABASE_PORT -U $DEFECT_DOJO_DEFAULT_DATABASE_USER
+            PGPASSWORD=$DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD createdb $DEFECT_DOJO_DEFAULT_DATABASE_NAME -h $DEFECT_DOJO_DEFAULT_DATABASE_HOST -p $DEFECT_DOJO_DEFAULT_DATABASE_PORT -U $DEFECT_DOJO_DEFAULT_DATABASE_USER
         else
             read -p "Try and install anyway? [Y/n] " INSTALL
             if [[ $INSTALL =~ ^[nN]$ ]]; then
@@ -300,12 +263,12 @@ function ensure_postgres_application_db() {
             fi
         fi
     else
-        PGPASSWORD=$SQLPWD createdb $DBNAME -h $SQLHOST -p $SQLPORT -U $SQLUSER
+        PGPASSWORD=$DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD createdb $DEFECT_DOJO_DEFAULT_DATABASE_NAME -h $DEFECT_DOJO_DEFAULT_DATABASE_HOST -p $DEFECT_DOJO_DEFAULT_DATABASE_PORT -U $DEFECT_DOJO_DEFAULT_DATABASE_USER
         if [ $? = 0 ]
         then
-            echo "Created database $DBNAME."
+            echo "Created database $DEFECT_DOJO_DEFAULT_DATABASE_NAME."
         else
-            echo "Error! Failed to create database $DBNAME. Check your credentials."
+            echo "Error! Failed to create database $DEFECT_DOJO_DEFAULT_DATABASE_NAME. Check your credentials."
             echo
             ensure_postgres_application_db
         fi
@@ -363,7 +326,7 @@ function install_db() {
             sudo yum install mariadb-server mysql-devel
         elif [ "$DBTYPE" == $POSTGRES ]; then
             echo "Installing Postgres client (and server if not already installed)"
-            sudo yum install postgresql-devel postgresql postgresql-contrib 
+            sudo yum install postgresql-devel postgresql postgresql-contrib
         fi
     elif [[ ! -z "$APT_GET_CMD" ]]; then
         if [ "$DBTYPE" == $MYSQL ]; then
@@ -385,10 +348,6 @@ function install_db() {
 }
 
 function prepare_settings_file() {
-    echo "=============================================================================="
-    echo "Creating dojo/settings/settings.py file"
-    echo "=============================================================================="
-    echo
     unset HISTFILE
 
     if [[ ! -z "$BREW_CMD" ]]; then
@@ -396,60 +355,9 @@ function prepare_settings_file() {
     fi
 
     SECRET=`cat /dev/urandom | LC_CTYPE=C tr -dc "a-zA-Z0-9" | head -c 128`
-    TARGET_SETTINGS_FILE=dojo/settings/settings.py
-
-    # Save MySQL details in settings file
-    cp dojo/settings/settings.dist.py ${TARGET_SETTINGS_FILE}
-
-    # Test whether we're running on a "brew"-system, like Mac OS X; then use
-    # BSD-style sed;
-    # By default, use GNU-style sed
-    BREW_CMD=$(which brew)
-    if [[ ! -z $BREW_CMD ]]; then
-        sed -i '' -e "s/MYSQLHOST/$SQLHOST/g" \
-                -e "s/MYSQLPORT/$SQLPORT/g" \
-                -e "s/MYSQLUSER/$SQLUSER/g" \
-                -e "s/MYSQLPWD/$SQLPWD/g" \
-                -e "s/MYSQLDB/$DBNAME/g" \
-                -e "s#DOJODIR#$PWD/dojo#g" \
-                -e "s/DOJOSECRET/$SECRET/g" \
-                -e "s#DOJO_MEDIA_ROOT#$PWD/media/#g" \
-                -e "s#DOJO_STATIC_ROOT#$PWD/static/#g" \
-                ${TARGET_SETTINGS_FILE}
-        if [ "$DBTYPE" == "$SQLITE" ]; then
-            sed -i '' -e "s/BACKENDDB/django.db.backends.sqlite3/g" \
-                      -e "s/MYSQLDB/db.sqlite3/g" \
-                      ${TARGET_SETTINGS_FILE}
-        elif [ "$DBTYPE" == "$MYSQL" ]; then
-            sed -i '' -e "s/BACKENDDB/django.db.backends.mysql/g" ${TARGET_SETTINGS_FILE}
-        elif [ "$DBTYPE" == "$POSTGRES" ]; then
-            sed -i '' -e "s/BACKENDDB/django.db.backends.postgresql_psycopg2/g" ${TARGET_SETTINGS_FILE}
-        fi
-    else
-        # Apply sed GNU-style wise
-        sed -i -e "s/MYSQLHOST/$SQLHOST/g" \
-               -e "s/MYSQLPORT/$SQLPORT/g" \
-               -e "s/MYSQLUSER/$SQLUSER/g" \
-               -e "s/MYSQLPWD/$SQLPWD/g" \
-               -e "s/MYSQLDB/$DBNAME/g" \
-               -e "s#DOJODIR#$PWD/dojo#g" \
-               -e "s/DOJOSECRET/$SECRET/g" \
-               -e "s#DOJO_MEDIA_ROOT#$PWD/media/#g" \
-               -e "s#DOJO_STATIC_ROOT#$PWD/static/#g" \
-               ${TARGET_SETTINGS_FILE}
-        if [ "$DBTYPE" == "$SQLITE" ]; then
-            sed -i -e "s/BACKENDDB/django.db.backends.sqlite3/g" \
-                   -e "s/MYSQLDB/db.sqlite3/g" \
-                   ${TARGET_SETTINGS_FILE}
-        elif [ "$DBTYPE" == "$MYSQL" ]; then
-            sed -i -e "s/BACKENDDB/django.db.backends.mysql/g" ${TARGET_SETTINGS_FILE}
-        elif [ "$DBTYPE" == "$POSTGRES" ]; then
-            sed -i -e "s/BACKENDDB/django.db.backends.postgresql_psycopg2/g" ${TARGET_SETTINGS_FILE}
-        fi
-    fi
 }
 
-function install_app(){
+function install_app() {
     # Install the app, apply migrations and load data
 
     # Detect if we're in a a virtualenv
@@ -463,7 +371,6 @@ function install_app(){
         else
             pip install .
         fi
-
     else
         if [ "$DBTYPE" == "$MYSQL" ]; then
             sudo -H pip install .[mysql]
