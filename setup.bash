@@ -48,9 +48,6 @@ fi
 # Create the application DB or recreate it, if it's already present
 ensure_application_db
 
-# Adjust the settings.py file
-prepare_settings_file
-
 # Ensure, we're running on a supported python version
 verify_python_version
 
