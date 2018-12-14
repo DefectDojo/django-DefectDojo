@@ -33,7 +33,6 @@ services:
       - proxy
     volumes:
       - './docker/static:/opt/django-DefectDojo/static'
-      - './docker/setup-superuser.expect:/opt/django-DefectDojo/docker/setup-superuser.expect'
 
   mysql:
     command: '--default-authentication-plugin=mysql_native_password'
