@@ -11,6 +11,11 @@ python manage.py migrate
 
 # The '&&' is critical here. If the admin user is already created, setting the
 # password will not be done.
+
+if [ "$DEFECT_DOJO_ADMIN_PASSWORD" == "" ]; then
+    DEFECT_DOJO_ADMIN_PASSWORD="admin"
+fi
+
 python manage.py createsuperuser \
     --noinput \
     --username=admin \
