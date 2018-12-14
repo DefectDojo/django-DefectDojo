@@ -25,6 +25,7 @@ services:
       DEFECT_DOJO_DEFAULT_DATABASE_USER: 'dojo'
       DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD: 'dojo'
       DEFECT_DOJO_ALLOWED_HOSTS_GLOB: '*'
+      DEFECT_DOJO_ADMIN_PASSWORD: "admin1"
       DEFECT_DOJO_SECRET_KEY: '08hrgqoiejijijjwirj'
     hostname: 'django'
     networks:
@@ -32,6 +33,7 @@ services:
       - proxy
     volumes:
       - './docker/static:/opt/django-DefectDojo/static'
+      - './docker/setup-superuser.expect:/opt/django-DefectDojo/docker/setup-superuser.expect'
 
   mysql:
     command: '--default-authentication-plugin=mysql_native_password'
@@ -67,3 +69,4 @@ services:
       - "$PWD/docker/key.pem:/key.pem:ro"
       # This gives Nginx access to the static assets compiled by Django.
       - './docker/static:/usr/share/nginx/html/static:ro'
+
