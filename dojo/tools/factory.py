@@ -36,7 +36,10 @@ def import_parser_factory(file, test, scan_type=None):
     if scan_type == "Burp Scan":
         parser = BurpXmlParser(file, test)
     elif scan_type == "Nessus Scan":
-        filename = file.name.lower()
+        if hasattr(file,'name'):
+            filename = file.name.lower()
+        if hasattr(file,'lower'):
+            filename = file.lower()
         if filename.endswith("csv"):
             parser = NessusCSVParser(file, test)
         elif filename.endswith("xml") or filename.endswith("nessus"):
