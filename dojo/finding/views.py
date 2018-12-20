@@ -313,6 +313,12 @@ def close_finding(request, fid):
 
     product_tab = Product_Tab(finding.test.engagement.product.id, title="Close", tab="findings")
 
+    # BEGIN FIX - lines below added to update the finding status in jira (when it's closed)
+    finding2 = finding
+    finding2.status = list(('Mitigated','Inactive','Verified'))
+    update_issue(finding2, old_status, True)
+    # END FIX
+
     return render(request, 'dojo/close_finding.html', {
         'finding': finding,
         'product_tab': product_tab,
