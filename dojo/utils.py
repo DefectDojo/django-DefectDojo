@@ -1104,23 +1104,33 @@ def update_issue(find, old_status, push_to_jira):
             log_jira_alert(e.text, find)
 
         req_url = jira_conf.url + '/rest/api/latest/issue/' + j_issue.jira_id + '/transitions'
-        if 'Inactive' in find.status() or 'Mitigated' in find.status(
-        ) or 'False Positive' in find.status(
-        ) or 'Out of Scope' in find.status() or 'Duplicate' in find.status():
-            if 'Active' in old_status:
-                json_data = {'transition': {'id': jira_conf.close_status_key}}
-                r = requests.post(
-                    url=req_url,
-                    auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
-                    json=json_data)
-        elif 'Active' in find.status() and 'Verified' in find.status():
-            if 'Inactive' in old_status:
-                json_data = {'transition': {'id': jira_conf.open_status_key}}
-                r = requests.post(
-                    url=req_url,
-                    auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
-                    json=json_data)
-
+   
+	if callable(find.status):
+            if 'Inactive' in find.status() or 'Mitigated' in find.status(
+            ) or 'False Positive' in find.status(
+            ) or 'Out of Scope' in find.status() or 'Duplicate' in find.status():
+                if 'Active' in old_status:
+                    json_data = {'transition': {'id': jira_conf.close_status_key}}
+                    r = requests.post(
+                        url=req_url,
+                        auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
+                        json=json_data)
+            elif 'Active' in find.status() and 'Verified' in find.status():
+                if 'Inactive' in old_status:
+                    json_data = {'transition': {'id': jira_conf.open_status_key}}
+                    r = requests.post(
+                        url=req_url,
+                        auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
+                        json=json_data)
+	else:
+            if 'Inactive' in find.status or 'Mitigated' in find.status or 'False Positive' in find.status or 'Out of Scope' in find.status or 'Duplicate' in find.status:
+                if 'Active' in old_status:
+                    json_data = {'transition': {'id': jira_conf.close_status_key}}
+                    r = requests.post(
+                        url=req_url,
+                        auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
+                        json=json_data)
+	        
 
 def close_epic(eng, push_to_jira):
     engagement = eng
