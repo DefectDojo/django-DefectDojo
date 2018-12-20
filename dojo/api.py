@@ -14,7 +14,7 @@ from tastypie.serializers import Serializer
 from tastypie.validation import FormValidation, Validation
 from django.urls.exceptions import Resolver404
 from django.utils import timezone
-
+from dojo.utils import add_comment, add_epic, add_issue, update_issue #required - Fix to update jira
 
 from dojo.models import Product, Engagement, Test, Finding, \
     User, ScanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance, \
@@ -1613,6 +1613,10 @@ class ReImportScanResource(MultipartResource, Resource):
                                                          )
                         burp_rr.clean()
                         burp_rr.save()
+                        # HERE: I have to add the jira creation
+                        add_issue(item, True)
+                        #END (for now)
+
                 if find:
                     finding_count += 1
                     for endpoint in item.unsaved_endpoints:
@@ -1638,6 +1642,7 @@ class ReImportScanResource(MultipartResource, Resource):
                              author=bundle.request.user)
                 note.save()
                 finding.notes.add(note)
+                update_issue(finding, old_status, True) # another fix HERE
                 mitigated_count += 1
 
         except SyntaxError:
