@@ -576,7 +576,8 @@ def import_scan_results(request, eid=None, pid=None):
 
                     if item.unsaved_tags is not None:
                         item.tags = item.unsaved_tags
-
+                    # patched: I have to add the jira creation in line below
+                    add_issue(item, True)
                     finding_count += 1
 
                 messages.add_message(
