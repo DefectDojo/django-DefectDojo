@@ -5,6 +5,7 @@ See the file 'doc/LICENSE' for the license information
 
 """
 from __future__ import with_statement
+from urlparse import urlparse
 
 import re
 # from defusedxml import ElementTree as ET
@@ -153,18 +154,22 @@ def get_item(item_node, test):
 
     url_host = host_node.text
 
-    rhost = re.search(
-        "(http|https|ftp)\://([a-zA-Z0-9\.\-]+(\:[a-zA-Z0-9\.&amp;%\$\-]+)*@)*((25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])|localhost|([a-zA-Z0-9\-]+\.)*[a-zA-Z0-9\-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))[\:]*([0-9]+)*([/]*($|[a-zA-Z0-9\.\,\?\'\\\+&amp;%\$#\=~_\-]+)).*?$",
-        url_host)
-    protocol = rhost.group(1)
-    host = rhost.group(4)
+    # rhost = re.search(
+    #     "(http|https|ftp)\://([a-zA-Z0-9\.\-]+(\:[a-zA-Z0-9\.&amp;%\$\-]+)*@)*((25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])|localhost|([a-zA-Z0-9\-]+\.)*[a-zA-Z0-9\-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))[\:]*([0-9]+)*([/]*($|[a-zA-Z0-9\.\,\?\'\\\+&amp;%\$#\=~_\-]+)).*?$",
+    #     url_host)
+    # protocol = rhost.group(1)
+    # host = rhost.group(4)
+    protocol = urlparse(url_host).scheme
+    host = urlparse(url_host).nettloc
 
     port = 80
     if protocol == 'https':
         port = 443
 
-    if rhost.group(11) is not None:
-        port = rhost.group(11)
+    # if rhost.group(11) is not None:
+    #     port = rhost.group(11)
+    if urlparse(url_host) is not None:
+        port = urlparse(url_host).port
 
     ip = host_node.get('ip')
     url = item_node.get('url')
