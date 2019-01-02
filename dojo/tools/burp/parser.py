@@ -168,7 +168,7 @@ def get_item(item_node, test):
 
     # if rhost.group(11) is not None:
     #     port = rhost.group(11)
-    if urlparse(url_host) is not None:
+    if urlparse(url_host).port is not None:
         port = urlparse(url_host).port
 
     ip = host_node.get('ip')
