@@ -5,6 +5,7 @@ from dojo.tools.nexpose.parser import NexposeFullXmlParser
 from dojo.tools.veracode.parser import VeracodeXMLParser
 from dojo.tools.zap.parser import ZapXmlParser
 from dojo.tools.checkmarx.parser import CheckmarxXMLParser
+from dojo.tools.crashtest_security.parser import CrashtestSecurityXmlParser
 from dojo.tools.contrast.parser import ContrastCSVParser
 from dojo.tools.bandit.parser import BanditParser
 from dojo.tools.appspider.parser import AppSpiderXMLParser
@@ -63,6 +64,8 @@ def import_parser_factory(file, test, scan_type=None):
         parser = CheckmarxXMLParser(file, test)
     elif scan_type == "Contrast Scan":
         parser = ContrastCSVParser(file, test)
+    elif scan_type == "Crashtest Security Scan":
+        parser = CrashtestSecurityXmlParser(file, test)
     elif scan_type == "Bandit Scan":
         parser = BanditParser(file, test)
     elif scan_type == "ZAP Scan":
