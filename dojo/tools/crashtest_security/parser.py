@@ -1,4 +1,4 @@
-__auther__ = "phylu"
+__author__ = "phylu"
 
 from defusedxml import ElementTree as ET
 from dojo.models import Finding
