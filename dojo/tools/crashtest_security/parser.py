@@ -46,24 +46,24 @@ class CrashtestSecurityXmlParser(object):
             failure = node.find('failure')
             if failure is None:
                 continue
-            
+
             title = node.get('name')
             description = failure.get('message')
             severity = failure.get('type')
 
             find = Finding(title=title,
-                          description=description,
-                          test=test,
-                          severity=severity,
-                          mitigation="No mitigation provided",
-                          active=False,
-                          verified=False,
-                          false_p=False,
-                          duplicate=False,
-                          out_of_scope=False,
-                          mitigated=None,
-                          impact="No impact provided",
-                          numerical_severity=Finding.get_numerical_severity(severity))
+                           description=description,
+                           test=test,
+                           severity=severity,
+                           mitigation="No mitigation provided",
+                           active=False,
+                           verified=False,
+                           false_p=False,
+                           duplicate=False,
+                           out_of_scope=False,
+                           mitigated=None,
+                           impact="No impact provided",
+                           numerical_severity=Finding.get_numerical_severity(severity))
             items.append(find)
 
         return items
