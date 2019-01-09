@@ -68,7 +68,7 @@ class AWSProwlerParser(object):
     def recursive_print(self, src, depth=0, key=''):
         tabs = lambda n: ' ' * n * 2
         if isinstance(src, dict):
-            for key, value in src.items():
+            for key, value in list(src.items()):
                 if isinstance(src, str):
                     self.item_data = self.item_data + key + "\n"
                 self.recursive_print(value, depth + 1, key)

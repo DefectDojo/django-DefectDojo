@@ -237,7 +237,7 @@ class NexposeFullXmlParser(object):
         for item in x:
             for service in item['services']:
                 for vuln in service['vulns']:
-                    for sev, num_sev in Finding.SEVERITIES.items():
+                    for sev, num_sev in list(Finding.SEVERITIES.items()):
                         if num_sev == vuln['severity']:
                             break
 

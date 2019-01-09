@@ -25,7 +25,7 @@ class NpmAuditParser(object):
     def get_items(self, tree, test):
         items = {}
 
-        for key, node in tree.items():
+        for key, node in list(tree.items()):
             item = get_item(node, test)
             unique_key = str(node['id']) + str(node['module_name'])
             items[unique_key] = item

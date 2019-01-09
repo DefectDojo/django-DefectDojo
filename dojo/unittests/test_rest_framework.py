@@ -73,7 +73,7 @@ class BaseClass():
             relative_url = self.url + '%s/' % current_objects['results'][0]['id']
             response = self.client.patch(
                 relative_url, self.update_fields)
-            for key, value in self.update_fields.items():
+            for key, value in list(self.update_fields.items()):
                 self.assertEqual(value, response.data[key])
             response = self.client.put(
                 relative_url, self.payload)

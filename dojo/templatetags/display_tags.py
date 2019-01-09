@@ -342,7 +342,7 @@ def action_log_entry(value, autoescape=None):
     import json
     history = json.loads(value)
     text = ''
-    for k in history.keys():
+    for k in list(history.keys()):
         text += k.capitalize() + ' changed from "' + \
             history[k][0] + '" to "' + history[k][1] + '"'
 
@@ -430,8 +430,8 @@ def colgroup(parser, token):
         def render(self, context):
             iterable = template.Variable(self.iterable).resolve(context)
             num_cols = self.num_cols
-            context[self.varname] = zip(
-                *[chain(iterable, [None] * (num_cols - 1))] * num_cols)
+            context[self.varname] = list(zip(
+                *[chain(iterable, [None] * (num_cols - 1))] * num_cols))
             return ''
 
     try:

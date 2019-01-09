@@ -686,7 +686,7 @@ def add_meta_data(request, pid):
 def edit_meta_data(request, pid):
     prod = Product.objects.get(id=pid)
     if request.method == 'POST':
-        for key, value in request.POST.items():
+        for key, value in list(request.POST.items()):
             if key.startswith('cfv_'):
                 cfv_id = int(key.split('_')[1])
                 cfv = get_object_or_404(DojoMeta, id=cfv_id)

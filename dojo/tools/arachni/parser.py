@@ -105,14 +105,14 @@ def get_item(item_node, test):
     #
     req = ''
     #
-    for key, value in request.items():
+    for key, value in list(request.items()):
         req += str(key) + ": " + str(value) + "\n\n"
     #
     respz = item_node['response']
 
     resp = ''
 
-    for key, value in respz.items():
+    for key, value in list(respz.items()):
         if key != 'body':
             resp += str(key) + ": " + str(value) + "\n\n"
 

@@ -182,7 +182,7 @@ if __name__ == "__main__":
     try:
         qualys_parser(args.qualys_xml_file)
     except IOError:
-        print("[!] Error processing file: {}".format(args.qualys_xml_file))
+        print(("[!] Error processing file: {}".format(args.qualys_xml_file)))
         exit()
 
 class QualysParser(object):
