@@ -26,6 +26,7 @@ from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
     Risk_Acceptance, Dojo_User
 from dojo.utils import get_page_items, add_breadcrumb, findings_this_period, opened_in_period, count_findings, \
     get_period_counts, get_punchcard_data, get_system_setting
+from functools import reduce
 
 logger = logging.getLogger(__name__)
 
@@ -732,8 +733,8 @@ def view_engineer(request, eid):
                                            mitigated__isnull=True,
                                            active=True).count()
         vulns[product.id] = f_count
-    od = OrderedDict(sorted(vulns.items(), key=itemgetter(1)))
-    items = od.items()
+    od = OrderedDict(sorted(list(vulns.items()), key=itemgetter(1)))
+    items = list(od.items())
     items.reverse()
     top = items[: 10]
     update = []
@@ -956,7 +957,7 @@ def research_metrics(request):
                             'S3': closed_findings.filter(severity='Low')}
 
     time_to_close = {}
-    for sev, finds in closed_findings_dict.items():
+    for sev, finds in list(closed_findings_dict.items()):
         total = 0
         for f in finds:
             total += (datetime.date(f.mitigated) - f.date).days

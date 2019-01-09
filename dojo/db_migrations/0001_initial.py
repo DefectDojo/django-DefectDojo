@@ -1306,14 +1306,14 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='languages',
-            unique_together=set([('language', 'product')]),
+            unique_together={('language', 'product')},
         ),
         migrations.AlterUniqueTogether(
             name='benchmark_product_summary',
-            unique_together=set([('product', 'benchmark_type')]),
+            unique_together={('product', 'benchmark_type')},
         ),
         migrations.AlterUniqueTogether(
             name='benchmark_product',
-            unique_together=set([('product', 'control')]),
+            unique_together={('product', 'control')},
         ),
     ]

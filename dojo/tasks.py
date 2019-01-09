@@ -148,7 +148,7 @@ def async_custom_pdf_report(self,
     selected_widgets = report_widget_factory(json_data=report.options, request=None, user=user,
                                              finding_notes=finding_notes, finding_images=finding_images, host=host)
 
-    widgets = selected_widgets.values()
+    widgets = list(selected_widgets.values())
     temp = None
 
     try:

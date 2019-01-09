@@ -30,7 +30,7 @@ class ClairParser(object):
             unique_key = str(node['vulnerability']) + str(node['featurename'])
             items[unique_key] = item
 
-        return items.values()
+        return list(items.values())
 
 
 def get_item(item_node, test):

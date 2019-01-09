@@ -115,7 +115,7 @@ class TaggitSerializer(serializers.Serializer):
         return self._save_tags(tag_object, to_be_tagged)
 
     def _save_tags(self, tag_object, tags):
-        for key in tags.keys():
+        for key in list(tags.keys()):
             tag_values = tags.get(key)
             tag_object.tags = ", ".join(tag_values)
 
@@ -124,7 +124,7 @@ class TaggitSerializer(serializers.Serializer):
     def _pop_tags(self, validated_data):
         to_be_tagged = {}
 
-        for key in self.fields.keys():
+        for key in list(self.fields.keys()):
             field = self.fields[key]
             if isinstance(field, TagListSerializerField):
                 if key in validated_data:
@@ -257,7 +257,7 @@ class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
             host = data.get('host', self.instance.host)
         product = data.get('product', None)
 
-        from urlparse import urlunsplit
+        from urllib.parse import urlunsplit
         if protocol:
             endpoint = urlunsplit((protocol, host, path, query, fragment))
         else:
@@ -535,7 +535,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
             pass
 
         test.save()
-        test.tags = u' '.join(data['tags'])
+        test.tags = ' '.join(data['tags'])
         try:
             parser = import_parser_factory(data['file'],
                                            test,

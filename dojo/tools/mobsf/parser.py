@@ -75,7 +75,7 @@ class MobSFParser(object):
         # Mobile Permissions
         if "permissions" in data:
             # for permission, details in data["permissions"].items():
-            if type(data["permissions"]) is list:
+            if isinstance(data["permissions"], list):
                 for details in data["permissions"]:
                     mobsf_item = {
                         "category": "Mobile Permissions",
@@ -86,7 +86,7 @@ class MobSFParser(object):
                     }
                     mobsf_findings.append(mobsf_item)
             else:
-                for permission, details in data["permissions"].items():
+                for permission, details in list(data["permissions"].items()):
                     mobsf_item = {
                         "category": "**Mobile Permissions**",
                         "title": permission,
@@ -138,7 +138,7 @@ class MobSFParser(object):
 
         # MobSF Findings
         if "findings" in data:
-            for title, finding in data["findings"].items():
+            for title, finding in list(data["findings"].items()):
                 description = title
                 file_path = None
 
@@ -188,7 +188,7 @@ class MobSFParser(object):
                                file_path=file_path,
                                static_finding=True)
                 dupes[dupe_key] = find
-        self.items = dupes.values()
+        self.items = list(dupes.values())
 
     # Criticality rating
     def getCriticalityRating(self, rating):

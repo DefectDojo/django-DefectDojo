@@ -846,7 +846,7 @@ class Endpoint(models.Model):
         ordering = ['product', 'protocol', 'host', 'path', 'query', 'fragment']
 
     def __unicode__(self):
-        from urlparse import uses_netloc
+        from urllib.parse import uses_netloc
 
         netloc = self.host
         port = self.port
@@ -1080,7 +1080,7 @@ class Finding(models.Model):
     def compute_hash_code(self):
         hash_string = self.title + str(self.cwe) + str(self.line) + str(self.file_path)
         if self.dynamic_finding:
-            endpoint_str = u''
+            endpoint_str = ''
             for e in self.endpoints.all():
                 endpoint_str += str(e)
             if endpoint_str:
@@ -1442,10 +1442,10 @@ class BurpRawRequestResponse(models.Model):
     burpResponseBase64 = models.BinaryField()
 
     def get_request(self):
-        return unicode(base64.b64decode(self.burpRequestBase64), errors='ignore')
+        return str(base64.b64decode(self.burpRequestBase64), errors='ignore')
 
     def get_response(self):
-        res = unicode(base64.b64decode(self.burpResponseBase64), errors='ignore')
+        res = str(base64.b64decode(self.burpResponseBase64), errors='ignore')
         # Removes all blank lines
         res = re.sub(r'\n\s*\n', '\n', res)
         return res
@@ -1523,7 +1523,7 @@ class FindingImage(models.Model):
                                  options={'quality': 100})
 
     def __unicode__(self):
-        return self.image.name or u'No Image'
+        return self.image.name or 'No Image'
 
 
 class FindingImageAccessToken(models.Model):

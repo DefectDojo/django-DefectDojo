@@ -1,10 +1,10 @@
-import StringIO
+import io
 import csv
 import hashlib
 from dojo.models import Finding, Endpoint
 from dateutil.parser import parse
 import re
-from urlparse import urlparse
+from urllib.parse import urlparse
 import socket
 
 
@@ -309,7 +309,7 @@ class GenericFindingUploadCsvParser(object):
         content = filename.read()
 
         row_number = 0
-        reader = csv.reader(StringIO.StringIO(content), delimiter=',', quotechar='"')
+        reader = csv.reader(io.StringIO(content), delimiter=',', quotechar='"')
         for row in reader:
             finding = Finding(test=test)
 
@@ -331,4 +331,4 @@ class GenericFindingUploadCsvParser(object):
 
             row_number += 1
 
-        self.items = self.dupes.values()
+        self.items = list(self.dupes.values())

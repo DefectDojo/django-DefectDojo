@@ -30,6 +30,7 @@ from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, message, get_system_setting, create_notification, Product_Tab
 from dojo.tasks import update_epic_task, add_epic_task, close_epic_task
+from functools import reduce
 
 logger = logging.getLogger(__name__)
 
@@ -517,8 +518,8 @@ def import_scan_results(request, eid=None, pid=None):
 
             try:
                 for item in parser.items:
-                    print "item blowup"
-                    print item
+                    print("item blowup")
+                    print(item)
                     sev = item.severity
                     if sev == 'Information' or sev == 'Informational':
                         sev = 'Info'

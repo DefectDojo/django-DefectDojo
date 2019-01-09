@@ -1,4 +1,4 @@
-import StringIO
+import io
 import csv
 import hashlib
 from dojo.models import Finding, Notes
@@ -116,7 +116,7 @@ class SKFCsvParser(object):
         content = filename.read()
 
         row_number = 0
-        reader = csv.reader(StringIO.StringIO(content), delimiter=',', quotechar='"', escapechar='\\')
+        reader = csv.reader(io.StringIO(content), delimiter=',', quotechar='"', escapechar='\\')
         for row in reader:
             finding = Finding(test=test)
             finding.severity = 'Info'
@@ -139,4 +139,4 @@ class SKFCsvParser(object):
 
             row_number += 1
 
-        self.items = self.dupes.values()
+        self.items = list(self.dupes.values())

@@ -33,7 +33,7 @@ def webhook(request):
 
     if request.method == 'POST':
         parsed = json.loads(request.body)
-        if 'issue' in parsed.keys():
+        if 'issue' in list(parsed.keys()):
             jid = parsed['issue']['id']
             jissue = get_object_or_404(JIRA_Issue, jira_id=jid)
             if jissue.finding is not None:
