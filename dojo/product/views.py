@@ -17,7 +17,7 @@ from django.db.models import Sum, Count, Q
 from dojo.filters import ProductFilter, ProductFindingFilter, EngagementFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, ProductMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm, \
                        EngagementPresetsForm, DeleteEngagementPresetsForm
-from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, Finding_Template, \
+from dojo.models import Product_Type, Finding, Product, Engagement, PortscanSettings, Risk_Acceptance, Test, JIRA_PKey, Finding_Template, \
     Tool_Product_Settings, Cred_Mapping, Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, \
     Endpoint, Engagement_Presets
 from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, get_system_setting, create_notification, Product_Tab
@@ -149,7 +149,7 @@ def view_product_metrics(request, pid):
 
     i_engs_page = get_page_items(request, result.qs, 10)
 
-    scan_sets = ScanSettings.objects.filter(product=prod)
+    scan_sets = PortscanSettings.objects.filter(product=prod)
     auth = request.user.is_staff or request.user in prod.authorized_users.all()
 
     if not auth:
@@ -389,7 +389,7 @@ def import_scan_results_prod(request, pid=None):
 
 def view_product_details(request, pid):
     prod = get_object_or_404(Product, id=pid)
-    scan_sets = ScanSettings.objects.filter(product=prod)
+    scan_sets = PortscanSettings.objects.filter(product=prod)
     tools = Tool_Product_Settings.objects.filter(product=prod).order_by('name')
     auth = request.user.is_staff or request.user in prod.authorized_users.all()
     creds = Cred_Mapping.objects.filter(product=prod).select_related('cred_id').order_by('cred_id')

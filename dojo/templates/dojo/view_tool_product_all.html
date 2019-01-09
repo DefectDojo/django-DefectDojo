@@ -32,9 +32,13 @@
                                     {{ tool.tool_configuration.name }}</a></td>
                                   <td>{{ tool.tool_configuration.tool_type.name }}</td>
                                   <td>
-                                      <div class="btn-group"><!--
+                                      <div class="btn-group">
+                                          <form id="start-scan-now" class="form-inline" method="post" action="{% url 'run_tool_product' tool.product.id tool.id  %}">
+                                              {% csrf_token %}
+                                              <input type="hidden" name="scan_now" value="Scan Now"/>
+                                          </form>
                                           <a class="btn btn-sm btn-primary"
-                                             href="{% url 'view_tool_product' tool.product.id tool.id  %}">View</a>-->
+                                             href="#" onclick="$('#start-scan-now').submit()"><i class="fa fa-rocket"></i> Run</a>
                                           <a class="btn btn-sm btn-warning"
                                              href="{% url 'edit_tool_product' tool.product.id tool.id  %}">Edit</a>
                                           <a class="btn btn-sm btn-danger delete-finding"
