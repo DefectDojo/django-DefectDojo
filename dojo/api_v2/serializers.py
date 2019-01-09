@@ -1,5 +1,5 @@
 from dojo.models import Product, Engagement_Type, Engagement, Test, Finding, \
-    User, ScanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance, \
+    User, PortscanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, Report_Type, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Product_Type, JIRA_Conf, Endpoint, BurpRawRequestResponse, JIRA_PKey, \
@@ -500,7 +500,7 @@ class StubFindingCreateSerializer(serializers.HyperlinkedModelSerializer):
 
 class ScanSettingsSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = ScanSettings
+        model = PortscanSettings
         fields = '__all__'
 
 
@@ -514,7 +514,7 @@ class ScanSettingsCreateSerializer(serializers.HyperlinkedModelSerializer):
     data = serializers.DateTimeField(required=False)
 
     class Meta:
-        model = ScanSettings
+        model = PortscanSettings
         fields = '__all__'
 
 

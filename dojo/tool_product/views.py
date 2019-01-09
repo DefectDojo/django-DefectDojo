@@ -6,9 +6,11 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from dojo.forms import DeleteToolProductSettingsForm, ToolProductSettingsForm, NoteForm
-from dojo.models import Product, Tool_Product_Settings
+from dojo.models import Product, Tool_Product_Settings, Tool_Configuration, Tool_Product_History
+from dojo.management.commands.run_tool import run_on_demand_scan
 from django.http import HttpResponseRedirect
 from dojo.utils import add_breadcrumb, Product_Tab
+from threading import Thread
 
 logger = logging.getLogger(__name__)
 
@@ -52,41 +54,48 @@ def all_tool_product(request, pid):
         'product_tab': product_tab
     })
 
-
-@user_passes_test(lambda u: u.is_staff)
-def view_tool_product(request, pid, ttid):
-    tool = Tool_Product_Settings.objects.get(pk=ttid)
-    notes = tool.notes.all()
-
-    if request.method == 'POST':
-        form = NoteForm(request.POST)
-        if form.is_valid():
-            new_note = form.save(commit=False)
-            new_note.author = request.user
-            new_note.date = timezone.now()
-            new_note.save()
-            tool.notes.add(new_note)
-            form = NoteForm()
-            # url = request.build_absolute_uri(reverse("view_test", args=(test.id,)))
-            # title="Test: %s on %s" % (test.test_type.name, test.engagement.product.name)
-            # process_notifications(request, new_note, url, title)
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                'Note added successfully.',
-                extra_tags='alert-success')
+#markme
+@user_passes_test(lambda u: u.is_superuser)
+def run_tool_product(request, pid, ttid):
+    scan_settings = get_object_or_404(Tool_Product_Settings, pk=ttid)
+    user = request.user
+    if user.is_superuser:
+        pass
     else:
-        form = NoteForm()
+        raise PermissionDenied
+
+    if scan_settings.url == "" and scan_settings.tool_configuration:
+        scan_settings.url = scan_settings.tool_configuration.url
+        
+    scan_is_running = False
+    if request.method == 'POST':
+        if 'scan_now' in request.POST:
+            t = Thread(target=run_on_demand_scan, args=(str(ttid),))
+            t.start()
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Tool successfully started.',
+                                 extra_tags='alert-success')
+            # need to redirect else reload will kick off new scans
+            return HttpResponseRedirect(reverse('run_tool_product', args=(pid, ttid)))
+
+    scan_history = Tool_Product_History.objects.get(product=ttid)
+    for scan in scan_history.all():
+        if scan.status in ["Running", "Pending"]:
+            scan_is_running = True
 
     add_breadcrumb(
-        title="View Product Tool Configuration",
+        title="Run Product Tool",
         top_level=False,
         request=request)
 
-    return render(request, 'dojo/view_tool_product.html', {
-        'tool': tool,
-        'notes': notes,
-        'form': form
+    return render(request, 'dojo/run_tool_product.html', {
+        'tool_config': tool_config,
+        'scan_settings': scan_settings,
+        'scans': scan_history.order_by('id'),
+        'scan_is_running': scan_is_running,
+        'pid': pid,
+        'ttid': ttid,
     })
 
 

@@ -567,7 +567,7 @@ class Product(models.Model):
         return self.prod_type if self.prod_type is not None else 'unknown'
 
 
-class ScanSettings(models.Model):
+class PortscanSettings(models.Model):
     product = models.ForeignKey(Product, default=1, editable=False)
     addresses = models.TextField(default="none")
     user = models.ForeignKey(User, editable=False)
@@ -585,8 +585,8 @@ class ScanSettings(models.Model):
 
     def get_breadcrumbs(self):
         bc = self.product.get_breadcrumbs()
-        bc += [{'title': "Scan Settings",
-                'url': reverse('view_scan_settings',
+        bc += [{'title': "Portscan Settings",
+                'url': reverse('view_portscan_settings',
                                args=(self.product.id, self.id,))}]
         return bc
 
@@ -598,7 +598,7 @@ removed ip_scans field
 
 
 class Scan(models.Model):
-    scan_settings = models.ForeignKey(ScanSettings, default=1, editable=False)
+    scan_settings = models.ForeignKey(PortscanSettings, default=1, editable=False)
     date = models.DateTimeField(editable=False, blank=True,
                                 default=get_current_datetime)
     protocol = models.CharField(max_length=10, default='TCP')
@@ -612,7 +612,7 @@ class Scan(models.Model):
     def get_breadcrumbs(self):
         bc = self.scan_settings.get_breadcrumbs()
         bc += [{'title': self.__unicode__(),
-                'url': reverse('view_scan', args=(self.id,))}]
+                'url': reverse('view_portscan', args=(self.id,))}]
         return bc
 
 
@@ -660,6 +660,7 @@ class Tool_Configuration(models.Model):
     ssh = models.CharField(max_length=6000, null=True, blank=True)
     api_key = models.CharField(max_length=600, null=True, blank=True,
                                verbose_name="API Key")
+    scan_type = models.CharField(max_length=100, null=True, blank=True, verbose_name="Scan Type")
 
     class Meta:
         ordering = ['name']
@@ -1619,8 +1620,8 @@ class Tool_Product_Settings(models.Model):
 
 class Tool_Product_History(models.Model):
     product = models.ForeignKey(Tool_Product_Settings, editable=False)
+    status = models.CharField(max_length=10, default='Pending', editable=False)
     last_scan = models.DateTimeField(null=False, editable=False, default=now)
-    succesfull = models.BooleanField(default=True, verbose_name="Succesfully")
     configuration_details = models.CharField(max_length=2000, null=True,
                                              blank=True)
 
@@ -2037,7 +2038,7 @@ admin.site.register(UserContactInfo)
 admin.site.register(Notes)
 admin.site.register(Report)
 admin.site.register(Scan)
-admin.site.register(ScanSettings)
+admin.site.register(PortscanSettings)
 admin.site.register(IPScan)
 admin.site.register(Alerts)
 admin.site.register(JIRA_Issue)

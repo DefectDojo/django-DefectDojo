@@ -3,7 +3,7 @@ from rest_framework.permissions import DjangoModelPermissions
 from django_filters.rest_framework import DjangoFilterBackend
 
 from dojo.models import Product, Engagement, Test, Finding, \
-    User, ScanSettings, Scan, Stub_Finding, Finding_Template, \
+    User, PortscanSettings, Scan, Stub_Finding, Finding_Template, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Endpoint, JIRA_PKey, JIRA_Conf
 
@@ -136,7 +136,7 @@ class ScanSettingsViewSet(mixins.ListModelMixin,
                           mixins.CreateModelMixin,
                           viewsets.GenericViewSet):
     serializer_class = serializers.ScanSettingsSerializer
-    queryset = ScanSettings.objects.all()
+    queryset = PortscanSettings.objects.all()
     permission_classes = (permissions.UserHasScanSettingsPermission,
                           DjangoModelPermissions)
     filter_backends = (DjangoFilterBackend,)
@@ -150,10 +150,10 @@ class ScanSettingsViewSet(mixins.ListModelMixin,
 
     def get_queryset(self):
         if not self.request.user.is_staff:
-            return ScanSettings.objects.filter(
+            return PortscanSettings.objects.filter(
                 product__authorized_users__in=[self.request.user])
         else:
-            return ScanSettings.objects.all()
+            return PortscanSettings.objects.all()
 
 
 class ScansViewSet(mixins.ListModelMixin,

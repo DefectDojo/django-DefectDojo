@@ -13,7 +13,7 @@ from django.utils.dates import MONTHS
 from django.utils.safestring import mark_safe
 from django.utils import timezone
 from tagging.models import Tag
-from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
+from dojo.models import Finding, Product_Type, Product, PortscanSettings, VA, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
     JIRA_Issue, JIRA_PKey, JIRA_Conf, UserContactInfo, Tool_Type, Tool_Configuration, Tool_Product_Settings, \
@@ -422,7 +422,7 @@ class AddFindingsRiskAcceptanceForm(forms.ModelForm):
         exclude = ('reporter', 'path', 'notes', 'accepted_by', 'expiration_date', 'compensating_control')
 
 
-class ScanSettingsForm(forms.ModelForm):
+class PortscanSettingsForm(forms.ModelForm):
     addHelpTxt = "Enter IP addresses in x.x.x.x format separated by commas"
     proHelpTxt = "UDP scans require root privs. See docs for more information"
     msg = 'Addresses must be x.x.x.x format, separated by commas'
@@ -444,7 +444,7 @@ class ScanSettingsForm(forms.ModelForm):
         help_text=proHelpTxt)
 
     class Meta:
-        model = ScanSettings
+        model = PortscanSettings
         fields = ['addresses', 'frequency', 'email', 'protocol']
 
 
@@ -1499,6 +1499,8 @@ class App_AnalysisTypeForm(forms.ModelForm):
 class ToolConfigForm(forms.ModelForm):
     tool_type = forms.ModelChoiceField(queryset=Tool_Type.objects.all(), label='Tool Type')
     ssh = forms.CharField(widget=forms.Textarea(attrs={}), required=False, label='SSH Key')
+    url = forms.CharField(widget=forms.TextInput, label='SSH or HTTP URL', required=True)
+    scan_type = forms.ChoiceField(required=False, choices=ImportScanForm.SORTED_SCAN_TYPE_CHOICES, label='Parse result as tool scan')
 
     class Meta:
         model = Tool_Configuration
@@ -1513,7 +1515,7 @@ class ToolConfigForm(forms.ModelForm):
             url_validator(form_data["url"])
         except forms.ValidationError:
             raise forms.ValidationError(
-                'It does not appear as though this endpoint is a valid URL/SSH or IP address.',
+                'It does not appear as if this URL is a valid HTTP or SSH URL.',
                 code='invalid')
 
         return form_data
@@ -1539,6 +1541,7 @@ class DeleteToolProductSettingsForm(forms.ModelForm):
 
 class ToolProductSettingsForm(forms.ModelForm):
     tool_configuration = forms.ModelChoiceField(queryset=Tool_Configuration.objects.all(), label='Tool Configuration')
+    url = forms.CharField(widget=forms.TextInput, label='SSH or HTTP URL', required=False) 
 
     class Meta:
         model = Tool_Product_Settings
@@ -1550,13 +1553,15 @@ class ToolProductSettingsForm(forms.ModelForm):
         from django.core.validators import URLValidator
         form_data = self.cleaned_data
 
-        try:
-            url_validator = URLValidator(schemes=['ssh', 'http', 'https'])
-            url_validator(form_data["url"])
-        except forms.ValidationError:
-            raise forms.ValidationError(
-                'It does not appear as though this endpoint is a valid URL/SSH or IP address.',
-                code='invalid')
+        if form_data["url"] != "":
+		try:
+		    url_validator = URLValidator(schemes=['ssh', 'http', 'https'])
+		    url_validator(form_data["url"])
+		except forms.ValidationError:
+		    raise forms.ValidationError(
+		        'It does not appear as if this URL is a valid HTTP or SSH URL.',
+		        code='invalid')
+        
 
         return form_data
 
