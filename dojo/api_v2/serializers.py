@@ -328,6 +328,13 @@ class JIRASerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class DevelopmentEnvironmentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Development_Environment
+        fields = '__all__'
+
+
 class TestSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
     test_type_name = serializers.ReadOnlyField()
@@ -502,6 +509,8 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
     verified = serializers.BooleanField(default=True)
     scan_type = serializers.ChoiceField(
         choices=ImportScanForm.SCAN_TYPE_CHOICES)
+    test_type = serializers.ChoiceField(
+        choices=Test_Type.objects.all())
     file = serializers.FileField()
     engagement = serializers.PrimaryKeyRelatedField(
         queryset=Engagement.objects.all())
@@ -518,7 +527,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         skip_duplicates = data['skip_duplicates']
         close_old_findings = data['close_old_findings']
         test_type, created = Test_Type.objects.get_or_create(
-            name=data['scan_type'])
+            name=data.get('test_type', data['scan_type']))
         environment, created = Development_Environment.objects.get_or_create(
             name='Development')
         test = Test(
