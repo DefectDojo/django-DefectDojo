@@ -125,7 +125,7 @@ def alerts(request):
 def alerts_json(request, limit=None):
     limit = request.GET.get('limit')
     if limit:
-        alerts = serializers.serialize('json', Alerts.objects.filter(user_id=request.user)[:limit])
+        alerts = serializers.serialize('json', Alerts.objects.filter(user_id=request.user)[:int(limit)])
     else:
         alerts = serializers.serialize('json', Alerts.objects.filter(user_id=request.user))
     return HttpResponse(alerts, content_type='application/json')

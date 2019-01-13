@@ -10,7 +10,6 @@ EXEMPT_URLS = [compile(settings.LOGIN_URL.lstrip('/'))]
 if hasattr(settings, 'LOGIN_EXEMPT_URLS'):
     EXEMPT_URLS += [compile(expr) for expr in settings.LOGIN_EXEMPT_URLS]
 
-
 class LoginRequiredMiddleware:
     """
     Middleware that requires a user to be authenticated to view any page other
@@ -29,9 +28,10 @@ class LoginRequiredMiddleware:
  'django.contrib.auth.middleware.AuthenticationMiddleware'. If that doesn't\
  work, ensure your TEMPLATE_CONTEXT_PROCESSORS setting includes\
  'django.core.context_processors.auth'."
-        if not request.user.is_authenticated():
+        
+        if not request.user.is_authenticated(): # if the user is not logged in 
             path = request.path_info.lstrip('/')
-            if not any(m.match(path) for m in EXEMPT_URLS):
+            if not any(m.match(path) for m in EXEMPT_URLS): # is the path exempt from login specs
                 fullURL = "%s?next=%s" % (settings.LOGIN_URL,
                                           urlquote(request.get_full_path()))
                 return HttpResponseRedirect(fullURL)
