@@ -6,7 +6,7 @@ from django.template.defaultfilters import stringfilter
 from django.utils.html import escape
 from django.utils.safestring import mark_safe, SafeData
 from django.utils.text import normalize_newlines
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib.auth.models import User
 from dojo.utils import prepare_for_view, get_system_setting
 from dojo.models import Check_List, FindingImageAccessToken, Finding, System_Settings, JIRA_PKey, Product
@@ -427,7 +427,7 @@ def colgroup(parser, token):
             self.num_cols = num_cols
             self.varname = varname
 
-        def render(self, context):
+        def render(self, context, renderer=None):
             iterable = template.Variable(self.iterable).resolve(context)
             num_cols = self.num_cols
             context[self.varname] = list(zip(

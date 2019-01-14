@@ -142,6 +142,8 @@ swagger_urls = [
 
 schema_view = get_swagger_view(title='Defect Dojo API v2')
 
+app_name = "tastypie_swagger"
+
 urlpatterns = [
     #  tastypie api
     url(r'^%sapi/' % get_system_setting('url_prefix'), include(v1_api.urls)),
@@ -149,7 +151,7 @@ urlpatterns = [
     url(r'^%sapi/v2/' % get_system_setting('url_prefix'), include(v2_api.urls)),
     # api doc urls
     url(r'%sapi/v1/doc/' % get_system_setting('url_prefix'),
-        include(swagger_urls, namespace='tastypie_swagger'),
+        include((swagger_urls, 'tp_s'), namespace='tastypie_swagger'),
         kwargs={
             "tastypie_api_module": "dojo.urls.v1_api",
             "namespace": "tastypie_swagger",
@@ -167,7 +169,7 @@ urlpatterns = [
 if hasattr(settings, 'DJANGO_ADMIN_ENABLED'):
     if settings.DJANGO_ADMIN_ENABLED:
         #  django admin
-        urlpatterns += [url(r'^%sadmin/' % get_system_setting('url_prefix'), include(admin.site.urls))]
+        urlpatterns += [url(r'^%sadmin/' % get_system_setting('url_prefix'), admin.site.urls)]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

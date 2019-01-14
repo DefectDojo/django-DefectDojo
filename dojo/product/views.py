@@ -8,7 +8,7 @@ from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.contrib.contenttypes.models import ContentType
@@ -35,8 +35,10 @@ def product(request):
         name_words = [product.name for product in
                       Product.objects.all()]
     else:
+        print('request.user :: ', request.user)
         initial_queryset = Product.objects.filter(
             authorized_users__in=[request.user])
+        
         name_words = [word for product in
                       Product.objects.filter(
                           authorized_users__in=[request.user])

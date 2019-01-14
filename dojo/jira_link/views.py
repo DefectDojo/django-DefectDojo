@@ -6,7 +6,7 @@ import logging
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.admin.utils import NestedObjects
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db import DEFAULT_DB_ALIAS
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404

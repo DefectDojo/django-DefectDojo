@@ -11,7 +11,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import Http404, HttpResponse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.http import StreamingHttpResponse

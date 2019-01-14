@@ -1,6 +1,6 @@
 # see tastypie documentation at http://django-tastypie.readthedocs.org/en
 from django.core.exceptions import ImproperlyConfigured, ValidationError
-from django.core.urlresolvers import resolve, get_script_prefix
+from django.urls import resolve, get_script_prefix
 from tastypie import fields
 from tastypie.fields import RelatedField
 from tastypie.authentication import ApiKeyAuthentication

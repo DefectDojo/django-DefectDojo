@@ -12,7 +12,7 @@ from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
