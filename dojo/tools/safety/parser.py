@@ -39,7 +39,7 @@ class SafetyParser(object):
 
 
 def get_item(item_node, test, safety_db):
-    severity = 'Info' # Because Safety doesn't include severity rating
+    severity = 'Info'  # Because Safety doesn't include severity rating
     cve = ''.join(a['cve'] for a in safety_db[item_node['package']] if a['id'] == 'pyup.io-' + item_node['id'])
     title = item_node['package'] + " (" + item_node['affected'] + ")"
     if cve:
@@ -68,5 +68,3 @@ def get_item(item_node, test, safety_db):
                       impact="No impact provided")
 
     return finding
-
-print "Hello"
