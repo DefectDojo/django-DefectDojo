@@ -36,6 +36,7 @@ from dojo.tools.awsscout2.parser import AWSScout2Parser
 from dojo.tools.awsprowler.parser import AWSProwlerParser
 from dojo.tools.brakeman.parser import BrakemanScanParser
 from dojo.tools.spotbugs.parser import SpotbugsXMLParser
+from dojo.tools.safety.parser import SafetyParser
 
 __author__ = 'Jay Paz'
 
@@ -122,6 +123,8 @@ def import_parser_factory(file, test, scan_type=None):
         parser = BrakemanScanParser(file, test)
     elif scan_type == 'SpotBugs Scan':
         parser = SpotbugsXMLParser(file, test)
+    elif scan_type == 'Safety Scan':
+        parser = SafetyParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 
