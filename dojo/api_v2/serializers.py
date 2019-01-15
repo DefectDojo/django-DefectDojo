@@ -509,8 +509,8 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
     verified = serializers.BooleanField(default=True)
     scan_type = serializers.ChoiceField(
         choices=ImportScanForm.SCAN_TYPE_CHOICES)
-    test_type = serializers.ChoiceField(
-        choices=Test_Type.objects.values_list('name', flat=True), required=False)
+    test_type = serializers.PrimaryKeyRelatedField(
+        queryset=Test_Type.objects.all(), required=False)
     file = serializers.FileField()
     engagement = serializers.PrimaryKeyRelatedField(
         queryset=Engagement.objects.all())
