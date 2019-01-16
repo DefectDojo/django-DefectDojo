@@ -313,6 +313,7 @@ INSTALLED_APPS = (
     'rest_framework_swagger',
     'dbbackup',
     'taggit_serializer',
+    # 'mysql-connector-python', # Needs to have the following somewhere : DD_DATABASE_URL=mysql.connector.django://user:pass@127.0.0.1:3306/dojodb3
     # 'axes'
 )
 
@@ -328,11 +329,12 @@ DJANGO_MIDDLEWARE_CLASSES = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    
     'dojo.middleware.LoginRequiredMiddleware',
     'dojo.middleware.TimezoneMiddleware'
 ]
 
-MIDDLEWARE_CLASSES = DJANGO_MIDDLEWARE_CLASSES
+MIDDLEWARE = DJANGO_MIDDLEWARE_CLASSES
 
 # WhiteNoise allows your web app to serve its own static files,
 # making it a self-contained unit that can be deployed anywhere without relying on nginx
@@ -342,7 +344,7 @@ if env('DD_WHITENOISE'):
         # https://warehouse.python.org/project/whitenoise/
         'whitenoise.middleware.WhiteNoiseMiddleware',
     ]
-    MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES + WHITE_NOISE
+    MIDDLEWARE = MIDDLEWARE + WHITE_NOISE
 
 EMAIL_CONFIG = env.email_url(
     'DD_EMAIL_URL', default='smtp://user@:password@localhost:25')

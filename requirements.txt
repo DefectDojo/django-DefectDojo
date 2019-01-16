@@ -1,10 +1,10 @@
 celery==4.2.1 # updated from 4.1.1 for django 2.1.5
 coverage==4.5.1
 defusedxml==0.5.0
-Django==2.1.5 # updated from 1.11.16
+Django==2.0.10 # updated from 1.11.16
 django-auditlog==0.4.5
-django-custom-field==2.9 # No Django 2.0 Support
-django-filter==2.0.0
+git+https://git@github.com/Maffooch/django-custom-field.git
+django-filter==1.0.4
 django-imagekit==4.0.2
 django-multiselectfield==0.1.8
 django-overextends==0.4.3  # Required for extensions # No Django 2.0 Support
@@ -13,7 +13,7 @@ django-slack==5.11.1
 django-rest-swagger==2.1.2
 django-tagging==0.4.6
 django-tastypie==0.14.2 # updated from 0.14.0
-django-tastypie-swagger==0.1.4
+git+https://git@github.com/Maffooch/django-tastypie-swagger.git
 django-watson==1.5.2
 django-rest-swagger==2.1.2
 djangorestframework==3.9.0
@@ -22,11 +22,7 @@ html2text==2018.1.9
 humanize==0.5.1
 jira==1.0.13
 lxml==4.1.1
-# <<<<<<< HEAD
-# mysqlclient==1.3.14 # No longer required
-# =======
-# mysqlclient==1.3.12
-# >>>>>>> bd25a3b64b4e7f094f01453d1b9c99eff1f51762
+# 'mysql-connector-python==8.0.13', # Needs to have the following somewhere : DD_DATABASE_URL=mysql.connector.django://user:pass@127.0.0.1:3306/dojodb3
 pdfkit==0.6.1
 Pillow==5.0.0  # required by django-imagekit
 psycopg2-binary==2.7.5
@@ -36,11 +32,6 @@ python-nmap==0.6.1
 pytz==2018.9
 requests>=2.2.1
 sqlalchemy  # Required by Celery broker transport
-# <<<<<<< HEAD
-# # supervisor==3.3.3 # No longer required
-# =======
-# # supervisor==3.3.3
-# >>>>>>> bd25a3b64b4e7f094f01453d1b9c99eff1f51762
 urllib3==1.22
 vobject==0.9.5
 asteval==0.9.12

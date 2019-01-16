@@ -93,3 +93,6 @@ dojo/media
 venv/
 ENV/
 quick.bash
+
+# Visual Studio Code
+.vscode/
