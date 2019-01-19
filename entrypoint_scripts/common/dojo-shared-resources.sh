@@ -529,15 +529,16 @@ function install_app(){
         if [ "$DBTYPE" == "$MYSQL" ]; then
             pip install .[mysql]
         else
-            pip install .
+            pip install -r requirements.txt
         fi
 
     else
+        echo "VENV NOT ACTIVE"
         sudo pip install --upgrade pip
         if [ "$DBTYPE" == "$MYSQL" ]; then
             sudo -H pip install .[mysql]
         else
-            sudo -H pip install .
+            sudo -H pip install -r requirements.txt
         fi
     fi
     python manage.py makemigrations dojo
