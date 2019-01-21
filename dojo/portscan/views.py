@@ -9,9 +9,9 @@ from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
-from dojo.forms import ScanSettingsForm, DeleteIPScanForm, VaForm
-from dojo.management.commands.run_scan import run_on_demand_scan
-from dojo.models import Product, Scan, IPScan, ScanSettings
+from dojo.forms import PortscanSettingsForm, DeleteIPScanForm, VaForm
+from dojo.management.commands.run_portscan import run_on_demand_scan
+from dojo.models import Product, Scan, IPScan, PortscanSettings
 from dojo.utils import add_breadcrumb, get_system_setting
 
 logger = logging.getLogger(__name__)
@@ -22,7 +22,7 @@ status: completed in use
 """
 
 
-def view_scan(request, sid):
+def view_portscan(request, sid):
     scan = get_object_or_404(Scan, id=sid)
     prod = get_object_or_404(Product, id=scan.scan_settings.product.id)
     scan_settings_id = scan.scan_settings.id
@@ -37,15 +37,15 @@ def view_scan(request, sid):
             scan.delete()
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 'Scan results deleted successfully.',
+                                 'Portscan results deleted successfully.',
                                  extra_tags='alert-success')
             return HttpResponseRedirect(
-                reverse('view_scan_settings', args=(prod.id, scan_settings_id,)))
+                reverse('view_portscan_settings', args=(prod.id, scan_settings_id,)))
         else:
             messages.add_message(
                 request,
                 messages.ERROR,
-                'There was a problem deleting scan, please try again.',
+                'There was a problem deleting portscan, please try again.',
                 extra_tags='alert-danger')
     ipScans = []
     ipScan_objects = IPScan.objects.filter(scan=scan)
@@ -66,7 +66,7 @@ def view_scan(request, sid):
 
     return render(
         request,
-        'dojo/view_scan.html',
+        'dojo/view_portscan.html',
         {'scan': scan,
          'ipScans': ipScans,
          'form': form}
@@ -79,8 +79,8 @@ status: completed in use
 """
 
 
-def view_scan_settings(request, pid, sid):
-    scan_settings = get_object_or_404(ScanSettings, id=sid)
+def view_portscan_settings(request, pid, sid):
+    scan_settings = get_object_or_404(PortscanSettings, id=sid)
     user = request.user
     if user.is_staff or user in scan_settings.product.authorized_users.all():
         pass
@@ -108,10 +108,10 @@ def view_scan_settings(request, pid, sid):
             t.start()
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 'Scan successfully started.',
+                                 'Portscan successfully started.',
                                  extra_tags='alert-success')
             # need to redirect else reload will kick off new scans
-            return HttpResponseRedirect(reverse('view_scan_settings', args=(scan_settings.product.id, sid,)))
+            return HttpResponseRedirect(reverse('view_portscan_settings', args=(scan_settings.product.id, sid,)))
 
     for scan in scan_settings.scan_set.all():
         if scan.status in ["Running", "Pending"]:
@@ -121,7 +121,7 @@ def view_scan_settings(request, pid, sid):
 
     return render(
         request,
-        'dojo/view_scan_settings.html',
+        'dojo/view_portscan_settings.html',
         {'scan_settings': scan_settings,
          'scans': scan_settings.scan_set.order_by('id'),
          'scan_is_running': scan_is_running,
@@ -135,8 +135,8 @@ view scan settings for self-service scan
 """
 
 
-def edit_scan_settings(request, pid, sid):
-    old_scan = ScanSettings.objects.get(id=sid)
+def edit_portscan_settings(request, pid, sid):
+    old_scan = PortscanSettings.objects.get(id=sid)
     pid = old_scan.product.id
     user = request.user
     if user.is_staff or user in old_scan.product.authorized_users.all():
@@ -146,14 +146,14 @@ def edit_scan_settings(request, pid, sid):
 
     if request.method == 'POST':
         if request.POST.get('edit'):
-            form = ScanSettingsForm(data=request.POST, instance=old_scan)
+            form = PortscanSettingsForm(data=request.POST, instance=old_scan)
             if form.is_valid():
                 form.save()
                 messages.add_message(request,
                                      messages.SUCCESS,
-                                     'Scan settings saved.',
+                                     'Portscan settings saved.',
                                      extra_tags='alert-success')
-                return HttpResponseRedirect(reverse('view_scan_settings', args=(old_scan.product.id, sid,)))
+                return HttpResponseRedirect(reverse('view_portscan_settings', args=(old_scan.product.id, sid,)))
             else:
                 messages.add_message(request,
                                      messages.ERROR,
@@ -161,7 +161,7 @@ def edit_scan_settings(request, pid, sid):
                                      extra_tags='alert-danger')
                 add_breadcrumb(parent=old_scan, top_level=False, request=request)
                 return render(request,
-                              'dojo/edit_scan_settings.html',
+                              'dojo/edit_portscan_settings.html',
                               {'form': form,
                                'sid': sid,
                                'pid': pid})
@@ -170,16 +170,16 @@ def edit_scan_settings(request, pid, sid):
             old_scan.delete()
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 'Scan settings deleted.',
+                                 'Portscan settings deleted.',
                                  extra_tags='alert-success')
             return HttpResponseRedirect(reverse('view_product', args=(pid,)))
     try:
-        form = ScanSettingsForm(instance=old_scan)
+        form = PortscanSettingsForm(instance=old_scan)
     except:
-        form = ScanSettingsForm()
+        form = PortscanSettingsForm()
     add_breadcrumb(parent=old_scan, top_level=False, request=request)
     return render(request,
-                  'dojo/edit_scan_settings.html',
+                  'dojo/edit_portscan_settings.html',
                   {'form': form,
                    'sid': sid,
                    'pid': pid})
@@ -199,9 +199,9 @@ def gmap(request, pid):
     else:
         raise PermissionDenied
 
-    form = ScanSettingsForm()
+    form = PortscanSettingsForm()
     if request.method == 'POST':
-        form = ScanSettingsForm(data=request.POST)
+        form = PortscanSettingsForm(data=request.POST)
         if form.is_valid():
             new_scan = form.save(commit=False)
             new_scan.product = prod
@@ -209,42 +209,19 @@ def gmap(request, pid):
             new_scan.save()
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 'Scan settings saved.',
+                                 'Portscan settings saved.',
                                  extra_tags='alert-success')
             return HttpResponseRedirect(reverse('view_product', args=(pid,)))
         else:
             messages.add_message(request,
                                  messages.ERROR,
-                                 'Scan settings not saved.',
+                                 'Portscan settings not saved.',
                                  extra_tags='alert-danger')
 
-    add_breadcrumb(title="Scan", top_level=False, request=request)
+    add_breadcrumb(title="Portscan", top_level=False, request=request)
 
     return render(request,
                   'dojo/gmap.html',
                   {'form': form,
                    'pid': pid})
 
-"""
-Greg
-Status: in dev, on hold
-Self service tool for launching nessus scans
-"""
-
-
-def launch_va(request, pid):
-    if request.method == 'POST':
-        form = VaForm(request.POST)
-        if form.isValid():
-            new_va = form.save(commit=False)
-            new_va.user = request.user
-            new_va.save()
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 'VA successfully created.',
-                                 extra_tags='alert-success')
-    else:
-        form = VaForm()
-    return render(request,
-                  "dojo/launch_va.html",
-                  {'form': form, 'pid': pid})

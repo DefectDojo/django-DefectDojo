@@ -79,7 +79,7 @@ def run_tool_product(request, pid, ttid):
             # need to redirect else reload will kick off new scans
             return HttpResponseRedirect(reverse('run_tool_product', args=(pid, ttid)))
 
-    scan_history = Tool_Product_History.objects.get(product=ttid)
+    scan_history = Tool_Product_History.objects.filter(product=ttid)
     for scan in scan_history.all():
         if scan.status in ["Running", "Pending"]:
             scan_is_running = True
@@ -90,7 +90,6 @@ def run_tool_product(request, pid, ttid):
         request=request)
 
     return render(request, 'dojo/run_tool_product.html', {
-        'tool_config': tool_config,
         'scan_settings': scan_settings,
         'scans': scan_history.order_by('id'),
         'scan_is_running': scan_is_running,
