@@ -9,16 +9,23 @@ from django.core.management.base import BaseCommand
 from nmap import PortScannerAsync, PortScannerError
 from pytz import timezone
 
-from dojo.models import Scan, Product, ScanSettings, IPScan
+from dojo.models import Scan, Product, PortscanSettings, IPScan
 from django.conf import settings
 from dojo.utils import get_system_setting
 
 locale = timezone(get_system_setting('time_zone'))
 
 
+"""
+Authors: Fatimah and Michael
+A script that scans a scheduled input of hosts for open ports and emails the
+results of the scan to the product's POC.
+"""
+
+
 class Command(BaseCommand):
-    help = "Details:\n\tRuns tool scans\n\nArguments:" +\
-           "\n\tProduct-Tool-ID"
+    help = "Details:\n\tRuns nmap scans\n\nArguments:" +\
+           "\n\tWeekly\n\tMonthly\n\tQuarterly"
 
     def add_arguments(self, parser):
         parser.add_argument('type')
@@ -206,9 +213,9 @@ class Command(BaseCommand):
             sys.exit(0)
 
         if type.isdigit():
-            scSettings = ScanSettings.objects.filter(id=type)
+            scSettings = PortscanSettings.objects.filter(id=type)
         else:
-            scSettings = ScanSettings.objects.filter(frequency=type)
+            scSettings = PortscanSettings.objects.filter(frequency=type)
 
         if len(scSettings) <= 0:
             print("No scan settings found with parameter specified.")
@@ -289,5 +296,5 @@ class Command(BaseCommand):
 
 
 def run_on_demand_scan(sid):
-    call_command('run_scan', sid)
+    call_command('run_portscan', sid)
     return True
