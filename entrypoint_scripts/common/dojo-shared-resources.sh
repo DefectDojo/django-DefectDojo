@@ -491,7 +491,7 @@ function prepare_settings_file() {
     elif [ "$DBTYPE" == "$MYSQL" ]; then
         DD_DATABASE_URL="mysql.connector.django://$SQLUSER:$SQLPWD@$SQLHOST:$SQLPORT/$DBNAME"
     elif [ "$DBTYPE" == "$POSTGRES" ]; then
-        DD_DATABASE_URL="postgres://$SQLUSER:$SQLPWD@$SQLHOST:$SQLPORT/$DBNAME"
+        DD_DATABASE_URL="mysql.connecto.django://$SQLUSER:$SQLPWD@$SQLHOST:$SQLPORT/$DBNAME"
     fi
 
     if [[ -z $DD_ALLOWED_HOSTS ]]; then

@@ -22,7 +22,7 @@ html2text==2018.1.9
 humanize==0.5.1
 jira==1.0.13
 lxml==4.1.1
-mysql-connector-python==8.0.13 # Needs to have the following somewhere : DD_DATABASE_URL=mysql.connector.django://user:pass@127.0.0.1:3306/dojodb3
+mysql-connector-python==8.0.14 # Needs to have the following somewhere : DD_DATABASE_URL=mysql.connector.django://user:pass@127.0.0.1:3306/dojodb3
 pdfkit==0.6.1
 Pillow==5.0.0  # required by django-imagekit
 psycopg2-binary==2.7.5
