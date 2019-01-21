@@ -178,7 +178,7 @@ function setupdojo() {
     echo "Pip install required components"
     echo "=============================================================================="
     echo
-    pip install .
+    pip install  -r requirements.txt
 
     echo "=============================================================================="
     echo "Copying settings.py"
@@ -489,7 +489,7 @@ function prepare_settings_file() {
     if [ "$DBTYPE" == "$SQLITE" ]; then
         DD_DATABASE_URL="sqlite:///defectdojo.db"
     elif [ "$DBTYPE" == "$MYSQL" ]; then
-        DD_DATABASE_URL="mysql://$SQLUSER:$SQLPWD@$SQLHOST:$SQLPORT/$DBNAME"
+        DD_DATABASE_URL="mysql.connector.django://$SQLUSER:$SQLPWD@$SQLHOST:$SQLPORT/$DBNAME"
     elif [ "$DBTYPE" == "$POSTGRES" ]; then
         DD_DATABASE_URL="postgres://$SQLUSER:$SQLPWD@$SQLHOST:$SQLPORT/$DBNAME"
     fi
@@ -531,9 +531,7 @@ function install_app(){
         else
             pip install -r requirements.txt
         fi
-
     else
-        echo "VENV NOT ACTIVE"
         sudo pip install --upgrade pip
         if [ "$DBTYPE" == "$MYSQL" ]; then
             sudo -H pip install .[mysql]

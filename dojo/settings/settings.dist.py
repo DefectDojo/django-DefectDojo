@@ -42,7 +42,7 @@ DEBUG = env('DD_DEBUG')
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = tuple(env.list('DD_ALLOWED_HOSTS', default=[]))
+ALLOWED_HOSTS = ["127.0.0.1"] # tuple(env.list('DD_ALLOWED_HOSTS', default=[]))
 
 # Raises django's ImproperlyConfigured exception if SECRET_KEY not in os.environ
 SECRET_KEY = env('DD_SECRET_KEY')
@@ -313,7 +313,7 @@ INSTALLED_APPS = (
     'rest_framework_swagger',
     'dbbackup',
     'taggit_serializer',
-    # 'mysql-connector-python', # Needs to have the following somewhere : DD_DATABASE_URL=mysql.connector.django://user:pass@127.0.0.1:3306/dojodb3
+    'mysql.connector.django', # Needs to have the following somewhere : DD_DATABASE_URL=mysql.connector.django://user:pass@127.0.0.1:3306/dojodb3
     # 'axes'
 )
 

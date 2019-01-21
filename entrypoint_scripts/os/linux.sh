@@ -237,7 +237,7 @@ function ubuntu_dojo_install() {
         if [ "$DB_TYPE" = MySQL ]; then
             pip install .[mysql]
         else
-            pip install .
+            pip install -r requirements.txt
         fi
 
     else
@@ -245,7 +245,7 @@ function ubuntu_dojo_install() {
         if [ "$DB_TYPE" = MySQL ]; then
             sudo -H pip install .[mysql]
         else
-            sudo -H pip install .
+            sudo -H pip install  -r requirements.txt
         fi
     fi
     
