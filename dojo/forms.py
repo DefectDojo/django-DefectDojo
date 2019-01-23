@@ -271,7 +271,8 @@ class ImportScanForm(forms.Form):
                          ("SpotBugs Scan", "SpotBugs Scan"),
                          ("AWS Scout2 Scan", "AWS Scout2 Scan"),
                          ("AWS Prowler Scan", "AWS Prowler Scan"),
-                         ("PHP Security Audit v2", "PHP Security Audit v2"))
+                         ("PHP Security Audit v2", "PHP Security Audit v2"),
+                         ("Safety Scan", "Safety Scan"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
 
