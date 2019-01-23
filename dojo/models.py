@@ -1622,8 +1622,6 @@ class Tool_Product_History(models.Model):
     product = models.ForeignKey(Tool_Product_Settings, editable=False)
     status = models.CharField(max_length=10, default='Pending', editable=False)
     last_scan = models.DateTimeField(null=False, editable=False, default=now)
-    configuration_details = models.CharField(max_length=2000, null=True,
-                                             blank=True)
 
 
 class Alerts(models.Model):
