@@ -973,10 +973,10 @@ class EditEndpointForm(forms.ModelForm):
             raise forms.ValidationError('Please enter a valid URL or IP address.',
                                         code='invalid')
 
-        protocol = cleaned_data['protocol']
-        path = cleaned_data['path']
-        query = cleaned_data['query']
-        fragment = cleaned_data['fragment']
+        protocol = cleaned_data['protocol'] or "http"
+        path = cleaned_data['path'] or "/"
+        query = cleaned_data['query'] or ""
+        fragment = cleaned_data['fragment'] or ""
 
         if protocol:
             endpoint = urlunsplit((protocol, host, path, query, fragment))
