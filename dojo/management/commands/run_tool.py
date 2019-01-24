@@ -39,7 +39,6 @@ class Command(BaseCommand):
             scan_settings = Tool_Product_Settings.objects.get(pk=ttid)
             tool_config = scan_settings.tool_configuration
             tool_config.password = prepare_for_view(tool_config.password)
-            tool_config.ssh = prepare_for_view(tool_config.ssh)
             endpoint_url = urlunsplit((endpoint.protocol or 'http', endpoint.host, endpoint.path or '/', endpoint.query or '', endpoint.fragment or ''))
             dummy_user = User.objects.get(id=settings.TOOL_RUN_CONFIG['dummy-user'])          
 
@@ -137,31 +136,29 @@ class Command(BaseCommand):
                     ssh_client = paramiko.SSHClient()
                     ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-                    if url_settings.port == None:
-                        url_settings.port = 22
+                    sshPort = url_settings.port or 22
 
                     if tool_config.authentication_type == "Password":
                         try:
-                            client.connect(url_settings.netloc, url_settings.port, tool_config.username, tool_config.password)
-                        except (BadHostKeyException, AuthenticationException, SSHException, socket.error) as e:
+                            ssh_client.connect(url_settings.netloc, sshPort, tool_config.username, tool_config.password)
+                        except Exception as e:
                             print(e)
 
                     elif tool_config.authentication_type == "SSH":
+                        tool_config.ssh = prepare_for_view(tool_config.ssh)
                         sshKey = StringIO.StringIO(tool_config.ssh)
 
                         try:
-                            key = paramiko.RSAKey.from_private_key_file(sshKey)
-                        except paramiko.PasswordRequiredException:
-                            key = paramiko.RSAKey.from_private_key_file(sshKey, password)
-                        
-                        try:
-                            client.connect(host=url_settings.netloc, port=url_settings.port, username=tool_config.username, pkey=key)
-                        except (BadHostKeyException, AuthenticationException, SSHException, socket.error) as e:
+                            key = paramiko.RSAKey.from_private_key(sshKey, tool_config.password)
+                            ssh_client.connect(url_settings.netloc, sshPort, tool_config.username, pkey=key)
+                        except Exception:
+                            print("Private key is not a valid RSA key. Generate it via ssh-keygen -t rsa.")
                             print(e)
                     
                     try:
-                        stdin, stdout, stderr = client.exec_command(' '.join(call_params))
-                        result = stdout.readlines()
+                        stdin, stdout, stderr = ssh_client.exec_command(' '.join(call_params))
+                        result = stdout.read().decode('ascii')
+                        ssh_client.close()
                     except Exception:
                         result = ""
 
