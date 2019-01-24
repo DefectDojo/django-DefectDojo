@@ -55,9 +55,7 @@ def edit_tool_config(request, ttid):
         tform = ToolConfigForm(request.POST, instance=tool_config)
         
         if tform.is_valid():
-            print("PW", tform.cleaned_data['password'])
             form_copy = tform.save(commit=False)
-            print("PW2", tform.cleaned_data['password'])
             form_copy.password = dojo_crypto_encrypt(tform.cleaned_data['password'])
             print "######"
             print tform.cleaned_data['ssh']
