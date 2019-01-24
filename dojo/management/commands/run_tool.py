@@ -6,17 +6,22 @@ import threading
 from django.core.mail import send_mail
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
-from pytz import timezone
+from django.conf import settings
+from django.contrib import messages
 
-from dojo.models import Product, Tool_Product_Settings, Endpoint, Tool_Product_History, Engagement, Finding
+from dojo.models import Product, \
+     Tool_Product_Settings, Endpoint, Tool_Product_History, \
+     Engagement, Finding, Test_Type, Development_Environment, \
+     Test, User, BurpRawRequestResponse, Finding
 from dojo.tools.factory import import_parser_factory
 from django.conf import settings
-from dojo.utils import get_system_setting
+from dojo.utils import get_system_setting, timezone, create_notification, prepare_for_view
+from django.core.urlresolvers import reverse
+from time import strftime
 
-from urlparse import urlunparse
-import requests, base64, subprocess, paramiko, StringIO
+from urlparse import urlparse, urlunsplit, parse_qs
+import requests, base64, subprocess, paramiko, StringIO, re, traceback
 
-locale = timezone(get_system_setting('time_zone'))
 
 class Command(BaseCommand):
     help = "Details:\n\tRuns product-tool configuration for each endpoint of its connected product\n\nArguments:\n\tID of Product-Tool configuration\n\tID of engagement"
@@ -29,22 +34,30 @@ class Command(BaseCommand):
         ttid = options['ttid']
         eid = options['eid']
 
-        # Run the tool for a specific product-tool configuration, endpoint and engagement
+        # Run the tool for a specific product-tool configuration ID, endpoint and engagement ID (0 = create one)
         def runTool(ttid, endpoint, eid):
-            scan_settings = Tool_Product_Settings.objects.filter(pk=ttid)
+            scan_settings = Tool_Product_Settings.objects.get(pk=ttid)
             tool_config = scan_settings.tool_configuration
+            tool_config.password = prepare_for_view(tool_config.password)
+            tool_config.ssh = prepare_for_view(tool_config.ssh)
+            endpoint_url = urlunsplit((endpoint.protocol or 'http', endpoint.host, endpoint.path or '/', endpoint.query or '', endpoint.fragment or ''))
+            dummy_user = User.objects.get(id=settings.TOOL_RUN_CONFIG['dummy-user'])          
 
             if scan_settings.url == "" and scan_settings.tool_configuration:
                 scan_settings.url = scan_settings.tool_configuration.url
 
-            # write to Tool_Product_History
             url_settings = urlparse(scan_settings.url)
-            scan_history = Tool_Product_History(product=scan_settings.id, status="Pending", last_scan=timezone.now())
+            scan_history = Tool_Product_History(product=scan_settings, status="Pending", last_scan=timezone.now())
             
             if url_settings.scheme not in ["http", "https", "ssh"]:
                 scan_history.status = "Failed"
                 scan_history.save()
-                print("Failed scan for ID " + ttid + " due to invalid URL scheme")
+                print("Failed tool run for ID " + str(ttid) + " due to invalid URL scheme")
+                return False
+            elif settings.ALLOW_TOOL_RUN[url_settings.scheme] == False or (url_settings.scheme == "ssh" and url_settings.netloc == "localhost" and settings.ALLOW_TOOL_RUN["ssh-localhost"] == False):
+                scan_history.status = "Denied"
+                scan_history.save()
+                print("Denied tool run for ID " + str(ttid) + " because " + url_settings.scheme + " connections for the specified host are disabled in settings.py")
                 return False
             else:
                 scan_history.status = "Running"
@@ -58,8 +71,8 @@ class Command(BaseCommand):
                 engagement.api_test = False
                 engagement.pen_test = False
                 engagement.check_list = False
-                engagement.target_start = timezone.now().date()
-                engagement.target_end = timezone.now().date()
+                engagement.target_start = timezone.now()
+                engagement.target_end = timezone.now()
                 engagement.product = product
                 engagement.active = True
                 engagement.status = 'In Progress'
@@ -73,8 +86,10 @@ class Command(BaseCommand):
             t = Test(
                 engagement=engagement,
                 test_type=tt,
-                target_start=timezone.now().date(),
+                target_start = timezone.now(),
+                target_end = timezone.now(),
                 environment=environment,
+                lead = dummy_user,
                 percent_complete=0)
             t.full_clean()
             t.save()
@@ -84,19 +99,41 @@ class Command(BaseCommand):
                 http_headers = {}
 
                 if tool_config.authentication_type == "API":
-                    http_headers = {"APIKEY": scan_settings.tool_configuration.api_key}
+                    http_headers = {settings.TOOL_RUN_CONFIG['http-api-header']: scan_settings.tool_configuration.api_key}
                 elif tool_config.authentication_type == "Password":
                     http_headers = {"Authorization": base64.b64encode('%s:%s' % (tool_config.username, tool_config.password))}
 
-                result = requests.get(scan_settings.url, headers=headers)
+                try:
+                    result = requests.get(scan_settings.url, headers=http_headers).text
+                except Exception as e:
+                    print("Error during HTTP request", e)
+                    result = ""
 
             # ssh://host/folder/file.extension?param connects to the host and runs the file in the query with the parameter provided
             elif url_settings.scheme == "ssh":
                 # On localhost it is directly executed
                 if url_settings.netloc == "localhost":
-                    result = subprocess.check_output([url_settings.path, url_settings.query, url_settings.fragment])
+                    try:
+                        result = subprocess.check_output(call_params)
+                    except Exception as e:
+                        print("Error during execution of ssh://localhost", e)
+                        result = ""
                 else:
                     # Otherwise we connect via SSH
+                    call_params = [url_settings.path]
+
+                    if url_settings.query != "":
+                        url_qs = parse_qs(url_settings.query)
+                        for key, val in url_qs.iteritems():
+                            call_params.append('--'+escapeshell(key)+'="'+escapeshell(val)+'"')
+
+                    if url_settings.fragment != "":
+                        call_params.append(escapeshell(url_settings.fragment))
+
+                    call_params.append(endpoint_url)
+                    if settings.DEBUG:
+                        print('Cmd: '+' '.join(call_params))
+
                     ssh_client = paramiko.SSHClient()
                     ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
@@ -108,9 +145,6 @@ class Command(BaseCommand):
                             client.connect(url_settings.netloc, url_settings.port, tool_config.username, tool_config.password)
                         except (BadHostKeyException, AuthenticationException, SSHException, socket.error) as e:
                             print(e)
-                            scan_history.status = "Failed"
-                            scan_history.save()
-                            return False
 
                     elif tool_config.authentication_type == "SSH":
                         sshKey = StringIO.StringIO(tool_config.ssh)
@@ -124,17 +158,35 @@ class Command(BaseCommand):
                             client.connect(host=url_settings.netloc, port=url_settings.port, username=tool_config.username, pkey=key)
                         except (BadHostKeyException, AuthenticationException, SSHException, socket.error) as e:
                             print(e)
-                            scan_history.status = "Failed"
-                            scan_history.save()
-                            return False
-
-                        stdin, stdout, stderr = client.exec_command(url_settings.path+" "+url_settings.query+" "+url_settings.fragment)
+                    
+                    try:
+                        stdin, stdout, stderr = client.exec_command(' '.join(call_params))
                         result = stdout.readlines()
+                    except Exception:
+                        result = ""
 
-            scan_history.status = "Success"
-            scan_history.save()
             t.percent_complete = 100
+            t.target_end = timezone.now()
             t.save()
+
+            if result == "":
+                scan_history.status = "Failed"
+                scan_history.save()
+                return False
+
+            if eid == 0:
+                engagement.target_end = timezone.now()
+                engagement.save()
+
+            if not tool_config.scan_type:
+                scan_history.status = "Completed"
+                scan_history.save()
+                print("No parsing enabled, so only echoing the result")
+                print(result)
+                return True
+
+            #if settings.DEBUG:
+            #    print("Result: "+result)
 
             parse_result = StringIO.StringIO(result)
             try:
@@ -144,10 +196,14 @@ class Command(BaseCommand):
                 return False
 
             try:
+                finding_count = 0
                 for item in parser.items:
                     sev = item.severity
                     if sev == 'Information' or sev == 'Informational':
                         sev = 'Info'
+
+                    if Finding.SEVERITIES[sev] > Finding.SEVERITIES[settings.TOOL_RUN_CONFIG['min-severity']]:
+                        continue
 
                     item.severity = sev
                     item.test = t
@@ -155,8 +211,9 @@ class Command(BaseCommand):
                         item.date = t.target_start
 
                     item.last_reviewed = timezone.now()
-                    item.active = active
+                    item.active = True
                     item.verified = False
+                    item.reporter = dummy_user
                     item.save(dedupe_option=False)
 
                     if hasattr(item, 'unsaved_req_resp') and len(
@@ -196,18 +253,22 @@ class Command(BaseCommand):
 
                     finding_count += 1
 
+                scan_history.status = "Completed"
+                scan_history.save()
+
                 create_notification(
                     event='results_added',
                     title=str(finding_count) + " findings for " + engagement.product.name,
                     finding_count=finding_count,
                     test=t,
                     engagement=engagement,
-                    url=request.build_absolute_uri(
-                        reverse('view_test', args=(t.id, ))))
+                    url=reverse('view_test', args=(t.id, )))
                 return True
 
             except SyntaxError:
-                print('There appears to be an error in the XML report, please check and try again.')
+                scan_history.status = "Failed"
+                scan_history.save()
+                print('There appears to be an error in the report output, please check and try again.')
                 return False
 
         # The execution is threaded. Each endpoint has their own thread.
@@ -218,7 +279,11 @@ class Command(BaseCommand):
 
             def run(self):
                 (ttid, endpoint, engagement) = self.scan_queue.get()
-                runTool(ttid, endpoint, engagement)
+                try:
+                    runTool(ttid, endpoint, engagement)
+                except Exception as e:
+                    print("Encountered exception during execution", e)
+                    traceback.print_exc()
                 self.scan_queue.task_done()
 
         if not options:
@@ -230,7 +295,10 @@ class Command(BaseCommand):
             print("Product-Tool Configuration ID not found.")
             sys.exit(0)
 
-        endpoints = Endpoint.objects.filter(product=scSettings.product.id)
+        if not scSettings[0].tool_configuration.scan_type:
+            print("Warning: This product tool configuration has no parsing configured.")
+
+        endpoints = Endpoint.objects.filter(product=scSettings[0].product.id)
         if len(endpoints) <= 0:
             print("Connected product has no endpoints configured that are tagged with `tool_export`.")
             sys.exit(0)
@@ -244,9 +312,9 @@ class Command(BaseCommand):
         scan_queue = Queue.Queue()
         has_exportable = False
         for e in endpoints:
-            tags = e.endpoint_params.tags.objects.filter(value="tool-export")
+            tags = e.tags.filter(name="tool-export")
 
-            if len(endpoints) > 0:
+            if len(tags) > 0:
                 scan_queue.put((ttid, e, eid))
                 t = threadedScan(scan_queue)
                 t.setDaemon(True)
@@ -255,6 +323,10 @@ class Command(BaseCommand):
         scan_queue.join()
 
 
-def run_on_demand_scan(ttid):
-    call_command('run_tool', ttid)
+def run_on_demand_scan(ttid, eid):
+    call_command('run_tool', ttid, eid)
     return True
+
+# Python 2.7 doesn't have a good way to escape shell arguments
+def escapeshell(string):
+    return re.sub('[^\w \-_/:.]', '', string)
