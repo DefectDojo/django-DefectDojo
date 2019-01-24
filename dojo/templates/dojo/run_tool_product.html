@@ -33,6 +33,15 @@
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                                 <li role="presentation">
+                                    <form id="clear-history" class="form-inline" method="post" action="{% url 'clear_tool_product_history' pid ttid %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="clear_now" value="Scan Now"/>
+                                    </form>
+                                    <a href="#" onclick="if(confirm('Are you sure you want to delete the history of this product tool configuration?')) $('#clear-history').submit()">
+                                        <i class="fa fa-eraser"></i> Clear
+                                    </a>
+                                </li>
+                                <li role="presentation">
                                     <a href='{% url 'edit_tool_product' pid ttid %}'>
                                         <i class="fa fa-pencil-square-o"></i> Edit Product Tool
                                     </a>
@@ -46,7 +55,6 @@
                                         <i class="fa fa-rocket"></i> Run
                                     </a>
                                 </li>
-
                             </ul>
                         </div>
                     </div>
@@ -68,7 +76,7 @@
                 <div class="col-md-12">
                     <div class="panel panel-default table-responsive">
                         <div class="panel-heading">
-                            <h4>Scan History</h4>
+                            <h4>Run History</h4>
                         </div>
                         <table class="table table-hover table-striped table-bordered">
                             <thead>
@@ -81,7 +89,7 @@
                             <tbody>
                             {% for sc in scans %}
                                 <tr>
-                                    <td>{{ sc.last_scan }} /td>
+                                    <td>{{ sc.last_scan }}</td>
                                     <td>{{ sc.status }}</td>
                                     <td>{% ifequal sc.status "Running" %}
                                         <div class="progress">

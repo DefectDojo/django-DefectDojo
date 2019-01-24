@@ -54,7 +54,6 @@ def all_tool_product(request, pid):
         'product_tab': product_tab
     })
 
-#markme
 @user_passes_test(lambda u: u.is_superuser)
 def run_tool_product(request, pid, ttid):
     scan_settings = get_object_or_404(Tool_Product_Settings, pk=ttid)
@@ -70,7 +69,7 @@ def run_tool_product(request, pid, ttid):
     scan_is_running = False
     if request.method == 'POST':
         if 'scan_now' in request.POST:
-            t = Thread(target=run_on_demand_scan, args=(str(ttid),))
+            t = Thread(target=run_on_demand_scan, args=(str(ttid),str(0)))
             t.start()
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -89,14 +88,35 @@ def run_tool_product(request, pid, ttid):
         top_level=False,
         request=request)
 
+    scan_settings.tool_configuration.scan_type = scan_settings.tool_configuration.scan_type or 'None'
+
     return render(request, 'dojo/run_tool_product.html', {
         'scan_settings': scan_settings,
-        'scans': scan_history.order_by('id'),
+        'scans': scan_history.order_by('-id'),
         'scan_is_running': scan_is_running,
         'pid': pid,
         'ttid': ttid,
     })
 
+@user_passes_test(lambda u: u.is_superuser)
+def clear_tool_product_history(request, pid, ttid):
+    scan_settings = get_object_or_404(Tool_Product_Settings, pk=ttid)
+    user = request.user
+    if user.is_superuser:
+        pass
+    else:
+        raise PermissionDenied
+
+    if request.method == 'POST':
+        if 'clear_now' in request.POST:
+            Tool_Product_History.objects.filter(product=ttid).delete()
+
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'History cleared.',
+                                 extra_tags='alert-success')
+
+    return HttpResponseRedirect(reverse('run_tool_product', args=(pid, ttid)))
 
 @user_passes_test(lambda u: u.is_staff)
 def edit_tool_product(request, pid, ttid):
