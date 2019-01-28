@@ -216,7 +216,7 @@ def user(request):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_passes_test(lambda u: u.is_superuser)
 def add_user(request):
     form = AddDojoUserForm()
     if not request.user.is_superuser:
@@ -259,7 +259,7 @@ def add_user(request):
         'to_add': True})
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_passes_test(lambda u: u.is_superuser)
 def edit_user(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     authed_products = Product.objects.filter(authorized_users__in=[user])
@@ -310,7 +310,7 @@ def edit_user(request, uid):
         'to_edit': user})
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_passes_test(lambda u: u.is_superuser)
 def delete_user(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     form = DeleteUserForm(instance=user)
