@@ -1,6 +1,6 @@
 # see tastypie documentation at http://django-tastypie.readthedocs.org/en
 from django.core.exceptions import ImproperlyConfigured, ValidationError
-from django.core.urlresolvers import resolve, get_script_prefix
+from django.urls import resolve, get_script_prefix
 from tastypie import fields
 from tastypie.fields import RelatedField
 from tastypie.authentication import ApiKeyAuthentication
@@ -29,7 +29,7 @@ from dojo.forms import ProductForm, EngForm, TestForm, \
     ToolTypeForm, LanguagesTypeForm, Languages_TypeTypeForm, App_AnalysisTypeForm
 from dojo.tools.factory import import_parser_factory
 from datetime import datetime
-from object.parser import import_object_eng
+from .object.parser import import_object_eng
 
 """
     Setup logging for the api
@@ -72,7 +72,7 @@ class ModelFormValidation(FormValidation):
         rsc = self.resource()
         kwargs = super(ModelFormValidation, self).form_args(bundle)
 
-        for name, rel_field in rsc.fields.items():
+        for name, rel_field in list(rsc.fields.items()):
             data = kwargs['data']
             if not issubclass(rel_field.__class__, RelatedField):
                 continue  # Not a resource field
@@ -1213,13 +1213,13 @@ class ImportScanValidation(Validation):
                 get_pk_from_uri(uri=bundle.data['engagement'])
             except NotFound:
                 errors.setdefault('engagement', []).append('A valid engagement must be supplied. Ex. /api/v1/engagements/1/')
-        scan_type_list = list(map(lambda x: x[0], ImportScanForm.SCAN_TYPE_CHOICES))
+        scan_type_list = list([x[0] for x in ImportScanForm.SCAN_TYPE_CHOICES])
         if 'scan_type' in bundle.data:
             if bundle.data['scan_type'] not in scan_type_list:
                 errors.setdefault('scan_type', []).append('scan_type must be one of the following: ' + ', '.join(scan_type_list))
         else:
             errors.setdefault('scan_type', []).append('A scan_type must be given so we know how to import the scan file.')
-        severity_list = list(map(lambda x: x[0], SEVERITY_CHOICES))
+        severity_list = list([x[0] for x in SEVERITY_CHOICES])
         if 'minimum_severity' in bundle.data:
             if bundle.data['minimum_severity'] not in severity_list:
                 errors.setdefault('minimum_severity', []).append('minimum_severity must be one of the following: ' + ', '.join(severity_list))
@@ -1346,8 +1346,8 @@ class ImportScanResource(MultipartResource, Resource):
         try:
             t.full_clean()
         except ValidationError as e:
-            print "Error Validating Test Object"
-            print e
+            print("Error Validating Test Object")
+            print(e)
 
         t.save()
         t.tags = bundle.data['tags']
@@ -1445,13 +1445,13 @@ class ReImportScanValidation(Validation):
                 get_pk_from_uri(uri=bundle.data['test'])
             except NotFound:
                 errors.setdefault('engagement', []).append('A valid engagement must be supplied. Ex. /api/v1/engagements/1/')
-        scan_type_list = list(map(lambda x: x[0], ImportScanForm.SCAN_TYPE_CHOICES))
+        scan_type_list = list([x[0] for x in ImportScanForm.SCAN_TYPE_CHOICES])
         if 'scan_type' in bundle.data:
             if bundle.data['scan_type'] not in scan_type_list:
                 errors.setdefault('scan_type', []).append('scan_type must be one of the following: ' + ', '.join(scan_type_list))
         else:
             errors.setdefault('scan_type', []).append('A scan_type must be given so we know how to import the scan file.')
-        severity_list = list(map(lambda x: x[0], SEVERITY_CHOICES))
+        severity_list = list([x[0] for x in SEVERITY_CHOICES])
         if 'minimum_severity' in bundle.data:
             if bundle.data['minimum_severity'] not in severity_list:
                 errors.setdefault('minimum_severity', []).append('minimum_severity must be one of the following: ' + ', '.join(severity_list))

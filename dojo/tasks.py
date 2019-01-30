@@ -6,7 +6,7 @@ from datetime import timedelta
 from django.db.models import Count
 from django.conf import settings
 from django.core.files.base import ContentFile
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.template.loader import render_to_string
 from django.utils.http import urlencode
 from celery.utils.log import get_task_logger
@@ -148,7 +148,7 @@ def async_custom_pdf_report(self,
     selected_widgets = report_widget_factory(json_data=report.options, request=None, user=user,
                                              finding_notes=finding_notes, finding_images=finding_images, host=host)
 
-    widgets = selected_widgets.values()
+    widgets = list(selected_widgets.values())
     temp = None
 
     try:

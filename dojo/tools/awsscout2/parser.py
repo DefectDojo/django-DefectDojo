@@ -28,7 +28,7 @@ class AWSScout2Parser(object):
 
         # Summary for AWS Services
         test_description = "%s\n**AWS Services** \n\n" % (test_description)
-        for service, items in last_run["summary"].items():
+        for service, items in list(last_run["summary"].items()):
             test_description = "%s\n**%s** \n" % (test_description, service.upper())
             test_description = "%s\n* **Checked Items:** %s\n" % (test_description, items["checked_items"])
             test_description = "%s* **Flagged Items:** %s\n" % (test_description, items["flagged_items"])
@@ -41,10 +41,10 @@ class AWSScout2Parser(object):
         scout2_findings = []
 
         # Configured AWS Services
-        for service in data["services"].items():
+        for service in list(data["services"].items()):
             for service_item in service:
                 if "findings" in service_item:
-                    for name, finding in service_item["findings"].items():
+                    for name, finding in list(service_item["findings"].items()):
                         if finding["items"]:
                             description_text = ""
                             for name in finding["items"]:
@@ -55,7 +55,7 @@ class AWSScout2Parser(object):
                                 lookup = service_item
                                 while i < len(key):
                                     if key[i] in lookup:
-                                        if (type(lookup[key[i]]) is dict):
+                                        if (isinstance(lookup[key[i]], dict)):
                                             lookup = lookup[key[i]]
                                             if (key[i - 1] == "security_groups" or key[i - 1] == "PolicyDocument"):
                                                 break
@@ -95,19 +95,19 @@ class AWSScout2Parser(object):
                                date=find_date,
                                dynamic_finding=True)
                 dupes[dupe_key] = find
-        self.items = dupes.values()
+        self.items = list(dupes.values())
 
     def formatview(self, depth):
         if depth > 1:
             return "* "
-            print "depth hit"
+            print("depth hit")
         else:
             return ""
 
     def recursive_print(self, src, depth=0, key=''):
         tabs = lambda n: ' ' * n * 2
         if isinstance(src, dict):
-            for key, value in src.iteritems():
+            for key, value in list(src.items()):
                 if isinstance(src, str):
                     self.item_data = self.item_data + key + "\n"
                 self.recursive_print(value, depth + 1, key)

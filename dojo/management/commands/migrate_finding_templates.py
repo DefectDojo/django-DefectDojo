@@ -36,4 +36,4 @@ class Command(BaseCommand):
             finding.save()
             count += 1
 
-        print 'A totla of %d findings have been turned into templates.' % count
+        print(('A totla of %d findings have been turned into templates.' % count))

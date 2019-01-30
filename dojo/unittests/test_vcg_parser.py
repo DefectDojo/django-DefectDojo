@@ -1,4 +1,4 @@
-import StringIO
+import io
 import csv
 
 from defusedxml import ElementTree
@@ -184,7 +184,7 @@ class TestVCGCsvParser(TestCase):
 
     def test_parseissuerow_with_row_has_finding(self):
         findings = """6,Suspicious Comment,"Comment Indicates Potentially Unfinished Code","The comment includes some wording which indicates that the developer regards it as unfinished or does not trust it to work correctly.",C:\Projects\WebGoat.Net\Core\Cart.cs,16,"TODO: Refactor this. Use LINQ with aggregation to get SUM.",False,"LawnGreen"""""
-        reader = csv.reader(StringIO.StringIO(findings), delimiter=',',
+        reader = csv.reader(io.StringIO(findings), delimiter=',',
                             quotechar='"')
         finding = None
         for row in reader:

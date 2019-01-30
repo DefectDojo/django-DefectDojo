@@ -10,10 +10,10 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
     UsersViewSet, ImportScanView
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase, APIClient
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 
 def skipIfNotSubclass(baseclass_name):
@@ -31,8 +31,8 @@ class BaseClass():
     class RESTEndpointTest(APITestCase):
         def __init__(self, *args, **kwargs):
             APITestCase.__init__(self, *args, **kwargs)
-            self.view_mixins = map(
-                (lambda x: x.__name__), self.viewset.__bases__)
+            self.view_mixins = list(map(
+                (lambda x: x.__name__), self.viewset.__bases__))
 
         def setUp(self):
             testuser = User.objects.get(username='admin')
@@ -73,7 +73,7 @@ class BaseClass():
             relative_url = self.url + '%s/' % current_objects['results'][0]['id']
             response = self.client.patch(
                 relative_url, self.update_fields)
-            for key, value in self.update_fields.iteritems():
+            for key, value in list(self.update_fields.items()):
                 self.assertEqual(value, response.data[key])
             response = self.client.put(
                 relative_url, self.payload)

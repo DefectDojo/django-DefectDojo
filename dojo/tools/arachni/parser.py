@@ -3,7 +3,7 @@ from __future__ import with_statement
 import json
 import re
 from base64 import b64encode
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 import html2text
 
@@ -59,7 +59,7 @@ class ArachniJSONParser(object):
             else:
                 items[dupe_key] = item
 
-        return items.values()
+        return list(items.values())
 
 
 def do_clean(value):
@@ -105,14 +105,14 @@ def get_item(item_node, test):
     #
     req = ''
     #
-    for key, value in request.iteritems():
+    for key, value in list(request.items()):
         req += str(key) + ": " + str(value) + "\n\n"
     #
     respz = item_node['response']
 
     resp = ''
 
-    for key, value in respz.iteritems():
+    for key, value in list(respz.items()):
         if key != 'body':
             resp += str(key) + ": " + str(value) + "\n\n"
 
@@ -155,7 +155,7 @@ def get_item(item_node, test):
     if remediation:
         remediation = html2text.html2text(remediation)
 
-    references = item_node['references'].values() if 'references' in item_node else None
+    references = list(item_node['references'].values()) if 'references' in item_node else None
     references = '<br/><br/>'.join(reference for reference in references)
 
     if references:

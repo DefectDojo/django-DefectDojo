@@ -7,7 +7,7 @@ from ast import literal_eval
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from dojo.forms import ScanSettingsForm, DeleteIPScanForm, VaForm

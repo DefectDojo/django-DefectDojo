@@ -4,7 +4,7 @@ import binascii
 import os
 import hashlib
 import json
-import StringIO
+import io
 from Crypto.Cipher import AES
 from calendar import monthrange
 from datetime import date, datetime
@@ -15,7 +15,7 @@ from dateutil.relativedelta import relativedelta, MO
 from django.conf import settings
 from django.core.mail import send_mail
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.core.urlresolvers import get_resolver, reverse
+from django.urls import get_resolver, reverse
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
 from django.template.defaultfilters import pluralize
 from django.template.loader import render_to_string
@@ -434,7 +434,7 @@ def get_punchcard_data(findings, weeks_between, start_date):
                 pass
 
         if sum(days.values()) > 0:
-            for day, count in days.items():
+            for day, count in list(days.items()):
                 punchcard.append([tick, day, count])
                 if append_tick:
                     ticks.append([
@@ -780,7 +780,7 @@ class FileIterWrapper(object):
         self.flo = flo
         self.chunk_size = chunk_size
 
-    def next(self):
+    def __next__(self):
         data = self.flo.read(self.chunk_size)
         if data:
             return data
@@ -1064,7 +1064,7 @@ def jira_attachment(jira, issue, file, jira_filename=None):
     if jira_check_attachment(issue, basename) is False:
         try:
             if jira_filename is not None:
-                attachment = StringIO.StringIO()
+                attachment = io.StringIO()
                 attachment.write(jira_filename)
                 jira.add_attachment(
                     issue=issue, attachment=attachment, filename=jira_filename)
@@ -1277,7 +1277,7 @@ def send_review_email(request, user, finding, users, new_note):
 
 def process_notifications(request, note, parent_url, parent_title):
     regex = re.compile(r'(?:\A|\s)@(\w+)\b')
-    usernames_to_check = set([un.lower() for un in regex.findall(note.entry)])
+    usernames_to_check = {un.lower() for un in regex.findall(note.entry)}
     users_to_notify = [
         User.objects.filter(username=username).get()
         for username in usernames_to_check
@@ -1599,7 +1599,7 @@ def calculate_grade(product):
 
 
 def get_celery_worker_status():
-    from tasks import celery_status
+    from .tasks import celery_status
     res = celery_status.apply_async()
 
     # Wait 15 seconds for a response from Celery

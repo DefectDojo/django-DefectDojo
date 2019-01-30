@@ -11,7 +11,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import Http404, HttpResponse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.http import StreamingHttpResponse
@@ -1275,7 +1275,7 @@ def download_finding_pic(request, token):
             'large': access_token.image.image_large,
             'original': access_token.image.image,
         }
-        if access_token.size not in sizes.keys():
+        if access_token.size not in list(sizes.keys()):
             raise Http404
         size = access_token.size
         # we know there is a token - is it for this image

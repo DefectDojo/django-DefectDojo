@@ -6,7 +6,7 @@ from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils.html import escape
@@ -342,7 +342,7 @@ def edit_meta_data(request, eid):
     endpoint = Endpoint.objects.get(id=eid)
 
     if request.method == 'POST':
-        for key, value in request.POST.iteritems():
+        for key, value in list(request.POST.items()):
             if key.startswith('cfv_'):
                 cfv_id = int(key.split('_')[1])
                 cfv = get_object_or_404(DojoMeta, id=cfv_id)

@@ -1,4 +1,4 @@
-from itertools import izip, chain
+from itertools import chain
 import random
 from django import template
 from django.contrib.contenttypes.models import ContentType
@@ -6,7 +6,7 @@ from django.template.defaultfilters import stringfilter
 from django.utils.html import escape
 from django.utils.safestring import mark_safe, SafeData
 from django.utils.text import normalize_newlines
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib.auth.models import User
 from dojo.utils import prepare_for_view, get_system_setting
 from dojo.models import Check_List, FindingImageAccessToken, Finding, System_Settings, JIRA_PKey, Product
@@ -17,7 +17,7 @@ from markdown.extensions import Extension
 import dateutil.relativedelta
 import datetime
 from ast import literal_eval
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 register = template.Library()
 
@@ -342,7 +342,7 @@ def action_log_entry(value, autoescape=None):
     import json
     history = json.loads(value)
     text = ''
-    for k in history.iterkeys():
+    for k in list(history.keys()):
         text += k.capitalize() + ' changed from "' + \
             history[k][0] + '" to "' + history[k][1] + '"'
 
@@ -427,12 +427,12 @@ def colgroup(parser, token):
             self.num_cols = num_cols
             self.varname = varname
 
-        def render(self, context):
+        def render(self, context, renderer=None):
             iterable = template.Variable(self.iterable).resolve(context)
             num_cols = self.num_cols
-            context[self.varname] = izip(
-                *[chain(iterable, [None] * (num_cols - 1))] * num_cols)
-            return u''
+            context[self.varname] = list(zip(
+                *[chain(iterable, [None] * (num_cols - 1))] * num_cols))
+            return ''
 
     try:
         _, iterable, _, num_cols, _, _, varname = token.split_contents()

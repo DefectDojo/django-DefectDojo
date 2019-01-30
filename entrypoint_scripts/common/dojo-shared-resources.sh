@@ -178,7 +178,7 @@ function setupdojo() {
     echo "Pip install required components"
     echo "=============================================================================="
     echo
-    pip install .
+    pip install  -r requirements.txt
 
     echo "=============================================================================="
     echo "Copying settings.py"
@@ -489,9 +489,9 @@ function prepare_settings_file() {
     if [ "$DBTYPE" == "$SQLITE" ]; then
         DD_DATABASE_URL="sqlite:///defectdojo.db"
     elif [ "$DBTYPE" == "$MYSQL" ]; then
-        DD_DATABASE_URL="mysql://$SQLUSER:$SQLPWD@$SQLHOST:$SQLPORT/$DBNAME"
+        DD_DATABASE_URL="mysql.connector.django://$SQLUSER:$SQLPWD@$SQLHOST:$SQLPORT/$DBNAME"
     elif [ "$DBTYPE" == "$POSTGRES" ]; then
-        DD_DATABASE_URL="postgres://$SQLUSER:$SQLPWD@$SQLHOST:$SQLPORT/$DBNAME"
+        DD_DATABASE_URL="mysql.connecto.django://$SQLUSER:$SQLPWD@$SQLHOST:$SQLPORT/$DBNAME"
     fi
 
     if [[ -z $DD_ALLOWED_HOSTS ]]; then
@@ -529,15 +529,14 @@ function install_app(){
         if [ "$DBTYPE" == "$MYSQL" ]; then
             pip install .[mysql]
         else
-            pip install .
+            pip install -r requirements.txt
         fi
-
     else
         sudo pip install --upgrade pip
         if [ "$DBTYPE" == "$MYSQL" ]; then
             sudo -H pip install .[mysql]
         else
-            sudo -H pip install .
+            sudo -H pip install -r requirements.txt
         fi
     fi
     python manage.py makemigrations dojo

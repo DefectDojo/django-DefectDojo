@@ -1,7 +1,7 @@
 import logging
 import mimetypes
 import os
-import urllib
+import urllib.request, urllib.parse, urllib.error
 from datetime import datetime
 
 from dateutil.relativedelta import relativedelta
@@ -9,7 +9,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import Http404, HttpResponseRedirect, HttpResponseForbidden, JsonResponse
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
@@ -116,7 +116,7 @@ def custom_report(request):
 
             return HttpResponseRedirect(reverse('reports'))
         elif report_format == 'AsciiDoc':
-            widgets = selected_widgets.values()
+            widgets = list(selected_widgets.values())
             return render(request,
                           'dojo/custom_asciidoc_report.html',
                           {"widgets": widgets,
@@ -198,16 +198,16 @@ def download_report(request, rid):
         response['Content-Encoding'] = encoding
 
     # To inspect details for the below code, see http://greenbytes.de/tech/tc2231/
-    if u'WebKit' in request.META['HTTP_USER_AGENT']:
+    if 'WebKit' in request.META['HTTP_USER_AGENT']:
         # Safari 3.0 and Chrome 2.0 accepts UTF-8 encoded string directly.
         filename_header = 'filename=%s' % original_filename.encode('utf-8')
-    elif u'MSIE' in request.META['HTTP_USER_AGENT']:
+    elif 'MSIE' in request.META['HTTP_USER_AGENT']:
         # IE does not support internationalized filename at all.
         # It can only recognize internationalized URL, so we do the trick via routing rules.
         filename_header = ''
     else:
         # For others like Firefox, we follow RFC2231 (encoding extension in HTTP headers).
-        filename_header = 'filename*=UTF-8\'\'%s' % urllib.quote(original_filename.encode('utf-8'))
+        filename_header = 'filename*=UTF-8\'\'%s' % urllib.parse.quote(original_filename.encode('utf-8'))
     response['Content-Disposition'] = 'attachment; ' + filename_header
     report.status = 'downloaded'
     report.save()

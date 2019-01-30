@@ -8,7 +8,7 @@ from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.contrib.contenttypes.models import ContentType
@@ -35,8 +35,10 @@ def product(request):
         name_words = [product.name for product in
                       Product.objects.all()]
     else:
+        print('request.user :: ', request.user)
         initial_queryset = Product.objects.filter(
             authorized_users__in=[request.user])
+        
         name_words = [word for product in
                       Product.objects.filter(
                           authorized_users__in=[request.user])
@@ -686,7 +688,7 @@ def add_meta_data(request, pid):
 def edit_meta_data(request, pid):
     prod = Product.objects.get(id=pid)
     if request.method == 'POST':
-        for key, value in request.POST.iteritems():
+        for key, value in list(request.POST.items()):
             if key.startswith('cfv_'):
                 cfv_id = int(key.split('_')[1])
                 cfv = get_object_or_404(DojoMeta, id=cfv_id)

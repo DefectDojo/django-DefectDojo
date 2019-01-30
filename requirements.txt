@@ -1,38 +1,37 @@
-celery==4.1.1
+celery==4.2.1 # updated from 4.1.1 for django 2.1.5
 coverage==4.5.1
 defusedxml==0.5.0
-Django==1.11.16
+Django==2.0.10 # updated from 1.11.16
 django-auditlog==0.4.5
-django-custom-field==2.9
+git+https://git@github.com/Maffooch/django-custom-field.git
 django-filter==1.0.4
 django-imagekit==4.0.2
 django-multiselectfield==0.1.8
-django-overextends==0.4.3  # Required for extensions
-django-polymorphic==1.2
+django-overextends==0.4.3  # Required for extensions # No Django 2.0 Support
+django-polymorphic==2.0 # updated from 1.2 for django 2.1.5
 django-slack==5.11.1
 django-rest-swagger==2.1.2
 django-tagging==0.4.6
-django-tastypie==0.14.0
-django-tastypie-swagger==0.1.4
+django-tastypie==0.14.2 # updated from 0.14.0
+git+https://git@github.com/Maffooch/django-tastypie-swagger.git
 django-watson==1.5.2
 django-rest-swagger==2.1.2
-djangorestframework==3.7.7
+djangorestframework==3.9.0
 gunicorn==19.7.1
 html2text==2018.1.9
 humanize==0.5.1
 jira==1.0.13
 lxml==4.1.1
-mysqlclient==1.3.12
+mysql-connector-python==8.0.14 # Needs to have the following somewhere : DD_DATABASE_URL=mysql.connector.django://user:pass@127.0.0.1:3306/dojodb3
 pdfkit==0.6.1
 Pillow==5.0.0  # required by django-imagekit
 psycopg2-binary==2.7.5
 pycrypto==2.6.1
-python-dateutil==2.6.1
+python-dateutil==2.6.0 # downgraded from 2.6.1 to work with django-auditlog 0.4.5
 python-nmap==0.6.1
-pytz==2017.3
+pytz==2018.9
 requests>=2.2.1
 sqlalchemy  # Required by Celery broker transport
-supervisor==3.3.3
 urllib3==1.22
 vobject==0.9.5
 asteval==0.9.12

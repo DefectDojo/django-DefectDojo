@@ -21,6 +21,6 @@ class Command(BaseCommand):
         findings = findings.filter(verified=True, active=True)
 
         for finding in findings:
-            print "Checking issue:" + str(finding.id)
+            print(("Checking issue:" + str(finding.id)))
             update_issue(finding, finding.status(), True)
-            print "########\n"
+            print("########\n")

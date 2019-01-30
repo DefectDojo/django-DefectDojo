@@ -33,7 +33,7 @@ class SnykParser(object):
                     node['version']) + str(node['from']))
                 items[unique_key] = item
 
-        return items.values()
+        return list(items.values())
 
 
 def get_item(vulnerability, test):

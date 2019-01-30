@@ -1,4 +1,4 @@
-import Queue
+import queue
 from datetime import datetime
 import sys
 import threading
@@ -36,7 +36,7 @@ class Command(BaseCommand):
 
         # Scan the host and add the results of the scan to the host informaiton
         def runScan(prod_id, p_dict):
-            ipScan_queue = Queue.Queue(50)
+            ipScan_queue = queue.Queue(50)
             for host in p_dict:
                 current_scan = Scan.objects.get(id=p_dict[host]['scan_id'])
                 if not current_scan.date:
@@ -99,10 +99,10 @@ class Command(BaseCommand):
             try:
                 nm = PortScannerAsync()
             except PortScannerError:
-                print('Nmap not found', sys.exc_info()[0])
+                print(('Nmap not found', sys.exc_info()[0]))
                 sys.exit(0)
             except:
-                print("Unexpected error:", sys.exc_info()[0])
+                print(("Unexpected error:", sys.exc_info()[0]))
                 sys.exit(0)
 
             def callback_result(host, scan_result, service_dict=service_dict):
@@ -110,7 +110,7 @@ class Command(BaseCommand):
                 try:
                     current_scan = Scan.objects.get(id=service_dict['scan_id'])
                     p = current_scan.scan_settings.protocol.lower()
-                    openTCP = scan_result['scan'][host][p].keys()
+                    openTCP = list(scan_result['scan'][host][p].keys())
                     # Save the open ports found by the scan to the dict
                     service_dict['result'] = openTCP
                     # enumerate the found port information to save to the db
@@ -157,9 +157,7 @@ class Command(BaseCommand):
                     address=host,
                     scan=Scan.objects.get(
                         id=service_dict['scan_id'])).services))
-                scan_results = map(
-                    lambda x: str(x[0]) + '/' + str(x[1]) + ': ' + str(x[3]),
-                    scan_results)
+                scan_results = [str(x[0]) + '/' + str(x[1]) + ': ' + str(x[3]) for x in scan_results]
             except:
                 scan.status = 'Failed'
                 scan.save()
@@ -201,16 +199,16 @@ class Command(BaseCommand):
             target frequency is specified by the cron job scheduler.
         """
         if not options:
-            print "Must specify an argument: Weekly, Monthly, Quarterly, or ID",\
-                " of Scan Settings to use."
+            print(("Must specify an argument: Weekly, Monthly, Quarterly, or ID",\
+                " of Scan Settings to use."))
             sys.exit(0)
         if (type in ["Weekly", "Monthly", "Quarterly"]
                 or type.isdigit()):
             pass
         else:
-            print("Unexpected parameter: " + str(args[0]))
-            print "\nMust specify an argument: Weekly, Monthly, Quarterly",\
-                  " or ID of Scan Settings to use."
+            print(("Unexpected parameter: " + str(args[0])))
+            print(("\nMust specify an argument: Weekly, Monthly, Quarterly",\
+                  " or ID of Scan Settings to use."))
             sys.exit(0)
 
         if type.isdigit():
@@ -225,7 +223,7 @@ class Command(BaseCommand):
             Main thread creates a dictionary formatted:
                 {prod_id: {hosts: {scan_id, expected, result}}}
         """
-        scan_queue = Queue.Queue()
+        scan_queue = queue.Queue()
         host_dict = {}
         for s in scSettings:
             try:
@@ -269,11 +267,9 @@ class Command(BaseCommand):
                                       'result': set([])}}})
                 else:
                     try:
-                        most_recent_ports = map(
-                            lambda x: str(x[0]) + '/' + str(x[1]) + ': ' +
-                            str(x[3]),
-                            literal_eval(most_recent_ipscans.get(
-                                address=addr).services))
+                        most_recent_ports = [str(x[0]) + '/' + str(x[1]) + ': ' +
+                            str(x[3]) for x in literal_eval(most_recent_ipscans.get(
+                                address=addr).services)]
                     except:
                         most_recent_ports = []
                     if len(most_recent_ports) > 0:
@@ -282,11 +278,11 @@ class Command(BaseCommand):
                                 host_dict[key][addr]['expected'].add(port)
                             except KeyError:
                                 host_dict.update(
-                                    {key: {addr: {'expected': set([port]),
+                                    {key: {addr: {'expected': {port},
                                                   'scan_id': str(scan.id),
                                                   'result': set([])}}})
 
-        for (prod_id, p_dict) in host_dict.items():
+        for (prod_id, p_dict) in list(host_dict.items()):
             pid = prod_id.split('_')[0]
             scan_queue.put((pid, p_dict))
             t = threadedScan(scan_queue)

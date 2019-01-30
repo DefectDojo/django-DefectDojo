@@ -11,7 +11,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
@@ -67,7 +67,7 @@ def import_object_eng(request, engagement, json_data):
     review_status = Objects_Review.objects.get(pk=review_status_id)
 
     for file in data:
-        print file["path"]
+        print((file["path"]))
         #Save the file if the object isn't in object table
         file_type, found_object = find_item(file["path"], object_queryset)
 

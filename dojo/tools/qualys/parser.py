@@ -11,7 +11,7 @@ import argparse
 import csv
 import re
 from dojo.models import Finding, Endpoint
-from urlparse import urlparse
+from urllib.parse import urlparse
 ################################################################
 
 # Non-standard libraries
@@ -19,20 +19,20 @@ try:
     import defusedxml.lxml as lxml
     from lxml import etree
 except ImportError:
-    print "Missing lxml library. Please install using PIP. https://pypi.python.org/pypi/lxml/3.4.2"
+    print("Missing lxml library. Please install using PIP. https://pypi.python.org/pypi/lxml/3.4.2")
     exit()
 
 try:
     import html2text
 except ImportError:
-    print "Missing html2text library. Please install using PIP. https://pypi.python.org/pypi/html2text/2015.2.18"
+    print("Missing html2text library. Please install using PIP. https://pypi.python.org/pypi/html2text/2015.2.18")
     exit()
 
 # Custom libraries
 try:
-    import utfdictcsv
+    from . import utfdictcsv
 except ImportError:
-    print "Missing dict to csv converter custom library. utfdictcsv.py should be in the same path as this file."
+    print("Missing dict to csv converter custom library. utfdictcsv.py should be in the same path as this file.")
     exit()
 
 ################################################################
@@ -72,7 +72,7 @@ def report_writer(report_dic, output_filename):
         csvWriter = utfdictcsv.DictUnicodeWriter(outFile, REPORT_HEADERS, quoting=csv.QUOTE_ALL)
         csvWriter.writerow(CUSTOM_HEADERS)
         csvWriter.writerows(report_dic)
-    print "Successfully parsed."
+    print("Successfully parsed.")
 
 ################################################################
 
@@ -124,8 +124,8 @@ def issue_r(raw_row, vuln):
             _temp_cve_details = vuln_item.iterfind('CVE_ID_LIST/CVE_ID')
             if _temp_cve_details:
                 _cl = {cve_detail.findtext('ID'): cve_detail.findtext('URL') for cve_detail in _temp_cve_details}
-                _temp['cve'] = "\n".join(_cl.keys())
-                _temp['links'] = "\n".join(_cl.values())
+                _temp['cve'] = "\n".join(list(_cl.keys()))
+                _temp['links'] = "\n".join(list(_cl.values()))
             sev = 'Low'
             if 0.1 <= float(_temp['CVSS_score']) <= 3.9 :
                 sev = 'Low'
@@ -137,7 +137,7 @@ def issue_r(raw_row, vuln):
                 sev = 'Critical'
             finding = None
             if _temp_cve_details:
-                refs = "\n".join(_cl.values())
+                refs = "\n".join(list(_cl.values()))
                 finding = Finding(title= _temp['vuln_name'], mitigation = _temp['solution'],
                               description = _temp['vuln_description'], severity= sev,
                                references= refs )
@@ -182,7 +182,7 @@ if __name__ == "__main__":
     try:
         qualys_parser(args.qualys_xml_file)
     except IOError:
-        print "[!] Error processing file: {}".format(args.qualys_xml_file)
+        print(("[!] Error processing file: {}".format(args.qualys_xml_file)))
         exit()
 
 class QualysParser(object):

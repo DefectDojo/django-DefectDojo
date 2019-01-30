@@ -1,11 +1,11 @@
 import logging
 
 from django.contrib import messages
-from django.contrib.auth import authenticate, logout
+from django.contrib.auth import authenticate, logout, login
 from django.contrib.auth.decorators import user_passes_test
 from django.core import serializers
 from django.core.exceptions import PermissionDenied
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db.models import Q
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404
@@ -125,7 +125,7 @@ def alerts(request):
 def alerts_json(request, limit=None):
     limit = request.GET.get('limit')
     if limit:
-        alerts = serializers.serialize('json', Alerts.objects.filter(user_id=request.user)[:limit])
+        alerts = serializers.serialize('json', Alerts.objects.filter(user_id=request.user)[:int(limit)])
     else:
         alerts = serializers.serialize('json', Alerts.objects.filter(user_id=request.user))
     return HttpResponse(alerts, content_type='application/json')

@@ -50,7 +50,7 @@ class AWSProwlerParser(object):
                                date=find_date,
                                dynamic_finding=True)
                 dupes[dupe_key] = find
-        self.items = dupes.values()
+        self.items = list(dupes.values())
 
         if account:
             test_description = ""
@@ -61,14 +61,14 @@ class AWSProwlerParser(object):
     def formatview(self, depth):
         if depth > 1:
             return "* "
-            print "depth hit"
+            print("depth hit")
         else:
             return ""
 
     def recursive_print(self, src, depth=0, key=''):
         tabs = lambda n: ' ' * n * 2
         if isinstance(src, dict):
-            for key, value in src.iteritems():
+            for key, value in list(src.items()):
                 if isinstance(src, str):
                     self.item_data = self.item_data + key + "\n"
                 self.recursive_print(value, depth + 1, key)
