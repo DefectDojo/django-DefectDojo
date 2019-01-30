@@ -1,0 +1,2 @@
+# Pip installs needed for MySQL DB support
+mysqlclient==1.3.12

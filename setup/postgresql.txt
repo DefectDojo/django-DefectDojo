@@ -1,0 +1,2 @@
+# Pip installs needed for PostgreSQL DB support 
+psycopg2-binary==2.7.5

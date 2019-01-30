@@ -19,7 +19,7 @@ cd ${0%/*}  # same as `cd "$(dirname "$0")"` without relying on dirname
 REPO_BASE=`pwd`
 
 # Set install config values and load the 'libraries' needed for install
-LIB_PATH="$REPO_BASE/entrypoint_scripts/common"
+LIB_PATH="$REPO_BASE/scripts/common"
 . "$LIB_PATH/config-vars.sh"     # Set install configuration default values
 . "$LIB_PATH/cmd-args.sh"        # Get command-line args and set config values as needed
 . "$LIB_PATH/prompt.sh"          # Prompt for config values if install is interactive
@@ -69,8 +69,11 @@ echo "ADMIN_PASS=$ADMIN_PASS"
 echo "DEV_ADMIN_PASS=$DEV_ADMIN_PASS"
 echo "DB URL is:"
 echo "$DD_DATABASE_URL"
-
 echo "End of refactoring"
+
+echo "When you're ready to start the DefectDojo server, type in this directory:"
+echo ""
+echo "    python3 manage.py runserver"
 
 ## Echo out important generated variables/passwords from this install
 

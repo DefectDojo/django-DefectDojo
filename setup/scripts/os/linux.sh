@@ -80,7 +80,7 @@ function ubuntu_os_packages() {
     
     # Install OS packages needed by Defect Dojo
     sudo apt update
-    sudo apt install -y apt-transport-https libjpeg-dev gcc libssl-dev python-dev python-pip nodejs yarn build-essential
+    sudo apt install -y apt-transport-https libjpeg-dev gcc libssl-dev python3-dev python3-pip nodejs yarn build-essential
 }
 
 function ubuntu_wkhtml_install() {
@@ -168,50 +168,50 @@ function create_dojo_settings() {
     #       https://docs.djangoproject.com/en/2.1/ref/settings/#allowed-hosts
     
     # Substitute install vars for settings.py values
-    echo "1"
+    #echo "1"
     sed -i -e 's%#DD_DEBUG#%'$DD_DEBUG'%' "$ENV_TARGET_FILE"
-    echo "2"
+    #echo "2"
     sed -i -e 's%#DD_DJANGO_ADMIN_ENABLED#%'$DD_DJANGO_ADMIN_ENABLED'%' "$ENV_TARGET_FILE"
-    echo "3"
+    #echo "3"
     sed -i -e 's%#DD_SECRET_KEY#%'$DD_SECRET_KEY'%' "$ENV_TARGET_FILE"
-    echo "4"
+    #echo "4"
     sed -i -e 's%#DD_CREDENTIAL_AES_256_KEY#%'$DD_CREDENTIAL_AES_256_KEY'%' "$ENV_TARGET_FILE"
-    echo "5"
+    #echo "5"
     sed -i -e "s^#DD_DATABASE_URL#^$DD_DATABASE_URL^" "$ENV_TARGET_FILE"
-    echo "6"
+    #echo "6"
     sed -i -e "s%#DD_ALLOWED_HOSTS#%$DD_ALLOWED_HOSTS%" "$ENV_TARGET_FILE" 
-    echo "7"
+    #echo "7"
     sed -i -e 's%#DD_WHITENOISE#%'$DD_WHITENOISE'%' "$ENV_TARGET_FILE"
     # Additional Settings / Override defaults in settings.py
-    echo "8"
+    #echo "8"
     sed -i -e 's%#DD_TIME_ZONE#%'$DD_TIME_ZONE'%' "$ENV_TARGET_FILE"
-    echo "9"
+    #echo "9"
     sed -i -e "s%#DD_TRACK_MIGRATIONS#%$DD_TRACK_MIGRATIONS%" "$ENV_TARGET_FILE"
-    echo "10"
+    #echo "10"
     sed -i -e 's%#DD_SESSION_COOKIE_HTTPONLY#%'$DD_SESSION_COOKIE_HTTPONLY'%' "$ENV_TARGET_FILE"
-    echo "11"
+    #echo "11"
     sed -i -e 's%#DD_CSRF_COOKIE_HTTPONLY#%'$DD_CSRF_COOKIE_HTTPONLY'%' "$ENV_TARGET_FILE"
-    echo "12"
+    #echo "12"
     sed -i -e 's%#DD_SECURE_SSL_REDIRECT#%'$DD_SECURE_SSL_REDIRECT'%' "$ENV_TARGET_FILE"
-    echo "13"
+    #echo "13"
     sed -i -e 's%#DD_CSRF_COOKIE_SECURE#%'$DD_CSRF_COOKIE_SECURE'%' "$ENV_TARGET_FILE"
-    echo "14"
+    #echo "14"
     sed -i -e 's%#DD_SECURE_BROWSER_XSS_FILTER#%'$DD_SECURE_BROWSER_XSS_FILTER'%' "$ENV_TARGET_FILE"
-    echo "15"
+    #echo "15"
     sed -i -e 's%#DD_LANG#%'$DD_LANG'%' "$ENV_TARGET_FILE"
-    echo "16"
+    #echo "16"
     sed -i -e 's%#DD_WKHTMLTOPDF#%'$DD_WKHTMLTOPDF'%' "$ENV_TARGET_FILE"
-    echo "17"
+    #echo "17"
     sed -i -e 's%#DD_TEAM_NAME#%'$DD_TEAM_NAME'%' "$ENV_TARGET_FILE"
-    echo "18"
+    #echo "18"
     sed -i -e 's%#DD_ADMINS#%'$DD_ADMINS'%' "$ENV_TARGET_FILE"
-    echo "19"
+    #echo "19"
     sed -i -e 's%#DD_PORT_SCAN_CONTACT_EMAIL#%'$DD_PORT_SCAN_CONTACT_EMAIL'%' "$ENV_TARGET_FILE"
-    echo "20"
+    #echo "20"
     sed -i -e 's%#DD_PORT_SCAN_RESULT_EMAIL_FROM#%'$DD_PORT_SCAN_RESULT_EMAIL_FROM'%' "$ENV_TARGET_FILE"
-    echo "21"
+    #echo "21"
     sed -i -e 's%#DD_PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST#%'$DD_PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST'%' "$ENV_TARGET_FILE"
-    echo "22"
+    #echo "22"
     sed -i -e 's%#DD_PORT_SCAN_SOURCE_IP#%'$DD_PORT_SCAN_SOURCE_IP'%' "$ENV_TARGET_FILE"
     # File paths for settings.py
     #sed -i -e 's%#DOJO_ROOT#%'$DOJO_ROOT'%' "$TARGET_SETTINGS_FILE"
@@ -232,20 +232,18 @@ function ubuntu_dojo_install() {
 
     # Decide if we always want to install in a VENV
     if [ "$VENV_ACTIVE" = "0" ]; then
-        pip install --upgrade pip
-        pip install -U pip
+        pip3 install --upgrade pip
+        pip3 install -r requirements.txt
         if [ "$DB_TYPE" = MySQL ]; then
-            pip install .[mysql]
-        else
-            pip install -r requirements.txt
+            sudo -H pip3 install -r mysql.txt
+        #TODO Add PostgreSQL here
         fi
-
     else
-        sudo pip install --upgrade pip
+        sudo pip3 install --upgrade pip
+        sudo pip3 install -r requirements.txt
         if [ "$DB_TYPE" = MySQL ]; then
-            sudo -H pip install .[mysql]
-        else
-            sudo -H pip install  -r requirements.txt
+            sudo -H pip3 install -r mysql.txt
+        #TODO Add PostgreSQL here
         fi
     fi
     
