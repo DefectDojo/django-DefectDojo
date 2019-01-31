@@ -29,7 +29,9 @@ function ubuntu_db_config() {
 	# Start up DB
 	if [ "$DB_LOCAL" = true ]; then
 	    sudo usermod -d /var/lib/mysql/ mysql
-	    sudo mkdir /var/run/mysqld
+		if [ ! -d "/var/run/mysqld" ]; then
+	        sudo mkdir /var/run/mysqld
+		fi
 	    sudo chown -R mysql:mysql /var/lib/mysql /var/run/mysqld
 	    sudo service mysql start
 	fi
@@ -221,7 +223,7 @@ function create_dojo_settings() {
 }
 
 function ubuntu_dojo_install() {
-	echo "=============================================================================="
+    echo "=============================================================================="
     echo "Installing DefectDojo Django application "
     echo "=============================================================================="
     echo ""
@@ -230,17 +232,17 @@ function ubuntu_dojo_install() {
     python -c 'import sys; print sys.real_prefix' 2>/dev/null
     VENV_ACTIVE=$?
 
-    # Decide if we always want to install in a VENV
+    # TODO: Decide if we always want to install in a VENV
     if [ "$VENV_ACTIVE" = "0" ]; then
         pip3 install --upgrade pip
-        pip3 install -r requirements.txt
+        #pip3 install -r requirements.txt
         if [ "$DB_TYPE" = MySQL ]; then
             sudo -H pip3 install -r mysql.txt
         #TODO Add PostgreSQL here
         fi
     else
         sudo pip3 install --upgrade pip
-        sudo pip3 install -r requirements.txt
+        #sudo pip3 install -r requirements.txt
         if [ "$DB_TYPE" = MySQL ]; then
             sudo -H pip3 install -r mysql.txt
         #TODO Add PostgreSQL here

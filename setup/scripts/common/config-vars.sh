@@ -59,10 +59,10 @@ DOJO_ROOT=${DOJO_ROOT:-"$DOJO_SOURCE/dojo"}
 ########################################################################
 
 # Meta vars used by installer 
-SOURCE_SETTINGS_FILE=${SOURCE_SETTINGS_FILE:-"dojo/settings/settings.dist.py"}
-TARGET_SETTINGS_FILE=${TARGET_SETTINGS_FILE:-"dojo/settings/settings.py"}
+SOURCE_SETTINGS_FILE=${SOURCE_SETTINGS_FILE:-"$REPO_BASE/dojo/settings/settings.dist.py"}
+TARGET_SETTINGS_FILE=${TARGET_SETTINGS_FILE:-"$REPO_BASE/dojo/settings/settings.py"}
 LOAD_SAMPLE_DATA=${LOAD_SAMPLE_DATA:-"false"}
-ENV_SETTINGS_FILE=${ENV_SETTINGS_FILE:-"$REPO_BASE/entrypoint_scripts/common/install-env"} 
+ENV_SETTINGS_FILE=${ENV_SETTINGS_FILE:-"$SETUP_BASE/scripts/common/install-env"} 
 ENV_TARGET_FILE=${ENV_TARGET_FILE:-"$REPO_BASE/dojo/settings/.env.prod"}
 
 # Default Dojo Admin user:

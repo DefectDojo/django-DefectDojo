@@ -123,7 +123,7 @@ bootstrap_install() {
 }
 
 check_python_version() {
-	# 
+	# TODO Adjust this for Python 3
 	echo "Inside check python version"
 	# Detect Python version
     PYV=`python -c "import sys;t='{v[0]}.{v[1]}'.format(v=list(sys.version_info[:2]));sys.stdout.write(t)";`

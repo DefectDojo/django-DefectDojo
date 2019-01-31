@@ -1,11 +1,15 @@
 # DefectDojo install 'library' to handle command-line arguments
-#  
+#
 
 # Function to randomly generate all passwords for credential pairs used by the installer
 init_install_creds() {
 	# Set creds to random values or hard-code them only for Dev installs
 	if [ "$INSTALL_TYPE" = "Dev Install" ]; then
 	    # Hardcode passwords for Dev installs so they are consistent
+	    echo ""
+        echo "=============================================================================="
+	    echo "  WARNNING: Dev install has hard coded credentials - you have been warned."
+	    echo "=============================================================================="
 	    echo ""
 	    echo "  WARNNING: Dev install has hard coded credentials - you have been warned."
 	    echo ""
@@ -23,9 +27,9 @@ init_install_creds() {
 	    # Generate a unique password for this install for the dojo admin user
 	    ADMIN_PASS=`LC_CTYPE=C tr -dc A-Za-z0-9_\!\@\#\$\%\^\&\*\(\)-+ < /dev/urandom | head -c 24`
 	fi
-	
+
 	# Always generate unique values for any install type
-	
+
 	# Generate a unique secret to use in the Django settings.py file per install
 	DD_SECRET_KEY=`cat /dev/urandom | LC_CTYPE=C tr -dc "a-zA-Z0-9" | head -c 128`
 	# Generate a unique AES key to use in the Django settings.py file per install
@@ -35,6 +39,12 @@ init_install_creds() {
 # Function to handle changing database install config options
 change_db_config() {
 	# Prompt for the various DB options
+	echo ""
+	echo "=============================================================================="
+	echo "  Prompting for DB options"
+	echo "=============================================================================="
+	echo ""
+
 	ANS="invalid"
 	echo ""
 	while [ $ANS = "invalid" ]
@@ -56,7 +66,7 @@ change_db_config() {
 		    ;;
 		esac
     done
-    
+
     ANS="invalid"
     echo ""
 	while [ $ANS = "invalid" ]
@@ -78,7 +88,7 @@ change_db_config() {
 		    ;;
 		esac
     done
-	
+
 	ANS="invalid"
 	echo ""
 	while [ $ANS = "invalid" ]
@@ -100,8 +110,8 @@ change_db_config() {
 		    ;;
 		esac
     done
-    
-    # Only ask for host when the DB is remote and exists 
+
+    # Only ask for host when the DB is remote and exists
     #  otherwise it's going to be localhost (aka local install)
     #  or the remote db doesn't exist and this installed doesn't handle remove DB installs
     if [ "$DB_LOCAL" = false ] && [ "$DB_EXISTS" = true ]; then
@@ -127,7 +137,7 @@ change_db_config() {
 			esac
 	    done
 	fi
-    
+
 	ANS="invalid"
 	echo ""
 	while [ $ANS = "invalid" ]
@@ -153,32 +163,40 @@ change_db_config() {
 
 # Function to handle interactive changes to OS config values
 change_os_config() {
+	#TODO - finish me
 	echo ""
 	echo "Prompts for OS configs HERE"
 }
 
 # Function to handle interactive changes to DefectDojo's admin login
 change_admin_login() {
+	#TODO - finish me
 	echo ""
 	echo "Prompts for DefectDojo's admin login HERE"
 }
 
 # Prompt user for config options needed for interactive install
 prompt_for_config_vals() {
+	echo "=============================================================================="
+	echo "  Starting interactive DefectDojo installation"
+	echo "=============================================================================="
 	echo ""
-	echo "Starting interactive DefectDojo installation"
-	echo ""
-	
+
 	# Prompt install type
 	ANS="invalid"
-	echo "  Choose install type - setup.bash supports the following install types:"
+	echo "  Choose install type: setup.bash supports the following install types:"
+	echo ""
 	echo "    (1) Single Server - Everything on one OS/server/container"
-	echo "    (2) Dev Install - Single Server install with all default install options & passwords"
-	echo "    (3) Stand-alone Server - DefectDojo installed on a separate OS/server/container then the database"
+	echo ""
+	echo "    (2) Dev Install - Single Server install with all default install options "
+	echo "        & passwords"
+	echo ""
+	echo "    (3) Stand-alone Server - DefectDojo installed on a separate OS/server/"
+	echo "        container then the database"
 	echo ""
 	while [ $ANS = "invalid" ]
     do
-	    read -p "  Select install type: (1) Single-Server, (2) Dev Install or (3) Stand-alone: " IN_Q
+	    read -p "Select install type: (1) Single-Server, (2) Dev Install or (3) Stand-alone: " IN_Q
 	    case $IN_Q in
 		    1)
 		    INSTALL_TYPE="Single Server"
@@ -201,12 +219,16 @@ prompt_for_config_vals() {
     done
     init_install_creds
     echo ""
-	
+
 	# Prompt user for DB type to use
+	echo "=============================================================================="
+	echo "  Select database type"
+	echo "=============================================================================="
+	echo ""
 	ANS="invalid"
 	while [ $ANS = "invalid" ]
     do
-	    read -p "  Select database type: (1) SQLite, (2) MySQL or (3) PostgreSQL: " DB_Q
+	    read -p "Select database type: (1) SQLite, (2) MySQL or (3) PostgreSQL: " DB_Q
 	    case $DB_Q in
 		    1)
 		    DB_TYPE="SQLite"
@@ -227,14 +249,19 @@ prompt_for_config_vals() {
 		    ;;
 		esac
     done
-    
+
     # Prompt for local or remote database
+    echo ""
+	echo "=============================================================================="
+	echo "  Select if database is remote or local to this install"
+	echo "=============================================================================="
     echo ""
     ANS="invalid"
     while [ $ANS = "invalid" ]
     do
         echo "  Will the $DB_TYPE database be local (on the same OS) or remote for this install?"
-        read -p "  Select (1) Remote, (2) Local: " DB_Q
+		echo ""
+        read -p "Select (1) Remote, (2) Local: " DB_Q
         case $DB_Q in
 		    1)
 		    DB_LOCAL="false"
@@ -249,14 +276,19 @@ prompt_for_config_vals() {
 		    ;;
 		esac
     done
-    
+
     # Prompt for existing or new database
+    echo ""
+	echo "=============================================================================="
+	echo "  Select if database should be installed during setup "
+	echo "=============================================================================="
     echo ""
     ANS="invalid"
     while [ $ANS = "invalid" ]
     do
         echo "  Will the $DB_TYPE database be installed during setup or does it already exist?"
-        read -p "  Select (1) Install of $DB_TYPE required, (2) $DB_TYPE server already exists/is running: " DB_Q
+		echo ""
+        read -p "Select (1) Install of $DB_TYPE required, (2) $DB_TYPE server already exists/is running: " DB_Q
         case $DB_Q in
 		    1)
 		    DB_EXISTS="false"
@@ -271,14 +303,19 @@ prompt_for_config_vals() {
 		    ;;
 		esac
     done
-    
+
     # Prompt for dropping any existing Dojo DB
+    echo ""
+	echo "=============================================================================="
+	echo "  Keep existing Defect Dojo database if found? "
+	echo "=============================================================================="
     echo ""
     ANS="invalid"
     while [ $ANS = "invalid" ]
     do
         echo "  If the installer finds an existing DefectDojo database, should it be dropped?"
-        read -p "  Select (1) Drop existing database, (2) Keep existing database & exit: " DB_Q
+		echo ""
+        read -p "Select (1) Drop existing database, (2) Keep existing database & exit: " DB_Q
         case $DB_Q in
 		    1)
 		    DB_DROP_EXISTING="true"
@@ -293,23 +330,30 @@ prompt_for_config_vals() {
 		    ;;
 		esac
     done
-	
+
 	# Sanity check answers, and exit if DB is remote and doesn't exists aka beyond the scope of this installer
 	# Case 1: Remote database + database doesn't exist
 	if [ "$DB_LOCAL" = false ] && [ "$DB_EXISTS" = false ]; then
 	    echo ""
-	    echo "  ERROR:"
-	    echo "  You answered that the $DB_TYPE is remote and doesn't already exist"
+		echo "##############################################################################"
+		echo "#  AN ERROR HAS OCCURED                                                      #"
+		echo "##############################################################################"
+	    echo ""
+		echo "  You answered that the $DB_TYPE is remote and doesn't already exist"
 	    echo "  This installer cannot do remote installs.  Please install $DB_TYPE"
 	    echo "  on the remote system of your choosing then re-run this installer"
 	    echo "  Exiting..."
 	    echo ""
 	    exit 1
 	fi
-	
+
 	# Ask if DB defaults are OK for a new, local DB install
 	# Case 2: Local database + database doesn't exist
 	if [ "$DB_LOCAL" = true ] && [ "$DB_EXISTS" = false ]; then
+		echo ""
+		echo "=============================================================================="
+		echo "  Install settings for local database that needs to be installed "
+		echo "=============================================================================="
 	    echo ""
 	    echo "  Current $DB_TYPE database install config includes:"
 	    echo "    Name of database:          $DB_NAME"
@@ -323,7 +367,8 @@ prompt_for_config_vals() {
 	    while [ $ANS = "invalid" ]
 	    do
 	        echo "  Do you want to change any of these values?"
-	        read -p "  Select (1) Yes, (2) No: " DB_Q
+			echo ""
+	        read -p "Select (1) Yes, (2) No: " DB_Q
 	        case $DB_Q in
 			    1)
 			    change_db_config
@@ -341,24 +386,36 @@ prompt_for_config_vals() {
 			esac
 	    done
 	fi
-	
+
 	# Case 3: Local database + database exists
 	if [ "$DB_LOCAL" = true ] && [ "$DB_EXISTS" = true ]; then
+		echo ""
+		echo "=============================================================================="
+		echo "  Install settings for local database that already is installed "
+		echo "=============================================================================="
+		echo ""
 	    # Should only need to get config values
-	    echo ""
 	    echo "  Please update database config to reflect the existing local database"
 	    change_db_config
 	fi
-	
+
 	# Case 4: Remote database + database exists
 	if [ "$DB_LOCAL" = false ] && [ "$DB_EXISTS" = true ]; then
+		echo ""
+		echo "=============================================================================="
+		echo "  Install settings for remote database that already exists "
+		echo "=============================================================================="
+		echo ""
 	    # Should only need to get config values
-	    echo ""
 	    echo "  Please update database config to reflect the existing remote database"
 	    change_db_config
 	fi
 
 	# Ask if OS defaults are OK for this install
+	echo ""
+	echo "=============================================================================="
+	echo "  Install settings for OS configuration "
+	echo "=============================================================================="
 	echo ""
     echo "  Current OS install config includes:"
     echo "    OS user to run Dojo as:             $OS_USER"
@@ -374,7 +431,8 @@ prompt_for_config_vals() {
     while [ $ANS = "invalid" ]
     do
         echo "  Do you want to change any of these values?"
-        read -p "  Select (1) Yes, (2) No: " OS_Q
+		echo ""
+        read -p "Select (1) Yes, (2) No: " OS_Q
         case $OS_Q in
 		    1)
 		    change_os_config
@@ -391,8 +449,12 @@ prompt_for_config_vals() {
 		    ;;
 		esac
     done
-	
+
 	# Ask if Dojo admin user defaults are OK for this install
+	echo ""
+	echo "=============================================================================="
+	echo "  Install settings for Defect Dojo application configuration "
+	echo "=============================================================================="
 	echo ""
     echo "  Current admin user config for DefectDojo:"
     echo "    Admin user to log into Dojo:  $ADMIN_USER"
@@ -403,7 +465,8 @@ prompt_for_config_vals() {
     while [ $ANS = "invalid" ]
     do
         echo "  Do you want to change any of these values?"
-        read -p "  Select (1) Yes, (2) No: " AD_Q
+		echo ""
+        read -p "Select (1) Yes, (2) No: " AD_Q
         case $AD_Q in
 		    1)
 		    change_admin_login
@@ -420,6 +483,10 @@ prompt_for_config_vals() {
 		    ;;
 		esac
     done
-	
-	echo "END prompt_for_config"
+
+	echo ""
+	echo "=============================================================================="
+	echo "  End of interactive portion of the installer "
+	echo "=============================================================================="
+	echo ""
 }

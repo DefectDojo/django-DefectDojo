@@ -15,11 +15,12 @@
 #
 
 # Make sure setup.bash is run from the same directory it is located in
-cd ${0%/*}  # same as `cd "$(dirname "$0")"` without relying on dirname 
-REPO_BASE=`pwd`
+cd ${0%/*}  # same as `cd "$(dirname "$0")"` without relying on dirname
+SETUP_BASE=`pwd`
+REPO_BASE=${SETUP_BASE%/*}
 
 # Set install config values and load the 'libraries' needed for install
-LIB_PATH="$REPO_BASE/scripts/common"
+LIB_PATH="$SETUP_BASE/scripts/common"
 . "$LIB_PATH/config-vars.sh"     # Set install configuration default values
 . "$LIB_PATH/cmd-args.sh"        # Get command-line args and set config values as needed
 . "$LIB_PATH/prompt.sh"          # Prompt for config values if install is interactive
@@ -27,11 +28,11 @@ LIB_PATH="$REPO_BASE/scripts/common"
 . "$LIB_PATH/install-dojo.sh"    # Complete an install of Dojo based on previously run code
 
 # Read command-line arguments, if any and set/override config defaults as needed
-#   Function in ./entrypoint_scripts/common/cmd-args.sh 
-read_cmd_args 
+#   Function in ./scripts/common/cmd-args.sh
+read_cmd_args
 
 # Prompt for config values if install is interactive - the default
-#   Function in ./entrypoint_scripts/common/prompt.sh 
+#   Function in ./scripts/common/prompt.sh
 if [ "$PROMPT" = true ] ; then
     prompt_for_config_vals
 else
@@ -39,20 +40,23 @@ else
 fi
 
 # Check for OS installer is running on and that python version is correct
-#   Funcions below in ./entrypoint-scripts/common/common-os.sh
-check_install_os 
+#   Funcions below in ./scripts/common/common-os.sh
+check_install_os
 # Bootstrap any programs needed specifically for the installer to run
-bootstrap_install 
+bootstrap_install
 check_python_version
 
 # Do the install - broken into pieces by OS
-#   Functions below in ./entrypoint-scripts/common/install-dojo.sh
+#   Functions below in ./scripts/common/install-dojo.sh
 install_dojo
 
 #echo "Blah is $BLAH"
 #echo "DD_ENV is $DD_ENV"
 echo ""
-echo "DEBUG JUNK:"
+echo "=============================================================================="
+echo " DEBUG JUNK"
+echo "=============================================================================="
+echo ""
 echo "PROMPT is $PROMPT"
 echo "====> "
 echo "INSTALL_OS is $INSTALL_OS"

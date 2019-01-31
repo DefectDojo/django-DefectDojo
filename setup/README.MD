@@ -107,8 +107,9 @@ Configuration items for setup.py are in template-env in ./dojo/settings/ and con
 
 ### Installer Bash variables
 
-* REPO_BASE : The full path to where the DefectDojo source was cloned usually /opt/dojo
-* LIB_PATH : The full path to where the configuration values and libraries are for the DefectDojo installer which is REPO_BASE + /entrypoint_scripts/common/
+* SETUP_BASE : The full path to where the setup.bash file is located e.g ./setup if starting from the Dojo repository root
+* REPO_BASE : The full path to where the DefectDojo source was cloned usually /opt/dojo/django-DefectDojo
+* LIB_PATH : The full path to where the configuration values and libraries are for the DefectDojo installer which is SETUP_BASE + /scripts/common/
 * DB_TYPPE : The database type DefectDojo will use - currently either SQLite, MySQL or PostgreSQL
 * 
 

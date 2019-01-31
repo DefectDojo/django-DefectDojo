@@ -3,8 +3,11 @@
 
 # Case statement on OS - move OS specific install code into separate included files
 install_dojo() {
-	OS_LIBS="$REPO_BASE/entrypoint_scripts/os"
-	echo "Starting install-dojo"
+	OS_LIBS="$SETUP_BASE/scripts/os"
+	echo "=============================================================================="
+	echo "  Starting the install of Defect Dojo"
+	echo "=============================================================================="
+	echo ""
 	case $INSTALL_OS in
 	    "linux-gnu")
 	    echo "  Linux install target"
