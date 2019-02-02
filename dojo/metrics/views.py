@@ -52,15 +52,6 @@ def metrics(request, mtype):
     page_name = 'Product Type Metrics'
     show_pt_filter = True
 
-    sql_age_query = ""
-    if "postgresql" in settings.DATABASES["default"]["ENGINE"]:
-        sql_age_query = """SELECT (CASE WHEN (dojo_finding.mitigated IS NULL)
-                        THEN DATE_PART(\'day\', date::timestamp - dojo_finding.date::timestamp)
-                        ELSE DATE_PART(\'day\', dojo_finding.mitigated::timestamp - dojo_finding.date::timestamp) END)"""
-    else:
-        sql_age_query = """SELECT IF(dojo_finding.mitigated IS NULL, DATEDIFF(CURDATE(), dojo_finding.date),
-                       DATEDIFF(dojo_finding.mitigated, dojo_finding.date))"""
-
     findings = Finding.objects.filter(verified=True,
                                       severity__in=('Critical', 'High', 'Medium', 'Low', 'Info')).prefetch_related(
         'test__engagement__product',
@@ -73,7 +64,6 @@ def metrics(request, mtype):
                         'dojo_risk_acceptance_accepted_findings ON '
                         '( dojo_risk_acceptance.id = dojo_risk_acceptance_accepted_findings.risk_acceptance_id ) '
                         'WHERE dojo_risk_acceptance_accepted_findings.finding_id = dojo_finding.id',
-            "sql_age": sql_age_query
         },
     )
     active_findings = Finding.objects.filter(verified=True, active=True,
@@ -88,7 +78,6 @@ def metrics(request, mtype):
                         'dojo_risk_acceptance_accepted_findings ON '
                         '( dojo_risk_acceptance.id = dojo_risk_acceptance_accepted_findings.risk_acceptance_id ) '
                         'WHERE dojo_risk_acceptance_accepted_findings.finding_id = dojo_finding.id',
-            "sql_age": sql_age_query
     },
     )
 
@@ -246,13 +235,13 @@ def metrics(request, mtype):
     accepted_in_period_details = {}
 
     for finding in findings.qs:
-        if 0 <= finding.sql_age <= 30:
+        if 0 <= finding.age <= 30:
             age_detail[0] += 1
-        elif 30 < finding.sql_age <= 60:
+        elif 30 < finding.age <= 60:
             age_detail[1] += 1
-        elif 60 < finding.sql_age <= 90:
+        elif 60 < finding.age <= 90:
             age_detail[2] += 1
-        elif finding.sql_age > 90:
+        elif finding.age > 90:
             age_detail[3] += 1
 
         in_period_counts[finding.severity] += 1

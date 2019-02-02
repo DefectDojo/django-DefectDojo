@@ -35,6 +35,7 @@ class NexposeFullXmlParser(object):
 
     def __init__(self, xml_output, test):
         tree = self.parse_xml(xml_output)
+
         vulns = []
         if tree:
             vulns = self.get_vuln_definitions(tree)
@@ -99,21 +100,25 @@ class NexposeFullXmlParser(object):
                     ret += self.parse_html_type(child)
             else:
                 if node.text:
-                    ret += "<p>" + str(node.text).strip()
+                    ret += "<p>" + node.text.encode('utf-8').strip()
                 if node.tail:
                     ret += str(node.tail).strip() + "</p>"
                 else:
                     ret += "</p>"
         if tag == 'unorderedlist':
             for item in list(node):
-                ret += "<ul>" + "* " + self.parse_html_type(item) + "</ul>"
+                unorderedlist = self.parse_html_type(item)
+                if unorderedlist not in ret:
+                    ret += "* " + unorderedlist
         if tag == 'urllink':
             if node.text:
                 ret += str(node.text).strip() + " "
             last = ""
+
             for attr in node.attrib:
-                if node.get(attr) != node.get(last):
-                    ret += str(node.get(attr)) + " "
+                if last is not "":
+                    if node.get(attr) != node.get(last):
+                        ret += str(node.get(attr)) + " "
                 last = attr
 
         return ret
@@ -182,7 +187,6 @@ class NexposeFullXmlParser(object):
                             vuln['tags'].append(tag.text.lower())
                     """
                 vulns[vid] = vuln
-
         return vulns
 
     def get_items(self, tree, vulns, test):
@@ -194,6 +198,7 @@ class NexposeFullXmlParser(object):
         if tree is None:
             return x
         for nodes in tree.iter('nodes'):
+            "in nodes"
             for node in nodes.iter('node'):
                 host = dict()
                 host['name'] = node.get('address')
@@ -240,7 +245,9 @@ class NexposeFullXmlParser(object):
 
                     if dupe_key in dupes:
                         find = dupes[dupe_key]
-                        find.description += "\n\n" + html2text.html2text(vuln['pluginOutput'])
+                        dupe_text = html2text.html2text(vuln['pluginOutput'].decode("utf8"))
+                        if dupe_text not in find.description:
+                            find.description += "\n\n" + dupe_text
                     else:
                         refs = ''
                         for ref in vuln['refs'][2:]:
@@ -250,10 +257,9 @@ class NexposeFullXmlParser(object):
                                 ref = "https://cve.mitre.org/cgi-bin/cvename.cgi?name=" + ref
                             refs += ref
                             refs += "\n"
-
                         find = Finding(title=vuln['name'],
                                        description=html2text.html2text(
-                                               vuln['desc']) + "\n\n" + html2text.html2text(vuln['pluginOutput']),
+                                               vuln['desc'].encode('utf-8').strip()) + "\n\n" + html2text.html2text(vuln['pluginOutput'].decode("utf8").strip()),
                                        severity=sev,
                                        numerical_severity=Finding.get_numerical_severity(sev),
                                        mitigation=html2text.html2text(vuln['resolution']),
@@ -265,12 +271,12 @@ class NexposeFullXmlParser(object):
                                        false_p=False,
                                        duplicate=False,
                                        out_of_scope=False,
-                                       mitigated=None)
+                                       mitigated=None,
+                                       dynamic_finding=True)
                         find.unsaved_endpoints = list()
                         dupes[dupe_key] = find
 
                     find.unsaved_endpoints.append(Endpoint(host=item['name'], product=test.engagement.product))
-
                     for hostname in item['hostnames']:
                         find.unsaved_endpoints.append(Endpoint(host=hostname, product=test.engagement.product))
                     for service in item['services']:
@@ -279,4 +285,5 @@ class NexposeFullXmlParser(object):
                                     Endpoint(host=item['name'] + (":" + service['port']) if service[
                                                                                                 'port'] is not None else "",
                                              product=test.engagement.product))
+
         return dupes.values()

@@ -7,6 +7,11 @@
         {{ form.non_field_errors }}
     </div>
 {% endif %}
+<div id="template_set_all_options" class="form-group"><div class="col-sm-offset-2 col-sm-10">
+        <button data-option="Keep" class="btn">Keep all</button>
+        <button data-option="Replace" class="btn">Replace all</button>
+        <button data-option="Combine" class="btn">Combine all</button>
+</div></div>
 {% for field in form.hidden_fields %}
     {{ field }}
 {% endfor %}

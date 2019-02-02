@@ -174,10 +174,17 @@ def change_password(request):
     if request.method == 'POST':
         current_pwd = request.POST['current_password']
         new_pwd = request.POST['new_password']
+        confirm_pwd = request.POST['confirm_password']
         user = authenticate(username=request.user.username,
                             password=current_pwd)
         if user is not None:
             if user.is_active:
+                if new_pwd != confirm_pwd:
+                    messages.add_message(request, messages.ERROR, 'Passwords do not match.', extra_tags='alert-danger')
+                    return render(request, 'dojo/change_pwd.html', {'error': ''})
+                if new_pwd == current_pwd:
+                    messages.add_message(request, messages.ERROR, 'New password must be different from current password.', extra_tags='alert-danger')
+                    return render(request, 'dojo/change_pwd.html', {'error': ''})
                 user.set_password(new_pwd)
                 user.save()
                 messages.add_message(request,
@@ -209,7 +216,7 @@ def user(request):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_passes_test(lambda u: u.is_superuser)
 def add_user(request):
     form = AddDojoUserForm()
     if not request.user.is_superuser:
@@ -252,7 +259,7 @@ def add_user(request):
         'to_add': True})
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_passes_test(lambda u: u.is_superuser)
 def edit_user(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     authed_products = Product.objects.filter(authorized_users__in=[user])
@@ -303,7 +310,7 @@ def edit_user(request, uid):
         'to_edit': user})
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_passes_test(lambda u: u.is_superuser)
 def delete_user(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     form = DeleteUserForm(instance=user)
