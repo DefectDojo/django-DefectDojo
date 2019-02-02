@@ -246,6 +246,7 @@ class ImportScanForm(forms.Form):
                          ("Generic Findings Import", "Generic Findings Import"),
                          ("Trustwave Scan (CSV)", "Trustwave Scan (CSV)"),
                          ("SKF Scan", "SKF Scan"),
+                         ("Clair Klar Scan", "Clair Klar Scan"),
                          ("Bandit Scan", "Bandit Scan"),
                          ("SSL Labs Scan", "SSL Labs Scan"),
                          ("Gosec Scanner", "Gosec Scanner"))
