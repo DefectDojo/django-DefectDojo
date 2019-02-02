@@ -22,17 +22,19 @@ services:
       DEFECT_DOJO_DEFAULT_DATABASE_HOST: 'mysql'
       DEFECT_DOJO_DEFAULT_DATABASE_PORT: '3306'
       DEFECT_DOJO_DEFAULT_DATABASE_NAME: 'dojodb'
-      DEFECT_DOJO_DEFAULT_DATABASE_USER: 'dojo'
-      DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD: 'dojo'
+      DEFECT_DOJO_DEFAULT_DATABASE_USER: 'root'
+      DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD: 'BLORMPF'
       DEFECT_DOJO_ALLOWED_HOSTS_GLOB: '*'
       DEFECT_DOJO_ADMIN_PASSWORD: "admin"
       DEFECT_DOJO_SECRET_KEY: '08hrgqoiejijijjwirj'
-    hostname: 'django'
+      DEFECT_DOJO_DEBUG: 'true'
+      hostname: 'django'
     networks:
       - data
       - proxy
     volumes:
       - '.:/opt/django-DefectDojo'
+      - './docker/entrypoint.sh:/entrypoint.sh'
 
   mysql:
     command: '--default-authentication-plugin=mysql_native_password'
