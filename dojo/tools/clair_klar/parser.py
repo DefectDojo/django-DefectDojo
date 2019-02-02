@@ -1,5 +1,6 @@
 import json
 import logging
+import sys
 
 from dojo.models import Finding
 
@@ -28,15 +29,16 @@ class ClairKlarParser(object):
     def set_items_for_severity(self, tree, test, severity):
         tree_severity = tree.get(severity)
         if tree_severity:
-            self.items = ([data for data in self.get_items(tree_severity , test)])
-            logger.info("Uploaded findings for severity " + severity)
+            for data in self.get_items(tree_severity , test):
+                self.items.append(data)
+            logger.info("Appended findings for severity " + severity)
         else:
             logger.info("No findings for severity " + severity)
 
-    def get_items(self, tree, test):
+    def get_items(self, tree_severity, test):
         items = {}
 
-        for node in tree:
+        for node in tree_severity:
             item = get_item(node, test)
             unique_key = str(node['Name']) + str(node['FeatureName'])
             items[unique_key] = item
