@@ -10,15 +10,26 @@ install_dojo() {
 	echo ""
 	case $INSTALL_OS in
 	    "linux-gnu")
-	    echo "  Linux install target"
+        echo "=============================================================================="
+        echo "  Linux install target"
+        echo "=============================================================================="
+        echo ""
 	    . "$OS_LIBS/linux.sh"
 	    install_linux
 	    ;;
 	    "darwin")
-	    echo "Mac OS X install target"
-	    echo "  TBD: Install for Mac OS X"
+        echo "=============================================================================="
+        echo "  Mac OS X install target"
+        echo "=============================================================================="
+        echo ""
+	    echo "  TODO: Installer code for Mac OS X"
+        exit 1
 	    ;;
 	    *)
+        echo "##############################################################################"
+        echo "#  ERROR: Unknown or NIY install target - exiting                            #"
+        echo "##############################################################################"
+        echo ""
 	    echo "    Error: Unsupported OS"
 	    exit 1
 	    ;;

@@ -7,11 +7,9 @@ init_install_creds() {
 	if [ "$INSTALL_TYPE" = "Dev Install" ]; then
 	    # Hardcode passwords for Dev installs so they are consistent
 	    echo ""
-        echo "=============================================================================="
-	    echo "  WARNNING: Dev install has hard coded credentials - you have been warned."
-	    echo "=============================================================================="
-	    echo ""
-	    echo "  WARNNING: Dev install has hard coded credentials - you have been warned."
+        echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+	    echo "!  WARNNING: Dev install has hard coded credentials - you have been warned.  !"
+	    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 	    echo ""
 	    DB_PASS="$DEV_DB_PASS"
 	    DB_ROOT="$DEV_DB_PASS"
