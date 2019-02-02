@@ -170,9 +170,9 @@
     <script src="{% static "flot/jquery.flot.resize.js" %}"></script>
     <script src="{% static "flot-axis/jquery.flot.axislabels.js" %}"></script>
     {% if punchcard %}
-        <script src="{% static "JUMFlot/JUMFlot.min.js" %}"></script>
-        <script src="{% static "JUMFlot/jquery.flot.mouse.js" %}"></script>
-        <script src="{% static "JUMFlot/jquery.flot.bubbles.js" %}"></script>
+        <script src="{% static "JUMFlot/javascripts/JUMFlot.min.js" %}"></script>
+        <script src="{% static "JUMFlot/javascripts/jquery.flot.mouse.js" %}"></script>
+        <script src="{% static "JUMFlot/javascripts/jquery.flot.bubbles.js" %}"></script>
     {% endif %}
     <script>
         var highest_count = {{ highest_count }};
@@ -422,7 +422,7 @@
                 var ticks = []
                 {% for t in top_ten_products %}
                     ttp = {{forloop.counter}};
-                    ticks.push([ttp, "{{t.name|safe}}"]);
+                    ticks.push([ttp, "{{t.name}}"]);
                     critical.push([ttp, {{t.critical|default_if_none:0}}]);
                     high.push([ttp, {{t.high|default_if_none:0}}]);
                     medium.push([ttp, {{t.medium|default_if_none:0}}]);
