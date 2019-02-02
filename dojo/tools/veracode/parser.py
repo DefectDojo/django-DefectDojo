@@ -56,7 +56,7 @@ class VeracodeXMLParser(object):
                 for flaw in category.iter(
                         '{https://www.veracode.com/schema/reports/export/1.0}flaw'
                 ):
-                    dupe_key = sev + flaw.attrib['cweid'] + flaw.attrib['module'] + flaw.attrib['type']
+                    dupe_key = sev + flaw.attrib['cweid'] + flaw.attrib['module'] + flaw.attrib['type'] + flaw.attrib['line'] + flaw.attrib['issueid']
 
                     if dupe_key in dupes:
                         find = dupes[dupe_key]
