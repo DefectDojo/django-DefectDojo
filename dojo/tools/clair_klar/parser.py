@@ -1,10 +1,12 @@
 import json
 import logging
-import sys
+
 
 from dojo.models import Finding
 
+
 logger = logging.getLogger(__name__)
+
 
 class ClairKlarParser(object):
     def __init__(self, json_output, test):
@@ -15,7 +17,7 @@ class ClairKlarParser(object):
         clair_severities = ["Unknown", "Negligible", "Low", "Medium", "High", "Critical", "Defcon1"]
         if tree:
             for clair_severity in clair_severities:
-                self.set_items_for_severity(tree , test, clair_severity)
+                self.set_items_for_severity(tree, test, clair_severity)
 
     def parse_json(self, json_output):
         try:
@@ -29,7 +31,7 @@ class ClairKlarParser(object):
     def set_items_for_severity(self, tree, test, severity):
         tree_severity = tree.get(severity)
         if tree_severity:
-            for data in self.get_items(tree_severity , test):
+            for data in self.get_items(tree_severity, test):
                 self.items.append(data)
             logger.info("Appended findings for severity " + severity)
         else:
@@ -44,6 +46,7 @@ class ClairKlarParser(object):
             items[unique_key] = item
 
         return items.values()
+
 
 def get_item(item_node, test):
 
@@ -64,7 +67,7 @@ def get_item(item_node, test):
                                   str(item_node['FeatureVersion']) + "\n Fixed by: " +
                                   str(item_node['FixedBy']) + "\n Namespace: " + str(item_node['NamespaceName']) + "\n CVE: " +
                                   str(item_node['Name']),
-                      mitigation = "Please use version " + item_node['FixedBy'] + " of library " + item_node['FeatureName'],
+                      mitigation="Please use version " + item_node['FixedBy'] + " of library " + item_node['FeatureName'],
                       references=item_node['Link'],
                       active=False,
                       verified=False,
