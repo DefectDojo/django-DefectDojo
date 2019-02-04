@@ -63,6 +63,21 @@ DATABASES = {
     }
 }
 
+# Configure which ways tools are allowed to run
+ALLOW_TOOL_RUN = {
+    'https': True,
+    'http': True,
+    'ssh': True,
+    'ssh-localhost': False # allows to run shell commands on the same server without authentication
+}
+
+# Configurations for the tool run
+TOOL_RUN_CONFIG = {
+    'http-api-header':'x-api', # HTTP header name for API authentication
+    'min-severity':'Low', # minimum severity for import
+    'dummy-user': 1 # import test result as this user ID
+}
+
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
 ALLOWED_HOSTS = []

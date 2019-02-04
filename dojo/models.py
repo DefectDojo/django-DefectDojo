@@ -698,6 +698,39 @@ class Engagement_Type(models.Model):
     def __unicode__(self):
         return self.name
 
+class Notes(models.Model):
+    entry = models.TextField()
+    date = models.DateTimeField(null=False, editable=False,
+                                default=get_current_datetime)
+    author = models.ForeignKey(User, editable=False)
+
+    class Meta:
+        ordering = ['-date']
+
+    def __unicode__(self):
+        return self.entry
+    
+class Tool_Product_Settings(models.Model):
+    name = models.CharField(max_length=200, null=False)
+    description = models.CharField(max_length=2000, null=True, blank=True)
+    url = models.CharField(max_length=2000, null=True, blank=True)
+    product = models.ForeignKey(Product, default=1, editable=False)
+    tool_configuration = models.ForeignKey(Tool_Configuration, null=False,
+                                           related_name='tool_configuration')
+    tool_project_id = models.CharField(max_length=200, null=True, blank=True)
+    notes = models.ManyToManyField(Notes, blank=True, editable=False)
+
+    class Meta:
+        ordering = ['name']
+        
+    def __unicode__(self):
+        return self.name
+
+
+class Tool_Product_History(models.Model):
+    product = models.ForeignKey(Tool_Product_Settings, editable=False)
+    status = models.CharField(max_length=10, default='Pending', editable=False)
+    last_scan = models.DateTimeField(null=False, editable=False, default=now)
 
 class Engagement(models.Model):
     name = models.CharField(max_length=300, null=True, blank=True)
@@ -756,7 +789,9 @@ class Engagement(models.Model):
     source_code_management_server = models.ForeignKey(Tool_Configuration, null=True, blank=True, verbose_name="SCM Server", help_text="Source code server for CI/CD test", related_name='source_code_management_server')
     source_code_management_uri = models.CharField(max_length=600, null=True, blank=True, verbose_name="Repo", help_text="Resource link to source code")
     orchestration_engine = models.ForeignKey(Tool_Configuration, verbose_name="Orchestration Engine", help_text="Orchestration service responsible for CI/CD test", null=True, blank=True, related_name='orchestration')
-
+    run_tool_test_engine = models.ForeignKey(Tool_Product_Settings, verbose_name="Schedule Product-Tool Test", help_text="A cronjob will run this tool test and import the results as configured after the target start", null=True, blank=True, related_name='run_tool_test')
+    run_tool_test = models.BooleanField(default=False, editable=False)
+    
     class Meta:
         ordering = ['-target_start']
 
@@ -898,19 +933,6 @@ class Endpoint(models.Model):
             return self.host[:self.host.index(":")]
         else:
             return self.host
-
-
-class Notes(models.Model):
-    entry = models.TextField()
-    date = models.DateTimeField(null=False, editable=False,
-                                default=get_current_datetime)
-    author = models.ForeignKey(User, editable=False)
-
-    class Meta:
-        ordering = ['-date']
-
-    def __unicode__(self):
-        return self.entry
 
 
 class Development_Environment(models.Model):
@@ -1602,26 +1624,6 @@ class Notifications(models.Model):
     review_requested = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     other = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     user = models.ForeignKey(User, default=None, null=True, editable=False)
-
-
-class Tool_Product_Settings(models.Model):
-    name = models.CharField(max_length=200, null=False)
-    description = models.CharField(max_length=2000, null=True, blank=True)
-    url = models.CharField(max_length=2000, null=True, blank=True)
-    product = models.ForeignKey(Product, default=1, editable=False)
-    tool_configuration = models.ForeignKey(Tool_Configuration, null=False,
-                                           related_name='tool_configuration')
-    tool_project_id = models.CharField(max_length=200, null=True, blank=True)
-    notes = models.ManyToManyField(Notes, blank=True, editable=False)
-
-    class Meta:
-        ordering = ['name']
-
-
-class Tool_Product_History(models.Model):
-    product = models.ForeignKey(Tool_Product_Settings, editable=False)
-    status = models.CharField(max_length=10, default='Pending', editable=False)
-    last_scan = models.DateTimeField(null=False, editable=False, default=now)
 
 class Alerts(models.Model):
     title = models.CharField(max_length=100, default='', null=False)
