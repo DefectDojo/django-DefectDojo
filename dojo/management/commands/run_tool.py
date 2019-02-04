@@ -12,7 +12,7 @@ from django.contrib import messages
 from dojo.models import Product, \
      Tool_Product_Settings, Endpoint, Tool_Product_History, \
      Engagement, Finding, Test_Type, Development_Environment, \
-     Test, User, BurpRawRequestResponse, Finding
+     Test, User, BurpRawRequestResponse, Finding, UserContactInfo
 from dojo.tools.factory import import_parser_factory
 from django.conf import settings
 from dojo.utils import get_system_setting, timezone, create_notification, prepare_for_view
@@ -24,18 +24,19 @@ import requests, base64, subprocess, paramiko, StringIO, re, traceback
 
 
 class Command(BaseCommand):
-    help = "Details:\n\tRuns product-tool configuration for each endpoint of its connected product\n\nArguments:\n\tID of Product-Tool configuration\n\tID of engagement"
+    help = "Details:\n\tExecutes an on-demand scan for a product-tool configuration for each endpoint of its connected product, or the cronjob to run all tool configurations associated with an engagament"
 
     def add_arguments(self, parser):
-        parser.add_argument('ttid', type=int, help="ID of product-tool configuration")
-        parser.add_argument('eid', type=int, help="ID of engagement or 0 for none")
-
+        parser.add_argument('-c', '--config', type=int, help='Provide an ID to execute an on-demand scan for a product-tool configuration', )
+        parser.add_argument('-e', '--engagement', type=int, help='For an on-demand scan, you can provide an engagement ID to import the test result into', )
+        
     def handle(self, *args, **options):
-        ttid = options['ttid']
-        eid = options['eid']
+        ttid = options['config'] or 0
+        eid = options['engagement'] or 0
 
         # Run the tool for a specific product-tool configuration ID, endpoint and engagement ID (0 = create one)
         def runTool(ttid, endpoint, eid):
+            print(ttid, endpoint, eid)
             scan_settings = Tool_Product_Settings.objects.get(pk=ttid)
             tool_config = scan_settings.tool_configuration
             tool_config.password = prepare_for_view(tool_config.password)
@@ -98,7 +99,7 @@ class Command(BaseCommand):
                 http_headers = {}
 
                 if tool_config.authentication_type == "API":
-                    http_headers = {settings.TOOL_RUN_CONFIG['http-api-header']: scan_settings.tool_configuration.api_key}
+                    http_headers = {settings.TOOL_RUN_CONFIG['http-api-header']: tool_config.api_key}
                 elif tool_config.authentication_type == "Password":
                     http_headers = {"Authorization": base64.b64encode('%s:%s' % (tool_config.username, tool_config.password))}
 
@@ -110,6 +111,20 @@ class Command(BaseCommand):
 
             # ssh://host/folder/file.extension?param connects to the host and runs the file in the query with the parameter provided
             elif url_settings.scheme == "ssh":
+                call_params = [url_settings.path]
+                
+                if url_settings.query != "":
+                    url_qs = parse_qs(url_settings.query)
+                    for key, val in url_qs.iteritems():
+                        call_params.append('--'+escapeshell(key)+'="'+escapeshell(val)+'"')
+
+                if url_settings.fragment != "":
+                    call_params.append(escapeshell(url_settings.fragment))
+
+                call_params.append(endpoint_url)
+                if settings.DEBUG:
+                    print('Cmd: '+' '.join(call_params))
+                    
                 # On localhost it is directly executed
                 if url_settings.netloc == "localhost":
                     try:
@@ -119,20 +134,6 @@ class Command(BaseCommand):
                         result = ""
                 else:
                     # Otherwise we connect via SSH
-                    call_params = [url_settings.path]
-
-                    if url_settings.query != "":
-                        url_qs = parse_qs(url_settings.query)
-                        for key, val in url_qs.iteritems():
-                            call_params.append('--'+escapeshell(key)+'="'+escapeshell(val)+'"')
-
-                    if url_settings.fragment != "":
-                        call_params.append(escapeshell(url_settings.fragment))
-
-                    call_params.append(endpoint_url)
-                    if settings.DEBUG:
-                        print('Cmd: '+' '.join(call_params))
-
                     ssh_client = paramiko.SSHClient()
                     ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
@@ -173,7 +174,9 @@ class Command(BaseCommand):
 
             if eid == 0:
                 engagement.target_end = timezone.now()
-                engagement.save()
+            
+            engagement.run_tool_test = True
+            engagement.save()
 
             if not tool_config.scan_type:
                 scan_history.status = "Completed"
@@ -283,45 +286,91 @@ class Command(BaseCommand):
                     traceback.print_exc()
                 self.scan_queue.task_done()
 
-        if not options:
-            print("Must specify an argument: Product-Tool Configuration ID.")
-            sys.exit(0)
-
-        scSettings = Tool_Product_Settings.objects.filter(pk=ttid)
-        if len(scSettings) <= 0:
-            print("Product-Tool Configuration ID not found.")
-            sys.exit(0)
-
-        if not scSettings[0].tool_configuration.scan_type:
-            print("Warning: This product tool configuration has no parsing configured.")
-
-        endpoints = Endpoint.objects.filter(product=scSettings[0].product.id)
-        if len(endpoints) <= 0:
-            print("Connected product has no endpoints configured that are tagged with `tool_export`.")
-            sys.exit(0)
+        # entry point for command
+        # we need to make sure the user has the contactinfo set, otherwise it will crash during execution
+        dummy_user = User.objects.get(id=settings.TOOL_RUN_CONFIG['dummy-user'])
+        user_contact = UserContactInfo.objects.filter(user=settings.TOOL_RUN_CONFIG['dummy-user'])
+        if len(user_contact) == 0:
+            contact = UserContactInfo(user=dummy_user)
+            contact.save()
         
-        if eid > 0:
-            engagement = Engagement.objects.filter(id=eid)
-            if len(engagement) <= 0:
-                print("Engagement ID invalid. Use 0 if you don't want to add it to a specific one.")
+        # differentiate between cronjob & on-demand scan
+        if ttid == 0:
+            # Cronjob for all open and scheduled engagements
+            engagements = Engagement.objects.exclude(run_tool_test_engine=None).filter(run_tool_test=False, target_start__lte=timezone.now().date())
+            if len(engagements) <= 0:
+                print("No engagements open to start")
+                sys.exit(0)
+            
+            scan_queue = Queue.Queue()
+            for engagement in engagements:
+                ttid = engagement.run_tool_test_engine.id
+                eid = engagement.id
+                
+                endpoints = Endpoint.objects.filter(product=engagement.product.id)
+                if len(endpoints) <= 0:
+                    print("Product-Tool config can't be executed because the product "+str(engagement.product.id)+" has no endpoints configured.")
+                    
+                has_exported = False
+                for e in endpoints:
+                    tags = e.tags.filter(name="tool-export")
+
+                    if len(tags) > 0:
+                        has_exported = True
+                        scan_queue.put((ttid, e, eid))
+                        t = threadedScan(scan_queue)
+                        t.setDaemon(True)
+                        t.start()
+
+                if not has_exported:
+                    print("Product "+str(engagement.product.id)+" has no endpoints configured that are tagged with `tool-export`.")
+                else:
+                    print("Started for product "+str(engagement.product.id))
+            
+            scan_queue.join()
+            
+        else:
+            # On-demand scan for single product-tool config
+            scSettings = Tool_Product_Settings.objects.filter(pk=ttid)
+            if len(scSettings) <= 0:
+                print("Product-Tool Configuration ID not found.")
+                sys.exit(0)
+                
+            if not scSettings[0].tool_configuration.scan_type:
+                print("Warning: This product tool configuration has no parsing configured.") 
+
+            endpoints = Endpoint.objects.filter(product=scSettings[0].product.id)
+            if len(endpoints) <= 0:
+                print("Connected product has no endpoints configured.")
                 sys.exit(0)
 
-        scan_queue = Queue.Queue()
-        has_exportable = False
-        for e in endpoints:
-            tags = e.tags.filter(name="tool-export")
+            if eid > 0:
+                engagement = Engagement.objects.filter(id=eid)
+                if len(engagement) <= 0:
+                    print("Engagement ID invalid. Use 0 if you don't want to add it to a specific one and instead create a new one.")
+                    sys.exit(0)
 
-            if len(tags) > 0:
-                scan_queue.put((ttid, e, eid))
-                t = threadedScan(scan_queue)
-                t.setDaemon(True)
-                t.start()
+            scan_queue = Queue.Queue()
+            has_exported = False
+            for e in endpoints:
+                tags = e.tags.filter(name="tool-export")
 
-        scan_queue.join()
+                if len(tags) > 0:
+                    has_exported = True
+                    scan_queue.put((ttid, e, eid))
+                    t = threadedScan(scan_queue)
+                    t.setDaemon(True)
+                    t.start()
+
+            if not has_exported:
+                print("Connected product has no endpoints configured that are tagged with `tool-export`.")
+                sys.exit(0)
+            else:
+                scan_queue.join()
 
 
 def run_on_demand_scan(ttid, eid):
-    call_command('run_tool', ttid, eid)
+    call_command('run_tool', config=int(ttid), engagement=int(eid))
     return True
 
 # Python 2.7 doesn't have a good way to escape shell arguments

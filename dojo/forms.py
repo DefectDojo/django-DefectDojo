@@ -541,6 +541,7 @@ class EngForm(forms.ModelForm):
         self.fields['tags'].widget.choices = t
         if product:
             self.fields['preset'] = forms.ModelChoiceField(help_text="Settings and notes for performing this engagement.", required=False, queryset=Engagement_Presets.objects.filter(product=product))
+            self.fields['run_tool_test_engine'] = forms.ModelChoiceField(help_text="A cronjob will run this tool test and import the results as configured after the target start", required=False, queryset=Tool_Product_Settings.objects.filter(product=product))
         # Don't show CICD fields on a interactive engagement
         if cicd is False:
             del self.fields['build_id']
@@ -571,55 +572,6 @@ class EngForm(forms.ModelForm):
         exclude = ('first_contacted', 'eng_type', 'real_start',
                    'real_end', 'requester', 'reason', 'updated', 'report_type',
                    'product', 'threat_model', 'api_test', 'pen_test', 'check_list', 'engagement_type')
-
-
-class EngForm2(forms.ModelForm):
-    name = forms.CharField(max_length=300,
-                           required=False,
-                           help_text="Add a descriptive name to identify " +
-                                     "this engagement. Without a name the target " +
-                                     "start date will be used in listings.")
-    description = forms.CharField(widget=forms.Textarea(attrs={}),
-                                  required=False)
-    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
-                           required=False,
-                           help_text="Add tags that help describe this engagement.  "
-                                     "Choose from the list or add new tags.  Press TAB key to add.")
-    product = forms.ModelChoiceField(queryset=Product.objects.all())
-    target_start = forms.DateField(widget=forms.TextInput(
-        attrs={'class': 'datepicker'}))
-    target_end = forms.DateField(widget=forms.TextInput(
-        attrs={'class': 'datepicker'}))
-    test_options = (('API', 'API Test'), ('Static', 'Static Check'),
-                    ('Pen', 'Pen Test'), ('Web App', 'Web Application Test'))
-    lead = forms.ModelChoiceField(
-        queryset=User.objects.exclude(is_staff=False),
-        required=True, label="Testing Lead")
-    test_strategy = forms.URLField(required=False, label="Test Strategy URL")
-
-    def __init__(self, *args, **kwargs):
-        tags = Tag.objects.usage_for_model(Engagement)
-        t = [(tag.name, tag.name) for tag in tags]
-        super(EngForm2, self).__init__(*args, **kwargs)
-        self.fields['tags'].widget.choices = t
-
-    def is_valid(self):
-        valid = super(EngForm2, self).is_valid()
-
-        # we're done now if not valid
-        if not valid:
-            return valid
-        if self.cleaned_data['target_start'] > self.cleaned_data['target_end']:
-            self.add_error('target_start', 'Your target start date exceeds your target end date')
-            self.add_error('target_end', 'Your target start date exceeds your target end date')
-            return False
-        return True
-
-    class Meta:
-        model = Engagement
-        exclude = ('first_contacted', 'version', 'eng_type', 'real_start',
-                   'real_end', 'requester', 'reason', 'updated', 'report_type')
-
 
 class DeleteEngagementForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
@@ -1613,7 +1565,7 @@ class EngagementPresetsForm(forms.ModelForm):
                                   required=False, help_text="Description of what needs to be tested or setting up environment for testing")
 
     scope = forms.CharField(widget=forms.Textarea(attrs={}),
-                                  required=False, help_text="Scope of Engagement testing, IP's/Resources/URL's)")
+                                  required=False, help_text="Scope of Engagement testing, IP's/Resources/URL's")
 
     class Meta:
         model = Engagement_Presets
