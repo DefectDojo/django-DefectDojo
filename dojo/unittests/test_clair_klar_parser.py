@@ -1,11 +1,4 @@
-import StringIO
-import csv
-import json
-
-from defusedxml import ElementTree
 from django.test import TestCase
-
-from dojo.models import Test
 from dojo.tools.clair_klar.parser import ClairKlarParser
 
 
@@ -26,19 +19,19 @@ class TestClairKlarParser(TestCase):
             ClairKlarParser(None, None)
 
     def test_parse_no_content_no_findings(self):
-        my_file_handle=open("dojo/unittests/scans/clair-klar/empty.json")
+        my_file_handle = open("dojo/unittests/scans/clair-klar/empty.json")
         self.parser = ClairKlarParser(my_file_handle, None)
         my_file_handle.close()
         self.assertEqual(0, len(self.parser.items))
 
     def test_high_findings(self):
-        my_file_handle=open("dojo/unittests/scans/clair-klar/high.json")
+        my_file_handle = open("dojo/unittests/scans/clair-klar/high.json")
         self.parser = ClairKlarParser(my_file_handle, None)
         my_file_handle.close()
         self.assertEqual(6, len(self.parser.items))
 
     def test_mixed_findings(self):
-        my_file_handle=open("dojo/unittests/scans/clair-klar/mixed.json")
+        my_file_handle = open("dojo/unittests/scans/clair-klar/mixed.json")
         self.parser = ClairKlarParser(my_file_handle, None)
         my_file_handle.close()
         self.assertEqual(6, len(self.parser.items))
