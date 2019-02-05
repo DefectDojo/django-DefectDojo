@@ -433,7 +433,7 @@ function prepare_settings_file() {
     ENV_SETTINGS_FILE=dojo/settings/.env.prod
 
     # Copy settings file
-    cp dojo/settings/settings.dist.py ${TARGET_SETTINGS_FILE}
+    sudo cp dojo/settings/settings.dist.py ${TARGET_SETTINGS_FILE}
 
     # Remove existing .env.prod files
     if [ ${ENV_SETTINGS_FILE} ]; then

@@ -32,6 +32,7 @@ FROM base as dev-mysql-self-contained
 RUN ./setup-docker.bash -y db -d MYSQL
 # Give the app user sudo permissions and switch executing user
 ADD ./docker/dojo_sudo /etc/sudoers.d/
+RUN sudo chown -R dojo:dojo /opt/django-DefectDojo
 USER dojo:dojo
 # Start DefectDojo Services
 CMD entrypoint_scripts/run/startup-docker.bash
