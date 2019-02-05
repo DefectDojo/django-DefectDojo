@@ -20,6 +20,7 @@ def get_text_severity(severity_id):
     else:
         return 'Info'
 
+
 class NessusCSVParser(object):
     def __init__(self, filename, test):
         content = open(filename.temporary_file_path(), "rb").read().replace("\r", "\n")
