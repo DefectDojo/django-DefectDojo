@@ -22,7 +22,7 @@ if [ "$FUNCTION" == "dependencies" ]; then
   echo
   echo "Installing required packages..."
   echo
-  # Install OS dependencies like DB client, further package managers, etc.
+  # Install OS dependencies including the DB client, further package managers, etc.
   install_os_dependencies
 elif [ "$FUNCTION" == "db" ]; then
   echo
@@ -62,6 +62,6 @@ elif [ "$FUNCTION" == "release" ]; then
 fi
 
 echo
-echo "Docker build complete"
+echo "Docker step $FUNCTION complete"
 echo
 travis_fold end dojo_container_build
