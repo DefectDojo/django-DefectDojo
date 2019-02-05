@@ -165,7 +165,7 @@ bootstrap_install() {
         echo ""
 	    DEBIAN_FRONTEND=noninteractive apt update
 	    DEBIAN_FRONTEND=noninteractive apt -y upgrade
-	    DEBIAN_FRONTEND=noninteractive apt -y install curl sudo python expect wget git gnupg2
+	    DEBIAN_FRONTEND=noninteractive apt -y install curl sudo python3 expect wget git gnupg2
 	    ;;
 	    "centos")
         echo "=============================================================================="

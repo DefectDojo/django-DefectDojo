@@ -265,7 +265,8 @@ function ubuntu_wkhtml_install() {
 function urlenc() {
     # URL encode values used in the DB URL to keep certain chars from breaking things
 	local STRING="${1}"
-	echo `python -c "import sys, urllib as ul; print ul.quote_plus('$STRING')"`
+	echo `python3 -c "import urllib.parse as ul; print(ul.quote_plus('$STRING'))"`
+	#echo `python -c "import sys, urllib as ul; print ul.quote_plus('$STRING')"`
 }
 
 function create_dojo_settings() {
@@ -289,6 +290,8 @@ function create_dojo_settings() {
         # mysql://USER:PASSWORD@HOST:PORT/NAME
         SAFE_URL=$(urlenc "$DB_USER")":"$(urlenc "$DB_PASS")"@"$(urlenc "$DB_HOST")":"$(urlenc "$DB_PORT")"/"$(urlenc "$DB_NAME")
         DD_DATABASE_URL="mysql://$SAFE_URL"
+        # TODO
+        echo "DD_DATABASE_URL is $DD_DATABASE_URL"
         ;;
         "PostgreSQL")
         # postgres://USER:PASSWORD@HOST:PORT/NAME
@@ -340,7 +343,7 @@ function ubuntu_dojo_install() {
 
     # TODO: Clean this function up a bit more
 	# Detect if we're in a a virtualenv
-    python -c 'import sys; print sys.real_prefix' 2>/dev/null
+    python3 -c 'import sys; print sys.real_prefix' 2>/dev/null
     VENV_ACTIVE=$?
 
     # TODO: Decide if we always want to install in a VENV
@@ -360,36 +363,39 @@ function ubuntu_dojo_install() {
         fi
     fi
 
-    python manage.py makemigrations dojo
-    python manage.py makemigrations --merge --noinput
-    python manage.py migrate
+    echo "BEFORE DJANGO JUNK"
+    cd $REPO_BASE
+    python3 manage.py makemigrations dojo
+    python3 manage.py makemigrations --merge --noinput
+    python3 manage.py migrate
 
-    python manage.py createsuperuser --noinput --username="$ADMIN_USER" --email="$ADMIN_EMAIL"
-    entrypoint_scripts/common/setup-superuser.expect "$ADMIN_USER" "$ADMIN_PASS"
+    python3 manage.py createsuperuser --noinput --username="$ADMIN_USER" --email="$ADMIN_EMAIL"
+    $SETUP_BASE/scripts/common/setup-superuser.expect "$ADMIN_USER" "$ADMIN_PASS"
+    #exit
     
 
     if [ "$LOAD_SAMPLE_DATA" = true ]; then
-      python manage.py loaddata dojo/fixtures/defect_dojo_sample_data.json
+      python3 manage.py loaddata dojo/fixtures/defect_dojo_sample_data.json
     fi
     
-    python manage.py loaddata product_type
-    python manage.py loaddata test_type
-    python manage.py loaddata development_environment
-    python manage.py loaddata system_settings
-    python manage.py loaddata benchmark_type
-    python manage.py loaddata benchmark_category
-    python manage.py loaddata benchmark_requirement
-    python manage.py loaddata language_type
-    python manage.py loaddata objects_review
-    python manage.py loaddata regulation
+    python3 manage.py loaddata product_type
+    python3 manage.py loaddata test_type
+    python3 manage.py loaddata development_environment
+    python3 manage.py loaddata system_settings
+    python3 manage.py loaddata benchmark_type
+    python3 manage.py loaddata benchmark_category
+    python3 manage.py loaddata benchmark_requirement
+    python3 manage.py loaddata language_type
+    python3 manage.py loaddata objects_review
+    python3 manage.py loaddata regulation
     
-    python manage.py installwatson
-    python manage.py buildwatson
+    python3 manage.py installwatson
+    python3 manage.py buildwatson
 
     # Install yarn packages
     cd components && yarn && cd ..
 
-    python manage.py collectstatic --noinput
+    python3 manage.py collectstatic --noinput
 }
 
 function install_linux() {

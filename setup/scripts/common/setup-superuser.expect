@@ -3,7 +3,7 @@
 set username [lindex $argv 0];
 set password [lindex $argv 1];
 set timeout -1;
-spawn python manage.py changepassword $username;
+spawn python3 manage.py changepassword $username;
 expect {
     "Password:" { exp_send "$password\r" ; exp_continue }
     "Password (again):" { exp_send "$password\r" ; exp_continue }
