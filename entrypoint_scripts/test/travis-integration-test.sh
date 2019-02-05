@@ -12,6 +12,7 @@ travis_fold start travis_integration_install
 # Docker Build
 export DOJO_ADMIN_USER='admin'
 export DEFECT_DEFECT_DOJO_ADMIN_PASSWORD='admin'
+export DOJO_ADMIN_PASSWORD=$DEFECT_DEFECT_DOJO_ADMIN_PASSWORD
 export CONTAINER_NAME=defect_dojo_integration
 docker build --target dev-mysql-self-contained -t $REPO .
 docker run -e DEFECT_DOJO_ADMIN_PASSWORD=$DEFECT_DOJO_ADMIN_PASSWORD -e ACTION=p -d -p 127.0.0.1:8000:8000 --name=$CONTAINER_NAME $REPO
