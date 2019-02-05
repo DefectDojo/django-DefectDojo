@@ -12,9 +12,12 @@ EXIT_STATUS=0
 # Build the actual container
 docker build --target dev-mysql-self-contained -t $REPO .
 
-# Launch one container per service
+### Launch one container per service
+# Celery startup verfication
 container_id_worker=$(docker run -e ACTION=c -d $REPO)
+# Celery beat startup verfication
 container_id_beat=$(docker run -e ACTION=b -d $REPO)
+# Defect startup verfication
 container_id_server=$(docker run -e ACTION=p -d $REPO)
 
 # Wait for the container to spin up and giev it some time to fail
