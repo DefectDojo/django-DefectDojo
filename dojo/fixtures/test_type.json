@@ -256,5 +256,12 @@
     	},
 	    "model": "dojo.test_type",
 		"pk": 36
-	}
+	},
+  {
+    "fields": {
+      "name": "Clair Klar Scan"
+    },
+    "model": "dojo.test_type",
+    "pk": 37
+  }
 ]
