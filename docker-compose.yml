@@ -1,0 +1,77 @@
+# Structure:
+# Internet --> [ nginx ] --> [ django ] --> [ mysql ]
+#                            | Data network         |
+#              | Proxy network        |
+
+version: '3.4'
+
+networks:
+  data:
+    external: false
+  proxy:
+    external: false
+
+services:
+
+  django:
+    build:
+      context: .
+      target: release
+    container_name: 'defectdojo_django'
+    depends_on:
+      - mysql
+    environment:
+      DEFECT_DOJO_ADMIN_PASSWORD: ${DEFECT_DOJO_ADMIN_PASSWORD:-admin}
+      DEFECT_DOJO_DEFAULT_DATABASE_HOST: 'mysql'
+      DEFECT_DOJO_DEFAULT_DATABASE_PORT: '3306'
+      DEFECT_DOJO_DEFAULT_DATABASE_NAME: 'dojodb'
+      DEFECT_DOJO_DEFAULT_DATABASE_USER: 'dojo'
+      DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD: ${DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD:-dojodbpwd}
+      DD_DATABASE_URL: 'mysql://dojo:${DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD:-dojodbpwd}@mysql:3306/dojodb'
+      DD_ALLOWED_HOSTS: '*'
+      DD_SECRET_KEY: ${DD_SECRET_KEY:-"hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq"}
+      DD_CREDENTIAL_AES_256_KEY: ${DD_CREDENTIAL_AES_256_KEY:-"&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw"}
+    hostname: 'django'
+    networks:
+      - data
+      - proxy
+    volumes:
+      - './docker/static:/opt/django-DefectDojo/static'
+
+  mysql:
+    command: '--default-authentication-plugin=mysql_native_password'
+    container_name: 'defectdojo_mysql'
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DEFECT_DOJO_MYSQL_ROOT_PASSWORD:-defectojo}
+      MYSQL_DATABASE: 'dojodb'
+      MYSQL_USER: 'dojo'
+      MYSQL_PASSWORD: ${DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD:-dojodbpwd}
+    hostname: 'mysql'
+    image: 'mysql:5.7'
+    networks:
+      - data
+    volumes:
+      - './docker/data:/var/lib/mysql'
+
+  nginx:
+    container_name: 'defectdojo_nginx'
+    depends_on:
+      - django
+    hostname: 'nginx'
+    image: 'nginx:latest'
+    networks:
+      - proxy
+    ports:
+      - '8080:80'
+      - '4443:443'
+    volumes:
+      - "$PWD/docker/nginx.conf:/etc/nginx/nginx.conf:ro"
+      - "$PWD/docker/cert.pem:/cert.pem:ro"
+      - "$PWD/docker/key.pem:/key.pem:ro"
+      # This gives Nginx access to the static assets compiled by Django.
+      - './docker/static:/usr/share/nginx/html/static:ro'
+    healthcheck:
+        test: ["CMD", "wget", "-qO-", "http://django:8000"]
+        interval: 20s
+        timeout: 1s
+        retries: 6

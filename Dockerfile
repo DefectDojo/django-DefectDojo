@@ -1,7 +1,21 @@
-FROM ubuntu:16.04 as base
+FROM ubuntu:latest as base
 MAINTAINER Matt Tesauro <matt.tesauro@owasp.org>, Aaron Weaver <aaron.weaver@owasp.org>
 
-# # # Create a docker image for DefectDojo and all dependencies
+# Multi-stage build for DefectDojo
+# Stage 1: base
+# Creates the base image with DefectDojo and Django
+#
+# Stage 2: dev-mysql-self-contained
+# Creates an all in one with mysql for travis and dev testing
+#
+# Stage 3: release
+# DefectDojo app only with depenencies and for use with an external DB
+#
+# To build MySQL:
+# docker build --target dev-mysql-self-contained -t defectdojo-dev-mysql-self-contained .
+#
+# To build release (no DB):
+# docker build --target release -t defectdojo-release .
 
 # Create the application user;
 RUN adduser --disabled-password --gecos "DefectDojo" dojo
@@ -17,12 +31,14 @@ RUN ./setup-docker.bash -y dependencies
 FROM base as dev-mysql-self-contained
 RUN ./setup-docker.bash -y db -d MYSQL
 # Give the app user sudo permissions and switch executing user
-ADD ./docker/etc/dojo_sudo /etc/sudoers.d/
+ADD ./docker/dojo_sudo /etc/sudoers.d/
+RUN sudo chown -R dojo:dojo /opt/django-DefectDojo
+USER dojo:dojo
 # Start DefectDojo Services
 CMD entrypoint_scripts/run/startup-docker.bash
 
 ########## Stage: release ##########
 FROM dev-mysql-self-contained as release
 RUN ./setup-docker.bash -y release
-# USER dojo
-CMD gunicorn --bind 0.0.0.0:$PORT wsgi
+RUN chmod +x docker/entrypoint.sh
+CMD docker/entrypoint.sh
