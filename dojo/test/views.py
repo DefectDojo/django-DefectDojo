@@ -232,7 +232,8 @@ def add_findings(request, tid):
             # always false now since this will be deprecated soon in favor of new Finding_Template model
             new_finding.is_template = False
             new_finding.save(dedupe_option=False)
-            new_finding.endpoints = form.cleaned_data['endpoints']
+            new_finding.endpoints.set(form.cleaned_data['endpoints'])
+            # new_finding.endpoints.set(form.cleaned_data['endpoints'])
             new_finding.save(false_history=True)
             if 'jiraform-push_to_jira' in request.POST:
                 jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=enabled)
@@ -316,7 +317,7 @@ def add_temp_finding(request, tid, fid):
             # no further action needed here since this is already adding from template.
             new_finding.is_template = False
             new_finding.save(dedupe_option=False, false_history=False)
-            new_finding.endpoints = form.cleaned_data['endpoints']
+            new_finding.endpoints.set(form.cleaned_data['endpoints'])
             new_finding.save(false_history=True)
             if 'jiraform-push_to_jira' in request.POST:
                     jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=True)
