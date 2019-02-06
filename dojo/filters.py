@@ -260,9 +260,11 @@ class VMFilter(DojoFilter):
         # tuple-mapping retains order
         fields=(
             ('short_name', 'short_name'),
+            ('IP', 'IP'),
         ),
         field_labels={
             'short_name': 'VM Name',
+            'IP': 'IP Address',
         }
 
     )

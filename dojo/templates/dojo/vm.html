@@ -19,35 +19,28 @@
             {% if vms %}
 
                 <div class="clearfix">
-                    {% include "dojo/paging_snippet.html" with page=products page_size=True %}
+                    {% include "dojo/paging_snippet.html" with page=vms page_size=True %}
                 </div>
 
                 <div class="table-responsive panel panel-default">
                     <table id="engagements"
                            class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
                         <tr>
-                            <th class="prod_name">{% dojo_sort request 'Product' 'name' 'asc' %}</th>
-                            <th class="prod_name">{% dojo_sort request 'Product Type' 'prod_type__name' %}</th>
+                            <th class="prod_name">{% dojo_sort request 'VM Name' 'short_name' 'asc' %}</th>
+                            <th class="prod_name">{% dojo_sort request 'IP' 'IP' %}</th>
                             <th>Active Engagements</th>
                             {% if user.is_staff %}
                                 <th> Engagement</th>
                             {% endif %}
                         </tr>
 
-                        {% for p in products %}
+                        {% for v in vms %}
                             <tr>
-                                <td class="prod_name"><a href="{% url 'view_product' p.id %}">{{ p.name }}</a>
-                                  <sup>
-                                   {% for tag in p.tags %}
-                                        <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
-                                    {% endfor %}
-                                  </sup>
+                                <td class="prod_name"><a href="{% url 'view_vm' v.id %}">{{ v.short_name }}</a>
                                 </td>
-                                <td class="prod_name"><a
-                                        href="{% url 'product_type_metrics' p.prod_type.id %}">{{ p.prod_type.name }}</a>
-                                </td>
+                                <td class="prod_name">{{ v.IP }}</td>
                                 <td>
-                                    {% for e in p.engagement_set.all %}
+                                    {% for e in v.engagement_set.all %}
                                         {% if e.active %}
 						<div class="lineContainer">
 							<a  style="display: inline" class="eng_link" href="{% url 'view_engagement' e.id %}">
@@ -72,7 +65,7 @@
                                 </td>
                                 {% if user.is_staff %}
                                     <td>
-                                        <a class="btn btn-sm btn-success" href="{% url 'new_eng_for_prod' p.id %}">
+                                        <a class="btn btn-sm btn-success" href="{% url 'add_vm_engagement' v.id %}">
                                             <i class="fa fa-plus"></i> Add
                                         </a>
                                     </td>
@@ -82,7 +75,7 @@
                     </table>
                 </div>
                 <div class="clearfix">
-                    {% include "dojo/paging_snippet.html" with page=products page_size=True %}
+                    {% include "dojo/paging_snippet.html" with page=vms page_size=True %}
                 </div>
             {% else %}
                 <h5> No virtual machines </h5>

@@ -41,6 +41,7 @@ def vm(request):
     filtered = VMFilter(
         request.GET,
         queryset=VM.objects.all().distinct())
+
     vms = get_page_items(request, filtered.qs, 25)
 #    name_words = [
 #        product.name for product in Product.objects.filter(
@@ -62,7 +63,7 @@ def vm(request):
 
     return render(
         request, 'dojo/vm.html', {
-#            'products': prods,
+            'vms': vms,
 #            'filtered': filtered,
 #            'name_words': sorted(set(name_words)),
 #            'eng_words': sorted(set(eng_words)),
@@ -72,8 +73,123 @@ def vm(request):
 #stubbed so things compile
 def new_vm(request):
     return None
-def view_vm(request):
-    return None
+def view_vm(request, id):
+    vm = get_object_or_404(VM, id=id)
+    #tests = Test.objects.filter(engagement=eng).order_by('test_type__name')
+    #prod = eng.product
+    auth = request.user.is_staff or request.user in prod.authorized_users.all()
+    #risks_accepted = eng.risk_acceptance.all()
+    #preset_test_type = None
+    #network = None
+    #if eng.preset:
+    #    preset_test_type = eng.preset.test_type.all()
+    #    network = eng.preset.network_locations.all()
+    #system_settings = System_Settings.objects.get()
+    #if not auth:
+    #    # will render 403
+    #    raise PermissionDenied
+
+    #try:
+    #    jissue = JIRA_Issue.objects.get(engagement=eng)
+    #except:
+    #    jissue = None
+    #    pass
+    #try:
+    #    jconf = JIRA_PKey.objects.get(product=eng.product).conf
+    #except:
+    #    jconf = None
+    #    pass
+    #exclude_findings = [
+    #    finding.id for ra in eng.risk_acceptance.all()
+    #    for finding in ra.accepted_findings.all()
+    #]
+    #eng_findings = Finding.objects.filter(test__in=eng.test_set.all()) \
+    #    .exclude(id__in=exclude_findings).order_by('title')
+
+    #try:
+    #    check = Check_List.objects.get(engagement=eng)
+    #except:
+    #    check = None
+    #    pass
+    #form = DoneForm()
+    #if request.method == 'POST' and request.user.is_staff:
+    #    eng.progress = 'check_list'
+    #    eng.save()
+
+    #creds = Cred_Mapping.objects.filter(
+    #    product=eng.product).select_related('cred_id').order_by('cred_id')
+    #cred_eng = Cred_Mapping.objects.filter(
+    #    engagement=eng.id).select_related('cred_id').order_by('cred_id')
+
+    add_breadcrumb(parent=vm, top_level=False, request=request)
+    #if hasattr(settings, 'ENABLE_DEDUPLICATION'):
+    #    if settings.ENABLE_DEDUPLICATION:
+    #        enabled = True
+    #        findings = Finding.objects.filter(
+    #            test__engagement=eng, duplicate=False)
+    #    else:
+    #        enabled = False
+    #        findings = None
+    #else:
+    #    enabled = False
+    #    findings = None
+
+    #if findings is not None:
+    #    fpage = get_page_items(request, findings, 15)
+    #else:
+    #    fpage = None
+
+    # ----------
+
+    #try:
+    #    start_date = Finding.objects.filter(
+    #        test__engagement__product=eng.product).order_by('date')[:1][0].date
+    #except:
+    #    start_date = timezone.now()
+
+    #end_date = timezone.now()
+
+    #risk_acceptances = Risk_Acceptance.objects.filter(
+    #    engagement__in=Engagement.objects.filter(product=eng.product))
+
+    #accepted_findings = [
+    #    finding for ra in risk_acceptances
+    #    for finding in ra.accepted_findings.all()
+    #]
+
+    #title = ""
+    #if eng.engagement_type == "CI/CD":
+    #    title = " CI/CD"
+    #product_tab = Product_Tab(prod.id, title="View" + title + " Engagement", tab="engagements")
+    #product_tab.setEngagement(eng)
+    return render(
+        request, 'dojo/view_vm.html', {
+            'vm': vm,
+        })
+    #return render(
+    #    request, 'dojo/view_eng.html', {
+    #        'eng': eng,
+    #        'product_tab': product_tab,
+    #        'system_settings': system_settings,
+    #        'tests': tests,
+    #        'findings': fpage,
+    #        'enabled': enabled,
+    #        'check': check,
+    #        'threat': eng.tmodel_path,
+    #        'risk': eng.risk_path,
+    #        'form': form,
+    #        'risks_accepted': risks_accepted,
+    #        'can_add_risk': len(eng_findings),
+    #        'jissue': jissue,
+    #        'jconf': jconf,
+    #        'accepted_findings': accepted_findings,
+    #        'start_date': start_date,
+    #        'creds': creds,
+    #        'cred_eng': cred_eng,
+    #        'network': network,
+    #        'preset_test_type': preset_test_type
+    #    })
+
 def edit_vm(request):
     return None
 def delete_vm(reqeust):
@@ -227,119 +343,6 @@ def delete_engagement(request, eid):
         'rels': rels,
     })
 
-
-def view_engagement(request, eid):
-    eng = get_object_or_404(Engagement, id=eid)
-    tests = Test.objects.filter(engagement=eng).order_by('test_type__name')
-    prod = eng.product
-    auth = request.user.is_staff or request.user in prod.authorized_users.all()
-    risks_accepted = eng.risk_acceptance.all()
-    preset_test_type = None
-    network = None
-    if eng.preset:
-        preset_test_type = eng.preset.test_type.all()
-        network = eng.preset.network_locations.all()
-    system_settings = System_Settings.objects.get()
-    if not auth:
-        # will render 403
-        raise PermissionDenied
-
-    try:
-        jissue = JIRA_Issue.objects.get(engagement=eng)
-    except:
-        jissue = None
-        pass
-    try:
-        jconf = JIRA_PKey.objects.get(product=eng.product).conf
-    except:
-        jconf = None
-        pass
-    exclude_findings = [
-        finding.id for ra in eng.risk_acceptance.all()
-        for finding in ra.accepted_findings.all()
-    ]
-    eng_findings = Finding.objects.filter(test__in=eng.test_set.all()) \
-        .exclude(id__in=exclude_findings).order_by('title')
-
-    try:
-        check = Check_List.objects.get(engagement=eng)
-    except:
-        check = None
-        pass
-    form = DoneForm()
-    if request.method == 'POST' and request.user.is_staff:
-        eng.progress = 'check_list'
-        eng.save()
-
-    creds = Cred_Mapping.objects.filter(
-        product=eng.product).select_related('cred_id').order_by('cred_id')
-    cred_eng = Cred_Mapping.objects.filter(
-        engagement=eng.id).select_related('cred_id').order_by('cred_id')
-
-    add_breadcrumb(parent=eng, top_level=False, request=request)
-    if hasattr(settings, 'ENABLE_DEDUPLICATION'):
-        if settings.ENABLE_DEDUPLICATION:
-            enabled = True
-            findings = Finding.objects.filter(
-                test__engagement=eng, duplicate=False)
-        else:
-            enabled = False
-            findings = None
-    else:
-        enabled = False
-        findings = None
-
-    if findings is not None:
-        fpage = get_page_items(request, findings, 15)
-    else:
-        fpage = None
-
-    # ----------
-
-    try:
-        start_date = Finding.objects.filter(
-            test__engagement__product=eng.product).order_by('date')[:1][0].date
-    except:
-        start_date = timezone.now()
-
-    end_date = timezone.now()
-
-    risk_acceptances = Risk_Acceptance.objects.filter(
-        engagement__in=Engagement.objects.filter(product=eng.product))
-
-    accepted_findings = [
-        finding for ra in risk_acceptances
-        for finding in ra.accepted_findings.all()
-    ]
-
-    title = ""
-    if eng.engagement_type == "CI/CD":
-        title = " CI/CD"
-    product_tab = Product_Tab(prod.id, title="View" + title + " Engagement", tab="engagements")
-    product_tab.setEngagement(eng)
-    return render(
-        request, 'dojo/view_eng.html', {
-            'eng': eng,
-            'product_tab': product_tab,
-            'system_settings': system_settings,
-            'tests': tests,
-            'findings': fpage,
-            'enabled': enabled,
-            'check': check,
-            'threat': eng.tmodel_path,
-            'risk': eng.risk_path,
-            'form': form,
-            'risks_accepted': risks_accepted,
-            'can_add_risk': len(eng_findings),
-            'jissue': jissue,
-            'jconf': jconf,
-            'accepted_findings': accepted_findings,
-            'start_date': start_date,
-            'creds': creds,
-            'cred_eng': cred_eng,
-            'network': network,
-            'preset_test_type': preset_test_type
-        })
 
 
 @user_passes_test(lambda u: u.is_staff)

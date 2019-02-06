@@ -1,0 +1,495 @@
+{% extends "base.html" %}
+{% load display_tags %}
+{% load get_system_setting %}
+{% load humanize %}
+{% load static from staticfiles %}
+{% block add_styles %}
+    .tooltip-inner {
+      max-width: 350px;
+    }
+{% endblock %}
+{% block content %}
+
+<div class="row">
+  <div id="tests" class="col-md-8">
+      <div class="panel panel-default">
+          <div class="panel-heading">
+              <div class="clearfix">
+                  <h4 class="pull-left">
+                      Description
+                  </h4>
+
+                  <div class="dropdown pull-right">
+                      <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                              data-toggle="dropdown" aria-expanded="true">
+                          <span class="fa fa-bars"></span>
+                          <span class="caret"></span>
+                      </button>
+                      <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                          <li role="presentation">
+                              <a class="" href="{% url 'edit_vm' vm.id %}">
+                                  <i class="fa fa-pencil-square-o"></i> Edit Virtual Machine
+                              </a>
+                          </li>
+
+                          <li role="presentation">
+                              <a class="" href="{% url 'delete_vm' vm.id %}">
+                                  <i class="fa fa-close"></i> Delete Virtual Machine
+                              </a>
+                          </li>
+                      </ul>
+                  </div>
+              </div>
+          </div>
+            <div class="panel-body">
+                <small class="text-muted"><em>There is no description.</em></small>
+            </div>
+        </div>
+        {% if eng.preset %}
+        <div class="row">
+            <div id="tests" class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="clearfix">
+                            <h4 class="pull-left">
+                            Engagement Presets <small>{{ eng.preset.title|truncatechars:60 }}</small>
+                            </h4>
+                            <div class="dropdown pull-right">
+                                <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                                        data-toggle="dropdown" aria-expanded="true">
+                                    <span class="fa fa-bars"></span>
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                                    <li role="presentation">
+                                        <a class="" href="{% url 'add_engagement_presets' eng.product.id %}">
+                                            <i class="fa fa-plus"></i> Add Engagement Preset
+                                        </a>
+                                    </li>
+                                    <li role="presentation">
+                                        <a class="" href="{% url 'edit_engagement_presets' eng.product.id eng.preset.id %}">
+                                            <i class="fa fa-edit"></i> Edit Engagement Preset
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                        <div class="table-responsive">
+                            <table class="tablesorter-bootstrap table table-condensed table-striped">
+                                <thead>
+                                <tr>
+                                    <th>Test Type</th>
+                                    <th>Network</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                          {% if preset_test_type.count > 1 %}
+                                            {% for test in preset_test_type %}
+                                               {{test.name}}{%if not forloop.last%},{%endif%}
+                                            {% endfor %}
+                                          {% else %}
+                                            {{ preset_test_type.0.name }}
+                                          {% endif %}
+                                        </td>
+                                        <td>
+                                          {% if network.count > 1 %}
+                                            {% for net in network %}
+                                               {{ net.location }}{%if not forloop.last%},{%endif%}
+                                            {% endfor %}
+                                          {% else %}
+                                            {{ network.0.location }}
+                                          {% endif %}
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="panel-body">
+                          {% if eng.preset.notes %}
+                            <strong>Notes: </strong>{{ eng.preset.notes|markdown_render }}
+                          {% else %}
+                            <small class="text-muted"><em>No test notes found.</em></small>
+                          {% endif %}
+                          {% if eng.preset.scope %}
+                            <strong>Scope: </strong>{{ eng.preset.scope|markdown_render }}
+                          {% else %}
+                            <small class="text-muted"><em>Testing scope not specified.</em></small>
+                          {% endif %}
+                        </div>
+                </div>
+            </div>
+</div>
+{% endif %}
+<div class="row">
+    <div id="tests" class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div class="clearfix">
+                    <h4 class="pull-left">
+                        Tests ({{tests.count}}) <small>{{ eng.id|get_severity_count:"engagement" }}</small>
+                    </h4>
+
+                    <div class="dropdown pull-right">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                                data-toggle="dropdown" aria-expanded="true">
+                            <span class="fa fa-bars"></span>
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                            <li role="presentation">
+                                <a class="" href="{% url 'add_tests' eng.id %}">
+                                    <i class="fa fa-plus"></i> Add Tests
+                                </a>
+                            </li>
+                            <li role="presentation">
+                                <a class="" href="{% url 'import_scan_results' eng.id %}">
+                                    <i class="fa fa-upload"></i> Import Scan Results
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            {% if tests %}
+                <div class="table-responsive">
+                    <table class="tablesorter-bootstrap table table-condensed table-striped">
+                        <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th></th>
+                            <th>Date</th>
+                            <th>Lead</th>
+                            <th>Findings</th>
+                            <th>Duplicate</th>
+                            <th>Notes</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for test in tests %}
+                            <tr>
+                                <td><a href="{% url 'view_test' test.id %}">{{ test.test_type }}</a>
+                                  {% if test.tags %}
+                                      <sup>
+                                          {% for tag in test.tags %}
+                                          <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                          {% endfor %}
+                                      </sup>
+                                  {% endif %}
+                                </td>
+                                <td>
+                                  <ul>
+                                   <li class="dropdown" style="list-style:none;">
+                                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                         <ul class="dropdown-menu">
+                                           <li>
+                                             <a class="" href="{% url 'view_test' test.id %}">
+                                               <i class="fa fa-list-alt"></i> View</a>
+                                          </li>
+                                          <li>
+                                             <a class="" href="{% url 'edit_test' test.id %}">
+                                              <i class="fa fa-pencil-square-o"></i> Edit</a>
+                                          </li>
+                                          <li class="divider"></li>
+                                          <li>
+                                            <a class="" href="{% url 'add_findings' test.id %}">
+                                              <i class="fa fa-plus"></i> Add Finding to Test
+                                            </a>
+                                          </li>
+                                           <li class="divider"></li>
+                                           <li><a class="" href="{% url 're_import_scan_results' test.id %}">
+                                               <i class="fa fa-upload"></i> Re-Upload Scan Results
+                                           </a></li>
+                                           <li class="divider"></li>
+                                           <li role="presentation">
+                                               <a href="{% url 'test_report' test.id %}?title=&active=1&verified=1&false_p=2&duplicate=2">
+                                                   <i class="fa fa-file-text-o"></i> Test Report
+                                               </a>
+                                           </li>
+                                           <li class="divider"></li>
+                                           <li>
+                                             <a class="text-danger" href="{% url 'delete_test' test.id %}">
+                                              <i class="fa fa-trash-o"></i> Delete</a>
+                                          </li>
+                                         </ul>
+                                       </li>
+                                   </ul>
+                                </td>
+                                <td>{{ test.target_start.date }} - {{ test.target_end.date }}</td>
+                                <td>
+                                  {% if eng.lead.get_full_name and eng.lead.get_full_name.strip %}
+                                      {{ eng.lead.get_full_name }}
+                                  {% elif eng.lead %}
+                                      {{ eng.lead }}
+                                  {% endif %}
+                                </td>
+                                <td><a href="{% url 'view_test' test.id %}">{{ test|count_findings_test_all }}</a></td>
+                                <td>{{ test|count_findings_test_duplicate }}</td>
+                                <td>{{ test.notes.all|length }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="panel-body">
+                    <small class="text-muted"><em>No tests found.</em></small>
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+</div>
+
+<div class="row">
+    <div id="risk" class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4> Risk Acceptance
+                    {% if can_add_risk %}
+                        <a title="Add Risk Acceptance" class="pull-right btn btn-sm btn-primary"
+                           href="{% url 'upload_risk_acceptance$' eng.id %}"><span class="fa fa-plus"></span></a>
+                        </a>
+                    {% endif %}
+                </h4>
+            </div>
+            {% if risks_accepted %}
+                <div class="table-responsive">
+                    <table id="open_findings"
+                           class="tablesorter-bootstrap table table-condensed table-striped">
+                        <thead>
+                        <tr>
+                            <th>Reporter</th>
+                            <th>Date</th>
+                            <th>Date Expires</th>
+                            <th>Accepted by</th>
+                            <th>Findings Accepted</th>
+                            <th>View File</th>
+                            <th>Actions</th>
+                        </thead>
+                        <tbody>
+                        {% for risk in risks_accepted %}
+                            <tr>
+                                <td>{{ risk.reporter }}</td>
+                                <td>{{ risk.created }}</td>
+                                <td>{{ risk.expiration_date|default_if_none:"" }}</td>
+                                <td>{{ risk.accepted_by|default_if_none:"" }}</td>
+                                <td>{{ risk.accepted_findings.all|length }}</td>
+                                <td><a href="{% url 'download_risk' eng.id risk.id %}">{{ risk.filename }}</a></td>
+                                <td>
+                                    <a class="btn btn-sm btn-primary" href="{% url 'view_risk' eng.id risk.id %}">
+                                        View
+                                        Approval</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="panel-body">
+                    <small class="text-muted"><em>No Risk Acceptances found.</em></small>
+                </div>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+{% if eng.engagement_type == "Interactive" %}
+<div class="row">
+    <div id="checklist" class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4> Check List
+                    {% if check %}
+                        <a title="Edit Checklist" class="btn btn-primary pull-right"
+                           href="{% url 'complete_checklist' eng.id %}">
+                            <span class="fa fa-edit"></span></a>
+                    {% else %}
+                        <a title="Complete Check List" class="btn btn-sm btn-primary pull-right"
+                           href="{% url 'complete_checklist' eng.id %}">
+                            <span class="fa fa-edit"></span></a></a>
+                    {% endif %}
+                </h4>
+            </div>
+
+            {% if check %}
+                <div class="table-responsive">
+                    <table class="tablesorter-bootstrap table table-condensed table-striped">
+                        <thead>
+                        <tr>
+                            <th>Session</th>
+                            <th>Encryption</th>
+                            <th>Configuration</th>
+                            <th>Authentication</th>
+                            <th>Authorization</th>
+                            <th>Data Input</th>
+                            <th>Sensitive Data</th>
+                            <th>Other</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td><span
+                                    class="label label-{{ check.session_management|checklist_status }}">{{ check.session_management }}</span>
+                            </td>
+                            <td><span
+                                    class="label label-{{ check.encryption_crypto|checklist_status }}">{{ check.encryption_crypto }}</span>
+                            </td>
+                            <td><span
+                                    class="label label-{{ check.configuration_management|checklist_status }}">{{ check.configuration_management }}</span>
+                            </td>
+                            <td><span
+                                    class="label label-{{ check.authentication|checklist_status }}">{{ check.authentication }}</span>
+                            </td>
+                            <td><span
+                                    class="label label-{{ check.authorization_and_access_control|checklist_status }}">{{ check.authorization_and_access_control }}</span>
+                            </td>
+                            <td><span
+                                    class="label label-{{ check.data_input_sanitization_validation|checklist_status }}">{{ check.data_input_sanitization_validation }}</span>
+                            </td>
+                            <td><span
+                                    class="label label-{{ check.sensitive_data|checklist_status }}">{{ check.sensitive_data }}</span>
+                            </td>
+                            <td><span
+                                    class="label label-{{ check.other|checklist_status }}">{{ check.other }}</span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="panel-body">
+                    <small class="text-muted"><em>Checklist has not been completed.</em></small>
+                </div>
+            {% endif %}
+
+
+        </div>
+
+    </div>
+
+</div>
+{% endif %}
+
+<!-- Sidebar -->
+</div>
+<div class="col-md-4">
+  <div class="panel panel-default-secondary">
+    <div class="panel-heading">
+      <h3 class="panel-title"><span class="fa fa-info-circle fa-fw" aria-hidden="true"></span> Metadata
+      </h3>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <tbody>
+          <tr>
+            <td style="width: 150px;"><strong>Status</strong></td>
+            <td>
+              {% if eng.status == "Blocked" %}
+              <em class="text-danger">
+              {% elif eng.status == "On Hold" %}
+              <em class="text-warning">
+              {% else %}
+              <em>
+              {% endif %}
+              {{ eng.status }}
+            </em>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>Dates Till Unused</strong></td>
+            <td><a target="#" data-toggle="tooltip" data-placement="bottom" title="{{ eng.target_start|date:"l, jS F Y" }} - {{ eng.target_end|date:"l, jS F Y" }}">
+            {{ eng.target_start|date:"jS F" }} - {{ eng.target_end|date:"jS F" }}
+          </a></td>
+          </tr>
+          <tr>
+            <td><strong>Internal IP</strong></td>
+            <td>{{ vm.IP }}</td>
+          </tr>
+          <tr>
+            <td><strong>External IP</strong></td>
+            <td>{{ vm.externalIP }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div>
+    <div class="panel panel-default-secondary">
+      <div class="panel-heading">
+        <h4><span class="fa fa-key" aria-hidden="true"></span>
+          RDP Link
+        </h4>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead>
+          <tr>
+            <th>Link</th>
+          </tr>
+          </thead>
+          <tbody>
+              <tr>
+                  <td><a href="{{vm.vm.rdp_link}}"</a>{{vm.fqdn}}</td>
+              </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+</div>
+
+</div>
+</div>
+<div class="protip">
+   <i class="fa fa-lightbulb-o"></i> <strong>ProTip!</strong> Type <kbd>e</kbd> to edit this vm. Type <kbd>r</kbd> to RDP.
+</div>
+{% endblock %}
+{% block postscript %}
+    <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
+    <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
+        <script type="text/javascript">
+        $(function () {
+            $(document).on('keypress', null, 'e', function () {
+              window.location.assign('{% url 'edit_vm' vm.id %}');
+            });
+
+            $(document).on('keypress', null, 'r', function () {
+                window.location.assign('{{vm.vm.rdp_link}}');
+            });
+
+            $(document).ready(function(){
+              $('[data-toggle="tooltip"]').tooltip();
+            });
+            //Ensures dropdown has proper zindex
+            $('.table-responsive').on('show.bs.dropdown', function () {
+              $('.table-responsive').css( "overflow", "inherit" );
+            });
+
+            $('.table-responsive').on('hide.bs.dropdown', function () {
+              $('.table-responsive').css( "overflow", "auto" );
+            })
+            if (document.referrer.indexOf('simple_search') > 0) {
+                var terms = '';
+                if ($.cookie('highlight')) {
+                    terms = $.cookie('highlight').split(' ');
+
+                    for (var i = 0; i < terms.length; i++) {
+                        $('body').highlight(terms[i]);
+                    }
+                }
+
+                $('input#simple_search').val(terms);
+            }
+        });
+
+
+
+    </script>
+{% endblock %}

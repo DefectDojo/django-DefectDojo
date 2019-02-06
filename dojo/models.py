@@ -2064,8 +2064,11 @@ watson.register(App_Analysis)
 
 # VM infrastructure mgmt by nDepth
 class VM(models.Model):
-    short_name = models.CharField(max_length=25)
-    IP         = models.CharField(max_length=15, default='127.0.0.1')
+    short_name  = models.CharField(max_length=25)
+    IP          = models.CharField(max_length=15, default='127.0.0.1')
+    description = models.CharField(max_length=200, default="nDepth standard Kali Linux Virtual Machine for Penetration testing")
+    externalIP  = models.CharField(max_length=15, default='127.0.0.1')
+
 
     class Meta:
          verbose_name_plural = "VMs"
