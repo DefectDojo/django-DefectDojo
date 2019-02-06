@@ -2076,33 +2076,45 @@ class VM(models.Model):
     def total_uses_count(self):
         return len([v.vm for v in self.vm.all()])
 
-# still needs to be checked/fixed
     def current_uses(self):
         active = []
         for p in VMOnProject.objects.filter(vm=self):
-            if p.engagement.is_active():
+            if p.eng.target_end <= get_current_datetime() and p.eng.target_start >= get_current_datetime():
                 active.append(p)
         return active
 
 
-# still needs to be checked/fixed
     def days_till_free(self):
         days = []
         for p in VMOnProject.objects.filter(vm=self):
-            days.append(p.engagement.days_till_deadline())
+            days.append((p.eng.target_end - get_current_datetime()).days)
         return max(days)
 
     def __str__(self):
         return "%s" %(self.short_name)
 
+
+class VMAdmin(admin.ModelAdmin):
+  list_display = ('short_name', 'IP')
+
+admin.site.register(VM, VMAdmin)
+
+
 class VMOnProject(models.Model):
-    tester  = models.ForeignKey(User, on_delete=models.PROTECT, related_name='tester')
+    tester     = models.ForeignKey(User, on_delete=models.PROTECT, related_name='tester')
     engagement = models.ForeignKey(Engagement, null=True, blank=True,
-                                   related_name="engagement")
-    vm      = models.ForeignKey(VM, on_delete=models.PROTECT, related_name='vm', blank=True, null=True)
+                                   related_name="eng")
+    vm         = models.ForeignKey(VM, on_delete=models.PROTECT, related_name='vm', blank=True, null=True)
 
     class Meta:
         verbose_name_plural = "VMs On Project"
 
     def rdp_link(self):
-        return "rdp://{{self.tester.linux_username}}@{{self.vm.fqdn}}"
+        return "rdp://{{self.tester}}@{{self.vm.fqdn}}"
+
+
+class VMOnProjectAdmin(admin.ModelAdmin):
+  list_filter = ['engagement', 'tester', 'vm']
+  list_display = ('engagement', 'tester', 'vm')
+
+admin.site.register(VMOnProject, VMOnProjectAdmin)

@@ -13,7 +13,7 @@ from django_filters.filters import ChoiceFilter, _truncate, DateTimeFilter
 from pytz import timezone
 
 from dojo.models import Dojo_User, Product_Type, Finding, Product, Test_Type, \
-    Endpoint, Development_Environment, Finding_Template, Report
+    Endpoint, Development_Environment, Finding_Template, Report, VM
 from dojo.utils import get_system_setting
 
 local_tz = timezone(get_system_setting('time_zone'))
@@ -251,6 +251,26 @@ class MetricsDateRangeFilter(ChoiceFilter):
         except (ValueError, TypeError):
             value = ''
         return self.options[value][1](self, qs, self.name)
+
+
+class VMFilter(DojoFilter):
+    short_name = CharFilter(lookup_expr='icontains')
+
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('short_name', 'short_name'),
+        ),
+        field_labels={
+            'short_name': 'VM Name',
+        }
+
+    )
+
+    class Meta:
+        model = VM
+        fields = ['short_name']
+
 
 
 class EngagementFilter(DojoFilter):
