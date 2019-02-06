@@ -51,7 +51,7 @@ class Command(BaseCommand):
             for field in headers:
                 if field is not "product_name":
                     value = getattr(obj, field)
-                    if isinstance(value, unicode):
+                    if isinstance(value, str):
                         value = value.encode('utf-8').strip()
 
                     row.append(value)

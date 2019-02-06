@@ -12,7 +12,7 @@ from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
@@ -26,6 +26,7 @@ from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
     Risk_Acceptance, Dojo_User
 from dojo.utils import get_page_items, add_breadcrumb, findings_this_period, opened_in_period, count_findings, \
     get_period_counts, get_punchcard_data, get_system_setting
+from functools import reduce
 
 logger = logging.getLogger(__name__)
 
@@ -52,15 +53,6 @@ def metrics(request, mtype):
     page_name = 'Product Type Metrics'
     show_pt_filter = True
 
-    sql_age_query = ""
-    if "postgresql" in settings.DATABASES["default"]["ENGINE"]:
-        sql_age_query = """SELECT (CASE WHEN (dojo_finding.mitigated IS NULL)
-                        THEN DATE_PART(\'day\', date::timestamp - dojo_finding.date::timestamp)
-                        ELSE DATE_PART(\'day\', dojo_finding.mitigated::timestamp - dojo_finding.date::timestamp) END)"""
-    else:
-        sql_age_query = """SELECT IF(dojo_finding.mitigated IS NULL, DATEDIFF(CURDATE(), dojo_finding.date),
-                       DATEDIFF(dojo_finding.mitigated, dojo_finding.date))"""
-
     findings = Finding.objects.filter(verified=True,
                                       severity__in=('Critical', 'High', 'Medium', 'Low', 'Info')).prefetch_related(
         'test__engagement__product',
@@ -73,7 +65,6 @@ def metrics(request, mtype):
                         'dojo_risk_acceptance_accepted_findings ON '
                         '( dojo_risk_acceptance.id = dojo_risk_acceptance_accepted_findings.risk_acceptance_id ) '
                         'WHERE dojo_risk_acceptance_accepted_findings.finding_id = dojo_finding.id',
-            "sql_age": sql_age_query
         },
     )
     active_findings = Finding.objects.filter(verified=True, active=True,
@@ -88,7 +79,6 @@ def metrics(request, mtype):
                         'dojo_risk_acceptance_accepted_findings ON '
                         '( dojo_risk_acceptance.id = dojo_risk_acceptance_accepted_findings.risk_acceptance_id ) '
                         'WHERE dojo_risk_acceptance_accepted_findings.finding_id = dojo_finding.id',
-            "sql_age": sql_age_query
     },
     )
 
@@ -246,13 +236,13 @@ def metrics(request, mtype):
     accepted_in_period_details = {}
 
     for finding in findings.qs:
-        if 0 <= finding.sql_age <= 30:
+        if 0 <= finding.age <= 30:
             age_detail[0] += 1
-        elif 30 < finding.sql_age <= 60:
+        elif 30 < finding.age <= 60:
             age_detail[1] += 1
-        elif 60 < finding.sql_age <= 90:
+        elif 60 < finding.age <= 90:
             age_detail[2] += 1
-        elif finding.sql_age > 90:
+        elif finding.age > 90:
             age_detail[3] += 1
 
         in_period_counts[finding.severity] += 1
@@ -743,8 +733,8 @@ def view_engineer(request, eid):
                                            mitigated__isnull=True,
                                            active=True).count()
         vulns[product.id] = f_count
-    od = OrderedDict(sorted(vulns.items(), key=itemgetter(1)))
-    items = od.items()
+    od = OrderedDict(sorted(list(vulns.items()), key=itemgetter(1)))
+    items = list(od.items())
     items.reverse()
     top = items[: 10]
     update = []
@@ -967,7 +957,7 @@ def research_metrics(request):
                             'S3': closed_findings.filter(severity='Low')}
 
     time_to_close = {}
-    for sev, finds in closed_findings_dict.items():
+    for sev, finds in list(closed_findings_dict.items()):
         total = 0
         for f in finds:
             total += (datetime.date(f.mitigated) - f.date).days

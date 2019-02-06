@@ -123,6 +123,6 @@ class ApiBasicOperationsTest(ResourceTestCaseMixin, TestCase):
         self.assertHttpBadRequest(r)
         data = self.deserialize(r)
         self.assertEqual(data, {
-            u'engagements': {u'status': [u'This field is required.'],
-                             u'target_end': [u'This field is required.'],
-                             u'target_start': [u'This field is required.']}})
+            'engagements': {'status': ['This field is required.'],
+                             'target_end': ['This field is required.'],
+                             'target_start': ['This field is required.']}})

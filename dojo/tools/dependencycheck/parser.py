@@ -19,34 +19,45 @@ class DependencyCheckParser(object):
         return self.get_field_value(dependency, 'fileName')
 
     def get_finding_from_vulnerability(self, vulnerability, filename, test):
-        title = '{0} | {1}'.format(filename,
-                                   self.get_field_value(vulnerability, 'name'))
+        name = self.get_field_value(vulnerability, 'name')
         severity = self.get_field_value(vulnerability, 'severity')
-        finding_detail = '{0}\n\n{1}'.format(
-            self.get_field_value(vulnerability, 'cwe'),
-            self.get_field_value(vulnerability, 'description'))
-        reference_detail = None
+        cwe_field = self.get_field_value(vulnerability, 'cwe')
+        description = self.get_field_value(vulnerability, 'description')
 
+        title = '{0} | {1}'.format(filename, name)
+
+        # Use CWE-1035 as fallback
+        cwe = 1035  # Vulnerable Third Party Component
+        if cwe_field:
+            m = re.match(r"^(CWE-)?(\d+)", cwe_field)
+            if m:
+                cwe = int(m.group(2))
+
+        reference_detail = None
         references_node = vulnerability.find(self.namespace + 'references')
 
         if references_node is not None:
             reference_detail = ''
             for reference_node in references_node.findall(self.namespace +
                                                           'reference'):
+                name = self.get_field_value(reference_node, 'name')
+                source = self.get_field_value(reference_node, 'source')
+                url = self.get_field_value(reference_node, 'url')
                 reference_detail += 'name: {0}\n' \
-                                    'source: {1}\n' \
-                                    'url: {2}\n\n'.format(self.get_field_value(reference_node, 'name'), self.get_field_value(reference_node, 'source'), self.get_field_value(reference_node, 'url'))
+                                     'source: {1}\n' \
+                                     'url: {2}\n\n'.format(name, source, url)
 
         return Finding(
             title=title,
             file_path=filename,
             test=test,
-            cwe=1035,  # Vulnerable Third Party Component
+            cwe=cwe,
             active=False,
             verified=False,
-            description=finding_detail,
+            description=description,
             severity=severity,
             numerical_severity=Finding.get_numerical_severity(severity),
+            static_finding=True,
             references=reference_detail)
 
     def __init__(self, filename, test):
@@ -83,11 +94,12 @@ class DependencyCheckParser(object):
                             vulnerability, dependency_filename, test)
 
                         if finding is not None:
-                            key = hashlib.md5(finding.severity + '|' +
-                                              finding.title + '|' +
-                                              finding.description).hexdigest()
+                            key_str = '{}|{}|{}'.format(finding.severity,
+                                                         finding.title,
+                                                         finding.description)
+                            key = hashlib.md5(key_str.encode('utf-8')).hexdigest()
 
                             if key not in self.dupes:
                                 self.dupes[key] = finding
 
-        self.items = self.dupes.values()
+        self.items = list(self.dupes.values())

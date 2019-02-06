@@ -8,7 +8,8 @@ from django.contrib.auth.models import User
 from django.utils import six
 from django.utils.translation import ugettext_lazy as _
 from django_filters import FilterSet, CharFilter, OrderingFilter, \
-    ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter
+    ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter, \
+    BooleanFilter
 from django_filters.filters import ChoiceFilter, _truncate, DateTimeFilter
 from pytz import timezone
 
@@ -336,6 +337,11 @@ class OpenFindingFilter(DojoFilter):
     test__engagement__product = ModelMultipleChoiceFilter(
         queryset=Product.objects.all(),
         label="Product")
+    if get_system_setting('enable_jira'):
+        jira_issue = BooleanFilter(name='jira_issue',
+                                   lookup_expr='isnull',
+                                   exclude=True,
+                                   label='JIRA issue')
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -369,26 +375,27 @@ class OpenFindingFilter(DojoFilter):
             self.pid = kwargs.pop('pid')
         super(OpenFindingFilter, self).__init__(*args, **kwargs)
 
-        # Don't show the product filter on the product finding view
-        if self.pid:
-            del self.form.fields['test__engagement__product']
         cwe = dict()
         cwe = dict([finding.cwe, finding.cwe]
                    for finding in self.queryset.distinct()
                    if finding.cwe > 0 and finding.cwe not in cwe)
         cwe = collections.OrderedDict(sorted(cwe.items()))
-        self.form.fields['cwe'].choices = cwe.items()
+        self.form.fields['cwe'].choices = list(cwe.items())
         sevs = dict()
         sevs = dict([finding.severity, finding.severity]
                     for finding in self.queryset.distinct()
                     if finding.severity not in sevs)
-        self.form.fields['severity'].choices = sevs.items()
+        self.form.fields['severity'].choices = list(sevs.items())
         if self.user is not None and not self.user.is_staff:
             self.form.fields[
                 'test__engagement__product'].queryset = Product.objects.filter(
                 authorized_users__in=[self.user])
             self.form.fields['endpoints'].queryset = Endpoint.objects.filter(
                 product__authorized_users__in=[self.user]).distinct()
+
+        # Don't show the product filter on the product finding view
+        if self.pid:
+            del self.form.fields['test__engagement__product']
 
 
 class OpenFingingSuperFilter(OpenFindingFilter):
@@ -454,12 +461,12 @@ class ClosedFindingFilter(DojoFilter):
                    for finding in self.queryset.distinct()
                    if finding.cwe > 0 and finding.cwe not in cwe)
         cwe = collections.OrderedDict(sorted(cwe.items()))
-        self.form.fields['cwe'].choices = cwe.items()
+        self.form.fields['cwe'].choices = list(cwe.items())
         sevs = dict()
         sevs = dict([finding.severity, finding.severity]
                     for finding in self.queryset.distinct()
                     if finding.severity not in sevs)
-        self.form.fields['severity'].choices = sevs.items()
+        self.form.fields['severity'].choices = list(sevs.items())
 
 
 class ClosedFingingSuperFilter(ClosedFindingFilter):
@@ -525,12 +532,12 @@ class AcceptedFindingFilter(DojoFilter):
                    for finding in self.queryset.distinct()
                    if finding.cwe > 0 and finding.cwe not in cwe)
         cwe = collections.OrderedDict(sorted(cwe.items()))
-        self.form.fields['cwe'].choices = cwe.items()
+        self.form.fields['cwe'].choices = list(cwe.items())
         sevs = dict()
         sevs = dict([finding.severity, finding.severity]
                     for finding in self.queryset.distinct()
                     if finding.severity not in sevs)
-        self.form.fields['severity'].choices = sevs.items()
+        self.form.fields['severity'].choices = list(sevs.items())
 
 
 class AcceptedFingingSuperFilter(AcceptedFindingFilter):
@@ -589,12 +596,12 @@ class ProductFindingFilter(DojoFilter):
                    for finding in self.queryset.distinct()
                    if finding.cwe > 0 and finding.cwe not in cwe)
         cwe = collections.OrderedDict(sorted(cwe.items()))
-        self.form.fields['cwe'].choices = cwe.items()
+        self.form.fields['cwe'].choices = list(cwe.items())
         sevs = dict()
         sevs = dict([finding.severity, finding.severity]
                     for finding in self.queryset.distinct()
                     if finding.severity not in sevs)
-        self.form.fields['severity'].choices = sevs.items()
+        self.form.fields['severity'].choices = list(sevs.items())
 
 
 class TemplateFindingFilter(DojoFilter):
@@ -628,19 +635,19 @@ class TemplateFindingFilter(DojoFilter):
                    for finding in self.queryset.distinct()
                    if finding.cwe > 0 and finding.cwe not in cwe)
         cwe = collections.OrderedDict(sorted(cwe.items()))
-        self.form.fields['cwe'].choices = cwe.items()
+        self.form.fields['cwe'].choices = list(cwe.items())
 
-        self.form.fields['severity'].choices = ((u'Critical', u'Critical'),
-                                                (u'High', u'High'),
-                                                (u'Medium', u'Medium'),
-                                                (u'Low', u'Low'),
-                                                (u'Info', u'Info'))
+        self.form.fields['severity'].choices = (('Critical', 'Critical'),
+                                                ('High', 'High'),
+                                                ('Medium', 'Medium'),
+                                                ('Low', 'Low'),
+                                                ('Info', 'Info'))
 
-        self.form.fields['numerical_severity'].choices = ((u'S0', u'S0'),
-                                                          (u'S1', u'S1'),
-                                                          (u'S2', u'S2'),
-                                                          (u'S3', u'S3'),
-                                                          (u'S4', u'S4'))
+        self.form.fields['numerical_severity'].choices = (('S0', 'S0'),
+                                                          ('S1', 'S1'),
+                                                          ('S2', 'S2'),
+                                                          ('S3', 'S3'),
+                                                          ('S4', 'S4'))
 
 
 class FindingStatusFilter(ChoiceFilter):
@@ -899,14 +906,14 @@ class ReportFilter(DojoFilter):
             [report.type, report.type] for report in self.queryset.distinct()
             if report.type is not None)
         type = collections.OrderedDict(sorted(type.items()))
-        self.form.fields['type'].choices = type.items()
+        self.form.fields['type'].choices = list(type.items())
 
         status = dict()
         status = dict(
             [report.status, report.status] for report in
             self.queryset.distinct() if report.status is not None)
         status = collections.OrderedDict(sorted(status.items()))
-        self.form.fields['status'].choices = status.items()
+        self.form.fields['status'].choices = list(status.items())
 
 
 class EngineerFilter(DojoFilter):

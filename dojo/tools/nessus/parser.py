@@ -134,7 +134,7 @@ class NessusCSVParser(object):
                     find.unsaved_endpoints.append(endpoint)
         os.unlink(filename.temporary_file_path())
         os.unlink("%s-filtered" % filename.temporary_file_path())
-        self.items = dupes.values()
+        self.items = list(dupes.values())
 
 
 class NessusXMLParser(object):
@@ -225,4 +225,4 @@ class NessusXMLParser(object):
                         find.unsaved_endpoints.append(Endpoint(host=fqdn,
                                                                protocol=protocol))
 
-        self.items = dupes.values()
+        self.items = list(dupes.values())

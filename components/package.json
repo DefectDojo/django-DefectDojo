@@ -18,7 +18,7 @@
     "@yarn_components/fullcalendar": "fullcalendar/fullcalendar#*",
     "@yarn_components/google-code-prettify": "tcollard/google-code-prettify#~1.0.4",
     "@yarn_components/holderjs": "imsky/holder#~2.4.1",
-    "@yarn_components/jquery": "jquery/jquery-dist#~2.1.4",
+    "@yarn_components/jquery": "jquery/jquery-dist#~3.3.1",
     "@yarn_components/jquery-cookie": "carhartl/jquery-cookie#*",
     "@yarn_components/jquery-highlight": "knownasilya/jquery-highlight#*",
     "@yarn_components/jquery-ui": "components/jqueryui#*",
@@ -28,7 +28,7 @@
     "@yarn_components/mocha": "mochajs/mocha#~1.17.1",
     "@yarn_components/moment": "moment/moment#^2.9.0",
     "@yarn_components/morrisjs": "morrisjs/morris.js#~0.5.1",
-    "@yarn_components/startbootstrap-sb-admin-2": "BlackrockDigital/startbootstrap-sb-admin-2#*",
+    "@yarn_components/startbootstrap-sb-admin-2": "BlackrockDigital/startbootstrap-sb-admin-2#~3.3.7+1",
     "@yarn_components/simplemde": "sparksuite/simplemde-markdown-editor#1.11.2"
   },
   "engines": {

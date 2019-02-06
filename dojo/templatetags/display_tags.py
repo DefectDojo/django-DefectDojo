@@ -1,4 +1,4 @@
-from itertools import izip, chain
+from itertools import chain
 import random
 from django import template
 from django.contrib.contenttypes.models import ContentType
@@ -6,7 +6,7 @@ from django.template.defaultfilters import stringfilter
 from django.utils.html import escape
 from django.utils.safestring import mark_safe, SafeData
 from django.utils.text import normalize_newlines
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib.auth.models import User
 from dojo.utils import prepare_for_view, get_system_setting
 from dojo.models import Check_List, FindingImageAccessToken, Finding, System_Settings, JIRA_PKey, Product
@@ -16,6 +16,8 @@ from django.utils import timezone
 from markdown.extensions import Extension
 import dateutil.relativedelta
 import datetime
+from ast import literal_eval
+from urllib.parse import urlparse
 
 register = template.Library()
 
@@ -29,15 +31,30 @@ class EscapeHtml(Extension):
 @register.filter
 def markdown_render(value):
     if value:
-        return mark_safe(markdown.markdown(value, extensions=[EscapeHtml(), 'markdown.extensions.codehilite', 'markdown.extensions.toc', 'markdown.extensions.tables']))
+        return mark_safe(markdown.markdown(value, extensions=['markdown.extensions.nl2br', 'markdown.extensions.sane_lists', 'markdown.extensions.codehilite', 'markdown.extensions.fenced_code', 'markdown.extensions.toc', 'markdown.extensions.tables']))
 
 
 @register.filter(name='ports_open')
 def ports_open(value):
     count = 0
     for ipscan in value.ipscan_set.all():
-        count += len(eval(ipscan.services))
+        count += len(literal_eval(ipscan.services))
     return count
+
+
+@register.filter(name='url_shortner')
+def url_shortner(value):
+    return_value = str(value)
+    url = urlparse(return_value)
+
+    if url.path:
+        return_value = url.path
+        if len(return_value) == 1:
+            return_value = value
+    if len(str(return_value)) > 50:
+            return_value = "..." + return_value[50:]
+
+    return return_value
 
 
 @register.filter(name='get_pwd')
@@ -325,7 +342,7 @@ def action_log_entry(value, autoescape=None):
     import json
     history = json.loads(value)
     text = ''
-    for k in history.iterkeys():
+    for k in list(history.keys()):
         text += k.capitalize() + ' changed from "' + \
             history[k][0] + '" to "' + history[k][1] + '"'
 
@@ -410,12 +427,12 @@ def colgroup(parser, token):
             self.num_cols = num_cols
             self.varname = varname
 
-        def render(self, context):
+        def render(self, context, renderer=None):
             iterable = template.Variable(self.iterable).resolve(context)
             num_cols = self.num_cols
-            context[self.varname] = izip(
-                *[chain(iterable, [None] * (num_cols - 1))] * num_cols)
-            return u''
+            context[self.varname] = list(zip(
+                *[chain(iterable, [None] * (num_cols - 1))] * num_cols))
+            return ''
 
     try:
         _, iterable, _, num_cols, _, _, varname = token.split_contents()

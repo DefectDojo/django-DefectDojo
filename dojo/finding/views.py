@@ -11,7 +11,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import Http404, HttpResponse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.http import StreamingHttpResponse
@@ -507,7 +507,7 @@ def edit_finding(request, fid):
             create_template = new_finding.is_template
             # always false now since this will be deprecated soon in favor of new Finding_Template model
             new_finding.is_template = False
-            new_finding.endpoints = form.cleaned_data['endpoints']
+            new_finding.endpoints.set(form.cleaned_data['endpoints'])
             new_finding.last_reviewed = timezone.now()
             new_finding.last_reviewed_by = request.user
             tags = request.POST.getlist('tags')
@@ -518,16 +518,14 @@ def edit_finding(request, fid):
                 jform = JIRAFindingForm(
                     request.POST, prefix='jiraform', enabled=enabled)
                 if jform.is_valid():
-                    try:
-                        # jissue = JIRA_Issue.objects.get(finding=new_finding)
+                    if JIRA_Issue.objects.filter(finding=new_finding).exists():
                         update_issue_task.delay(
                             new_finding, old_status,
                             jform.cleaned_data.get('push_to_jira'))
-                    except:
+                    else:
                         add_issue_task.delay(
                             new_finding,
                             jform.cleaned_data.get('push_to_jira'))
-                        pass
             tags = request.POST.getlist('tags')
             t = ", ".join(tags)
             new_finding.tags = t
@@ -839,22 +837,6 @@ def apply_template_to_finding(request, fid, tid):
 
 
 @user_passes_test(lambda u: u.is_staff)
-def delete_finding_note(request, tid, nid):
-    note = get_object_or_404(Notes, id=nid)
-    if note.author == request.user:
-        finding = get_object_or_404(Finding, id=tid)
-        finding.notes.remove(note)
-        note.delete()
-        messages.add_message(
-            request,
-            messages.SUCCESS,
-            'Note removed.',
-            extra_tags='alert-success')
-        return view_finding(request, tid)
-    return HttpResponseForbidden()
-
-
-@user_passes_test(lambda u: u.is_staff)
 def add_stub_finding(request, tid):
     test = get_object_or_404(Test, id=tid)
     form = StubFindingForm()
@@ -971,7 +953,7 @@ def promote_to_finding(request, fid):
             new_finding.out_of_scope = False
 
             new_finding.save()
-            new_finding.endpoints = form.cleaned_data['endpoints']
+            new_finding.endpoints.set(form.cleaned_data['endpoints'])
             new_finding.save()
 
             finding.delete()
@@ -1293,7 +1275,7 @@ def download_finding_pic(request, token):
             'large': access_token.image.image_large,
             'original': access_token.image.image,
         }
-        if access_token.size not in sizes.keys():
+        if access_token.size not in list(sizes.keys()):
             raise Http404
         size = access_token.size
         # we know there is a token - is it for this image

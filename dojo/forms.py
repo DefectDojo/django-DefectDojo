@@ -1,12 +1,13 @@
 import re
 from datetime import datetime, date
-from urlparse import urlsplit, urlunsplit
+from urllib.parse import urlsplit, urlunsplit
 
-from custom_field.models import CustomField
+
 from dateutil.relativedelta import relativedelta
 from django import forms
 from django.core import validators
 from django.core.validators import RegexValidator
+from django.core.exceptions import ValidationError
 from django.forms import modelformset_factory
 from django.forms.widgets import Widget, Select
 from django.utils.dates import MONTHS
@@ -18,7 +19,7 @@ from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
     Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
     JIRA_Issue, JIRA_PKey, JIRA_Conf, UserContactInfo, Tool_Type, Tool_Configuration, Tool_Product_Settings, \
     Cred_User, Cred_Mapping, System_Settings, Notifications, Languages, Language_Type, App_Analysis, Objects, \
-    Benchmark_Product, Benchmark_Requirement, Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets
+    Benchmark_Product, Benchmark_Requirement, Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
 
@@ -77,14 +78,14 @@ class MonthYearWidget(Widget):
             self.years = years
         else:
             this_year = date.today().year
-            self.years = range(this_year - 10, this_year + 1)
+            self.years = list(range(this_year - 10, this_year + 1))
 
     def render(self, name, value, attrs=None):
         try:
             year_val, month_val = value.year, value.month
         except AttributeError:
             year_val = month_val = None
-            if isinstance(value, basestring):
+            if isinstance(value, str):
                 match = RE_DATE.match(value)
                 if match:
                     year_val,
@@ -98,7 +99,7 @@ class MonthYearWidget(Widget):
         else:
             id_ = 'id_%s' % name
 
-        month_choices = MONTHS.items()
+        month_choices = list(MONTHS.items())
         if not (self.required and value):
             month_choices.append(self.none_value)
         month_choices.sort()
@@ -116,7 +117,7 @@ class MonthYearWidget(Widget):
         select_html = s.render(self.year_field % name, year_val, local_attrs)
         output.append(select_html)
 
-        return mark_safe(u'\n'.join(output))
+        return mark_safe('\n'.join(output))
 
     def id_for_label(self, id_):
         return '%s_month' % id_
@@ -192,16 +193,24 @@ class DeleteProductForm(forms.ModelForm):
                    'prod_type', 'updated', 'tid', 'authorized_users', 'product_manager',
                    'technical_contact', 'team_manager', 'prod_numeric_grade', 'business_criticality',
                    'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience',
-                   'internet_accessible', 'regulations']
+                   'internet_accessible', 'regulations', 'product_meta']
 
 
-class ProductMetaDataForm(forms.ModelForm):
+class DojoMetaDataForm(forms.ModelForm):
     value = forms.CharField(widget=forms.Textarea(attrs={}),
                             required=True)
 
+    def full_clean(self):
+        super(DojoMetaDataForm, self).full_clean()
+        try:
+            self.instance.validate_unique()
+        except ValidationError:
+            msg = "A metadata entry with the same name exists already for this object."
+            self.add_error('name', msg)
+
     class Meta:
-        model = CustomField
-        exclude = ['field_type', 'content_type', 'default_value', 'is_required', 'field_choices']
+        model = DojoMeta
+        fields = '__all__'
 
 
 class Product_TypeProductForm(forms.ModelForm):
@@ -233,12 +242,14 @@ class ImportScanForm(forms.Form):
                          ("AppSpider Scan", "AppSpider Scan"),
                          ("Veracode Scan", "Veracode Scan"),
                          ("Checkmarx Scan", "Checkmarx Scan"),
+                         ("Crashtest Security Scan", "Crashtest Security Scan"),
                          ("ZAP Scan", "ZAP Scan"),
                          ("Arachni Scan", "Arachni Scan"),
                          ("VCG Scan", "VCG Scan"),
                          ("Dependency Check Scan", "Dependency Check Scan"),
                          ("Retire.js Scan", "Retire.js Scan"),
                          ("Node Security Platform Scan", "Node Security Platform Scan"),
+                         ("NPM Audit Scan", "NPM Audit Scan"),
                          ("Qualys Scan", "Qualys Scan"),
                          ("Qualys Webapp Scan", "Qualys Webapp Scan"),
                          ("OpenVAS CSV", "OpenVAS CSV"),
@@ -248,7 +259,19 @@ class ImportScanForm(forms.Form):
                          ("SKF Scan", "SKF Scan"),
                          ("Bandit Scan", "Bandit Scan"),
                          ("SSL Labs Scan", "SSL Labs Scan"),
-                         ("Gosec Scanner", "Gosec Scanner"))
+                         ("Acunetix Scan", "Acunetix Scan"),
+                         ("Fortify Scan", "Fortify Scan"),
+                         ("Gosec Scanner", "Gosec Scanner"),
+                         ("SonarQube Scan", "SonarQube Scan"),
+                         ("MobSF Scan", "MobSF Scan"),
+                         ("Trufflehog Scan", "Trufflehog Scan"),
+                         ("Nikto Scan", "Nikto Scan"),
+                         ("Clair Scan", "Clair Scan"),
+                         ("Brakeman Scan", "Brakeman Scan"),
+                         ("SpotBugs Scan", "SpotBugs Scan"),
+                         ("AWS Scout2 Scan", "AWS Scout2 Scan"),
+                         ("AWS Prowler Scan", "AWS Prowler Scan"),
+                         ("PHP Security Audit v2", "PHP Security Audit v2"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
 
@@ -270,7 +293,7 @@ class ImportScanForm(forms.Form):
                            help_text="Add tags that help describe this scan.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
     file = forms.FileField(widget=forms.widgets.FileInput(
-        attrs={"accept": ".xml, .csv, .nessus, .json"}),
+        attrs={"accept": ".xml, .csv, .nessus, .json, .html, .js"}),
         label="Choose report file",
         required=True)
 
@@ -305,7 +328,7 @@ class ReImportScanForm(forms.Form):
                            help_text="Add tags that help describe this scan.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
     file = forms.FileField(widget=forms.widgets.FileInput(
-        attrs={"accept": ".xml, .csv, .nessus, .json"}),
+        attrs={"accept": ".xml, .csv, .nessus, .json, .html"}),
         label="Choose report file",
         required=True)
 
@@ -518,9 +541,9 @@ class EngForm(forms.ModelForm):
                            help_text="Add tags that help describe this engagement.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
     target_start = forms.DateField(widget=forms.TextInput(
-        attrs={'class': 'datepicker'}))
+        attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     target_end = forms.DateField(widget=forms.TextInput(
-        attrs={'class': 'datepicker'}))
+        attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     lead = forms.ModelChoiceField(
         queryset=User.objects.exclude(is_staff=False),
         required=True, label="Testing Lead")
@@ -587,9 +610,9 @@ class EngForm2(forms.ModelForm):
                                      "Choose from the list or add new tags.  Press TAB key to add.")
     product = forms.ModelChoiceField(queryset=Product.objects.all())
     target_start = forms.DateField(widget=forms.TextInput(
-        attrs={'class': 'datepicker'}))
+        attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     target_end = forms.DateField(widget=forms.TextInput(
-        attrs={'class': 'datepicker'}))
+        attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     test_options = (('API', 'API Test'), ('Static', 'Static Check'),
                     ('Pen', 'Pen Test'), ('Web App', 'Web Application Test'))
     lead = forms.ModelChoiceField(
@@ -641,9 +664,9 @@ class TestForm(forms.ModelForm):
         queryset=Development_Environment.objects.all().order_by('name'))
     # credential = forms.ModelChoiceField(Cred_User.objects.all(), required=False)
     target_start = forms.DateTimeField(widget=forms.TextInput(
-        attrs={'class': 'datepicker'}))
+        attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     target_end = forms.DateTimeField(widget=forms.TextInput(
-        attrs={'class': 'datepicker'}))
+        attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False,
                            help_text="Add tags that help describe this test.  "
@@ -675,14 +698,14 @@ class DeleteTestForm(forms.ModelForm):
                    'target_end',
                    'engagement',
                    'percent_complete',
+                   'description',
                    'lead')
 
 
 class AddFindingForm(forms.ModelForm):
     title = forms.CharField(max_length=1000)
     date = forms.DateField(required=True,
-                           widget=forms.TextInput(attrs={'class':
-                                                             'datepicker'}))
+                           widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
@@ -719,8 +742,7 @@ class AddFindingForm(forms.ModelForm):
 class AdHocFindingForm(forms.ModelForm):
     title = forms.CharField(max_length=1000)
     date = forms.DateField(required=True,
-                           widget=forms.TextInput(attrs={'class':
-                                                             'datepicker'}))
+                           widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
@@ -757,8 +779,7 @@ class AdHocFindingForm(forms.ModelForm):
 class PromoteFindingForm(forms.ModelForm):
     title = forms.CharField(max_length=1000)
     date = forms.DateField(required=True,
-                           widget=forms.TextInput(attrs={'class':
-                                                             'datepicker'}))
+                           widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
@@ -782,8 +803,7 @@ class PromoteFindingForm(forms.ModelForm):
 class FindingForm(forms.ModelForm):
     title = forms.CharField(max_length=1000)
     date = forms.DateField(required=True,
-                           widget=forms.TextInput(attrs={'class':
-                                                             'datepicker'}))
+                           widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
@@ -1143,17 +1163,8 @@ class DeleteEndpointForm(forms.ModelForm):
                    'product')
 
 
-class EndpointMetaDataForm(forms.ModelForm):
-    value = forms.CharField(widget=forms.Textarea(attrs={}),
-                            required=True)
-
-    class Meta:
-        model = CustomField
-        exclude = ['field_type', 'content_type', 'default_value', 'is_required', 'field_choices']
-
-
 class NoteForm(forms.ModelForm):
-    entry = forms.CharField(max_length=2400, widget=forms.Textarea,
+    entry = forms.CharField(max_length=2400, widget=forms.Textarea(attrs={'rows': 4, 'cols': 15}),
                             label='Notes:')
 
     class Meta:
@@ -1255,23 +1266,19 @@ class SimpleSearchForm(forms.Form):
 
 class DateRangeMetrics(forms.Form):
     start_date = forms.DateField(required=True, label="To",
-                                 widget=forms.TextInput(attrs={'class':
-                                                                   'datepicker'}))
+                                 widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     end_date = forms.DateField(required=True,
                                label="From",
-                               widget=forms.TextInput(attrs={'class':
-                                                                 'datepicker'}))
+                               widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
 
 
 class MetricsFilterForm(forms.Form):
     start_date = forms.DateField(required=False,
                                  label="To",
-                                 widget=forms.TextInput(attrs={'class':
-                                                                   'datepicker'}))
+                                 widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     end_date = forms.DateField(required=False,
                                label="From",
-                               widget=forms.TextInput(attrs={'class':
-                                                                 'datepicker'}))
+                               widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     finding_status = forms.MultipleChoiceField(
         required=False,
         widget=forms.CheckboxSelectMultiple,
@@ -1319,6 +1326,15 @@ class AddDojoUserForm(forms.ModelForm):
                    'date_joined', 'user_permissions']
 
 
+class DeleteNoteForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = Notes
+        fields = ('id',)
+
+
 class DeleteUserForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())
@@ -1342,7 +1358,7 @@ def get_years():
 
 
 class ProductTypeCountsForm(forms.Form):
-    month = forms.ChoiceField(choices=MONTHS.items(), required=True, error_messages={
+    month = forms.ChoiceField(choices=list(MONTHS.items()), required=True, error_messages={
         'required': '*'})
     year = forms.ChoiceField(choices=get_years, required=True, error_messages={
         'required': '*'})
@@ -1369,7 +1385,7 @@ class ReportOptionsForm(forms.Form):
     include_finding_images = forms.ChoiceField(choices=yes_no, label="Finding Images")
     include_executive_summary = forms.ChoiceField(choices=yes_no, label="Executive Summary")
     include_table_of_contents = forms.ChoiceField(choices=yes_no, label="Table of Contents")
-    report_type = forms.ChoiceField(choices=(('HTML', 'HTML'), ('AsciiDoc', 'AsciiDoc'), ('PDF', 'PDF')))
+    report_type = forms.ChoiceField(choices=(('HTML', 'HTML'), ('AsciiDoc', 'AsciiDoc')))
 
 
 class CustomReportOptionsForm(forms.Form):
@@ -1377,7 +1393,7 @@ class CustomReportOptionsForm(forms.Form):
     report_name = forms.CharField(required=False, max_length=100)
     include_finding_notes = forms.ChoiceField(required=False, choices=yes_no)
     include_finding_images = forms.ChoiceField(choices=yes_no, label="Finding Images")
-    report_type = forms.ChoiceField(required=False, choices=(('AsciiDoc', 'AsciiDoc'), ('PDF', 'PDF')))
+    report_type = forms.ChoiceField(required=False, choices=(('AsciiDoc', 'AsciiDoc')))
 
 
 class DeleteReportForm(forms.ModelForm):

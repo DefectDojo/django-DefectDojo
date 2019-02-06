@@ -14,6 +14,10 @@ class SSLlabsParser(object):
 
         for host in data:
             ssl_endpoints = []
+            hostName = ""
+            if "host" in host:
+                hostName = host["host"]
+
             if "endpoints" in host:
                 ssl_endpoints = host["endpoints"]
             for endpoints in ssl_endpoints:
@@ -27,16 +31,12 @@ class SSLlabsParser(object):
                 group = ''
                 status = ''
                 port = ''
-                hostName = ''
                 ipAddress = ''
                 protocol = ''
 
                 grade = ""
                 if "grade" in endpoints:
                     grade = endpoints["grade"]
-                hostName = ""
-                if "hostName" in host:
-                    hostName = host["host"]
                 port = ""
                 if "port" in host:
                     port = host["port"]
@@ -48,12 +48,20 @@ class SSLlabsParser(object):
                     protocol = host["protocol"]
 
                 title = "TLS Grade '%s' for %s" % (grade, hostName)
-                cert = endpoints["details"]["cert"]
+
                 sev = self.getCriticalityRating(grade)
                 description = "%s \n\n" % title
-                description = "%sCertifcate Subject: %s\n" % (description, cert["subject"])
-                description = "%sIssuer Subject: %s\n" % (description, cert["issuerSubject"])
-                description = "%sSignature Algorithm: %s\n" % (description, cert["sigAlg"])
+                cert = ""
+                if "cert" in endpoints["details"]:
+                    cert = endpoints["details"]["cert"]
+                    description = "%sCertifcate Subject: %s\n" % (description, cert["subject"])
+                    description = "%sIssuer Subject: %s\n" % (description, cert["issuerSubject"])
+                    description = "%sSignature Algorithm: %s\n" % (description, cert["sigAlg"])
+                else:
+                    for cert in host["certs"]:
+                        description = "%sCertifcate Subject: %s\n" % (description, cert["subject"])
+                        description = "%sIssuer Subject: %s\n" % (description, cert["issuerSubject"])
+                        description = "%sSignature Algorithm: %s\n" % (description, cert["sigAlg"])
 
                 protocol_str = ""
                 for protocol_data in endpoints["details"]["protocols"]:
@@ -64,14 +72,14 @@ class SSLlabsParser(object):
 
                 description += "\nSuites List:\n\n"
                 suite_info = ""
-                for suites in endpoints["details"]["suites"]["list"]:
-                    suite_info += suites["name"] + "\n"
-                    suite_info += "Cipher Strength: " + str(suites["cipherStrength"]) + "\n"
-                    if "ecdhBits" in suites:
-                        suite_info += "ecdhBits: " + str(suites["ecdhBits"]) + "\n"
-                    if "ecdhStrength" in suites:
-                        suite_info += "ecdhStrength: " + str(suites["ecdhStrength"])
-                    suite_info += "\n\n"
+
+                if "list" in endpoints["details"]["suites"]:
+                    for suites in endpoints["details"]["suites"]["list"]:
+                        suite_info = suite_info + self.suite_data(suites)
+                elif "suites" in endpoints["details"]:
+                    for item in endpoints["details"]["suites"]:
+                        for suites in item["list"]:
+                            suite_info = suite_info + self.suite_data(suites)
 
                 description += suite_info
                 description += "Additional Information:\n\n"
@@ -136,6 +144,7 @@ class SSLlabsParser(object):
                 if "hasSct" in endpoints["details"]:
                     description += "hasSct: " + str(endpoints["details"]["hasSct"]) + "\n"
 
+                """
                 cName = ""
                 for commonNames in cert["commonNames"]:
                     cName = "%s %s \n" % (cName, commonNames)
@@ -143,6 +152,7 @@ class SSLlabsParser(object):
                 aName = ""
                 for altNames in cert["altNames"]:
                     aName = "%s %s \n" % (aName, altNames)
+                """
 
                 protoName = ""
                 for protocols in endpoints["details"]["protocols"]:
@@ -174,7 +184,7 @@ class SSLlabsParser(object):
 
                 find.unsaved_endpoints.append(Endpoint(host=ipAddress, fqdn=hostName, port=port, protocol=protocol))
 
-            self.items = dupes.values()
+            self.items = list(dupes.values())
 
     # Criticality rating
     # Grades: https://github.com/ssllabs/research/wiki/SSL-Server-Rating-Guide
@@ -191,3 +201,14 @@ class SSLlabsParser(object):
             criticality = "Critical"
 
         return criticality
+
+    def suite_data(self, suites):
+        suite_info = ""
+        suite_info += suites["name"] + "\n"
+        suite_info += "Cipher Strength: " + str(suites["cipherStrength"]) + "\n"
+        if "ecdhBits" in suites:
+            suite_info += "ecdhBits: " + str(suites["ecdhBits"]) + "\n"
+        if "ecdhStrength" in suites:
+            suite_info += "ecdhStrength: " + str(suites["ecdhStrength"])
+        suite_info += "\n\n"
+        return suite_info

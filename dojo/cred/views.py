@@ -2,7 +2,7 @@ import logging
 import os
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import HttpResponseRedirect, StreamingHttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
@@ -557,10 +557,10 @@ def new_cred_finding(request, fid):
                 cred_id=cred_user.cred_id, finding=finding.id)
 
             if cred_lookup:
-                print "Cred lookup valid"
+                print("Cred lookup valid")
 
             if cred_user:
-                print "Cred user"
+                print("Cred user")
 
             message = "Credential already associated."
             status_tag = 'alert-danger'
@@ -703,7 +703,7 @@ def view_selenium(request, ttid):
 
     mimetypes.init()
     cred = Cred_Mapping.objects.get(pk=ttid)
-    print cred.cred_id.selenium_script
+    print((cred.cred_id.selenium_script))
     # mimetype, encoding = mimetypes.guess_type(cred.cred_id.selenium_script)
     response = StreamingHttpResponse(
         FileIterWrapper(open(cred.cred_id.selenium_script)))

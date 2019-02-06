@@ -3,15 +3,16 @@ import hashlib
 import logging
 import os
 import re
-from datetime import datetime
 from uuid import uuid4
 from django.conf import settings
 from watson import search as watson
 from auditlog.registry import auditlog
 from django.contrib import admin
 from django.contrib.auth import get_user_model
-from django.core.urlresolvers import reverse
+# from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core.validators import RegexValidator
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
 from django.utils.timezone import now
@@ -78,6 +79,9 @@ class System_Settings(models.Model):
                                               "oldest will be deleted.")
     enable_jira = models.BooleanField(default=False,
                                       verbose_name='Enable JIRA integration',
+                                      blank=False)
+    enable_jira_web_hook = models.BooleanField(default=False,
+                                      verbose_name='Enable JIRA web hook. Please note: It is strongly recommended to whitelist the Jira server using a proxy such as Nginx.',
                                       blank=False)
     jira_choices = (('Critical', 'Critical'),
                     ('High', 'High'),
@@ -245,7 +249,8 @@ class Dojo_User(User):
 
 
 class UserContactInfo(models.Model):
-    user = models.OneToOneField(User)
+    # on_delete = models.CASCADE
+    user = models.OneToOneField(User, models.CASCADE)
     title = models.CharField(blank=True, null=True, max_length=150)
     phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$',
                                  message="Phone number must be entered in the format: '+999999999'. "
@@ -276,7 +281,7 @@ class Contact(models.Model):
 
 
 class Product_Type(models.Model):
-    name = models.CharField(max_length=300)
+    name = models.CharField(max_length=300, unique=True)
     critical_product = models.BooleanField(default=False)
     key_product = models.BooleanField(default=False)
     updated = models.DateTimeField(auto_now=True, null=True)
@@ -349,7 +354,7 @@ class Report_Type(models.Model):
 
 
 class Test_Type(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, unique=True)
     static_tool = models.BooleanField(default=False)
     dynamic_tool = models.BooleanField(default=False)
 
@@ -363,6 +368,37 @@ class Test_Type(models.Model):
         bc = [{'title': self.__unicode__(),
                'url': None}]
         return bc
+
+
+class DojoMeta(models.Model):
+    name = models.CharField(max_length=120)
+    value = models.CharField(max_length=300)
+    product = models.ForeignKey('Product',
+                                on_delete=models.CASCADE,
+                                null=True,
+                                editable=False,
+                                related_name='product_meta')
+    endpoint = models.ForeignKey('Endpoint',
+                                 on_delete=models.CASCADE,
+                                 null=True,
+                                 editable=False,
+                                 related_name='endpoint_meta')
+
+    """
+    Verify that this metadata entry belongs only to one object.
+    """
+    def clean(self):
+        if self.product_id is None and self.endpoint_id is None:
+            raise ValidationError('Metadata entries need either a product or an endpoint')
+        if self.product_id is not None and self.endpoint_id is not None:
+            raise ValidationError('Metadata entries may not have both a product and an endpoint')
+
+    def __unicode__(self):
+        return "%s: %s" % (self.name, self.value)
+
+    class Meta:
+        unique_together = (('product', 'name'),
+                           ('endpoint', 'name'))
 
 
 class Product(models.Model):
@@ -418,7 +454,7 @@ class Product(models.Model):
         (NONE_CRITICALITY, _('None')),
     )
 
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=4000)
 
     '''
@@ -435,15 +471,15 @@ class Product(models.Model):
     manager = models.CharField(default=0, max_length=200, null=True, blank=True)  # unused
 
     product_manager = models.ForeignKey(Dojo_User, null=True, blank=True,
-                                        related_name='product_manager')
+                                        related_name='product_manager', on_delete=models.CASCADE)
     technical_contact = models.ForeignKey(Dojo_User, null=True, blank=True,
-                                          related_name='technical_contact')
+                                          related_name='technical_contact', on_delete=models.CASCADE)
     team_manager = models.ForeignKey(Dojo_User, null=True, blank=True,
-                                     related_name='team_manager')
+                                     related_name='team_manager', on_delete=models.CASCADE)
 
     created = models.DateTimeField(editable=False, null=True, blank=True)
     prod_type = models.ForeignKey(Product_Type, related_name='prod_type',
-                                  null=True, blank=True)
+                                  null=True, blank=True, on_delete=models.CASCADE)
     updated = models.DateTimeField(editable=False, null=True, blank=True)
     tid = models.IntegerField(default=0, editable=False)
     authorized_users = models.ManyToManyField(User, blank=True)
@@ -568,9 +604,9 @@ class Product(models.Model):
 
 
 class ScanSettings(models.Model):
-    product = models.ForeignKey(Product, default=1, editable=False)
+    product = models.ForeignKey(Product, default=1, editable=False, on_delete=models.CASCADE)
     addresses = models.TextField(default="none")
-    user = models.ForeignKey(User, editable=False)
+    user = models.ForeignKey(User, editable=False, on_delete=models.CASCADE)
     date = models.DateTimeField(editable=False, blank=True,
                                 default=get_current_datetime)
     frequency = models.CharField(max_length=10000, null=True,
@@ -598,7 +634,7 @@ removed ip_scans field
 
 
 class Scan(models.Model):
-    scan_settings = models.ForeignKey(ScanSettings, default=1, editable=False)
+    scan_settings = models.ForeignKey(ScanSettings, default=1, editable=False, on_delete=models.CASCADE)
     date = models.DateTimeField(editable=False, blank=True,
                                 default=get_current_datetime)
     protocol = models.CharField(max_length=10, default='TCP')
@@ -627,7 +663,7 @@ Added scan_id
 class IPScan(models.Model):
     address = models.TextField(editable=False, default="none")
     services = models.CharField(max_length=800, null=True)
-    scan = models.ForeignKey(Scan, default=1, editable=False)
+    scan = models.ForeignKey(Scan, default=1, editable=False, on_delete=models.CASCADE)
 
 
 class Tool_Type(models.Model):
@@ -645,7 +681,7 @@ class Tool_Configuration(models.Model):
     name = models.CharField(max_length=200, null=False)
     description = models.CharField(max_length=2000, null=True, blank=True)
     url = models.CharField(max_length=2000, null=True)
-    tool_type = models.ForeignKey(Tool_Type, related_name='tool_type')
+    tool_type = models.ForeignKey(Tool_Type, related_name='tool_type', on_delete=models.CASCADE)
     authentication_type = models.CharField(max_length=15,
                                            choices=(
                                                ('API', 'API Key'),
@@ -681,7 +717,7 @@ class Engagement_Presets(models.Model):
     network_locations = models.ManyToManyField(Network_Locations, default=None, blank=True)
     notes = models.CharField(max_length=2000, help_text="Description of what needs to be tested or setting up environment for testing", null=True, blank=True)
     scope = models.CharField(max_length=800, help_text="Scope of Engagement testing, IP's/Resources/URL's)", default=None, blank=True)
-    product = models.ForeignKey(Product)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True, null=False)
 
     def __unicode__(self):
@@ -702,16 +738,16 @@ class Engagement(models.Model):
     name = models.CharField(max_length=300, null=True, blank=True)
     description = models.CharField(max_length=2000, null=True, blank=True)
     version = models.CharField(max_length=100, null=True, blank=True, help_text="Version of the product the engagement tested.")
-    eng_type = models.ForeignKey(Engagement_Type, null=True, blank=True)
+    eng_type = models.ForeignKey(Engagement_Type, null=True, blank=True, on_delete=models.CASCADE)
     first_contacted = models.DateField(null=True, blank=True)
     target_start = models.DateField(null=False, blank=False)
     target_end = models.DateField(null=False, blank=False)
-    lead = models.ForeignKey(User, editable=True, null=True)
-    requester = models.ForeignKey(Contact, null=True, blank=True)
-    preset = models.ForeignKey(Engagement_Presets, null=True, blank=True, help_text="Settings and notes for performing this engagement.")
+    lead = models.ForeignKey(User, editable=True, null=True, on_delete=models.CASCADE)
+    requester = models.ForeignKey(Contact, null=True, blank=True, on_delete=models.CASCADE)
+    preset = models.ForeignKey(Engagement_Presets, null=True, blank=True, help_text="Settings and notes for performing this engagement.", on_delete=models.CASCADE)
     reason = models.CharField(max_length=2000, null=True, blank=True)
-    report_type = models.ForeignKey(Report_Type, null=True, blank=True)
-    product = models.ForeignKey(Product)
+    report_type = models.ForeignKey(Report_Type, null=True, blank=True, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
     updated = models.DateTimeField(auto_now=True, null=True)
     created = models.DateTimeField(auto_now_add=True, null=True)
     active = models.BooleanField(default=True, editable=False)
@@ -751,10 +787,11 @@ class Engagement(models.Model):
                                    null=True, blank=True, help_text="Commit hash from repo", verbose_name="Commit Hash")
     branch_tag = models.CharField(editable=True, max_length=150,
                                    null=True, blank=True, help_text="Tag or branch of the product the engagement tested.", verbose_name="Branch/Tag")
-    build_server = models.ForeignKey(Tool_Configuration, verbose_name="Build Server", help_text="Build server responsible for CI/CD test", null=True, blank=True, related_name='build_server')
-    source_code_management_server = models.ForeignKey(Tool_Configuration, null=True, blank=True, verbose_name="SCM Server", help_text="Source code server for CI/CD test", related_name='source_code_management_server')
+    build_server = models.ForeignKey(Tool_Configuration, verbose_name="Build Server", help_text="Build server responsible for CI/CD test", null=True, blank=True, related_name='build_server', on_delete=models.CASCADE)
+    source_code_management_server = models.ForeignKey(Tool_Configuration, null=True, blank=True, verbose_name="SCM Server", help_text="Source code server for CI/CD test", related_name='source_code_management_server', on_delete=models.CASCADE)
     source_code_management_uri = models.CharField(max_length=600, null=True, blank=True, verbose_name="Repo", help_text="Resource link to source code")
-    orchestration_engine = models.ForeignKey(Tool_Configuration, verbose_name="Orchestration Engine", help_text="Orchestration service responsible for CI/CD test", null=True, blank=True, related_name='orchestration')
+    orchestration_engine = models.ForeignKey(Tool_Configuration, verbose_name="Orchestration Engine", help_text="Orchestration service responsible for CI/CD test", null=True, blank=True, related_name='orchestration', on_delete=models.CASCADE)
+    deduplication_on_engagement = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['-target_start']
@@ -797,13 +834,13 @@ class Endpoint(models.Model):
     path = models.CharField(null=True, blank=True, max_length=500,
                             help_text="The location of the resource, it should start with a '/'. For example"
                                       "/endpoint/420/edit")
-    query = models.CharField(null=True, blank=True, max_length=5000,
+    query = models.CharField(null=True, blank=True, max_length=1000,
                              help_text="The query string, the question mark should be omitted."
                                        "For example 'group=4&team=8'")
     fragment = models.CharField(null=True, blank=True, max_length=500,
                                 help_text="The fragment identifier which follows the hash mark. The hash mark should "
                                           "be omitted. For example 'section-13', 'paragraph-2'.")
-    product = models.ForeignKey(Product, null=True, blank=True, )
+    product = models.ForeignKey(Product, null=True, blank=True, on_delete=models.CASCADE)
     endpoint_params = models.ManyToManyField(Endpoint_Params, blank=True,
                                              editable=False)
 
@@ -811,7 +848,7 @@ class Endpoint(models.Model):
         ordering = ['product', 'protocol', 'host', 'path', 'query', 'fragment']
 
     def __unicode__(self):
-        from urlparse import uses_netloc
+        from urllib.parse import uses_netloc
 
         netloc = self.host
         port = self.port
@@ -903,7 +940,7 @@ class Notes(models.Model):
     entry = models.TextField()
     date = models.DateTimeField(null=False, editable=False,
                                 default=get_current_datetime)
-    author = models.ForeignKey(User, editable=False)
+    author = models.ForeignKey(User, editable=False, on_delete=models.CASCADE)
 
     class Meta:
         ordering = ['-date']
@@ -924,9 +961,10 @@ class Development_Environment(models.Model):
 
 
 class Test(models.Model):
-    engagement = models.ForeignKey(Engagement, editable=False)
-    lead = models.ForeignKey(User, editable=True, null=True)
-    test_type = models.ForeignKey(Test_Type)
+    engagement = models.ForeignKey(Engagement, editable=False, on_delete=models.CASCADE)
+    lead = models.ForeignKey(User, editable=True, null=True, on_delete=models.CASCADE)
+    test_type = models.ForeignKey(Test_Type, on_delete=models.CASCADE)
+    description = models.TextField(null=True, blank=True)
     target_start = models.DateTimeField()
     target_end = models.DateTimeField()
     estimated_time = models.TimeField(null=True, blank=True, editable=False)
@@ -936,10 +974,13 @@ class Test(models.Model):
     notes = models.ManyToManyField(Notes, blank=True,
                                    editable=False)
     environment = models.ForeignKey(Development_Environment, null=True,
-                                    blank=False)
+                                    blank=False, on_delete=models.CASCADE)
 
     updated = models.DateTimeField(auto_now=True, null=True)
     created = models.DateTimeField(auto_now_add=True, null=True)
+
+    def test_type_name(self):
+        return self.test_type.name
 
     def __unicode__(self):
         return "%s (%s)" % (self.test_type,
@@ -957,8 +998,8 @@ class Test(models.Model):
 
 class VA(models.Model):
     address = models.TextField(editable=False, default="none")
-    user = models.ForeignKey(User, editable=False)
-    result = models.ForeignKey(Test, editable=False, null=True, blank=True)
+    user = models.ForeignKey(User, editable=False, on_delete=models.CASCADE)
+    result = models.ForeignKey(Test, editable=False, null=True, blank=True, on_delete=models.CASCADE)
     status = models.BooleanField(default=False, editable=False)
     start = models.CharField(max_length=100)
 
@@ -980,7 +1021,7 @@ class Finding(models.Model):
     unsaved_response = None
     unsaved_tags = None
     references = models.TextField(null=True, blank=True, db_column="refs")
-    test = models.ForeignKey(Test, editable=False)
+    test = models.ForeignKey(Test, editable=False, on_delete=models.CASCADE)
     # TODO: Will be deprecated soon
     is_template = models.BooleanField(default=False)
     active = models.BooleanField(default=True)
@@ -989,30 +1030,30 @@ class Finding(models.Model):
     duplicate = models.BooleanField(default=False)
     duplicate_finding = models.ForeignKey('self', editable=False, null=True,
                                           related_name='original_finding',
-                                          blank=True)
+                                          blank=True, on_delete=models.CASCADE)
     duplicate_list = models.ManyToManyField("self", editable=False, blank=True)
     out_of_scope = models.BooleanField(default=False)
     under_review = models.BooleanField(default=False)
     review_requested_by = models.ForeignKey(Dojo_User, null=True, blank=True,
-                                            related_name='review_requested_by')
+                                            related_name='review_requested_by', on_delete=models.CASCADE)
     reviewers = models.ManyToManyField(User, blank=True)
 
     # Defect Tracking Review
     under_defect_review = models.BooleanField(default=False)
     defect_review_requested_by = models.ForeignKey(Dojo_User, null=True, blank=True,
-                                                   related_name='defect_review_requested_by')
+                                                   related_name='defect_review_requested_by', on_delete=models.CASCADE)
 
     thread_id = models.IntegerField(default=0, editable=False)
     mitigated = models.DateTimeField(editable=False, null=True, blank=True)
     mitigated_by = models.ForeignKey(User, null=True, editable=False,
-                                     related_name="mitigated_by")
-    reporter = models.ForeignKey(User, editable=False, related_name='reporter')
+                                     related_name="mitigated_by", on_delete=models.CASCADE)
+    reporter = models.ForeignKey(User, editable=False, related_name='reporter', on_delete=models.CASCADE)
     notes = models.ManyToManyField(Notes, blank=True,
                                    editable=False)
     numerical_severity = models.CharField(max_length=4)
     last_reviewed = models.DateTimeField(null=True, editable=False)
     last_reviewed_by = models.ForeignKey(User, null=True, editable=False,
-                                         related_name='last_reviewed_by')
+                                         related_name='last_reviewed_by', on_delete=models.CASCADE)
     images = models.ManyToManyField('FindingImage', blank=True)
 
     line_number = models.CharField(null=True, blank=True, max_length=200,
@@ -1021,7 +1062,7 @@ class Finding(models.Model):
     sourcefile = models.TextField(null=True, blank=True, editable=False)
     param = models.TextField(null=True, blank=True, editable=False)
     payload = models.TextField(null=True, blank=True, editable=False)
-    hash_code = models.TextField(null=True, blank=True, editable=False)
+    hash_code = models.TextField(null=True, blank=True, editable=True)
 
     line = models.IntegerField(null=True, blank=True,
                                verbose_name="Line number")
@@ -1038,15 +1079,15 @@ class Finding(models.Model):
     class Meta:
         ordering = ('numerical_severity', '-date', 'title')
 
-    def get_hash_code(self):
+    def compute_hash_code(self):
         hash_string = self.title + str(self.cwe) + str(self.line) + str(self.file_path)
-
         if self.dynamic_finding:
-            endpoint_str = ""
+            endpoint_str = ''
             for e in self.endpoints.all():
                 endpoint_str += str(e)
-            hash_string = endpoint_str
-        hash_string = hash_string.decode('utf-8').strip()
+            if endpoint_str:
+                hash_string = hash_string + endpoint_str
+        hash_string = hash_string.strip()
         return hashlib.sha256(hash_string.encode('utf-8')).hexdigest()
 
     def duplicate_finding_set(self):
@@ -1118,14 +1159,13 @@ class Finding(models.Model):
 
         return ", ".join([str(s) for s in status])
 
+    @property
     def age(self):
         if self.mitigated:
-            days = (self.mitigated.date() - datetime.combine(self.date,
-                                                             datetime.min.time()).date()).days
+            diff = self.mitigated.date() - self.date
         else:
-            days = (get_current_date() - datetime.combine(self.date,
-                                                          datetime.min.time()).date()).days
-
+            diff = get_current_date() - self.date
+        days = diff.days
         return days if days > 0 else 0
 
     def sla(self):
@@ -1134,9 +1174,9 @@ class Finding(models.Model):
         from dojo.utils import get_system_setting
         sla_age = get_system_setting('sla_' + self.severity.lower())
         if sla_age and self.active:
-            sla_calculation = sla_age - self.age()
+            sla_calculation = sla_age - self.age
         elif sla_age and self.mitigated:
-            age = self.age()
+            age = self.age
             if age < sla_age:
                 sla_calculation = 0
             else:
@@ -1173,32 +1213,41 @@ class Finding(models.Model):
         long_desc += '*References*:' + self.references
         return long_desc
 
-    def save(self, dedupe_option=True, rules_option=True, *args, **kwargs):
+    def save(self, dedupe_option=True, false_history=False, rules_option=True, *args, **kwargs):
         # Make changes to the finding before it's saved to add a CWE template
-        if not self.pk:
+        new_finding = False
+        if self.pk is None:
+            false_history = True
             from dojo.utils import apply_cwe_to_template
             self = apply_cwe_to_template(self)
-        super(Finding, self).save(*args, **kwargs)
-        self.hash_code = self.get_hash_code()
+            super(Finding, self).save(*args, **kwargs)
+            # Only compute hash code for new findings.
+            self.hash_code = self.compute_hash_code()
+        else:
+            super(Finding, self).save(*args, **kwargs)
         self.found_by.add(self.test.test_type)
         if self.test.test_type.static_tool:
             self.static_finding = True
         else:
-            self.dyanmic_finding = True
+            self.dynamic_finding = True
         if rules_option:
             from dojo.tasks import async_rules
             from dojo.utils import sync_rules
-            if self.reporter.usercontactinfo.block_execution:
-                sync_rules(self, *args, **kwargs)
-            else:
+            try:
+                if self.reporter.usercontactinfo.block_execution:
+                    sync_rules(self, *args, **kwargs)
+                else:
+                    async_rules(self, *args, **kwargs)
+            except UserContactInfo.DoesNotExist:
                 async_rules(self, *args, **kwargs)
+                pass
         from dojo.utils import calculate_grade
         calculate_grade(self.test.engagement.product)
         # Assign the numerical severity for correct sorting order
         self.numerical_severity = Finding.get_numerical_severity(self.severity)
         super(Finding, self).save()
+        system_settings = System_Settings.objects.get()
         if (dedupe_option):
-            system_settings = System_Settings.objects.get()
             if system_settings.enable_deduplication:
                 from dojo.tasks import async_dedupe
                 from dojo.utils import sync_dedupe
@@ -1210,8 +1259,7 @@ class Finding(models.Model):
                 except:
                     async_dedupe.delay(self, *args, **kwargs)
                     pass
-
-            if system_settings.false_positive_history:
+        if system_settings.false_positive_history and false_history:
                 from dojo.tasks import async_false_history
                 from dojo.utils import sync_false_history
                 try:
@@ -1294,8 +1342,8 @@ class Stub_Finding(models.Model):
     date = models.DateField(default=get_current_date, blank=False, null=False)
     severity = models.CharField(max_length=200, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
-    test = models.ForeignKey(Test, editable=False)
-    reporter = models.ForeignKey(User, editable=False)
+    test = models.ForeignKey(Test, editable=False, on_delete=models.CASCADE)
+    reporter = models.ForeignKey(User, editable=False, on_delete=models.CASCADE)
 
     class Meta:
         ordering = ('-date', 'title')
@@ -1371,7 +1419,7 @@ class Check_List(models.Model):
     other_issues = models.ManyToManyField(Finding, related_name='other_issues',
                                           blank=True)
     engagement = models.ForeignKey(Engagement, editable=False,
-                                   related_name='eng_for_check')
+                                   related_name='eng_for_check', on_delete=models.CASCADE)
 
     @staticmethod
     def get_status(pass_fail):
@@ -1391,15 +1439,15 @@ class Check_List(models.Model):
 
 
 class BurpRawRequestResponse(models.Model):
-    finding = models.ForeignKey(Finding, blank=True, null=True)
+    finding = models.ForeignKey(Finding, blank=True, null=True, on_delete=models.CASCADE)
     burpRequestBase64 = models.BinaryField()
     burpResponseBase64 = models.BinaryField()
 
     def get_request(self):
-        return unicode(base64.b64decode(self.burpRequestBase64), errors='ignore')
+        return str(base64.b64decode(self.burpRequestBase64), errors='ignore')
 
     def get_response(self):
-        res = unicode(base64.b64decode(self.burpResponseBase64), errors='ignore')
+        res = str(base64.b64decode(self.burpResponseBase64), errors='ignore')
         # Removes all blank lines
         res = re.sub(r'\n\s*\n', '\n', res)
         return res
@@ -1412,7 +1460,7 @@ class Risk_Acceptance(models.Model):
     accepted_findings = models.ManyToManyField(Finding)
     expiration_date = models.DateTimeField(default=None, null=True, blank=True)
     accepted_by = models.CharField(max_length=200, default=None, null=True, blank=True, verbose_name='Accepted By', help_text="The entity or person that accepts the risk.")
-    reporter = models.ForeignKey(User, editable=False)
+    reporter = models.ForeignKey(User, editable=False, on_delete=models.CASCADE)
     notes = models.ManyToManyField(Notes, editable=False)
     compensating_control = models.TextField(default=None, blank=True, null=True, help_text="If a compensating control exists to mitigate the finding or reduce risk, then list the compensating control(s).")
     created = models.DateTimeField(null=False, editable=False, default=now)
@@ -1438,7 +1486,7 @@ class Report(models.Model):
     name = models.CharField(max_length=200)
     type = models.CharField(max_length=100, default='Finding')
     format = models.CharField(max_length=15, default='AsciiDoc')
-    requester = models.ForeignKey(User)
+    requester = models.ForeignKey(User, on_delete=models.CASCADE)
     task_id = models.CharField(max_length=50)
     file = models.FileField(upload_to='reports/%Y/%m/%d',
                             verbose_name='Report File', null=True)
@@ -1477,15 +1525,15 @@ class FindingImage(models.Model):
                                  options={'quality': 100})
 
     def __unicode__(self):
-        return self.image.name or u'No Image'
+        return self.image.name or 'No Image'
 
 
 class FindingImageAccessToken(models.Model):
     """This will allow reports to request the images without exposing the
     media root to the world without
     authentication"""
-    user = models.ForeignKey(User, null=False, blank=False)
-    image = models.ForeignKey(FindingImage, null=False, blank=False)
+    user = models.ForeignKey(User, null=False, blank=False, on_delete=models.CASCADE)
+    image = models.ForeignKey(FindingImage, null=False, blank=False, on_delete=models.CASCADE)
     token = models.CharField(max_length=255)
     size = models.CharField(max_length=9,
                             choices=(
@@ -1543,10 +1591,10 @@ class JIRA_Conf(models.Model):
 
 
 class JIRA_Issue(models.Model):
-    jira_id = models.CharField(max_length=200)
+    jira_id = models.CharField(max_length=200, unique=True)
     jira_key = models.CharField(max_length=200)
-    finding = models.OneToOneField(Finding, null=True, blank=True)
-    engagement = models.OneToOneField(Engagement, null=True, blank=True)
+    finding = models.OneToOneField(Finding, null=True, blank=True, on_delete=models.CASCADE)
+    engagement = models.OneToOneField(Engagement, null=True, blank=True, on_delete=models.CASCADE)
 
     def __unicode__(self):
         text = ""
@@ -1571,14 +1619,17 @@ class JIRA_Details_Cache(models.Model):
 
 class JIRA_PKey(models.Model):
     project_key = models.CharField(max_length=200, blank=True)
-    product = models.ForeignKey(Product)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
     conf = models.ForeignKey(JIRA_Conf, verbose_name="JIRA Configuration",
-                             null=True, blank=True)
+                             null=True, blank=True, on_delete=models.CASCADE)
     component = models.CharField(max_length=200, blank=True)
     push_all_issues = models.BooleanField(default=False, blank=True)
     enable_engagement_epic_mapping = models.BooleanField(default=False,
                                                          blank=True)
     push_notes = models.BooleanField(default=False, blank=True)
+
+    def __unicode__(self):
+        return self.product.name + " | " + self.project_key
 
 
 NOTIFICATION_CHOICES = (
@@ -1600,16 +1651,16 @@ class Notifications(models.Model):
     code_review = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     review_requested = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     other = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
-    user = models.ForeignKey(User, default=None, null=True, editable=False)
+    user = models.ForeignKey(User, default=None, null=True, editable=False, on_delete=models.CASCADE)
 
 
 class Tool_Product_Settings(models.Model):
     name = models.CharField(max_length=200, null=False)
     description = models.CharField(max_length=2000, null=True, blank=True)
     url = models.CharField(max_length=2000, null=True, blank=True)
-    product = models.ForeignKey(Product, default=1, editable=False)
+    product = models.ForeignKey(Product, default=1, editable=False, on_delete=models.CASCADE)
     tool_configuration = models.ForeignKey(Tool_Configuration, null=False,
-                                           related_name='tool_configuration')
+                                           related_name='tool_configuration', on_delete=models.CASCADE)
     tool_project_id = models.CharField(max_length=200, null=True, blank=True)
     notes = models.ManyToManyField(Notes, blank=True, editable=False)
 
@@ -1618,7 +1669,7 @@ class Tool_Product_Settings(models.Model):
 
 
 class Tool_Product_History(models.Model):
-    product = models.ForeignKey(Tool_Product_Settings, editable=False)
+    product = models.ForeignKey(Tool_Product_Settings, editable=False, on_delete=models.CASCADE)
     last_scan = models.DateTimeField(null=False, editable=False, default=now)
     succesfull = models.BooleanField(default=True, verbose_name="Succesfully")
     configuration_details = models.CharField(max_length=2000, null=True,
@@ -1631,7 +1682,7 @@ class Alerts(models.Model):
     url = models.URLField(max_length=2000, null=True)
     source = models.CharField(max_length=100, default='Generic')
     icon = models.CharField(max_length=25, default='icon-user-check')
-    user_id = models.ForeignKey(User, null=True, editable=False)
+    user_id = models.ForeignKey(User, null=True, editable=False, on_delete=models.CASCADE)
     created = models.DateTimeField(null=False, editable=False, default=now)
 
     class Meta:
@@ -1655,7 +1706,7 @@ class Cred_User(models.Model):
                                            null=True, blank=True)
     description = models.CharField(max_length=2000, null=True, blank=True)
     url = models.URLField(max_length=2000, null=False)
-    environment = models.ForeignKey(Development_Environment, null=False)
+    environment = models.ForeignKey(Development_Environment, null=False, on_delete=models.CASCADE)
     login_regex = models.CharField(max_length=200, null=True, blank=True)
     logout_regex = models.CharField(max_length=200, null=True, blank=True)
     notes = models.ManyToManyField(Notes, blank=True, editable=False)
@@ -1675,14 +1726,14 @@ class Cred_User(models.Model):
 class Cred_Mapping(models.Model):
     cred_id = models.ForeignKey(Cred_User, null=False,
                                 related_name="cred_user",
-                                verbose_name="Credential")
+                                verbose_name="Credential", on_delete=models.CASCADE)
     product = models.ForeignKey(Product, null=True, blank=True,
-                                related_name="product")
+                                related_name="product", on_delete=models.CASCADE)
     finding = models.ForeignKey(Finding, null=True, blank=True,
-                                related_name="finding")
+                                related_name="finding", on_delete=models.CASCADE)
     engagement = models.ForeignKey(Engagement, null=True, blank=True,
-                                   related_name="engagement")
-    test = models.ForeignKey(Test, null=True, blank=True, related_name="test")
+                                   related_name="engagement", on_delete=models.CASCADE)
+    test = models.ForeignKey(Test, null=True, blank=True, related_name="test", on_delete=models.CASCADE)
     is_authn_provider = models.BooleanField(default=False,
                                             verbose_name="Authentication Provider")
     url = models.URLField(max_length=2000, null=True, blank=True)
@@ -1700,9 +1751,9 @@ class Language_Type(models.Model):
 
 
 class Languages(models.Model):
-    language = models.ForeignKey(Language_Type)
-    product = models.ForeignKey(Product)
-    user = models.ForeignKey(User, editable=True, blank=True, null=True)
+    language = models.ForeignKey(Language_Type, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, editable=True, blank=True, null=True, on_delete=models.CASCADE)
     files = models.IntegerField(blank=True, null=True, verbose_name='Number of files')
     blank = models.IntegerField(blank=True, null=True, verbose_name='Number of blank lines')
     comment = models.IntegerField(blank=True, null=True, verbose_name='Number of comment lines')
@@ -1717,9 +1768,9 @@ class Languages(models.Model):
 
 
 class App_Analysis(models.Model):
-    product = models.ForeignKey(Product)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
     name = models.CharField(max_length=200, null=False)
-    user = models.ForeignKey(User, editable=True)
+    user = models.ForeignKey(User, editable=True, on_delete=models.CASCADE)
     confidence = models.IntegerField(blank=True, null=True, verbose_name='Confidence level')
     version = models.CharField(max_length=200, null=True, blank=True, verbose_name='Version Number')
     icon = models.CharField(max_length=200, null=True, blank=True)
@@ -1740,7 +1791,7 @@ class Objects_Review(models.Model):
 
 
 class Objects(models.Model):
-    product = models.ForeignKey(Product)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
     name = models.CharField(max_length=100, null=True, blank=True)
     path = models.CharField(max_length=600, verbose_name='Full file path',
                             null=True, blank=True)
@@ -1748,7 +1799,7 @@ class Objects(models.Model):
                               null=True, blank=True)
     artifact = models.CharField(max_length=400, verbose_name='Artifact',
                                 null=True, blank=True)
-    review_status = models.ForeignKey(Objects_Review)
+    review_status = models.ForeignKey(Objects_Review, on_delete=models.CASCADE)
     created = models.DateTimeField(null=False, editable=False, default=now)
 
     def __unicode__(self):
@@ -1764,8 +1815,8 @@ class Objects(models.Model):
 
 
 class Objects_Engagement(models.Model):
-    engagement = models.ForeignKey(Engagement)
-    object_id = models.ForeignKey(Objects)
+    engagement = models.ForeignKey(Engagement, on_delete=models.CASCADE)
+    object_id = models.ForeignKey(Objects, on_delete=models.CASCADE)
     build_id = models.CharField(max_length=150, null=True)
     created = models.DateTimeField(null=False, editable=False, default=now)
     full_url = models.URLField(max_length=400, null=True, blank=True)
@@ -1797,7 +1848,7 @@ class Testing_Guide_Category(models.Model):
 
 
 class Testing_Guide(models.Model):
-    testing_guide_category = models.ForeignKey(Testing_Guide_Category)
+    testing_guide_category = models.ForeignKey(Testing_Guide_Category, on_delete=models.CASCADE)
     identifier = models.CharField(max_length=20, blank=True, null=True, help_text="Test Unique Identifier")
     name = models.CharField(max_length=400, help_text="Name of the test")
     summary = models.CharField(max_length=800, help_text="Summary of the test")
@@ -1829,7 +1880,7 @@ class Benchmark_Type(models.Model):
 
 
 class Benchmark_Category(models.Model):
-    type = models.ForeignKey(Benchmark_Type, verbose_name='Benchmark Type')
+    type = models.ForeignKey(Benchmark_Type, verbose_name='Benchmark Type', on_delete=models.CASCADE)
     name = models.CharField(max_length=300)
     objective = models.TextField()
     references = models.TextField(blank=True, null=True)
@@ -1845,7 +1896,7 @@ class Benchmark_Category(models.Model):
 
 
 class Benchmark_Requirement(models.Model):
-    category = models.ForeignKey(Benchmark_Category)
+    category = models.ForeignKey(Benchmark_Category, on_delete=models.CASCADE)
     objective_number = models.CharField(max_length=15, null=True)
     objective = models.TextField()
     references = models.TextField(blank=True, null=True)
@@ -1863,8 +1914,8 @@ class Benchmark_Requirement(models.Model):
 
 
 class Benchmark_Product(models.Model):
-    product = models.ForeignKey(Product)
-    control = models.ForeignKey(Benchmark_Requirement)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    control = models.ForeignKey(Benchmark_Requirement, on_delete=models.CASCADE)
     pass_fail = models.BooleanField(default=False, verbose_name='Pass',
                                     help_text='Does the product meet the requirement?')
     enabled = models.BooleanField(default=True,
@@ -1881,8 +1932,8 @@ class Benchmark_Product(models.Model):
 
 
 class Benchmark_Product_Summary(models.Model):
-    product = models.ForeignKey(Product)
-    benchmark_type = models.ForeignKey(Benchmark_Type)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    benchmark_type = models.ForeignKey(Benchmark_Type, on_delete=models.CASCADE)
     asvs_level = (('Level 1', 'Level 1'),
                     ('Level 2', 'Level 2'),
                     ('Level 3', 'Level 3'))
@@ -1951,7 +2002,7 @@ class Rule(models.Model):
     # and_rules = models.ManyToManyField('self')
     applied_field = models.CharField(max_length=200, choices=(all_options))
     child_rules = models.ManyToManyField('self', editable=False)
-    parent_rule = models.ForeignKey('self', editable=False, null=True)
+    parent_rule = models.ForeignKey('self', editable=False, null=True, on_delete=models.CASCADE)
 
 
 class Child_Rule(models.Model):
@@ -1969,7 +2020,7 @@ class Child_Rule(models.Model):
     match_text = models.TextField()
     # TODO: Add or ?
     # and_rules = models.ManyToManyField('self')
-    parent_rule = models.ForeignKey(Rule, editable=False, null=True)
+    parent_rule = models.ForeignKey(Rule, editable=False, null=True, on_delete=models.CASCADE)
 
 
 class FieldRule(models.Model):

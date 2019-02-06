@@ -28,15 +28,15 @@ class Command(BaseCommand):
             issue = jira.issue(j_issue.jira_id)
 
             # Issue Cloned
-            print issue.fields.issuelinks[0]
+            print((issue.fields.issuelinks[0]))
 
-            print "Jira Issue: " + str(issue)
-            print "Resolution: " + str(issue.fields.resolution)
+            print(("Jira Issue: " + str(issue)))
+            print(("Resolution: " + str(issue.fields.resolution)))
 
             if issue.fields.resolution is not None \
                     and finding.under_defect_review == False:
                 # print issue.fields.__dict__
-                print "Jira Issue: " + str(issue) + " changed status"
+                print(("Jira Issue: " + str(issue) + " changed status"))
 
                 # Create Jira Note
                 now = timezone.now()
@@ -57,4 +57,4 @@ class Command(BaseCommand):
                                  finding)
                 finding.save()
             else:
-                print "No update necessary"
+                print("No update necessary")

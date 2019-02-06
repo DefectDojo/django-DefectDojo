@@ -7,7 +7,7 @@ See the file 'doc/LICENSE' for the license information
 from __future__ import with_statement
 
 import re
-# from defusedxml import ElementTree as ET
+# from defusedxml import ElementTree as etree
 from lxml import etree
 import html2text
 import string
@@ -59,14 +59,14 @@ class BurpXmlParser(object):
 
         tree = None
         try:
-            tree = etree.parse(xml_file)
-        except Exception, e:
+            tree = etree.parse(xml_file, etree.XMLParser(resolve_entities=False))
+        except Exception as e:
             # Solution to remove unicode characters in xml, tried several
             xml_file.seek(0)
             data = xml_file.read()
             printable = set(string.printable)
-            data = filter(lambda x: x in printable, data)
-            tree = etree.fromstring(data, etree.XMLParser(encoding='ISO-8859-1', ns_clean=True, recover=True))
+            data = [x for x in data if x in printable]
+            tree = etree.fromstring(data, etree.XMLParser(encoding='ISO-8859-1', ns_clean=True, recover=True, resolve_entities=False))
 
         return tree
 
@@ -81,11 +81,8 @@ class BurpXmlParser(object):
             item = get_item(node, test)
             dupe_key = str(item.url) + item.severity + item.title
             if dupe_key in items:
-                items[
-                    dupe_key].unsaved_endpoints = items[dupe_key].unsaved_endpoints + item.unsaved_endpoints
-                items[
-                    dupe_key].unsaved_req_resp = items[dupe_key].unsaved_req_resp + item.unsaved_req_resp
-
+                items[dupe_key].unsaved_endpoints = items[dupe_key].unsaved_endpoints + item.unsaved_endpoints
+                items[dupe_key].unsaved_req_resp = items[dupe_key].unsaved_req_resp + item.unsaved_req_resp
                 # make sure only unique endpoints are retained
                 unique_objs = []
                 new_list = []
@@ -98,12 +95,15 @@ class BurpXmlParser(object):
                 items[dupe_key].unsaved_endpoints = new_list
 
                 # Description details of the finding are added
-                items[
-                    dupe_key].description = item.description + items[dupe_key].description
+                items[dupe_key].description = item.description + items[dupe_key].description
+
+                # Parameters of the finding are added
+                if items[dupe_key].param and items[dupe_key].param:
+                    items[dupe_key].param = item.param + ", " + items[dupe_key].param
             else:
                 items[dupe_key] = item
 
-        return items.values()
+        return list(items.values())
 
 
 def get_attrib_from_subnode(xml_node, subnode_xpath_expr, attrib_name):
@@ -117,7 +117,7 @@ def get_attrib_from_subnode(xml_node, subnode_xpath_expr, attrib_name):
 
     if ETREE_VERSION[0] <= 1 and ETREE_VERSION[1] < 3:
 
-        match_obj = re.search("([^\@]+?)\[\@([^=]*?)=\'([^\']*?)\'",
+        match_obj = re.search(r"([^\@]+?)\[\@([^=]*?)=\'([^\']*?)\'",
                               subnode_xpath_expr)
         if match_obj is not None:
             node_to_find = match_obj.group(1)
@@ -149,6 +149,7 @@ def do_clean(value):
 
 
 def get_item(item_node, test):
+    endpoints = []
     host_node = item_node.findall('host')[0]
 
     url_host = host_node.text
@@ -170,15 +171,15 @@ def get_item(item_node, test):
     url = item_node.get('url')
     path = item_node.findall('path')[0].text
     location = item_node.findall('location')[0].text
-
-    request = item_node.findall('./requestresponse/request')[0].text if len(
-        item_node.findall('./requestresponse/request')) > 0 else None
-    response = item_node.findall('./requestresponse/response')[0].text if len(
-        item_node.findall('./requestresponse/response')) > 0 else None
+    rparameter = re.search(r"(?<=\[)(.*)(\])", location)
+    parameter = None
+    if rparameter:
+        parameter = rparameter.group(1)
 
     unsaved_req_resp = list()
-
-    if request is not None and response is not None:
+    for request_response in item_node.findall('./requestresponse'):
+        request = request_response.findall('request')[0].text
+        response = request_response.findall('response')[0].text
         unsaved_req_resp.append({"req": request, "resp": response})
 
     try:
@@ -223,6 +224,9 @@ def get_item(item_node, test):
         else:
             endpoints = [endpoint, dupe_endpoint]
 
+    if len(endpoints) is 0:
+        endpoints = [endpoint]
+
     text_maker = html2text.HTML2Text()
     text_maker.body_width = 0
 
@@ -263,6 +267,7 @@ def get_item(item_node, test):
         url=url,
         test=test,
         severity=severity,
+        param=parameter,
         scanner_confidence=scanner_confidence,
         description="URL: " + url_host + path + "\n\n" + detail + "\n",
         mitigation=remediation,

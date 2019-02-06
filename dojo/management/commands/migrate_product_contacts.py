@@ -85,5 +85,5 @@ class Command(BaseCommand):
             if product_updated:
                 count += 1
 
-        print 'A total of %d products have been migrated.  A total of %d contacts were updated.  ' \
-              'A total of %d users were created' % (count, contact_count, user_created)
+        print(('A total of %d products have been migrated.  A total of %d contacts were updated.  ' \
+              'A total of %d users were created' % (count, contact_count, user_created)))
