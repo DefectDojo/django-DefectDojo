@@ -87,17 +87,19 @@ function createadmin() {
     echo
 
     #setup default admin dojo user
-    if [ -z "$DOJO_ADMIN_USER" ]; then
-        DOJO_ADMIN_USER='admin'
+    if [ -z "$DEFECT_DOJO_ADMIN_NAME" ]; then
+        DEFECT_DOJO_ADMIN_NAME='admin'
     fi
-    if [ -z "$DOJO_ADMIN_EMAIL" ]; then
-        DOJO_ADMIN_EMAIL='admin@localhost.local'
+    if [ -z "$DEFECT_DOJO_ADMIN_EMAIL" ]; then
+        DEFECT_DOJO_ADMIN_EMAIL='admin@localhost.local'
     fi
-    if [ -z "$DOJO_ADMIN_PASSWORD" ]; then
-        DOJO_ADMIN_PASSWORD=`LC_CTYPE=C tr -dc A-Za-z0-9_\!\@\#\$\%\^\&\*\(\)-+ < /dev/urandom | head -c 32 | xargs`
+    if [ -z "$DEFECT_DOJO_ADMIN_PASSWORD" ]; then
+        DEFECT_DOJO_ADMIN_PASSWORD="admin"
     fi
+    export DEFECT_DOJO_ADMIN_PASSWORD=$DEFECT_DOJO_ADMIN_PASSWORD
     #creating default admin user
-    echo "from django.contrib.auth.models import User; User.objects.create_superuser('$DOJO_ADMIN_USER', '$DOJO_ADMIN_EMAIL', '$DOJO_ADMIN_PASSWORD')" | ./manage.py shell
+    python manage.py createsuperuser --noinput --username="$DEFECT_DOJO_ADMIN_NAME" --email="$DEFECT_DOJO_ADMIN_EMAIL"
+    docker/setup-superuser.expect
 }
 
 function setupdb() {
@@ -169,6 +171,7 @@ function setupdojo() {
     then
         rm -r $DOJO_VENV_NAME
     fi
+    pip install virtualenv
     virtualenv $DOJO_VENV_NAME
     source $DOJO_VENV_NAME/bin/activate
 
@@ -178,20 +181,7 @@ function setupdojo() {
     echo "Pip install required components"
     echo "=============================================================================="
     echo
-    pip install .
-
-    echo "=============================================================================="
-    echo "Copying settings.py"
-    echo "=============================================================================="
-    echo
-    #Copying setting.py temporarily so that collect static will run correctly
-    cp dojo/settings/settings.dist.py dojo/settings/settings.py
-    sed -i'' "s#DOJO_STATIC_ROOT#$PWD/static/#g" dojo/settings/settings.py
-
-    echo "Setting dojo settings for SQLLITEDB."
-    SQLLITEDB="'NAME': os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'db.sqlite3')"
-    sed -i "s/django.db.backends.mysql/django.db.backends.sqlite3/g" dojo/settings/settings.py
-    sed -i "s/'NAME': 'MYSQLDB'/$SQLLITEDB/g" dojo/settings/settings.py
+    pip install . --ignore-installed Markdown
 
     echo "=============================================================================="
     echo "Installing yarn"
@@ -201,12 +191,6 @@ function setupdojo() {
 
     # Setup the DB
     setupdb
-
-    echo "=============================================================================="
-    echo "Removing temporary files"
-    echo "=============================================================================="
-    echo
-    rm dojo/settings/settings.dist.py
 
     echo "=============================================================================="
     echo "SUCCESS!"
@@ -228,40 +212,30 @@ function prompt_db_type() {
 # Ensures the mysql application DB is present
 function ensure_mysql_application_db() {
     # Allow script to be called non-interactively using:
-    # export AUTO_DOCKER=yes && /opt/django-DefectDojo/setup.bash
-    # Added BATCH_MODE condition and rewrite old negate logic.
-    if [ "$AUTO_DOCKER" == "yes" ] || [ "$BATCH_MODE" == "yes" ]; then
-        # Default values for a automated Docker install if not provided
+    if [ "$AUTO_DOCKER" == "yes" ]; then
         echo "Setting values for MySQL install"
-        if [ -z "$SQLHOST" ]; then
-            SQLHOST="localhost"
+        if [ -z "$DEFECT_DOJO_DEFAULT_DATABASE_HOST" ]; then
+            DEFECT_DOJO_DEFAULT_DATABASE_HOST="localhost"
         fi
-        if [ -z "$SQLPORT" ]; then
-            SQLPORT="3306"
+        if [ -z "$DEFECT_DOJO_DEFAULT_DATABASE_PORT" ]; then
+            DEFECT_DOJO_DEFAULT_DATABASE_PORT="3306"
         fi
-        if [ -z "$SQLUSER" ]; then
-            SQLUSER="root"
+        if [ -z "$DEFECT_DOJO_DEFAULT_DATABASE_USER" ]; then
+            DEFECT_DOJO_DEFAULT_DATABASE_USER="root"
         fi
-        if [ -z "$SQLPWD" -a  "$BATCH_MODE" == "yes" ]; then
+        if [ -z "$DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD" -a "$BATCH_MODE" == "yes" ]; then
             echo "SQL Password not provided, exiting"
             exit 1
+        else
+            DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD="dojodb_install"
         fi
-        if [ -z "$DBNAME" ]; then
-            DBNAME="dojodb"
+        if [ -z "$DEFECT_DOJO_DEFAULT_DATABASE_NAME" ]; then
+            DEFECT_DOJO_DEFAULT_DATABASE_NAME="dojodb"
         fi
-    else
-        # Run interactively
-        read -p "MySQL host: " SQLHOST
-        read -p "MySQL port: " SQLPORT
-        read -p "MySQL user (should already exist): " SQLUSER
-        stty -echo
-        read -p "Password for user: " SQLPWD; echo
-        stty echo
-        read -p "Database name (should NOT exist): " DBNAME
     fi
 
-    if mysql -fs --protocol=TCP -h "$SQLHOST" -P "$SQLPORT" -u"$SQLUSER" -p"$SQLPWD" "$DBNAME" >/dev/null 2>&1 </dev/null; then
-        echo "Database $DBNAME already exists!"
+    if mysql -fs --protocol=TCP -h "$DEFECT_DOJO_DEFAULT_DATABASE_HOST" -P "$DEFECT_DOJO_DEFAULT_DATABASE_PORT" -u"$DEFECT_DOJO_DEFAULT_DATABASE_USER" -p"$DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD" "$DEFECT_DOJO_DEFAULT_DATABASE_NAME" >/dev/null 2>&1 </dev/null; then
+        echo "Database $DEFECT_DOJO_DEFAULT_DATABASE_NAME already exists!"
         echo
         if [ "$AUTO_DOCKER" == "yes" ] || [ "$BATCH_MODE" == "yes" ]; then
             if [ -z "$FLUSHDB" ]; then
@@ -270,20 +244,21 @@ function ensure_mysql_application_db() {
                 DELETE="$FLUSHDB"
             fi
         else
-            read -p "Drop database $DBNAME? [Y/n] " DELETE
+            read -p "Drop database $DEFECT_DOJO_DEFAULT_DATABASE_NAME? [Y/n] " DELETE
         fi
         if [[ ! $DELETE =~ ^[nN]$ ]]; then
-            mysqladmin -f --protocol=TCP --host="$SQLHOST" --port="$SQLPORT" --user="$SQLUSER" --password="$SQLPWD" drop "$DBNAME"
-            mysqladmin    --protocol=TCP --host="$SQLHOST" --port="$SQLPORT" --user="$SQLUSER" --password="$SQLPWD" create "$DBNAME"
+            mysqladmin -f --protocol=TCP --host="$DEFECT_DOJO_DEFAULT_DATABASE_HOST" --port="$DEFECT_DOJO_DEFAULT_DATABASE_PORT" --user="$DEFECT_DOJO_DEFAULT_DATABASE_USER" --password="$DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD" drop "$DEFECT_DOJO_DEFAULT_DATABASE_NAME"
+            mysqladmin    --protocol=TCP --host="$DEFECT_DOJO_DEFAULT_DATABASE_HOST" --port="$DEFECT_DOJO_DEFAULT_DATABASE_PORT" --user="$DEFECT_DOJO_DEFAULT_DATABASE_USER" --password="$DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD" create "$DEFECT_DOJO_DEFAULT_DATABASE_NAME"
         fi
     else
-        # Set the root password for mysql - install has it blank
-        mysql -uroot -e "SET PASSWORD = PASSWORD('${SQLPWD}');"
-
-        if mysqladmin --protocol=TCP --host="$SQLHOST" --port="$SQLPORT" --user="$SQLUSER" --password="$SQLPWD" create $DBNAME; then
-            echo "Created database $DBNAME."
+        echo "Setting password..."
+        # Set the root password for mysql
+        set_random_mysql_db_pwd
+        sudo service mysql start
+        if mysqladmin --protocol=TCP --host="$DEFECT_DOJO_DEFAULT_DATABASE_HOST" --port="$DEFECT_DOJO_DEFAULT_DATABASE_PORT" --user="$DEFECT_DOJO_DEFAULT_DATABASE_USER" --password="$DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD" create $DEFECT_DOJO_DEFAULT_DATABASE_NAME; then
+            echo "Created database $DEFECT_DOJO_DEFAULT_DATABASE_NAME."
         else
-            echo "Error! Failed to create database $DBNAME. Check your credentials."
+            echo "Error! Failed to create database $DEFECT_DOJO_DEFAULT_DATABASE_NAME. Check your credentials."
             echo
             ensure_mysql_application_db
         fi
@@ -292,54 +267,22 @@ function ensure_mysql_application_db() {
 
 # Ensures the Postgres application DB is present
 function ensure_postgres_application_db() {
-    # Added BATCH_MODE condition and rewrite old negate logic.
-    if [ "$BATCH_MODE" == "yes" ]; then
-      echo "Setting values for POSTGRES install"
-      if [ -z "$SQLHOST" ]; then
-          SQLHOST="localhost"
-      fi
-      if [ -z "$SQLPORT" ]; then
-          SQLPORT="5432"
-      fi
-      if [ -z "$SQLUSER" ]; then
-          SQLUSER="root"
-      fi
-      if [ -z "$SQLPWD" ]; then
-          echo "SQL Password not provided, exiting"
-          exit 1
-      fi
-      if [ -z "$DBNAME" ]; then
-          DBNAME="dojodb"
-      fi
-    else
-      read -p "Postgres host: " SQLHOST
-      read -p "Postgres port: " SQLPORT
-      read -p "Postgres user (should already exist): " SQLUSER
-      stty -echo
-      read -p "Password for user: " SQLPWD; echo
-      stty echo
-      read -p "Database name (should NOT exist): " DBNAME
-    fi
+    read -p "Postgres host: " $DEFECT_DOJO_DEFAULT_DATABASE_HOST
+    read -p "Postgres port: " $DEFECT_DOJO_DEFAULT_DATABASE_PORT
+    read -p "Postgres user (should already exist): " $DEFECT_DOJO_DEFAULT_DATABASE_USER
+    stty -echo
+    read -p "Password for user: " $DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD; echo
+    stty echo
+    read -p "Database name (should NOT exist): " $DEFECT_DOJO_DEFAULT_DATABASE_NAME
 
-    if [ "$( PGPASSWORD=$SQLPWD psql -h $SQLHOST -p $SQLPORT -U $SQLUSER -tAc "SELECT 1 FROM pg_database WHERE datname='$DBNAME'" )" = '1' ]
+    if [ "$( PGPASSWORD=$DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD psql -h $DEFECT_DOJO_DEFAULT_DATABASE_HOST -p $DEFECT_DOJO_DEFAULT_DATABASE_PORT -U $DEFECT_DOJO_DEFAULT_DATABASE_USER -tAc "SELECT 1 FROM pg_database WHERE datname='$DEFECT_DOJO_DEFAULT_DATABASE_NAME'" )" = '1' ]
     then
-        echo "Database $DBNAME already exists!"
+        echo "Database $DEFECT_DOJO_DEFAULT_DATABASE_NAME already exists!"
         echo
-
-        # Added BATCH_MODE condition.
-        if [ "$AUTO_DOCKER" == "yes" ] || [ "$BATCH_MODE" == "yes" ]; then
-            if [ -z "$FLUSHDB" ]; then
-                DELETE="yes"
-            else
-                DELETE="$FLUSHDB"
-            fi
-        else
-            read -p "Drop database $DBNAME? [Y/n] " DELETE
-        fi
-
+        read -p "Drop database $DEFECT_DOJO_DEFAULT_DATABASE_NAME? [Y/n] " DELETE
         if [[ ! $DELETE =~ ^[nN]$ ]]; then
-            PGPASSWORD=$SQLPWD dropdb $DBNAME -h $SQLHOST -p $SQLPORT -U $SQLUSER
-            PGPASSWORD=$SQLPWD createdb $DBNAME -h $SQLHOST -p $SQLPORT -U $SQLUSER
+            PGPASSWORD=$DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD dropdb $DEFECT_DOJO_DEFAULT_DATABASE_NAME -h $DEFECT_DOJO_DEFAULT_DATABASE_HOST -p $DEFECT_DOJO_DEFAULT_DATABASE_PORT -U $DEFECT_DOJO_DEFAULT_DATABASE_USER
+            PGPASSWORD=$DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD createdb $DEFECT_DOJO_DEFAULT_DATABASE_NAME -h $DEFECT_DOJO_DEFAULT_DATABASE_HOST -p $DEFECT_DOJO_DEFAULT_DATABASE_PORT -U $DEFECT_DOJO_DEFAULT_DATABASE_USER
         else
             read -p "Try and install anyway? [Y/n] " INSTALL
             if [[ $INSTALL =~ ^[nN]$ ]]; then
@@ -348,12 +291,12 @@ function ensure_postgres_application_db() {
             fi
         fi
     else
-        PGPASSWORD=$SQLPWD createdb $DBNAME -h $SQLHOST -p $SQLPORT -U $SQLUSER
+        PGPASSWORD=$DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD createdb $DEFECT_DOJO_DEFAULT_DATABASE_NAME -h $DEFECT_DOJO_DEFAULT_DATABASE_HOST -p $DEFECT_DOJO_DEFAULT_DATABASE_PORT -U $DEFECT_DOJO_DEFAULT_DATABASE_USER
         if [ $? = 0 ]
         then
-            echo "Created database $DBNAME."
+            echo "Created database $DEFECT_DOJO_DEFAULT_DATABASE_NAME."
         else
-            echo "Error! Failed to create database $DBNAME. Check your credentials."
+            echo "Error! Failed to create database $DEFECT_DOJO_DEFAULT_DATABASE_NAME. Check your credentials."
             echo
             ensure_postgres_application_db
         fi
@@ -372,6 +315,7 @@ function ensure_application_db() {
 
 # Set up packages via Yum / APT
 function install_os_dependencies() {
+    echo "Installing OS Dependencies"
     YUM_CMD=$(which yum)
     APT_GET_CMD=$(which apt-get)
     BREW_CMD=$(which brew)
@@ -384,16 +328,19 @@ function install_os_dependencies() {
         sudo yum groupinstall 'Development Tools'
     elif [[ ! -z "$APT_GET_CMD" ]]; then
         if [ "$AUTO_DOCKER" == "yes" ]; then
-          apt-get update && apt-get install -y sudo git nano
+          echo "Installing Docker OS Dependencies"
+          DEBIAN_FRONTEND=noninteractive apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y sudo git nano
         fi
-        sudo apt-get update && sudo apt-get install -y curl apt-transport-https expect
-        #Yarn
-        curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
-        echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+        sudo DEBIAN_FRONTEND=noninteractive apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y curl apt-transport-https expect gnupg2
         #Node
         curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash
+        sudo DEBIAN_FRONTEND=noninteractive apt-get install -y apt-transport-https libjpeg-dev gcc libssl-dev python-dev python-pip nodejs wkhtmltopdf build-essential
 
-        sudo apt-get install -y apt-transport-https libjpeg-dev gcc libssl-dev python-dev python-pip nodejs yarn wkhtmltopdf build-essential
+        #Yarn from cmdtest conflicts
+        sudo apt -y remove cmdtest
+        curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+        echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+        sudo DEBIAN_FRONTEND=noninteractive apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y yarn
 
     elif [[ ! -z "$BREW_CMD" ]]; then
         brew install gcc openssl python node npm yarn Caskroom/cask/wkhtmltopdf expect
@@ -403,6 +350,11 @@ function install_os_dependencies() {
     fi
 
     echo
+}
+
+function urlenc() {
+	local STRING="${1}"
+	echo `python -c "import sys, urllib as ul; print ul.quote_plus('$STRING')"`
 }
 
 function install_db() {
@@ -423,6 +375,7 @@ function install_db() {
             echo "Installing MySQL client (and server if not already installed)"
             if [ "$AUTO_DOCKER" == "yes" ]; then
               DEBIAN_FRONTEND=noninteractive apt-get install -y mysql-server pwgen libmysqlclient-dev
+              echo "MySQL client (and server if not already installed) setup complete"
               sudo service mysql start
             else
               sudo apt-get install -y libmysqlclient-dev mysql-server
@@ -480,44 +433,37 @@ function prepare_settings_file() {
     ENV_SETTINGS_FILE=dojo/settings/.env.prod
 
     # Copy settings file
-    cp dojo/settings/settings.dist.py ${TARGET_SETTINGS_FILE}
+    sudo cp dojo/settings/settings.dist.py ${TARGET_SETTINGS_FILE}
 
-    # Copy env file
-    cp dojo/settings/template-env ${ENV_SETTINGS_FILE}
+    # Remove existing .env.prod files
+    if [ ${ENV_SETTINGS_FILE} ]; then
+      sudo rm ${ENV_SETTINGS_FILE}
+    fi
+
+    # Create the env file
+    touch ${ENV_SETTINGS_FILE}
 
     # DD_DATABASE_URL can be set as an environment variable, if not construct
     if [ "$DBTYPE" == "$SQLITE" ]; then
-        DD_DATABASE_URL="sqlite:///defectdojo.db"
+        echo 'DD_DATABASE_URL="sqlite:///defectdojo.db"' >> ${ENV_SETTINGS_FILE}
     elif [ "$DBTYPE" == "$MYSQL" ]; then
-        DD_DATABASE_URL="mysql://$SQLUSER:$SQLPWD@$SQLHOST:$SQLPORT/$DBNAME"
+        SAFE_URL=$(urlenc "$DEFECT_DOJO_DEFAULT_DATABASE_USER")":"$(urlenc "$DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD")"@"$(urlenc "$DEFECT_DOJO_DEFAULT_DATABASE_HOST")":"$(urlenc "$DEFECT_DOJO_DEFAULT_DATABASE_PORT")"/"$(urlenc "$DEFECT_DOJO_DEFAULT_DATABASE_NAME")
+        echo "DD_DATABASE_URL=mysql://$SAFE_URL" >> ${ENV_SETTINGS_FILE}
     elif [ "$DBTYPE" == "$POSTGRES" ]; then
-        DD_DATABASE_URL="postgres://$SQLUSER:$SQLPWD@$SQLHOST:$SQLPORT/$DBNAME"
+        SAFE_URL=$(urlenc "$DEFECT_DOJO_DEFAULT_DATABASE_USER")":"$(urlenc "$DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD")"@"$(urlenc "$DEFECT_DOJO_DEFAULT_DATABASE_HOST")":"$(urlenc "$DEFECT_DOJO_DEFAULT_DATABASE_PORT")"/"$(urlenc "$DEFECT_DOJO_DEFAULT_DATABASE_NAME")
+        echo "DD_DATABASE_URL=postgres://$SAFE_URL" >> ${ENV_SETTINGS_FILE}
     fi
 
-    if [[ -z $DD_ALLOWED_HOSTS ]]; then
-        DD_ALLOWED_HOSTS="localhost"
+    if [[ $DD_ALLOWED_HOSTS ]]; then
+        echo 'DD_ALLOWED_HOSTS="localhost"' >> ${ENV_SETTINGS_FILE}
     fi
 
-    # Test whether we're running on a "brew"-system, like Mac OS X; then use
-    # BSD-style sed;
-    # By default, use GNU-style sed
-    BREW_CMD=$(which brew)
-    if [[ ! -z $BREW_CMD ]]; then
-        sed -i '' -e 's%#DD_DATABASE_URL#%'$DD_DATABASE_URL'%' \
-                -e "s/#DD_SECRET_KEY#/$SECRET/g" \
-                -e "s%#ALLOWED_HOSTS#%$DD_ALLOWED_HOSTS%" \
-                -e "s/#DD_CREDENTIAL_AES_256_KEY#/$AES_PASSPHRASE/g" \
-                ${ENV_SETTINGS_FILE}
-    else
-        # Apply sed GNU-style wise
-        sed -i -e 's%#DD_DATABASE_URL#%'$DD_DATABASE_URL'%' ${ENV_SETTINGS_FILE}
-        sed -i -e "s/#DD_SECRET_KEY#/$SECRET/g" ${ENV_SETTINGS_FILE}
-        sed -i -e "s%#DD_ALLOWED_HOSTS#%$DD_ALLOWED_HOSTS%" ${ENV_SETTINGS_FILE}
-        sed -i -e "s/#DD_CREDENTIAL_AES_256_KEY#/$AES_PASSPHRASE/g" ${ENV_SETTINGS_FILE}
-    fi
+    echo 'DD_DEBUG="on"' >> ${ENV_SETTINGS_FILE}
+    echo 'DD_SECRET_KEY="'${SECRET}'"' >> ${ENV_SETTINGS_FILE}
+    echo 'DD_CREDENTIAL_AES_256_KEY="'${AES_PASSPHRASE}'"' >> ${ENV_SETTINGS_FILE}
 }
 
-function install_app(){
+function install_app() {
     # Install the app, apply migrations and load data
     # Detect if we're in a a virtualenv
     python -c 'import sys; print sys.real_prefix' 2>/dev/null
@@ -527,26 +473,24 @@ function install_app(){
         pip install --upgrade pip
         pip install -U pip
         if [ "$DBTYPE" == "$MYSQL" ]; then
-            pip install .[mysql]
+            pip install .[mysql] --ignore-installed Markdown
         else
-            pip install .
+            pip install . --ignore-installed Markdown
         fi
-
     else
         sudo pip install --upgrade pip
         if [ "$DBTYPE" == "$MYSQL" ]; then
-            sudo -H pip install .[mysql]
+            sudo -H pip install .[mysql] --ignore-installed Markdown
         else
-            sudo -H pip install .
+            sudo -H pip install . --ignore-installed Markdown
         fi
     fi
     python manage.py makemigrations dojo
     python manage.py makemigrations --merge --noinput
     python manage.py migrate
 
-    if [ "$BATCH_MODE" == "yes" ]; then
-      python manage.py createsuperuser --noinput --username=$DEFECTDOJO_ADMIN_USER --email='admin@defectdojo.org'
-      entrypoint_scripts/common/setup-superuser.expect $DEFECTDOJO_ADMIN_USER $DEFECTDOJO_ADMIN_PASSWORD
+    if [ "$AUTO_DOCKER" == "yes" ]; then
+      createadmin
     elif [ -z "$AUTO_DOCKER" ]; then
       echo -e "${GREEN}${BOLD}Create Dojo superuser:"
       tput sgr0
@@ -595,30 +539,32 @@ function set_random_mysql_db_pwd() {
   sudo mysqld_safe --skip-grant-tables >/dev/null 2>&1 &
   sleep 5
   DB_ROOT_PASS_LEN=`shuf -i 50-60 -n 1`
-  DB_ROOT_PASS=`pwgen -scn $DB_ROOT_PASS_LEN 1`
-
-  mysql mysql -e "UPDATE user SET authentication_string=PASSWORD('$DB_ROOT_PASS') WHERE User='root';FLUSH PRIVILEGES;"
+  if [[ -z "$DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD" ]]; then
+    DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD=`pwgen -scn $DB_ROOT_PASS_LEN 1`
+  fi
+  mysql mysql -e "UPDATE user SET authentication_string=PASSWORD('$DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD'), plugin='mysql_native_password' WHERE User='root';FLUSH PRIVILEGES;"
+  sudo service mysql stop
 }
 
 function upgrade() {
-  apt-get upgrade
+  apt-get -y upgrade
   apt-get clean all
 }
 
 function remove_install_artifacts() {
-  sudo deluser dojo sudo
-  apt-get remove -y mysql-server nodejs yarn autoremove
+  # sudo deluser dojo sudo
+  # nodejs yarn autoremove
+  sudo apt-get remove -y mysql-server
 }
 
 function install_postgres_client() {
-  apt-get install -y postgresql postgresql-contrib
-  apt-get upgrade
-  apt-get clean all
+  sudo apt-get install -y postgresql-client
+  sudo apt-get upgrade
+  sudo apt-get clean all
 }
 
 function slim_defect_dojo_settings() {
   # Copy settings file
   ENV_SETTINGS_FILE=dojo/settings/.env.prod
-  cp dojo/settings/template-env ${ENV_SETTINGS_FILE}
-  sed -i'' "s&# DD_TRACK_MIGRATIONS=on&#DD_TRACK_MIGRATIONS=on&g" ${ENV_SETTINGS_FILE}
+  rm ${ENV_SETTINGS_FILE}
 }

@@ -1,3 +1,10 @@
+# Docker container persistent data
+docker/data/
+docker/static/
+
+# VS Code
+.vscode/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
