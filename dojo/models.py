@@ -2060,3 +2060,49 @@ watson.register(Finding_Template)
 watson.register(Endpoint)
 watson.register(Engagement)
 watson.register(App_Analysis)
+
+
+# VM infrastructure mgmt by nDepth
+class VM(models.Model):
+    short_name = models.CharField(max_length=25)
+    IP         = models.CharField(max_length=15, default='127.0.0.1')
+
+    class Meta:
+         verbose_name_plural = "VMs"
+
+    def fqdn(self):
+        return "%s.ndepthsecurity.net" %(self.short_name)
+
+    def total_uses_count(self):
+        return len([v.vm for v in self.vm.all()])
+
+# still needs to be checked/fixed
+    def current_uses(self):
+        active = []
+        for p in VMOnProject.objects.filter(vm=self):
+            if p.engagement.is_active():
+                active.append(p)
+        return active
+
+
+# still needs to be checked/fixed
+    def days_till_free(self):
+        days = []
+        for p in VMOnProject.objects.filter(vm=self):
+            days.append(p.engagement.days_till_deadline())
+        return max(days)
+
+    def __str__(self):
+        return "%s" %(self.short_name)
+
+class VMOnProject(models.Model):
+    tester  = models.ForeignKey(User, on_delete=models.PROTECT, related_name='tester')
+    engagement = models.ForeignKey(Engagement, null=True, blank=True,
+                                   related_name="engagement")
+    vm      = models.ForeignKey(VM, on_delete=models.PROTECT, related_name='vm', blank=True, null=True)
+
+    class Meta:
+        verbose_name_plural = "VMs On Project"
+
+    def rdp_link(self):
+        return "rdp://{{self.tester.linux_username}}@{{self.vm.fqdn}}"

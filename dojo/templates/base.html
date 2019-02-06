@@ -161,6 +161,16 @@
                             </li>
                             {% if request.user.is_staff %}
                                 <li>
+                                    <a href="#"><i class="fa fa-keyboard-o fa-fw"></i> <span>Virtual Machines</span><span
+                                            class="glyphicon arrow"></span></a>
+                                    <ul class="nav nav-second-level">
+                                        <li>
+                                            <a href="{% url 'vm' %}">All VMs</a>
+                                        </li>
+                                    </ul>
+                                    <!-- /.nav-second-level -->
+                                </li>
+                                <li>
                                     <a href="#"><i class="fa fa-inbox fa-fw"></i> <span>Engagements</span><span
                                             class="glyphicon arrow"></span></a>
                                     <ul class="nav nav-second-level">
