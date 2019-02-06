@@ -37,6 +37,7 @@ from dojo.tools.awsprowler.parser import AWSProwlerParser
 from dojo.tools.brakeman.parser import BrakemanScanParser
 from dojo.tools.spotbugs.parser import SpotbugsXMLParser
 from dojo.tools.safety.parser import SafetyParser
+from dojo.tools.clair_klar.parser import ClairKlarParser
 
 __author__ = 'Jay Paz'
 
@@ -101,6 +102,8 @@ def import_parser_factory(file, test, scan_type=None):
         parser = SSLlabsParser(file, test)
     elif scan_type == 'Trufflehog Scan':
         parser = TruffleHogJSONParser(file, test)
+    elif scan_type == 'Clair Klar Scan':
+        parser = ClairKlarParser(file, test)
     elif scan_type == 'Gosec Scanner':
         parser = GosecScannerParser(file, test)
     elif scan_type == 'Trustwave Scan (CSV)':
