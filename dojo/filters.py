@@ -261,17 +261,19 @@ class VMFilter(DojoFilter):
         fields=(
             ('short_name', 'short_name'),
             ('IP', 'IP'),
+            ('externalIP', 'externalIP')
         ),
         field_labels={
             'short_name': 'VM Name',
-            'IP': 'IP Address',
+            'IP': 'Internal IP Address',
+            'externalIP': 'External IP Address',
         }
 
     )
 
     class Meta:
         model = VM
-        fields = ['short_name']
+        fields = ['short_name', 'IP', 'externalIP']
 
 
 

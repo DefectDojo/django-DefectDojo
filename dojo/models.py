@@ -2077,20 +2077,15 @@ class VM(models.Model):
         return "%s.ndepthsecurity.net" %(self.short_name)
 
     def total_uses_count(self):
-        return len([v.vm for v in self.vm.all()])
+        return VMOnProject.objects.filter(vm=self).count()
 
     def current_uses(self):
-        active = []
-        for p in VMOnProject.objects.filter(vm=self):
-            if p.eng.target_end <= get_current_datetime() and p.eng.target_start >= get_current_datetime():
-                active.append(p)
-        return active
-
+        return VMOnProject.objects.filter(vm=self, engagement__active=True)
 
     def days_till_free(self):
         days = []
         for p in VMOnProject.objects.filter(vm=self):
-            days.append((p.eng.target_end - get_current_datetime()).days)
+            days.append((p.engagement.target_end - get_current_datetime().date()).days)
         return max(days)
 
     def __str__(self):
@@ -2098,7 +2093,7 @@ class VM(models.Model):
 
 
 class VMAdmin(admin.ModelAdmin):
-  list_display = ('short_name', 'IP')
+  list_display = ('short_name', 'IP', 'externalIP')
 
 admin.site.register(VM, VMAdmin)
 

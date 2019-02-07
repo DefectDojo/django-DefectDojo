@@ -27,7 +27,8 @@
                            class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
                         <tr>
                             <th class="prod_name">{% dojo_sort request 'VM Name' 'short_name' 'asc' %}</th>
-                            <th class="prod_name">{% dojo_sort request 'IP' 'IP' %}</th>
+                            <th class="prod_name">{% dojo_sort request 'Internal IP' 'IP' %}</th>
+                            <th class="prod_name">{% dojo_sort request 'External IP' 'externalIP' %}</th>
                             <th>Active Engagements</th>
                             {% if user.is_staff %}
                                 <th> Engagement</th>
@@ -39,24 +40,25 @@
                                 <td class="prod_name"><a href="{% url 'view_vm' v.id %}">{{ v.short_name }}</a>
                                 </td>
                                 <td class="prod_name">{{ v.IP }}</td>
+                                <td class="prod_name">{{ v.externalIP }}</td>
                                 <td>
-                                    {% for e in v.engagement_set.all %}
-                                        {% if e.active %}
+                                    {% for e in v.vm.all %}
+                                        {% if e.engagement.active %}
 						<div class="lineContainer">
 							<a  style="display: inline" class="eng_link" href="{% url 'view_engagement' e.id %}">
-                                                {% if e.name %}{{ e.name }} {% endif %}{{ e.target_start }}</a>
-							| Lead: {{ e.lead.first_name }}
+                                                {% if e.engagement.name %}{{e.tester}} - {{ e.engagement.name }} {% endif %}{{ e.engagement.target_start }}</a>
+							| Lead: {{ e.engagement.lead.first_name }}
                                                         |
-                                                        {%  for test in e.test_set.all %}
+                                                        {%  for test in e.engagement.test_set.all %}
 								{% if test.lead %}
-                                                                <a href="{% url 'view_test' test.id %}"> {{ test.test_type }}: {{ test.lead.first_name }} </a> |
+                                                                {{e.tester}} - <a href="{% url 'view_test' test.id %}"> {{ test.test_type }}: {{ test.lead.first_name }} </a> |
 								{% else %}
-                                                                <a href="{% url 'view_test' test.id %}"> {{ test.test_type }} </a> |
+                                                                {{e.tester}} - <a href="{% url 'view_test' test.id %}"> {{ test.test_type }} </a> |
 								{% endif %}
                                                         {% endfor %}
 						</div>
                                                 <sup>
-                                                 {% for tag in e.tags %}
+                                                 {% for tag in e.engagement.tags %}
                                                       <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                                   {% endfor %}
                                                 </sup>

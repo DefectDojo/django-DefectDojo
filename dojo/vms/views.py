@@ -64,7 +64,7 @@ def vm(request):
     return render(
         request, 'dojo/vm.html', {
             'vms': vms,
-#            'filtered': filtered,
+            'filtered': filtered,
 #            'name_words': sorted(set(name_words)),
 #            'eng_words': sorted(set(eng_words)),
         })
