@@ -2082,11 +2082,19 @@ class VM(models.Model):
     def current_uses(self):
         return VMOnProject.objects.filter(vm=self, engagement__active=True)
 
+    def past_uses(self):
+        return VMOnProject.objects.filter(vm=self, engagement__active=False)
+
     def days_till_free(self):
         days = []
         for p in VMOnProject.objects.filter(vm=self):
             days.append((p.engagement.target_end - get_current_datetime().date()).days)
-        return max(days)
+        return max(days) if days else 'Free'
+
+    def get_breadcrumbs(self):
+        bc = [{'title': self.__str__(),
+               'url': reverse('view_vm', args=(self.id,))}]
+        return bc
 
     def __str__(self):
         return "%s" %(self.short_name)
@@ -2106,9 +2114,6 @@ class VMOnProject(models.Model):
 
     class Meta:
         verbose_name_plural = "VMs On Project"
-
-    def rdp_link(self):
-        return "rdp://{{self.tester}}@{{self.vm.fqdn}}"
 
 
 class VMOnProjectAdmin(admin.ModelAdmin):

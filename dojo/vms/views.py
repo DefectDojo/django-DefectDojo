@@ -6,19 +6,20 @@ import operator
 
 #from django.contrib.auth.models import User
 #from django.conf import settings
-#from django.contrib import messages
+from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 #from django.core.exceptions import PermissionDenied
-#from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse
 from django.db.models import Q
-#from django.http import HttpResponseRedirect, StreamingHttpResponse, Http404, HttpResponse
+from django.http import HttpResponseRedirect, StreamingHttpResponse, Http404, HttpResponse
 from django.shortcuts import render, get_object_or_404
 #from django.views.decorators.cache import cache_page
 #from django.utils import timezone
 #from time import strftime
 
 from dojo.filters import VMFilter
-#from dojo.forms import CheckForm, \
+from dojo.forms import VMForm, DeleteVMForm, AddVMEngagementForm
+#    CheckForm, \
 #    UploadThreatForm, UploadRiskForm, NoteForm, DoneForm, \
 #    EngForm, TestForm, ReplaceRiskAcceptanceForm, AddFindingsRiskAcceptanceForm, DeleteEngagementForm, ImportScanForm, \
 #    JIRAFindingForm, CredMappingForm
@@ -70,132 +71,108 @@ def vm(request):
         })
 
 
-#stubbed so things compile
+@user_passes_test(lambda u: u.is_staff)
 def new_vm(request):
-    return None
+    if request.method == 'POST':
+        form = VMForm(request.POST)
+        if form.is_valid():
+            new_vm = form.save()
+            new_vm.save()
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'VM added successfully.',
+                extra_tags='alert-success')
+            return HttpResponseRedirect(
+                reverse('view_vm', args=(new_vm.id, )))
+    else:
+        form = VMForm()
+
+    add_breadcrumb(title="New Virtual machine", top_level=False, request=request)
+    return render(request, 'dojo/new_vm.html', {
+        'form': form,
+    })
+
 def view_vm(request, id):
     vm = get_object_or_404(VM, id=id)
-    #tests = Test.objects.filter(engagement=eng).order_by('test_type__name')
-    #prod = eng.product
-    auth = request.user.is_staff or request.user in prod.authorized_users.all()
-    #risks_accepted = eng.risk_acceptance.all()
-    #preset_test_type = None
-    #network = None
-    #if eng.preset:
-    #    preset_test_type = eng.preset.test_type.all()
-    #    network = eng.preset.network_locations.all()
-    #system_settings = System_Settings.objects.get()
-    #if not auth:
-    #    # will render 403
-    #    raise PermissionDenied
-
-    #try:
-    #    jissue = JIRA_Issue.objects.get(engagement=eng)
-    #except:
-    #    jissue = None
-    #    pass
-    #try:
-    #    jconf = JIRA_PKey.objects.get(product=eng.product).conf
-    #except:
-    #    jconf = None
-    #    pass
-    #exclude_findings = [
-    #    finding.id for ra in eng.risk_acceptance.all()
-    #    for finding in ra.accepted_findings.all()
-    #]
-    #eng_findings = Finding.objects.filter(test__in=eng.test_set.all()) \
-    #    .exclude(id__in=exclude_findings).order_by('title')
-
-    #try:
-    #    check = Check_List.objects.get(engagement=eng)
-    #except:
-    #    check = None
-    #    pass
-    #form = DoneForm()
-    #if request.method == 'POST' and request.user.is_staff:
-    #    eng.progress = 'check_list'
-    #    eng.save()
-
-    #creds = Cred_Mapping.objects.filter(
-    #    product=eng.product).select_related('cred_id').order_by('cred_id')
-    #cred_eng = Cred_Mapping.objects.filter(
-    #    engagement=eng.id).select_related('cred_id').order_by('cred_id')
-
     add_breadcrumb(parent=vm, top_level=False, request=request)
-    #if hasattr(settings, 'ENABLE_DEDUPLICATION'):
-    #    if settings.ENABLE_DEDUPLICATION:
-    #        enabled = True
-    #        findings = Finding.objects.filter(
-    #            test__engagement=eng, duplicate=False)
-    #    else:
-    #        enabled = False
-    #        findings = None
-    #else:
-    #    enabled = False
-    #    findings = None
-
-    #if findings is not None:
-    #    fpage = get_page_items(request, findings, 15)
-    #else:
-    #    fpage = None
-
-    # ----------
-
-    #try:
-    #    start_date = Finding.objects.filter(
-    #        test__engagement__product=eng.product).order_by('date')[:1][0].date
-    #except:
-    #    start_date = timezone.now()
-
-    #end_date = timezone.now()
-
-    #risk_acceptances = Risk_Acceptance.objects.filter(
-    #    engagement__in=Engagement.objects.filter(product=eng.product))
-
-    #accepted_findings = [
-    #    finding for ra in risk_acceptances
-    #    for finding in ra.accepted_findings.all()
-    #]
-
-    #title = ""
-    #if eng.engagement_type == "CI/CD":
-    #    title = " CI/CD"
-    #product_tab = Product_Tab(prod.id, title="View" + title + " Engagement", tab="engagements")
-    #product_tab.setEngagement(eng)
     return render(
         request, 'dojo/view_vm.html', {
             'vm': vm,
         })
-    #return render(
-    #    request, 'dojo/view_eng.html', {
-    #        'eng': eng,
-    #        'product_tab': product_tab,
-    #        'system_settings': system_settings,
-    #        'tests': tests,
-    #        'findings': fpage,
-    #        'enabled': enabled,
-    #        'check': check,
-    #        'threat': eng.tmodel_path,
-    #        'risk': eng.risk_path,
-    #        'form': form,
-    #        'risks_accepted': risks_accepted,
-    #        'can_add_risk': len(eng_findings),
-    #        'jissue': jissue,
-    #        'jconf': jconf,
-    #        'accepted_findings': accepted_findings,
-    #        'start_date': start_date,
-    #        'creds': creds,
-    #        'cred_eng': cred_eng,
-    #        'network': network,
-    #        'preset_test_type': preset_test_type
-    #    })
 
-def edit_vm(request):
-    return None
-def delete_vm(reqeust):
-    return None
-def add_vm_engagement(request):
-    return None
+@user_passes_test(lambda u: u.is_staff)
+def edit_vm(request, id):
+    vm = VM.objects.get(pk=id)
+    if request.method == 'POST':
+        form = VMForm(request.POST, instance=vm)
+        if form.is_valid():
+            form.save()
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'VM updated successfully.',
+                extra_tags='alert-success')
+            return HttpResponseRedirect(reverse('view_vm', args=(vm.id,)))
+    else:
+        form = VMForm(instance=vm)
+    title = ""
+    return render(request, 'dojo/new_vm.html', {
+        'form': form,
+        'edit': True,
+        'vm': vm
+    })
+
+@user_passes_test(lambda u: u.is_staff)
+def delete_vm(request, id):
+    vm = get_object_or_404(VM, pk=id)
+    form = DeleteVMForm(instance=vm)
+
+    from django.contrib.admin.utils import NestedObjects
+    from django.db import DEFAULT_DB_ALIAS
+
+    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+    collector.collect([vm])
+    rels = collector.nested()
+
+    if request.method == 'POST':
+        if 'id' in request.POST and str(vm.id) == request.POST['id']:
+            form = DeleteVMForm(request.POST, instance=vm)
+            if form.is_valid():
+                vm.delete()
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    'Virtual Machine removed.',
+                    extra_tags='alert-success')
+                return HttpResponseRedirect(reverse("vm"))
+
+    return render(request, 'dojo/delete_vm.html', {
+        'vm': vm,
+        'form': form,
+        'rels': rels,
+    })
+
+def add_vm_engagement(request, id):
+    if request.method == 'POST':
+        form = AddVMEngagementForm(request.POST)
+        if form.is_valid():
+            new_eng = form.save()
+            new_eng.save()
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Engagement added successfully.',
+                extra_tags='alert-success')
+            return HttpResponseRedirect(
+                reverse('view_vm', args=(new_eng.vm.id, )))
+    else:
+        form = AddVMEngagementForm(initial={'vm': id})
+
+    add_breadcrumb(title="New Engagement for VM", top_level=False, request=request)
+    return render(request, 'dojo/new_vm_eng.html', {
+        'form': form,
+    })
 
 @user_passes_test(lambda u: u.is_staff)
 def new_engagement(request):

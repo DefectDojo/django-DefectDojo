@@ -18,7 +18,8 @@ from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
     Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
     JIRA_Issue, JIRA_PKey, JIRA_Conf, UserContactInfo, Tool_Type, Tool_Configuration, Tool_Product_Settings, \
     Cred_User, Cred_Mapping, System_Settings, Notifications, Languages, Language_Type, App_Analysis, Objects, \
-    Benchmark_Product, Benchmark_Requirement, Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets
+    Benchmark_Product, Benchmark_Requirement, Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, \
+    VM, VMOnProject
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
 
@@ -504,6 +505,51 @@ class CheckForm(forms.ModelForm):
                   'data_input_sanitization_validation', 'data_issues',
                   'sensitive_data', 'sensitive_issues', 'other', 'other_issues', ]
 
+
+class VMForm(forms.ModelForm):
+    #name = forms.CharField(
+    #    max_length=25, required=True,
+    #    help_text="Virtual Machine name, like kali4")
+    #description = forms.CharField(widget=forms.Textarea(attrs={}),
+    #                              required=False, help_text="Description of the box")
+    #internal_ip = forms.CharField(
+    #    max_length=15, required=True,
+    #    help_text="Internal IP like 10.x.x.x")
+    #
+    #external_ip = forms.CharField(
+    #    max_length=15, required=True,
+    #    help_text="Internal IP like 40.117.x.x")
+    #
+    def __init__(self, *args, **kwargs):
+        super(VMForm, self).__init__(*args, **kwargs)
+        self.fields['description'].initial = "nDepth standard Kali Linux Virtual Machine for Penetration testing"
+
+    class Meta:
+        model = VM
+        exclude = ['']
+
+class DeleteVMForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = VM
+        exclude = ['short_name', 'description', 'IP', 'externalIP']
+
+class AddVMEngagementForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        vm = None
+        engagement = None
+        if 'vm' in kwargs:
+            vm = kwargs.pop('vm')
+        if 'engagement' in kwargs:
+            engagement = kwargs.pop('engagement')
+        super(AddVMEngagementForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = VMOnProject
+        fields = ['tester', 'engagement', 'vm']
 
 class EngForm(forms.ModelForm):
     name = forms.CharField(

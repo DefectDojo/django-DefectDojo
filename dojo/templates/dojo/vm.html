@@ -46,7 +46,7 @@
                                         {% if e.engagement.active %}
 						<div class="lineContainer">
 							<a  style="display: inline" class="eng_link" href="{% url 'view_engagement' e.id %}">
-                                                {% if e.engagement.name %}{{e.tester}} - {{ e.engagement.name }} {% endif %}{{ e.engagement.target_start }}</a>
+                                                {% if e.engagement.name %}<i class="fa fa-user fa-fw"></i>{{e.tester}} - <i class="fa fa-inbox fa-fw"></i> {{ e.engagement.name }} {% endif %}{{ e.engagement.target_start }}</a>
 							| Lead: {{ e.engagement.lead.first_name }}
                                                         |
                                                         {%  for test in e.engagement.test_set.all %}

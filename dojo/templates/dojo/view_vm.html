@@ -12,43 +12,124 @@
 
 <div class="row">
   <div id="tests" class="col-md-8">
-      <div class="panel panel-default">
-          <div class="panel-heading">
-              <div class="clearfix">
-                  <h4 class="pull-left">
-                      Description
-                  </h4>
-
-                  <div class="dropdown pull-right">
-                      <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
-                              data-toggle="dropdown" aria-expanded="true">
-                          <span class="fa fa-bars"></span>
-                          <span class="caret"></span>
-                      </button>
-                      <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                          <li role="presentation">
-                              <a class="" href="{% url 'edit_vm' vm.id %}">
-                                  <i class="fa fa-pencil-square-o"></i> Edit Virtual Machine
-                              </a>
-                          </li>
-
-                          <li role="presentation">
-                              <a class="" href="{% url 'delete_vm' vm.id %}">
-                                  <i class="fa fa-close"></i> Delete Virtual Machine
-                              </a>
-                          </li>
-                      </ul>
-                  </div>
-              </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <div class="clearfix">
+          <h4 class="pull-left">Virtual Machine Description</h4>
+          <div class="dropdown pull-right">
+            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+              data-toggle="dropdown" aria-expanded="true">
+              <span class="fa fa-bars"></span>
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+              <li role="presentation">
+                <a class="" href="{% url 'edit_vm' vm.id %}">
+                  <i class="fa fa-pencil-square-o"></i> Edit Virtual Machine
+                </a>
+              </li>
+              <li role="presentation">
+                <a class="" href="{% url 'delete_vm' vm.id %}">
+                  <i class="fa fa-close"></i> Delete Virtual Machine
+                </a>
+              </li>
+            </ul>
           </div>
-            <div class="panel-body">
-              {% if vm.description %}
-                {{ vm.description|markdown_render }}
-              {% else %}
-                <small class="text-muted"><em>No virtual machine description.</em></small>
-              {% endif %}
-            </div>
         </div>
+      </div>
+      <div class="panel-body">
+        {% if vm.description %}
+          {{ vm.description|markdown_render }}
+        {% else %}
+          <small class="text-muted"><em>No virtual machine description.</em></small>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="panel panel-default table-responsive">
+      <div class="panel-heading">
+        <h4> Active Engagements ({{vm.current_uses.count}})
+        <a title="Add New Engagement" class="pull-right btn btn-sm btn-primary" href="{% url 'add_vm_engagement' vm.id %}"><span
+          class="fa fa-plus"></span> </a>
+        </h4>
+      </div>
+        {% if vm.current_uses.count == 0 %}
+          <div class="panel-body">
+            <p class="text-muted">No active engagements found.</p>
+          </div>
+        {% else %}
+          <div class="table-responsive">
+            <table class="tablesorter-bootstrap table table-condensed table-striped table-hover">
+              <thead>
+                <tr>
+                  <th>Company Name</th>
+                  <th>Engagement Name</th>
+                  <th>Date</th>
+                  <th>Tester Assigned</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for eng in vm.current_uses %}
+                  <tr>
+                    <td>{{eng.engagement.product}}</td>
+                    <td style="width: 250px;">
+                      <a href="{% url 'view_engagement' eng.engagement.id %}" data-toggle="tooltip" data-placement="bottom" title="{{ eng.engagement.name|default:"N/A" }}">
+                        {{ eng.engagement.name|truncatechars:35|default:"N/A" }}</a>
+                    </td>
+                    <td style="width: 200px;">
+                      <a target="#" data-toggle="tooltip" data-placement="bottom" title="{{ eng.engagement.target_start|date:"l, jS F Y" }} - {{ eng.engagement.target_end|date:"l, jS F Y" }}">
+                        {{ eng.engagement.target_start|date:"jS F" }} {% if eng.engagement.target_start|datediff_time:eng.engagement.target_end != "1 day" %} - {{ eng.engagement.target_end|date:"jS F" }}{% endif %}
+                      </a>
+                    </td>
+                    <td>{{eng.tester}}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
+      </div>
+
+    <div class="panel panel-default table-responsive">
+      <div class="panel-heading">
+        <h4> Historical Engagements ({{vm.past_uses.count}})</h4>
+      </div>
+        {% if vm.past_uses.count == 0 %}
+          <div class="panel-body">
+            <p class="text-muted">No historical engagements found.</p>
+          </div>
+        {% else %}
+          <div class="table-responsive">
+            <table class="tablesorter-bootstrap table table-condensed table-striped table-hover">
+              <thead>
+                <tr>
+                  <th>Company Name</th>
+                  <th>Engagement Name</th>
+                  <th>Date</th>
+                  <th>Tester Assigned</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for eng in vm.past_uses %}
+                  <tr>
+                    <td>{{eng.engagement.product}}</td>
+                    <td style="width: 250px;">
+                      <a href="{% url 'view_engagement' eng.engagement.id %}" data-toggle="tooltip" data-placement="bottom" title="{{ eng.engagement.name|default:"N/A" }}">
+                        {{ eng.engagement.name|truncatechars:35|default:"N/A" }}</a>
+                    </td>
+                    <td style="width: 200px;">
+                      <a target="#" data-toggle="tooltip" data-placement="bottom" title="{{ eng.engagement.target_start|date:"l, jS F Y" }} - {{ eng.engagement.target_end|date:"l, jS F Y" }}">
+                        {{ eng.engagement.target_start|date:"jS F" }} {% if eng.engagement.target_start|datediff_time:eng.engagement.target_end != "1 day" %} - {{ eng.engagement.target_end|date:"jS F" }}{% endif %}
+                      </a>
+                    </td>
+                    <td>{{eng.tester}}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
+      </div>
 
 <!-- Sidebar -->
 </div>
@@ -61,20 +142,6 @@
     <div class="table-responsive">
       <table class="table table-striped">
         <tbody>
-          <tr>
-            <td style="width: 150px;"><strong>Status</strong></td>
-            <td>
-              {% if vm.status == "Blocked" %}
-              <em class="text-danger">
-              {% elif vm.status == "On Hold" %}
-              <em class="text-warning">
-              {% else %}
-              <em>
-              {% endif %}
-              {{ vm.status }}
-            </em>
-            </td>
-          </tr>
           <tr>
             <td><strong>Dates Till Unused</strong></td>
             <td>{{ vm.days_till_free }}</td>
@@ -89,13 +156,16 @@
           </tr>
           <tr>
             <td><strong>Current Users</strong></td>
-            <td>{{ vm.current_uses.count }}
+            <td>
               {% if vm.total_uses_count > 0 %}
+                <span class="badge badge-count badge-count{{vm.current_uses.count}}">{{ vm.current_uses.count }}</span>
                 <ol>
                   {% for e in vm.vm.all %}
                     <li>{{e.tester}}</li>
                   {% endfor %}
                 </ol>
+              {% else %}
+                None
               {% endif %}
             </td>
           </tr>
@@ -123,7 +193,7 @@
           </thead>
           <tbody>
              <tr>
-               <td><a href="{{vm.vm.rdp_link}}">{{vm.fqdn}}</a></td>
+               <td><a href="rdp://{{vm.fqdn}}=s:{{request.user.username}}:3389">{{vm.fqdn}}</a></td>
              </tr>
           </tbody>
         </table>
@@ -147,7 +217,7 @@
             });
 
             $(document).on('keypress', null, 'r', function () {
-                window.location.assign('{{vm.vm.rdp_link}}');
+                window.location.assign("rdp://{{vm.fqdn}}=s:{{request.user.username}}:3389");
             });
 
             $(document).ready(function(){
