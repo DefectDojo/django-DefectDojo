@@ -1,7 +1,7 @@
 celery==4.1.0
 coverage==4.5.1
 defusedxml==0.5.0
-Django==1.11.11
+Django>=1.11.18
 django-auditlog==0.4.5
 django-custom-field==2.9
 django-filter==1.0.4
@@ -33,7 +33,7 @@ pytz==2017.3
 requests==2.18.4
 sqlalchemy  # Required by Celery broker transport
 supervisor==3.3.3
-urllib3==1.22
+urllib3>=1.23
 vobject==0.9.5
 asteval==0.9.12
 Markdown==2.6.11
