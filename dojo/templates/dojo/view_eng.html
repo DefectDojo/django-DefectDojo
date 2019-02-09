@@ -306,6 +306,50 @@
     <div id="risk" class="col-md-12">
         <div class="panel panel-default">
             <div class="panel-heading">
+                <h4> Virtual Machines
+                    {% if request.user.is_staff %}
+                        <a title="Add Virtual Machine" class="pull-right btn btn-sm btn-primary"
+                           href="{% url 'add_vm_engagement' eng.id %}"><span class="fa fa-plus"></span></a>
+                        </a>
+                    {% endif %}
+                </h4>
+            </div>
+            {% if  eng.eng %}
+                <div class="table-responsive">
+                    <table id="open_findings"
+                           class="tablesorter-bootstrap table table-condensed table-striped">
+                        <thead>
+                        <tr>
+                            <th>Tester</th>
+                            <th>Virtual Machine</th>
+                            <th>RDP Link</th>
+                        </thead>
+                        <tbody>
+                        {% for vm in eng.eng.all %}
+                            <tr {% if vm.tester.username == request.user.username %}style="background-color: rgb(255, 255, 123); !important"{% endif %}>
+                                <td>{{ vm.tester }}</td>
+                                <td>{{ vm.vm.short_name }}</td>
+                                <td><a href="rdp://{{vm.vm.fqdn}}=s:{{request.user.username}}:3389">{{vm.vm.fqdn}}</a></td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="panel-body">
+                    <small class="text-muted"><em>No Virtual Machines Assigned.</em></small>
+                </div>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+<div class="row">
+    <div id="risk" class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
                 <h4> Risk Acceptance
                     {% if can_add_risk %}
                         <a title="Add Risk Acceptance" class="pull-right btn btn-sm btn-primary"

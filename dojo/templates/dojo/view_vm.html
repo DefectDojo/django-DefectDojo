@@ -66,6 +66,7 @@
                   <th>Engagement Name</th>
                   <th>Date</th>
                   <th>Tester Assigned</th>
+                  <th>Delete</th>
                 </tr>
               </thead>
               <tbody>
@@ -82,6 +83,11 @@
                       </a>
                     </td>
                     <td>{{eng.tester}}</td>
+                    <td>
+                      <a href="{% url 'delete_vm_engagement' eng.id %}" class="text-danger">
+                        <i class="fa fa-trash"></i>
+                      </a>
+                    </td>
                   </tr>
                 {% endfor %}
               </tbody>
@@ -157,10 +163,10 @@
           <tr>
             <td><strong>Current Users</strong></td>
             <td>
-              {% if vm.total_uses_count > 0 %}
+              {% if vm.current_uses.count > 0 %}
                 <span class="badge badge-count badge-count{{vm.current_uses.count}}">{{ vm.current_uses.count }}</span>
                 <ol>
-                  {% for e in vm.vm.all %}
+                  {% for e in vm.current_uses.all %}
                     <li>{{e.tester}}</li>
                   {% endfor %}
                 </ol>

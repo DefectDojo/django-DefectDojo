@@ -18,12 +18,12 @@ from django.shortcuts import render, get_object_or_404
 #from time import strftime
 
 from dojo.filters import VMFilter
-from dojo.forms import VMForm, DeleteVMForm, AddVMEngagementForm
+from dojo.forms import VMForm, DeleteVMForm, AddVMEngagementForm, DeleteVMEngagementForm
 #    CheckForm, \
 #    UploadThreatForm, UploadRiskForm, NoteForm, DoneForm, \
 #    EngForm, TestForm, ReplaceRiskAcceptanceForm, AddFindingsRiskAcceptanceForm, DeleteEngagementForm, ImportScanForm, \
 #    JIRAFindingForm, CredMappingForm
-from dojo.models import VM
+from dojo.models import VM, VMOnEngagement
 #Finding, Product, Engagement, Test, \
 #from dojo.models import Finding, Product, Engagement, Test, \
 #    Check_List, Test_Type, Notes, \
@@ -153,6 +153,7 @@ def delete_vm(request, id):
         'rels': rels,
     })
 
+@user_passes_test(lambda u: u.is_staff)
 def add_vm_engagement(request, id):
     if request.method == 'POST':
         form = AddVMEngagementForm(request.POST)
@@ -172,6 +173,37 @@ def add_vm_engagement(request, id):
     add_breadcrumb(title="New Engagement for VM", top_level=False, request=request)
     return render(request, 'dojo/new_vm_eng.html', {
         'form': form,
+    })
+
+@user_passes_test(lambda u: u.is_staff)
+def delete_vm_engagement(request, id):
+    vmoneng = get_object_or_404(VMOnEngagement, pk=id)
+    form = DeleteVMEngagementForm(instance=vmoneng)
+
+    from django.contrib.admin.utils import NestedObjects
+    from django.db import DEFAULT_DB_ALIAS
+
+    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+    collector.collect([vmoneng])
+    rels = collector.nested()
+
+    if request.method == 'POST':
+        if 'id' in request.POST and str(vmoneng.id) == request.POST['id']:
+            form = DeleteVMEngagementForm(request.POST, instance=vmoneng)
+            if form.is_valid():
+                vmid = vmoneng.vm.id #for the reverse http response
+                vmoneng.delete()
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    'Virtual Machine removed from engagement.',
+                    extra_tags='alert-success')
+                return HttpResponseRedirect(reverse("view_vm", args=(vmid,)))
+
+    return render(request, 'dojo/delete_vm_eng.html', {
+        'vmoneng': vmoneng,
+        'form': form,
+        'rels': rels,
     })
 
 @user_passes_test(lambda u: u.is_staff)

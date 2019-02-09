@@ -19,7 +19,7 @@ from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
     JIRA_Issue, JIRA_PKey, JIRA_Conf, UserContactInfo, Tool_Type, Tool_Configuration, Tool_Product_Settings, \
     Cred_User, Cred_Mapping, System_Settings, Notifications, Languages, Language_Type, App_Analysis, Objects, \
     Benchmark_Product, Benchmark_Requirement, Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, \
-    VM, VMOnProject
+    VM, VMOnEngagement
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
 
@@ -528,6 +528,7 @@ class VMForm(forms.ModelForm):
         model = VM
         exclude = ['']
 
+
 class DeleteVMForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())
@@ -535,6 +536,7 @@ class DeleteVMForm(forms.ModelForm):
     class Meta:
         model = VM
         exclude = ['short_name', 'description', 'IP', 'externalIP']
+
 
 class AddVMEngagementForm(forms.ModelForm):
 
@@ -548,8 +550,18 @@ class AddVMEngagementForm(forms.ModelForm):
         super(AddVMEngagementForm, self).__init__(*args, **kwargs)
 
     class Meta:
-        model = VMOnProject
+        model = VMOnEngagement
         fields = ['tester', 'engagement', 'vm']
+
+
+class DeleteVMEngagementForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = VMOnEngagement
+        exclude = ('tester', 'engagement', 'vm')
+
 
 class EngForm(forms.ModelForm):
     name = forms.CharField(

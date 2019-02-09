@@ -2077,17 +2077,17 @@ class VM(models.Model):
         return "%s.ndepthsecurity.net" %(self.short_name)
 
     def total_uses_count(self):
-        return VMOnProject.objects.filter(vm=self).count()
+        return VMOnEngagement.objects.filter(vm=self).count()
 
     def current_uses(self):
-        return VMOnProject.objects.filter(vm=self, engagement__active=True)
+        return VMOnEngagement.objects.filter(vm=self, engagement__active=True)
 
     def past_uses(self):
-        return VMOnProject.objects.filter(vm=self, engagement__active=False)
+        return VMOnEngagement.objects.filter(vm=self, engagement__active=False)
 
     def days_till_free(self):
         days = []
-        for p in VMOnProject.objects.filter(vm=self):
+        for p in VMOnEngagement.objects.filter(vm=self):
             days.append((p.engagement.target_end - get_current_datetime().date()).days)
         return max(days) if days else 'Free'
 
@@ -2106,18 +2106,21 @@ class VMAdmin(admin.ModelAdmin):
 admin.site.register(VM, VMAdmin)
 
 
-class VMOnProject(models.Model):
-    tester     = models.ForeignKey(User, on_delete=models.PROTECT, related_name='tester')
+class VMOnEngagement(models.Model):
+    tester     = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='tester', null=True)
     engagement = models.ForeignKey(Engagement, null=True, blank=True,
                                    related_name="eng")
-    vm         = models.ForeignKey(VM, on_delete=models.PROTECT, related_name='vm', blank=True, null=True)
+    vm         = models.ForeignKey(VM, on_delete=models.SET_NULL, related_name='vm', blank=True, null=True)
+
+    def __str__(self):
+        return "%s: %s" %(self.engagement.product, self.engagement)
 
     class Meta:
-        verbose_name_plural = "VMs On Project"
+        verbose_name_plural = "VMs On Engagement"
 
 
-class VMOnProjectAdmin(admin.ModelAdmin):
+class VMOnEngagementAdmin(admin.ModelAdmin):
   list_filter = ['engagement', 'tester', 'vm']
   list_display = ('engagement', 'tester', 'vm')
 
-admin.site.register(VMOnProject, VMOnProjectAdmin)
+admin.site.register(VMOnEngagement, VMOnEngagementAdmin)
