@@ -9,7 +9,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 
 from dojo.filters import DevelopmentEnvironmentFilter
-from dojo.forms import Development_EnvironmentForm
+from dojo.forms import Development_EnvironmentForm, Delete_Development_EnvironmentForm
 from dojo.models import Development_Environment
 from dojo.utils import get_page_items, add_breadcrumb, get_system_setting
 
@@ -57,21 +57,34 @@ def add_dev_env(request):
 @user_passes_test(lambda u: u.is_staff)
 def edit_dev_env(request, deid):
     de = get_object_or_404(Development_Environment, pk=deid)
-    form = Development_EnvironmentForm(instance=de)
-    if request.method == 'POST':
-        form = Development_EnvironmentForm(request.POST, instance=de)
-        if form.is_valid():
-            de = form.save()
+    form1 = Development_EnvironmentForm(instance=de)
+    form2 = Delete_Development_EnvironmentForm(instance=de)
+    if request.method == 'POST' and request.POST.get('edit_dev_env'):
+        form1 = Development_EnvironmentForm(request.POST, instance=de)
+        if form1.is_valid():
+            de = form1.save()
             messages.add_message(
                 request,
                 messages.SUCCESS,
                 'Environment updated successfully.',
                 extra_tags='alert-success')
             return HttpResponseRedirect(reverse('dev_env'))
+    
+    if request.method == 'POST' and request.POST.get('delete_dev_env'):
+        form2 = Development_EnvironmentForm(request.POST, instance=de)
+        if form2.is_valid():
+            de.delete()
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Environment deleted successfully.',
+                extra_tags='alert-success')
+            return HttpResponseRedirect(reverse('dev_env'))
+
     add_breadcrumb(title="Edit Environment", top_level=False, request=request)
     return render(request, 'dojo/edit_dev_env.html', {
         'name': 'Edit Environment',
         'metric': False,
         'user': request.user,
-        'form': form,
+        'form1': form1,
         'de': de})
