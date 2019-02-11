@@ -151,7 +151,7 @@ class Development_EnvironmentForm(forms.ModelForm):
         model = Development_Environment
         fields = ['name']
 
-class Delete_Development_EnvironmentForm(forms.ModelForm):
+class Delete_Dev_EnvironmentForm(forms.ModelForm):
     class Meta:
         model = Development_Environment
         exclude = ['name']
