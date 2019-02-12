@@ -105,7 +105,8 @@ class VeracodeXMLParser(object):
                                 description=description +
                                 "\n\nVulnerable Module: " +
                                 flaw.attrib['module'] + ' Type: ' +
-                                flaw.attrib['type'],
+                                flaw.attrib['type'] + ' Issue ID: ' +
+                                flaw.attrib['issueid'],
                                 mitigated=mitigated,
                                 mitigated_by_id=mitigated_by_id,
                                 severity=sev,
@@ -132,7 +133,8 @@ class VeracodeXMLParser(object):
                                 description=description +
                                 "\n\nVulnerable Module: " +
                                 flaw.attrib['module'] + ' Type: ' +
-                                flaw.attrib['type'],
+                                flaw.attrib['type'] + ' Issue ID: ' +
+                                flaw.attrib['issueid'],
                                 severity=sev,
                                 numerical_severity=Finding.
                                 get_numerical_severity(sev),
