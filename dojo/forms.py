@@ -139,6 +139,11 @@ class Product_TypeForm(forms.ModelForm):
         model = Product_Type
         fields = ['name', 'critical_product', 'key_product']
 
+class Delete_Product_TypeForm(forms.ModelForm):
+    class Meta:
+        model = Product_Type
+        exclude = ['name', 'critical_product', 'key_product']
+
 
 class Test_TypeForm(forms.ModelForm):
     class Meta:
