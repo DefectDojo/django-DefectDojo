@@ -90,7 +90,7 @@ Quarterly.txt
 components/*
 !components/package.json
 dojo/static/*
-!dojo/static/dojo/*
+!dojo/static/dojo/
 dojo/media
 /static
 /media
