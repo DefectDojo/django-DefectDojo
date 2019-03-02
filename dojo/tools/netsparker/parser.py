@@ -31,11 +31,10 @@ class NetsparkerParser(object):
             cwe = item["Classification"]["Cwe"]
             sev = item["Severity"]
             mitigation = cleantags(item["RemedialProcedure"])
-            references = cleantags(item["ExternalReferences"])
+            references = cleantags(item["RemedyReferences"])
             url = item["Url"]
             impact = cleantags(item["Impact"])
             dupe_key = title + item["Name"] + item["Url"]
-            unsaved_req_resp = list()
              
             if dupe_key in dupes:
                 find = dupes[dupe_key]
