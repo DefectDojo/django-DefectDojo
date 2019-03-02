@@ -159,8 +159,73 @@ change_os_config() {
 
 # Function to handle interactive changes to DefectDojo's admin login
 change_admin_login() {
+	# echo ""
+	# echo "Prompts for DefectDojo's admin login HERE"
+	ANS="invalid"
 	echo ""
-	echo "Prompts for DefectDojo's admin login HERE"
+	while [ $ANS = "invalid" ]
+    do
+	    read -p "  Change DefectDojo's admin name from $ADMIN_USER? (1) Yes, (2) No, keep the default: " LG_Q
+	    case $LG_Q in
+		    1)
+		    echo ""
+		    read -p "    Enter a new DefectDojo's admin name: " ADMIN_USER
+		    ANS="valid"
+		    ;;
+		    2)
+		    echo ""
+		    echo "  Keeping DefectDojo's admin name of $ADMIN_USER"
+		    ANS="valid"
+		    ;;
+		    *)
+		    echo "    Error: Please enter 1, or 2"
+		    ;;
+		esac
+    done
+	
+	ANS="invalid"
+	echo ""
+	while [ $ANS = "invalid" ]
+    do
+	    read -p "  Change DefectDojo's admin password from $ADMIN_PASS? (1) Yes, (2) No, keep the default: " LG_Q
+	    case $LG_Q in
+		    1)
+		    echo ""
+		    read -p "    Enter a new DefectDojo's admin password: " ADMIN_PASS
+		    ANS="valid"
+		    ;;
+		    2)
+		    echo ""
+		    echo "  Keeping DefectDojo's admin password of $ADMIN_PASS"
+		    ANS="valid"
+		    ;;
+		    *)
+		    echo "    Error: Please enter 1, or 2"
+		    ;;
+		esac
+    done
+
+	ANS="invalid"
+	echo ""
+	while [ $ANS = "invalid" ]
+    do
+	    read -p "  Change DefectDojo's admin email from $ADMIN_EMAIL? (1) Yes, (2) No, keep the default: " LG_Q
+	    case $LG_Q in
+		    1)
+		    echo ""
+		    read -p "    Enter a new DefectDojo's admin email: " ADMIN_EMAIL
+		    ANS="valid"
+		    ;;
+		    2)
+		    echo ""
+		    echo "  Keeping DefectDojo's admin email of $ADMIN_EMAIL"
+		    ANS="valid"
+		    ;;
+		    *)
+		    echo "    Error: Please enter 1, or 2"
+		    ;;
+		esac
+    done
 }
 
 # Prompt user for config options needed for interactive install
