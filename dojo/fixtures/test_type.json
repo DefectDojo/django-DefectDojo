@@ -208,6 +208,13 @@
       },
       "model": "dojo.test_type",
       "pk":28
+},
+{
+    "fields": {
+      "name": "Netsparker Scanner"
+    },
+    "model": "dojo.test_type",
+    "pk": 29
 }
 
 ]
