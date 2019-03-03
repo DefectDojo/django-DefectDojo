@@ -97,6 +97,10 @@ function ubuntu_wkhtml_install() {
 	    wget https://downloads.wkhtmltopdf.org/0.12/0.12.5/wkhtmltox_0.12.5-1.xenial_amd64.deb
 	    dpkg -i wkhtmltox_0.12.5-1.xenial_amd64.deb 
 	    ;;
+        "19")
+        wget https://downloads.wkhtmltopdf.org/0.12/0.12.5/wkhtmltox_0.12.5-1.bionic_amd64.deb 
+        apt install -y ./wkhtmltox_0.12.5-1.bionic_amd64.deb 
+        ;;
 	    *)
 		echo "    Error: Unsupported OS version - $INSTALL_OS_VER"
 		exit 1
@@ -297,6 +301,11 @@ function install_linux() {
 		    echo "  Installing database on CentOS"
 		    echo "  TBD: DB install for CentOS"
 		    ;;
+		    "Linux Mint")
+		    echo "  Installing database on Ubuntu"
+		    ubuntu_db_install 
+		    ubuntu_db_config
+		    ;;
 		    *)
 		    echo "    Error: Unsupported OS"
 		    exit 1
@@ -320,6 +329,14 @@ function install_linux() {
         echo "  Installing database on CentOS"
 		echo "  TBD: DB install for CentOS"
 		;;
+	    "Linux Mint")
+	    # OS Packages needed by DefectDojo
+	    ubuntu_os_packages
+	    ubuntu_wkhtml_install
+	    # Install DefectDojo
+	    create_dojo_settings
+	    ubuntu_dojo_install
+	    ;;
 		*)
 		echo "    Error: Unsupported OS"
 		exit 1
