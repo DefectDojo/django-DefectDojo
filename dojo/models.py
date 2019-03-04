@@ -3,7 +3,6 @@ import hashlib
 import logging
 import os
 import re
-from datetime import datetime
 from uuid import uuid4
 from django.conf import settings
 from watson import search as watson
@@ -12,6 +11,7 @@ from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.core.validators import RegexValidator
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
 from django.utils.timezone import now
@@ -78,6 +78,9 @@ class System_Settings(models.Model):
                                               "oldest will be deleted.")
     enable_jira = models.BooleanField(default=False,
                                       verbose_name='Enable JIRA integration',
+                                      blank=False)
+    enable_jira_web_hook = models.BooleanField(default=False,
+                                      verbose_name='Enable JIRA web hook. Please note: It is strongly recommended to whitelist the Jira server using a proxy such as Nginx.',
                                       blank=False)
     jira_choices = (('Critical', 'Critical'),
                     ('High', 'High'),
@@ -276,7 +279,7 @@ class Contact(models.Model):
 
 
 class Product_Type(models.Model):
-    name = models.CharField(max_length=300)
+    name = models.CharField(max_length=255, unique=True)
     critical_product = models.BooleanField(default=False)
     key_product = models.BooleanField(default=False)
     updated = models.DateTimeField(auto_now=True, null=True)
@@ -349,7 +352,7 @@ class Report_Type(models.Model):
 
 
 class Test_Type(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, unique=True)
     static_tool = models.BooleanField(default=False)
     dynamic_tool = models.BooleanField(default=False)
 
@@ -363,6 +366,37 @@ class Test_Type(models.Model):
         bc = [{'title': self.__unicode__(),
                'url': None}]
         return bc
+
+
+class DojoMeta(models.Model):
+    name = models.CharField(max_length=120)
+    value = models.CharField(max_length=300)
+    product = models.ForeignKey('Product',
+                                on_delete=models.CASCADE,
+                                null=True,
+                                editable=False,
+                                related_name='product_meta')
+    endpoint = models.ForeignKey('Endpoint',
+                                 on_delete=models.CASCADE,
+                                 null=True,
+                                 editable=False,
+                                 related_name='endpoint_meta')
+
+    """
+    Verify that this metadata entry belongs only to one object.
+    """
+    def clean(self):
+        if self.product_id is None and self.endpoint_id is None:
+            raise ValidationError('Metadata entries need either a product or an endpoint')
+        if self.product_id is not None and self.endpoint_id is not None:
+            raise ValidationError('Metadata entries may not have both a product and an endpoint')
+
+    def __unicode__(self):
+        return "%s: %s" % (self.name, self.value)
+
+    class Meta:
+        unique_together = (('product', 'name'),
+                           ('endpoint', 'name'))
 
 
 class Product(models.Model):
@@ -418,7 +452,7 @@ class Product(models.Model):
         (NONE_CRITICALITY, _('None')),
     )
 
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=4000)
 
     '''
@@ -755,6 +789,7 @@ class Engagement(models.Model):
     source_code_management_server = models.ForeignKey(Tool_Configuration, null=True, blank=True, verbose_name="SCM Server", help_text="Source code server for CI/CD test", related_name='source_code_management_server')
     source_code_management_uri = models.CharField(max_length=600, null=True, blank=True, verbose_name="Repo", help_text="Resource link to source code")
     orchestration_engine = models.ForeignKey(Tool_Configuration, verbose_name="Orchestration Engine", help_text="Orchestration service responsible for CI/CD test", null=True, blank=True, related_name='orchestration')
+    deduplication_on_engagement = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['-target_start']
@@ -797,7 +832,7 @@ class Endpoint(models.Model):
     path = models.CharField(null=True, blank=True, max_length=500,
                             help_text="The location of the resource, it should start with a '/'. For example"
                                       "/endpoint/420/edit")
-    query = models.CharField(null=True, blank=True, max_length=5000,
+    query = models.CharField(null=True, blank=True, max_length=1000,
                              help_text="The query string, the question mark should be omitted."
                                        "For example 'group=4&team=8'")
     fragment = models.CharField(null=True, blank=True, max_length=500,
@@ -927,6 +962,7 @@ class Test(models.Model):
     engagement = models.ForeignKey(Engagement, editable=False)
     lead = models.ForeignKey(User, editable=True, null=True)
     test_type = models.ForeignKey(Test_Type)
+    description = models.TextField(null=True, blank=True)
     target_start = models.DateTimeField()
     target_end = models.DateTimeField()
     estimated_time = models.TimeField(null=True, blank=True, editable=False)
@@ -940,6 +976,9 @@ class Test(models.Model):
 
     updated = models.DateTimeField(auto_now=True, null=True)
     created = models.DateTimeField(auto_now_add=True, null=True)
+
+    def test_type_name(self):
+        return self.test_type.name
 
     def __unicode__(self):
         return "%s (%s)" % (self.test_type,
@@ -1021,7 +1060,7 @@ class Finding(models.Model):
     sourcefile = models.TextField(null=True, blank=True, editable=False)
     param = models.TextField(null=True, blank=True, editable=False)
     payload = models.TextField(null=True, blank=True, editable=False)
-    hash_code = models.TextField(null=True, blank=True, editable=False)
+    hash_code = models.TextField(null=True, blank=True, editable=True)
 
     line = models.IntegerField(null=True, blank=True,
                                verbose_name="Line number")
@@ -1038,15 +1077,15 @@ class Finding(models.Model):
     class Meta:
         ordering = ('numerical_severity', '-date', 'title')
 
-    def get_hash_code(self):
-        hash_string = self.title + str(self.cwe) + str(self.line) + str(self.file_path)
-
+    def compute_hash_code(self):
+        hash_string = self.title + str(self.cwe) + str(self.line) + str(self.file_path) + str(self.description)
         if self.dynamic_finding:
-            endpoint_str = ""
+            endpoint_str = u''
             for e in self.endpoints.all():
                 endpoint_str += str(e)
-            hash_string = endpoint_str
-        hash_string = hash_string.decode('utf-8').strip()
+            if endpoint_str:
+                hash_string = hash_string + endpoint_str
+        hash_string = hash_string.strip()
         return hashlib.sha256(hash_string.encode('utf-8')).hexdigest()
 
     def duplicate_finding_set(self):
@@ -1118,14 +1157,13 @@ class Finding(models.Model):
 
         return ", ".join([str(s) for s in status])
 
+    @property
     def age(self):
         if self.mitigated:
-            days = (self.mitigated.date() - datetime.combine(self.date,
-                                                             datetime.min.time()).date()).days
+            diff = self.mitigated.date() - self.date
         else:
-            days = (get_current_date() - datetime.combine(self.date,
-                                                          datetime.min.time()).date()).days
-
+            diff = get_current_date() - self.date
+        days = diff.days
         return days if days > 0 else 0
 
     def sla(self):
@@ -1134,9 +1172,9 @@ class Finding(models.Model):
         from dojo.utils import get_system_setting
         sla_age = get_system_setting('sla_' + self.severity.lower())
         if sla_age and self.active:
-            sla_calculation = sla_age - self.age()
+            sla_calculation = sla_age - self.age
         elif sla_age and self.mitigated:
-            age = self.age()
+            age = self.age
             if age < sla_age:
                 sla_calculation = 0
             else:
@@ -1173,32 +1211,41 @@ class Finding(models.Model):
         long_desc += '*References*:' + self.references
         return long_desc
 
-    def save(self, dedupe_option=True, rules_option=True, *args, **kwargs):
+    def save(self, dedupe_option=True, false_history=False, rules_option=True, *args, **kwargs):
         # Make changes to the finding before it's saved to add a CWE template
-        if not self.pk:
+        new_finding = False
+        if self.pk is None:
+            false_history = True
             from dojo.utils import apply_cwe_to_template
             self = apply_cwe_to_template(self)
-        super(Finding, self).save(*args, **kwargs)
-        self.hash_code = self.get_hash_code()
+            super(Finding, self).save(*args, **kwargs)
+            # Only compute hash code for new findings.
+            self.hash_code = self.compute_hash_code()
+        else:
+            super(Finding, self).save(*args, **kwargs)
         self.found_by.add(self.test.test_type)
         if self.test.test_type.static_tool:
             self.static_finding = True
         else:
-            self.dyanmic_finding = True
+            self.dynamic_finding = True
         if rules_option:
             from dojo.tasks import async_rules
             from dojo.utils import sync_rules
-            if self.reporter.usercontactinfo.block_execution:
-                sync_rules(self, *args, **kwargs)
-            else:
+            try:
+                if self.reporter.usercontactinfo.block_execution:
+                    sync_rules(self, *args, **kwargs)
+                else:
+                    async_rules(self, *args, **kwargs)
+            except UserContactInfo.DoesNotExist:
                 async_rules(self, *args, **kwargs)
+                pass
         from dojo.utils import calculate_grade
         calculate_grade(self.test.engagement.product)
         # Assign the numerical severity for correct sorting order
         self.numerical_severity = Finding.get_numerical_severity(self.severity)
         super(Finding, self).save()
+        system_settings = System_Settings.objects.get()
         if (dedupe_option):
-            system_settings = System_Settings.objects.get()
             if system_settings.enable_deduplication:
                 from dojo.tasks import async_dedupe
                 from dojo.utils import sync_dedupe
@@ -1210,8 +1257,7 @@ class Finding(models.Model):
                 except:
                     async_dedupe.delay(self, *args, **kwargs)
                     pass
-
-            if system_settings.false_positive_history:
+        if system_settings.false_positive_history and false_history:
                 from dojo.tasks import async_false_history
                 from dojo.utils import sync_false_history
                 try:
@@ -1543,7 +1589,7 @@ class JIRA_Conf(models.Model):
 
 
 class JIRA_Issue(models.Model):
-    jira_id = models.CharField(max_length=200)
+    jira_id = models.CharField(max_length=200, unique=True)
     jira_key = models.CharField(max_length=200)
     finding = models.OneToOneField(Finding, null=True, blank=True)
     engagement = models.OneToOneField(Engagement, null=True, blank=True)
@@ -1579,6 +1625,9 @@ class JIRA_PKey(models.Model):
     enable_engagement_epic_mapping = models.BooleanField(default=False,
                                                          blank=True)
     push_notes = models.BooleanField(default=False, blank=True)
+
+    def __unicode__(self):
+        return self.product.name + " | " + self.project_key
 
 
 NOTIFICATION_CHOICES = (
