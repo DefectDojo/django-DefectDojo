@@ -3,7 +3,7 @@ import os
 import re
 import time
 import unittest
-
+import sys
 import requests
 from selenium import webdriver
 from selenium.common.exceptions import NoAlertPresentException
@@ -107,5 +107,14 @@ class Login(unittest.TestCase):
         self.assertEqual([], self.verificationErrors)
 
 
+def suite():
+    suite = unittest.TestSuite()
+    suite.addTest(Login('setUp'))
+    suite.addTest(Login('login_page'))
+    return suite
+
+
 if __name__ == "__main__":
-    unittest.main()
+    runner = unittest.TextTestRunner(descriptions=True, failfast=True)
+    ret = not runner.run(suite()).wasSuccessful()
+    sys.exit(ret)

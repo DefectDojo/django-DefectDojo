@@ -9,7 +9,6 @@ from Crypto.Cipher import AES
 from calendar import monthrange
 from datetime import date, datetime
 from math import pi, sqrt
-
 import vobject
 import requests
 from dateutil.relativedelta import relativedelta, MO
@@ -37,54 +36,79 @@ Helper functions for DefectDojo
 
 
 def sync_false_history(new_finding, *args, **kwargs):
-    eng_findings_cwe = Finding.objects.filter(
-        test__engagement__product=new_finding.test.engagement.product,
-        cwe=new_finding.cwe,
-        test__test_type=new_finding.test.test_type,
-        false_p=True).exclude(id=new_finding.id).exclude(cwe=None).exclude(
-            endpoints=None)
-    eng_findings_title = Finding.objects.filter(
-        test__engagement__product=new_finding.test.engagement.product,
-        title=new_finding.title,
-        test__test_type=new_finding.test.test_type,
-        false_p=True).exclude(id=new_finding.id).exclude(endpoints=None)
-    total_findings = eng_findings_cwe | eng_findings_title
-    if total_findings.count() > 0:
-        new_finding.false_p = True
-        super(Finding, new_finding).save(*args, **kwargs)
-
-
-def sync_dedupe(new_finding, *args, **kwargs):
-    eng_hash_code = Finding.objects.filter(
-        test__engagement__product=new_finding.test.engagement.product,
-        hash_code=new_finding.hash_code, duplicate=False).exclude(id=new_finding.id)
-    if eng_hash_code.count() > 0:
-        for find in eng_hash_code:
-            new_finding.duplicate = True
-            new_finding.active = False
-            new_finding.verified = False
-            new_finding.duplicate_finding = find
-            find.duplicate_list.add(new_finding)
-            find.found_by.add(new_finding.test.test_type)
-            super(Finding, new_finding).save(*args, **kwargs)
+    if new_finding.endpoints.count() == 0:
+        eng_findings_cwe = Finding.objects.filter(
+            test__engagement__product=new_finding.test.engagement.product,
+            cwe=new_finding.cwe,
+            test__test_type=new_finding.test.test_type,
+            false_p=True, hash_code=new_finding.hash_code).exclude(id=new_finding.id).exclude(cwe=None)
+        eng_findings_title = Finding.objects.filter(
+            test__engagement__product=new_finding.test.engagement.product,
+            title=new_finding.title,
+            test__test_type=new_finding.test.test_type,
+            false_p=True, hash_code=new_finding.hash_code).exclude(id=new_finding.id)
+        total_findings = eng_findings_cwe | eng_findings_title
     else:
         eng_findings_cwe = Finding.objects.filter(
             test__engagement__product=new_finding.test.engagement.product,
             cwe=new_finding.cwe,
-            static_finding=new_finding.static_finding,
-            dynamic_finding=new_finding.dynamic_finding,
-            date__lte=new_finding.date).exclude(id=new_finding.id).exclude(
-                cwe=0).exclude(duplicate=True)
+            test__test_type=new_finding.test.test_type,
+            false_p=True).exclude(id=new_finding.id).exclude(cwe=None).exclude(endpoints=None)
         eng_findings_title = Finding.objects.filter(
             test__engagement__product=new_finding.test.engagement.product,
             title=new_finding.title,
-            static_finding=new_finding.static_finding,
-            dynamic_finding=new_finding.dynamic_finding,
-            date__lte=new_finding.date).exclude(id=new_finding.id).exclude(
+            test__test_type=new_finding.test.test_type,
+            false_p=True).exclude(id=new_finding.id).exclude(endpoints=None)
+    total_findings = eng_findings_cwe | eng_findings_title
+    if total_findings.count() > 0:
+        new_finding.false_p = True
+        new_finding.active = False
+        new_finding.verified = False
+        super(Finding, new_finding).save(*args, **kwargs)
+
+
+def is_deduplication_on_engamgent(new_finding, to_duplicate_finding):
+    return not new_finding.test.engagement.deduplication_on_engagement and to_duplicate_finding.test.engagement.deduplication_on_engagement
+
+
+def sync_dedupe(new_finding, *args, **kwargs):
+        if new_finding.test.engagement.deduplication_on_engagement:
+            eng_findings_cwe = Finding.objects.filter(
+                test__engagement=new_finding.test.engagement,
+                cwe=new_finding.cwe,
+                static_finding=new_finding.static_finding,
+                dynamic_finding=new_finding.dynamic_finding,
+                date__lte=new_finding.date).exclude(id=new_finding.id).exclude(
+                cwe=0).exclude(duplicate=True)
+            eng_findings_title = Finding.objects.filter(
+                test__engagement=new_finding.test.engagement,
+                title=new_finding.title,
+                static_finding=new_finding.static_finding,
+                dynamic_finding=new_finding.dynamic_finding,
+                date__lte=new_finding.date).exclude(id=new_finding.id).exclude(
                 duplicate=True)
+        else:
+            eng_findings_cwe = Finding.objects.filter(
+                test__engagement__product=new_finding.test.engagement.product,
+                cwe=new_finding.cwe,
+                static_finding=new_finding.static_finding,
+                dynamic_finding=new_finding.dynamic_finding,
+                date__lte=new_finding.date).exclude(id=new_finding.id).exclude(
+                cwe=0).exclude(duplicate=True)
+            eng_findings_title = Finding.objects.filter(
+                test__engagement__product=new_finding.test.engagement.product,
+                title=new_finding.title,
+                static_finding=new_finding.static_finding,
+                dynamic_finding=new_finding.dynamic_finding,
+                date__lte=new_finding.date).exclude(id=new_finding.id).exclude(
+                duplicate=True)
+
         total_findings = eng_findings_cwe | eng_findings_title
         # total_findings = total_findings.order_by('date')
+
         for find in total_findings:
+            if is_deduplication_on_engamgent(new_finding, find):
+                continue
             if find.endpoints.count() != 0 and new_finding.endpoints.count() != 0:
                 list1 = new_finding.endpoints.all()
                 list2 = find.endpoints.all()
@@ -99,6 +123,14 @@ def sync_dedupe(new_finding, *args, **kwargs):
                     break
             elif find.line == new_finding.line and find.file_path == new_finding.file_path and new_finding.static_finding and len(
                     new_finding.file_path) > 0:
+                new_finding.duplicate = True
+                new_finding.active = False
+                new_finding.verified = False
+                new_finding.duplicate_finding = find
+                find.duplicate_list.add(new_finding)
+                find.found_by.add(new_finding.test.test_type)
+                super(Finding, new_finding).save(*args, **kwargs)
+            elif find.hash_code == new_finding.hash_code:
                 new_finding.duplicate = True
                 new_finding.active = False
                 new_finding.verified = False
