@@ -59,6 +59,6 @@ class NetsparkerParser(object):
                                cwe=cwe,
                                static_finding=True)
                 dupes[dupe_key] = find
-                findingdetail = '' 
+                findingdetail = ''
 
         self.items = dupes.values()
