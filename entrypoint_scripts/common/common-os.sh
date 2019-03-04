@@ -102,7 +102,7 @@ bootstrap_install() {
 	
 	# Install any programs needed by the installer
 	case $INSTALL_DISTRO in
-	    "Ubuntu")
+	    "Ubuntu" | "Linux Mint")
 	    echo "  Bootstapping Ubuntu"
 	    echo "  Updating package list"
 	    DEBIAN_FRONTEND=noninteractive apt update
@@ -114,15 +114,6 @@ bootstrap_install() {
 	    "centos")
 	    echo "Bootstapping CentOS"
 	    echo "  TBD: Pre-reqs for CentOS"
-	    ;;
-	    "Linux Mint")
-	    echo "  Bootstapping Linux Mint"
-	    echo "  Updating package list"
-	    DEBIAN_FRONTEND=noninteractive apt update
-	    echo "  Updating $INSTALL_DISTRO packages"
-	    DEBIAN_FRONTEND=noninteractive apt -y upgrade
-	    echo "  Installing packages needed for the installer"
-	    DEBIAN_FRONTEND=noninteractive apt -y install curl sudo python expect wget git gnupg2
 	    ;;
 	    *)
 	    echo "    Error: Unsupported OS"
