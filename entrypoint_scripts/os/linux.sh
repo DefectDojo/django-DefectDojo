@@ -89,7 +89,7 @@ function ubuntu_wkhtml_install() {
 	
 	# case statement on Ubuntu version built against 18.04 or 16.04
 	case $INSTALL_OS_VER in
-	    "18.04")
+	    "18.04" | "19")
         wget https://downloads.wkhtmltopdf.org/0.12/0.12.5/wkhtmltox_0.12.5-1.bionic_amd64.deb 
         apt install -y ./wkhtmltox_0.12.5-1.bionic_amd64.deb 
 	    ;;
@@ -97,10 +97,6 @@ function ubuntu_wkhtml_install() {
 	    wget https://downloads.wkhtmltopdf.org/0.12/0.12.5/wkhtmltox_0.12.5-1.xenial_amd64.deb
 	    dpkg -i wkhtmltox_0.12.5-1.xenial_amd64.deb 
 	    ;;
-        "19")
-        wget https://downloads.wkhtmltopdf.org/0.12/0.12.5/wkhtmltox_0.12.5-1.bionic_amd64.deb 
-        apt install -y ./wkhtmltox_0.12.5-1.bionic_amd64.deb 
-        ;;
 	    *)
 		echo "    Error: Unsupported OS version - $INSTALL_OS_VER"
 		exit 1
@@ -292,7 +288,7 @@ function install_linux() {
 	if [ "$DB_LOCAL" = true ] && [ "$DB_EXISTS" = false ]; then
         # DB is local and needs to be installed	
 		case $INSTALL_DISTRO in
-		    "Ubuntu")
+		    "Ubuntu" | "Linux Mint")
 		    echo "  Installing database on Ubuntu"
 		    ubuntu_db_install 
 		    ubuntu_db_config
@@ -300,11 +296,6 @@ function install_linux() {
 		    "centos")
 		    echo "  Installing database on CentOS"
 		    echo "  TBD: DB install for CentOS"
-		    ;;
-		    "Linux Mint")
-		    echo "  Installing database on Ubuntu"
-		    ubuntu_db_install 
-		    ubuntu_db_config
 		    ;;
 		    *)
 		    echo "    Error: Unsupported OS"
@@ -317,7 +308,7 @@ function install_linux() {
 	# Install OS packages and DefectDojo app
 	echo "Install OS packages on $INSTALL_DISTRO"
 	case $INSTALL_DISTRO in
-	    "Ubuntu")
+	    "Ubuntu" | "Linux Mint")
 	    # OS Packages needed by DefectDojo
 	    ubuntu_os_packages
 	    ubuntu_wkhtml_install
@@ -329,14 +320,6 @@ function install_linux() {
         echo "  Installing database on CentOS"
 		echo "  TBD: DB install for CentOS"
 		;;
-	    "Linux Mint")
-	    # OS Packages needed by DefectDojo
-	    ubuntu_os_packages
-	    ubuntu_wkhtml_install
-	    # Install DefectDojo
-	    create_dojo_settings
-	    ubuntu_dojo_install
-	    ;;
 		*)
 		echo "    Error: Unsupported OS"
 		exit 1
