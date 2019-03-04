@@ -5,16 +5,20 @@ from dojo.models import Finding
 __author__ = "Roy Shoemake"
 __status__ = "Development"
 
+
 # Function to remove HTML tags
 TAG_RE = re.compile(r'<[^>]+>')
+
+
 def cleantags(text):
     return TAG_RE.sub('', text)
+
 
 class NetsparkerParser(object):
     def __init__(self, filename, test):
         data = json.load(filename)
         dupes = dict()
-
+        
         for item in data["Vulnerabilities"]:
             categories = ''
             language = ''
@@ -25,7 +29,7 @@ class NetsparkerParser(object):
             title = ''
             group = ''
             status = ''
-
+            
             title = item["Name"]
             findingdetail = cleantags(item["Description"])
             cwe = item["Classification"]["Cwe"]
