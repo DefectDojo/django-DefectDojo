@@ -18,7 +18,7 @@ class NetsparkerParser(object):
     def __init__(self, filename, test):
         data = json.load(filename)
         dupes = dict()
-        
+
         for item in data["Vulnerabilities"]:
             categories = ''
             language = ''
@@ -29,7 +29,7 @@ class NetsparkerParser(object):
             title = ''
             group = ''
             status = ''
-            
+
             title = item["Name"]
             findingdetail = cleantags(item["Description"])
             cwe = item["Classification"]["Cwe"]
@@ -39,7 +39,7 @@ class NetsparkerParser(object):
             url = item["Url"]
             impact = cleantags(item["Impact"])
             dupe_key = title + item["Name"] + item["Url"]
-             
+
             if dupe_key in dupes:
                 find = dupes[dupe_key]
             else:
@@ -59,6 +59,6 @@ class NetsparkerParser(object):
                                cwe=cwe,
                                static_finding=True)
                 dupes[dupe_key] = find
-                findingdetail = ''
+                findingdetail = '' 
 
         self.items = dupes.values()
