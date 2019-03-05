@@ -37,7 +37,6 @@ services:
       - proxy
     volumes:
       - './docker/static:/opt/django-DefectDojo/static'
-      - './docker/entrypoint.sh:/opt/django-DefectDojo/docker/entrypoint.sh'
 
   mysql:
     command: '--default-authentication-plugin=mysql_native_password'
