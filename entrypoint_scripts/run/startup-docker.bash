@@ -21,33 +21,33 @@ if cat dojo/settings/.env.prod | grep -q "mysql://root:dojodb_install@localhost:
 	# Reset mysql password
 	set_random_mysql_db_pwd
 	DBTYPE=1
-	DEFECT_DOJO_DEFAULT_DATABASE_USER=root
-	DEFECT_DOJO_DEFAULT_DATABASE_HOST=localhost
-	DEFECT_DOJO_DEFAULT_DATABASE_PORT=3306
-	DEFECT_DOJO_DEFAULT_DATABASE_NAME=dojodb
+	DD_DATABASE_USER=root
+	DD_DATABASE_HOST=localhost
+	DD_DATABASE_PORT=3306
+	DD_DATABASE_NAME=dojodb
 
 	# Set the settings file
 	prepare_settings_file
 
 	# Reset admin user or use user supplied password
-	if [[ -z $DEFECT_DOJO_ADMIN_PASSWORD ]]; then
+	if [[ -z $DD_ADMIN_PASSWORD ]]; then
 		DB_ROOT_PASS_LEN=`shuf -i 20-25 -n 1`
-	  DEFECT_DOJO_ADMIN_PASSWORD=`pwgen -scn $DB_ROOT_PASS_LEN 1`
+	  DD_ADMIN_PASSWORD=`pwgen -scn $DB_ROOT_PASS_LEN 1`
 	fi
   sudo chown -R mysql:mysql /var/lib/mysql /var/run/mysqld \
   && sudo service mysql start
-	entrypoint_scripts/common/setup-superuser.expect admin "$DEFECT_DOJO_ADMIN_PASSWORD"
+	entrypoint_scripts/common/setup-superuser.expect admin "$DD_ADMIN_PASSWORD"
 
 	#DB_ROOT_PASS_USER=`pwgen -scn $DB_ROOT_PASS_LEN 1`
-	#entrypoint_scripts/common/setup-superuser.expect product_manager "$DEFECT_DOJO_ADMIN_PASSWORD"
+	#entrypoint_scripts/common/setup-superuser.expect product_manager "$DD_ADMIN_PASSWORD"
 
-	#DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD=`pwgen -scn $DB_ROOT_PASS_LEN 1`
-	#entrypoint_scripts/common/setup-superuser.expect user2 "$DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD"
+	#DD_DATABASE_PASsWORD=`pwgen -scn $DB_ROOT_PASS_LEN 1`
+	#entrypoint_scripts/common/setup-superuser.expect user2 "$DD_DATABASE_PASsWORD"
 
 	echo
 	echo "=============================================================================="
 	echo " SUCCESS! Please login at: http://localhost:$PORT"
-	echo " admin / $DEFECT_DOJO_ADMIN_PASSWORD"
+	echo " admin / $DD_ADMIN_PASSWORD"
 	echo "=============================================================================="
 	echo
 else
