@@ -44,7 +44,8 @@ __author__ = 'Jay Paz'
 
 
 def import_parser_factory(file, test, scan_type=None):
-    scan_type = test.test_type.name
+    if scan_type is None:
+        scan_type = test.test_type.name
     if scan_type == "Burp Scan":
         parser = BurpXmlParser(file, test)
     elif scan_type == "Nessus Scan":

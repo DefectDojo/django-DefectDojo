@@ -5,7 +5,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Finding, \
     User, ScanSettings, Scan, Stub_Finding, Finding_Template, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
-    Endpoint, JIRA_PKey, JIRA_Conf, DojoMeta
+    Endpoint, JIRA_PKey, JIRA_Conf, DojoMeta, Development_Environment
 
 from dojo.api_v2 import serializers, permissions
 
@@ -145,6 +145,8 @@ class ProductViewSet(mixins.ListModelMixin,
 
 class ProductTypeViewSet(mixins.ListModelMixin,
                          mixins.RetrieveModelMixin,
+                         mixins.CreateModelMixin,
+                         mixins.UpdateModelMixin,
                          viewsets.GenericViewSet):
     serializer_class = serializers.ProductTypeSerializer
     queryset = Product_Type.objects.all()
@@ -215,6 +217,16 @@ class StubFindingsViewSet(mixins.ListModelMixin,
             return serializers.StubFindingSerializer
 
 
+class DevelopmentEnvironmentViewSet(mixins.ListModelMixin,
+                                    mixins.RetrieveModelMixin,
+                                    mixins.CreateModelMixin,
+                                    mixins.UpdateModelMixin,
+                                    viewsets.GenericViewSet):
+    serializer_class = serializers.DevelopmentEnvironmentSerializer
+    queryset = Development_Environment.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+
+
 class TestsViewSet(mixins.ListModelMixin,
                    mixins.RetrieveModelMixin,
                    mixins.UpdateModelMixin,
@@ -235,6 +247,9 @@ class TestsViewSet(mixins.ListModelMixin,
 
 
 class TestTypesViewSet(mixins.ListModelMixin,
+                       mixins.RetrieveModelMixin,
+                       mixins.UpdateModelMixin,
+                       mixins.CreateModelMixin,
                        viewsets.GenericViewSet):
     serializer_class = serializers.TestTypeSerializer
     queryset = Test_Type.objects.all()
