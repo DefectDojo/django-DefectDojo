@@ -17,7 +17,7 @@ Try out DefectDojo in our [testing environment](https://defectdojo.herokuapp.com
 $ git clone https://github.com/DefectDojo/django-DefectDojo
 $ cd django-DefectDojo
 $ ./setup.bash
-$ ./run_dojo.bash
+$ ./entrypoint_scripts/run/run-local-dojo.bash
 ```
 
 navigate to `127.0.0.1:8000`
