@@ -1085,7 +1085,10 @@ class Finding(models.Model):
                 endpoint_str += str(e)
             if endpoint_str:
                 hash_string = hash_string + endpoint_str
-        hash_string = hash_string.strip()
+        try:
+            hash_string = hash_string.encode('utf-8').strip()
+        except:
+            hash_string = hash_string.strip()
         return hashlib.sha256(hash_string.encode('utf-8')).hexdigest()
 
     def duplicate_finding_set(self):
