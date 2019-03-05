@@ -1,7 +1,7 @@
 celery==4.1.1
 coverage==4.5.1
 defusedxml==0.5.0
-Django>=1.11.18
+Django==1.11.18
 django-auditlog==0.4.5
 django-custom-field==2.9
 django-filter==1.0.4
