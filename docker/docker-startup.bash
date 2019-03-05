@@ -41,7 +41,7 @@ else
     if [ $? -eq 0 ]; then
       echo "Database server is up and running."
       echo
-      if [ $(mysql -N -s -u$DD_DATABASE_USER -p$DD_DATABASE_PASsWORD $DD_DATABASE_NAME --host $DD_DATABASE_HOST --port $DD_DATABASE_PORT -e \
+      if [ $(mysql -N -s -u$DD_DATABASE_USER -p$DD_DATABASE_PASSWORD $DD_DATABASE_NAME --host $DD_DATABASE_HOST --port $DD_DATABASE_PORT -e \
           "select count(*) from information_schema.tables where table_schema='$DD_DATABASE_NAME' and table_name='dojo_product';") -eq 1 ]; then
           echo "DB Exists."
       else
