@@ -111,7 +111,7 @@ class CheckmarxXMLParser(object):
                     findingdetail = "{}**Source Object:** {}\n".format(findingdetail, pathnode.find('Name').text)
 
                     for codefragment in pathnode.findall('Snippet/Line'):
-                        findingdetail = "{}**Number:** {}\n**Code:** {}\n".format(findingdetail, codefragment.find('Number').text, codefragment.find('Code').text.strip())
+                        findingdetail = "{}**Number:** {}\n**Code:** {}\n".format(findingdetail, codefragment.find('Number').text, codefragment.find('Code').text.encode('utf-8').strip())
 
                     findingdetail = '{}-----\n'.format(findingdetail)
 
