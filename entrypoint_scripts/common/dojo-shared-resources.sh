@@ -93,10 +93,10 @@ function createadmin() {
     if [ -z "$DEFECT_DOJO_ADMIN_EMAIL" ]; then
         DEFECT_DOJO_ADMIN_EMAIL='admin@localhost.local'
     fi
-    if [ -z "$DEFECT_DOJO_ADMIN_PASSWORD" ]; then
-        DEFECT_DOJO_ADMIN_PASSWORD="admin"
+    if [ -z "$DD_ADMIN_PASSWORD" ]; then
+        DD_ADMIN_PASSWORD="admin"
     fi
-    export DEFECT_DOJO_ADMIN_PASSWORD=$DEFECT_DOJO_ADMIN_PASSWORD
+    export DD_ADMIN_PASSWORD=$DD_ADMIN_PASSWORD
     #creating default admin user
     python manage.py createsuperuser --noinput --username="$DEFECT_DOJO_ADMIN_NAME" --email="$DEFECT_DOJO_ADMIN_EMAIL"
     docker/setup-superuser.expect
@@ -214,28 +214,28 @@ function ensure_mysql_application_db() {
     # Allow script to be called non-interactively using:
     if [ "$AUTO_DOCKER" == "yes" ]; then
         echo "Setting values for MySQL install"
-        if [ -z "$DEFECT_DOJO_DEFAULT_DATABASE_HOST" ]; then
-            DEFECT_DOJO_DEFAULT_DATABASE_HOST="localhost"
+        if [ -z "$DD_DATABASE_HOST" ]; then
+            DD_DATABASE_HOST="localhost"
         fi
-        if [ -z "$DEFECT_DOJO_DEFAULT_DATABASE_PORT" ]; then
-            DEFECT_DOJO_DEFAULT_DATABASE_PORT="3306"
+        if [ -z "$DD_DATABASE_PORT" ]; then
+            DD_DATABASE_PORT="3306"
         fi
-        if [ -z "$DEFECT_DOJO_DEFAULT_DATABASE_USER" ]; then
-            DEFECT_DOJO_DEFAULT_DATABASE_USER="root"
+        if [ -z "$DD_DATABASE_USER" ]; then
+            DD_DATABASE_USER="root"
         fi
-        if [ -z "$DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD" -a "$BATCH_MODE" == "yes" ]; then
+        if [ -z "$DD_DATABASE_PASsWORD" -a "$BATCH_MODE" == "yes" ]; then
             echo "SQL Password not provided, exiting"
             exit 1
         else
-            DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD="dojodb_install"
+            DD_DATABASE_PASsWORD="dojodb_install"
         fi
-        if [ -z "$DEFECT_DOJO_DEFAULT_DATABASE_NAME" ]; then
-            DEFECT_DOJO_DEFAULT_DATABASE_NAME="dojodb"
+        if [ -z "$DD_DATABASE_NAME" ]; then
+            DD_DATABASE_NAME="dojodb"
         fi
     fi
 
-    if mysql -fs --protocol=TCP -h "$DEFECT_DOJO_DEFAULT_DATABASE_HOST" -P "$DEFECT_DOJO_DEFAULT_DATABASE_PORT" -u"$DEFECT_DOJO_DEFAULT_DATABASE_USER" -p"$DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD" "$DEFECT_DOJO_DEFAULT_DATABASE_NAME" >/dev/null 2>&1 </dev/null; then
-        echo "Database $DEFECT_DOJO_DEFAULT_DATABASE_NAME already exists!"
+    if mysql -fs --protocol=TCP -h "$DD_DATABASE_HOST" -P "$DD_DATABASE_PORT" -u"$DD_DATABASE_USER" -p"$DD_DATABASE_PASsWORD" "$DD_DATABASE_NAME" >/dev/null 2>&1 </dev/null; then
+        echo "Database $DD_DATABASE_NAME already exists!"
         echo
         if [ "$AUTO_DOCKER" == "yes" ] || [ "$BATCH_MODE" == "yes" ]; then
             if [ -z "$FLUSHDB" ]; then
@@ -244,21 +244,21 @@ function ensure_mysql_application_db() {
                 DELETE="$FLUSHDB"
             fi
         else
-            read -p "Drop database $DEFECT_DOJO_DEFAULT_DATABASE_NAME? [Y/n] " DELETE
+            read -p "Drop database $DD_DATABASE_NAME? [Y/n] " DELETE
         fi
         if [[ ! $DELETE =~ ^[nN]$ ]]; then
-            mysqladmin -f --protocol=TCP --host="$DEFECT_DOJO_DEFAULT_DATABASE_HOST" --port="$DEFECT_DOJO_DEFAULT_DATABASE_PORT" --user="$DEFECT_DOJO_DEFAULT_DATABASE_USER" --password="$DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD" drop "$DEFECT_DOJO_DEFAULT_DATABASE_NAME"
-            mysqladmin    --protocol=TCP --host="$DEFECT_DOJO_DEFAULT_DATABASE_HOST" --port="$DEFECT_DOJO_DEFAULT_DATABASE_PORT" --user="$DEFECT_DOJO_DEFAULT_DATABASE_USER" --password="$DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD" create "$DEFECT_DOJO_DEFAULT_DATABASE_NAME"
+            mysqladmin -f --protocol=TCP --host="$DD_DATABASE_HOST" --port="$DD_DATABASE_PORT" --user="$DD_DATABASE_USER" --password="$DD_DATABASE_PASsWORD" drop "$DD_DATABASE_NAME"
+            mysqladmin    --protocol=TCP --host="$DD_DATABASE_HOST" --port="$DD_DATABASE_PORT" --user="$DD_DATABASE_USER" --password="$DD_DATABASE_PASsWORD" create "$DD_DATABASE_NAME"
         fi
     else
         echo "Setting password..."
         # Set the root password for mysql
         set_random_mysql_db_pwd
         sudo service mysql start
-        if mysqladmin --protocol=TCP --host="$DEFECT_DOJO_DEFAULT_DATABASE_HOST" --port="$DEFECT_DOJO_DEFAULT_DATABASE_PORT" --user="$DEFECT_DOJO_DEFAULT_DATABASE_USER" --password="$DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD" create $DEFECT_DOJO_DEFAULT_DATABASE_NAME; then
-            echo "Created database $DEFECT_DOJO_DEFAULT_DATABASE_NAME."
+        if mysqladmin --protocol=TCP --host="$DD_DATABASE_HOST" --port="$DD_DATABASE_PORT" --user="$DD_DATABASE_USER" --password="$DD_DATABASE_PASsWORD" create $DD_DATABASE_NAME; then
+            echo "Created database $DD_DATABASE_NAME."
         else
-            echo "Error! Failed to create database $DEFECT_DOJO_DEFAULT_DATABASE_NAME. Check your credentials."
+            echo "Error! Failed to create database $DD_DATABASE_NAME. Check your credentials."
             echo
             ensure_mysql_application_db
         fi
@@ -267,22 +267,22 @@ function ensure_mysql_application_db() {
 
 # Ensures the Postgres application DB is present
 function ensure_postgres_application_db() {
-    read -p "Postgres host: " $DEFECT_DOJO_DEFAULT_DATABASE_HOST
-    read -p "Postgres port: " $DEFECT_DOJO_DEFAULT_DATABASE_PORT
-    read -p "Postgres user (should already exist): " $DEFECT_DOJO_DEFAULT_DATABASE_USER
+    read -p "Postgres host: " $DD_DATABASE_HOST
+    read -p "Postgres port: " $DD_DATABASE_PORT
+    read -p "Postgres user (should already exist): " $DD_DATABASE_USER
     stty -echo
-    read -p "Password for user: " $DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD; echo
+    read -p "Password for user: " $DD_DATABASE_PASsWORD; echo
     stty echo
-    read -p "Database name (should NOT exist): " $DEFECT_DOJO_DEFAULT_DATABASE_NAME
+    read -p "Database name (should NOT exist): " $DD_DATABASE_NAME
 
-    if [ "$( PGPASSWORD=$DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD psql -h $DEFECT_DOJO_DEFAULT_DATABASE_HOST -p $DEFECT_DOJO_DEFAULT_DATABASE_PORT -U $DEFECT_DOJO_DEFAULT_DATABASE_USER -tAc "SELECT 1 FROM pg_database WHERE datname='$DEFECT_DOJO_DEFAULT_DATABASE_NAME'" )" = '1' ]
+    if [ "$( PGPASSWORD=$DD_DATABASE_PASsWORD psql -h $DD_DATABASE_HOST -p $DD_DATABASE_PORT -U $DD_DATABASE_USER -tAc "SELECT 1 FROM pg_database WHERE datname='$DD_DATABASE_NAME'" )" = '1' ]
     then
-        echo "Database $DEFECT_DOJO_DEFAULT_DATABASE_NAME already exists!"
+        echo "Database $DD_DATABASE_NAME already exists!"
         echo
-        read -p "Drop database $DEFECT_DOJO_DEFAULT_DATABASE_NAME? [Y/n] " DELETE
+        read -p "Drop database $DD_DATABASE_NAME? [Y/n] " DELETE
         if [[ ! $DELETE =~ ^[nN]$ ]]; then
-            PGPASSWORD=$DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD dropdb $DEFECT_DOJO_DEFAULT_DATABASE_NAME -h $DEFECT_DOJO_DEFAULT_DATABASE_HOST -p $DEFECT_DOJO_DEFAULT_DATABASE_PORT -U $DEFECT_DOJO_DEFAULT_DATABASE_USER
-            PGPASSWORD=$DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD createdb $DEFECT_DOJO_DEFAULT_DATABASE_NAME -h $DEFECT_DOJO_DEFAULT_DATABASE_HOST -p $DEFECT_DOJO_DEFAULT_DATABASE_PORT -U $DEFECT_DOJO_DEFAULT_DATABASE_USER
+            PGPASSWORD=$DD_DATABASE_PASsWORD dropdb $DD_DATABASE_NAME -h $DD_DATABASE_HOST -p $DD_DATABASE_PORT -U $DD_DATABASE_USER
+            PGPASSWORD=$DD_DATABASE_PASsWORD createdb $DD_DATABASE_NAME -h $DD_DATABASE_HOST -p $DD_DATABASE_PORT -U $DD_DATABASE_USER
         else
             read -p "Try and install anyway? [Y/n] " INSTALL
             if [[ $INSTALL =~ ^[nN]$ ]]; then
@@ -291,12 +291,12 @@ function ensure_postgres_application_db() {
             fi
         fi
     else
-        PGPASSWORD=$DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD createdb $DEFECT_DOJO_DEFAULT_DATABASE_NAME -h $DEFECT_DOJO_DEFAULT_DATABASE_HOST -p $DEFECT_DOJO_DEFAULT_DATABASE_PORT -U $DEFECT_DOJO_DEFAULT_DATABASE_USER
+        PGPASSWORD=$DD_DATABASE_PASsWORD createdb $DD_DATABASE_NAME -h $DD_DATABASE_HOST -p $DD_DATABASE_PORT -U $DD_DATABASE_USER
         if [ $? = 0 ]
         then
-            echo "Created database $DEFECT_DOJO_DEFAULT_DATABASE_NAME."
+            echo "Created database $DD_DATABASE_NAME."
         else
-            echo "Error! Failed to create database $DEFECT_DOJO_DEFAULT_DATABASE_NAME. Check your credentials."
+            echo "Error! Failed to create database $DD_DATABASE_NAME. Check your credentials."
             echo
             ensure_postgres_application_db
         fi
@@ -447,10 +447,10 @@ function prepare_settings_file() {
     if [ "$DBTYPE" == "$SQLITE" ]; then
         echo 'DD_DATABASE_URL="sqlite:///defectdojo.db"' >> ${ENV_SETTINGS_FILE}
     elif [ "$DBTYPE" == "$MYSQL" ]; then
-        SAFE_URL=$(urlenc "$DEFECT_DOJO_DEFAULT_DATABASE_USER")":"$(urlenc "$DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD")"@"$(urlenc "$DEFECT_DOJO_DEFAULT_DATABASE_HOST")":"$(urlenc "$DEFECT_DOJO_DEFAULT_DATABASE_PORT")"/"$(urlenc "$DEFECT_DOJO_DEFAULT_DATABASE_NAME")
+        SAFE_URL=$(urlenc "$DD_DATABASE_USER")":"$(urlenc "$DD_DATABASE_PASsWORD")"@"$(urlenc "$DD_DATABASE_HOST")":"$(urlenc "$DD_DATABASE_PORT")"/"$(urlenc "$DD_DATABASE_NAME")
         echo "DD_DATABASE_URL=mysql://$SAFE_URL" >> ${ENV_SETTINGS_FILE}
     elif [ "$DBTYPE" == "$POSTGRES" ]; then
-        SAFE_URL=$(urlenc "$DEFECT_DOJO_DEFAULT_DATABASE_USER")":"$(urlenc "$DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD")"@"$(urlenc "$DEFECT_DOJO_DEFAULT_DATABASE_HOST")":"$(urlenc "$DEFECT_DOJO_DEFAULT_DATABASE_PORT")"/"$(urlenc "$DEFECT_DOJO_DEFAULT_DATABASE_NAME")
+        SAFE_URL=$(urlenc "$DD_DATABASE_USER")":"$(urlenc "$DD_DATABASE_PASsWORD")"@"$(urlenc "$DD_DATABASE_HOST")":"$(urlenc "$DD_DATABASE_PORT")"/"$(urlenc "$DD_DATABASE_NAME")
         echo "DD_DATABASE_URL=postgres://$SAFE_URL" >> ${ENV_SETTINGS_FILE}
     fi
 
@@ -539,10 +539,10 @@ function set_random_mysql_db_pwd() {
   sudo mysqld_safe --skip-grant-tables >/dev/null 2>&1 &
   sleep 5
   DB_ROOT_PASS_LEN=`shuf -i 50-60 -n 1`
-  if [[ -z "$DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD" ]]; then
-    DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD=`pwgen -scn $DB_ROOT_PASS_LEN 1`
+  if [[ -z "$DD_DATABASE_PASsWORD" ]]; then
+    DD_DATABASE_PASsWORD=`pwgen -scn $DB_ROOT_PASS_LEN 1`
   fi
-  mysql mysql -e "UPDATE user SET authentication_string=PASSWORD('$DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD'), plugin='mysql_native_password' WHERE User='root';FLUSH PRIVILEGES;"
+  mysql mysql -e "UPDATE user SET authentication_string=PASSWORD('$DD_DATABASE_PASsWORD'), plugin='mysql_native_password' WHERE User='root';FLUSH PRIVILEGES;"
   sudo service mysql stop
 }
 

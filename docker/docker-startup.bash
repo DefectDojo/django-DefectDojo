@@ -36,13 +36,13 @@ else
     echo "=============================================================================="
     echo
     #Make sure MySQL is up and running, run the mysql script to check the port and report back
-    bash ./wait-for-it.sh $DEFECT_DOJO_DEFAULT_DATABASE_HOST:$DEFECT_DOJO_DEFAULT_DATABASE_PORT
+    bash ./wait-for-it.sh $DD_DATABASE_HOST:$DD_DATABASE_PORT
 
     if [ $? -eq 0 ]; then
       echo "Database server is up and running."
       echo
-      if [ $(mysql -N -s -u$DEFECT_DOJO_DEFAULT_DATABASE_USER -p$DEFECT_DOJO_DEFAULT_DATABASE_PASSWORD $DEFECT_DOJO_DEFAULT_DATABASE_NAME --host $DEFECT_DOJO_DEFAULT_DATABASE_HOST --port $DEFECT_DOJO_DEFAULT_DATABASE_PORT -e \
-          "select count(*) from information_schema.tables where table_schema='$DEFECT_DOJO_DEFAULT_DATABASE_NAME' and table_name='dojo_product';") -eq 1 ]; then
+      if [ $(mysql -N -s -u$DD_DATABASE_USER -p$DD_DATABASE_PASsWORD $DD_DATABASE_NAME --host $DD_DATABASE_HOST --port $DD_DATABASE_PORT -e \
+          "select count(*) from information_schema.tables where table_schema='$DD_DATABASE_NAME' and table_name='dojo_product';") -eq 1 ]; then
           echo "DB Exists."
       else
         setupdb
@@ -70,7 +70,7 @@ else
     fi
 
     echo "=============================================================================="
-    echo "Login with $DOJO_ADMIN_USER/$DEFECT_DOJO_DEFAULT_DATABASE_USER"
+    echo "Login with $DOJO_ADMIN_USER/$DD_DATABASE_USER"
     echo "URL: http://localhost:$PORT"
     echo "=============================================================================="
     echo
