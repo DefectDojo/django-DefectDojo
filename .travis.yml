@@ -1,94 +1,19 @@
+dist: xenial
+language: minimal
 sudo: required
-language: python
-install: true
-
 services:
   - docker
-
-before_script:
-  - export -f travis_fold
-  - export REPO=appsecpipeline/django-defectdojo
-  - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH ; fi`
-
 env:
-  - TEST=smoke-test
-  - TEST=integration-test
-  - TEST=unit-test
-  - TEST=bandit
-  - TEST=docker-bench-security
-  - TEST=flake8-complete
-  - TEST=flake8
-
-matrix:
-  allow_failures:
-    - env: TEST=bandit
-    - env: TEST=flake8-complete
-
-script:
-  - |
-    echo "Running test=$TEST"
-    case "$TEST" in
-      smoke-test)
-        travis_fold start "smoke-test"
-        bash entrypoint_scripts/test/travis-smoke-test.sh || exit 1
-        travis_fold end "smoke-test"
-        ;;
-      unit-test)
-        travis_fold start "unit-test"
-        bash entrypoint_scripts/test/travis-unit-test.sh || exit 1
-        travis_fold end "unit-test"
-        ;;
-      integration-test)
-        travis_fold start "integration-test"
-        bash entrypoint_scripts/test/travis-integration-test.sh || exit 1
-        travis_fold end "integration-test"
-        ;;
-      bandit)
-        # install bandit
-        pip install bandit
-
-        ## Run Bandit python static code
-        bandit -r * -x venv,tests
-        ;;
-      docker-bench-security)
-        ## Run Docker Bench for Security
-        git clone https://github.com/docker/docker-bench-security.git
-        cd docker-bench-security
-        sh docker-bench-security.sh
-        ;;
-      flake8-complete)
-        pip install flake8
-        flake8 .
-        ;;
-      safety)
-        pip install safety
-        safety check -i 35015
-        ;;
-      flake8)
-        echo "$TRAVIS_BRANCH"
-        if [ "$TRAVIS_BRANCH" == "dev" ]
-        then
-            echo "Running Flake8 tests on dev branch aka pull requests"
-            # We need to checkout dev for flake8-diff to work properly
-            git checkout dev
-            pip install pep8 flake8 flake8-diff
-            flake8-diff
-        else
-            echo "true"
-        fi
-    esac
-
-after_success:
-  #Push to docker repo
-  - bash entrypoint_scripts/deploy/post-action.bash
-
-notifications:
-  slack:
-    rooms:
-      secure: nPXwHnPcf37yGkCkLimx5UmY9LTtOHL0lw88cAQeXCNNjeZuhS2jS5xGUOwwp3SrsYE4tZhD0WuVEHGDcyIhmBZh9Qqk3NHKz+tQDD/e0GE/8uTTfR1Eh+pq1YOIcLYzzKA2khmJSeHqqDriVZZoWpn67oHtrui9FYesapZ8AX0=
-    on_success: never
-    on_failure: never
-    on_start: never
-addons:
-  firefox: "45.0"
-  chrome: stable
+  global:
+    - K8S_VERSION=v1.13.4
+    - MINIKUBE_VERSION=v0.35.0
+    - HELM_VERSION=v2.13.0
+    - CHANGE_MINIKUBE_NONE_USER=true
+  matrix:
+    - BROKER=rabbitmq DATABASE=mysql
+    - BROKER=rabbitmq DATABASE=postgresql
+    - BROKER=redis DATABASE=mysql
+    - BROKER=redis DATABASE=postgresql
+before_install: ['./travis/before-install.sh']
+before_script: ['./travis/before-script.sh']
+script: ['./travis/script.sh']
