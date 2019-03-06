@@ -1,0 +1,19 @@
+# code: language=Dockerfile
+FROM python:2
+WORKDIR /app
+COPY requirements.txt ./
+RUN pip install -r ./requirements.txt
+COPY wsgi.py manage.py docker/entrypoint-uwsgi.sh ./
+COPY dojo/ ./dojo/
+RUN \
+  mkdir dojo/migrations && \
+  chmod g=u dojo/migrations && \
+  chmod g=u /var/run && \
+  true
+USER 1001
+ENV \
+  DD_SECRET_KEY="." \
+  DD_CREDENTIAL_AES_256_KEY="." \
+  UWSGI_MODE="socket" \
+  UWSGI_ENDPOINT="0.0.0.0:3031"
+ENTRYPOINT ["/app/entrypoint-uwsgi.sh"]
