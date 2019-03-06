@@ -1,0 +1,4 @@
+# code: language=Dockerfile
+FROM defectdojo-uwsgi
+COPY docker/entrypoint-initializer.sh /
+ENTRYPOINT ["/entrypoint-initializer.sh"]
