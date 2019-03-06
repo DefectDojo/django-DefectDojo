@@ -41,15 +41,50 @@ env = environ.Env(
     DD_MEDIA_ROOT=(str, root('media')),
     DD_STATIC_URL=(str, '/static/'),
     DD_STATIC_ROOT=(str, root('static')),
-    DD_CELERY_BROKER_URL=(str, 'sqla+sqlite:///dojo.celerydb.sqlite'),
+    DD_CELERY_BROKER_URL=(str, ''),
+    DD_CELERY_BROKER_SCHEME=(str, 'sqla+sqlite'),
+    DD_CELERY_BROKER_USER=(str, ''),
+    DD_CELERY_BROKER_PASSWORD=(str, ''),
+    DD_CELERY_BROKER_HOST=(str, ''),
+    DD_CELERY_BROKER_PORT=(int, -1),
+    DD_CELERY_BROKER_PATH=(str, '/dojo.celerydb.sqlite'),
     DD_CELERY_TASK_IGNORE_RESULT=(bool, True),
-    DD_CELERY_RESULT_BACKEND=(str, 'db+sqlite:///dojo.celeryresults.sqlite'),
+    DD_CELERY_RESULT_BACKEND=(str, 'django-db'),
     DD_CELERY_RESULT_EXPIRES=(int, 86400),
     DD_CELERY_BEAT_SCHEDULE_FILENAME=(str, root('/dojo.celery.beat.db')),
     DD_CELERY_TASK_SERIALIZER=(str, 'pickle'),
     DD_FORCE_LOWERCASE_TAGS=(bool, True),
-    DD_MAX_TAG_LENGTH=(int, 25)
+    DD_MAX_TAG_LENGTH=(int, 25),
+    DD_DATABASE_ENGINE=(str, 'django.db.backends.mysql'),
+    DD_DATABASE_HOST=(str, 'mysql'),
+    DD_DATABASE_NAME=(str, 'defectdojo'),
+    DD_DATABASE_PASSWORD=(str, 'defectdojo'),
+    DD_DATABASE_PORT=(int, 3306),
+    DD_DATABASE_USER=(str, 'defectdojo'),
+    DD_SECRET_KEY=(str, '.'),
+    DD_CREDENTIAL_AES_256_KEY=(str, '.'),
 )
+
+def generate_url(scheme, double_slashes, user, password, host, port, path):
+    result_list = []
+    result_list.append(scheme)
+    result_list.append(':')
+    if double_slashes:
+        result_list.append('//')
+    result_list.append(user)
+    if len(password) > 0:
+        result_list.append(':')
+        result_list.append(password)
+    if len(user) > 0 or len(password) > 0:
+        result_list.append('@')
+    result_list.append(host)
+    if port >= 0:
+        result_list.append(':')
+        result_list.append(str(port))
+    if len(path) > 0 and path[0] != '/':
+        result_list.append('/')
+    result_list.append(path)
+    return ''.join(result_list)
 
 # Read .env file as default or from the command line, DD_ENV_PATH
 if os.path.isfile(root('dojo/settings/.env.prod')) or 'DD_ENV_PATH' in os.environ:
@@ -99,9 +134,21 @@ TEST_RUNNER = env('DD_TEST_RUNNER')
 # ------------------------------------------------------------------------------
 
 # Parse database connection url strings like psql://user:pass@127.0.0.1:8458/db
-DATABASES = {
-    'default': env.db('DD_DATABASE_URL')
-}
+if os.getenv('DD_DATABASE_URL') is not None:
+    DATABASES = {
+        'default': env.db('DD_DATABASE_URL')
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': env('DD_DATABASE_ENGINE'),
+            'NAME': env('DD_DATABASE_NAME'),
+            'USER': env('DD_DATABASE_USER'),
+            'PASSWORD': env('DD_DATABASE_PASSWORD'),
+            'HOST': env('DD_DATABASE_HOST'),
+            'PORT': env('DD_DATABASE_PORT'),
+        }
+    }
 
 # Track migrations through source control rather than making migrations locally
 if env('DD_TRACK_MIGRATIONS'):
@@ -336,6 +383,7 @@ INSTALLED_APPS = (
     'dbbackup',
     'taggit_serializer',
     # 'axes'
+    'django_celery_results',
 )
 
 # ------------------------------------------------------------------------------
@@ -376,7 +424,16 @@ vars().update(EMAIL_CONFIG)
 # ------------------------------------------------------------------------------
 
 # Celery settings
-CELERY_BROKER_URL = env('DD_CELERY_BROKER_URL')
+CELERY_BROKER_URL = env('DD_CELERY_BROKER_URL') \
+    if len(env('DD_CELERY_BROKER_URL')) > 0 else generate_url(
+    env('DD_CELERY_BROKER_SCHEME'),
+    True,
+    env('DD_CELERY_BROKER_USER'),
+    env('DD_CELERY_BROKER_PASSWORD'),
+    env('DD_CELERY_BROKER_HOST'),
+    env('DD_CELERY_BROKER_PORT'),
+    env('DD_CELERY_BROKER_PATH'),
+)
 CELERY_TASK_IGNORE_RESULT = env('DD_CELERY_TASK_IGNORE_RESULT')
 CELERY_RESULT_BACKEND = env('DD_CELERY_RESULT_BACKEND')
 CELERY_TIMEZONE = TIME_ZONE
@@ -434,17 +491,8 @@ LOGGING = {
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
         },
-        'file_handler_debug': {
-            'level': 'DEBUG',
-            'filters': ['require_debug_true'],
-            'class': 'logging.FileHandler',
-            'filename': '%s/../django_app.log' % (DOJO_ROOT or '.',)
-        },
-        'file_handler': {
-            'level': 'INFO',
-            'filters': ['require_debug_false'],
-            'class': 'logging.FileHandler',
-            'filename': '%s/../django_app.log' % (DOJO_ROOT or '.',)
+        'console': {
+            'class': 'logging.StreamHandler',
         },
     },
     'loggers': {
@@ -454,7 +502,7 @@ LOGGING = {
             'propagate': True,
         },
         'dojo': {
-            'handlers': ['file_handler', 'file_handler_debug'],
+            'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': False,
         }

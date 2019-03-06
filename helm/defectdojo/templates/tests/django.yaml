@@ -1,0 +1,21 @@
+{{- $fullName := include "defectdojo.fullname" . -}}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "defectdojo.fullname" . }}-django-test
+  labels:
+    app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+    helm.sh/chart: {{ include "defectdojo.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  annotations:
+    helm.sh/hook: test-success
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args:
+        - '--header=Host: {{ .Values.host }}'
+        - '{{ $fullName }}-django'
+  restartPolicy: Never
