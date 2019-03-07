@@ -32,7 +32,8 @@ intended for production use, but rather as a memo for creating a Helm chart.
 # Network
 docker network create defectdojo
 
-#  PostgreSQL
+# Choose PostgreSQL or MySQL
+# PostgreSQL
 docker run --rm -it --network=defectdojo \
   --name=defectdojo_postgresql \
   --network-alias postgresql \
@@ -40,12 +41,25 @@ docker run --rm -it --network=defectdojo \
   --env POSTGRES_USER=defectdojo \
   --env POSTGRES_PASSWORD=defectdojo \
   postgres
-
+#MySQL
+docker run --rm -it --network=defectdojo \
+  --name=defectdojo_mysql \
+  --network-alias mysql \
+  --env MYSQL_DATABASE=defectdojo \
+  --env MYSQL_USER=defectdojo \
+  --env MYSQL_PASSWORD=defectdojo \
+  --env MYSQL_RANDOM_ROOT_PASSWORD=pleaseChangeMe \
+  mysql:5.7
+  
 # Django application
 docker run --rm -it --network=defectdojo \
   --name=defectdojo_uwsgi \
   --network-alias uwsgi \
-  defectdojo-uwsgi
+  --env DD_DATABASE_ENGINE='django.db.backends.mysql' \
+  --env DD_DATABASE_HOST='mysql' \
+  --env DD_DATABASE_PORT=3306 \
+  --env DD_ALLOWED_HOSTS='*' \
+    defectdojo-uwsgi
 
 # RabbitMQ
 docker run --rm -it --network=defectdojo \
@@ -77,5 +91,8 @@ docker run --rm -it --network=defectdojo \
 # Initializer
 docker run --rm -it --network=defectdojo \
   --name defectdojo_initializer \
+  --env DD_DATABASE_ENGINE='django.db.backends.mysql' \
+  --env DD_DATABASE_HOST='mysql' \
+  --env DD_DATABASE_PORT=3306 \
   defectdojo-initializer
 ```
