@@ -1,4 +1,4 @@
-celery==4.2.1 # updated from 4.1.1 for django 2.1.5
+celery==4.3.0rc2 # updated from 4.1.1 for django 2.1.5, rc because of a bug in 4.2.1: https://github.com/celery/celery/issues/4849
 coverage==4.5.1
 defusedxml==0.5.0
 Django==2.0.10 # updated from 1.11.16
