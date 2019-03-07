@@ -3,10 +3,18 @@
 python manage.py makemigrations dojo
 python manage.py makemigrations --merge --noinput
 python manage.py migrate
-python manage.py createsuperuser \
-  --noinput \
-  --username=admin \
-  --email='admin@localhost' && \
+cat <<EOD | python manage.py shell
+import os
+from django.contrib.auth.models import User
+User.objects.create_superuser(
+    os.getenv('DD_ADMIN_USER'),
+    os.getenv('DD_ADMIN_MAIL'),
+    os.getenv('DD_ADMIN_PASSWORD'),
+    first_name=os.getenv('DD_ADMIN_FIRST_NAME'),
+    last_name=os.getenv('DD_ADMIN_LAST_NAME')
+)
+EOD
+
 python manage.py loaddata product_type
 python manage.py loaddata test_type
 python manage.py loaddata development_environment
