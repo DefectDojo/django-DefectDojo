@@ -34,6 +34,7 @@ minikube start
 minikube addons enable ingress
 helm init
 helm repo update
+helm dependency update ./helm/defectdojo
 
 # Create a TLS secret called defectdojo-tls according to
 # <https://kubernetes.io/docs/concepts/services-networking/ingress/#tls>
