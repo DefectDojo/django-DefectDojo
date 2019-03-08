@@ -1,0 +1,66 @@
+{{- $fullName := include "defectdojo.fullname" . -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $fullName }}-celery
+  labels:
+    defectdojo.org/component: celery
+    app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "defectdojo.chart" . }}
+spec:
+  replicas: {{ .Values.celeryReplicas }}
+  selector:
+    matchLabels:
+      defectdojo.org/component: celery
+      app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        defectdojo.org/component: celery
+        app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: celery
+          image: {{ .Values.celery.image }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          env:
+            - name: DD_CELERY_BROKER_SCHEME
+              value: {{ if eq .Values.celery.broker "rabbitmq" }}amqp{{ end }}{{ if eq .Values.celery.broker "redis" }}redis{{ end }}
+            - name: DD_CELERY_BROKER_USER
+              value: "{{ if eq .Values.celery.broker "rabbitmq" }}user{{ end }}"
+            - name: DD_CELERY_BROKER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $fullName }}-{{ .Values.celery.broker }}
+                  key: {{ .Values.celery.broker }}-password
+            - name: DD_CELERY_BROKER_HOST
+              value: {{ $fullName }}-{{ if eq .Values.celery.broker "rabbitmq" }}rabbitmq{{ end }}{{ if eq .Values.celery.broker "redis" }}redis-master{{ end }}
+            - name: DD_CELERY_BROKER_PORT
+              value: "{{ if eq .Values.celery.broker "rabbitmq" }}5672{{ end }}{{ if eq .Values.celery.broker "redis" }}6379{{ end }}"
+            - name: DD_CELERY_LOG_LEVEL
+              value: {{ .Values.celery.logLevel }}
+            - name: DD_DATABASE_HOST
+              value: {{ $fullName }}-{{ .Values.database }}
+            - name: DD_DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $fullName }}-{{ .Values.database }}
+                  key: {{ .Values.database }}-password
+          resources:
+            {{- toYaml .Values.celery.resources | nindent 12 }}
+      {{- with .Values.celery.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.celery.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.celery.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

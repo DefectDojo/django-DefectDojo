@@ -1,4 +1,13 @@
 # code: language=Dockerfile
 FROM defectdojo-uwsgi
 COPY docker/entrypoint-celery.sh /
+ENV \
+  DD_CELERY_BROKER_SCHEME="amqp" \
+  DD_CELERY_BROKER_USER="defectdojo" \
+  DD_CELERY_BROKER_PASSWORD="defectdojo" \
+  DD_CELERY_BROKER_HOST="rabbitmq" \
+  DD_CELERY_BROKER_PORT="5672" \
+  DD_CELERY_BROKER_PATH="//" \
+  DD_CELERY_LOG_LEVEL="INFO"
+
 ENTRYPOINT ["/entrypoint-celery.sh"]

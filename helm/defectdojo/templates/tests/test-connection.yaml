@@ -1,3 +1,4 @@
+{{- $fullName := include "defectdojo.fullname" . -}}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -13,6 +14,6 @@ spec:
   containers:
     - name: wget
       image: busybox
-      command: ['wget']
-      args:  ['{{ include "defectdojo.fullname" . }}:{{ .Values.service.port }}']
+      command: ['curl']
+      args:  ['{{ $fullName }}-django']
   restartPolicy: Never

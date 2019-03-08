@@ -12,8 +12,6 @@ RUN \
   true
 USER 1001
 ENV \
-  DD_SECRET_KEY="." \
-  DD_CREDENTIAL_AES_256_KEY="." \
   UWSGI_MODE="socket" \
   UWSGI_ENDPOINT="0.0.0.0:3031"
 ENTRYPOINT ["/app/entrypoint-uwsgi.sh"]

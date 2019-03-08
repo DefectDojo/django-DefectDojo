@@ -18,7 +18,7 @@ RUN \
   yarn && \
   true
 RUN \
-  DD_SECRET_KEY=. DD_CREDENTIAL_AES_256_KEY= DD_DATABASE_URL= python manage.py collectstatic && \
+  python manage.py collectstatic && \
   true
 
 FROM nginx

@@ -1,5 +1,10 @@
 #!/bin/sh
 
+until echo "select 1" | python manage.py dbshell
+do
+    echo "Waiting for database"
+done
+
 python manage.py makemigrations dojo
 python manage.py makemigrations --merge --noinput
 python manage.py migrate

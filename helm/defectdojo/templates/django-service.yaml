@@ -1,19 +1,21 @@
+{{- $fullName := include "defectdojo.fullname" . -}}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "defectdojo.fullname" . }}
+  name: {{ $fullName }}-django
   labels:
+    defectdojo.org/component: django
     app.kubernetes.io/name: {{ include "defectdojo.name" . }}
-    helm.sh/chart: {{ include "defectdojo.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "defectdojo.chart" . }}
 spec:
-  type: {{ .Values.service.type }}
-  ports:
-    - port: {{ .Values.service.port }}
-      targetPort: http
-      protocol: TCP
-      name: http
   selector:
+    defectdojo.org/component: django
     app.kubernetes.io/name: {{ include "defectdojo.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
+  ports:
+  - name: http
+    protocol: TCP
+    port: 80
+    targetPort: 8080
