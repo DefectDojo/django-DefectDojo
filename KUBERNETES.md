@@ -14,34 +14,77 @@
   be added instead of maintaining the .dockerignore.
 * Celery uses SQLite that doesn't scale
 
-## Build
+## Build images
 
-```bash
+```zsh
 docker build -t defectdojo-uwsgi -f Dockerfile.uwsgi .
 docker build -t defectdojo-nginx -f Dockerfile.nginx .
 docker build -t defectdojo-celery -f Dockerfile.celery .
 docker build -t defectdojo-initializer -f Dockerfile.initializer .
 ```
 
-## Run
+## Run with Kubernetes
+
+```zsh
+minikube start
+minikube addons enable ingress
+helm init
+helm repo update
+
+# Create a TLS secret called defectdojo-tls according to
+# <https://kubernetes.io/docs/concepts/services-networking/ingress/#tls>
+# e.g.
+TLS_CERT_DOMAIN="default.minikube.local"
+kubectl --namespace "${K8S_NAMESPACE}" create secret tls defectdojo-tls \
+  --key <(openssl rsa \
+    -in "${CA_DIR}/private/${TLS_CERT_DOMAIN}.key.pem" \
+    -passin "pass:${TLS_CERT_PASSWORD}") \
+  --cert <(cat \
+    "${CA_DIR}/certs/${TLS_CERT_DOMAIN}.cert.pem" \
+    "${CA_DIR}/chain.pem")
+
+# Install Helm chart. Choose a host name that matches the certificate above.
+# Image pull policy has to be `never` as images aren't available on Docker Hub
+# yet.
+helm install \
+  ./helm/defectdojo \
+  --name=defectdojo \
+  --namespace="${K8S_NAMESPACE}" \
+  --set host="defectdojo.${TLS_CERT_DOMAIN}" \
+  --set imagePullPolicy=Never
+
+# Navigate to https://defectdojo.minikube.local
+
+# Uninstall Helm chart
+helm delete defectdojo --purge
+```
+
+## Other useful stuff
+
+```zsh
+# View logs of a specific pod
+kubectl logs $(kubectl get pod --selector=defectdojo.org/component=${POD} \
+  -o jsonpath="{.items[0].metadata.name}") -f
+
+# Open a shell in a specific pod
+kubectl exec -it $(kubectl get pod --selector=defectdojo.org/component=${POD} \
+  -o jsonpath="{.items[0].metadata.name}") -- /bin/bash
+
+# Open a Python shell in a specific pod
+kubectl exec -it $(kubectl get pod --selector=defectdojo.org/component=${POD} \
+  -o jsonpath="{.items[0].metadata.name}") -- python manage.py shell
+```
+
+## Run in with plain Docker
 
 The following describes how to run the docker images built above. This is not
 intended for production use, but rather as a memo for creating a Helm chart.
 
-```bash
+```zsh
 # Network
 docker network create defectdojo
 
-# Choose PostgreSQL or MySQL
-# PostgreSQL
-docker run --rm -it --network=defectdojo \
-  --name=defectdojo_postgresql \
-  --network-alias postgresql \
-  --env POSTGRES_DB=defectdojo \
-  --env POSTGRES_USER=defectdojo \
-  --env POSTGRES_PASSWORD=defectdojo \
-  postgres
-#MySQL
+# MySQL
 docker run --rm -it --network=defectdojo \
   --name=defectdojo_mysql \
   --network-alias mysql \
@@ -50,14 +93,11 @@ docker run --rm -it --network=defectdojo \
   --env MYSQL_PASSWORD=defectdojo \
   --env MYSQL_RANDOM_ROOT_PASSWORD=pleaseChangeMe \
   mysql:5.7
-  
+
 # Django application
 docker run --rm -it --network=defectdojo \
   --name=defectdojo_uwsgi \
   --network-alias uwsgi \
-  --env DD_DATABASE_ENGINE='django.db.backends.mysql' \
-  --env DD_DATABASE_HOST='mysql' \
-  --env DD_DATABASE_PORT=3306 \
   --env DD_ALLOWED_HOSTS='*' \
     defectdojo-uwsgi
 
@@ -91,8 +131,7 @@ docker run --rm -it --network=defectdojo \
 # Initializer
 docker run --rm -it --network=defectdojo \
   --name defectdojo_initializer \
-  --env DD_DATABASE_ENGINE='django.db.backends.mysql' \
-  --env DD_DATABASE_HOST='mysql' \
-  --env DD_DATABASE_PORT=3306 \
   defectdojo-initializer
+
+# Navigate to http://localhost:8080
 ```

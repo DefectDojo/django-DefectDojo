@@ -49,12 +49,14 @@ env = environ.Env(
     DD_CELERY_TASK_SERIALIZER=(str, 'pickle'),
     DD_FORCE_LOWERCASE_TAGS=(bool, True),
     DD_MAX_TAG_LENGTH=(int, 25),
-    DD_DATABASE_ENGINE=(str, 'django.db.backends.postgresql'),
-    DD_DATABASE_HOST=(str, 'postgresql'),
+    DD_DATABASE_ENGINE=(str, 'django.db.backends.mysql'),
+    DD_DATABASE_HOST=(str, 'mysql'),
     DD_DATABASE_NAME=(str, 'defectdojo'),
     DD_DATABASE_PASSWORD=(str, 'defectdojo'),
-    DD_DATABASE_PORT=(int, 5432),
+    DD_DATABASE_PORT=(int, 3306),
     DD_DATABASE_USER=(str, 'defectdojo'),
+    DD_SECRET_KEY=(str, '.'),
+    DD_CREDENTIAL_AES_256_KEY=(str, '.'),
 )
 
 # Read .env file as default or from the command line, DD_ENV_PATH

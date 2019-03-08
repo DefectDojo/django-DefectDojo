@@ -3,3 +3,4 @@ appVersion: "1.0"
 description: A Helm chart for Kubernetes
 name: defectdojo
 version: 0.1.0
+icon: https://www.defectdojo.org/img/favicon.ico
