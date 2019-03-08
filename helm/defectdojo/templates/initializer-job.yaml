@@ -12,14 +12,25 @@ metadata:
 spec:
   ttlSecondsAfterFinished: {{ .Values.initializerKeepSeconds }}
   template:
+    metadata:
+      labels:
+        defectdojo.org/component: initializer
+        app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       containers:
         - name: initializer
           image: {{ .Values.initializer.image }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           env:
+            - name: DD_DATABASE_ENGINE
+              value: django.db.backends.{{ if eq .Values.database "postgresql" }}postgresql_psycopg2{{ end }}{{ if eq .Values.database "mysql" }}mysql{{ end }}
             - name: DD_DATABASE_HOST
               value: {{ $fullName }}-{{ .Values.database }}
+            - name: DD_DATABASE_PORT
+              value: "{{ if eq .Values.database "postgresql" }}{{ .Values.postgresql.service.port }}{{ end }}{{ if eq .Values.database "mysql" }}3306{{ end }}"
+            - name: DD_DATABASE_USER
+              value: {{ if eq .Values.database "postgresql" }}{{ .Values.postgresql.postgresqlUsername }}{{ end }}{{ if eq .Values.database "mysql" }}{{ .Values.mysql.mysqlUser }}{{ end }}
             - name: DD_DATABASE_PASSWORD
               valueFrom:
                 secretKeyRef:

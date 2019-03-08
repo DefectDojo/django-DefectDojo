@@ -60,6 +60,23 @@ helm install \
   --set celery.replicas=3 \
   --set rabbitmq.replicas=3
 
+helm install \
+  ./helm/defectdojo \
+  --name=defectdojo \
+  --namespace="${K8S_NAMESPACE}" \
+  --set host="defectdojo.${TLS_CERT_DOMAIN}" \
+  --set django.replicas=1 \
+  --set celery.replicas=1 \
+  --set rabbitmq.replicas=1 \
+  --set django.ingress.secretName="minikube-tls" \
+  --set mysql.enabled=false \
+  --set database=postgresql \
+  --set postgresql.enabled=true \
+  --set postgresql.replication.enabled=true \
+  --set postgresql.replication.slaveReplicas=3
+
+
+
 # Run test. If there are any errors, re-run the command without `--cleanup` and
 # inspect the test container.
 helm test defectdojo --cleanup
