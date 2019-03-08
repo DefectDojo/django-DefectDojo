@@ -2,13 +2,13 @@
 # Global settings
 database: mysql
 host: defectdojo.default.minikube.local
-imagePullPolicy: IfNotPresent
+imagePullPolicy: Always
 
 # Components
 celery:
   affinity: {}
   broker: rabbitmq
-  image: defectdojo-celery:latest
+  image: defectdojo/defectdojo-celery:latest
   logLevel: DEBUG
   nodeSelector: {}
   replicas: 1
@@ -23,7 +23,7 @@ django:
     enabled: true
     secretName: defectdojo-tls
   nginx:
-    image: defectdojo-nginx:latest
+    image: defectdojo/defectdojo-nginx:latest
     resources:
       cpu: 100m
       memory: 128Mi
@@ -31,13 +31,13 @@ django:
   replicas: 1
   tolerations: []
   uwsgi:
-    image: defectdojo-uwsgi:latest
+    image: defectdojo/defectdojo-uwsgi:latest
     resources:
       cpu: 100m
       memory: 128Mi
 
 initializer:
-  image: defectdojo-initializer:latest
+  image: defectdojo/defectdojo-initializer:latest
   keepSeconds: 60
   resources:
     cpu: 100m
@@ -47,6 +47,11 @@ mysql:
   enabled: true
   mysqlUser: defectdojo
   mysqlDatabase: defectdojo
+
+postgresql:
+  enabled: false
+  postgresqlDatabase: defectdojo
+  slaveReplicas: 1
 
 rabbitmq:
   enabled: true
