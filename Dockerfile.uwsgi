@@ -2,7 +2,13 @@
 FROM python:2
 WORKDIR /app
 COPY requirements.txt ./
-RUN pip install -r ./requirements.txt
+RUN \
+  apt-get -y update && \
+  apt-get -y install mysql-client postgresql-client && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists && \
+  pip install -r ./requirements.txt && \
+  true
 COPY wsgi.py manage.py docker/entrypoint-uwsgi.sh ./
 COPY dojo/ ./dojo/
 RUN \
