@@ -17,10 +17,14 @@
 ## Build images
 
 ```zsh
-docker build -t defectdojo-uwsgi -f Dockerfile.uwsgi .
-docker build -t defectdojo-nginx -f Dockerfile.nginx .
-docker build -t defectdojo-celery -f Dockerfile.celery .
-docker build -t defectdojo-initializer -f Dockerfile.initializer .
+docker build -t defectdojo/defectdojo-uwsgi -f Dockerfile.uwsgi .
+docker build -t defectdojo/defectdojo-nginx -f Dockerfile.nginx .
+docker build -t defectdojo/defectdojo-celery -f Dockerfile.celery .
+docker build -t defectdojo/defectdojo-initializer -f Dockerfile.initializer .
+docker push defectdojo/defectdojo-uwsgi
+docker push defectdojo/defectdojo-nginx
+docker push defectdojo/defectdojo-celery
+docker push defectdojo/defectdojo-initializer
 ```
 
 ## Run with Kubernetes
@@ -34,7 +38,8 @@ helm repo update
 # Create a TLS secret called defectdojo-tls according to
 # <https://kubernetes.io/docs/concepts/services-networking/ingress/#tls>
 # e.g.
-TLS_CERT_DOMAIN="default.minikube.local"
+K8S_NAMESPACE="default"
+TLS_CERT_DOMAIN="${K8S_NAMESPACE}.minikube.local"
 kubectl --namespace "${K8S_NAMESPACE}" create secret tls defectdojo-tls \
   --key <(openssl rsa \
     -in "${CA_DIR}/private/${TLS_CERT_DOMAIN}.key.pem" \
@@ -43,15 +48,12 @@ kubectl --namespace "${K8S_NAMESPACE}" create secret tls defectdojo-tls \
     "${CA_DIR}/certs/${TLS_CERT_DOMAIN}.cert.pem" \
     "${CA_DIR}/chain.pem")
 
-# Install Helm chart. Choose a host name that matches the certificate above.
-# Image pull policy has to be `never` as images aren't available on Docker Hub
-# yet.
+# Install Helm chart. Choose a host name that matches the certificate above
 helm install \
   ./helm/defectdojo \
   --name=defectdojo \
   --namespace="${K8S_NAMESPACE}" \
-  --set host="defectdojo.${TLS_CERT_DOMAIN}" \
-  --set imagePullPolicy=Never
+  --set host="defectdojo.${TLS_CERT_DOMAIN}"
 
 # Navigate to https://defectdojo.minikube.local
 
