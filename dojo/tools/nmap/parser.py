@@ -7,6 +7,12 @@ __author__ = 'patriknordlen'
 
 class NmapXMLParser(object):
     def __init__(self, file, test):
+        self.dupes = dict()
+        self.items = ()
+        
+        if file is None:
+            return
+
         parser = le.XMLParser(resolve_entities=False)
         nscan = le.parse(file, parser)
         root = nscan.getroot()
@@ -60,8 +66,8 @@ class NmapXMLParser(object):
 
                 dupe_key = port
 
-                if dupe_key in dupes:
-                    find = dupes[dupe_key]
+                if dupe_key in self.dupes:
+                    find = self.dupes[dupe_key]
                     if description is not None:
                         find.description += description
                 else:
@@ -73,7 +79,7 @@ class NmapXMLParser(object):
                                     severity=severity,
                                     numerical_severity=Finding.get_numerical_severity(severity))
                     find.unsaved_endpoints = list()
-                    dupes[dupe_key] = find
+                    self.dupes[dupe_key] = find
 
                 find.unsaved_endpoints.append(Endpoint(host=ip, fqdn=fqdn, port=port, protocol=protocol))
-        self.items = dupes.values()
+        self.items = self.dupes.values()
