@@ -1,5 +1,5 @@
 # code: language=Dockerfile
-FROM defectdojo-uwsgi AS build
+FROM defectdojo/defectdojo-uwsgi:latest AS build
 USER root
 COPY components/ ./components/
 RUN \

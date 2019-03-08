@@ -1,5 +1,5 @@
 # code: language=Dockerfile
-FROM defectdojo-uwsgi
+FROM defectdojo/defectdojo-uwsgi:latest
 USER root
 RUN \
   apt-get -y update && \

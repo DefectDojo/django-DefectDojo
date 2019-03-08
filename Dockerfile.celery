@@ -1,5 +1,5 @@
 # code: language=Dockerfile
-FROM defectdojo-uwsgi
+FROM defectdojo/defectdojo-uwsgi:latest
 COPY docker/entrypoint-celery.sh /
 ENV \
   DD_CELERY_BROKER_SCHEME="amqp" \
