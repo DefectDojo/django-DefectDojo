@@ -1,77 +1,39 @@
-# Structure:
-# Internet --> [ nginx ] --> [ django ] --> [ mysql ]
-#                            | Data network         |
-#              | Proxy network        |
-
-version: '3.4'
-
-networks:
-  data:
-    external: false
-  proxy:
-    external: false
-
+---
+version: '3.7'
 services:
-
-  django:
-    build:
-      context: .
-      target: release
-    container_name: 'defectdojo_django'
+  nginx:
+    # TODO: Don't use 'latest' tag after explicit tags have been created.
+    image: defectdojo/defectdojo-nginx:latest
+    depends_on:
+      - uwsgi
+    ports:
+      - target: 8080
+        published: 8080
+        protocol: tcp
+        mode: host
+  uwsgi:
+    # TODO: Don't use 'latest' tag after explicit tags have been created.
+    image: defectdojo/defectdojo-uwsgi:latest
     depends_on:
       - mysql
-    environment:
-      DD_ADMIN_PASSWORD: ${DD_ADMIN_PASSWORD:-admin}
-      DD_DATABASE_TYPE: 'mysql'
-      DD_DATABASE_HOST: 'mysql'
-      DD_DATABASE_PORT: '3306'
-      DD_DATABASE_NAME: 'dojodb'
-      DD_DATABASE_USER: 'dojo'
-      DD_DATABASE_PASSWORD: ${DD_DATABASE_PASsWORD:-dojodbpwd}
-      DD_ALLOWED_HOSTS: '*'
-      DD_SECRET_KEY: ${DD_SECRET_KEY:-"hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq"}
-      DD_CREDENTIAL_AES_256_KEY: ${DD_CREDENTIAL_AES_256_KEY:-"&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw"}
-    hostname: 'django'
-    networks:
-      - data
-      - proxy
-    volumes:
-      - './docker/static:/opt/django-DefectDojo/static'
-
-  mysql:
-    command: '--default-authentication-plugin=mysql_native_password'
-    container_name: 'defectdojo_mysql'
-    environment:
-      MYSQL_ROOT_PASSWORD: ${DEFECT_DOJO_MYSQL_ROOT_PASSWORD:-defectojo}
-      MYSQL_DATABASE: 'dojodb'
-      MYSQL_USER: 'dojo'
-      MYSQL_PASSWORD: ${DD_DATABASE_PASSWORD:-dojodbpwd}
-    hostname: 'mysql'
-    image: 'mysql:5.7'
-    networks:
-      - data
-    volumes:
-      - './docker/data:/var/lib/mysql'
-
-  nginx:
-    container_name: 'defectdojo_nginx'
+  celery:
+    # TODO: Don't use 'latest' tag after explicit tags have been created.
+    image: defectdojo/defectdojo-celery:latest
     depends_on:
-      - django
-    hostname: 'nginx'
-    image: 'nginx:latest'
-    networks:
-      - proxy
-    ports:
-      - '8080:80'
-      - '4443:443'
-    volumes:
-      - "./docker/nginx.conf:/etc/nginx/nginx.conf:ro"
-      - "./docker/cert.pem:/cert.pem:ro"
-      - "./docker/key.pem:/key.pem:ro"
-      # This gives Nginx access to the static assets compiled by Django.
-      - './docker/static:/usr/share/nginx/html/static:ro'
-    healthcheck:
-        test: ["CMD", "wget", "-qO-", "http://django:8000"]
-        interval: 20s
-        timeout: 1s
-        retries: 6
+      - rabbitmq
+    environment:
+      DD_CELERY_BROKER_USER: guest
+      DD_CELERY_BROKER_PASSWORD: guest
+  initializer:
+    image: defectdojo/defectdojo-initializer:latest
+    depends_on:
+      - mysql
+  mysql:
+    image: mysql:5.7
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
+      MYSQL_USER: defectdojo
+      MYSQL_PASSWORD: defectdojo
+      MYSQL_DATABASE: defectdojo
+  rabbitmq:
+    image: rabbitmq:3.7
