@@ -48,7 +48,15 @@ env = environ.Env(
     DD_CELERY_BEAT_SCHEDULE_FILENAME=(str, root('dojo.celery.beat.db')),
     DD_CELERY_TASK_SERIALIZER=(str, 'pickle'),
     DD_FORCE_LOWERCASE_TAGS=(bool, True),
-    DD_MAX_TAG_LENGTH=(int, 25)
+    DD_MAX_TAG_LENGTH=(int, 25),
+    DD_DATABASE_ENGINE=(str, 'django.db.backends.mysql'),
+    DD_DATABASE_HOST=(str, 'mysql'),
+    DD_DATABASE_NAME=(str, 'defectdojo'),
+    DD_DATABASE_PASSWORD=(str, 'defectdojo'),
+    DD_DATABASE_PORT=(int, 3306),
+    DD_DATABASE_USER=(str, 'defectdojo'),
+    DD_SECRET_KEY=(str, '.'),
+    DD_CREDENTIAL_AES_256_KEY=(str, '.'),
 )
 
 # Read .env file as default or from the command line, DD_ENV_PATH
@@ -99,9 +107,21 @@ TEST_RUNNER = env('DD_TEST_RUNNER')
 # ------------------------------------------------------------------------------
 
 # Parse database connection url strings like psql://user:pass@127.0.0.1:8458/db
-DATABASES = {
-    'default': env.db('DD_DATABASE_URL')
-}
+if os.getenv('DD_DATABASE_URL') is not None:
+    DATABASES = {
+        'default': env.db('DD_DATABASE_URL')
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': env('DD_DATABASE_ENGINE'),
+            'NAME': env('DD_DATABASE_NAME'),
+            'USER': env('DD_DATABASE_USER'),
+            'PASSWORD': env('DD_DATABASE_PASSWORD'),
+            'HOST': env('DD_DATABASE_HOST'),
+            'PORT': env('DD_DATABASE_PORT'),
+        }
+    }
 
 # Track migrations through source control rather than making migrations locally
 if env('DD_TRACK_MIGRATIONS'):
@@ -434,17 +454,8 @@ LOGGING = {
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
         },
-        'file_handler_debug': {
-            'level': 'DEBUG',
-            'filters': ['require_debug_true'],
-            'class': 'logging.FileHandler',
-            'filename': '%s/../django_app.log' % (DOJO_ROOT or '.',)
-        },
-        'file_handler': {
-            'level': 'INFO',
-            'filters': ['require_debug_false'],
-            'class': 'logging.FileHandler',
-            'filename': '%s/../django_app.log' % (DOJO_ROOT or '.',)
+        'console': {
+            'class': 'logging.StreamHandler',
         },
     },
     'loggers': {
@@ -454,7 +465,7 @@ LOGGING = {
             'propagate': True,
         },
         'dojo': {
-            'handlers': ['file_handler', 'file_handler_debug'],
+            'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': False,
         }

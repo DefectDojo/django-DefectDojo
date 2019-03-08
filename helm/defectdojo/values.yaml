@@ -1,0 +1,58 @@
+---
+# Global settings
+database: mysql
+host: defectdojo.default.minikube.local
+imagePullPolicy: IfNotPresent
+
+# Components
+celery:
+  affinity: {}
+  broker: rabbitmq
+  image: defectdojo-celery:latest
+  logLevel: DEBUG
+  nodeSelector: {}
+  replicas: 1
+  resources:
+    cpu: 100m
+    memory: 128Mi
+  tolerations: []
+
+django:
+  affinity: {}
+  ingress:
+    enabled: true
+    secretName: defectdojo-tls
+  nginx:
+    image: defectdojo-nginx:latest
+    resources:
+      cpu: 100m
+      memory: 128Mi
+  nodeSelector: {}
+  replicas: 1
+  tolerations: []
+  uwsgi:
+    image: defectdojo-uwsgi:latest
+    resources:
+      cpu: 100m
+      memory: 128Mi
+
+initializer:
+  image: defectdojo-initializer:latest
+  keepSeconds: 60
+  resources:
+    cpu: 100m
+    memory: 128Mi
+
+mysql:
+  enabled: true
+  mysqlUser: defectdojo
+  mysqlDatabase: defectdojo
+
+rabbitmq:
+  enabled: true
+  replicas: 1
+
+redis:
+  enabled: false
+  cluster:
+    slaveCount: 1
