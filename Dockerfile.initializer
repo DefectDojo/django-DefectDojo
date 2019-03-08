@@ -1,0 +1,20 @@
+# code: language=Dockerfile
+FROM defectdojo/defectdojo-uwsgi:latest
+USER root
+RUN \
+  apt-get -y update && \
+  apt-get -y install mysql-client && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists && \
+  true
+
+ENV \
+  DD_ADMIN_USER=admin \
+  DD_ADMIN_MAIL=admin@localhost \
+  DD_ADMIN_PASSWORD=admin \
+  DD_ADMIN_FIRST_NAME=Admin \
+  DD_ADMIN_LAST_NAME=User
+
+COPY docker/entrypoint-initializer.sh /
+USER 1001
+ENTRYPOINT ["/entrypoint-initializer.sh"]
