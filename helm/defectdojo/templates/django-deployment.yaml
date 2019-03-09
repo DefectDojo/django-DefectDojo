@@ -28,7 +28,7 @@ spec:
           emptyDir: {}
       containers:
         - name: uwsgi
-          image: {{ .Values.django.uwsgi.image | quote }}
+          image: "{{ .Values.django.uwsgi.repository }}:{{ .Values.tag }}"
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           volumeMounts:
             - name: run
@@ -37,7 +37,7 @@ spec:
             - name: DD_DATABASE_ENGINE
               value: django.db.backends.{{ if eq .Values.database "postgresql" }}postgresql_psycopg2{{ end }}{{ if eq .Values.database "mysql" }}mysql{{ end }}
             - name: DD_ALLOWED_HOSTS
-              value: {{ $fullName }}.{{ .Release.Namespace }}.minikube.local
+              value: {{ .Values.host }}
             - name: DD_DATABASE_HOST
               value: {{ $fullName }}-{{ .Values.database }}
             - name: DD_DATABASE_PORT
@@ -54,7 +54,7 @@ spec:
           resources:
             {{- toYaml .Values.django.uwsgi.resources | nindent 12 }}
         - name: nginx
-          image: {{ .Values.django.nginx.image | quote }}
+          image: "{{ .Values.django.nginx.repository }}:{{ .Values.tag }}"
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           volumeMounts:
             - name: run

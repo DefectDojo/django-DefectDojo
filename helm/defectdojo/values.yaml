@@ -3,12 +3,13 @@
 database: mysql
 host: defectdojo.default.minikube.local
 imagePullPolicy: Always
+tag: latest
 
 # Components
 celery:
   affinity: {}
   broker: rabbitmq
-  image: defectdojo/defectdojo-celery:latest
+  repository: defectdojo/defectdojo-celery
   logLevel: DEBUG
   nodeSelector: {}
   replicas: 1
@@ -23,7 +24,7 @@ django:
     enabled: true
     secretName: defectdojo-tls
   nginx:
-    image: defectdojo/defectdojo-nginx:latest
+    repository: defectdojo/defectdojo-nginx
     resources:
       cpu: 100m
       memory: 128Mi
@@ -31,13 +32,13 @@ django:
   replicas: 1
   tolerations: []
   uwsgi:
-    image: defectdojo/defectdojo-uwsgi:latest
+    repository: defectdojo/defectdojo-uwsgi
     resources:
       cpu: 100m
       memory: 128Mi
 
 initializer:
-  image: defectdojo/defectdojo-initializer:latest
+  repository: defectdojo/defectdojo-initializer
   keepSeconds: 60
   resources:
     cpu: 100m
