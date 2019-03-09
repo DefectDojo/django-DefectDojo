@@ -8,7 +8,7 @@ services:
       - uwsgi
     ports:
       - target: 8080
-        published: 8080
+        published: ${DD_PORT:-8080}
         protocol: tcp
         mode: host
   uwsgi:
@@ -16,6 +16,12 @@ services:
     image: defectdojo/defectdojo-uwsgi:latest
     depends_on:
       - mysql
+    environment:
+      DD_ADMIN_PASSWORD: ${DD_ADMIN_PASSWORD:-admin}
+      DD_DATABASE_URL: "mysql://defectdojo:defectdojo@mysql:3306/defectdojo"
+      DD_ALLOWED_HOSTS: '*'
+      DD_SECRET_KEY: ${DD_SECRET_KEY:-"hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq"}
+      DD_CREDENTIAL_AES_256_KEY: ${DD_CREDENTIAL_AES_256_KEY:-"&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw"}
   celery:
     # TODO: Don't use 'latest' tag after explicit tags have been created.
     image: defectdojo/defectdojo-celery:latest
@@ -28,6 +34,12 @@ services:
     image: defectdojo/defectdojo-initializer:latest
     depends_on:
       - mysql
+    environment:
+      DD_ADMIN_PASSWORD: ${DD_ADMIN_PASSWORD:-admin}
+      DD_DATABASE_URL: "mysql://defectdojo:defectdojo@mysql:3306/defectdojo"
+      DD_ALLOWED_HOSTS: '*'
+      DD_SECRET_KEY: ${DD_SECRET_KEY:-"hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq"}
+      DD_CREDENTIAL_AES_256_KEY: ${DD_CREDENTIAL_AES_256_KEY:-"&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw"}
   mysql:
     image: mysql:5.7
     environment:
