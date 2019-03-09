@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: initializer
-          image: {{ .Values.initializer.image }}
+          image: "{{ .Values.initializer.repository }}:{{ .Values.tag }}"
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           env:
             - name: DD_DATABASE_ENGINE

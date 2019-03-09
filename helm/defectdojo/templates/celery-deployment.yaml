@@ -25,7 +25,7 @@ spec:
     spec:
       containers:
         - name: celery
-          image: {{ .Values.celery.image }}
+          image: "{{ .Values.celery.repository }}:{{ .Values.tag }}"
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           env:
             - name: DD_CELERY_BROKER_SCHEME
