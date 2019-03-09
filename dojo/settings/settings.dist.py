@@ -41,9 +41,15 @@ env = environ.Env(
     DD_MEDIA_ROOT=(str, root('media')),
     DD_STATIC_URL=(str, '/static/'),
     DD_STATIC_ROOT=(str, root('static')),
-    DD_CELERY_BROKER_URL=(str, 'sqla+sqlite:///dojo.celerydb.sqlite'),
+    DD_CELERY_BROKER_URL=(str, ''),
+    DD_CELERY_BROKER_SCHEME=(str, 'sqla+sqlite'),
+    DD_CELERY_BROKER_USER=(str, ''),
+    DD_CELERY_BROKER_PASSWORD=(str, ''),
+    DD_CELERY_BROKER_HOST=(str, ''),
+    DD_CELERY_BROKER_PORT=(int, -1),
+    DD_CELERY_BROKER_PATH=(str, '/dojo.celerydb.sqlite'),
     DD_CELERY_TASK_IGNORE_RESULT=(bool, True),
-    DD_CELERY_RESULT_BACKEND=(str, 'db+sqlite:///dojo.celeryresults.sqlite'),
+    DD_CELERY_RESULT_BACKEND=(str, 'django-db'),
     DD_CELERY_RESULT_EXPIRES=(int, 86400),
     DD_CELERY_BEAT_SCHEDULE_FILENAME=(str, root('dojo.celery.beat.db')),
     DD_CELERY_TASK_SERIALIZER=(str, 'pickle'),
@@ -58,6 +64,27 @@ env = environ.Env(
     DD_SECRET_KEY=(str, '.'),
     DD_CREDENTIAL_AES_256_KEY=(str, '.'),
 )
+
+def generate_url(scheme, double_slashes, user, password, host, port, path):
+    result_list = []
+    result_list.append(scheme)
+    result_list.append(':')
+    if double_slashes:
+        result_list.append('//')
+    result_list.append(user)
+    if len(password) > 0:
+        result_list.append(':')
+        result_list.append(password)
+    if len(user) > 0 or len(password) > 0:
+        result_list.append('@')
+    result_list.append(host)
+    if port >= 0:
+        result_list.append(':')
+        result_list.append(str(port))
+    if len(path) > 0 and path[0] != '/':
+        result_list.append('/')
+    result_list.append(path)
+    return ''.join(result_list)
 
 # Read .env file as default or from the command line, DD_ENV_PATH
 if os.path.isfile(root('dojo/settings/.env.prod')) or 'DD_ENV_PATH' in os.environ:
@@ -356,6 +383,7 @@ INSTALLED_APPS = (
     'dbbackup',
     'taggit_serializer',
     # 'axes'
+    'django_celery_results',
 )
 
 # ------------------------------------------------------------------------------
@@ -396,7 +424,16 @@ vars().update(EMAIL_CONFIG)
 # ------------------------------------------------------------------------------
 
 # Celery settings
-CELERY_BROKER_URL = env('DD_CELERY_BROKER_URL')
+CELERY_BROKER_URL = env('DD_CELERY_BROKER_URL') \
+    if len(env('DD_CELERY_BROKER_URL')) > 0 else generate_url(
+    env('DD_CELERY_BROKER_SCHEME'),
+    True,
+    env('DD_CELERY_BROKER_USER'),
+    env('DD_CELERY_BROKER_PASSWORD'),
+    env('DD_CELERY_BROKER_HOST'),
+    env('DD_CELERY_BROKER_PORT'),
+    env('DD_CELERY_BROKER_PATH'),
+)
 CELERY_TASK_IGNORE_RESULT = env('DD_CELERY_TASK_IGNORE_RESULT')
 CELERY_RESULT_BACKEND = env('DD_CELERY_RESULT_BACKEND')
 CELERY_TIMEZONE = TIME_ZONE
