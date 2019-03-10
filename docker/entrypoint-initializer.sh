@@ -1,8 +1,15 @@
 #!/bin/sh
 
+if [ -z "${DD_ADMIN_PASSWORD}" ]
+then
+  export DD_ADMIN_PASSWORD="$(cat /dev/random | LC_ALL=C tr -dc a-zA-Z0-9 | \
+    head -c 22)"
+  echo "Admin password: ${DD_ADMIN_PASSWORD}"
+fi
+
 until echo "select 1" | python manage.py dbshell
 do
-    echo "Waiting for database"
+  echo "Waiting for database"
 done
 
 python manage.py makemigrations dojo
@@ -12,11 +19,11 @@ cat <<EOD | python manage.py shell
 import os
 from django.contrib.auth.models import User
 User.objects.create_superuser(
-    os.getenv('DD_ADMIN_USER'),
-    os.getenv('DD_ADMIN_MAIL'),
-    os.getenv('DD_ADMIN_PASSWORD'),
-    first_name=os.getenv('DD_ADMIN_FIRST_NAME'),
-    last_name=os.getenv('DD_ADMIN_LAST_NAME')
+  os.getenv('DD_ADMIN_USER'),
+  os.getenv('DD_ADMIN_MAIL'),
+  os.getenv('DD_ADMIN_PASSWORD'),
+  first_name=os.getenv('DD_ADMIN_FIRST_NAME'),
+  last_name=os.getenv('DD_ADMIN_LAST_NAME')
 )
 EOD
 

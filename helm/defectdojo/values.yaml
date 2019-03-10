@@ -5,6 +5,12 @@ host: defectdojo.default.minikube.local
 imagePullPolicy: Always
 tag: latest
 
+admin:
+  user: admin
+  firstName: Administrator
+  lastName: User
+  mail: admin@defectdojo.local
+
 # Components
 celery:
   affinity: {}
