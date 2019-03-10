@@ -5,7 +5,7 @@ DOCKER_IMAGES=(uwsgi nginx celery initializer)
 for DOCKER_IMAGE in "${DOCKER_IMAGES[@]}"
 do
   docker build \
-    --tag "defectdojo/defectdojo-${DOCKER_IMAGE}:${TRAVIS_BUILD_NUMBER}" \
+    --tag "defectdojo/defectdojo-${DOCKER_IMAGE}" \
     --file "Dockerfile.${DOCKER_IMAGE}" \
     .
 done
@@ -56,7 +56,6 @@ sudo helm install \
   ./helm/defectdojo \
   --name=defectdojo \
   --set django.ingress.enabled=false \
-  --set tag="${TRAVIS_BUILD_NUMBER}" \
   --set imagePullPolicy=Never
 echo -n "Waiting for DefectDojo to become ready "
 until [[ "True" == "$(sudo kubectl get pod \
