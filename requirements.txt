@@ -1,5 +1,5 @@
 asteval==0.9.12
-celery[cassandra]==4.2.1
+celery==4.2.1
 coverage==4.5.1
 defusedxml==0.5.0
 django_celery_results==1.0.4
