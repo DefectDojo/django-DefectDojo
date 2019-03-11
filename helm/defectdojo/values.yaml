@@ -13,16 +13,27 @@ admin:
 
 # Components
 celery:
-  affinity: {}
   broker: rabbitmq
   repository: defectdojo/defectdojo-django
-  logLevel: DEBUG
-  nodeSelector: {}
-  replicas: 1
-  resources:
-    cpu: 100m
-    memory: 128Mi
-  tolerations: []
+  beat:
+    affinity: {}
+    logLevel: DEBUG
+    nodeSelector: {}
+    resources:
+      cpu: 100m
+      memory: 128Mi
+    tolerations: []
+  worker:
+    affinity: {}
+    broker: rabbitmq
+    repository: defectdojo/defectdojo-django
+    logLevel: DEBUG
+    nodeSelector: {}
+    replicas: 1
+    resources:
+      cpu: 100m
+      memory: 128Mi
+    tolerations: []
 
 django:
   affinity: {}

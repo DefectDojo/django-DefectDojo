@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ $fullName }}-celery
+  name: {{ $fullName }}-celery-worker
   labels:
     defectdojo.org/component: celery
     app.kubernetes.io/name: {{ include "defectdojo.name" . }}
@@ -10,7 +10,7 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "defectdojo.chart" . }}
 spec:
-  replicas: {{ .Values.celery.replicas }}
+  replicas: {{ .Values.celery.worker.replicas }}
   selector:
     matchLabels:
       defectdojo.org/component: celery
@@ -27,7 +27,7 @@ spec:
         - name: celery
           image: "{{ .Values.celery.repository }}:{{ .Values.tag }}"
           imagePullPolicy: {{ .Values.imagePullPolicy }}
-          command: ['/entrypoint-celery.sh']
+          command: ['/entrypoint-celery-worker.sh']
           envFrom:
             - configMapRef:
                 name: {{ $fullName }}
@@ -43,16 +43,16 @@ spec:
                   name: {{ $fullName }}-{{ .Values.database }}
                   key: {{ .Values.database }}-password
           resources:
-            {{- toYaml .Values.celery.resources | nindent 12 }}
-      {{- with .Values.celery.nodeSelector }}
+            {{- toYaml .Values.celery.worker.resources | nindent 12 }}
+      {{- with .Values.celery.worker.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-    {{- with .Values.celery.affinity }}
+    {{- with .Values.celery.worker.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
     {{- end }}
-    {{- with .Values.celery.tolerations }}
+    {{- with .Values.celery.worker.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
     {{- end }}

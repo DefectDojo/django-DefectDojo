@@ -14,11 +14,12 @@ RUN \
 COPY requirements.txt ./
 RUN pip install -r ./requirements.txt
 COPY \
-  docker/entrypoint-celery.sh \
+  docker/entrypoint-celery-beat.sh \
+  docker/entrypoint-celery-worker.sh \
   docker/entrypoint-initializer.sh \
   docker/entrypoint-uwsgi.sh \
   /
-COPY wsgi.py manage.py docker/entrypoint-uwsgi.sh ./
+COPY wsgi.py manage.py ./
 COPY dojo/ ./dojo/
 RUN \
   mkdir dojo/migrations && \
