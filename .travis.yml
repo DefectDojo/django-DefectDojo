@@ -14,13 +14,6 @@ env:
     - BROKER=rabbitmq DATABASE=postgresql
     - BROKER=redis DATABASE=mysql
     - BROKER=redis DATABASE=postgresql
-
-
-jobs:
-  include:
-    - stage: flake8
-      script: ./travis/flake8.sh
-    - stage: kubernetes
-      before_install: ['./travis/before-install.sh']
-      before_script: ['./travis/before-script.sh']
-      script: ['./travis/script.sh']
+before_install: ['./travis/before-install.sh']
+before_script: ['./travis/before-script.sh']
+script: ['./travis/script.sh']
