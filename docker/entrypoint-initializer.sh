@@ -4,8 +4,11 @@ umask 0002
 
 if [ "${DD_INITIALIZE}" = false ]
 then
+  echo "Echo initialization skipped. Exiting."
   exit
 fi
+echo "Initializing."
+
 
 if [ -z "${DD_ADMIN_PASSWORD}" ]
 then
@@ -13,14 +16,6 @@ then
     head -c 22)"
   echo "Admin password: ${DD_ADMIN_PASSWORD}"
 fi
-
-echo -n "Waiting for database to be resolvable "
-until dig "${DD_DATABASE_HOST}"
-do
-  echo -n "."
-  sleep 1
-done
-echo
 
 echo -n "Waiting for database to be reachable "
 until echo "select 1;" | python manage.py dbshell > /dev/null

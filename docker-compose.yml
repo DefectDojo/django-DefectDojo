@@ -17,11 +17,21 @@ services:
     environment:
       DD_CELERY_BROKER_USER: guest
       DD_CELERY_BROKER_PASSWORD: guest
-  celery:
+  celerybeat:
     image: defectdojo/defectdojo-django:latest
     depends_on:
+      - mysql
       - rabbitmq
-    entrypoint: ['/entrypoint-celery.sh']
+    entrypoint: ['/entrypoint-celery-beat.sh']
+    environment:
+      DD_CELERY_BROKER_USER: guest
+      DD_CELERY_BROKER_PASSWORD: guest
+  celeryworker:
+    image: defectdojo/defectdojo-django:latest
+    depends_on:
+      - mysql
+      - rabbitmq
+    entrypoint: ['/entrypoint-celery-worker.sh']
     environment:
       DD_CELERY_BROKER_USER: guest
       DD_CELERY_BROKER_PASSWORD: guest
