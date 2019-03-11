@@ -45,7 +45,8 @@ services:
       - mysql
     entrypoint: ['/entrypoint-initializer.sh']
     environment:
-      DD_ADMIN_USER: ${DD_ADMIN_USER:-guest}
+      DD_ADMIN_USER: ${DD_ADMIN_USER:-admin}
+      DD_ADMIN_PASSWORD: ${DD_ADMIN_PASSWORD:-admin}
       DD_ADMIN_MAIL: ${DD_ADMIN_USER:-admin@defectdojo.local}
       DD_ADMIN_FIRST_NAME: ${DD_ADMIN_FIRST_NAME:-Admin}
       DD_ADMIN_LAST_NAME: ${DD_ADMIN_LAST_NAME:-Admin}
