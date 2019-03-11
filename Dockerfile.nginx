@@ -1,7 +1,6 @@
 # code: language=Dockerfile
 FROM defectdojo/defectdojo-uwsgi:latest AS build
 USER root
-COPY components/ ./components/
 RUN \
   apt-get -y update && \
   apt-get -y install apt-transport-https ca-certificates && \
@@ -14,10 +13,12 @@ RUN \
   apt-get -y install --no-install-recommends yarn && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
+  true
+COPY components/ ./components/
+RUN \
   cd components && \
   yarn && \
-  true
-RUN \
+  cd .. && \
   python manage.py collectstatic && \
   true
 
