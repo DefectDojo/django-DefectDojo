@@ -33,6 +33,7 @@ ENV \
   DD_ADMIN_PASSWORD= \
   DD_ADMIN_FIRST_NAME=Administrator \
   DD_ADMIN_LAST_NAME=User \
+  DD_CELERY_BEAT_SCHEDULE_FILENAME="/run/celery-beat-schedule" \
   DD_CELERY_BROKER_SCHEME="amqp" \
   DD_CELERY_BROKER_USER="defectdojo" \
   DD_CELERY_BROKER_PASSWORD="defectdojo" \
