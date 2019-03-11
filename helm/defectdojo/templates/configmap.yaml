@@ -10,7 +10,7 @@ metadata:
     helm.sh/chart: {{ include "defectdojo.chart" . }}
 data:
   DD_ADMIN_USER: {{ .Values.admin.user | default "admin" }}
-  DD_ADMIN_MAIL: {{ .Values.admin.Mail | default "admin@defectcojo.local" }}
+  DD_ADMIN_MAIL: {{ .Values.admin.Mail | default "admin@defectdojo.local" }}
   DD_ADMIN_FIRST_NAME: {{ .Values.admin.FirstName | default "Admin" }}
   DD_ADMIN_LAST_NAME: {{ .Values.admin.LastName | default "User" }}
   DD_ALLOWED_HOSTS: {{ .Values.host }}

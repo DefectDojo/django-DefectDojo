@@ -7,7 +7,7 @@ services:
       - uwsgi
     ports:
       - target: 8080
-        published: 8080
+        published: ${DD_PORT:-8080}
         protocol: tcp
         mode: host
   uwsgi:
@@ -15,8 +15,9 @@ services:
     depends_on:
       - mysql
     environment:
-      DD_CELERY_BROKER_USER: guest
-      DD_CELERY_BROKER_PASSWORD: guest
+      DD_ALLOWED_HOSTS: ${DD_ALLOWED_HOSTS:-localhost}
+      DD_CELERY_BROKER_USER: ${DD_CELERY_BROKER_USER:-guest}
+      DD_CELERY_BROKER_PASSWORD: ${DD_CELERY_BROKER_USER:-guest}
   celerybeat:
     image: defectdojo/defectdojo-django:latest
     depends_on:
@@ -24,8 +25,11 @@ services:
       - rabbitmq
     entrypoint: ['/entrypoint-celery-beat.sh']
     environment:
-      DD_CELERY_BROKER_USER: guest
-      DD_CELERY_BROKER_PASSWORD: guest
+      DD_CELERY_BROKER_USER: ${DD_CELERY_BROKER_USER:-guest}
+      DD_CELERY_BROKER_PASSWORD: ${DD_CELERY_BROKER_USER:-guest}
+      DD_DATABASE_NAME: ${DD_DATABASE_NAME:-defectdojo}
+      DD_DATABASE_USER: ${DD_DATABASE_USER:-defectdojo}
+      DD_DATABASE_PASSWORD: ${DD_DATABASE_PASSWORD:-defectdojo}
   celeryworker:
     image: defectdojo/defectdojo-django:latest
     depends_on:
@@ -33,19 +37,24 @@ services:
       - rabbitmq
     entrypoint: ['/entrypoint-celery-worker.sh']
     environment:
-      DD_CELERY_BROKER_USER: guest
-      DD_CELERY_BROKER_PASSWORD: guest
+      DD_CELERY_BROKER_USER: ${DD_CELERY_BROKER_USER:-guest}
+      DD_CELERY_BROKER_PASSWORD: ${DD_CELERY_BROKER_USER:-guest}
   initializer:
     image: defectdojo/defectdojo-django:latest
     depends_on:
       - mysql
     entrypoint: ['/entrypoint-initializer.sh']
+    environment:
+      DD_ADMIN_USER: ${DD_ADMIN_USER:-guest}
+      DD_ADMIN_MAIL: ${DD_ADMIN_USER:-admin@defectdojo.local}
+      DD_ADMIN_FIRST_NAME: ${DD_ADMIN_FIRST_NAME:-Admin}
+      DD_ADMIN_LAST_NAME: ${DD_ADMIN_LAST_NAME:-Admin}
   mysql:
     image: mysql:5.7
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
-      MYSQL_USER: defectdojo
-      MYSQL_PASSWORD: defectdojo
-      MYSQL_DATABASE: defectdojo
+      MYSQL_USER: ${DD_DATABASE_USER:-defectdojo}
+      MYSQL_PASSWORD: ${DD_DATABASE_PASSWORD:-defectdojo}
+      MYSQL_DATABASE: ${DD_DATABASE_NAME:-defectdojo}
   rabbitmq:
     image: rabbitmq:3.7
