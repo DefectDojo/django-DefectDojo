@@ -10,7 +10,7 @@ setup(
     install_requires=[
         'celery==4.1.1',
         'defusedxml',
-        'Django==1.11.18',
+        'Django==1.11.19',
         'django-auditlog',
         'django-custom-field',
         'django-filter==1.0.4',
