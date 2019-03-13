@@ -21,7 +21,7 @@ from dojo.filters import EngagementFilter
 from dojo.forms import CheckForm, \
     UploadThreatForm, UploadRiskForm, NoteForm, DoneForm, \
     EngForm, TestForm, ReplaceRiskAcceptanceForm, AddFindingsRiskAcceptanceForm, DeleteEngagementForm, ImportScanForm, \
-    JIRAFindingForm, CredMappingForm
+    JIRAFindingForm, CredMappingForm, EngagementPlanForm
 from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Type, Notes, \
     Risk_Acceptance, Development_Environment, BurpRawRequestResponse, Endpoint, \
@@ -354,6 +354,32 @@ def view_engagement(request, eid):
             'network': network,
             'preset_test_type': preset_test_type
         })
+
+# markme
+@user_passes_test(lambda u: u.is_staff)
+def plan_engagaments(request):
+    plan_form = EngagementPlanForm()
+    
+    if request.method == 'POST':
+        plan_form = EngagementPlanForm(request.POST)
+        
+        if plan_form.is_valid():
+            # todo: the actual planning
+            # default order: business criticality. allow to change?
+            
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Planned engagements successfully.',
+                extra_tags='alert-success')
+            
+            return HttpResponseRedirect(
+                    reverse('plan_engagements', args=()))
+    
+    add_breadcrumb(parent=None, title="Plan Engagements", top_level=True, request=request)
+    return render(request, 'dojo/engagement_plan.html', {
+        'tform': plan_form,
+    })
 
 
 @user_passes_test(lambda u: u.is_staff)
