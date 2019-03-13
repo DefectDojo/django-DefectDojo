@@ -1,0 +1,35 @@
+# code: language=Dockerfile
+FROM python:2
+WORKDIR /app
+RUN \
+  apt-get -y update && \
+  apt-get -y install mysql-client postgresql-client && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists && \
+  true
+COPY requirements.txt ./
+RUN pip install -r ./requirements.txt
+COPY \
+  docker/entrypoint-celery.sh \
+  docker/entrypoint-initializer.sh \
+  docker/entrypoint-uwsgi.sh \
+  /
+COPY wsgi.py manage.py docker/entrypoint-uwsgi.sh ./
+COPY dojo/ ./dojo/
+RUN \
+  mkdir dojo/migrations && \
+  chmod g=u dojo/migrations && \
+  chmod g=u /var/run && \
+  true
+USER 1001
+ENV \
+  DD_CELERY_BROKER_SCHEME="amqp" \
+  DD_CELERY_BROKER_USER="defectdojo" \
+  DD_CELERY_BROKER_PASSWORD="defectdojo" \
+  DD_CELERY_BROKER_HOST="rabbitmq" \
+  DD_CELERY_BROKER_PORT="5672" \
+  DD_CELERY_BROKER_PATH="//" \
+  DD_CELERY_LOG_LEVEL="INFO" \
+  UWSGI_MODE="socket" \
+  UWSGI_ENDPOINT="0.0.0.0:3031"
+ENTRYPOINT ["/entrypoint-uwsgi.sh"]
