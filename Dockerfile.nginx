@@ -1,5 +1,6 @@
 # code: language=Dockerfile
 FROM defectdojo/defectdojo-django:latest AS build
+
 USER root
 RUN \
   apt-get -y update && \
