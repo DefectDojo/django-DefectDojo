@@ -1,5 +1,6 @@
 # code: language=Dockerfile
-FROM defectdojo/defectdojo-uwsgi:latest AS build
+FROM defectdojo/defectdojo-django:latest AS build
+
 USER root
 RUN \
   apt-get -y update && \
@@ -31,8 +32,8 @@ RUN \
   chmod -R g=u /var/run && \
   true
 ENV \
-  UWSGI_PASS="uwsgi_server" \
-  UWSGI_HOST="uwsgi" \
-  UWSGI_PORT="3031"
+  DD_UWSGI_PASS="uwsgi_server" \
+  DD_UWSGI_HOST="uwsgi" \
+  DD_UWSGI_PORT="3031"
 USER 1001
 ENTRYPOINT ["/entrypoint-nginx.sh"]
