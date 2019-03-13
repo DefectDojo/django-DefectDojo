@@ -4,12 +4,12 @@ sudo: required
 services:
   - docker
 env:
-  - TEST=flake8
   global:
     - K8S_VERSION=v1.13.4
     - MINIKUBE_VERSION=v0.35.0
     - HELM_VERSION=v2.13.0
     - CHANGE_MINIKUBE_NONE_USER=true
+    - TEST=pep8
   matrix:
     - BROKER=rabbitmq DATABASE=mysql
     - BROKER=rabbitmq DATABASE=postgresql
@@ -17,21 +17,4 @@ env:
     - BROKER=redis DATABASE=postgresql
 before_install: ['./travis/before-install.sh']
 before_script: ['./travis/before-script.sh']
-script:
-  - |
-    echo "Running test=$TEST"
-    case "$TEST" in
-      flake8)
-        echo "$TRAVIS_BRANCH"
-        if [ "$TRAVIS_BRANCH" == "dev" ]
-        then
-            echo "Running Flake8 tests on dev branch aka pull requests"
-            # We need to checkout dev for flake8-diff to work properly
-            git checkout dev
-            pip install pep8 flake8 flake8-diff
-            flake8-diff
-        else
-            echo "true"
-        fi
-    esac
 script: ['./travis/script.sh']
