@@ -1,5 +1,15 @@
 #!/bin/sh
 
+umask 0002
+
+if [ "${DD_INITIALIZE}" = false ]
+then
+  echo "Echo initialization skipped. Exiting."
+  exit
+fi
+echo "Initializing."
+
+
 if [ -z "${DD_ADMIN_PASSWORD}" ]
 then
   export DD_ADMIN_PASSWORD="$(cat /dev/random | LC_ALL=C tr -dc a-zA-Z0-9 | \
@@ -7,10 +17,13 @@ then
   echo "Admin password: ${DD_ADMIN_PASSWORD}"
 fi
 
-until echo "select 1" | python manage.py dbshell
+echo -n "Waiting for database to be reachable "
+until echo "select 1;" | python manage.py dbshell > /dev/null
 do
-  echo "Waiting for database"
+  echo -n "."
+  sleep 1
 done
+echo
 
 python manage.py makemigrations dojo
 python manage.py makemigrations --merge --noinput

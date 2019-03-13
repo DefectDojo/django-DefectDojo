@@ -1,0 +1,55 @@
+# code: language=Dockerfile
+FROM python:2
+WORKDIR /app
+RUN \
+  apt-get -y update && \
+  apt-get -y install \
+    dnsutils \
+    mysql-client \
+    postgresql-client \
+    && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists && \
+  true
+COPY requirements.txt ./
+RUN pip install -r ./requirements.txt
+COPY \
+  docker/entrypoint-celery-beat.sh \
+  docker/entrypoint-celery-worker.sh \
+  docker/entrypoint-initializer.sh \
+  docker/entrypoint-uwsgi.sh \
+  /
+COPY wsgi.py manage.py ./
+COPY dojo/ ./dojo/
+RUN \
+  mkdir dojo/migrations && \
+  chmod g=u dojo/migrations && \
+  chmod g=u /var/run && \
+  true
+USER 1001
+ENV \
+  DD_ADMIN_USER=admin \
+  DD_ADMIN_MAIL=admin@defectdojo.local \
+  DD_ADMIN_PASSWORD= \
+  DD_ADMIN_FIRST_NAME=Administrator \
+  DD_ADMIN_LAST_NAME=User \
+  DD_CELERY_BEAT_SCHEDULE_FILENAME="/run/celery-beat-schedule" \
+  DD_CELERY_BROKER_SCHEME="amqp" \
+  DD_CELERY_BROKER_USER="defectdojo" \
+  DD_CELERY_BROKER_PASSWORD="defectdojo" \
+  DD_CELERY_BROKER_HOST="rabbitmq" \
+  DD_CELERY_BROKER_PORT="5672" \
+  DD_CELERY_BROKER_PATH="//" \
+  DD_CELERY_LOG_LEVEL="INFO" \
+  DD_DATABASE_ENGINE="django.db.backends.mysql" \
+  DD_DATABASE_HOST="mysql" \
+  DD_DATABASE_NAME="defectdojo" \
+  DD_DATABASE_PASSWORD="defectdojo" \
+  DD_DATABASE_PORT="3306" \
+  DD_DATABASE_USER="defectdojo" \
+  DD_SECRET_KEY="." \
+  DD_CREDENTIAL_AES_256_KEY="." \
+  DD_INITIALIZE=true \
+  DD_UWSGI_MODE="socket" \
+  DD_UWSGI_ENDPOINT="0.0.0.0:3031"
+ENTRYPOINT ["/entrypoint-uwsgi.sh"]

@@ -2,7 +2,6 @@
 version: '3.7'
 services:
   nginx:
-    # TODO: Don't use 'latest' tag after explicit tags have been created.
     image: defectdojo/defectdojo-nginx:latest
     depends_on:
       - uwsgi
@@ -12,40 +11,51 @@ services:
         protocol: tcp
         mode: host
   uwsgi:
-    # TODO: Don't use 'latest' tag after explicit tags have been created.
-    image: defectdojo/defectdojo-uwsgi:latest
+    image: defectdojo/defectdojo-django:latest
     depends_on:
       - mysql
     environment:
-      DD_ADMIN_PASSWORD: ${DD_ADMIN_PASSWORD:-admin}
-      DD_DATABASE_URL: "mysql://defectdojo:defectdojo@mysql:3306/defectdojo"
-      DD_ALLOWED_HOSTS: '*'
-      DD_SECRET_KEY: ${DD_SECRET_KEY:-"hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq"}
-      DD_CREDENTIAL_AES_256_KEY: ${DD_CREDENTIAL_AES_256_KEY:-"&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw"}
-  celery:
-    # TODO: Don't use 'latest' tag after explicit tags have been created.
-    image: defectdojo/defectdojo-celery:latest
+      DD_ALLOWED_HOSTS: ${DD_ALLOWED_HOSTS:-localhost}
+      DD_CELERY_BROKER_USER: ${DD_CELERY_BROKER_USER:-guest}
+      DD_CELERY_BROKER_PASSWORD: ${DD_CELERY_BROKER_USER:-guest}
+  celerybeat:
+    image: defectdojo/defectdojo-django:latest
     depends_on:
+      - mysql
       - rabbitmq
+    entrypoint: ['/entrypoint-celery-beat.sh']
     environment:
-      DD_CELERY_BROKER_USER: guest
-      DD_CELERY_BROKER_PASSWORD: guest
-  initializer:
-    image: defectdojo/defectdojo-initializer:latest
+      DD_CELERY_BROKER_USER: ${DD_CELERY_BROKER_USER:-guest}
+      DD_CELERY_BROKER_PASSWORD: ${DD_CELERY_BROKER_USER:-guest}
+      DD_DATABASE_NAME: ${DD_DATABASE_NAME:-defectdojo}
+      DD_DATABASE_USER: ${DD_DATABASE_USER:-defectdojo}
+      DD_DATABASE_PASSWORD: ${DD_DATABASE_PASSWORD:-defectdojo}
+  celeryworker:
+    image: defectdojo/defectdojo-django:latest
     depends_on:
       - mysql
+      - rabbitmq
+    entrypoint: ['/entrypoint-celery-worker.sh']
     environment:
+      DD_CELERY_BROKER_USER: ${DD_CELERY_BROKER_USER:-guest}
+      DD_CELERY_BROKER_PASSWORD: ${DD_CELERY_BROKER_USER:-guest}
+  initializer:
+    image: defectdojo/defectdojo-django:latest
+    depends_on:
+      - mysql
+    entrypoint: ['/entrypoint-initializer.sh']
+    environment:
+      DD_ADMIN_USER: ${DD_ADMIN_USER:-admin}
       DD_ADMIN_PASSWORD: ${DD_ADMIN_PASSWORD:-admin}
-      DD_DATABASE_URL: "mysql://defectdojo:defectdojo@mysql:3306/defectdojo"
-      DD_ALLOWED_HOSTS: '*'
-      DD_SECRET_KEY: ${DD_SECRET_KEY:-"hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq"}
-      DD_CREDENTIAL_AES_256_KEY: ${DD_CREDENTIAL_AES_256_KEY:-"&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw"}
+      DD_ADMIN_MAIL: ${DD_ADMIN_USER:-admin@defectdojo.local}
+      DD_ADMIN_FIRST_NAME: ${DD_ADMIN_FIRST_NAME:-Admin}
+      DD_ADMIN_LAST_NAME: ${DD_ADMIN_LAST_NAME:-Admin}
   mysql:
     image: mysql:5.7
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
-      MYSQL_USER: defectdojo
-      MYSQL_PASSWORD: defectdojo
-      MYSQL_DATABASE: defectdojo
+      MYSQL_USER: ${DD_DATABASE_USER:-defectdojo}
+      MYSQL_PASSWORD: ${DD_DATABASE_PASSWORD:-defectdojo}
+      MYSQL_DATABASE: ${DD_DATABASE_NAME:-defectdojo}
   rabbitmq:
     image: rabbitmq:3.7

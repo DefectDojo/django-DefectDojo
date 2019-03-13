@@ -22,6 +22,7 @@ spec:
         - name: initializer
           image: "{{ .Values.initializer.repository }}:{{ .Values.tag }}"
           imagePullPolicy: {{ .Values.imagePullPolicy }}
+          command: ['/entrypoint-initializer.sh']
           envFrom:
             - configMapRef:
                 name: {{ $fullName }}
