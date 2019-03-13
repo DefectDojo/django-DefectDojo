@@ -7,7 +7,7 @@ from dateutil.relativedelta import relativedelta
 from django import forms
 from django.core import validators
 from django.core.validators import RegexValidator
-from django.forms import modelformset_factory
+from django.forms import modelformset_factory, extras
 from django.forms.widgets import Widget, Select
 from django.utils.dates import MONTHS
 from django.utils.safestring import mark_safe
@@ -1558,6 +1558,79 @@ class CredMappingFormProd(forms.ModelForm):
         fields = ['cred_id', 'url', 'is_authn_provider']
         exclude = ['product', 'finding', 'engagement', 'test']
 
+# markme
+class EngagementPlanForm(forms.Form):
+    products = forms.MultipleChoiceField(choices=((product.id,product.name) for product in Product.objects.all()), widget=forms.CheckboxSelectMultiple(), label='Products', help_text='Planned in descending order of business criticality')
+    start_tool_category = forms.ModelChoiceField(queryset=Tool_Type.objects.all(), required=False, label='Run Tool Category', help_text='Run a tool with this category (needs to be configured for each product) at the beginning of each engagement. This also requires that all selected products have at least one endpoint tagged as `tool-export`.')
+    
+    from_date = forms.DateField(label="Period Start", widget=extras.SelectDateWidget, initial=timezone.now())
+    to_date = forms.DateField(label="Period End", widget=extras.SelectDateWidget, initial=(timezone.now() + timezone.timedelta(days=365)))
+    
+    allowed_days = forms.MultipleChoiceField(choices=[(1,"Monday"),(2,"Tuesday"),(3,"Wednesday"),(4,"Thursday"),(5,"Friday"),(6,"Saturday"),(7,"Sunday")], widget=forms.CheckboxSelectMultiple(), initial=(1,2,3,4,5), label='Working Days')
+    days_per_engagement = forms.IntegerField(required=True, label='Days per Engagement', help_text='How many working days should an engagement last? Keep in mind that a tool running at the start of it will take time as well.', initial=5)
+    parallel_engagements = forms.IntegerField(required=True, label='Parallel Engagements', help_text='How many engagements can happen at the same time?', initial=1)
+    
+    break_days = forms.IntegerField(required=True, label='Break Duration', help_text='How many working days should a break last? A duration of one engagement is recommended', initial=5)
+    break_interval = forms.IntegerField(required=True, label='Break Interval', help_text='Every how many working days should a break be inserted?', initial=20)
+    
+    
+    def clean_products(self):
+        if len(self.cleaned_data['products']) == 0:
+            raise forms.ValidationError('Select at least one product')
+            
+        return self.cleaned_data['products']
+    
+    def clean_allowed_days(self):
+        if len(self.cleaned_data['allowed_days']) == 0:
+            raise forms.ValidationError('Select at least one working day')
+        return self.cleaned_data['allowed_days']
+    
+    def clean_parallel_engagements(self):
+        if self.cleaned_data['parallel_engagements'] <= 0:
+            raise forms.ValidationError('You need at least one parallel engagement')
+        return self.cleaned_data['parallel_engagements']
+    
+    def clean_days_per_engagement(self):
+        if self.cleaned_data['days_per_engagement'] <= 0:
+            raise forms.ValidationError('Engagements need to be at least one working day long')
+        return self.cleaned_data['days_per_engagement']
+    
+    def clean(self):
+        # Check start & end date
+        if self.cleaned_data['from_date'] >= self.cleaned_data['to_date']:
+            raise forms.ValidationError('Period End must be after Period Start')
+        
+        # Validate products against tool category
+        if self.cleaned_data['start_tool_category'] != None:
+            tool_type = Tool_Type.objects.get(id=self.cleaned_data['start_tool_category'].id)
+            
+            for product_id in self.cleaned_data['products']:
+                product = Product.objects.get(id=product_id)
+                
+                # Check if product-tool with correct type is configured
+                tool_configs = Tool_Product_Settings.objects.filter(product=product.id)
+                has_product_tool = False
+                for tc in tool_configs:
+                    c = tc.tool_configuration
+                    if tc.tool_configuration.tool_type.id == tool_type.id:
+                        has_product_tool = True
+                        break
+                
+                if has_product_tool == False:
+                    raise forms.ValidationError('Product "'+product.name+'" has no product-tool configuration in the category "'+tool_type.name+'"')
+
+                # Check if exportable endpoint is configured
+                endpoints = Endpoint.objects.filter(product=product.id)
+                has_exported = False
+                for e in endpoints:
+                    tags = e.tags.filter(name="tool-export")
+                    if len(tags) > 0:
+                        has_exported = True
+                        break
+                        
+                if has_exported == False:
+                    raise forms.ValidationError('Product "'+product.name+'" has no endpoint that is tagged as `tool-export`')
+    
 
 class EngagementPresetsForm(forms.ModelForm):
 
