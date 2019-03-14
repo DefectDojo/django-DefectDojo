@@ -1,5 +1,5 @@
 #!/bin/bash
-
+RETURN_VALUE=0
 if [ -z "$TEST" ]; then
   # Build Docker images
   DOCKER_IMAGES=(django nginx)
@@ -60,15 +60,21 @@ if [ -z "$TEST" ]; then
     --set imagePullPolicy=Never
   echo -n "Waiting for DefectDojo to become ready "
   i=0
+  # Timeout value so that the wait doesn't timeout the travis build (faster fail)
+  TIMEOUT=20
   until [[ "True" == "$(sudo kubectl get pod \
       --selector=defectdojo.org/component=django \
       -o 'jsonpath={.items[*].status.conditions[?(@.type=="Ready")].status}')" \
-      || $i -gt 20 ]]
+      || $i -gt $TIMEOUT ]]
   do
     ((i++))
     sleep 6
     echo -n "."
   done
+  if [[ $i -gt $TIMEOUT ]]; then
+    RETURN_VALUE=1
+  fi
+  echo
   echo "UWSGI logs"
   sudo kubectl logs --selector=defectdojo.org/component=django -c uwsgi
   echo
@@ -78,15 +84,20 @@ if [ -z "$TEST" ]; then
   # Run all tests
   echo "Running tests."
   sudo helm test defectdojo
+  # Check exit status
+  RETURN_VALUE=$?
   echo
   echo "Unit Tests"
-  kubectl logs defectdojo-django-unit-test --namespace default
+  sudo kubectl logs defectdojo-django-unit-test --namespace default
+  echo
+  echo "Pods"
   sudo kubectl get pods
 
   # Uninstall
   echo "Deleting DefectDojo from Kubernetes."
   sudo helm delete defectdojo --purge
   sudo kubectl get pods
+  exit RETURN_VALUE
 else
 echo "Running test=$TEST"
   case "$TEST" in
