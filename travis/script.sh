@@ -1,7 +1,14 @@
 #!/bin/bash
+travis_fold() {
+  local action=$1
+  local name=$2
+  echo -en "travis_fold:${action}:${name}\r"
+}
+
 RETURN_VALUE=0
 if [ -z "$TEST" ]; then
   # Build Docker images
+  travis_fold start docker_image_build
   DOCKER_IMAGES=(django nginx)
   for DOCKER_IMAGE in "${DOCKER_IMAGES[@]}"
   do
@@ -10,8 +17,10 @@ if [ -z "$TEST" ]; then
       --file "Dockerfile.${DOCKER_IMAGE}" \
       .
   done
+  travis_fold end docker_image_build
 
   # Start Minikube
+  travis_fold start minikube_install
   sudo minikube start \
     --vm-driver=none \
     --kubernetes-version="${K8S_VERSION}"
@@ -80,8 +89,10 @@ if [ -z "$TEST" ]; then
   echo
   echo "DefectDojo is up and running."
   sudo kubectl get pods
+  travis_fold end minikube_install
 
   # Run all tests
+  travis_fold start defectdojo_tests
   echo "Running tests."
   sudo helm test defectdojo
   # Check exit status
@@ -100,6 +111,8 @@ if [ -z "$TEST" ]; then
   echo "Deleting DefectDojo from Kubernetes."
   sudo helm delete defectdojo --purge
   sudo kubectl get pods
+  travis_fold end defectdojo_tests
+
   exit RETURN_VALUE
 else
 echo "Running test=$TEST"

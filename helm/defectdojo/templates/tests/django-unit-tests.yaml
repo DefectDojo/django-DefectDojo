@@ -20,4 +20,6 @@ spec:
         - manage.py
         - test
         - dojo.unittests
+      data:
+        DD_DATABASE_URL="sql"
   restartPolicy: Never
