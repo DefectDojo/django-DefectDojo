@@ -14,7 +14,7 @@ env:
     - BROKER=rabbitmq DATABASE=postgresql
     - BROKER=redis DATABASE=mysql
     - BROKER=redis DATABASE=postgresql
-    - TEST=pep8
+    - TEST=flake8
 before_install: ['./travis/before-install.sh']
 before_script: ['./travis/before-script.sh']
 script: ['./travis/script.sh']
