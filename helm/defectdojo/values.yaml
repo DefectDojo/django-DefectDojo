@@ -13,17 +13,28 @@ admin:
 
 # Components
 celery:
-  affinity: {}
   broker: rabbitmq
-  repository: defectdojo/defectdojo-celery
-  logLevel: DEBUG
-  nodeSelector: {}
-  replicas: 1
-  resources:
-    cpu: 100m
-    memory: 128Mi
-  tolerations: []
-
+  repository: defectdojo/defectdojo-django
+  beat:
+    affinity: {}
+    logLevel: DEBUG
+    nodeSelector: {}
+    resources:
+      cpu: 100m
+      memory: 128Mi
+    tolerations: []
+  worker:
+    affinity: {}
+    broker: rabbitmq
+    repository: defectdojo/defectdojo-django
+    logLevel: DEBUG
+    nodeSelector: {}
+    replicas: 1
+    resources:
+      cpu: 100m
+      memory: 128Mi
+    tolerations: []
+    
 django:
   affinity: {}
   ingress:
@@ -38,13 +49,13 @@ django:
   replicas: 1
   tolerations: []
   uwsgi:
-    repository: defectdojo/defectdojo-uwsgi
+    repository: defectdojo/defectdojo-django
     resources:
       cpu: 100m
       memory: 128Mi
 
 initializer:
-  repository: defectdojo/defectdojo-initializer
+  repository: defectdojo/defectdojo-django
   keepSeconds: 60
   resources:
     cpu: 100m

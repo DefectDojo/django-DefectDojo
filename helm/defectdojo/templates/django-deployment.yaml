@@ -79,9 +79,9 @@ spec:
               httpHeaders:
                 - name: Host
                   value: {{ .Values.host }}
-            initialDelaySeconds: 100
+            initialDelaySeconds: 60
             periodSeconds: 10
-            failureThreshold: 5
+            failureThreshold: 12
           resources:
             {{- toYaml .Values.django.nginx.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
