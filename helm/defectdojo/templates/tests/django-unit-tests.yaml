@@ -13,7 +13,7 @@ metadata:
 spec:
   containers:
     - name: unittest
-      image: defectdojo/defectdojo-django
+      image: defectdojo/defectdojo-django:latest
       command: ['python']
       args:
         - manage.py
