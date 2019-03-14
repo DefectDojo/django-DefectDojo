@@ -2,7 +2,7 @@
 
 if [ -z "$TEST" ]; then
   # Build Docker images
-  DOCKER_IMAGES=(uwsgi nginx celery initializer)
+  DOCKER_IMAGES=(django nginx)
   for DOCKER_IMAGE in "${DOCKER_IMAGES[@]}"
   do
     docker build \

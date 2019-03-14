@@ -1,0 +1,22 @@
+{{- $fullName := include "defectdojo.fullname" . -}}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "defectdojo.fullname" . }}-django-test
+  labels:
+    app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+    helm.sh/chart: {{ include "defectdojo.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  annotations:
+    helm.sh/hook: test-success
+spec:
+  containers:
+    - name: unittest
+      image: defectdojo/defectdojo-django:latest
+      command: ['python']
+      args:
+        - manage.py
+        - test
+        - dojo.unittests
+  restartPolicy: Never

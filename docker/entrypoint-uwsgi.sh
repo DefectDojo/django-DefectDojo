@@ -1,6 +1,9 @@
 #!/bin/sh
 
+umask 0002
+
 exec uwsgi \
-  "--${UWSGI_MODE}" "${UWSGI_ENDPOINT}" \
+  "--${DD_UWSGI_MODE}" "${DD_UWSGI_ENDPOINT}" \
+
   --protocol uwsgi \
   --wsgi dojo.wsgi:application

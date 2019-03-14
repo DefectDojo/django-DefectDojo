@@ -4,15 +4,11 @@
 
 ```zsh
 # Build images
-docker build -t defectdojo/defectdojo-uwsgi -f Dockerfile.uwsgi .
+docker build -t defectdojo/defectdojo-django -f Dockerfile.django .
 docker build -t defectdojo/defectdojo-nginx -f Dockerfile.nginx .
-docker build -t defectdojo/defectdojo-celery -f Dockerfile.celery .
-docker build -t defectdojo/defectdojo-initializer -f Dockerfile.initializer .
 # Push images to Docker Hub
-docker push defectdojo/defectdojo-uwsgi
+docker push defectdojo/defectdojo-django
 docker push defectdojo/defectdojo-nginx
-docker push defectdojo/defectdojo-celery
-docker push defectdojo/defectdojo-initializer
 ```
 
 ## Run with Kubernetes
