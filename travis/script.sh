@@ -59,13 +59,18 @@ if [ -z "$TEST" ]; then
     --set django.ingress.enabled=false \
     --set imagePullPolicy=Never
   echo -n "Waiting for DefectDojo to become ready "
+  i=0
   until [[ "True" == "$(sudo kubectl get pod \
-    --selector=defectdojo.org/component=django \
-    -o 'jsonpath={.items[*].status.conditions[?(@.type=="Ready")].status}')" ]]
+      --selector=defectdojo.org/component=django \
+      -o 'jsonpath={.items[*].status.conditions[?(@.type=="Ready")].status}')" \
+      || $i -gt 20 ]]
   do
-    sleep 1
+    ((i++))
+    sleep 6
     echo -n "."
   done
+  echo "UWSGI logs"
+  sudo kubectl logs --selector=defectdojo.org/component=django -c uwsgi
   echo
   echo "DefectDojo is up and running."
   sudo kubectl get pods
@@ -73,6 +78,9 @@ if [ -z "$TEST" ]; then
   # Run all tests
   echo "Running tests."
   sudo helm test defectdojo
+  echo
+  echo "Unit Tests"
+  kubectl logs defectdojo-django-unit-test --namespace default
   sudo kubectl get pods
 
   # Uninstall
@@ -84,7 +92,7 @@ echo "Running test=$TEST"
   case "$TEST" in
     flake8)
       echo "$TRAVIS_BRANCH"
-      if [ "$TRAVIS_BRANCH" == "dev" ]
+      if [ "$TRAVIS_BRANCH" == "k8s" ]
       then
           echo "Running Flake8 tests on dev branch aka pull requests"
           # We need to checkout dev for flake8-diff to work properly
