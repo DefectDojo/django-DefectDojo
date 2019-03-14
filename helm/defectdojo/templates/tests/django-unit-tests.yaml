@@ -18,6 +18,14 @@ spec:
       env:
         - name: DD_DATABASE_URL
           value: "sql"
+        - name: DJANGO_SETTINGS_MODULE
+          value: "dojo.settings.unittest"
+        - name: DD_SECRET_KEY
+          value: ""
+        - name: DD_CREDENTIAL_AES_256_KEY
+          value: "temp"
+        - name: DD_DEBUG
+          value: "on"
       command: ['python']
       args:
         - manage.py
