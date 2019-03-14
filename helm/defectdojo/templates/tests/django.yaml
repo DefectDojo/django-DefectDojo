@@ -18,7 +18,4 @@ spec:
       args:
         - '--header=Host: {{ .Values.host }}'
         - '{{ $fullName }}-django'
-    - name: unittest
-      image: uwsgi
-      command: ['python manage.py test dojo.unittests']
   restartPolicy: Never
