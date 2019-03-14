@@ -1,7 +1,7 @@
 # #  engagements
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 import operator
 
 from django.contrib.auth.models import User
@@ -356,6 +356,7 @@ def view_engagement(request, eid):
         })
 
 # markme
+from pprint import pprint # debugging
 @user_passes_test(lambda u: u.is_staff)
 def plan_engagaments(request):
     plan_form = EngagementPlanForm()
@@ -364,8 +365,39 @@ def plan_engagaments(request):
         plan_form = EngagementPlanForm(request.POST)
         
         if plan_form.is_valid():
+            # Load products by ID
+            products = []
+            for product_id in plan_form.cleaned_data['products']:
+                products.append(Product.objects.get(id=product_id))
+            
+            # Sort products
+            criticality_mapping = {'very high':6, 'high':5, 'medium':4, 'low':3, 'very low':2, 'none':1}
+            sortMap = {'business_criticality': lambda x : criticality_mapping[x.business_criticality], 
+                       'revenue': lambda x : x.revenue, 
+                       'user_records': lambda x : x.user_records}
+            
+            sort_order = plan_form.cleaned_data['products_order']
+
+            products = sorted(products, key=sortMap[sort_order[1:]])
+            if sort_order[0] == "-":
+                products.reverse()
+                
             # todo: the actual planning
-            # default order: business criticality. allow to change?
+            # Loop through dates and ignore deselected ones
+            delta = timedelta(days=1)
+            d = plan_form.cleaned_data['from_date']
+            i = 0
+            pprint(["Init", plan_form.cleaned_data['from_date'], plan_form.cleaned_data['to_date'], plan_form.cleaned_data['allowed_days']])
+            while d <= plan_form.cleaned_data['to_date']:
+                if str(weekday) in plan_form.cleaned_data['allowed_days']:
+                    pprint(d)
+                    
+                    # iteration limitation for debugging
+                    i+=1
+                    if i >= 10:
+                        break
+                        
+                d += delta
             
             messages.add_message(
                 request,

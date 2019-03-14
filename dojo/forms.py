@@ -30,6 +30,8 @@ FINDING_STATUS = (('verified', 'Verified'),
 SEVERITY_CHOICES = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
                     ('High', 'High'), ('Critical', 'Critical'))
 
+WEEKDAY_CHOICES = ((0,"Monday"),(1,"Tuesday"),(2,"Wednesday"),(3,"Thursday"),(4,"Friday"),(5,"Saturday"),(6,"Sunday"))
+
 
 class SelectWithPop(forms.Select):
     def render(self, name, *args, **kwargs):
@@ -1560,13 +1562,21 @@ class CredMappingFormProd(forms.ModelForm):
 
 # markme
 class EngagementPlanForm(forms.Form):
+    SORT_PRODUCT_CHOICES = (('-business_criticality', 'Business Criticality: High to Low'),
+                            ('+business_criticality', 'Business Criticality: Low to High'),
+                            ('-revenue', 'Revenue: High to Low'),
+                            ('+revenue', 'Revenue: Low to High'),
+                            ('-user_records', 'User Records: High to Low'),
+                            ('+user_records', 'User Records: Low to High'))
+    
     products = forms.MultipleChoiceField(choices=((product.id,product.name) for product in Product.objects.all()), widget=forms.CheckboxSelectMultiple(), label='Products', help_text='Planned in descending order of business criticality')
+    products_order = forms.ChoiceField(choices=SORT_PRODUCT_CHOICES, required=True, label='Planning Order', help_text='Please specify how the order of planning per product should be calculated')
     start_tool_category = forms.ModelChoiceField(queryset=Tool_Type.objects.all(), required=False, label='Run Tool Category', help_text='Run a tool with this category (needs to be configured for each product) at the beginning of each engagement. This also requires that all selected products have at least one endpoint tagged as `tool-export`.')
     
     from_date = forms.DateField(label="Period Start", widget=extras.SelectDateWidget, initial=timezone.now())
     to_date = forms.DateField(label="Period End", widget=extras.SelectDateWidget, initial=(timezone.now() + timezone.timedelta(days=365)))
     
-    allowed_days = forms.MultipleChoiceField(choices=[(1,"Monday"),(2,"Tuesday"),(3,"Wednesday"),(4,"Thursday"),(5,"Friday"),(6,"Saturday"),(7,"Sunday")], widget=forms.CheckboxSelectMultiple(), initial=(1,2,3,4,5), label='Working Days')
+    allowed_days = forms.MultipleChoiceField(choices=WEEKDAY_CHOICES, widget=forms.CheckboxSelectMultiple(), initial=(0,1,2,3,4), label='Working Days')
     days_per_engagement = forms.IntegerField(required=True, label='Days per Engagement', help_text='How many working days should an engagement last? Keep in mind that a tool running at the start of it will take time as well.', initial=5)
     parallel_engagements = forms.IntegerField(required=True, label='Parallel Engagements', help_text='How many engagements can happen at the same time?', initial=1)
     
