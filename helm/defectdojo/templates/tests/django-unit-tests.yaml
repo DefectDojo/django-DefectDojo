@@ -15,11 +15,12 @@ spec:
     - name: unittest
       image: defectdojo/defectdojo-django:latest
       imagePullPolicy: {{ .Values.imagePullPolicy }}
+      env:
+        - name: DD_DATABASE_URL
+          value: "sql"
       command: ['python']
       args:
         - manage.py
         - test
         - dojo.unittests
-      data:
-        DD_DATABASE_URL="sql"
   restartPolicy: Never
