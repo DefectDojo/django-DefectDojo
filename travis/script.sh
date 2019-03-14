@@ -87,6 +87,9 @@ if [ -z "$TEST" ]; then
   # Check exit status
   RETURN_VALUE=$?
   echo
+  echo "Smoke Test"
+  sudo kubectl logs defectdojo-django-test --namespace default
+  echo
   echo "Unit Tests"
   sudo kubectl logs defectdojo-django-unit-test --namespace default
   echo
@@ -103,7 +106,7 @@ echo "Running test=$TEST"
   case "$TEST" in
     flake8)
       echo "$TRAVIS_BRANCH"
-      if [ "$TRAVIS_BRANCH" == "k8s" ]
+      if [ "$TRAVIS_BRANCH" == "dev" ]
       then
           echo "Running Flake8 tests on dev branch aka pull requests"
           # We need to checkout dev for flake8-diff to work properly
