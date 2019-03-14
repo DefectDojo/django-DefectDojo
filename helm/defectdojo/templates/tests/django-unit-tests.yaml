@@ -21,7 +21,7 @@ spec:
         - name: DJANGO_SETTINGS_MODULE
           value: "dojo.settings.unittest"
         - name: DD_SECRET_KEY
-          value: ""
+          value: "temp"
         - name: DD_CREDENTIAL_AES_256_KEY
           value: "temp"
         - name: DD_DEBUG
