@@ -26,9 +26,5 @@ spec:
           value: "temp"
         - name: DD_DEBUG
           value: "on"
-      command: ['python']
-      args:
-        - manage.py
-        - test
-        - dojo.unittests
+      command: ['/app/tests/unit-tests.sh']
   restartPolicy: Never
