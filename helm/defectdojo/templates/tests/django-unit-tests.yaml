@@ -15,16 +15,27 @@ spec:
     - name: unittest
       image: defectdojo/defectdojo-django:latest
       imagePullPolicy: {{ .Values.imagePullPolicy }}
+      command: ['python']
+      args:
+        - manage.py
+        - test
+        - dojo.unittests
+      envFrom:
+        - configMapRef:
+            name: {{ $fullName }}
       env:
-        - name: DD_DATABASE_URL
-          value: "sql"
-        - name: DJANGO_SETTINGS_MODULE
-          value: "dojo.settings.unittest"
-        - name: DD_SECRET_KEY
-          value: "temp"
-        - name: DD_CREDENTIAL_AES_256_KEY
-          value: "temp"
         - name: DD_DEBUG
           value: "on"
-      command: ['/unit-tests.sh']
+        - name: DJANGO_SETTINGS_MODULE
+          value: "dojo.settings.unittest"
+        - name: DD_CELERY_BROKER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ $fullName }}-{{ .Values.celery.broker }}
+              key: {{ .Values.celery.broker }}-password
+        - name: DD_DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ $fullName }}-{{ .Values.database }}
+              key: {{ .Values.database }}-password
   restartPolicy: Never
