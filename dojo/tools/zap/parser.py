@@ -83,7 +83,7 @@ class ZapXmlParser(object):
 
                 find.unsaved_endpoints = [main_host]
                 for i in item.items:
-                    parts = urlparse.urlparse(i['uri'])
+                    parts = urlparse(i['uri'])
                     find.unsaved_endpoints.append(Endpoint(protocol=parts.scheme,
                                                            host=parts.netloc,
                                                            path=parts.path,
