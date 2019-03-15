@@ -161,7 +161,7 @@ def get_item(item_node, test):
     # protocol = rhost.group(1)
     # host = rhost.group(4)
     protocol = urlparse(url_host).scheme
-    host = urlparse(url_host).nettloc
+    host = urlparse(url_host).netloc
 
     port = 80
     if protocol == 'https':
