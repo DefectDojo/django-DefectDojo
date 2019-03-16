@@ -1,0 +1,29 @@
+{{- $fullName := include "defectdojo.fullname" . -}}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "defectdojo.fullname" . }}-django-unit-test
+  labels:
+    app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+    helm.sh/chart: {{ include "defectdojo.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  annotations:
+    helm.sh/hook: test-success
+spec:
+  containers:
+    - name: unittest
+      image: defectdojo/defectdojo-django:latest
+      imagePullPolicy: {{ .Values.imagePullPolicy }}
+      command: ['/entrypoint-unit-tests.sh']
+      envFrom:
+        - configMapRef:
+            name: {{ $fullName }}
+      env:
+        - name: DD_DEBUG
+          value: "on"
+        - name: DJANGO_SETTINGS_MODULE
+          value: "dojo.settings.unittest"
+        - name: DD_DATABASE_URL
+          value: "sqlite:////tmp/test-sqlite.db"
+  restartPolicy: Never

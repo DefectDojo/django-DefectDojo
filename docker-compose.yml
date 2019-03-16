@@ -15,9 +15,14 @@ services:
     depends_on:
       - mysql
     environment:
+      DD_DEBUG: 'on'
+      DD_ALLOWED_HOSTS: ${DD_ALLOWED_HOSTS:-*}
+      DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}
       DD_ALLOWED_HOSTS: ${DD_ALLOWED_HOSTS:-localhost}
       DD_CELERY_BROKER_USER: ${DD_CELERY_BROKER_USER:-guest}
       DD_CELERY_BROKER_PASSWORD: ${DD_CELERY_BROKER_USER:-guest}
+      DD_SECRET_KEY: ${DD_SECRET_KEY:-"hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq"}
+      DD_CREDENTIAL_AES_256_KEY: ${DD_CREDENTIAL_AES_256_KEY:-"&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw"}
   celerybeat:
     image: defectdojo/defectdojo-django:latest
     depends_on:
@@ -25,6 +30,7 @@ services:
       - rabbitmq
     entrypoint: ['/entrypoint-celery-beat.sh']
     environment:
+      DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}
       DD_CELERY_BROKER_USER: ${DD_CELERY_BROKER_USER:-guest}
       DD_CELERY_BROKER_PASSWORD: ${DD_CELERY_BROKER_USER:-guest}
       DD_DATABASE_NAME: ${DD_DATABASE_NAME:-defectdojo}
@@ -37,6 +43,7 @@ services:
       - rabbitmq
     entrypoint: ['/entrypoint-celery-worker.sh']
     environment:
+      DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}
       DD_CELERY_BROKER_USER: ${DD_CELERY_BROKER_USER:-guest}
       DD_CELERY_BROKER_PASSWORD: ${DD_CELERY_BROKER_USER:-guest}
   initializer:
@@ -45,11 +52,12 @@ services:
       - mysql
     entrypoint: ['/entrypoint-initializer.sh']
     environment:
-      DD_ADMIN_USER: ${DD_ADMIN_USER:-admin}
-      DD_ADMIN_PASSWORD: ${DD_ADMIN_PASSWORD:-admin}
-      DD_ADMIN_MAIL: ${DD_ADMIN_USER:-admin@defectdojo.local}
-      DD_ADMIN_FIRST_NAME: ${DD_ADMIN_FIRST_NAME:-Admin}
-      DD_ADMIN_LAST_NAME: ${DD_ADMIN_LAST_NAME:-Admin}
+      DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}
+      DD_ADMIN_USER: ${DD_ADMIN_USER:-"admin"}
+      DD_ADMIN_PASSWORD: ${DD_ADMIN_PASSWORD:-"admin"}
+      DD_ADMIN_MAIL: ${DD_ADMIN_USER:-"admin@defectdojo.local"}
+      DD_ADMIN_FIRST_NAME: ${DD_ADMIN_FIRST_NAME:-"Admin"}
+      DD_ADMIN_LAST_NAME: ${DD_ADMIN_LAST_NAME:-"Admin"}
   mysql:
     image: mysql:5.7
     environment:
