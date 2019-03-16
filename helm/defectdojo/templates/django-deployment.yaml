@@ -69,7 +69,7 @@ spec:
               httpHeaders:
                 - name: Host
                   value: {{ .Values.host }}
-            initialDelaySeconds: 60
+            initialDelaySeconds: 120
             periodSeconds: 10
             failureThreshold: 6
           readinessProbe:
@@ -79,7 +79,7 @@ spec:
               httpHeaders:
                 - name: Host
                   value: {{ .Values.host }}
-            initialDelaySeconds: 60
+            initialDelaySeconds: 120
             periodSeconds: 10
             failureThreshold: 12
           resources:

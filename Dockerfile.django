@@ -18,9 +18,11 @@ COPY \
   docker/entrypoint-celery-worker.sh \
   docker/entrypoint-initializer.sh \
   docker/entrypoint-uwsgi.sh \
+  docker/entrypoint-unit-tests.sh \
   /
-COPY wsgi.py manage.py ./
+COPY wsgi.py manage.py tests/unit-tests.sh ./
 COPY dojo/ ./dojo/
+COPY tests/ ./tests/
 RUN \
   mkdir dojo/migrations && \
   chmod g=u dojo/migrations && \
