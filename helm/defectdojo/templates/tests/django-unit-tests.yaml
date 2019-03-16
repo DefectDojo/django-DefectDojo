@@ -25,5 +25,5 @@ spec:
         - name: DJANGO_SETTINGS_MODULE
           value: "dojo.settings.unittest"
         - name: DD_DATABASE_URL
-          value: sqlite:////tmp/test-sqlite.db
+          value: "sqlite:////tmp/test-sqlite.db"
   restartPolicy: Never
