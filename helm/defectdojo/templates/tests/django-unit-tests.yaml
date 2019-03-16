@@ -15,7 +15,7 @@ spec:
     - name: unittest
       image: defectdojo/defectdojo-django:latest
       imagePullPolicy: {{ .Values.imagePullPolicy }}
-      command: ['entrypoint-unit-tests.sh']
+      command: ['/entrypoint-unit-tests.sh']
       envFrom:
         - configMapRef:
             name: {{ $fullName }}
