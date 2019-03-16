@@ -16,7 +16,7 @@ services:
       - mysql
     environment:
       DD_DEBUG: 'on'
-      DD_ALLOWED_HOSTS: ${DD_ALLOWED_HOSTS:-"*"}
+      DD_ALLOWED_HOSTS: ${DD_ALLOWED_HOSTS:-*}
       DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}
       DD_ALLOWED_HOSTS: ${DD_ALLOWED_HOSTS:-localhost}
       DD_CELERY_BROKER_USER: ${DD_CELERY_BROKER_USER:-guest}
