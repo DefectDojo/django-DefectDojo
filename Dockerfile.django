@@ -18,6 +18,7 @@ COPY \
   docker/entrypoint-celery-worker.sh \
   docker/entrypoint-initializer.sh \
   docker/entrypoint-uwsgi.sh \
+  docker/entrypoint-unit-tests.sh \
 
   /
 COPY wsgi.py manage.py tests/unit-tests.sh ./
