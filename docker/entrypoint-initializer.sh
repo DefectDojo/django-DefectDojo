@@ -9,6 +9,7 @@ then
 fi
 echo "Initializing."
 
+echo "Admin user: ${DD_ADMIN_USER}"
 
 if [ -z "${DD_ADMIN_PASSWORD}" ]
 then
@@ -51,4 +52,4 @@ python manage.py loaddata language_type
 python manage.py loaddata objects_review
 python manage.py loaddata regulation
 python manage.py installwatson
-python manage.py buildwatson
+exec python manage.py buildwatson

@@ -6,9 +6,6 @@
 # Build images
 docker build -t defectdojo/defectdojo-django -f Dockerfile.django .
 docker build -t defectdojo/defectdojo-nginx -f Dockerfile.nginx .
-# Push images to Docker Hub
-docker push defectdojo/defectdojo-django
-docker push defectdojo/defectdojo-nginx
 ```
 
 ## Run with Kubernetes
@@ -56,7 +53,8 @@ helm install \
   --set celery.replicas=3 \
   --set rabbitmq.replicas=3
 
-# Run highly available PostgreSQL cluster instead of MySQL
+# Run highly available PostgreSQL cluster instead of MySQL - recommended setup
+# for production environment.
 helm install \
   ./helm/defectdojo \
   --name=defectdojo \
@@ -72,12 +70,34 @@ helm install \
   --set postgresql.replication.enabled=true \
   --set postgresql.replication.slaveReplicas=3
 
+# Note: If you run `helm install defectdojo before, you will get an error
+# message like `Error: release defectdojo failed: secrets "defectdojo" already
+# exists`. This is because the secret is kept across installations.
+# To prevent recreating the secret, add --set createSecret=false` to your
+# command.
+
 # Run test. If there are any errors, re-run the command without `--cleanup` and
 # inspect the test container.
 helm test defectdojo --cleanup
 
 # Navigate to <https://defectdojo.default.minikube.local>.
 ```
+
+TODO: The MySQL volumes aren't persistent across `helm delete` operations. To
+make them persistent, you need to add an annotation to the persistent volume
+claim:
+
+```zsh
+kubectl --namespace "${K8S_NAMESPACE}" patch pvc defectdojo-mysql -p \
+  '{"metadata": {"annotations": {"\"helm.sh/resource-policy\"": "keep"}}}'
+```
+
+See also
+<https://github.com/helm/charts/blob/master/stable/mysql/templates/pvc.yaml>.
+
+However, that doesn't work and I haven't found out why. In a production
+environment, a redundant PostgreSQL cluster is the better option. As it uses
+statefulsets that are kept by default, the problem doesn't exist there.
 
 ### Useful stuff
 
@@ -104,68 +124,25 @@ helm delete defectdojo --purge
 
 ## Run with Docker Compose
 
+Docker compose is not intended for production use.
+If you want to deploy a containerized DefectDojo to a production environment,
+use the Helm and Kubernetes approach described above.
+
 ### Setup via Docker Compose
 
-```zsh
-docker-compose up
-```
+If you start your DefectDojo instance on Docker Compose for the first time, just
+run `docker-compose up`.
+
+Navigate to <http://localhost:8080> where you can log in with username admin.
+To find out the admin user’s password, check the very beginning of the console
+output of the initializer container.
+
+If you ran DefectDojo before and you want to prevent the initializer container
+to run again, define an environment variable DD_INITIALIZE=false to prevent re-
+initialization.
 
 ### Clean up Docker Compose
 
 ```zsh
 docker-compose down --volumes
-```
-
-## Run in with plain Docker
-
-The following describes how to run the docker images built above. This is not
-intended for production use, but rather as a memo for creating a Helm chart.
-
-```zsh
-# Network
-docker network create defectdojo
-
-# MySQL
-docker run --rm -it --network=defectdojo \
-  --name=defectdojo_mysql \
-  --network-alias mysql \
-  --env MYSQL_DATABASE=defectdojo \
-  --env MYSQL_USER=defectdojo \
-  --env MYSQL_PASSWORD=defectdojo \
-  --env MYSQL_RANDOM_ROOT_PASSWORD=pleaseChangeMe \
-  mysql:5.7
-
-# Django application
-docker run --rm -it --network=defectdojo \
-  --name=defectdojo_uwsgi \
-  --network-alias uwsgi \
-  --env DD_ALLOWED_HOSTS='*' \
-  defectdojo/defectdojo-uwsgi
-
-# RabbitMQ
-docker run --rm -it --network=defectdojo \
-  --name=defectdojo_rabbitmq \
-  --network-alias rabbitmq \
-  rabbitmq:3
-
-# Celery
-docker run --rm -it --network=defectdojo \
-  --name=defectdojo_celery \
-  --network-alias celery \
-  --env DD_CELERY_BROKER_USER=guest \
-  --env DD_CELERY_BROKER_PASSWORD=guest \
-  defectdojo/defectdojo-celery
-
-# Nginx
-docker run --rm -it --network=defectdojo \
-  --name=defectdojo_nginx \
-  --publish 8080:8080 \
-  defectdojo-nginx
-
-# Initializer
-docker run --rm -it --network=defectdojo \
-  --name defectdojo_initializer \
-  defectdojo/defectdojo-initializer
-
-# Navigate to <http://localhost:8080>.
 ```

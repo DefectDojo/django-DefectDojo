@@ -20,6 +20,8 @@ spec:
         - configMapRef:
             name: {{ $fullName }}
       env:
+        - name: DD_DATABASE_USER
+          value: root
         - name: DD_CELERY_BROKER_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -29,7 +31,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: {{ $fullName }}-{{ .Values.database }}
-              key: {{ .Values.database }}-password
+              key: {{ .Values.database }}-root-password
         - name: DD_DEBUG
           value: 'on'
   restartPolicy: Never
