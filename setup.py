@@ -8,9 +8,9 @@ setup(
     author='Greg Anderson',
     description="Tool for managing vulnerability engagements",
     install_requires=[
-        'celery>=4.1',
+        'celery==4.1.1',
         'defusedxml',
-        'Django==1.11.11',
+        'Django==1.11.19',
         'django-auditlog',
         'django-custom-field',
         'django-filter==1.0.4',
