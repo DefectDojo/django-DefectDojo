@@ -1,9 +1,0 @@
-# code: language=Dockerfile
-FROM defectdojo/defectdojo-uwsgi:latest
-ENV \
-  DD_ADMIN_USER=admin \
-  DD_ADMIN_MAIL=admin@defectdojo.local \
-  DD_ADMIN_PASSWORD= \
-  DD_ADMIN_FIRST_NAME=Administrator \
-  DD_ADMIN_LAST_NAME=User
-ENTRYPOINT ["/entrypoint-initializer.sh"]
