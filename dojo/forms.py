@@ -16,9 +16,10 @@ from tagging.models import Tag
 from dojo.models import Finding, Product_Type, Product, PortscanSettings, VA, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
-    JIRA_Issue, JIRA_PKey, JIRA_Conf, UserContactInfo, Tool_Type, Tool_Configuration, Tool_Product_Settings, \
+    JIRA_Issue, JIRA_PKey, JIRA_Conf, UserContactInfo, Tool_Type, \
     Cred_User, Cred_Mapping, System_Settings, Notifications, Languages, Language_Type, App_Analysis, Objects, \
-    Benchmark_Product, Benchmark_Requirement, Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets
+    Benchmark_Product, Benchmark_Requirement, Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, \
+    Tool_Configuration, Tool_Product_Settings
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
 
@@ -586,7 +587,7 @@ class DeleteEngagementForm(forms.ModelForm):
                    'product', 'test_strategy', 'threat_model', 'api_test', 'pen_test',
                    'check_list', 'status', 'description', 'engagement_type', 'build_id',
                    'commit_hash', 'branch_tag', 'build_server', 'source_code_management_server',
-                   'source_code_management_uri', 'orchestration_engine', 'preset', 'tracker']
+                   'source_code_management_uri', 'orchestration_engine', 'preset', 'tracker', 'run_tool_test_engine']
 
 
 class TestForm(forms.ModelForm):
@@ -1569,7 +1570,10 @@ class EngagementPlanForm(forms.Form):
                             ('-user_records', 'User Records: High to Low'),
                             ('+user_records', 'User Records: Low to High'))
     
-    products = forms.MultipleChoiceField(choices=((product.id,product.name) for product in Product.objects.all()), widget=forms.CheckboxSelectMultiple(), label='Products', help_text='Planned in descending order of business criticality')
+    prefix = forms.CharField(required=False, help_text="Every engagement planned by this plan will start with this prefix", label="Engagement Prefix")
+    remove_prefix = forms.CharField(required=False, help_text="Provide a comma seperated list of prefixes - every engagement that starts with this prefix in the specified timeframe will be removed", label="Remove Engagement Prefixes")
+    
+    products = forms.MultipleChoiceField(choices=[], widget=forms.CheckboxSelectMultiple(), label='Products', help_text='Planned in descending order of business criticality')
     products_order = forms.ChoiceField(choices=SORT_PRODUCT_CHOICES, required=True, label='Planning Order', help_text='Please specify how the order of planning per product should be calculated')
     start_tool_category = forms.ModelChoiceField(queryset=Tool_Type.objects.all(), required=False, label='Run Tool Category', help_text='Run a tool with this category (needs to be configured for each product) at the beginning of each engagement. This also requires that all selected products have at least one endpoint tagged as `tool-export`.')
     
