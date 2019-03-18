@@ -1,3 +1,0 @@
-# code: language=Dockerfile
-FROM defectdojo/defectdojo-uwsgi:latest
-ENTRYPOINT ["/entrypoint-celery.sh"]
