@@ -27,4 +27,28 @@
 {% endblock %}
 {% block postscript %}
     <!-- <script type="application/javascript" src="{% static "chosen/chosen.jquery.min.js" %}"></script> -->
+    <script type="application/javascript">
+        $('label[for=id_products]').append('<div>Select <a href="#" id="select_all">All</a> &bull; <a href="#" id="select_none">None</a><br>Filter <a href="#" id="select_search">Search</a> &bull; <a href="#" id="select_search_reset">Reset</a></div>');
+        
+        $("a#select_all").click(function() {
+            $("ul#id_products > li:not(.hidden) input:checkbox").prop("checked", true);
+        });
+        
+        $("a#select_none").click(function() {
+            $("ul#id_products > li:not(.hidden) input:checkbox").prop("checked", false);
+        });
+        
+        $("a#select_search").click(function() {
+            let searchTerm = prompt("Enter the search term:", "");
+            if(searchTerm == "" || !searchTerm) return;
+            
+            $('ul#id_products > li').each(function() {
+                ($("label", this).text().indexOf(searchTerm)!=-1) ? $(this).removeClass("hidden") : $(this).addClass("hidden");
+            });
+        });
+        
+        $("a#select_search_reset").click(function() {
+            $('ul#id_products > li').removeClass("hidden");
+        });
+    </script>
 {% endblock %}
