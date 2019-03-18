@@ -99,10 +99,10 @@ if [ -z "$TEST" ]; then
   RETURN_VALUE=$?
   echo
   echo "Smoke Test"
-  sudo kubectl logs defectdojo-django-test --namespace default
+  sudo kubectl logs defectdojo-smoke-test
   echo
   echo "Unit Tests"
-  sudo kubectl logs defectdojo-django-unit-test --namespace default
+  sudo kubectl logs defectdojo-unit-tests
   echo
   echo "Pods"
   sudo kubectl get pods
