@@ -35,6 +35,7 @@ ENV \
   DD_ADMIN_PASSWORD= \
   DD_ADMIN_FIRST_NAME=Administrator \
   DD_ADMIN_LAST_NAME=User \
+  DD_ALLOWED_HOSTS="*" \
   DD_CELERY_BEAT_SCHEDULE_FILENAME="/run/celery-beat-schedule" \
   DD_CELERY_BROKER_SCHEME="amqp" \
   DD_CELERY_BROKER_USER="defectdojo" \
@@ -49,8 +50,8 @@ ENV \
   DD_DATABASE_PASSWORD="defectdojo" \
   DD_DATABASE_PORT="3306" \
   DD_DATABASE_USER="defectdojo" \
-  DD_SECRET_KEY="." \
-  DD_CREDENTIAL_AES_256_KEY="." \
+  DD_SECRET_KEY="hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq" \
+  DD_CREDENTIAL_AES_256_KEY="&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw" \
   DD_INITIALIZE=true \
   DD_UWSGI_MODE="socket" \
   DD_UWSGI_ENDPOINT="0.0.0.0:3031"
