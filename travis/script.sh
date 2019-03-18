@@ -1,20 +1,20 @@
 #!/bin/bash
 travis_fold() {
-  local action=$1
-  local name=$2
+  local action="${1}"
+  local name="${2}"
   echo -en "travis_fold:${action}:${name}\r"
 }
 
-RETURN_VALUE=0
-if [ -z "$TEST" ]; then
+return_value=0
+if [ -z "${TEST}" ]; then
   # Build Docker images
   travis_fold start docker_image_build
   DOCKER_IMAGES=(django nginx)
-  for DOCKER_IMAGE in "${DOCKER_IMAGES[@]}"
+  for docker_image in "${DOCKER_IMAGES[@]}"
   do
     docker build \
-      --tag "defectdojo/defectdojo-${DOCKER_IMAGE}" \
-      --file "Dockerfile.${DOCKER_IMAGE}" \
+      --tag "defectdojo/defectdojo-${docker_image}" \
+      --file "Dockerfile.${docker_image}" \
       .
   done
   travis_fold end docker_image_build
@@ -74,14 +74,14 @@ if [ -z "$TEST" ]; then
   until [[ "True" == "$(sudo kubectl get pod \
       --selector=defectdojo.org/component=django \
       -o 'jsonpath={.items[*].status.conditions[?(@.type=="Ready")].status}')" \
-      || $i -gt $TIMEOUT ]]
+      || ${i} -gt ${TIMEOUT} ]]
   do
     ((i++))
     sleep 6
     echo -n "."
   done
-  if [[ $i -gt $TIMEOUT ]]; then
-    RETURN_VALUE=1
+  if [[ ${i} -gt ${TIMEOUT} ]]; then
+    return_value=1
   fi
   echo
   echo "UWSGI logs"
@@ -96,30 +96,30 @@ if [ -z "$TEST" ]; then
   echo "Running tests."
   sudo helm test defectdojo
   # Check exit status
-  RETURN_VALUE=$?
+  return_value=${?}
   echo
-  echo "Smoke Test"
-  sudo kubectl logs defectdojo-django-test --namespace default
+  echo "Smoke test results"
+  sudo kubectl logs defectdojo-smoke-test
   echo
-  echo "Unit Tests"
-  sudo kubectl logs defectdojo-django-unit-test --namespace default
+  echo "Unit test results"
+  sudo kubectl logs defectdojo-unit-tests
   echo
   echo "Pods"
   sudo kubectl get pods
 
   # Uninstall
-  echo "Deleting DefectDojo from Kubernetes."
+  echo "Deleting DefectDojo from Kubernetes"
   sudo helm delete defectdojo --purge
   sudo kubectl get pods
   travis_fold end defectdojo_tests
 
-  exit RETURN_VALUE
+  exit ${return_value}
 else
-echo "Running test=$TEST"
-  case "$TEST" in
+echo "Running test ${TEST}"
+  case "${TEST}" in
     flake8)
-      echo "$TRAVIS_BRANCH"
-      if [ "$TRAVIS_BRANCH" == "dev" ]
+      echo "${TRAVIS_BRANCH}"
+      if [[ "${TRAVIS_BRANCH}" == "dev" ]]
       then
           echo "Running Flake8 tests on dev branch aka pull requests"
           # We need to checkout dev for flake8-diff to work properly
@@ -127,7 +127,7 @@ echo "Running test=$TEST"
           sudo pip install pep8 flake8 flake8-diff
           flake8-diff
       else
-          echo "true"
+          echo "Skipping because not on dev branch"
       fi
   esac
 fi
