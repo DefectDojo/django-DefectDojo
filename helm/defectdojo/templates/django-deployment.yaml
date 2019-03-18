@@ -28,7 +28,7 @@ spec:
           emptyDir: {}
       containers:
         - name: uwsgi
-          image: "{{ .Values.django.uwsgi.repository }}:{{ .Values.tag }}"
+          image: '{{ .Values.django.uwsgi.repository }}:{{ .Values.tag }}'
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           volumeMounts:
             - name: run
@@ -50,7 +50,7 @@ spec:
           resources:
             {{- toYaml .Values.django.uwsgi.resources | nindent 12 }}
         - name: nginx
-          image: "{{ .Values.django.nginx.repository }}:{{ .Values.tag }}"
+          image: '{{ .Values.django.nginx.repository }}:{{ .Values.tag }}'
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           volumeMounts:
             - name: run
