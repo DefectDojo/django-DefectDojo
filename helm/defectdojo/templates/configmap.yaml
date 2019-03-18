@@ -23,6 +23,7 @@ data:
   DD_DATABASE_HOST: {{ $fullName }}-{{ .Values.database }}
   DD_DATABASE_PORT: '{{ if eq .Values.database "postgresql" }}{{ .Values.postgresql.service.port }}{{ end }}{{ if eq .Values.database "mysql" }}3306{{ end }}'
   DD_DATABASE_USER: {{ if eq .Values.database "postgresql" }}{{ .Values.postgresql.postgresqlUsername }}{{ end }}{{ if eq .Values.database "mysql" }}{{ .Values.mysql.mysqlUser }}{{ end }}
+  DD_INITIALIZE: '{{ .Values.initializer.run }}'
   DD_UWSGI_ENDPOINT: /run/uwsgi.sock
   DD_UWSGI_HOST: localhost
   DD_UWSGI_PASS: unix:///run/uwsgi.sock

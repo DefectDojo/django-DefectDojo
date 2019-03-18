@@ -1,5 +1,6 @@
 ---
 # Global settings
+createSecret: true
 database: mysql
 host: defectdojo.default.minikube.local
 imagePullPolicy: Always
@@ -34,7 +35,7 @@ celery:
       cpu: 100m
       memory: 128Mi
     tolerations: []
-    
+
 django:
   affinity: {}
   ingress:
@@ -55,6 +56,7 @@ django:
       memory: 128Mi
 
 initializer:
+  run: true
   repository: defectdojo/defectdojo-django
   keepSeconds: 60
   resources:

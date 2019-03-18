@@ -53,7 +53,8 @@ helm install \
   --set celery.replicas=3 \
   --set rabbitmq.replicas=3
 
-# Run highly available PostgreSQL cluster instead of MySQL
+# Run highly available PostgreSQL cluster instead of MySQL - recommended setup
+# for production environment.
 helm install \
   ./helm/defectdojo \
   --name=defectdojo \
@@ -69,12 +70,34 @@ helm install \
   --set postgresql.replication.enabled=true \
   --set postgresql.replication.slaveReplicas=3
 
+# Note: If you run `helm install defectdojo before, you will get an error
+# message like `Error: release defectdojo failed: secrets "defectdojo" already
+# exists`. This is because the secret is kept across installations.
+# To prevent recreating the secret, add --set createSecret=false` to your
+# command.
+
 # Run test. If there are any errors, re-run the command without `--cleanup` and
 # inspect the test container.
 helm test defectdojo --cleanup
 
 # Navigate to <https://defectdojo.default.minikube.local>.
 ```
+
+TODO: The MySQL volumes aren't persistent across `helm delete` operations. To
+make them persistent, you need to add an annotation to the persistent volume
+claim:
+
+```zsh
+kubectl --namespace "${K8S_NAMESPACE}" patch pvc defectdojo-mysql -p \
+  '{"metadata": {"annotations": {"\"helm.sh/resource-policy\"": "keep"}}}'
+```
+
+See also
+<https://github.com/helm/charts/blob/master/stable/mysql/templates/pvc.yaml>.
+
+However, that doesn't work and I haven't found out why. In a production
+environment, a redundant PostgreSQL cluster is the better option. As it uses
+statefulsets that are kept by default, the problem doesn't exist there.
 
 ### Useful stuff
 
@@ -107,9 +130,16 @@ use the Helm and Kubernetes approach described above.
 
 ### Setup via Docker Compose
 
-```zsh
-docker-compose up
-```
+If you start your DefectDojo instance on Docker Compose for the first time, just
+run `docker-compose up`.
+
+Navigate to <http://localhost:8080> where you can log in with username admin.
+To find out the admin user’s password, check the very beginning of the console
+output of the initializer container.
+
+If you ran DefectDojo before and you want to prevent the initializer container
+to run again, define an environment variable DD_INITIALIZE=false to prevent re-
+initialization.
 
 ### Clean up Docker Compose
 
