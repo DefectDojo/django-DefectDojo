@@ -17,7 +17,6 @@ services:
     environment:
       DD_DEBUG: 'on'
       DD_ALLOWED_HOSTS: ${DD_ALLOWED_HOSTS:-*}
-      DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}
       DD_ALLOWED_HOSTS: ${DD_ALLOWED_HOSTS:-localhost}
       DD_CELERY_BROKER_USER: ${DD_CELERY_BROKER_USER:-guest}
       DD_CELERY_BROKER_PASSWORD: ${DD_CELERY_BROKER_USER:-guest}
@@ -30,12 +29,8 @@ services:
       - rabbitmq
     entrypoint: ['/entrypoint-celery-beat.sh']
     environment:
-      DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}
       DD_CELERY_BROKER_USER: ${DD_CELERY_BROKER_USER:-guest}
       DD_CELERY_BROKER_PASSWORD: ${DD_CELERY_BROKER_USER:-guest}
-      DD_DATABASE_NAME: ${DD_DATABASE_NAME:-defectdojo}
-      DD_DATABASE_USER: ${DD_DATABASE_USER:-defectdojo}
-      DD_DATABASE_PASSWORD: ${DD_DATABASE_PASSWORD:-defectdojo}
   celeryworker:
     image: defectdojo/defectdojo-django:latest
     depends_on:
@@ -43,7 +38,6 @@ services:
       - rabbitmq
     entrypoint: ['/entrypoint-celery-worker.sh']
     environment:
-      DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}
       DD_CELERY_BROKER_USER: ${DD_CELERY_BROKER_USER:-guest}
       DD_CELERY_BROKER_PASSWORD: ${DD_CELERY_BROKER_USER:-guest}
   initializer:
@@ -52,7 +46,6 @@ services:
       - mysql
     entrypoint: ['/entrypoint-initializer.sh']
     environment:
-      DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}
       DD_ADMIN_USER: ${DD_ADMIN_USER:-"admin"}
       DD_ADMIN_PASSWORD: ${DD_ADMIN_PASSWORD:-"admin"}
       DD_ADMIN_MAIL: ${DD_ADMIN_USER:-"admin@defectdojo.local"}

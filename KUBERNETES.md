@@ -6,9 +6,6 @@
 # Build images
 docker build -t defectdojo/defectdojo-django -f Dockerfile.django .
 docker build -t defectdojo/defectdojo-nginx -f Dockerfile.nginx .
-# Push images to Docker Hub
-docker push defectdojo/defectdojo-django
-docker push defectdojo/defectdojo-nginx
 ```
 
 ## Run with Kubernetes
@@ -104,6 +101,10 @@ helm delete defectdojo --purge
 
 ## Run with Docker Compose
 
+Docker compose is not intended for production use.
+If you want to deploy a containerized DefectDojo to a production environment,
+use the Helm and Kubernetes approach described above.
+
 ### Setup via Docker Compose
 
 ```zsh
@@ -114,58 +115,4 @@ docker-compose up
 
 ```zsh
 docker-compose down --volumes
-```
-
-## Run in with plain Docker
-
-The following describes how to run the docker images built above. This is not
-intended for production use, but rather as a memo for creating a Helm chart.
-
-```zsh
-# Network
-docker network create defectdojo
-
-# MySQL
-docker run --rm -it --network=defectdojo \
-  --name=defectdojo_mysql \
-  --network-alias mysql \
-  --env MYSQL_DATABASE=defectdojo \
-  --env MYSQL_USER=defectdojo \
-  --env MYSQL_PASSWORD=defectdojo \
-  --env MYSQL_RANDOM_ROOT_PASSWORD=pleaseChangeMe \
-  mysql:5.7
-
-# Django application
-docker run --rm -it --network=defectdojo \
-  --name=defectdojo_uwsgi \
-  --network-alias uwsgi \
-  --env DD_ALLOWED_HOSTS='*' \
-  defectdojo/defectdojo-uwsgi
-
-# RabbitMQ
-docker run --rm -it --network=defectdojo \
-  --name=defectdojo_rabbitmq \
-  --network-alias rabbitmq \
-  rabbitmq:3
-
-# Celery
-docker run --rm -it --network=defectdojo \
-  --name=defectdojo_celery \
-  --network-alias celery \
-  --env DD_CELERY_BROKER_USER=guest \
-  --env DD_CELERY_BROKER_PASSWORD=guest \
-  defectdojo/defectdojo-celery
-
-# Nginx
-docker run --rm -it --network=defectdojo \
-  --name=defectdojo_nginx \
-  --publish 8080:8080 \
-  defectdojo-nginx
-
-# Initializer
-docker run --rm -it --network=defectdojo \
-  --name defectdojo_initializer \
-  defectdojo/defectdojo-initializer
-
-# Navigate to <http://localhost:8080>.
 ```
