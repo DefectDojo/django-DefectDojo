@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: {{ include "defectdojo.fullname" . }}-django-test
+  name: {{ include "defectdojo.fullname" . }}-smoke-test
   labels:
     app.kubernetes.io/name: {{ include "defectdojo.name" . }}
     helm.sh/chart: {{ include "defectdojo.chart" . }}
