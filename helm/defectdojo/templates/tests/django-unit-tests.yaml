@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: {{ include "defectdojo.fullname" . }}-django-unit-test
+  name: {{ include "defectdojo.fullname" . }}-django-unit-tests
   labels:
     app.kubernetes.io/name: {{ include "defectdojo.name" . }}
     helm.sh/chart: {{ include "defectdojo.chart" . }}
@@ -12,18 +12,24 @@ metadata:
     helm.sh/hook: test-success
 spec:
   containers:
-    - name: unittest
-      image: defectdojo/defectdojo-django:latest
+    - name: unit-tests
+      image: '{{ .Values.django.uwsgi.repository }}:{{ .Values.tag }}'
       imagePullPolicy: {{ .Values.imagePullPolicy }}
       command: ['/entrypoint-unit-tests.sh']
       envFrom:
         - configMapRef:
             name: {{ $fullName }}
       env:
+        - name: DD_CELERY_BROKER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ $fullName }}-{{ .Values.celery.broker }}
+              key: {{ .Values.celery.broker }}-password
+        - name: DD_DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ $fullName }}-{{ .Values.database }}
+              key: {{ .Values.database }}-password
         - name: DD_DEBUG
-          value: "on"
-        - name: DJANGO_SETTINGS_MODULE
-          value: "dojo.settings.unittest"
-        - name: DD_DATABASE_URL
-          value: "sqlite:////tmp/test-sqlite.db"
+          value: 'on'
   restartPolicy: Never
