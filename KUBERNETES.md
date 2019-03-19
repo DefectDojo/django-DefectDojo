@@ -1,7 +1,10 @@
 # DefectDojo on Kubernetes
 
-The DefetDojo Kubernetes install utilizes [Helm](https://helm.sh/), a
-package manager for Kubernetes. For development purposes,
+DefetDojo Kubernetes utilizes [Helm](https://helm.sh/), a
+package manager for Kubernetes. Helm Charts help you define, install, and
+upgrade even the most complex Kubernetes application.
+
+For development purposes,
 [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/)
 and [Helm](https://helm.sh/) can be installed locally by following
 this [guide](https://helm.sh/docs/using_helm/#installing-helm).
@@ -35,9 +38,11 @@ helm install \
 
 It usually takes up to a minute for the services to startup and the
 status of the containers can be viewed by starting up ```minikube dashboard```.
+Note: If the containers are not cached locally the services will start once the
+containers have been pulled locally.
 
-To be able to access it, set up an ingress or access the service directly by
-running the following command:
+To be able to access DefectDojo, set up an ingress or access the service
+directly by running the following command:
 
 ```zsh
 kubectl port-forward --namespace=default \
@@ -53,10 +58,23 @@ to /etc/hosts:
 127.0.0.1 defectdojo.default.minikube.local
 ```
 
+To find out the password, run the following command:
+
+```zsh
+echo "DefectDojo admin password: $(kubectl \
+  get secret defectdojo \
+  --namespace=default \
+  --output jsonpath='{.data.DD_ADMIN_PASSWORD}' \
+  | base64 --decode)"
+```
+
+To access DefectDojo, go to <http://defectdojo.default.minikube.local:8080>.
+Log in with username admin and the password from the previous command.
+
 # Minikube with locally built containers
 
 If testing containers locally, then set the imagePullPolicy to Never,
-which ensure containers are not pulled from Docker hub.
+which ensures containers are not pulled from Docker hub.
 
 ```zsh
 helm install \
@@ -66,7 +84,7 @@ helm install \
   --set imagePullPolicy=Never
 ```
 
-## Build Images
+## Build Images Locally
 
 ```zsh
 # Build images
