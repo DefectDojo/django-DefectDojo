@@ -17,6 +17,16 @@ If you ran DefectDojo with compose before and you want to prevent the
 initializer container from running again, define an environment variable
 DD_INITIALIZE=false to prevent re-initialization.
 
+## Build Images Locally
+
+Build the docker containers locally for testing purposes.
+
+```zsh
+# Build images
+docker build -t defectdojo/defectdojo-django -f Dockerfile.django .
+docker build -t defectdojo/defectdojo-nginx -f Dockerfile.nginx .
+```
+
 ### Clean up Docker Compose
 
 ```zsh
