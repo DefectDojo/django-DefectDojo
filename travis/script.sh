@@ -133,6 +133,7 @@ echo "Running test ${TEST}"
       else
           echo "Skipping because not on dev branch"
       fi
+      ;;
     docker)
       echo "Validating docker compose"
       build_containers
@@ -140,5 +141,6 @@ echo "Running test ${TEST}"
       # Wait for services to become available
       sleep 30
       wget "localhost:8080" --timeout 60 -O
+      ;;
   esac
 fi
