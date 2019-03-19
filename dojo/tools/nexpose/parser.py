@@ -116,7 +116,7 @@ class NexposeFullXmlParser(object):
             last = ""
 
             for attr in node.attrib:
-                if last is not "":
+                if last != "":
                     if node.get(attr) != node.get(last):
                         ret += str(node.get(attr)) + " "
                 last = attr

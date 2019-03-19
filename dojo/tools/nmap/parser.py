@@ -9,7 +9,6 @@ class NmapXMLParser(object):
     def __init__(self, file, test):
         self.dupes = dict()
         self.items = ()
-        
         if file is None:
             return
 
