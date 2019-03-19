@@ -18,4 +18,4 @@ env:
 before_install: ['./travis/before-install.sh']
 before_script: ['./travis/before-script.sh']
 script: ['./travis/script.sh']
-after_success: ['./travis/after-script.sh']
+after_success: ['./travis/after-success-script.sh']
