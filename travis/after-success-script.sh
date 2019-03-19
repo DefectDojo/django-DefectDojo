@@ -1,7 +1,7 @@
 #!/bin/bash
 
 TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH ; fi`
-
+TRAVIS_TAG=1.5.4
 DOCKER_IMAGES=(django nginx)
 for docker_image in "${DOCKER_IMAGES[@]}"
 do
