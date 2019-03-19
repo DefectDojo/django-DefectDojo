@@ -5,8 +5,20 @@ travis_fold() {
   echo -en "travis_fold:${action}:${name}\r"
 }
 
+travis_fold start docker_image_build
+DOCKER_IMAGES=(django nginx)
+for docker_image in "${DOCKER_IMAGES[@]}"
+do
+  docker build \
+    --tag "defectdojo/defectdojo-${docker_image}" \
+    --file "Dockerfile.${docker_image}" \
+    .
+done
+travis_fold end docker_image_build
+
 return_value=0
-if [ -z "${TEST}" ]; then
+#if [ -z "${TEST}" ]; then
+if [ 1==2 ]; then
   # Build Docker images
   travis_fold start docker_image_build
   DOCKER_IMAGES=(django nginx)
