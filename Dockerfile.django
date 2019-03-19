@@ -22,6 +22,9 @@ COPY \
   /
 COPY wsgi.py manage.py tests/unit-tests.sh ./
 COPY dojo/ ./dojo/
+# Legacy installs need the modified settings.py, do not remove!
+RUN \
+  mv dojo/settings/settings.dist.py settings.py
 COPY tests/ ./tests/
 RUN \
   mkdir dojo/migrations && \
