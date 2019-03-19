@@ -65,6 +65,7 @@ env = environ.Env(
     DD_CREDENTIAL_AES_256_KEY=(str, '.'),
 )
 
+
 def generate_url(scheme, double_slashes, user, password, host, port, path):
     result_list = []
     result_list.append(scheme)
@@ -85,6 +86,7 @@ def generate_url(scheme, double_slashes, user, password, host, port, path):
         result_list.append('/')
     result_list.append(path)
     return ''.join(result_list)
+
 
 # Read .env file as default or from the command line, DD_ENV_PATH
 if os.path.isfile(root('dojo/settings/.env.prod')) or 'DD_ENV_PATH' in os.environ:
