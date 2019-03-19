@@ -1,7 +1,9 @@
 #!/bin/bash
 
-TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH ; fi`
 TRAVIS_TAG="1.5.4"
+DOCKER_USER=test
+DOCKER_PASS=adsf
+TRAVIS_BRANCH="dev"
 
 if { [ "${TRAVIS_TAG}" != "" ] || [ "${TRAVIS_EVENT_TYPE}" == "cron" ]; } && [ "${DOCKER_USER}" != "" ] && [  "${DOCKER_PASS}" != "" ]; then
   DOCKER_IMAGES=(django nginx)
@@ -13,6 +15,6 @@ if { [ "${TRAVIS_TAG}" != "" ] || [ "${TRAVIS_EVENT_TYPE}" == "cron" ]; } && [ "
       REPO="defectdojo/defectdojo-${docker_image}"
       docker tag ${REPO} "defectdojo/${TRAVIS_BRANCH}-${docker_image}":$TRAVIS_TAG
       docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
-      docker push ${REPO}
+      docker push "defectdojo/${TRAVIS_BRANCH}-${docker_image}"
   done
 fi
