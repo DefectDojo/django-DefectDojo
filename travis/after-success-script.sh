@@ -9,8 +9,8 @@ if { [ "${TRAVIS_TAG}" != "" ] || [ "${TRAVIS_EVENT_TYPE}" == "cron" ]; } && [ "
       REPO="${ORG}/${ORG}-${docker_image}"
       # Cron pushed into branch-weekly-dev-image, triggered weekly
       if [ "${TRAVIS_EVENT_TYPE}" == "cron" ]; then
-        TRAVIS_TAG=`date +%Y-%m-%d`
-        REPO="${ORG}/weekly-${TRAVIS_BRANCH}-${ORG}-${docker_image}"
+        TRAVIS_TAG=`date +%Y-%m-%d`-${TRAVIS_BRANCH}
+        REPO="${ORG}/weekly-${ORG}-${docker_image}"
       elif [ ${TRAVIS_BRANCH} == "master" ]; then
         docker tag $CONTAINER $REPO:latest
       else
@@ -20,6 +20,7 @@ if { [ "${TRAVIS_TAG}" != "" ] || [ "${TRAVIS_EVENT_TYPE}" == "cron" ]; } && [ "
       CONTAINER="${ORG}/${ORG}-${docker_image}"
 
       docker tag $CONTAINER $REPO:$TRAVIS_TAG
+      docker tag $CONTAINER $REPO:$TRAVIS_BUILD_ID
       docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
       docker push $REPO
   done
