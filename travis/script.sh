@@ -138,9 +138,13 @@ echo "Running test ${TEST}"
       echo "Validating docker compose"
       build_containers
       docker-compose up -d
+      echo "Waiting for services to start"
       # Wait for services to become available
       sleep 80
+      echo "Testing DefectDojo Service"
       curl -s -o "/dev/null" http://localhost:8080 -m 120
+      echo "Docker compose container status"
+      docker-compose ps
       ;;
   esac
 fi
