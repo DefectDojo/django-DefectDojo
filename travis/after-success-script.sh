@@ -1,5 +1,7 @@
 #!/bin/bash
 
+TRAVIS_TAG="dev"
+
 if { [ "${TRAVIS_TAG}" != "" ] || [ "${TRAVIS_EVENT_TYPE}" == "cron" ]; } && [ "${DOCKER_USER}" != "" ] && [  "${DOCKER_PASS}" != "" ]; then
   DOCKER_IMAGES=(django nginx)
   for docker_image in "${DOCKER_IMAGES[@]}"
