@@ -13,7 +13,7 @@ do
     docker tag ${REPO} "defectdojo/${TRAVIS_BRANCH}-${docker_image}":${TRAVIS_TAG}
     echo ${DOCKER_USER}
     echo ${REPO}
-    docker login -u ${DOCKER_USER} -p {$DOCKER_PASS}
-    docker push {$REPO}
+    docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
+    docker push ${REPO}
   fi
 done
