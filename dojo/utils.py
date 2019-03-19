@@ -72,36 +72,36 @@ def is_deduplication_on_engamgent(new_finding, to_duplicate_finding):
 
 
 def sync_dedupe(new_finding, *args, **kwargs):
-        if new_finding.test.engagement.deduplication_on_engagement:
-            eng_findings_cwe = Finding.objects.filter(
-                test__engagement=new_finding.test.engagement,
-                cwe=new_finding.cwe,
-                static_finding=new_finding.static_finding,
-                dynamic_finding=new_finding.dynamic_finding,
-                date__lte=new_finding.date).exclude(id=new_finding.id).exclude(
-                cwe=0).exclude(duplicate=True)
-            eng_findings_title = Finding.objects.filter(
-                test__engagement=new_finding.test.engagement,
-                title=new_finding.title,
-                static_finding=new_finding.static_finding,
-                dynamic_finding=new_finding.dynamic_finding,
-                date__lte=new_finding.date).exclude(id=new_finding.id).exclude(
-                duplicate=True)
-        else:
-            eng_findings_cwe = Finding.objects.filter(
-                test__engagement__product=new_finding.test.engagement.product,
-                cwe=new_finding.cwe,
-                static_finding=new_finding.static_finding,
-                dynamic_finding=new_finding.dynamic_finding,
-                date__lte=new_finding.date).exclude(id=new_finding.id).exclude(
-                cwe=0).exclude(duplicate=True)
-            eng_findings_title = Finding.objects.filter(
-                test__engagement__product=new_finding.test.engagement.product,
-                title=new_finding.title,
-                static_finding=new_finding.static_finding,
-                dynamic_finding=new_finding.dynamic_finding,
-                date__lte=new_finding.date).exclude(id=new_finding.id).exclude(
-                duplicate=True)
+    if new_finding.test.engagement.deduplication_on_engagement:
+        eng_findings_cwe = Finding.objects.filter(
+            test__engagement=new_finding.test.engagement,
+            cwe=new_finding.cwe,
+            static_finding=new_finding.static_finding,
+            dynamic_finding=new_finding.dynamic_finding,
+            date__lte=new_finding.date).exclude(id=new_finding.id).exclude(
+            cwe=0).exclude(duplicate=True)
+        eng_findings_title = Finding.objects.filter(
+            test__engagement=new_finding.test.engagement,
+            title=new_finding.title,
+            static_finding=new_finding.static_finding,
+            dynamic_finding=new_finding.dynamic_finding,
+            date__lte=new_finding.date).exclude(id=new_finding.id).exclude(
+            duplicate=True)
+    else:
+        eng_findings_cwe = Finding.objects.filter(
+            test__engagement__product=new_finding.test.engagement.product,
+            cwe=new_finding.cwe,
+            static_finding=new_finding.static_finding,
+            dynamic_finding=new_finding.dynamic_finding,
+            date__lte=new_finding.date).exclude(id=new_finding.id).exclude(
+            cwe=0).exclude(duplicate=True)
+        eng_findings_title = Finding.objects.filter(
+            test__engagement__product=new_finding.test.engagement.product,
+            title=new_finding.title,
+            static_finding=new_finding.static_finding,
+            dynamic_finding=new_finding.dynamic_finding,
+            date__lte=new_finding.date).exclude(id=new_finding.id).exclude(
+            duplicate=True)
 
         total_findings = eng_findings_cwe | eng_findings_title
         # total_findings = total_findings.order_by('date')

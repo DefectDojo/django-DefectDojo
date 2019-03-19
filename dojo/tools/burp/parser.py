@@ -229,7 +229,7 @@ def get_item(item_node, test):
         else:
             endpoints = [endpoint, dupe_endpoint]
 
-    if len(endpoints) is 0:
+    if len(endpoints) == 0:
         endpoints = [endpoint]
 
     text_maker = html2text.HTML2Text()
