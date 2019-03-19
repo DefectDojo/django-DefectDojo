@@ -1,6 +1,5 @@
 #!/bin/bash
 
-TRAVIS_TAG="dev"
 ORG="defectdojo"
 
 if { [ "${TRAVIS_TAG}" != "" ] || [ "${TRAVIS_EVENT_TYPE}" == "cron" ]; } && [ "${DOCKER_USER}" != "" ] && [  "${DOCKER_PASS}" != "" ]; then
