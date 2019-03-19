@@ -1,0 +1,37 @@
+{{- $fullName := include "defectdojo.fullname" . -}}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "defectdojo.fullname" . }}-unit-tests
+  labels:
+    app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+    helm.sh/chart: {{ include "defectdojo.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  annotations:
+    helm.sh/hook: test-success
+spec:
+  containers:
+    - name: unit-tests
+      image: '{{ .Values.django.uwsgi.repository }}:{{ .Values.tag }}'
+      imagePullPolicy: {{ .Values.imagePullPolicy }}
+      command: ['/entrypoint-unit-tests.sh']
+      envFrom:
+        - configMapRef:
+            name: {{ $fullName }}
+      env:
+        - name: DD_DATABASE_USER
+          value: root
+        - name: DD_CELERY_BROKER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ $fullName }}-{{ .Values.celery.broker }}
+              key: {{ .Values.celery.broker }}-password
+        - name: DD_DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ $fullName }}-{{ .Values.database }}
+              key: {{ .Values.database }}-root-password
+        - name: DD_DEBUG
+          value: 'on'
+  restartPolicy: Never

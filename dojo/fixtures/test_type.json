@@ -243,7 +243,7 @@
     	"model": "dojo.test_type",
     	"pk": 35
 	},
-	{  
+	{
 	    "fields": {
             "name": "Crashtest Security Scan"
     	},
@@ -264,18 +264,11 @@
     "model": "dojo.test_type",
     "pk": 38
   },
-    {
+  {
       "fields": {
-	"name": "Gosec Scanner"
+        "name": "Netsparker Scanner"
       },
       "model": "dojo.test_type",
-      "pk":39
-},
-{
-    "fields": {
-      "name": "Netsparker Scanner"
-    },
-    "model": "dojo.test_type",
-    "pk": 40
-}
+      "pk": 49
+  }
 ]

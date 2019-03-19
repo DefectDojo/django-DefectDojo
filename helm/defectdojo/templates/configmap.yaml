@@ -1,0 +1,29 @@
+{{- $fullName := include "defectdojo.fullname" . -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $fullName }}
+  labels:
+    app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "defectdojo.chart" . }}
+data:
+  DD_ADMIN_USER: {{ .Values.admin.user | default "admin" }}
+  DD_ADMIN_MAIL: {{ .Values.admin.Mail | default "admin@defectdojo.local" }}
+  DD_ADMIN_FIRST_NAME: {{ .Values.admin.FirstName | default "Admin" }}
+  DD_ADMIN_LAST_NAME: {{ .Values.admin.LastName | default "User" }}
+  DD_ALLOWED_HOSTS: {{ .Values.host }}
+  DD_CELERY_BROKER_SCHEME: {{ if eq .Values.celery.broker "rabbitmq" }}amqp{{ end }}{{ if eq .Values.celery.broker "redis" }}redis{{ end }}
+  DD_CELERY_BROKER_USER: '{{ if eq .Values.celery.broker "rabbitmq" }}user{{ end }}'
+  DD_CELERY_BROKER_HOST: {{ $fullName }}-{{ if eq .Values.celery.broker "rabbitmq" }}rabbitmq{{ end }}{{ if eq .Values.celery.broker "redis" }}redis-master{{ end }}
+  DD_CELERY_BROKER_PORT: '{{ if eq .Values.celery.broker "rabbitmq" }}5672{{ end }}{{ if eq .Values.celery.broker "redis" }}6379{{ end }}'
+  DD_CELERY_LOG_LEVEL: {{ .Values.celery.logLevel }}
+  DD_DATABASE_ENGINE: django.db.backends.{{ if eq .Values.database "postgresql" }}postgresql_psycopg2{{ end }}{{ if eq .Values.database "mysql" }}mysql{{ end }}
+  DD_DATABASE_HOST: {{ $fullName }}-{{ .Values.database }}
+  DD_DATABASE_PORT: '{{ if eq .Values.database "postgresql" }}{{ .Values.postgresql.service.port }}{{ end }}{{ if eq .Values.database "mysql" }}3306{{ end }}'
+  DD_DATABASE_USER: {{ if eq .Values.database "postgresql" }}{{ .Values.postgresql.postgresqlUsername }}{{ end }}{{ if eq .Values.database "mysql" }}{{ .Values.mysql.mysqlUser }}{{ end }}
+  DD_INITIALIZE: '{{ .Values.initializer.run }}'
+  DD_UWSGI_ENDPOINT: /run/uwsgi.sock
+  DD_UWSGI_HOST: localhost
+  DD_UWSGI_PASS: unix:///run/uwsgi.sock
