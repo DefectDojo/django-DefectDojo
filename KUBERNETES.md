@@ -9,9 +9,10 @@ For development purposes,
 and [Helm](https://helm.sh/) can be installed locally by following
 this [guide](https://helm.sh/docs/using_helm/#installing-helm).
 
-# Kubernetes Local Quickstart
+## Kubernetes Local Quickstart
 
 Requirements:
+
 1. Helm installed locally
 2. Minikube installed locally
 3. Latest cloned copy of DefectDojo
@@ -71,7 +72,7 @@ echo "DefectDojo admin password: $(kubectl \
 To access DefectDojo, go to <http://defectdojo.default.minikube.local:8080>.
 Log in with username admin and the password from the previous command.
 
-# Minikube with locally built containers
+### Minikube with locally built containers
 
 If testing containers locally, then set the imagePullPolicy to Never,
 which ensures containers are not pulled from Docker hub.
@@ -84,7 +85,7 @@ helm install \
   --set imagePullPolicy=Never
 ```
 
-## Build Images Locally
+### Build Images Locally
 
 ```zsh
 # Build images
@@ -92,7 +93,7 @@ docker build -t defectdojo/defectdojo-django -f Dockerfile.django .
 docker build -t defectdojo/defectdojo-nginx -f Dockerfile.nginx .
 ```
 
-# Kubernetes Production
+## Kubernetes Production
 
 Optionally, for TLS locally, you need to install a TLS certificate into your
 Kubernetes cluster.
