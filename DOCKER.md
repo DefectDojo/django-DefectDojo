@@ -1,10 +1,10 @@
-## Run with Docker Compose
+# Run with Docker Compose
 
 Docker compose is not intended for production use.
 If you want to deploy a containerized DefectDojo to a production environment,
 use the [Helm and Kubernetes](KUBERNETES.md) approach.
 
-### Setup via Docker Compose
+## Setup via Docker Compose
 
 If you start your DefectDojo instance on Docker Compose for the first time, just
 run `docker-compose up`.
@@ -17,7 +17,7 @@ If you ran DefectDojo with compose before and you want to prevent the
 initializer container from running again, define an environment variable
 DD_INITIALIZE=false to prevent re-initialization.
 
-## Build Images Locally
+### Build Images Locally
 
 Build the docker containers locally for testing purposes.
 
