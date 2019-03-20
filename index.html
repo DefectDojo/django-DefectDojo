@@ -1,0 +1,311 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>
+        
+        DefectDojo
+    </title>
+    
+    
+    <!-- Bootstrap Core CSS -->
+    <link href="/static/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- MetisMenu CSS -->
+    <link href="/static/metisMenu/dist/metisMenu.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="/static/startbootstrap-sb-admin-2/dist/css/sb-admin-2.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="/static/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+    
+    
+    <link rel="stylesheet" href="/static/jquery-ui/themes/flick/jquery-ui.min.css">
+    <link rel="shortcut icon" href="/static/dojo/img/favicon.ico"/>
+    <link rel="stylesheet" href="/static/fullcalendar/dist/fullcalendar.min.css">
+    <link rel="stylesheet" href="/static/dojo/css/dojo.css">
+    <style>
+        
+        
+    </style>
+</head>
+<body class="min">
+
+<div id="wrapper">
+    
+        <!-- Navigation -->
+        <nav class="navbar navbar-default navbar-fixed-top" role="navigation" style="margin-bottom: 0">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">
+                    <img src="/static/dojo/img/logo.png" alt="DefectDojo Logo" width="240"/>
+                </a>
+
+            </div>
+            <!-- /.navbar-header -->
+
+            <ul class="nav navbar-top-links navbar-right">
+              
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                        <i class="fa fa-user fa-fw"></i> <i class="fa fa-caret-down"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-user">
+                        
+                            
+                            <li><a href="/api/v1/doc/"><i class="fa fa-book fa-fw"></i> API
+                                v1 Docs</a></li>
+                            <li><a href="/api/v2/doc/"><i class="fa fa-book fa-fw"></i> API
+                                v2 Docs</a></li>
+                        
+                        
+                    </ul>
+                    <!-- /.dropdown-user -->
+                </li>
+                <!-- /.dropdown -->
+            </ul>
+            <!-- /.navbar-top-links -->
+
+            <div class="navbar-default sidebar" role="navigation">
+                <div class="sidebar-nav navbar-collapse">
+                    <ul class="nav" id="side-menu">
+                        
+
+                            
+                            <li>
+                                
+                                
+                                <!-- /.nav-second-level -->
+                            </li>
+                            
+                            
+                            
+                            
+
+                        
+
+                        <li id="min-menu">
+                            <a href="#" id="minimize-menu">
+                                <i id="nav-minimize-menu-li" class="fa fa-arrow-circle-right fa-fw"></i>
+                                <span>Collapse Menu</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- /.sidebar-collapse -->
+            </div>
+            <!-- /.navbar-static-side -->
+        </nav>
+    
+    <!-- Page Content -->
+    <div id="page-wrapper">
+        <div class="container-fluid">
+            <!-- start of tabs -->
+            
+            <div class="row hidden-xs">
+                <div class="col-lg-12">
+                    
+                </div>
+            </div>
+            
+            <!-- end of tabs -->
+            <div class="row">
+                <div class="col-lg-12">
+                    
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+            <!-- /.row -->
+            <div class="row">
+                <div id="base-content" class="col-lg-12">
+                    
+
+                    
+
+                    
+
+                    
+
+                    
+
+                    
+    <h3>Login</h3>
+    <hr/>
+    
+
+    
+
+    <form class="form-horizontal" method="POST"> <input type='hidden' name='csrfmiddlewaretoken' value='P8PX4GNO8PtqDatd5QpZzGgabPqHqes9FGBqbaTHN6GfNEQ6NeOfyplZ0rhePKe7' />
+
+        <fieldset class="col-md-offset-3 col-md-6">
+            
+
+
+
+
+    <div class="form-group">
+        
+            
+                <label class="col-sm-2 control-label
+                        "
+                       for="id_username">Username<sup>*</sup>
+                        
+                </label>
+            
+
+            <div class="col-sm-10  ">
+                <input type="text" name="username" id="id_username" autofocus required class="form-control" maxlength="254" />
+
+                
+            </div>
+        
+    </div>
+
+    <div class="form-group">
+        
+            
+                <label class="col-sm-2 control-label
+                        "
+                       for="id_password">Password<sup>*</sup>
+                        
+                </label>
+            
+
+            <div class="col-sm-10  ">
+                <input type="password" name="password" required class="form-control" id="id_password" />
+
+                
+            </div>
+        
+    </div>
+
+
+
+            <!-- Button -->
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <button class="btn btn-success">Login</button>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+        </div>
+        <!-- /.container-fluid -->
+    </div>
+    <!-- /#page-wrapper -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12 text-center text-">
+                    <p>
+                        <a href="/"><img class="logo" src="/static/dojo/img/chop.png"
+                                                        alt="DefectDojo Chop" height="45"/></a><br/>
+                        v. 1.5.4
+                    </p>
+                    <p>
+                        Detailed DefectDojo documentation can be found at  <a
+                            href="http://defectdojo.readthedocs.io/">Read The Docs</a>.
+                    </p>
+                    <p>
+                        DefectDojo is licensed under the <a
+                            href="https://github.com/DefectDojo/django-DefectDojo/blob/master/LICENSE.md">Simplified BSD
+                        license</a>.
+                    </p>
+                    <p>
+                        &copy; 2019 DefectDojo
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+</div>
+
+<!-- /#wrapper -->
+
+<!-- jQuery -->
+<script src="/static/jquery/dist/jquery.js"></script>
+<!--  jQuery UI -->
+<script src="/static/jquery-ui/jquery-ui.min.js"></script>
+<!-- Bootstrap Core JavaScript -->
+<script src="/static/bootstrap/dist/js/bootstrap.min.js"></script>
+
+<!-- Metis Menu Plugin JavaScript -->
+<script src="/static/metisMenu/dist/metisMenu.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/static/startbootstrap-sb-admin-2/dist/js/sb-admin-2.js"></script>
+<!-- Calendar JavaScript -->
+<script src="/static/moment/min/moment.min.js"></script>
+<script src="/static/fullcalendar/dist/fullcalendar.min.js"></script>
+<!-- jquery cookie -->
+<script src="/static/jquery-cookie/jquery.cookie.js"></script>
+<!-- our JS -->
+<script src="/static/dojo/js/index.js"></script>
+<script type="application/javascript">
+    $(document).ready(function() {
+        $('.has-popover').popover({'trigger':'hover'});
+        
+        function update_alertcount() {
+            $.get("/alerts/count", function (data) {
+                if (data.count != $('#alert_count').text()) {
+                    $('#alert_count').text(data.count);
+                    $('#alert_count').removeClass().addClass('badge badge-count badge-count' + data.count);
+                }
+            });
+        }
+
+        function htmlEscape(str) {
+          return str
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+        }
+
+        function get_alerts() {
+            $('.dropdown-alerts').html('<div class="text-center"><i class="fa fa-spin fa-spinner"></i></div>');
+            $.get("/alerts/json?limit=12", function (data) {
+                $('.dropdown-alerts').empty();
+                $.each(data, function(i, elem) {
+                  var titleField = elem.fields.title ? elem.fields.title : elem.fields.description;
+                  var desc = titleField.length < 50 ? titleField : jQuery.trim(titleField).substring(0,50).trim(this) + '...';
+                  var dropdown_alert = "alert-list" + i;
+                  $('.dropdown-alerts').append('<li><div style="padding: 3px 20px;"><i class="fa fa-' + htmlEscape(elem.fields.icon) +
+                                                ' fa-fw"></i><a href="' + htmlEscape(elem.fields.url) + '" id=' + dropdown_alert + '></a><span class="pull-right text-muted small">' +
+                                               htmlEscape(elem.fields.source) + '</span></div></li><li class="divider"></li>');
+                  $("#" + dropdown_alert).text(desc);
+                });
+                $('.dropdown-alerts').append('<li><a class="text-center" href="/alerts"><strong>See All Alerts </strong>' +
+                                             '<i class="fa fa-angle-right"></i></a></li>');
+            });
+        }
+    });
+</script>
+
+
+
+</body>
+
+</html>

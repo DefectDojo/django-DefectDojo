@@ -5,8 +5,7 @@ travis_fold() {
   echo -en "travis_fold:${action}:${name}\r"
 }
 
-return_value=0
-if [ -z "${TEST}" ]; then
+build_containers() {
   # Build Docker images
   travis_fold start docker_image_build
   DOCKER_IMAGES=(django nginx)
@@ -18,6 +17,11 @@ if [ -z "${TEST}" ]; then
       .
   done
   travis_fold end docker_image_build
+}
+
+return_value=0
+if [ -z "${TEST}" ]; then
+  build_containers
 
   # Start Minikube
   travis_fold start minikube_install
@@ -129,5 +133,18 @@ echo "Running test ${TEST}"
       else
           echo "Skipping because not on dev branch"
       fi
+      ;;
+    docker)
+      echo "Validating docker compose"
+      build_containers
+      docker-compose up -d
+      echo "Waiting for services to start"
+      # Wait for services to become available
+      sleep 80
+      echo "Testing DefectDojo Service"
+      curl -s -o "/dev/null" http://localhost:8080 -m 120
+      echo "Docker compose container status"
+      docker-compose ps
+      ;;
   esac
 fi
