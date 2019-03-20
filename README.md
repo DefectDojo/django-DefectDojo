@@ -41,8 +41,7 @@ For detailed documentation you can visit
 ## Installation Options
 
 * [Kubernetes](KUBERNETES.md)
-* [Docker](https://defectdojo.readthedocs.io/en/latest/getting-started.html#docker-local-install)
-* [Debian, Ubuntu (16.04.2+) or RHEL-based Install Script](https://defectdojo.readthedocs.io/en/latest/getting-started.html#install-script)
+* [Docker](DOCKER.md)
 
 ## Getting Started
 

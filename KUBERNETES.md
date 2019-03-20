@@ -1,6 +1,90 @@
 # DefectDojo on Kubernetes
 
-## Build images
+DefetDojo Kubernetes utilizes [Helm](https://helm.sh/), a
+package manager for Kubernetes. Helm Charts help you define, install, and
+upgrade even the most complex Kubernetes application.
+
+For development purposes,
+[minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/)
+and [Helm](https://helm.sh/) can be installed locally by following
+this [guide](https://helm.sh/docs/using_helm/#installing-helm).
+
+# Kubernetes Local Quickstart
+
+Requirements:
+1. Helm installed locally
+2. Minikube installed locally
+3. Latest cloned copy of DefectDojo
+
+```zsh
+git clone https://github.com/DefectDojo/django-DefectDojo
+cd django-DefectDojo
+
+minikube start
+minikube addons enable ingress
+helm init
+helm repo update
+helm dependency update ./helm/defectdojo
+```
+
+Now, install the helm chart into minikube:
+
+```zsh
+helm install \
+  ./helm/defectdojo \
+  --name=defectdojo \
+  --set django.ingress.enabled=false
+```
+
+It usually takes up to a minute for the services to startup and the
+status of the containers can be viewed by starting up ```minikube dashboard```.
+Note: If the containers are not cached locally the services will start once the
+containers have been pulled locally.
+
+To be able to access DefectDojo, set up an ingress or access the service
+directly by running the following command:
+
+```zsh
+kubectl port-forward --namespace=default \
+service/defectdojo-django 8080:80
+```
+
+As you set your host value to defectdojo.default.minikube.local, make sure that
+it resolves to the localhost IP address, e.g. by adding the following two lines
+to /etc/hosts:
+
+```zsh
+::1       defectdojo.default.minikube.local
+127.0.0.1 defectdojo.default.minikube.local
+```
+
+To find out the password, run the following command:
+
+```zsh
+echo "DefectDojo admin password: $(kubectl \
+  get secret defectdojo \
+  --namespace=default \
+  --output jsonpath='{.data.DD_ADMIN_PASSWORD}' \
+  | base64 --decode)"
+```
+
+To access DefectDojo, go to <http://defectdojo.default.minikube.local:8080>.
+Log in with username admin and the password from the previous command.
+
+# Minikube with locally built containers
+
+If testing containers locally, then set the imagePullPolicy to Never,
+which ensures containers are not pulled from Docker hub.
+
+```zsh
+helm install \
+  ./helm/defectdojo \
+  --name=defectdojo \
+  --set django.ingress.enabled=false \
+  --set imagePullPolicy=Never
+```
+
+## Build Images Locally
 
 ```zsh
 # Build images
@@ -8,20 +92,14 @@ docker build -t defectdojo/defectdojo-django -f Dockerfile.django .
 docker build -t defectdojo/defectdojo-nginx -f Dockerfile.nginx .
 ```
 
-## Run with Kubernetes
+# Kubernetes Production
 
-To install the Helm chart, you need to install a TLS certificate into your
+Optionally, for TLS locally, you need to install a TLS certificate into your
 Kubernetes cluster.
 For development purposes, you can create your own certificate authority as
 described [here](https://github.com/hendrikhalkow/k8s-docs/blob/master/tls.md).
 
 ```zsh
-minikube start
-minikube addons enable ingress
-helm init
-helm repo update
-helm dependency update ./helm/defectdojo
-
 # https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
 # Create a TLS secret called minikube-tls as mentioned above, e.g.
 K8S_NAMESPACE="default"
@@ -33,7 +111,9 @@ kubectl --namespace "${K8S_NAMESPACE}" create secret tls defectdojo-tls \
   --cert <(cat \
     "${CA_DIR}/certs/${TLS_CERT_DOMAIN}.cert.pem" \
     "${CA_DIR}/chain.pem")
+```
 
+```zsh
 # Install Helm chart. Choose a host name that matches the certificate above
 helm install \
   ./helm/defectdojo \
@@ -120,29 +200,4 @@ kubectl exec -it $(kubectl get pod --selector=defectdojo.org/component=${POD} \
 ```zsh
 # Uninstall Helm chart
 helm delete defectdojo --purge
-```
-
-## Run with Docker Compose
-
-Docker compose is not intended for production use.
-If you want to deploy a containerized DefectDojo to a production environment,
-use the Helm and Kubernetes approach described above.
-
-### Setup via Docker Compose
-
-If you start your DefectDojo instance on Docker Compose for the first time, just
-run `docker-compose up`.
-
-Navigate to <http://localhost:8080> where you can log in with username admin.
-To find out the admin user’s password, check the very beginning of the console
-output of the initializer container.
-
-If you ran DefectDojo before and you want to prevent the initializer container
-to run again, define an environment variable DD_INITIALIZE=false to prevent re-
-initialization.
-
-### Clean up Docker Compose
-
-```zsh
-docker-compose down --volumes
 ```
