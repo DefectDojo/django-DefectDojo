@@ -31,7 +31,8 @@ FINDING_STATUS = (('verified', 'Verified'),
 SEVERITY_CHOICES = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
                     ('High', 'High'), ('Critical', 'Critical'))
 
-WEEKDAY_CHOICES = ((0,"Monday"),(1,"Tuesday"),(2,"Wednesday"),(3,"Thursday"),(4,"Friday"),(5,"Saturday"),(6,"Sunday"))
+WEEKDAY_CHOICES = ((0, "Monday"), (1, "Tuesday"), (2, "Wednesday"),
+                   (3, "Thursday"), (4, "Friday"), (5, "Saturday"), (6, "Sunday"))
 
 
 class SelectWithPop(forms.Select):
@@ -511,9 +512,7 @@ class CheckForm(forms.ModelForm):
 class EngForm(forms.ModelForm):
     name = forms.CharField(
         max_length=300, required=False,
-        help_text="Add a descriptive name to identify this engagement. " +
-                  "Without a name the target start date will be used in " +
-                  "listings.")
+        help_text="Add a descriptive name to identify this engagement. Without a name the target start date will be used in listings.")
     description = forms.CharField(widget=forms.Textarea(attrs={}),
                                   required=False, help_text="Description of the engagement and details regarding the engagement.")
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
@@ -575,6 +574,7 @@ class EngForm(forms.ModelForm):
         exclude = ('first_contacted', 'eng_type', 'real_start',
                    'real_end', 'requester', 'reason', 'updated', 'report_type',
                    'product', 'threat_model', 'api_test', 'pen_test', 'check_list', 'engagement_type')
+
 
 class DeleteEngagementForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
@@ -1190,8 +1190,7 @@ class WeeklyMetricsForm(forms.Form):
                                                  hour=0, minute=0, second=0)
 
             wmf_options.append((end_of_period.strftime("%b %d %Y %H %M %S %Z"),
-                                start_of_period.strftime("%b %d") +
-                                " - " + end_of_period.strftime("%b %d")))
+                                start_of_period.strftime("%b %d") + " - " + end_of_period.strftime("%b %d")))
 
         wmf_options = tuple(wmf_options)
 
@@ -1496,7 +1495,7 @@ class DeleteToolProductSettingsForm(forms.ModelForm):
 
 class ToolProductSettingsForm(forms.ModelForm):
     tool_configuration = forms.ModelChoiceField(queryset=Tool_Configuration.objects.all(), label='Tool Configuration')
-    url = forms.CharField(widget=forms.TextInput, label='SSH or HTTP URL', required=False) 
+    url = forms.CharField(widget=forms.TextInput, label='SSH or HTTP URL', required=False)
 
     class Meta:
         model = Tool_Product_Settings
@@ -1509,14 +1508,13 @@ class ToolProductSettingsForm(forms.ModelForm):
         form_data = self.cleaned_data
 
         if form_data["url"] != "":
-		try:
-		    url_validator = URLValidator(schemes=['ssh', 'http', 'https'])
-		    url_validator(form_data["url"])
-		except forms.ValidationError:
-		    raise forms.ValidationError(
-		        'It does not appear as if this URL is a valid HTTP or SSH URL.',
-		        code='invalid')
-        
+            try:
+                url_validator = URLValidator(schemes=['ssh', 'http', 'https'])
+                url_validator(form_data["url"])
+            except forms.ValidationError:
+                raise forms.ValidationError(
+                    'It does not appear as if this URL is a valid HTTP or SSH URL.',
+                    code='invalid')
 
         return form_data
 
@@ -1561,7 +1559,7 @@ class CredMappingFormProd(forms.ModelForm):
         fields = ['cred_id', 'url', 'is_authn_provider']
         exclude = ['product', 'finding', 'engagement', 'test']
 
-# markme
+
 class EngagementPlanForm(forms.Form):
     SORT_PRODUCT_CHOICES = (('-business_criticality', 'Business Criticality: High to Low'),
                             ('+business_criticality', 'Business Criticality: Low to High'),
@@ -1569,58 +1567,57 @@ class EngagementPlanForm(forms.Form):
                             ('+revenue', 'Revenue: Low to High'),
                             ('-user_records', 'User Records: High to Low'),
                             ('+user_records', 'User Records: Low to High'))
-    
+
     prefix = forms.CharField(required=False, help_text="Every engagement planned by this plan will start with this prefix", label="Engagement Prefix")
     remove_prefix = forms.CharField(required=False, help_text="Provide a comma seperated list of prefixes - every engagement that starts with this prefix in the specified timeframe will be removed", label="Remove Engagement Prefixes")
-    
+
     products = forms.MultipleChoiceField(choices=[], widget=forms.CheckboxSelectMultiple(), label='Products', help_text='Planned in descending order of business criticality')
     products_order = forms.ChoiceField(choices=SORT_PRODUCT_CHOICES, required=True, label='Planning Order', help_text='Please specify how the order of planning per product should be calculated')
     start_tool_category = forms.ModelChoiceField(queryset=Tool_Type.objects.all(), required=False, label='Run Tool Category', help_text='Run a tool with this category (needs to be configured for each product) at the beginning of each engagement. This also requires that all selected products have at least one endpoint tagged as `tool-export`.')
-    
+
     from_date = forms.DateField(label="Period Start", widget=extras.SelectDateWidget, initial=timezone.now())
     to_date = forms.DateField(label="Period End", widget=extras.SelectDateWidget, initial=(timezone.now() + timezone.timedelta(days=365)))
-    
-    allowed_days = forms.MultipleChoiceField(choices=WEEKDAY_CHOICES, widget=forms.CheckboxSelectMultiple(), initial=(0,1,2,3,4), label='Working Days')
+
+    allowed_days = forms.MultipleChoiceField(choices=WEEKDAY_CHOICES, widget=forms.CheckboxSelectMultiple(), initial=(0, 1, 2, 3, 4), label='Working Days')
     days_per_engagement = forms.IntegerField(required=True, label='Days per Engagement', help_text='How many working days should an engagement last? Keep in mind that a tool running at the start of it will take time as well.', initial=5)
     parallel_engagements = forms.IntegerField(required=True, label='Parallel Engagements', help_text='How many engagements can happen at the same time?', initial=1)
-    
+
     break_days = forms.IntegerField(required=True, label='Break Duration', help_text='How many working days should a break last? A duration of one engagement is recommended', initial=5)
     break_interval = forms.IntegerField(required=True, label='Break Interval', help_text='Every how many working days should a break be inserted?', initial=20)
-    
-    
+
     def clean_products(self):
         if len(self.cleaned_data['products']) == 0:
             raise forms.ValidationError('Select at least one product')
-            
+
         return self.cleaned_data['products']
-    
+
     def clean_allowed_days(self):
         if len(self.cleaned_data['allowed_days']) == 0:
             raise forms.ValidationError('Select at least one working day')
         return self.cleaned_data['allowed_days']
-    
+
     def clean_parallel_engagements(self):
         if self.cleaned_data['parallel_engagements'] <= 0:
             raise forms.ValidationError('You need at least one parallel engagement')
         return self.cleaned_data['parallel_engagements']
-    
+
     def clean_days_per_engagement(self):
         if self.cleaned_data['days_per_engagement'] <= 0:
             raise forms.ValidationError('Engagements need to be at least one working day long')
         return self.cleaned_data['days_per_engagement']
-    
+
     def clean(self):
         # Check start & end date
         if self.cleaned_data['from_date'] >= self.cleaned_data['to_date']:
             raise forms.ValidationError('Period End must be after Period Start')
-        
+
         # Validate products against tool category
-        if self.cleaned_data['start_tool_category'] != None:
+        if self.cleaned_data['start_tool_category'] is not None:
             tool_type = Tool_Type.objects.get(id=self.cleaned_data['start_tool_category'].id)
-            
+
             for product_id in self.cleaned_data['products']:
                 product = Product.objects.get(id=product_id)
-                
+
                 # Check if product-tool with correct type is configured
                 tool_configs = Tool_Product_Settings.objects.filter(product=product.id)
                 has_product_tool = False
@@ -1629,9 +1626,9 @@ class EngagementPlanForm(forms.Form):
                     if tc.tool_configuration.tool_type.id == tool_type.id:
                         has_product_tool = True
                         break
-                
-                if has_product_tool == False:
-                    raise forms.ValidationError('Product "'+product.name+'" has no product-tool configuration in the category "'+tool_type.name+'"')
+
+                if has_product_tool is False:
+                    raise forms.ValidationError('Product "' + product.name + '" has no product-tool configuration in the category "' + tool_type.name + '"')
 
                 # Check if exportable endpoint is configured
                 endpoints = Endpoint.objects.filter(product=product.id)
@@ -1641,10 +1638,10 @@ class EngagementPlanForm(forms.Form):
                     if len(tags) > 0:
                         has_exported = True
                         break
-                        
-                if has_exported == False:
-                    raise forms.ValidationError('Product "'+product.name+'" has no endpoint that is tagged as `tool-export`')
-    
+
+                if has_exported is False:
+                    raise forms.ValidationError('Product "' + product.name + '" has no endpoint that is tagged as `tool-export`')
+
 
 class EngagementPresetsForm(forms.ModelForm):
 

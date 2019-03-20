@@ -529,6 +529,18 @@
               {% endif %}
             </td>
           </tr>
+          <tr>
+            <td><strong>Scheduled Tool</strong></td>
+            <td>
+              {% if eng.run_tool_test %}
+                <a target="_blank" data-toggle="tooltip" data-placement="top" title="{{ eng.run_tool_test_engine.name }}" href="{% url 'edit_tool_product' eng.product.id eng.run_tool_test_engine.id %}">
+                  <i class="fa fa-external-link"></i> {{ eng.run_tool_test_engine.name }}
+                </a>
+              {% else %}
+                None
+              {% endif %}
+            </td>
+          </tr>
           {% if jissue and jconf %}
           <tr>
             <td><strong>Jira</strong></td>

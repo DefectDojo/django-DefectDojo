@@ -1,21 +1,17 @@
 import Queue
-from datetime import datetime
 import sys
 import threading
 
-from django.core.mail import send_mail
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
-from django.conf import settings
-from django.contrib import messages
 
 from dojo.models import Product, \
      Tool_Product_Settings, Endpoint, Tool_Product_History, \
      Engagement, Finding, Test_Type, Development_Environment, \
-     Test, User, BurpRawRequestResponse, Finding, UserContactInfo
+     Test, User, BurpRawRequestResponse, UserContactInfo
 from dojo.tools.factory import import_parser_factory
 from django.conf import settings
-from dojo.utils import get_system_setting, timezone, create_notification, prepare_for_view
+from dojo.utils import timezone, create_notification, prepare_for_view
 from django.core.urlresolvers import reverse
 from time import strftime
 
@@ -29,7 +25,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('-c', '--config', type=int, help='Provide an ID to execute an on-demand scan for a product-tool configuration', )
         parser.add_argument('-e', '--engagement', type=int, help='For an on-demand scan, you can provide an engagement ID to import the test result into', )
-        
+
     def handle(self, *args, **options):
         ttid = options['config'] or 0
         eid = options['engagement'] or 0
@@ -41,20 +37,20 @@ class Command(BaseCommand):
             tool_config = scan_settings.tool_configuration
             tool_config.password = prepare_for_view(tool_config.password)
             endpoint_url = urlunsplit((endpoint.protocol or 'http', endpoint.host, endpoint.path or '/', endpoint.query or '', endpoint.fragment or ''))
-            dummy_user = User.objects.get(id=settings.TOOL_RUN_CONFIG['dummy-user'])          
+            dummy_user = User.objects.get(id=settings.TOOL_RUN_CONFIG['dummy-user'])
 
             if scan_settings.url == "" and scan_settings.tool_configuration:
                 scan_settings.url = scan_settings.tool_configuration.url
 
             url_settings = urlparse(scan_settings.url)
             scan_history = Tool_Product_History(product=scan_settings, status="Pending", last_scan=timezone.now())
-            
+
             if url_settings.scheme not in ["http", "https", "ssh"]:
                 scan_history.status = "Failed"
                 scan_history.save()
                 print("Failed tool run for ID " + str(ttid) + " due to invalid URL scheme")
                 return False
-            elif settings.ALLOW_TOOL_RUN[url_settings.scheme] == False or (url_settings.scheme == "ssh" and url_settings.netloc == "localhost" and settings.ALLOW_TOOL_RUN["ssh-localhost"] == False):
+            elif settings.ALLOW_TOOL_RUN[url_settings.scheme] is False or (url_settings.scheme == "ssh" and url_settings.netloc == "localhost" and settings.ALLOW_TOOL_RUN["ssh-localhost"] is False):
                 scan_history.status = "Denied"
                 scan_history.save()
                 print("Denied tool run for ID " + str(ttid) + " because " + url_settings.scheme + " connections for the specified host are disabled in settings.py")
@@ -86,10 +82,10 @@ class Command(BaseCommand):
             t = Test(
                 engagement=engagement,
                 test_type=tt,
-                target_start = timezone.now(),
-                target_end = timezone.now(),
+                target_start=timezone.now(),
+                target_end=timezone.now(),
                 environment=environment,
-                lead = dummy_user,
+                lead=dummy_user,
                 percent_complete=0)
             t.full_clean()
             t.save()
@@ -112,19 +108,19 @@ class Command(BaseCommand):
             # ssh://host/folder/file.extension?param connects to the host and runs the file in the query with the parameter provided
             elif url_settings.scheme == "ssh":
                 call_params = [url_settings.path]
-                
+
                 if url_settings.query != "":
                     url_qs = parse_qs(url_settings.query)
                     for key, val in url_qs.iteritems():
-                        call_params.append('--'+escapeshell(key)+'="'+escapeshell(val)+'"')
+                        call_params.append('--' + escapeshell(key) + '="' + escapeshell(val) + '"')
 
                 if url_settings.fragment != "":
                     call_params.append(escapeshell(url_settings.fragment))
 
                 call_params.append(endpoint_url)
                 if settings.DEBUG:
-                    print('Cmd: '+' '.join(call_params))
-                    
+                    print('Cmd: ' + ' '.join(call_params))
+
                 # On localhost it is directly executed
                 if url_settings.netloc == "localhost":
                     try:
@@ -155,7 +151,7 @@ class Command(BaseCommand):
                         except Exception:
                             print("Private key is not a valid RSA key. Generate it via ssh-keygen -t rsa.")
                             print(e)
-                    
+
                     try:
                         stdin, stdout, stderr = ssh_client.exec_command(' '.join(call_params))
                         result = stdout.read().decode('ascii')
@@ -174,7 +170,7 @@ class Command(BaseCommand):
 
             if eid == 0:
                 engagement.target_end = timezone.now()
-            
+
             engagement.run_tool_test = True
             engagement.save()
 
@@ -184,9 +180,6 @@ class Command(BaseCommand):
                 print("No parsing enabled, so only echoing the result")
                 print(result)
                 return True
-
-            #if settings.DEBUG:
-            #    print("Result: "+result)
 
             parse_result = StringIO.StringIO(result)
             try:
@@ -293,7 +286,7 @@ class Command(BaseCommand):
         if len(user_contact) == 0:
             contact = UserContactInfo(user=dummy_user)
             contact.save()
-        
+
         # differentiate between cronjob & on-demand scan
         if ttid == 0:
             # Cronjob for all open and scheduled engagements
@@ -301,16 +294,16 @@ class Command(BaseCommand):
             if len(engagements) <= 0:
                 print("No engagements open to start")
                 sys.exit(0)
-            
+
             scan_queue = Queue.Queue()
             for engagement in engagements:
                 ttid = engagement.run_tool_test_engine.id
                 eid = engagement.id
-                
+
                 endpoints = Endpoint.objects.filter(product=engagement.product.id)
                 if len(endpoints) <= 0:
-                    print("Product-Tool config can't be executed because the product "+str(engagement.product.id)+" has no endpoints configured.")
-                    
+                    print("Product-Tool config can't be executed because the product " + str(engagement.product.id)+" has no endpoints configured.")
+
                 has_exported = False
                 for e in endpoints:
                     tags = e.tags.filter(name="tool-export")
@@ -323,21 +316,21 @@ class Command(BaseCommand):
                         t.start()
 
                 if not has_exported:
-                    print("Product "+str(engagement.product.id)+" has no endpoints configured that are tagged with `tool-export`.")
+                    print("Product " + str(engagement.product.id) + " has no endpoints configured that are tagged with `tool-export`.")
                 else:
-                    print("Started for product "+str(engagement.product.id))
-            
+                    print("Started for product " + str(engagement.product.id))
+
             scan_queue.join()
-            
+
         else:
             # On-demand scan for single product-tool config
             scSettings = Tool_Product_Settings.objects.filter(pk=ttid)
             if len(scSettings) <= 0:
                 print("Product-Tool Configuration ID not found.")
                 sys.exit(0)
-                
+
             if not scSettings[0].tool_configuration.scan_type:
-                print("Warning: This product tool configuration has no parsing configured.") 
+                print("Warning: This product tool configuration has no parsing configured.")
 
             endpoints = Endpoint.objects.filter(product=scSettings[0].product.id)
             if len(endpoints) <= 0:
@@ -372,6 +365,7 @@ class Command(BaseCommand):
 def run_on_demand_scan(ttid, eid):
     call_command('run_tool', config=int(ttid), engagement=int(eid))
     return True
+
 
 # Python 2.7 doesn't have a good way to escape shell arguments
 def escapeshell(string):

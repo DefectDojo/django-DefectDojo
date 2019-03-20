@@ -1,6 +1,6 @@
 from dojo.models import Product, Engagement, Test, Finding, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
-    User, ScanSettings, Scan, Stub_Finding, Endpoint, JIRA_PKey, JIRA_Conf, \
+    User, PortscanSettings, Scan, Stub_Finding, Endpoint, JIRA_PKey, JIRA_Conf, \
     Finding_Template
 
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
@@ -282,12 +282,12 @@ class ProductTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class ScanSettingsTest(BaseClass.RESTEndpointTest):
+class PortscanSettingsTest(BaseClass.RESTEndpointTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
-        self.endpoint_model = ScanSettings
-        self.viewname = 'scansettings'
+        self.endpoint_model = PortscanSettings
+        self.viewname = 'portscansettings'
         self.viewset = ScanSettingsViewSet
         self.payload = {
             "addresses": "127.0.0.1",
@@ -442,7 +442,7 @@ class ProductPermissionTest(APITestCase):
         self.assertEqual(response.status_code, 404)
 
 
-class ScanSettingsPermissionTest(APITestCase):
+class PortscanSettingsPermissionTest(APITestCase):
     fixtures = ['dojo_testdata.json']
 
     def setUp(self):
@@ -453,11 +453,11 @@ class ScanSettingsPermissionTest(APITestCase):
 
     def test_user_should_not_have_access_to_setting_3_in_list(self):
         response = self.client.get(
-            reverse('scansettings-list'), format='json')
+            reverse('portscansettings-list'), format='json')
         for obj in response.data['results']:
             self.assertNotEqual(
                 obj['url'],
-                'http://testserver/api/v2/scan_settings/3/')
+                'http://testserver/api/v2/portscan_settings/3/')
 
     def test_user_should_not_have_access_to_setting_3_in_detail(self):
         response = self.client.get('http://testserver/api/v2/scan_settings/3/')

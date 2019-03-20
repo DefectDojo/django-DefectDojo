@@ -3,16 +3,15 @@
 import logging
 from threading import Thread
 
-from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
-from dojo.forms import PortscanSettingsForm, DeleteIPScanForm, VaForm
+from dojo.forms import PortscanSettingsForm, DeleteIPScanForm
 from dojo.management.commands.run_portscan import run_on_demand_scan
 from dojo.models import Product, Scan, IPScan, PortscanSettings
-from dojo.utils import add_breadcrumb, get_system_setting
+from dojo.utils import add_breadcrumb
 
 logger = logging.getLogger(__name__)
 
@@ -224,4 +223,3 @@ def gmap(request, pid):
                   'dojo/gmap.html',
                   {'form': form,
                    'pid': pid})
-
