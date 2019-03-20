@@ -8,7 +8,8 @@ from django.contrib.auth.models import User
 from django.utils import six
 from django.utils.translation import ugettext_lazy as _
 from django_filters import FilterSet, CharFilter, OrderingFilter, \
-    ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter
+    ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter, \
+    BooleanFilter
 from django_filters.filters import ChoiceFilter, _truncate, DateTimeFilter
 from pytz import timezone
 
@@ -336,6 +337,11 @@ class OpenFindingFilter(DojoFilter):
     test__engagement__product = ModelMultipleChoiceFilter(
         queryset=Product.objects.all(),
         label="Product")
+    if get_system_setting('enable_jira'):
+        jira_issue = BooleanFilter(name='jira_issue',
+                                   lookup_expr='isnull',
+                                   exclude=True,
+                                   label='JIRA issue')
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -369,9 +375,6 @@ class OpenFindingFilter(DojoFilter):
             self.pid = kwargs.pop('pid')
         super(OpenFindingFilter, self).__init__(*args, **kwargs)
 
-        # Don't show the product filter on the product finding view
-        if self.pid:
-            del self.form.fields['test__engagement__product']
         cwe = dict()
         cwe = dict([finding.cwe, finding.cwe]
                    for finding in self.queryset.distinct()
@@ -384,11 +387,15 @@ class OpenFindingFilter(DojoFilter):
                     if finding.severity not in sevs)
         self.form.fields['severity'].choices = sevs.items()
         if self.user is not None and not self.user.is_staff:
-            self.form.fields[
-                'test__engagement__product'].queryset = Product.objects.filter(
-                authorized_users__in=[self.user])
+            if self.form.fields.get('test__engagement__product'):
+                qs = Product.objects.filter(authorized_users__in=[self.user])
+                self.form.fields['test__engagement__product'].queryset = qs
             self.form.fields['endpoints'].queryset = Endpoint.objects.filter(
                 product__authorized_users__in=[self.user]).distinct()
+
+        # Don't show the product filter on the product finding view
+        if self.pid:
+            del self.form.fields['test__engagement__product']
 
 
 class OpenFingingSuperFilter(OpenFindingFilter):

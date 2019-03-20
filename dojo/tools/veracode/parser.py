@@ -56,7 +56,7 @@ class VeracodeXMLParser(object):
                 for flaw in category.iter(
                         '{https://www.veracode.com/schema/reports/export/1.0}flaw'
                 ):
-                    dupe_key = sev + flaw.attrib['cweid'] + flaw.attrib['module'] + flaw.attrib['type']
+                    dupe_key = sev + flaw.attrib['cweid'] + flaw.attrib['module'] + flaw.attrib['type'] + flaw.attrib['line'] + flaw.attrib['issueid']
 
                     if dupe_key in dupes:
                         find = dupes[dupe_key]
@@ -105,7 +105,8 @@ class VeracodeXMLParser(object):
                                 description=description +
                                 "\n\nVulnerable Module: " +
                                 flaw.attrib['module'] + ' Type: ' +
-                                flaw.attrib['type'],
+                                flaw.attrib['type'] + ' Issue ID: ' +
+                                flaw.attrib['issueid'],
                                 mitigated=mitigated,
                                 mitigated_by_id=mitigated_by_id,
                                 severity=sev,
@@ -132,7 +133,8 @@ class VeracodeXMLParser(object):
                                 description=description +
                                 "\n\nVulnerable Module: " +
                                 flaw.attrib['module'] + ' Type: ' +
-                                flaw.attrib['type'],
+                                flaw.attrib['type'] + ' Issue ID: ' +
+                                flaw.attrib['issueid'],
                                 severity=sev,
                                 numerical_severity=Finding.
                                 get_numerical_severity(sev),

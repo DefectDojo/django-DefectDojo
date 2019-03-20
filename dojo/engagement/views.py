@@ -145,16 +145,14 @@ def edit_engagement(request, eid):
 
         if (form.is_valid() and jform is None) or (form.is_valid() and jform and jform.is_valid()):
             if 'jiraform-push_to_jira' in request.POST:
-                try:
-                    # jissue = JIRA_Issue.objects.get(engagement=eng)
+                if JIRA_Issue.objects.filter(engagement=eng).exists():
                     update_epic_task.delay(
                         eng, jform.cleaned_data.get('push_to_jira'))
                     enabled = True
-                except:
+                else:
                     enabled = False
                     add_epic_task.delay(eng,
                                         jform.cleaned_data.get('push_to_jira'))
-                    pass
             temp_form = form.save(commit=False)
             if (temp_form.status == "Cancelled" or temp_form.status == "Completed"):
                 temp_form.active = False
@@ -515,13 +513,12 @@ def import_scan_results(request, eid=None, pid=None):
                     new_f.cred_id = cred_user.cred_id
                     new_f.save()
 
-            try:
-                parser = import_parser_factory(file, t)
-            except ValueError:
-                raise Http404()
+            parser = import_parser_factory(file, t)
 
             try:
                 for item in parser.items:
+                    print "item blowup"
+                    print item
                     sev = item.severity
                     if sev == 'Information' or sev == 'Informational':
                         sev = 'Info'
@@ -540,7 +537,7 @@ def import_scan_results(request, eid=None, pid=None):
                     item.last_reviewed_by = request.user
                     item.active = active
                     item.verified = verified
-                    item.save(dedupe_option=False)
+                    item.save(dedupe_option=False, false_history=True)
 
                     if hasattr(item, 'unsaved_req_resp') and len(
                             item.unsaved_req_resp) > 0:
@@ -572,7 +569,7 @@ def import_scan_results(request, eid=None, pid=None):
                             product=t.engagement.product)
 
                         item.endpoints.add(ep)
-                    item.save()
+                    item.save(false_history=True)
 
                     if item.unsaved_tags is not None:
                         item.tags = item.unsaved_tags
