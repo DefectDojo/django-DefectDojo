@@ -102,6 +102,8 @@ Proceeds are used for testing, infrastructure, etc.
 
 [![Xing](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/XING_logo.png)](https://corporate.xing.com/en/about-xing/security/)
 
+[![Panasonic Information Systems Company Europe](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/PISCEU_logo.png)](https://application.job.panasonic.eu/data/ruP0pHQvHrGZJKvL/rc.php?nav=jobsearch&custval12=ite&lang=EN&custval11=PBSEU_GER)
+
 Interested in becoming a sponsor and having your logo displayed? Please review our [sponsorship information](SPONSORING.md) or email greg.anderson@owasp.org
 
 # License

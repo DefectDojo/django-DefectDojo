@@ -356,7 +356,6 @@ def add_meta_data(request, eid):
 
 @user_passes_test(lambda u: u.is_staff)
 def edit_meta_data(request, eid):
-
     endpoint = Endpoint.objects.get(id=eid)
     ct = ContentType.objects.get_for_model(endpoint)
 

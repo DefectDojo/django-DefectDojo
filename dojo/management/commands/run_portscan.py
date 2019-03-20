@@ -155,7 +155,7 @@ class Command(BaseCommand):
                 scan_results = eval('set(' + IPScan.objects.get(
                     address=host,
                     scan=Scan.objects.get(
-                        id=service_dict['scan_id'])).services+')')
+                        id=service_dict['scan_id'])).services + ')')
                 scan_results = map(
                     lambda x: str(x[0]) + '/' + str(x[1]) + ': ' + str(x[3]),
                     scan_results)
@@ -203,8 +203,7 @@ class Command(BaseCommand):
             print "Must specify an argument: Weekly, Monthly, Quarterly, or ID",\
                 " of Scan Settings to use."
             sys.exit(0)
-        if (type in ["Weekly", "Monthly", "Quarterly"]
-                or type.isdigit()):
+        if (type in ["Weekly", "Monthly", "Quarterly"] or type.isdigit()):
             pass
         else:
             print("Unexpected parameter: " + str(args[0]))
@@ -269,8 +268,7 @@ class Command(BaseCommand):
                 else:
                     try:
                         most_recent_ports = map(
-                            lambda x: str(x[0]) + '/' + str(x[1]) + ': ' +
-                            str(x[3]),
+                            lambda x: str(x[0]) + '/' + str(x[1]) + ': ' + str(x[3]),
                             eval(most_recent_ipscans.get(
                                 address=addr).services))
                     except:

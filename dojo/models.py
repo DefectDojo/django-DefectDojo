@@ -698,6 +698,7 @@ class Engagement_Type(models.Model):
     def __unicode__(self):
         return self.name
 
+
 class Notes(models.Model):
     entry = models.TextField()
     date = models.DateTimeField(null=False, editable=False,
@@ -709,7 +710,8 @@ class Notes(models.Model):
 
     def __unicode__(self):
         return self.entry
-    
+
+
 class Tool_Product_Settings(models.Model):
     name = models.CharField(max_length=200, null=False)
     description = models.CharField(max_length=2000, null=True, blank=True)
@@ -722,7 +724,7 @@ class Tool_Product_Settings(models.Model):
 
     class Meta:
         ordering = ['name']
-        
+
     def __unicode__(self):
         return self.name
 
@@ -731,6 +733,7 @@ class Tool_Product_History(models.Model):
     product = models.ForeignKey(Tool_Product_Settings, editable=False)
     status = models.CharField(max_length=10, default='Pending', editable=False)
     last_scan = models.DateTimeField(null=False, editable=False, default=now)
+
 
 class Engagement(models.Model):
     name = models.CharField(max_length=300, null=True, blank=True)
@@ -791,7 +794,7 @@ class Engagement(models.Model):
     orchestration_engine = models.ForeignKey(Tool_Configuration, verbose_name="Orchestration Engine", help_text="Orchestration service responsible for CI/CD test", null=True, blank=True, related_name='orchestration')
     run_tool_test_engine = models.ForeignKey(Tool_Product_Settings, verbose_name="Schedule Product-Tool Test", help_text="A cronjob will run this tool test and import the results as configured after the target start", null=True, blank=True, related_name='run_tool_test')
     run_tool_test = models.BooleanField(default=False, editable=False)
-    
+
     class Meta:
         ordering = ['-target_start']
 
@@ -1624,6 +1627,7 @@ class Notifications(models.Model):
     review_requested = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     other = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     user = models.ForeignKey(User, default=None, null=True, editable=False)
+
 
 class Alerts(models.Model):
     title = models.CharField(max_length=100, default='', null=False)

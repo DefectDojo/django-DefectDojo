@@ -1,12 +1,12 @@
 # #  product
 import logging
 from django.contrib import messages
+from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import reverse
 from django.shortcuts import render, get_object_or_404
-from django.utils import timezone
-from dojo.forms import DeleteToolProductSettingsForm, ToolProductSettingsForm, NoteForm
-from dojo.models import Product, Tool_Product_Settings, Tool_Configuration, Tool_Product_History
+from dojo.forms import DeleteToolProductSettingsForm, ToolProductSettingsForm
+from dojo.models import Product, Tool_Product_Settings, Tool_Product_History
 from dojo.management.commands.run_tool import run_on_demand_scan
 from django.http import HttpResponseRedirect
 from dojo.utils import add_breadcrumb, Product_Tab
@@ -54,6 +54,7 @@ def all_tool_product(request, pid):
         'product_tab': product_tab
     })
 
+
 @user_passes_test(lambda u: u.is_superuser)
 def run_tool_product(request, pid, ttid):
     scan_settings = get_object_or_404(Tool_Product_Settings, pk=ttid)
@@ -65,11 +66,11 @@ def run_tool_product(request, pid, ttid):
 
     if scan_settings.url == "" and scan_settings.tool_configuration:
         scan_settings.url = scan_settings.tool_configuration.url
-        
+
     scan_is_running = False
     if request.method == 'POST':
         if 'scan_now' in request.POST:
-            t = Thread(target=run_on_demand_scan, args=(str(ttid),str(0)))
+            t = Thread(target=run_on_demand_scan, args=(str(ttid), str(0)))
             t.start()
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -98,6 +99,7 @@ def run_tool_product(request, pid, ttid):
         'ttid': ttid,
     })
 
+
 @user_passes_test(lambda u: u.is_superuser)
 def clear_tool_product_history(request, pid, ttid):
     scan_settings = get_object_or_404(Tool_Product_Settings, pk=ttid)
@@ -117,6 +119,7 @@ def clear_tool_product_history(request, pid, ttid):
                                  extra_tags='alert-success')
 
     return HttpResponseRedirect(reverse('run_tool_product', args=(pid, ttid)))
+
 
 @user_passes_test(lambda u: u.is_staff)
 def edit_tool_product(request, pid, ttid):
