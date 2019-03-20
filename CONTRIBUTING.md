@@ -14,9 +14,9 @@ Here are a few things to keep in mind when making changes to DefectDojo.
 
 ## Modifying DefectDojo and Testing
 
-Please use [these test scripts](./tests) to test your changes. These are the exact scripts we run in our [Travis Build](https://travis-ci.org/OWASP/django-DefectDojo)
+Please use [these test scripts](./tests) to test your changes. These are the exact scripts we run in our [Travis Build](https://travis-ci.org/OWASP/django-DefectDojo).
 
-For changes that require additional settings. settings.dist.py is the file you want to change. settings.py is populated by setup.bash from settings.dist.py
+For changes that require additional settings, settings.dist.py is the file you want to change. Settings.py is created by setup.bash from settings.dist.py
 
 ## Submitting Pull Requests
 

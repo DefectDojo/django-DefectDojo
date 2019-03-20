@@ -2,10 +2,12 @@
 {% block content %}
     <h3> Edit Environment {{ pt.name }}</h3>
     <form class="form-horizontal" action="{% url 'edit_dev_env' de.id %}" method="post">{% csrf_token %}
-        {% include "dojo/form_fields.html" with form=form %}
+        {% include "dojo/form_fields.html" with form=form1 %}
+        {{ form2 }}
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
-                <input class="btn btn-primary" type="submit" value="Submit"/>
+                <input class="btn btn-primary" name="edit_dev_env" type="submit" value="Submit"/>
+                <input class="btn btn-danger" name="delete_dev_env" type="submit" value="Delete"/>
             </div>
         </div>
     </form>

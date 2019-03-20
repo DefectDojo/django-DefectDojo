@@ -1,0 +1,83 @@
+---
+# Global settings
+createSecret: true
+database: mysql
+host: defectdojo.default.minikube.local
+imagePullPolicy: Always
+tag: latest
+
+admin:
+  user: admin
+  firstName: Administrator
+  lastName: User
+  mail: admin@defectdojo.local
+
+# Components
+celery:
+  broker: rabbitmq
+  repository: defectdojo/defectdojo-django
+  beat:
+    affinity: {}
+    logLevel: DEBUG
+    nodeSelector: {}
+    resources:
+      cpu: 100m
+      memory: 128Mi
+    tolerations: []
+  worker:
+    affinity: {}
+    broker: rabbitmq
+    repository: defectdojo/defectdojo-django
+    logLevel: DEBUG
+    nodeSelector: {}
+    replicas: 1
+    resources:
+      cpu: 100m
+      memory: 128Mi
+    tolerations: []
+
+django:
+  affinity: {}
+  ingress:
+    enabled: true
+    secretName: defectdojo-tls
+  nginx:
+    repository: defectdojo/defectdojo-nginx
+    resources:
+      cpu: 100m
+      memory: 128Mi
+  nodeSelector: {}
+  replicas: 1
+  tolerations: []
+  uwsgi:
+    repository: defectdojo/defectdojo-django
+    resources:
+      cpu: 100m
+      memory: 128Mi
+
+initializer:
+  run: true
+  repository: defectdojo/defectdojo-django
+  keepSeconds: 60
+  resources:
+    cpu: 100m
+    memory: 128Mi
+
+mysql:
+  enabled: true
+  mysqlUser: defectdojo
+  mysqlDatabase: defectdojo
+
+postgresql:
+  enabled: false
+  postgresqlDatabase: defectdojo
+  slaveReplicas: 1
+
+rabbitmq:
+  enabled: true
+  replicas: 1
+
+redis:
+  enabled: false
+  cluster:
+    slaveCount: 1
