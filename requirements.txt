@@ -21,7 +21,7 @@ django-taggit-serializer==0.1.7
 django-tastypie-swagger==0.1.4
 django-tastypie==0.14.0
 django-watson==1.5.2
-Django==1.11.18
+Django==1.11.20
 djangorestframework==3.7.7
 gunicorn==19.7.1
 html2text==2018.1.9
