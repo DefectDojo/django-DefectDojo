@@ -387,9 +387,9 @@ class OpenFindingFilter(DojoFilter):
                     if finding.severity not in sevs)
         self.form.fields['severity'].choices = sevs.items()
         if self.user is not None and not self.user.is_staff:
-            self.form.fields[
-                'test__engagement__product'].queryset = Product.objects.filter(
-                authorized_users__in=[self.user])
+            if self.form.fields.get('test__engagement__product'):
+                qs = Product.objects.filter(authorized_users__in=[self.user])
+                self.form.fields['test__engagement__product'].queryset = qs
             self.form.fields['endpoints'].queryset = Endpoint.objects.filter(
                 product__authorized_users__in=[self.user]).distinct()
 
