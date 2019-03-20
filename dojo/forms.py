@@ -270,7 +270,7 @@ class ImportScanForm(forms.Form):
                          ("Acunetix Scan", "Acunetix Scan"),
                          ("Fortify Scan", "Fortify Scan"),
                          ("Gosec Scanner", "Gosec Scanner"),
-                         ("SonarQube Scan", "SonarQube Scan"),
+                         # ("SonarQube Scan", "SonarQube Scan"),
                          ("MobSF Scan", "MobSF Scan"),
                          ("Trufflehog Scan", "Trufflehog Scan"),
                          ("Nikto Scan", "Nikto Scan"),
