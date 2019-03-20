@@ -26,12 +26,11 @@ credentials.
 
 ```sh
 git clone https://github.com/DefectDojo/django-DefectDojo
-cd django-DefectDojo
-./setup.bash
-./run_dojo.bash
+cd django-DefectDojo/docker
+docker-compose up
 ```
 
-Navigate to <http://127.0.0.1:8000>.
+Navigate to <http://localhost:8080>.
 
 ## Documentation
 
