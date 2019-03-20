@@ -17,6 +17,9 @@ env:
     - TEST=flake8
     - TEST=docker
     - TEST=snyk
+  matrix:	matrix:
+    allow_failures:
+      - env: TEST=snyk
 before_install: ['./travis/before-install.sh']
 before_script: ['./travis/before-script.sh']
 script: ['./travis/script.sh']
