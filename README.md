@@ -125,6 +125,7 @@ Proceeds are used for testing, infrastructure, etc.
 
 [![Xing](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/XING_logo.png)](https://corporate.xing.com/en/about-xing/security/)
 [![10Security](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/10Security-logo.png)](https://10security.com/services-by-technology/defectdojo-commercial-support/)
+[![GCSecurity](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/gc_logo_2018.png)](https://gcsec.com.br/)
 
 Interested in becoming a sponsor and having your logo displayed? Please review
 our [sponsorship information](SPONSORING.md) or email greg.anderson@owasp.org
