@@ -11,7 +11,14 @@ run `docker-compose up`.
 
 Navigate to <http://localhost:8080> where you can log in with username admin.
 To find out the admin user’s password, check the very beginning of the console
-output of the initializer container.
+output of the initializer container, typically name 'django-defectdojo_initializer_1', or run the following:
+
+```zsh
+container_id=(`docker ps -a \
+--filter "name=django-defectdojo_initializer_1" \
+| awk 'FNR == 2 {print $1}'`) && \
+docker logs $container_id 2>&1 | grep "Admin password:"
+```
 
 If you ran DefectDojo with compose before and you want to prevent the
 initializer container from running again, define an environment variable
