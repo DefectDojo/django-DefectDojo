@@ -102,9 +102,6 @@ if [ -z "${TEST}" ]; then
   # Check exit status
   return_value=${?}
   echo
-  echo "Smoke test results"
-  sudo kubectl logs defectdojo-smoke-test
-  echo
   echo "Unit test results"
   sudo kubectl logs defectdojo-unit-tests
   echo
@@ -146,5 +143,10 @@ echo "Running test ${TEST}"
       echo "Docker compose container status"
       docker-compose ps
       ;;
+    snyk)
+      echo "Testing containers"
+      build_containers
+      snyk test --docker defectdojo/defectdojo-django:latest
+      snyk test --docker defectdojo/defectdojo-nginx:latest
   esac
 fi
