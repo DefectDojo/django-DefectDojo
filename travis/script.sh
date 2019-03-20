@@ -146,7 +146,7 @@ echo "Running test ${TEST}"
     snyk)
       echo "Testing containers"
       build_containers
-      snyk test --docker defectdojo/defectdojo-django:latest
-      snyk test --docker defectdojo/defectdojo-nginx:latest
+      snyk monitor --docker defectdojo/defectdojo-django:latest
+      snyk monitor --docker defectdojo/defectdojo-nginx:latest
   esac
 fi
