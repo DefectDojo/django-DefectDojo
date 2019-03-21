@@ -10,14 +10,17 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "defectdojo.chart" . }}
+{{- with .Values.django.ingress.annotations }}
   annotations:
-    kubernetes.io/ingress.class: nginx
-    nginx.org/ssl-services: {{ $fullName }}-nginx
+{{ toYaml . | indent 4 }}
+{{- end }}
 spec:
   tls:
     - hosts:
         - {{ .Values.host }}
+    {{- if .Values.django.ingress.secretName }}
       secretName: {{ .Values.django.ingress.secretName }}
+    {{- end }}
   rules:
     - host: {{ .Values.host }}
       http:
