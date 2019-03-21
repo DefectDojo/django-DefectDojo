@@ -15,8 +15,9 @@ Please include the version number (ex: Ubuntu 16.04)
 
 ### Install
 
-- [ ] setup.bash
-- [ ] docker
+- [ ] Kubernetes
+- [ ] Docker
+- [ ] setup.bash / legacy-setup.bash
 
 ### DefectDojo Version
 
