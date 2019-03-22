@@ -13,7 +13,7 @@ echo "Admin user: ${DD_ADMIN_USER}"
 
 if [ -z "${DD_ADMIN_PASSWORD}" ]
 then
-  export DD_ADMIN_PASSWORD="$(cat /dev/random | LC_ALL=C tr -dc a-zA-Z0-9 | \
+  export DD_ADMIN_PASSWORD="$(cat /dev/urandom | LC_ALL=C tr -dc a-zA-Z0-9 | \
     head -c 22)"
   echo "Admin password: ${DD_ADMIN_PASSWORD}"
 fi
