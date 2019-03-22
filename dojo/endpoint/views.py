@@ -11,6 +11,8 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils.html import escape
 from django.utils import timezone
+from django.contrib.admin.utils import NestedObjects
+from django.db import DEFAULT_DB_ALIAS
 from dojo.filters import EndpointFilter
 from dojo.forms import EditEndpointForm, \
     DeleteEndpointForm, AddEndpointForm, DojoMetaDataForm
@@ -216,13 +218,6 @@ def delete_endpoint(request, eid):
     product = endpoint.product
     form = DeleteEndpointForm(instance=endpoint)
 
-    from django.contrib.admin.utils import NestedObjects
-    from django.db import DEFAULT_DB_ALIAS
-
-    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-    collector.collect([endpoint])
-    rels = collector.nested()
-
     if request.method == 'POST':
         if 'id' in request.POST and str(endpoint.id) == request.POST['id']:
             form = DeleteEndpointForm(request.POST, instance=endpoint)
@@ -234,6 +229,10 @@ def delete_endpoint(request, eid):
                                      'Endpoint and relationships removed.',
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('view_endpoint', args=(product.id,)))
+
+    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+    collector.collect([endpoint])
+    rels = collector.nested()
 
     product_tab = Product_Tab(endpoint.product.id, "Delete Endpoint", tab="endpoints")
 
