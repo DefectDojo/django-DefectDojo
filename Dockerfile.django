@@ -1,3 +1,4 @@
+
 # code: language=Dockerfile
 FROM python:2
 WORKDIR /app
@@ -58,5 +59,6 @@ ENV \
   DD_CREDENTIAL_AES_256_KEY="&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw" \
   DD_INITIALIZE=true \
   DD_UWSGI_MODE="socket" \
-  DD_UWSGI_ENDPOINT="0.0.0.0:3031"
+  DD_UWSGI_ENDPOINT="0.0.0.0:3031" \
+  DD_DJANGO_ADMIN_ENABLED="on"
 ENTRYPOINT ["/entrypoint-uwsgi.sh"]
