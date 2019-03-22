@@ -16,6 +16,8 @@ from django.shortcuts import render, get_object_or_404
 from django.views.decorators.cache import cache_page
 from django.utils import timezone
 from time import strftime
+from django.contrib.admin.utils import NestedObjects
+from django.db import DEFAULT_DB_ALIAS
 
 from dojo.filters import EngagementFilter
 from dojo.forms import CheckForm, \
@@ -210,13 +212,6 @@ def delete_engagement(request, eid):
     product = engagement.product
     form = DeleteEngagementForm(instance=engagement)
 
-    from django.contrib.admin.utils import NestedObjects
-    from django.db import DEFAULT_DB_ALIAS
-
-    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-    collector.collect([engagement])
-    rels = collector.nested()
-
     if request.method == 'POST':
         if 'id' in request.POST and str(engagement.id) == request.POST['id']:
             form = DeleteEngagementForm(request.POST, instance=engagement)
@@ -229,6 +224,10 @@ def delete_engagement(request, eid):
                     'Engagement and relationships removed.',
                     extra_tags='alert-success')
                 return HttpResponseRedirect(reverse("view_engagements", args=(product.id, )))
+
+    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+    collector.collect([engagement])
+    rels = collector.nested()
 
     product_tab = Product_Tab(product.id, title="Delete Engagement", tab="engagements")
     product_tab.setEngagement(engagement)
