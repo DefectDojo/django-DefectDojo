@@ -1078,7 +1078,7 @@ class Finding(models.Model):
         ordering = ('numerical_severity', '-date', 'title')
 
     def compute_hash_code(self):
-        hash_string = self.title + str(self.cwe) + str(self.line) + str(self.file_path) + str(self.description)
+        hash_string = self.title + str(self.cwe) + str(self.line) + str(self.file_path) + self.description
         if self.dynamic_finding:
             endpoint_str = u''
             for e in self.endpoints.all():
@@ -1087,9 +1087,10 @@ class Finding(models.Model):
                 hash_string = hash_string + endpoint_str
         try:
             hash_string = hash_string.encode('utf-8').strip()
+            return hashlib.sha256(hash_string.encode('utf-8')).hexdigest()
         except:
             hash_string = hash_string.strip()
-        return hashlib.sha256(hash_string.encode('utf-8')).hexdigest()
+            return hashlib.sha256(hash_string).hexdigest()
 
     def duplicate_finding_set(self):
         return self.duplicate_list.all().order_by('title')
