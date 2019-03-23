@@ -41,6 +41,8 @@ django:
   ingress:
     enabled: true
     secretName: defectdojo-tls
+    annotations:
+      kubernetes.io/ingress.class: nginx
   nginx:
     repository: defectdojo/defectdojo-nginx
     resources:

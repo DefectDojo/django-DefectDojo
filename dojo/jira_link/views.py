@@ -176,10 +176,6 @@ def delete_jira(request, tid):
     # TODO Make Form
     form = DeleteJIRAConfForm(instance=jira_instance)
 
-    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-    collector.collect([jira_instance])
-    rels = collector.nested()
-
     if request.method == 'POST':
         if 'id' in request.POST and str(jira_instance.id) == request.POST['id']:
             form = DeleteJIRAConfForm(request.POST, instance=jira_instance)
@@ -190,6 +186,10 @@ def delete_jira(request, tid):
                                      'JIRA Conf and relationships removed.',
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('jira'))
+
+    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+    collector.collect([jira_instance])
+    rels = collector.nested()
 
     add_breadcrumb(title="Delete", top_level=False, request=request)
     return render(request, 'dojo/delete_jira.html',
