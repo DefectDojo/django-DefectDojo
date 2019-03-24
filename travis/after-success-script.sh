@@ -12,7 +12,7 @@ deploy_demo() {
     
     # Deploy
     docker login -u "$HEROKU_USER" -p "$HEROKU_TOKEN" registry.heroku.com
-    docker push registry.heroku.com/docker-travis-heroku/web
+    docker push registry.heroku.com/defectdojo-dev/web
     heroku container:release web -a defectdojo-dev
   fi
 }
