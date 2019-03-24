@@ -3,15 +3,8 @@
 ORG="defectdojo"
 
 deploy_demo() {
-  if [ "$HEROKU_TOKEN" != "" ]; then
-    echo "Deploying demo environment"
-    git clone https://github.com/DefectDojo/heroku-DefectDojo.git
-    cd heroku-DefectDojo 
-    docker build -t deploy --build-arg DD_IMAGE=latest . 
-    docker tag deploy registry.heroku.com/defectdojo-dev/web
-    
+  if [ "$HEROKU_API_KEY" != "" ]; then
     # Deploy
-    docker login -u "$HEROKU_USER" -p "$HEROKU_TOKEN" registry.heroku.com
     docker push registry.heroku.com/defectdojo-dev/web
     heroku container:release web -a defectdojo-dev
   fi
