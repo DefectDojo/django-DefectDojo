@@ -7,11 +7,11 @@ deploy_demo() {
     echo "Deploying demo environment"
     git clone https://github.com/DefectDojo/heroku-DefectDojo.git
     cd heroku-DefectDojo 
-    docker build -t deploy --build-arg DD_IMAGE=latest .
+    docker build -t deploy --build-arg DD_IMAGE=latest . 
     docker tag deploy registry.heroku.com/defectdojo-dev/web
-
+    
     # Deploy
-    docker login -u -p "$HEROKU_TOKEN" registry.heroku.com
+    docker login -u "$HEROKU_USER" -p "$HEROKU_TOKEN" registry.heroku.com
     docker push registry.heroku.com/docker-travis-heroku/web
     heroku container:release web -a defectdojo-dev
   fi
