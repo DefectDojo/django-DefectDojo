@@ -5,8 +5,11 @@ ORG="defectdojo"
 deploy_demo() {
   if [ "$HEROKU_API_KEY" != "" ]; then
     # Deploy
+    docker tag "defectdojo/defectdojo-django" "registry.heroku.com/defectdojo-dev/web"
+    docker login -u "$HEROKU_EMAIL" -p "$HEROKU_TOKEN" registry.heroku.com
     docker push registry.heroku.com/defectdojo-dev/web
     heroku container:release web -a defectdojo-dev
+    heroku run bash /opt/heroku-DefectDojo/scripts/migrate.bash -a defectdojo-dev
   fi
 }
 
