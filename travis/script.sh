@@ -142,7 +142,7 @@ echo "Running test ${TEST}"
       curl -s -o "/dev/null" http://localhost:8080 -m 120
       echo "Docker compose container status"
       docker-compose ps
-      source /travis/after-success-script.sh
+      source ./travis/deploy.sh
       deploy_demo
       ;;
     snyk)
