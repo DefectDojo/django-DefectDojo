@@ -20,6 +20,10 @@ env:
 matrix:
   allow_failures:
     - env: TEST=snyk
+jobs:
+  include:
+    - stage: deploy
+      script: echo Deploy
 before_install: ['./travis/before-install.sh']
 before_script: ['./travis/before-script.sh']
 script: ['./travis/script.sh']
