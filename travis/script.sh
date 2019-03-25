@@ -142,13 +142,18 @@ echo "Running test ${TEST}"
       curl -s -o "/dev/null" http://localhost:8080 -m 120
       echo "Docker compose container status"
       docker-compose ps
-      source ./travis/deploy.sh
-      deploy_demo
       ;;
     snyk)
       echo "Testing containers"
       build_containers
       snyk monitor --docker defectdojo/defectdojo-django:latest
       snyk monitor --docker defectdojo/defectdojo-nginx:latest
+    deploy)
+      echo "Deploy and container push"
+      build_containers
+      source ./travis/deploy.sh
+      deploy_demo
+      docker_hub
+      ;;
   esac
 fi

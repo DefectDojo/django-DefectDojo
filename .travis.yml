@@ -16,9 +16,10 @@ env:
     - BROKER=redis DATABASE=postgresql
     - TEST=flake8
     - TEST=snyk
+    - TEST=docker
 matrix:
   allow_failures:
-    - env: TEST=snyk
+    - env: TEST=deploy
 jobs:
   include:  
     - stage: deploy
