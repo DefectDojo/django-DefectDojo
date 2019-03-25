@@ -15,16 +15,15 @@ env:
     - BROKER=redis DATABASE=mysql
     - BROKER=redis DATABASE=postgresql
     - TEST=flake8
-    - TEST=docker
     - TEST=snyk
 matrix:
   allow_failures:
     - env: TEST=snyk
 jobs:
-  include:
+  include:  
     - stage: deploy
-      script: echo Deploy
+      script: ./travis/after-success-script.sh
+      env: TEST=docker
 before_install: ['./travis/before-install.sh']
 before_script: ['./travis/before-script.sh']
 script: ['./travis/script.sh']
-after_success: ['./travis/after-success-script.sh']
