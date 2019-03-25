@@ -17,13 +17,13 @@ env:
     - TEST=flake8
     - TEST=snyk
     - TEST=docker
-matrix:
+matrix: 
   allow_failures:
-    - env: TEST=deploy
+    - env: TEST=snyk
 jobs:
   include:  
     - stage: deploy
-      env: TEST=docker
+      env: TEST=deploy
 before_install: ['./travis/before-install.sh']
 before_script: ['./travis/before-script.sh']
 script: ['./travis/script.sh']
