@@ -142,6 +142,8 @@ echo "Running test ${TEST}"
       curl -s -o "/dev/null" http://localhost:8080 -m 120
       echo "Docker compose container status"
       docker-compose ps
+      source after-success-script.sh
+      deploy_demo
       ;;
     snyk)
       echo "Testing containers"

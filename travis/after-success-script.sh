@@ -1,6 +1,4 @@
 #!/bin/bash
-source script.sh
-
 ORG="defectdojo"
 
 deploy_demo() {
@@ -13,8 +11,6 @@ deploy_demo() {
     heroku run bash /opt/heroku-DefectDojo/scripts/migrate.bash -a defectdojo-dev
   fi
 }
-
-deploy_demo
 
 if { [ "${TRAVIS_TAG}" != "" ] || [ "${TRAVIS_EVENT_TYPE}" == "cron" ]; } && [ "${DOCKER_USER}" != "" ] && [  "${DOCKER_PASS}" != "" ]; then
   DOCKER_IMAGES=(django nginx)
