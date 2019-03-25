@@ -22,7 +22,6 @@ matrix:
 jobs:
   include:  
     - stage: deploy
-      script: ./travis/after-success-script.sh
       env: TEST=docker
 before_install: ['./travis/before-install.sh']
 before_script: ['./travis/before-script.sh']
