@@ -144,9 +144,17 @@ echo "Running test ${TEST}"
       docker-compose ps
       ;;
     snyk)
-      echo "Testing containers"
+      echo "Snyk security testing on containers"
       build_containers
       snyk monitor --docker defectdojo/defectdojo-django:latest
       snyk monitor --docker defectdojo/defectdojo-nginx:latest
+      ;;
+    deploy)
+      echo "Deploy and container push"
+      build_containers
+      source ./travis/deploy.sh
+      deploy_demo
+      docker_hub
+      ;;
   esac
 fi
