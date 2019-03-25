@@ -1,4 +1,5 @@
 #!/bin/bash
+source script.sh
 
 ORG="defectdojo"
 
