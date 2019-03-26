@@ -35,6 +35,16 @@ class Login(unittest.TestCase):
             s.cookies.set(cookie['name'], cookie['value'])
         r = s.get(url)
         self.assertEqual(r.status_code, 200)
+    
+    def test_engagement_planning_status(self):
+        driver = self.login_page()
+        cookies = driver.get_cookies()
+        url = self.base_url+ "engagement/plan"
+        s = requests.Session()
+        for cookie in cookies:
+            s.cookies.set(cookie['name'], cookie['value'])
+        r = s.get(url)
+        self.assertEqual(r.status_code, 200)
 
     def test_product_status(self):
         driver = self.login_page()
@@ -81,6 +91,26 @@ class Login(unittest.TestCase):
         driver = self.login_page()
         cookies = driver.get_cookies()
         url = self.base_url+ "calendar"
+        s = requests.Session()
+        for cookie in cookies:
+            s.cookies.set(cookie['name'], cookie['value'])
+        r = s.get(url)
+        self.assertEqual(r.status_code, 200)
+    
+    def test_tool_type_status(self):
+        driver = self.login_page()
+        cookies = driver.get_cookies()
+        url = self.base_url+ "tool_type"
+        s = requests.Session()
+        for cookie in cookies:
+            s.cookies.set(cookie['name'], cookie['value'])
+        r = s.get(url)
+        self.assertEqual(r.status_code, 200)
+    
+    def test_tool_config_status(self):
+        driver = self.login_page()
+        cookies = driver.get_cookies()
+        url = self.base_url+ "tool_config"
         s = requests.Session()
         for cookie in cookies:
             s.cookies.set(cookie['name'], cookie['value'])

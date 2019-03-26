@@ -32,7 +32,6 @@ class Command(BaseCommand):
 
         # Run the tool for a specific product-tool configuration ID, endpoint and engagement ID (0 = create one)
         def runTool(ttid, endpoint, eid):
-            print(ttid, endpoint, eid)
             scan_settings = Tool_Product_Settings.objects.get(pk=ttid)
             tool_config = scan_settings.tool_configuration
             tool_config.password = prepare_for_view(tool_config.password)
@@ -48,47 +47,48 @@ class Command(BaseCommand):
             if url_settings.scheme not in ["http", "https", "ssh"]:
                 scan_history.status = "Failed"
                 scan_history.save()
-                print("Failed tool run for ID " + str(ttid) + " due to invalid URL scheme")
+                self.stdout.write("Failed tool run for ID " + str(ttid) + " due to invalid URL scheme")
                 return False
             elif settings.ALLOW_TOOL_RUN[url_settings.scheme] is False or (url_settings.scheme == "ssh" and url_settings.netloc == "localhost" and settings.ALLOW_TOOL_RUN["ssh-localhost"] is False):
                 scan_history.status = "Denied"
                 scan_history.save()
-                print("Denied tool run for ID " + str(ttid) + " because " + url_settings.scheme + " connections for the specified host are disabled in settings.py")
+                self.stdout.write("Denied tool run for ID " + str(ttid) + " because " + url_settings.scheme + " connections for the specified host are disabled in settings.py")
                 return False
             else:
                 scan_history.status = "Running"
                 scan_history.save()
 
-            if eid == 0:
-                engagement = Engagement()
-                product = Product.objects.get(id=scan_settings.product.id)
-                engagement.name = "RunTool Import - " + strftime("%a, %d %b %Y %X", timezone.now().timetuple())
-                engagement.threat_model = False
-                engagement.api_test = False
-                engagement.pen_test = False
-                engagement.check_list = False
-                engagement.target_start = timezone.now()
-                engagement.target_end = timezone.now()
-                engagement.product = product
-                engagement.active = True
-                engagement.status = 'In Progress'
-                engagement.save()
-            else:
-                engagement = Engagement.objects.get(id=eid)
+            if tool_config.scan_type:
+                if eid == 0:
+                    engagement = Engagement()
+                    product = Product.objects.get(id=scan_settings.product.id)
+                    engagement.name = "RunTool Import - " + strftime("%a, %d %b %Y %X", timezone.now().timetuple())
+                    engagement.threat_model = False
+                    engagement.api_test = False
+                    engagement.pen_test = False
+                    engagement.check_list = False
+                    engagement.target_start = timezone.now()
+                    engagement.target_end = timezone.now()
+                    engagement.product = product
+                    engagement.active = True
+                    engagement.status = 'In Progress'
+                    engagement.save()
+                else:
+                    engagement = Engagement.objects.get(id=eid)
 
-            tt, t_created = Test_Type.objects.get_or_create(name=tool_config.scan_type)
-            # will save in development environment
-            environment, env_created = Development_Environment.objects.get_or_create(name="Development")
-            t = Test(
-                engagement=engagement,
-                test_type=tt,
-                target_start=timezone.now(),
-                target_end=timezone.now(),
-                environment=environment,
-                lead=dummy_user,
-                percent_complete=0)
-            t.full_clean()
-            t.save()
+                tt, t_created = Test_Type.objects.get_or_create(name=tool_config.scan_type)
+                # will save in development environment
+                environment, env_created = Development_Environment.objects.get_or_create(name="Development")
+                t = Test(
+                    engagement=engagement,
+                    test_type=tt,
+                    target_start=timezone.now(),
+                    target_end=timezone.now(),
+                    environment=environment,
+                    lead=dummy_user,
+                    percent_complete=0)
+                t.full_clean()
+                t.save()
 
             result = ""
             if url_settings.scheme in ["http", "https"]:
@@ -102,7 +102,7 @@ class Command(BaseCommand):
                 try:
                     result = requests.get(scan_settings.url, headers=http_headers).text
                 except Exception as e:
-                    print("Error during HTTP request", e)
+                    self.stdout.write("Error during HTTP request: " + str(e))
                     result = ""
 
             # ssh://host/folder/file.extension?param connects to the host and runs the file in the query with the parameter provided
@@ -119,14 +119,14 @@ class Command(BaseCommand):
 
                 call_params.append(endpoint_url)
                 if settings.DEBUG:
-                    print('Cmd: ' + ' '.join(call_params))
+                    self.stdout.write('Cmd: ' + ' '.join(call_params))
 
                 # On localhost it is directly executed
                 if url_settings.netloc == "localhost":
                     try:
                         result = subprocess.check_output(call_params)
                     except Exception as e:
-                        print("Error during execution of ssh://localhost", e)
+                        self.stdout.write("Error during execution of ssh://localhost: " + str(e))
                         result = ""
                 else:
                     # Otherwise we connect via SSH
@@ -139,7 +139,7 @@ class Command(BaseCommand):
                         try:
                             ssh_client.connect(url_settings.netloc, sshPort, tool_config.username, tool_config.password)
                         except Exception as e:
-                            print(e)
+                            self.stdout.write(str(e))
 
                     elif tool_config.authentication_type == "SSH":
                         tool_config.ssh = prepare_for_view(tool_config.ssh)
@@ -149,8 +149,8 @@ class Command(BaseCommand):
                             key = paramiko.RSAKey.from_private_key(sshKey, tool_config.password)
                             ssh_client.connect(url_settings.netloc, sshPort, tool_config.username, pkey=key)
                         except Exception:
-                            print("Private key is not a valid RSA key. Generate it via ssh-keygen -t rsa.")
-                            print(e)
+                            self.stdout.write("Private key is not a valid RSA key. Generate it via ssh-keygen -t rsa.")
+                            self.stdout.write(str(e))
 
                     try:
                         stdin, stdout, stderr = ssh_client.exec_command(' '.join(call_params))
@@ -159,14 +159,22 @@ class Command(BaseCommand):
                     except Exception:
                         result = ""
 
-            t.percent_complete = 100
-            t.target_end = timezone.now()
-            t.save()
+            if tool_config.scan_type:
+                t.percent_complete = 100
+                t.target_end = timezone.now()
+                t.save()
 
             if result == "":
                 scan_history.status = "Failed"
                 scan_history.save()
                 return False
+
+            if not tool_config.scan_type:
+                scan_history.status = "Completed"
+                scan_history.save()
+                self.stdout.write("No parsing enabled, so only echoing the result")
+                self.stdout.write(result)
+                return True
 
             if eid == 0:
                 engagement.target_end = timezone.now()
@@ -174,18 +182,11 @@ class Command(BaseCommand):
             engagement.run_tool_test = True
             engagement.save()
 
-            if not tool_config.scan_type:
-                scan_history.status = "Completed"
-                scan_history.save()
-                print("No parsing enabled, so only echoing the result")
-                print(result)
-                return True
-
             parse_result = StringIO.StringIO(result)
             try:
                 parser = import_parser_factory(parse_result, t)
             except ValueError:
-                print("Import of parser factory failed")
+                self.stdout.write("Import of parser factory failed")
                 return False
 
             try:
@@ -261,7 +262,7 @@ class Command(BaseCommand):
             except SyntaxError:
                 scan_history.status = "Failed"
                 scan_history.save()
-                print('There appears to be an error in the report output, please check and try again.')
+                self.stdout.write('There appears to be an error in the report output, please check and try again.')
                 return False
 
         # The execution is threaded. Each endpoint has their own thread.
@@ -292,7 +293,7 @@ class Command(BaseCommand):
             # Cronjob for all open and scheduled engagements
             engagements = Engagement.objects.exclude(run_tool_test_engine=None).filter(run_tool_test=False, target_start__lte=timezone.now().date())
             if len(engagements) <= 0:
-                print("No engagements open to start")
+                self.stdout.write("No engagements open to start")
                 sys.exit(0)
 
             scan_queue = Queue.Queue()
@@ -302,7 +303,7 @@ class Command(BaseCommand):
 
                 endpoints = Endpoint.objects.filter(product=engagement.product.id)
                 if len(endpoints) <= 0:
-                    print("Product-Tool config can't be executed because the product " + str(engagement.product.id)+" has no endpoints configured.")
+                    self.stdout.write("Product-Tool config can't be executed because the product " + str(engagement.product.id)+" has no endpoints configured.")
 
                 has_exported = False
                 for e in endpoints:
@@ -316,9 +317,9 @@ class Command(BaseCommand):
                         t.start()
 
                 if not has_exported:
-                    print("Product " + str(engagement.product.id) + " has no endpoints configured that are tagged with `tool-export`.")
+                    self.stdout.write("Product " + str(engagement.product.id) + " has no endpoints configured that are tagged with `tool-export`.")
                 else:
-                    print("Started for product " + str(engagement.product.id))
+                    self.stdout.write("Started for product " + str(engagement.product.id))
 
             scan_queue.join()
 
@@ -326,21 +327,21 @@ class Command(BaseCommand):
             # On-demand scan for single product-tool config
             scSettings = Tool_Product_Settings.objects.filter(pk=ttid)
             if len(scSettings) <= 0:
-                print("Product-Tool Configuration ID not found.")
+                self.stdout.write("Product-Tool Configuration ID not found.")
                 sys.exit(0)
 
             if not scSettings[0].tool_configuration.scan_type:
-                print("Warning: This product tool configuration has no parsing configured.")
+                self.stdout.write("Warning: This product tool configuration has no parsing configured.")
 
             endpoints = Endpoint.objects.filter(product=scSettings[0].product.id)
             if len(endpoints) <= 0:
-                print("Connected product has no endpoints configured.")
+                self.stdout.write("Connected product has no endpoints configured.")
                 sys.exit(0)
 
             if eid > 0:
                 engagement = Engagement.objects.filter(id=eid)
                 if len(engagement) <= 0:
-                    print("Engagement ID invalid. Use 0 if you don't want to add it to a specific one and instead create a new one.")
+                    self.stdout.write("Engagement ID invalid. Use 0 if you don't want to add it to a specific one and instead create a new one.")
                     sys.exit(0)
 
             scan_queue = Queue.Queue()
@@ -356,7 +357,7 @@ class Command(BaseCommand):
                     t.start()
 
             if not has_exported:
-                print("Connected product has no endpoints configured that are tagged with `tool-export`.")
+                self.stdout.write("Connected product has no endpoints configured that are tagged with `tool-export`.")
                 sys.exit(0)
             else:
                 scan_queue.join()

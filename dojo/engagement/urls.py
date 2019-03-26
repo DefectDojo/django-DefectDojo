@@ -8,7 +8,7 @@ urlpatterns = [
     url(r'^calendar/engagements$', views.engagement_calendar, name='engagement_calendar'),
     url(r'^engagement$', views.engagement, name='engagement'),
     url(r'^engagement/new$', views.new_engagement, name='new_eng'),
-    url(r'^engagement/plan$', views.plan_engagaments, name='plan_engagements'),
+    url(r'^engagement/plan$', views.plan_engagements, name='plan_engagements'),
     url(r'^engagement/(?P<eid>\d+)$', views.view_engagement,
         name='view_engagement'),
     url(r'^engagement/(?P<eid>\d+)/ics$', views.engagement_ics,

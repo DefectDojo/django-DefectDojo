@@ -357,7 +357,7 @@ def view_engagement(request, eid):
 
 
 @user_passes_test(lambda u: u.is_staff)
-def plan_engagaments(request):
+def plan_engagements(request):
     plan_form = EngagementPlanForm()
 
     PRODUCT_CHOICES = []
