@@ -1382,7 +1382,7 @@ def merge_finding_product(request, pid):
                     if finding_to_merge_into.file_path is None:
                         file_path = finding_to_merge_into.file_path
 
-                    if finding_references is not '':
+                    if finding_references != '':
                         finding_to_merge_into.references = "{}\n{}".format(finding_to_merge_into.references, finding_references)
 
                     finding_to_merge_into.static_finding = static
