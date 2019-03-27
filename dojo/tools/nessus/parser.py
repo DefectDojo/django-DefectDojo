@@ -20,6 +20,7 @@ def get_text_severity(severity_id):
     else:
         return 'Info'
 
+
 class NessusCSVParser(object):
     def __init__(self, filename, test):
         content = open(filename.temporary_file_path(), "rb").read().replace("\r", "\n")
@@ -99,7 +100,9 @@ class NessusCSVParser(object):
                             dat['references'] = var
                     elif heading[i] == "Plugin Output":
                         dat['plugin_output'] = "\nPlugin output(" + \
-                                               dat['endpoint'] + "):" + str(var) + "\n"
+                                               dat['endpoint'] + \
+                                               "):\n```\n" + str(var) + \
+                                               "\n```\n"
 
                 if not dat['severity']:
                     dat['severity'] = "Info"
@@ -170,7 +173,9 @@ class NessusXMLParser(object):
                         description = item.find("synopsis").text + "\n\n"
                     if item.findtext("plugin_output"):
                         plugin_output = "Plugin Output: " + ip + (
-                            (":" + port) if port is not None else "") + " " + item.find("plugin_output").text + "\n\n"
+                            (":" + port) if port is not None else "") + \
+                            " \n```\n" + item.find("plugin_output").text + \
+                            "\n```\n\n"
                         description += plugin_output
 
                     nessus_severity_id = int(item.attrib["severity"])

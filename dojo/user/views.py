@@ -9,6 +9,8 @@ from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404
+from django.contrib.admin.utils import NestedObjects
+from django.db import DEFAULT_DB_ALIAS
 from rest_framework.authtoken.models import Token
 from tastypie.models import ApiKey
 
@@ -174,10 +176,17 @@ def change_password(request):
     if request.method == 'POST':
         current_pwd = request.POST['current_password']
         new_pwd = request.POST['new_password']
+        confirm_pwd = request.POST['confirm_password']
         user = authenticate(username=request.user.username,
                             password=current_pwd)
         if user is not None:
             if user.is_active:
+                if new_pwd != confirm_pwd:
+                    messages.add_message(request, messages.ERROR, 'Passwords do not match.', extra_tags='alert-danger')
+                    return render(request, 'dojo/change_pwd.html', {'error': ''})
+                if new_pwd == current_pwd:
+                    messages.add_message(request, messages.ERROR, 'New password must be different from current password.', extra_tags='alert-danger')
+                    return render(request, 'dojo/change_pwd.html', {'error': ''})
                 user.set_password(new_pwd)
                 user.save()
                 messages.add_message(request,
@@ -308,13 +317,6 @@ def delete_user(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     form = DeleteUserForm(instance=user)
 
-    from django.contrib.admin.utils import NestedObjects
-    from django.db import DEFAULT_DB_ALIAS
-
-    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-    collector.collect([user])
-    rels = collector.nested()
-
     if user.id == request.user.id:
         messages.add_message(request,
                              messages.ERROR,
@@ -332,6 +334,11 @@ def delete_user(request, uid):
                                      'User and relationships removed.',
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('users'))
+
+    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+    collector.collect([user])
+    rels = collector.nested()
+
     add_breadcrumb(title="Delete User", top_level=False, request=request)
     return render(request, 'dojo/delete_user.html',
                   {'to_delete': user,

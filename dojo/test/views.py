@@ -6,13 +6,15 @@ from datetime import datetime
 
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.urlresolvers import reverse
 from django.db.models import Q
-from django.http import HttpResponseRedirect, HttpResponseForbidden, Http404, HttpResponse
+from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.cache import cache_page
 from django.utils import timezone
+from django.contrib.admin.utils import NestedObjects
+from django.db import DEFAULT_DB_ALIAS
 
 from dojo.filters import TemplateFindingFilter
 from dojo.forms import NoteForm, TestForm, FindingForm, \
@@ -117,13 +119,6 @@ def delete_test(request, tid):
     eng = test.engagement
     form = DeleteTestForm(instance=test)
 
-    from django.contrib.admin.utils import NestedObjects
-    from django.db import DEFAULT_DB_ALIAS
-
-    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-    collector.collect([test])
-    rels = collector.nested()
-
     if request.method == 'POST':
         if 'id' in request.POST and str(test.id) == request.POST['id']:
             form = DeleteTestForm(request.POST, instance=test)
@@ -136,6 +131,10 @@ def delete_test(request, tid):
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('view_engagement', args=(eng.id,)))
 
+    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+    collector.collect([test])
+    rels = collector.nested()
+
     product_tab = Product_Tab(test.engagement.product.id, title="Delete Test", tab="engagements")
     product_tab.setEngagement(test.engagement)
     return render(request, 'dojo/delete_test.html',
@@ -145,21 +144,6 @@ def delete_test(request, tid):
                    'rels': rels,
                    'deletable_objects': rels,
                    })
-
-
-@user_passes_test(lambda u: u.is_staff)
-def delete_test_note(request, tid, nid):
-    note = Notes.objects.get(id=nid)
-    test = Test.objects.get(id=tid)
-    if note.author == request.user:
-        test.notes.remove(note)
-        note.delete()
-        messages.add_message(request,
-                             messages.SUCCESS,
-                             'Note removed.',
-                             extra_tags='alert-success')
-        return view_test(request, tid)
-    return HttpResponseForbidden()
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -219,6 +203,20 @@ def add_findings(request, tid):
 
     if request.method == 'POST':
         form = AddFindingForm(request.POST)
+        if form['active'].value() is False or form['verified'].value() is False and 'jiraform-push_to_jira' in request.POST:
+            error = ValidationError('Findings must be active and verified to be pushed to JIRA',
+                                    code='not_active_or_verified')
+            if form['active'].value() is False:
+                form.add_error('active', error)
+            if form['verified'].value() is False:
+                form.add_error('verified', error)
+            messages.add_message(request,
+                                 messages.ERROR,
+                                 'Findings must be active and verified to be pushed to JIRA',
+                                 extra_tags='alert-danger')
+        if form['severity'].value() == 'Info' and 'jiraform-push_to_jira' in request.POST:
+            error = ValidationError('Findings with Informational severity cannot be pushed to JIRA.',
+                                    code='info-severity-to-jira')
         if form.is_valid():
             new_finding = form.save(commit=False)
             new_finding.test = test
@@ -233,7 +231,7 @@ def add_findings(request, tid):
             new_finding.is_template = False
             new_finding.save(dedupe_option=False)
             new_finding.endpoints = form.cleaned_data['endpoints']
-            new_finding.save()
+            new_finding.save(false_history=True)
             if 'jiraform-push_to_jira' in request.POST:
                 jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=enabled)
                 if jform.is_valid():
@@ -315,9 +313,9 @@ def add_temp_finding(request, tid, fid):
             # is template always False now in favor of new model Finding_Template
             # no further action needed here since this is already adding from template.
             new_finding.is_template = False
-            new_finding.save(dedupe_option=False)
+            new_finding.save(dedupe_option=False, false_history=False)
             new_finding.endpoints = form.cleaned_data['endpoints']
-            new_finding.save()
+            new_finding.save(false_history=True)
             if 'jiraform-push_to_jira' in request.POST:
                     jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=True)
                     if jform.is_valid():

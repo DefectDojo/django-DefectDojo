@@ -22,6 +22,8 @@ def action_history(request, cid, oid):
     active_tab = None
     finding = None
     test = False
+    object_value = None
+
     if str(ct) == "product":
         product_id = obj.id
         active_tab = "overview"

@@ -1,0 +1,58 @@
+{{- $fullName := include "defectdojo.fullname" . -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $fullName }}-celery-beat
+  labels:
+    defectdojo.org/component: celery
+    app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "defectdojo.chart" . }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      defectdojo.org/component: celery
+      app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        defectdojo.org/component: celery
+        app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: celery
+          image: "{{ .Values.celery.repository }}:{{ .Values.tag }}"
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          command: ['/entrypoint-celery-beat.sh']
+          envFrom:
+            - configMapRef:
+                name: {{ $fullName }}
+          env:
+            - name: DD_CELERY_BROKER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $fullName }}-{{ .Values.celery.broker }}
+                  key: {{ .Values.celery.broker }}-password
+            - name: DD_DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $fullName }}-{{ .Values.database }}
+                  key: {{ .Values.database }}-password
+          resources:
+            {{- toYaml .Values.celery.beat.resources | nindent 12 }}
+      {{- with .Values.celery.beat.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.celery.beat.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.celery.beat.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

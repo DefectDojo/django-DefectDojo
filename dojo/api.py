@@ -21,12 +21,13 @@ from dojo.models import Product, Engagement, Test, Finding, \
     Finding_Template, Test_Type, Development_Environment, \
     BurpRawRequestResponse, Endpoint, Notes, JIRA_PKey, JIRA_Conf, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
-    Languages, Language_Type, App_Analysis
+    Languages, Language_Type, App_Analysis, Product_Type
 from dojo.forms import ProductForm, EngForm, TestForm, \
     ScanSettingsForm, FindingForm, StubFindingForm, FindingTemplateForm, \
     ImportScanForm, SEVERITY_CHOICES, JIRAForm, JIRA_PKeyForm, EditEndpointForm, \
     JIRA_IssueForm, ToolConfigForm, ToolProductSettingsForm, \
-    ToolTypeForm, LanguagesTypeForm, Languages_TypeTypeForm, App_AnalysisTypeForm
+    ToolTypeForm, LanguagesTypeForm, Languages_TypeTypeForm, App_AnalysisTypeForm, \
+    Development_EnvironmentForm, Product_TypeForm, Test_TypeForm
 from dojo.tools.factory import import_parser_factory
 from datetime import datetime
 from object.parser import import_object_eng
@@ -325,6 +326,40 @@ class UserResource(BaseModelResource):
 
 
 """
+    /api/v1/product_types/
+    GET [/id/], DELETE [/id/]
+    Expects: no params
+    Returns product_types: ALL
+    Relevant apply filter ?id=?
+
+    POST, PUT [/id/]
+    Expects *name
+"""
+
+
+class ProductTypeResource(BaseModelResource):
+
+    class Meta:
+        resource_name = 'product_types'
+        list_allowed_methods = ['get', 'post']
+        # disabled delete. Should not be allowed without fine authorization.
+        detail_allowed_methods = ['get', 'post', 'put']
+        queryset = Product_Type.objects.all().order_by('id')
+        include_resource_uri = True
+        filtering = {
+            'id': ALL,
+            'name': ALL,
+        }
+        authentication = DojoApiKeyAuthentication()
+        authorization = DjangoAuthorization()
+        serializer = Serializer(formats=['json'])
+
+        @property
+        def validation(self):
+            return ModelFormValidation(form_class=Product_TypeForm, resource=ProductTypeResource)
+
+
+"""
     POST, PUT
     Expects *product name, *description, *prod_type [1-7]
 """
@@ -449,7 +484,6 @@ class Tool_ConfigurationResource(BaseModelResource):
             'id': ALL,
             'name': ALL,
             'tool_type': ALL_WITH_RELATIONS,
-            'name': ALL,
             'tool_project_id': ALL,
             'url': ALL,
             'authentication_type': ALL,
@@ -604,7 +638,7 @@ class LanguageTypeResource(BaseModelResource):
     Returns Tool_ConfigurationResource
     Relevant apply filter ?test_type=?, ?id=?
 
-    POST, PUT, DLETE [/id/]
+    POST, PUT, DELETE [/id/]
 """
 
 
@@ -670,7 +704,6 @@ class ToolProductSettingsResource(BaseModelResource):
             'name': ALL,
             'product': ALL_WITH_RELATIONS,
             'tool_configuration': ALL_WITH_RELATIONS,
-            'name': ALL,
             'tool_project_id': ALL,
             'url': ALL,
         }
@@ -821,6 +854,74 @@ class JiraResource(BaseModelResource):
         @property
         def validation(self):
             return ModelFormValidation(form_class=JIRA_PKeyForm, resource=JiraResource)
+
+
+"""
+    /api/v1/environments/
+    GET [/id/]
+    Expects: no params
+    Returns environments: ALL
+    Relevant apply filter ?id=?
+
+    POST, PUT [/id/]
+    Expects *name
+"""
+
+
+class DevelopmentEnvironmentResource(BaseModelResource):
+
+    class Meta:
+        resource_name = 'development_environments'
+        list_allowed_methods = ['get', 'post']
+        # disabled delete. Should not be allowed without fine authorization.
+        detail_allowed_methods = ['get', 'post', 'put']
+        queryset = Development_Environment.objects.all().order_by('id')
+        include_resource_uri = True
+        filtering = {
+            'id': ALL,
+            'name': ALL,
+        }
+        authentication = DojoApiKeyAuthentication()
+        authorization = DjangoAuthorization()
+        serializer = Serializer(formats=['json'])
+
+        @property
+        def validation(self):
+            return ModelFormValidation(form_class=Development_EnvironmentForm, resource=DevelopmentEnvironmentResource)
+
+
+"""
+    /api/v1/test_types/
+    GET [/id/]
+    Expects: no params
+    Returns environments: ALL
+    Relevant apply filter ?id=?
+
+    POST, PUT [/id/]
+    Expects *name
+"""
+
+
+class TestTypeResource(BaseModelResource):
+
+    class Meta:
+        resource_name = 'test_types'
+        list_allowed_methods = ['get', 'post']
+        # disabled delete. Should not be allowed without fine authorization.
+        detail_allowed_methods = ['get', 'post', 'put']
+        queryset = Test_Type.objects.all().order_by('id')
+        include_resource_uri = True
+        filtering = {
+            'id': ALL,
+            'name': ALL,
+        }
+        authentication = DojoApiKeyAuthentication()
+        authorization = DjangoAuthorization()
+        serializer = Serializer(formats=['json'])
+
+        @property
+        def validation(self):
+            return ModelFormValidation(form_class=Test_TypeForm, resource=TestTypeResource)
 
 
 """
@@ -1150,7 +1251,7 @@ def get_pk_from_uri(uri):
         chomped_uri = chomped_uri[len(prefix) - 1:]
 
     try:
-        view, args, kwargs = resolve(chomped_uri)
+        view, args, kwargs = resolve(chomped_uri.replace('//', '/'))
     except Resolver404:
         raise NotFound("The URL provided '%s' was not a link to a valid resource." % uri)
 
@@ -1219,6 +1320,15 @@ class ImportScanValidation(Validation):
                 errors.setdefault('scan_type', []).append('scan_type must be one of the following: ' + ', '.join(scan_type_list))
         else:
             errors.setdefault('scan_type', []).append('A scan_type must be given so we know how to import the scan file.')
+        try:
+            if 'test_type' in bundle.data:
+                Test_Type.objects.get(name=bundle.data.get('test_type'))
+            else:
+                bundle.data['test_type'] = bundle.data.get('scan_type')
+        except Test_Type.DoesNotExist:
+            errors.setdefault('test_type', []).append(
+                'test_type must be one of the following: ' +
+                ', '.join(Test_Type.objects.values_list("name", flat=True)))
         severity_list = list(map(lambda x: x[0], SEVERITY_CHOICES))
         if 'minimum_severity' in bundle.data:
             if bundle.data['minimum_severity'] not in severity_list:
@@ -1283,6 +1393,7 @@ class ImportScanResource(MultipartResource, Resource):
     active = fields.BooleanField(attribute='active')
     verified = fields.BooleanField(attribute='verified')
     scan_type = fields.CharField(attribute='scan_type')
+    test_type = fields.CharField(attribute='test_type')
     tags = fields.CharField(attribute='tags')
     file = fields.FileField(attribute='file')
     engagement = fields.CharField(attribute='engagement')
@@ -1334,7 +1445,7 @@ class ImportScanResource(MultipartResource, Resource):
         bundle = self.full_hydrate(bundle)
 
         # We now have all the options we need and will just replicate the process in views.py
-        tt, t_created = Test_Type.objects.get_or_create(name=bundle.data['scan_type'])
+        tt, t_created = Test_Type.objects.get_or_create(name=bundle.data.get('test_type', bundle.data['scan_type']))
         # will save in development environment
         environment, env_created = Development_Environment.objects.get_or_create(name="Development")
 
@@ -1353,7 +1464,7 @@ class ImportScanResource(MultipartResource, Resource):
         t.tags = bundle.data['tags']
 
         try:
-            parser = import_parser_factory(bundle.data['file'], t)
+            parser = import_parser_factory(bundle.data['file'], t, bundle.data['scan_type'])
         except ValueError:
             raise NotFound("Parser ValueError")
 
@@ -1535,7 +1646,7 @@ class ReImportScanResource(MultipartResource, Resource):
         active = bundle.obj.__getattr__('active')
 
         try:
-            parser = import_parser_factory(bundle.data['file'], test)
+            parser = import_parser_factory(bundle.data['file'], test, scan_type)
         except ValueError:
             raise NotFound("Parser ValueError")
 

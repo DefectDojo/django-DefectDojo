@@ -1,0 +1,39 @@
+# code: language=Dockerfile
+FROM defectdojo/defectdojo-django:latest AS build
+
+USER root
+RUN \
+  apt-get -y update && \
+  apt-get -y install apt-transport-https ca-certificates && \
+  curl -sSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - && \
+  echo "deb https://deb.nodesource.com/node_11.x stretch main" | tee /etc/apt/sources.list.d/nodesource.list && \
+  curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
+  echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
+  apt-get -y update && \
+  apt-get -y install nodejs && \
+  apt-get -y install --no-install-recommends yarn && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists && \
+  true
+COPY components/ ./components/
+RUN \
+  cd components && \
+  yarn && \
+  cd .. && \
+  python manage.py collectstatic && \
+  true
+
+FROM nginx
+COPY --from=build /app/static/ /usr/share/nginx/html/static/
+COPY wsgi_params nginx/nginx.conf /etc/nginx/
+COPY docker/entrypoint-nginx.sh /
+RUN \
+  chmod -R g=u /var/cache/nginx && \
+  chmod -R g=u /var/run && \
+  true
+ENV \
+  DD_UWSGI_PASS="uwsgi_server" \
+  DD_UWSGI_HOST="uwsgi" \
+  DD_UWSGI_PORT="3031"
+USER 1001
+ENTRYPOINT ["/entrypoint-nginx.sh"]
