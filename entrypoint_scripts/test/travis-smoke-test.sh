@@ -10,18 +10,18 @@ set -x
 EXIT_STATUS=0
 
 # Build the actual container
-export DOJO_ADMIN_USER='admin'
-export DOJO_ADMIN_PASSWORD='admin'
-export CONTAINER_NAME=dojo
-docker build -t $REPO .
+docker build --target dev-mysql-self-contained -t $REPO .
 
-# Launch one container per service
-container_id_worker=$(docker run -d --entrypoint=celery $REPO worker -A dojo -l info -c 1 -P solo)
-container_id_beat=$(docker run -d --entrypoint=celery $REPO beat -A dojo -l info)
-container_id_server=$(docker run -d --entrypoint=python $REPO manage.py runserver 0.0.0.0:8000)
+### Launch one container per service
+# Celery startup verfication
+container_id_worker=$(docker run -e ACTION=c -d $REPO)
+# Celery beat startup verfication
+container_id_beat=$(docker run -e ACTION=b -d $REPO)
+# Defect startup verfication
+container_id_server=$(docker run -e ACTION=p -d $REPO)
 
-# Wait for the container to spin up and gie it some time to fail
-sleep 10
+# Wait for the container to spin up and giev it some time to fail
+sleep 25
 
 # See whether containers came up or failed
 for container_id in $container_id_worker $container_id_beat $container_id_server; do
@@ -36,7 +36,7 @@ for container_id in $container_id_worker $container_id_beat $container_id_server
         docker logs $container_id
         ((EXIT_STATUS+=1))
     fi
-    
+
     # Clean up, once we're done with the container
     docker rm -f $container_id
 done

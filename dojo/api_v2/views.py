@@ -2,10 +2,10 @@ from rest_framework import viewsets, mixins
 from rest_framework.permissions import DjangoModelPermissions
 from django_filters.rest_framework import DjangoFilterBackend
 
-from dojo.models import Product, Engagement, Test, Finding, \
+from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Finding, \
     User, ScanSettings, Scan, Stub_Finding, Finding_Template, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
-    Endpoint, JIRA_PKey, JIRA_Conf
+    Endpoint, JIRA_PKey, JIRA_Conf, DojoMeta, Development_Environment
 
 from dojo.api_v2 import serializers, permissions
 
@@ -25,6 +25,7 @@ class EndPointViewSet(mixins.ListModelMixin,
 class EngagementViewSet(mixins.ListModelMixin,
                         mixins.RetrieveModelMixin,
                         mixins.UpdateModelMixin,
+                        mixins.DestroyModelMixin,
                         mixins.CreateModelMixin,
                         viewsets.GenericViewSet):
     serializer_class = serializers.EngagementSerializer
@@ -51,6 +52,7 @@ class FindingTemplatesViewSet(mixins.ListModelMixin,
 class FindingViewSet(mixins.ListModelMixin,
                      mixins.RetrieveModelMixin,
                      mixins.UpdateModelMixin,
+                     mixins.DestroyModelMixin,
                      mixins.CreateModelMixin,
                      viewsets.GenericViewSet):
     serializer_class = serializers.FindingSerializer
@@ -107,6 +109,18 @@ class JiraViewSet(mixins.ListModelMixin,
                      'push_notes')
 
 
+class DojoMetaViewSet(mixins.ListModelMixin,
+                     mixins.RetrieveModelMixin,
+                     mixins.DestroyModelMixin,
+                     mixins.CreateModelMixin,
+                     mixins.UpdateModelMixin,
+                     viewsets.GenericViewSet):
+    serializer_class = serializers.MetaSerializer
+    queryset = DojoMeta.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'product', 'endpoint', 'name')
+
+
 class ProductViewSet(mixins.ListModelMixin,
                      mixins.RetrieveModelMixin,
                      mixins.CreateModelMixin,
@@ -127,6 +141,17 @@ class ProductViewSet(mixins.ListModelMixin,
                 authorized_users__in=[self.request.user])
         else:
             return Product.objects.all()
+
+
+class ProductTypeViewSet(mixins.ListModelMixin,
+                         mixins.RetrieveModelMixin,
+                         mixins.CreateModelMixin,
+                         mixins.UpdateModelMixin,
+                         viewsets.GenericViewSet):
+    serializer_class = serializers.ProductTypeSerializer
+    queryset = Product_Type.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'name', 'critical_product', 'key_product', 'created', 'updated')
 
 
 class ScanSettingsViewSet(mixins.ListModelMixin,
@@ -192,9 +217,20 @@ class StubFindingsViewSet(mixins.ListModelMixin,
             return serializers.StubFindingSerializer
 
 
+class DevelopmentEnvironmentViewSet(mixins.ListModelMixin,
+                                    mixins.RetrieveModelMixin,
+                                    mixins.CreateModelMixin,
+                                    mixins.UpdateModelMixin,
+                                    viewsets.GenericViewSet):
+    serializer_class = serializers.DevelopmentEnvironmentSerializer
+    queryset = Development_Environment.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+
+
 class TestsViewSet(mixins.ListModelMixin,
                    mixins.RetrieveModelMixin,
                    mixins.UpdateModelMixin,
+                   mixins.DestroyModelMixin,
                    mixins.CreateModelMixin,
                    viewsets.GenericViewSet):
     serializer_class = serializers.TestSerializer
@@ -208,6 +244,16 @@ class TestsViewSet(mixins.ListModelMixin,
             return serializers.TestCreateSerializer
         else:
             return serializers.TestSerializer
+
+
+class TestTypesViewSet(mixins.ListModelMixin,
+                       mixins.RetrieveModelMixin,
+                       mixins.UpdateModelMixin,
+                       mixins.CreateModelMixin,
+                       viewsets.GenericViewSet):
+    serializer_class = serializers.TestTypeSerializer
+    queryset = Test_Type.objects.all()
+    filter_backends = (DjangoFilterBackend,)
 
 
 class ToolConfigurationsViewSet(mixins.ListModelMixin,

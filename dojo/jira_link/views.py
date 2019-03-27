@@ -12,18 +12,25 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
+from django.core.exceptions import PermissionDenied
 from jira import JIRA
 
 # Local application/library imports
 from dojo.forms import JIRAForm, DeleteJIRAConfForm
 from dojo.models import User, JIRA_Conf, JIRA_Issue, Notes
-from dojo.utils import add_breadcrumb
+from dojo.utils import add_breadcrumb, get_system_setting
 
 logger = logging.getLogger(__name__)
 
 
 @csrf_exempt
 def webhook(request):
+    # Webhook shouldn't be active if jira isn't enabled
+    if not get_system_setting('enable_jira'):
+        raise PermissionDenied
+    elif not get_system_setting('enable_jira_web_hook'):
+        raise PermissionDenied
+
     if request.method == 'POST':
         parsed = json.loads(request.body)
         if 'issue' in parsed.keys():
@@ -169,10 +176,6 @@ def delete_jira(request, tid):
     # TODO Make Form
     form = DeleteJIRAConfForm(instance=jira_instance)
 
-    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-    collector.collect([jira_instance])
-    rels = collector.nested()
-
     if request.method == 'POST':
         if 'id' in request.POST and str(jira_instance.id) == request.POST['id']:
             form = DeleteJIRAConfForm(request.POST, instance=jira_instance)
@@ -183,6 +186,10 @@ def delete_jira(request, tid):
                                      'JIRA Conf and relationships removed.',
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('jira'))
+
+    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+    collector.collect([jira_instance])
+    rels = collector.nested()
 
     add_breadcrumb(title="Delete", top_level=False, request=request)
     return render(request, 'dojo/delete_jira.html',

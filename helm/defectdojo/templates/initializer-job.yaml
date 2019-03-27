@@ -1,0 +1,40 @@
+{{- $fullName := include "defectdojo.fullname" . -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-initializer
+  labels:
+    defectdojo.org/component: initializer
+    app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "defectdojo.chart" . }}
+spec:
+  ttlSecondsAfterFinished: {{ .Values.initializerKeepSeconds }}
+  template:
+    metadata:
+      labels:
+        defectdojo.org/component: initializer
+        app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: initializer
+          image: "{{ .Values.initializer.repository }}:{{ .Values.tag }}"
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          command: ['/entrypoint-initializer.sh']
+          envFrom:
+            - configMapRef:
+                name: {{ $fullName }}
+            - secretRef:
+                name: {{ $fullName }}
+          env:
+            - name: DD_DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $fullName }}-{{ .Values.database }}
+                  key: {{ .Values.database }}-password
+          resources:
+            {{- toYaml .Values.initializer.resources | nindent 10 }}
+      restartPolicy: Never
+  backoffLimit: 1
