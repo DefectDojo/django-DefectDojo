@@ -26,6 +26,7 @@ from dojo.tools.skf.parser import SKFCsvParser
 from dojo.tools.ssllabs.parser import SSLlabsParser
 from dojo.tools.nikto.parser import NiktoXMLParser
 from dojo.tools.trufflehog.parser import TruffleHogJSONParser
+from dojo.tools.netsparker.parser import NetsparkerParser
 from dojo.tools.php_security_audit_v2.parser import PhpSecurityAuditV2
 from dojo.tools.acunetix.parser import AcunetixScannerParser
 from dojo.tools.fortify.parser import FortifyXMLParser
@@ -43,7 +44,8 @@ __author__ = 'Jay Paz'
 
 
 def import_parser_factory(file, test, scan_type=None):
-    scan_type = test.test_type.name
+    if scan_type is None:
+        scan_type = test.test_type.name
     if scan_type == "Burp Scan":
         parser = BurpXmlParser(file, test)
     elif scan_type == "Nessus Scan":
@@ -108,6 +110,8 @@ def import_parser_factory(file, test, scan_type=None):
         parser = GosecScannerParser(file, test)
     elif scan_type == 'Trustwave Scan (CSV)':
         parser = TrustwaveUploadCsvParser(file, test)
+    elif scan_type == 'Netsparker Scan':
+        parser = NetsparkerParser(file, test)
     elif scan_type == 'PHP Security Audit v2':
         parser = PhpSecurityAuditV2(file, test)
     elif scan_type == 'Acunetix Scan':

@@ -1,15 +1,23 @@
 #!/bin/sh
 
 # Waits for the database to come up.
-./docker/wait-for-it.sh $DEFECT_DOJO_DEFAULT_DATABASE_HOST:$DEFECT_DOJO_DEFAULT_DATABASE_PORT
+./docker/wait-for-it.sh $DD_DATABASE_HOST:$DD_DATABASE_PORT
+
+if [ -z "$DD_DATABASE_URL" ]; then
+  if [ -z "$DD_DATABASE_PASSWORD" ]; then
+      echo "Please set DD_DATABASE_URL or other DD_DATABASE_HOST, DD_DATABASE_USER, DD_DATABASE_PASSWORD, ..."
+      exit 1
+  fi
+  export DD_DATABASE_URL="$DD_DATABASE_TYPE://$DD_DATABASE_USER:$DD_DATABASE_PASSWORD@$DD_DATABASE_HOST:$DD_DATABASE_PORT/$DD_DATABASE_NAME"
+fi
 
 if [ ! -f "/opt/django-DefectDojo/static/docker_complete" ]; then
   python manage.py makemigrations dojo
   python manage.py makemigrations --merge --noinput
   python manage.py migrate
 
-  if [ -z "$DEFECT_DOJO_ADMIN_PASSWORD" ]; then
-      DEFECT_DOJO_ADMIN_PASSWORD="admin"
+  if [ -z "$DD_ADMIN_PASSWORD" ]; then
+      DD_ADMIN_PASSWORD="admin"
   fi
 
   # The '&&' is critical here. If the admin user is already created, setting the

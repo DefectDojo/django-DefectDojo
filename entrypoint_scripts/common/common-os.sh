@@ -102,7 +102,7 @@ bootstrap_install() {
 	
 	# Install any programs needed by the installer
 	case $INSTALL_DISTRO in
-	    "Ubuntu")
+	    "Ubuntu" | "Linux Mint")
 	    echo "  Bootstapping Ubuntu"
 	    echo "  Updating package list"
 	    DEBIAN_FRONTEND=noninteractive apt update

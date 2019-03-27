@@ -100,3 +100,4 @@ dojo/media
 venv/
 ENV/
 quick.bash
+*.tgz

@@ -16,13 +16,14 @@ from dojo.api import UserResource, ProductResource, EngagementResource, \
     ReImportScanResource, JiraResource, JIRA_ConfResource, EndpointResource, \
     JIRA_IssueResource, ToolProductSettingsResource, Tool_ConfigurationResource, \
     Tool_TypeResource, LanguagesResource, LanguageTypeResource, App_AnalysisResource, \
-    BuildDetails
+    BuildDetails, DevelopmentEnvironmentResource, ProductTypeResource, TestTypeResource
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraConfigurationsViewSet, \
     JiraIssuesViewSet, JiraViewSet, ProductViewSet, ScanSettingsViewSet, \
     ScansViewSet, StubFindingsViewSet, TestsViewSet, TestTypesViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
-    UsersViewSet, ImportScanView, ReImportScanView, ProductTypeViewSet, DojoMetaViewSet
+    UsersViewSet, ImportScanView, ReImportScanView, ProductTypeViewSet, DojoMetaViewSet, \
+    DevelopmentEnvironmentViewSet
 
 from dojo.utils import get_system_setting
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
@@ -59,7 +60,10 @@ admin.autodiscover()
 v1_api = Api(api_name='v1', )
 v1_api.register(UserResource())
 v1_api.register(ProductResource())
+v1_api.register(ProductTypeResource())
 v1_api.register(EngagementResource())
+v1_api.register(DevelopmentEnvironmentResource())
+v1_api.register(TestTypeResource())
 v1_api.register(TestResource())
 v1_api.register(FindingResource())
 v1_api.register(FindingTemplateResource())
@@ -85,6 +89,7 @@ v1_api.register(BuildDetails())
 v2_api = DefaultRouter()
 v2_api.register(r'endpoints', EndPointViewSet)
 v2_api.register(r'engagements', EngagementViewSet)
+v2_api.register(r'development_environments', DevelopmentEnvironmentViewSet)
 v2_api.register(r'finding_templates', FindingTemplatesViewSet)
 v2_api.register(r'findings', FindingViewSet)
 v2_api.register(r'jira_configurations', JiraConfigurationsViewSet)

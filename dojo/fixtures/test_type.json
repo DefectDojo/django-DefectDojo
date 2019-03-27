@@ -1,5 +1,5 @@
 [
-    {
+  {
 		"fields": {
 			"name": "API Test"
 		},
@@ -123,63 +123,63 @@
 			"name": "Dependency Check Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 17
+		"pk": 18
 	},
 	{
 		"fields": {
 			"name": "Generic Findings Import"
 		},
 		"model": "dojo.test_type",
-		"pk": 18
+		"pk": 19
 	},
 	{
 		"fields": {
 			"name": "Nmap Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 19
+		"pk": 20
 	},
 	{
 		"fields": {
 			"name": "Node Security Platform Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 20
+		"pk": 21
 	},
 	{
 		"fields": {
 			"name": "Qualys Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 21
+		"pk": 22
 	},
 	{
 		"fields": {
 			"name": "Qualys Web App Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 22
+		"pk": 23
 	},
 	{
 		"fields": {
 			"name": "Retire.js Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 23
+		"pk": 24
 	},
 	{
 		"fields": {
 			"name": "SKF Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 24
+		"pk": 25
 	},
 	{
 		"fields": {
 			"name": "Snyk Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 25
+		"pk": 26
 	},
 	{
 		"fields": {
@@ -213,55 +213,62 @@
 			"name": "Gosec Scanner"
 		},
 		"model": "dojo.test_type",
-		"pk": 30
+		"pk": 31
 	},
 	{
 		"fields": {
 			"name": "NPM Audit Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 31
+		"pk": 32
 	},
 	{
 		"fields": {
 			"name": "Clair Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 32
+		"pk": 33
 	},
 	{
 		"fields": {
 			"name": "Brakeman Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 33
+		"pk": 34
 	},
 	{
 		"fields": {
       		"name": "PHP Security Audit v2"
     	},
     	"model": "dojo.test_type",
-    	"pk": 34
+    	"pk": 35
 	},
-	{  
+	{
 	    "fields": {
             "name": "Crashtest Security Scan"
     	},
 	    "model": "dojo.test_type",
-		"pk": 35
+		"pk": 36
 	},
 	{
 	    "fields": {
             "name": "Safety Scan"
     	},
 	    "model": "dojo.test_type",
-		"pk": 36
+		"pk": 37
 	},
   {
     "fields": {
       "name": "Clair Klar Scan"
     },
     "model": "dojo.test_type",
-    "pk": 37
+    "pk": 38
+  },
+  {
+      "fields": {
+        "name": "Netsparker Scanner"
+      },
+      "model": "dojo.test_type",
+      "pk": 49
   }
 ]

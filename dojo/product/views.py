@@ -14,6 +14,8 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 from django.db.models import Sum, Count, Q
+from django.contrib.admin.utils import NestedObjects
+from django.db import DEFAULT_DB_ALIAS
 from dojo.filters import ProductFilter, ProductFindingFilter, EngagementFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm, \
                        EngagementPresetsForm, DeleteEngagementPresetsForm
@@ -533,13 +535,6 @@ def delete_product(request, pid):
     product = get_object_or_404(Product, pk=pid)
     form = DeleteProductForm(instance=product)
 
-    from django.contrib.admin.utils import NestedObjects
-    from django.db import DEFAULT_DB_ALIAS
-
-    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-    collector.collect([product])
-    rels = collector.nested()
-
     if request.method == 'POST':
         if 'id' in request.POST and str(product.id) == request.POST['id']:
             form = DeleteProductForm(request.POST, instance=product)
@@ -552,6 +547,10 @@ def delete_product(request, pid):
                                      'Product and relationships removed.',
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('product'))
+
+    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+    collector.collect([product])
+    rels = collector.nested()
 
     product_tab = Product_Tab(pid, title="Product", tab="settings")
     return render(request, 'dojo/delete_product.html',
@@ -883,13 +882,6 @@ def delete_engagement_presets(request, pid, eid):
     preset = get_object_or_404(Engagement_Presets, id=eid)
     form = DeleteEngagementPresetsForm(instance=preset)
 
-    from django.contrib.admin.utils import NestedObjects
-    from django.db import DEFAULT_DB_ALIAS
-
-    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-    collector.collect([preset])
-    rels = collector.nested()
-
     if request.method == 'POST':
         if 'id' in request.POST:
             form = DeleteEngagementPresetsForm(request.POST, instance=preset)
@@ -900,6 +892,10 @@ def delete_engagement_presets(request, pid, eid):
                                      'Engagement presets and engagement relationships removed.',
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('engagement_presets', args=(pid,)))
+
+    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+    collector.collect([preset])
+    rels = collector.nested()
 
     product_tab = Product_Tab(pid, title="Delete Engagement Preset", tab="settings")
     return render(request, 'dojo/delete_presets.html',

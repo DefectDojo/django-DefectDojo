@@ -151,6 +151,7 @@ class Development_EnvironmentForm(forms.ModelForm):
         model = Development_Environment
         fields = ['name']
 
+
 class Delete_Dev_EnvironmentForm(forms.ModelForm):
     class Meta:
         model = Development_Environment
@@ -240,6 +241,7 @@ class Product_TypeProductForm(forms.ModelForm):
 
 class ImportScanForm(forms.Form):
     SCAN_TYPE_CHOICES = (("", "Please Select a Scan Type"),
+                         ("Netsparker Scan", "Netsparker Scan"),
                          ("Burp Scan", "Burp Scan"),
                          ("Nessus Scan", "Nessus Scan"),
                          ("Nmap Scan", "Nmap Scan"),
@@ -268,7 +270,7 @@ class ImportScanForm(forms.Form):
                          ("Acunetix Scan", "Acunetix Scan"),
                          ("Fortify Scan", "Fortify Scan"),
                          ("Gosec Scanner", "Gosec Scanner"),
-                         ("SonarQube Scan", "SonarQube Scan"),
+                         # ("SonarQube Scan", "SonarQube Scan"),
                          ("MobSF Scan", "MobSF Scan"),
                          ("Trufflehog Scan", "Trufflehog Scan"),
                          ("Nikto Scan", "Nikto Scan"),
