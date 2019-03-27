@@ -120,4 +120,3 @@ def add_product_to_product_type(request, ptid):
                    top_level=False,
                    request=request)
     return render(request, "dojo/new_product.html", {"form": form})
-    
