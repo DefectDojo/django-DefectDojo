@@ -2,6 +2,7 @@ import Queue
 from datetime import datetime
 import sys
 import threading
+from ast import literal_eval
 
 from django.core.mail import send_mail
 from django.core.management import call_command
@@ -152,7 +153,7 @@ class Command(BaseCommand):
 
             scan_results = set()
             try:
-                scan_results = eval('set(' + IPScan.objects.get(
+                scan_results = set(literal_eval(IPScan.objects.get(
                     address=host,
                     scan=Scan.objects.get(
                         id=service_dict['scan_id'])).services + ')')
@@ -269,7 +270,7 @@ class Command(BaseCommand):
                     try:
                         most_recent_ports = map(
                             lambda x: str(x[0]) + '/' + str(x[1]) + ': ' + str(x[3]),
-                            eval(most_recent_ipscans.get(
+                            literal_eval(most_recent_ipscans.get(
                                 address=addr).services))
                     except:
                         most_recent_ports = []

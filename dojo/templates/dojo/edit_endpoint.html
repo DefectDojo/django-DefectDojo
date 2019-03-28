@@ -32,7 +32,8 @@
                 var stroke;
                 stroke = (_ref = evt.which) != null ? _ref : evt.keyCode;
                 if (stroke == 9) { // 9 = tab key
-                    $('#id_tags').append('<option value="' + $(this).val() + '" selected="selected">' + $(this).val() + '</option>');
+                    var o = new Option($(this).val(), $(this).val(), true, true);
+			        $("#id_tags").append(o);
                     $('#id_tags').trigger('chosen:updated');
                     $('#id_tags').focus();
                     return false;

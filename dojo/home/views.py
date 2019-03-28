@@ -70,7 +70,7 @@ def dashboard(request):
 
     for finding in findings:
         if finding.severity:
-            sev_counts[finding.severity] += 1
+            sev_counts[finding.severity.capitalize()] += 1
 
     by_month = list()
 

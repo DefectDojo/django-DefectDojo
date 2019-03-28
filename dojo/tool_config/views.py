@@ -43,9 +43,6 @@ def edit_tool_config(request, ttid):
         if tform.is_valid():
             form_copy = tform.save(commit=False)
             form_copy.password = dojo_crypto_encrypt(tform.cleaned_data['password'])
-            print "######"
-            print tform.cleaned_data['ssh']
-
             form_copy.ssh = dojo_crypto_encrypt(tform.cleaned_data['ssh'])
             form_copy.save()
             messages.add_message(request,
