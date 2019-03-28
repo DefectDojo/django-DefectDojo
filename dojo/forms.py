@@ -18,7 +18,7 @@ from dojo.models import Finding, Product_Type, Product, PortscanSettings, VA, \
     Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
     JIRA_Issue, JIRA_PKey, JIRA_Conf, UserContactInfo, Tool_Type, \
     Cred_User, Cred_Mapping, System_Settings, Notifications, Languages, Language_Type, App_Analysis, Objects, \
-    Benchmark_Product, Benchmark_Requirement, Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta
+    Benchmark_Product, Benchmark_Requirement, Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, \
     Tool_Configuration, Tool_Product_Settings
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')

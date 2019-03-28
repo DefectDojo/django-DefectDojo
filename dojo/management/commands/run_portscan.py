@@ -157,9 +157,7 @@ class Command(BaseCommand):
                     address=host,
                     scan=Scan.objects.get(
                         id=service_dict['scan_id'])).services + ')')
-                scan_results = map(
-                    lambda x: str(x[0]) + '/' + str(x[1]) + ': ' + str(x[3]),
-                    scan_results)
+                scan_results = map(lambda x: str(x[0]) + '/' + str(x[1]) + ': ' + str(x[3]), scan_results)
             except:
                 scan.status = 'Failed'
                 scan.save()

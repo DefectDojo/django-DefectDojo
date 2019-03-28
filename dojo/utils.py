@@ -1370,7 +1370,7 @@ def get_db_key():
     db_key = None
     if hasattr(settings, 'DB_KEY'):
         db_key = settings.DB_KEY
-        
+
     if hasattr(settings, 'SECRET_KEY'):
         db_key = settings.SECRET_KEY
 
