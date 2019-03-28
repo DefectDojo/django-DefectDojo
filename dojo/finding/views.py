@@ -518,16 +518,14 @@ def edit_finding(request, fid):
                 jform = JIRAFindingForm(
                     request.POST, prefix='jiraform', enabled=enabled)
                 if jform.is_valid():
-                    try:
-                        # jissue = JIRA_Issue.objects.get(finding=new_finding)
+                    if JIRA_Issue.objects.filter(finding=new_finding).exists():
                         update_issue_task.delay(
                             new_finding, old_status,
                             jform.cleaned_data.get('push_to_jira'))
-                    except:
+                    else:
                         add_issue_task.delay(
                             new_finding,
                             jform.cleaned_data.get('push_to_jira'))
-                        pass
             tags = request.POST.getlist('tags')
             t = ", ".join(tags)
             new_finding.tags = t
@@ -836,22 +834,6 @@ def apply_template_to_finding(request, fid, tid):
     else:
         return HttpResponseRedirect(
             reverse('view_finding', args=(finding.id, )))
-
-
-@user_passes_test(lambda u: u.is_staff)
-def delete_finding_note(request, tid, nid):
-    note = get_object_or_404(Notes, id=nid)
-    if note.author == request.user:
-        finding = get_object_or_404(Finding, id=tid)
-        finding.notes.remove(note)
-        note.delete()
-        messages.add_message(
-            request,
-            messages.SUCCESS,
-            'Note removed.',
-            extra_tags='alert-success')
-        return view_finding(request, tid)
-    return HttpResponseForbidden()
 
 
 @user_passes_test(lambda u: u.is_staff)

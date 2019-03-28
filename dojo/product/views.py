@@ -14,12 +14,14 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 from django.db.models import Sum, Count, Q
+from django.contrib.admin.utils import NestedObjects
+from django.db import DEFAULT_DB_ALIAS
 from dojo.filters import ProductFilter, ProductFindingFilter, EngagementFilter
-from dojo.forms import ProductForm, EngForm, DeleteProductForm, ProductMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm, \
+from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm, \
                        EngagementPresetsForm, DeleteEngagementPresetsForm
 from dojo.models import Product_Type, Finding, Product, Engagement, PortscanSettings, Risk_Acceptance, Test, JIRA_PKey, Finding_Template, \
     Tool_Product_Settings, Cred_Mapping, Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, \
-    Endpoint, Engagement_Presets
+    Endpoint, Engagement_Presets, DojoMeta
 from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, get_system_setting, create_notification, Product_Tab
 from custom_field.models import CustomFieldValue, CustomField
 from dojo.tasks import add_epic_task, add_issue_task
@@ -83,14 +85,7 @@ def view_product(request, pid):
     benchmarks = Benchmark_Product_Summary.objects.filter(product=prod, publish=True, benchmark_type__enabled=True).order_by('benchmark_type__name')
     system_settings = System_Settings.objects.get()
 
-    ct = ContentType.objects.get_for_model(prod)
-    product_cf = CustomField.objects.filter(content_type=ct).order_by('name')
-    product_metadata = {}
-
-    for cf in product_cf:
-        cfv = CustomFieldValue.objects.filter(field=cf, object_id=prod.id)
-        if len(cfv):
-            product_metadata[cf.name] = cfv[0].value
+    product_metadata = dict(prod.product_meta.order_by('name').values_list('name', 'value'))
 
     verified_findings = Finding.objects.filter(test__engagement__product=prod,
                                                 false_p=False,
@@ -404,14 +399,7 @@ def view_product_details(request, pid):
         # will render 403
         raise PermissionDenied
 
-    ct = ContentType.objects.get_for_model(prod)
-    product_cf = CustomField.objects.filter(content_type=ct)
-    product_metadata = {}
-
-    for cf in product_cf:
-        cfv = CustomFieldValue.objects.filter(field=cf, object_id=prod.id)
-        if len(cfv):
-            product_metadata[cf.name] = cfv[0].value
+    product_metadata = dict(prod.product_meta.values_list('name', 'value'))
 
     add_breadcrumb(parent=product, title="Details", top_level=False, request=request)
     return render(request,
@@ -547,13 +535,6 @@ def delete_product(request, pid):
     product = get_object_or_404(Product, pk=pid)
     form = DeleteProductForm(instance=product)
 
-    from django.contrib.admin.utils import NestedObjects
-    from django.db import DEFAULT_DB_ALIAS
-
-    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-    collector.collect([product])
-    rels = collector.nested()
-
     if request.method == 'POST':
         if 'id' in request.POST and str(product.id) == request.POST['id']:
             form = DeleteProductForm(request.POST, instance=product)
@@ -566,6 +547,10 @@ def delete_product(request, pid):
                                      'Product and relationships removed.',
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('product'))
+
+    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+    collector.collect([product])
+    rels = collector.nested()
 
     product_tab = Product_Tab(pid, title="Product", tab="settings")
     return render(request, 'dojo/delete_product.html',
@@ -671,16 +656,10 @@ def new_eng_for_app_cicd(request, pid):
 @user_passes_test(lambda u: u.is_staff)
 def add_meta_data(request, pid):
     prod = Product.objects.get(id=pid)
-    ct = ContentType.objects.get_for_model(prod)
     if request.method == 'POST':
-        form = ProductMetaDataForm(request.POST)
+        form = DojoMetaDataForm(request.POST, instance=DojoMeta(product=prod))
         if form.is_valid():
-            cf, created = CustomField.objects.get_or_create(name=form.cleaned_data['name'], content_type=ct, field_type='a')
-            cf.save()
-            cfv, created = CustomFieldValue.objects.get_or_create(field=cf, object_id=prod.id)
-            cfv.value = form.cleaned_data['value']
-            cfv.clean()
-            cfv.save()
+            form.save()
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Metadata added successfully.',
@@ -690,9 +669,9 @@ def add_meta_data(request, pid):
             else:
                 return HttpResponseRedirect(reverse('view_product', args=(pid,)))
     else:
-        form = ProductMetaDataForm(initial={'content_type': prod})
+        form = DojoMetaDataForm()
 
-    product_tab = Product_Tab(pid, title="Add Custom Fields", tab="settings")
+    product_tab = Product_Tab(pid, title="Add Metadata", tab="settings")
 
     return render(request,
                   'dojo/add_product_meta_data.html',
@@ -705,22 +684,11 @@ def add_meta_data(request, pid):
 @user_passes_test(lambda u: u.is_staff)
 def edit_meta_data(request, pid):
     prod = Product.objects.get(id=pid)
-    ct = ContentType.objects.get_for_model(prod)
-
-    product_cf = CustomField.objects.filter(content_type=ct)
-    product_metadata = {}
-
-    for cf in product_cf:
-        cfv = CustomFieldValue.objects.filter(field=cf, object_id=prod.id)
-        if len(cfv):
-            product_metadata[cf] = cfv[0]
-
     if request.method == 'POST':
         for key, value in request.POST.iteritems():
             if key.startswith('cfv_'):
                 cfv_id = int(key.split('_')[1])
-                cfv = get_object_or_404(CustomFieldValue, id=cfv_id)
-
+                cfv = get_object_or_404(DojoMeta, id=cfv_id)
                 value = value.strip()
                 if value:
                     cfv.value = value
@@ -733,12 +701,11 @@ def edit_meta_data(request, pid):
                              extra_tags='alert-success')
         return HttpResponseRedirect(reverse('view_product', args=(pid,)))
 
-    product_tab = Product_Tab(pid, title="Edit Custom Fields", tab="settings")
+    product_tab = Product_Tab(pid, title="Edit Metadata", tab="settings")
     return render(request,
                   'dojo/edit_product_meta_data.html',
                   {'product': prod,
                    'product_tab': product_tab,
-                   'product_metadata': product_metadata,
                    })
 
 
@@ -915,13 +882,6 @@ def delete_engagement_presets(request, pid, eid):
     preset = get_object_or_404(Engagement_Presets, id=eid)
     form = DeleteEngagementPresetsForm(instance=preset)
 
-    from django.contrib.admin.utils import NestedObjects
-    from django.db import DEFAULT_DB_ALIAS
-
-    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-    collector.collect([preset])
-    rels = collector.nested()
-
     if request.method == 'POST':
         if 'id' in request.POST:
             form = DeleteEngagementPresetsForm(request.POST, instance=preset)
@@ -932,6 +892,10 @@ def delete_engagement_presets(request, pid, eid):
                                      'Engagement presets and engagement relationships removed.',
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('engagement_presets', args=(pid,)))
+
+    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+    collector.collect([preset])
+    rels = collector.nested()
 
     product_tab = Product_Tab(pid, title="Delete Engagement Preset", tab="settings")
     return render(request, 'dojo/delete_presets.html',

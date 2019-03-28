@@ -2,6 +2,7 @@
 
 import logging
 from threading import Thread
+from ast import literal_eval
 
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
@@ -49,7 +50,7 @@ def view_scan(request, sid):
     ipScans = []
     ipScan_objects = IPScan.objects.filter(scan=scan)
     for i in ipScan_objects:
-        service_list = eval(i.services)
+        service_list = literal_eval(i.services)
         row = [i.address]
         for (port, protocol, status, service) in service_list:
             row.append(port)

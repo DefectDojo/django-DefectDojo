@@ -10,13 +10,13 @@
     </p>
     <br/>
     <form class="form-horizontal" method="post">{% csrf_token %}
-        {% for cf, cfv in endpoint_metadata.items %}
+        {% for cf in endpoint.endpoint_meta.all %}
 
             <div class="form-group">
-                <label class="col-sm-2 control-label" for="cfv_{{ cfv.id }}">{{ cf.name }}</label>
+                <label class="col-sm-2 control-label" for="cfv_{{ cf.id }}">{{ cf.name }}</label>
                 <div class="col-sm-10">
-                    <input type="text" class="form-control" id="cfv_{{ cfv.id }}" name="cfv_{{ cfv.id }}"
-                           value="{{ cfv.value }}">
+                    <input type="text" class="form-control" id="cfv_{{ cf.id }}" name="cfv_{{ cf.id }}"
+                           value="{{ cf.value }}">
                 </div>
             </div>
 
