@@ -1,17 +1,13 @@
 import sys
 sys.path.append('..')
-from dojo.models import Product, Tool_Type, Tool_Configuration, Endpoint, User, Tool_Product_Settings
+from dojo.models import Product, Tool_Type, Tool_Configuration, Endpoint, Tool_Product_Settings
 from django.test import TransactionTestCase
-from django.test.client import RequestFactory
 from django.contrib.auth.models import User
-from django.contrib.messages.storage.fallback import FallbackStorage
-from django.http import HttpResponseRedirect
 from django.core.management import call_command
 from tagging.models import Tag
 from django.conf import settings
 from StringIO import StringIO
 import os
-from pprint import pprint
 
 
 class TestToolRun(TransactionTestCase):
@@ -40,13 +36,13 @@ class TestToolRun(TransactionTestCase):
         tt.Name = 'Tool Type 1'
         tt.Description = 'Tool Type for testing run functionality'
         tt.save()
-        
+
         tc = Tool_Configuration()
         tc.Name = 'Tool Configuration 1'
         tc.url = 'ssh://localhost' + self.project_root + '/dojo/fixtures/tool_run.sh'
         tc.tool_type = tt
         tc.save()
-        
+
         tp = Tool_Product_Settings()
         tp.Name = 'Tool Product Configuration 1'
         tp.Product = p
@@ -59,13 +55,13 @@ class TestToolRun(TransactionTestCase):
     def test_tool_run_invalid_engagement(self):
         with self.assertRaises(SystemExit) as cm:
             call_command('run_tool', config=1, engagement=999, stdout=self.devnull)
-        
+
         self.assertEqual(cm.exception.code, 0)
 
     def test_tool_run_invalid_config(self):
         with self.assertRaises(SystemExit) as cm:
             call_command('run_tool', config=999, engagement=0, stdout=self.devnull)
-        
+
         self.assertEqual(cm.exception.code, 0)
 
     def test_tool_run_execute_localhost_denied(self):
@@ -75,7 +71,7 @@ class TestToolRun(TransactionTestCase):
 
     def test_tool_run_execute_simple(self):
         settings.ALLOW_TOOL_RUN["ssh-localhost"] = True
-        
+
         out = StringIO()
         call_command('run_tool', config=1, engagement=0, stdout=out)
         self.assertNotIn("Denied tool run", out.getvalue())
