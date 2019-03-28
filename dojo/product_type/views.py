@@ -106,7 +106,7 @@ def edit_product_type(request, ptid):
             "name": "Edit Product Type",
             "metric": False,
             "user": request.user,
-            "form1": form1,
+            "pt": pt_form,
             "pt": pt,
         },
     )
