@@ -733,6 +733,7 @@ def mktemplate(request, fid):
         template = Finding_Template(
             title=finding.title,
             cwe=finding.cwe,
+            cve=finding.cve,
             severity=finding.severity,
             description=finding.description,
             mitigation=finding.mitigation,
@@ -805,6 +806,7 @@ def apply_template_to_finding(request, fid, tid):
         if form.is_valid():
             finding.title = form.cleaned_data['title']
             finding.cwe = form.cleaned_data['cwe']
+            finding.cve = form.cleaned_data['cve']
             finding.severity = form.cleaned_data['severity']
             finding.description = form.cleaned_data['description']
             finding.mitigation = form.cleaned_data['mitigation']
