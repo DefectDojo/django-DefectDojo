@@ -24,7 +24,7 @@ Product Type views
 
 
 def product_type(request):
-    initial_queryset = Product_Type.objects.all().order_by("name")
+    initial_queryset = Product_Type.objects.all().order_by('name')
     name_words = [product.name for product in initial_queryset]
 
     ptl = ProductTypeFilter(request.GET, queryset=initial_queryset)
@@ -32,7 +32,7 @@ def product_type(request):
     add_breadcrumb(title="Product Type List", top_level=True, request=request)
     return render(
         request,
-        "dojo/product_type.html",
+        'dojo/product_type.html',
         {
             "name": "Product Type List",
             "metric": False,
@@ -47,21 +47,21 @@ def product_type(request):
 @user_passes_test(lambda u: u.is_staff)
 def add_product_type(request):
     form = Product_TypeForm()
-    if request.method == "POST":
+    if request.method == 'POST':
         form = Product_TypeForm(request.POST)
         if form.is_valid():
             form.save()
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Product type added successfully.",
+                'Product type added successfully.',
                 extra_tags="alert-success",
             )
             return HttpResponseRedirect(reverse("product_type"))
     add_breadcrumb(title="Add Product Type", top_level=False, request=request)
     return render(
         request,
-        "dojo/new_product_type.html",
+        'dojo/new_product_type.html',
         {
             "name": "Add Product Type",
             "metric": False,
@@ -74,16 +74,16 @@ def add_product_type(request):
 @user_passes_test(lambda u: u.is_staff)
 def edit_product_type(request, ptid):
     pt = get_object_or_404(Product_Type, pk=ptid)
-    form1 = Product_TypeForm(instance=pt)
-    form2 = Delete_Product_TypeForm(instance=pt)
-    if request.method == "POST" and request.POST.get("edit_product_type"):
-        form1 = Product_TypeForm(request.POST, instance=pt)
-        if form1.is_valid():
-            pt = form1.save()
+    pt_form = Product_TypeForm(instance=pt)
+    delete_pt_form = Delete_Product_TypeForm(instance=pt)
+    if request.method == "POST" and request.POST.get('edit_product_type'):
+        pt_form = Product_TypeForm(request.POST, instance=pt)
+        if pt_form.is_valid():
+            pt = pt_form.save()
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Product type updated successfully.",
+                'Product type updated successfully.',
                 extra_tags="alert-success",
             )
             return HttpResponseRedirect(reverse("product_type"))
@@ -101,7 +101,7 @@ def edit_product_type(request, ptid):
     add_breadcrumb(title="Edit Product Type", top_level=False, request=request)
     return render(
         request,
-        "dojo/edit_product_type.html",
+        'dojo/edit_product_type.html',
         {
             "name": "Edit Product Type",
             "metric": False,
@@ -115,7 +115,7 @@ def edit_product_type(request, ptid):
 @user_passes_test(lambda u: u.is_staff)
 def add_product_to_product_type(request, ptid):
     pt = get_object_or_404(Product_Type, pk=ptid)
-    form = Product_TypeProductForm(initial={"prod_type": pt})
+    form = Product_TypeProductForm(initial={'prod_type': pt})
     add_breadcrumb(title="New %s Product" % pt.name,
                    top_level=False,
                    request=request)
