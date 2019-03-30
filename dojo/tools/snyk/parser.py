@@ -45,14 +45,19 @@ def get_item(vulnerability, test):
         vulnerable_versions = vulnerability['semver']['vulnerable']
 
     # Following the CVSS Scoring per https://nvd.nist.gov/vuln-metrics/cvss
-    if vulnerability['cvssScore'] <= 3.9:
-        severity = "Low"
-    elif vulnerability['cvssScore'] > 4.0 and vulnerability['cvssScore'] <= 6.9:
-        severity = "Medium"
-    elif vulnerability['cvssScore'] > 7.0 and vulnerability['cvssScore'] <= 8.9:
-        severity = "High"
+    if 'cvssScore' in vulnerability:
+        # If we're dealing with a license finding, there will be no cvssScore
+        if vulnerability['cvssScore'] <= 3.9:
+            severity = "Low"
+        elif vulnerability['cvssScore'] > 4.0 and vulnerability['cvssScore'] <= 6.9:
+            severity = "Medium"
+        elif vulnerability['cvssScore'] > 7.0 and vulnerability['cvssScore'] <= 8.9:
+            severity = "High"
+        else:
+            severity = "Critical"
     else:
-        severity = "Critical"
+        # Re-assign 'severity' directly
+        severity = vulnerability['severity'].title()
 
     # create the finding object
     finding = Finding(
