@@ -551,3 +551,6 @@ LOGGING = {
 # As we require `innodb_large_prefix = ON` for MySQL, we can silence the
 # warning about large varchar with unique indices.
 SILENCED_SYSTEM_CHECKS = ['mysql.E001']
+
+# Issue on benchmark : "The number of GET/POST parameters exceeded settings.DATA_UPLOAD_MAX_NUMBER_FIELD S"
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
