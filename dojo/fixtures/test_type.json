@@ -263,7 +263,14 @@
     },
     "model": "dojo.test_type",
     "pk": 38
-  },
+	},
+  {
+    "fields": {
+      "name": "DawnScanner Scan"
+    },
+    "model": "dojo.test_type",
+    "pk": 39
+  },	
   {
       "fields": {
         "name": "Netsparker Scanner"
