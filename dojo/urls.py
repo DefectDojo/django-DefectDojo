@@ -171,6 +171,12 @@ urlpatterns = [
 
 if hasattr(settings, 'DJANGO_ADMIN_ENABLED'):
     if settings.DJANGO_ADMIN_ENABLED:
+        urlpatterns += [url(r'^%ssaml2_auth/' % get_system_setting('url_prefix'), include(django_saml2_auth.urls))]
+        urlpatterns += [url(r'^%saccounts/login/$' % get_system_setting('url_prefix'), include(django_saml2_auth.views.signin))]
+        urlpatterns += [url(r'^%sadmin/login/$' % get_system_setting('url_prefix'), include(django_saml2_auth.views.signin))]
+
+if hasattr(settings, 'DJANGO_ADMIN_ENABLED'):
+    if settings.DJANGO_ADMIN_ENABLED:
         #  django admin
         urlpatterns += [url(r'^%sadmin/' % get_system_setting('url_prefix'), include(admin.site.urls))]
 
