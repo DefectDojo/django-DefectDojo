@@ -180,6 +180,7 @@ class TestDependencyCheckParser(TestCase):
         </dependencies>
 </analysis>
  """
+ 
         testfile = TestFile("dependency-check-report.xml", content)
         parser = DependencyCheckParser(testfile, Test())
         self.assertEqual(1, len(parser.items))
