@@ -134,7 +134,7 @@ def import_parser_factory(file, test, scan_type=None):
     elif scan_type == 'Safety Scan':
         parser = SafetyParser(file, test)
     elif scan_type == 'DawnScanner Scan':
-        parser = DawnScannerParser(file, test)        
+        parser = DawnScannerParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 
