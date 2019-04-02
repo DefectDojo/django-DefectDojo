@@ -1,6 +1,5 @@
 __author__ = 'jaguasch'
 
-from dateutil import parser
 import json
 from dojo.models import Finding
 from datetime import datetime
@@ -59,7 +58,7 @@ class AnchoreEngineScanParser(object):
                     mitigation=mitigation,
                     impact=impact,
                     references=references,
-                    file_path = item["package_path"],
+                    file_path=item["package_path"],
                     url=item['url'],
                     date=find_date,
                     static_finding=True)
