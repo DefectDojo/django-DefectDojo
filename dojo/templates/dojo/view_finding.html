@@ -242,7 +242,9 @@
                         </td>
                     {% endif %}
                     <td>
-                        {% if finding.static_finding or finding.line > 0 %}
+                        {% if finding.static_finding and finding.dynamic_finding > 0 %}
+                            Static/Dynamic
+                        {% elif finding.static_finding > 0 %}
                             Static
                         {% else %}
                             Dynamic
