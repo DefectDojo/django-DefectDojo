@@ -1228,9 +1228,12 @@ class Finding(models.Model):
         else:
             super(Finding, self).save(*args, **kwargs)
         self.found_by.add(self.test.test_type)
-        if self.test.test_type.static_tool:
+        if self.test.test_type.static_tool and self.test.test_type.dynamic_tool:
             self.static_finding = True
-        else:
+            self.dynamic_finding = True
+        elif self.test.test_type.static_tool:
+            self.static_finding = True
+        elif self.test.test_type.dynamic_tool:
             self.dynamic_finding = True
         if rules_option:
             from dojo.tasks import async_rules
