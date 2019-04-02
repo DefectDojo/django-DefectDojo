@@ -5,8 +5,9 @@ import json
 import hashlib
 from dojo.models import Finding
 
+
 class DawnScannerParser(object):
-    def __init__(self, filename, test):   
+    def __init__(self, filename, test):
         data = json.load(filename)
 
         dupes = dict()
@@ -27,7 +28,6 @@ class DawnScannerParser(object):
 
             # Finding details information
             findingdetail = item['message'].encode('ascii', 'ignore')
-            
             sev = item['severity'].capitalize()
             mitigation = item['remediation']
             references = item['cve_link']
