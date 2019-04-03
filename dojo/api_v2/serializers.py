@@ -560,8 +560,8 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     if ((test.engagement.deduplication_on_engagement and
                         Finding.objects.filter(Q(active=True) | Q(false_p=True) | Q(duplicate=True),
                                               test__engagement=test.engagement,
-                                              hash_code=hash_code).exists())
-                    or (Finding.objects.filter(Q(active=True) | Q(false_p=True) | Q(duplicate=True),
+                                              hash_code=hash_code).exists()) or
+                       (Finding.objects.filter(Q(active=True) | Q(false_p=True) | Q(duplicate=True),
                                               test__engagement__product=test.engagement.product,
                                               hash_code=hash_code).exists())):
                         skipped_hashcodes.append(hash_code)
