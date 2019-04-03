@@ -183,14 +183,9 @@
                           <span>Out of scope</span>
                       </label>
                       {% if "enable_jira"|get_system_setting %}
-                      <b>JIRA</b> <input id="id_jira" name="jira" type="checkbox" alt="Select to enable"/><br/>
-                      <label style="font-size: 80%; font-weight: normal; display: block">
-                          <input id="id_push_to_jira" name="push_to_jira" type="checkbox" disabled/> <span>Push to JIRA</span>
-                      </label>                                
-                      {% else %}
-                      <b>JIRA disabled</b> <input id="id_jira" name="jira" type="checkbox" alt="Select to enable"/><br/>
+                      <b>Push to JIRA</b> <input id="id_jira" name="jira" type="checkbox" alt="Select to push to JIRA"/><br/>
                       {% endif %}
-                      <input type="submit" class="btn btn-sm btn-primary" value="Submit"/>
+            <input type="submit" class="btn btn-sm btn-primary" value="Submit"/>
                   </form>
               </li>
           </ul>
