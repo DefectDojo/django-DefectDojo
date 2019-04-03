@@ -443,8 +443,8 @@ def finding_bulk_update(request, tid):
                 if form.cleaned_data['severity'] or form.cleaned_data['status']:
                     calculate_grade(test.engagement.product)
 
+                logger.info('test bulkdupdate: form: ' + str(form.cleaned_data))
                 for finding in finds:
-                    logger.info('test bulkdupdate: form: ' + str(form))
                     old_status = finding.status()
                     if form.cleaned_data['push_to_jira']:
                         if JIRA_Issue.objects.filter(finding=finds).exists():

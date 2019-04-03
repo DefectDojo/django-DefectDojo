@@ -1471,8 +1471,8 @@ def finding_bulk_update_all(request, pid=None):
                             calculate_grade(finding.test.engagement.product)
                             prev_prod = finding.test.engagement.product.id
 
+                logger.info('test bulkdupdate: form: ' + str(form.cleaned_data))
                 for finding in finds:
-                    logger.info('finding bulkdupdate: form: ' + str(form))
                     old_status = finding.status()
                     if form.cleaned_data['push_to_jira']:
                         if JIRA_Issue.objects.filter(finding=finds).exists():
