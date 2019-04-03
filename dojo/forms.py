@@ -949,6 +949,7 @@ class DeleteFindingTemplateForm(forms.ModelForm):
 
 class FindingBulkUpdateForm(forms.ModelForm):
     status = forms.BooleanField(required=False)
+    push_to_jira = forms.BooleanField(required=False)
 
     def __init__(self, *args, **kwargs):
         super(FindingBulkUpdateForm, self).__init__(*args, **kwargs)
@@ -967,7 +968,7 @@ class FindingBulkUpdateForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        fields = ('severity', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope', 'push_to_jira')
+        fields = ('severity', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope')
 
 
 class EditEndpointForm(forms.ModelForm):
