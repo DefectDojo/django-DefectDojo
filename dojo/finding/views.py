@@ -1450,7 +1450,6 @@ def finding_bulk_update_all(request, pid=None):
         else:
             if form.is_valid() and finding_to_update:
                 finding_to_update = request.POST.getlist('finding_to_update')
-                old_status = finding_to_update.status()
                 finds = Finding.objects.filter(id__in=finding_to_update).order_by("finding__test__engagement__product__id")
                 if form.cleaned_data['severity']:
                     finds.update(severity=form.cleaned_data['severity'],
@@ -1472,13 +1471,15 @@ def finding_bulk_update_all(request, pid=None):
                             calculate_grade(finding.test.engagement.product)
                             prev_prod = finding.test.engagement.product.id
 
-                logger.info('finding bulkdupdate: form: ' + str(form))
-                if form.cleaned_data['jira']:
-                    if form.cleaned_data['push_to_jira']:
-                        if JIRA_Issue.objects.filter(finding=finding_to_update).exists():
-                            update_issue_task.delay(finding_to_update, old_status, True)
-                        else:
-                            add_issue_task.delay(finding_to_update, True)                            
+                for finding in finds:
+                    logger.info('finding bulkdupdate: form: ' + str(form))
+                    old_status = finding.status()
+                    if form.cleaned_data['jira']:
+                        if form.cleaned_data['push_to_jira']:
+                            if JIRA_Issue.objects.filter(finding=finds).exists():
+                                update_issue_task.delay(finds, old_status, True)
+                            else:
+                                add_issue_task.delay(finds, True)
 
                 messages.add_message(request,
                                      messages.SUCCESS,
