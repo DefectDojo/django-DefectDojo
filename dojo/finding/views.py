@@ -1474,12 +1474,11 @@ def finding_bulk_update_all(request, pid=None):
                 for finding in finds:
                     logger.info('finding bulkdupdate: form: ' + str(form))
                     old_status = finding.status()
-                    if form.cleaned_data['jira']:
-                        if form.cleaned_data['push_to_jira']:
-                            if JIRA_Issue.objects.filter(finding=finds).exists():
-                                update_issue_task.delay(finds, old_status, True)
-                            else:
-                                add_issue_task.delay(finds, True)
+                    if form.cleaned_data['push_to_jira']:
+                        if JIRA_Issue.objects.filter(finding=finds).exists():
+                            update_issue_task.delay(finds, old_status, True)
+                        else:
+                            add_issue_task.delay(finds, True)
 
                 messages.add_message(request,
                                      messages.SUCCESS,
