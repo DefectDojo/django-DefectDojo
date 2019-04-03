@@ -1475,10 +1475,10 @@ def finding_bulk_update_all(request, pid=None):
                 for finding in finds:
                     old_status = finding.status()
                     if form.cleaned_data['push_to_jira']:
-                        if JIRA_Issue.objects.filter(finding=finds).exists():
-                            update_issue_task.delay(finds, old_status, True)
+                        if JIRA_Issue.objects.filter(finding=finding).exists():
+                            update_issue_task.delay(finding, old_status, True)
                         else:
-                            add_issue_task.delay(finds, True)
+                            add_issue_task.delay(finding, True)
 
                 messages.add_message(request,
                                      messages.SUCCESS,
