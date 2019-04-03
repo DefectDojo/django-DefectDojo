@@ -40,6 +40,7 @@ from dojo.tools.spotbugs.parser import SpotbugsXMLParser
 from dojo.tools.safety.parser import SafetyParser
 from dojo.tools.clair_klar.parser import ClairKlarParser
 from dojo.tools.dawnscanner.parser import DawnScannerParser
+from dojo.tools.anchore_engine.parser import AnchoreEngineScanParser
 
 __author__ = 'Jay Paz'
 
@@ -135,6 +136,8 @@ def import_parser_factory(file, test, scan_type=None):
         parser = SafetyParser(file, test)
     elif scan_type == 'DawnScanner Scan':
         parser = DawnScannerParser(file, test)
+    elif scan_type == 'Anchore Engine Scan':
+        parser = AnchoreEngineScanParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 
