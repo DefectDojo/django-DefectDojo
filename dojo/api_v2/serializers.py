@@ -623,9 +623,9 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
             for old_finding in Finding.objects.exclude(test=test) \
                                               .exclude(hash_code__in=new_hash_codes) \
                                               .exclude(hash_code__in=skipped_hashcodes) \
-                               .filter(test__engagement__product=test.engagement.product,
-                                       test__test_type=test_type,
-                                       active=True):
+                                              .filter(test__engagement__product=test.engagement.product,
+                                                  test__test_type=test_type,
+                                                  active=True):
                 old_finding.active = False
                 old_finding.mitigated = datetime.datetime.combine(
                     test.target_start,
