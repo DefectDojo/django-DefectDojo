@@ -991,6 +991,7 @@ def jira_long_description(find_description, find_id, jira_conf_finding_text):
 
 
 def add_issue(find, push_to_jira):
+    logger.debug('adding issue: ' + str(find))
     eng = Engagement.objects.get(test=find.test)
     prod = Product.objects.get(engagement=eng)
     jpkey = JIRA_PKey.objects.get(product=prod)
@@ -1001,8 +1002,10 @@ def add_issue(find, push_to_jira):
             if ((jpkey.push_all_issues and Finding.get_number_severity(
                     System_Settings.objects.get().jira_minimum_severity) >
                  Finding.get_number_severity(find.severity))):
-                pass
+                log_jira_alert("Finding below jira_minimum_severity threshold.", find)
+
             else:
+                logger.debug('Trying to create a new JIRA issue')
                 try:
                     JIRAError.log_to_tempfile = False
                     jira = JIRA(
@@ -1055,7 +1058,7 @@ def add_issue(find, push_to_jira):
                 except JIRAError as e:
                     log_jira_alert(e.text, find)
         else:
-            log_jira_alert("Finding not active, verified, or over threshold.",
+            log_jira_alert("Finding not active or not verified.",
                            find)
 
 
