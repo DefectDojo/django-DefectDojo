@@ -623,18 +623,18 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
             old_findings = None
             if test.engagement.deduplication_on_engagement:
                 old_findings = Finding.objects.exclude(test=test) \
-                                                        .exclude(hash_code__in=new_hash_codes) \
-                                                        .exclude(hash_code__in=skipped_hashcodes) \
-                                        .filter(test__engagement=test.engagement,
-                                                test__test_type=test_type,
-                                                active=True)
+                                              .exclude(hash_code__in=new_hash_codes) \
+                                              .exclude(hash_code__in=skipped_hashcodes) \
+                                              .filter(test__engagement=test.engagement,
+                                                  test__test_type=test_type,
+                                                  active=True)
             else:
                 old_findings = Finding.objects.exclude(test=test) \
-                                                        .exclude(hash_code__in=new_hash_codes) \
-                                                        .exclude(hash_code__in=skipped_hashcodes) \
-                                        .filter(test__engagement__product=test.engagement.product,
-                                                test__test_type=test_type,
-                                                active=True)
+                                              .exclude(hash_code__in=new_hash_codes) \
+                                              .exclude(hash_code__in=skipped_hashcodes) \
+                                              .filter(test__engagement__product=test.engagement.product,
+                                                  test__test_type=test_type,
+                                                  active=True)
 
             for old_finding in old_findings:
                 old_finding.active = False
