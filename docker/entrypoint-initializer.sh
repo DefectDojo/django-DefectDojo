@@ -26,8 +26,6 @@ do
 done
 echo
 
-python manage.py makemigrations dojo
-python manage.py makemigrations --merge --noinput
 python manage.py migrate
 cat <<EOD | python manage.py shell
 import os
