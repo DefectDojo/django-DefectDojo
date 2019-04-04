@@ -994,7 +994,7 @@ def add_issue(find, push_to_jira):
     logger.debug('adding issue: ' + str(find))
     eng = Engagement.objects.get(test=find.test)
     prod = Product.objects.get(engagement=eng)
-    
+
     if JIRA_PKey.objects.filter(product=prod).count() == 0:
         log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', find)
         return
