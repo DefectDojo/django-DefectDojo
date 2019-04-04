@@ -285,7 +285,8 @@
                                 <td class="nowrap">
                                   {% if "enable_jira"|get_system_setting %}
                                     {% if finding.jira.jira_key %}
-                                      <a href="{{finding.jira_conf.url}}/browse/{{finding.jira.jira_key}}" target="_blank" alt="Jira Bug - {{finding.jira.jira_key}}"><i class="fa fa-bug fa-fw"></i></a>
+                                      <a href="{{finding.jira_conf.url}}/browse/{{finding.jira.jira_key}}" target="_blank" 
+                                           alt="Jira Bug - {{finding.jira.jira_key}}" data-toggle="tooltip" data-placement="bottom" title="{{finding.jira.jira_key}}"><i class="fa fa-bug fa-fw"></i></a>
                                     {% endif %}
                                     {% if finding.notes.count %}
                                       <a href="{% url 'view_finding' finding.id %}#vuln_notes" alt="{{ finding.notes.count }} comment{{ finding.notes.count|pluralize }}">
