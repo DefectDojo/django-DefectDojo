@@ -24,6 +24,14 @@ If you ran DefectDojo with compose before and you want to prevent the
 initializer container from running again, define an environment variable
 DD_INITIALIZE=false to prevent re-initialization.
 
+### Develop with Docker Compose
+
+For developing the easiset way to make changes is to startup DefectDojo in debug by running `docker-compose -f docker-compose.yml up`. This starts the DefectDojo (uwsgi) container with manage.py and shares the local source directory so that changes to the code immediately restart the process.
+
+Navigate to the container directly, <http://localhost:8000>
+
+The initializer container can be disabled by exporting: `export DD_INITIALIZE=false`
+
 ### Build Images Locally
 
 Build the docker containers locally for testing purposes.
@@ -35,6 +43,14 @@ docker build -t defectdojo/defectdojo-nginx -f Dockerfile.nginx .
 ```
 
 ### Clean up Docker Compose
+
+Removes all containers 
+
+```zsh
+docker-compose down
+```
+
+Removes all containers, networks and the database volume
 
 ```zsh
 docker-compose down --volumes
