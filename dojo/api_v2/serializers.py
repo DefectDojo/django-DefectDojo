@@ -557,9 +557,13 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
             for item in parser.items:
                 if skip_duplicates:
                     hash_code = item.compute_hash_code()
-                    if Finding.objects.filter(Q(active=True) | Q(false_p=True) | Q(duplicate=True),
+                    if ((test.engagement.deduplication_on_engagement and
+                        Finding.objects.filter(Q(active=True) | Q(false_p=True) | Q(duplicate=True),
+                                              test__engagement=test.engagement,
+                                              hash_code=hash_code).exists()) or
+                       (Finding.objects.filter(Q(active=True) | Q(false_p=True) | Q(duplicate=True),
                                               test__engagement__product=test.engagement.product,
-                                              hash_code=hash_code).exists():
+                                              hash_code=hash_code).exists())):
                         skipped_hashcodes.append(hash_code)
                         continue
 
@@ -620,12 +624,23 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         if close_old_findings:
             # Close old active findings that are not reported by this scan.
             new_hash_codes = test.finding_set.values('hash_code')
-            for old_finding in Finding.objects.exclude(test=test) \
+            old_findings = None
+            if test.engagement.deduplication_on_engagement:
+                old_findings = Finding.objects.exclude(test=test) \
                                               .exclude(hash_code__in=new_hash_codes) \
                                               .exclude(hash_code__in=skipped_hashcodes) \
-                               .filter(test__engagement__product=test.engagement.product,
-                                       test__test_type=test_type,
-                                       active=True):
+                                              .filter(test__engagement=test.engagement,
+                                                  test__test_type=test_type,
+                                                  active=True)
+            else:
+                old_findings = Finding.objects.exclude(test=test) \
+                                              .exclude(hash_code__in=new_hash_codes) \
+                                              .exclude(hash_code__in=skipped_hashcodes) \
+                                              .filter(test__engagement__product=test.engagement.product,
+                                                  test__test_type=test_type,
+                                                  active=True)
+
+            for old_finding in old_findings:
                 old_finding.active = False
                 old_finding.mitigated = datetime.datetime.combine(
                     test.target_start,
