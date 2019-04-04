@@ -1209,6 +1209,7 @@ class Finding(models.Model):
         long_desc = ''
         long_desc += '*' + self.title + '*\n\n'
         long_desc += '*Severity:* ' + self.severity + '\n\n'
+        long_desc += '*Cve:* ' + self.cve + '\n\n'
         long_desc += '*Systems*: \n'
         for e in self.endpoints.all():
             long_desc += str(e) + '\n\n'
