@@ -29,6 +29,9 @@ from dojo.models import Finding, Engagement, Finding_Template, Product, JIRA_PKe
 from asteval import Interpreter
 from requests.auth import HTTPBasicAuth
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 """
 Helper functions for DefectDojo
@@ -67,11 +70,12 @@ def sync_false_history(new_finding, *args, **kwargs):
         super(Finding, new_finding).save(*args, **kwargs)
 
 
-def is_deduplication_on_engamgent(new_finding, to_duplicate_finding):
+def is_deduplication_on_engagement_mismatch(new_finding, to_duplicate_finding):
     return not new_finding.test.engagement.deduplication_on_engagement and to_duplicate_finding.test.engagement.deduplication_on_engagement
 
 
 def sync_dedupe(new_finding, *args, **kwargs):
+    logger.debug('sync_dedupe for: ' + str(new_finding.id) + ":" + str(new_finding.title))
     if new_finding.test.engagement.deduplication_on_engagement:
         eng_findings_cwe = Finding.objects.filter(
             test__engagement=new_finding.test.engagement,
@@ -103,26 +107,17 @@ def sync_dedupe(new_finding, *args, **kwargs):
             date__lte=new_finding.date).exclude(id=new_finding.id).exclude(
             duplicate=True)
 
-        total_findings = eng_findings_cwe | eng_findings_title
-        # total_findings = total_findings.order_by('date')
+    total_findings = eng_findings_cwe | eng_findings_title
+    # total_findings = total_findings.order_by('date')
 
-        for find in total_findings:
-            if is_deduplication_on_engamgent(new_finding, find):
-                continue
-            if find.endpoints.count() != 0 and new_finding.endpoints.count() != 0:
-                list1 = new_finding.endpoints.all()
-                list2 = find.endpoints.all()
-                if all(x in list1 for x in list2):
-                    new_finding.duplicate = True
-                    new_finding.active = False
-                    new_finding.verified = False
-                    new_finding.duplicate_finding = find
-                    find.duplicate_list.add(new_finding)
-                    find.found_by.add(new_finding.test.test_type)
-                    super(Finding, new_finding).save(*args, **kwargs)
-                    break
-            elif find.line == new_finding.line and find.file_path == new_finding.file_path and new_finding.static_finding and len(
-                    new_finding.file_path) > 0:
+    for find in total_findings:
+        if is_deduplication_on_engagement_mismatch(new_finding, find):
+            logger.debug('deduplication_on_engagement_mismatch, skipping dedupe.')
+            continue
+        if find.endpoints.count() != 0 and new_finding.endpoints.count() != 0:
+            list1 = new_finding.endpoints.all()
+            list2 = find.endpoints.all()
+            if all(x in list1 for x in list2):
                 new_finding.duplicate = True
                 new_finding.active = False
                 new_finding.verified = False
@@ -130,14 +125,24 @@ def sync_dedupe(new_finding, *args, **kwargs):
                 find.duplicate_list.add(new_finding)
                 find.found_by.add(new_finding.test.test_type)
                 super(Finding, new_finding).save(*args, **kwargs)
-            elif find.hash_code == new_finding.hash_code:
-                new_finding.duplicate = True
-                new_finding.active = False
-                new_finding.verified = False
-                new_finding.duplicate_finding = find
-                find.duplicate_list.add(new_finding)
-                find.found_by.add(new_finding.test.test_type)
-                super(Finding, new_finding).save(*args, **kwargs)
+                break
+        elif find.line == new_finding.line and find.file_path == new_finding.file_path and new_finding.static_finding and len(
+                new_finding.file_path) > 0:
+            new_finding.duplicate = True
+            new_finding.active = False
+            new_finding.verified = False
+            new_finding.duplicate_finding = find
+            find.duplicate_list.add(new_finding)
+            find.found_by.add(new_finding.test.test_type)
+            super(Finding, new_finding).save(*args, **kwargs)
+        elif find.hash_code == new_finding.hash_code:
+            new_finding.duplicate = True
+            new_finding.active = False
+            new_finding.verified = False
+            new_finding.duplicate_finding = find
+            find.duplicate_list.add(new_finding)
+            find.found_by.add(new_finding.test.test_type)
+            super(Finding, new_finding).save(*args, **kwargs)
 
 
 def sync_rules(new_finding, *args, **kwargs):
