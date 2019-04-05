@@ -37,7 +37,7 @@ class BundlerAuditParser(object):
                 elif field.startswith('Solution'):
                     advisory_solution = field.replace('Solution: ', '')
 
-            title = "Gem " + gem_name + ": " + advisory_title + " [" + advisory_cve + "]"          
+            title = "Gem " + gem_name + ": " + advisory_title + " [" + advisory_cve + "]"
             findingdetail = "Gem **" + gem_name + "** has known security issues:\n"
             findingdetail += '**Name**: ' + gem_name + '\n'
             findingdetail += '**Version**: ' + gem_version + '\n'
@@ -46,7 +46,6 @@ class BundlerAuditParser(object):
             references = advisory_url
             fingerprint = "bundler-audit" + gem_name + gem_version + advisory_cve + sev
             dupe_key = hashlib.md5(fingerprint).hexdigest()
-            
             if dupe_key in dupes:
                 find = dupes[dupe_key]
             else:
@@ -69,4 +68,3 @@ class BundlerAuditParser(object):
                 dupes[dupe_key] = find
 
         self.items = dupes.values()
-        
