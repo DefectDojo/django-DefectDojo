@@ -14,9 +14,6 @@ class NpmAuditParser(object):
             self.items = []
 
     def parse_json(self, json_output):
-        if json_output is None:
-            self.items = []
-            return
         try:
             tree = json.load(json_output)
             subtree = tree.get('advisories')
