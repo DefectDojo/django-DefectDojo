@@ -1,0 +1,85 @@
+{
+  "actions": [
+    {
+      "action": "install",
+      "module": "mocha-jenkins-reporter",
+      "target": "0.3.12",
+      "isMajor": false,
+      "resolves": [
+        {
+          "id": 534,
+          "path": "mocha-jenkins-reporter>mocha>debug",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 146,
+          "path": "mocha-jenkins-reporter>mocha>growl",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        }
+      ]
+    }
+  ],
+  "advisories": {
+    "146": {
+      "findings": [
+        {
+          "version": "1.9.2",
+          "paths": [
+            "mocha-jenkins-reporter>mocha>growl"
+          ],
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 146,
+      "created": "2016-09-06T12:49:40.000Z",
+      "updated": "2018-03-02T21:07:28.071Z",
+      "deleted": null,
+      "title": "Command Injection",
+      "found_by": {
+        "name": "Cristian-Alexandru Staicu"
+      },
+      "reported_by": {
+        "name": "Cristian-Alexandru Staicu"
+      },
+      "module_name": "growl",
+      "cves": [
+        "CVE-2017-16042"
+      ],
+      "vulnerable_versions": "<1.10.2",
+      "patched_versions": ">=1.10.2",
+      "overview": "Affected versions of `growl` do not properly sanitize input prior to passing it into a shell command, allowing for arbitrary command execution.",
+      "recommendation": "Update to version 1.10.2 or later.",
+      "references": "[Issue #60](https://github.com/tj/node-growl/issues/60)\n[PR #61](https://github.com/tj/node-growl/pull/61)",
+      "access": "public",
+      "severity": "critical",
+      "cwe": "CWE-94",
+      "metadata": {
+        "module_type": "CLI.Library",
+        "exploitability": 5,
+        "affected_components": ""
+      },
+      "url": "https://www.npmjs.com/advisories/146"
+    }
+  },
+  "muted": [],
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 1
+    },
+    "dependencies": 0,
+    "devDependencies": 43,
+    "optionalDependencies": 0,
+    "totalDependencies": 43
+  },
+  "runId": "ab9f276f-15b6-4034-a7a2-f0af6d4420f3"
+}
