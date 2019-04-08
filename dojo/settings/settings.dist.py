@@ -63,6 +63,7 @@ env = environ.Env(
     DD_DATABASE_USER=(str, 'defectdojo'),
     DD_SECRET_KEY=(str, '.'),
     DD_CREDENTIAL_AES_256_KEY=(str, '.'),
+    DD_DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 8388608)  # Max post size set to 8mb
 )
 
 
@@ -204,6 +205,8 @@ STATICFILES_FINDERS = (
 FILE_UPLOAD_HANDLERS = (
     "django.core.files.uploadhandler.TemporaryFileUploadHandler",
 )
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = env('DD_DATA_UPLOAD_MAX_MEMORY_SIZE')
 
 # ------------------------------------------------------------------------------
 # URLS
