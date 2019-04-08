@@ -27,6 +27,11 @@ done
 echo
 
 python manage.py migrate
+
+ADMIN_EXISTS=$(echo "SELECT * from auth_user;" | python manage.py dbshell | grep admin)
+
+if [ -z "${ADMIN_EXISTS}" ]
+then
 cat <<EOD | python manage.py shell
 import os
 from django.contrib.auth.models import User
@@ -39,15 +44,16 @@ User.objects.create_superuser(
 )
 EOD
 
-python manage.py loaddata product_type
-python manage.py loaddata test_type
-python manage.py loaddata development_environment
-python manage.py loaddata system_settings
-python manage.py loaddata benchmark_type
-python manage.py loaddata benchmark_category
-python manage.py loaddata benchmark_requirement
-python manage.py loaddata language_type
-python manage.py loaddata objects_review
-python manage.py loaddata regulation
-python manage.py installwatson
-exec python manage.py buildwatson
+  python manage.py loaddata product_type
+  python manage.py loaddata test_type
+  python manage.py loaddata development_environment
+  python manage.py loaddata system_settings
+  python manage.py loaddata benchmark_type
+  python manage.py loaddata benchmark_category
+  python manage.py loaddata benchmark_requirement
+  python manage.py loaddata language_type
+  python manage.py loaddata objects_review
+  python manage.py loaddata regulation
+  python manage.py installwatson
+  exec python manage.py buildwatson
+fi

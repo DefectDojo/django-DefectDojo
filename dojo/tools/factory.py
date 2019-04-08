@@ -41,6 +41,7 @@ from dojo.tools.safety.parser import SafetyParser
 from dojo.tools.clair_klar.parser import ClairKlarParser
 from dojo.tools.dawnscanner.parser import DawnScannerParser
 from dojo.tools.anchore_engine.parser import AnchoreEngineScanParser
+from dojo.tools.bundler_audit.parser import BundlerAuditParser
 
 __author__ = 'Jay Paz'
 
@@ -138,6 +139,8 @@ def import_parser_factory(file, test, scan_type=None):
         parser = DawnScannerParser(file, test)
     elif scan_type == 'Anchore Engine Scan':
         parser = AnchoreEngineScanParser(file, test)
+    elif scan_type == 'Bundler-Audit Scan':
+        parser = BundlerAuditParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 

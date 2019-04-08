@@ -80,6 +80,6 @@ def get_item(vulnerability, test):
         mitigated=None,
         impact=severity)
 
-    finding.description = finding.description.encode('utf-8').strip()
+    finding.description = finding.description.strip()
 
     return finding

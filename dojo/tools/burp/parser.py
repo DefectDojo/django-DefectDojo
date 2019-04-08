@@ -183,8 +183,14 @@ def get_item(item_node, test):
 
     unsaved_req_resp = list()
     for request_response in item_node.findall('./requestresponse'):
-        request = request_response.findall('request')[0].text
-        response = request_response.findall('response')[0].text
+        try:
+            request = request_response.findall('request')[0].text
+        except:
+            request = ""
+        try:
+            response = request_response.findall('response')[0].text
+        except:
+            response = ""
         unsaved_req_resp.append({"req": request, "resp": response})
 
     try:
