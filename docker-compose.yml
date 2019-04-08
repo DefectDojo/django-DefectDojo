@@ -11,12 +11,13 @@ services:
         protocol: tcp
         mode: host
   uwsgi:
+    image: defectdojo/defectdojo-django:latest
     build: 
       context: ./
       dockerfile: Dockerfile.django
     depends_on:
       - mysql
-    entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', 'python', 'manage.py', 'runserver 0.0.0.0:8000']
+    entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/entrypoint-uwsgi-dev.sh']
     volumes:
       - '.:/app'
     ports:
