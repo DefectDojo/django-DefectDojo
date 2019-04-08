@@ -34,7 +34,7 @@ from dojo.models import Product_Type, Finding, Notes, \
     FindingImageAccessToken, JIRA_Issue, JIRA_PKey, Dojo_User, Cred_Mapping, Test, Product, User
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
     add_comment, jira_get_resolution_id, jira_change_resolution_id, get_jira_connection, \
-    get_system_setting, create_notification, apply_cwe_to_template, Product_Tab, calculate_grade
+    get_system_setting, create_notification, apply_cwe_to_template, Product_Tab, calculate_grade, log_jira_alert
 
 from dojo.tasks import add_issue_task, update_issue_task, add_comment_task
 from django.template.defaultfilters import pluralize
@@ -1470,6 +1470,17 @@ def finding_bulk_update_all(request, pid=None):
                         if prev_prod != finding.test.engagement.product.id:
                             calculate_grade(finding.test.engagement.product)
                             prev_prod = finding.test.engagement.product.id
+
+                for finding in finds:
+                    if JIRA_PKey.objects.filter(product=finding.test.engagement.product).count() == 0:
+                        log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', finding)
+                    else:
+                        old_status = finding.status()
+                        if form.cleaned_data['push_to_jira']:
+                            if JIRA_Issue.objects.filter(finding=finding).exists():
+                                update_issue_task.delay(finding, old_status, True)
+                            else:
+                                add_issue_task.delay(finding, True)
 
                 messages.add_message(request,
                                      messages.SUCCESS,
