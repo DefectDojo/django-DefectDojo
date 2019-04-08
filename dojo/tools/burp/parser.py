@@ -278,7 +278,7 @@ def get_item(item_node, test):
     if detail:
         detail = text_maker.handle(detail)
         if collab_text:
-            detail = text_maker.handle(detail+'<p>'+collab_text+'</p>')
+            detail = text_maker.handle(detail + '<p>' + collab_text + '</p>')
 
     remediation = do_clean(item_node.findall('remediationBackground'))
     if remediation:
