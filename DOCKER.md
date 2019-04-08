@@ -22,13 +22,15 @@ docker logs $container_id 2>&1 | grep "Admin password:"
 
 If you ran DefectDojo with compose before and you want to prevent the
 initializer container from running again, define an environment variable
-DD_INITIALIZE=false to prevent re-initialization.
+`DD_INITIALIZE=false` to prevent re-initialization.
 
 ### Develop with Docker Compose
 
 For developing the easiset way to make changes is to startup DefectDojo in debug by running `docker-compose -f docker-compose.yml up`. This starts the DefectDojo (uwsgi) container with manage.py and shares the local source directory so that changes to the code immediately restart the process.
 
 Navigate to the container directly, <http://localhost:8000>
+
+Build the containers locally: `docker-compose build`
 
 The initializer container can be disabled by exporting: `export DD_INITIALIZE=false`
 
