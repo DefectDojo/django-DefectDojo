@@ -97,7 +97,7 @@ DefectDojo is maintained by:
 
 Project Moderators can help you with pull requests or feedback on dev ideas.
 
-* [Alex Dracea] (https://www.linkedin.com/in/alexandru-marin-dracea-910b51122/)
+* [Alex Dracea](https://www.linkedin.com/in/alexandru-marin-dracea-910b51122/)
 
 ## Hall of Fame
 
