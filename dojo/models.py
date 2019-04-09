@@ -601,7 +601,7 @@ class Product(models.Model):
         return self.prod_type if self.prod_type is not None else 'unknown'
 
 
-class ScanSettings(models.Model):
+class PortscanSettings(models.Model):
     product = models.ForeignKey(Product, default=1, editable=False)
     addresses = models.TextField(default="none")
     user = models.ForeignKey(User, editable=False)
@@ -619,8 +619,8 @@ class ScanSettings(models.Model):
 
     def get_breadcrumbs(self):
         bc = self.product.get_breadcrumbs()
-        bc += [{'title': "Scan Settings",
-                'url': reverse('view_scan_settings',
+        bc += [{'title': "Portscan Settings",
+                'url': reverse('view_portscan_settings',
                                args=(self.product.id, self.id,))}]
         return bc
 
@@ -632,7 +632,7 @@ removed ip_scans field
 
 
 class Scan(models.Model):
-    scan_settings = models.ForeignKey(ScanSettings, default=1, editable=False)
+    scan_settings = models.ForeignKey(PortscanSettings, default=1, editable=False)
     date = models.DateTimeField(editable=False, blank=True,
                                 default=get_current_datetime)
     protocol = models.CharField(max_length=10, default='TCP')
@@ -646,7 +646,7 @@ class Scan(models.Model):
     def get_breadcrumbs(self):
         bc = self.scan_settings.get_breadcrumbs()
         bc += [{'title': self.__unicode__(),
-                'url': reverse('view_scan', args=(self.id,))}]
+                'url': reverse('view_portscan', args=(self.id,))}]
         return bc
 
 
@@ -694,6 +694,7 @@ class Tool_Configuration(models.Model):
     ssh = models.CharField(max_length=6000, null=True, blank=True)
     api_key = models.CharField(max_length=600, null=True, blank=True,
                                verbose_name="API Key")
+    scan_type = models.CharField(max_length=100, null=True, blank=True, verbose_name="Scan Type")
 
     class Meta:
         ordering = ['name']
@@ -730,6 +731,42 @@ class Engagement_Type(models.Model):
 
     def __unicode__(self):
         return self.name
+
+
+class Notes(models.Model):
+    entry = models.TextField()
+    date = models.DateTimeField(null=False, editable=False,
+                                default=get_current_datetime)
+    author = models.ForeignKey(User, editable=False)
+
+    class Meta:
+        ordering = ['-date']
+
+    def __unicode__(self):
+        return self.entry
+
+
+class Tool_Product_Settings(models.Model):
+    name = models.CharField(max_length=200, null=False)
+    description = models.CharField(max_length=2000, null=True, blank=True)
+    url = models.CharField(max_length=2000, null=True, blank=True)
+    product = models.ForeignKey(Product, default=1, editable=False)
+    tool_configuration = models.ForeignKey(Tool_Configuration, null=False,
+                                           related_name='tool_configuration')
+    tool_project_id = models.CharField(max_length=200, null=True, blank=True)
+    notes = models.ManyToManyField(Notes, blank=True, editable=False)
+
+    class Meta:
+        ordering = ['name']
+
+    def __unicode__(self):
+        return self.name
+
+
+class Tool_Product_History(models.Model):
+    product = models.ForeignKey(Tool_Product_Settings, editable=False)
+    status = models.CharField(max_length=10, default='Pending', editable=False)
+    last_scan = models.DateTimeField(null=False, editable=False, default=now)
 
 
 class Engagement(models.Model):
@@ -789,6 +826,8 @@ class Engagement(models.Model):
     source_code_management_server = models.ForeignKey(Tool_Configuration, null=True, blank=True, verbose_name="SCM Server", help_text="Source code server for CI/CD test", related_name='source_code_management_server')
     source_code_management_uri = models.CharField(max_length=600, null=True, blank=True, verbose_name="Repo", help_text="Resource link to source code")
     orchestration_engine = models.ForeignKey(Tool_Configuration, verbose_name="Orchestration Engine", help_text="Orchestration service responsible for CI/CD test", null=True, blank=True, related_name='orchestration')
+    run_tool_test_engine = models.ForeignKey(Tool_Product_Settings, verbose_name="Schedule Product-Tool Test", help_text="A cronjob will run this tool test and import the results as configured after the target start", null=True, blank=True, related_name='run_tool_test')
+    run_tool_test = models.BooleanField(default=False, editable=False)
     deduplication_on_engagement = models.BooleanField(default=False)
 
     class Meta:
@@ -932,19 +971,6 @@ class Endpoint(models.Model):
             return self.host[:self.host.index(":")]
         else:
             return self.host
-
-
-class Notes(models.Model):
-    entry = models.TextField()
-    date = models.DateTimeField(null=False, editable=False,
-                                default=get_current_datetime)
-    author = models.ForeignKey(User, editable=False)
-
-    class Meta:
-        ordering = ['-date']
-
-    def __unicode__(self):
-        return self.entry
 
 
 class Development_Environment(models.Model):
@@ -1666,28 +1692,6 @@ class Notifications(models.Model):
     user = models.ForeignKey(User, default=None, null=True, editable=False)
 
 
-class Tool_Product_Settings(models.Model):
-    name = models.CharField(max_length=200, null=False)
-    description = models.CharField(max_length=2000, null=True, blank=True)
-    url = models.CharField(max_length=2000, null=True, blank=True)
-    product = models.ForeignKey(Product, default=1, editable=False)
-    tool_configuration = models.ForeignKey(Tool_Configuration, null=False,
-                                           related_name='tool_configuration')
-    tool_project_id = models.CharField(max_length=200, null=True, blank=True)
-    notes = models.ManyToManyField(Notes, blank=True, editable=False)
-
-    class Meta:
-        ordering = ['name']
-
-
-class Tool_Product_History(models.Model):
-    product = models.ForeignKey(Tool_Product_Settings, editable=False)
-    last_scan = models.DateTimeField(null=False, editable=False, default=now)
-    succesfull = models.BooleanField(default=True, verbose_name="Succesfully")
-    configuration_details = models.CharField(max_length=2000, null=True,
-                                             blank=True)
-
-
 class Alerts(models.Model):
     title = models.CharField(max_length=100, default='', null=False)
     description = models.CharField(max_length=2000, null=True)
@@ -2100,7 +2104,7 @@ admin.site.register(UserContactInfo)
 admin.site.register(Notes)
 admin.site.register(Report)
 admin.site.register(Scan)
-admin.site.register(ScanSettings)
+admin.site.register(PortscanSettings)
 admin.site.register(IPScan)
 admin.site.register(Alerts)
 admin.site.register(JIRA_Issue)

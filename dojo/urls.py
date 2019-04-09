@@ -11,7 +11,7 @@ from django.http import HttpResponse
 
 from dojo import views
 from dojo.api import UserResource, ProductResource, EngagementResource, \
-    TestResource, FindingResource, ScanSettingsResource, ScanResource, \
+    TestResource, FindingResource, PortscanSettingsResource, PortscanResource, \
     StubFindingResource, FindingTemplateResource, ImportScanResource, \
     ReImportScanResource, JiraResource, JIRA_ConfResource, EndpointResource, \
     JIRA_IssueResource, ToolProductSettingsResource, Tool_ConfigurationResource, \
@@ -35,7 +35,7 @@ from dojo.metrics.urls import urlpatterns as metrics_urls
 from dojo.product.urls import urlpatterns as prod_urls
 from dojo.product_type.urls import urlpatterns as pt_urls
 from dojo.reports.urls import urlpatterns as reports_urls
-from dojo.scan.urls import urlpatterns as scan_urls
+from dojo.portscan.urls import urlpatterns as portscan_urls
 from dojo.search.urls import urlpatterns as search_urls
 from dojo.test.urls import urlpatterns as test_urls
 from dojo.test_type.urls import urlpatterns as test_type_urls
@@ -67,8 +67,8 @@ v1_api.register(TestTypeResource())
 v1_api.register(TestResource())
 v1_api.register(FindingResource())
 v1_api.register(FindingTemplateResource())
-v1_api.register(ScanSettingsResource())
-v1_api.register(ScanResource())
+v1_api.register(PortscanSettingsResource())
+v1_api.register(PortscanResource())
 v1_api.register(StubFindingResource())
 v1_api.register(ImportScanResource())
 v1_api.register(ReImportScanResource())
@@ -121,7 +121,7 @@ ur += metrics_urls
 ur += prod_urls
 ur += pt_urls
 ur += reports_urls
-ur += scan_urls
+ur += portscan_urls
 ur += search_urls
 ur += test_type_urls
 ur += test_urls

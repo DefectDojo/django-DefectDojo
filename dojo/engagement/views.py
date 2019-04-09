@@ -1,7 +1,7 @@
 # #  engagements
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 import operator
 
 from django.contrib.auth.models import User
@@ -23,9 +23,9 @@ from dojo.filters import EngagementFilter
 from dojo.forms import CheckForm, \
     UploadThreatForm, UploadRiskForm, NoteForm, DoneForm, \
     EngForm, TestForm, ReplaceRiskAcceptanceForm, AddFindingsRiskAcceptanceForm, DeleteEngagementForm, ImportScanForm, \
-    JIRAFindingForm, CredMappingForm
+    JIRAFindingForm, CredMappingForm, EngagementPlanForm
 from dojo.models import Finding, Product, Engagement, Test, \
-    Check_List, Test_Type, Notes, \
+    Check_List, Test_Type, Notes, Tool_Product_Settings, Tool_Type, \
     Risk_Acceptance, Development_Environment, BurpRawRequestResponse, Endpoint, \
     JIRA_PKey, JIRA_Issue, Cred_Mapping, Dojo_User, System_Settings
 from dojo.tools.factory import import_parser_factory
@@ -351,6 +351,161 @@ def view_engagement(request, eid):
             'network': network,
             'preset_test_type': preset_test_type
         })
+
+
+@user_passes_test(lambda u: u.is_staff)
+def plan_engagements(request):
+    plan_form = EngagementPlanForm()
+
+    PRODUCT_CHOICES = []
+    for product in Product.objects.all():
+        PRODUCT_CHOICES.append((product.id, product.name))
+    plan_form.fields["products"].choices = PRODUCT_CHOICES
+
+    if request.method == 'POST':
+        plan_form = EngagementPlanForm(request.POST)
+        plan_form.fields["products"].choices = PRODUCT_CHOICES
+
+        if plan_form.is_valid():
+            # Clean old prefixes
+            if len(plan_form.cleaned_data['remove_prefix']) > 0:
+                if "," not in plan_form.cleaned_data['remove_prefix']:
+                    clearPrefixes = [plan_form.cleaned_data['remove_prefix']]
+                else:
+                    clearPrefixes = plan_form.cleaned_data['remove_prefix'].split(",")
+
+                queryFilter = Q()
+                for clearPrefix in clearPrefixes:
+                    queryFilter = queryFilter | Q(name__startswith=clearPrefix)
+
+                clearEngagements = Engagement.objects.filter(active=True, target_start__gte=plan_form.cleaned_data['from_date'], target_end__lte=plan_form.cleaned_data['to_date']).filter(queryFilter)
+
+                if len(clearEngagements):
+                    for clearEngagement in clearEngagements:
+                        del clearEngagement.tags
+                        clearEngagement.delete()
+
+                    messages.add_message(
+                        request,
+                        messages.SUCCESS,
+                        'Removed ' + str(len(clearEngagements)) + ' engagements due to their prefix.',
+                        extra_tags='alert-success')
+
+            # Load products by ID
+            products = []
+            for product_id in plan_form.cleaned_data['products']:
+                products.append(Product.objects.get(id=product_id))
+
+            # Sort products
+            criticality_mapping = {'very high': 6, 'high': 5, 'medium': 4, 'low': 3, 'very low': 2, 'none': 1, None: 1}
+            sortMap = {'business_criticality': lambda x: criticality_mapping[x.business_criticality],
+                       'revenue': lambda x: x.revenue,
+                       'user_records': lambda x: x.user_records}
+
+            sort_order = plan_form.cleaned_data['products_order']
+            products = sorted(products, key=sortMap[sort_order[1:]])
+            if sort_order[0] == "-":
+                products.reverse()
+
+            # Prepare settings
+            tool_type = None
+            if plan_form.cleaned_data['start_tool_category'] is not None:
+                tool_type = Tool_Type.objects.get(id=plan_form.cleaned_data['start_tool_category'].id)
+
+            engagement_settings = {"prefix": plan_form.cleaned_data['prefix'], "days": int(plan_form.cleaned_data['days_per_engagement']), "parallel": int(plan_form.cleaned_data['parallel_engagements'])}
+            break_settings = {"days": int(plan_form.cleaned_data['break_days']), "interval": int(plan_form.cleaned_data['break_interval'])}
+            break_counter = []
+            for i in xrange(engagement_settings['parallel']):
+                break_counter.append({"work_days": 0, "break_days": 0, "on_break": False})
+
+            # Loop through dates and ignore deselected ones
+            delta = timedelta(days=1)
+            d = plan_form.cleaned_data['from_date']
+            i = 0
+            while d <= plan_form.cleaned_data['to_date'] and len(products) > 0:
+                if str(d.weekday()) in plan_form.cleaned_data['allowed_days']:
+                    engagamentCollisions = Engagement.objects.filter(active=True, engagement_type='Interactive', target_start__lte=d, target_end__gte=d)
+                    if len(engagamentCollisions) < engagement_settings['parallel']:
+                        # Day is not full yet
+                        for i in xrange(engagement_settings['parallel'] - len(engagamentCollisions)):
+                            if len(products) == 0:
+                                break
+
+                            # Go through available slots
+                            for break_i in xrange(len(break_counter)):
+                                # Process break information, not creating engagement during planning
+                                if break_counter[break_i]['on_break']:
+                                    break_counter[break_i]['break_days'] += 1
+                                    if break_counter[break_i]['break_days'] >= break_settings['days']:
+                                        break_counter[break_i]['break_days'] = 0
+                                        break_counter[break_i]['on_break'] = False
+                                else:
+                                    break_counter[break_i]['work_days'] += engagement_settings['days']
+                                    if break_counter[break_i]['work_days'] >= break_settings['interval']:
+                                        break_counter[break_i]['work_days'] = 0
+                                        break_counter[break_i]['on_break'] = True
+
+                                    # Found time slot for work
+                                    # Get top priority product
+                                    planProduct = products.pop(0)
+
+                                    # Find end date according to weekday limitations
+                                    planEnd = d
+                                    planDays = 0
+                                    while planDays < engagement_settings['days']:
+                                        if str(planEnd.weekday()) in plan_form.cleaned_data['allowed_days']:
+                                            planDays += 1
+                                        planEnd += timedelta(days=1)
+
+                                    # Create engagement entry
+                                    engagement = Engagement()
+                                    product = Product.objects.get(id=planProduct.id)
+                                    engagement.name = engagement_settings['prefix'] + planProduct.name
+                                    engagement.description = "Planned via Engagement Planner"
+                                    engagement.threat_model = False
+                                    engagement.api_test = False
+                                    engagement.pen_test = False
+                                    engagement.check_list = False
+                                    engagement.target_start = d
+                                    engagement.target_end = planEnd
+                                    engagement.product = planProduct
+                                    engagement.active = True
+                                    engagement.status = 'Not Started'
+
+                                    if tool_type is not None:
+                                        tool_configs = Tool_Product_Settings.objects.filter(product=planProduct.id)
+
+                                        schedule_tool = None
+                                        for tc in tool_configs:
+                                            c = tc.tool_configuration
+                                            if tc.tool_configuration.tool_type.id == tool_type.id:
+                                                schedule_tool = tc
+                                                break
+
+                                        if schedule_tool is not None:
+                                            engagement.run_tool_test = True
+                                            engagement.run_tool_test_engine = schedule_tool
+
+                                    engagement.save()
+
+                                    if len(products) == 0:
+                                        break
+
+                d += delta
+
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Planned engagements successfully.',
+                extra_tags='alert-success')
+
+            return HttpResponseRedirect(
+                    reverse('plan_engagements', args=()))
+
+    add_breadcrumb(parent=None, title="Plan Engagements", top_level=True, request=request)
+    return render(request, 'dojo/engagement_plan.html', {
+        'tform': plan_form,
+    })
 
 
 @user_passes_test(lambda u: u.is_staff)
