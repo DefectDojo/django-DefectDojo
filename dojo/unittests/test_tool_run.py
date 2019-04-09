@@ -29,8 +29,8 @@ class TestToolRun(TransactionTestCase):
         e = Endpoint()
         e.product = p
         e.host = 'http://example.com'
+        e.export_tool = True
         e.save()
-        Tag.objects.add_tag(e, 'tool-export')
 
         tt = Tool_Type()
         tt.Name = 'Tool Type 1'

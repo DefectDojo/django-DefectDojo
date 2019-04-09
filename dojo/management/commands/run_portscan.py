@@ -153,11 +153,10 @@ class Command(BaseCommand):
 
             scan_results = set()
             try:
-                scan_results = set(literal_eval(IPScan.objects.get(
-                    address=host,
-                    scan=Scan.objects.get(
-                        id=service_dict['scan_id'])).services + ')')
-                scan_results = map(lambda x: str(x[0]) + '/' + str(x[1]) + ': ' + str(x[3]), scan_results)
+                scan_results = set(literal_eval(IPScan.objects.get(address=host, scan=Scan.objects.get(id=service_dict['scan_id'])).services + ')'))
+
+                scan_formatter = lambda x: str(x[0]) + '/' + str(x[1]) + ': ' + str(x[3])
+                scan_results = map(scan_formatter, scan_results)
             except:
                 scan.status = 'Failed'
                 scan.save()

@@ -46,6 +46,7 @@
                             <th>{% dojo_sort request 'Endpoint' 'host' %}</th>
                             <th>{% dojo_sort request 'Product' 'product' 'asc' %}</th>
                             <th nowrap="nowrap">Open Findings</th>
+                            <th nowrap="nowrap">Provide to Tools</th>
                         </tr>
 
                         {% for e in endpoints %}
@@ -80,6 +81,13 @@
                                   {% endif %}
                                   {% else %}
                                   No Open, Active Findings
+                                  {% endif %}
+                                </td>
+                                <td>
+                                  {% if e.export_tool %}
+                                  <a title="Endpoint is provided to tool runs" class="text-success" href="{% url 'edit_endpoint' e.id %}">Enabled</a>
+                                  {% else %}
+                                  <a title="Endpoint is not provided to tool runs" href="{% url 'edit_endpoint' e.id %}">Disabled</a>
                                   {% endif %}
                                 </td>
                             </tr>

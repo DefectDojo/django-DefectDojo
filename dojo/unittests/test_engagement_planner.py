@@ -73,8 +73,8 @@ class TestEngagementPlanner(TestCase):
         e1 = Endpoint()
         e1.product = p1
         e1.host = 'http://example.com'
+        e1.export_tool = True
         e1.save()
-        Tag.objects.add_tag(e1, 'tool-export')
 
         p2 = Product()
         p2.Name = 'Test Product 2'
@@ -84,8 +84,8 @@ class TestEngagementPlanner(TestCase):
         e2 = Endpoint()
         e2.product = p2
         e2.host = 'http://example2.com'
+        e2.export_tool = True
         e2.save()
-        Tag.objects.add_tag(e2, 'tool-export')
 
         call_command('loaddata', 'dojo/fixtures/system_settings', verbosity=0)
 
