@@ -1361,6 +1361,7 @@ def dojo_crypto_encrypt(plaintext):
     if plaintext:
         key = None
         key = get_db_key()
+        print("key", key)
 
         iv = os.urandom(16)
         data = prepare_for_save(
@@ -1382,6 +1383,11 @@ def get_db_key():
     db_key = None
     if hasattr(settings, 'DB_KEY'):
         db_key = settings.DB_KEY
+
+    if hasattr(settings, 'SECRET_KEY'):
+        db_key = settings.SECRET_KEY
+
+    if db_key is not None:
         db_key = binascii.b2a_hex(
             hashlib.sha256(db_key).digest().rstrip())[:32]
 

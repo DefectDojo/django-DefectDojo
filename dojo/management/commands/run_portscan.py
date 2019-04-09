@@ -10,7 +10,7 @@ from django.core.management.base import BaseCommand
 from nmap import PortScannerAsync, PortScannerError
 from pytz import timezone
 
-from dojo.models import Scan, Product, ScanSettings, IPScan
+from dojo.models import Scan, Product, PortscanSettings, IPScan
 from django.conf import settings
 from dojo.utils import get_system_setting
 
@@ -156,10 +156,8 @@ class Command(BaseCommand):
                 scan_results = set(literal_eval(IPScan.objects.get(
                     address=host,
                     scan=Scan.objects.get(
-                        id=service_dict['scan_id'])).services))
-                scan_results = map(
-                    lambda x: str(x[0]) + '/' + str(x[1]) + ': ' + str(x[3]),
-                    scan_results)
+                        id=service_dict['scan_id'])).services + ')')
+                scan_results = map(lambda x: str(x[0]) + '/' + str(x[1]) + ': ' + str(x[3]), scan_results)
             except:
                 scan.status = 'Failed'
                 scan.save()
@@ -204,8 +202,7 @@ class Command(BaseCommand):
             print "Must specify an argument: Weekly, Monthly, Quarterly, or ID",\
                 " of Scan Settings to use."
             sys.exit(0)
-        if (type in ["Weekly", "Monthly", "Quarterly"]
-                or type.isdigit()):
+        if (type in ["Weekly", "Monthly", "Quarterly"] or type.isdigit()):
             pass
         else:
             print("Unexpected parameter: " + str(args[0]))
@@ -214,9 +211,9 @@ class Command(BaseCommand):
             sys.exit(0)
 
         if type.isdigit():
-            scSettings = ScanSettings.objects.filter(id=type)
+            scSettings = PortscanSettings.objects.filter(id=type)
         else:
-            scSettings = ScanSettings.objects.filter(frequency=type)
+            scSettings = PortscanSettings.objects.filter(frequency=type)
 
         if len(scSettings) <= 0:
             print("No scan settings found with parameter specified.")
@@ -270,8 +267,7 @@ class Command(BaseCommand):
                 else:
                     try:
                         most_recent_ports = map(
-                            lambda x: str(x[0]) + '/' + str(x[1]) + ': ' +
-                            str(x[3]),
+                            lambda x: str(x[0]) + '/' + str(x[1]) + ': ' + str(x[3]),
                             literal_eval(most_recent_ipscans.get(
                                 address=addr).services))
                     except:
@@ -296,6 +292,6 @@ class Command(BaseCommand):
         scan_queue.join()
 
 
-def run_on_deman_scan(sid):
-    call_command('run_scan', sid)
+def run_on_demand_scan(sid):
+    call_command('run_portscan', sid)
     return True

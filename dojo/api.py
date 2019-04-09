@@ -17,13 +17,13 @@ from django.utils import timezone
 
 
 from dojo.models import Product, Engagement, Test, Finding, \
-    User, ScanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance, \
+    User, PortscanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, \
     BurpRawRequestResponse, Endpoint, Notes, JIRA_PKey, JIRA_Conf, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Languages, Language_Type, App_Analysis, Product_Type
 from dojo.forms import ProductForm, EngForm, TestForm, \
-    ScanSettingsForm, FindingForm, StubFindingForm, FindingTemplateForm, \
+    PortscanSettingsForm, FindingForm, StubFindingForm, FindingTemplateForm, \
     ImportScanForm, SEVERITY_CHOICES, JIRAForm, JIRA_PKeyForm, EditEndpointForm, \
     JIRA_IssueForm, ToolConfigForm, ToolProductSettingsForm, \
     ToolTypeForm, LanguagesTypeForm, Languages_TypeTypeForm, App_AnalysisTypeForm, \
@@ -190,7 +190,7 @@ class UserProductsOnlyAuthorization(Authorization):
 
 
 # Authorization class for Scan Settings
-class UserScanSettingsAuthorization(Authorization):
+class UserPortscanSettingsAuthorization(Authorization):
     def read_list(self, object_list, bundle):
         # This assumes a ``QuerySet`` from ``ModelResource``.
         if bundle.request.user.is_staff:
@@ -242,7 +242,7 @@ class UserScanSettingsAuthorization(Authorization):
 
 
 # Authorization class for Scan Settings
-class UserScanAuthorization(Authorization):
+class UserPortscanAuthorization(Authorization):
     def read_list(self, object_list, bundle):
         # This assumes a ``QuerySet`` from ``ModelResource``.
         if bundle.request.user.is_staff:
@@ -1139,7 +1139,7 @@ class StubFindingResource(BaseModelResource):
 
 
 '''
-    /api/v1/scansettings/
+    /api/v1/portscansettings/
     GET [/id/], DELETE [/id/]
     Expects: no params or product_id
     Returns test: ALL or by product_id
@@ -1149,13 +1149,13 @@ class StubFindingResource(BaseModelResource):
 '''
 
 
-class ScanSettingsResource(BaseModelResource):
+class PortscanSettingsResource(BaseModelResource):
     user = fields.ForeignKey(UserResource, 'user', null=False)
     product = fields.ForeignKey(ProductResource, 'product', null=False)
 
     class Meta:
         resource_name = 'scan_settings'
-        queryset = ScanSettings.objects.all()
+        queryset = PortscanSettings.objects.all()
 
         list_allowed_methods = ['get', 'post']
         detail_allowed_methods = ['get', 'put', 'post', 'delete']
@@ -1170,12 +1170,12 @@ class ScanSettingsResource(BaseModelResource):
         }
 
         authentication = DojoApiKeyAuthentication()
-        authorization = UserScanSettingsAuthorization()
+        authorization = UserPortscanSettingsAuthorization()
         serializer = Serializer(formats=['json'])
 
         @property
         def validation(self):
-            return ModelFormValidation(form_class=ScanSettingsForm, resource=ScanSettingsResource)
+            return ModelFormValidation(form_class=PortscanSettingsForm, resource=PortscanSettingsResource)
 
 
 """
@@ -1214,9 +1214,9 @@ class IPScanResource(BaseModelResource):
 """
 
 
-class ScanResource(BaseModelResource):
-    scan_settings = fields.ForeignKey(ScanSettingsResource,
-                                      'scan_settings',
+class PortscanResource(BaseModelResource):
+    scan_settings = fields.ForeignKey(PortscanSettingsResource,
+                                      'portscan_settings',
                                       null=False)
     ipscans = fields.ToManyField(
         IPScanResource,
@@ -1238,7 +1238,7 @@ class ScanResource(BaseModelResource):
         }
 
         authentication = DojoApiKeyAuthentication()
-        authorization = UserScanAuthorization()
+        authorization = UserPortscanAuthorization()
         serializer = Serializer(formats=['json'])
 
 

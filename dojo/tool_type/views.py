@@ -17,7 +17,6 @@ from django.shortcuts import render, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from dojo.filters import ProductFilter, ProductFindingFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm
-from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance
 from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, get_system_setting
 from dojo.models import *
 from dojo.models import *
