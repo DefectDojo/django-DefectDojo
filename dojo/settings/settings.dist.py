@@ -63,6 +63,13 @@ env = environ.Env(
     DD_DATABASE_USER=(str, 'defectdojo'),
     DD_SECRET_KEY=(str, '.'),
     DD_CREDENTIAL_AES_256_KEY=(str, '.'),
+    DD_ALLOW_TOOL_RUN_HTTPS=(bool, True),
+    DD_ALLOW_TOOL_RUN_HTTP=(bool, False),
+    DD_ALLOW_TOOL_RUN_SSH=(bool, True),
+    DD_ALLOW_TOOL_RUN_SSH_LOCALHOST=(bool, False),
+    DD_TOOL_RUN_CONFIG_API_HEADER=(str, 'x-api'),
+    DD_TOOL_RUN_CONFIG_MIN_SEVRITY=(str, 'Low'),
+    DD_TOOL_RUN_CONFIG_DUMMY_USER=(int, 1),
 )
 
 
@@ -99,19 +106,19 @@ if os.path.isfile(root('dojo/settings/.env.prod')) or 'DD_ENV_PATH' in os.enviro
 # False if not in os.environ
 DEBUG = env('DD_DEBUG')
 
-# Configure which ways tools are allowed to run
+# Configure how securty tools are allowed to run
 ALLOW_TOOL_RUN = {
-    'https': True,
-    'http': True,
-    'ssh': True,
-    'ssh-localhost': False,  # allows to run shell commands on the same server without authentication
+    'https': env('DD_ALLOW_TOOL_RUN_HTTPS'),
+    'http': env('DD_ALLOW_TOOL_RUN_HTTP'),
+    'ssh': env('DD_ALLOW_TOOL_RUN_SSH'),
+    'ssh-localhost': env('DD_ALLOW_TOOL_RUN_SSH_LOCALHOST'),  # Allow shell commands to run on the same server without authentication, not recommended for production
 }
 
 # Configurations for the tool run
 TOOL_RUN_CONFIG = {
-    'http-api-header': 'x-api',  # HTTP header name for API authentication
-    'min-severity': 'Low',  # minimum severity for import
-    'dummy-user': 1,  # import test result as this user ID
+    'http-api-header': env('DD_TOOL_RUN_CONFIG_API_HEADER'),  # HTTP header name for API authentication
+    'min-severity': env('DD_TOOL_RUN_CONFIG_MIN_SEVRITY'),  # Minimum severity for imports
+    'dummy-user': env('DD_TOOL_RUN_CONFIG_DUMMY_USER'),  # Import test result as this user ID
 }
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
@@ -399,7 +406,6 @@ INSTALLED_APPS = (
     'rest_framework_swagger',
     'dbbackup',
     'taggit_serializer',
-    # 'axes'
     'django_celery_results',
 )
 
