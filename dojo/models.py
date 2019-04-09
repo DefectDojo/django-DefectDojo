@@ -880,9 +880,10 @@ class Endpoint(models.Model):
     product = models.ForeignKey(Product, null=True, blank=True, )
     endpoint_params = models.ManyToManyField(Endpoint_Params, blank=True,
                                              editable=False)
+    export_tool = models.BooleanField(default=False, editable=True, verbose_name='Provide endpoint to tool runs', help_text="This endpoint will be provided as parameter to tool runs of this product, e.g. for a vulnerability scanner")
 
     class Meta:
-        ordering = ['product', 'protocol', 'host', 'path', 'query', 'fragment']
+        ordering = ['product', 'protocol', 'host', 'path', 'query', 'fragment', 'export_tool']
 
     def __unicode__(self):
         from urlparse import uses_netloc

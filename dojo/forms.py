@@ -7,7 +7,7 @@ from dateutil.relativedelta import relativedelta
 from django import forms
 from django.core import validators
 from django.core.validators import RegexValidator
-from django.forms import modelformset_factory, extras
+from django.forms import modelformset_factory
 from django.forms.widgets import Widget, Select
 from django.utils.dates import MONTHS
 from django.utils.safestring import mark_safe
@@ -1598,10 +1598,10 @@ class EngagementPlanForm(forms.Form):
 
     products = forms.MultipleChoiceField(choices=[], widget=forms.CheckboxSelectMultiple(), label='Products', help_text='Planned in descending order of business criticality')
     products_order = forms.ChoiceField(choices=SORT_PRODUCT_CHOICES, required=True, label='Planning Order', help_text='Please specify how the order of planning per product should be calculated')
-    start_tool_category = forms.ModelChoiceField(queryset=Tool_Type.objects.all(), required=False, label='Run Tool Category', help_text='Run a tool with this category (needs to be configured for each product) at the beginning of each engagement. This also requires that all selected products have at least one endpoint tagged as `tool-export`.')
+    start_tool_category = forms.ModelChoiceField(queryset=Tool_Type.objects.all(), required=False, label='Run Tool Category', help_text='Run a tool with this category (needs to be configured for each product) at the beginning of each engagement. This also requires that all selected products have at least one endpoint marked for tool runs.')
 
-    from_date = forms.DateField(label="Period Start", widget=extras.SelectDateWidget, initial=timezone.now())
-    to_date = forms.DateField(label="Period End", widget=extras.SelectDateWidget, initial=(timezone.now() + timezone.timedelta(days=365)))
+    from_date = forms.DateField(label="Period Start", widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), initial=timezone.now().strftime("%Y-%m-%d"))
+    to_date = forms.DateField(label="Period End", widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), initial=(timezone.now() + timezone.timedelta(days=365)).strftime("%Y-%m-%d"))
 
     allowed_days = forms.MultipleChoiceField(choices=WEEKDAY_CHOICES, widget=forms.CheckboxSelectMultiple(), initial=(0, 1, 2, 3, 4), label='Working Days')
     days_per_engagement = forms.IntegerField(required=True, label='Days per Engagement', help_text='How many working days should an engagement last? Keep in mind that a tool running at the start of it will take time as well.', initial=5)
@@ -1640,6 +1640,9 @@ class EngagementPlanForm(forms.Form):
         if self.cleaned_data['start_tool_category'] is not None:
             tool_type = Tool_Type.objects.get(id=self.cleaned_data['start_tool_category'].id)
 
+            if not ('products' in self.cleaned_data):
+                raise forms.ValidationError('Select at least one product')
+
             for product_id in self.cleaned_data['products']:
                 product = Product.objects.get(id=product_id)
 
@@ -1656,16 +1659,9 @@ class EngagementPlanForm(forms.Form):
                     raise forms.ValidationError('Product "' + product.name + '" has no product-tool configuration in the category "' + tool_type.name + '"')
 
                 # Check if exportable endpoint is configured
-                endpoints = Endpoint.objects.filter(product=product.id)
-                has_exported = False
-                for e in endpoints:
-                    tags = e.tags.filter(name="tool-export")
-                    if len(tags) > 0:
-                        has_exported = True
-                        break
-
-                if has_exported is False:
-                    raise forms.ValidationError('Product "' + product.name + '" has no endpoint that is tagged as `tool-export`')
+                endpoints = Endpoint.objects.filter(product=product.id, export_tool=True)
+                if len(endpoints) == 0:
+                    raise forms.ValidationError('Product "' + product.name + '" has no endpoint that is provided to tool runs')
 
 
 class EngagementPresetsForm(forms.ModelForm):
