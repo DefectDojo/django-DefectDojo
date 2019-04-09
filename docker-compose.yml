@@ -12,9 +12,16 @@ services:
         mode: host
   uwsgi:
     image: defectdojo/defectdojo-django:latest
+    build: 
+      context: ./
+      dockerfile: Dockerfile.django
     depends_on:
       - mysql
-    entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/entrypoint-uwsgi.sh']
+    entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/entrypoint-uwsgi-dev.sh']
+    volumes:
+      - '.:/app'
+    ports:
+      - 8000:8000
     environment:
       DD_DEBUG: 'on'
       DD_ALLOWED_HOSTS: ${DD_ALLOWED_HOSTS:-*}
@@ -52,13 +59,19 @@ services:
       DD_ADMIN_MAIL: ${DD_ADMIN_USER:-admin@defectdojo.local}
       DD_ADMIN_FIRST_NAME: ${DD_ADMIN_FIRST_NAME:-Admin}
       DD_ADMIN_LAST_NAME: ${DD_ADMIN_LAST_NAME:-User}
+      DD_INITIALIZE: ${DD_INITIALIZE:-true}
   mysql:
     image: mysql:5.7
+    volumes:
+       - defectdojo_data:/var/lib/mysql
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
       DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}
       MYSQL_USER: ${DD_DATABASE_USER:-defectdojo}
       MYSQL_PASSWORD: ${DD_DATABASE_PASSWORD:-defectdojo}
       MYSQL_DATABASE: ${DD_DATABASE_NAME:-defectdojo}
+    command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
   rabbitmq:
     image: rabbitmq:3.7
+volumes:
+  defectdojo_data: {}

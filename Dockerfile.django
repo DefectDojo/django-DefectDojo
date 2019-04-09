@@ -19,6 +19,7 @@ COPY \
   docker/entrypoint-celery-worker.sh \
   docker/entrypoint-initializer.sh \
   docker/entrypoint-uwsgi.sh \
+  docker/entrypoint-uwsgi-dev.sh \
   docker/entrypoint-unit-tests.sh \
   docker/wait-for-it.sh \
   /
@@ -60,5 +61,6 @@ ENV \
   DD_INITIALIZE=true \
   DD_UWSGI_MODE="socket" \
   DD_UWSGI_ENDPOINT="0.0.0.0:3031" \
-  DD_DJANGO_ADMIN_ENABLED="on"
+  DD_DJANGO_ADMIN_ENABLED="on" \
+  DD_TRACK_MIGRATIONS="on"
 ENTRYPOINT ["/entrypoint-uwsgi.sh"]
