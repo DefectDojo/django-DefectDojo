@@ -75,29 +75,29 @@
                             <div class="input-group">
                                 <input id="simple_search" type="text" name="query" class="form-control"
                                        placeholder="Search...">
-	                                    <span class="input-group-btn">
-	                                        <button class="btn btn-primary" type="submit">
-                                                <i class="fa fa-search"></i>
-                                            </button>
-	                                    </span>
+                                <span class="input-group-btn">
+                                    <button class="btn btn-primary" type="submit" aria-label="Search">
+                                        <i class="fa fa-search"></i>
+                                    </button>
+                                </span>
                             </div>
                         </form>
                     </div>
                     <!-- /input-group -->
                 </li>
-                    <li class="dropdown">
-			    <a class="dropdown-toggle dropdown-toggle-h{% alert_count %}" data-toggle="dropdown" href="#" aria-label="{% alert_count %} Alerts">
-                            <i class="fa fa-bell fa-fw"></i><span
-                            id="alert_count" class="badge badge-count badge-count{% alert_count %}">{% alert_count %}</span>
-                            <i class="fa fa-caret-down"></i>
-                        </a>
-                        <ul class="dropdown-menu dropdown-alerts">
-                        </ul>
-                        <!-- /.dropdown-alerts -->
-                    </li>
+                <li class="dropdown">
+                    <a class="dropdown-toggle dropdown-toggle-h{% alert_count %}" data-toggle="dropdown" href="#" aria-expanded="false" aria-label="{% alert_count %} Alerts">
+                        <i class="fa fa-bell fa-fw"></i>
+                        <span id="alert_count" class="badge badge-count badge-count{% alert_count %}">{% alert_count %}</span>
+                        <i class="fa fa-caret-down"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-alerts">
+                    </ul>
+                    <!-- /.dropdown-alerts -->
+                </li>
                 {% endif %}
                 <li class="dropdown">
-                    <a class="dropdown-toggle" data-toggle="dropdown" href="#" aria-label="User Menu">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#" aria-expanded="false" aria-label="User Menu">
                         <i class="fa fa-user fa-fw"></i> <i class="fa fa-caret-down"></i>
                     </a>
                     <ul class="dropdown-menu dropdown-user">
@@ -131,7 +131,10 @@
 
                             {% if request.user.is_staff %}
                                 <li>
-                                    <a href="{% url 'dashboard' %}" aria-label="Dashboard"><i class="fa fa-dashboard fa-fw"></i><span>Dashboard</span></a>
+                                    <a href="{% url 'dashboard' %}" aria-disabled="true" aria-expanded="false" aria-label="Dashboard">
+                                        <i class="fa fa-dashboard fa-fw"></i>
+                                        <span>Dashboard</span>
+                                    </a>
                                 </li>
                             {% endif %}
                             <li>
