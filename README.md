@@ -70,7 +70,7 @@ Realtime discussion is done in the OWASP Slack Channel, #defectdojo.
 
 ![Twitter](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/Twitter_Logo.png)
 
-[DefectDojo Twitter Account](https://twitter.com/defect_dojo) tweets project
+[DefectDojo Twitter Account](https://twitter.com/defectdojo) tweets project
 updates and changes.
 
 ## Available Plugins
@@ -91,6 +91,13 @@ DefectDojo is maintained by:
 * [Greg Anderson](https://www.linkedin.com/in/g-anderson/)
 * [Aaron Weaver](https://www.linkedin.com/in/aweaver/) ([@weavera](https://twitter.com/weavera))
 * [Matt Tesauro](https://www.linkedin.com/in/matttesauro/) ([@matt_tesauro](https://twitter.com/matt_tesauro))
+
+
+## Project Moderators
+
+Project Moderators can help you with pull requests or feedback on dev ideas.
+
+* [Alex Dracea](https://www.linkedin.com/in/alexandru-marin-dracea-910b51122/)
 
 ## Hall of Fame
 
