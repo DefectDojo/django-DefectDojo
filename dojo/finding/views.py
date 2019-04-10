@@ -1311,6 +1311,7 @@ def merge_finding_product(request, pid):
                 finding_to_merge_into = form.cleaned_data['finding_to_merge_into']
                 findings_to_merge = form.cleaned_data['findings_to_merge']
                 finding_descriptions = ''
+                finding_references = ''
                 notes_entry = ''
                 static = False
                 dynamic = False
@@ -1336,6 +1337,10 @@ def merge_finding_product(request, pid):
                             # Workaround until file path is one to many
                             if finding.file_path:
                                 finding_descriptions = "{}\n**File Path:** {}\n".format(finding_descriptions, finding.file_path)
+
+                        # If checked merge the Reference
+                        if form.cleaned_data['append_reference']:
+                            finding_references = "{}\n{}".format(finding_references, finding.references)
 
                         # if checked merge the endpoints
                         if form.cleaned_data['add_endpoints']:
@@ -1376,6 +1381,9 @@ def merge_finding_product(request, pid):
 
                     if finding_to_merge_into.file_path is None:
                         file_path = finding_to_merge_into.file_path
+
+                    if finding_references != '':
+                        finding_to_merge_into.references = "{}\n{}".format(finding_to_merge_into.references, finding_references)
 
                     finding_to_merge_into.static_finding = static
                     finding_to_merge_into.dynamic_finding = dynamic
