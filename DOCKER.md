@@ -7,7 +7,19 @@ use the [Helm and Kubernetes](KUBERNETES.md) approach.
 ## Setup via Docker Compose
 
 If you start your DefectDojo instance on Docker Compose for the first time, just
-run `docker-compose up`.
+run
+ 
+```zsh
+. docker/aliases_release.sh
+docker-compose up
+```
+or
+
+```zsh
+docker-compose -f docker-compose_base.yml -f docker-compose_uwsgi-release.yml up
+```
+
+This will run the application based on images commited on dockerhub (or the last images built locally). If you need to be more up to date, see "Build images locally" below
 
 **NOTE:** Installing with docker-compose requires the latest version of docker and docker-compose - at least docker 18.09.4 and docker-compose 1.24.0. See "Checking Docker versions" below for version errors during running docker-compose up.
 
@@ -24,15 +36,26 @@ docker logs $container_id 2>&1 | grep "Admin password:"
 
 If you ran DefectDojo with compose before and you want to prevent the
 initializer container from running again, define an environment variable
-`DD_INITIALIZE=false` to prevent re-initialization.
+DD_INITIALIZE=false to prevent re-initialization.
+
 
 ### Develop with Docker Compose
 
-For developing the easiset way to make changes is to startup DefectDojo in debug by running `docker-compose -f docker-compose.yml up`. This starts the DefectDojo (uwsgi) container with manage.py and shares the local source directory so that changes to the code immediately restart the process.
+For developing the easiset way to make changes is to startup DefectDojo in debug by running 
+
+```zsh
+. docker/aliases_dev.sh
+docker-compose up
+```
+or
+
+```zsh
+docker-compose -f docker-compose_base.yml -f docker-compose_uwsgi-dev.yml up
+```
+
+This starts the DefectDojo (uwsgi) container with manage.py and shares the local source directory so that changes to the code immediately restart the process.
 
 Navigate to the container directly, <http://localhost:8000>
-
-Build the containers locally: `docker-compose build`
 
 The initializer container can be disabled by exporting: `export DD_INITIALIZE=false`
 
