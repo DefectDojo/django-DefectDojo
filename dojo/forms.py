@@ -284,7 +284,10 @@ class ImportScanForm(forms.Form):
                          ("AWS Scout2 Scan", "AWS Scout2 Scan"),
                          ("AWS Prowler Scan", "AWS Prowler Scan"),
                          ("PHP Security Audit v2", "PHP Security Audit v2"),
-                         ("Safety Scan", "Safety Scan"))
+                         ("Safety Scan", "Safety Scan"),
+                         ("DawnScanner Scan", "DawnScanner Scan"),
+                         ("Anchore Engine Scan", "Anchore Engine Scan"),
+                         ("Bundler-Audit Scan", "Bundler-Audit Scan"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
 
@@ -903,6 +906,7 @@ class DeleteFindingTemplateForm(forms.ModelForm):
 
 class FindingBulkUpdateForm(forms.ModelForm):
     status = forms.BooleanField(required=False)
+    push_to_jira = forms.BooleanField(required=False)
 
     def __init__(self, *args, **kwargs):
         super(FindingBulkUpdateForm, self).__init__(*args, **kwargs)

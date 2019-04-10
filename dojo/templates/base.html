@@ -75,29 +75,29 @@
                             <div class="input-group">
                                 <input id="simple_search" type="text" name="query" class="form-control"
                                        placeholder="Search...">
-	                                    <span class="input-group-btn">
-	                                        <button class="btn btn-primary" type="submit">
-                                                <i class="fa fa-search"></i>
-                                            </button>
-	                                    </span>
+                                <span class="input-group-btn">
+                                    <button class="btn btn-primary" type="submit" aria-label="Search">
+                                        <i class="fa fa-search"></i>
+                                    </button>
+                                </span>
                             </div>
                         </form>
                     </div>
                     <!-- /input-group -->
                 </li>
-                    <li class="dropdown">
-                        <a class="dropdown-toggle dropdown-toggle-h{% alert_count %}" data-toggle="dropdown" href="#">
-                            <i class="fa fa-bell fa-fw"></i><span
-                            id="alert_count" class="badge badge-count badge-count{% alert_count %}">{% alert_count %}</span>
-                            <i class="fa fa-caret-down"></i>
-                        </a>
-                        <ul class="dropdown-menu dropdown-alerts">
-                        </ul>
-                        <!-- /.dropdown-alerts -->
-                    </li>
+                <li class="dropdown">
+                    <a class="dropdown-toggle dropdown-toggle-h{% alert_count %}" data-toggle="dropdown" href="#" aria-expanded="false" aria-label="{% alert_count %} Alerts">
+                        <i class="fa fa-bell fa-fw"></i>
+                        <span id="alert_count" class="badge badge-count badge-count{% alert_count %}">{% alert_count %}</span>
+                        <i class="fa fa-caret-down"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-alerts">
+                    </ul>
+                    <!-- /.dropdown-alerts -->
+                </li>
                 {% endif %}
                 <li class="dropdown">
-                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#" aria-expanded="false" aria-label="User Menu">
                         <i class="fa fa-user fa-fw"></i> <i class="fa fa-caret-down"></i>
                     </a>
                     <ul class="dropdown-menu dropdown-user">
@@ -131,15 +131,21 @@
 
                             {% if request.user.is_staff %}
                                 <li>
-                                    <a href="{% url 'dashboard' %}"><i class="fa fa-dashboard fa-fw"></i> <span>Dashboard</span></a>
+                                    <a href="{% url 'dashboard' %}" aria-disabled="true" aria-expanded="false" aria-label="Dashboard">
+                                        <i class="fa fa-dashboard fa-fw"></i>
+                                        <span>Dashboard</span>
+                                    </a>
                                 </li>
                             {% endif %}
                             <li>
                                 {% if request.user.is_staff %}
-                                    <a href="#"><i class="fa fa-list fa-fw"></i> <span>Products</span>
-                                        <span class="glyphicon arrow"></span></a>
+                                    <a href="#" aria-expanded="false" aria-label="Products">
+                                        <i class="fa fa-list fa-fw"></i>
+                                        <span>Products</span>
+                                        <span class="glyphicon arrow"></span>
+                                    </a>
                                 {% elif request.user.is_authenticated %}
-                                    <a href="{% url 'product' %}" title="Product Listing"><i class="fa fa-list fa-fw"></i> <span>Products</span></a>
+                                <a href="{% url 'product' %}" title="Products" aria-label="Products"><i class="fa fa-list fa-fw"></i><span>Products</span></a>
                                 {% endif %}
                                 {% if request.user.is_staff %}
                                     <ul class="nav nav-second-level">
@@ -161,8 +167,11 @@
                             </li>
                             {% if request.user.is_staff %}
                                 <li>
-                                    <a href="#"><i class="fa fa-inbox fa-fw"></i> <span>Engagements</span><span
-                                            class="glyphicon arrow"></span></a>
+                                    <a href="#" aria-expanded="false" aria-label="Engagements">
+                                        <i class="fa fa-inbox fa-fw"></i>
+                                        <span>Engagements</span>
+                                        <span class="glyphicon arrow"></span>
+                                    </a>
                                     <ul class="nav nav-second-level">
                                         <li>
                                             <a href="{% url 'engagement' %}">All Engagements</a>
@@ -180,8 +189,11 @@
                                     <!-- /.nav-second-level -->
                                 </li>
                                 <li>
-                                    <a href="#"><i class="fa fa-bug fa-fw"></i> <span>Findings</span><span
-                                            class="glyphicon arrow"></span></a>
+                                    <a href="#" aria-expanded="false" aria-label="Findings">
+                                        <i class="fa fa-bug fa-fw"></i>
+                                        <span>Findings</span>
+                                        <span class="glyphicon arrow"></span>
+				    </a>
                                     <ul class="nav nav-second-level">
                                         <li>
                                             <a href="{% url 'open_findings' %}">Open Findings</a>
@@ -202,8 +214,11 @@
                                     <!-- /.nav-second-level -->
                                 </li>
                                 <li>
-                                    <a href="#"><i class="fa fa-sitemap fa-fw"></i> <span>Endpoints</span><span
-                                            class="glyphicon arrow"></span></a>
+                                    <a href="#" aria-expanded="false" aria-label="Endpoints">
+					                    <i class="fa fa-sitemap fa-fw"></i>
+                                        <span>Endpoints</span>
+                                        <span class="glyphicon arrow"></span>
+                                    </a>
                                     <ul class="nav nav-second-level">
                                         <li>
                                             <a href="{% url 'endpoints' %}">All Endpoints</a>
@@ -218,8 +233,11 @@
                             {% endif %}
                             {% if request.user.is_authenticated %}
                             <li>
-                                <a href="{% url 'reports' %}"><i class="fa fa-file-text-o fa-fw"></i> <span>Reports</span><span
-                                        class="glyphicon arrow"></span></a>
+                                <a href="#" aria-expanded="false" aria-label="Reports">
+				                    <i class="fa fa-file-text-o fa-fw"></i>
+                                    <span>Reports</span>
+                                    <span class="glyphicon arrow"></span>
+                                </a>
                                 <ul class="nav nav-second-level">
                                     <li><a href="{% url 'reports' %}"> All Reports </a></li>
                                     <li><a href="{% url 'report_builder' %}"> Report Builder </a></li>
@@ -227,8 +245,11 @@
                                 <!-- /.nav-second-level -->
                             </li>
                             <li>
-                                <a href="/metrics"><i class="fa fa-bar-chart fa-fw"></i> <span>Metrics</span><span
-                                        class="glyphicon arrow"></span></a>
+                                <a href="#" aria-expanded="false" aria-label="Metrics">
+				                    <i class="fa fa-bar-chart fa-fw"></i>
+                                    <span>Metrics</span>
+                                    <span class="glyphicon arrow"></span>
+                                </a>
                                 <ul class="nav nav-second-level">
                                     <li><a href="{% url 'critical_product_metrics' %}"> Critical Product Metrics </a></li>
                                     <li><a href="{% url 'metrics_product_type' %}"> Product Type Metrics </a></li>
@@ -245,17 +266,24 @@
                             {% endif %}
                             {% if request.user.is_staff %}
                                 <li>
-                                    <a href="{% url 'users' %}"><i class="fa fa-user fa-fw"></i> <span>Users</span></a>
+                                    <a href="{% url 'users' %}" aria-disabled="true" aria-expanded="false" aria-label="Users">
+                                        <i class="fa fa-user fa-fw"></i>
+                                        <span>Users</span>
+                                    </a>
                                 </li>
                             {% endif %}
                             {% if request.user.is_staff %}
                                 <li>
-                                    <a href="{% url 'engagement_calendar' %}"><i class="fa fa-calendar fa-fw"></i>
-                                        <span>Calendar</span></a>
+				                    <a href="{% url 'engagement_calendar' %}" aria-disabled="true" aria-expanded="false" aria-label="Calendar">
+                                        <i class="fa fa-calendar fa-fw"></i>
+                                        <span>Calendar</span>
+                                    </a>
                                 </li>
                                 <li>
-                                    <a href="{% url 'jira' %}"><i class="fa fa-cog fa-fw"></i>
-                                        <span>Configuration</span></a>
+				                    <a href="#" aria-expanded="false" aria-label="Configuration">
+                                        <i class="fa fa-cog fa-fw"></i>
+                                        <span>Configuration</span>
+                                    </a>
                                     <ul class="nav nav-second-level">
                                         <li><a href="{% url 'cred' %}">Credential Manager </a></li>
                                         {% if "enable_jira"|get_system_setting %}
@@ -275,7 +303,7 @@
                         {% endblock %}
 
                         <li id="min-menu">
-                            <a href="#" id="minimize-menu">
+                            <a href="#" id="minimize-menu" title="Expand/Collapse Menu" aria-label="Expand/Collapse Menu">
                                 <i id="nav-minimize-menu-li" class="fa fa-arrow-circle-right fa-fw"></i>
                                 <span>Collapse Menu</span>
                             </a>

@@ -5,7 +5,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Finding, \
     User, PortscanSettings, Scan, Stub_Finding, Finding_Template, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
-    Endpoint, JIRA_PKey, JIRA_Conf, DojoMeta, Development_Environment
+    Endpoint, JIRA_PKey, JIRA_Conf, DojoMeta, Development_Environment, \
+    Finding
 
 from dojo.api_v2 import serializers, permissions
 
