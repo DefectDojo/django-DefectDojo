@@ -386,6 +386,9 @@ class MergeFindings(forms.ModelForm):
     mark_tag_finding = forms.BooleanField(label="Tag Merged Finding", initial=True, required=False,
                                            help_text="Creates a tag titled 'merged' for the finding that will be merged. If the 'Finding Action' is set to 'inactive' the inactive findings will be tagged with 'merged-inactive'.")
 
+    append_reference = forms.BooleanField(label="Append Reference", initial=True, required=False,
+                                            help_text="Reference in all findings will be appended into the merged finding.")
+
     finding_action = forms.ChoiceField(
         required=True,
         choices=FINDING_ACTION,
@@ -405,11 +408,11 @@ class MergeFindings(forms.ModelForm):
             queryset=findings, required=True, label="Findings to Merge",
             widget=forms.widgets.SelectMultiple(attrs={'size': 10}),
             help_text=('Select the findings to merge.'))
-        self.fields.keyOrder = ['finding_to_merge_into', 'findings_to_merge', 'append_description', 'add_endpoints']
+        self.fields.keyOrder = ['finding_to_merge_into', 'findings_to_merge', 'append_description', 'add_endpoints', 'append_reference']
 
     class Meta:
         model = Finding
-        fields = ['append_description', 'add_endpoints']
+        fields = ['append_description', 'add_endpoints', 'append_reference']
 
 
 class UploadRiskForm(forms.ModelForm):
