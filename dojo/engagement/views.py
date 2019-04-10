@@ -388,7 +388,7 @@ def plan_engagements(request):
                     messages.add_message(
                         request,
                         messages.SUCCESS,
-                        'Removed ' + str(len(clearEngagements)) + ' engagements due to their prefix.',
+                        'Removed ' + str(len(clearEngagements)) + ' engagements with prefix ' + plan_form.cleaned_data['remove_prefix'] + '.',
                         extra_tags='alert-success')
 
             # Load products by ID
@@ -422,6 +422,7 @@ def plan_engagements(request):
             delta = timedelta(days=1)
             d = plan_form.cleaned_data['from_date']
             i = 0
+            plannedEngagements = 0
             while d <= plan_form.cleaned_data['to_date'] and len(products) > 0:
                 if str(d.weekday()) in plan_form.cleaned_data['allowed_days']:
                     engagamentCollisions = Engagement.objects.filter(active=True, engagement_type='Interactive', target_start__lte=d, target_end__gte=d)
@@ -472,6 +473,8 @@ def plan_engagements(request):
                                     engagement.active = True
                                     engagement.status = 'Not Started'
 
+                                    plannedEngagements += 1
+
                                     if tool_type is not None:
                                         tool_configs = Tool_Product_Settings.objects.filter(product=planProduct.id)
 
@@ -493,14 +496,18 @@ def plan_engagements(request):
 
                 d += delta
 
+            prefixText = "no common prefix"
+            if len(plan_form.cleaned_data['prefix']) > 1:
+                prefixText = "the common prefix '" + plan_form.cleaned_data['prefix'] + "'"
+
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                'Planned engagements successfully.',
+                'Successfully planned ' + str(plannedEngagements) + ' engagement(s) with ' + prefixText + '.',
                 extra_tags='alert-success')
 
             return HttpResponseRedirect(
-                    reverse('plan_engagements', args=()))
+                    reverse('engagement_calendar', args=()))
 
     add_breadcrumb(parent=None, title="Plan Engagements", top_level=True, request=request)
     return render(request, 'dojo/engagement_plan.html', {

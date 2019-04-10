@@ -301,23 +301,9 @@ class Command(BaseCommand):
                 ttid = engagement.run_tool_test_engine.id
                 eid = engagement.id
 
-                endpoints = Endpoint.objects.filter(product=engagement.product.id)
+                endpoints = Endpoint.objects.filter(product=engagement.product.id, export_tool=True)
                 if len(endpoints) <= 0:
-                    self.stdout.write("Product-Tool config can't be executed because the product " + str(engagement.product.id)+" has no endpoints configured.")
-
-                has_exported = False
-                for e in endpoints:
-                    tags = e.tags.filter(name="tool-export")
-
-                    if len(tags) > 0:
-                        has_exported = True
-                        scan_queue.put((ttid, e, eid))
-                        t = threadedScan(scan_queue)
-                        t.setDaemon(True)
-                        t.start()
-
-                if not has_exported:
-                    self.stdout.write("Product " + str(engagement.product.id) + " has no endpoints configured that are tagged with `tool-export`.")
+                    self.stdout.write("Product-Tool config can't be executed because the product " + str(engagement.product.id)+" has no endpoints configured that are provided to tool runs.")
                 else:
                     self.stdout.write("Started for product " + str(engagement.product.id))
 
@@ -333,9 +319,9 @@ class Command(BaseCommand):
             if not scSettings[0].tool_configuration.scan_type:
                 self.stdout.write("Warning: This product tool configuration has no parsing configured.")
 
-            endpoints = Endpoint.objects.filter(product=scSettings[0].product.id)
+            endpoints = Endpoint.objects.filter(product=scSettings[0].product.id, export_tool=True)
             if len(endpoints) <= 0:
-                self.stdout.write("Connected product has no endpoints configured.")
+                self.stdout.write("Connected product has no endpoints configured that are provided to tool runs.")
                 sys.exit(0)
 
             if eid > 0:
@@ -345,22 +331,13 @@ class Command(BaseCommand):
                     sys.exit(0)
 
             scan_queue = Queue.Queue()
-            has_exported = False
             for e in endpoints:
-                tags = e.tags.filter(name="tool-export")
+                scan_queue.put((ttid, e, eid))
+                t = threadedScan(scan_queue)
+                t.setDaemon(True)
+                t.start()
 
-                if len(tags) > 0:
-                    has_exported = True
-                    scan_queue.put((ttid, e, eid))
-                    t = threadedScan(scan_queue)
-                    t.setDaemon(True)
-                    t.start()
-
-            if not has_exported:
-                self.stdout.write("Connected product has no endpoints configured that are tagged with `tool-export`.")
-                sys.exit(0)
-            else:
-                scan_queue.join()
+            scan_queue.join()
 
 
 def run_on_demand_scan(ttid, eid):

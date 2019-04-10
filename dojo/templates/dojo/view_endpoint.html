@@ -210,6 +210,17 @@
 
     <div class="panel panel-default table-responsive">
         <div class="panel-heading">
+            <h4>Tool Runs</h4>
+        </div>
+        {% if endpoint.export_tool %}
+        <p class="text-center text-success">This endpoint is exported to tool runs, e.g. as an entry point for a vulnerability scanner.</p>
+        {% else %}
+        <p class="text-center">This endpoint is not exported to tool runs. It will not be provided e.g. as an entry point for a vulnerability scanner.</p>
+        {% endif %}
+    </div>
+
+    <div class="panel panel-default table-responsive">
+        <div class="panel-heading">
             <h4>Active Findings</h4>
         </div>
         {% if findings %}
