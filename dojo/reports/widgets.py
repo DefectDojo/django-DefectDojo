@@ -18,7 +18,7 @@ from dojo.utils import get_page_items
 
 """
 Widgets are content sections that can be included on reports.  The report builder will allow any number of widgets
- to be included.  Each widget will provide a set of options, reporesented by form elements, to be included.
+ to be included.  Each widget will provide a set of options, represented by form elements, to be included.
 """
 
 

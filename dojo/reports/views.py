@@ -19,9 +19,9 @@ from dojo.celery import app
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter, EndpointReportFilter, ReportFilter, \
     EndpointFilter
-from dojo.forms import ReportOptionsForm, DeleteReportForm
+from dojo.forms import ReportOptionsForm, DeleteReportForm, ReportIntervalForm
 from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
-    Dojo_User, Endpoint, Report, Risk_Acceptance
+    Dojo_User, Endpoint, Report, Report_Interval, Risk_Acceptance
 from dojo.reports.widgets import CoverPage, PageBreak, TableOfContents, WYSIWYGContent, FindingList, EndpointList, \
     CustomReportJsonForm, ReportOptions, report_widget_factory
 from dojo.tasks import async_pdf_report, async_custom_pdf_report
@@ -71,6 +71,62 @@ def report_builder(request):
                   {"available_widgets": available_widgets,
                    "in_use_widgets": in_use_widgets})
 
+#markme
+def report_scheduler(request):
+    add_breadcrumb(title="Report Scheduler", top_level=True, request=request)
+    intervals = Report_Interval.objects.all()
+
+    return render(request, 'dojo/report_scheduler.html', {'confs':intervals})
+
+
+def add_report_interval(request):
+    add_breadcrumb(parent=report_scheduler, title="Add", top_level=False, request=request)
+    
+    form = ReportIntervalForm()
+    if request.method == 'POST':
+        form = ReportIntervalForm(request.POST)
+        if form.is_valid():
+            form.save()
+            
+            messages.add_message(request, messages.SUCCESS,
+                                 'Report interval created.',
+                                 extra_tags='alert-success')
+
+            return HttpResponseRedirect(reverse('report_scheduler'))
+
+    return render(request, 'dojo/report_interval.html', {'form': form})
+
+#markme
+def edit_report_interval(request, sid):
+    interval = get_object_or_404(Report_Interval, id=sid)
+    add_breadcrumb(parent=report_scheduler, title="Edit", top_level=False, request=request)
+    
+    form = ReportIntervalForm(instance=interval)
+    if request.method == 'POST':
+        form = ReportIntervalForm(request.POST, instance=interval)
+        if form.is_valid():
+            form.save()
+            
+            messages.add_message(request, messages.SUCCESS, 'Report interval edited.', extra_tags='alert-success')
+
+            return HttpResponseRedirect(reverse('report_scheduler'))
+
+    return render(request, 'dojo/report_interval.html', {'form': form})
+
+#markme
+def delete_report_interval(request, sid):
+    interval = get_object_or_404(Report_Interval, id=sid)
+    add_breadcrumb(parent=report_scheduler, title="Edit", top_level=False, request=request)
+    
+    if request.method == 'POST':
+        if 'delete_now' in request.POST:
+            interval.delete()
+            messages.add_message(request, messages.SUCCESS, 'Report interval deleted.', extra_tags='alert-success')
+
+            return HttpResponseRedirect(reverse('report_scheduler'))
+
+    return HttpResponseRedirect(reverse('edit_report_interval', args=(sid)))
+
 
 def custom_report(request):
     # saving the report
@@ -79,14 +135,14 @@ def custom_report(request):
     if form.is_valid():
         selected_widgets = report_widget_factory(json_data=request.POST['json'], request=request, user=request.user,
                                                  finding_notes=False, finding_images=False, host=host)
-        report_name = 'Custom PDF Report: ' + request.user.username
+        report_name = 'Custom Report: ' + request.user.username
         report_format = 'AsciiDoc'
         finding_notes = True
         finding_images = True
 
         if 'report-options' in selected_widgets:
             options = selected_widgets['report-options']
-            report_name = 'Custom PDF Report: ' + options.report_name
+            report_name = 'Custom Report: ' + options.report_name
             report_format = options.report_type
             finding_notes = (options.include_finding_notes == '1')
             finding_images = (options.include_finding_images == '1')
@@ -94,14 +150,16 @@ def custom_report(request):
         selected_widgets = report_widget_factory(json_data=request.POST['json'], request=request, user=request.user,
                                                  finding_notes=finding_notes, finding_images=finding_images, host=host)
 
-        if report_format == 'PDF':
-            report = Report(name=report_name,
+        report = Report(name=report_name,
                             type="Custom",
                             format=report_format,
                             requester=request.user,
-                            task_id='tbd',
                             options=request.POST['json'])
-            report.save()
+        report.save()
+
+        if report_format == 'PDF':
+            report.name = 'Custom PDF Report: ' + options.report_name
+            report.task_id = 'tbd'
             async_custom_pdf_report.delay(report=report,
                                           template="dojo/custom_pdf_report.html",
                                           filename="custom_pdf_report.pdf",

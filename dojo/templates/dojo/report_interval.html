@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load static from staticfiles %}
+{% block content %}
+    <form class="form-horizontal" method="post">{% csrf_token %}
+        <fieldset>
+            <legend>Manage Report Interval</legend>
+            {% include "dojo/form_fields.html" with form=form %}
+        </fieldset>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                {% if form.instance.pk is None %}
+                <input class="btn btn-primary" type="submit" name="add_user" value="Create"/>
+                {% else %}
+                <input class="btn btn-primary" type="submit" name="add_user" value="Save Changes"/>
+                <a href="#" class="btn btn-danger" onclick="if(confirm('Are you sure you want to delete this schedule?')) $('#delete-interval-now').submit()">
+                    <i class="fa fa-trash"></i> Delete
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </form>
+    {% if form.instance.pk is not None %}
+    <form id="delete-interval-now" class="form-inline" method="post" action="{% url 'delete_report_interval' form.instance.pk %}">
+        {% csrf_token %}
+        <input type="hidden" name="delete_now" value="Delete Now"/>
+    </form>
+    {% endif %}
+{% endblock %}
