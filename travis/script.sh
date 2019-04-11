@@ -133,7 +133,7 @@ echo "Running test ${TEST}"
       ;;
     docker)
       echo "Validating docker compose"
-      . /docker/aliases_release.sh
+      source ./docker/aliases_release.sh
       build_containers
       docker-compose up -d
       echo "Waiting for services to start"
