@@ -77,13 +77,11 @@ function sidebar() {  // minimize side nav bar
         width = '175px';
         fontSize = '14px';
         speed = 100;
-        $('a#minimize-menu').attr('title', 'Collapse Menu');
     }
     else {
         action = 'min';
         remove = 'max';
         $.cookie('dojo-sidebar', 'min', {expires: 10000, path: '/'});
-        $('a#minimize-menu').attr('title', 'Expand Menu')
     }
 
     $('body').switchClass(remove, action);

@@ -1078,7 +1078,7 @@ class Finding(models.Model):
         ordering = ('numerical_severity', '-date', 'title')
 
     def compute_hash_code(self):
-        hash_string = self.title + str(self.cwe) + str(self.line) + str(self.file_path) + str(self.description).decode('utf-8')
+        hash_string = self.title + str(self.cwe) + str(self.line) + str(self.file_path) + self.description
 
         if self.dynamic_finding:
             endpoint_str = u''
@@ -1091,8 +1091,7 @@ class Finding(models.Model):
             return hashlib.sha256(hash_string.encode('utf-8')).hexdigest()
         except:
             hash_string = hash_string.strip()
-
-        return hashlib.sha256(hash_string).hexdigest()
+            return hashlib.sha256(hash_string).hexdigest()
 
 
     def duplicate_finding_set(self):
@@ -1209,7 +1208,15 @@ class Finding(models.Model):
         long_desc = ''
         long_desc += '*' + self.title + '*\n\n'
         long_desc += '*Severity:* ' + self.severity + '\n\n'
-        long_desc += '*Systems*: \n'
+        long_desc += '*Product/Engagement:* ' + self.test.engagement.product.name + ' / ' + self.test.engagement.name + '\n\n'
+        if self.test.engagement.branch_tag:
+            long_desc += '*Branch/Tag:* ' + self.test.engagement.branch_tag + '\n\n'
+        if self.test.engagement.build_id:
+            long_desc += '*BuildID:* ' + self.test.engagement.build_id + '\n\n'
+        if self.test.engagement.commit_hash:
+            long_desc += '*Commit hash:* ' + self.test.engagement.commit_hash + '\n\n'
+        long_desc += '*Systems*: \n\n'
+
         for e in self.endpoints.all():
             long_desc += str(e) + '\n\n'
         long_desc += '*Description*: \n' + self.description + '\n\n'
