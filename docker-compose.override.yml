@@ -4,7 +4,8 @@ services:
   uwsgi:
     volumes:
       - '.:/app'
-    ports:
-      - 8000:8000
     environment:
       DD_DEBUG: 'on'
+  nginx:
+    volumes:
+      - './dojo/static/dojo:/usr/share/nginx/html/static/dojo'
