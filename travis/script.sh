@@ -134,14 +134,14 @@ echo "Running test ${TEST}"
     docker)
       echo "Validating docker compose"
       build_containers
-      docker-compose up -d
+      docker-compose -f docker-compose_base.yml -f docker-compose_uwsgi-release.yml up -d
       echo "Waiting for services to start"
       # Wait for services to become available
       sleep 80
       echo "Testing DefectDojo Service"
       curl -s -o "/dev/null" http://localhost:8080 -m 120
       echo "Docker compose container status"
-      docker-compose ps
+      docker-compose -f docker-compose_base.yml -f docker-compose_uwsgi-release.yml ps
       ;;
     snyk)
       echo "Snyk security testing on containers"
