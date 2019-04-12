@@ -133,9 +133,8 @@ echo "Running test ${TEST}"
       ;;
     docker)
       echo "Validating docker compose"
-      source ./docker/aliases_release.sh
       build_containers
-      docker-compose up -d
+      docker-compose -f docker-compose_base.yml -f docker-compose_uwsgi-release.yml up -d
       echo "Waiting for services to start"
       # Wait for services to become available
       sleep 80
