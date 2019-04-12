@@ -92,6 +92,14 @@ DefectDojo is maintained by:
 * [Aaron Weaver](https://www.linkedin.com/in/aweaver/) ([@weavera](https://twitter.com/weavera))
 * [Matt Tesauro](https://www.linkedin.com/in/matttesauro/) ([@matt_tesauro](https://twitter.com/matt_tesauro))
 
+
+## Project Moderators
+
+Project Moderators can help you with pull requests or feedback on dev ideas.
+
+* [Alex Dracea](https://www.linkedin.com/in/alexandru-marin-dracea-910b51122/)
+* [Valentijn Scholten](https://www.linkedin.com/in/valentijn-scholten/)
+
 ## Hall of Fame
 
 * Charles Neill ([@ccneill](https://twitter.com/ccneill)) – Charles served as a
