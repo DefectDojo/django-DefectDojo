@@ -4,7 +4,7 @@ services:
   uwsgi:
     entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/entrypoint-uwsgi-dev.sh']
     volumes:
-      - '.:/app'
+      - '.:/app:z'
     environment:
       DD_DEBUG: 'on'
   nginx:
