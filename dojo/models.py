@@ -1256,7 +1256,8 @@ class Finding(models.Model):
         # Assign the numerical severity for correct sorting order
         self.numerical_severity = Finding.get_numerical_severity(self.severity)
         super(Finding, self).save()
-        self.hash_code = self.compute_hash_code() #compute hash code before dedupe
+        # Compute hash code before dedupe
+        self.hash_code = self.compute_hash_code()
         system_settings = System_Settings.objects.get()
         if (dedupe_option):
             if system_settings.enable_deduplication:
