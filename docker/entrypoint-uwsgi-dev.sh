@@ -2,8 +2,7 @@
 
 umask 0002
 
-# Change volume permission
-chown root:root /app/dojo/settings/
+
 
 # Copy settings.py (settings.py copied to allow for legacy installs and customizations)
 cd /app
