@@ -75,7 +75,8 @@ def is_deduplication_on_engagement_mismatch(new_finding, to_duplicate_finding):
 
 
 def sync_dedupe(new_finding, *args, **kwargs):
-    logger.debug('sync_dedupe for: ' + str(new_finding.id) + ":" + str(new_finding.title))
+    logger.debug('sync_dedupe for: ' + str(new_finding.id) +
+                 ":" + str(new_finding.title))
     if new_finding.test.engagement.deduplication_on_engagement:
         eng_findings_cwe = Finding.objects.filter(
             test__engagement=new_finding.test.engagement,
@@ -111,31 +112,24 @@ def sync_dedupe(new_finding, *args, **kwargs):
     # total_findings = total_findings.order_by('date')
 
     for find in total_findings:
+        flag_endpoints = False
+        flag_line_path = False
+        flag_hash = False
         if is_deduplication_on_engagement_mismatch(new_finding, find):
-            logger.debug('deduplication_on_engagement_mismatch, skipping dedupe.')
+            logger.debug(
+                'deduplication_on_engagement_mismatch, skipping dedupe.')
             continue
         if find.endpoints.count() != 0 and new_finding.endpoints.count() != 0:
             list1 = new_finding.endpoints.all()
             list2 = find.endpoints.all()
             if all(x in list1 for x in list2):
-                new_finding.duplicate = True
-                new_finding.active = False
-                new_finding.verified = False
-                new_finding.duplicate_finding = find
-                find.duplicate_list.add(new_finding)
-                find.found_by.add(new_finding.test.test_type)
-                super(Finding, new_finding).save(*args, **kwargs)
-                break
+                flag_endpoints = True
         elif find.line == new_finding.line and find.file_path == new_finding.file_path and new_finding.static_finding and len(
                 new_finding.file_path) > 0:
-            new_finding.duplicate = True
-            new_finding.active = False
-            new_finding.verified = False
-            new_finding.duplicate_finding = find
-            find.duplicate_list.add(new_finding)
-            find.found_by.add(new_finding.test.test_type)
-            super(Finding, new_finding).save(*args, **kwargs)
-        elif find.hash_code == new_finding.hash_code:
+            flag_line_path = True
+        if find.hash_code == new_finding.hash_code:
+            flag_hash = True
+        if ((flag_endpoints or flag_line_path) and flag_hash):
             new_finding.duplicate = True
             new_finding.active = False
             new_finding.verified = False
@@ -156,17 +150,21 @@ def sync_rules(new_finding, *args, **kwargs):
             if rule.operator == 'Matches':
                 if getattr(new_finding, rule.match_field) == rule.match_text:
                     if rule.application == 'Append':
-                        set_attribute_rule(new_finding, rule, (getattr(new_finding, rule.applied_field) + rule.text))
+                        set_attribute_rule(new_finding, rule, (getattr(
+                            new_finding, rule.applied_field) + rule.text))
                     else:
                         set_attribute_rule(new_finding, rule, rule.text)
-                        new_finding.save(dedupe_option=False, rules_option=False)
+                        new_finding.save(dedupe_option=False,
+                                         rules_option=False)
             else:
                 if rule.match_text in getattr(new_finding, rule.match_field):
                     if rule.application == 'Append':
-                        set_attribute_rule(new_finding, rule, (getattr(new_finding, rule.applied_field) + rule.text))
+                        set_attribute_rule(new_finding, rule, (getattr(
+                            new_finding, rule.applied_field) + rule.text))
                     else:
                         set_attribute_rule(new_finding, rule, rule.text)
-                        new_finding.save(dedupe_option=False, rules_option=False)
+                        new_finding.save(dedupe_option=False,
+                                         rules_option=False)
 
 
 def set_attribute_rule(new_finding, rule, value):
@@ -996,7 +994,8 @@ def add_issue(find, push_to_jira):
     prod = Product.objects.get(engagement=eng)
 
     if JIRA_PKey.objects.filter(product=prod).count() == 0:
-        log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', find)
+        log_jira_alert(
+            'Finding cannot be pushed to jira as there is no jira configuration for this product.', find)
         return
 
     jpkey = JIRA_PKey.objects.get(product=prod)
@@ -1007,7 +1006,8 @@ def add_issue(find, push_to_jira):
             if ((jpkey.push_all_issues and Finding.get_number_severity(
                     System_Settings.objects.get().jira_minimum_severity) >
                  Finding.get_number_severity(find.severity))):
-                log_jira_alert('Finding below jira_minimum_severity threshold.', find)
+                log_jira_alert(
+                    'Finding below jira_minimum_severity threshold.', find)
 
             else:
                 logger.debug('Trying to create a new JIRA issue')
@@ -1148,7 +1148,8 @@ def update_issue(find, old_status, push_to_jira):
         except JIRAError as e:
             log_jira_alert(e.text, find)
 
-        req_url = jira_conf.url + '/rest/api/latest/issue/' + j_issue.jira_id + '/transitions'
+        req_url = jira_conf.url + '/rest/api/latest/issue/' + \
+            j_issue.jira_id + '/transitions'
         if 'Inactive' in find.status() or 'Mitigated' in find.status(
         ) or 'False Positive' in find.status(
         ) or 'Out of Scope' in find.status() or 'Duplicate' in find.status():
@@ -1175,7 +1176,8 @@ def close_epic(eng, push_to_jira):
     if jpkey.enable_engagement_epic_mapping and push_to_jira:
         try:
             j_issue = JIRA_Issue.objects.get(engagement=eng)
-            req_url = jira_conf.url + '/rest/api/latest/issue/' + j_issue.jira_id + '/transitions'
+            req_url = jira_conf.url + '/rest/api/latest/issue/' + \
+                j_issue.jira_id + '/transitions'
             j_issue = JIRA_Issue.objects.get(engagement=eng)
             json_data = {'transition': {'id': jira_conf.close_status_key}}
             r = requests.post(
@@ -1236,7 +1238,8 @@ def add_epic(eng, push_to_jira):
             error = str(e)
             message = ""
             if "customfield" in error:
-                message = "The 'Epic name id' in your DefectDojo Jira Configuration does not appear to be correct. Please visit, " + jira_conf.url + "/rest/api/2/field and search for Epic Name. Copy the number out of cf[number] and place in your DefectDojo settings for Jira and try again. For example, if your results are cf[100001] then copy 100001 and place it in 'Epic name id'. (Your Epic Id will be different.) \n\n"
+                message = "The 'Epic name id' in your DefectDojo Jira Configuration does not appear to be correct. Please visit, " + jira_conf.url + \
+                    "/rest/api/2/field and search for Epic Name. Copy the number out of cf[number] and place in your DefectDojo settings for Jira and try again. For example, if your results are cf[100001] then copy 100001 and place it in 'Epic name id'. (Your Epic Id will be different.) \n\n"
 
             log_jira_generic_alert('Jira Engagement/Epic Creation Error',
                                    message + error)
@@ -1606,7 +1609,8 @@ def calculate_grade(product):
         if severity_values:
             aeval = Interpreter()
             aeval(system_settings.product_grade)
-            grade_product = "grade_product(%s, %s, %s, %s)" % (critical, high, medium, low)
+            grade_product = "grade_product(%s, %s, %s, %s)" % (
+                critical, high, medium, low)
             product.prod_numeric_grade = aeval(grade_product)
             product.save()
 
@@ -1628,16 +1632,19 @@ class Product_Tab():
         self.product = Product.objects.get(id=product_id)
         self.title = title
         self.tab = tab
-        self.engagement_count = Engagement.objects.filter(product=self.product, active=True).count()
+        self.engagement_count = Engagement.objects.filter(
+            product=self.product, active=True).count()
         self.open_findings_count = Finding.objects.filter(test__engagement__product=self.product,
-                                                           false_p=False,
-                                                           verified=True,
-                                                           duplicate=False,
-                                                           out_of_scope=False,
-                                                           active=True,
-                                                           mitigated__isnull=True).count()
-        self.endpoints_count = Endpoint.objects.filter(product=self.product).count()
-        self.benchmark_type = Benchmark_Type.objects.filter(enabled=True).order_by('name')
+                                                          false_p=False,
+                                                          verified=True,
+                                                          duplicate=False,
+                                                          out_of_scope=False,
+                                                          active=True,
+                                                          mitigated__isnull=True).count()
+        self.endpoints_count = Endpoint.objects.filter(
+            product=self.product).count()
+        self.benchmark_type = Benchmark_Type.objects.filter(
+            enabled=True).order_by('name')
         self.engagement = None
 
     def setTab(self, tab):
@@ -1677,7 +1684,8 @@ class Product_Tab():
 # Used to display the counts and enabled tabs in the product view
 def tab_view_count(product_id):
     product = Product.objects.get(id=product_id)
-    engagements = Engagement.objects.filter(product=product, active=True).count()
+    engagements = Engagement.objects.filter(
+        product=product, active=True).count()
     open_findings = Finding.objects.filter(test__engagement__product=product,
                                            false_p=False,
                                            verified=True,
@@ -1687,17 +1695,20 @@ def tab_view_count(product_id):
                                            mitigated__isnull=True).count()
     endpoints = Endpoint.objects.filter(product=product).count()
     # benchmarks = Benchmark_Product_Summary.objects.filter(product=product, publish=True, benchmark_type__enabled=True).order_by('benchmark_type__name')
-    benchmark_type = Benchmark_Type.objects.filter(enabled=True).order_by('name')
+    benchmark_type = Benchmark_Type.objects.filter(
+        enabled=True).order_by('name')
     return product, engagements, open_findings, endpoints, benchmark_type
 
 
 # Add a lanaguage to product
 def add_language(product, language):
-    prod_language = Languages.objects.filter(language__language__iexact=language, product=product)
+    prod_language = Languages.objects.filter(
+        language__language__iexact=language, product=product)
 
     if not prod_language:
         try:
-            language_type = Language_Type.objects.get(language__iexact=language)
+            language_type = Language_Type.objects.get(
+                language__iexact=language)
 
             if language_type:
                 lang = Languages(language=language_type, product=product)
@@ -1710,10 +1721,12 @@ def add_language(product, language):
 def apply_cwe_to_template(finding, override=False):
     if System_Settings.objects.get().enable_template_match or override:
         # Attempt to match on CWE and Title First
-        template = Finding_Template.objects.filter(cwe=finding.cwe, title__icontains=finding.title, template_match=True).first()
+        template = Finding_Template.objects.filter(
+            cwe=finding.cwe, title__icontains=finding.title, template_match=True).first()
 
         # If none then match on CWE
-        template = Finding_Template.objects.filter(cwe=finding.cwe, template_match=True).first()
+        template = Finding_Template.objects.filter(
+            cwe=finding.cwe, template_match=True).first()
 
         if template:
             finding.mitigation = template.mitigation
