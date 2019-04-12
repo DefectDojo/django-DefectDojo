@@ -1,0 +1,10 @@
+---
+version: '3.7'
+services:
+  uwsgi:
+    volumes:
+      - '.:/app'
+    ports:
+      - 8000:8000
+    environment:
+      DD_DEBUG: 'on'
