@@ -1233,8 +1233,6 @@ class Finding(models.Model):
             from dojo.utils import apply_cwe_to_template
             self = apply_cwe_to_template(self)
             super(Finding, self).save(*args, **kwargs)
-            # Only compute hash code for new findings.
-            self.hash_code = self.compute_hash_code()
         else:
             super(Finding, self).save(*args, **kwargs)
         self.found_by.add(self.test.test_type)
@@ -1258,6 +1256,7 @@ class Finding(models.Model):
         # Assign the numerical severity for correct sorting order
         self.numerical_severity = Finding.get_numerical_severity(self.severity)
         super(Finding, self).save()
+        self.hash_code = self.compute_hash_code() #compute hash code before dedupe
         system_settings = System_Settings.objects.get()
         if (dedupe_option):
             if system_settings.enable_deduplication:
