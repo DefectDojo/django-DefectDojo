@@ -27,7 +27,7 @@ credentials.
 ```sh
 git clone https://github.com/DefectDojo/django-DefectDojo
 cd django-DefectDojo
-docker-compose up
+docker-compose -f docker-compose_base.yml -f docker-compose_uwsgi-release.yml up
 ```
 
 Navigate to <http://localhost:8080>.
@@ -91,6 +91,14 @@ DefectDojo is maintained by:
 * [Greg Anderson](https://www.linkedin.com/in/g-anderson/)
 * [Aaron Weaver](https://www.linkedin.com/in/aweaver/) ([@weavera](https://twitter.com/weavera))
 * [Matt Tesauro](https://www.linkedin.com/in/matttesauro/) ([@matt_tesauro](https://twitter.com/matt_tesauro))
+
+
+## Project Moderators
+
+Project Moderators can help you with pull requests or feedback on dev ideas.
+
+* [Alex Dracea](https://www.linkedin.com/in/alexandru-marin-dracea-910b51122/)
+* [Valentijn Scholten](https://www.linkedin.com/in/valentijn-scholten/)
 
 ## Hall of Fame
 

@@ -223,7 +223,11 @@ def delete_engagement(request, eid):
                     messages.SUCCESS,
                     'Engagement and relationships removed.',
                     extra_tags='alert-success')
-                return HttpResponseRedirect(reverse("view_engagements", args=(product.id, )))
+
+                if engagement.engagement_type == 'CI/CD':
+                    return HttpResponseRedirect(reverse("view_engagements_cicd", args=(product.id, )))
+                else:
+                    return HttpResponseRedirect(reverse("view_engagements", args=(product.id, )))
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)
     collector.collect([engagement])
