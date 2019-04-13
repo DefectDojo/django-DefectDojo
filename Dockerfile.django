@@ -50,6 +50,7 @@ COPY \
   docker/entrypoint-initializer.sh \
   docker/entrypoint-uwsgi.sh \
   docker/entrypoint-uwsgi-dev.sh \
+  docker/entrypoint-uwsgi-ptvsd.sh \
   docker/entrypoint-unit-tests.sh \
   docker/wait-for-it.sh \
   /

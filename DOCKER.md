@@ -66,6 +66,39 @@ Navigate to the container directly, <http://localhost:8000>
 
 The initializer container can be disabled by exporting: `export DD_INITIALIZE=false`
 
+### Remote debug with pvstd
+
+If you want to be able to step in your code, you can active ptvsd.Server. 
+
+You can launch your local dev instance of DefectDojo as
+
+```
+$ docker-compose -f docker-compose_base.yml -f docker-compose_uwsgi-ptvsd.yml up
+```
+
+The default configuration assumes port 3000 by default.
+
+#### VS code
+Add the following python debug configuration (You would have to install the `ms-python.python`. Other setup may work.)
+
+```
+  {
+      "name": "Remote DefectDojo",
+      "type": "python",
+      "request": "attach",
+      "pathMappings": [
+          {
+              "localRoot": "${workspaceFolder}",
+              "remoteRoot": "/app"
+          }
+      ],
+      "port": 3000,
+      "host": "localhost"
+  }
+```
+
+You can now launch the remote debug from VS Code, place your breakpoints and step through the code.
+
 ### Build Images Locally
 
 Build the docker containers locally for testing purposes.

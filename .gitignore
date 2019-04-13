@@ -104,3 +104,7 @@ quick.bash
 
 #visual studio code
 *.code-workspace
+
+# pipenv
+Pipfile
+Pipfile.lock
