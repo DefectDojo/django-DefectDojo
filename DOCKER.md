@@ -4,25 +4,82 @@ Docker compose is not intended for production use.
 If you want to deploy a containerized DefectDojo to a production environment,
 use the [Helm and Kubernetes](KUBERNETES.md) approach.
 
-## Setup via Docker Compose
+## Prerequisites
+**NOTE:** Installing with docker-compose requires at least docker 18.09.4 and docker-compose 1.24.0. See "Checking Docker versions" below for version errors during running docker-compose.
 
-To start your DefectDojo instance on Docker Compose for the first time, just
-run:
+
+## Setup via Docker Compose - introduction
+
+DefectDojo needs several docker images to run. Two of them depend on DefectDojo code:
+
+*  django image
+*  nginx image
+
+The nginx image is build based on the django image.
+
+Before running the application, it's advised to build local images to make sure that you'll be working on images consistent with your current code base.
+When running the application without building images, the application will run based on: 
+*  a previously locally built image if it exists
+*  else the image pulled from dockerhub
+    *  https://hub.docker.com/r/defectdojo/defectdojo-django
+    *  https://hub.docker.com/r/defectdojo/defectdojo-nginx
+
+
+## Setup via Docker Compose - building and running the application
+### Building images
+
+To build images and put them in your local cache, run:
 
 ```zsh
-. docker/aliases_release.sh
+docker-compose build
+```
+
+To build a single image, run: 
+
+```zsh
+docker-compose build django
+```
+or
+
+```
+docker-compose build nginx
+```
+
+
+### Run with Docker compose in release mode
+To run the application based on previously built image (or based on dockerhub images if none was locally built), run: 
+
+```zsh
+docker-compose -f docker-compose_base.yml up
+```
+
+The -f argument makes docker-compose ignore the docker-compose.override.yml file.
+
+In this setup, you need to rebuild django and/or nginx images after each code change and restart the containers 
+
+
+### Run with Docker compose in development mode with hot-reloading
+
+For development, use: 
+
+```zsh
 docker-compose up
 ```
 
-or
+This will run the application based on merged configurations from docker-compose.yml and docker-compose.override.yml (which holds the dev-specific configuration).
 
-```zsh
-docker-compose -f docker-compose_base.yml -f docker-compose_uwsgi-release.yml up
-```
+*  Volumes are mounted to synchronize between the host and the containers :
+    *  static resources (nginx container)
+    *  python code (django container) . 
 
-This command will run the application based on images commited on dockerhub (or the last images built locally). If you need to be more up to date, see "Build images locally" below
+*  The `--py-autoreload 1` parameter in entrypoint-uwsgi-dev.sh will make uwsgi handle python hot-reloading. 
 
-**NOTE:** Installing with docker-compose requires the latest version of docker and docker-compose - at least docker 18.09.4 and docker-compose 1.24.0. See "Checking Docker versions" below for version errors during running docker-compose up.
+To update changes in static ressources, served by nginx, just refresh the browser with ctrl + F5 
+
+### Access the application
+Navigate to the container directly, <http://localhost:8080>
+
+The initializer container can be disabled by exporting: `export DD_INITIALIZE=false`
 
 Navigate to <http://localhost:8080> where you can log in with username admin.
 To find out the admin user’s password, check the very beginning of the console
@@ -45,41 +102,32 @@ If you ran DefectDojo with compose before and you want to prevent the
 initializer container from running again, define an environment variable
 DD_INITIALIZE=false to prevent re-initialization.
 
-### Develop with Docker Compose
+### Versioning
+In order to use a specific version when building the images and running the containers, set the environment with 
+*  For the nginx image: `NGINX_VERSION=x.y.z`
+*  For the django image: `DJANGO_VERSION=x.y.z`
 
-For developing the easiset way to make changes is to startup DefectDojo in debug by running:
+Building will tag the images with "x.y.z", then you can run the application based on a specific tagged images.
 
-```zsh
-. docker/aliases_dev.sh
-docker-compose up
+Tags can be verified with: 
+*  Image tag: 
+
+```
+$ docker images
+REPOSITORY                     TAG                 IMAGE ID            CREATED             SIZE
+defectdojo/defectdojo-nginx    1.0.0               bc9c5f7bb4e5        About an hour ago   191MB
 ```
 
-or
+Running container tag:
 
-```zsh
-docker-compose -f docker-compose_base.yml -f docker-compose_uwsgi-dev.yml up
+``` 
+$ docker ps
+CONTAINER ID        IMAGE                                 COMMAND                  CREATED             STATUS              PORTS                                NAMES
+aedc404d6dee        defectdojo/defectdojo-nginx:1.0.0     "/entrypoint-nginx.sh"   2 minutes ago       Up 2 minutes        80/tcp, 0.0.0.0:8080->8080/tcp       django-defectdojo_nginx_1
 ```
 
-This starts the DefectDojo (uwsgi) container with manage.py and shares the local source directory so that changes to the code immediately restart the process.
 
-Navigate to the container directly, <http://localhost:8000>
 
-The initializer container can be disabled by exporting: `export DD_INITIALIZE=false`
-
-### Build Images Locally
-
-Build the docker containers locally for testing purposes.
-
-```zsh
-# Build Dev Compose
-docker-compose build
-
-or:
-
-# Build images
-docker build -t defectdojo/defectdojo-django -f Dockerfile.django .
-docker build -t defectdojo/defectdojo-nginx -f Dockerfile.nginx .
-```
 
 ### Clean up Docker Compose
 
