@@ -8,14 +8,12 @@ travis_fold() {
 build_containers() {
   # Build Docker images
   travis_fold start docker_image_build
-  DOCKER_IMAGES=(django nginx)
-  for docker_image in "${DOCKER_IMAGES[@]}"
-  do
-    docker build \
-      --tag "defectdojo/defectdojo-${docker_image}" \
-      --file "Dockerfile.${docker_image}" \
-      .
-  done
+  docker-compose -f docker-compose.yml build
+  return_value=${?}
+  if [ ${return_value} -ne 0 ]; then
+    echo "ERROR: cannot build django or nginx image"
+    exit ${return_value}
+  fi
   travis_fold end docker_image_build
 }
 
@@ -134,14 +132,15 @@ echo "Running test ${TEST}"
     docker)
       echo "Validating docker compose"
       build_containers
-      docker-compose -f docker-compose_base.yml -f docker-compose_uwsgi-release.yml up -d
+      # Testing only release mode, not dev mode (ignores docker-compose.override.yml)
+      docker-compose -f docker-compose.yml up -d
       echo "Waiting for services to start"
       # Wait for services to become available
       sleep 80
       echo "Testing DefectDojo Service"
       curl -s -o "/dev/null" http://localhost:8080 -m 120
       echo "Docker compose container status"
-      docker-compose -f docker-compose_base.yml -f docker-compose_uwsgi-release.yml ps
+      docker-compose -f docker-compose.yml ps
       ;;
     snyk)
       echo "Snyk security testing on containers"
