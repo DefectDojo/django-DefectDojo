@@ -63,6 +63,7 @@ In this setup, you need to rebuild django and/or nginx images after each code ch
 For development, use: 
 
 ```zsh
+cp dojo/settings/settings.dist.py dojo/settings/settings.py
 docker-compose up
 ```
 
@@ -74,7 +75,18 @@ This will run the application based on merged configurations from docker-compose
 
 *  The `--py-autoreload 1` parameter in entrypoint-uwsgi-dev.sh will make uwsgi handle python hot-reloading. 
 
-To update changes in static ressources, served by nginx, just refresh the browser with ctrl + F5 
+To update changes in static ressources, served by nginx, just refresh the browser with ctrl + F5.
+
+
+*Notes about volume permissions*
+
+*The manual copy of settings.py is sometimes required on linux hosts when the host files cannot be modified from within the django container. In that case that copy in entrypoint-uwsgi-dev.sh fails.* 
+
+*Another way to fix this is changing `USER 1001` in Dockerfile.django to match your user uid and then rebuild the images. Get your user id with* 
+
+```
+id -u
+```
 
 ### Access the application
 Navigate to the container directly, <http://localhost:8080>
