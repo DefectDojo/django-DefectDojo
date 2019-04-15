@@ -76,7 +76,7 @@ This will run the application based on merged configurations from docker-compose
 *  The `--py-autoreload 1` parameter in entrypoint-uwsgi-dev.sh will make uwsgi handle python hot-reloading. 
 *  The mysql port is forwarded to the host so that you can access your database from outside the container. 
 
-To update changes in static ressources, served by nginx, just refresh the browser with ctrl + F5.
+To update changes in static resources, served by nginx, just refresh the browser with ctrl + F5.
 
 
 *Notes about volume permissions*
@@ -110,6 +110,8 @@ or:
 ```zsh
 docker logs django-defectdojo_initializer_1
 ```
+
+Beware that when re-running the application several times, there may be several occurrences of "Admin password". In that case you should use the last occurrence.
 
 If you ran DefectDojo with compose before and you want to prevent the
 initializer container from running again, define an environment variable
@@ -188,7 +190,7 @@ OpenSSL version: OpenSSL 1.0.1t  3 May 2016
 
 In this case, both docker (version 17.09.0-ce) and docker-compose (1.18.0) need to be updated.
 
-Follow [Dockers' documentation](https://docs.docker.com/install/) for your OS to get the lastest version of Docker. For the docker command, most OSes have a built-in update mechanism like "apt upgrade".
+Follow [Dockers' documentation](https://docs.docker.com/install/) for your OS to get the latest version of Docker. For the docker command, most OSes have a built-in update mechanism like "apt upgrade".
 
 Docker Compose isn't packaged like Docker and you'll need to manually update an existing install if using Linux. For Linux, either follow the instructions in the [Docker Compose documentation](https://docs.docker.com/compose/install/) or use the shell script below. The script below will update docker-compose to the latest version automatically. You will need to make the script executable and have sudo privileges to upgrade docker-compose:
 
@@ -206,7 +208,7 @@ echo "Note: docker-compose version $VERSION will be downloaded from:"
 echo "https://github.com/docker/compose/releases/download/${VERSION}/docker-compose-$(uname -s)-$(uname -m)"
 echo "Enter sudo password to install docker-compose"
 
-# Download and install lastest docker compose
+# Download and install latest docker compose
 sudo curl -L https://github.com/docker/compose/releases/download/${VERSION}/docker-compose-$(uname -s)-$(uname -m) -o $DESTINATION
 sudo chmod +x $DESTINATION
 
