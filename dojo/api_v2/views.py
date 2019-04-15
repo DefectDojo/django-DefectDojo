@@ -1,5 +1,9 @@
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from rest_framework import viewsets, mixins
 from rest_framework.permissions import DjangoModelPermissions
+from rest_framework.decorators import detail_route
 from django_filters.rest_framework import DjangoFilterBackend
 
 from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Finding, \
@@ -35,6 +39,23 @@ class EngagementViewSet(mixins.ListModelMixin,
                      'target_end', 'requester', 'report_type',
                      'updated', 'threat_model', 'api_test',
                      'pen_test', 'status', 'product')
+
+    @detail_route(methods=["post"])
+    def close(self, request, pk=None):
+        eng = get_object_or_404(Engagement.objects, id=pk)
+        eng.active = False
+        eng.status = 'Completed'
+        eng.updated = timezone.now()
+        eng.save()
+        return HttpResponse()
+
+    @detail_route(methods=["post"])
+    def reopen(self, request, pk=None):
+        eng = get_object_or_404(Engagement.objects, id=pk)
+        eng.active = True
+        eng.status = 'In Progress'
+        eng.save()
+        return HttpResponse()
 
 
 class FindingTemplatesViewSet(mixins.ListModelMixin,
