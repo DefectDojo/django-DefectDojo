@@ -12,8 +12,8 @@ use the [Helm and Kubernetes](KUBERNETES.md) approach.
 
 DefectDojo needs several docker images to run. Two of them depend on DefectDojo code:
 
-*  django image
-*  nginx image
+*  django service - defectdojo/defectdojo-django image 
+*  nginx service - defectdojo/defectdojo-nginx image
 
 The nginx image is build based on the django image.
 
@@ -74,13 +74,14 @@ This will run the application based on merged configurations from docker-compose
     *  python code (django container) . 
 
 *  The `--py-autoreload 1` parameter in entrypoint-uwsgi-dev.sh will make uwsgi handle python hot-reloading. 
+*  The mysql port is forwarded to the host so that you can access your database from outside the container. 
 
 To update changes in static ressources, served by nginx, just refresh the browser with ctrl + F5.
 
 
 *Notes about volume permissions*
 
-*The manual copy of settings.py is sometimes required on linux hosts when the host files cannot be modified from within the django container. In that case that copy in entrypoint-uwsgi-dev.sh fails.* 
+*The manual copy of settings.py is sometimes required once after cloning the repository, on linux hosts when the host files cannot be modified from within the django container. In that case that copy in entrypoint-uwsgi-dev.sh fails.* 
 
 *Another way to fix this is changing `USER 1001` in Dockerfile.django to match your user uid and then rebuild the images. Get your user id with* 
 
