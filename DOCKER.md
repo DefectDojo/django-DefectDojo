@@ -50,7 +50,7 @@ docker-compose build nginx
 To run the application based on previously built image (or based on dockerhub images if none was locally built), run: 
 
 ```zsh
-docker-compose -f docker-compose_base.yml up
+docker-compose -f docker-compose.yml up
 ```
 
 The -f argument makes docker-compose ignore the docker-compose.override.yml file.
