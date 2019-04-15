@@ -10,3 +10,9 @@ services:
   nginx:
     volumes:
       - './dojo/static/dojo:/usr/share/nginx/html/static/dojo'
+  mysql:
+    ports:
+      - target: 3306
+        published: 3306
+        protocol: tcp
+        mode: host
