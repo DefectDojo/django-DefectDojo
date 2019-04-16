@@ -1533,6 +1533,7 @@ class Report(models.Model):
     options = models.TextField()
     datetime = models.DateTimeField(auto_now_add=True)
     done_datetime = models.DateTimeField(null=True)
+    host = models.CharField(max_length=100, null=False, editable=False)
 
     def __unicode__(self):
         return self.name
@@ -1580,12 +1581,14 @@ class Report_Interval(models.Model):
                    (2, 'Start of Week'),
                    (3, 'Start of Month'),
                    (4, 'Start of Year'),
-                   (5, 'Start of engagements'))
+                   (5, 'Start of Engagements'))
 
     report = models.ForeignKey(Report, null=False, blank=False)
     event = models.IntegerField(choices=EVENT_CHOICES)
     time_unit = models.IntegerField(choices=TIME_UNIT_CHOICES)
     time_count = models.IntegerField(default=0, help_text='Negative numbers are before the chosen event, positive ones after')
+    recipients = models.TextField(null=False, blank=False, help_text="Email recipients, one per line. You can use the following placeholders, depending on the event: {product.owner}")
+    last_run = models.DateTimeField(null=True, editable=False)
 
     def search_tuple(self, searchKey, tuples):
         for key, value in tuples:

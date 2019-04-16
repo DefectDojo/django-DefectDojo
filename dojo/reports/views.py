@@ -71,10 +71,13 @@ def report_builder(request):
                   {"available_widgets": available_widgets,
                    "in_use_widgets": in_use_widgets})
 
-#markme
+
 def report_scheduler(request):
     add_breadcrumb(title="Report Scheduler", top_level=True, request=request)
     intervals = Report_Interval.objects.all()
+    
+    for i in range(len(intervals)):
+        intervals[i].numRecipients = intervals[i].recipients.count('\n') + 1
 
     return render(request, 'dojo/report_scheduler.html', {'confs':intervals})
 
@@ -96,7 +99,7 @@ def add_report_interval(request):
 
     return render(request, 'dojo/report_interval.html', {'form': form})
 
-#markme
+
 def edit_report_interval(request, sid):
     interval = get_object_or_404(Report_Interval, id=sid)
     add_breadcrumb(parent=report_scheduler, title="Edit", top_level=False, request=request)
@@ -113,10 +116,9 @@ def edit_report_interval(request, sid):
 
     return render(request, 'dojo/report_interval.html', {'form': form})
 
-#markme
+
 def delete_report_interval(request, sid):
     interval = get_object_or_404(Report_Interval, id=sid)
-    add_breadcrumb(parent=report_scheduler, title="Edit", top_level=False, request=request)
     
     if request.method == 'POST':
         if 'delete_now' in request.POST:
@@ -142,7 +144,7 @@ def custom_report(request):
 
         if 'report-options' in selected_widgets:
             options = selected_widgets['report-options']
-            report_name = 'Custom Report: ' + options.report_name
+            report_name = options.report_name
             report_format = options.report_type
             finding_notes = (options.include_finding_notes == '1')
             finding_images = (options.include_finding_images == '1')
@@ -154,7 +156,8 @@ def custom_report(request):
                             type="Custom",
                             format=report_format,
                             requester=request.user,
-                            options=request.POST['json'])
+                            options=request.POST['json'],
+                            host=host)
         report.save()
 
         if report_format == 'PDF':
@@ -539,6 +542,7 @@ def product_endpoint_report(request, pid):
                                 format='PDF',
                                 requester=request.user,
                                 task_id='tbd',
+                                host=report_url_resolver(request),
                                 options=request.path + "?" + request.GET.urlencode())
             report.save()
             async_pdf_report.delay(report=report,
@@ -866,6 +870,7 @@ def generate_report(request, obj):
                                 format='PDF',
                                 requester=request.user,
                                 task_id='tbd',
+                                host=report_url_resolver(request),
                                 options=request.path + "?" + request.GET.urlencode())
             report.save()
             async_pdf_report.delay(report=report,
