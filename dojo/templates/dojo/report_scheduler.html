@@ -38,6 +38,8 @@
                         <tr>
                             <th>Report</th>
                             <th>Interval</th>
+                            <th>Recipients</th>
+                            <th>Last Run</th>
                             <th>Action</th>
                         </tr>
                         </thead>
@@ -49,6 +51,16 @@
                                 </td>
                                 <td>
                                     {{ conf }}
+                                </td>
+                                <td>
+                                    {{ conf.numRecipients }}
+                                </td>
+                                <td>
+                                    {% if conf.last_run %}
+                                    {{ conf.last_run }}
+                                    {% else %}
+                                    Never
+                                    {% endif %}
                                 </td>
                                 <td>
                                     <a class="btn btn-warning" href="{% url 'edit_report_interval' conf.id %}">Edit</a>
