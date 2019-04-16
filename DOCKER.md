@@ -5,7 +5,10 @@ If you want to deploy a containerized DefectDojo to a production environment,
 use the [Helm and Kubernetes](KUBERNETES.md) approach.
 
 ## Prerequisites
-**NOTE:** Installing with docker-compose requires at least docker 18.09.4 and docker-compose 1.24.0. See "Checking Docker versions" below for version errors during running docker-compose.
+*  Docker version
+    *  Installing with docker-compose requires at least docker 18.09.4 and docker-compose 1.24.0. See "Checking Docker versions" below for version errors during running docker-compose.
+*  Proxies
+    *  If you're behind a corporate proxy check https://docs.docker.com/network/proxy/ . 
 
 
 ## Setup via Docker Compose - introduction
@@ -19,8 +22,8 @@ The nginx image is build based on the django image.
 
 Before running the application, it's advised to build local images to make sure that you'll be working on images consistent with your current code base.
 When running the application without building images, the application will run based on: 
-*  a previously locally built image if it exists
-*  else the image pulled from dockerhub
+*  a previously locally built image if it exists in the docker cache
+*  else the images pulled from dockerhub
     *  https://hub.docker.com/r/defectdojo/defectdojo-django
     *  https://hub.docker.com/r/defectdojo/defectdojo-nginx
 
@@ -28,7 +31,7 @@ When running the application without building images, the application will run b
 ## Setup via Docker Compose - building and running the application
 ### Building images
 
-To build images and put them in your local cache, run:
+To build images and put them in your local docker cache, run:
 
 ```zsh
 docker-compose build
@@ -55,7 +58,7 @@ docker-compose -f docker-compose.yml up
 
 The -f argument makes docker-compose ignore the docker-compose.override.yml file.
 
-In this setup, you need to rebuild django and/or nginx images after each code change and restart the containers 
+In this setup, you need to rebuild django and/or nginx images after each code change and restart the containers. 
 
 
 ### Run with Docker compose in development mode with hot-reloading
@@ -90,10 +93,6 @@ id -u
 ```
 
 ### Access the application
-Navigate to the container directly, <http://localhost:8080>
-
-The initializer container can be disabled by exporting: `export DD_INITIALIZE=false`
-
 Navigate to <http://localhost:8080> where you can log in with username admin.
 To find out the admin user’s password, check the very beginning of the console
 output of the initializer container, typically name 'django-defectdojo_initializer_1', or run the following:
@@ -113,9 +112,10 @@ docker logs django-defectdojo_initializer_1
 
 Beware that when re-running the application several times, there may be several occurrences of "Admin password". In that case you should use the last occurrence.
 
-If you ran DefectDojo with compose before and you want to prevent the
-initializer container from running again, define an environment variable
-DD_INITIALIZE=false to prevent re-initialization.
+### Disable the database initialization
+The initializer container can be disabled by exporting: `export DD_INITIALIZE=false`. 
+
+This will ensure that the database remains unchanged when re-running the application, keeping your previous settings and admin password.
 
 ### Versioning
 In order to use a specific version when building the images and running the containers, set the environment with 
@@ -124,8 +124,7 @@ In order to use a specific version when building the images and running the cont
 
 Building will tag the images with "x.y.z", then you can run the application based on a specific tagged images.
 
-Tags can be verified with: 
-*  Image tag: 
+*  Tagged images can be seen with: 
 
 ```
 $ docker images
@@ -133,7 +132,7 @@ REPOSITORY                     TAG                 IMAGE ID            CREATED  
 defectdojo/defectdojo-nginx    1.0.0               bc9c5f7bb4e5        About an hour ago   191MB
 ```
 
-Running container tag:
+*  This will show on which tagged images the containers are running:
 
 ``` 
 $ docker ps
