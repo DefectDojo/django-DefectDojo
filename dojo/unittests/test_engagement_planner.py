@@ -66,8 +66,8 @@ class TestEngagementPlanner(TestCase):
 
     def setUp(self):
         p1 = Product()
-        p1.Name = 'Test Product 1'
-        p1.Description = 'Product for Testing Endpoint functionality'
+        p1.name = 'Test Product 1'
+        p1.description = 'Product for Testing Endpoint functionality'
         p1.save()
 
         e1 = Endpoint()
@@ -77,8 +77,8 @@ class TestEngagementPlanner(TestCase):
         e1.save()
 
         p2 = Product()
-        p2.Name = 'Test Product 2'
-        p2.Description = 'Product for Testing Endpoint functionality'
+        p2.name = 'Test Product 2'
+        p2.description = 'Product for Testing Endpoint functionality'
         p2.save()
 
         e2 = Endpoint()

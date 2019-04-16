@@ -17,13 +17,13 @@ class TestToolRun(TransactionTestCase):
 
     def setUp(self):
         u = User()
-        u.Name = 'Test User 1'
+        u.name = 'Test User 1'
         u.is_staff = True
         u.save()
 
         p = Product()
-        p.Name = 'Test Product 1'
-        p.Description = 'Product for Testing Endpoint functionality'
+        p.name = 'Test Product 1'
+        p.description = 'Product for Testing Endpoint functionality'
         p.save()
 
         e = Endpoint()
@@ -33,19 +33,19 @@ class TestToolRun(TransactionTestCase):
         e.save()
 
         tt = Tool_Type()
-        tt.Name = 'Tool Type 1'
-        tt.Description = 'Tool Type for testing run functionality'
+        tt.name = 'Tool Type 1'
+        tt.description = 'Tool Type for testing run functionality'
         tt.save()
 
         tc = Tool_Configuration()
-        tc.Name = 'Tool Configuration 1'
+        tc.name = 'Tool Configuration 1'
         tc.url = 'ssh://localhost' + self.project_root + '/dojo/fixtures/tool_run.sh'
         tc.tool_type = tt
         tc.save()
 
         tp = Tool_Product_Settings()
-        tp.Name = 'Tool Product Configuration 1'
-        tp.Product = p
+        tp.name = 'Tool Product Configuration 1'
+        tp.product = p
         tp.tool_configuration = tc
         tp.url = ""
         tp.save()
