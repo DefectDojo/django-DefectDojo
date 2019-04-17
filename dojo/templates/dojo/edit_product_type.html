@@ -2,10 +2,12 @@
 {% block content %}
     <h3> Edit Product Type {{ pt.name }}</h3>
     <form class="form-horizontal" action="{% url 'edit_product_type' pt.id %}" method="post">{% csrf_token %}
-        {% include "dojo/form_fields.html" with form=form %}
+        {% include "dojo/form_fields.html" with form=pt_form %}
+        {{ delete_pt_form }}
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
-                <input class="btn btn-primary" type="submit" value="Submit"/>
+                <input aria-label="Edit product type" class="btn btn-primary" name="edit_product_type" type="submit" value="Submit"/>
+                <input aria-label="Delete product type" class="btn btn-danger" name="delete_product_type" type="submit" value="Delete"/>
             </div>
         </div>
     </form>
