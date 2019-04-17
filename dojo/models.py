@@ -1078,7 +1078,7 @@ class Finding(models.Model):
         ordering = ('numerical_severity', '-date', 'title')
 
     def compute_hash_code(self):
-        hash_string = self.title + str(self.cwe) + str(self.line) + str(self.file_path) + self.description
+        hash_string = unicode(self.title) + unicode(self.cwe) + unicode(self.line) + unicode(self.file_path) + unicode(self.description)
 
         if self.dynamic_finding:
             endpoint_str = u''
