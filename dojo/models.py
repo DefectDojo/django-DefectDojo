@@ -1257,7 +1257,8 @@ class Finding(models.Model):
         self.numerical_severity = Finding.get_numerical_severity(self.severity)
         super(Finding, self).save()
         # Compute hash code before dedupe
-        self.hash_code = self.compute_hash_code()
+        if self.hash_code is None:
+            self.hash_code= self.compute_hash_code()
         system_settings = System_Settings.objects.get()
         if (dedupe_option):
             if system_settings.enable_deduplication:
