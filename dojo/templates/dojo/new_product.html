@@ -14,6 +14,7 @@
 {% endblock %}
 
 {% block content %}
+    <h1>Register a New Product</h1>
     <form class="form-horizontal" action="{% url 'new_product' %}" method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
         {%  if jform %}

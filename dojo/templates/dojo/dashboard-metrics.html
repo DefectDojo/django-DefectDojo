@@ -2,31 +2,41 @@
 {% load event_tags %}
 {% load static from staticfiles %}
 {% block add_styles %}
-    body{
+    body {
         padding-top: 0px !important;
     }
-    nav.navbar {display: none;}
+    nav.navbar { display: none; }
     #page-wrapper {
-    margin: 0 0 0 0 !important;
-    padding: 0 0 0 0 !important;
+        margin: 0 0 0 0 !important;
+        padding: 0 0 0 0 !important;
     }
-    br {margin: 0;}
-    h2 {margin: -5px 0px 0px;background-color: white;padding: 5px 15px 8px;border-bottom: 1px solid #e8e8e8;}
+    br { margin: 0; }
+    h2 {
+        margin: -5px 0px 0px;
+        background-color: white;
+        padding: 5px 15px 8px;
+        border-bottom: 1px solid #e8e8e8; 
+    }
 
-    ul.breadcrumb {display:none}
-    span.close_link {font-size: 14px;}
-    .metric-data{margin-top: 40px;}
-    .graph {height: 45vh; width: 100%;}
-    .graph-500 {height: 65vh; width: 100%;}
-    #punchcard .flot-x-axis .flot-tick-label span {  transform: rotate(45deg);-webkit-transform:
-    rotate(-45deg);-ms-transform:rotate(-45deg);display: inline-block;}
+    ul.breadcrumb { display: none; }
+    span.close_link { font-size: 14px; }
+    .metric-data { margin-top: 40px; }
+    .graph { height: 45vh; width: 100%; }
+    .graph-500 { height: 65vh; width: 100%; }
+    #punchcard .flot-x-axis .flot-tick-label span {
+        transform: rotate(45deg);
+        -webkit-transform: rotate(-45deg);
+        -ms-transform:rotate(-45deg);
+        display: inline-block;
+    }
 {% endblock %}
 {% block content %}
     <div class="row navbar-fixed-top">
         <div class="col-md-12">
-            <h2>{{ name }} For {{ start_date.date }} - {{ end_date.date }}
-                <a class="btn close pull-right" href="{% url 'metrics' %}" aria-hidden="true">&times;</a>
-            </h2>
+            <h1>
+                {{ name }} For {{ start_date.date }} - {{ end_date.date }}
+                <a class="btn close pull-right" href="{% url 'metrics' %}" aria-label="Close">&times;</a>
+            </h1>
         </div>
     </div>
     <div class="row metric-data">

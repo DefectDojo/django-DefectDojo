@@ -9,7 +9,7 @@
 }
 {% endblock %}
 {% block content %}
-    <h3> Add Tests</h3>
+    <h3>Import Scan Results</h3>
     <form class="form-horizontal" action="" enctype="multipart/form-data" method="post">
 	{% csrf_token %}
 	{% include "dojo/form_fields.html" with form=form %}

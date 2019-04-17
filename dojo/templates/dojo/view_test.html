@@ -32,8 +32,7 @@
                 <small>Updated {{ test.updated|naturaltime|default_if_none:"" }}, Created {{ test.created|naturaltime|default_if_none:"" }}</small>
                 </h3>
                 <div id="test-pulldown" class="dropdown pull-right">
-                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
-                            data-toggle="dropdown" aria-expanded="true">
+                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="false" aria-label="Options">
                         <span class="fa fa-bars"></span>
                         <span class="caret"></span>
                     </button>
@@ -135,60 +134,55 @@
     <div class="row">
       <div class="col-md-12" id="cred">
           <div class="dropdown pull-left hidden" style="padding-bottom: 5px;" id="bulk_edit_menu">
-          <button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="dropdownMenu2"
-                  data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-              Bulk Edit
-              <span class="caret"></span>
-          </button>
-          <div class="btn-group mr-2" role="group" aria-label="Bulk Actions">
+              <div class="btn-group mr-2" role="group" aria-label="Bulk Actions">
+                  <button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-expanded="false">
+                      Bulk Edit
+                      <span class="caret"></span>
+                  </button>
+                  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" id="bulk_edit">
+                      <li class="dropdown-header">Choose wisely...</li>
+                      <li style="padding-left: 8px;">
+                          <form action="{% url 'finding_bulk_update' test.id %}" method="post" id="bulk_change_form">
+                              {% csrf_token %}
+                              <label style="display: block" for="severity">Severity</label>
+                              <select name="severity" id="severity" style="font-size: 80%">
+                                  <option value="">Choose...</option>
+                                  <option value="Info">Info</option>
+                                  <option value="Low">Low</option>
+                                  <option value="Medium">Medium</option>
+                                  <option value="High">High</option>
+                                  <option value="Critical">Critical</option>
+                              </select><br/><br/>
+                              <b>Status</b> <input id="id_status" name="status" type="checkbox" alt="Select to enable"/><br/>
+                              <label style="font-size: 80%; font-weight: normal; display: block">
+                                  <input id="id_active" name="active" type="checkbox" disabled/> <span>Active</span>
+                              </label>
+                              <label style="font-size: 80%; font-weight: normal; display: block">
+                                  <input id="id_verified" name="verified" type="checkbox" disabled/> <span>Verified</span>
+                              </label>
+                              <label style="font-size: 80%; font-weight: normal; display: block">
+                                  <input id="id_false_p" name="false_p" type="checkbox" disabled/> <span>False Positive</span>
+                              </label>
+                              <label style="font-size: 80%; font-weight: normal; display: block">
+                                  <input id="id_out_of_scope" name="out_of_scope" type="checkbox" disabled/>
+                                  <span>Out of scope</span>
+                              </label>
+                              {% if "enable_jira"|get_system_setting %}
+                              <b>Push to JIRA</b> <input id="id_push_tojira" name="push_to_jira" type="checkbox" alt="Select to push to JIRA"/><br/>
+                              {% endif %}
+                              <input type="submit" class="btn btn-sm btn-primary" value="Submit"/>
+                          </form>
+                      </li>
+                  </ul>
             {% if tab_product %}
-            <button type="button" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Merge Findings">
-              <a class="white-color merge" href="#" alt="Merge Findings">
+            <button type="button" class="btn btn-sm  btn-primary white-color merge" data-toggle="tooltip" data-placement="bottom" title="Merge Findings">
                 <i class="fa fa-compress"></i>
-              </a>
             </button>
             {% endif %}
-            <button type="button" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Delete Findings">
-              <a class="white-color delete-bulk" href="#" alt="Delete Findings">
+            <button type="button" class="btn btn-sm  btn-primary white-color delete-bulk" data-toggle="tooltip" data-placement="bottom" title="Delete Findings">
                 <i class="fa fa-trash"></i>
-              </a>
             </button>
           </div>
-          <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" id="bulk_edit">
-              <li class="dropdown-header">Choose wisely...</li>
-              <li style="padding-left: 8px;">
-                  <form action="{% url 'finding_bulk_update' test.id %}" method="post" id="bulk_change_form">
-                      {% csrf_token %}
-                      <label style="display: block" for="severity">Severity</label>
-                      <select name="severity" id="severity" style="font-size: 80%">
-                          <option value="">Choose...</option>
-                          <option value="Info">Info</option>
-                          <option value="Low">Low</option>
-                          <option value="Medium">Medium</option>
-                          <option value="High">High</option>
-                          <option value="Critical">Critical</option>
-                      </select><br/><br/>
-                      <b>Status</b> <input id="id_status" name="status" type="checkbox" alt="Select to enable"/><br/>
-                      <label style="font-size: 80%; font-weight: normal; display: block">
-                          <input id="id_active" name="active" type="checkbox" disabled/> <span>Active</span>
-                      </label>
-                      <label style="font-size: 80%; font-weight: normal; display: block">
-                          <input id="id_verified" name="verified" type="checkbox" disabled/> <span>Verified</span>
-                      </label>
-                      <label style="font-size: 80%; font-weight: normal; display: block">
-                          <input id="id_false_p" name="false_p" type="checkbox" disabled/> <span>False Positive</span>
-                      </label>
-                      <label style="font-size: 80%; font-weight: normal; display: block">
-                          <input id="id_out_of_scope" name="out_of_scope" type="checkbox" disabled/>
-                          <span>Out of scope</span>
-                      </label>
-                      {% if "enable_jira"|get_system_setting %}
-                      <b>Push to JIRA</b> <input id="id_push_tojira" name="push_to_jira" type="checkbox" alt="Select to push to JIRA"/><br/>
-                      {% endif %}
-                      <input type="submit" class="btn btn-sm btn-primary" value="Submit"/>
-                  </form>
-              </li>
-          </ul>
         </div>
       </div>
     </div>
@@ -199,13 +193,11 @@
                 <h4 class="pull-left"> Findings ({{findings_count}}) <small>{{ test.id|get_severity_count:"test" }}</small>
                 </h4>
                 <div id="test-pulldown" class="dropdown pull-right">
-                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
-                            data-toggle="dropdown" aria-expanded="true">
+                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="false" aria-label="Options">
                         <span class="fa fa-plus"></span>
                         <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-
                         <li role="presentation">
                             <a title="Add Finding" href="{% url 'add_findings' test.id %}">
                                 <span class="fa fa-bug"></span> New Finding
@@ -227,21 +219,19 @@
                 <tr>
                     <th class="hidden-sm centered" title="Select all visible findings.">
                         <div class="dropdown">
-                            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
-                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                                <form class="inline-form" action="#"><input type="checkbox" name="select_all"
-                                                                            id="select_all"/></form>
+                            <form class="inline-form" action="#"><input type="checkbox" name="select_all" id="select_all" aria-label="Select All"/></form>
+                            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="false" aria-label="Select by Severity">
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" id="select_by_severity">
-                                <li><a id="Info">Info</a></li>
-                                <li><a id="Low">Low</a></li>
-                                <li><a id="Medium">Medium</a></li>
-                                <li><a id="High">High</a></li>
-                                <li><a id="Critical">Critical</a></li>
+                                <li><a href="#" id="Info">Info</a></li>
+                                <li><a href="#" id="Low">Low</a></li>
+                                <li><a href="#" id="Medium">Medium</a></li>
+                                <li><a href="#" id="High">High</a></li>
+                                <li><a href="#" id="Critical">Critical</a></li>
                                 <li role="separator" class="divider"></li>
-                                <li><a id="All">All</a></li>
-                                <li><a id="None">None</a></li>
+                                <li><a href="#" id="All">All</a></li>
+                                <li><a href="#" id="None">None</a></li>
                             </ul>
                         </div>
                     </th>
@@ -273,7 +263,10 @@
                         <td class="nowrap">
                           <div class="align-top">
                             <div class="dropdown">
-                              <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown">&nbsp;<i class="fa fa-ellipsis-v"></i>&nbsp;</a>                                   <ul class="dropdown-menu">
+                                <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown" aria-expanded="false" aria-label="Options">
+                                    &nbsp;<i class="fa fa-ellipsis-v"></i>&nbsp;
+                                </a>
+                                <ul class="dropdown-menu">
                                      <li>
                                        <a class="" href="{% url 'view_finding' finding.id %}">
                                          <i class="fa fa-arrow-circle-right"></i> View
@@ -594,7 +587,7 @@
 </div>
 <!--Cred end -->
 
-{% include "dojo/snippets/comments.html" with notes=notes object=test destination="test" %}
+{% include "./snippets/notes.html" with id="test_notes" notes=notes object=test destination="test" open=True %}
 
 <div class="protip">
     <i class="fa fa-lightbulb-o"></i> <strong>ProTip!</strong> Type <kbd>e</kbd> to edit this test. Type <kbd>a</kbd> to add a finding to this test.

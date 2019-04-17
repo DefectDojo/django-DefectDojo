@@ -88,13 +88,18 @@ a {
   color: white;
 }
 
-.h1,
-.h2,
-.h3,
-h1,
-h2 {
-    margin-top: 10px;
+h1 {
+    margin-top: 5px;
     margin-bottom: 10px;
+  font-size: 28px;
+  line-height: 28px;
+}
+
+h2 {
+  margin-top: 5px;
+  margin-bottom: 5px;
+  font-size: 23px;
+  line-height: 23px;
 }
 
 h3 {

@@ -3,6 +3,7 @@
 {% block content %}
     <div class="row">
         <div class="col-md-12">
+            <h1>Alerts for {{ request.user.get_full_name }}</h1>
             {% if alerts %}
             <form id="delete_alerts" method="POST">{% csrf_token %}
                 <div class="table-responsive panel panel-default">

@@ -9,13 +9,11 @@
                     <h3 class="has-filters">
                         {{ name }}
                         <div class="dropdown pull-right">
-                            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
-                                    data-toggle="dropdown" aria-expanded="true">
+                            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="false" aria-label="Options">
                                 <span class="fa fa-wrench"></span>
                                 <span class="caret"></span>
                             </button>
-                            <ul class="dropdown-menu dropdown-menu-right" role="menu"
-                                aria-labelledby="dropdownMenu1">
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                                 {% if request.user.is_staff %}
                                     <li role="presentation">
                                         <a href="{% url 'add_user' %}">

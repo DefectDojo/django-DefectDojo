@@ -7,11 +7,11 @@
             <div class="panel panel-default">
                 <div class="panel-heading tight">
                     <h3 class="has-filters">
-                        {{ product }} Open Findings
+                        {{ product }} - Open Findings
                         <div class="dropdown pull-right">
-                            <a class="btn btn-primary"
-                               href="{% url 'product_report' product.id %}?{{ request.GET.urlencode }}">
-                                <i class="fa fa-file-text-o"></i> Report
+                            <a class="btn btn-primary" href="{% url 'product_report' product.id %}?{{ request.GET.urlencode }}">
+                                <i class="fa fa-file-text-o"></i>
+                                Report
                             </a>
                         </div>
                     </h3>

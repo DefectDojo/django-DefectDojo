@@ -1,0 +1,30 @@
+<div class="panel panel-default {{ add_panel_class }}" id="{{ id }}">
+    {% if add_heading|default_if_none:True %}
+        <div class="panel-heading {{ add_panel_heading_class }}">
+            <h{{ heading_level|default:4 }}>
+                {{ title }}
+                {{ extra_heading }}
+                {% if collapsible|default_if_none:True %}
+                    <button class="btn btn-sm btn-primary pull-right" data-toggle="collapse" data-target="#{{ id }}_collapse" aria-expanded="{% if open|default_if_none:True %}true{% else %}false{% endif %}" aria-label="{{ title }}">
+                        <i class="fa fa-down"></i>
+                    </button>
+                {% endif %}
+                {% if options_menu %}
+                    {% include "./dropdown_menu.html" with label="Options" menu=options_menu add_dropdown_class="pull-right" only %}
+                {% endif %}
+            </h{{ heading_level|default:4 }}>
+        </div>
+    {% endif %}
+    <div class="{% if collapsible|default_if_none:True %}collapse{% if open|default_if_none:True %} in{% endif %}{% endif %}" id="{{ id }}_collapse">
+        {% if body %}
+            <div class="panel-body {{ add_panel_body_class }}" id="{{ id }}_body">
+                {{ body }}
+            </div>
+        {% endif %}
+        {% if footer %}
+            <div class="panel-footer {{ add_panel_footer_class }}" id="{{ id }}_footer">
+                {{ footer }}
+            </div>
+        {% endif %}
+    </div>
+</div>

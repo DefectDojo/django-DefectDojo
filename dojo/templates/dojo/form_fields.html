@@ -1,11 +1,13 @@
 {% load event_tags %}
 {% if form.non_field_errors %}
     <div class="alert alert-danger alert-dismissible" role="alert">
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
-                aria-hidden="true">&times;</span></button>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Dismiss">
+            <span>&times;</span>
+        </button>
         {{ form.non_field_errors }}
     </div>
 {% endif %}
+
 {% for field in form.hidden_fields %}
     {{ field }}
 {% endfor %}
@@ -21,19 +23,19 @@
                         </label>
                     {% endif %}
                     {% if field.help_text %}
-                        <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="{{ field.help_text }}" data-placement="right" data-container="body">
-                        </i>
+                        <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="{{ field.help_text }}" data-placement="right" data-container="body" aria-label="{{ field.help_text }}"></i>
                     {% endif %}
                     {% for error in field.errors %}
                         <span class="help-block {{ form.error_css_class }}">{{ error }}</span>
                     {% endfor %}
-
                 </div>
             </div>
         {% elif field|is_radio %}
             {% if field.auto_id %}
-                <label class="col-sm-2 control-label
-                        {% if field.field.required %}{{ form.required_css_class }}{% endif %}">{{ field.label }}{% if field.field.required%}<sup>*</sup>{% endif %}</label>
+                <label class="col-sm-2 control-label{% if field.field.required %} {{ form.required_css_class }}{% endif %}">
+                    {{ field.label }}
+                    {% if field.field.required%}<sup>*</sup>{% endif %}
+                </label>
             {% endif %}
             <div class="col-sm-offset-2 col-sm-10 {{ classes.value }}">
                 {% for choice in field %}
@@ -50,8 +52,7 @@
                 {% endfor %}
 
                 {% if field.help_text %}
-                    <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="{{ field.help_text }}" data-placement="right" data-container="body">
-                    </i>
+                    <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="{{ field.help_text }}" data-placement="right" data-container="body" aria-label="{{ field.help_text }}"></i>
                 {% endif %}
             </div>
         {% else %}
@@ -60,7 +61,7 @@
                         {% if field.field.required %}{{ form.required_css_class }}{% endif %}"
                        for="{{ field.auto_id }}">{{ field.label }}{% if field.field.required%}<sup>*</sup>{% endif %}
                         {% if field.help_text %}
-                            <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="{{ field.help_text }}" data-placement="right" data-container="body">
+                            <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="{{ field.help_text }}" data-placement="right" data-container="body" aria-label="{{ field.help_text }}">
                             </i>
                         {% endif %}
                 </label>

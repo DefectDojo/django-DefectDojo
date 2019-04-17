@@ -12,20 +12,19 @@
                         <div class="dropdown pull-right"></div>
                     </h3>
                 </div>
-                <div id="the-filters" class="panel-body collapse">
+                <div id="the-filters" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
                     {% include "dojo/filter_snippet.html" with form=filtered.form %}
                 </div>
             </div>
             {% if findings %}
             <div class="hidden" style="padding-bottom: 5px;" id="bulk_edit_menu">
                 <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
-                  <div class="btn-group mr-2" role="group" aria-label="Second group">
-                    <button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="dropdownMenu2"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                  <div class="btn-group mr-2" role="group" aria-label="Bulk Actions">
+                    <button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-expanded="false">
                         Bulk Edit
                         <span class="caret"></span>
                     </button>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" id="bulk_edit">
+                    <ul class="dropdown-menu" id="bulk_edit">
                         <li class="dropdown-header">Choose wisely...</li>
                         <li style="padding-left: 8px;">
                           {% if product_tab %}
@@ -64,19 +63,13 @@
                             </form>
                         </li>
                     </ul>
-                  </div>
-                  <div class="btn-group mr-2" role="group" aria-label="Bulk Actions">
                     {% if product_tab %}
-                    <button type="button" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Merge Findings">
-                      <a class="white-color merge" href="#" alt="Merge Findings">
+                    <button type="button" class="btn btn-sm  btn-primary white-color merge" data-toggle="tooltip" data-placement="bottom" title="Merge Findings">
                         <i class="fa fa-compress"></i>
-                      </a>
                     </button>
                     {% endif %}
-                    <button type="button" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Delete Findings">
-                      <a class="white-color delete-bulk" href="#" alt="Delete Findings">
+                    <button type="button" class="btn btn-sm btn-primary white-color delete-bulk" data-toggle="tooltip" data-placement="bottom" title="Delete Findings">
                         <i class="fa fa-trash"></i>
-                      </a>
                     </button>
                   </div>
                 </div>
@@ -85,28 +78,27 @@
                     {% include "dojo/paging_snippet.html" with page=findings page_size=True %}
                 </div>
                 <div class="panel panel-default table-responsive">
-                    <table id="open_findings"
-                           class="tablesorter-bootstrap table table-condensed table-striped table-hover">
+                    <table id="open_findings" class="tablesorter-bootstrap table table-condensed table-striped table-hover">
                         <thead>
                         <tr>
                           {% if user.is_staff %}
                           <th class="hidden-sm centered" title="Select all visible findings.">
                               <div class="dropdown">
-                                  <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
-                                          data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                                      <form class="inline-form" action="#"><input type="checkbox" name="select_all"
-                                                                                  id="select_all"/></form>
+                                  <form class="inline-form" action="#">
+                                      <input type="checkbox" name="select_all" id="select_all"/ aria-label="Select All">
+                                  </form>
+                                  <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="false" aria-label="Select by Severity">
                                       <span class="caret"></span>
                                   </button>
-                                  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" id="select_by_severity">
-                                      <li><a id="Info">Info</a></li>
-                                      <li><a id="Low">Low</a></li>
-                                      <li><a id="Medium">Medium</a></li>
-                                      <li><a id="High">High</a></li>
-                                      <li><a id="Critical">Critical</a></li>
+                                  <ul class="dropdown-menu" role="menu" id="select_by_severity">
+                                      <li><a href="#" id="Info">Info</a></li>
+                                      <li><a href="#" id="Low">Low</a></li>
+                                      <li><a href="#" id="Medium">Medium</a></li>
+                                      <li><a href="#" id="High">High</a></li>
+                                      <li><a href="#" id="Critical">Critical</a></li>
                                       <li role="separator" class="divider"></li>
-                                      <li><a id="All">All</a></li>
-                                      <li><a id="None">None</a></li>
+                                      <li><a href="#" id="All">All</a></li>
+                                      <li><a href="#" id="None">None</a></li>
                                   </ul>
                               </div>
                             </th>
@@ -135,15 +127,16 @@
                                 {% if user.is_staff %}
                                 <td class="hidden-sm centered">
                                     <form action="#">
-                                        <input type="checkbox" name="select_{{ finding.id }}" id="{{ finding.id }}"
-                                               class="select_one {{ finding.severity }}"/>
+                                        <input type="checkbox" name="select_{{ finding.id }}" id="{{ finding.id }}" class="select_one {{ finding.severity }}"/>
                                     </form>
                                 </td>
                                 <td class="nowrap">
                                   <div class="align-top">
                                     <div class="dropdown">
-                                      <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown">&nbsp;<i class="fa fa-ellipsis-v"></i>&nbsp;</a>
-                                      <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                                      <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown" aria-expanded="false" aria-label="Options">
+                                          &nbsp;<i class="fa fa-ellipsis-v"></i>&nbsp;
+                                      </a>
+                                      <ul class="dropdown-menu" role="menu">
                                         <li>
                                           <a class="" href="{% url 'view_finding' finding.id %}">
                                             <i class="fa fa-arrow-circle-right"></i> View

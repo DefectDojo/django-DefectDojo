@@ -14,7 +14,7 @@
     }
 {% endblock %}
 {% block content %}
-    <h3> Apply template to a Finding</h3>
+    <h3>Apply template to a Finding</h3>
     <form id="add_finding" class="form-horizontal" name="apply_template"
           action="{% url 'apply_template_to_finding' finding.id template.id %}" method="post">
         {% csrf_token %}

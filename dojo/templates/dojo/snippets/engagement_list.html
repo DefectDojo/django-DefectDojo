@@ -3,17 +3,19 @@
 <div class="col-md-12">
     <div class="panel panel-default table-responsive">
         <div class="panel-heading">
-            <h4> {% if status == "open" %}Active{% elif status == "paused" %}Paused {% else %}Closed{% endif %} {% if type == "CI/CD" %}CI/CD{% endif %} Engagements ({{ count }})
+            <h3>{% if status == "open" %}Active{% elif status == "paused" %}Paused {% else %}Closed{% endif %} {% if type == "CI/CD" %}CI/CD{% endif %} Engagements ({{ count }})
               {% if user.is_staff %}
                 {% if type == "CI/CD" %}
-                <a title="Add New Engagement" class="pull-right btn btn-sm btn-primary" href="{% url 'new_eng_for_prod_cicd' prod.id %}"><span
-                      class="fa fa-plus"></span> </a>
+                <a title="Add New Engagement" class="pull-right btn btn-sm btn-primary" href="{% url 'new_eng_for_prod_cicd' prod.id %}">
+                    <span class="fa fa-plus"></span> 
+                </a>
                 {% else %}
-                <a title="Add New Engagement" class="pull-right btn btn-sm btn-primary" href="{% url 'new_eng_for_prod' prod.id %}"><span
-                      class="fa fa-plus"></span> </a>
+                <a title="Add New Engagement" class="pull-right btn btn-sm btn-primary" href="{% url 'new_eng_for_prod' prod.id %}">
+                    <span class="fa fa-plus"></span> 
+                </a>
                 {% endif %}
               {% endif %}
-              </h4>
+              </h3>
         </div>
         {% if engs %}
             <table class="tablesorter-bootstrap table table-condensed table-striped table-hover">
@@ -57,7 +59,9 @@
                     <td class="nowrap">
                       <div class="align-top">
                         <div class="dropdown">
-                          <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown">&nbsp;<i class="fa fa-ellipsis-v"></i>&nbsp;</a>
+                          <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown" aria-expanded="false" aria-label="Options">
+                              &nbsp;<i class="fa fa-ellipsis-v"></i>&nbsp;
+                          </a>
                           <ul class="dropdown-menu">
                              <li>
                                <a class="" href="{% url 'view_engagement' eng.id %}">
@@ -149,7 +153,9 @@
                       {% if eng.test_set.all|length %}
                       <div class="dropdown">
                         <a class="" href="{% url 'view_engagement' eng.id %}">{{ eng.test_set.all|length }}</a>
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">&nbsp;<i class="fa fa-ellipsis-v"></i>&nbsp;</a>
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false" aria-label="View a test">
+                            &nbsp;<i class="fa fa-ellipsis-v"></i>&nbsp;
+                        </a>
                         <ul class="dropdown-menu">
                           {% for test in eng.test_set.all %}
                                <li>
@@ -167,8 +173,10 @@
                     <td>{{ eng|count_findings_eng_open }}</td>
                     <td>{{ eng|count_findings_eng_all }}</td>
                     <td>{{ eng|count_findings_eng_duplicate }}</td>
-                    <td><a target="_blank" data-toggle="tooltip" data-placement="bottom" title="{{ eng.updated|default_if_none:"" }}">
-                    {{ eng.updated|naturaltime|default_if_none:"" }}</a>
+                    <td>
+                        <a target="_blank" data-toggle="tooltip" data-placement="bottom" title="{{ eng.updated|default_if_none:"" }}">
+                            {{ eng.updated|naturaltime|default_if_none:"" }}
+                        </a>
                     </td>
                     {% if status == "paused" or status == "closed" %}
                     <td>

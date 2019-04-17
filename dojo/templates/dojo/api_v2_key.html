@@ -2,42 +2,41 @@
 {% load event_tags %}
 
 {% block content %}
-    <h2> {{ name }}</h2>
-    <hr/>
-    <p>Your current API key is <code>{{ key.key }}</code></p>
-    <p>Your current API Authorization Header value is <code>Token {{ key.key }}</code></p>
-    <p>Has your key been exposed? Are you ready for a new one?</p>
-    <form action="{% url 'api_v2_key' %}" method="post" class="inline-form">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <input class="btn btn-primary" type="submit" value="Generate New Key"/>
-    </form>
+    <h1>{{ name }}</h1>
     <hr/>
     <p>
-        Alternatively, you can use /api/v2/api-token-auth/ to get your token. Example:
+        Your current API key is:
+        <pre>{{ key.key }}</pre>
     </p>
-    <pre>
-curl -X POST -H 'content-type: application/json' {% if request.is_secure %}https{% else %}http{% endif %}://{{ request.META.HTTP_HOST }}/api/v2/api-token-auth/ -d '{"username": "&lt;YOURUSERNAME&gt;", "password": "&lt;YOURPASSWROD&gt;"}'</pre>
     <p>
-        To use your API Key you need to specify an Authorization header. Example:
+        Has your key been exposed? Are you ready for a new one?
+        <form action="{% url 'api_v2_key' %}" method="post" class="inline-form">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input class="btn btn-primary" type="submit" value="Generate New Key"/>
+        </form>
     </p>
-    <pre>
-# As a header
-# Format is ``Authorization: Token &lt;api_key&gt;
-Authorization: Token {{ key.key }}
-	</pre>
-    <p>Here is a simple python example against the /users endpoint</p>
-    <pre>
-import requests
-
+    <hr/>
+    <p>
+        Alternatively, you can use /api/v2/api-token-auth/ to get your token:
+        <pre>curl -X POST -H 'content-type: application/json' {% if request.is_secure %}https{% else %}http{% endif %}://{{ request.META.HTTP_HOST }}/api/v2/api-token-auth/ -d '{"username": "&lt;YOURUSERNAME&gt;", "password": "&lt;YOURPASSWORD&gt;"}'</pre>
+    </p>
+    <hr/>
+    <p>
+        To use your API Key you need to specify an Authorization header.
+        <pre># Add this HTTP request header:
+Authorization: Token {{ key.key }}</pre>
+    </p>
+    <p>
+        Here is a simple python example against the /users endpoint
+        <pre>import requests
 url = '{% if request.is_secure %}https{% else %}http{% endif %}://{{ request.META.HTTP_HOST }}/api/v2/users/'
 headers = {'content-type': 'application/json',
            'Authorization': 'Token {{ key.key }}'}
 r = requests.get(url, headers=headers, verify=True) # set verify to False if ssl cert is self-signed
-
 for key, value in r.__dict__.iteritems():
-  print key
-  print value
-  print '------------------'
-	</pre>
+    print key
+    print value
+    print '------------------'</pre>
+    </p>
 {% endblock %}

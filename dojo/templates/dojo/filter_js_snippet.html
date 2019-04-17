@@ -11,7 +11,7 @@
             $(this).attr("placeholder", label.html().replace(':', "..."));
         });
 
-        var toggle = $(' <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>')
+        var toggle = $(' <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary" aria-expanded="{% if request.META.QUERY_STRING %}true{% else %}false{% endif %}" aria-label="Filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>')
         $(".has-filters .dropdown.pull-right").prepend(toggle);
         toggle.on('click', function () {
             $(this).toggleClass("dropup");

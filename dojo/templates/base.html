@@ -103,8 +103,10 @@
                     <ul class="dropdown-menu dropdown-user">
                         {% block settings-dropdown-items %}
                             {% if request.user.is_authenticated %}
-                                <li><a href="{% url 'view_profile' %}"><i
-                                        class="fa fa-user fa-fw"></i> {{ request.user.username }}</a>
+                                <li>
+                                    <a href="{% url 'view_profile' %}">
+                                        <i class="fa fa-user fa-fw"></i> {{ request.user.username }}
+                                    </a>
                                 </li>
                                 <li><a href="{% url 'api_key' %}"><i class="fa fa-fw fa-key"></i> API v1 Key</a></li>
                                 <li><a href="{% url 'api_v2_key' %}"><i class="fa fa-fw fa-key"></i> API v2 Key</a></li>
@@ -319,7 +321,7 @@
             {% if product_tab.tab %}
             <div class="row">
               <div class="col-md-12">
-                <h3 class="no-margin-top" style="padding-bottom: 5px;">
+                <h1 class="no-margin-top" style="padding-bottom: 5px;">
                     {{ product_tab.product }}
                     {% if system_settings.enable_benchmark == 9 %}
                       {% for benchmark in tab_benchmarks%}
@@ -339,7 +341,7 @@
                           {% endfor %}
                       </sup>
                     {% endif %}
-                </h3>
+                </h1>
                 <ul class="nav nav-tabs horizontal-bar in">
                   <li role="presentation"{% if product_tab.tab == 'overview' %} class="active"{% endif %}><a href="{% url 'view_product' product_tab.product.id %}"><span class="fa fa-globe" aria-hidden="true"></span><span class="hidden-xs"> Overview</span></a></li>
                   <li role="presentation"{% if product_tab.tab == 'metrics' %} class="active"{% endif %}><a href="{% url 'view_product_metrics' product_tab.product.id %}"><span class="fa fa-bar-chart" aria-hidden="true"></span><span class="hidden-xs"> Metrics</span></a></li>
@@ -504,8 +506,9 @@
                     {% if messages %}
                         {% for message in messages %}
                             <div class="alert {{ message.tags }} alert-dismissible" role="alert">
-                                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
-                                        aria-hidden="true">&times;</span></button>
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Dismiss">
+                                    <span>&times;</span>
+                                </button>
                                 {{ message }}
                             </div>
                         {% endfor %}
@@ -535,18 +538,16 @@
             <div class="row">
                 <div class="col-md-12 text-center text-">
                     <p>
-                        <a href="{% url 'home' %}"><img class="logo" src="{% static "dojo/img/chop.png" %}"
-                                                        alt="DefectDojo Chop" height="45"/></a><br/>
+                        <a href="{% url 'home' %}"><img class="logo" src="{% static "dojo/img/chop.png" %}" alt="DefectDojo Chop" height="45"/></a><br/>
                         {% dojo_version %}
                     </p>
                     <p>
-                        Detailed DefectDojo documentation can be found at  <a
-                            href="{% dojo_docs_url %}">Read The Docs</a>.
+                        Detailed DefectDojo documentation can be found at 
+                        <a href="{% dojo_docs_url %}">Read The Docs</a>.
                     </p>
                     <p>
-                        DefectDojo is licensed under the <a
-                            href="https://github.com/DefectDojo/django-DefectDojo/blob/master/LICENSE.md">Simplified BSD
-                        license</a>.
+                        DefectDojo is licensed under the 
+                        <a href="https://github.com/DefectDojo/django-DefectDojo/blob/master/LICENSE.md">Simplified BSD license</a>.
                     </p>
                     <p>
                         &copy; {% now "Y" %} DefectDojo

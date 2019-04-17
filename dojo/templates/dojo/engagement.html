@@ -1,5 +1,25 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
+{% block add_styles %}
+    ul.engagement-list {
+        padding-left: 10px;
+        list-style: none;
+    }
+    ul.engagement-test-list {
+        margin-bottom: 10px;
+    }
+    ul.engagement-test-list-horizontal {
+        padding-left: 0;
+        list-style: none;
+    }
+    ul.engagement-test-list-horizontal > li {
+        display: inline-block;
+        margin: 5px 10px;
+        padding: 2px 8px;
+        border: 1px dotted;
+        border-radius: 4px;
+    }
+{% endblock %}
 {% block content %}
     <div class="row">
         <div class="col-md-12">
@@ -7,9 +27,7 @@
                 <div class="panel-heading tight">
                     <h3 class="has-filters">
                         Active Engagements
-                        <div class="dropdown pull-right">
-
-                        </div>
+                        <div class="dropdown pull-right"></div>
                     </h3>
                 </div>
                 <div id="the-filters" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
@@ -17,58 +35,70 @@
                 </div>
             </div>
             {% if products %}
-
                 <div class="clearfix">
                     {% include "dojo/paging_snippet.html" with page=products page_size=True %}
                 </div>
-
                 <div class="table-responsive panel panel-default">
                     <table id="engagements"
-                           class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
+                        class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
                         <tr>
                             <th class="prod_name">{% dojo_sort request 'Product' 'name' 'asc' %}</th>
                             <th class="prod_name">{% dojo_sort request 'Product Type' 'prod_type__name' %}</th>
-                            <th>Active Engagements</th>
+                            <th>
+                                Active Engagements&nbsp;
+                                <div class="inline-block">
+                                    <a href="#" id="toggle-engagement-test-list-horizontal" title="Toggle orientation of test lists">
+                                        <span class="fa fa-toggle-right"></span>
+                                    </a>
+                                </div>
+                            </th>
                             {% if user.is_staff %}
                                 <th> Engagement</th>
                             {% endif %}
                         </tr>
-
                         {% for p in products %}
                             <tr>
-                                <td class="prod_name"><a href="{% url 'view_product' p.id %}">{{ p.name }}</a>
-                                  <sup>
-                                   {% for tag in p.tags %}
-                                        <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
-                                    {% endfor %}
-                                  </sup>
+                                <td class="prod_name">
+                                    <a href="{% url 'view_product' p.id %}">{{ p.name }}</a>
+                                    <sup>
+                                        {% for tag in p.tags %}
+                                            <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                        {% endfor %}
+                                    </sup>
                                 </td>
                                 <td class="prod_name"><a
                                         href="{% url 'product_type_metrics' p.prod_type.id %}">{{ p.prod_type.name }}</a>
                                 </td>
                                 <td>
-                                    {% for e in p.engagement_set.all %}
-                                        {% if e.active %}
-						<div class="lineContainer">
-							<a  style="display: inline" class="eng_link" href="{% url 'view_engagement' e.id %}">
-                                                {% if e.name %}{{ e.name }} {% endif %}{{ e.target_start }}</a>
-							| Lead: {{ e.lead.first_name }}
-                                                        |
-                                                        {%  for test in e.test_set.all %}
-								{% if test.lead %}
-                                                                <a href="{% url 'view_test' test.id %}"> {{ test.test_type }}: {{ test.lead.first_name }} </a> |
-								{% else %}
-                                                                <a href="{% url 'view_test' test.id %}"> {{ test.test_type }} </a> |
-								{% endif %}
+                                    <ul class="engagement-list">
+                                        {% for e in p.engagement_set.all %}
+                                            {% if e.active %}
+                                                <li>
+                                                    <a  style="display: inline" class="eng_link" href="{% url 'view_engagement' e.id %}">
+                                                        {% if e.name %}{{ e.name }} {% endif %}{{ e.target_start }}
+                                                    </a>
+                                                    {% if e.lead %}
+                                                        (Lead: {{ e.lead.username }})
+                                                    {% endif %}
+                                                    <sup>
+                                                        {% for tag in e.tags %}
+                                                            <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                                         {% endfor %}
-						</div>
-                                                <sup>
-                                                 {% for tag in e.tags %}
-                                                      <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
-                                                  {% endfor %}
-                                                </sup>
-                                        {% endif %}
-                                    {% endfor %}
+                                                    </sup>
+                                                </li>
+                                                <ul class="engagement-test-list engagement-test-list-horizontal">
+                                                    {%  for test in e.test_set.all %}
+                                                        <li>
+                                                            <a href="{% url 'view_test' test.id %}"> {{ test.test_type }} </a>
+                                                            {% if test.lead %}
+                                                                ({{ test.lead.username }})
+                                                            {% endif %}
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </ul>
                                 </td>
                                 {% if user.is_staff %}
                                     <td>
@@ -89,7 +119,6 @@
             {% endif %}
         </div>
     </div>
-
 {% endblock %}
 {% block postscript %}
     <script>
@@ -97,18 +126,21 @@
             var availableTags = [
                 {% for word in name_words %}
                     "{{word}}",
-                {% endfor %}
+            {% endfor %}
             ];
             var engWords = [
                 {% for word in eng_words %}
                     "{{word}}",
-                {% endfor %}
+            {% endfor %}
             ];
             $("#id_name").autocomplete({
                 source: availableTags
             });
             $("#id_engagement__name").autocomplete({
                 source: engWords
+            });
+            $("#toggle-engagement-test-list-horizontal").click(function () {
+                $("ul.engagement-test-list").toggleClass("engagement-test-list-horizontal");
             });
         });
     </script>

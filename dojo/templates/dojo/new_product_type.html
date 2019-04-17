@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-    <h3> Register a new Product Type </h3>
+    <h1>Register a New Product Type</h1>
     <form class="form-horizontal" action="{%  url 'add_product_type' %}" method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
         <div class="form-group">

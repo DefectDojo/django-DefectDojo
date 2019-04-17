@@ -13,7 +13,7 @@
     }
 {% endblock %}
 {% block content %}
-    <h3> Edit {{ product.name }}</h3>
+    <h3>Edit {{ product.name }}</h3>
     <form class="form-horizontal" method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
         {%  if jform %}

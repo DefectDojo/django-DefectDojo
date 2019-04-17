@@ -1,0 +1,12 @@
+<div class="dropdown {{ add_dropdown_class }}">
+    <button class="btn dropdown-toggle {{ button_class|default:'btn-sm btn-primary' }}" data-toggle="dropdown" aria-expanded="false"{% if label %} aria-label="{{ label }}"{% endif %}>
+        {% if button %}
+            {{ button }}
+        {% else %}
+            <i class="fa fa-bars"></i>
+        {% endif %}
+    </button>
+    <ul class="dropdown-menu" role="menu">
+        {{ menu }}
+    </ul>
+</div>

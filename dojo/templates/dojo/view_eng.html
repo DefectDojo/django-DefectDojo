@@ -15,13 +15,12 @@
       <div class="panel panel-default">
           <div class="panel-heading">
               <div class="clearfix">
-                  <h4 class="pull-left">
+                  <h3 class="pull-left">
                       Description
-                  </h4>
+                  </h3>
 
                   <div class="dropdown pull-right">
-                      <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
-                              data-toggle="dropdown" aria-expanded="true">
+                      <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="false" aria-label="Options">
                           <span class="fa fa-bars"></span>
                           <span class="caret"></span>
                       </button>
@@ -35,13 +34,13 @@
 
                           <li role="presentation">
                               {% if eng.active %}
-                                  <a class="" href="{% url 'close_engagement' eng.id %}">
-                                      <i class="fa fa-close"></i> Close Engagement
-                                  </a>
+                              <a class="" href="{% url 'close_engagement' eng.id %}">
+                                  <i class="fa fa-close"></i> Close Engagement
+                              </a>
                               {% else %}
-                                  <a class="" href="{% url 'reopen_engagement' eng.id %}">
-                                      <i class="fa fa-undo"></i> Reopen Engagement
-                                  </a>
+                              <a class="" href="{% url 'reopen_engagement' eng.id %}">
+                                  <i class="fa fa-undo"></i> Reopen Engagement
+                              </a>
                               {% endif %}
                           </li>
                           {% endif %}
@@ -108,18 +107,18 @@
               {% endif %}
             </div>
         </div>
+
         {% if eng.preset %}
         <div class="row">
             <div id="tests" class="col-md-12">
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <div class="clearfix">
-                            <h4 class="pull-left">
+                            <h3 class="pull-left">
                             Engagement Presets <small>{{ eng.preset.title|truncatechars:60 }}</small>
-                            </h4>
+                            </h3>
                             <div class="dropdown pull-right">
-                                <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
-                                        data-toggle="dropdown" aria-expanded="true">
+                                <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="false" aria-label="Options">
                                     <span class="fa fa-bars"></span>
                                     <span class="caret"></span>
                                 </button>
@@ -185,20 +184,20 @@
                         </div>
                 </div>
             </div>
-</div>
-{% endif %}
+        </div>
+        {% endif %}
+
 <div class="row">
     <div id="tests" class="col-md-12">
         <div class="panel panel-default">
             <div class="panel-heading">
                 <div class="clearfix">
-                    <h4 class="pull-left">
+                    <h3 class="pull-left">
                         Tests ({{tests.count}}) <small>{{ eng.id|get_severity_count:"engagement" }}</small>
-                    </h4>
+                    </h3>
                     {% if user.is_staff %}
                     <div class="dropdown pull-right">
-                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
-                                data-toggle="dropdown" aria-expanded="true">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="false" aria-label="Options">
                             <span class="fa fa-bars"></span>
                             <span class="caret"></span>
                         </button>
@@ -247,7 +246,7 @@
                                 <td>
                                   <ul>
                                    <li class="dropdown" style="list-style:none;">
-                                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-label="Options">&nbsp;<span class="fa fa-ellipsis-v"></span>&nbsp;</a>
                                          <ul class="dropdown-menu">
                                            <li>
                                              <a class="" href="{% url 'view_test' test.id %}">
@@ -310,22 +309,19 @@
                 </div>
             {% endif %}
         </div>
-
     </div>
-
 </div>
 
 <div class="row">
     <div id="risk" class="col-md-12">
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h4> Risk Acceptance
+                <h3>
+                    Risk Acceptance
                     {% if can_add_risk %}
-                        <a title="Add Risk Acceptance" class="pull-right btn btn-sm btn-primary"
-                           href="{% url 'upload_risk_acceptance$' eng.id %}"><span class="fa fa-plus"></span></a>
-                        </a>
+                        <a title="Add Risk Acceptance" class="pull-right btn btn-sm btn-primary" href="{% url 'upload_risk_acceptance$' eng.id %}"><span class="fa fa-plus"></span></a>
                     {% endif %}
-                </h4>
+                </h3>
             </div>
             {% if risks_accepted %}
                 <div class="table-responsive">
@@ -349,11 +345,11 @@
                                 <td>{{ risk.expiration_date|default_if_none:"" }}</td>
                                 <td>{{ risk.accepted_by|default_if_none:"" }}</td>
                                 <td>{{ risk.accepted_findings.all|length }}</td>
-                                <td><a href="{% url 'download_risk' eng.id risk.id %}">{{ risk.filename }}</a></td>
                                 <td>
-                                    <a class="btn btn-sm btn-primary" href="{% url 'view_risk' eng.id risk.id %}">
-                                        View
-                                        Approval</a>
+                                    <a href="{% url 'download_risk' eng.id risk.id %}">{{ risk.filename }}</a>
+                                </td>
+                                <td>
+                                    <a class="btn btn-sm btn-primary" href="{% url 'view_risk' eng.id risk.id %}">View Approval</a>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -365,18 +361,17 @@
                     <small class="text-muted"><em>No Risk Acceptances found.</em></small>
                 </div>
             {% endif %}
-
         </div>
-
     </div>
-
 </div>
+
 {% if eng.engagement_type == "Interactive" %}
 <div class="row">
     <div id="checklist" class="col-md-12">
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h4> Check List
+                <h3>
+                    Check List
                   {% if user.is_staff %}
                     {% if check %}
                         <a title="Edit Checklist" class="btn btn-primary pull-right"
@@ -388,7 +383,7 @@
                             <span class="fa fa-edit"></span></a></a>
                     {% endif %}
                     {% endif %}
-                </h4>
+                </h3>
             </div>
 
             {% if check %}
@@ -408,9 +403,7 @@
                         </thead>
                         <tbody>
                         <tr>
-                            <td><span
-                                    class="label label-{{ check.session_management|checklist_status }}">{{ check.session_management }}</span>
-                            </td>
+                            <td><span class="label label-{{ check.session_management|checklist_status }}">{{ check.session_management }}</span></td>
                             <td><span
                                     class="label label-{{ check.encryption_crypto|checklist_status }}">{{ check.encryption_crypto }}</span>
                             </td>
@@ -455,7 +448,9 @@
 <div class="col-md-4">
   <div class="panel panel-default-secondary">
     <div class="panel-heading">
-      <h3 class="panel-title"><span class="fa fa-info-circle fa-fw" aria-hidden="true"></span> {% if eng.name %}
+      <h3 class="panel-title">
+          <span class="fa fa-info-circle fa-fw" aria-hidden="true"></span>
+          {% if eng.name %}
           {{ eng.name }}
       {% else %}
           Engagement for <a href="{% url 'view_product' eng.product.id %}">{{ eng.product }}</a>
@@ -494,9 +489,9 @@
           </tr>
           <tr>
             <td><strong>Dates</strong></td>
-            <td><a target="#" data-toggle="tooltip" data-placement="bottom" title="{{ eng.target_start|date:"l, jS F Y" }} - {{ eng.target_end|date:"l, jS F Y" }}">
+            <td><span data-toggle="tooltip" data-placement="bottom" title="{{ eng.target_start|date:"l, jS F Y" }} - {{ eng.target_end|date:"l, jS F Y" }}">
             {{ eng.target_start|date:"jS F" }} - {{ eng.target_end|date:"jS F" }}
-          </a></td>
+          </span></td>
           </tr>
           <tr>
             <td><strong>Length</strong></td>
@@ -513,10 +508,8 @@
           <tr>
             <td><strong>
               {% if eng.engagement_type == "Interactive" %}Lead{% else %}Service Account {% endif %}</strong></td>
-            <td>{% if eng.lead.get_full_name and eng.lead.get_full_name.strip %}
-                {{ eng.lead.get_full_name }}
-            {% elif eng.lead %}
-                {{ eng.lead }}
+            <td>{% if eng.lead %}
+                {{ eng.lead.get_full_name }} ({{ eng.lead.username }})
             {% else %}
                 None Assigned
             {% endif %}</td>
@@ -557,14 +550,15 @@
           </tr>
           <tr>
             <td><strong>Created</strong></td>
-            <td><a target="_blank" data-toggle="tooltip" data-placement="bottom" title="{{ eng.created|default_if_none:"" }}">
-            {{ eng.created|naturaltime|default_if_none:"" }}</a></td>
+            <td><span data-toggle="tooltip" data-placement="bottom" title="{{ eng.created|default_if_none:"" }}">
+            {{ eng.created|naturaltime|default_if_none:"" }}</span></td>
           </tr>
 
         </tbody>
       </table>
     </div>
   </div>
+
   {% if eng.engagement_type == "CI/CD" %}
   <div>
     <div class="panel panel-default-secondary">
@@ -621,16 +615,16 @@
     </div>
 </div>
 {% endif %}
+
   <div>
     <div class="panel panel-default-secondary">
       <div class="panel-heading">
-        <h4><span class="fa fa-key" aria-hidden="true"></span>
+        <h3><span class="fa fa-key" aria-hidden="true"></span>
           Credentials
         {% if creds %}
-          <a title="Add New Credential" class="pull-right btn btn-sm btn-primary"
-             href="{% url 'new_cred_product_engagement' eng.id %}"><span class="fa fa-plus"></span></a>
+          <a title="Add New Credential" class="pull-right btn btn-sm btn-primary" href="{% url 'new_cred_product_engagement' eng.id %}"><span class="fa fa-plus"></span></a>
         {% endif %}
-      </h4>
+      </h3>
       </div>
       <div class="table-responsive">
         <table class="table table-striped">
@@ -661,7 +655,7 @@
                   <td>
                     <ul>
                      <li class="dropdown" style="list-style:none;">
-                           <a href="#" class="dropdown-toggle" data-toggle="dropdown">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                           <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-label="Options">&nbsp;<span class="fa fa-ellipsis-v"></span>&nbsp;</a>
                            <ul class="dropdown-menu">
                              <li>
                                <a class="" href="{% url 'view_cred_product_engagement' cred.engagement.id cred.id %}">
@@ -695,7 +689,7 @@
                   <td>
                     <ul>
                      <li class="dropdown" style="list-style:none;">
-                           <a href="#" class="dropdown-toggle" data-toggle="dropdown">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                           <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-label="Options">&nbsp;<span class="fa fa-ellipsis-v"></span>&nbsp;</a>
                            <ul class="dropdown-menu">
                              <li>
                                <a class="" href="{% url 'view_cred_product' cred.product.id cred.id %}">

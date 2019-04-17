@@ -1,0 +1,15 @@
+{% load as_tag %}
+
+{% as body %}
+    <form class="form-horizontal" action="" method="post">
+        {% csrf_token %}
+        {% include "../form_fields.html" with form=form %}
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <input class="btn btn-primary" type="submit" value="Add Note"/>
+            </div>
+        </div>
+    </form>
+{% endas %}
+
+{% include "./panel.html" with title="Notes" %}
