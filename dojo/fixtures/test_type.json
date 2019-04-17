@@ -270,14 +270,21 @@
     },
     "model": "dojo.test_type",
     "pk": 39
-	},	
+	},
   {
     "fields": {
       "name": "Anchore Engine Scan"
     },
     "model": "dojo.test_type",
     "pk": 40
-  },		
+	},
+  {
+    "fields": {
+      "name": "Bundler-Audit Scan"
+    },
+    "model": "dojo.test_type",
+    "pk": 41
+  },
   {
       "fields": {
         "name": "Netsparker Scanner"
