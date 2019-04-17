@@ -1018,23 +1018,20 @@ div.custom-search-form {
         left: 100%;
         top: 0;
         min-width: 200px;
-        display: none;
-        border-radius: 4px;
-    }
-
-    #side-menu li:hover > ul,
-    #side-menu li:hover > ul.collapse {
-        display: block !important;
         height: auto !important;
+	display: none;
         z-index: 10000;
         background-color: #fff;
         background-clip: padding-box;
-        visibility: visible;
         border: 1px solid rgba(0, 0, 0, .15);
         border-left-width: 0;
         border-radius: 4px;
         box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
-        border-radius: 4px;
+    }
+
+    #side-menu > li.mm-active ul,
+    #side-menu > li:hover ul {
+        display: block !important;
     }
 
     body.min #page-wrapper {
