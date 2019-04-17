@@ -1,11 +1,11 @@
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from django.utils import timezone
 from rest_framework import viewsets, mixins
 from rest_framework.permissions import DjangoModelPermissions
 from rest_framework.decorators import detail_route
 from django_filters.rest_framework import DjangoFilterBackend
 
+from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Finding, \
     User, ScanSettings, Scan, Stub_Finding, Finding_Template, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
@@ -43,18 +43,13 @@ class EngagementViewSet(mixins.ListModelMixin,
     @detail_route(methods=["post"])
     def close(self, request, pk=None):
         eng = get_object_or_404(Engagement.objects, id=pk)
-        eng.active = False
-        eng.status = 'Completed'
-        eng.updated = timezone.now()
-        eng.save()
+        close_engagement(eng)
         return HttpResponse()
 
     @detail_route(methods=["post"])
     def reopen(self, request, pk=None):
         eng = get_object_or_404(Engagement.objects, id=pk)
-        eng.active = True
-        eng.status = 'In Progress'
-        eng.save()
+        reopen_engagement(eng)
         return HttpResponse()
 
 
