@@ -1235,6 +1235,9 @@ class Finding(models.Model):
             super(Finding, self).save(*args, **kwargs)
         else:
             super(Finding, self).save(*args, **kwargs)
+        # Compute hash code before dedupe
+        if self.hash_code is None:
+            self.hash_code = self.compute_hash_code()
         self.found_by.add(self.test.test_type)
         if self.test.test_type.static_tool:
             self.static_finding = True
@@ -1256,9 +1259,6 @@ class Finding(models.Model):
         # Assign the numerical severity for correct sorting order
         self.numerical_severity = Finding.get_numerical_severity(self.severity)
         super(Finding, self).save()
-        # Compute hash code before dedupe
-        if self.hash_code is None:
-            self.hash_code= self.compute_hash_code()
         system_settings = System_Settings.objects.get()
         if (dedupe_option):
             if system_settings.enable_deduplication:
