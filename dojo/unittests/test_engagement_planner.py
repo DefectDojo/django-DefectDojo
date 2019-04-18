@@ -10,6 +10,7 @@ from django.contrib.messages.storage.fallback import FallbackStorage
 from django.http import HttpResponseRedirect
 from django.core.management import call_command
 from tagging.models import Tag
+from django.utils import timezone
 
 
 class EngagementPlannerTestUtil:
@@ -50,12 +51,8 @@ class TestEngagementPlanner(TestCase):
     plan_engagement_url = 'engagement/plan'
     default_plan = {
         'products': ['1', '2'],
-        'from_date_day': '1',
-        'from_date_month': '1',
-        'from_date_year': '2018',
-        'to_date_day': '1',
-        'to_date_month': '1',
-        'to_date_year': '2019',
+        'from_date': timezone.now().strftime("%Y-%m-%d"),
+        'to_date': timezone.now() + timezone.timedelta(days=365)).strftime("%Y-%m-%d"),
         'products_order': '-business_criticality',
         'allowed_days': ['0', '1', '2', '3', '4'],
         'days_per_engagement': '5',
