@@ -436,11 +436,11 @@ class PortscanSettingsPermissionTest(APITestCase):
 
     def test_user_should_not_have_access_to_setting_3_in_list(self):
         response = self.client.get(
-            reverse('portscansettings-list'), format='json')
+            reverse('scansettings-list'), format='json')
         for obj in response.data['results']:
             self.assertNotEqual(
                 obj['url'],
-                'http://testserver/api/v2/portscan_settings/3/')
+                'http://testserver/api/v2/scan_settings/3/')
 
     def test_user_should_not_have_access_to_setting_3_in_detail(self):
         response = self.client.get('http://testserver/api/v2/scan_settings/3/')
