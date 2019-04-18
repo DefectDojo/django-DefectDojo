@@ -50,6 +50,8 @@ class TestEngagementPlanner(TestCase):
 
     plan_engagement_url = 'engagement/plan'
     default_plan = {
+        'prefix': '',
+        'remove_prefix': '',
         'products': ['1', '2'],
         'from_date': timezone.now().strftime("%Y-%m-%d"),
         'to_date': (timezone.now() + timezone.timedelta(days=365)).strftime("%Y-%m-%d"),
@@ -58,13 +60,14 @@ class TestEngagementPlanner(TestCase):
         'days_per_engagement': '5',
         'parallel_engagements': '1',
         'break_days': '5',
-        'break_interval': '20'
+        'break_interval': '20',
     }
 
     def setUp(self):
         p1 = Product()
         p1.name = 'Test Product 1'
         p1.description = 'Product for Testing Endpoint functionality'
+        p1.id = 1
         p1.save()
 
         e1 = Endpoint()
@@ -76,6 +79,7 @@ class TestEngagementPlanner(TestCase):
         p2 = Product()
         p2.name = 'Test Product 2'
         p2.description = 'Product for Testing Endpoint functionality'
+        p2.id = 2
         p2.save()
 
         e2 = Endpoint()

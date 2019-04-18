@@ -49,6 +49,7 @@ class TestToolRun(TransactionTestCase):
         tp.product = p
         tp.tool_configuration = tc
         tp.url = ""
+        tp.id = 1
         tp.save()
 
         call_command('loaddata', 'dojo/fixtures/system_settings', verbosity=0)
