@@ -1,28 +1,31 @@
-import sys
 import re
 
-from django.core.management import call_command
 from django.core.management.base import BaseCommand
-from dojo.utils import create_notification
 
-from dojo.reports.widgets import CoverPage, PageBreak, TableOfContents, WYSIWYGContent, FindingList, EndpointList, \
-    CustomReportJsonForm, ReportOptions, report_widget_factory
-from dojo.models import Report_Interval, Engagement, Report
-from datetime import datetime, date, time, timedelta
+from dojo.reports.widgets import report_widget_factory
+from dojo.models import Report_Interval, Engagement
+from datetime import datetime, time, timedelta
+from django.template.loader import render_to_string
+from django.utils import timezone
 from django.core.mail import send_mail
 from django.conf import settings
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 
 
-from pprint import pprint
 class Command(BaseCommand):
     help = "Details:\n\tChecks if any reports are due to be sent and if so, sends them out"
 
+    def add_arguments(self, parser):
+        parser.add_argument('-s', '--simulate', type=str, help='Provide a time that will be simulated as current time', )
+
     def handle(self, *args, **options):
+        simulate = options['simulate'] or None
         interval_list = Report_Interval.objects.all()
-        
+
         # Build reference dataset for faster lookup
-        current_time = datetime.now()
-        start_day = datetime.combine(date.today(), time())
+        current_time = timezone.localtime()
+        start_day = timezone.make_aware(datetime.combine(current_time.date(), time()), timezone=current_time.tzinfo)
         start_week = start_day - timedelta(days=start_day.weekday())
         start_month = start_day.replace(day=1)
         start_year = start_day.replace(month=1, day=1)
@@ -34,7 +37,7 @@ class Command(BaseCommand):
             4: start_year,
         }
         event_date_reference_keys = event_date_reference.keys()
-        
+
         event_object_reference = {
             5: {
                 'Object': Engagement,
@@ -45,60 +48,81 @@ class Command(BaseCommand):
             }
         }
         event_object_reference_keys = event_object_reference.keys()
-        
-        placeholder_regex = re.compile('{[\w._]+?}')
-        
+
+        placeholder_regex = re.compile('{([\w._]+?)}')
+
         # Allows to use a dynamic placeholder like {product.prod_manager}
         def resolve_recipient_placeholder(obj, placeholder):
             if "." in placeholder:
                 components = placeholder.split(".")
-                
+
                 for component in components:
                     obj = getattr(obj, component, None)
             else:
                 obj = getattr(obj, placeholder, None)
-            
+
             return obj
-        
+
         # Compile and send the actual report
-        def send_report(interval, related_object = None):
+        def send_report(interval, related_object=None):
             report = interval.report
-            finding_notes = (report.options.include_finding_notes == '1')
-            finding_images = (report.options.include_finding_images == '1')
             host = report.host
-            
+
+            selected_widgets = report_widget_factory(json_data=report.options, user=report.requester, host=host,
+                                                 finding_notes=False, finding_images=False)
+            options = selected_widgets['report-options']
+            finding_notes = (options.include_finding_notes == '1')
+            finding_images = (options.include_finding_images == '1')
+
             selected_widgets = report_widget_factory(json_data=report.options, user=report.requester, host=host,
                                                  finding_notes=finding_notes, finding_images=finding_images)
+
             widgets = selected_widgets.values()
-            send_body = render(request,
-                          'dojo/custom_asciidoc_report.html',
+            send_body = render_to_string('dojo/custom_asciidoc_report.html',
                           {"widgets": widgets,
                            "host": host,
                            "finding_notes": finding_notes,
                            "finding_images": finding_images,
-                           "user_id": report.requester})
-            
+                           "user_id": report.requester,
+                           "override_base": "blank.html"})
+
             recipients = interval.recipients.splitlines()
             for i in range(len(recipients)):
                 check_placeholder = placeholder_regex.match(recipients[i])
                 insert_placeholder = None
-                if check_placeholder:
-                    insert_placeholder = resolve_recipient_placeholder(related_object, check_placeholder.group(1))
+                if check_placeholder is not None:
+                    if related_object is not None:
+                        extractedPlaceholder = check_placeholder.group(1)
+                        lookup_placeholder = resolve_recipient_placeholder(related_object, extractedPlaceholder)
+
+                        if lookup_placeholder is not None and extractedPlaceholder is not None:
+                            try:
+                                validate_email(lookup_placeholder)
+                                insert_placeholder = lookup_placeholder
+                            except ValidationError:
+                                print('Placeholder "' + extractedPlaceholder + '" resolved to "' + lookup_placeholder + '" for "' + str(related_object) + '", which is not a valid email address')
+                    else:
+                        print('Placeholder "' + extractedPlaceholder + '" was used, but the event is not connected to an object')
                 else:
                     continue
-                
-                if insert_placeholder == None:
-                    # If it didn't work, we will overwrite it with an email that gives users more hints about what failed
-                    # Console could work, but researching that takes longer
-                    insert_placeholder = 'placeholder-resolve-failed@' + str(check_placeholder.group(1))
-                
+
                 recipients[i] = insert_placeholder
-            
-            return send_mail(interval.name,
-                      send_body,
-                      settings.PORT_SCAN_RESULT_EMAIL_FROM,
-                      recipients,
-                      fail_silently=False)
+
+            recipients = [recipient for recipient in recipients if recipient is not None]
+            if len(recipients) > 0:
+                success_mail = send_mail(interval.report.name,
+                          send_body,
+                          settings.PORT_SCAN_RESULT_EMAIL_FROM,
+                          recipients,
+                          fail_silently=False,
+                          html_message=send_body)
+
+                interval.last_run = timezone.now()
+                interval.save()
+
+                return success_mail
+            else:
+                return None
 
         # Loop through set up intervals
         for interval in interval_list:
@@ -116,8 +140,8 @@ class Command(BaseCommand):
             elif interval.event in event_object_reference_keys:
                 # The event is related to the date field of an object
                 object_reference = event_object_reference[interval.event]
-                
+
                 object_reference['Filter'][object_reference['DateField']] = compare_time
-                check_objects = (object_reference['Object']).objects.filter(**timeFilter).filter(**object_reference['Filter'])
+                check_objects = (object_reference['Object']).objects.filter(**object_reference['Filter'])
                 for check_object in check_objects:
                     send_report(interval, check_object)

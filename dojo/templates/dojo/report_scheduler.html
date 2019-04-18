@@ -64,7 +64,13 @@
                                 </td>
                                 <td>
                                     <a class="btn btn-warning" href="{% url 'edit_report_interval' conf.id %}">Edit</a>
-                                    <a class="btn btn-danger" href="{% url 'delete_report_interval' conf.id %}">Delete</a>
+                                    <form method="post" action="{% url 'delete_report_interval' conf.id %}" style="display: inline" class="form-inline form">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="delete_now" value="1"/>
+                                        <button type="submit" class="btn btn-danger report-delete">
+                                            Delete <span class="fa fa-trash"></span>
+                                        </button>
+                                    </form>
                                 </td>
                             </tr>
                         {% endfor %}

@@ -71,7 +71,7 @@
                                                 Delete <span class="fa fa-trash"></span>
                                             </button>
                                         </form>
-                                    {% elif report.status == 'requested' %}
+                                    {% elif report.status == 'requested' and report.task_id is not None %}
                                         <a class="btn btn-sm btn-warning">
                                             Running&nbsp;&nbsp;&nbsp;
                                             <i class="fa fa-spinner fa-pulse"></i>
@@ -85,10 +85,12 @@
                                             </button>
                                         </form>
                                     {% else %}
+                                        {% if report.task_id is not None %}
                                         <a class="btn btn-sm btn-warning">
                                             {{ report.status|capfirst }}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                             <i class="fa fa-exclamation-triangle"></i>
                                         </a>
+                                        {% endif %}
                                         <form method="post" action="{% url 'delete_report' report.id %}"
                                               style="display: inline" class="form-inline form">
                                             {% csrf_token %}

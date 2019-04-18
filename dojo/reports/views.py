@@ -75,22 +75,22 @@ def report_builder(request):
 def report_scheduler(request):
     add_breadcrumb(title="Report Scheduler", top_level=True, request=request)
     intervals = Report_Interval.objects.all()
-    
+
     for i in range(len(intervals)):
         intervals[i].numRecipients = intervals[i].recipients.count('\n') + 1
 
-    return render(request, 'dojo/report_scheduler.html', {'confs':intervals})
+    return render(request, 'dojo/report_scheduler.html', {'confs': intervals})
 
 
 def add_report_interval(request):
     add_breadcrumb(parent=report_scheduler, title="Add", top_level=False, request=request)
-    
+
     form = ReportIntervalForm()
     if request.method == 'POST':
         form = ReportIntervalForm(request.POST)
         if form.is_valid():
             form.save()
-            
+
             messages.add_message(request, messages.SUCCESS,
                                  'Report interval created.',
                                  extra_tags='alert-success')
@@ -103,13 +103,13 @@ def add_report_interval(request):
 def edit_report_interval(request, sid):
     interval = get_object_or_404(Report_Interval, id=sid)
     add_breadcrumb(parent=report_scheduler, title="Edit", top_level=False, request=request)
-    
+
     form = ReportIntervalForm(instance=interval)
     if request.method == 'POST':
         form = ReportIntervalForm(request.POST, instance=interval)
         if form.is_valid():
             form.save()
-            
+
             messages.add_message(request, messages.SUCCESS, 'Report interval edited.', extra_tags='alert-success')
 
             return HttpResponseRedirect(reverse('report_scheduler'))
@@ -119,7 +119,7 @@ def edit_report_interval(request, sid):
 
 def delete_report_interval(request, sid):
     interval = get_object_or_404(Report_Interval, id=sid)
-    
+
     if request.method == 'POST':
         if 'delete_now' in request.POST:
             interval.delete()
@@ -163,6 +163,7 @@ def custom_report(request):
         if report_format == 'PDF':
             report.name = 'Custom PDF Report: ' + options.report_name
             report.task_id = 'tbd'
+            report.save()
             async_custom_pdf_report.delay(report=report,
                                           template="dojo/custom_pdf_report.html",
                                           filename="custom_pdf_report.pdf",
@@ -178,6 +179,8 @@ def custom_report(request):
             return HttpResponseRedirect(reverse('reports'))
         elif report_format == 'AsciiDoc':
             widgets = selected_widgets.values()
+            report.status = 'Stored'
+            report.save()
             return render(request,
                           'dojo/custom_asciidoc_report.html',
                           {"widgets": widgets,
