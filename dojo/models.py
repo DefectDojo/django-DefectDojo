@@ -1600,14 +1600,18 @@ class Report_Interval(models.Model):
     def __unicode__(self):
         offsetText = ''
         if(self.time_count < 0):
-            offsetText = 'before'
+            offset_text = 'before'
         elif self.time_count > 0:
-            offsetText = 'after'
+            offset_text = 'after'
         else:
             return self.search_tuple(self.event, self.EVENT_CHOICES)
 
-        return str(abs(self.time_count)) + " " + self.search_tuple(self.time_unit, self.TIME_UNIT_CHOICES).lower() + " " + offsetText + \
-                " the " + self.search_tuple(self.event, self.EVENT_CHOICES).lower()
+        event_choice_label = self.search_tuple(self.event, self.EVENT_CHOICES).lower()
+        time_unit_label = self.search_tuple(self.time_unit, self.TIME_UNIT_CHOICES).lower()
+        if(abs(self.time_count) == 1):
+            time_unit_label = time_unit_label[:-1]
+        
+        return str(abs(self.time_count)) + " " + time_unit_label + " " + offset_text + " the " + event_choice_label
 
     class Meta:
         ordering = ['time_unit']
