@@ -19,6 +19,7 @@ class TestToolRun(TransactionTestCase):
         u = User()
         u.name = 'Test User 1'
         u.is_staff = True
+		u.id = 1
         u.save()
 
         p = Product()
