@@ -1,7 +1,6 @@
 
 # code: language=Dockerfile
-########## Stage: build ##########
-FROM python:2 as build
+FROM python:2
 WORKDIR /app
 RUN \
   apt-get -y update && \
@@ -14,36 +13,7 @@ RUN \
   rm -rf /var/lib/apt/lists && \
   true
 COPY requirements.txt ./
-RUN pip install \
-	--no-cache-dir \
-	-r ./requirements.txt
-RUN pip wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
-
-########## Stage: release ##########
-FROM python:2-slim as release
-WORKDIR /app
-RUN \
-  apt-get -y update && \
-  apt-get -y install --no-install-recommends \
-	  # libopenjp2-7 libjpeg62 libtiff5 are required by the pillow package
-    libopenjp2-7 \
-		libjpeg62 \
-		libtiff5 \
-    dnsutils \
-		mysql-client \
-		libmariadbclient18 \
-    && \
-  apt-get clean && \
-  rm -rf /var/lib/apt/lists && \
-  true
-RUN pip install --no-cache-dir --upgrade pip
-COPY --from=build /tmp/wheels /tmp/wheels	
-COPY requirements.txt ./
-RUN pip install \
-	--no-cache-dir \
-  --no-index \
-  --find-links=/tmp/wheels \
-	-r ./requirements.txt
+RUN pip install -r ./requirements.txt
 COPY \
   docker/entrypoint-celery-beat.sh \
   docker/entrypoint-celery-worker.sh \
