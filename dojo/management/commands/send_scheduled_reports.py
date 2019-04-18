@@ -11,6 +11,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
+from dateutil import parser
 
 
 class Command(BaseCommand):
@@ -21,6 +22,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         simulate = options['simulate'] or None
+        if simulate is not None:
+            simulate = parser.parse(simulate, fuzzy=True)
+
         interval_list = Report_Interval.objects.all()
 
         # Build reference dataset for faster lookup
@@ -100,9 +104,9 @@ class Command(BaseCommand):
                                 validate_email(lookup_placeholder)
                                 insert_placeholder = lookup_placeholder
                             except ValidationError:
-                                print('Placeholder "' + extractedPlaceholder + '" resolved to "' + lookup_placeholder + '" for "' + str(related_object) + '", which is not a valid email address')
+                                self.stdout.write('Placeholder "' + extractedPlaceholder + '" resolved to "' + lookup_placeholder + '" for "' + str(related_object) + '", which is not a valid email address')
                     else:
-                        print('Placeholder "' + extractedPlaceholder + '" was used, but the event is not connected to an object')
+                        self.stdout.write('Placeholder "' + extractedPlaceholder + '" was used, but the event is not connected to an object')
                 else:
                     continue
 
@@ -125,17 +129,20 @@ class Command(BaseCommand):
                 return None
 
         # Loop through set up intervals
+        sent_reports = 0
         for interval in interval_list:
-            if interval.time_count > 0:
+            if simulate is not None:
+                compare_time = simulate
+            elif interval.time_count > 0:
                 time_offset = timedelta(seconds=interval.time_count * interval.time_unit)
                 compare_time = current_time + time_offset
             else:
-                time_offset = 0
                 compare_time = current_time
 
             if interval.event in event_date_reference_keys:
                 # If the event is a static date, we can calculate it easily
                 if compare_time == event_date_reference[interval.event]:
+                    sent_reports += 1
                     send_report(interval)
             elif interval.event in event_object_reference_keys:
                 # The event is related to the date field of an object
@@ -144,4 +151,7 @@ class Command(BaseCommand):
                 object_reference['Filter'][object_reference['DateField']] = compare_time
                 check_objects = (object_reference['Object']).objects.filter(**object_reference['Filter'])
                 for check_object in check_objects:
+                    sent_reports += 1
                     send_report(interval, check_object)
+        
+        self.stdout.write("Reports sent out: " + str(sent_reports))

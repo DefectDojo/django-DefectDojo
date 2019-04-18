@@ -43,6 +43,7 @@ def report_url_resolver(request):
     return url_resolver + ":" + request.META['SERVER_PORT']
 
 
+@user_passes_test(lambda u: u.is_staff)
 def report_builder(request):
     add_breadcrumb(title="Report Builder", top_level=True, request=request)
     findings = Finding.objects.all()
@@ -72,6 +73,7 @@ def report_builder(request):
                    "in_use_widgets": in_use_widgets})
 
 
+@user_passes_test(lambda u: u.is_staff)
 def report_scheduler(request):
     add_breadcrumb(title="Report Scheduler", top_level=True, request=request)
     intervals = Report_Interval.objects.all()
@@ -82,7 +84,11 @@ def report_scheduler(request):
     return render(request, 'dojo/report_scheduler.html', {'confs': intervals})
 
 
+@user_passes_test(lambda u: u.is_staff)
 def add_report_interval(request):
+    if not request.user.is_staff:
+        raise PermissionDenied
+
     add_breadcrumb(parent=report_scheduler, title="Add", top_level=False, request=request)
 
     form = ReportIntervalForm()
@@ -100,6 +106,7 @@ def add_report_interval(request):
     return render(request, 'dojo/report_interval.html', {'form': form})
 
 
+@user_passes_test(lambda u: u.is_staff)
 def edit_report_interval(request, sid):
     interval = get_object_or_404(Report_Interval, id=sid)
     add_breadcrumb(parent=report_scheduler, title="Edit", top_level=False, request=request)
@@ -117,6 +124,7 @@ def edit_report_interval(request, sid):
     return render(request, 'dojo/report_interval.html', {'form': form})
 
 
+@user_passes_test(lambda u: u.is_staff)
 def delete_report_interval(request, sid):
     interval = get_object_or_404(Report_Interval, id=sid)
 
