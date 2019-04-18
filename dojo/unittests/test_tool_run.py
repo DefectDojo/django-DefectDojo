@@ -66,6 +66,8 @@ class TestToolRun(TransactionTestCase):
         self.assertEqual(cm.exception.code, 0)
 
     def test_tool_run_execute_localhost_denied(self):
+        settings.ALLOW_TOOL_RUN["ssh-localhost"] = False
+        
         out = StringIO()
         call_command('run_tool', config=1, engagement=0, stdout=out)
         self.assertIn("Denied tool run", out.getvalue())
