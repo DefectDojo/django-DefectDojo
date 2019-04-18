@@ -52,7 +52,7 @@ class TestEngagementPlanner(TestCase):
     default_plan = {
         'products': ['1', '2'],
         'from_date': timezone.now().strftime("%Y-%m-%d"),
-        'to_date': timezone.now() + timezone.timedelta(days=365)).strftime("%Y-%m-%d"),
+        'to_date': (timezone.now() + timezone.timedelta(days=365)).strftime("%Y-%m-%d"),
         'products_order': '-business_criticality',
         'allowed_days': ['0', '1', '2', '3', '4'],
         'days_per_engagement': '5',
