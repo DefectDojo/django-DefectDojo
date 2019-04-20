@@ -158,6 +158,7 @@ docker-compose down --volumes
 ```
 
 ### Run the unit-tests with docker
+#### Preparation
 The unit-tests are under `dojo/unittests`
 
 First remove the containers built for running the application: 
@@ -172,6 +173,8 @@ Comment out the mysql volume from docker-compose.yml:
 #    volumes:
 #       - defectdojo_data:/var/lib/mysql
 ```
+
+#### Running the unit-tests 
 This will run all the tests and leave the uwsgi container up: 
 
 ```
@@ -201,7 +204,9 @@ Run a single test. Example:
 ```
 python manage.py test dojo.unittests.test_dependency_check_parser.TestDependencyCheckParser.test_parse_without_file_has_no_findings --keepdb
 ```
-After testing, before running the application again, remove the test containers:
+
+#### After running the unit-tests
+Before running the application again, remove the test containers:
 
 ```
 docker-compose down
@@ -210,7 +215,7 @@ docker-compose down
 Reactivate the mysql volume in docker-compose.yml and put back the original override file:
 
 ```
-git checkout docker-compose.override.yml docker-compose.yml
+git checkout docker-compose.yml docker-compose.override.yml
 ```
 
 
