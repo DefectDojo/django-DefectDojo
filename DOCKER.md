@@ -24,8 +24,6 @@ This command will run the application based on images commited on dockerhub (or 
 
 **NOTE:** Installing with docker-compose requires the latest version of docker and docker-compose - at least docker 18.09.4 and docker-compose 1.24.0. See "Checking Docker versions" below for version errors during running docker-compose up.
 
-**NOTE:** Installing with docker-compose requires the latest version of docker and docker-compose - at least docker 18.09.4 and docker-compose 1.24.0. See "Checking Docker versions" below for version errors during running docker-compose up.
-
 Navigate to <http://localhost:8080> where you can log in with username admin.
 To find out the admin user’s password, check the very beginning of the console
 output of the initializer container, typically name 'django-defectdojo_initializer_1', or run the following:
