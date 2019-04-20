@@ -7,6 +7,7 @@ The _cleanup-branches.bash_ file removes engagements, which does not have a corr
 
 ## Usage
 Modify _scan_type_ in _report-upload.bash_ to the scan_type you want to use.
+Modify the prefix in the POST (_name_) according to your needs. For example "dep check" to have the prefix dep check for engamgents using _OWASP Dependency Check_.
 
 Create a product and fetch the Product ID.
 
