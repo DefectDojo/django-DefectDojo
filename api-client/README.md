@@ -2,15 +2,16 @@
 This files can be used in a continuous delivery/integration pipeline.
 
 ## Description
-The `report-upload.bash` uploads a given report.
-The cleanup file removes engagements, which does not have a corresponding branch.
+The _report-upload.bash_ uploads a given report.
+The _cleanup-branches.bash_ file removes engagements, which does not have a corresponding branch.
 
 ## Usage
-Modify _scan_type_ in `report-upload.bash` to the scan_type you want to use.
+Modify _scan_type_ in _report-upload.bash_ to the scan_type you want to use.
 
 Create a product and fetch the Product ID.
 
-Call ```
+Call 
+```
 ./report-upload.bash $PRODUCT_ID $BRANCH_NAME ./report-to-upload.xml
 ```
 
