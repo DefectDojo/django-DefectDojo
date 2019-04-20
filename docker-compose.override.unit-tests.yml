@@ -1,0 +1,31 @@
+---
+version: '3.7'
+services:
+  nginx:
+    image: hello-world
+    entrypoint: []
+  uwsgi:
+    entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/entrypoint-unit-tests-devDocker.sh']
+    volumes:
+      - '.:/app:z'
+    environment:
+      DD_DEBUG: 'on'
+      DD_TEST_DATABASE_NAME: ${DD_TEST_DATABASE_NAME:-test_defectdojo}
+      DD_DATABASE_NAME: ${DD_TEST_DATABASE_NAME:-test_defectdojo}
+  celerybeat:
+    environment:
+      DD_DATABASE_URL: ${DD_TEST_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/test_defectdojo}
+  celeryworker:
+    environment:
+      DD_DATABASE_URL: ${DD_TEST_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/test_defectdojo}
+  initializer:
+    environment:
+      DD_INITIALIZE: 'false'
+  mysql:
+    ports:
+      - target: 3306
+        published: 3306
+        protocol: tcp
+        mode: host
+    environment:
+      MYSQL_DATABASE: ${DD_TEST_DATABASE_NAME:-test_defectdojo}
