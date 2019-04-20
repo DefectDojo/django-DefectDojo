@@ -34,6 +34,8 @@ class AnchoreEngineScanParser(object):
             findingdetail += 'CPE: ' + item['package_cpe'] + '\n'
 
             sev = item['severity']
+            if sev == "Negligible" or sev == "Unknown":
+                sev = u'Info'
 
             mitigation += "Upgrade to " + item['package_name'] + ' ' + item['fix'] + '\n'
             mitigation += "URL: " + item['url'] + '\n'

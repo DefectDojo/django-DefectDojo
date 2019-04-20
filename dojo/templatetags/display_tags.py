@@ -18,6 +18,8 @@ import dateutil.relativedelta
 import datetime
 from ast import literal_eval
 from urlparse import urlparse
+import bleach
+from bleach_whitelist import markdown_tags, markdown_attrs
 
 register = template.Library()
 
@@ -31,8 +33,8 @@ class EscapeHtml(Extension):
 @register.filter
 def markdown_render(value):
     if value:
-        return mark_safe(markdown.markdown(value, extensions=[EscapeHtml(), 'markdown.extensions.nl2br', 'markdown.extensions.sane_lists', 'markdown.extensions.codehilite', 'markdown.extensions.fenced_code', 'markdown.extensions.toc', 'markdown.extensions.tables']))
-
+        value = bleach.clean(markdown.markdown(value), markdown_tags, markdown_attrs)
+        return mark_safe(markdown.markdown(value, extensions=['markdown.extensions.nl2br', 'markdown.extensions.sane_lists', 'markdown.extensions.codehilite', 'markdown.extensions.fenced_code', 'markdown.extensions.toc', 'markdown.extensions.tables']))
 
 @register.filter(name='ports_open')
 def ports_open(value):

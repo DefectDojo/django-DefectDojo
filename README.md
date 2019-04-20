@@ -27,7 +27,7 @@ credentials.
 ```sh
 git clone https://github.com/DefectDojo/django-DefectDojo
 cd django-DefectDojo
-docker-compose up
+docker-compose -f docker-compose_base.yml -f docker-compose_uwsgi-release.yml up
 ```
 
 Navigate to <http://localhost:8080>.
@@ -99,7 +99,6 @@ Project Moderators can help you with pull requests or feedback on dev ideas.
 
 * [Alex Dracea](https://www.linkedin.com/in/alexandru-marin-dracea-910b51122/)
 * [Valentijn Scholten](https://www.linkedin.com/in/valentijn-scholten/)
-* [Piotr Pawlicki](https://www.linkedin.com/in/piotrpawlicki/)
 
 ## Hall of Fame
 
