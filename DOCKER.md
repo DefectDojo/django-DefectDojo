@@ -157,6 +157,63 @@ Removes all containers, networks and the database volume
 docker-compose down --volumes
 ```
 
+### Run the unit-tests with docker
+The unit-tests are under `dojo/unittests`
+
+First remove the containers built for running the application: 
+
+```
+docker-compose down
+```
+
+Comment out the mysql volume from docker-compose.yml: 
+
+```
+#    volumes:
+#       - defectdojo_data:/var/lib/mysql
+```
+This will run all the tests and leave the uwsgi container up: 
+
+```
+cp dojo/settings/settings.dist.py dojo/settings/settings.py
+cp docker-compose.override.unit-tests.yml docker-compose.override.yml
+docker-compose up
+```
+Enter the container to run more tests:
+
+```
+docker exec -it django-defectdojo_uwsgi_1 bash
+```
+Rerun all the tests:
+
+```
+python manage.py test dojo.unittests --keepdb
+```
+
+Run all the tests from a python file. Example:
+
+```
+python manage.py test dojo.unittests.test_dependency_check_parser --keepdb
+```
+
+Run a single test. Example:
+
+```
+python manage.py test dojo.unittests.test_dependency_check_parser.TestDependencyCheckParser.test_parse_without_file_has_no_findings --keepdb
+```
+After testing, before running the application again, remove the test containers:
+
+```
+docker-compose down
+```
+    
+Reactivate the mysql volume in docker-compose.yml and put back the original override file:
+
+```
+git checkout docker-compose.override.yml docker-compose.yml
+```
+
+
 ## Checking Docker versions
 
 Run the following to determine the versions for docker and docker-compose:
