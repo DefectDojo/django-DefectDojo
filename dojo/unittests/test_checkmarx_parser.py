@@ -1,4 +1,3 @@
-from defusedxml import ElementTree
 from django.test import TestCase
 
 from dojo.models import Test, Engagement, Product
@@ -6,7 +5,6 @@ from dojo.tools.checkmarx.parser import CheckmarxXMLParser
 
 
 class TestCheckmarxParser(TestCase):
-
 
     def test_parse_file_with_no_vulnerabilities_has_no_findings(self):
         my_file_handle = open("dojo/unittests/scans/checkmarx/no_finding.xml")
@@ -52,7 +50,6 @@ class TestCheckmarxParser(TestCase):
         self.parser = CheckmarxXMLParser(my_file_handle, test)
         my_file_handle.close()
         self.assertEqual(1, len(self.parser.items))
-
 
     def test_parse_file_with_utf8_various_non_ascii_char(self):
         my_file_handle = open("dojo/unittests/scans/checkmarx/utf8_various_non_ascii_char.xml")
