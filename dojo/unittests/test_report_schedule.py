@@ -1,15 +1,13 @@
 import sys
 import os
 sys.path.append('..')
-from dojo.models import User, Report, Report_Interval
+from dojo.models import Report, Report_Interval
 from django.test import TestCase
 from django.test.client import RequestFactory
 from django.http import HttpResponseRedirect
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.contrib.auth.models import User
 from django.core.management import call_command
-from tagging.models import Tag
-from django.conf import settings
 from StringIO import StringIO
 from dojo.reports import views
 from django.utils import timezone
@@ -66,7 +64,7 @@ class TestReportSchedule(TestCase):
         u.username = 'john.doe'
         u.id = 1
         u.save()
-        
+
         r = Report()
         r.id = 1
         r.name = "Test Report"
@@ -76,7 +74,7 @@ class TestReportSchedule(TestCase):
         r.options = self.report_json
         r.host = "http://example.com"
         r.save()
-        
+
         i = Report_Interval()
         i.id = 1
         i.report = r

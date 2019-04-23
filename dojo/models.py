@@ -1533,7 +1533,7 @@ class Report(models.Model):
     options = models.TextField()
     datetime = models.DateTimeField(auto_now_add=True)
     done_datetime = models.DateTimeField(null=True)
-    host = models.CharField(max_length=100, null=False, editable=False)
+    host = models.CharField(max_length=100, null=False, editable=False, default='http://example.com')
 
     def __unicode__(self):
         return self.name
@@ -1592,9 +1592,9 @@ class Report_Interval(models.Model):
 
     def search_tuple(self, searchKey, tuples):
         for key, value in tuples:
-            if( key == searchKey ):
+            if(key == searchKey):
                 return value
-        
+
         return None
 
     def __unicode__(self):
@@ -1610,7 +1610,7 @@ class Report_Interval(models.Model):
         time_unit_label = self.search_tuple(self.time_unit, self.TIME_UNIT_CHOICES).lower()
         if(abs(self.time_count) == 1):
             time_unit_label = time_unit_label[:-1]
-        
+
         return str(abs(self.time_count)) + " " + time_unit_label + " " + offset_text + " the " + event_choice_label
 
     class Meta:
