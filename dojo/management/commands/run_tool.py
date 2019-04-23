@@ -303,7 +303,7 @@ class Command(BaseCommand):
 
                 endpoints = Endpoint.objects.filter(product=engagement.product.id, export_tool=True)
                 if len(endpoints) <= 0:
-                    self.stdout.write("Product-Tool config can't be executed because the product " + str(engagement.product.id)+" has no endpoints configured that are provided to tool runs.")
+                    self.stdout.write("Product-Tool config can't be executed because the product " + str(engagement.product.id) + " has no endpoints configured that are provided to tool runs.")
                 else:
                     self.stdout.write("Started for product " + str(engagement.product.id))
 

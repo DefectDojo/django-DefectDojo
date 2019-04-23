@@ -153,5 +153,5 @@ class Command(BaseCommand):
                 for check_object in check_objects:
                     sent_reports += 1
                     send_report(interval, check_object)
-        
+
         self.stdout.write("Reports sent out: " + str(sent_reports))

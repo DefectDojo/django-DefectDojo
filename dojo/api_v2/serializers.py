@@ -1,4 +1,4 @@
-from dojo.models import Product, Engagement_Type, Engagement, Test, Finding, \
+from dojo.models import Product, Engagement, Test, Finding, \
     User, PortscanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
