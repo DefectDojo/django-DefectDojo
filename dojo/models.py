@@ -1238,10 +1238,11 @@ class Finding(models.Model):
             from dojo.utils import apply_cwe_to_template
             self = apply_cwe_to_template(self)
             super(Finding, self).save(*args, **kwargs)
-            # Only compute hash code for new findings.
-            self.hash_code = self.compute_hash_code()
         else:
             super(Finding, self).save(*args, **kwargs)
+        # Compute hash code before dedupe
+        if self.hash_code is None:
+            self.hash_code = self.compute_hash_code()
         self.found_by.add(self.test.test_type)
         if self.test.test_type.static_tool:
             self.static_finding = True
