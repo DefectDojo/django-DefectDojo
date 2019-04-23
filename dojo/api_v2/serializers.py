@@ -557,13 +557,16 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
             for item in parser.items:
                 if skip_duplicates:
                     hash_code = item.compute_hash_code()
+
                     if ((test.engagement.deduplication_on_engagement and
-                        Finding.objects.filter(Q(active=True) | Q(false_p=True) | Q(duplicate=True),
-                                              test__engagement=test.engagement,
-                                              hash_code=hash_code).exists()) or
-                       (Finding.objects.filter(Q(active=True) | Q(false_p=True) | Q(duplicate=True),
-                                              test__engagement__product=test.engagement.product,
-                                              hash_code=hash_code).exists())):
+                             Finding.objects.filter(Q(active=True) | Q(false_p=True) | Q(duplicate=True),
+                             test__engagement=test.engagement,
+                             hash_code=hash_code).exists()) or
+                        (not test.engagement.deduplication_on_engagement and
+                            Finding.objects.filter(Q(active=True) | Q(false_p=True) | Q(duplicate=True),
+                                                    test__engagement__product=test.engagement.product,
+                                                    hash_code=hash_code).exists())):
+
                         skipped_hashcodes.append(hash_code)
                         continue
 
