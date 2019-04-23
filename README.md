@@ -66,7 +66,7 @@ should give you an idea of how to use DefectDojo for your own team.
 ![Slack](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/slack_rgb.png)
 
 Realtime discussion is done in the OWASP Slack Channel, #defectdojo.
-[Get Access.](http://owaspslack.com/)
+[Get Access.](https://join.slack.com/t/owasp/shared_invite/enQtNjExMTc3MTg0MzU4LTViMDg1MmJiMzMwZGUxZjgxZWQ1MTE0NTBlOTBhNjhhZDIzZTZiNmEwOTJlYjdkMzAxMGVhNDkwNDNiNjZiOWQ)
 
 ![Twitter](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/Twitter_Logo.png)
 
