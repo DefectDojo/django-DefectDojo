@@ -243,7 +243,5 @@ function togglePassVisibility() {
         toggleBox.innerHTML = "<i class='fa fa-eye'></i>\
         <span><b>Show Password</b></span>";
     }
-    toggleIcon = toggleIcon.className === "fa fa-eye" ? "fa fa-eye-slash" : "fa fa-eye";
-    toggleMsg = toggleMsg.innerHTML === "<b>Show Password</b>" ? "<b>Hide Password</b>" : "<b>Show Password</b>";
 } 
 
