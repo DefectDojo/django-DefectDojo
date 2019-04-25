@@ -1,5 +1,4 @@
 import sys
-import os
 sys.path.append('..')
 from dojo.models import Report, Report_Interval
 from django.test import TestCase

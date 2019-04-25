@@ -8,10 +8,9 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from dojo.utils import dojo_crypto_encrypt, prepare_for_view
 from dojo.utils import add_breadcrumb
-from dojo.models import *
+from dojo.models import Tool_Configuration, JIRA_Issue
 from jira import JIRA
-from dojo.tasks import *
-from dojo.forms import *
+from dojo.forms import ToolConfigForm
 
 logger = logging.getLogger(__name__)
 
@@ -61,14 +60,6 @@ def edit_tool_config(request, ttid):
                   {
                       'tform': tform,
                   })
-
-
-@user_passes_test(lambda u: u.is_staff)
-def delete_issue(request, find):
-    j_issue = JIRA_Issue.objects.get(finding=find)
-    jira = JIRA(server=Tool_config.url, basic_auth=(Tool_config.username, Tool_config.password))
-    issue = jira.issue(j_issue.jira_id)
-    issue.delete()
 
 
 @user_passes_test(lambda u: u.is_staff)
