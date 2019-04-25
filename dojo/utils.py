@@ -1605,14 +1605,12 @@ def calculate_grade(product):
                 medium = severity_count['numerical_severity__count']
             elif severity_count['severity'] == "Low":
                 low = severity_count['numerical_severity__count']
-
-        if severity_values:
-            aeval = Interpreter()
-            aeval(system_settings.product_grade)
-            grade_product = "grade_product(%s, %s, %s, %s)" % (
-                critical, high, medium, low)
-            product.prod_numeric_grade = aeval(grade_product)
-            product.save()
+        aeval = Interpreter()
+        aeval(system_settings.product_grade)
+        grade_product = "grade_product(%s, %s, %s, %s)" % (
+            critical, high, medium, low)
+        product.prod_numeric_grade = aeval(grade_product)
+        product.save()
 
 
 def get_celery_worker_status():
