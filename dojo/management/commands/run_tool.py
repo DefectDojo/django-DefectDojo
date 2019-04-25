@@ -16,7 +16,13 @@ from django.core.urlresolvers import reverse
 from time import strftime
 
 from urlparse import urlparse, urlunsplit, parse_qs
-import requests, base64, subprocess, paramiko, StringIO, re, traceback
+from base64 import b64encode
+from subprocess import check_output
+from StringIO import StringIO
+from traceback import print_exc
+import requests
+import paramiko
+import re
 
 
 class Command(BaseCommand):
@@ -97,7 +103,7 @@ class Command(BaseCommand):
                 if tool_config.authentication_type == "API":
                     http_headers = {settings.TOOL_RUN_CONFIG['http-api-header']: tool_config.api_key}
                 elif tool_config.authentication_type == "Password":
-                    http_headers = {"Authorization": base64.b64encode('%s:%s' % (tool_config.username, tool_config.password))}
+                    http_headers = {"Authorization": b64encode('%s:%s' % (tool_config.username, tool_config.password))}
 
                 try:
                     result = requests.get(scan_settings.url, headers=http_headers).text
@@ -124,7 +130,7 @@ class Command(BaseCommand):
                 # On localhost it is directly executed
                 if url_settings.netloc == "localhost":
                     try:
-                        result = subprocess.check_output(call_params)
+                        result = check_output(call_params)
                     except Exception as e:
                         self.stdout.write("Error during execution of ssh://localhost: " + str(e))
                         result = ""
@@ -143,7 +149,7 @@ class Command(BaseCommand):
 
                     elif tool_config.authentication_type == "SSH":
                         tool_config.ssh = prepare_for_view(tool_config.ssh)
-                        sshKey = StringIO.StringIO(tool_config.ssh)
+                        sshKey = StringIO(tool_config.ssh)
 
                         try:
                             key = paramiko.RSAKey.from_private_key(sshKey, tool_config.password)
@@ -182,7 +188,7 @@ class Command(BaseCommand):
             engagement.run_tool_test = True
             engagement.save()
 
-            parse_result = StringIO.StringIO(result)
+            parse_result = StringIO(result)
             try:
                 parser = import_parser_factory(parse_result, t)
             except ValueError:
@@ -277,7 +283,7 @@ class Command(BaseCommand):
                     runTool(ttid, endpoint, engagement)
                 except Exception as e:
                     print("Encountered exception during execution", e)
-                    traceback.print_exc()
+                    print_exc()
                 self.scan_queue.task_done()
 
         # entry point for command
