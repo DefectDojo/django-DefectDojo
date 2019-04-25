@@ -8,8 +8,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from dojo.utils import dojo_crypto_encrypt, prepare_for_view
 from dojo.utils import add_breadcrumb
-from dojo.models import Tool_Configuration, JIRA_Issue
-from jira import JIRA
+from dojo.models import Tool_Configuration
 from dojo.forms import ToolConfigForm
 
 logger = logging.getLogger(__name__)
