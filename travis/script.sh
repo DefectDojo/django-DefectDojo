@@ -8,13 +8,18 @@ travis_fold() {
 build_containers() {
   # Build Docker images
   travis_fold start docker_image_build
-  DOCKER_IMAGES=(django nginx)
+  DOCKER_IMAGES=(build django nginx)
   for docker_image in "${DOCKER_IMAGES[@]}"
   do
     docker build \
       --tag "defectdojo/defectdojo-${docker_image}" \
       --file "Dockerfile.${docker_image}" \
       .
+    return_value=${?}
+    if [ ${return_value} -ne 0 ]; then
+      echo "ERROR: cannot build ${docker_image} image"
+      exit ${return_value}
+    fi
   done
   travis_fold end docker_image_build
 }
