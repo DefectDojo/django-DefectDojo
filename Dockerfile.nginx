@@ -16,6 +16,10 @@ RUN \
   rm -rf /var/lib/apt/lists && \
   true
 COPY components/ ./components/
+COPY manage.py ./
+COPY dojo/ ./dojo/
+RUN \
+  cp dojo/settings/settings.dist.py dojo/settings/settings.py
 RUN \
   cd components && \
   yarn && \
