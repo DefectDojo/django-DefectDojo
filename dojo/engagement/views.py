@@ -246,7 +246,7 @@ def delete_engagement(request, eid):
 
 def view_engagement(request, eid):
     eng = get_object_or_404(Engagement, id=eid)
-    tests = Test.objects.filter(engagement=eng).order_by('test_type__name')
+    tests = Test.objects.filter(engagement=eng).order_by('test_type__name', '-updated')
     prod = eng.product
     auth = request.user.is_staff or request.user in prod.authorized_users.all()
     risks_accepted = eng.risk_acceptance.all()
