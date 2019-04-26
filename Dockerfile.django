@@ -1,19 +1,29 @@
 
 # code: language=Dockerfile
-FROM python:2
+FROM python:2-slim
 WORKDIR /app
 RUN \
   apt-get -y update && \
-  apt-get -y install \
+  apt-get -y install --no-install-recommends \
+    # libopenjp2-7 libjpeg62 libtiff5 are required by the pillow package
+    libopenjp2-7 \
+    libjpeg62 \
+    libtiff5 \
     dnsutils \
     mysql-client \
-    postgresql-client \
+    libmariadbclient18 \
     && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
   true
+RUN pip install --no-cache-dir --upgrade pip
+COPY --from=defectdojo/defectdojo-build:latest /tmp/wheels /tmp/wheels
 COPY requirements.txt ./
-RUN pip install -r ./requirements.txt
+RUN pip install \
+	--no-cache-dir \
+	--no-index \
+  --find-links=/tmp/wheels \
+  -r ./requirements.txt
 COPY \
   docker/entrypoint-celery-beat.sh \
   docker/entrypoint-celery-worker.sh \
@@ -38,7 +48,7 @@ USER 1001
 ENV \
   DD_ADMIN_USER=admin \
   DD_ADMIN_MAIL=admin@defectdojo.local \
-  DD_ADMIN_PASSWORD= \
+  DD_ADMIN_PASSWORD='' \
   DD_ADMIN_FIRST_NAME=Administrator \
   DD_ADMIN_LAST_NAME=User \
   DD_ALLOWED_HOSTS="*" \
