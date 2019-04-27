@@ -1,0 +1,19 @@
+
+# code: language=Dockerfile
+FROM python:2
+WORKDIR /app
+RUN \
+  apt-get -y update && \
+  apt-get -y install \
+    dnsutils \
+    mysql-client \
+    postgresql-client \
+    && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists && \
+  true
+COPY requirements.txt ./
+RUN pip install \
+	--no-cache-dir \
+	-r ./requirements.txt
+RUN pip wheel --wheel-dir=/tmp/wheels -r ./requirements.txt

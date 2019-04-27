@@ -17,7 +17,7 @@ import datetime
 import six
 from django.utils.translation import ugettext_lazy as _
 import json
-
+from tagging.models import Tag
 
 class TagList(list):
     def __init__(self, *args, **kwargs):
@@ -557,13 +557,16 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
             for item in parser.items:
                 if skip_duplicates:
                     hash_code = item.compute_hash_code()
+
                     if ((test.engagement.deduplication_on_engagement and
-                        Finding.objects.filter(Q(active=True) | Q(false_p=True) | Q(duplicate=True),
-                                              test__engagement=test.engagement,
-                                              hash_code=hash_code).exists()) or
-                       (Finding.objects.filter(Q(active=True) | Q(false_p=True) | Q(duplicate=True),
-                                              test__engagement__product=test.engagement.product,
-                                              hash_code=hash_code).exists())):
+                             Finding.objects.filter(Q(active=True) | Q(false_p=True) | Q(duplicate=True),
+                             test__engagement=test.engagement,
+                             hash_code=hash_code).exists()) or
+                        (not test.engagement.deduplication_on_engagement and
+                            Finding.objects.filter(Q(active=True) | Q(false_p=True) | Q(duplicate=True),
+                                                    test__engagement__product=test.engagement.product,
+                                                    hash_code=hash_code).exists())):
+
                         skipped_hashcodes.append(hash_code)
                         continue
 
@@ -649,6 +652,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 old_finding.notes.create(author=self.context['request'].user,
                                          entry="This finding has been automatically closed"
                                          " as it is not present anymore in recent scans.")
+                Tag.objects.add_tag(old_finding, 'stale')
                 old_finding.save()
                 title = 'An old finding has been closed for "{}".' \
                         .format(test.engagement.product.name)
