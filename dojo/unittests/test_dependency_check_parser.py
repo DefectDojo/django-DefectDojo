@@ -383,4 +383,3 @@ class TestDependencyCheckParser(TestCase):
                 'Description of a bad vulnerability.',
                 finding.description)
         self.assertEqual(expected_references, finding.references)
-        
