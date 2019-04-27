@@ -71,12 +71,8 @@ The initializer container can be disabled by exporting: `export DD_INITIALIZE=fa
 Build the docker containers locally for testing purposes.
 
 ```zsh
-# Build Dev Compose
-docker-compose build
-
-or:
-
 # Build images
+docker build -t defectdojo/defectdojo-build -f Dockerfile.build .
 docker build -t defectdojo/defectdojo-django -f Dockerfile.django .
 docker build -t defectdojo/defectdojo-nginx -f Dockerfile.nginx .
 ```

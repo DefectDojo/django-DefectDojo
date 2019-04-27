@@ -89,6 +89,7 @@ helm install \
 
 ```zsh
 # Build images
+docker build -t defectdojo/defectdojo-build -f Dockerfile.build .
 docker build -t defectdojo/defectdojo-django -f Dockerfile.django .
 docker build -t defectdojo/defectdojo-nginx -f Dockerfile.nginx .
 ```
