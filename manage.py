@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import os
 import sys
-from socket import error as socket_error
 
 
 if __name__ == "__main__":
@@ -13,9 +12,7 @@ if __name__ == "__main__":
         try:
             # enable remote debugging
             import ptvsd
-            ptvsd.enable_attach(address=('0.0.0.0', 3000))
-        except socket_error as se:
-            # in case you run python manage.py within the container, do not fail because ptvsd is already connected.
-            pass
+            ptvsd.enable_attach(address=('0.0.0.0', 3000), redirect_output=True)
+        except Exception as e: pass
 
     execute_from_command_line(sys.argv)
