@@ -13,6 +13,7 @@ if __name__ == "__main__":
             # enable remote debugging
             import ptvsd
             ptvsd.enable_attach(address=('0.0.0.0', 3000), redirect_output=True)
-        except Exception as e: pass
+        except Exception as e:
+            pass
 
     execute_from_command_line(sys.argv)
