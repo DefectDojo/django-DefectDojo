@@ -50,6 +50,7 @@ DD_INITIALIZE=false to prevent re-initialization.
 For developing the easiset way to make changes is to startup DefectDojo in debug by running:
 
 ```zsh
+docker build -t defectdojo/defectdojo-build -f Dockerfile.build .
 . docker/aliases_dev.sh
 docker-compose up
 ```
@@ -57,6 +58,7 @@ docker-compose up
 or
 
 ```zsh
+docker build -t defectdojo/defectdojo-build -f Dockerfile.build .
 docker-compose -f docker-compose_base.yml -f docker-compose_uwsgi-dev.yml up
 ```
 
