@@ -1006,9 +1006,6 @@ class Finding(models.Model):
     title = models.TextField(max_length=1000)
     date = models.DateField(default=get_current_date)
     cwe = models.IntegerField(default=0, null=True, blank=True)
-    cve_regex = RegexValidator(regex=r'^CVE-\d{4}-\d{4,7}$',
-                                 message="CVE must be entered in the format: 'CVE-9999-9999'. ")
-    cve = models.TextField(validators=[cve_regex], max_length=20, null=True)
     url = models.TextField(null=True, blank=True, editable=False)
     severity = models.CharField(max_length=200, help_text="The severity level of this flaw (Critical, High, Medium, Low, Informational)")
     description = models.TextField()
@@ -1211,8 +1208,6 @@ class Finding(models.Model):
         long_desc = ''
         long_desc += '*' + self.title + '*\n\n'
         long_desc += '*Severity:* ' + self.severity + '\n\n'
-        long_desc += '*Cve:* ' + self.cve + '\n\n'
-        long_desc += '*Systems*: \n'
         long_desc += '*Product/Engagement:* ' + self.test.engagement.product.name + ' / ' + self.test.engagement.name + '\n\n'
         if self.test.engagement.branch_tag:
             long_desc += '*Branch/Tag:* ' + self.test.engagement.branch_tag + '\n\n'
@@ -1379,9 +1374,6 @@ class Stub_Finding(models.Model):
 class Finding_Template(models.Model):
     title = models.TextField(max_length=1000)
     cwe = models.IntegerField(default=None, null=True, blank=True)
-    cve_regex = RegexValidator(regex=r'^CVE-\d{4}-\d{4,7}$',
-                                 message="CVE must be entered in the format: 'CVE-9999-9999'. ")
-    cve = models.TextField(validators=[cve_regex], max_length=20, null=True)
     severity = models.CharField(max_length=200, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     mitigation = models.TextField(null=True, blank=True)
