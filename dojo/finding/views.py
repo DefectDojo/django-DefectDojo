@@ -31,7 +31,7 @@ from dojo.forms import NoteForm, CloseFindingForm, FindingForm, PromoteFindingFo
     FindingFormID, FindingBulkUpdateForm, MergeFindings
 from dojo.models import Product_Type, Finding, Notes, \
     Risk_Acceptance, BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, \
-    FindingImageAccessToken, JIRA_Issue, JIRA_PKey, Dojo_User, Cred_Mapping, Test, Product, User
+    FindingImageAccessToken, JIRA_Issue, JIRA_PKey, Dojo_User, Cred_Mapping, Test, Product, User, Engagement
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
     add_comment, jira_get_resolution_id, jira_change_resolution_id, get_jira_connection, \
     get_system_setting, create_notification, apply_cwe_to_template, Product_Tab, calculate_grade, log_jira_alert
@@ -42,17 +42,26 @@ from django.template.defaultfilters import pluralize
 logger = logging.getLogger(__name__)
 
 
-def open_findings(request, pid=None, view=None):
+def open_findings(request, pid=None, eid=None, view=None):
     show_product_column = True
     title = None
     custom_breadcrumb = None
     filter_name = "Open"
+    pid_local = None
     if pid:
         if view == "All":
             filter_name = "All"
             findings = Finding.objects.filter(test__engagement__product__id=pid).order_by('numerical_severity')
         else:
             findings = Finding.objects.filter(test__engagement__product__id=pid, active=True, duplicate=False).order_by('numerical_severity')
+    elif eid:
+        eng = get_object_or_404(Engagement, id=eid)
+        pid_local = eng.product.id
+        if view == "All":
+            filter_name = "All"
+            findings = Finding.objects.filter(test__engagement=eid).order_by('numerical_severity')
+        else:
+            findings = Finding.objects.filter(test__engagement=eid, active=True, duplicate=False).order_by('numerical_severity')
     else:
         if view == "All":
             filter_name = "All"
@@ -103,10 +112,13 @@ def open_findings(request, pid=None, view=None):
     product_tab = None
     active_tab = None
 
-    # Only show product tab view in product
+    # Only show product tab view in product or engagement
     if pid:
         show_product_column = False
         product_tab = Product_Tab(pid, title="Findings", tab="findings")
+    elif eid and pid_local:
+        show_product_column = False
+        product_tab = Product_Tab(pid_local, title=eng.name, tab="engagements")
     else:
         add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
 
@@ -568,6 +580,7 @@ def edit_finding(request, fid):
                         page_value = "&page=" + str(page)
                 except:
                     pass
+            # TODO additions needed for engagement view?
             if source == "test":
                 return HttpResponseRedirect(reverse('view_test', args=(new_finding.test.id, )))
             elif source == "product_findings":
@@ -1501,6 +1514,7 @@ def finding_bulk_update_all(request, pid=None):
                                      messages.ERROR,
                                      'Unable to process bulk update. Required fields were not selected.',
                                      extra_tags='alert-danger')
+    # TODO additions needed for engagement view?
     if pid:
         return HttpResponseRedirect(reverse('product_open_findings', args=(pid, )) + '?test__engagement__product=' + pid)
     else:
