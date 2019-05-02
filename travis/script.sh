@@ -8,7 +8,7 @@ travis_fold() {
 build_containers() {
   # Build Docker images
   travis_fold start docker_image_build
-  DOCKER_IMAGES=(build django nginx)
+  DOCKER_IMAGES=(django nginx)
   for docker_image in "${DOCKER_IMAGES[@]}"
   do
     docker build \
