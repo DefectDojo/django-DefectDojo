@@ -1,5 +1,27 @@
 # code: language=Dockerfile
-FROM defectdojo/defectdojo-build:latest AS build
+
+# The code for the build image should be idendical with the code in
+# Dockerfile.django to use the caching mechanism of Docker.
+
+FROM python:2 as build
+WORKDIR /app
+RUN \
+  apt-get -y update && \
+  apt-get -y install \
+    dnsutils \
+    mysql-client \
+    postgresql-client \
+    && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists && \
+  true
+COPY requirements.txt ./
+RUN pip install \
+	--no-cache-dir \
+	-r ./requirements.txt
+RUN pip wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
+
+FROM build AS collectstatic
 
 USER root
 RUN \
