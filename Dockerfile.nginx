@@ -16,9 +16,6 @@ RUN \
   rm -rf /var/lib/apt/lists && \
   true
 COPY requirements.txt ./
-RUN pip install \
-	--no-cache-dir \
-	-r ./requirements.txt
 RUN pip wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 
 FROM build AS collectstatic
@@ -37,6 +34,13 @@ RUN \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
   true
+
+RUN pip install \
+	--no-cache-dir \
+	--no-index \
+  --find-links=/tmp/wheels \
+	-r ./requirements.txt
+
 COPY components/ ./components/
 COPY manage.py ./
 COPY dojo/ ./dojo/
@@ -50,7 +54,7 @@ RUN \
   true
 
 FROM nginx
-COPY --from=build /app/static/ /usr/share/nginx/html/static/
+COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/
 COPY wsgi_params nginx/nginx.conf /etc/nginx/
 COPY docker/entrypoint-nginx.sh /
 RUN \
