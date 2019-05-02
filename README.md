@@ -28,9 +28,9 @@ credentials.
 git clone https://github.com/DefectDojo/django-DefectDojo
 cd django-DefectDojo
 # building
-docker-compose -f docker-compose.yml build
+docker-compose build
 # running
-docker-compose -f docker-compose.yml up
+docker-compose up
 ```
 
 Navigate to <http://localhost:8080>.

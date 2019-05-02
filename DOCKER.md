@@ -53,10 +53,11 @@ docker-compose build nginx
 To run the application based on previously built image (or based on dockerhub images if none was locally built), run: 
 
 ```zsh
-docker-compose -f docker-compose.yml up
+docker/setEnvRelease.sh
+docker-compose up
 ```
 
-The -f argument makes docker-compose ignore the docker-compose.override.yml file.
+This will run the application based on merged configurations from docker-compose.yml and docker-compose.override.yml.
 
 In this setup, you need to rebuild django and/or nginx images after each code change and restart the containers. 
 
@@ -67,10 +68,10 @@ For development, use:
 
 ```zsh
 cp dojo/settings/settings.dist.py dojo/settings/settings.py
+docker/setEnvDev.sh
 docker-compose up
 ```
 
-This will run the application based on merged configurations from docker-compose.yml and docker-compose.override.yml (which holds the dev-specific configuration).
 
 *  Volumes are mounted to synchronize between the host and the containers :
     *  static resources (nginx container)
@@ -158,28 +159,17 @@ docker-compose down --volumes
 ```
 
 ### Run the unit-tests with docker
-#### Preparation
+#### Introduction
 The unit-tests are under `dojo/unittests`
 
-First remove the containers built for running the application: 
 
-```
-docker-compose down
-```
-
-Comment out the mysql volume from docker-compose.yml: 
-
-```
-#    volumes:
-#       - defectdojo_data:/var/lib/mysql
-```
 
 #### Running the unit-tests 
 This will run all the tests and leave the uwsgi container up: 
 
 ```
 cp dojo/settings/settings.dist.py dojo/settings/settings.py
-cp docker-compose.override.unit-tests.yml docker-compose.override.yml
+docker/setEnvUnitTests.sh
 docker-compose up
 ```
 Enter the container to run more tests:
@@ -204,20 +194,6 @@ Run a single test. Example:
 ```
 python manage.py test dojo.unittests.test_dependency_check_parser.TestDependencyCheckParser.test_parse_without_file_has_no_findings --keepdb
 ```
-
-#### After running the unit-tests
-Before running the application again, remove the test containers:
-
-```
-docker-compose down
-```
-    
-Reactivate the mysql volume in docker-compose.yml and put back the original override file:
-
-```
-git checkout docker-compose.yml docker-compose.override.yml
-```
-
 
 ## Checking Docker versions
 

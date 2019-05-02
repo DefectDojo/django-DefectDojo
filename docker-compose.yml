@@ -61,8 +61,6 @@ services:
       DD_INITIALIZE: ${DD_INITIALIZE:-true}
   mysql:
     image: mysql:5.7
-    volumes:
-       - defectdojo_data:/var/lib/mysql
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
       DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}
@@ -72,5 +70,3 @@ services:
     command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
   rabbitmq:
     image: rabbitmq:3.7
-volumes:
-  defectdojo_data: {}
