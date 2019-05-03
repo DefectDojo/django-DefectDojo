@@ -21,7 +21,7 @@ spec:
             name: {{ $fullName }}
       env:
         - name: DD_DATABASE_USER
-          value: root
+          value: {{ if eq .Values.database "postgresql" }}{{ .Values.postgresql.postgresqlUsername }}{{ end }}{{ if eq .Values.database "mysql" }}root{{ end }}
         - name: DD_CELERY_BROKER_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -31,7 +31,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: {{ $fullName }}-{{ .Values.database }}
-              key: {{ .Values.database }}-root-password
+              key: {{ if eq .Values.database "postgresql" }}{{ .Values.database }}-password{{ end }}{{ if eq .Values.database "mysql" }}{{ .Values.database }}-root-password{{ end }}
         - name: DD_DEBUG
           value: 'on'
   restartPolicy: Never
