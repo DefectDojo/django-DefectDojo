@@ -195,7 +195,9 @@
                     {% if finding.cwe > 0 %}
                         <th>CWE</th>
                     {% endif %}
-                    <th>CVE</th>
+                    {% if finding.cve %}
+                        <th>CVE</th>
+                    {% endif %}
                     <th>Found by</th>
                 </tr>
                 <tr>
@@ -263,11 +265,13 @@
                             </a>
                         </td>
                     {% endif %}
-                    <td>
-                        <a target="_blank" href="https://cve.mitre.org/cgi-bin/cvename.cgi?name={{ finding.cve }}">
-                            <i class="fa fa-external-link"></i> {{ finding.cve }}
-                        </a>
-                    </td>
+                    {% if finding.cve %}
+                        <td>
+                            <a target="_blank" href="https://cve.mitre.org/cgi-bin/cvename.cgi?name={{ finding.cve }}">
+                                <i class="fa fa-external-link"></i> {{ finding.cve }}
+                            </a>
+                        </td>
+                    {% endif %}
                     <td> {% for scanner in found_by %}
                         {{ scanner }}
                     {% endfor %}</td>
