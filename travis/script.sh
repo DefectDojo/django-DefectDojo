@@ -71,11 +71,47 @@ if [ -z "${TEST}" ]; then
   sudo helm dependency update ./helm/defectdojo
 
   # Install DefectDojo into Kubernetes and wait for it
-  sudo helm install \
-    ./helm/defectdojo \
-    --name=defectdojo \
-    --set django.ingress.enabled=false \
-    --set imagePullPolicy=Never
+  if [ "${BROKER}" = "rabbitmq" ] && [ "${DATABASE}" = "mysql" ]; then
+    sudo helm install \
+      ./helm/defectdojo \
+      --name=defectdojo \
+      --set django.ingress.enabled=false \
+      --set imagePullPolicy=Never
+  elif [ "${BROKER}" = "rabbitmq" ] && [ "${DATABASE}" = "postgresql" ]; then
+    sudo helm install \
+      ./helm/defectdojo \
+      --name=defectdojo \
+      --set django.ingress.enabled=false \
+      --set imagePullPolicy=Never \
+      --set database=postgresql \
+      --set postgresql.enabled=true \
+      --set mysql.enabled=false
+  elif [ "${BROKER}" = "redis" ] && [ "${DATABASE}" = "mysql" ]; then
+    sudo helm install \
+      ./helm/defectdojo \
+      --name=defectdojo \
+      --set django.ingress.enabled=false \
+      --set imagePullPolicy=Never \
+      --set redis.enabled=true \
+      --set rabbitmq.enabled=false \
+      --set celery.broker=redis
+  elif [ "${BROKER}" = "redis" ] && [ "${DATABASE}" = "postgresql" ]; then
+    sudo helm install \
+      ./helm/defectdojo \
+      --name=defectdojo \
+      --set django.ingress.enabled=false \
+      --set imagePullPolicy=Never \
+      --set database=postgresql \
+      --set postgresql.enabled=true \
+      --set mysql.enabled=false \
+      --set redis.enabled=true \
+      --set rabbitmq.enabled=false \
+      --set celery.broker=redis
+  else
+    echo "ERROR: BROKER must be redis or redditmq and DATABASE must be mysql or postgresql"
+    exit 1
+  fi
+
   echo -n "Waiting for DefectDojo to become ready "
   i=0
   # Timeout value so that the wait doesn't timeout the travis build (faster fail)
