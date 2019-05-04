@@ -136,6 +136,7 @@ Proceeds are used for testing, infrastructure, etc.
 [![GCSecurity](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/gc_logo_2018.png)](https://gcsec.com.br/)
 [![Timo-Pagel](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/timo-pagel-logo.png )](https://pagel.pro/)
 [![SDA-SE](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/sda-se-logo.png)](https://sda-se.com/)
+[![Signal-Iduna](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/signal-iduna.png)](https://signal-iduna.de/)
 
 Interested in becoming a sponsor and having your logo displayed? Please review
 our [sponsorship information](SPONSORING.md) or email greg.anderson@owasp.org
