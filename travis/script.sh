@@ -72,9 +72,9 @@ if [ -z "${TEST}" ]; then
 
   # Set Helm settings for the broker
   if [ "${BROKER}" = "rabbitmq" ]; then
-    HELM_BROKER_SETTINGS = "--set redis.enabled=false --set rabbitmq.enabled=true --set celery.broker=rabbitmq"
+    HELM_BROKER_SETTINGS="--set redis.enabled=false --set rabbitmq.enabled=true --set celery.broker=rabbitmq"
   elif [ "${BROKER}" = "redis" ]; then
-    HELM_BROKER_SETTINGS = "--set redis.enabled=true --set rabbitmq.enabled=false --set celery.broker=redis"
+    HELM_BROKER_SETTINGS="--set redis.enabled=true --set rabbitmq.enabled=false --set celery.broker=redis"
   else
     >&2 echo "ERROR: BROKER must be redis or rebbitmq and DATABASE must be mysql or postgresql"
     exit 1
@@ -82,9 +82,9 @@ if [ -z "${TEST}" ]; then
 
   # Set Helm settings for the database
   if [ "${BROKER}" = "mysql" ]; then
-    HELM_DATABASE_SETTINGS = "--set database=mysql --set postgresql.enabled=false --set mysql.enabled=true"
+    HELM_DATABASE_SETTINGS="--set database=mysql --set postgresql.enabled=false --set mysql.enabled=true"
   elif [ "${BROKER}" = "postgresql" ]; then
-    HELM_DATABASE_SETTINGS = "--set database=postgresql --set postgresql.enabled=true --set mysql.enabled=false"
+    HELM_DATABASE_SETTINGS="--set database=postgresql --set postgresql.enabled=true --set mysql.enabled=false"
   else
     >&2 echo "ERROR: DATABASE must be mysql or postgresql"
     exit 1
