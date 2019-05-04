@@ -96,8 +96,8 @@ if [ -z "${TEST}" ]; then
     --name=defectdojo \
     --set django.ingress.enabled=false \
     --set imagePullPolicy=Never \
-    "${HELM_BROKER_SETTINGS}" \
-    "${HELM_DATABASE_SETTINGS}"
+    ${HELM_BROKER_SETTINGS} \
+    ${HELM_DATABASE_SETTINGS}
 
   echo -n "Waiting for DefectDojo to become ready "
   i=0
