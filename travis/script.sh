@@ -81,9 +81,9 @@ if [ -z "${TEST}" ]; then
   fi
 
   # Set Helm settings for the database
-  if [ "${BROKER}" = "mysql" ]; then
+  if [ "${DATABASE}" = "mysql" ]; then
     HELM_DATABASE_SETTINGS="--set database=mysql --set postgresql.enabled=false --set mysql.enabled=true"
-  elif [ "${BROKER}" = "postgresql" ]; then
+  elif [ "${DATABASE}" = "postgresql" ]; then
     HELM_DATABASE_SETTINGS="--set database=postgresql --set postgresql.enabled=true --set mysql.enabled=false"
   else
     >&2 echo "ERROR: DATABASE must be mysql or postgresql"
