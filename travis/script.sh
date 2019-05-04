@@ -17,7 +17,7 @@ build_containers() {
       .
     return_value=${?}
     if [ ${return_value} -ne 0 ]; then
-      >&2 echo "ERROR: cannot build ${docker_image} image"
+      (>&2 echo "ERROR: cannot build '${docker_image}' image")
       exit ${return_value}
     fi
   done
@@ -71,24 +71,48 @@ if [ -z "${TEST}" ]; then
   sudo helm dependency update ./helm/defectdojo
 
   # Set Helm settings for the broker
-  if [ "${BROKER}" = "rabbitmq" ]; then
-    HELM_BROKER_SETTINGS="--set redis.enabled=false --set rabbitmq.enabled=true --set celery.broker=rabbitmq"
-  elif [ "${BROKER}" = "redis" ]; then
-    HELM_BROKER_SETTINGS="--set redis.enabled=true --set rabbitmq.enabled=false --set celery.broker=redis"
-  else
-    >&2 echo "ERROR: BROKER must be redis or rebbitmq and DATABASE must be mysql or postgresql"
-    exit 1
-  fi
+  case "${BROKER}" in
+      rabbitmq)
+	  HELM_BROKER_SETTINGS=" \
+	      --set redis.enabled=false \
+	      --set rabbitmq.enabled=true \
+	      --set celery.broker=rabbitmq \
+	  "
+	  ;;
+      redis)
+	  HELM_BROKER_SETTINGS=" \
+	      --set redis.enabled=true \
+	      --set rabbitmq.enabled=false \
+              --set celery.broker=redis \
+	  "
+	  ;;
+      *)
+	  (>&2 echo "ERROR: 'BROKER' must be 'redis' or 'rabbitmq'")
+	  exit 1
+	  ;;
+  esac
 
   # Set Helm settings for the database
-  if [ "${DATABASE}" = "mysql" ]; then
-    HELM_DATABASE_SETTINGS="--set database=mysql --set postgresql.enabled=false --set mysql.enabled=true"
-  elif [ "${DATABASE}" = "postgresql" ]; then
-    HELM_DATABASE_SETTINGS="--set database=postgresql --set postgresql.enabled=true --set mysql.enabled=false"
-  else
-    >&2 echo "ERROR: DATABASE must be mysql or postgresql"
-    exit 1
-  fi
+  case "${DATABASE}" in
+      mysql)
+	  HELM_DATABASE_SETTINGS=" \
+	      --set database=mysql \
+	      --set postgresql.enabled=false \
+	      --set mysql.enabled=true \
+	  "
+	  ;;
+      postgresql)
+	  HELM_DATABASE_SETTINGS=" \
+	      --set database=postgresql \
+	      --set postgresql.enabled=true \
+	      --set mysql.enabled=false \
+	  "
+	  ;;
+      *)
+	  (>&2 echo "ERROR: 'DATABASE' must be 'mysql' or 'postgresql'")
+	  exit 1
+	  ;;
+  esac
 
   # Install DefectDojo into Kubernetes and wait for it
   sudo helm install \
