@@ -223,7 +223,7 @@
                     <table class="tablesorter-bootstrap table table-condensed table-striped">
                         <thead>
                         <tr>
-                            <th>Type</th>
+                            <th>Title / Type</th>
                             <th></th>
                             <th>Date</th>
                             <th>Lead</th>
@@ -235,7 +235,7 @@
                         <tbody>
                         {% for test in tests %}
                             <tr>
-                                <td><a href="{% url 'view_test' test.id %}">{{ test.test_type }}</a>
+                                <td><a href="{% url 'view_test' test.id %}">{{ test }}</a>
                                   {% if test.tags %}
                                       <sup>
                                           {% for tag in test.tags %}
