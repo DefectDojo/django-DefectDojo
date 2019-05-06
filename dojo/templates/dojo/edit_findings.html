@@ -36,7 +36,6 @@
     {% else %}
         <form id="add_finding" class="form-horizontal" action="{% url 'edit_finding' finding.id %}" method="post">
             {% csrf_token %}
-            <!-- TODO: Additions needed for engagment view / source? -->
             {% if request.GET.source == "test" %}
                 <input type="hidden" name="source" value="test">
             {% elif request.GET.source == "product_findings" %}
