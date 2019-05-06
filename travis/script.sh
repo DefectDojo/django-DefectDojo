@@ -8,7 +8,7 @@ travis_fold() {
 build_containers() {
   # Build Docker images
   travis_fold start docker_image_build
-  DOCKER_IMAGES=(build django nginx)
+  DOCKER_IMAGES=(django nginx)
   for docker_image in "${DOCKER_IMAGES[@]}"
   do
     docker build \
@@ -17,7 +17,7 @@ build_containers() {
       .
     return_value=${?}
     if [ ${return_value} -ne 0 ]; then
-      echo "ERROR: cannot build ${docker_image} image"
+      (>&2 echo "ERROR: cannot build '${docker_image}' image")
       exit ${return_value}
     fi
   done
@@ -70,12 +70,59 @@ if [ -z "${TEST}" ]; then
   # Update Helm dependencies for DefectDojo
   sudo helm dependency update ./helm/defectdojo
 
+  # Set Helm settings for the broker
+  case "${BROKER}" in
+      rabbitmq)
+	  HELM_BROKER_SETTINGS=" \
+	      --set redis.enabled=false \
+	      --set rabbitmq.enabled=true \
+	      --set celery.broker=rabbitmq \
+	  "
+	  ;;
+      redis)
+	  HELM_BROKER_SETTINGS=" \
+	      --set redis.enabled=true \
+	      --set rabbitmq.enabled=false \
+              --set celery.broker=redis \
+	  "
+	  ;;
+      *)
+	  (>&2 echo "ERROR: 'BROKER' must be 'redis' or 'rabbitmq'")
+	  exit 1
+	  ;;
+  esac
+
+  # Set Helm settings for the database
+  case "${DATABASE}" in
+      mysql)
+	  HELM_DATABASE_SETTINGS=" \
+	      --set database=mysql \
+	      --set postgresql.enabled=false \
+	      --set mysql.enabled=true \
+	  "
+	  ;;
+      postgresql)
+	  HELM_DATABASE_SETTINGS=" \
+	      --set database=postgresql \
+	      --set postgresql.enabled=true \
+	      --set mysql.enabled=false \
+	  "
+	  ;;
+      *)
+	  (>&2 echo "ERROR: 'DATABASE' must be 'mysql' or 'postgresql'")
+	  exit 1
+	  ;;
+  esac
+
   # Install DefectDojo into Kubernetes and wait for it
   sudo helm install \
     ./helm/defectdojo \
     --name=defectdojo \
     --set django.ingress.enabled=false \
-    --set imagePullPolicy=Never
+    --set imagePullPolicy=Never \
+    ${HELM_BROKER_SETTINGS} \
+    ${HELM_DATABASE_SETTINGS}
+
   echo -n "Waiting for DefectDojo to become ready "
   i=0
   # Timeout value so that the wait doesn't timeout the travis build (faster fail)
