@@ -22,8 +22,8 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     JiraIssuesViewSet, JiraViewSet, ProductViewSet, ScanSettingsViewSet, \
     ScansViewSet, StubFindingsViewSet, TestsViewSet, TestTypesViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
-    UsersViewSet, ImportScanView, ReImportScanView, ProductTypeViewSet, DojoMetaViewSet, \
-    DevelopmentEnvironmentViewSet
+    UsersViewSet, ImportScanViewSet, ReImportScanViewSet, \
+    ProductTypeViewSet, DojoMetaViewSet, DevelopmentEnvironmentViewSet
 
 from dojo.utils import get_system_setting
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
@@ -106,8 +106,9 @@ v2_api.register(r'tool_configurations', ToolConfigurationsViewSet)
 v2_api.register(r'tool_product_settings', ToolProductSettingsViewSet)
 v2_api.register(r'tool_types', ToolTypesViewSet)
 v2_api.register(r'users', UsersViewSet)
-v2_api.register(r'import-scan', ImportScanView, base_name='importscan')
-v2_api.register(r'reimport-scan', ReImportScanView, base_name='reimportscan')
+v2_api.register(r'import-scan', ImportScanViewSet, base_name='importscan')
+v2_api.register(r'reimport-scan', ReImportScanViewSet,
+                base_name='reimportscan')
 v2_api.register(r'metadata', DojoMetaViewSet, base_name='metadata')
 
 
@@ -165,14 +166,17 @@ urlpatterns = [
     url(r'^%s' % get_system_setting('url_prefix'), include(ur)),
     url(r'^api/v2/api-token-auth/', tokenviews.obtain_auth_token),
     url(r'^api/v2/doc/', schema_view, name="api_v2_schema"),
-    url(r'^robots.txt', lambda x: HttpResponse("User-Agent: *\nDisallow: /", content_type="text/plain"), name="robots_file"),
+    url(r'^robots.txt', lambda x: HttpResponse(
+        "User-Agent: *\nDisallow: /", content_type="text/plain"), name="robots_file"),
 
 ]
 
 if hasattr(settings, 'DJANGO_ADMIN_ENABLED'):
     if settings.DJANGO_ADMIN_ENABLED:
         #  django admin
-        urlpatterns += [url(r'^%sadmin/' % get_system_setting('url_prefix'), include(admin.site.urls))]
+        urlpatterns += [url(r'^%sadmin/' %
+                            get_system_setting('url_prefix'), include(admin.site.urls))]
 
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.MEDIA_URL,
+                          document_root=settings.MEDIA_ROOT)

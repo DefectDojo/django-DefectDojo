@@ -8,7 +8,7 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     JiraIssuesViewSet, JiraViewSet, ProductViewSet, ScanSettingsViewSet, \
     ScansViewSet, StubFindingsViewSet, TestsViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
-    UsersViewSet, ImportScanView
+    UsersViewSet, ImportScanViewSet
 
 from django.core.urlresolvers import reverse
 from rest_framework.authtoken.models import Token
@@ -471,7 +471,7 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Test
         self.viewname = 'importscan'
-        self.viewset = ImportScanView
+        self.viewset = ImportScanViewSet
         self.payload = {
             "scan_date": '2017-12-30',
             "minimum_severity": 'Low',
