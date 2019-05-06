@@ -386,7 +386,7 @@
                             {% for test in tagged_tests %}
                                 <tr>
                                     <td><a class="search-finding"
-                                           href="{% url 'view_test' test.id %}">{{ test.test_type }}</a>
+                                           href="{% url 'view_test' test.id %}">{{ test }}</a>
                                         <sup>
                                             {% for tag in test.tags %}
                                                 <a title="Search {{ tag }}" class="tag-label tag-color"

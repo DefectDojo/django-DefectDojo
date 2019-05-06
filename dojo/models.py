@@ -962,6 +962,7 @@ class Test(models.Model):
     engagement = models.ForeignKey(Engagement, editable=False)
     lead = models.ForeignKey(User, editable=True, null=True)
     test_type = models.ForeignKey(Test_Type)
+    title = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     target_start = models.DateTimeField()
     target_end = models.DateTimeField()
@@ -981,8 +982,9 @@ class Test(models.Model):
         return self.test_type.name
 
     def __unicode__(self):
-        return "%s (%s)" % (self.test_type,
-                            self.target_start.strftime("%b %d, %Y"))
+        if self.title:
+            return u"%s (%s)" % (self.title, self.test_type)
+        return unicode(self.test_type)
 
     def get_breadcrumbs(self):
         bc = self.engagement.get_breadcrumbs()

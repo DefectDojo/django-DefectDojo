@@ -252,8 +252,9 @@ class TestsViewSet(mixins.ListModelMixin,
     serializer_class = serializers.TestSerializer
     queryset = Test.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'test_type', 'target_start', 'target_end', 'notes',
-                     'percent_complete', 'actual_time', 'engagement')
+    filter_fields = ('id', 'title', 'test_type', 'target_start',
+                     'target_end', 'notes', 'percent_complete',
+                     'actual_time', 'engagement')
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
