@@ -154,7 +154,7 @@
                           {% for test in eng.test_set.all %}
                                <li>
                                  <a class="" href="{% url 'view_test' test.id %}">
-                                   <i class="fa fa-list-alt"></i> {{test.test_type}}, {{test.created}}
+                                   <i class="fa fa-list-alt"></i> {{test}}, {{test.created}}
                                </li>
                             {% endfor %}
                         </ul>
