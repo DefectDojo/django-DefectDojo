@@ -580,7 +580,7 @@ def edit_finding(request, fid):
                         page_value = "&page=" + str(page)
                 except:
                     pass
-            # TODO additions needed for engagement view?
+
             if source == "test":
                 return HttpResponseRedirect(reverse('view_test', args=(new_finding.test.id, )))
             elif source == "product_findings":
@@ -1514,7 +1514,7 @@ def finding_bulk_update_all(request, pid=None):
                                      messages.ERROR,
                                      'Unable to process bulk update. Required fields were not selected.',
                                      extra_tags='alert-danger')
-    # TODO additions needed for engagement view?
+
     if pid:
         return HttpResponseRedirect(reverse('product_open_findings', args=(pid, )) + '?test__engagement__product=' + pid)
     else:
