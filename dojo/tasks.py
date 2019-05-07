@@ -281,7 +281,7 @@ def async_false_history(new_finding, *args, **kwargs):
 def async_dupe_delete(*args, **kwargs):
     logger.info("delete excess duplicates")
     system_settings = System_Settings.objects.get()
-    if system_settings.delete_dupulicates:
+    if system_settings.delete_duplicates:
         dupe_max = system_settings.max_dupes
         findings = Finding.objects \
                 .filter(duplicate_list__duplicate=True) \
