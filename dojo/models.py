@@ -69,7 +69,7 @@ class System_Settings(models.Model):
                   "title, Dojo marks the less recent finding as a duplicate. "
                   "When deduplication is enabled, a list of "
                   "deduplicated findings is added to the engagement view.")
-    delete_dupulicates = models.BooleanField(default=False, blank=False)
+    delete_duplicates = models.BooleanField(default=False, blank=False)
     max_dupes = models.IntegerField(blank=True, null=True,
                                     verbose_name='Max Duplicates',
                                     help_text="When enabled, if a single "
