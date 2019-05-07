@@ -697,7 +697,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('enable_deduplication', models.BooleanField(default=False, help_text=b'With this setting turned on, Dojo deduplicates findings by comparing endpoints, cwe fields, and titles. If two findings share a URL and have the same CWE or title, Dojo marks the less recent finding as a duplicate. When deduplication is enabled, a list of deduplicated findings is added to the engagement view.', verbose_name=b'Deduplicate findings')),
-                ('delete_dupulicates', models.BooleanField(default=False)),
+                ('delete_duplicates', models.BooleanField(default=False)),
                 ('max_dupes', models.IntegerField(blank=True, help_text=b'When enabled, if a single issue reaches the maximum number of duplicates, the oldest will be deleted.', null=True, verbose_name=b'Max Duplicates')),
                 ('enable_jira', models.BooleanField(default=False, verbose_name=b'Enable JIRA integration')),
                 ('enable_jira_web_hook', models.BooleanField(default=False, verbose_name=b'Enable JIRA web hook. Please note: It is strongly recommended to whitelist the Jira server using a proxy such as Nginx.')),
