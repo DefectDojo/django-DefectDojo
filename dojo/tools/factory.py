@@ -42,6 +42,7 @@ from dojo.tools.clair_klar.parser import ClairKlarParser
 from dojo.tools.dawnscanner.parser import DawnScannerParser
 from dojo.tools.anchore_engine.parser import AnchoreEngineScanParser
 from dojo.tools.bundler_audit.parser import BundlerAuditParser
+from dojo.tools.twistlock.parser import TwistlockParser
 
 __author__ = 'Jay Paz'
 
@@ -141,6 +142,8 @@ def import_parser_factory(file, test, scan_type=None):
         parser = AnchoreEngineScanParser(file, test)
     elif scan_type == 'Bundler-Audit Scan':
         parser = BundlerAuditParser(file, test)
+    elif scan_type == 'Twistlock Image Scan':
+        parser = TwistlockParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 
