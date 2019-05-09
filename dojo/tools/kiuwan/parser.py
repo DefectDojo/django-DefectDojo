@@ -1,7 +1,7 @@
 import StringIO
 import csv
 import hashlib
-from dojo.models import Finding, Endpoint
+from dojo.models import Finding
 
 __author__ = 'dr3dd589'
 
@@ -47,16 +47,16 @@ class KiuwanCSVParser(object):
             findingdict['severity'] = severityfilter.severity
             findingdict['title'] = row['Rule']
             findingdict['description'] = "**Source file** : " + row['Source file'] + "\n\n" + \
-            							 "**Vulnerability type** : " + row['Vulnerability type'] + "\n\n" + \
-            							 "**Status** : " + row['Status'] + "\n\n" + \
-                                         "**CWE Scope** : " + row['CWE Scope'] + "\n\n" + \
-            							 "**Line text** : " + row['Line text'] + "\n\n" + \
-            							 "**Normative** : " + row['Normative'] + "\n\n" + \
-            							 "**Line number** : " + row['Line number'] + "\n\n" + \
-            							 "**Rule code** : " + row['Rule code'] + "\n\n" + \
-            							 "**File** : " + row['File'] + "\n\n" + \
-            							 "**Source line text** : " + row['Source line text'] + "\n\n" + \
-            							 "**Source line number** : " + row['Source line number'] + "\n"
+                                        "**Vulnerability type** : " + row['Vulnerability type'] + "\n\n" + \
+                                        "**Status** : " + row['Status'] + "\n\n" + \
+                                        "**CWE Scope** : " + row['CWE Scope'] + "\n\n" + \
+                                        "**Line text** : " + row['Line text'] + "\n\n" + \
+                                        "**Normative** : " + row['Normative'] + "\n\n" + \
+                                        "**Line number** : " + row['Line number'] + "\n\n" + \
+                                        "**Rule code** : " + row['Rule code'] + "\n\n" + \
+                                        "**File** : " + row['File'] + "\n\n" + \
+                                        "**Source line text** : " + row['Source line text'] + "\n\n" + \
+                                        "**Source line number** : " + row['Source line number'] + "\n"
 
             finding.title = findingdict['title']
             finding.description = findingdict['description']
@@ -77,4 +77,3 @@ class KiuwanCSVParser(object):
                     self.dupes[key] = finding
 
         self.items = self.dupes.values()
-
