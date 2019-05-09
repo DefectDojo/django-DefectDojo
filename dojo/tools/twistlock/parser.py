@@ -58,6 +58,7 @@ def get_item(vulnerability, test):
     # create the finding object
     finding = Finding(
         title=vulnerability['id'] + ": " + vulnerability['packageName'] + " - " + vulnerability['packageVersion'],
+        cve=vulnerability['id'],
         test=test,
         severity=severity,
         description=vulnerability['description'] + "<p> Vulnerable Package: " +
