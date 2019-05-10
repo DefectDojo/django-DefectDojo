@@ -1,5 +1,24 @@
 # code: language=Dockerfile
-FROM defectdojo/defectdojo-django:latest AS build
+
+# The code for the build image should be idendical with the code in
+# Dockerfile.django to use the caching mechanism of Docker.
+
+FROM python:2 as build
+WORKDIR /app
+RUN \
+  apt-get -y update && \
+  apt-get -y install \
+    dnsutils \
+    mysql-client \
+    postgresql-client \
+    && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists && \
+  true
+COPY requirements.txt ./
+RUN pip wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
+
+FROM build AS collectstatic
 
 USER root
 RUN \
@@ -15,7 +34,18 @@ RUN \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
   true
+
+RUN pip install \
+	--no-cache-dir \
+	--no-index \
+  --find-links=/tmp/wheels \
+	-r ./requirements.txt
+
 COPY components/ ./components/
+COPY manage.py ./
+COPY dojo/ ./dojo/
+RUN \
+  cp dojo/settings/settings.dist.py dojo/settings/settings.py
 RUN \
   cd components && \
   yarn && \
@@ -24,7 +54,7 @@ RUN \
   true
 
 FROM nginx
-COPY --from=build /app/static/ /usr/share/nginx/html/static/
+COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/
 COPY wsgi_params nginx/nginx.conf /etc/nginx/
 COPY docker/entrypoint-nginx.sh /
 RUN \

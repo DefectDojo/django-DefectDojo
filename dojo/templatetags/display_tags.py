@@ -709,24 +709,18 @@ def get_severity_count(id, table):
     total = critical + high + medium + low + info
     display_counts = []
 
-    if critical:
-        display_counts.append("Critical: " + str(critical))
-    if high:
-        display_counts.append("High: " + str(high))
-    if medium:
-        display_counts.append("Medium: " + str(medium))
-    if low:
-        display_counts.append("Low: " + str(low))
-    if info:
-        display_counts.append("Info: " + str(info))
+    display_counts.append("Critical: " + str(critical))
+    display_counts.append("High: " + str(high))
+    display_counts.append("Medium: " + str(medium))
+    display_counts.append("Low: " + str(low))
+    display_counts.append("Info: " + str(info))
 
-    if total > 0:
-        if table == "test":
-            display_counts.append("Total: " + str(total) + " Findings")
-        elif table == "engagement":
-            display_counts.append("Total: " + str(total) + " Active, Verified Findings")
-        elif table == "product":
-            display_counts.append("Total: " + str(total) + " Active Findings")
+    if table == "test":
+        display_counts.append("Total: " + str(total) + " Findings")
+    elif table == "engagement":
+        display_counts.append("Total: " + str(total) + " Active, Verified Findings")
+    elif table == "product":
+        display_counts.append("Total: " + str(total) + " Active Findings")
 
     display_counts = ", ".join([str(item) for item in display_counts])
 

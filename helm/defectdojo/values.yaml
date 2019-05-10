@@ -26,7 +26,6 @@ celery:
     tolerations: []
   worker:
     affinity: {}
-    broker: rabbitmq
     repository: defectdojo/defectdojo-django
     logLevel: DEBUG
     nodeSelector: {}
@@ -72,8 +71,12 @@ mysql:
 
 postgresql:
   enabled: false
+  postgresqlUsername: defectdojo
   postgresqlDatabase: defectdojo
-  slaveReplicas: 1
+  persistence:
+    enabled: false
+  replication:
+    enabled: false
 
 rabbitmq:
   enabled: true

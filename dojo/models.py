@@ -69,7 +69,7 @@ class System_Settings(models.Model):
                   "title, Dojo marks the less recent finding as a duplicate. "
                   "When deduplication is enabled, a list of "
                   "deduplicated findings is added to the engagement view.")
-    delete_dupulicates = models.BooleanField(default=False, blank=False)
+    delete_duplicates = models.BooleanField(default=False, blank=False)
     max_dupes = models.IntegerField(blank=True, null=True,
                                     verbose_name='Max Duplicates',
                                     help_text="When enabled, if a single "
@@ -962,6 +962,7 @@ class Test(models.Model):
     engagement = models.ForeignKey(Engagement, editable=False)
     lead = models.ForeignKey(User, editable=True, null=True)
     test_type = models.ForeignKey(Test_Type)
+    title = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     target_start = models.DateTimeField()
     target_end = models.DateTimeField()
@@ -981,8 +982,9 @@ class Test(models.Model):
         return self.test_type.name
 
     def __unicode__(self):
-        return "%s (%s)" % (self.test_type,
-                            self.target_start.strftime("%b %d, %Y"))
+        if self.title:
+            return u"%s (%s)" % (self.title, self.test_type)
+        return unicode(self.test_type)
 
     def get_breadcrumbs(self):
         bc = self.engagement.get_breadcrumbs()
@@ -1006,6 +1008,9 @@ class Finding(models.Model):
     title = models.TextField(max_length=1000)
     date = models.DateField(default=get_current_date)
     cwe = models.IntegerField(default=0, null=True, blank=True)
+    cve_regex = RegexValidator(regex=r'^CVE-\d{4}-\d{4,7}$',
+                                 message="CVE must be entered in the format: 'CVE-9999-9999'. ")
+    cve = models.TextField(validators=[cve_regex], max_length=20, null=True)
     url = models.TextField(null=True, blank=True, editable=False)
     severity = models.CharField(max_length=200, help_text="The severity level of this flaw (Critical, High, Medium, Low, Informational)")
     description = models.TextField()
@@ -1208,6 +1213,7 @@ class Finding(models.Model):
         long_desc = ''
         long_desc += '*' + self.title + '*\n\n'
         long_desc += '*Severity:* ' + self.severity + '\n\n'
+        long_desc += '*Cve:* ' + self.cve + '\n\n'
         long_desc += '*Product/Engagement:* ' + self.test.engagement.product.name + ' / ' + self.test.engagement.name + '\n\n'
         if self.test.engagement.branch_tag:
             long_desc += '*Branch/Tag:* ' + self.test.engagement.branch_tag + '\n\n'
@@ -1233,10 +1239,11 @@ class Finding(models.Model):
             from dojo.utils import apply_cwe_to_template
             self = apply_cwe_to_template(self)
             super(Finding, self).save(*args, **kwargs)
-            # Only compute hash code for new findings.
-            self.hash_code = self.compute_hash_code()
         else:
             super(Finding, self).save(*args, **kwargs)
+        # Compute hash code before dedupe
+        if self.hash_code is None:
+            self.hash_code = self.compute_hash_code()
         self.found_by.add(self.test.test_type)
         if self.test.test_type.static_tool:
             self.static_finding = True
@@ -1373,6 +1380,9 @@ class Stub_Finding(models.Model):
 class Finding_Template(models.Model):
     title = models.TextField(max_length=1000)
     cwe = models.IntegerField(default=None, null=True, blank=True)
+    cve_regex = RegexValidator(regex=r'^CVE-\d{4}-\d{4,7}$',
+                                 message="CVE must be entered in the format: 'CVE-9999-9999'. ")
+    cve = models.TextField(validators=[cve_regex], max_length=20, null=True)
     severity = models.CharField(max_length=200, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     mitigation = models.TextField(null=True, blank=True)
