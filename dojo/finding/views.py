@@ -359,10 +359,13 @@ def defect_finding_review(request, fid):
                 finding.last_reviewed = finding.mitigated
                 finding.last_reviewed_by = request.user
                 finding.endpoints.clear()
-                jira = get_jira_connection(finding)
-                if jira:
-                    j_issue = JIRA_Issue.objects.get(finding=finding)
-                    issue = jira.issue(j_issue.jira_id)
+
+            jira = get_jira_connection(finding)
+            if jira and JIRA_Issue.objects.filter(finding=finding).exists():
+                j_issue = JIRA_Issue.objects.get(finding=finding)
+                issue = jira.issue(j_issue.jira_id)
+
+                if defect_choice == "Close Finding":
                     # If the issue id is closed jira will return Reopen Issue
                     resolution_id = jira_get_resolution_id(jira, issue,
                                                            "Reopen Issue")
@@ -371,16 +374,13 @@ def defect_finding_review(request, fid):
                             jira, issue, "Resolve Issue")
                         jira_change_resolution_id(jira, issue, resolution_id)
                         new_note.entry = new_note.entry + "\nJira issue set to resolved."
-            else:
-                # Re-open finding with notes stating why re-open
-                jira = get_jira_connection(finding)
-                j_issue = JIRA_Issue.objects.get(finding=finding)
-                issue = jira.issue(j_issue.jira_id)
-                resolution_id = jira_get_resolution_id(jira, issue,
-                                                       "Resolve Issue")
-                if resolution_id is not None:
-                    jira_change_resolution_id(jira, issue, resolution_id)
-                    new_note.entry = new_note.entry + "\nJira issue re-opened."
+                else:
+                    # Re-open finding with notes stating why re-open
+                    resolution_id = jira_get_resolution_id(jira, issue,
+                                                        "Resolve Issue")
+                    if resolution_id is not None:
+                        jira_change_resolution_id(jira, issue, resolution_id)
+                        new_note.entry = new_note.entry + "\nJira issue re-opened."
 
             # Update Dojo and Jira with a notes
             add_comment(finding, new_note, force_push=True)
