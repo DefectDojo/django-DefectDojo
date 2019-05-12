@@ -1,29 +1,117 @@
 dist: xenial
 language: minimal
-sudo: required
-services:
-  - docker
+
+stages:
+  - prechecks
+  - build and cache
+  - integration tests
+  - deploy
+  - cleanup
+
 env:
-  global:
-    - K8S_VERSION=v1.13.4
-    - MINIKUBE_VERSION=v0.35.0
-    - HELM_VERSION=v2.13.0
-    - CHANGE_MINIKUBE_NONE_USER=true
-  matrix:
-    - BROKER=rabbitmq DATABASE=mysql
-    - BROKER=rabbitmq DATABASE=postgresql
-    - BROKER=redis DATABASE=mysql
-    - BROKER=redis DATABASE=postgresql
-    - TEST=flake8
-    - TEST=snyk
-    - TEST=docker
-matrix: 
-  allow_failures:
-    - env: TEST=snyk
+  global: DOCKER_CACHE=${HOME}/docker-images
+
+cache:
+  directories: ${DOCKER_CACHE}
+
 jobs:
-  include:  
-    - stage: deploy
-      env: TEST=deploy
-before_install: ['./travis/before-install.sh']
-before_script: ['./travis/before-script.sh']
-script: ['./travis/script.sh']
+  include:
+    - &precheck
+      stage: prechecks
+      install: '.github/travis/precheck/install.sh'
+      before_script: '.github/travis/precheck/before-script.sh'
+      script: '.github/travis/precheck/script.sh'
+      env: # don't use environment variables in order to have a shared cache
+
+      name: "Pull request targets"
+      before_install: export CHECK=pr_targets
+    - <<: *precheck
+      name: "Code base quality"
+      before_install: export CHECK=code_base_quality
+    - <<: *precheck
+      name: "Unwanted changes"
+      before_install: export CHECK=unwanted_changes
+    - <<: *precheck
+      name: "Static application security testing"
+      before_install: export CHECK=sast
+
+
+    - &build
+      stage: build and cache
+      name: "Build and cache Docker images"
+      services: docker
+      install: '.github/travis/build/install.sh'
+      before_script: '.github/travis/build/before-script.sh'
+      script: '.github/travis/build/script.sh || export JOB_FAILED=true'
+      before_cache: echo "JOB_FAILER: $JOB_FAILED" #TODO: export Docker images, tag with TRAVIS_BUILD_NUMBER
+      env: # don't use environment variables in order to have a shared cache
+
+
+    - &test
+      stage: integration tests
+      services: docker
+      install: '.github/travis/test/install.sh' #TODO: load Docker images
+      before_script: '.github/travis/test/before-script.sh'
+      script: '.github/travis/test/script.sh || export JOB_FAILED=true'
+      before_cache: echo "JOB_FAILER: $JOB_FAILED" #TODO: remove build specific Docker images from cache
+      env: # don't use environment variables in order to have a shared cache
+
+      name: "K8S, RabbitMQ & MySQL"
+      before_install:
+        - export TARGET=k8s
+        - export BROKER=rabbitmq
+        - export DATABASE=mysql
+    - <<: *test
+      name: "K8S, RabbitMQ & PostgreSQL"
+      before_install:
+        - export TARGET=k8s
+        - export BROKER=rabbitmq
+        - export DATABASE=postgresql
+    - <<: *test
+      name: "K8S, Redis & MySQL"
+      before_install:
+        - export TARGET=k8s
+        - export BROKER=redis
+        - export DATABASE=mysql
+    - <<: *test
+      name: "K8S, Redis & PostgreSQL"
+      before_install:
+        - export TARGET=k8s
+        - export BROKER=redis
+        - export DATABASE=postgresql
+    - <<: *test
+      name: "Docker, 'release' version"
+      before_install:
+        - export TARGET=docker
+        - export VERSION=release
+    - <<: *test
+      name: "Docker, 'dev' version"
+      before_install:
+        - export TARGET=docker
+        - export VERSION=dev
+
+
+    - &deploy
+      stage: deploy
+      install: '.github/travis/deploy/install.sh'
+      before_script: '.github/travis/deploy/before-script.sh'
+      script: '.github/travis/deploy/script.sh || export JOB_FAILED=true'
+      before_cache: echo "JOB_FAILER: $JOB_FAILED" #TODO: remove build specific Docker images from cache
+      env: # don't use environment variables in order to have a shared cache
+
+      name: "Deploy to Heroku"
+      before_install: export TARGET=heroku
+    - <<: *deploy
+      name: "Deploy to Docker Hub"
+      before_install: export TARGET=dockerhub
+
+
+    - &cleanup
+      stage: cleanup
+      install: '.github/travis/cleanup/install.sh'
+      before_script: '.github/travis/cleanup/before-script.sh'
+      script: '.github/travis/cleanup/script.sh'
+
+  allow_failures:
+    - name: "Static application security testing"
+  fast_finish: true
