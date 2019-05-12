@@ -290,7 +290,8 @@ class ImportScanForm(forms.Form):
                          ("DawnScanner Scan", "DawnScanner Scan"),
                          ("Anchore Engine Scan", "Anchore Engine Scan"),
                          ("Bundler-Audit Scan", "Bundler-Audit Scan"),
-                         ("Twistlock Image Scan", "Twistlock Image Scan"))
+                         ("Twistlock Image Scan", "Twistlock Image Scan"),
+                         ("Blackduck Hub Scan", "Blackduck Hub Scan"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
 
