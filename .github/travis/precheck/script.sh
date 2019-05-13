@@ -1,26 +1,26 @@
 #!/bin/bash
 
-source ../common-functions.bash
+source ${BASH_SOURCE%/*}/../common-functions.bash
+source ${BASH_SOURCE%/*}/../common-vars.bash
 
-# `set` flags:
-# -e: exit as soon as one command returns a non-zero exit code
-# -v: print all lines before executing them, to help identify which step failed
-set -ev
 
 function check_pr_targets {
+    : # Do nothing
 }
 
 
 function check_code_base_quality {
+    : # Do nothing
 }
 
 
 function check_unwanted_changes {
+    : # Do nothing
 }
 
 
 function check_sast {
-    exit 1 #FIXME: remove; only to demo allowed job failure
+    error_and_exit 'only to demo allowed job failure'
 }
 
 

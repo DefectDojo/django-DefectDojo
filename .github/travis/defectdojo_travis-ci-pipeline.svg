@@ -1,0 +1,1051 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="851.37897"
+   height="621.98859"
+   viewBox="0 0 225.26068 164.56781"
+   version="1.1"
+   id="svg8"
+   sodipodi:docname="defectdojo_travis-ci-pipeline.svg"
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)">
+  <title
+     id="title11281">DEFECTDOJO CI/CD DEVELOPMENT PIPEPELINE USING TRAVIS-CI</title>
+  <defs
+     id="defs2">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient11277">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop11273" />
+      <stop
+         style="stop-color:#000000;stop-opacity:0;"
+         offset="1"
+         id="stop11275" />
+    </linearGradient>
+    <marker
+       inkscape:stockid="Arrow2Lstart"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Lstart"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         id="path5813"
+         style="fill:#ff0000;fill-opacity:1;fill-rule:evenodd;stroke:#ff0000;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="matrix(1.1,0,0,1.1,1.1,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Lstart"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Lstart-8"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         id="path5813-5"
+         style="fill:#008000;fill-opacity:1;fill-rule:evenodd;stroke:#008000;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="matrix(1.1,0,0,1.1,1.1,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Lstart"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Lstart-8-9"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         id="path5813-5-9"
+         style="fill:#008000;fill-opacity:1;fill-rule:evenodd;stroke:#008000;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="matrix(1.1,0,0,1.1,1.1,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Lstart"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Lstart-8-9-0"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         id="path5813-5-9-2"
+         style="fill:#008000;fill-opacity:1;fill-rule:evenodd;stroke:#008000;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="matrix(1.1,0,0,1.1,1.1,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Lstart"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Lstart-8-9-9"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         id="path5813-5-9-0"
+         style="fill:#008000;fill-opacity:1;fill-rule:evenodd;stroke:#008000;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="matrix(1.1,0,0,1.1,1.1,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Lstart"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Lstart-8-2"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         id="path5813-5-0"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="matrix(1.1,0,0,1.1,1.1,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient11277"
+       id="linearGradient11279"
+       x1="2.9092629"
+       y1="161.53143"
+       x2="172.77177"
+       y2="161.53143"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1.2866043,0,0,1,-0.83380738,0)" />
+    <marker
+       inkscape:stockid="Arrow2Lstart"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Lstart-8-9-9-3"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         id="path5813-5-9-0-6"
+         style="fill:#008000;fill-opacity:1;fill-rule:evenodd;stroke:#008000;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="matrix(1.1,0,0,1.1,1.1,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="1"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.99999999"
+     inkscape:cx="296.87878"
+     inkscape:cy="281.79702"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     units="px"
+     width="600px"
+     inkscape:window-width="1366"
+     inkscape:window-height="719"
+     inkscape:window-x="0"
+     inkscape:window-y="25"
+     inkscape:window-maximized="1"
+     inkscape:pagecheckerboard="false"
+     fit-margin-bottom="5"
+     fit-margin-top="5"
+     fit-margin-left="5"
+     fit-margin-right="5">
+    <inkscape:grid
+       type="xygrid"
+       id="grid863"
+       originx="1.2579245"
+       originy="16.195405" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>DEFECTDOJO CI/CD DEVELOPMENT PIPEPELINE USING TRAVIS-CI</dc:title>
+        <dc:date>2019-05-12</dc:date>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>Piotr PAWLICKI</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <cc:license
+           rdf:resource="http://creativecommons.org/licenses/by-nc-sa/4.0/" />
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/licenses/by-nc-sa/4.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Notice" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Attribution" />
+        <cc:prohibits
+           rdf:resource="http://creativecommons.org/ns#CommercialUse" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#ShareAlike" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="GRID"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(1.2579246,-148.62758)"
+     style="display:inline">
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:end;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:end;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="27.502453"
+       y="190.17833"
+       id="text817-3"><tspan
+         sodipodi:role="line"
+         x="27.502453"
+         y="190.17833"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:end;writing-mode:lr-tb;text-anchor:end;stroke-width:0.26458332"
+         id="tspan819-3">PRE</tspan><tspan
+         sodipodi:role="line"
+         x="27.502453"
+         y="194.58806"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:end;writing-mode:lr-tb;text-anchor:end;stroke-width:0.26458332"
+         id="tspan4938">CHECKS</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:end;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:end;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="27.50791"
+       y="214.5488"
+       id="text817-3-8"><tspan
+         sodipodi:role="line"
+         x="27.50791"
+         y="214.5488"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:end;writing-mode:lr-tb;text-anchor:end;stroke-width:0.26458332"
+         id="tspan4940">BUILD</tspan><tspan
+         sodipodi:role="line"
+         x="27.50791"
+         y="218.95853"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:end;writing-mode:lr-tb;text-anchor:end;stroke-width:0.26458332"
+         id="tspan4944">IMAGES</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:end;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:end;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="27.50802"
+       y="242.94969"
+       id="text817-3-8-1"><tspan
+         sodipodi:role="line"
+         x="27.50802"
+         y="242.94969"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:end;writing-mode:lr-tb;text-anchor:end;stroke-width:0.26458332"
+         id="tspan819-3-5-0">INTEGRATION</tspan><tspan
+         sodipodi:role="line"
+         x="27.50802"
+         y="247.35942"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:end;writing-mode:lr-tb;text-anchor:end;stroke-width:0.26458332"
+         id="tspan5544">TESTS</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:end;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:end;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="27.398438"
+       y="269.2774"
+       id="text817-3-8-1-8"><tspan
+         sodipodi:role="line"
+         x="27.398439"
+         y="269.2774"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:end;writing-mode:lr-tb;text-anchor:end;stroke-width:0.26458332"
+         id="tspan4946">PROMOTE</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:end;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:end;fill:#666666;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="27.490379"
+       y="175.99226"
+       id="text817-3-6"><tspan
+         sodipodi:role="line"
+         x="27.490379"
+         y="175.99226"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:end;writing-mode:lr-tb;text-anchor:end;fill:#666666;stroke-width:0.26458332"
+         id="tspan4737">Stages</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#333333;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="2.8872666"
+       y="306.8475"
+       id="text817-3-6-5"><tspan
+         sodipodi:role="line"
+         x="2.8872666"
+         y="306.8475"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:FreeSans;-inkscape-font-specification:FreeSans;text-align:start;text-anchor:start;fill:#333333;stroke-width:0.26458332"
+         id="tspan4737-8">Stages are run sequentially</tspan><tspan
+         sodipodi:role="line"
+         x="2.8872666"
+         y="311.25723"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:FreeSans;-inkscape-font-specification:FreeSans;text-align:start;text-anchor:start;fill:#333333;stroke-width:0.26458332"
+         id="tspan4764">Jobs within stages are run in parallel</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#666666;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="35.812737"
+       y="175.94994"
+       id="text817-3-6-0"><tspan
+         sodipodi:role="line"
+         x="35.812737"
+         y="175.94994"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:center;text-anchor:middle;fill:#666666;stroke-width:0.26458332"
+         id="tspan4737-4">Jobs</tspan></text>
+    <g
+       id="build-fail"
+       transform="translate(63.500033,20.309846)">
+      <rect
+         style="fill:#ffffff;stroke:#000000;stroke-width:0.19699268;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0"
+         id="rect5202-4"
+         width="22.693796"
+         height="6.6586928"
+         x="136.38751"
+         y="284.67484"
+         ry="3.3293464" />
+      <text
+         id="text817-8"
+         y="289.24948"
+         x="147.70712"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         xml:space="preserve"><tspan
+           id="tspan819-0"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:center;text-anchor:middle;fill:#ff0000;stroke-width:0.26458332"
+           y="289.24948"
+           x="147.70712"
+           sodipodi:role="line"><tspan
+   style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:center;text-anchor:middle;fill:#000000;stroke-width:0.26458332"
+   id="tspan5198">Build </tspan>fail</tspan></text>
+    </g>
+    <path
+       style="fill:#ff0000;stroke:#ff0000;stroke-width:0.26458332;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:1;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#Arrow2Lstart)"
+       d="m 211.4021,304.29478 v -112.9939 0 0"
+       id="path5793"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccc" />
+    <path
+       style="fill:none;stroke:#ff0000;stroke-width:0.26458332;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:1;stroke-dasharray:none;stroke-opacity:1"
+       d="m 204.72118,191.16667 h 6.81299"
+       id="path6803"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;stroke:#ff0000;stroke-width:0.26458332;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:1;stroke-dasharray:none;stroke-opacity:1"
+       d="m 204.72118,216.80878 h 6.81299"
+       id="path6803-0"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;stroke:#ff0000;stroke-width:0.26458332;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:1;stroke-dasharray:none;stroke-opacity:1"
+       d="m 204.72118,245.49766 h 6.81299"
+       id="path6803-0-3"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;stroke:#ff0000;stroke-width:0.26458332;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:1;stroke-dasharray:none;stroke-opacity:1"
+       d="m 204.72118,271.75714 h 6.81299"
+       id="path6803-0-5"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc" />
+    <g
+       id="build-success"
+       transform="translate(0,17.991672)">
+      <path
+         inkscape:connector-curvature="0"
+         id="path4589-6-7"
+         d="M 31.750002,282.18336 H 201.61246"
+         style="fill:none;stroke:#000000;stroke-width:0.26458332;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:1;stroke-dasharray:0.26458332, 0.26458332;stroke-dashoffset:0;stroke-opacity:1" />
+      <g
+         transform="translate(37.570815,2.3181858)"
+         id="g5223">
+        <rect
+           style="fill:#ffffff;stroke:#000000;stroke-width:0.26458332;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0"
+           id="rect5202-7"
+           width="31.254417"
+           height="6.6481681"
+           x="63.483204"
+           y="284.68008"
+           ry="3.324084" />
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+           x="79.032166"
+           y="289.24948"
+           id="text817-8-2"><tspan
+             sodipodi:role="line"
+             x="79.032166"
+             y="289.24948"
+             style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:center;text-anchor:middle;fill:#008000;stroke-width:0.26458332"
+             id="tspan819-0-7"><tspan
+   id="tspan5196"
+   style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:center;text-anchor:middle;fill:#000000;stroke-width:0.26458332">Build </tspan>success</tspan></text>
+      </g>
+      <path
+         inkscape:connector-curvature="0"
+         id="path5793-0"
+         d="m 116.67657,286.39741 v -5.5029 0 0"
+         style="fill:#008000;stroke:#008000;stroke-width:0.26458332;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:1;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#Arrow2Lstart-8)" />
+    </g>
+    <g
+       id="g11184"
+       transform="translate(0,-0.79374999)">
+      <path
+         inkscape:connector-curvature="0"
+         id="path4589-6-1"
+         d="M 31.75002,202.80818 H 201.61249"
+         style="fill:none;stroke:#000000;stroke-width:0.26458332;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:1;stroke-dasharray:0.26458332, 0.26458332;stroke-dashoffset:0;stroke-opacity:1" />
+      <path
+         inkscape:connector-curvature="0"
+         id="path5793-0-8"
+         d="m 116.67657,204.0464 v -2.50288 0 0"
+         style="fill:#008000;stroke:#008000;stroke-width:0.26458332;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:1;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#Arrow2Lstart-8-9)" />
+    </g>
+    <g
+       id="g11174"
+       transform="translate(0,-1.3229167)">
+      <path
+         inkscape:connector-curvature="0"
+         id="path4589-6"
+         d="M 31.750002,229.2666 H 201.61248"
+         style="fill:none;stroke:#000000;stroke-width:0.26458332;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:1;stroke-dasharray:0.26458332, 0.26458332;stroke-dashoffset:0;stroke-opacity:1" />
+      <path
+         inkscape:connector-curvature="0"
+         id="path5793-0-8-4"
+         d="m 116.67657,230.54348 v -2.50288 0 0"
+         style="fill:#008000;stroke:#008000;stroke-width:0.26458332;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:1;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#Arrow2Lstart-8-9-0)" />
+    </g>
+    <g
+       id="g11164"
+       transform="translate(0,-0.26458333)">
+      <path
+         inkscape:connector-curvature="0"
+         id="path4589-6-5"
+         d="M 31.750012,259.69373 H 201.61247"
+         style="fill:none;stroke:#000000;stroke-width:0.26458332;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:1;stroke-dasharray:0.26458332, 0.26458332;stroke-dashoffset:0;stroke-opacity:1" />
+      <path
+         inkscape:connector-curvature="0"
+         id="path5793-0-8-1"
+         d="m 116.67657,260.89322 v -2.50288 0 0"
+         style="fill:#008000;stroke:#008000;stroke-width:0.26458332;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:1;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#Arrow2Lstart-8-9-9)" />
+    </g>
+    <g
+       id="build-start">
+      <path
+         inkscape:connector-curvature="0"
+         id="path4589"
+         d="M 31.750002,179.52478 H 201.61251"
+         style="fill:none;stroke:#000000;stroke-width:0.26458332;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:1;stroke-dasharray:0.26458332, 0.26458332;stroke-dashoffset:0;stroke-opacity:1" />
+      <g
+         transform="translate(36.557158,-25.400009)"
+         id="g5228">
+        <rect
+           style="fill:#ffffff;stroke:#000000;stroke-width:0.20677772;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0"
+           id="rect5202"
+           width="25.004288"
+           height="6.6586928"
+           x="67.621941"
+           y="192.99669"
+           ry="3.3293464" />
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#006680;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+           x="80.035698"
+           y="197.57133"
+           id="text817"><tspan
+             sodipodi:role="line"
+             x="80.035698"
+             y="197.57133"
+             style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:center;text-anchor:middle;fill:#006680;fill-opacity:1;stroke-width:0.26458332"
+             id="tspan819"><tspan
+   id="tspan5542"
+   style="fill:#000000">Build </tspan>start</tspan></text>
+      </g>
+      <path
+         inkscape:connector-curvature="0"
+         id="path5793-0-0"
+         d="m 116.67657,179.87918 v -5.5029 0 0"
+         style="fill:#000000;stroke:#000000;stroke-width:0.26458332;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:1;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#Arrow2Lstart-8-2)" />
+    </g>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="194.65666"
+       y="-213.3981"
+       id="text817-3-6-5-6"
+       transform="rotate(90)"><tspan
+         sodipodi:role="line"
+         x="194.65666"
+         y="-213.3981"
+         style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222247px;font-family:FreeSans;-inkscape-font-specification:'FreeSans Italic';text-align:start;text-anchor:start;fill:#ff0000;stroke-width:0.26458332"
+         id="tspan4764-9">A failure in a job, unless the job is allowed to fail, fails the stage, which fails the build</tspan></text>
+    <image
+       y="149.9505"
+       x="0.064992093"
+       id="image11224"
+       xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAADfsAAAJOCAYAAAC6fjxOAAAABHNCSVQICAgIfAhkiAAAIABJREFU eJzs3TFOFHEYxuFvJsSKIyCx0z2FY88B3I5DoC1jix6Cbu0ltq6n2NgRoLAXO7NjY2FiDLJLfBnm eU7wNt9/siS/UAUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwG+a9AC4ye7BUVfVdtkVQMr1 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 AAAAAAAAAAAAAEBM7AcAAAAAAAAAAAAAAAAAMbEfAAAAAAAAAAAAAAAAAMTEfgAAAAAAAAAAAAAA AAAQE/sBAAAAAAAAAAAAAAAAQEzsBwAAAAAAAAAAAAAAAAAxsR8AAAAAAAAAAAAAAAAAxMR+AAAA AAAAAAAAAAAAABAT+wEAAAAAAAAAAAAAAABATOwHAAAAAAAAAAAAAAAAADGxHwAAAAAAAAAAAAAA AADExH4AAAAAAAAAAAAAAAAAEBP7AQAAAAAAAAAAAAAAAEBM7AcAAAAAAAAAAAAAAAAAMbEfAAAA AAAAAAAAAAAAAMTEfgAAAAAAAAAAAAAAAAAQE/sBAAAAAAAAAAAAAAAAQEzsBwAAAAAAAAAAAAAA AAAxsR8AAAAAAAAAAAAAAAAAxMR+AAAAAAAAAAAAAAAAABAT+wEAAAAAAAAAAAAAAABATOwHAAAA AAAAAAAAAAAAADGxHwAAAAAAAAAAAAAAAADExH4AAAAAAAAAAAAAAAAAEBP7AQAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACypAvuAAAF1klEQVQAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAPBne3BIAAAAACDo/2tX2AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AABgFSkKFH9zPHPQAAAAAElFTkSuQmCC "
+       preserveAspectRatio="none"
+       height="9.9934158"
+       width="60.621086" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:end;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:end;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="64.713875"
+       y="157.30756"
+       id="text817-3-83"><tspan
+         sodipodi:role="line"
+         x="64.713875"
+         y="157.30756"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:5.29166651px;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332"
+         id="tspan4938-7">CI/CD DEVELOPMENT PIPELINE USING TRAVIS-CI</tspan></text>
+    <path
+       inkscape:connector-curvature="0"
+       id="path4589-9"
+       d="M 2.9092629,161.53143 H 221.4551"
+       style="fill:none;fill-opacity:1;stroke:url(#linearGradient11279);stroke-width:0.26458332;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:1;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+    <g
+       style="display:inline"
+       id="g11164-7"
+       transform="translate(-1e-5,18.748851)">
+      <path
+         inkscape:connector-curvature="0"
+         id="path4589-6-5-5"
+         d="M 31.750012,259.69373 H 201.61247"
+         style="fill:none;stroke:#000000;stroke-width:0.26458332;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:1;stroke-dasharray:0.26458332, 0.26458332;stroke-dashoffset:0;stroke-opacity:1" />
+      <path
+         inkscape:connector-curvature="0"
+         id="path5793-0-8-1-3"
+         d="m 116.67657,260.89322 v -2.50288 0 0"
+         style="fill:#008000;stroke:#008000;stroke-width:0.26458332;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:1;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#Arrow2Lstart-8-9-9-3)" />
+    </g>
+    <path
+       style="display:inline;fill:none;stroke:#ff0000;stroke-width:0.26458332;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:1;stroke-dasharray:none;stroke-opacity:1"
+       d="m 204.72118,291.10271 h 6.81299"
+       id="path6803-0-5-7"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:end;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:end;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="27.398438"
+       y="289.06183"
+       id="text817-3-8-1-8-0"><tspan
+         sodipodi:role="line"
+         x="27.398438"
+         y="289.06183"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:end;writing-mode:lr-tb;text-anchor:end;stroke-width:0.26458332"
+         id="tspan4946-9">DEPLOY</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;display:inline;fill:#333333;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="27.480722"
+       y="272.83475"
+       id="text817-3-6-5-3"><tspan
+         sodipodi:role="line"
+         x="27.480722"
+         y="272.83475"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:FreeSans;-inkscape-font-specification:FreeSans;text-align:end;text-anchor:end;fill:#333333;stroke-width:0.26458332"
+         id="tspan4764-7">(conditional)</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;display:inline;fill:#333333;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="27.584738"
+       y="292.75821"
+       id="text817-3-6-5-3-5"><tspan
+         sodipodi:role="line"
+         x="27.584738"
+         y="292.75821"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:FreeSans;-inkscape-font-specification:FreeSans;text-align:end;text-anchor:end;fill:#333333;stroke-width:0.26458332"
+         id="tspan4764-7-3">(conditional)</tspan></text>
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="JOBS"
+     style="display:inline"
+     transform="translate(1.2579246,0.20575565)">
+    <g
+       style="display:inline"
+       id="job-sast"
+       transform="translate(76.127785,-176.25838)">
+      <rect
+         ry="1.3193936"
+         y="211.18333"
+         x="91.983337"
+         height="11.214829"
+         width="32.116913"
+         id="rect4802"
+         style="fill:#ffffff;stroke:#536c67;stroke-width:0.26458332;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:0.26458333, 1.05833333;stroke-dashoffset:0" />
+      <text
+         id="text817-3-1"
+         y="215.41141"
+         x="94.606041"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#536c67;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         xml:space="preserve"><tspan
+           id="tspan819-3-1"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.82222223px;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:start;text-anchor:start;fill:#536c67;stroke-width:0.26458332"
+           y="215.41141"
+           x="94.606041"
+           sodipodi:role="line">SAST <tspan
+   id="tspan4830"
+   style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:FreeSans;-inkscape-font-specification:'FreeSans Italic'">(allowed to fail)</tspan></tspan></text>
+      <text
+         id="text817-3-1-3"
+         y="219.65604"
+         x="94.560883"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#536c67;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         xml:space="preserve"><tspan
+           id="tspan819-3-1-5"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:FreeSans;-inkscape-font-specification:FreeSans;text-align:start;text-anchor:start;fill:#536c67;stroke-width:0.26458332"
+           y="219.65604"
+           x="94.560883"
+           sodipodi:role="line">- run Snyk checks</tspan></text>
+    </g>
+    <g
+       style="display:inline"
+       id="job-code_base_quality"
+       transform="translate(1.4554404,-139.77978)">
+      <rect
+         ry="1.3209481"
+         y="174.70473"
+         x="86.064102"
+         height="11.228043"
+         width="28.955126"
+         id="rect4802-3"
+         style="fill:#ffffff;stroke:#006680;stroke-width:0.26458332;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0" />
+      <text
+         id="text817-3-1-5"
+         y="178.93941"
+         x="88.693413"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#006680;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         xml:space="preserve"><tspan
+           id="tspan819-3-1-0"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.82222223px;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:start;text-anchor:start;fill:#006680;stroke-width:0.26458332"
+           y="178.93941"
+           x="88.693413"
+           sodipodi:role="line">Code base quality</tspan></text>
+      <text
+         id="text817-3-1-3-5"
+         y="183.18404"
+         x="88.648254"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#006680;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         xml:space="preserve"><tspan
+           id="tspan819-3-1-5-6"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:FreeSans;-inkscape-font-specification:FreeSans;text-align:start;text-anchor:start;fill:#006680;stroke-width:0.26458332"
+           y="183.18404"
+           x="88.648254"
+           sodipodi:role="line">- run Flake8 checks</tspan></text>
+    </g>
+    <g
+       style="display:inline"
+       id="job-unwanted_changes"
+       transform="translate(32.490806,-139.8162)">
+      <rect
+         ry="1.3123775"
+         y="174.74115"
+         x="86.100533"
+         height="11.155191"
+         width="47.403111"
+         id="rect4802-3-0"
+         style="fill:#ffffff;stroke:#006680;stroke-width:0.26458332;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0" />
+      <text
+         id="text817-3-1-5-9"
+         y="178.93941"
+         x="88.693413"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#006680;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         xml:space="preserve"><tspan
+           id="tspan819-3-1-0-9"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.82222223px;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:start;text-anchor:start;fill:#006680;stroke-width:0.26458332"
+           y="178.93941"
+           x="88.693413"
+           sodipodi:role="line">Unwanted changes</tspan></text>
+      <text
+         id="text817-3-1-3-5-7"
+         y="183.18404"
+         x="88.648254"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#006680;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         xml:space="preserve"><tspan
+           id="tspan819-3-1-5-6-6"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:FreeSans;-inkscape-font-specification:FreeSans;text-align:start;text-anchor:start;fill:#006680;stroke-width:0.26458332"
+           y="183.18404"
+           x="88.648254"
+           sodipodi:role="line">- check DB migrations files integrity</tspan></text>
+    </g>
+    <g
+       style="display:inline"
+       id="job-docker_images"
+       transform="translate(39.290619,-107.69063)">
+      <rect
+         ry="2.1109638"
+         y="164.99718"
+         x="52.014874"
+         height="17.943167"
+         width="50.751499"
+         id="rect4802-3-1"
+         style="fill:#ffffff;stroke:#006680;stroke-width:0.26458332;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0" />
+      <text
+         id="text817-3-1-5-7"
+         y="169.14983"
+         x="54.562164"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#006680;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         xml:space="preserve"><tspan
+           id="tspan819-3-1-0-6"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.82222223px;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:start;text-anchor:start;fill:#006680;stroke-width:0.26458332"
+           y="169.14983"
+           x="54.562164"
+           sodipodi:role="line">Docker images</tspan></text>
+      <text
+         id="text817-3-1-3-5-5"
+         y="173.39445"
+         x="54.517006"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#006680;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         xml:space="preserve"><tspan
+           id="tspan819-3-1-5-6-0"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:FreeSans;-inkscape-font-specification:FreeSans;text-align:start;text-anchor:start;fill:#006680;stroke-width:0.26458332"
+           y="173.39445"
+           x="54.517006"
+           sodipodi:role="line">- build defectdojo/defectdojo-django</tspan></text>
+      <text
+         id="text817-3-1-3-5-5-6"
+         y="176.95465"
+         x="54.517006"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#006680;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         xml:space="preserve"><tspan
+           id="tspan819-3-1-5-6-0-5"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:FreeSans;-inkscape-font-specification:FreeSans;text-align:start;text-anchor:start;fill:#006680;stroke-width:0.26458332"
+           y="176.95465"
+           x="54.517006"
+           sodipodi:role="line">- build defectdojo/defectdojo-nginx</tspan></text>
+      <text
+         id="text817-3-1-3-5-5-6-0"
+         y="180.51485"
+         x="54.517006"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#006680;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         xml:space="preserve"><tspan
+           id="tspan819-3-1-5-6-0-5-8"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:FreeSans;-inkscape-font-specification:FreeSans;text-align:start;text-anchor:start;fill:#006680;stroke-width:0.26458332"
+           y="180.51485"
+           x="54.517006"
+           sodipodi:role="line">- export Docker images to build cache</tspan></text>
+    </g>
+    <g
+       style="display:inline"
+       id="job-docker_hub"
+       transform="translate(-37.757941,-51.351565)">
+      <rect
+         ry="1.3116312"
+         y="165.48392"
+         x="129.75995"
+         height="11.148849"
+         width="48.984264"
+         id="rect4802-3-6-4"
+         style="fill:#ffffff;stroke:#006680;stroke-width:0.26458332;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0" />
+      <text
+         id="text817-3-1-5-2-2"
+         y="169.679"
+         x="132.34967"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#006680;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         xml:space="preserve"><tspan
+           id="tspan819-3-1-0-2-7"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.82222223px;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:start;text-anchor:start;fill:#006680;stroke-width:0.26458332"
+           y="169.679"
+           x="132.34967"
+           sodipodi:role="line">Docker Hub</tspan></text>
+      <text
+         id="text817-3-1-3-5-9-0"
+         y="173.92363"
+         x="132.3045"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#006680;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         xml:space="preserve"><tspan
+           id="tspan819-3-1-5-6-1-3"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:FreeSans;-inkscape-font-specification:FreeSans;text-align:start;text-anchor:start;fill:#006680;stroke-width:0.26458332"
+           y="173.92363"
+           x="132.3045"
+           sodipodi:role="line">- push Docker images to Docker Hub</tspan></text>
+    </g>
+    <g
+       style="display:inline"
+       id="job-heroku"
+       transform="translate(41.623423,-33.955704)">
+      <rect
+         ry="1.7317343"
+         y="166.6089"
+         x="39.074512"
+         height="14.71972"
+         width="71.340553"
+         id="rect4802-3-6"
+         style="fill:#ffffff;stroke:#006680;stroke-width:0.26458332;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0" />
+      <text
+         id="text817-3-1-5-2"
+         y="170.73734"
+         x="41.59758"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#006680;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         xml:space="preserve"><tspan
+           id="tspan819-3-1-0-2"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.82222223px;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:start;text-anchor:start;fill:#006680;stroke-width:0.26458332"
+           y="170.73734"
+           x="41.59758"
+           sodipodi:role="line">Heroku</tspan></text>
+      <text
+         id="text817-3-1-3-5-9"
+         y="174.98196"
+         x="41.552422"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#006680;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         xml:space="preserve"><tspan
+           id="tspan819-3-1-5-6-1"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:FreeSans;-inkscape-font-specification:FreeSans;text-align:start;text-anchor:start;fill:#006680;stroke-width:0.26458332"
+           y="174.98196"
+           x="41.552422"
+           sodipodi:role="line">- push defectdojo/defectdojo-django to Heroku registry</tspan></text>
+      <text
+         id="text817-3-1-3-5-9-2"
+         y="178.66284"
+         x="41.552422"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#006680;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         xml:space="preserve"><tspan
+           id="tspan819-3-1-5-6-1-8"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:FreeSans;-inkscape-font-specification:FreeSans;text-align:start;text-anchor:start;fill:#006680;stroke-width:0.26458332"
+           y="178.66284"
+           x="41.552422"
+           sodipodi:role="line">- update DefectDojo demo site on Heroku</tspan></text>
+    </g>
+    <g
+       style="display:inline"
+       id="job-pr_targets"
+       transform="translate(-5.1881433,-131.66426)">
+      <rect
+         ry="1.7363698"
+         y="166.5892"
+         x="39.05481"
+         height="14.759123"
+         width="51.536205"
+         id="rect4802-3-6-6"
+         style="fill:#ffffff;stroke:#006680;stroke-width:0.26458332;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0" />
+      <text
+         id="text817-3-1-5-2-6"
+         y="170.73734"
+         x="41.59758"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#006680;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         xml:space="preserve"><tspan
+           id="tspan819-3-1-0-2-0"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.82222223px;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:start;text-anchor:start;fill:#006680;stroke-width:0.26458332"
+           y="170.73734"
+           x="41.59758"
+           sodipodi:role="line">Pull request targets</tspan></text>
+      <text
+         id="text817-3-1-3-5-9-4"
+         y="174.98196"
+         x="41.552422"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#006680;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         xml:space="preserve"><tspan
+           id="tspan819-3-1-5-6-1-9"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:FreeSans;-inkscape-font-specification:FreeSans;text-align:start;text-anchor:start;fill:#006680;stroke-width:0.26458332"
+           y="174.98196"
+           x="41.552422"
+           sodipodi:role="line">- check PR from a fork is made to 'dev'</tspan></text>
+      <text
+         id="text817-3-1-3-5-9-2-9"
+         y="178.66284"
+         x="41.552422"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#006680;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         xml:space="preserve"><tspan
+           id="tspan819-3-1-5-6-1-8-0"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:FreeSans;-inkscape-font-specification:FreeSans;text-align:start;text-anchor:start;fill:#006680;stroke-width:0.26458332"
+           y="178.66284"
+           x="41.552422"
+           sodipodi:role="line">- check PR to 'master' is from 'dev'</tspan></text>
+    </g>
+    <g
+       style="display:inline"
+       id="jobs-k8s_helm_matrix"
+       transform="translate(119.07013,-81.100011)">
+      <rect
+         ry="2.5202568"
+         y="163.83107"
+         x="-73.769112"
+         height="21.42215"
+         width="65.995987"
+         id="rect4802-3-1-3-3-5-8-3-7"
+         style="fill:#ffffff;stroke:#006680;stroke-width:0.26458332;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0" />
+      <rect
+         ry="2.5202568"
+         y="164.89656"
+         x="-74.435921"
+         height="21.42215"
+         width="65.995987"
+         id="rect4802-3-1-3-3-5-8-3"
+         style="fill:#ffffff;stroke:#006680;stroke-width:0.26458332;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0" />
+      <rect
+         ry="2.5202568"
+         y="165.99092"
+         x="-75.115646"
+         height="21.42215"
+         width="65.995987"
+         id="rect4802-3-1-3-3-5-8-3-1"
+         style="fill:#ffffff;stroke:#006680;stroke-width:0.26458332;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0" />
+      <g
+         transform="translate(-19.878212,32.553756)"
+         id="g5701">
+        <rect
+           style="fill:#ffffff;stroke:#006680;stroke-width:0.26458332;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0"
+           id="rect4802-3-1-3-3-5-8"
+           width="65.995987"
+           height="21.42215"
+           x="-55.898888"
+           y="134.4955"
+           ry="2.5202568" />
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#006680;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+           x="-53.383938"
+           y="138.61581"
+           id="text817-3-1-5-7-4-1-7-6"><tspan
+             sodipodi:role="line"
+             x="-53.383938"
+             y="138.61581"
+             style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.82222223px;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:start;text-anchor:start;fill:#006680;stroke-width:0.26458332"
+             id="tspan819-3-1-0-6-4-8-1-7">K8S Helm BROKER^DATABASE (4)</tspan></text>
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#006680;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+           x="-53.429096"
+           y="142.86044"
+           id="text817-3-1-3-5-5-8-4-6-0"><tspan
+             sodipodi:role="line"
+             x="-53.429096"
+             y="142.86044"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:FreeSans;-inkscape-font-specification:FreeSans;text-align:start;text-anchor:start;fill:#006680;stroke-width:0.26458332"
+             id="tspan819-3-1-5-6-0-6-2-9-4">- load Docker images from build cache</tspan></text>
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#006680;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+           x="-53.429096"
+           y="146.42064"
+           id="text817-3-1-3-5-5-6-08-2-8-8"><tspan
+             sodipodi:role="line"
+             x="-53.429096"
+             y="146.42064"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:FreeSans;-inkscape-font-specification:FreeSans;text-align:start;text-anchor:start;fill:#006680;stroke-width:0.26458332"
+             id="tspan819-3-1-5-6-0-5-9-4-1-4">- install minikube, kubectl and helm</tspan></text>
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#006680;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+           x="-53.429096"
+           y="149.98083"
+           id="text817-3-1-3-5-5-6-0-2-5-3-8"><tspan
+             sodipodi:role="line"
+             x="-53.429096"
+             y="149.98083"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:FreeSans;-inkscape-font-specification:FreeSans;text-align:start;text-anchor:start;fill:#006680;stroke-width:0.26458332"
+             id="tspan819-3-1-5-6-0-5-8-2-1-3-1">- helm install BROKER &amp; DATABASE combination</tspan></text>
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#006680;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+           x="-53.429096"
+           y="153.55185"
+           id="text817-3-1-3-5-5-6-0-2-5-3-8-7"><tspan
+             sodipodi:role="line"
+             x="-53.429096"
+             y="153.55185"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:FreeSans;-inkscape-font-specification:FreeSans;text-align:start;text-anchor:start;fill:#006680;stroke-width:0.26458332"
+             id="tspan819-3-1-5-6-0-5-8-2-1-3-1-7">- run integration tests on combination</tspan></text>
+      </g>
+    </g>
+    <g
+       style="display:inline"
+       id="jobs-docker_matrix"
+       transform="translate(61.026813,-81.712651)">
+      <rect
+         ry="2.1108122"
+         y="166.53616"
+         x="61.755955"
+         height="17.941877"
+         width="51.279377"
+         id="rect4802-3-1-3-3"
+         style="fill:#ffffff;stroke:#006680;stroke-width:0.26458332;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0" />
+      <g
+         transform="translate(8.6821039,2.5966859)"
+         id="g5030-2-3-7">
+        <rect
+           style="fill:#ffffff;stroke:#006680;stroke-width:0.26458332;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0"
+           id="rect4802-3-1-3-3-5"
+           width="51.279377"
+           height="17.941877"
+           x="52.015518"
+           y="164.99782"
+           ry="2.1108122" />
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#006680;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+           x="54.562164"
+           y="169.14983"
+           id="text817-3-1-5-7-4-1-7"><tspan
+             sodipodi:role="line"
+             x="54.562164"
+             y="169.14983"
+             style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.82222223px;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:start;text-anchor:start;fill:#006680;stroke-width:0.26458332"
+             id="tspan819-3-1-0-6-4-8-1">Docker 'release' | 'dev' version (2)</tspan></text>
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#006680;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+           x="54.517006"
+           y="173.39445"
+           id="text817-3-1-3-5-5-8-4-6"><tspan
+             sodipodi:role="line"
+             x="54.517006"
+             y="173.39445"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:FreeSans;-inkscape-font-specification:FreeSans;text-align:start;text-anchor:start;fill:#006680;stroke-width:0.26458332"
+             id="tspan819-3-1-5-6-0-6-2-9">- load Docker images from build cache</tspan></text>
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#006680;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+           x="54.517006"
+           y="176.95465"
+           id="text817-3-1-3-5-5-6-08-2-8"><tspan
+             sodipodi:role="line"
+             x="54.517006"
+             y="176.95465"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:FreeSans;-inkscape-font-specification:FreeSans;text-align:start;text-anchor:start;fill:#006680;stroke-width:0.26458332"
+             id="tspan819-3-1-5-6-0-5-9-4-1">- docker-compose relase | dev</tspan></text>
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#006680;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+           x="54.517006"
+           y="180.51485"
+           id="text817-3-1-3-5-5-6-0-2-5-3"><tspan
+             sodipodi:role="line"
+             x="54.517006"
+             y="180.51485"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222223px;font-family:FreeSans;-inkscape-font-specification:FreeSans;text-align:start;text-anchor:start;fill:#006680;stroke-width:0.26458332"
+             id="tspan819-3-1-5-6-0-5-8-2-1-3">- run integration tests</tspan></text>
+      </g>
+    </g>
+  </g>
+</svg>

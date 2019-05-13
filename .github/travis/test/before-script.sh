@@ -1,21 +1,19 @@
 #!/bin/bash
 
-source ../common-functions.bash
+source ${BASH_SOURCE%/*}/../common-functions.bash
+source ${BASH_SOURCE%/*}/../common-vars.bash
 
-# `set` flags:
-# -e: exit as soon as one command returns a non-zero exit code
-# -v: print all lines before executing them, to help identify which step failed
-set -ev
 
 function target_k8s {
-    export K8S_VERSION=v1.13.4
-    export MINIKUBE_VERSION=v0.35.0
-    export HELM_VERSION=v2.13.0
-    export CHANGE_MINIKUBE_NONE_USER=true
+    echo $K8S_VERSION
+    echo $MINIKUBE_VERSION
+    echo $HELM_VERSION
+    echo $CHANGE_MINIKUBE_NONE_USER
 }
 
 
 function target_docker {
+    : # Do nothing
 }
 
 

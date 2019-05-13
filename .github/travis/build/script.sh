@@ -1,26 +1,32 @@
 #!/bin/bash
 
-source ../common-functions.bash
+source ${BASH_SOURCE%/*}/../common-functions.bash
+source ${BASH_SOURCE%/*}/../common-vars.bash
 
-# `set` flags:
-# -e: exit as soon as one command returns a non-zero exit code
-# -v: print all lines before executing them, to help identify which step failed
-set -ev
 
-function build_containers {
-  # Build Docker images
-  travis_fold start docker_image_build
-  DOCKER_IMAGES=(django nginx)
-  for docker_image in "${DOCKER_IMAGES[@]}"
-  do
-    docker build \
-      --tag "defectdojo/defectdojo-${docker_image}:{TRAVIS_BUILD_NUMBER}" \
-      --file "Dockerfile.${docker_image}" \
-      .
-    $? || error_and_exit "cannot build '${docker_image}' image"
-  done
-  travis_fold end docker_image_build
+function build_docker_images {
+    for docker_image in ${DOCKER_IMAGES[@]}
+    do
+	local image_repo="${DOCKER_USER}/${IMAGE_PREFIX}-${docker_image}"
+	local build_tag="travis-${TRAVIS_BUILD_NUMBER}"
+
+	travis_fold start docker_build.${docker_image}
+	echo_info "building 'Dockerfile.${docker_image}'..."
+	docker build \
+	       --tag "${image_repo}:${build_tag}" \
+	       --file "Dockerfile.${docker_image}" \
+	       ${PWD}
+
+	return_value=${?}
+	travis_fold end docker_build.${docker_image}
+
+	[ ${return_value} -ne 0 ] &&
+	    error_and_exit "cannot build '${docker_image}' image."
+
+	echo_success "building '${docker_image}' image done."
+    done
+    return 0
 }
 
 
-build_containers
+run_or_die build_docker_images

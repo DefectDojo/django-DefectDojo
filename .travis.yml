@@ -5,8 +5,8 @@ stages:
   - prechecks
   - build and cache
   - integration tests
+  - promote and clean up cache
   - deploy
-  - cleanup
 
 env:
   global: DOCKER_CACHE=${HOME}/docker-images
@@ -18,10 +18,11 @@ jobs:
   include:
     - &precheck
       stage: prechecks
+      if: tag IS blank # Ignore tag commits
       install: '.github/travis/precheck/install.sh'
       before_script: '.github/travis/precheck/before-script.sh'
       script: '.github/travis/precheck/script.sh'
-      env: # don't use environment variables in order to have a shared cache
+      cache: # don't use any cache for precheck stage to execute faster
 
       name: "Pull request targets"
       before_install: export CHECK=pr_targets
@@ -38,22 +39,49 @@ jobs:
 
     - &build
       stage: build and cache
+      if: (type = pull_request) AND (tag IS blank) # Ignore tag commits
       name: "Build and cache Docker images"
       services: docker
-      install: '.github/travis/build/install.sh'
+      install:
+        - ls -lah ${DOCKER_CACHE}
+        - '.github/travis/build/install.sh'
       before_script: '.github/travis/build/before-script.sh'
-      script: '.github/travis/build/script.sh || export JOB_FAILED=true'
-      before_cache: echo "JOB_FAILER: $JOB_FAILED" #TODO: export Docker images, tag with TRAVIS_BUILD_NUMBER
+      script: '.github/travis/build/script.sh'
+      before_cache:
+        - docker images --all
+        - >
+          test ${TRAVIS_TEST_RESULT} -eq 0
+          && .github/travis/cache-operations.sh save
+          || .github/travis/cache-operations.sh clean
       env: # don't use environment variables in order to have a shared cache
+
+    - <<: *build
+      if: (type != pull_request) AND (tag IS blank) # Ignore tag commits
+      name: "Build and cache Docker images (including 'builder')"
+      before_cache:
+        - docker images --all
+        - >
+          test ${TRAVIS_TEST_RESULT} -eq 0
+          && .github/travis/cache-operations.sh save all
+          || .github/travis/cache-operations.sh clean
 
 
     - &test
       stage: integration tests
+      if: tag IS blank # Do nothing for tag commits
       services: docker
-      install: '.github/travis/test/install.sh' #TODO: load Docker images
+      install:
+        - ls -lah ${DOCKER_CACHE}
+        - '.github/travis/cache-operations.sh load'
+        - docker images --all
+        - '.github/travis/test/install.sh'
       before_script: '.github/travis/test/before-script.sh'
-      script: '.github/travis/test/script.sh || export JOB_FAILED=true'
-      before_cache: echo "JOB_FAILER: $JOB_FAILED" #TODO: remove build specific Docker images from cache
+      script: '.github/travis/test/script.sh'
+      before_cache:
+        - docker images --all
+        - >
+          test ${TRAVIS_TEST_RESULT} -eq 0
+          || .github/travis/cache-operations.sh clean
       env: # don't use environment variables in order to have a shared cache
 
       name: "K8S, RabbitMQ & MySQL"
@@ -91,26 +119,33 @@ jobs:
         - export VERSION=dev
 
 
+    - &promote
+      stage: promote and clean up cache
+      if: (type != pull_request) AND (tag IS blank) # Ignore tag commits
+      name: "Promote images to Docker Hub, and clean up build cache"
+      install:
+        - ls -lah ${DOCKER_CACHE}
+        - '.github/travis/cache-operations.sh load all'
+        - docker images --all
+        - '.github/travis/promote/install.sh'
+      before_script: '.github/travis/promote/before-script.sh'
+      script: '.github/travis/promote/script.sh'
+      before_cache: '.github/travis/cache-operations.sh clean'
+      env: # don't use environment variables in order to have a shared cache
+
+
     - &deploy
       stage: deploy
+      if: (branch = master) AND (type != pull_request) AND (tag IS blank)
       install: '.github/travis/deploy/install.sh'
       before_script: '.github/travis/deploy/before-script.sh'
       script: '.github/travis/deploy/script.sh || export JOB_FAILED=true'
-      before_cache: echo "JOB_FAILER: $JOB_FAILED" #TODO: remove build specific Docker images from cache
+      cache: # no need for cache, images have been pushed to Docker Hub already
       env: # don't use environment variables in order to have a shared cache
 
       name: "Deploy to Heroku"
       before_install: export TARGET=heroku
-    - <<: *deploy
-      name: "Deploy to Docker Hub"
-      before_install: export TARGET=dockerhub
 
-
-    - &cleanup
-      stage: cleanup
-      install: '.github/travis/cleanup/install.sh'
-      before_script: '.github/travis/cleanup/before-script.sh'
-      script: '.github/travis/cleanup/script.sh'
 
   allow_failures:
     - name: "Static application security testing"
