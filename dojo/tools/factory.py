@@ -15,6 +15,7 @@ from dojo.tools.dependencycheck.parser import DependencyCheckParser
 from dojo.tools.retirejs.parser import RetireJsParser
 from dojo.tools.nsp.parser import NspParser
 from dojo.tools.npmaudit.parser import NpmAuditParser
+from dojo.tools.phpsymfonysecuritycheck.parser import PhpSymfonySecurityCheckParser
 from dojo.tools.generic.parser import GenericFindingUploadCsvParser
 from dojo.tools.qualys.parser import QualysParser
 from dojo.tools.qualyswebapp.parser import QualysWebAppParser
@@ -93,6 +94,8 @@ def import_parser_factory(file, test, scan_type=None):
         parser = NspParser(file, test)
     elif scan_type == 'NPM Audit Scan':
         parser = NpmAuditParser(file, test)
+    elif scan_type == 'Symfony Security Check':
+        parser = PhpSymfonySecurityCheckParser(file, test)
     elif scan_type == 'Generic Findings Import':
         parser = GenericFindingUploadCsvParser(file, test)
     elif scan_type == 'Qualys Scan':
