@@ -54,10 +54,12 @@ def get_item(vulnerability, test):
     vector = vulnerability['vector'] if 'vector' in vulnerability else "CVSS vector not provided. "
     status = vulnerability['status'] if 'status' in vulnerability else "There seems to be no fix yet. Please check description field."
     cvss = vulnerability['cvss'] if 'cvss' in vulnerability else "No CVSS score yet."
+    riskFactors = vulnerability['riskFactors'] if 'riskFactors' in vulnerability else "No risk factors."
 
     # create the finding object
     finding = Finding(
         title=vulnerability['id'] + ": " + vulnerability['packageName'] + " - " + vulnerability['packageVersion'],
+        cve=vulnerability['id'],
         test=test,
         severity=severity,
         description=vulnerability['description'] + "<p> Vulnerable Package: " +
@@ -71,7 +73,7 @@ def get_item(vulnerability, test):
         duplicate=False,
         out_of_scope=False,
         mitigated=None,
-        severity_justification="{}({})\n\n{}".format(vector, cvss, vulnerability['riskFactors']),
+        severity_justification="{}({})\n\n{}".format(vector, cvss, riskFactors),
         impact=severity)
 
     finding.description = finding.description.strip()
