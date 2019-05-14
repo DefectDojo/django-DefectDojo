@@ -286,6 +286,7 @@ class ImportScanForm(forms.Form):
                          ("AWS Scout2 Scan", "AWS Scout2 Scan"),
                          ("AWS Prowler Scan", "AWS Prowler Scan"),
                          ("PHP Security Audit v2", "PHP Security Audit v2"),
+                         ("Symfony Security Check", "PHP Symfony Security Check"),
                          ("Safety Scan", "Safety Scan"),
                          ("DawnScanner Scan", "DawnScanner Scan"),
                          ("Anchore Engine Scan", "Anchore Engine Scan"),
