@@ -4,6 +4,7 @@ import unittest
 import re
 import sys
 
+
 class ProductTest(unittest.TestCase):
     def setUp(self):
         # Initialize the driver
