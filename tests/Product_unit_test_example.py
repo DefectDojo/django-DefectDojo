@@ -1,12 +1,8 @@
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
-from selenium.common.exceptions import NoSuchElementException
-from selenium.common.exceptions import NoAlertPresentException
 import unittest
 import re
-import os
-import sys, time
-
+import sys
 
 class ProductTest(unittest.TestCase):
     def setUp(self):
@@ -37,7 +33,7 @@ class ProductTest(unittest.TestCase):
         return driver
 
     def test_create_product(self):
-        # Login to the site. Password will have to be modified 
+        # Login to the site. Password will have to be modified
         # to match an admin password in your own container
         driver = self.login_page()
         # Navigate to the product page
@@ -62,7 +58,7 @@ class ProductTest(unittest.TestCase):
         self.assertTrue(re.search(r'Product added successfully', productTxt))
 
     def test_edit_product_title(self):
-        # Login to the site. Password will have to be modified 
+        # Login to the site. Password will have to be modified
         # to match an admin password in your own container
         driver = self.login_page()
         # Navigate to the product page
@@ -83,7 +79,7 @@ class ProductTest(unittest.TestCase):
         self.assertTrue(re.search(r'Product updated successfully', productTxt))
 
     def test_delete_product(self):
-        # Login to the site. Password will have to be modified 
+        # Login to the site. Password will have to be modified
         # to match an admin password in your own container
         driver = self.login_page()
         # Navigate to the product page
