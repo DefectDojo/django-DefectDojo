@@ -80,7 +80,9 @@ updates and changes.
 
 [LDAP Integration](https://django-auth-ldap.readthedocs.io/en/latest/)
 
-[SAML Integration](https://pypi.python.org/pypi/djangosaml2/)
+[SAML Integration](https://pypi.python.org/pypi/djangosaml2/) 
+– Already integrated, just add your configuration in the settings file. For detailed information have a look at the
+ documentation of the plugin.
 
 [Multi-Factor Auth](https://django-mfa.readthedocs.io/en/latest/)
 
