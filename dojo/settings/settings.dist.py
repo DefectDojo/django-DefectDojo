@@ -63,7 +63,10 @@ env = environ.Env(
     DD_DATABASE_USER=(str, 'defectdojo'),
     DD_SECRET_KEY=(str, '.'),
     DD_CREDENTIAL_AES_256_KEY=(str, '.'),
-    DD_DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 8388608)  # Max post size set to 8mb
+    DD_DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 8388608),  # Max post size set to 8mb
+    DD_SAML_ENABLED=(bool, False),
+    DD_DOJO_URL=(str, 'http://localhost'),
+    DD_SSO_URL=(str, 'https://sso.service.com'),
 )
 
 
@@ -213,9 +216,9 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = env('DD_DATA_UPLOAD_MAX_MEMORY_SIZE')
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#root-urlconf
 
-# AUTHENTICATION_BACKENDS = [
-# 'axes.backends.AxesModelBackend',
-# ]
+AUTHENTICATION_BACKENDS = [
+    # 'axes.backends.AxesModelBackend',
+]
 
 ROOT_URLCONF = 'dojo.urls'
 
@@ -390,6 +393,130 @@ INSTALLED_APPS = (
     # 'axes'
     'django_celery_results',
 )
+
+# ------------------------------------------------------------------------------
+# SAML
+# ------------------------------------------------------------------------------
+SAML_ENABLED = env('DD_SAML_ENABLED')
+if env('DD_SAML_ENABLED'):
+    import saml2
+    import saml2.saml
+    from os import path
+    DOJO_URL = env('DD_DOJO_URL')
+    SSO_URL = env('DD_SSO_URL')
+    INSTALLED_APPS += ('djangosaml2',)
+    AUTHENTICATION_BACKENDS += ('djangosaml2.backends.Saml2Backend',)
+    LOGIN_EXEMPT_URLS += (r'^%ssaml2/' % URL_PREFIX,)
+    SAML_LOGOUT_REQUEST_PREFERRED_BINDING = saml2.BINDING_HTTP_POST
+    SAML_DJANGO_USER_MAIN_ATTRIBUTE = 'username'
+    #SAML_DJANGO_USER_MAIN_ATTRIBUTE_LOOKUP = '__iexact'
+    SAML_USE_NAME_ID_AS_USERNAME = True
+    SAML_CREATE_UNKNOWN_USER = True
+    SAML_ATTRIBUTE_MAPPING = {
+        'Email': ('email', ),
+        'Firstname': ('first_name', ),
+        'Lastname': ('last_name', ),
+    }
+    BASEDIR = path.dirname(path.abspath(__file__))
+    SAML_CONFIG = {
+        # full path to the xmlsec1 binary programm
+        'xmlsec_binary': '/usr/bin/xmlsec1',
+
+        # your entity id, usually your subdomain plus the url to the metadata view
+        'entityid': '%s/saml2/metadata/' % DOJO_URL,
+
+
+        # directory with attribute mapping
+        'attribute_map_dir': path.join(BASEDIR, 'attributemaps'),
+
+        # this block states what services we provide
+        'service': {
+            # we are just a lonely SP
+            'sp': {
+                'name': 'Defect_Dojo',
+                "want_response_signed": False,
+                "want_assertions_signed": True,
+                "force_authn": True,
+                'endpoints': {
+                    # url and binding to the assetion consumer service view
+                    # do not change the binding or service name
+                    'assertion_consumer_service': [
+                        ('%s/saml2/acs/' % DOJO_URL,
+                         saml2.BINDING_HTTP_POST),
+                    ],
+                    # url and binding to the single logout service view
+                    # do not change the binding or service name
+                    'single_logout_service': [
+                        ('%s/saml2/ls/' % DOJO_URL,
+                         saml2.BINDING_HTTP_REDIRECT),
+                        ('%s/saml2/ls/post' % DOJO_URL,
+                         saml2.BINDING_HTTP_POST),
+                    ],
+                },
+
+                # attributes that this project need to identify a user
+                'required_attributes': ['Email', 'NameID'],
+
+                # attributes that may be useful to have but not required
+                'optional_attributes': ['Firstname', 'Lastname'],
+
+                # in this section the list of IdPs we talk to are defined
+                'idp': {
+                    # we do not need a WAYF service since there is
+                    # only an IdP defined here. This IdP should be
+                    # present in our metadata
+
+                    # the keys of this dictionary are entity ids
+                    'endpoints': {
+                        'single_sign_on_service': {
+                            saml2.BINDING_HTTP_REDIRECT: '%s/saml/idp/profile/redirectorpost/sso' % SSO_URL,
+                        },
+                        'single_logout_service': {
+                            saml2.BINDING_HTTP_REDIRECT: '%s/saml/idp/profile/post/sls' % SSO_URL,
+                        },
+                    },
+                },
+            },
+        },
+
+        # where the remote metadata is stored
+        'metadata': {
+            'remote':[
+                {
+                    "url":'%s/public/share/idp_metadata.xml' % SSO_URL
+                }
+            ],
+        },
+
+        # set to 1 to output debugging information
+        'debug': 0,
+
+        # Signing
+        #'key_file': path.join(BASEDIR, 'mycert.key'), # private part
+        #'cert_file': path.join(BASEDIR, 'mycert.pem'), # public part
+
+        # Encryption
+        #'encryption_keypairs': [{
+        #    'key_file': path.join(BASEDIR, 'my_encryption_key.key'), # private part
+        #    'cert_file': path.join(BASEDIR, 'my_encryption_cert.pem'), # public part
+        #}],
+
+        # own metadata settings
+        'contact_person': [
+            {'given_name': 'Defect-Dojo',
+             'sur_name': '',
+             'company': 'OWASP',
+             'email_address': 'admin@admin.com',
+             'contact_type': 'technical'},
+        ],
+        # you can set multilanguage information here
+        'organization': {
+            'name': [('OWASP', 'en')],
+            'display_name': [('OWASP', 'en')],
+        },
+        'valid_for': 24,  # how long is our metadata valid
+    }
+
 
 # ------------------------------------------------------------------------------
 # MIDDLEWARE

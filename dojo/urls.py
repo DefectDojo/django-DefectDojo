@@ -169,6 +169,11 @@ urlpatterns = [
 
 ]
 
+if hasattr(settings, 'SAML_ENABLED'):
+    if settings.SAML_ENABLED:
+        #  django saml2
+        urlpatterns += [url(r'^saml2/', include('djangosaml2.urls'))]
+
 if hasattr(settings, 'DJANGO_ADMIN_ENABLED'):
     if settings.DJANGO_ADMIN_ENABLED:
         #  django admin

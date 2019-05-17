@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.conf.urls import url
 from django.contrib.auth.views import login
 
@@ -6,7 +7,7 @@ from dojo.user import views
 urlpatterns = [
     #  user specific
     url(r'^login$', login,
-        {'template_name': 'dojo/login.html'}, name='login'),
+        {'template_name': 'dojo/login.html', 'extra_context': {'saml_enabled': settings.SAML_ENABLED}}, name='login'),
     url(r'^logout$', views.logout_view, name='logout'),
     url(r'^alerts$', views.alerts, name='alerts'),
     url(r'^alerts/json$', views.alerts_json, name='alerts_json'),

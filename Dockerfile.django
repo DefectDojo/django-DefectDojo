@@ -12,6 +12,8 @@ RUN \
     dnsutils \
     mysql-client \
     postgresql-client \
+    # required for saml
+    xmlsec1 \
     && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
@@ -35,6 +37,8 @@ RUN \
     libmariadbclient18 \
     # only required for the dbshell (used by the initializer job)
     postgresql-client \
+    # required for saml
+    xmlsec1 \
     && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
