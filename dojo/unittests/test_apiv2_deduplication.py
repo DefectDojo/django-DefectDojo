@@ -1,6 +1,6 @@
 from rest_framework.test import APITestCase, APIClient
 from django.core.urlresolvers import reverse
-from dojo.models import Finding, Test, Test_Type
+from dojo.models import Finding, Test
 from rest_framework.authtoken.models import Token
 from django.core.files.uploadedfile import SimpleUploadedFile
 import time
