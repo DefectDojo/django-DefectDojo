@@ -21,17 +21,21 @@ class AnchoreEngineScanParser(object):
             title = ''
             group = ''
             status = ''
+            cve = ''
 
             title = item['vuln'] + ' - ' + item['package'] + '(' + item['package_type'] + ')'
 
+            if item['vuln']:
+                cve = item['vuln']
+
             # Finding details information
-            findingdetail += 'Image hash: ' + data['imageDigest'] + '\n'
-            findingdetail += 'Package: ' + item['package'] + '\n'
-            findingdetail += 'Package path: ' + item['package_path'] + '\n'
-            findingdetail += 'Package type: ' + item['package_type'] + '\n'
-            findingdetail += 'Feed: ' + item['feed'] + '/' + item['feed_group'] + '\n'
-            findingdetail += 'CVE: ' + item['vuln'] + '\n'
-            findingdetail += 'CPE: ' + item['package_cpe'] + '\n'
+            findingdetail += 'Image hash: ' + data['imageDigest'] + '\n\n'
+            findingdetail += 'Package: ' + item['package'] + '\n\n'
+            findingdetail += 'Package path: ' + item['package_path'] + '\n\n'
+            findingdetail += 'Package type: ' + item['package_type'] + '\n\n'
+            findingdetail += 'Feed: ' + item['feed'] + '/' + item['feed_group'] + '\n\n'
+            findingdetail += 'CVE: ' + item['vuln'] + '\n\n'
+            findingdetail += 'CPE: ' + item['package_cpe'] + '\n\n'
 
             sev = item['severity']
             if sev == "Negligible" or sev == "Unknown":
@@ -54,6 +58,7 @@ class AnchoreEngineScanParser(object):
                     test=test,
                     active=False,
                     verified=False,
+                    cve=cve,
                     description=findingdetail,
                     severity=sev,
                     numerical_severity=Finding.get_numerical_severity(sev),
