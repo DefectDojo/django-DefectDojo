@@ -5,7 +5,7 @@ source ${BASH_SOURCE%/*}/../common-vars.bash
 
 
 function target_heroku {
-    : # Do nothing
+    sudo curl https://cli-assets.heroku.com/install-ubuntu.sh | sh
 }
 
 

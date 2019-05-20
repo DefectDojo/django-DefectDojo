@@ -10,7 +10,16 @@ function check_pr_targets {
 
 
 function check_code_base_quality {
-    : # Do nothing
+    if [ "${TRAVIS_PULL_REQUEST}" = 'false' ]
+    then
+    echo_info "new writes to ${TRAVIS_REPO_SLUG}, linting everything..."
+    flake8
+    else
+    echo_info "linting changes coming from ${TRAVIS_PULL_REQUEST_SLUG}..."
+    flake8-diff
+    fi
+
+    [ ${?} -ne 0 ] && error_and_exit 'linting failed.'
 }
 
 

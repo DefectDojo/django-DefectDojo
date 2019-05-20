@@ -18,7 +18,7 @@ jobs:
   include:
     - &precheck
       stage: prechecks
-      if: tag IS blank # Ignore tag commits
+      if: tag IS blank # Ignore stage for tag commits
       install: '.github/travis/precheck/install.sh'
       before_script: '.github/travis/precheck/before-script.sh'
       script: '.github/travis/precheck/script.sh'
@@ -27,7 +27,14 @@ jobs:
       name: "Pull request targets"
       before_install: export CHECK=pr_targets
     - <<: *precheck
-      name: "Code base quality"
+      name: "Code base quality (changes only)"
+      # Ignore stage for tag commits, only lint changes for pull requests
+      if: (type = pull_request) AND (tag IS blank)
+      before_install: export CHECK=code_base_quality
+    - <<: *precheck
+      name: "Code base quality (full)"
+      # Ignore stage for tag commits, lint everything on writes to a branch
+      if: (type != pull_request) AND (tag IS blank)
       before_install: export CHECK=code_base_quality
     - <<: *precheck
       name: "Unwanted changes"
@@ -39,7 +46,8 @@ jobs:
 
     - &build
       stage: build and cache
-      if: (type = pull_request) AND (tag IS blank) # Ignore tag commits
+      # Ignore stage for tag commits, don't cache 'builder' for pull requests
+      if: (type = pull_request) AND (tag IS blank)
       name: "Build and cache Docker images"
       services: docker
       install:
@@ -56,7 +64,8 @@ jobs:
       env: # don't use environment variables in order to have a shared cache
 
     - <<: *build
-      if: (type != pull_request) AND (tag IS blank) # Ignore tag commits
+      # Ignore stage for tag commits, cache 'builder' after writes to a branch
+      if: (type != pull_request) AND (tag IS blank)
       name: "Build and cache Docker images (including 'builder')"
       before_cache:
         - docker images --all
@@ -68,8 +77,12 @@ jobs:
 
     - &test
       stage: integration tests
-      if: tag IS blank # Do nothing for tag commits
+      # Ignore stage for tag commits, always run otherwise
+      if: tag IS blank
       services: docker
+      addons:
+        apt:
+          packages: socat # required by Helm for port forwarding
       install:
         - ls -lah ${DOCKER_CACHE}
         - '.github/travis/cache-operations.sh load'
@@ -121,7 +134,8 @@ jobs:
 
     - &promote
       stage: promote and clean up cache
-      if: (type != pull_request) AND (tag IS blank) # Ignore tag commits
+      # Ignore stage for tag commits, only run after writes to a branch
+      if: (type != pull_request) AND (tag IS blank)
       name: "Promote images to Docker Hub, and clean up build cache"
       install:
         - ls -lah ${DOCKER_CACHE}
@@ -136,6 +150,7 @@ jobs:
 
     - &deploy
       stage: deploy
+      # Ignore stage for tag commits, only run after writes to 'master'
       if: (branch = master) AND (type != pull_request) AND (tag IS blank)
       install: '.github/travis/deploy/install.sh'
       before_script: '.github/travis/deploy/before-script.sh'
@@ -149,4 +164,5 @@ jobs:
 
   allow_failures:
     - name: "Static application security testing"
+    - name: "Code base quality (full)"
   fast_finish: true

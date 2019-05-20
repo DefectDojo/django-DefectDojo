@@ -10,7 +10,8 @@ function check_pr_targets {
 
 
 function check_code_base_quality {
-    : # Do nothing
+    # flake8-diff
+    sudo pip install pep8 flake8 flake8-diff
 }
 
 
@@ -20,7 +21,10 @@ function check_unwanted_changes {
 
 
 function check_sast {
-    : # Do nothing
+    # Snyk
+    curl -sL "https://deb.nodesource.com/setup_10.x" | sudo -E bash -
+    sudo apt-get install nodejs
+    sudo npm install -g snyk
 }
 
 
