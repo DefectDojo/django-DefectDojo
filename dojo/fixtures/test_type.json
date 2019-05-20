@@ -286,10 +286,31 @@
     "pk": 41
   },
   {
-      "fields": {
-        "name": "Netsparker Scanner"
-      },
-      "model": "dojo.test_type",
-      "pk": 49
+    "fields": {
+      "name": "Netsparker Scanner"
+    },
+    "model": "dojo.test_type",
+    "pk": 49
+  },
+  {
+    "fields": {
+      "name": "Twistlock Image Scan"
+    },
+    "model": "dojo.test_type",
+    "pk": 50
+  },
+  {
+    "fields": {
+      "name": "Blackduck Hub Scan"
+    },
+    "model": "dojo.test_type",
+    "pk": 51
+  },
+  {
+    "fields": {
+      "name": "Kiuwan Scan"
+    },
+    "model": "dojo.test_type",
+    "pk": 52
   }
 ]
