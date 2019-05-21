@@ -21,8 +21,8 @@ class Login(unittest.TestCase):
         driver = self.driver
         driver.get(self.base_url + "login")
         driver.find_element_by_id("id_username").clear()
-        driver.find_element_by_id("id_username").send_keys(os.environ['DOJO_ADMIN_USER'])
-        driver.find_element_by_id("id_password").send_keys(os.environ['DOJO_ADMIN_PASSWORD'])
+        driver.find_element_by_id("id_username").send_keys(os.environ['DD_ADMIN_USER'])
+        driver.find_element_by_id("id_password").send_keys(os.environ['DD_ADMIN_PASSWORD'])
         driver.find_element_by_css_selector("button.btn.btn-success").click()
         return driver
 
