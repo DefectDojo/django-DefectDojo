@@ -3,7 +3,7 @@ from selenium.webdriver.support.ui import Select
 import unittest
 import re
 import sys
-Import os
+import os
 
 
 class ProductTest(unittest.TestCase):
@@ -29,9 +29,9 @@ class ProductTest(unittest.TestCase):
         # These credentials will be used by Travis when testing new PRs
         # They will not work when testing on your own build
         # Be sure to change them before submitting a PR
-        driver.find_element_by_id("id_username").send_keys(os.environ['DOJO_ADMIN_USER'])
+        driver.find_element_by_id("id_username").send_keys(os.environ['DD_ADMIN_USER'])
         driver.find_element_by_id("id_password").clear()
-        driver.find_element_by_id("id_password").send_keys(os.environ['DOJO_ADMIN_PASSWORD'])
+        driver.find_element_by_id("id_password").send_keys(os.environ['DD_ADMIN_PASSWORD'])
         # "Click" the but the login button
         driver.find_element_by_css_selector("button.btn.btn-success").click()
         return driver
