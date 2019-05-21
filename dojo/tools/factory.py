@@ -44,6 +44,7 @@ from dojo.tools.dawnscanner.parser import DawnScannerParser
 from dojo.tools.anchore_engine.parser import AnchoreEngineScanParser
 from dojo.tools.bundler_audit.parser import BundlerAuditParser
 from dojo.tools.twistlock.parser import TwistlockParser
+from dojo.tools.kiuwan.parser import KiuwanCSVParser
 from dojo.tools.blackduck.parser import BlackduckHubCSVParser
 
 __author__ = 'Jay Paz'
@@ -148,6 +149,8 @@ def import_parser_factory(file, test, scan_type=None):
         parser = BundlerAuditParser(file, test)
     elif scan_type == 'Twistlock Image Scan':
         parser = TwistlockParser(file, test)
+    elif scan_type == 'Kiuwan Scan':
+        parser = KiuwanCSVParser(file, test)
     elif scan_type == 'Blackduck Hub Scan':
         parser = BlackduckHubCSVParser(file, test)
     else:
