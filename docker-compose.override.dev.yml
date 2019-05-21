@@ -16,7 +16,3 @@ services:
         published: 3306
         protocol: tcp
         mode: host
-    volumes:
-       - defectdojo_data:/var/lib/mysql
-volumes:
-  defectdojo_data: {}
