@@ -68,5 +68,9 @@ services:
       MYSQL_PASSWORD: ${DD_DATABASE_PASSWORD:-defectdojo}
       MYSQL_DATABASE: ${DD_DATABASE_NAME:-defectdojo}
     command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
+    volumes:
+       - defectdojo_data:/var/lib/mysql
   rabbitmq:
     image: rabbitmq:3.7
+volumes:
+  defectdojo_data: {}

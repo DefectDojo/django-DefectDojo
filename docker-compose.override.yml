@@ -1,8 +1,0 @@
----
-version: '3.7'
-services:
-  mysql:
-    volumes:
-       - defectdojo_data:/var/lib/mysql
-volumes:
-  defectdojo_data: {}
