@@ -44,6 +44,27 @@ def get_item(vulnerability, test):
     else:
         vulnerable_versions = vulnerability['semver']['vulnerable']
 
+    if 'identifiers' in vulnerability:
+        if 'CVE' in vulnerability['identifiers']:
+            if isinstance(vulnerability['identifiers']['CVE'], list):
+                # Per the current json format, if several CVEs listed, take the first one.
+                cve = ' '.join(vulnerability['identifiers']['CVE']).split(" ")[0]
+            else:
+                # In case the structure is not a list?
+                cve = vulnerability['identifiers']['CVE']
+
+        if 'CWE' in vulnerability['identifiers']:
+            if isinstance(vulnerability['identifiers']['CWE'], list):
+                # Per the current json format, if several CWEs, take the first one.
+                cwe = ' '.join(vulnerability['identifiers']['CWE']).split(" ")[0].split("-")[1]
+            else:
+                # in case the structure is not a list?
+                cwe = ''.join(vulnerability['identifiers']['CWE']).split("-")[1]
+    else:
+        # If no identifiers, set to defaults
+        cve = ""
+        cwe = 1035
+
     # Following the CVSS Scoring per https://nvd.nist.gov/vuln-metrics/cvss
     if 'cvssScore' in vulnerability:
         # If we're dealing with a license finding, there will be no cvssScore
@@ -64,7 +85,8 @@ def get_item(vulnerability, test):
         title=vulnerability['from'][0] + ": " + vulnerability['title'] + " - " + "(" + vulnerability['packageName'] + ", " + vulnerability['version'] + ")",
         test=test,
         severity=severity,
-        cwe=1035,  # Vulnerable Third Party Component
+        cwe=cwe,
+        cve=cve,
         description=vulnerability['description'] + "\n Vulnerable Package: " +
         vulnerability['packageName'] + "\n Current Version: " + str(
             vulnerability['version']) + "\n Vulnerable Version(s): " +
