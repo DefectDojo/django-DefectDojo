@@ -23,10 +23,10 @@ class Login(unittest.TestCase):
         driver.get(self.base_url + "login")
         cred_user_elem = driver.find_element_by_id("id_username")
         cred_user_elem.clear()
-        cred_user_elem.send_keys(os.environ['DOJO_ADMIN_USER'])
+        cred_user_elem.send_keys(os.environ['DD_ADMIN_USER'])
         cred_pass_elem = driver.find_element_by_id("id_password")
         cred_pass_elem.clear()
-        cred_pass_elem.send_keys(os.environ['DOJO_ADMIN_PASSWORD'])
+        cred_pass_elem.send_keys(os.environ['DD_ADMIN_PASSWORD'])
         driver.find_element_by_css_selector("button.btn.btn-success").click()
         return driver
 
