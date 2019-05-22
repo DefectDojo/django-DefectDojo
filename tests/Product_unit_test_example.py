@@ -3,16 +3,19 @@ from selenium.webdriver.support.ui import Select
 import unittest
 import re
 import sys
+import os
 
 
 class ProductTest(unittest.TestCase):
     def setUp(self):
         # Initialize the driver
+        # When used with Travis, chromdriver is stored in the same
+        # directory as the unit tests
         self.driver = webdriver.Chrome('chromedriver')
         # Allow a little time for the driver to initialize
         self.driver.implicitly_wait(30)
         # Set the base address of the dojo
-        self.base_url = "http://localhost:8080/"
+        self.base_url = "http://localhost:8000/"
         self.verificationErrors = []
         self.accept_next_alert = True
 
@@ -23,12 +26,12 @@ class ProductTest(unittest.TestCase):
         driver.get(self.base_url + "login")
         # Good practice to clear the entry before typing
         driver.find_element_by_id("id_username").clear()
-        # Set the user to an admin account
-        driver.find_element_by_id("id_username").send_keys('admin')
+        # These credentials will be used by Travis when testing new PRs
+        # They will not work when testing on your own build
+        # Be sure to change them before submitting a PR
+        driver.find_element_by_id("id_username").send_keys(os.environ['DD_ADMIN_USER'])
         driver.find_element_by_id("id_password").clear()
-        # Use the password unqiue to the container. Info on finding this below
-        # https://github.com/DefectDojo/django-DefectDojo/blob/master/DOCKER.md
-        driver.find_element_by_id("id_password").send_keys('eE1F6IKz3Uq4rLg6aYtI0k')
+        driver.find_element_by_id("id_password").send_keys(os.environ['DD_ADMIN_PASSWORD'])
         # "Click" the but the login button
         driver.find_element_by_css_selector("button.btn.btn-success").click()
         return driver
