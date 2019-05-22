@@ -53,11 +53,11 @@ docker-compose build nginx
 To run the application based on previously built image (or based on dockerhub images if none was locally built), run: 
 
 ```zsh
-docker/setEnvRelease.sh
+docker/setEnv.sh release
 docker-compose up
 ```
 
-This will run the application based on merged configurations from docker-compose.yml and docker-compose.override.yml.
+This will run the application based on docker-compose.yml only.
 
 In this setup, you need to rebuild django and/or nginx images after each code change and restart the containers. 
 
@@ -68,10 +68,11 @@ For development, use:
 
 ```zsh
 cp dojo/settings/settings.dist.py dojo/settings/settings.py
-docker/setEnvDev.sh
+docker/setEnv.sh dev
 docker-compose up
 ```
 
+This will run the application based on merged configurations from docker-compose.yml and docker-compose.override.dev.yml.
 
 *  Volumes are mounted to synchronize between the host and the containers :
     *  static resources (nginx container)
@@ -95,7 +96,7 @@ id -u
 
 ### Access the application
 Navigate to <http://localhost:8080> where you can log in with username admin.
-To find out the admin user’s password, check the very beginning of the console
+To find out the admin password, check the very beginning of the console
 output of the initializer container, typically name 'django-defectdojo_initializer_1', or run the following:
 
 ```zsh
@@ -169,7 +170,7 @@ This will run all the tests and leave the uwsgi container up:
 
 ```
 cp dojo/settings/settings.dist.py dojo/settings/settings.py
-docker/setEnvUnitTests.sh
+docker/setEnv.sh unit_tests
 docker-compose up
 ```
 Enter the container to run more tests:
