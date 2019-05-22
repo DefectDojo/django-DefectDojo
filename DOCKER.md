@@ -76,9 +76,15 @@ This will run the application based on merged configurations from docker-compose
 
 *  Volumes are mounted to synchronize between the host and the containers :
     *  static resources (nginx container)
-    *  python code (django container) . 
+    *  python code (uwsgi and celeryworker containers). 
 
-*  The `--py-autoreload 1` parameter in entrypoint-uwsgi-dev.sh will make uwsgi handle python hot-reloading. 
+*  The `--py-autoreload 1` parameter in entrypoint-uwsgi-dev.sh will make uwsgi handle python hot-reloading for the **uwsgi** container.
+* Hot-reloading for the **celeryworker** container is not yet implemented. When working on deduplication for example, restart the celeryworker container with: 
+
+```
+docker restart django-defectdojo_celeryworker_1
+```
+
 *  The mysql port is forwarded to the host so that you can access your database from outside the container. 
 
 To update changes in static resources, served by nginx, just refresh the browser with ctrl + F5.

@@ -7,6 +7,9 @@ services:
       - '.:/app:z'
     environment:
       DD_DEBUG: 'on'
+  celeryworker:
+    volumes:
+      - '.:/app:z'
   nginx:
     volumes:
       - './dojo/static/dojo:/usr/share/nginx/html/static/dojo'
