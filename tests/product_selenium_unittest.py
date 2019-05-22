@@ -174,7 +174,7 @@ class ProductTest(unittest.TestCase):
         # Assert ot the query to dtermine status of failure
         self.assertTrue(re.search(r'Endpoint added successfully', productTxt))
 
-    def test_add_product_custom_fields(self):
+    def test_add_product_custom_field(self):
         # Test To Add Custom Fields To product
         # login to site, password set to fetch from environ
         driver = self.login_page()
@@ -199,6 +199,27 @@ class ProductTest(unittest.TestCase):
         # Also confirm success even if variable is returned as already exists for test sake
         self.assertTrue(re.search(r'Metadata added successfully', productTxt) or \
             re.search(r'A metadata entry with the same name exists already for this object.', productTxt))
+
+    def test_edit_product_custom_field(self):
+        # Test To Edit Product Custom Fields
+        # login to site, password set to fetch from environ
+        driver = self.login_page()
+        # Navigate to Product page
+        driver.get(self.base_url + "product")
+        # "Click" the dropdown option
+        driver.find_element_by_class_name("pull-left").click()
+        # 'click' the Edit Custom Fields
+        driver.find_element_by_link_text("Edit Custom Fields").click()
+        # Keep a good practice of clearing field before entering value
+        # Edit Custom Value of First field
+        driver.find_element_by_name("cfv_1").clear()
+        driver.find_element_by_name("cfv_1").send_keys("Strong")
+        # submit
+        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        # Query the site to determine if the finding has been added
+        productTxt = driver.find_element_by_tag_name("BODY").text
+        # Assert ot the query to dtermine status of failure
+        self.assertTrue(re.search(r'Metadata editted successfully', productTxt))
 
     def test_delete_product(self):
         # Login to the site. Password will have to be modified
@@ -226,13 +247,14 @@ def suite():
     suite = unittest.TestSuite()
     # Add each test and the suite to be run
     # success and failure is output by the test
-    # suite.addTest(ProductTest('test_create_product'))
-    #suite.addTest(ProductTest('test_edit_product_title'))
-    # suite.addTest(ProductTest('test_add_product_engagement'))
+    suite.addTest(ProductTest('test_create_product'))
+    suite.addTest(ProductTest('test_edit_product_title'))
+    suite.addTest(ProductTest('test_add_product_engagement'))
     # suite.addTest(ProductTest('test_add_product_finding'))
-    # suite.addTest(ProductTest('test_add_product_endpoints'))
-    suite.addTest(ProductTest('test_add_product_custom_fields'))
-    # suite.addTest(ProductTest('test_delete_product'))
+    suite.addTest(ProductTest('test_add_product_endpoints'))
+    suite.addTest(ProductTest('test_add_product_custom_field'))
+    suite.addTest(ProductTest('test_edit_product_custom_field'))
+    suite.addTest(ProductTest('test_delete_product'))
     return suite
 
 
