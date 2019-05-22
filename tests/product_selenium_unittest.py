@@ -218,8 +218,55 @@ class ProductTest(unittest.TestCase):
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
         # Query the site to determine if the finding has been added
         productTxt = driver.find_element_by_tag_name("BODY").text
+        # Assert ot the query to dtermine success or failure
+        self.assertTrue(re.search(r'Metadata edited successfully', productTxt))
+
+    def test_add_product_tracking_files(self):
+        # Test To Add tracking files To product
+        # login to site, password set to fetch from environ
+        driver = self.login_page()
+        # Navigate to Product page
+        driver.get(self.base_url + "product")
+        # "Click" the dropdown option
+        driver.find_element_by_class_name("pull-left").click()
+        # 'click' the Add Product Tracking Files
+        driver.find_element_by_link_text("Add Product Tracking Files").click()
+        # Keep a good practice of clearing field before entering value
+        # Just fill up to main required fields: 'File path' nd 'review status'
+        # Full File path
+        driver.find_element_by_id("id_path").clear()
+        driver.find_element_by_id("id_path").send_keys("/strange/folder/")
+        # REview Status
+        Select(driver.find_element_by_id("id_review_status")).select_by_visible_text("Untracked")
+        # submit
+        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        # Query the site to determine if the finding has been added
+        productTxt = driver.find_element_by_tag_name("BODY").text
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(re.search(r'Metadata editted successfully', productTxt))
+        self.assertTrue(re.search(r'Added Tracked File to a Product', productTxt))
+
+    def test_edit_product_tracking_files(self):
+        # Test To Edit Product Tracking Files
+        # login to site, password set to fetch from environ
+        driver = self.login_page()
+        # Navigate to Product page
+        driver.get(self.base_url + "product")
+        # "Click" the dropdown option
+        driver.find_element_by_class_name("pull-left").click()
+        # 'click' the Edit Product Tracking Files
+        driver.find_element_by_link_text("View Product Tracking Files").click()
+        # Keep a good practice of clearing field before entering value
+        # Edit Custom Value of First field
+        driver.find_element_by_link_text("Edit").click()
+        # Edit full file path
+        driver.find_element_by_id("id_path").clear()
+        driver.find_element_by_id("id_path").send_keys("/unknown/folder/")
+        # submit
+        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        # Query the site to determine if the Tracking file has been updated
+        productTxt = driver.find_element_by_tag_name("BODY").text
+        # Assert ot the query to dtermine status of failure
+        self.assertTrue(re.search(r'Tool Product Configuration Successfully Updated', productTxt))
 
     def test_delete_product(self):
         # Login to the site. Password will have to be modified
@@ -247,14 +294,16 @@ def suite():
     suite = unittest.TestSuite()
     # Add each test and the suite to be run
     # success and failure is output by the test
-    suite.addTest(ProductTest('test_create_product'))
-    suite.addTest(ProductTest('test_edit_product_title'))
-    suite.addTest(ProductTest('test_add_product_engagement'))
-    # suite.addTest(ProductTest('test_add_product_finding'))
-    suite.addTest(ProductTest('test_add_product_endpoints'))
-    suite.addTest(ProductTest('test_add_product_custom_field'))
-    suite.addTest(ProductTest('test_edit_product_custom_field'))
-    suite.addTest(ProductTest('test_delete_product'))
+    # suite.addTest(ProductTest('test_create_product'))
+    # suite.addTest(ProductTest('test_edit_product_title'))
+    # suite.addTest(ProductTest('test_add_product_engagement'))
+    # # suite.addTest(ProductTest('test_add_product_finding'))
+    # suite.addTest(ProductTest('test_add_product_endpoints'))
+    # suite.addTest(ProductTest('test_add_product_custom_field'))
+    # suite.addTest(ProductTest('test_edit_product_custom_field'))
+    suite.addTest(ProductTest('test_add_product_tracking_files'))
+    suite.addTest(ProductTest('test_edit_product_tracking_files'))
+    # suite.addTest(ProductTest('test_delete_product'))
     return suite
 
 
