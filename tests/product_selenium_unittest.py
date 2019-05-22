@@ -25,11 +25,11 @@ class ProductTest(unittest.TestCase):
         # Good practice to clear the entry before typing
         driver.find_element_by_id("id_username").clear()
         # Set the user to an admin account
-        driver.find_element_by_id("id_username").send_keys(os.environ['DOJO_ADMIN_USER'])
+        driver.find_element_by_id("id_username").send_keys(os.environ['DD_ADMIN_USER'])
         driver.find_element_by_id("id_password").clear()
         # Use the password unqiue to the container. Info on finding this below
         # https://github.com/DefectDojo/django-DefectDojo/blob/master/DOCKER.md
-        driver.find_element_by_id("id_password").send_keys(os.environ['DOJO_ADMIN_PASSWORD'])
+        driver.find_element_by_id("id_password").send_keys(os.environ['DD_ADMIN_PASSWORD'])
         # "Click" the but the login button
         driver.find_element_by_css_selector("button.btn.btn-success").click()
         return driver
