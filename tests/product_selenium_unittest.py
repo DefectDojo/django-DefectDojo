@@ -58,8 +58,8 @@ class ProductTest(unittest.TestCase):
         productTxt = driver.find_element_by_tag_name("BODY").text
         # Assert ot the query to dtermine status of failure
         # Also confirm success even if Product is returned as already exists for test sake
-        self.assertTrue(re.search(r'Product added successfully', productTxt) or \
-             re.search(r'Product with this Name already exists.', productTxt))
+        self.assertTrue(re.search(r'Product added successfully', productTxt) or
+            re.search(r'Product with this Name already exists.', productTxt))
 
     def test_edit_product_title(self):
         # Login to the site. Password will have to be modified
@@ -81,7 +81,7 @@ class ProductTest(unittest.TestCase):
         productTxt = driver.find_element_by_tag_name("BODY").text
         # Assert ot the query to dtermine status of failure
         self.assertTrue(re.search(r'Product updated successfully', productTxt))
-    
+
     def test_add_product_engagement(self):
         # Test To Add Engagement To product
         # login to site, password set to fetch from environ
@@ -94,7 +94,7 @@ class ProductTest(unittest.TestCase):
         driver.find_element_by_link_text("Add New Engagement").click()
         # Keep a good practice of clearing field before entering value
         # fill up at least all required input field options.
-        # fields: 'Name', 'Description', 'Target Start', 'Target End', 'Testing Lead' and 'Status' 
+        # fields: 'Name', 'Description', 'Target Start', 'Target End', 'Testing Lead' and 'Status'
         # engagement name
         driver.find_element_by_id("id_name").clear()
         driver.find_element_by_id("id_name").send_keys("Beta Test")
@@ -127,7 +127,7 @@ class ProductTest(unittest.TestCase):
         driver.find_element_by_link_text("Add New Finding").click()
         # Keep a good practice of clearing field before entering value
         # fill up at least all required input field options.
-        # fields: 'Title', 'Date', 'Severity', 'Description', 'Mitigation' and 'Impact' 
+        # fields: 'Title', 'Date', 'Severity', 'Description', 'Mitigation' and 'Impact'
         # finding Title
         driver.find_element_by_id("id_title").clear()
         driver.find_element_by_id("id_title").send_keys("App Vulnerable to XSS")
@@ -197,7 +197,7 @@ class ProductTest(unittest.TestCase):
         productTxt = driver.find_element_by_tag_name("BODY").text
         # Assert ot the query to dtermine status of failure
         # Also confirm success even if variable is returned as already exists for test sake
-        self.assertTrue(re.search(r'Metadata added successfully', productTxt) or \
+        self.assertTrue(re.search(r'Metadata added successfully', productTxt) or
             re.search(r'A metadata entry with the same name exists already for this object.', productTxt))
 
     def test_edit_product_custom_field(self):
