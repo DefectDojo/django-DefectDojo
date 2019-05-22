@@ -294,16 +294,16 @@ def suite():
     suite = unittest.TestSuite()
     # Add each test and the suite to be run
     # success and failure is output by the test
-    # suite.addTest(ProductTest('test_create_product'))
-    # suite.addTest(ProductTest('test_edit_product_title'))
-    # suite.addTest(ProductTest('test_add_product_engagement'))
-    # # suite.addTest(ProductTest('test_add_product_finding'))
-    # suite.addTest(ProductTest('test_add_product_endpoints'))
-    # suite.addTest(ProductTest('test_add_product_custom_field'))
-    # suite.addTest(ProductTest('test_edit_product_custom_field'))
+    suite.addTest(ProductTest('test_create_product'))
+    suite.addTest(ProductTest('test_edit_product_title'))
+    suite.addTest(ProductTest('test_add_product_engagement'))
+    # suite.addTest(ProductTest('test_add_product_finding'))
+    suite.addTest(ProductTest('test_add_product_endpoints'))
+    suite.addTest(ProductTest('test_add_product_custom_field'))
+    suite.addTest(ProductTest('test_edit_product_custom_field'))
     suite.addTest(ProductTest('test_add_product_tracking_files'))
     suite.addTest(ProductTest('test_edit_product_tracking_files'))
-    # suite.addTest(ProductTest('test_delete_product'))
+    suite.addTest(ProductTest('test_delete_product'))
     return suite
 
 
