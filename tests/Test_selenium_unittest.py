@@ -112,7 +112,7 @@ class TestUnitTest(unittest.TestCase):
         self.assertTrue(re.search(r'Test added successfully', productTxt))
 
     def test_edit_test(self):
-        # Login to the site. 
+        # Login to the site.
         driver = self.login_page()
         # Navigate to the engagement page
         driver.get(self.base_url + "engagement")
@@ -135,20 +135,23 @@ class TestUnitTest(unittest.TestCase):
         # Login to the site. Password will have to be modified
         # to match an admin password in your own container
         driver = self.login_page()
-        # Navigate to the endpoint page
-        driver.get(self.base_url + "endpoint")
-        # Select one of the previously created endpoint to delete
-        driver.find_element_by_link_text("123.22.43.101").click()
+        # Navigate to the engagement page
+        driver.get(self.base_url + "engagement")
+        # Select a previously created engagement title
+        driver.find_element_by_partial_link_text("Quick Security Testing").click()
         # "Click" the dropdown button to see options
         driver.find_element_by_id("dropdownMenu1").click()
-        # "Click" the Delete Endpoint
-        driver.find_element_by_link_text("Delete Endpoint").click()
+        # "Click" the Edit Test option
+        driver.find_element_by_link_text("Delete Test").click()
+        # Type test name into Title field before clicking Delet button
+        driver.find_element_by_id("id_title").clear() # always clear for inputting
+        driver.find_element_by_id("id_title").send_keys("Quick Security Testing")
         # "Click" the delete button to complete the transaction
         driver.find_element_by_css_selector("button.btn.btn-danger").click()
         # Query the site to determine if the product has been added
         productTxt = driver.find_element_by_tag_name("BODY").text
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(re.search(r'Endpoint and relationships removed.', productTxt))
+        self.assertTrue(re.search(r'Test and relationships removed.', productTxt))
 
     def tearDown(self):
         self.driver.quit()
@@ -161,8 +164,8 @@ def suite():
     # success and failure is output by the test
     suite.addTest(TestUnitTest('test_create_product'))
     suite.addTest(TestUnitTest('test_create_test'))
-    suite.addTest(TestUnitTest('test_edit_test'))
-    # suite.addTest(TestUnitTest('test_delete_test'))
+    # suite.addTest(TestUnitTest('test_edit_test'))
+    suite.addTest(TestUnitTest('test_delete_test'))
     return suite
 
 
