@@ -46,7 +46,7 @@ class ProductTest(unittest.TestCase):
         driver.find_element_by_link_text("Add Product").click()
         # Fill in th product name
         driver.find_element_by_id("id_name").clear()
-        driver.find_element_by_id("id_name").send_keys("QA Test2")
+        driver.find_element_by_id("id_name").send_keys("QA Test")
         # Tab into the description area to fill some text
         # Couldnt find a way to get into the box with selenium
         driver.find_element_by_id("id_name").send_keys("\tThis is just a test. Be very afraid.")

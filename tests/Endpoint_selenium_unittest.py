@@ -5,6 +5,14 @@ import re
 import sys
 import os
 
+# first thing first. We have to create product, just to make sure there is atleast 1 product available
+# to assign endpoints to when creating or editing any.
+# importing Product_selenium_unittest as a module
+# This style is for python2 alone
+import imp
+product_unit_test = imp.load_source('product_selenium_unittest',
+    os.path.join(os.environ['DD_ROOT'], 'tests', 'product_selenium_unittest.py'))
+
 
 class EndpointTest(unittest.TestCase):
     def setUp(self):
@@ -36,35 +44,6 @@ class EndpointTest(unittest.TestCase):
         driver.find_element_by_css_selector("button.btn.btn-success").click()
         return driver
 
-    # first thing first. We create product, just to make sure there is atleast 1 product available
-    # to assign endpoints to when creating or editing any.
-    def test_create_product(self):
-        # Login to the site. Password will have to be modified
-        # to match an admin password in your own container
-        driver = self.login_page()
-        # Navigate to the product page
-        driver.get(self.base_url + "product")
-        # "Click" the dropdown button to see options
-        driver.find_element_by_id("dropdownMenu1").click()
-        # "Click" the add prodcut button
-        driver.find_element_by_link_text("Add Product").click()
-        # Fill in th product name
-        driver.find_element_by_id("id_name").clear()
-        driver.find_element_by_id("id_name").send_keys("QA Test")
-        # Tab into the description area to fill some text
-        # Couldnt find a way to get into the box with selenium
-        driver.find_element_by_id("id_name").send_keys("\tThis is just a test. Be very afraid.")
-        # Select an option in the poroduct type
-        Select(driver.find_element_by_id("id_prod_type")).select_by_visible_text("Research and Development")
-        # "Click" the submit button to complete the transaction
-        driver.find_element_by_css_selector("input.btn.btn-primary").click()
-        # Query the site to determine if the product has been added
-        productTxt = driver.find_element_by_tag_name("BODY").text
-        # Assert ot the query to dtermine status of failure
-        # Also confirm success even if Product is returned as already exists for test sake
-        self.assertTrue(re.search(r'Product added successfully', productTxt) or
-            re.search(r'Product with this Name already exists.', productTxt))
-
     def test_create_endpoint(self):
         # Login to the site.
         # Username and password will be gotten from environ
@@ -78,7 +57,7 @@ class EndpointTest(unittest.TestCase):
         # Keep a good practice of clearing field before entering value
         # Endpoints
         driver.find_element_by_id("id_endpoint").clear()
-        driver.find_element_by_id("id_endpoint").send_keys("123.22.43.101\nmoving.com.rnd\nhttps://gorand.in/publish")
+        driver.find_element_by_id("id_endpoint").send_keys("moving.com.rnd")
         # Select product to assign endpoint to
         Select(driver.find_element_by_id("id_product")).select_by_visible_text("QA Test")
         # submit
@@ -103,7 +82,7 @@ class EndpointTest(unittest.TestCase):
         # Clear the old endpoint host name
         driver.find_element_by_id("id_host").clear()
         # Fill in the endpoint host name
-        driver.find_element_by_id("id_host").send_keys("https://moving.com/")
+        driver.find_element_by_id("id_host").send_keys("/rnd.moving.com")
         # Fill in port for endpoint
         driver.find_element_by_id("id_port").clear()
         driver.find_element_by_id("id_port").send_keys("8080")
@@ -121,7 +100,7 @@ class EndpointTest(unittest.TestCase):
         # Navigate to the endpoint page
         driver.get(self.base_url + "endpoint")
         # Select one of the previously created endpoint to delete
-        driver.find_element_by_link_text("123.22.43.101").click()
+        driver.find_element_by_link_text("/rnd.moving.com").click()
         # "Click" the dropdown button to see options
         driver.find_element_by_id("dropdownMenu1").click()
         # "Click" the Delete Endpoint
@@ -142,7 +121,7 @@ def suite():
     suite = unittest.TestSuite()
     # Add each test the the suite to be run
     # success and failure is output by the test
-    suite.addTest(EndpointTest('test_create_product'))
+    suite.addTest(product_unit_test.ProductTest('test_create_product'))
     suite.addTest(EndpointTest('test_create_endpoint'))
     suite.addTest(EndpointTest('test_edit_endpoint'))
     suite.addTest(EndpointTest('test_delete_endpoint'))
