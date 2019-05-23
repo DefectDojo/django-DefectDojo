@@ -68,8 +68,6 @@ travis_fold start travis_integration_tests
 
 python tests/check_status.py -v
 python tests/smoke_test.py
-python tests/product_selenium_unittest.py
-python tests/Endpoint_selenium_unittest.py
 
 travis_fold end travis_integration_tests
 # python tests/zap.py
