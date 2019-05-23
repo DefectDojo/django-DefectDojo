@@ -111,33 +111,27 @@ class TestUnitTest(unittest.TestCase):
         # Assert on the query to determine success or failure
         self.assertTrue(re.search(r'Test added successfully', productTxt))
 
-    def test_edit_endpoint(self):
-        # Login to the site. Password will have to be modified
-        # to match an admin password in your own container
+    def test_edit_test(self):
+        # Login to the site. 
         driver = self.login_page()
-        # Navigate to the endpoint page
-        driver.get(self.base_url + "endpoint")
-        # Select one of the previously created endpoint to edit
-        driver.find_element_by_link_text("moving.com.rnd").click()
+        # Navigate to the engagement page
+        driver.get(self.base_url + "engagement")
+        # Select a previously created engagement title
+        driver.find_element_by_partial_link_text("Quick Security Testing").click()
         # "Click" the dropdown button to see options
         driver.find_element_by_id("dropdownMenu1").click()
-        # "Click" the Edit Endpoint
-        driver.find_element_by_link_text("Edit Endpoint").click()
-        # Clear the old endpoint host name
-        driver.find_element_by_id("id_host").clear()
-        # Fill in the endpoint host name
-        driver.find_element_by_id("id_host").send_keys("https://moving.com/")
-        # Fill in port for endpoint
-        driver.find_element_by_id("id_port").clear()
-        driver.find_element_by_id("id_port").send_keys("8080")
+        # "Click" the Edit Test option
+        driver.find_element_by_link_text("Edit Test").click()
+        # Change Testing Environment to Staging from Development
+        Select(driver.find_element_by_id("id_environment")).select_by_visible_text("Staging")
         # "Click" the submit button to complete the transaction
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
-        # Query the site to determine if the product has been added
+        # Query the site to determine if the Test has been updated
         productTxt = driver.find_element_by_tag_name("BODY").text
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(re.search(r'Endpoint updated successfully', productTxt))
+        self.assertTrue(re.search(r'Test saved.', productTxt))
 
-    def test_delete_endpoint(self):
+    def test_delete_test(self):
         # Login to the site. Password will have to be modified
         # to match an admin password in your own container
         driver = self.login_page()
@@ -167,8 +161,8 @@ def suite():
     # success and failure is output by the test
     suite.addTest(TestUnitTest('test_create_product'))
     suite.addTest(TestUnitTest('test_create_test'))
-    # suite.addTest(TestUnitTest('test_edit_endpoint'))
-    # suite.addTest(TestUnitTest('test_delete_endpoint'))
+    suite.addTest(TestUnitTest('test_edit_test'))
+    # suite.addTest(TestUnitTest('test_delete_test'))
     return suite
 
 
