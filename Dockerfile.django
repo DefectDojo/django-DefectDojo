@@ -8,9 +8,24 @@ RUN \
     dnsutils \
     mysql-client \
     postgresql-client \
+    wget \
+    git \
+    mlocate \
     && \
+  wget -O "wkhtmltox_0.12.5-1.stretch_amd64.deb" 'https://downloads.wkhtmltopdf.org/0.12/0.12.5/wkhtmltox_0.12.5-1.stretch_amd64.deb' && \
+  apt install -y --fix-broken ./wkhtmltox_0.12.5-1.stretch_amd64.deb && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
+  true
+RUN git clone https://github.com/JazzCore/python-pdfkit.git && \
+    true
+RUN ls -lh python-pdfkit -R
+COPY Patches/pdfkit/pdfkit.py /app
+RUN mv python-pdfkit/pdfkit/pdfkit.py python-pdfkit/pdfkit/pdfkit.py.old && \
+    mv pdfkit.py python-pdfkit/pdfkit/pdfkit.py 
+RUN cd python-pdfkit && \
+  pip install setuptools --upgrade && \
+  python setup.py install && \
   true
 COPY requirements.txt ./
 RUN pip install -r ./requirements.txt
@@ -25,9 +40,14 @@ COPY \
   /
 COPY wsgi.py manage.py tests/unit-tests.sh ./
 COPY dojo/ ./dojo/
+RUN updatedb && true
 # Legacy installs need the modified settings.py, do not remove!
 RUN \
   cp dojo/settings/settings.dist.py dojo/settings/settings.py
+RUN \
+  mkdir media && \
+  chmod g=u media && \
+  true 
 COPY tests/ ./tests/
 RUN \
   mkdir dojo/migrations && \
@@ -37,9 +57,9 @@ RUN \
 USER 1001
 ENV \
   DD_ADMIN_USER=admin \
-  DD_ADMIN_MAIL=admin@defectdojo.local \
+  DD_ADMIN_MAIL=support@gvit.com \
   DD_ADMIN_PASSWORD= \
-  DD_ADMIN_FIRST_NAME=Administrator \
+  DD_ADMIN_FIRST_NAME=Admin \
   DD_ADMIN_LAST_NAME=User \
   DD_ALLOWED_HOSTS="*" \
   DD_CELERY_BEAT_SCHEDULE_FILENAME="/run/celery-beat-schedule" \

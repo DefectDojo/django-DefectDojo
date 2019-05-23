@@ -179,31 +179,34 @@ def async_custom_pdf_report(self,
 
         cover = None
         if 'cover-page' in selected_widgets:
+            import requests
             cover_first_val = True
             cp = selected_widgets['cover-page']
             x = urlencode({'title': cp.title,
                            'subtitle': cp.sub_heading,
                            'info': cp.meta_info})
-            cover = host + reverse(
+            cover = "http://nginx:8080/" + reverse(
                 'report_cover_page') + "?" + x
-        bytes = render_to_string(template, {'widgets': widgets,
-                                            'toc_depth': toc_depth,
-                                            'host': host,
-                                            'report_name': report.name})
-        pdf = pdfkit.from_string(bytes,
-                                 False,
-                                 configuration=config,
-                                 toc=toc,
-                                 cover=cover,
-                                 cover_first=cover_first_val)
 
-        if report.file.name:
-            with open(report.file.path, 'w') as f:
-                f.write(pdf)
-            f.close()
+        htmlToRender = render_to_string(template, {'widgets': widgets,
+                                                   'toc_depth': toc_depth,
+                                                   'host': host,
+                                                   'report_name': report.name})
+        if cover_first_val == True: 
+            pdfData = pdfkit.from_string(htmlToRender,
+                                         False,
+                                         configuration = config,
+                                         toc = toc,
+                                         cover = cover,
+                                         cover_first = cover_first_val)
         else:
-            f = ContentFile(pdf)
-            report.file.save(filename, f)
+            pdfData = pdfkit.from_string(htmlToRender,
+                                         False,
+                                         configuration = config,
+                                         toc = toc)
+
+        fObj = ContentFile(pdfData)
+        report.file.save(filename, fObj)
         report.status = 'success'
         report.done_datetime = timezone.now()
         report.save()

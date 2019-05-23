@@ -1326,19 +1326,22 @@ class Finding(models.Model):
             return BurpRawRequestResponse.objects.filter(finding=self)[0:3]
         elif self.burprawrequestresponse_set.count() > 0:
             return BurpRawRequestResponse.objects.filter(finding=self)
+        return
 
     def get_request(self):
         if self.burprawrequestresponse_set.count() > 0:
             reqres = BurpRawRequestResponse.objects.filter(finding=self)[0]
-        return base64.b64decode(reqres.burpRequestBase64)
+            return base64.b64decode(reqres.burpRequestBase64)
+        return
 
     def get_response(self):
         if self.burprawrequestresponse_set.count() > 0:
             reqres = BurpRawRequestResponse.objects.filter(finding=self)[0]
-        res = base64.b64decode(reqres.burpResponseBase64)
-        # Removes all blank lines
-        res = re.sub(r'\n\s*\n', '\n', res)
-        return res
+            res = base64.b64decode(reqres.burpResponseBase64)
+            # Removes all blank lines
+            res = re.sub(r'\n\s*\n', '\n', res)
+            return res
+        return
 
     def get_found_by(self):
         scanners = self.found_by.all().distinct()

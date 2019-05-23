@@ -155,6 +155,7 @@ class ReportOptions(Widget):
         self.title = 'Report Options'
         self.form = CustomReportOptionsForm()
         self.extra_help = "Choose additional report options.  These will apply to the overall report."
+        self.multiple = "true"
 
     def get_asciidoc(self):
         return mark_safe('')

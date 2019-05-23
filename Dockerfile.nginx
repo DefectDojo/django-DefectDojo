@@ -1,5 +1,5 @@
 # code: language=Dockerfile
-FROM defectdojo/defectdojo-django:latest AS build
+FROM gvit/defectdojo-django:latest AS build
 
 USER root
 RUN \
@@ -22,7 +22,6 @@ RUN \
   cd .. && \
   python manage.py collectstatic && \
   true
-
 FROM nginx
 COPY --from=build /app/static/ /usr/share/nginx/html/static/
 COPY wsgi_params nginx/nginx.conf /etc/nginx/
