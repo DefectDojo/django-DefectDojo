@@ -10,9 +10,16 @@ import os
 # to assign endpoints to when creating or editing any.
 # importing Product_selenium_unittest as a module
 # This style is for python2 alone
-import imp
-product_unit_test = imp.load_source('product_selenium_unittest',
-    os.path.join(os.environ['DD_ROOT'], 'tests', 'product_selenium_unittest.py'))
+try: # This will work for python2
+    import imp
+    product_unit_test = imp.load_source('product_selenium_unittest',
+        os.path.join(os.environ['DD_ROOT'], 'tests', 'product_selenium_unittest.py'))
+except: # if Above fails then this is for python 3
+    import importlib.util
+    product_unit_test_module = importlib.util.spec_from_file_location("product_selenium_unittest", 
+        os.path.join(os.environ['DD_ROOT'], 'tests', 'product_selenium_unittest.py'))
+    product_unit_test = importlib.util.module_from_spec(product_unit_test_module)
+    product_unit_test_module.loader.exec_module(product_unit_test)
 
 
 class TestUnitTest(unittest.TestCase):
