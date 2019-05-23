@@ -144,7 +144,7 @@ class TestUnitTest(unittest.TestCase):
         # "Click" the Edit Test option
         driver.find_element_by_link_text("Delete Test").click()
         # Type test name into Title field before clicking Delet button
-        driver.find_element_by_id("id_title").clear() # always clear for inputting
+        driver.find_element_by_id("id_title").clear()  # always clear for inputting
         driver.find_element_by_id("id_title").send_keys("Quick Security Testing")
         # "Click" the delete button to complete the transaction
         driver.find_element_by_css_selector("button.btn.btn-danger").click()
