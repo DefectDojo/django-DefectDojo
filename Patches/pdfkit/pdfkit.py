@@ -136,7 +136,7 @@ class PDFKit(object):
         # Sometimes wkhtmltopdf will exit with non-zero
         # even if it finishes generation.
         # If will display 'Done' in the second last line
-        #if stderr.splitlines()[-2].strip() == 'Done':
+        # if stderr.splitlines()[-2].strip() == 'Done':
 
         if 'cannot connect to X server' in stderr:
             raise IOError('%s\n'
@@ -266,8 +266,7 @@ class PDFKit(object):
         returns:
           dict: {config option: value}
         """
-        if (isinstance(content, io.IOBase)
-                or content.__class__.__name__ == 'StreamReaderWriter'):
+        if (isinstance(content, io.IOBase) or content.__class__.__name__ == 'StreamReaderWriter'):
             content = content.read()
 
         found = {}
