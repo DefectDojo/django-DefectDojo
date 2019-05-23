@@ -2,7 +2,7 @@
 version: '3.7'
 services:
   nginx:
-    image: gvit/defectdojo-nginx:latest
+    image: defectdojo/defectdojo-nginx:latest
     depends_on:
       - uwsgi
     ports:
@@ -15,7 +15,7 @@ services:
         source: app-volume
         target: /app/media
   celerybeat:
-    image: gvit/defectdojo-django:latest
+    image: defectdojo/defectdojo-django:latest
     depends_on:
       - mysql
       - rabbitmq
@@ -29,7 +29,7 @@ services:
         source: app-volume
         target: /app/media
   celeryworker:
-    image: gvit/defectdojo-django:latest
+    image: defectdojo/defectdojo-django:latest
     depends_on:
       - mysql
       - rabbitmq
@@ -43,7 +43,7 @@ services:
         source: app-volume
         target: /app/media
   initializer:
-    image: gvit/defectdojo-django:latest
+    image: defectdojo/defectdojo-django:latest
     depends_on:
       - mysql
     entrypoint: ['/wait-for-it.sh', 'mysql:3306', '--', '/entrypoint-initializer.sh']

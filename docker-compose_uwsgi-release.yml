@@ -2,7 +2,7 @@
 version: '3.7'
 services:
   uwsgi:
-    image: gvit/defectdojo-django:latest
+    image: defectdojo/defectdojo-django:latest
     depends_on:
       - mysql
     entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/entrypoint-uwsgi.sh']

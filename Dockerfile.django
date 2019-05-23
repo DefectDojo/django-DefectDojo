@@ -57,9 +57,9 @@ RUN \
 USER 1001
 ENV \
   DD_ADMIN_USER=admin \
-  DD_ADMIN_MAIL=support@gvit.com \
+  DD_ADMIN_MAIL=admin@defectdojo.local \
   DD_ADMIN_PASSWORD= \
-  DD_ADMIN_FIRST_NAME=Admin \
+  DD_ADMIN_FIRST_NAME=Administrator \
   DD_ADMIN_LAST_NAME=User \
   DD_ALLOWED_HOSTS="*" \
   DD_CELERY_BEAT_SCHEDULE_FILENAME="/run/celery-beat-schedule" \
