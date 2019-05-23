@@ -191,7 +191,7 @@ def async_custom_pdf_report(self,
                                                    'toc_depth': toc_depth,
                                                    'host': host,
                                                    'report_name': report.name})
-        if cover_first_val == True:
+        if cover_first_val:
             pdfData = pdfkit.from_string(htmlToRender,
                                        False,
                                        configuration=config,
@@ -203,7 +203,7 @@ def async_custom_pdf_report(self,
                                          False,
                                          configuration=config,
                                          toc=toc)
-        fObj=ContentFile(pdfData)
+        fObj = ContentFile(pdfData)
         report.file.save(filename, fObj)
         report.status = 'success'
         report.done_datetime = timezone.now()
@@ -211,7 +211,7 @@ def async_custom_pdf_report(self,
 
         create_notification(event='report_created', title='Report created', description='The report "%s" is ready.' % report.name, url=uri, report=report, objowner=report.requester)
     except Exception as e:
-        report.status='error'
+        report.status = 'error'
         report.save()
         # email_requester(report, uri, error=e)
         # raise e
