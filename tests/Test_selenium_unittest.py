@@ -97,7 +97,7 @@ class TestUnitTest(unittest.TestCase):
         driver.find_element_by_name("_Add Tests").click()
         # Fill at least required fields needed to create Test
         # Test title
-        driver.find_element_by_id("id_title").clear() # clear field before inserting anything
+        driver.find_element_by_id("id_title").clear()  # clear field before inserting anything
         driver.find_element_by_id("id_title").send_keys("Quick Security Testing")
         # Select Test type
         Select(driver.find_element_by_id("id_test_type")).select_by_visible_text("Manual Code Review")
@@ -119,9 +119,9 @@ class TestUnitTest(unittest.TestCase):
         driver.get(self.base_url + "endpoint")
         # Select one of the previously created endpoint to edit
         driver.find_element_by_link_text("moving.com.rnd").click()
-         # "Click" the dropdown button to see options
+        # "Click" the dropdown button to see options
         driver.find_element_by_id("dropdownMenu1").click()
-         # "Click" the Edit Endpoint
+        # "Click" the Edit Endpoint
         driver.find_element_by_link_text("Edit Endpoint").click()
         # Clear the old endpoint host name
         driver.find_element_by_id("id_host").clear()
@@ -147,7 +147,7 @@ class TestUnitTest(unittest.TestCase):
         driver.find_element_by_link_text("123.22.43.101").click()
         # "Click" the dropdown button to see options
         driver.find_element_by_id("dropdownMenu1").click()
-         # "Click" the Delete Endpoint
+        # "Click" the Delete Endpoint
         driver.find_element_by_link_text("Delete Endpoint").click()
         # "Click" the delete button to complete the transaction
         driver.find_element_by_css_selector("button.btn.btn-danger").click()
