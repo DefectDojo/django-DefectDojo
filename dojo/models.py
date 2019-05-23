@@ -1289,6 +1289,9 @@ class Finding(models.Model):
                 except:
                     async_false_history.delay(self, *args, **kwargs)
                     pass
+        # Title Casing
+        from titlecase import titlecase
+        self.title = titlecase(self.title)
 
         from dojo.utils import calculate_grade
         calculate_grade(self.test.engagement.product)
