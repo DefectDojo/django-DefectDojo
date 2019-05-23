@@ -142,11 +142,11 @@ class TestUnitTest(unittest.TestCase):
         driver.find_element_by_id("dropdownMenu1").click()
         # "Click" the Edit Test option
         driver.find_element_by_link_text("Add Notes").click()
-        # Select entry field, clear and input note
+        # Select entry, clear field and input note
         driver.find_element_by_id("id_entry").clear()
         driver.find_element_by_id("id_entry").send_keys("This is a sample note for all to see.")
         # "Click" the submit button to complete the transaction
-        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        driver.find_element_by_xpath("//input[@value='Add Note']").click()
         # Query the site to determine if the Test has been updated
         productTxt = driver.find_element_by_tag_name("BODY").text
         # Assert ot the query to dtermine status of failure
@@ -187,7 +187,7 @@ def suite():
     suite.addTest(TestUnitTest('test_create_test'))
     suite.addTest(TestUnitTest('test_edit_test'))
     suite.addTest(TestUnitTest('test_add_note'))
-    suite.addTest(TestUnitTest('test_delete_test'))
+    # suite.addTest(TestUnitTest('test_delete_test'))
     return suite
 
 
