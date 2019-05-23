@@ -10,7 +10,6 @@ RUN \
     postgresql-client \
     wget \
     git \
-    mlocate \
     && \
   wget -O "wkhtmltox_0.12.5-1.stretch_amd64.deb" 'https://downloads.wkhtmltopdf.org/0.12/0.12.5/wkhtmltox_0.12.5-1.stretch_amd64.deb' && \
   apt install -y --fix-broken ./wkhtmltox_0.12.5-1.stretch_amd64.deb && \
@@ -40,7 +39,6 @@ COPY \
   /
 COPY wsgi.py manage.py tests/unit-tests.sh ./
 COPY dojo/ ./dojo/
-RUN updatedb && true
 # Legacy installs need the modified settings.py, do not remove!
 RUN \
   cp dojo/settings/settings.dist.py dojo/settings/settings.py

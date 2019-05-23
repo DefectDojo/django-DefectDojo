@@ -182,8 +182,6 @@ def report_endpoints(request):
 
 
 def download_report(request, rid):
-    import os
-    os.system('ls -lhR /app/media')
     report = get_object_or_404(Report, id=rid)
     original_filename = report.file.name
     file_path = report.file.path
