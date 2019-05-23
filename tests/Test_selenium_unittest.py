@@ -131,6 +131,27 @@ class TestUnitTest(unittest.TestCase):
         # Assert ot the query to dtermine status of failure
         self.assertTrue(re.search(r'Test saved.', productTxt))
 
+    def test_add_note(self):
+        # Login to the site.
+        driver = self.login_page()
+        # Navigate to the engagement page
+        driver.get(self.base_url + "engagement")
+        # Select a previously created engagement title
+        driver.find_element_by_partial_link_text("Quick Security Testing").click()
+        # "Click" the dropdown button to see options
+        driver.find_element_by_id("dropdownMenu1").click()
+        # "Click" the Edit Test option
+        driver.find_element_by_link_text("Add Notes").click()
+        # Select entry field, clear and input note
+        driver.find_element_by_id("id_entry").clear()
+        driver.find_element_by_id("id_entry").send_keys("This is a sample note for all to see.")
+        # "Click" the submit button to complete the transaction
+        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        # Query the site to determine if the Test has been updated
+        productTxt = driver.find_element_by_tag_name("BODY").text
+        # Assert ot the query to dtermine status of failure
+        self.assertTrue(re.search(r'Note added successfully.', productTxt))
+
     def test_delete_test(self):
         # Login to the site. Password will have to be modified
         # to match an admin password in your own container
