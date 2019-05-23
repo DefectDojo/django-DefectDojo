@@ -6,6 +6,15 @@ import sys
 import os
 
 
+# first thing first. We have to create product, just to make sure there is atleast 1 product available
+# to assign endpoints to when creating or editing any.
+# importing Product_selenium_unittest as a module
+# This style is for python2 alone
+import imp
+product_unit_test = imp.load_source('product_selenium_unittest',
+    os.path.join(os.environ['DD_ROOT'], 'tests', 'product_selenium_unittest.py'))
+
+
 class TestUnitTest(unittest.TestCase):
     def setUp(self):
         # Initialize the driver
@@ -36,35 +45,6 @@ class TestUnitTest(unittest.TestCase):
         driver.find_element_by_css_selector("button.btn.btn-success").click()
         return driver
 
-    # first thing first. We create product, just to make sure there is atleast 1 product available
-    # to assign engagements and tests to when creating or editing tests.
-    def test_create_product(self):
-        # Login to the site. Password will have to be modified
-        # to match an admin password in your own container
-        driver = self.login_page()
-        # Navigate to the product page
-        driver.get(self.base_url + "product")
-        # "Click" the dropdown button to see options
-        driver.find_element_by_id("dropdownMenu1").click()
-        # "Click" the add prodcut button
-        driver.find_element_by_link_text("Add Product").click()
-        # Fill in th product name
-        driver.find_element_by_id("id_name").clear()
-        driver.find_element_by_id("id_name").send_keys("QA Test")
-        # Tab into the description area to fill some text
-        # Couldnt find a way to get into the box with selenium
-        driver.find_element_by_id("id_name").send_keys("\tThis is just a test. Be very afraid.")
-        # Select an option in the poroduct type
-        Select(driver.find_element_by_id("id_prod_type")).select_by_visible_text("Research and Development")
-        # "Click" the submit button to complete the transaction
-        driver.find_element_by_css_selector("input.btn.btn-primary").click()
-        # Query the site to determine if the product has been added
-        productTxt = driver.find_element_by_tag_name("BODY").text
-        # Assert ot the query to dtermine status of failure
-        # Also confirm success even if Product is returned as already exists for test sake
-        self.assertTrue(re.search(r'Product added successfully', productTxt) or
-            re.search(r'Product with this Name already exists.', productTxt))
-
     def test_create_test(self):
         # To create test for a product
         # You must have an engagement and then tests are packed in engagements
@@ -90,7 +70,7 @@ class TestUnitTest(unittest.TestCase):
         # engagement target start and target end already have defaults
         # we can safely skip
         # Testing Lead: This can be the logged in user
-        Select(driver.find_element_by_id("id_lead")).select_by_visible_text(os.environ['DOJO_ADMIN_USER'])
+        Select(driver.find_element_by_id("id_lead")).select_by_visible_text(os.environ['DD_ADMIN_USER'])
         # engagement status
         Select(driver.find_element_by_id("id_status")).select_by_visible_text("In Progress")
         # "Click" the 'Add Test' button to Add Test to engagement
@@ -183,7 +163,7 @@ def suite():
     suite = unittest.TestSuite()
     # Add each test the the suite to be run
     # success and failure is output by the test
-    suite.addTest(TestUnitTest('test_create_product'))
+    suite.addTest(product_unit_test.ProductTest('test_create_product'))
     suite.addTest(TestUnitTest('test_create_test'))
     suite.addTest(TestUnitTest('test_edit_test'))
     suite.addTest(TestUnitTest('test_add_note'))
