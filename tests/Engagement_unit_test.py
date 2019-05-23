@@ -77,7 +77,7 @@ class EngagementTest(unittest.TestCase):
         driver.find_element_by_id('id_active').get_attribute('checked')
         driver.find_element_by_id('id_verified').get_attribute('checked')
         Select(driver.find_element_by_id("id_scan_type")).select_by_visible_text("Nmap Scan")
-        driver.find_element_by_id('id_file').send_keys(os.getcwd().replace('/tests','') + "/dojo/unittests/scans/nmap_sample/nmap_multiple_port.xml")
+        driver.find_element_by_id('id_file').send_keys(os.getcwd().replace('/tests', '') + "/dojo/unittests/scans/nmap_sample/nmap_multiple_port.xml")
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
         EngagementTXT = driver.find_element_by_tag_name("BODY").text
         self.assertTrue(re.search(r'Nmap Scan processed, a total of 13 findings were processed', EngagementTXT))
