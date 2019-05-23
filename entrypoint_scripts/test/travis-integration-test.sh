@@ -68,14 +68,8 @@ travis_fold start travis_integration_tests
 
 python tests/check_status.py -v
 python tests/smoke_test.py
-<<<<<<< HEAD
-python tests/product_selenium_unittest.py
-python tests/Endpoint_selenium_unittest.py
-python tests/Test_selenium_unittest.py
-python tests/User_selenium_unittest.py
-=======
-python tests/Endpoint_selenium_unittest.py
->>>>>>> parent of 7919a615... Remove Endpoint test run from integration test
 
+travis_fold end travis_integration_tests
+# python tests/zap.py
 
 set +ex
