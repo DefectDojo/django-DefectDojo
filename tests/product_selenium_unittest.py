@@ -1,5 +1,6 @@
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
+from selenium.webdriver.common.keys import Keys
 import unittest
 import re
 import sys
@@ -46,7 +47,7 @@ class ProductTest(unittest.TestCase):
         driver.find_element_by_link_text("Add Product").click()
         # Fill in th product name
         driver.find_element_by_id("id_name").clear()
-        driver.find_element_by_id("id_name").send_keys("QA Test2")
+        driver.find_element_by_id("id_name").send_keys("QA Test")
         # Tab into the description area to fill some text
         # Couldnt find a way to get into the box with selenium
         driver.find_element_by_id("id_name").send_keys("\tThis is just a test. Be very afraid.")
@@ -61,26 +62,29 @@ class ProductTest(unittest.TestCase):
         self.assertTrue(re.search(r'Product added successfully', productTxt) or
             re.search(r'Product with this Name already exists.', productTxt))
 
-    def test_edit_product_title(self):
+    # For product consistency sake, We won't be editting the product title
+    # instead We can edit the product description
+    def test_edit_product_description(self):
         # Login to the site. Password will have to be modified
         # to match an admin password in your own container
         driver = self.login_page()
         # Navigate to the product page
         driver.get(self.base_url + "product")
+        # Select and click on the particular product to edit
+        driver.find_element_by_link_text("QA Test").click()
         # "Click" the dropdown option
-        driver.find_element_by_class_name("pull-left").click()
-        # "Click" the edit option
+        driver.find_element_by_id("dropdownMenu1").click()
+        # Click on the 'Edit' option
         driver.find_element_by_link_text("Edit").click()
-        # Clear the old product name
-        driver.find_element_by_id("id_name").clear()
-        # Fill in the product name
-        driver.find_element_by_id("id_name").send_keys("EDITED QA Test")
+        # Edit product description
+        driver.find_element_by_id("id_name").send_keys(Keys.TAB, "Updated Desription: ")
         # "Click" the submit button to complete the transaction
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
         # Query the site to determine if the product has been added
         productTxt = driver.find_element_by_tag_name("BODY").text
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(re.search(r'Product updated successfully', productTxt))
+        self.assertTrue(re.search(r'Product updated successfully', productTxt) or
+            re.search(r'Product with this Name already exists.', productTxt))
 
     def test_add_product_engagement(self):
         # Test To Add Engagement To product
@@ -88,8 +92,12 @@ class ProductTest(unittest.TestCase):
         driver = self.login_page()
         # Navigate to Product page
         driver.get(self.base_url + "product")
+        # Select and click on the particular product to edit
+        driver.find_element_by_link_text("QA Test").click()
         # "Click" the dropdown option
-        driver.find_element_by_class_name("pull-left").click()
+        driver.find_element_by_id("dropdownMenu1").click()
+        # Click on the 'Engagement dropdown button'
+        driver.find_element_by_partial_link_text("Engagement").click()
         # 'click' the Add New Engagement option
         driver.find_element_by_link_text("Add New Engagement").click()
         # Keep a good practice of clearing field before entering value
@@ -101,11 +109,11 @@ class ProductTest(unittest.TestCase):
         # engagement description
         # Tab into the description area to fill some text
         # Couldnt find a way to get into the box with selenium
-        driver.find_element_by_id("id_name").send_keys("\tRunning Test on product before approving and push to production.")
+        driver.find_element_by_id("id_name").send_keys(Keys.TAB, "Running Test on product before approving and push to production.")
         # engagement target start and target end already have defaults
         # we can safely skip
         # Testing Lead: This can be the logged in user
-        Select(driver.find_element_by_id("id_lead")).select_by_visible_text(os.environ['DOJO_ADMIN_USER'])
+        Select(driver.find_element_by_id("id_lead")).select_by_visible_text(os.environ['DD_ADMIN_USER'])
         # engagement status
         Select(driver.find_element_by_id("id_status")).select_by_visible_text("In Progress")
         # "Click" the Done button to Add the engagement
@@ -121,9 +129,11 @@ class ProductTest(unittest.TestCase):
         driver = self.login_page()
         # Navigate to Product page
         driver.get(self.base_url + "product")
-        # "Click" the dropdown option
-        driver.find_element_by_class_name("pull-left").click()
-        # 'click' the Add New Engagement option
+        # Select and click on the particular product to edit
+        driver.find_element_by_link_text("QA Test").click()
+        # Click on the 'Finding dropdown button'
+        driver.find_element_by_partial_link_text("Findings").click()
+        # Click on `Add New Finding`
         driver.find_element_by_link_text("Add New Finding").click()
         # Keep a good practice of clearing field before entering value
         # fill up at least all required input field options.
@@ -135,23 +145,23 @@ class ProductTest(unittest.TestCase):
         # finding Severity
         Select(driver.find_element_by_id("id_severity")).select_by_visible_text("High")
         # finding Description
-        # Double Tab into the Description area to fill some text
-        # Couldnt find a way to get into the box with selenium
-        driver.find_elements_by_xpath("//div[@class='editor-toolbar']")[1].click().send_keys("\tThis is a very dangerous weakness to this application and really risky indeed.")
+        driver.find_element_by_id("id_severity").send_keys(Keys.TAB, "This is just a Test Case Finding")
         # Finding Mitigation
-        # Triple Tab into the Mitigation area to fill some text
-        # Couldnt find a way to get into the box with selenium
-        driver.find_element_by_xpath("//textarea[@name='mitigation']").send_keys("\tProperly Filter out inputs entered into that field.")
+        # Use Javascript to bypass the editor by making Setting textArea style from none to inline
+        # Any Text written to textarea automatically reflects in Editor field.
+        driver.execute_script("document.getElementsByName('mitigation')[0].style.display = 'inline'")
+        driver.find_element_by_name("mitigation").send_keys(Keys.TAB, "How to mitigate this finding")
         # Finding Impact
-        # Tab 4 times to get into the Impact area to fill some text
-        # Couldnt find a way to get into the box with selenium
-        driver.find_elements_by_css_selector("textarea#req")[3].send_keys("\tThis is a very dangerous weakness to this application and really risky indeed.")
+        # Use Javascript to bypass the editor by making Setting textArea style from none to inline
+        # Any Text written to textarea automatically reflects in Editor field. 
+        driver.execute_script("document.getElementsByName('impact')[0].style.display = 'inline'")
+        driver.find_element_by_name("impact").send_keys(Keys.TAB, "This has a very critical effect on production")
         # "Click" the Done button to Add the finding with other defaults
-        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        driver.find_element_by_xpath("//input[@name='_Finished']").click()
         # Query the site to determine if the finding has been added
         productTxt = driver.find_element_by_tag_name("BODY").text
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(re.search(r'Engagement added successfully', productTxt))
+        self.assertTrue(re.search(r'App Vulnerable to XSS', productTxt))
 
     def test_add_product_endpoints(self):
         # Test To Add Endpoints To product
@@ -159,14 +169,16 @@ class ProductTest(unittest.TestCase):
         driver = self.login_page()
         # Navigate to Product page
         driver.get(self.base_url + "product")
-        # "Click" the dropdown option
-        driver.find_element_by_class_name("pull-left").click()
+        # Select and click on the particular product to edit
+        driver.find_element_by_link_text("QA Test").click()
+        # Click on the 'Endpoints' dropdown button
+        driver.find_element_by_partial_link_text("Endpoints").click()
         # 'click' the Add New Endpoint option
         driver.find_element_by_link_text("Add New Endpoint").click()
         # Keep a good practice of clearing field before entering value
         # Endpoints
         driver.find_element_by_id("id_endpoint").clear()
-        driver.find_element_by_id("id_endpoint").send_keys("123.22.43.2\nstrange.dir.com\nhttps://anoter.com/strageport")
+        driver.find_element_by_id("id_endpoint").send_keys("strange.prod.dev\n123.45.6.30")
         # submit
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
         # Query the site to determine if the finding has been added
@@ -180,8 +192,10 @@ class ProductTest(unittest.TestCase):
         driver = self.login_page()
         # Navigate to Product page
         driver.get(self.base_url + "product")
+        # Select and click on the particular product to edit
+        driver.find_element_by_link_text("QA Test").click()
         # "Click" the dropdown option
-        driver.find_element_by_class_name("pull-left").click()
+        driver.find_element_by_id("dropdownMenu1").click()
         # 'click' the Add Custom Fields
         driver.find_element_by_link_text("Add Custom Fields").click()
         # Keep a good practice of clearing field before entering value
@@ -206,20 +220,23 @@ class ProductTest(unittest.TestCase):
         driver = self.login_page()
         # Navigate to Product page
         driver.get(self.base_url + "product")
+        # Select and click on the particular product to edit
+        driver.find_element_by_link_text("QA Test").click()
         # "Click" the dropdown option
-        driver.find_element_by_class_name("pull-left").click()
+        driver.find_element_by_id("dropdownMenu1").click()
         # 'click' the Edit Custom Fields
         driver.find_element_by_link_text("Edit Custom Fields").click()
         # Keep a good practice of clearing field before entering value
         # Edit Custom Value of First field
-        driver.find_element_by_name("cfv_1").clear()
-        driver.find_element_by_name("cfv_1").send_keys("Strong")
+        driver.find_element_by_xpath("//input[@value='Loose']").clear()
+        driver.find_element_by_xpath("//input[@value='Loose']").send_keys("Strong")
         # submit
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
         # Query the site to determine if the finding has been added
         productTxt = driver.find_element_by_tag_name("BODY").text
         # Assert ot the query to dtermine success or failure
-        self.assertTrue(re.search(r'Metadata edited successfully', productTxt))
+        self.assertTrue(re.search(r'Metadata edited successfully', productTxt) or
+            re.search(r'A metadata entry with the same name exists already for this object.', productTxt))
 
     def test_add_product_tracking_files(self):
         # Test To Add tracking files To product
@@ -227,8 +244,10 @@ class ProductTest(unittest.TestCase):
         driver = self.login_page()
         # Navigate to Product page
         driver.get(self.base_url + "product")
+        # Select and click on the particular product to edit
+        driver.find_element_by_link_text("QA Test").click()
         # "Click" the dropdown option
-        driver.find_element_by_class_name("pull-left").click()
+        driver.find_element_by_id("dropdownMenu1").click()
         # 'click' the Add Product Tracking Files
         driver.find_element_by_link_text("Add Product Tracking Files").click()
         # Keep a good practice of clearing field before entering value
@@ -251,8 +270,10 @@ class ProductTest(unittest.TestCase):
         driver = self.login_page()
         # Navigate to Product page
         driver.get(self.base_url + "product")
+        # Select and click on the particular product to edit
+        driver.find_element_by_link_text("QA Test").click()
         # "Click" the dropdown option
-        driver.find_element_by_class_name("pull-left").click()
+        driver.find_element_by_id("dropdownMenu1").click()
         # 'click' the Edit Product Tracking Files
         driver.find_element_by_link_text("View Product Tracking Files").click()
         # Keep a good practice of clearing field before entering value
@@ -274,9 +295,11 @@ class ProductTest(unittest.TestCase):
         driver = self.login_page()
         # Navigate to the product page
         driver.get(self.base_url + "product")
-        # "Click" the dropdown option
-        driver.find_element_by_class_name("pull-left").click()
-        # "Click" the edit option
+        # Select the specific product to delete
+        driver.find_element_by_link_text("QA Test").click()
+        # Click the drop down menu
+        driver.find_element_by_id('dropdownMenu1').click()
+        # "Click" the Delete option
         driver.find_element_by_link_text("Delete").click()
         # "Click" the delete button to complete the transaction
         driver.find_element_by_css_selector("button.btn.btn-danger").click()
@@ -295,9 +318,9 @@ def suite():
     # Add each test and the suite to be run
     # success and failure is output by the test
     suite.addTest(ProductTest('test_create_product'))
-    suite.addTest(ProductTest('test_edit_product_title'))
+    suite.addTest(ProductTest('test_edit_product_description'))
     suite.addTest(ProductTest('test_add_product_engagement'))
-    # suite.addTest(ProductTest('test_add_product_finding'))
+    suite.addTest(ProductTest('test_add_product_finding'))
     suite.addTest(ProductTest('test_add_product_endpoints'))
     suite.addTest(ProductTest('test_add_product_custom_field'))
     suite.addTest(ProductTest('test_edit_product_custom_field'))
