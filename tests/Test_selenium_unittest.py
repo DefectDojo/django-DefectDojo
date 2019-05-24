@@ -20,6 +20,7 @@ except:  # If python 3 code above fails This will work for python2
     product_unit_test = imp.load_source('product_selenium_unittest',
         os.path.join(os.environ['DD_ROOT'], 'tests', 'product_selenium_unittest.py'))
 
+
 class TestUnitTest(unittest.TestCase):
     def setUp(self):
         # Initialize the driver
@@ -58,8 +59,12 @@ class TestUnitTest(unittest.TestCase):
         driver = self.login_page()
         # Navigate to the Product page to select the product we created earlier
         driver.get(self.base_url + "product")
+        # Select and click on the particular product to create test for
+        driver.find_element_by_link_text("QA Test").click()
         # "Click" the dropdown option
-        driver.find_element_by_class_name("pull-left").click()
+        driver.find_element_by_id("dropdownMenu1").click()
+        # Click on the 'Engagement' Dropdown button
+        driver.find_element_by_partial_link_text("Engagement").click()
         # 'click' the Add New Engagement option
         driver.find_element_by_link_text("Add New Engagement").click()
         # Keep a good practice of clearing field before entering value
