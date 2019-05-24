@@ -38,6 +38,9 @@ class SnykParser(object):
 
 def get_item(vulnerability, test):
 
+    cve_references = ''
+    cwe_references = ''
+
     # vulnerable and unaffected versions can be in string format for a single vulnerable version, or an array for multiple versions depending on the language.
     if isinstance(vulnerability['semver']['vulnerable'], list):
         vulnerable_versions = ", ".join(vulnerability['semver']['vulnerable'])
@@ -49,6 +52,8 @@ def get_item(vulnerability, test):
             if isinstance(vulnerability['identifiers']['CVE'], list):
                 # Per the current json format, if several CVEs listed, take the first one.
                 cve = ' '.join(vulnerability['identifiers']['CVE']).split(" ")[0]
+                if len(vulnerability['identifiers']['CVE']) > 1:
+                    cve_references = ', '.join(vulnerability['identifiers']['CVE'])
             else:
                 # In case the structure is not a list?
                 cve = vulnerability['identifiers']['CVE']
@@ -57,6 +62,8 @@ def get_item(vulnerability, test):
             if isinstance(vulnerability['identifiers']['CWE'], list):
                 # Per the current json format, if several CWEs, take the first one.
                 cwe = ' '.join(vulnerability['identifiers']['CWE']).split(" ")[0].split("-")[1]
+                if len(vulnerability['identifiers']['CVE']) > 1:
+                    cwe_references = ', '.join(vulnerability['identifiers']['CWE'])
             else:
                 # in case the structure is not a list?
                 cwe = ''.join(vulnerability['identifiers']['CWE']).split("-")[1]
@@ -80,6 +87,12 @@ def get_item(vulnerability, test):
         # Re-assign 'severity' directly
         severity = vulnerability['severity'].title()
 
+    if cve_references or cwe_references:
+        references = "Several CVEs or CWEs were reported: \n\n{}\n{}".format(
+            cve_references, cwe_references)
+    else:
+        references = "Refer to the description above for references."
+
     # create the finding object
     finding = Finding(
         title=vulnerability['from'][0] + ": " + vulnerability['title'] + " - " + "(" + vulnerability['packageName'] + ", " + vulnerability['version'] + ")",
@@ -87,13 +100,13 @@ def get_item(vulnerability, test):
         severity=severity,
         cwe=cwe,
         cve=cve,
-        description=vulnerability['description'] + "\n Vulnerable Package: " +
-        vulnerability['packageName'] + "\n Current Version: " + str(
-            vulnerability['version']) + "\n Vulnerable Version(s): " +
-        vulnerable_versions + "\n Vulnerable Path: " + " > ".join(
-            vulnerability['from']),
+        description="<h2>Details</h2><p><li>Vulnerable Package: " +
+        vulnerability['packageName'] + "</li><li> Current Version: " + str(
+            vulnerability['version']) + "</li><li>Vulnerable Version(s): " +
+        vulnerable_versions + "</li><li>Vulnerable Path: " + " > ".join(
+            vulnerability['from']) + "</li></p>" + vulnerability['description'],
         mitigation="A fix (if available) will be provided in the description.",
-        references="Provided in the description.",
+        references=references,
         active=False,
         verified=False,
         false_p=False,
