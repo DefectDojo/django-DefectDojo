@@ -174,7 +174,8 @@ def suite():
     suite.addTest(TestUnitTest('test_create_test'))
     suite.addTest(TestUnitTest('test_edit_test'))
     suite.addTest(TestUnitTest('test_add_note'))
-    # suite.addTest(TestUnitTest('test_delete_test'))
+    suite.addTest(TestUnitTest('test_delete_test'))
+    suite.addTest(product_unit_test.ProductTest('test_delete_product'))
     return suite
 
 
