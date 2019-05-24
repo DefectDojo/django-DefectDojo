@@ -34,7 +34,5 @@ spec:
                 secretKeyRef:
                   name: {{ $fullName }}-{{ .Values.database }}
                   key: {{ .Values.database }}-password
-          resources:
-            {{- toYaml .Values.initializer.resources | nindent 10 }}
       restartPolicy: Never
   backoffLimit: 1
