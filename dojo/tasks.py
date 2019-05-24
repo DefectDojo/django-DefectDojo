@@ -19,7 +19,7 @@ from dojo.celery import app
 from dojo.utils import sync_dedupe, sync_false_history, calculate_grade
 from dojo.reports.widgets import report_widget_factory
 from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, \
-                       close_epic, create_notification, sync_rules
+                       close_epic, create_notification, sync_rules, get_system_setting
 
 import logging
 fmt = getattr(settings, 'LOG_FORMAT', None)
@@ -184,8 +184,11 @@ def async_custom_pdf_report(self,
             x = urlencode({'title': cp.title,
                            'subtitle': cp.sub_heading,
                            'info': cp.meta_info})
-            cover = "http://nginx:8080/" + reverse(
-                'report_cover_page') + "?" + x
+            if get_system_setting('DD_IS_DOCKER'):
+                nginxHost = "{0}:{1}".format(get_system_setting('DD_NGINX_CONTAINER_REF'), str(get_system_setting('DD_NGINX_CONTAINER_PORT')))
+            else:
+                nginxHost = host
+            cover = nginxHost + reverse('report_cover_page') + "?" + x
 
         htmlToRender = render_to_string(template, {'widgets': widgets,
                                                    'toc_depth': toc_depth,
