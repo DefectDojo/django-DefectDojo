@@ -132,7 +132,7 @@ class ProductTest(unittest.TestCase):
         # Select and click on the particular product to edit
         driver.find_element_by_link_text("QA Test").click()
         # Click on the 'Finding dropdown button'
-        driver.find_element_by_link_text("Findings").click()
+        driver.find_element_by_partial_link_text("Findings").click()
         # Click on `Add New Finding`
         driver.find_element_by_link_text("Add New Finding").click()
         # Keep a good practice of clearing field before entering value
@@ -145,13 +145,19 @@ class ProductTest(unittest.TestCase):
         # finding Severity
         Select(driver.find_element_by_id("id_severity")).select_by_visible_text("High")
         # finding Description
-        driver.find_element_by_xpath("//textarea[@name='description']").send_keys(Keys.ALT, Keys.TAB, "This is just a Test Case Finding")
+        driver.find_element_by_id("id_severity").send_keys(Keys.TAB, "This is just a Test Case Finding")
         # Finding Mitigation
-        driver.find_element_by_xpath("//textarea[@name='mitigation']").send_keys(Keys.TAB, "How to mitigate this finding")
+        # Use Javascript to bypass the editor by making Setting textArea style from none to inline
+        # Any Text written to textarea automatically reflects in Editor field.
+        driver.execute_script("document.getElementsByName('mitigation')[0].style.display = 'inline'")
+        driver.find_element_by_name("mitigation").send_keys(Keys.TAB, "How to mitigate this finding")
         # Finding Impact
-        driver.find_element_by_xpath("//textarea[@name='impact']").send_keys(Keys.TAB, "Impact of this Finding Goes here")
+        # Use Javascript to bypass the editor by making Setting textArea style from none to inline
+        # Any Text written to textarea automatically reflects in Editor field. 
+        driver.execute_script("document.getElementsByName('impact')[0].style.display = 'inline'")
+        driver.find_element_by_name("impact").send_keys(Keys.TAB, "This has a very critical effect on production")
         # "Click" the Done button to Add the finding with other defaults
-        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        driver.find_element_by_xpath("//input[@name='_Finished']").click()
         # Query the site to determine if the finding has been added
         productTxt = driver.find_element_by_tag_name("BODY").text
         # Assert ot the query to dtermine status of failure
@@ -313,11 +319,11 @@ def suite():
     # success and failure is output by the test
     suite.addTest(ProductTest('test_create_product'))
     suite.addTest(ProductTest('test_edit_product_description'))
-    # suite.addTest(ProductTest('test_add_product_engagement'))
-    # suite.addTest(ProductTest('test_add_product_finding'))
-    # suite.addTest(ProductTest('test_add_product_endpoints'))
-    # suite.addTest(ProductTest('test_add_product_custom_field'))
-    # suite.addTest(ProductTest('test_edit_product_custom_field'))
+    suite.addTest(ProductTest('test_add_product_engagement'))
+    suite.addTest(ProductTest('test_add_product_finding'))
+    suite.addTest(ProductTest('test_add_product_endpoints'))
+    suite.addTest(ProductTest('test_add_product_custom_field'))
+    suite.addTest(ProductTest('test_edit_product_custom_field'))
     suite.addTest(ProductTest('test_add_product_tracking_files'))
     suite.addTest(ProductTest('test_edit_product_tracking_files'))
     suite.addTest(ProductTest('test_delete_product'))
