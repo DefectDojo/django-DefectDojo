@@ -153,7 +153,7 @@ class ProductTest(unittest.TestCase):
         driver.find_element_by_name("mitigation").send_keys(Keys.TAB, "How to mitigate this finding")
         # Finding Impact
         # Use Javascript to bypass the editor by making Setting textArea style from none to inline
-        # Any Text written to textarea automatically reflects in Editor field. 
+        # Any Text written to textarea automatically reflects in Editor field.
         driver.execute_script("document.getElementsByName('impact')[0].style.display = 'inline'")
         driver.find_element_by_name("impact").send_keys(Keys.TAB, "This has a very critical effect on production")
         # "Click" the Done button to Add the finding with other defaults
