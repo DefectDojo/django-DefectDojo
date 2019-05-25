@@ -60,7 +60,7 @@ class UserTest(unittest.TestCase):
         # Email Address
         driver.find_element_by_id("id_email").clear()
         driver.find_element_by_id("id_email").send_keys("propersam@example.com")
-        # Select user with super user permissions
+        # Give user super user permissions by ticking the checkbox 'is_superuser'
         driver.find_element_by_name("is_superuser").click()  # Clicking will mark the checkbox
         # "Click" the submit button to complete the transaction
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
@@ -76,9 +76,19 @@ class UserTest(unittest.TestCase):
         driver = self.login_page()
         # Navigate to User Management page
         driver.get(self.base_url + "user")
-        # Select A user to edit
+        # Select the previously created user to edit
+        # The User name is not clickable
+        # so we would have to select specific user by filtering list of users
+        driver.find_element_by_id("show-filters").click()  # open d filters
+        # Insert username to filter by into user name box
+        driver.find_element_by_id("id_username").clear()
+        driver.find_element_by_id("id_username").send_keys("propersahm")
+        # click on 'apply filter' button
+        driver.find_element_by_css_selector("button.btn.btn-sm.btn-primary").click()
+        # only the needed user is now available proceed with clicking 'Edit' button
         driver.find_element_by_link_text("Edit").click()
-        # Unselect Super Admin Permission and only select Staff Permission
+        # Unselect Super Admin Permission from previously created user
+        # and only select Staff Permission
         driver.find_element_by_name("is_superuser").click()
         driver.find_element_by_name("is_staff").click()
         # "Click" the submit button to complete the transaction
@@ -95,6 +105,15 @@ class UserTest(unittest.TestCase):
         # Navigate to the product page
         driver.get(self.base_url + "user")
         # Select A user to edit
+        # The User name is not clickable
+        # so we would have to select specific user by filtering list of users
+        driver.find_element_by_id("show-filters").click()  # open d filters
+        # Insert username to filter by into user name box
+        driver.find_element_by_id("id_username").clear()
+        driver.find_element_by_id("id_username").send_keys("propersahm")
+        # click on 'apply filter' button
+        driver.find_element_by_css_selector("button.btn.btn-sm.btn-primary").click()
+        # only the needed user is now available proceed with clicking 'Edit' button
         driver.find_element_by_link_text("Edit").click()
         # "Click" the delete button to complete the transaction
         driver.find_element_by_css_selector("a.btn.btn-danger").click()
@@ -116,7 +135,7 @@ def suite():
     # success and failure is output by the test
     suite.addTest(UserTest('test_create_user'))
     suite.addTest(UserTest('test_user_edit_permissions'))
-    # suite.addTest(UserTest('test_delete_user'))
+    suite.addTest(UserTest('test_user_delete'))
     return suite
 
 
