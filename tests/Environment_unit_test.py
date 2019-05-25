@@ -5,10 +5,10 @@ import sys
 import os
 
 
-class ProductTest(unittest.TestCase):
+class EnvironmentTest(unittest.TestCase):
     def setUp(self):
         # change path of chromedriver according to which directory you have chromedriver.
-        self.driver = webdriver.Chrome('/home/dr3dd/gsoc2/chromedriver')
+        self.driver = webdriver.Chrome('chromedriver')
         self.driver.implicitly_wait(30)
         self.base_url = "http://localhost:8000/"
         self.verificationErrors = []
@@ -24,35 +24,34 @@ class ProductTest(unittest.TestCase):
         driver.find_element_by_css_selector("button.btn.btn-success").click()
         return driver
 
-    def test_create_product_type(self):
+    def test_create_environment(self):
         driver = self.login_page()
-        driver.get(self.base_url + "product/type")
+        driver.get(self.base_url + "dev_env")
         driver.find_element_by_id("dropdownMenu1").click()
-        driver.find_element_by_link_text("Add Product Type").click()
+        driver.find_element_by_link_text("New Environment").click()
         driver.find_element_by_id("id_name").clear()
-        driver.find_element_by_id("id_name").send_keys("product test type")
-        driver.find_element_by_id("id_critical_product").click()
+        driver.find_element_by_id("id_name").send_keys("environment test")
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
         productTxt = driver.find_element_by_tag_name("BODY").text
-        self.assertTrue(re.search(r'Product type added successfully.', productTxt))
+        self.assertTrue(re.search(r'Environment added successfully.', productTxt))
 
-    def test_edit_product_type(self):
+    def test_edit_environment(self):
         driver = self.login_page()
-        driver.get(self.base_url + "product/type")
-        driver.find_element_by_link_text("Edit Product Type").click()
+        driver.get(self.base_url + "dev_env")
+        driver.find_element_by_link_text("environment test").click()
         driver.find_element_by_id("id_name").clear()
-        driver.find_element_by_id("id_name").send_keys("Edited product test type")
+        driver.find_element_by_id("id_name").send_keys("Edited environment test")
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
         productTxt = driver.find_element_by_tag_name("BODY").text
-        self.assertTrue(re.search(r'Product type updated successfully.', productTxt))
+        self.assertTrue(re.search(r'Environment updated successfully.', productTxt))
 
-    def test_delete_product_type(self):
+    def test_delete_environment(self):
         driver = self.login_page()
-        driver.get(self.base_url + "product/type")
-        driver.find_element_by_link_text("Edit Product Type").click()
+        driver.get(self.base_url + "dev_env")
+        driver.find_element_by_link_text("Edited environment test").click()
         driver.find_element_by_css_selector("input.btn.btn-danger").click()
         productTxt = driver.find_element_by_tag_name("BODY").text
-        self.assertTrue(re.search(r'Product type Deleted successfully.', productTxt))
+        self.assertTrue(re.search(r'Environment deleted successfully.', productTxt))
 
     def tearDown(self):
         self.driver.quit()
@@ -61,9 +60,9 @@ class ProductTest(unittest.TestCase):
 
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(ProductTest('test_create_product_type'))
-    suite.addTest(ProductTest('test_edit_product_type'))
-    suite.addTest(ProductTest('test_delete_product_type'))
+    suite.addTest(EnvironmentTest('test_create_environment'))
+    suite.addTest(EnvironmentTest('test_edit_environment'))
+    suite.addTest(EnvironmentTest('test_delete_environment'))
     return suite
 
 
