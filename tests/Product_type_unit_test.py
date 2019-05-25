@@ -8,7 +8,7 @@ import os
 class ProductTest(unittest.TestCase):
     def setUp(self):
         # change path of chromedriver according to which directory you have chromedriver.
-        self.driver = webdriver.Chrome('/home/dr3dd/gsoc2/chromedriver')
+        self.driver = webdriver.Chrome('chromedriver')
         self.driver.implicitly_wait(30)
         self.base_url = "http://localhost:8000/"
         self.verificationErrors = []
