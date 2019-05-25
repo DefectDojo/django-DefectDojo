@@ -5,20 +5,20 @@ import re
 import sys
 import os
 
+
 # first thing first. We have to create product, just to make sure there is atleast 1 product available
 # to assign endpoints to when creating or editing any.
 # importing Product_selenium_unittest as a module
-
-try:  # This will work for python2
-    import imp
-    product_unit_test = imp.load_source('product_selenium_unittest',
-        os.path.join(os.environ['DD_ROOT'], 'tests', 'product_selenium_unittest.py'))
-except:  # if Above fails then this is for python 3
+try:  # First Try for python 3
     import importlib.util
     product_unit_test_module = importlib.util.spec_from_file_location("product_selenium_unittest",
         os.path.join(os.environ['DD_ROOT'], 'tests', 'product_selenium_unittest.py'))
     product_unit_test = importlib.util.module_from_spec(product_unit_test_module)
     product_unit_test_module.loader.exec_module(product_unit_test)
+except:  # This will work for python2 if above fails
+    import imp
+    product_unit_test = imp.load_source('product_selenium_unittest',
+        os.path.join(os.environ['DD_ROOT'], 'tests', 'product_selenium_unittest.py'))
 
 
 class EndpointTest(unittest.TestCase):
@@ -132,6 +132,7 @@ def suite():
     suite.addTest(EndpointTest('test_create_endpoint'))
     suite.addTest(EndpointTest('test_edit_endpoint'))
     suite.addTest(EndpointTest('test_delete_endpoint'))
+    suite.addTest(product_unit_test.ProductTest('test_delete_product'))
     return suite
 
 
