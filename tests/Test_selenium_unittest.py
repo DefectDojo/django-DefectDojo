@@ -20,7 +20,7 @@ try:  # First Try for python 3
 except:  # This will work for python2 if above fails
     import imp
     product_unit_test = imp.load_source('product_selenium_unittest',
-        os.path.join(os.environ['DD_ROOT'], 'tests', 'product_selenium_unittest.py'))
+        os.path.join(dir_path, 'product_selenium_unittest.py'))
 
 
 class TestUnitTest(unittest.TestCase):
