@@ -10,7 +10,7 @@ import os
 class ProductTest(unittest.TestCase):
     def setUp(self):
         # Initialize the driver
-        self.driver = webdriver.Chrome('chromedriver')
+        self.driver = webdriver.Chrome('/home/dr3dd/gsoc2/chromedriver')
         # Allow a little time for the driver to initialize
         self.driver.implicitly_wait(30)
         # Set the base address of the dojo
