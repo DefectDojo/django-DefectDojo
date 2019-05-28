@@ -22,7 +22,7 @@ except:  # This will work for python2 if above fails
 
 class EngagementTest(unittest.TestCase):
     def setUp(self):
-        self.driver = webdriver.Chrome('/home/dr3dd/gsoc2/chromedriver')
+        self.driver = webdriver.Chrome('chromedriver')
         self.driver.implicitly_wait(30)
         self.base_url = "http://localhost:8000/"
         self.verificationErrors = []
