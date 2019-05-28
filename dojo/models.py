@@ -787,7 +787,7 @@ class Engagement(models.Model):
                                    null=True, blank=True, help_text="Tag or branch of the product the engagement tested.", verbose_name="Branch/Tag")
     build_server = models.ForeignKey(Tool_Configuration, verbose_name="Build Server", help_text="Build server responsible for CI/CD test", null=True, blank=True, related_name='build_server')
     source_code_management_server = models.ForeignKey(Tool_Configuration, null=True, blank=True, verbose_name="SCM Server", help_text="Source code server for CI/CD test", related_name='source_code_management_server')
-    source_code_management_uri = models.CharField(max_length=600, null=True, blank=True, verbose_name="Repo", help_text="Resource link to source code")
+    source_code_management_uri = models.URLField(max_length=600, null=True, blank=True, editable=True, verbose_name="Repo", help_text="Resource link to source code")
     orchestration_engine = models.ForeignKey(Tool_Configuration, verbose_name="Orchestration Engine", help_text="Orchestration service responsible for CI/CD test", null=True, blank=True, related_name='orchestration')
     deduplication_on_engagement = models.BooleanField(default=False)
 
