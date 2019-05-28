@@ -63,6 +63,7 @@ class BlackduckHubCSVParser(object):
 
                 finding = Finding(title=title,
                                   cwe=int(cwe),
+                                  cve=cve,
                                   test=test,
                                   active=False,
                                   verified=False,
