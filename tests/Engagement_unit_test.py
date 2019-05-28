@@ -19,7 +19,6 @@ except:  # This will work for python2 if above fails
         os.path.join(dir_path, 'product_selenium_unittest.py'))
 
 
-
 class EngagementTest(unittest.TestCase):
     def setUp(self):
         self.driver = webdriver.Chrome('chromedriver')
