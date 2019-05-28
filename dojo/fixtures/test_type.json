@@ -312,5 +312,12 @@
     },
     "model": "dojo.test_type",
     "pk": 52
+  },
+  {
+    "fields": {
+      "name": "Sonatype Application Scan"
+    },
+    "model": "dojo.test_type",
+    "pk": 53
   }
 ]
