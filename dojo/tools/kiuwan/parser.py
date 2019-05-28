@@ -63,7 +63,11 @@ class KiuwanCSVParser(object):
             finding.references = "Not provided!"
             finding.mitigation = "Not provided!"
             finding.severity = findingdict['severity']
-            finding.cwe = row['CWE']
+            finding.static_finding = True
+            try:
+                finding.cwe = int(row['CWE'])
+            except:
+                pass
 
             if finding is not None:
                 if finding.title is None:
