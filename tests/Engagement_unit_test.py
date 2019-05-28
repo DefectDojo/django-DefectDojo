@@ -118,15 +118,6 @@ class EngagementTest(unittest.TestCase):
         EngagementTXT = driver.find_element_by_tag_name("BODY").text
         self.assertTrue(re.search(r'Engagement added successfully.', EngagementTXT))
 
-    def delete_created_product(self):
-        driver = self.login_page()
-        driver.get(self.base_url + "product")
-        driver.find_element_by_class_name("pull-left").click()
-        driver.find_element_by_link_text('Delete').click()
-        driver.find_element_by_name('delete_name').click()
-        EngagementTXT = driver.find_element_by_tag_name("BODY").text
-        self.assertTrue(re.search(r'Product and relationships removed.', EngagementTXT))
-
     def tearDown(self):
         self.driver.quit()
         self.assertEqual([], self.verificationErrors)
@@ -141,7 +132,7 @@ def suite():
     suite.addTest(EngagementTest('test_close_new_engagement'))
     suite.addTest(EngagementTest('test_delete_new_closed_engagement'))
     suite.addTest(EngagementTest('test_new_ci_cd_engagement'))
-    suite.addTest(EngagementTest('delete_created_product'))
+    suite.addTest(product_unit_test.ProductTest('test_delete_product'))
     return suite
 
 
