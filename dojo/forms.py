@@ -294,7 +294,8 @@ class ImportScanForm(forms.Form):
                          ("Twistlock Image Scan", "Twistlock Image Scan"),
                          ("Kiuwan Scan", "Kiuwan Scan"),
                          ("Blackduck Hub Scan", "Blackduck Hub Scan"),
-                         ("Sonatype Application Scan", "Sonatype Application Scan"))
+                         ("Sonatype Application Scan", "Sonatype Application Scan"),
+                         ("Openscap Vulnerability Scan", "Openscap Vulnerability Scan"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
 
