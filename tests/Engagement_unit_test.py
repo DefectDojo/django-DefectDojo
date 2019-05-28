@@ -6,9 +6,23 @@ import sys
 import os
 
 
+dir_path = os.path.dirname(os.path.realpath(__file__))
+try:  # First Try for python 3
+    import importlib.util
+    product_unit_test_module = importlib.util.spec_from_file_location("product_selenium_unittest",
+        os.path.join(dir_path, 'product_selenium_unittest.py'))  # using ',' allows python to determine the type of separator to use.
+    product_unit_test = importlib.util.module_from_spec(product_unit_test_module)
+    product_unit_test_module.loader.exec_module(product_unit_test)
+except:  # This will work for python2 if above fails
+    import imp
+    product_unit_test = imp.load_source('product_selenium_unittest',
+        os.path.join(dir_path, 'product_selenium_unittest.py'))
+
+
+
 class EngagementTest(unittest.TestCase):
     def setUp(self):
-        self.driver = webdriver.Chrome('chromedriver')
+        self.driver = webdriver.Chrome('/home/dr3dd/gsoc2/chromedriver')
         self.driver.implicitly_wait(30)
         self.base_url = "http://localhost:8000/"
         self.verificationErrors = []
@@ -23,19 +37,6 @@ class EngagementTest(unittest.TestCase):
         driver.find_element_by_id("id_password").send_keys(os.environ['DD_ADMIN_PASSWORD'])
         driver.find_element_by_css_selector("button.btn.btn-success").click()
         return driver
-
-    def create_new_product_to_test_engagement(self):
-        driver = self.login_page()
-        driver.get(self.base_url + "product")
-        driver.find_element_by_id("dropdownMenu1").click()
-        driver.find_element_by_link_text("Add Product").click()
-        driver.find_element_by_id("id_name").clear()
-        driver.find_element_by_id("id_name").send_keys("Engagement Test")
-        driver.find_element_by_id("id_name").send_keys("\tthis is engagement test.")
-        Select(driver.find_element_by_id("id_prod_type")).select_by_visible_text("Research and Development")
-        driver.find_element_by_css_selector("input.btn.btn-primary").click()
-        EngagementTXT = driver.find_element_by_tag_name("BODY").text
-        self.assertTrue(re.search(r'Product added successfully', EngagementTXT))
 
     def test_add_new_engagement(self):
         driver = self.login_page()
@@ -108,7 +109,7 @@ class EngagementTest(unittest.TestCase):
     def test_new_ci_cd_engagement(self):
         driver = self.login_page()
         driver.get(self.base_url + "product")
-        driver.find_element_by_link_text('Engagement Test').click()
+        driver.find_element_by_link_text('QA Test').click()
         driver.find_element_by_xpath("//a[@class='dropdown-toggle active']//span[@class='hidden-xs']").click()
         driver.find_element_by_link_text('Add New CI/CD Engagement').click()
         driver.find_element_by_id("id_name").send_keys("test new ci/cd engagement")
@@ -134,7 +135,7 @@ class EngagementTest(unittest.TestCase):
 
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(EngagementTest('create_new_product_to_test_engagement'))
+    suite.addTest(product_unit_test.ProductTest('test_create_product'))
     suite.addTest(EngagementTest('test_add_new_engagement'))
     suite.addTest(EngagementTest('test_edit_created_new_engagement'))
     suite.addTest(EngagementTest('test_engagement_import_scan_result'))
