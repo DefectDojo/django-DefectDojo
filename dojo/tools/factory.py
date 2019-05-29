@@ -155,13 +155,10 @@ def import_parser_factory(file, test, scan_type=None):
         parser = KiuwanCSVParser(file, test)
     elif scan_type == 'Blackduck Hub Scan':
         parser = BlackduckHubCSVParser(file, test)
-<<<<<<< HEAD
     elif scan_type == 'Sonatype Application Scan':
         parser = SonatypeJSONParser(file, test)
-=======
     elif scan_type == 'Openscap Vulnerability Scan':
         parser = OpenscapXMLParser(file, test)
->>>>>>> openscap scan start
     else:
         raise ValueError('Unknown Test Type')
 
