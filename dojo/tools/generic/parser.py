@@ -5,7 +5,6 @@ from dojo.models import Finding, Endpoint
 from dateutil.parser import parse
 import re
 from urlparse import urlparse
-import sys
 import socket
 # from engagement.views import
 
@@ -330,8 +329,12 @@ class GenericFindingUploadCsvParser(object):
 
             if self.active:
                 finding.active = ActiveColumnMappingStrategy.evaluate_bool_value(row[9])#Corresponds to Active Row
+            else:
+                finding.active = False
             if self.verified:
                 finding.verified = VerifiedColumnMappingStrategy.evaluate_bool_value(row[10])#Corresponds to Verified Row
+            else:
+                finding.verified = False
             if finding is not None:
                 key = hashlib.md5(finding.severity + '|' + finding.title + '|' + finding.description).hexdigest()
 
