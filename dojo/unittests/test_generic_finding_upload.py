@@ -6,10 +6,6 @@ from django.test import TestCase
 from dojo.models import Finding, Test, Engagement, Product
 from dojo.tools.generic.parser import GenericFindingUploadCsvParser
 
-#My Additions
-#from dojo.forms import ImportScanForm
-
-
 class TestFile(object):
 
     def read(self):

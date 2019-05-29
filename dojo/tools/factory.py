@@ -98,7 +98,7 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
     elif scan_type == 'Symfony Security Check':
         parser = PhpSymfonySecurityCheckParser(file, test)
     elif scan_type == 'Generic Findings Import':
-        parser = GenericFindingUploadCsvParser(file, test, active, verified)#New call utilizing the active and verified checkboxes
+        parser = GenericFindingUploadCsvParser(file, test, active, verified)
     elif scan_type == 'Qualys Scan':
         parser = QualysParser(file, test)
     elif scan_type == 'Qualys Webapp Scan':

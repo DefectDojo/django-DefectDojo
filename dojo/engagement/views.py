@@ -476,8 +476,8 @@ def import_scan_results(request, eid=None, pid=None):
             file = request.FILES['file']
             scan_date = form.cleaned_data['scan_date']
             min_sev = form.cleaned_data['minimum_severity']
-            active = form.cleaned_data['active'] #Active Checkbox - outputs True or False
-            verified = form.cleaned_data['verified'] #Verified Checkbox - outputs True or False
+            active = form.cleaned_data['active']
+            verified = form.cleaned_data['verified']
             scan_type = request.POST['scan_type']
             if not any(scan_type in code
                        for code in ImportScanForm.SCAN_TYPE_CHOICES):
@@ -514,7 +514,7 @@ def import_scan_results(request, eid=None, pid=None):
                     new_f.cred_id = cred_user.cred_id
                     new_f.save()
 
-            parser = import_parser_factory(file, t, active, verified)# The Call to Generic Findings Import is made here
+            parser = import_parser_factory(file, t, active, verified)
 
             try:
                 for item in parser.items:
