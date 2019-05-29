@@ -125,7 +125,7 @@ class OpenscapXMLParser(object):
                                                  query=query,
                                                  fragment=fragment,
                                                  path=path,
-                                                 product=finding.test.engagement.product)
+                                                 )
         except Endpoint.DoesNotExist:
             dupe_endpoint = None
 
@@ -135,7 +135,7 @@ class OpenscapXMLParser(object):
                                 query=query,
                                 fragment=fragment,
                                 path=path,
-                                product=finding.test.engagement.product)
+                                )
         else:
             endpoint = dupe_endpoint
 
