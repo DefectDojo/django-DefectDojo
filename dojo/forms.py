@@ -1,5 +1,4 @@
 import re
-import sys#Used for debugging
 from datetime import datetime, date
 from urlparse import urlsplit, urlunsplit
 

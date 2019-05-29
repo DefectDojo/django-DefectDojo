@@ -3,7 +3,6 @@ import logging
 import os
 from datetime import datetime
 import operator
-import sys
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.contrib import messages
@@ -479,8 +478,6 @@ def import_scan_results(request, eid=None, pid=None):
             min_sev = form.cleaned_data['minimum_severity']
             active = form.cleaned_data['active'] #Active Checkbox - outputs True or False
             verified = form.cleaned_data['verified'] #Verified Checkbox - outputs True or False
-            #sys.stderr.write(" Active in import_scan_results is :: " + str(active) + "\n")
-            #sys.stderr.write(" Verified in import_scan_results is :: " + str(active) + "\n")
             scan_type = request.POST['scan_type']
             if not any(scan_type in code
                        for code in ImportScanForm.SCAN_TYPE_CHOICES):
