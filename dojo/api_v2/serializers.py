@@ -526,6 +526,8 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         data = self.validated_data
         skip_duplicates = data['skip_duplicates']
         close_old_findings = data['close_old_findings']
+        active = data['active']
+        verified = data['verified']
         test_type, created = Test_Type.objects.get_or_create(
             name=data.get('test_type', data['scan_type']))
         environment, created = Development_Environment.objects.get_or_create(
@@ -548,6 +550,8 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         try:
             parser = import_parser_factory(data['file'],
                                            test,
+                                           active,
+                                           verified,
                                            data['scan_type'],)
         except ValueError:
             raise Exception('FileParser ValueError')
