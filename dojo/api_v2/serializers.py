@@ -704,6 +704,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         try:
             parser = import_parser_factory(data['file'],
                                            test,
+                                           active,
+                                           verified,
                                            data['scan_type'],)
         except ValueError:
             raise Exception("Parser ValueError")
