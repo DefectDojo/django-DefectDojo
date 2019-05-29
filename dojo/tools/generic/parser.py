@@ -5,8 +5,9 @@ from dojo.models import Finding, Endpoint
 from dateutil.parser import parse
 import re
 from urlparse import urlparse
+import sys
 import socket
-
+# from engagement.views import
 
 class ColumnMappingStrategy(object):
 
@@ -224,6 +225,7 @@ class ActiveColumnMappingStrategy(ColumnMappingStrategy):
         super(ActiveColumnMappingStrategy, self).__init__()
 
     def map_column_value(self, finding, column_value):
+        #if finding.active:
         finding.active = self.evaluate_bool_value(column_value)
 
 
@@ -234,6 +236,7 @@ class VerifiedColumnMappingStrategy(ColumnMappingStrategy):
         super(VerifiedColumnMappingStrategy, self).__init__()
 
     def map_column_value(self, finding, column_value):
+        #if finding.verified:
         finding.verified = self.evaluate_bool_value(column_value)
 
 
@@ -295,13 +298,14 @@ class GenericFindingUploadCsvParser(object):
             self.column_names[index] = column
             index += 1
 
-    def __init__(self, filename, test):
+    def __init__(self, filename, test, active, verified):#Modified constructor to use Active and Verified checkboxes
         self.chain = None
         self.column_names = dict()
         self.dupes = dict()
         self.items = ()
         self.create_chain()
-
+        self.active = active
+        self.verified = verified
         if filename is None:
             self.items = ()
             return
@@ -310,7 +314,7 @@ class GenericFindingUploadCsvParser(object):
 
         row_number = 0
         reader = csv.reader(StringIO.StringIO(content), delimiter=',', quotechar='"')
-        for row in reader:
+        for row in reader:#Parses through the rows of the column
             finding = Finding(test=test)
 
             if row_number == 0:
@@ -321,8 +325,13 @@ class GenericFindingUploadCsvParser(object):
             column_number = 0
             for column in row:
                 self.chain.process_column(self.column_names[column_number], column, finding)
+
                 column_number += 1
 
+            if self.active:
+                finding.active = ActiveColumnMappingStrategy.evaluate_bool_value(row[9])#Corresponds to Active Row
+            if self.verified:
+                finding.verified = VerifiedColumnMappingStrategy.evaluate_bool_value(row[10])#Corresponds to Verified Row
             if finding is not None:
                 key = hashlib.md5(finding.severity + '|' + finding.title + '|' + finding.description).hexdigest()
 

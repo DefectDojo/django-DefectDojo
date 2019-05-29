@@ -50,7 +50,7 @@ from dojo.tools.blackduck.parser import BlackduckHubCSVParser
 __author__ = 'Jay Paz'
 
 
-def import_parser_factory(file, test, scan_type=None):
+def import_parser_factory(file, test, active, verified, scan_type=None):
     if scan_type is None:
         scan_type = test.test_type.name
     if scan_type == "Burp Scan":
@@ -98,7 +98,7 @@ def import_parser_factory(file, test, scan_type=None):
     elif scan_type == 'Symfony Security Check':
         parser = PhpSymfonySecurityCheckParser(file, test)
     elif scan_type == 'Generic Findings Import':
-        parser = GenericFindingUploadCsvParser(file, test)
+        parser = GenericFindingUploadCsvParser(file, test, active, verified)#New call utilizing the active and verified checkboxes
     elif scan_type == 'Qualys Scan':
         parser = QualysParser(file, test)
     elif scan_type == 'Qualys Webapp Scan':
