@@ -1,15 +1,16 @@
-#!/usr/bin/env python
+# !/usr/bin/env python
 #
 # by John Kim
 # Thanks to Securicon, LLC. for sponsoring development
 #
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 
 import codecs
 import cStringIO
 import csv
 
 ################################################################
+
 
 class DictUnicodeWriter(object):
 
@@ -21,7 +22,7 @@ class DictUnicodeWriter(object):
         self.encoder = codecs.getincrementalencoder(encoding)()
 
     def writerow(self, D):
-        self.writer.writerow({k:v.encode("utf-8") for k, v in D.items() if v})
+        self.writer.writerow({k: v.encode("utf-8") for k, v in D.items() if v})
         # Fetch UTF-8 output from the queue ...
         data = self.queue.getvalue()
         data = data.decode("utf-8")
