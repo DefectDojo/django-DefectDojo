@@ -14,7 +14,7 @@ class ProductTest(unittest.TestCase):
         # Allow a little time for the driver to initialize
         self.driver.implicitly_wait(30)
         # Set the base address of the dojo
-        self.base_url = "http://localhost:8080/"
+        self.base_url = "http://localhost:8000/"
         self.verificationErrors = []
         self.accept_next_alert = True
 
@@ -27,12 +27,12 @@ class ProductTest(unittest.TestCase):
         driver.find_element_by_id("id_username").clear()
         # Set the user to an admin account
         # os.environ['DD_ADMIN_USER']
-        driver.find_element_by_id("id_username").send_keys('admin')
+        driver.find_element_by_id("id_username").send_keys(os.environ['DD_ADMIN_USER'])
         driver.find_element_by_id("id_password").clear()
         # Use the password unqiue to the container. Info on finding this below
         # https://github.com/DefectDojo/django-DefectDojo/blob/master/DOCKER.md
         # os.environ['DD_ADMIN_PASSWORD']
-        driver.find_element_by_id("id_password").send_keys('muYU8BbiEwhEMGhmMc5Ibq')
+        driver.find_element_by_id("id_password").send_keys(os.environ['DD_ADMIN_PASSWORD'])
         # "Click" the but the login button
         driver.find_element_by_css_selector("button.btn.btn-success").click()
         return driver
@@ -115,7 +115,7 @@ class ProductTest(unittest.TestCase):
         # engagement target start and target end already have defaults
         # we can safely skip
         # Testing Lead: This can be the logged in user
-        Select(driver.find_element_by_id("id_lead")).select_by_visible_text('admin')
+        Select(driver.find_element_by_id("id_lead")).select_by_visible_text(os.environ['DD_ADMIN_USER'])
         # engagement status
         Select(driver.find_element_by_id("id_status")).select_by_visible_text("In Progress")
         # "Click" the Done button to Add the engagement
