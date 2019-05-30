@@ -1204,16 +1204,16 @@ def manage_images(request, fid):
             images_formset.save()
 
             for obj in images_formset.deleted_objects:
-                os.remove(settings.MEDIA_ROOT + obj.image.name)
+                os.remove(os.path.join(settings.MEDIA_ROOT, obj.image.name))
                 if obj.image_thumbnail is not None and os.path.isfile(
-                        settings.MEDIA_ROOT + obj.image_thumbnail.name):
-                    os.remove(settings.MEDIA_ROOT + obj.image_thumbnail.name)
+                        os.path.join(settings.MEDIA_ROOT, obj.image_thumbnail.name)):
+                    os.remove(os.path.join(settings.MEDIA_ROOT, obj.image_thumbnail.name))
                 if obj.image_medium is not None and os.path.isfile(
-                        settings.MEDIA_ROOT + obj.image_medium.name):
-                    os.remove(settings.MEDIA_ROOT + obj.image_medium.name)
+                        os.path.join(settings.MEDIA_ROOT, obj.image_medium.name)):
+                    os.remove(os.path.join(settings.MEDIA_ROOT, obj.image_medium.name))
                 if obj.image_large is not None and os.path.isfile(
-                        settings.MEDIA_ROOT + obj.image_large.name):
-                    os.remove(settings.MEDIA_ROOT + obj.image_large.name)
+                        os.path.join(settings.MEDIA_ROOT, obj.image_large.name)):
+                    os.remove(os.path.join(settings.MEDIA_ROOT, obj.image_large.name))
 
             for obj in images_formset.new_objects:
                 finding.images.add(obj)
