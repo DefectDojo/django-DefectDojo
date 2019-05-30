@@ -49,18 +49,19 @@ class KiuwanCSVParser(object):
             findingdict['file'] = row['File']
             findingdict['line_number'] = row['Line number']
             findingdict['description'] = "**Vulnerability type** : " + row['Vulnerability type'] + "\n\n" + \
-                                        "**Status** : " + row['Status'] + "\n\n" + \
                                         "**CWE Scope** : " + row['CWE Scope'] + "\n\n" + \
-                                        "**Line text** : " + row['Line text'] + "\n\n" + \
+                                        "**Line number** : " + row['Line number'] + "\n\n" + \
+                                        "**Code at line number** : " + row['Line text'] + "\n\n" + \
                                         "**Normative** : " + row['Normative'] + "\n\n" + \
                                         "**Rule code** : " + row['Rule code'] + "\n\n" + \
+                                        "**Status** : " + row['Status'] + "\n\n" + \
                                         "**Source file** : " + row['Source file'] + "\n\n" + \
                                         "**Source line number** : " + row['Source line number'] + "\n\n" + \
-                                        "**Source line text** : " + row['Source line text'] + "\n"
+                                        "**Code at sorce line number** : " + row['Source line text'] + "\n"
 
             finding.title = findingdict['title']
             finding.file_path = findingdict['file']
-            finding.line_number = findingdict['line_number']
+            finding.line = findingdict['line_number']
             finding.description = findingdict['description']
             finding.references = "Not provided!"
             finding.mitigation = "Not provided!"
