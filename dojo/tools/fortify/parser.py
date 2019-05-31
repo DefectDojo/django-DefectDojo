@@ -94,7 +94,7 @@ class FortifyXMLParser(object):
                     if not isinstance(cwe_id, int):
                         dupe_key = (title + sev + cwe_id)
                     else:
-                        dupe_key = (title + sev+ str(cwe_id))
+                        dupe_key = (title + sev + str(cwe_id))
 
                     if dupe_key in dupes:
                         find = dupes[dupe_key]
