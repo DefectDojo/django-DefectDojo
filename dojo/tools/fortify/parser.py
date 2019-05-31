@@ -59,7 +59,6 @@ class FortifyXMLParser(object):
                         cwe_id = cwe_id[:1]
                     else:
                         cwe_id = 0
-
                 else:
                     cwe_id = 0
 
