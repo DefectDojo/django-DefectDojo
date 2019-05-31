@@ -53,9 +53,12 @@ class FortifyXMLParser(object):
                     grouptitle = groupTitle.text
                 cwe_id = grouptitle.split(' ')
                 if len(cwe_id) > 2:
-                    cwe_id = cwe_id[2]
-                    if "," in cwe_id:
+                    if cwe_id[2].isdigit():
+                        cwe_id = cwe_id[2]
+                    elif "," in cwe_id[2]:
                         cwe_id = cwe_id[:1]
+                    else:
+                        cwe_id = 0
                 else:
                     cwe_id = 0
 
@@ -88,7 +91,10 @@ class FortifyXMLParser(object):
                             findingdetail += "**Filepath:**" + filepath + '\n'
 
                     title = category + " " + kingdom
-                    dupe_key = (title + sev + cwe_id)
+                    if not isinstance(cwe_id, int):
+                        dupe_key = (title + sev + cwe_id)
+                    else:
+                        dupe_key = (title + sev+ str(cwe_id))
 
                     if dupe_key in dupes:
                         find = dupes[dupe_key]
