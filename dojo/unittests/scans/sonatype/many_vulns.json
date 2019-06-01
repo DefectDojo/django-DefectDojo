@@ -1,0 +1,307 @@
+{
+  "components": [
+    {
+      "hash": "0002f9e901cfb0aeb16c",
+      "componentIdentifier": {
+        "format": "maven",
+        "coordinates": {
+          "artifactId": "aws-java-sdk-signer",
+          "classifier": "",
+          "extension": "jar",
+          "groupId": "com.amazonaws",
+          "version": "1.11.403"
+        }
+      },
+      "proprietary": false,
+      "matchState": "exact",
+      "pathnames": [
+        "WEB-INF/lib/aws-java-sdk-signer-1.11.403.jar"
+      ],
+      "licenseData": {
+        "declaredLicenses": [
+          {
+            "licenseId": "Apache-2.0",
+            "licenseName": "Apache-2.0"
+          }
+        ],
+        "observedLicenses": [
+          {
+            "licenseId": "Apache-2.0",
+            "licenseName": "Apache-2.0"
+          }
+        ],
+        "overriddenLicenses": [],
+        "status": "Open",
+        "effectiveLicenseThreats": [
+          {
+            "licenseThreatGroupName": "Liberal",
+            "licenseThreatGroupLevel": 0,
+            "licenseThreatGroupCategory": "no-threat"
+          }
+        ]
+      },
+      "securityData": {
+        "securityIssues": []
+      }
+    },
+    {
+      "hash": "010519754ea6d9e3c9fa",
+      "componentIdentifier": {
+        "format": "a-name",
+        "coordinates": {
+          "name": "@rokt33r/ace-builds",
+          "qualifier": "",
+          "version": "1.1.9"
+        }
+      },
+      "proprietary": false,
+      "matchState": "exact",
+      "pathnames": [
+        "/packs/ace-editor-119/ext-linking.js",
+        "/packs/ace-editor-119/ext-spellcheck.js",
+        "/packs/ace-editor-119/ext-statusbar.js",
+        "/packs/ace-editor-119/mode-ada.js",
+        "/packs/ace-editor-119/mode-cobol.js",
+        "/packs/ace-editor-119/mode-gcode.js",
+        "/packs/ace-editor-119/mode-gherkin.js",
+        "/packs/ace-editor-119/mode-gitignore.js",
+        "/packs/ace-editor-119/mode-lisp.js",
+        "/packs/ace-editor-119/mode-live_script.js",
+        "/packs/ace-editor-119/mode-lucene.js",
+        "/packs/ace-editor-119/mode-mipsassembler.js",
+        "/packs/ace-editor-119/mode-plain_text.js",
+        "/packs/ace-editor-119/mode-properties.js",
+        "/packs/ace-editor-119/mode-scheme.js",
+        "/packs/ace-editor-119/mode-space.js",
+        "/packs/ace-editor-119/mode-textile.js",
+        "/packs/ace-editor-119/mode-verilog.js",
+        "/packs/ace-editor-122/ext-linking.js",
+        "/packs/ace-editor-122/ext-spellcheck.js",
+        "/packs/ace-editor-122/ext-themelist.js",
+        "/packs/ace-editor-122/mode-ada.js",
+        "/packs/ace-editor-122/mode-cobol.js",
+        "/packs/ace-editor-122/mode-gcode.js",
+        "/packs/ace-editor-122/mode-gitignore.js",
+        "/packs/ace-editor-122/mode-lisp.js",
+        "/packs/ace-editor-122/mode-live_script.js",
+        "/packs/ace-editor-122/mode-lucene.js",
+        "/packs/ace-editor-122/mode-mipsassembler.js",
+        "/packs/ace-editor-122/mode-plain_text.js",
+        "/packs/ace-editor-122/mode-properties.js",
+        "/packs/ace-editor-122/mode-space.js",
+        "/packs/ace-editor-122/mode-textile.js",
+        "/packs/ace-editor-122/mode-vbscript.js"
+      ],
+      "licenseData": {
+        "declaredLicenses": [
+          {
+            "licenseId": "BSD-UNSPECIFIED",
+            "licenseName": "BSD"
+          }
+        ],
+        "observedLicenses": [
+          {
+            "licenseId": "Not-Supported",
+            "licenseName": "Not Supported"
+          }
+        ],
+        "overriddenLicenses": [],
+        "status": "Open",
+        "effectiveLicenseThreats": [
+          {
+            "licenseThreatGroupName": "Liberal",
+            "licenseThreatGroupLevel": 0,
+            "licenseThreatGroupCategory": "no-threat"
+          }
+        ]
+      },
+      "securityData": {
+        "securityIssues": []
+      }
+    },
+    {
+      "hash": "112cf195dec0bd2b7967",
+      "componentIdentifier": {
+        "format": "maven",
+        "coordinates": {
+          "artifactId": "ant",
+          "classifier": "",
+          "extension": "jar",
+          "groupId": "org.apache.ant",
+          "version": "1.9.2"
+        }
+      },
+      "proprietary": false,
+      "matchState": "exact",
+      "pathnames": [
+        "WEB-INF/lib/ant-1.9.2.jar"
+      ],
+      "licenseData": {
+        "declaredLicenses": [
+          {
+            "licenseId": "Apache-2.0",
+            "licenseName": "Apache-2.0"
+          }
+        ],
+        "observedLicenses": [
+          {
+            "licenseId": "Apache-2.0",
+            "licenseName": "Apache-2.0"
+          }
+        ],
+        "overriddenLicenses": [],
+        "status": "Open",
+        "effectiveLicenseThreats": [
+          {
+            "licenseThreatGroupName": "Liberal",
+            "licenseThreatGroupLevel": 0,
+            "licenseThreatGroupCategory": "no-threat"
+          }
+        ]
+      },
+      "securityData": {
+        "securityIssues": [
+          {
+            "source": "sonatype",
+            "reference": "sonatype-2018-0330",
+            "severity": 6.5,
+            "status": "Open",
+            "url": null,
+            "threatCategory": "severe"
+          }
+        ]
+      }
+    },
+    {
+      "hash": "161ed1603117c2d37b86",
+      "componentIdentifier": {
+        "format": "maven",
+        "coordinates": {
+          "artifactId": "xstream",
+          "classifier": "",
+          "extension": "jar",
+          "groupId": "org.jvnet.hudson",
+          "version": "1.4.7"
+        }
+      },
+      "proprietary": false,
+      "matchState": "exact",
+      "pathnames": [
+        "WEB-INF/lib/xstream-1.4.7.jar"
+      ],
+      "licenseData": {
+        "declaredLicenses": [
+          {
+            "licenseId": "Not-Declared",
+            "licenseName": "Not Declared"
+          }
+        ],
+        "observedLicenses": [
+          {
+            "licenseId": "BSD-UNSPECIFIED",
+            "licenseName": "BSD"
+          }
+        ],
+        "overriddenLicenses": [],
+        "status": "Open",
+        "effectiveLicenseThreats": [
+          {
+            "licenseThreatGroupName": "Sonatype Special Licenses",
+            "licenseThreatGroupLevel": 5,
+            "licenseThreatGroupCategory": "severe"
+          },
+          {
+            "licenseThreatGroupName": "Liberal",
+            "licenseThreatGroupLevel": 0,
+            "licenseThreatGroupCategory": "no-threat"
+          }
+        ]
+      },
+      "securityData": {
+        "securityIssues": [
+          {
+            "source": "cve",
+            "reference": "CVE-2016-3674",
+            "severity": 7.5,
+            "status": "Open",
+            "url": "http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2016-3674",
+            "threatCategory": "critical"
+          },
+          {
+            "source": "cve",
+            "reference": "CVE-2017-7957",
+            "severity": 7.5,
+            "status": "Open",
+            "url": "http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-7957",
+            "threatCategory": "critical"
+          }
+        ]
+      }
+    },
+    {
+      "hash": "212387a39088ecd3daff",
+      "componentIdentifier": {
+        "format": "maven",
+        "coordinates": {
+          "artifactId": "okhttp",
+          "classifier": "",
+          "extension": "jar",
+          "groupId": "com.squareup.okhttp",
+          "version": "2.6.0"
+        }
+      },
+      "proprietary": false,
+      "matchState": "exact",
+      "pathnames": [
+        "WEB-INF/lib/okhttp-2.6.0.jar"
+      ],
+      "licenseData": {
+        "declaredLicenses": [
+          {
+            "licenseId": "Apache-2.0",
+            "licenseName": "Apache-2.0"
+          }
+        ],
+        "observedLicenses": [
+          {
+            "licenseId": "Apache-2.0",
+            "licenseName": "Apache-2.0"
+          }
+        ],
+        "overriddenLicenses": [],
+        "status": "Open",
+        "effectiveLicenseThreats": [
+          {
+            "licenseThreatGroupName": "Liberal",
+            "licenseThreatGroupLevel": 0,
+            "licenseThreatGroupCategory": "no-threat"
+          }
+        ]
+      },
+      "securityData": {
+        "securityIssues": [
+          {
+            "source": "cve",
+            "reference": "CVE-2016-2402",
+            "severity": 5.9,
+            "status": "Open",
+            "url": "http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2016-2402",
+            "threatCategory": "severe"
+          },
+          {
+            "source": "sonatype",
+            "reference": "sonatype-2018-0035",
+            "severity": 5.9,
+            "status": "Open",
+            "url": null,
+            "threatCategory": "severe"
+          }
+        ]
+      }
+    }
+  ],
+  "matchSummary": {
+    "totalComponentCount": 1011,
+    "knownComponentCount": 826
+  }
+}

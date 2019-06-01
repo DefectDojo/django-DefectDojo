@@ -131,7 +131,7 @@
         {% endif %}
         {% if test %}
             <br>
-            A {{ test.test_type.name }} was conducted in the {{ test.environment.name }} environemnt
+            A {{ test.test_type.name }} was conducted in the {{ test.environment.name }} environment
             {% if test.target_end %}
                 from {{ test.target_start|date:"SHORT_DATE_FORMAT" }} to {{ test.target_end|date:"SHORT_DATE_FORMAT" }}
             {% else %}
