@@ -514,7 +514,7 @@ LOGGING = {
         # Can be very verbose when many findings exist
         'dojo.specific-loggers.deduplication': {
             'handlers': ['console'],
-            'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': False,
         }
     }
