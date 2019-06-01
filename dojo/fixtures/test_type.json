@@ -340,5 +340,13 @@
 		},
 		"model": "dojo.test_type",
 		"pk":56
+	},
+	{
+		"fields": {
+      "name": "Cobalt.io Scan"
+    },
+    "model": "dojo.test_type",
+    "pk": 57
+
 	}
 ]

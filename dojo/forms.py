@@ -297,7 +297,8 @@ class ImportScanForm(forms.Form):
                          ("Openscap Vulnerability Scan", "Openscap Vulnerability Scan"),
                          ("Wapiti Scan", "Wapiti Scan"),
                          ("Immuniweb Scan", "Immuniweb Scan"),
-                         ("Sonatype Application Scan", "Sonatype Application Scan"))
+                         ("Sonatype Application Scan", "Sonatype Application Scan"),
+                         ("Cobalt.io Scan", "Cobalt.io Scan"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
     scan_date = forms.DateTimeField(
