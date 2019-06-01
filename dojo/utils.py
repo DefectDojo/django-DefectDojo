@@ -80,8 +80,8 @@ def sync_dedupe(new_finding, *args, **kwargs):
                  ":" + str(new_finding.title))
     # ---------------------------------------------------------
     # 1) Collects all the findings that have the same:
-    #      (title  and static_finding and dynamic_finding ane date__lte)
-    #      or (CWE and static_finding and dynamic_finding ane date__lte)
+    #      (title  and static_finding and dynamic_finding)
+    #      or (CWE and static_finding and dynamic_finding)
     #    as the new one
     #    (this is "cond1")
     # ---------------------------------------------------------
