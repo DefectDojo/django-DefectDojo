@@ -53,7 +53,7 @@ class FindingTest(unittest.TestCase):
 
     def test_edit_finding(self):
         # The Name of the Finding created by test_add_product_finding => 'App Vulnerable to XSS'
-                # Test To Add Finding To product
+        # Test To Add Finding To product
         # login to site, password set to fetch from environ
         driver = self.login_page()
         # Navigate to All Finding page
@@ -78,7 +78,7 @@ class FindingTest(unittest.TestCase):
 
     def test_add_image(self):
         # The Name of the Finding created by test_add_product_finding => 'App Vulnerable to XSS'
-                # Test To Add Finding To product
+        # Test To Add Finding To product
         # login to site, password set to fetch from environ
         driver = self.login_page()
         # Navigate to All Finding page
@@ -264,7 +264,7 @@ class FindingTest(unittest.TestCase):
 
     def test_delete_finding(self):
         # The Name of the Finding created by test_add_product_finding => 'App Vulnerable to XSS'
-                # Test To Add Finding To product
+        # Test To Add Finding To product
         # login to site, password set to fetch from environ
         driver = self.login_page()
         # Navigate to All Finding page
