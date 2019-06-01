@@ -18,6 +18,8 @@ import dateutil.relativedelta
 import datetime
 from ast import literal_eval
 from urlparse import urlparse
+import bleach
+from bleach_whitelist import markdown_tags, markdown_attrs
 
 register = template.Library()
 
@@ -31,8 +33,8 @@ class EscapeHtml(Extension):
 @register.filter
 def markdown_render(value):
     if value:
-        return mark_safe(markdown.markdown(value, extensions=[EscapeHtml(), 'markdown.extensions.nl2br', 'markdown.extensions.sane_lists', 'markdown.extensions.codehilite', 'markdown.extensions.fenced_code', 'markdown.extensions.toc', 'markdown.extensions.tables']))
-
+        value = bleach.clean(markdown.markdown(value), markdown_tags, markdown_attrs)
+        return mark_safe(markdown.markdown(value, extensions=['markdown.extensions.nl2br', 'markdown.extensions.sane_lists', 'markdown.extensions.codehilite', 'markdown.extensions.fenced_code', 'markdown.extensions.toc', 'markdown.extensions.tables']))
 
 @register.filter(name='ports_open')
 def ports_open(value):
@@ -707,24 +709,18 @@ def get_severity_count(id, table):
     total = critical + high + medium + low + info
     display_counts = []
 
-    if critical:
-        display_counts.append("Critical: " + str(critical))
-    if high:
-        display_counts.append("High: " + str(high))
-    if medium:
-        display_counts.append("Medium: " + str(medium))
-    if low:
-        display_counts.append("Low: " + str(low))
-    if info:
-        display_counts.append("Info: " + str(info))
+    display_counts.append("Critical: " + str(critical))
+    display_counts.append("High: " + str(high))
+    display_counts.append("Medium: " + str(medium))
+    display_counts.append("Low: " + str(low))
+    display_counts.append("Info: " + str(info))
 
-    if total > 0:
-        if table == "test":
-            display_counts.append("Total: " + str(total) + " Findings")
-        elif table == "engagement":
-            display_counts.append("Total: " + str(total) + " Active, Verified Findings")
-        elif table == "product":
-            display_counts.append("Total: " + str(total) + " Active Findings")
+    if table == "test":
+        display_counts.append("Total: " + str(total) + " Findings")
+    elif table == "engagement":
+        display_counts.append("Total: " + str(total) + " Active, Verified Findings")
+    elif table == "product":
+        display_counts.append("Total: " + str(total) + " Active Findings")
 
     display_counts = ", ".join([str(item) for item in display_counts])
 

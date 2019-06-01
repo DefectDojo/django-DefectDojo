@@ -15,6 +15,7 @@ from dojo.tools.dependencycheck.parser import DependencyCheckParser
 from dojo.tools.retirejs.parser import RetireJsParser
 from dojo.tools.nsp.parser import NspParser
 from dojo.tools.npmaudit.parser import NpmAuditParser
+from dojo.tools.phpsymfonysecuritycheck.parser import PhpSymfonySecurityCheckParser
 from dojo.tools.generic.parser import GenericFindingUploadCsvParser
 from dojo.tools.qualys.parser import QualysParser
 from dojo.tools.qualyswebapp.parser import QualysWebAppParser
@@ -42,6 +43,10 @@ from dojo.tools.clair_klar.parser import ClairKlarParser
 from dojo.tools.dawnscanner.parser import DawnScannerParser
 from dojo.tools.anchore_engine.parser import AnchoreEngineScanParser
 from dojo.tools.bundler_audit.parser import BundlerAuditParser
+from dojo.tools.twistlock.parser import TwistlockParser
+from dojo.tools.kiuwan.parser import KiuwanCSVParser
+from dojo.tools.blackduck.parser import BlackduckHubCSVParser
+from dojo.tools.sonatype.parser import SonatypeJSONParser
 
 __author__ = 'Jay Paz'
 
@@ -91,6 +96,8 @@ def import_parser_factory(file, test, scan_type=None):
         parser = NspParser(file, test)
     elif scan_type == 'NPM Audit Scan':
         parser = NpmAuditParser(file, test)
+    elif scan_type == 'Symfony Security Check':
+        parser = PhpSymfonySecurityCheckParser(file, test)
     elif scan_type == 'Generic Findings Import':
         parser = GenericFindingUploadCsvParser(file, test)
     elif scan_type == 'Qualys Scan':
@@ -141,6 +148,14 @@ def import_parser_factory(file, test, scan_type=None):
         parser = AnchoreEngineScanParser(file, test)
     elif scan_type == 'Bundler-Audit Scan':
         parser = BundlerAuditParser(file, test)
+    elif scan_type == 'Twistlock Image Scan':
+        parser = TwistlockParser(file, test)
+    elif scan_type == 'Kiuwan Scan':
+        parser = KiuwanCSVParser(file, test)
+    elif scan_type == 'Blackduck Hub Scan':
+        parser = BlackduckHubCSVParser(file, test)
+    elif scan_type == 'Sonatype Application Scan':
+        parser = SonatypeJSONParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 
