@@ -319,5 +319,12 @@
     },
     "model": "dojo.test_type",
     "pk": 53
-  }
+	},
+	{
+		"fields":{
+			"name": "Openscap Vulnerability Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 54 
+	}
 ]
