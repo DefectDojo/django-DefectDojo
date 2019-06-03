@@ -528,6 +528,7 @@ class AcceptedFindingFilter(DojoFilter):
                    for finding in self.queryset.distinct()
                    if finding.cwe > 0 and finding.cwe not in cwe)
         cwe = collections.OrderedDict(sorted(cwe.items()))
+        self.form.fields['cwe'].choices = cwe.items()
         self.form.fields['severity'].choices = self.queryset.order_by(
             'numerical_severity'
         ).values_list('severity', 'severity').distinct()
