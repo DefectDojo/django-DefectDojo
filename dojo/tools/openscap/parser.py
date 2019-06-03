@@ -120,7 +120,7 @@ class OpenscapXMLParser(object):
         except:
             pass
         try:
-            dupe_endpoint = Endpoint.objects.get(protocol="protocol",
+            dupe_endpoint = Endpoint.objects.get(protocol=protocol,
                                                  host=host,
                                                  query=query,
                                                  fragment=fragment,
