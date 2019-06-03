@@ -359,7 +359,7 @@ class OpenFindingFilter(DojoFilter):
     class Meta:
         model = Finding
         exclude = ['url', 'description', 'mitigation', 'impact', 'active',
-                   'endpoint','verified', 'references', 'test', 'is_template', 'verified',
+                   'endpoint', 'references', 'test', 'is_template', 'verified',
                    'thread_id', 'notes', 'scanner_confidence', 'mitigated',
                    'numerical_severity', 'reporter', 'last_reviewed', 'line',
                    'duplicate_list', 'duplicate_finding', 'hash_code', 'images',
