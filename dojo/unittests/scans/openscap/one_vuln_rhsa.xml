@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Benchmark xmlns="http://checklists.nist.gov/xccdf/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="generated-xccdf" resolved="1">
+  <status>incomplete</status>
+  <title xmlns:xhtml="http://www.w3.org/1999/xhtml">Automatically generated XCCDF from OVAL file: com.redhat.rhsa-all.xml</title>
+  <description xmlns:xhtml="http://www.w3.org/1999/xhtml">This file has been generated automatically from oval definitions file.</description>
+  <version time="2019-02-28T13:23:58">None, generated from OVAL file.</version>
+  <model system="urn:xccdf:scoring:default"/>
+  <Rule id="oval-com.redhat.rhsa-def-20060015" selected="true" severity="medium">
+    <title xmlns:xhtml="http://www.w3.org/1999/xhtml">RHSA-2006:0015: initscripts security update (Moderate)</title>
+    <ident system="http://cve.mitre.org">CVE-2005-3629</ident>
+    <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+      <check-content-ref name="oval:com.redhat.rhsa:def:20060015" href="com.redhat.rhsa-all.xml"/>
+    </check>
+  </Rule>
+  <Rule id="oval-com.redhat.rhsa-def-20060016" selected="true" severity="medium">
+    <title xmlns:xhtml="http://www.w3.org/1999/xhtml">RHSA-2006:0016: initscripts security update (Moderate)</title>
+    <ident system="http://cve.mitre.org">CVE-2005-3629</ident>
+    <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+      <check-content-ref name="oval:com.redhat.rhsa:def:20060016" href="com.redhat.rhsa-all.xml"/>
+    </check>
+  </Rule>
+  <Rule id="oval-com.redhat.rhsa-def-20060044" selected="true" severity="low">
+    <title xmlns:xhtml="http://www.w3.org/1999/xhtml">RHSA-2006:0044: openssh security update (Low)</title>
+    <ident system="http://cve.mitre.org">CVE-2006-0225</ident>
+    <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+      <check-content-ref name="oval:com.redhat.rhsa:def:20060044" href="com.redhat.rhsa-all.xml"/>
+    </check>
+  </Rule>
+  <Rule id="oval-com.redhat.rhsa-def-20060045" selected="true" severity="medium">
+    <title xmlns:xhtml="http://www.w3.org/1999/xhtml">RHSA-2006:0045: squid security update (Moderate)</title>
+    <ident system="http://cve.mitre.org">CVE-2005-2917</ident>
+    <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+      <check-content-ref name="oval:com.redhat.rhsa:def:20060045" href="com.redhat.rhsa-all.xml"/>
+    </check>
+  </Rule>
+  <Rule id="oval-com.redhat.rhsa-def-20060052" selected="true" severity="medium">
+    <title xmlns:xhtml="http://www.w3.org/1999/xhtml">RHSA-2006:0052: squid security update (Moderate)</title>
+    <ident system="http://cve.mitre.org">CVE-2005-2917</ident>
+    <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+      <check-content-ref name="oval:com.redhat.rhsa:def:20060052" href="com.redhat.rhsa-all.xml"/>
+    </check>
+  </Rule>
+  <Rule id="oval-com.redhat.rhsa-def-20060101" selected="true" severity="high">
+    <title xmlns:xhtml="http://www.w3.org/1999/xhtml">RHSA-2006:0101: kernel security update (Important)</title>
+    <ident system="http://cve.mitre.org">CVE-2002-2185</ident>
+    <ident system="http://cve.mitre.org">CVE-2004-1190</ident>
+    <ident system="http://cve.mitre.org">CVE-2005-2458</ident>
+    <ident system="http://cve.mitre.org">CVE-2005-2709</ident>
+    <ident system="http://cve.mitre.org">CVE-2005-2800</ident>
+    <ident system="http://cve.mitre.org">CVE-2005-3044</ident>
+    <ident system="http://cve.mitre.org">CVE-2005-3106</ident>
+    <ident system="http://cve.mitre.org">CVE-2005-3109</ident>
+    <ident system="http://cve.mitre.org">CVE-2005-3276</ident>
+    <ident system="http://cve.mitre.org">CVE-2005-3356</ident>
+    <ident system="http://cve.mitre.org">CVE-2005-3358</ident>
+    <ident system="http://cve.mitre.org">CVE-2005-3784</ident>
+    <ident system="http://cve.mitre.org">CVE-2005-3806</ident>
+    <ident system="http://cve.mitre.org">CVE-2005-3848</ident>
+    <ident system="http://cve.mitre.org">CVE-2005-3857</ident>
+    <ident system="http://cve.mitre.org">CVE-2005-3858</ident>
+    <ident system="http://cve.mitre.org">CVE-2005-4605</ident>
+    <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+      <check-content-ref name="oval:com.redhat.rhsa:def:20060101" href="com.redhat.rhsa-all.xml"/>
+    </check>
+  </Rule>
+  <Rule id="oval-com.redhat.rhsa-def-20060117" selected="true" severity="low">
+    <title xmlns:xhtml="http://www.w3.org/1999/xhtml">RHSA-2006:0117: vixie-cron security update (Low)</title>
+    <ident system="http://cve.mitre.org">CVE-2005-1038</ident>
+    <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+      <check-content-ref name="oval:com.redhat.rhsa:def:20060117" href="com.redhat.rhsa-all.xml"/>
+    </check>
+  </Rule>
+  <Rule id="oval-com.redhat.rhsa-def-20060129" selected="true" severity="medium">
+    <title xmlns:xhtml="http://www.w3.org/1999/xhtml">RHSA-2006:0129: spamassassin security update (Moderate)</title>
+    <ident system="http://cve.mitre.org">CVE-2005-3351</ident>
+    <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+      <check-content-ref name="oval:com.redhat.rhsa:def:20060129" href="com.redhat.rhsa-all.xml"/>
+    </check>
+  </Rule>
+  <TestResult id="xccdf_org.open-scap_testresult_default-profile" start-time="2019-03-04T07:43:35" end-time="2019-03-04T07:43:39" version="None, generated from OVAL file." test-system="cpe:/a:redhat:openscap:1.2.17">
+    <benchmark href="/usr/local/hpsa/data/RHEL7-tailored//com.redhat.rhsa-all.xccdf.xml"/>
+    <title>OSCAP Scan Result</title>
+    <identity authenticated="false" privileged="false">root</identity>
+    <target>sample.system</target>
+    <target-address>127.0.0.1</target-address>
+    <target-address>192.168.94.166</target-address>
+    <target-address>192.168.94.53</target-address>
+    <target-address>192.168.83.194:8080</target-address>
+    <target-address>192.168.85.194</target-address>
+    <target-address>192.168.100.194</target-address>
+    <target-address>http://a.com/a.php?a=b</target-address>
+    <target-facts>
+      <fact name="urn:xccdf:fact:scanner:name" type="string">OpenSCAP</fact>
+      <fact name="urn:xccdf:fact:scanner:version" type="string">1.2.17</fact>
+      <fact name="urn:xccdf:fact:ethernet:MAC" type="string">00:00:00:00:00:00</fact>
+      <fact name="urn:xccdf:fact:ethernet:MAC" type="string">00:aa:bb:86:6A:49</fact>
+      <fact name="urn:xccdf:fact:ethernet:MAC" type="string">00:aa:bb:86:6A:49</fact>
+      <fact name="urn:xccdf:fact:ethernet:MAC" type="string">00:aa:bb:86:2C:56</fact>
+      <fact name="urn:xccdf:fact:ethernet:MAC" type="string">00:aa:bb:86:29:BF</fact>
+      <fact name="urn:xccdf:fact:ethernet:MAC" type="string">00:aa:bb:86:6C:12</fact>
+    </target-facts>
+    <rule-result idref="oval-com.redhat.rhsa-def-20060015" time="2019-03-04T07:43:35" severity="medium" weight="1.000000">
+      <result>pass</result>
+      <ident system="http://cve.mitre.org">CVE-2005-3629</ident>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref name="oval:com.redhat.rhsa:def:20060015" href="com.redhat.rhsa-all.xml"/>
+      </check>
+    </rule-result>
+    <rule-result idref="oval-com.redhat.rhsa-def-20060016" time="2019-03-04T07:43:35" severity="medium" weight="1.000000">
+      <result>pass</result>
+      <ident system="http://cve.mitre.org">CVE-2005-3629</ident>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref name="oval:com.redhat.rhsa:def:20060016" href="com.redhat.rhsa-all.xml"/>
+      </check>
+    </rule-result>
+    <rule-result idref="oval-com.redhat.rhsa-def-20060044" time="2019-03-04T07:43:35" severity="low" weight="1.000000">
+      <result>pass</result>
+      <ident system="http://cve.mitre.org">CVE-2006-0225</ident>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref name="oval:com.redhat.rhsa:def:20060044" href="com.redhat.rhsa-all.xml"/>
+      </check>
+    </rule-result>
+    <rule-result idref="oval-com.redhat.rhsa-def-20060045" time="2019-03-04T07:43:35" severity="medium" weight="1.000000">
+      <result>pass</result>
+      <ident system="http://cve.mitre.org">CVE-2005-2917</ident>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref name="oval:com.redhat.rhsa:def:20060045" href="com.redhat.rhsa-all.xml"/>
+      </check>
+    </rule-result>
+    <rule-result idref="oval-com.redhat.rhsa-def-20060052" time="2019-03-04T07:43:35" severity="medium" weight="1.000000">
+      <result>pass</result>
+      <ident system="http://cve.mitre.org">CVE-2005-2917</ident>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref name="oval:com.redhat.rhsa:def:20060052" href="com.redhat.rhsa-all.xml"/>
+      </check>
+    </rule-result>
+    <rule-result idref="oval-com.redhat.rhsa-def-20060101" time="2019-03-04T07:43:35" severity="high" weight="1.000000">
+      <result>pass</result>
+      <ident system="http://cve.mitre.org">CVE-2002-2185</ident>
+      <ident system="http://cve.mitre.org">CVE-2004-1190</ident>
+      <ident system="http://cve.mitre.org">CVE-2005-2458</ident>
+      <ident system="http://cve.mitre.org">CVE-2005-2709</ident>
+      <ident system="http://cve.mitre.org">CVE-2005-2800</ident>
+      <ident system="http://cve.mitre.org">CVE-2005-3044</ident>
+      <ident system="http://cve.mitre.org">CVE-2005-3106</ident>
+      <ident system="http://cve.mitre.org">CVE-2005-3109</ident>
+      <ident system="http://cve.mitre.org">CVE-2005-3276</ident>
+      <ident system="http://cve.mitre.org">CVE-2005-3356</ident>
+      <ident system="http://cve.mitre.org">CVE-2005-3358</ident>
+      <ident system="http://cve.mitre.org">CVE-2005-3784</ident>
+      <ident system="http://cve.mitre.org">CVE-2005-3806</ident>
+      <ident system="http://cve.mitre.org">CVE-2005-3848</ident>
+      <ident system="http://cve.mitre.org">CVE-2005-3857</ident>
+      <ident system="http://cve.mitre.org">CVE-2005-3858</ident>
+      <ident system="http://cve.mitre.org">CVE-2005-4605</ident>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref name="oval:com.redhat.rhsa:def:20060101" href="com.redhat.rhsa-all.xml"/>
+      </check>
+    </rule-result>
+    <rule-result idref="oval-com.redhat.rhsa-def-20060117" time="2019-03-04T07:43:35" severity="low" weight="1.000000">
+      <result>fail</result>
+      <ident system="http://cve.mitre.org">CVE-2005-1038</ident>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref name="oval:com.redhat.rhsa:def:20060117" href="com.redhat.rhsa-all.xml"/>
+      </check>
+    </rule-result>
+    <rule-result idref="oval-com.redhat.rhsa-def-20060129" time="2019-03-04T07:43:35" severity="medium" weight="1.000000">
+      <result>pass</result>
+      <ident system="http://cve.mitre.org">CVE-2005-3351</ident>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref name="oval:com.redhat.rhsa:def:20060129" href="com.redhat.rhsa-all.xml"/>
+      </check>
+    </rule-result>
+   <score system="urn:xccdf:scoring:default" maximum="100.000000">98.943779</score>
+ </TestResult>
+</Benchmark>

@@ -47,12 +47,13 @@ from dojo.tools.twistlock.parser import TwistlockParser
 from dojo.tools.kiuwan.parser import KiuwanCSVParser
 from dojo.tools.blackduck.parser import BlackduckHubCSVParser
 from dojo.tools.sonatype.parser import SonatypeJSONParser
+from dojo.tools.openscap.parser import OpenscapXMLParser
 from dojo.tools.immuniweb.parser import ImmuniwebXMLParser
 
 __author__ = 'Jay Paz'
 
 
-def import_parser_factory(file, test, scan_type=None):
+def import_parser_factory(file, test, active, verified, scan_type=None):
     if scan_type is None:
         scan_type = test.test_type.name
     if scan_type == "Burp Scan":
@@ -100,7 +101,7 @@ def import_parser_factory(file, test, scan_type=None):
     elif scan_type == 'Symfony Security Check':
         parser = PhpSymfonySecurityCheckParser(file, test)
     elif scan_type == 'Generic Findings Import':
-        parser = GenericFindingUploadCsvParser(file, test)
+        parser = GenericFindingUploadCsvParser(file, test, active, verified)
     elif scan_type == 'Qualys Scan':
         parser = QualysParser(file, test)
     elif scan_type == 'Qualys Webapp Scan':
@@ -157,6 +158,8 @@ def import_parser_factory(file, test, scan_type=None):
         parser = BlackduckHubCSVParser(file, test)
     elif scan_type == 'Sonatype Application Scan':
         parser = SonatypeJSONParser(file, test)
+    elif scan_type == 'Openscap Vulnerability Scan':
+        parser = OpenscapXMLParser(file, test)
     elif scan_type == 'Immuniweb Scan':
         parser = ImmuniwebXMLParser(file, test)
     else:

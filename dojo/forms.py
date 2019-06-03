@@ -294,11 +294,11 @@ class ImportScanForm(forms.Form):
                          ("Twistlock Image Scan", "Twistlock Image Scan"),
                          ("Kiuwan Scan", "Kiuwan Scan"),
                          ("Blackduck Hub Scan", "Blackduck Hub Scan"),
+                         ("Openscap Vulnerability Scan", "Openscap Vulnerability Scan"))
                          ("Immuniweb Scan", "Immuniweb Scan"),
                          ("Sonatype Application Scan", "Sonatype Application Scan"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
-
     scan_date = forms.DateTimeField(
         required=True,
         label="Scan Completion Date",
@@ -311,7 +311,6 @@ class ImportScanForm(forms.Form):
     active = forms.BooleanField(help_text="Select if these findings are currently active.", required=False)
     verified = forms.BooleanField(help_text="Select if these findings have been verified.", required=False)
     scan_type = forms.ChoiceField(required=True, choices=SORTED_SCAN_TYPE_CHOICES)
-
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False,
                            help_text="Add tags that help describe this scan.  "
@@ -334,6 +333,9 @@ class ImportScanForm(forms.Form):
             raise forms.ValidationError("The date cannot be in the future!")
         return date
 
+    def get_scan_type(self):
+        TGT_scan = self.cleaned_data['scan_type']
+        return TGT_scan
 
 class ReImportScanForm(forms.Form):
     scan_date = forms.DateTimeField(
