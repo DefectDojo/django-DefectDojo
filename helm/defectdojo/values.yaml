@@ -21,8 +21,9 @@ celery:
     affinity: {}
     nodeSelector: {}
     resources:
-      cpu: 100m
-      memory: 128Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
     tolerations: []
   worker:
     affinity: {}
@@ -32,8 +33,9 @@ celery:
     nodeSelector: {}
     replicas: 1
     resources:
-      cpu: 100m
-      memory: 128Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
     tolerations: []
 
 django:
@@ -46,24 +48,27 @@ django:
   nginx:
     repository: defectdojo/defectdojo-nginx
     resources:
-      cpu: 100m
-      memory: 128Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
   nodeSelector: {}
   replicas: 1
   tolerations: []
   uwsgi:
     repository: defectdojo/defectdojo-django
     resources:
-      cpu: 100m
-      memory: 128Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
 
 initializer:
   run: true
   repository: defectdojo/defectdojo-django
   keepSeconds: 60
   resources:
-    cpu: 100m
-    memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
 
 mysql:
   enabled: true
