@@ -40,22 +40,28 @@ class WapitiXMLParser(object):
 
         for result in root.findall('report/results/result'):
             family = result.find('nvt/family').text
-
+            # check if vulnerability found in family then proceed.
             if "vulnerability" in family:
+                # get host
                 host = result.find('host').text
+                # get title
                 title = result.find('nvt/name').text
+                # get cve
                 cve = result.find('nvt/cve').text
+                # get numerical severity.
                 num_severity = result.find('nvt/risk_factor').text
                 severityfilter = Severityfilter()
                 severityfilter.eval_column(num_severity)
                 severity = severityfilter.severity
+                # get reference
                 reference = result.find('nvt/xref').text
+                # get description and encode to utf-8.
                 description = (result.find('description').text).encode('utf-8')
                 mitigation = "N/A"
                 impact = "N/A"
-
+                # make dupe hash key
                 dupe_key = hashlib.md5(description + title + severity).hexdigest()
-
+                # check if dupes are present.
                 if dupe_key in self.dupes:
                     finding = self.dupes[dupe_key]
                     if finding.description:
