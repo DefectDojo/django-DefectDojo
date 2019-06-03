@@ -36,7 +36,7 @@ class WapitiXMLParser(object):
         root = tree.getroot()
         # check if it is
         if 'report' not in root.tag:
-            raise NamespaceErr("This doesn't seem to be a valid Nmap xml file.")
+            raise NamespaceErr("This doesn't seem to be a valid Wapiti xml file.")
 
         for result in root.findall('report/results/result'):
             family = result.find('nvt/family').text
