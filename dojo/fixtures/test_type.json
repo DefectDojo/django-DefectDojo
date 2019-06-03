@@ -220,109 +220,123 @@
 		"model": "dojo.test_type",
 		"pk": 123
 	},
+  {
+		"fields":{
+			"name": "Openscap Vulnerability Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 124 
+	},
 	{
 		"fields": {
 			"name": "OpenVAS CSV"
 		},
 		"model": "dojo.test_type",
-		"pk": 124
+		"pk": 125
 	},
 	{
 		"fields": {
       		"name": "PHP Security Audit v2"
     	},
     	"model": "dojo.test_type",
-    	"pk": 125
+    	"pk": 126
 	},
 	{
 		"fields": {
 			"name": "Qualys Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 126
+		"pk": 127
 	},
 	{
 		"fields": {
 			"name": "Qualys Web App Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 127
+		"pk": 128
 	},
 	{
 		"fields": {
 			"name": "Retire.js Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 128
+		"pk": 129
 	},
 	{
 		"fields": {
 					"name": "Safety Scan"
 		},
 		"model": "dojo.test_type",
-	"pk": 129
+	"pk": 130
 	},
 	{
 		"fields": {
 			"name": "SKF Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 130
+		"pk": 131
 	},
 	{
 		"fields": {
 			"name": "Snyk Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 131
+		"pk": 132
 	},
 	{
     "fields": {
       "name": "Sonatype Application Scan"
     },
     "model": "dojo.test_type",
-    "pk": 132
+    "pk": 133
 	},
 	{
 		"fields": {
 			"name": "SSL Labs Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 133
+		"pk": 134
 	},
 	{
 		"fields": {
 			"name": "Trustwave"
 		},
 		"model": "dojo.test_type",
-		"pk": 134
+		"pk": 135
 	},
 	{
     "fields": {
       "name": "Twistlock Image Scan"
     },
     "model": "dojo.test_type",
-    "pk": 135
+    "pk": 136
 	},
 	{
 		"fields": {
 			"name": "VCG Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 136
+		"pk": 137
 	},
 	{
 		"fields": {
 			"name": "Veracode Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 137
+		"pk": 138
 	},
+  {
+    "fields": {
+      "name": "Wapiti Scan"
+    },
+    "model": "dojo.test_type",
+    "pk": 139
+  },
 	{
 		"fields": {
 			"name": "ZAP Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 138
-	}
+		"pk": 140
+  }
 ]
