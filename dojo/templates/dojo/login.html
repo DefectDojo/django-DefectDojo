@@ -26,26 +26,26 @@
                     <i class="fa fa-eye"></i>
                     <span><b>Show Password</b></span>
                 </div>
-                <div class="col-sm-offset-2 col-sm-4">
-                        <button class="btn btn-success">Login</button>
-                </div>
             </div>
             <div class="form-group">
-                <div class="col-sm-offset-1 col-sm-4">
+                    <div class="col-sm-offset-1 col-sm-1">
+                            <button class="btn btn-success">Login</button>
+                    </div>
+                <div class="col-sm-offset-1 col-sm-3">
                     <button class="btn btn-success" type="button">
                         {% if GOOGLE_ENABLED == True %}
                             <a href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)">Login with Google</a>
                         {% else %}
-                            <a href="https://docs.google.com/document/d/1NaynLZ1EOQuVgdnHjG4h9fp7XVGHpB9qqtPrapknOw0/edit?usp=sharing style=" style="color: rgb(255,255,255)">Login with Google</a>
+                            <a href="https://defectdojo.readthedocs.io/en/latest/social-authentication.html#google" style="color: rgb(255,255,255)">Login with Google</a>
                         {% endif %}
                     </button>
                 </div>
-                <div class="col-sm-offset-1 col-sm-2">
+                <div class="col-sm-offset-1 col-sm-1">
                     <button class="btn btn-success" type="button">
                         {% if OKTA_ENABLED == True %}
                             <a href="{% url 'social:begin' 'okta-oauth2' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)">Login with OKTA</a>
                         {% else %}
-                            <a href="https://docs.google.com/document/d/1NaynLZ1EOQuVgdnHjG4h9fp7XVGHpB9qqtPrapknOw0/edit?usp=sharing" style="color: rgb(255,255,255)">Login with OKTA</a>
+                            <a href="https://defectdojo.readthedocs.io/en/latest/social-authentication.html#okta" style="color: rgb(255,255,255)">Login with OKTA</a>
                         {% endif %}
                     </button>
                 </div>

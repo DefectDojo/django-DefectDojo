@@ -1,4 +1,5 @@
-from django.conf import settings # import the settings file
+# import the settings file
+from django.conf import settings
 
 
 def globalize_oauth_vars(request):
