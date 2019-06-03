@@ -47,6 +47,7 @@ from dojo.tools.twistlock.parser import TwistlockParser
 from dojo.tools.kiuwan.parser import KiuwanCSVParser
 from dojo.tools.blackduck.parser import BlackduckHubCSVParser
 from dojo.tools.sonatype.parser import SonatypeJSONParser
+from dojo.tools.openscap.parser import OpenscapXMLParser
 
 __author__ = 'Jay Paz'
 
@@ -156,6 +157,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = BlackduckHubCSVParser(file, test)
     elif scan_type == 'Sonatype Application Scan':
         parser = SonatypeJSONParser(file, test)
+    elif scan_type == 'Openscap Vulnerability Scan':
+        parser = OpenscapXMLParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 
