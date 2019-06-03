@@ -65,6 +65,7 @@ setup(
         'django-taggit-serializer==0.1.7',
         'whitenoise==4.0',
         'django-environ==0.4.5',
+        'titlecase',
     ],
 
     extras_require={'mysql': ['mysqlclient==1.3.12']},
