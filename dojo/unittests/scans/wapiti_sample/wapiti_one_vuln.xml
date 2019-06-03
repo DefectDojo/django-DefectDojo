@@ -1,0 +1,29 @@
+<?xml version="1.0" ?>
+<report content_type="text/html" extension="xml" format_id="a994b278-1f62-11e1-96ac-406186ea4fc5" id="1d248704-7b9f-11e9-9325-000c29276b54" type="scan">
+   <report id="1d248704-7b9f-11e9-9325-000c29276b54">
+      <scan_run_status>Done</scan_run_status>
+      <scan_start>Mon, 20 May 2019 10:37:03 +0000</scan_start>
+      <results max="362" start="1">
+         <result id="74b37216-13c4-44aa-ab49-a6d21c816920">
+            <subnet>www.exemple.com</subnet>
+            <host>www.exemple.com</host>
+            <port>443</port>
+            <nvt oid="0702403d-630c-4c62-825b-ef3ab757a472">
+               <name>Injection SQL</name>
+               <family>vulnerability</family>
+               <cvss_base>0.0</cvss_base>
+               <risk_factor>1</risk_factor>
+               <cve>CVE-2019-6708</cve>
+               <bid></bid>
+               <tags></tags>
+               <certs></certs>
+               <xref>NOXREF</xref>
+            </nvt>
+            <threat>1</threat>
+            <description>
+<![CDATA[Injection MySQL via une injection dans le paramètre jform%5Bid%5D]]>            </description>
+            <original_threat>1</original_threat>
+         </result>
+      </results>
+   </report>
+</report>
