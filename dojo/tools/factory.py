@@ -158,13 +158,10 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = BlackduckHubCSVParser(file, test)
     elif scan_type == 'Sonatype Application Scan':
         parser = SonatypeJSONParser(file, test)
-<<<<<<< HEAD
     elif scan_type == 'Openscap Vulnerability Scan':
         parser = OpenscapXMLParser(file, test)
-=======
     elif scan_type == 'Wapiti Scan':
         parser = WapitiXMLParser(file, test)
->>>>>>> add wapiti importer
     else:
         raise ValueError('Unknown Test Type')
 
