@@ -28,19 +28,21 @@ class ImmuniwebXMLParser(object):
                 Type, CWE_ID, CVE_ID, CVSSv3,
                 Risk, URL, Description, PoC
             """
+            mitigation = "N/A"
+            impact = "N/A"
             title = vulnerability.find('Name').text
             reference = vulnerability.find('ID').text
             cwe = vulnerability.find('CWE-ID').text
             cve = vulnerability.find('CVE-ID').text
+            steps_to_reproduce = vulnerability.find('PoC').text
             # just to make sure severity is in the recognised sentence casing form
             severity = vulnerability.find('Risk').text.capitalize()
             # Set 'Warning' severity === 'Informational'
             if severity == 'Warning':
                 severity = "Informational"
-            print("#%#%#$#%$^$^$^$^$/n" + severity + "/n$$^$^$^$^$^$^^$^")
+
             description = (vulnerability.find('Description').text).encode('utf-8')
-            mitigation = "N/A"
-            impact = "N/A"
+            
 
             url = vulnerability.find("URL").text
             parsedUrl = urlparse(url)
@@ -54,7 +56,7 @@ class ImmuniwebXMLParser(object):
                 host, port = parsedUrl.netloc.split(':')
             except:  # there's no port attached to address
                 host = parsedUrl.netloc
-                
+
             dupe_key = hashlib.md5(description + title + severity).hexdigest()
             
             # check if finding is a duplicate
@@ -69,6 +71,7 @@ class ImmuniwebXMLParser(object):
                     verified=False, cve=cve,
                     description=description,
                     severity=severity,
+                    steps_to_reproduce=steps_to_reproduce,
                     numerical_severity=Finding.get_numerical_severity(
                         severity
                     ),
