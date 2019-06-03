@@ -4,7 +4,7 @@ from urlparse import urlparse
 from dojo.models import Endpoint, Finding
 from defusedxml import ElementTree
 
-__author__= 'properam'
+__author__ = 'properam'
 
 
 class ImmuniwebXMLParser(object):
@@ -12,15 +12,15 @@ class ImmuniwebXMLParser(object):
         self.items = ()
         if file is None:
             return
-        
+
         ImmuniScanTree = ElementTree.parse(file)
         root = ImmuniScanTree.getroot()
         # validate XML file
         if 'Vulnerabilities' not in root.tag:
             raise NamespaceErr("This does not look like a valid expected Immuniweb XML file.")
-        
+
         self.dupes = dict()
-        
+
         for vulnerability in root.iter("Vulnerability"):
             """
                 The Tags available in XML File are:
@@ -42,29 +42,27 @@ class ImmuniwebXMLParser(object):
                 severity = "Informational"
 
             description = (vulnerability.find('Description').text).encode('utf-8')
-            
-
             url = vulnerability.find("URL").text
             parsedUrl = urlparse(url)
-            protocol = parsedUrl.scheme  
+            protocol = parsedUrl.scheme
             query = parsedUrl.query
             fragment = parsedUrl.fragment
             path = parsedUrl.path
             port = ""  # Set port to empty string by default
-            # Split the returned network address into host and 
-            try:  # If there is port number attached to host address 
+            # Split the returned network address into host and
+            try:  # If there is port number attached to host address
                 host, port = parsedUrl.netloc.split(':')
             except:  # there's no port attached to address
                 host = parsedUrl.netloc
 
             dupe_key = hashlib.md5(description + title + severity).hexdigest()
-            
+
             # check if finding is a duplicate
             if dupe_key in self.dupes:
                 finding = self.dupes[dupe_key]  # fetch finding
                 if description is not None:
                     finding.description += description
-            else:  # finding is not a duplicate                
+            else:  # finding is not a duplicate
                 # create finding
                 finding = Finding(title=title,
                     test=test, active=False,
@@ -87,7 +85,6 @@ class ImmuniwebXMLParser(object):
                         host=host, port=port,
                         path=path,
                         protocol=protocol,
-                        query=query, fragment=fragment
-                    ))
+                        query=query, fragment=fragment))
 
         self.items = self.dupes.values()
