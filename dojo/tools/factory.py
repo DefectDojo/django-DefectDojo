@@ -48,6 +48,7 @@ from dojo.tools.kiuwan.parser import KiuwanCSVParser
 from dojo.tools.blackduck.parser import BlackduckHubCSVParser
 from dojo.tools.sonatype.parser import SonatypeJSONParser
 from dojo.tools.openscap.parser import OpenscapXMLParser
+from dojo.tools.wapiti.parser import WapitiXMLParser
 
 __author__ = 'Jay Paz'
 
@@ -159,6 +160,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = SonatypeJSONParser(file, test)
     elif scan_type == 'Openscap Vulnerability Scan':
         parser = OpenscapXMLParser(file, test)
+    elif scan_type == 'Wapiti Scan':
+        parser = WapitiXMLParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 
