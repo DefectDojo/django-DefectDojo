@@ -49,6 +49,7 @@ from dojo.tools.blackduck.parser import BlackduckHubCSVParser
 from dojo.tools.sonatype.parser import SonatypeJSONParser
 from dojo.tools.openscap.parser import OpenscapXMLParser
 from dojo.tools.immuniweb.parser import ImmuniwebXMLParser
+from dojo.tools.wapiti.parser import WapitiXMLParser
 
 __author__ = 'Jay Paz'
 
@@ -162,6 +163,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = OpenscapXMLParser(file, test)
     elif scan_type == 'Immuniweb Scan':
         parser = ImmuniwebXMLParser(file, test)
+    elif scan_type == 'Wapiti Scan':
+        parser = WapitiXMLParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 

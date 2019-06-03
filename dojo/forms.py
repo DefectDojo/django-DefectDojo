@@ -295,6 +295,7 @@ class ImportScanForm(forms.Form):
                          ("Kiuwan Scan", "Kiuwan Scan"),
                          ("Blackduck Hub Scan", "Blackduck Hub Scan"),
                          ("Openscap Vulnerability Scan", "Openscap Vulnerability Scan"),
+                         ("Wapiti Scan", "Wapiti Scan"),
                          ("Immuniweb Scan", "Immuniweb Scan"),
                          ("Sonatype Application Scan", "Sonatype Application Scan"))
 

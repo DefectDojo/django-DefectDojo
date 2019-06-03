@@ -326,10 +326,19 @@
 		},
 		"model": "dojo.test_type",
 		"pk": 54
+	},
+	{
+    "fields": {
+      "name": "Wapiti Scan"
+    },
+    "model": "dojo.test_type",
+    "pk": 55
+  },
+  {
 		"fields": {
 			"name": "Immuniweb Scan"
 		},
 		"model": "dojo.test_type",
-		"pk":55
+		"pk":56
 	}
 ]
