@@ -3,7 +3,6 @@ import logging
 import os
 from datetime import datetime
 import operator
-
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.contrib import messages
@@ -449,7 +448,6 @@ def import_scan_results(request, eid=None, pid=None):
     form = ImportScanForm()
     cred_form = CredMappingForm()
     finding_count = 0
-
     if eid:
         engagement = get_object_or_404(Engagement, id=eid)
         cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(engagement=engagement).order_by('cred_id')
@@ -480,7 +478,6 @@ def import_scan_results(request, eid=None, pid=None):
             min_sev = form.cleaned_data['minimum_severity']
             active = form.cleaned_data['active']
             verified = form.cleaned_data['verified']
-
             scan_type = request.POST['scan_type']
             if not any(scan_type in code
                        for code in ImportScanForm.SCAN_TYPE_CHOICES):
@@ -517,7 +514,7 @@ def import_scan_results(request, eid=None, pid=None):
                     new_f.cred_id = cred_user.cred_id
                     new_f.save()
 
-            parser = import_parser_factory(file, t)
+            parser = import_parser_factory(file, t, active, verified)
 
             try:
                 for item in parser.items:
@@ -539,8 +536,9 @@ def import_scan_results(request, eid=None, pid=None):
                     item.reporter = request.user
                     item.last_reviewed = timezone.now()
                     item.last_reviewed_by = request.user
-                    item.active = active
-                    item.verified = verified
+                    if form.get_scan_type() != "Generic Findings Import":
+                        item.active = active
+                        item.verified = verified
                     item.save(dedupe_option=False, false_history=True)
 
                     if hasattr(item, 'unsaved_req_resp') and len(
