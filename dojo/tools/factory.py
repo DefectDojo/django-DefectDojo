@@ -51,7 +51,7 @@ from dojo.tools.sonatype.parser import SonatypeJSONParser
 __author__ = 'Jay Paz'
 
 
-def import_parser_factory(file, test, scan_type=None):
+def import_parser_factory(file, test, active, verified, scan_type=None):
     if scan_type is None:
         scan_type = test.test_type.name
     if scan_type == "Burp Scan":
@@ -99,7 +99,7 @@ def import_parser_factory(file, test, scan_type=None):
     elif scan_type == 'Symfony Security Check':
         parser = PhpSymfonySecurityCheckParser(file, test)
     elif scan_type == 'Generic Findings Import':
-        parser = GenericFindingUploadCsvParser(file, test)
+        parser = GenericFindingUploadCsvParser(file, test, active, verified)
     elif scan_type == 'Qualys Scan':
         parser = QualysParser(file, test)
     elif scan_type == 'Qualys Webapp Scan':
