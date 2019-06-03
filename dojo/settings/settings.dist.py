@@ -64,11 +64,11 @@ env = environ.Env(
     DD_SECRET_KEY=(str, '.'),
     DD_CREDENTIAL_AES_256_KEY=(str, '.'),
     DD_DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 8388608),  # Max post size set to 8mb
-    DD_SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = (str, ''),
-    DD_SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = (str, ''),
-    DD_SOCIAL_AUTH_OKTA_OAUTH2_KEY = (str, ''),
-    DD_SOCIAL_AUTH_OKTA_OAUTH2_SECRET = (str, ''),
-    DD_SOCIAL_AUTH_OKTA_OAUTH2_API_URL = (str, 'https://{your-org-url}/oauth2/default'),
+    DD_SOCIAL_AUTH_GOOGLE_OAUTH2_KEY=(str, ''),
+    DD_SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET=(str, ''),
+    DD_SOCIAL_AUTH_OKTA_OAUTH2_KEY=(str, ''),
+    DD_SOCIAL_AUTH_OKTA_OAUTH2_SECRET=(str, ''),
+    DD_SOCIAL_AUTH_OKTA_OAUTH2_API_URL=(str, 'https://{your-org-url}/oauth2/default'),
 )
 
 
@@ -237,7 +237,7 @@ URL_PREFIX = env('DD_URL_PREFIX')
 LOGIN_REDIRECT_URL = env('DD_LOGIN_REDIRECT_URL')
 LOGIN_URL = '/login'
 
-# These are the individidual modules supported by social-auth 
+# These are the individidual modules supported by social-auth
 AUTHENTICATION_BACKENDS = (
     'social_core.backends.google.GoogleOAuth2',
     'dojo.okta.OktaOAuth2',
@@ -262,11 +262,11 @@ SOCIAL_AUTH_STRATEGY = 'social_django.strategy.DjangoStrategy'
 SOCIAL_AUTH_STORAGE = 'social_django.models.DjangoStorage'
 SOCIAL_AUTH_ADMIN_USER_SEARCH_FIELDS = ['username', 'first_name', 'last_name', 'email']
 
-GOOGLE_OAUTH_ENABLED = False 
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = env('DD_SOCIAL_AUTH_GOOGLE_OAUTH2_KEY') 
+GOOGLE_OAUTH_ENABLED = False
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = env('DD_SOCIAL_AUTH_GOOGLE_OAUTH2_KEY')
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = env('DD_SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET')
 
-OKTA_OAUTH_ENABLED = False 
+OKTA_OAUTH_ENABLED = False
 SOCIAL_AUTH_OKTA_OAUTH2_KEY = env('DD_SOCIAL_AUTH_OKTA_OAUTH2_KEY')
 SOCIAL_AUTH_OKTA_OAUTH2_SECRET = env('DD_SOCIAL_AUTH_OKTA_OAUTH2_SECRET')
 SOCIAL_AUTH_OKTA_OAUTH2_API_URL = env('DD_SOCIAL_AUTH_OKTA_OAUTH2_API_URL')

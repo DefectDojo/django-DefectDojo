@@ -4,16 +4,9 @@ Taken from Pull Request #333 of
 python-social-auth/socail-core
 
 """
-import sys
-if sys.version_info[0] < 3:
-    import urlparse as urlparse
-else:
-    import urllib.parse as urlparse
-import requests
 from six.moves.urllib.parse import urljoin
-from jose import jwk, jwt, jws
-from jose.jwt import JWTError, JWTClaimsError, ExpiredSignatureError
-from jose.exceptions import JWSSignatureError
+from jose import jwt
+from jose.jwt import JWTError, ExpiredSignatureError
 from social_core.utils import append_slash
 from social_core.backends.oauth import BaseOAuth2
 from social_core.backends.open_id_connect import OpenIdConnectAuth
@@ -33,7 +26,8 @@ class OktaMixin(object):
         return urljoin(append_slash(self.setting('API_URL')), path)
 
     def oidc_config(self):
-        return self.get_json(self._url('/.well-known/openid-configuration?client_id='+self.setting('KEY')))
+        return self.get_json(self._url('/.well-known/openid-configuration?client_id=' + self.setting('KEY')))
+
 
 class OktaOAuth2(OktaMixin, BaseOAuth2):
     """Okta OAuth authentication backend"""
@@ -67,6 +61,7 @@ class OktaOAuth2(OktaMixin, BaseOAuth2):
             }
         )
 
+
 class OktaOpenIdConnect(OktaOAuth2, OpenIdConnectAuth):
     """Okta OpenID-Connect authentication backend"""
     name = 'okta-openidconnect'
@@ -95,7 +90,6 @@ class OktaOpenIdConnect(OktaOAuth2, OpenIdConnectAuth):
                     k = self.get_jwks_keys()[0]
                 pass
 
-        try:
             claims = jwt.decode(
                 id_token,
                 k,
@@ -103,12 +97,6 @@ class OktaOpenIdConnect(OktaOAuth2, OpenIdConnectAuth):
                 issuer=self.id_token_issuer(),
                 access_token=access_token
             )
-        except ExpiredSignatureError:
-            raise AuthTokenError(self, 'Signature has expired')
-        except JWTClaimsError as error:
-            raise AuthTokenError(self, str(error))
-        except JWTError:
-            raise AuthTokenError(self, 'Signature verification failed')
 
         self.validate_claims(claims)
 
