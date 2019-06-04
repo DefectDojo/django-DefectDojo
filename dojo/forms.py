@@ -294,9 +294,10 @@ class ImportScanForm(forms.Form):
                          ("Twistlock Image Scan", "Twistlock Image Scan"),
                          ("Kiuwan Scan", "Kiuwan Scan"),
                          ("Blackduck Hub Scan", "Blackduck Hub Scan"),
-                         ("Sonatype Application Scan", "Sonatype Application Scan"),
                          ("Openscap Vulnerability Scan", "Openscap Vulnerability Scan"),
-                         ("Wapiti Scan", "Wapiti Scan"))
+                         ("Wapiti Scan", "Wapiti Scan"),
+                         ("Immuniweb Scan", "Immuniweb Scan"),
+                         ("Sonatype Application Scan", "Sonatype Application Scan"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
     scan_date = forms.DateTimeField(
@@ -336,6 +337,7 @@ class ImportScanForm(forms.Form):
     def get_scan_type(self):
         TGT_scan = self.cleaned_data['scan_type']
         return TGT_scan
+
 
 class ReImportScanForm(forms.Form):
     scan_date = forms.DateTimeField(
@@ -484,7 +486,7 @@ class ScanSettingsForm(forms.ModelForm):
         help_text=addHelpTxt,
         validators=[
             validators.RegexValidator(
-                regex='^\s*([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+,*\s*)+\s*$',
+                regex=r'^\s*([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+,*\s*)+\s*$',
                 message=msg,
                 code='invalid_address')])
     options = (('Weekly', 'Weekly'), ('Monthly', 'Monthly'),

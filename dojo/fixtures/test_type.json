@@ -171,172 +171,180 @@
 		"model": "dojo.test_type",
 		"pk": 116
 	},
+  {
+		"fields": {
+			"name": "Immuniweb Scan"
+		},
+		"model": "dojo.test_type",
+		"pk":117
+	},
 	{
     "fields": {
       "name": "Kiuwan Scan"
     },
     "model": "dojo.test_type",
-    "pk": 117
+    "pk": 118
 	},
 	{
 		"fields": {
 			"name": "Nessus Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 118
+		"pk": 119
 	},
 	{
     "fields": {
       "name": "Netsparker Scanner"
     },
     "model": "dojo.test_type",
-    "pk": 119
+    "pk": 120
 	},
 	{
 		"fields": {
 			"name": "Nexpose Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 120
+		"pk": 121
 	},
 	{
 		"fields": {
 			"name": "Nmap Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 121
+		"pk": 122
 	},
 	{
 		"fields": {
 			"name": "NPM Audit Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 122
+		"pk": 123
 	},
 	{
 		"fields": {
 			"name": "Node Security Platform Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 123
+		"pk": 124
 	},
   {
 		"fields":{
 			"name": "Openscap Vulnerability Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 124 
+		"pk": 125 
 	},
 	{
 		"fields": {
 			"name": "OpenVAS CSV"
 		},
 		"model": "dojo.test_type",
-		"pk": 125
+		"pk": 126
 	},
 	{
 		"fields": {
       		"name": "PHP Security Audit v2"
     	},
     	"model": "dojo.test_type",
-    	"pk": 126
+    	"pk": 127
 	},
 	{
 		"fields": {
 			"name": "Qualys Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 127
+		"pk": 128
 	},
 	{
 		"fields": {
 			"name": "Qualys Web App Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 128
+		"pk": 129
 	},
 	{
 		"fields": {
 			"name": "Retire.js Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 129
+		"pk": 130
 	},
 	{
 		"fields": {
 					"name": "Safety Scan"
 		},
 		"model": "dojo.test_type",
-	"pk": 130
+	"pk": 131
 	},
 	{
 		"fields": {
 			"name": "SKF Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 131
+		"pk": 132
 	},
 	{
 		"fields": {
 			"name": "Snyk Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 132
+		"pk": 133
 	},
 	{
     "fields": {
       "name": "Sonatype Application Scan"
     },
     "model": "dojo.test_type",
-    "pk": 133
+    "pk": 134
 	},
 	{
 		"fields": {
 			"name": "SSL Labs Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 134
+		"pk": 135
 	},
 	{
 		"fields": {
 			"name": "Trustwave"
 		},
 		"model": "dojo.test_type",
-		"pk": 135
+		"pk": 136
 	},
 	{
     "fields": {
       "name": "Twistlock Image Scan"
     },
     "model": "dojo.test_type",
-    "pk": 136
+    "pk": 137
 	},
 	{
 		"fields": {
 			"name": "VCG Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 137
+		"pk": 138
 	},
 	{
 		"fields": {
 			"name": "Veracode Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 138
+		"pk": 139
 	},
   {
     "fields": {
       "name": "Wapiti Scan"
     },
     "model": "dojo.test_type",
-    "pk": 139
+    "pk": 140
   },
 	{
 		"fields": {
 			"name": "ZAP Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 140
+		"pk": 141
   }
+
 ]
