@@ -14,6 +14,7 @@ import requests
 from dateutil.relativedelta import relativedelta, MO
 from django.conf import settings
 from django.core.mail import send_mail
+from django.core.mail import EmailMessage
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import get_resolver, reverse
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
@@ -1271,6 +1272,8 @@ def add_comment(find, note, force_push=False):
 
 
 def send_review_email(request, user, finding, users, new_note):
+    # TODO remove apparent dead code
+      
     recipients = [u.email for u in users]
     msg = "\nGreetings, \n\n"
     msg += "{0} has requested that you please review ".format(str(user))
@@ -1492,13 +1495,18 @@ def create_notification(event=None, **kwargs):
         if 'title' in kwargs:
             subject += ': %s' % kwargs['title']
         try:
-            send_mail(
+            email = EmailMessage(
                 subject,
                 create_notification_message(event, 'mail'),
-                get_system_setting('mail_notifications_from'), [address],
-                fail_silently=False)
+                get_system_setting('mail_notifications_from'),
+                [address],
+                headers={"From": "{}".format(get_system_setting('mail_notifications_from'))}
+            )
+            email.send(fail_silently=False)
+            
         except Exception as e:
             log_alert(e)
+            print(str(e))
             pass
 
     def send_alert_notification(user=None):
