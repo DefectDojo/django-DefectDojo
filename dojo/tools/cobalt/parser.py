@@ -31,7 +31,7 @@ class CobaltCSVParser(object):
             finding.references = row['ResearcherUrl']
             finding.steps_to_reproduce = row['StepsToReproduce']
             finding.severity_justification = row['CriticalityJustification']
-            finding.severity = "Medium"
+            finding.severity = "Info"
             
             if finding is not None:
                 if finding.title is None:
