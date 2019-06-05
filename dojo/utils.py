@@ -32,6 +32,7 @@ from requests.auth import HTTPBasicAuth
 
 import logging
 logger = logging.getLogger(__name__)
+deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 
 """
@@ -76,40 +77,53 @@ def is_deduplication_on_engagement_mismatch(new_finding, to_duplicate_finding):
 
 
 def sync_dedupe(new_finding, *args, **kwargs):
-    logger.debug('sync_dedupe for: ' + str(new_finding.id) +
+    deduplicationLogger.debug('sync_dedupe for: ' + str(new_finding.id) +
                  ":" + str(new_finding.title))
+    # ---------------------------------------------------------
+    # 1) Collects all the findings that have the same:
+    #      (title  and static_finding and dynamic_finding)
+    #      or (CWE and static_finding and dynamic_finding)
+    #    as the new one
+    #    (this is "cond1")
+    # ---------------------------------------------------------
     if new_finding.test.engagement.deduplication_on_engagement:
         eng_findings_cwe = Finding.objects.filter(
             test__engagement=new_finding.test.engagement,
             cwe=new_finding.cwe,
             static_finding=new_finding.static_finding,
-            dynamic_finding=new_finding.dynamic_finding,
-            date__lte=new_finding.date).exclude(id=new_finding.id).exclude(
-            cwe=0).exclude(duplicate=True)
+            dynamic_finding=new_finding.dynamic_finding
+                                                  ).exclude(id=new_finding.id
+                                                            ).exclude(cwe=0
+                                                                      ).exclude(duplicate=True)
         eng_findings_title = Finding.objects.filter(
             test__engagement=new_finding.test.engagement,
             title=new_finding.title,
             static_finding=new_finding.static_finding,
-            dynamic_finding=new_finding.dynamic_finding,
-            date__lte=new_finding.date).exclude(id=new_finding.id).exclude(
-            duplicate=True)
+            dynamic_finding=new_finding.dynamic_finding
+                                                   ).exclude(id=new_finding.id
+                                                             ).exclude(duplicate=True)
     else:
         eng_findings_cwe = Finding.objects.filter(
             test__engagement__product=new_finding.test.engagement.product,
             cwe=new_finding.cwe,
             static_finding=new_finding.static_finding,
-            dynamic_finding=new_finding.dynamic_finding,
-            date__lte=new_finding.date).exclude(id=new_finding.id).exclude(
-            cwe=0).exclude(duplicate=True)
+            dynamic_finding=new_finding.dynamic_finding
+                                                  ).exclude(id=new_finding.id
+                                                            ).exclude(cwe=0
+                                                                      ).exclude(duplicate=True)
         eng_findings_title = Finding.objects.filter(
             test__engagement__product=new_finding.test.engagement.product,
             title=new_finding.title,
             static_finding=new_finding.static_finding,
-            dynamic_finding=new_finding.dynamic_finding,
-            date__lte=new_finding.date).exclude(id=new_finding.id).exclude(
-            duplicate=True)
+            dynamic_finding=new_finding.dynamic_finding
+                                                    ).exclude(id=new_finding.id
+                                                              ).exclude(duplicate=True)
 
     total_findings = eng_findings_cwe | eng_findings_title
+    deduplicationLogger.debug("Found " +
+        str(len(eng_findings_cwe)) + " findings with same cwe, " +
+        str(len(eng_findings_title)) + " findings with same title: " +
+        str(len(total_findings)) + " findings with either same title or same cwe")
     # total_findings = total_findings.order_by('date')
 
     for find in total_findings:
@@ -117,20 +131,38 @@ def sync_dedupe(new_finding, *args, **kwargs):
         flag_line_path = False
         flag_hash = False
         if is_deduplication_on_engagement_mismatch(new_finding, find):
-            logger.debug(
+            deduplicationLogger.debug(
                 'deduplication_on_engagement_mismatch, skipping dedupe.')
             continue
+        # ---------------------------------------------------------
+        # 2) If existing and new findings have endpoints: compare them all
+        #    Else look at line+file_path
+        #    (if new finding is not static, do not deduplicate)
+        # ---------------------------------------------------------
         if find.endpoints.count() != 0 and new_finding.endpoints.count() != 0:
             list1 = new_finding.endpoints.all()
             list2 = find.endpoints.all()
             if all(x in list1 for x in list2):
                 flag_endpoints = True
-        elif find.line == new_finding.line and find.file_path == new_finding.file_path and new_finding.static_finding and len(
-                new_finding.file_path) > 0:
-            flag_line_path = True
+        elif new_finding.static_finding and len(new_finding.file_path) > 0:
+            if(str(find.line) == new_finding.line and find.file_path == new_finding.file_path):
+                flag_line_path = True
+            else:
+                deduplicationLogger.debug("no endpoints on one of the findings and file_path doesn't match")
+        else:
+            deduplicationLogger.debug("no endpoints on one of the findings and the new finding is either dynamic or doesn't have a file_path; Deduplication will not occur")
         if find.hash_code == new_finding.hash_code:
             flag_hash = True
+        deduplicationLogger.debug(
+            'deduplication flags for new finding ' + str(new_finding.id) + ' and existing finding ' + str(find.id) +
+            ' flag_endpoints: ' + str(flag_endpoints) + ' flag_line_path:' + str(flag_line_path) + ' flag_hash:' + str(flag_hash))
+        # ---------------------------------------------------------
+        # 3) Findings are duplicate if (cond1 is true) and they have the same:
+        #    hash
+        #    and (endpoints or (line and file_path)
+        # ---------------------------------------------------------
         if ((flag_endpoints or flag_line_path) and flag_hash):
+            deduplicationLogger.debug('New finding ' + str(new_finding.id) + ' is a duplicate of existing finding ' + str(find.id))
             new_finding.duplicate = True
             new_finding.active = False
             new_finding.verified = False

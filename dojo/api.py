@@ -1551,11 +1551,11 @@ class ReImportScanValidation(Validation):
         if 'test' not in bundle.data:
             errors.setdefault('test', []).append('test must be given')
         else:
-            # verify the engagement is valid
+            # verify the test is valid
             try:
                 get_pk_from_uri(uri=bundle.data['test'])
             except NotFound:
-                errors.setdefault('engagement', []).append('A valid engagement must be supplied. Ex. /api/v1/engagements/1/')
+                errors.setdefault('test', []).append('A valid test must be supplied. Ex. /api/v1/tests/1/')
         scan_type_list = list(map(lambda x: x[0], ImportScanForm.SCAN_TYPE_CHOICES))
         if 'scan_type' in bundle.data:
             if bundle.data['scan_type'] not in scan_type_list:

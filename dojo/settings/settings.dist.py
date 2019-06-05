@@ -556,6 +556,12 @@ LOGGING = {
             'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': False,
+        },
+        # Can be very verbose when many findings exist
+        'dojo.specific-loggers.deduplication': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
         }
     }
 }
