@@ -14,6 +14,7 @@ import requests
 from dateutil.relativedelta import relativedelta, MO
 from django.conf import settings
 from django.core.mail import send_mail
+from django.core.mail import EmailMessage
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import get_resolver, reverse
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
@@ -1271,6 +1272,8 @@ def add_comment(find, note, force_push=False):
 
 
 def send_review_email(request, user, finding, users, new_note):
+    # TODO remove apparent dead code
+
     recipients = [u.email for u in users]
     msg = "\nGreetings, \n\n"
     msg += "{0} has requested that you please review ".format(str(user))
@@ -1330,7 +1333,7 @@ def send_atmention_email(user, users, parent_url, parent_title, new_note):
 
 def encrypt(key, iv, plaintext):
     text = ""
-    if plaintext is not "" and plaintext is not None:
+    if plaintext and plaintext is not None:
         aes = AES.new(key, AES.MODE_CBC, iv, segment_size=128)
         plaintext = _pad_string(plaintext)
         encrypted_text = aes.encrypt(plaintext)
@@ -1353,7 +1356,7 @@ def _pad_string(value):
 
 
 def _unpad_string(value):
-    if value is not "" and value is not None:
+    if value and value is not None:
         while value[-1] == '\x00':
             value = value[:-1]
     return value
@@ -1375,7 +1378,7 @@ def dojo_crypto_encrypt(plaintext):
 def prepare_for_save(iv, encrypted_value):
     stored_value = None
 
-    if encrypted_value is not "" and encrypted_value is not None:
+    if encrypted_value and encrypted_value is not None:
         binascii.b2a_hex(encrypted_value).rstrip()
         stored_value = "AES.1:" + binascii.b2a_hex(iv) + ":" + encrypted_value
     return stored_value
@@ -1492,11 +1495,15 @@ def create_notification(event=None, **kwargs):
         if 'title' in kwargs:
             subject += ': %s' % kwargs['title']
         try:
-            send_mail(
+            email = EmailMessage(
                 subject,
                 create_notification_message(event, 'mail'),
-                get_system_setting('mail_notifications_from'), [address],
-                fail_silently=False)
+                get_system_setting('mail_notifications_from'),
+                [address],
+                headers={"From": "{}".format(get_system_setting('mail_notifications_from'))}
+            )
+            email.send(fail_silently=False)
+
         except Exception as e:
             log_alert(e)
             pass
