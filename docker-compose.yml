@@ -2,7 +2,10 @@
 version: '3.7'
 services:
   nginx:
-    image: defectdojo/defectdojo-nginx:latest
+    build: 
+      context: ./
+      dockerfile: Dockerfile.nginx
+    image: defectdojo/defectdojo-nginx:${NGINX_VERSION:-latest}
     depends_on:
       - uwsgi
     ports:
@@ -10,6 +13,20 @@ services:
         published: ${DD_PORT:-8080}
         protocol: tcp
         mode: host
+  uwsgi:
+    build: 
+      context: ./
+      dockerfile: Dockerfile.django
+    image: defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}
+    depends_on:
+      - mysql
+    entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/entrypoint-uwsgi.sh']
+    environment:
+      DD_DEBUG: 'off'
+      DD_ALLOWED_HOSTS: ${DD_ALLOWED_HOSTS:-*}
+      DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}
+      DD_CELERY_BROKER_USER: ${DD_CELERY_BROKER_USER:-guest}
+      DD_CELERY_BROKER_PASSWORD: ${DD_CELERY_BROKER_USER:-guest}
   celerybeat:
     image: defectdojo/defectdojo-django:latest
     depends_on:
@@ -51,5 +68,9 @@ services:
       MYSQL_PASSWORD: ${DD_DATABASE_PASSWORD:-defectdojo}
       MYSQL_DATABASE: ${DD_DATABASE_NAME:-defectdojo}
     command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
+    volumes:
+       - defectdojo_data:/var/lib/mysql
   rabbitmq:
     image: rabbitmq:3.7
+volumes:
+  defectdojo_data: {}

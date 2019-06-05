@@ -58,6 +58,8 @@ env = environ.Env(
     DD_DATABASE_ENGINE=(str, 'django.db.backends.mysql'),
     DD_DATABASE_HOST=(str, 'mysql'),
     DD_DATABASE_NAME=(str, 'defectdojo'),
+    # default django database name for testing is test_<dbname>
+    DD_TEST_DATABASE_NAME=(str, 'test_defectdojo'),
     DD_DATABASE_PASSWORD=(str, 'defectdojo'),
     DD_DATABASE_PORT=(int, 3306),
     DD_DATABASE_USER=(str, 'defectdojo'),
@@ -151,6 +153,9 @@ else:
         'default': {
             'ENGINE': env('DD_DATABASE_ENGINE'),
             'NAME': env('DD_DATABASE_NAME'),
+            'TEST': {
+                'NAME': env('DD_TEST_DATABASE_NAME'),
+            },
             'USER': env('DD_DATABASE_USER'),
             'PASSWORD': env('DD_DATABASE_PASSWORD'),
             'HOST': env('DD_DATABASE_HOST'),
