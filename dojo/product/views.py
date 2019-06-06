@@ -16,8 +16,7 @@ from django.utils import timezone
 from django.db.models import Sum, Count, Q
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
-from dojo.benchmark.views import score_asvs, return_score
-from dojo.templatetags.display_tags import asvs_level, get_level
+from dojo.templatetags.display_tags import get_level
 from dojo.filters import ProductFilter, ProductFindingFilter, EngagementFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm, \
                        EngagementPresetsForm, DeleteEngagementPresetsForm
