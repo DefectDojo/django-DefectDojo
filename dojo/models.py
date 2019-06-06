@@ -1981,7 +1981,6 @@ class Benchmark_Product_Summary(models.Model):
     def __unicode__(self):
         return self.product.name + ': ' + self.benchmark_type.name
 
-
     class Meta:
         unique_together = [('product', 'benchmark_type')]
 
