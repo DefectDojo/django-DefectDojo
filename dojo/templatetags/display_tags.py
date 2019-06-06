@@ -158,6 +158,11 @@ def asvs_calc_level(benchmark_score):
     return benchmark_score.desired_level, level, str(total_pass), str(total)
 
 
+def get_level(benchmark_score):
+    benchmark_score.desired_level, level, total_pass, total = asvs_calc_level(benchmark_score)
+    level = percentage(total_pass, total)
+    return level
+
 @register.filter(name='asvs_level')
 def asvs_level(benchmark_score):
     benchmark_score.desired_level, level, total_pass, total = asvs_calc_level(
