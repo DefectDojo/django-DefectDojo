@@ -79,7 +79,7 @@ class BlackduckHubCSVParser(object):
 
                 dupes[dupe_key] = finding
 
-        self.items = dupes.values()
+        self.items = list(dupes.values())
 
     def format_title(self, df, i):
         return "{} - {}".format(df.ix[i, 'Vulnerability id'], df.ix[i, 'Channel version origin id'])

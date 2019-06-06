@@ -61,7 +61,7 @@ class ContrastCSVParser(object):
                 dupes[dupe_key] = finding
                 self.process_endpoints(finding, df, i)
 
-        self.items = dupes.values()
+        self.items = list(dupes.values())
 
     def format_description(self, df, i):
         description = "Request URI: " + str(df.ix[i, 'Request URI']) + "\n"

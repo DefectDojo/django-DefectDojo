@@ -246,6 +246,9 @@ class Dojo_User(User):
     def __unicode__(self):
         return self.get_full_name()
 
+    def __str__(self):
+        return self.get_full_name()
+
 
 class UserContactInfo(models.Model):
     user = models.OneToOneField(User)
@@ -333,6 +336,9 @@ class Product_Type(models.Model):
     def __unicode__(self):
         return self.name
 
+    def __str__(self):
+        return self.name
+
     def get_breadcrumbs(self):
         bc = [{'title': self.__unicode__(),
                'url': reverse('edit_product_type', args=(self.id,))}]
@@ -346,6 +352,9 @@ class Product_Line(models.Model):
     def __unicode__(self):
         return self.name
 
+    def __str__(self):
+        return self.name
+
 
 class Report_Type(models.Model):
     name = models.CharField(max_length=255)
@@ -357,6 +366,9 @@ class Test_Type(models.Model):
     dynamic_tool = models.BooleanField(default=False)
 
     def __unicode__(self):
+        return self.name
+    
+    def __str__(self):
         return self.name
 
     class Meta:
@@ -392,6 +404,9 @@ class DojoMeta(models.Model):
             raise ValidationError('Metadata entries may not have both a product and an endpoint')
 
     def __unicode__(self):
+        return "%s: %s" % (self.name, self.value)
+    
+    def __str__(self):
         return "%s: %s" % (self.name, self.value)
 
     class Meta:
@@ -495,6 +510,9 @@ class Product(models.Model):
     regulations = models.ManyToManyField(Regulation, blank=True)
 
     def __unicode__(self):
+        return self.name
+
+    def __str__(self):
         return self.name
 
     class Meta:
@@ -643,6 +661,9 @@ class Scan(models.Model):
     def __unicode__(self):
         return self.scan_settings.protocol + " Scan " + str(self.date)
 
+    def __str__(self):
+        return self.scan_settings.protocol + " Scan " + str(self.date)
+
     def get_breadcrumbs(self):
         bc = self.scan_settings.get_breadcrumbs()
         bc += [{'title': self.__unicode__(),
@@ -674,6 +695,9 @@ class Tool_Type(models.Model):
     def __unicode__(self):
         return self.name
 
+    def __str__(self):
+        return self.name
+
 
 class Tool_Configuration(models.Model):
     name = models.CharField(max_length=200, null=False)
@@ -701,11 +725,17 @@ class Tool_Configuration(models.Model):
     def __unicode__(self):
         return self.name
 
+    def __str__(self):
+        return self.name
+
 
 class Network_Locations(models.Model):
     location = models.CharField(max_length=500, help_text="Location of network testing: Examples: VPN, Internet or Internal.")
 
     def __unicode__(self):
+        return self.location
+
+    def __str__(self):
         return self.location
 
 
@@ -721,6 +751,9 @@ class Engagement_Presets(models.Model):
     def __unicode__(self):
         return self.title
 
+    def __str__(self):
+        return self.title
+
     class Meta:
         ordering = ['title']
 
@@ -729,6 +762,9 @@ class Engagement_Type(models.Model):
     name = models.CharField(max_length=200)
 
     def __unicode__(self):
+        return self.name
+
+    def __str__(self):
         return self.name
 
 
@@ -799,6 +835,11 @@ class Engagement(models.Model):
                                         self.target_start.strftime(
                                             "%b %d, %Y"))
 
+    def __str__(self):
+        return "Engagement: %s (%s)" % (self.name if self.name else '',
+                                        self.target_start.strftime(
+                                            "%b %d, %Y"))
+
     def get_breadcrumbs(self):
         bc = self.product.get_breadcrumbs()
         bc += [{'title': self.__unicode__(),
@@ -846,7 +887,7 @@ class Endpoint(models.Model):
         ordering = ['product', 'protocol', 'host', 'path', 'query', 'fragment']
 
     def __unicode__(self):
-        from urlparse import uses_netloc
+        from urllib.parse import uses_netloc
 
         netloc = self.host
         port = self.port
@@ -874,6 +915,39 @@ class Endpoint(models.Model):
         if fragment:
             url = url + '#' + fragment
         return url
+
+    def __str__(self):
+        from urllib.parse import uses_netloc
+
+        netloc = self.host
+        port = self.port
+        scheme = self.protocol
+        url = self.path if self.path else ''
+        query = self.query
+        fragment = self.fragment
+
+        if port:
+            # If http or https on standard ports then don't tack on the port number
+            if (port != 443 and scheme == "https") or (port != 80 and scheme == "http"):
+                netloc += ':%s' % port
+
+        if netloc or (scheme and scheme in uses_netloc and url[:2] != '//'):
+            if url and url[:1] != '/':
+                url = '/' + url
+            if scheme and scheme in uses_netloc and url[:2] != '//':
+                url = '//' + (netloc or '') + url
+            else:
+                url = (netloc or '') + url
+        if scheme:
+            url = scheme + ':' + url
+        if query:
+            url = url + '?' + query
+        if fragment:
+            url = url + '#' + fragment
+        return url
+
+    def __hash__(self):
+        return self.__str__().__hash__()
 
     def __eq__(self, other):
         if isinstance(other, Endpoint):
@@ -946,11 +1020,17 @@ class Notes(models.Model):
     def __unicode__(self):
         return self.entry
 
+    def __str__(self):
+        return self.entry
+
 
 class Development_Environment(models.Model):
     name = models.CharField(max_length=200)
 
     def __unicode__(self):
+        return self.name
+
+    def __str__(self):
         return self.name
 
     def get_breadcrumbs(self):
@@ -983,8 +1063,13 @@ class Test(models.Model):
 
     def __unicode__(self):
         if self.title:
-            return u"%s (%s)" % (self.title, self.test_type)
-        return unicode(self.test_type)
+            return "%s (%s)" % (self.title, self.test_type)
+        return str(self.test_type)
+
+    def __str__(self):
+        if self.title:
+            return "%s (%s)" % (self.title, self.test_type)
+        return str(self.test_type)
 
     def get_breadcrumbs(self):
         bc = self.engagement.get_breadcrumbs()
@@ -1086,7 +1171,7 @@ class Finding(models.Model):
         hash_string = self.title + str(self.cwe) + str(self.line) + str(self.file_path) + self.description
 
         if self.dynamic_finding:
-            endpoint_str = u''
+            endpoint_str = ''
             for e in self.endpoints.all():
                 endpoint_str += str(e)
             if endpoint_str:
@@ -1097,7 +1182,6 @@ class Finding(models.Model):
         except:
             hash_string = hash_string.strip()
             return hashlib.sha256(hash_string).hexdigest()
-
 
     def duplicate_finding_set(self):
         return self.duplicate_list.all().order_by('title')
@@ -1142,6 +1226,9 @@ class Finding(models.Model):
             return 5
 
     def __unicode__(self):
+        return self.title
+
+    def __str__(self):
         return self.title
 
     def status(self):
@@ -1279,16 +1366,16 @@ class Finding(models.Model):
                     async_dedupe.delay(self, *args, **kwargs)
                     pass
         if system_settings.false_positive_history and false_history:
-                from dojo.tasks import async_false_history
-                from dojo.utils import sync_false_history
-                try:
-                    if self.reporter.usercontactinfo.block_execution:
-                        sync_false_history(self, *args, **kwargs)
-                    else:
-                        async_false_history.delay(self, *args, **kwargs)
-                except:
+            from dojo.tasks import async_false_history
+            from dojo.utils import sync_false_history
+            try:
+                if self.reporter.usercontactinfo.block_execution:
+                    sync_false_history(self, *args, **kwargs)
+                else:
                     async_false_history.delay(self, *args, **kwargs)
-                    pass
+            except:
+                async_false_history.delay(self, *args, **kwargs)
+                pass
         # Title Casing
         from titlecase import titlecase
         self.title = titlecase(self.title)
@@ -1372,6 +1459,9 @@ class Stub_Finding(models.Model):
 
     def __unicode__(self):
         return self.title
+        
+    def __str__(self):
+        return self.title
 
     def get_breadcrumbs(self):
         bc = self.test.get_breadcrumbs()
@@ -1402,6 +1492,9 @@ class Finding_Template(models.Model):
         ordering = ['-cwe']
 
     def __unicode__(self):
+        return self.title
+
+    def __str__(self):
         return self.title
 
     def get_breadcrumbs(self):
@@ -1469,10 +1562,10 @@ class BurpRawRequestResponse(models.Model):
     burpResponseBase64 = models.BinaryField()
 
     def get_request(self):
-        return unicode(base64.b64decode(self.burpRequestBase64), errors='ignore')
+        return str(base64.b64decode(self.burpRequestBase64), errors='ignore')
 
     def get_response(self):
-        res = unicode(base64.b64decode(self.burpResponseBase64), errors='ignore')
+        res = str(base64.b64decode(self.burpResponseBase64), errors='ignore')
         # Removes all blank lines
         res = re.sub(r'\n\s*\n', '\n', res)
         return res
@@ -1492,6 +1585,10 @@ class Risk_Acceptance(models.Model):
     updated = models.DateTimeField(editable=False, default=now)
 
     def __unicode__(self):
+        return "Risk Acceptance added on %s" % self.created.strftime(
+            "%b %d, %Y")
+        
+    def __str__(self):
         return "Risk Acceptance added on %s" % self.created.strftime(
             "%b %d, %Y")
 
@@ -1523,6 +1620,9 @@ class Report(models.Model):
     def __unicode__(self):
         return self.name
 
+    def __str__(self):
+        return self.name
+
     def get_url(self):
         return reverse('download_report', args=(self.id,))
 
@@ -1550,7 +1650,10 @@ class FindingImage(models.Model):
                                  options={'quality': 100})
 
     def __unicode__(self):
-        return self.image.name or u'No Image'
+        return self.image.name or 'No Image'
+
+    def __str__(self):
+        return self.image.name or 'No Image'
 
 
 class FindingImageAccessToken(models.Model):
@@ -1602,6 +1705,9 @@ class JIRA_Conf(models.Model):
     def __unicode__(self):
         return self.url + " | " + self.username
 
+    def __str__(self):
+        return self.url + " | " + self.username
+
     def get_priority(self, status):
         if status == 'Low':
             return self.low_mapping_severity
@@ -1622,6 +1728,14 @@ class JIRA_Issue(models.Model):
     engagement = models.OneToOneField(Engagement, null=True, blank=True)
 
     def __unicode__(self):
+        text = ""
+        if self.finding:
+            text = self.finding.test.engagement.product.name + " | Finding: " + self.finding.title + ", ID: " + str(self.finding.id)
+        elif self.engagement:
+            text = self.engagement.product.name + " | Engagement: " + self.engagement.name + ", ID: " + str(self.engagement.id)
+        return text + " | Jira Key: " + str(self.jira_key)
+
+    def __str__(self):
         text = ""
         if self.finding:
             text = self.finding.test.engagement.product.name + " | Finding: " + self.finding.title + ", ID: " + str(self.finding.id)
@@ -1654,6 +1768,9 @@ class JIRA_PKey(models.Model):
     push_notes = models.BooleanField(default=False, blank=True)
 
     def __unicode__(self):
+        return self.product.name + " | " + self.project_key
+
+    def __str__(self):
         return self.product.name + " | " + self.project_key
 
 
@@ -1747,6 +1864,9 @@ class Cred_User(models.Model):
     def __unicode__(self):
         return self.name + " (" + self.role + ")"
 
+    def __str__(self):
+        return self.name + " (" + self.role + ")"
+
 
 class Cred_Mapping(models.Model):
     cred_id = models.ForeignKey(Cred_User, null=False,
@@ -1766,12 +1886,18 @@ class Cred_Mapping(models.Model):
     def __unicode__(self):
         return self.cred_id.name + " (" + self.cred_id.role + ")"
 
+    def __str__(self):
+        return self.cred_id.name + " (" + self.cred_id.role + ")"
+
 
 class Language_Type(models.Model):
     language = models.CharField(max_length=100, null=False)
     color = models.CharField(max_length=7, null=True, verbose_name='HTML color')
 
     def __unicode__(self):
+        return self.language
+
+    def __str__(self):
         return self.language
 
 
@@ -1786,6 +1912,9 @@ class Languages(models.Model):
     created = models.DateTimeField(null=False, editable=False, default=now)
 
     def __unicode__(self):
+        return self.language.language
+
+    def __str__(self):
         return self.language.language
 
     class Meta:
@@ -1806,12 +1935,18 @@ class App_Analysis(models.Model):
     def __unicode__(self):
         return self.name + " | " + self.product.name
 
+    def __str__(self):
+        return self.name + " | " + self.product.name
+
 
 class Objects_Review(models.Model):
     name = models.CharField(max_length=100, null=True)
     created = models.DateTimeField(null=False, editable=False, default=now)
 
     def __unicode__(self):
+        return self.name
+
+    def __str__(self):
         return self.name
 
 
@@ -1828,6 +1963,17 @@ class Objects(models.Model):
     created = models.DateTimeField(null=False, editable=False, default=now)
 
     def __unicode__(self):
+        name = None
+        if self.path is not None:
+            name = self.path
+        elif self.folder is not None:
+            name = self.folder
+        elif self.artifact is not None:
+            name = self.artifact
+
+        return name
+
+    def __str__(self):
         name = None
         if self.path is not None:
             name = self.path
@@ -1859,6 +2005,17 @@ class Objects_Engagement(models.Model):
 
         return data + " | " + self.engagement.name + " | " + str(self.engagement.id)
 
+    def __str__(self):
+        data = ""
+        if self.object_id.path:
+            data = self.object_id.path
+        elif self.object_id.folder:
+            data = self.object_id.folder
+        elif self.object_id.artifact:
+            data = self.object_id.artifact
+
+        return data + " | " + self.engagement.name + " | " + str(self.engagement.id)
+
 
 class Testing_Guide_Category(models.Model):
     name = models.CharField(max_length=300)
@@ -1869,6 +2026,9 @@ class Testing_Guide_Category(models.Model):
         ordering = ('name',)
 
     def __unicode__(self):
+        return self.name
+
+    def __str__(self):
         return self.name
 
 
@@ -1884,6 +2044,9 @@ class Testing_Guide(models.Model):
     updated = models.DateTimeField(editable=False, default=now)
 
     def __unicode__(self):
+        return self.testing_guide_category.name + ': ' + self.name
+
+    def __str__(self):
         return self.testing_guide_category.name + ': ' + self.name
 
 
@@ -1903,6 +2066,9 @@ class Benchmark_Type(models.Model):
     def __unicode__(self):
         return self.name + " " + self.version
 
+    def __str__(self):
+        return self.name + " " + self.version
+
 
 class Benchmark_Category(models.Model):
     type = models.ForeignKey(Benchmark_Type, verbose_name='Benchmark Type')
@@ -1917,6 +2083,9 @@ class Benchmark_Category(models.Model):
         ordering = ('name',)
 
     def __unicode__(self):
+        return self.name + ': ' + self.type.name
+
+    def __str__(self):
         return self.name + ': ' + self.type.name
 
 
@@ -1937,6 +2106,9 @@ class Benchmark_Requirement(models.Model):
     def __unicode__(self):
         return str(self.objective_number) + ': ' + self.category.name
 
+    def __str__(self):
+        return str(self.objective_number) + ': ' + self.category.name
+
 
 class Benchmark_Product(models.Model):
     product = models.ForeignKey(Product)
@@ -1950,6 +2122,9 @@ class Benchmark_Product(models.Model):
     updated = models.DateTimeField(editable=False, default=now)
 
     def __unicode__(self):
+        return self.product.name + ': ' + self.control.objective_number + ': ' + self.control.category.name
+
+    def __str__(self):
         return self.product.name + ': ' + self.control.objective_number + ': ' + self.control.category.name
 
     class Meta:
@@ -1979,6 +2154,9 @@ class Benchmark_Product_Summary(models.Model):
     updated = models.DateTimeField(editable=False, default=now)
 
     def __unicode__(self):
+        return self.product.name + ': ' + self.benchmark_type.name
+
+    def __str__(self):
         return self.product.name + ': ' + self.benchmark_type.name
 
     class Meta:

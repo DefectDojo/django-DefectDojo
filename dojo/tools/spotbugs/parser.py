@@ -62,4 +62,4 @@ class SpotbugsXMLParser(object):
                 )
                 dupes[dupe_key] = finding
 
-        self.items = dupes.values()
+        self.items = list(dupes.values())

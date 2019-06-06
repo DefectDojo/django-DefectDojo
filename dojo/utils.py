@@ -4,7 +4,7 @@ import binascii
 import os
 import hashlib
 import json
-import StringIO
+import io
 from Crypto.Cipher import AES
 from calendar import monthrange
 from datetime import date, datetime
@@ -470,7 +470,7 @@ def get_punchcard_data(findings, weeks_between, start_date):
                 pass
 
         if sum(days.values()) > 0:
-            for day, count in days.items():
+            for day, count in list(days.items()):
                 punchcard.append([tick, day, count])
                 if append_tick:
                     ticks.append([
@@ -816,7 +816,7 @@ class FileIterWrapper(object):
         self.flo = flo
         self.chunk_size = chunk_size
 
-    def next(self):
+    def __next__(self):
         data = self.flo.read(self.chunk_size)
         if data:
             return data
@@ -1110,7 +1110,7 @@ def jira_attachment(jira, issue, file, jira_filename=None):
     if jira_check_attachment(issue, basename) is False:
         try:
             if jira_filename is not None:
-                attachment = StringIO.StringIO()
+                attachment = io.StringIO()
                 attachment.write(jira_filename)
                 jira.add_attachment(
                     issue=issue, attachment=attachment, filename=jira_filename)
@@ -1653,7 +1653,7 @@ def calculate_grade(product):
 
 
 def get_celery_worker_status():
-    from tasks import celery_status
+    from .tasks import celery_status
     res = celery_status.apply_async()
 
     # Wait 15 seconds for a response from Celery

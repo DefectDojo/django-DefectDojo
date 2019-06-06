@@ -1,4 +1,4 @@
-from itertools import izip, chain
+from itertools import chain
 import random
 from django import template
 from django.contrib.contenttypes.models import ContentType
@@ -17,7 +17,7 @@ from markdown.extensions import Extension
 import dateutil.relativedelta
 import datetime
 from ast import literal_eval
-from urlparse import urlparse
+from urllib.parse import urlparse
 import bleach
 from bleach_whitelist import markdown_tags, markdown_attrs
 
@@ -344,7 +344,7 @@ def action_log_entry(value, autoescape=None):
     import json
     history = json.loads(value)
     text = ''
-    for k in history.iterkeys():
+    for k in history.keys():
         text += k.capitalize() + ' changed from "' + \
             history[k][0] + '" to "' + history[k][1] + '"'
 
@@ -432,9 +432,9 @@ def colgroup(parser, token):
         def render(self, context):
             iterable = template.Variable(self.iterable).resolve(context)
             num_cols = self.num_cols
-            context[self.varname] = izip(
+            context[self.varname] = zip(
                 *[chain(iterable, [None] * (num_cols - 1))] * num_cols)
-            return u''
+            return ''
 
     try:
         _, iterable, _, num_cols, _, _, varname = token.split_contents()
