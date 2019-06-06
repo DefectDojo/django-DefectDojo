@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 
 import argparse
 import csv
@@ -10,7 +10,6 @@ from urllib.parse import urlparse
 
 # Non-standard libraries
 try:
-    import defusedxml.lxml as lxml
     from lxml import etree
 except ImportError:
     print("Missing lxml library. Please install using PIP. https://pypi.python.org/pypi/lxml/3.4.2")
@@ -55,6 +54,7 @@ REPORT_HEADERS = ['CVSS_score',
 
 ################################################################
 
+
 def htmltext(blob):
     h = html2text.HTML2Text()
     h.ignore_links = False
@@ -70,22 +70,23 @@ def report_writer(report_dic, output_filename):
 
 ################################################################
 
+
 def issue_r(raw_row, vuln, test, issueType):
     ret_rows = []
     issue_row = {}
 
     _gid = raw_row.findtext('QID')
     _temp = issue_row
-    param=None
-    payload=None
+    param = None
+    payload = None
 
     if(issueType == "vul"):
-        url=raw_row.findtext('URL')
-        param=raw_row.findtext('PARAM')
-        payload=raw_row.findtext('PAYLOADS/PAYLOAD/PAYLOAD')
+        url = raw_row.findtext('URL')
+        param = raw_row.findtext('PARAM')
+        payload = raw_row.findtext('PAYLOADS/PAYLOAD/PAYLOAD')
         parts = urlparse(url)
 
-        ep=Endpoint(protocol=parts.scheme,
+        ep = Endpoint(protocol=parts.scheme,
                  host=parts.netloc,
                  path=parts.path,
                  query=parts.query,
@@ -109,7 +110,7 @@ def issue_r(raw_row, vuln, test, issueType):
 
                 if _temp['Severity'] is not None:
                     if float(_temp['Severity']) == 1:
-                        _temp['Severity']="Info"
+                        _temp['Severity'] = "Info"
                     elif float(_temp['Severity']) == 2:
                         _temp['Severity'] = "Low"
                     elif float(_temp['Severity']) == 3:
@@ -122,41 +123,43 @@ def issue_r(raw_row, vuln, test, issueType):
 
                 finding = None
 
-                if issueType=="vul":
+                if issueType == "vul":
                     finding = Finding(title=_temp['vuln_name'], mitigation=_temp['vuln_solution'],
-                                         description=_temp['vuln_description'], param=param, payload=payload, severity=_temp['Severity'],impact=_temp['impact'])
+                                         description=_temp['vuln_description'], param=param, payload=payload, severity=_temp['Severity'], impact=_temp['impact'])
 
                     finding.unsaved_endpoints = list()
                     finding.unsaved_endpoints.append(ep)
                 else:
                     finding = Finding(title=_temp['vuln_name'], mitigation=_temp['vuln_solution'],
                                          description=_temp['vuln_description'], param=param, payload=payload,
-                                         severity=_temp['Severity'],impact=_temp['impact'])
+                                         severity=_temp['Severity'], impact=_temp['impact'])
 
                 ret_rows.append(finding)
 
     return ret_rows
 
-def qualys_webapp_parser(qualys_xml_file,test):
+
+def qualys_webapp_parser(qualys_xml_file, test):
     parser = etree.XMLParser(remove_blank_text=True, no_network=True, recover=True)
     d = etree.parse(qualys_xml_file, parser)
 
-    r = d.xpath('/WAS_WEBAPP_REPORT/RESULTS/WEB_APPLICATION/VULNERABILITY_LIST/VULNERABILITY')
+    right = d.xpath('/WAS_WEBAPP_REPORT/RESULTS/WEB_APPLICATION/VULNERABILITY_LIST/VULNERABILITY')
     # r = d.xpath('/WAS_SCAN_REPORT/RESULTS/VULNERABILITY_LIST/VULNERABILITY')
-    l = d.xpath('/WAS_WEBAPP_REPORT/RESULTS/WEB_APPLICATION/INFORMATION_GATHERED_LIST/INFORMATION_GATHERED')
+    left = d.xpath('/WAS_WEBAPP_REPORT/RESULTS/WEB_APPLICATION/INFORMATION_GATHERED_LIST/INFORMATION_GATHERED')
     # l = d.xpath('/WAS_SCAN_REPORT/RESULTS/INFORMATION_GATHERED_LIST/INFORMATION_GATHERED')
 
     master_list = []
 
-    for issue in r:
-        master_list += issue_r(issue, d,test,"vul")
+    for issue in right:
+        master_list += issue_r(issue, d, test, "vul")
 
-    for issue in l:
-        master_list += issue_r(issue,d,test,"info")
+    for issue in left:
+        master_list += issue_r(issue, d, test, "info")
 
     return master_list
 
 ################################################################
+
 
 if __name__ == "__main__":
 
@@ -177,6 +180,7 @@ if __name__ == "__main__":
         print("[!] Error processing file: {}".format(args.qualys_xml_file))
         exit()
 
+
 class QualysWebAppParser(object):
     def __init__(self, file, test):
-        self.items = qualys_webapp_parser(file,test)
+        self.items = qualys_webapp_parser(file, test)
