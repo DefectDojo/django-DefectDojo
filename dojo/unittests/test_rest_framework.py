@@ -10,10 +10,9 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
     UsersViewSet, ImportScanView
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase, APIClient
-from urllib.parse import urlparse
 
 
 def skipIfNotSubclass(baseclass_name):
@@ -489,10 +488,10 @@ class ReimportScanTest(APITestCase):
     fixtures = ['dojo_testdata.json']
 
     def setUp(self):
-            testuser = User.objects.get(username='admin')
-            token = Token.objects.get(user=testuser)
-            self.client = APIClient()
-            self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        testuser = User.objects.get(username='admin')
+        token = Token.objects.get(user=testuser)
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
 
     def test_import_zap_xml(self):
         length = Test.objects.all().count()

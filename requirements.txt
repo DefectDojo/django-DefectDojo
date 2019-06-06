@@ -6,7 +6,7 @@ coverage==4.5.3
 defusedxml==0.6.0
 django_celery_results==1.1.1
 django-auditlog==0.4.5
-django-custom-field==2.9
+git+https://git@github.com/Maffooch/django-custom-field.git
 django-dbbackup>=3.2.0
 django-environ==0.4.5
 django-filter==2.0.0
@@ -18,10 +18,10 @@ django-rest-swagger==2.2.0
 django-slack==5.13.0
 django-tagging==0.4.6
 django-taggit-serializer==0.1.7
-django-tastypie-swagger==0.1.4
+git+https://git@github.com/Maffooch/django-tastypie-swagger.git
 django-tastypie==0.14.2
 django-watson==1.5.2
-Django==1.11.20 # Hold off for now
+Django==2.2.1
 djangorestframework==3.9.4
 gunicorn==19.9.0
 html2text==2018.1.9

@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, logout
 from django.contrib.auth.decorators import user_passes_test
 from django.core import serializers
 from django.core.exceptions import PermissionDenied
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db.models import Q
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404
@@ -106,7 +106,7 @@ def logout_view(request):
     return HttpResponseRedirect(reverse('login'))
 
 
-# @user_passes_test(lambda u: u.is_staff)
+@user_passes_test(lambda u: u.is_active)
 def alerts(request):
     alerts = Alerts.objects.filter(user_id=request.user)
 
