@@ -1,5 +1,5 @@
 from django.test import TestCase
-from dojo.tools.phpsymfonysecuritycheck.parser import PhpSymfonySecurityCheckParser
+from dojo.tools.php_symfony_security_check.parser import PhpSymfonySecurityCheckParser
 from dojo.models import Test
 
 
