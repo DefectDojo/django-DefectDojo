@@ -1,7 +1,7 @@
 import logging
 import mimetypes
 import os
-import urllib.request, urllib.parse, urllib.error
+import urllib.parse
 from datetime import datetime
 
 from dateutil.relativedelta import relativedelta
@@ -9,7 +9,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import Http404, HttpResponseRedirect, HttpResponseForbidden, JsonResponse
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404

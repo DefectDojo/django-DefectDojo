@@ -6,7 +6,7 @@ from django.template.defaultfilters import stringfilter
 from django.utils.html import escape
 from django.utils.safestring import mark_safe, SafeData
 from django.utils.text import normalize_newlines
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib.auth.models import User
 from dojo.utils import prepare_for_view, get_system_setting
 from dojo.models import Check_List, FindingImageAccessToken, Finding, System_Settings, JIRA_PKey, Product
@@ -35,6 +35,7 @@ def markdown_render(value):
     if value:
         value = bleach.clean(markdown.markdown(value), markdown_tags, markdown_attrs)
         return mark_safe(markdown.markdown(value, extensions=['markdown.extensions.nl2br', 'markdown.extensions.sane_lists', 'markdown.extensions.codehilite', 'markdown.extensions.fenced_code', 'markdown.extensions.toc', 'markdown.extensions.tables']))
+
 
 @register.filter(name='ports_open')
 def ports_open(value):
@@ -243,7 +244,7 @@ def count_findings_test_duplicate(test):
 def paginator(page):
     page_value = paginator_value(page)
     if page_value:
-            page_value = "&page=" + page_value
+        page_value = "&page=" + page_value
     return page_value
 
 
@@ -301,7 +302,7 @@ def product_grade(product):
     if system_settings.enable_product_grade and product:
         prod_numeric_grade = product.prod_numeric_grade
 
-        if prod_numeric_grade is "" or prod_numeric_grade is None:
+        if prod_numeric_grade == "" or prod_numeric_grade is None:
             from dojo.utils import calculate_grade
             calculate_grade(product)
         if prod_numeric_grade:
@@ -376,7 +377,7 @@ def datediff_time(date1, date2):
         date_str = date_str + date_part + " "
 
     # Date is for one day
-    if date_str is "":
+    if date_str == "":
         date_str = "1 day"
 
     return date_str

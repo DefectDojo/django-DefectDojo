@@ -7,7 +7,7 @@ from datetime import datetime
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.shortcuts import render, get_object_or_404
@@ -318,9 +318,9 @@ def add_temp_finding(request, tid, fid):
             new_finding.endpoints = form.cleaned_data['endpoints']
             new_finding.save(false_history=True)
             if 'jiraform-push_to_jira' in request.POST:
-                    jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=True)
-                    if jform.is_valid():
-                        add_issue_task.delay(new_finding, jform.cleaned_data.get('push_to_jira'))
+                jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=True)
+                if jform.is_valid():
+                    add_issue_task.delay(new_finding, jform.cleaned_data.get('push_to_jira'))
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Finding from template added successfully.',

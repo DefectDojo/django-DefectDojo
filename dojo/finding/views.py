@@ -11,7 +11,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import Http404, HttpResponse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.http import StreamingHttpResponse
@@ -1382,7 +1382,7 @@ def merge_finding_product(request, pid):
                                 Tag.objects.add_tag(finding, "merged-inactive")
 
                     # Update the finding to merge into
-                    if finding_descriptions is not '':
+                    if finding_descriptions != '':
                         finding_to_merge_into.description = "{}\n\n{}".format(finding_to_merge_into.description, finding_descriptions)
 
                     if finding_to_merge_into.static_finding:

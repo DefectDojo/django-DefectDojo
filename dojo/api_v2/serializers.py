@@ -8,7 +8,7 @@ from dojo.forms import ImportScanForm, SEVERITY_CHOICES
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import create_notification
 from django.core.validators import URLValidator, validate_ipv46_address
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
 from django.utils import timezone
@@ -18,6 +18,7 @@ import six
 from django.utils.translation import ugettext_lazy as _
 import json
 from tagging.models import Tag
+
 
 class TagList(list):
     def __init__(self, *args, **kwargs):

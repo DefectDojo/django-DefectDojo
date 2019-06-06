@@ -12,6 +12,7 @@ RUN \
     mysql-client \
     postgresql-client \
     xmlsec1 \
+    git \
     && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \

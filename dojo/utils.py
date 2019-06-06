@@ -16,7 +16,7 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.core.mail import EmailMessage
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.core.urlresolvers import get_resolver, reverse
+from django.urls import get_resolver, reverse
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
 from django.template.defaultfilters import pluralize
 from django.template.loader import render_to_string

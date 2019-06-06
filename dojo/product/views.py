@@ -8,7 +8,7 @@ from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.contrib.contenttypes.models import ContentType
@@ -425,7 +425,7 @@ def new_product(request):
     if request.method == 'POST':
         form = ProductForm(request.POST, instance=Product())
         if get_system_setting('enable_jira'):
-                jform = JIRAPKeyForm(request.POST, instance=JIRA_PKey())
+            jform = JIRAPKeyForm(request.POST, instance=JIRA_PKey())
         else:
             jform = None
 
@@ -439,21 +439,21 @@ def new_product(request):
                                  'Product added successfully.',
                                  extra_tags='alert-success')
             if get_system_setting('enable_jira'):
-                    if jform.is_valid():
-                        jira_pkey = jform.save(commit=False)
-                        if jira_pkey.conf is not None:
-                            jira_pkey.product = product
-                            jira_pkey.save()
-                            messages.add_message(request,
-                                                 messages.SUCCESS,
-                                                 'JIRA information added successfully.',
-                                                 extra_tags='alert-success')
+                if jform.is_valid():
+                    jira_pkey = jform.save(commit=False)
+                    if jira_pkey.conf is not None:
+                        jira_pkey.product = product
+                        jira_pkey.save()
+                        messages.add_message(request,
+                                                messages.SUCCESS,
+                                                'JIRA information added successfully.',
+                                                extra_tags='alert-success')
             create_notification(event='product_added', title=product.name, url=request.build_absolute_uri(reverse('view_product', args=(product.id,))))
             return HttpResponseRedirect(reverse('view_product', args=(product.id,)))
     else:
         form = ProductForm()
         if get_system_setting('enable_jira'):
-                jform = JIRAPKeyForm()
+            jform = JIRAPKeyForm()
         else:
             jform = None
     add_breadcrumb(title="New Product", top_level=False, request=request)
@@ -613,13 +613,13 @@ def new_eng_for_app(request, pid, cicd=False):
             t = ", ".join(tags)
             new_eng.tags = t
             if get_system_setting('enable_jira'):
-                    # Test to make sure there is a Jira project associated the product
-                    try:
-                        jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=JIRA_PKey.objects.get(product=prod).push_all_issues)
-                        if jform.is_valid():
-                            add_epic_task.delay(new_eng, jform.cleaned_data.get('push_to_jira'))
-                    except JIRA_PKey.DoesNotExist:
-                        pass
+                # Test to make sure there is a Jira project associated the product
+                try:
+                    jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=JIRA_PKey.objects.get(product=prod).push_all_issues)
+                    if jform.is_valid():
+                        add_epic_task.delay(new_eng, jform.cleaned_data.get('push_to_jira'))
+                except JIRA_PKey.DoesNotExist:
+                    pass
 
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -637,8 +637,8 @@ def new_eng_for_app(request, pid, cicd=False):
     else:
         form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(), 'target_end': timezone.now().date() + timedelta(days=7)}, cicd=cicd, product=prod.id)
         if(get_system_setting('enable_jira')):
-                if JIRA_PKey.objects.filter(product=prod).count() != 0:
-                    jform = JIRAFindingForm(prefix='jiraform', enabled=JIRA_PKey.objects.get(product=prod).push_all_issues)
+            if JIRA_PKey.objects.filter(product=prod).count() != 0:
+                jform = JIRAFindingForm(prefix='jiraform', enabled=JIRA_PKey.objects.get(product=prod).push_all_issues)
 
     product_tab = Product_Tab(pid, title="New Engagement", tab="engagements")
     return render(request, 'dojo/new_eng.html',
@@ -735,9 +735,9 @@ def ad_hoc_finding(request, pid):
     jform = None
     form = AdHocFindingForm(initial={'date': timezone.now().date()})
     if get_system_setting('enable_jira'):
-            if JIRA_PKey.objects.filter(product=test.engagement.product).count() != 0:
-                enabled = JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues
-                jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
+        if JIRA_PKey.objects.filter(product=test.engagement.product).count() != 0:
+            enabled = JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues
+            jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
     else:
         jform = None
     if request.method == 'POST':

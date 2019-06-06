@@ -1,27 +1,14 @@
 # #  product
 import logging
-import sys
-import json
-import pprint
-from datetime import datetime
-from math import ceil
 
-from dateutil.relativedelta import relativedelta
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
-from django.core.exceptions import PermissionDenied
-from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect, StreamingHttpResponse, Http404, HttpResponse
-from django.shortcuts import render, get_object_or_404
-from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import render
 
-from dojo.filters import ProductFilter, ProductFindingFilter
-from dojo.forms import ProductForm, EngForm, DeleteProductForm
-from dojo.models import Notifications, Dojo_User
-from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, handle_uploaded_selenium, get_system_setting
+from dojo.models import Notifications
+from dojo.utils import add_breadcrumb
 from dojo.forms import NotificationsForm
-from pprint import pprint
+
 
 logger = logging.getLogger(__name__)
 
@@ -71,4 +58,3 @@ def global_notifications(request):
                   {'form': form,
                    'scope': 'global',
                    'admin': request.user.is_superuser})
-
