@@ -133,15 +133,15 @@ def delete_rule(request, tid):
     form = DeleteRuleForm(instance=rule)
 
     if request.method == 'POST':
-        print >> sys.stderr, 'id' in request.POST
-        print >> sys.stderr, str(rule.id) == request.POST['id']
-        print >> sys.stderr, str(rule.id) == request.POST['id']
+        print('id' in request.POST, file=sys.stderr)
+        print(str(rule.id) == request.POST['id'], file=sys.stderr)
+        print(str(rule.id) == request.POST['id'], file=sys.stderr)
         # if 'id' in request.POST and str(rule.id) == request.POST['id']:
         form = DeleteRuleForm(request.POST, instance=rule)
-        print >> sys.stderr, form.is_valid()
-        print >> sys.stderr, form.errors
-        print >> sys.stderr, form.non_field_errors()
-        print >> sys.stderr, 'id' in request.POST
+        print(form.is_valid(), file=sys.stderr)
+        print(form.errors, file=sys.stderr)
+        print(form.non_field_errors(), file=sys.stderr)
+        print('id' in request.POST, file=sys.stderr)
         if form.is_valid():
             rule.delete()
             messages.add_message(request,

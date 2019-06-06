@@ -173,7 +173,7 @@ class TestApplyFindingTemplate(TestCase):
         self.assertEqual(test_severity, f.severity)
         self.assertEqual(test_description, f.description)
         self.assertEqual(test_mitigation, f.mitigation)
-        self.assertEquals(test_impact, f.impact)
+        self.assertEqual(test_impact, f.impact)
 
     def test_unauthorized_apply_template_to_finding_fails(self):
         result = self.make_request(False, 1, 1,

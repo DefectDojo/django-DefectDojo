@@ -24,6 +24,7 @@ from dojo.models import Product, Finding, Test, Notes, BurpRawRequestResponse, E
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, create_notification, Product_Tab, calculate_grade, log_jira_alert
 from dojo.tasks import add_issue_task, update_issue_task
+from functools import reduce
 
 logger = logging.getLogger(__name__)
 

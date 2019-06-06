@@ -65,7 +65,7 @@ class TruffleHogJSONParser(object):
 
                 self.dupes[dupe_key] = finding
 
-        self.items = self.dupes.values()
+        self.items = list(self.dupes.values())
 
     def parse_json(self, json_output):
         try:

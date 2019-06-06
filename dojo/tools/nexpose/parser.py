@@ -4,7 +4,7 @@ Copyright (C) 2013  Infobyte LLC (http://www.infobytesec.com/)
 See the file 'doc/LICENSE' for the license information
 
 '''
-from __future__ import with_statement
+
 
 from defusedxml import ElementTree as ET
 
@@ -237,7 +237,7 @@ class NexposeFullXmlParser(object):
         for item in x:
             for service in item['services']:
                 for vuln in service['vulns']:
-                    for sev, num_sev in Finding.SEVERITIES.iteritems():
+                    for sev, num_sev in Finding.SEVERITIES.items():
                         if num_sev == vuln['severity']:
                             break
 
@@ -286,4 +286,4 @@ class NexposeFullXmlParser(object):
                                                                                                 'port'] is not None else "",
                                              product=test.engagement.product))
 
-        return dupes.values()
+        return list(dupes.values())

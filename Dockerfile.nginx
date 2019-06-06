@@ -3,7 +3,7 @@
 # The code for the build image should be idendical with the code in
 # Dockerfile.django to use the caching mechanism of Docker.
 
-FROM python:2 as build
+FROM python:3 as build
 WORKDIR /app
 RUN \
   apt-get -y update && \
@@ -17,7 +17,7 @@ RUN \
   rm -rf /var/lib/apt/lists && \
   true
 COPY requirements.txt ./
-RUN pip wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
+RUN pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 
 FROM build AS collectstatic
 
@@ -36,7 +36,7 @@ RUN \
   rm -rf /var/lib/apt/lists && \
   true
 
-RUN pip install \
+RUN pip3 install \
 	--no-cache-dir \
 	--no-index \
   --find-links=/tmp/wheels \
@@ -51,7 +51,7 @@ RUN \
   cd components && \
   yarn && \
   cd .. && \
-  python manage.py collectstatic && \
+  python3 manage.py collectstatic && \
   true
 
 FROM nginx
@@ -66,5 +66,5 @@ ENV \
   DD_UWSGI_PASS="uwsgi_server" \
   DD_UWSGI_HOST="uwsgi" \
   DD_UWSGI_PORT="3031"
-USER 1001
+USER root
 ENTRYPOINT ["/entrypoint-nginx.sh"]
