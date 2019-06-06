@@ -16,6 +16,8 @@ from django.utils import timezone
 from django.db.models import Sum, Count, Q
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
+from dojo.benchmark.views import score_asvs, return_score
+from dojo.templatetags.display_tags import asvs_level, get_level
 from dojo.filters import ProductFilter, ProductFindingFilter, EngagementFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm, \
                        EngagementPresetsForm, DeleteEngagementPresetsForm
@@ -26,6 +28,7 @@ from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, get_s
 from custom_field.models import CustomFieldValue, CustomField
 from dojo.tasks import add_epic_task, add_issue_task
 from tagging.models import Tag
+
 from tagging.utils import get_tag_list
 
 logger = logging.getLogger(__name__)
@@ -83,6 +86,10 @@ def view_product(request, pid):
     app_analysis = App_Analysis.objects.filter(product=prod).order_by('name')
     benchmark_type = Benchmark_Type.objects.filter(enabled=True).order_by('name')
     benchmarks = Benchmark_Product_Summary.objects.filter(product=prod, publish=True, benchmark_type__enabled=True).order_by('benchmark_type__name')
+    benchAndPercent = []
+    for i in range(0, len(benchmarks)):
+        benchAndPercent.append([benchmark_type[i], get_level(benchmarks[i])])
+
     system_settings = System_Settings.objects.get()
 
     product_metadata = dict(prod.product_meta.order_by('name').values_list('name', 'value'))
@@ -115,7 +122,6 @@ def view_product(request, pid):
     total = critical + high + medium + low + info
 
     product_tab = Product_Tab(pid, title="Product", tab="overview")
-
     return render(request, 'dojo/view_product_details.html', {
                   'prod': prod,
                   'product_tab': product_tab,
@@ -131,6 +137,8 @@ def view_product(request, pid):
                   'langSummary': langSummary,
                   'app_analysis': app_analysis,
                   'system_settings': system_settings,
+                  'benchmarks_percents': benchAndPercent,
+                  'benchmarks': benchmarks,
                   'authorized': auth})
 
 
