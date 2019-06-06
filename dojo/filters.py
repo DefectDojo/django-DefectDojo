@@ -3,7 +3,6 @@ import collections
 from datetime import timedelta, datetime
 
 from auditlog.models import LogEntry
-from django import forms
 from django.contrib.auth.models import User
 from django.utils import six
 from django.utils.translation import ugettext_lazy as _
@@ -45,10 +44,6 @@ def get_earliest_finding():
 class DojoFilter(FilterSet):
     def __init__(self, *args, **kwargs):
         super(DojoFilter, self).__init__(*args, **kwargs)
-        page_size = forms.ChoiceField(
-            choices=((25, 25), (50, 50), (75, 75), (100, 100), (150, 150),),
-            required=False)
-        self.form.fields['page_size'] = page_size
 
 
 class DateRangeFilter(ChoiceFilter):
@@ -380,7 +375,7 @@ class OpenFindingFilter(DojoFilter):
                    for finding in self.queryset.distinct()
                    if finding.cwe > 0 and finding.cwe not in cwe)
         cwe = collections.OrderedDict(sorted(cwe.items()))
-        self.form.fields['cwe'].choices = cwe.items()
+        self.form.fields['cwe'].choices = list(cwe.items())
         self.form.fields['severity'].choices = self.queryset.order_by(
             'numerical_severity'
         ).values_list('severity', 'severity').distinct()
@@ -459,7 +454,7 @@ class ClosedFindingFilter(DojoFilter):
                    for finding in self.queryset.distinct()
                    if finding.cwe > 0 and finding.cwe not in cwe)
         cwe = collections.OrderedDict(sorted(cwe.items()))
-        self.form.fields['cwe'].choices = cwe.items()
+        self.form.fields['cwe'].choices = list(cwe.items())
         self.form.fields['severity'].choices = self.queryset.order_by(
             'numerical_severity'
         ).values_list('severity', 'severity').distinct()
@@ -528,7 +523,7 @@ class AcceptedFindingFilter(DojoFilter):
                    for finding in self.queryset.distinct()
                    if finding.cwe > 0 and finding.cwe not in cwe)
         cwe = collections.OrderedDict(sorted(cwe.items()))
-        self.form.fields['cwe'].choices = cwe.items()
+        self.form.fields['cwe'].choices = list(cwe.items())
         self.form.fields['severity'].choices = self.queryset.order_by(
             'numerical_severity'
         ).values_list('severity', 'severity').distinct()
@@ -590,7 +585,7 @@ class ProductFindingFilter(DojoFilter):
                    for finding in self.queryset.distinct()
                    if finding.cwe > 0 and finding.cwe not in cwe)
         cwe = collections.OrderedDict(sorted(cwe.items()))
-        self.form.fields['cwe'].choices = cwe.items()
+        self.form.fields['cwe'].choices = list(cwe.items())
         self.form.fields['severity'].choices = self.queryset.order_by(
             'numerical_severity'
         ).values_list('severity', 'severity').distinct()
@@ -627,19 +622,19 @@ class TemplateFindingFilter(DojoFilter):
                    for finding in self.queryset.distinct()
                    if finding.cwe > 0 and finding.cwe not in cwe)
         cwe = collections.OrderedDict(sorted(cwe.items()))
-        self.form.fields['cwe'].choices = cwe.items()
+        self.form.fields['cwe'].choices = list(cwe.items())
 
-        self.form.fields['severity'].choices = ((u'Critical', u'Critical'),
-                                                (u'High', u'High'),
-                                                (u'Medium', u'Medium'),
-                                                (u'Low', u'Low'),
-                                                (u'Info', u'Info'))
+        self.form.fields['severity'].choices = (('Critical', 'Critical'),
+                                                ('High', 'High'),
+                                                ('Medium', 'Medium'),
+                                                ('Low', 'Low'),
+                                                ('Info', 'Info'))
 
-        self.form.fields['numerical_severity'].choices = ((u'S0', u'S0'),
-                                                          (u'S1', u'S1'),
-                                                          (u'S2', u'S2'),
-                                                          (u'S3', u'S3'),
-                                                          (u'S4', u'S4'))
+        self.form.fields['numerical_severity'].choices = (('S0', 'S0'),
+                                                          ('S1', 'S1'),
+                                                          ('S2', 'S2'),
+                                                          ('S3', 'S3'),
+                                                          ('S4', 'S4'))
 
 
 class FindingStatusFilter(ChoiceFilter):
@@ -898,14 +893,14 @@ class ReportFilter(DojoFilter):
             [report.type, report.type] for report in self.queryset.distinct()
             if report.type is not None)
         type = collections.OrderedDict(sorted(type.items()))
-        self.form.fields['type'].choices = type.items()
+        self.form.fields['type'].choices = list(type.items())
 
         status = dict()
         status = dict(
             [report.status, report.status] for report in
             self.queryset.distinct() if report.status is not None)
         status = collections.OrderedDict(sorted(status.items()))
-        self.form.fields['status'].choices = status.items()
+        self.form.fields['status'].choices = list(status.items())
 
 
 class EngineerFilter(DojoFilter):

@@ -1,6 +1,6 @@
 from xml.dom import NamespaceErr
 import hashlib
-from urlparse import urlparse
+from urllib.parse import urlparse
 from dojo.models import Endpoint, Finding
 from defusedxml import ElementTree
 
@@ -87,4 +87,4 @@ class ImmuniwebXMLParser(object):
                         protocol=protocol,
                         query=query, fragment=fragment))
 
-        self.items = self.dupes.values()
+        self.items = list(self.dupes.values())

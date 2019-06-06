@@ -68,7 +68,7 @@ def validate_acunetix_scan_xml_file(filename):
                             "must be children of 'scan' node.Invalid Acunetix Scan XML file.".
                             format(required_nodes=required_nodes))
 
-    print("Acunetix Scan XML file '{filename}' is valid. It can be uploaded to DefectDojo.".format(filename=filename))
+    print(("Acunetix Scan XML file '{filename}' is valid. It can be uploaded to DefectDojo.".format(filename=filename)))
 
 
 if __name__ == "__main__":

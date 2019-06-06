@@ -184,7 +184,7 @@ class SSLlabsParser(object):
 
                 find.unsaved_endpoints.append(Endpoint(host=ipAddress, fqdn=hostName, port=port, protocol=protocol))
 
-            self.items = dupes.values()
+            self.items = list(dupes.values())
 
     # Criticality rating
     # Grades: https://github.com/ssllabs/research/wiki/SSL-Server-Rating-Guide

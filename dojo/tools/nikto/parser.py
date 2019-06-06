@@ -3,7 +3,7 @@ __author__ = 'aaronweaver'
 import re
 from defusedxml import ElementTree as ET
 import hashlib
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 from dojo.models import Finding, Endpoint
 
@@ -78,7 +78,7 @@ class NiktoXMLParser(object):
                 dupes[dupe_key] = finding
                 self.process_endpoints(finding, ip)
 
-        self.items = dupes.values()
+        self.items = list(dupes.values())
 
     def process_endpoints(self, finding, host):
         protocol = "http"

@@ -17,7 +17,7 @@ from tastypie.models import ApiKey
 from dojo.filters import UserFilter
 from dojo.forms import DojoUserForm, AddDojoUserForm, DeleteUserForm, APIKeyForm, UserContactInfoForm
 from dojo.models import Product, Dojo_User, UserContactInfo, Alerts
-from dojo.utils import get_page_items, add_breadcrumb, get_system_setting
+from dojo.utils import get_page_items, add_breadcrumb
 
 logger = logging.getLogger(__name__)
 
@@ -96,6 +96,7 @@ def api_v2_key(request):
 
 # #  user specific
 
+
 def logout_view(request):
     logout(request)
     messages.add_message(request,
@@ -118,16 +119,17 @@ def alerts(request):
     alert_title = "Alerts"
     if request.user.get_full_name():
         alert_title += " for " + request.user.get_full_name()
-        
+
     add_breadcrumb(title=alert_title, top_level=True, request=request)
     return render(request,
                   'dojo/alerts.html',
                   {'alerts': paged_alerts})
 
+
 def alerts_json(request, limit=None):
     limit = request.GET.get('limit')
     if limit:
-        alerts = serializers.serialize('json', Alerts.objects.filter(user_id=request.user)[:limit])
+        alerts = serializers.serialize('json', Alerts.objects.filter(user_id=request.user)[:int(limit)])
     else:
         alerts = serializers.serialize('json', Alerts.objects.filter(user_id=request.user))
     return HttpResponse(alerts, content_type='application/json')
@@ -135,7 +137,7 @@ def alerts_json(request, limit=None):
 
 def alertcount(request):
     count = Alerts.objects.filter(user_id=request.user).count()
-    return JsonResponse({'count':count})
+    return JsonResponse({'count': count})
 
 
 def view_profile(request):
