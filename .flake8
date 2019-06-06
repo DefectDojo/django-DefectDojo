@@ -25,6 +25,8 @@ ignore =
     E128
     # line break after binary operator
     W504
+    # undefined file name excpetion
+    F821
 
 exclude =
     # No need to traverse our git directory
