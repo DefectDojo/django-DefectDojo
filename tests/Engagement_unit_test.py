@@ -9,14 +9,14 @@ import os
 dir_path = os.path.dirname(os.path.realpath(__file__))
 try:  # First Try for python 3
     import importlib.util
-    product_unit_test_module = importlib.util.spec_from_file_location("product_selenium_unittest",
-        os.path.join(dir_path, 'product_selenium_unittest.py'))  # using ',' allows python to determine the type of separator to use.
+    product_unit_test_module = importlib.util.spec_from_file_location("Product_unit_test",
+        os.path.join(dir_path, 'Product_unit_test.py'))  # using ',' allows python to determine the type of separator to use.
     product_unit_test = importlib.util.module_from_spec(product_unit_test_module)
     product_unit_test_module.loader.exec_module(product_unit_test)
 except:  # This will work for python2 if above fails
     import imp
-    product_unit_test = imp.load_source('product_selenium_unittest',
-        os.path.join(dir_path, 'product_selenium_unittest.py'))
+    product_unit_test = imp.load_source('Product_unit_test',
+        os.path.join(dir_path, 'Product_unit_test.py'))
 
 
 class EngagementTest(unittest.TestCase):
