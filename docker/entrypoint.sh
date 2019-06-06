@@ -12,9 +12,9 @@ if [ -z "$DD_DATABASE_URL" ]; then
 fi
 
 if [ ! -f "/opt/django-DefectDojo/static/docker_complete" ]; then
-  python manage.py makemigrations dojo
-  python manage.py makemigrations --merge --noinput
-  python manage.py migrate
+  python3 manage.py makemigrations dojo
+  python3 manage.py makemigrations --merge --noinput
+  python3 manage.py migrate
 
   if [ -z "$DD_ADMIN_PASSWORD" ]; then
       DD_ADMIN_PASSWORD="admin"
@@ -22,25 +22,25 @@ if [ ! -f "/opt/django-DefectDojo/static/docker_complete" ]; then
 
   # The '&&' is critical here. If the admin user is already created, setting the
   # password will not be done.
-  python manage.py createsuperuser \
+  python3 manage.py createsuperuser \
       --noinput \
       --username=admin \
       --email='admin@localhost' && \
       ./docker/setup-superuser.expect
 
-  python manage.py loaddata product_type
-  python manage.py loaddata test_type
-  python manage.py loaddata development_environment
-  python manage.py loaddata system_settings
-  python manage.py loaddata benchmark_type
-  python manage.py loaddata benchmark_category
-  python manage.py loaddata benchmark_requirement
-  python manage.py loaddata language_type
-  python manage.py loaddata objects_review
-  python manage.py loaddata regulation
-  python manage.py installwatson
-  python manage.py buildwatson
-  python manage.py collectstatic --noinput
+  python3 manage.py loaddata product_type
+  python3 manage.py loaddata test_type
+  python3 manage.py loaddata development_environment
+  python3 manage.py loaddata system_settings
+  python3 manage.py loaddata benchmark_type
+  python3 manage.py loaddata benchmark_category
+  python3 manage.py loaddata benchmark_requirement
+  python3 manage.py loaddata language_type
+  python3 manage.py loaddata objects_review
+  python3 manage.py loaddata regulation
+  python3 manage.py installwatson
+  python3 manage.py buildwatson
+  python3 manage.py collectstatic --noinput
   touch /opt/django-DefectDojo/static/docker_complete
 fi
 

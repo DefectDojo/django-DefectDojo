@@ -1,4 +1,4 @@
-import StringIO
+import io
 import csv
 import hashlib
 from dojo.models import Finding
@@ -16,7 +16,7 @@ class CobaltCSVParser(object):
             return
 
         content = filename.read()
-        reader = csv.DictReader(StringIO.StringIO(content), delimiter=',', quotechar='"')
+        reader = csv.DictReader(io.StringIO(content), delimiter=',', quotechar='"')
         csvarray = []
 
         for row in reader:
@@ -44,4 +44,4 @@ class CobaltCSVParser(object):
                 if key not in self.dupes:
                     self.dupes[key] = finding
 
-        self.items = self.dupes.values()
+        self.items = list(self.dupes.values())

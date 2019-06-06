@@ -1,4 +1,4 @@
-import StringIO
+import io
 import csv
 import hashlib
 from defusedxml import ElementTree
@@ -162,7 +162,7 @@ class VCGCsvParser(object):
 
     def parse(self, content, test):
         dupes = dict()
-        reader = csv.reader(StringIO.StringIO(content), delimiter=',', quotechar='"')
+        reader = csv.reader(io.StringIO(content), delimiter=',', quotechar='"')
         for row in reader:
             finding = self.parse_issue(row, test)
 
@@ -190,8 +190,8 @@ class VCGParser(object):
         content = filename.read()
 
         if filename.name.lower().endswith('.xml'):
-            self.items = VCGXmlParser().parse(content, test).values()
+            self.items = list(VCGXmlParser().parse(content, test).values())
         elif filename.name.lower().endswith('.csv'):
-            self.items = VCGCsvParser().parse(content, test).values()
+            self.items = list(VCGCsvParser().parse(content, test).values())
         else:
             raise Exception('Unknown File Format')
