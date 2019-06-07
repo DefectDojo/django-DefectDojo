@@ -66,6 +66,7 @@ urlpatterns = [
         views.merge_finding_product, name='merge_finding'),
     url(r'^product/(?P<pid>\d+)/merge$', views.merge_finding_product,
         name='merge_finding_product'),
+
     # stub findings
     url(r'^stub_finding/(?P<tid>\d+)/add$',
         views.add_stub_finding, name='add_stub_finding'),
@@ -73,6 +74,7 @@ urlpatterns = [
         views.promote_to_finding, name='promote_to_finding'),
     url(r'^stub_finding/(?P<fid>\d+)/delete$',
         views.delete_stub_finding, name='delete_stub_finding'),
+
     # template findings
 
     url(r'^template$', views.templates,
