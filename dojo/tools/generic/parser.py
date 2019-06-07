@@ -7,6 +7,7 @@ import re
 from urllib.parse import urlparse
 import socket
 
+
 class ColumnMappingStrategy(object):
 
     mapped_column = None
@@ -306,7 +307,7 @@ class GenericFindingUploadCsvParser(object):
             self.items = ()
             return
 
-        content = filename.read()
+        content = filename.read().decode("utf-8")
 
         row_number = 0
         reader = csv.reader(io.StringIO(content), delimiter=',', quotechar='"')
@@ -333,7 +334,7 @@ class GenericFindingUploadCsvParser(object):
             else:
                 finding.verified = False
             if finding is not None:
-                key = hashlib.md5(finding.severity + '|' + finding.title + '|' + finding.description).hexdigest()
+                key = hashlib.md5((finding.severity + '|' + finding.title + '|' + finding.description).encode("utf-8")).hexdigest()
 
                 if key not in self.dupes:
                     self.dupes[key] = finding

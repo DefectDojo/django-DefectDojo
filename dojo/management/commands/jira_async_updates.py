@@ -34,7 +34,7 @@ class Command(BaseCommand):
             print("Resolution: " + str(issue.fields.resolution))
 
             if issue.fields.resolution is not None \
-                    and finding.under_defect_review == False:
+                    and not finding.under_defect_review:
                 # print issue.fields.__dict__
                 print("Jira Issue: " + str(issue) + " changed status")
 

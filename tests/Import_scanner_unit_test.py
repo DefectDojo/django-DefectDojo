@@ -77,7 +77,7 @@ class ScannerTest(unittest.TestCase):
             print('https://github.com/DefectDojo/sample-scan-files\n')
             for test in missing_tests:
                 print(test)
-            print
+            print()
         assert len(missing_tests) == 0
 
     def test_check_for_doc(self):
@@ -96,8 +96,8 @@ class ScannerTest(unittest.TestCase):
         missing_docs = []
         for tool in self.tools:
             reg = re.compile('.*' + tool.replace('_', ' ') + '.*')
-            if len(filter(reg.search, integration_text)) != 1:
-                if len(filter(reg.search, acronyms)) != 1:
+            if len(list(filter(reg.search, integration_text))) != 1:
+                if len(list(filter(reg.search, acronyms))) != 1:
                     missing_docs += [tool]
 
         if len(missing_docs) > 0:
@@ -107,7 +107,7 @@ class ScannerTest(unittest.TestCase):
             print('https://github.com/DefectDojo/Documentation\n')
             for tool in missing_docs:
                 print(tool)
-            print
+            print()
         assert len(missing_docs) == 0
 
     def test_check_for_fixtures(self):
@@ -123,7 +123,7 @@ class ScannerTest(unittest.TestCase):
         for pattern in remove_patterns:
             fixtures = [re.sub(pattern, '', fix) for fix in fixtures]
         fixtures = fixtures[fixtures.index('100') - 1:]
-        fixtures = filter((re.compile(r'\D')).match, fixtures)
+        fixtures = list(filter((re.compile(r'\D')).match, fixtures))
 
         acronyms = []
         for words in fixtures:
@@ -132,7 +132,7 @@ class ScannerTest(unittest.TestCase):
         missing_fixtures = []
         for tool in self.tools:
             reg = re.compile(tool.replace('_', ' '))
-            matches = filter(reg.search, fixtures) + filter(reg.search, acronyms)
+            matches = list(filter(reg.search, fixtures)) + list(filter(reg.search, acronyms))
             matches = [m.strip() for m in matches]
             if len(matches) != 1:
                 if tool not in matches:
@@ -145,7 +145,7 @@ class ScannerTest(unittest.TestCase):
             print('https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/fixtures/test_type.json\n')
             for tool in missing_fixtures:
                 print(tool)
-            print
+            print()
         assert len(missing_fixtures) == 0
 
     def test_engagement_import_scan_result(self):
@@ -175,7 +175,7 @@ class ScannerTest(unittest.TestCase):
             reg = re.compile('.*' + temp_test + '.*')
             found_matches = {}
             for i in range(len(potential_matches)):
-                matches = filter(reg.search, [potential_matches[i]])
+                matches = list(filter(reg.search, [potential_matches[i]]))
                 if len(matches) > 0:
                     index = i
                     if i >= len(mod_options):
@@ -183,12 +183,12 @@ class ScannerTest(unittest.TestCase):
                     found_matches[index] = matches[0]
 
             if len(found_matches) == 1:
-                index = found_matches.keys()[0]
+                index = list(found_matches.keys())[0]
                 scan_map[test] = options_text[index]
             elif len(found_matches) > 1:
                 try:
-                    index = found_matches.values().index(temp_test)
-                    scan_map[test] = options_text[found_matches.keys()[index]]
+                    index = list(found_matches.values()).index(temp_test)
+                    scan_map[test] = options_text[list(found_matches.keys())[index]]
                 except:
                     pass
 
@@ -214,7 +214,7 @@ class ScannerTest(unittest.TestCase):
                     driver.find_element_by_css_selector("input.btn.btn-primary").click()
                     EngagementTXT = ''.join(driver.find_element_by_tag_name("BODY").text).split('\n')
                     reg = re.compile('processed, a total of')
-                    matches = filter(reg.search, EngagementTXT)
+                    matches = list(filter(reg.search, EngagementTXT))
                     if len(matches) != 1:
                         failed_tests += [test.upper() + ' - ' + case + ': Not imported']
                 except Exception as e:
@@ -231,7 +231,7 @@ class ScannerTest(unittest.TestCase):
             print('https://github.com/DefectDojo/sample-scan-files\n')
             for test in failed_tests:
                 print(test)
-            print
+            print()
         assert len(failed_tests) == 0
 
     def tearDown(self):
@@ -242,9 +242,9 @@ class ScannerTest(unittest.TestCase):
 
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(ScannerTest('test_check_test_file'))
-    suite.addTest(ScannerTest('test_check_for_doc'))
-    suite.addTest(ScannerTest('test_check_for_fixtures'))
+    # suite.addTest(ScannerTest('test_check_test_file'))
+    # suite.addTest(ScannerTest('test_check_for_doc'))
+    # suite.addTest(ScannerTest('test_check_for_fixtures'))
     suite.addTest(product_unit_test.ProductTest('test_create_product'))
     suite.addTest(ScannerTest('test_engagement_import_scan_result'))
     suite.addTest(product_unit_test.ProductTest('test_delete_product'))

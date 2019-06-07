@@ -492,7 +492,7 @@ def re_import_scan_results(request, tid):
             ts = ", ".join(tags)
             t.tags = ts
             try:
-                parser = import_parser_factory(file, t)
+                parser = import_parser_factory(file, t, active, verified)
             except ValueError:
                 raise Http404()
 
@@ -558,16 +558,16 @@ def re_import_scan_results(request, tid):
                         if hasattr(item, 'unsaved_req_resp') and len(item.unsaved_req_resp) > 0:
                             for req_resp in item.unsaved_req_resp:
                                 burp_rr = BurpRawRequestResponse(finding=find,
-                                                                 burpRequestBase64=req_resp["req"],
-                                                                 burpResponseBase64=req_resp["resp"],
+                                                                 burpRequestBase64=req_resp["req"].encode("utf-8"),
+                                                                 burpResponseBase64=req_resp["resp"].encode("utf-8"),
                                                                  )
                                 burp_rr.clean()
                                 burp_rr.save()
 
                         if item.unsaved_request is not None and item.unsaved_response is not None:
                             burp_rr = BurpRawRequestResponse(finding=find,
-                                                             burpRequestBase64=item.unsaved_request,
-                                                             burpResponseBase64=item.unsaved_response,
+                                                             burpRequestBase64=item.unsaved_request.encode("utf-8"),
+                                                             burpResponseBase64=item.unsaved_response.encode("utf-8"),
                                                              )
                             burp_rr.clean()
                             burp_rr.save()

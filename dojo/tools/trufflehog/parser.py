@@ -37,7 +37,7 @@ class TruffleHogJSONParser(object):
             for string in json_data["stringsFound"]:
                 strings_found += string + "\n"
 
-            dupe_key = hashlib.md5(file + reason).hexdigest()
+            dupe_key = hashlib.md5((file + reason).encode("utf-8")).hexdigest()
             description += "\n**Strings Found:**\n" + strings_found + "\n"
 
             if dupe_key in self.dupes:

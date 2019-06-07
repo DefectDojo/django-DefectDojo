@@ -50,7 +50,7 @@ class NiktoXMLParser(object):
             impact = "N/A"
             references = "N/A"
 
-            dupe_key = hashlib.md5(description).hexdigest()
+            dupe_key = hashlib.md5(description.encode("utf-8")).hexdigest()
 
             if dupe_key in dupes:
                 finding = dupes[dupe_key]

@@ -27,12 +27,12 @@ class DawnScannerParser(object):
             title = item['name']
 
             # Finding details information
-            findingdetail = item['message'].encode('ascii', 'ignore')
+            findingdetail = item['message'] if item['message'][0:2] != 'b,' else item['message'][0:-1]
             sev = item['severity'].capitalize()
             mitigation = item['remediation']
             references = item['cve_link']
 
-            dupe_key = hashlib.md5(sev + '|' + title).hexdigest()
+            dupe_key = hashlib.md5(str(sev + '|' + title).encode("utf-8")).hexdigest()
 
             if dupe_key in dupes:
                 find = dupes[dupe_key]
@@ -55,5 +55,5 @@ class DawnScannerParser(object):
                     static_finding=True)
 
                 dupes[dupe_key] = find
-
+        # raise Exception('Stopping import')
         self.items = list(dupes.values())

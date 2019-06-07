@@ -32,7 +32,7 @@ class KiuwanCSVParser(object):
             self.items = ()
             return
 
-        content = filename.read()
+        content = filename.read().decode("utf-8")
         reader = csv.DictReader(io.StringIO(content), delimiter=',', quotechar='"')
         csvarray = []
 
@@ -78,7 +78,7 @@ class KiuwanCSVParser(object):
                 if finding.description is None:
                     finding.description = ""
 
-                key = hashlib.md5(finding.severity + '|' + finding.title + '|' + finding.description).hexdigest()
+                key = hashlib.md5((finding.severity + '|' + finding.title + '|' + finding.description).encode("utf-8")).hexdigest()
 
                 if key not in self.dupes:
                     self.dupes[key] = finding

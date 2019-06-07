@@ -56,11 +56,11 @@ class WapitiXMLParser(object):
                 # get reference
                 reference = result.find('nvt/xref').text
                 # get description and encode to utf-8.
-                description = (result.find('description').text).encode('utf-8')
+                description = (result.find('description').text)
                 mitigation = "N/A"
                 impact = "N/A"
                 # make dupe hash key
-                dupe_key = hashlib.md5(description + title + severity).hexdigest()
+                dupe_key = hashlib.md5(str(description + title + severity).encode('utf-8')).hexdigest()
                 # check if dupes are present.
                 if dupe_key in self.dupes:
                     finding = self.dupes[dupe_key]

@@ -547,8 +547,8 @@ def import_scan_results(request, eid=None, pid=None):
                         for req_resp in item.unsaved_req_resp:
                             burp_rr = BurpRawRequestResponse(
                                 finding=item,
-                                burpRequestBase64=req_resp["req"],
-                                burpResponseBase64=req_resp["resp"],
+                                burpRequestBase64=req_resp["req"].encode("utf-8"),
+                                burpResponseBase64=req_resp["resp"].encode("utf-8"),
                             )
                             burp_rr.clean()
                             burp_rr.save()
@@ -556,8 +556,8 @@ def import_scan_results(request, eid=None, pid=None):
                     if item.unsaved_request is not None and item.unsaved_response is not None:
                         burp_rr = BurpRawRequestResponse(
                             finding=item,
-                            burpRequestBase64=item.unsaved_request,
-                            burpResponseBase64=item.unsaved_response,
+                            burpRequestBase64=item.unsaved_request.encode("utf-8"),
+                            burpResponseBase64=item.unsaved_response.encode("utf-8"),
                         )
                         burp_rr.clean()
                         burp_rr.save()
