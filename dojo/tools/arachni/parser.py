@@ -1,14 +1,11 @@
-
-
 import json
-import re
 from base64 import b64encode
 from urllib.parse import urlparse
 
 import html2text
 
 from dojo.models import Finding, Endpoint
-from django.utils.encoding import smart_text, force_str
+from django.utils.encoding import force_str
 
 __author__ = "Jay Paz"
 
@@ -122,7 +119,7 @@ def get_item(item_node, test):
     unsaved_req_resp = list()
 
     if request is not None and respz is not None:
-        unsaved_req_resp.append({"req": b64encode(req), "resp": b64encode(resp)})
+        unsaved_req_resp.append({"req": b64encode(req.encode("utf-8")), "resp": b64encode(resp.encode("utf-8"))})
 
     try:
         dupe_endpoint = Endpoint.objects.get(protocol=protocol,

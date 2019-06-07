@@ -100,7 +100,7 @@ class NexposeFullXmlParser(object):
                     ret += self.parse_html_type(child)
             else:
                 if node.text:
-                    ret += "<p>" + node.text.encode('utf-8').strip()
+                    ret += "<p>" + node.text.strip()
                 if node.tail:
                     ret += str(node.tail).strip() + "</p>"
                 else:
@@ -245,7 +245,7 @@ class NexposeFullXmlParser(object):
 
                     if dupe_key in dupes:
                         find = dupes[dupe_key]
-                        dupe_text = html2text.html2text(vuln['pluginOutput'].decode("utf8"))
+                        dupe_text = html2text.html2text(vuln['pluginOutput'])
                         if dupe_text not in find.description:
                             find.description += "\n\n" + dupe_text
                     else:
@@ -259,7 +259,7 @@ class NexposeFullXmlParser(object):
                             refs += "\n"
                         find = Finding(title=vuln['name'],
                                        description=html2text.html2text(
-                                               vuln['desc'].encode('utf-8').strip()) + "\n\n" + html2text.html2text(vuln['pluginOutput'].decode("utf8").strip()),
+                                               vuln['desc'].strip()) + "\n\n" + html2text.html2text(vuln['pluginOutput'].strip()),
                                        severity=sev,
                                        numerical_severity=Finding.get_numerical_severity(sev),
                                        mitigation=html2text.html2text(vuln['resolution']),

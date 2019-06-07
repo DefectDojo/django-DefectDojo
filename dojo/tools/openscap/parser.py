@@ -61,7 +61,7 @@ class OpenscapXMLParser(object):
                 references = "**name** : " + check_content['name'] + "\n" + \
                             "**href** : " + check_content['href'] + "\n"
 
-                dupe_key = hashlib.md5(references).hexdigest()
+                dupe_key = hashlib.md5(references.encode('utf-8')).hexdigest()
 
                 if dupe_key in self.dupes:
                     finding = self.dupes[dupe_key]

@@ -18,8 +18,6 @@ from dojo.forms import EditEndpointForm, \
     DeleteEndpointForm, AddEndpointForm, DojoMetaDataForm
 from dojo.models import Product, Endpoint, Finding, System_Settings, DojoMeta
 from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_system_setting, Product_Tab
-from django.contrib.contenttypes.models import ContentType
-from custom_field.models import CustomFieldValue, CustomField
 
 logger = logging.getLogger(__name__)
 

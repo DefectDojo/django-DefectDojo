@@ -199,15 +199,14 @@ class Command(BaseCommand):
             target frequency is specified by the cron job scheduler.
         """
         if not options:
-            print("Must specify an argument: Weekly, Monthly, Quarterly, or ID",\
+            print("Must specify an argument: Weekly, Monthly, Quarterly, or ID",
                 " of Scan Settings to use.")
             sys.exit(0)
-        if (type in ["Weekly", "Monthly", "Quarterly"]
-                or type.isdigit()):
+        if (type in ["Weekly", "Monthly", "Quarterly"] or type.isdigit()):
             pass
         else:
             print(("Unexpected parameter: " + str(args[0])))
-            print("\nMust specify an argument: Weekly, Monthly, Quarterly",\
+            print("\nMust specify an argument: Weekly, Monthly, Quarterly",
                   " or ID of Scan Settings to use.")
             sys.exit(0)
 

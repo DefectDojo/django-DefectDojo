@@ -1,5 +1,4 @@
 import json
-import urllib.request, urllib.parse, urllib.error
 from dojo.models import Finding
 
 

@@ -89,7 +89,7 @@ class DateRangeFilter(ChoiceFilter):
             value = int(value)
         except (ValueError, TypeError):
             value = ''
-        return self.options[value][1](qs, self.name)
+        return self.options[value][1](qs, self.field_name)
 
 
 class MitigatedDateRangeFilter(ChoiceFilter):
@@ -113,7 +113,7 @@ class MitigatedDateRangeFilter(ChoiceFilter):
             value = int(value)
         except (ValueError, TypeError):
             value = ''
-        return self.options[value][1](qs, self.name)
+        return self.options[value][1](qs, self.field_name)
 
 
 class ReportBooleanFilter(ChoiceFilter):
@@ -137,7 +137,7 @@ class ReportBooleanFilter(ChoiceFilter):
             value = int(value)
         except (ValueError, TypeError):
             value = ''
-        return self.options[value][1](qs, self.name)
+        return self.options[value][1](qs, self.field_name)
 
 
 class ReportRiskAcceptanceFilter(ChoiceFilter):
@@ -166,7 +166,7 @@ class ReportRiskAcceptanceFilter(ChoiceFilter):
             value = int(value)
         except (ValueError, TypeError):
             value = ''
-        return self.options[value][1](self, qs, self.name)
+        return self.options[value][1](self, qs, self.field_name)
 
 
 class MetricsDateRangeFilter(ChoiceFilter):
@@ -246,7 +246,7 @@ class MetricsDateRangeFilter(ChoiceFilter):
             value = int(value)
         except (ValueError, TypeError):
             value = ''
-        return self.options[value][1](self, qs, self.name)
+        return self.options[value][1](self, qs, self.field_name)
 
 
 class EngagementFilter(DojoFilter):
@@ -680,7 +680,7 @@ class FindingStatusFilter(ChoiceFilter):
             value = int(value)
         except (ValueError, TypeError):
             value = ''
-        return self.options[value][1](self, qs, self.name)
+        return self.options[value][1](self, qs, self.field_name)
 
 
 class MetricsFindingFilter(FilterSet):

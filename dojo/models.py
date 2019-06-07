@@ -367,7 +367,7 @@ class Test_Type(models.Model):
 
     def __unicode__(self):
         return self.name
-    
+
     def __str__(self):
         return self.name
 
@@ -405,7 +405,7 @@ class DojoMeta(models.Model):
 
     def __unicode__(self):
         return "%s: %s" % (self.name, self.value)
-    
+
     def __str__(self):
         return "%s: %s" % (self.name, self.value)
 

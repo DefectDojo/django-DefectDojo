@@ -41,7 +41,7 @@ class ImmuniwebXMLParser(object):
             if severity == 'Warning':
                 severity = "Informational"
 
-            description = (vulnerability.find('Description').text).encode('utf-8')
+            description = (vulnerability.find('Description').text)
             url = vulnerability.find("URL").text
             parsedUrl = urlparse(url)
             protocol = parsedUrl.scheme
@@ -55,7 +55,7 @@ class ImmuniwebXMLParser(object):
             except:  # there's no port attached to address
                 host = parsedUrl.netloc
 
-            dupe_key = hashlib.md5(description + title + severity).hexdigest()
+            dupe_key = hashlib.md5(str(description + title + severity).encode('utf-8')).hexdigest()
 
             # check if finding is a duplicate
             if dupe_key in self.dupes:

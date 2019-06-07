@@ -3,20 +3,18 @@
 # by John Kim
 # Thanks to Securicon, LLC. for sponsoring development
 #
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 
-#Modified by Greg
+# Modified by Greg
 
 import argparse
 import csv
 import re
 from dojo.models import Finding, Endpoint
-from urllib.parse import urlparse
 ################################################################
 
 # Non-standard libraries
 try:
-    import defusedxml.lxml as lxml
     from lxml import etree
 except ImportError:
     print("Missing lxml library. Please install using PIP. https://pypi.python.org/pypi/lxml/3.4.2")
@@ -61,6 +59,7 @@ REPORT_HEADERS = ['CVSS_score',
 
 ################################################################
 
+
 def htmltext(blob):
     h = html2text.HTML2Text()
     h.ignore_links = False
@@ -76,15 +75,16 @@ def report_writer(report_dic, output_filename):
 
 ################################################################
 
+
 def issue_r(raw_row, vuln):
     ret_rows = []
     issue_row = {}
 
     # IP ADDRESS
-    issue_row['ip_address']  = raw_row.findtext('IP')
+    issue_row['ip_address'] = raw_row.findtext('IP')
 
     # FQDN
-    issue_row['fqdn'] =raw_row.findtext('DNS')
+    issue_row['fqdn'] = raw_row.findtext('DNS')
 
     # Create Endpoint
     if issue_row['fqdn']:
@@ -110,8 +110,7 @@ def issue_r(raw_row, vuln):
             # Vuln name
             _temp['vuln_name'] = vuln_item.findtext('TITLE')
 
-
-            #Solution Strips Heading Workaround(s)
+            # Solution Strips Heading Workaround(s)
             _temp['solution'] = re.sub('Workaround(s)?:.+\n', '', htmltext(vuln_item.findtext('SOLUTION')))
 
             # Vuln_description
@@ -127,24 +126,24 @@ def issue_r(raw_row, vuln):
                 _temp['cve'] = "\n".join(list(_cl.keys()))
                 _temp['links'] = "\n".join(list(_cl.values()))
             sev = 'Low'
-            if 0.1 <= float(_temp['CVSS_score']) <= 3.9 :
+            if 0.1 <= float(_temp['CVSS_score']) <= 3.9:
                 sev = 'Low'
             elif 4.0 <= float(_temp['CVSS_score']) <= 6.9:
                 sev = 'Medium'
-            elif 7.0 <= float(_temp['CVSS_score']) <= 8.9 :
+            elif 7.0 <= float(_temp['CVSS_score']) <= 8.9:
                 sev = 'High'
             else:
                 sev = 'Critical'
             finding = None
             if _temp_cve_details:
                 refs = "\n".join(list(_cl.values()))
-                finding = Finding(title= _temp['vuln_name'], mitigation = _temp['solution'],
-                              description = _temp['vuln_description'], severity= sev,
-                               references= refs )
+                finding = Finding(title=_temp['vuln_name'], mitigation=_temp['solution'],
+                              description=_temp['vuln_description'], severity=sev,
+                               references=refs)
 
             else:
-                finding = Finding(title= _temp['vuln_name'], mitigation = _temp['solution'],
-                                  description = _temp['vuln_description'], severity= sev)
+                finding = Finding(title=_temp['vuln_name'], mitigation=_temp['solution'],
+                                  description=_temp['vuln_description'], severity=sev)
             finding.unsaved_endpoints = list()
             finding.unsaved_endpoints.append(ep)
             ret_rows.append(finding)
@@ -160,9 +159,10 @@ def qualys_parser(qualys_xml_file):
     for issue in r:
         master_list += issue_r(issue, d)
     return master_list
-    #report_writer(master_list, args.outfile)
+    # report_writer(master_list, args.outfile)
 
 ################################################################
+
 
 if __name__ == "__main__":
 
@@ -185,7 +185,7 @@ if __name__ == "__main__":
         print("[!] Error processing file: {}".format(args.qualys_xml_file))
         exit()
 
+
 class QualysParser(object):
     def __init__(self, file, test):
         self.items = qualys_parser(file)
-
