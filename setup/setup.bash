@@ -15,8 +15,8 @@
 #
 
 # Set the python version for the installer
-PY="python"
-PIP="pip"
+PY="python3"
+PIP="pip3"
 
 # Make sure setup.bash is run from the same directory it is located in
 cd ${0%/*}  # same as `cd "$(dirname "$0")"` without relying on dirname

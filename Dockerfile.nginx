@@ -52,7 +52,7 @@ RUN \
   cd components && \
   yarn && \
   cd .. && \
-  python3 manage.py collectstatic && \
+  python3 manage.py collectstatic --noinput && \
   true
 
 FROM nginx

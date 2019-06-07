@@ -242,9 +242,9 @@ class ScannerTest(unittest.TestCase):
 
 def suite():
     suite = unittest.TestSuite()
-    # suite.addTest(ScannerTest('test_check_test_file'))
-    # suite.addTest(ScannerTest('test_check_for_doc'))
-    # suite.addTest(ScannerTest('test_check_for_fixtures'))
+    suite.addTest(ScannerTest('test_check_test_file'))
+    suite.addTest(ScannerTest('test_check_for_doc'))
+    suite.addTest(ScannerTest('test_check_for_fixtures'))
     suite.addTest(product_unit_test.ProductTest('test_create_product'))
     suite.addTest(ScannerTest('test_engagement_import_scan_result'))
     suite.addTest(product_unit_test.ProductTest('test_delete_product'))
