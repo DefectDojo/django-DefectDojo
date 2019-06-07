@@ -89,7 +89,7 @@ class DateRangeFilter(ChoiceFilter):
             value = int(value)
         except (ValueError, TypeError):
             value = ''
-        return self.options[value][1](qs, self.name)
+        return self.options[value][1](qs, self.field_name)
 
 
 class MitigatedDateRangeFilter(ChoiceFilter):
@@ -113,7 +113,7 @@ class MitigatedDateRangeFilter(ChoiceFilter):
             value = int(value)
         except (ValueError, TypeError):
             value = ''
-        return self.options[value][1](qs, self.name)
+        return self.options[value][1](qs, self.field_name)
 
 
 class ReportBooleanFilter(ChoiceFilter):
@@ -137,7 +137,7 @@ class ReportBooleanFilter(ChoiceFilter):
             value = int(value)
         except (ValueError, TypeError):
             value = ''
-        return self.options[value][1](qs, self.name)
+        return self.options[value][1](qs, self.field_name)
 
 
 class ReportRiskAcceptanceFilter(ChoiceFilter):
@@ -166,7 +166,7 @@ class ReportRiskAcceptanceFilter(ChoiceFilter):
             value = int(value)
         except (ValueError, TypeError):
             value = ''
-        return self.options[value][1](self, qs, self.name)
+        return self.options[value][1](self, qs, self.field_name)
 
 
 class MetricsDateRangeFilter(ChoiceFilter):
@@ -246,7 +246,7 @@ class MetricsDateRangeFilter(ChoiceFilter):
             value = int(value)
         except (ValueError, TypeError):
             value = ''
-        return self.options[value][1](self, qs, self.name)
+        return self.options[value][1](self, qs, self.field_name)
 
 
 class EngagementFilter(DojoFilter):
@@ -373,7 +373,7 @@ class OpenFindingFilter(DojoFilter):
         cwe = dict()
         cwe = dict([finding.cwe, finding.cwe]
                    for finding in self.queryset.distinct()
-                   if finding.cwe > 0 and finding.cwe not in cwe)
+                   if finding.cwe is not None and finding.cwe > 0 and finding.cwe not in cwe)
         cwe = collections.OrderedDict(sorted(cwe.items()))
         self.form.fields['cwe'].choices = list(cwe.items())
         self.form.fields['severity'].choices = self.queryset.order_by(
@@ -680,7 +680,7 @@ class FindingStatusFilter(ChoiceFilter):
             value = int(value)
         except (ValueError, TypeError):
             value = ''
-        return self.options[value][1](self, qs, self.name)
+        return self.options[value][1](self, qs, self.field_name)
 
 
 class MetricsFindingFilter(FilterSet):
