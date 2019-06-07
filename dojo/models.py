@@ -1103,7 +1103,7 @@ class Finding(models.Model):
     impact = models.TextField()
     steps_to_reproduce = models.TextField(null=True, blank=True)
     severity_justification = models.TextField(null=True, blank=True)
-    endpoints = models.ManyToManyField(Endpoint, blank=True, )
+    endpoints = models.ManyToManyField(Endpoint, blank=True)
     unsaved_endpoints = []
     unsaved_request = None
     unsaved_response = None
@@ -1459,7 +1459,7 @@ class Stub_Finding(models.Model):
 
     def __unicode__(self):
         return self.title
-        
+
     def __str__(self):
         return self.title
 
@@ -1587,7 +1587,7 @@ class Risk_Acceptance(models.Model):
     def __unicode__(self):
         return "Risk Acceptance added on %s" % self.created.strftime(
             "%b %d, %Y")
-        
+
     def __str__(self):
         return "Risk Acceptance added on %s" % self.created.strftime(
             "%b %d, %Y")
