@@ -27,7 +27,7 @@ urlpatterns = [
     url(r'^engagement/(?P<eid>\d+)/complete_checklist$',
         views.complete_checklist, name='complete_checklist'),
     url(r'^engagement/(?P<eid>\d+)/upload_risk_acceptance$',
-        views.upload_risk, name='upload_risk_acceptance$'),
+        views.upload_risk, name='upload_risk_acceptance'),
     url(r'^engagement/(?P<eid>\d+)/risk_approval/(?P<raid>\d+)$',
         views.view_risk, name='view_risk'),
     url(r'^engagement/(?P<eid>\d+)/risk_approval/(?P<raid>\d+)/delete$',
