@@ -1,7 +1,6 @@
 import json
 import hashlib
 from urlparse import urlparse
-import re
 from dojo.models import Endpoint, Finding
 
 __author__ = 'dr3dd589'
@@ -18,7 +17,7 @@ class MozillaObservatoryJSONParser(object):
             node = tree[content]
             if not node['pass']:
                 title = node['name']
-                description ="**Score Description** : " + node['score_description'] + "\n\n" + \
+                description = "**Score Description** : " + node['score_description'] + "\n\n" + \
                             "**Result** : " + node['result'] + "\n\n" + \
                             "**expectation** : " + node['expectation'] + "\n"
                 severity = self.get_severity(int(node['score_modifier']))
@@ -34,13 +33,13 @@ class MozillaObservatoryJSONParser(object):
                     fragment = parsedUrl.fragment
                     path = parsedUrl.path
                     port = ""
-                    try:  
+                    try:
                         host, port = parsedUrl.netloc.split(':')
-                    except:  
+                    except:
                         host = parsedUrl.netloc
                 except:
                     url = None
-                
+
                 dupe_key = hashlib.md5(description + title).hexdigest()
 
                 if dupe_key in self.dupes:
@@ -65,7 +64,7 @@ class MozillaObservatoryJSONParser(object):
                                     dynamic_finding=True)
                     finding.unsaved_endpoints = list()
                     self.dupes[dupe_key] = finding
-                    
+
                     if url is not None:
                         finding.unsaved_endpoints.append(Endpoint(
                                 host=host, port=port,
@@ -73,7 +72,7 @@ class MozillaObservatoryJSONParser(object):
                                 protocol=protocol,
                                 query=query, fragment=fragment))
             self.items = self.dupes.values()
-    
+
     def get_severity(self, num_severity):
         if num_severity >= -10:
             return "Low"
