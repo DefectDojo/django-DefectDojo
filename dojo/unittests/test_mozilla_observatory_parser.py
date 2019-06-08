@@ -3,7 +3,6 @@ from dojo.tools.mozilla_observatory.parser import MozillaObservatoryJSONParser
 from dojo.models import Test
 
 
-
 class TestMozillaObservatoryJSONParser(TestCase):
 
     def test_parse_without_file_has_no_findings(self):
