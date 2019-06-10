@@ -229,3 +229,19 @@ function punchcard(element, data, ticks) {
 
 }
 
+function togglePassVisibility() {
+    var passwdInput = document.getElementById("id_password");
+    var toggleBox = document.getElementById("toggleBox");
+    
+    // swap password
+    if (passwdInput.type === "password") {
+        passwdInput.type = "text";
+        toggleBox.innerHTML = "<i class='fa fa-eye-slash'></i>\
+        <span><b>Hide Password</b></span>";
+    } else {
+        passwdInput.type = "password";
+        toggleBox.innerHTML = "<i class='fa fa-eye'></i>\
+        <span><b>Show Password</b></span>";
+    }
+} 
+

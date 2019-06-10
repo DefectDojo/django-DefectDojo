@@ -56,9 +56,9 @@
                                                         |
                                                         {%  for test in e.test_set.all %}
 								{% if test.lead %}
-                                                                <a href="{% url 'view_test' test.id %}"> {{ test.test_type }}: {{ test.lead.first_name }} </a> |
+                                                                <a href="{% url 'view_test' test.id %}"> {{ test }}: {{ test.lead.first_name }} </a> |
 								{% else %}
-                                                                <a href="{% url 'view_test' test.id %}"> {{ test.test_type }} </a> |
+                                                                <a href="{% url 'view_test' test.id %}"> {{ test }} </a> |
 								{% endif %}
                                                         {% endfor %}
 						</div>

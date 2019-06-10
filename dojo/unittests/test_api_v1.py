@@ -72,9 +72,22 @@ class ApiBasicOperationsTest(ResourceTestCaseMixin, TestCase):
         p = Product.objects.get(id=obj_id)
         self.assertEqual('Fantastic Product', p.name)
 
-    @skip("TODO: Test for product updating")
+    # @skip("TODO: Test for product updating")
     def test_update_product(self):
-        pass
+        new_p_data = {
+            'name': 'Wonderful Product',
+            'description': 'This is an awesome updated product',
+            'prod_type': self.prod_type.id,
+        }
+        p = self.prepare_a_product()
+        self.api_client.put('/api/v1/products/%s/' % p.id,
+                                data=new_p_data,
+                                authentication=self.get_credentials())
+        r = self.api_client.get('/api/v1/products/%s/' % p.id,
+                                authentication=self.get_credentials())
+        self.assertValidJSONResponse(r)
+        data = self.deserialize(r)
+        self.assertEqual('Wonderful Product', data['name'])
 
     @skip("TODO: Test for product deletion")
     def test_delete_product(self):

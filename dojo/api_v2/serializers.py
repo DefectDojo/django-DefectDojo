@@ -17,7 +17,7 @@ import datetime
 import six
 from django.utils.translation import ugettext_lazy as _
 import json
-
+from tagging.models import Tag
 
 class TagList(list):
     def __init__(self, *args, **kwargs):
@@ -526,6 +526,8 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         data = self.validated_data
         skip_duplicates = data['skip_duplicates']
         close_old_findings = data['close_old_findings']
+        active = data['active']
+        verified = data['verified']
         test_type, created = Test_Type.objects.get_or_create(
             name=data.get('test_type', data['scan_type']))
         environment, created = Development_Environment.objects.get_or_create(
@@ -548,6 +550,8 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         try:
             parser = import_parser_factory(data['file'],
                                            test,
+                                           active,
+                                           verified,
                                            data['scan_type'],)
         except ValueError:
             raise Exception('FileParser ValueError')
@@ -557,13 +561,16 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
             for item in parser.items:
                 if skip_duplicates:
                     hash_code = item.compute_hash_code()
+
                     if ((test.engagement.deduplication_on_engagement and
-                        Finding.objects.filter(Q(active=True) | Q(false_p=True) | Q(duplicate=True),
-                                              test__engagement=test.engagement,
-                                              hash_code=hash_code).exists()) or
-                       (Finding.objects.filter(Q(active=True) | Q(false_p=True) | Q(duplicate=True),
-                                              test__engagement__product=test.engagement.product,
-                                              hash_code=hash_code).exists())):
+                             Finding.objects.filter(Q(active=True) | Q(false_p=True) | Q(duplicate=True),
+                             test__engagement=test.engagement,
+                             hash_code=hash_code).exists()) or
+                        (not test.engagement.deduplication_on_engagement and
+                            Finding.objects.filter(Q(active=True) | Q(false_p=True) | Q(duplicate=True),
+                                                    test__engagement__product=test.engagement.product,
+                                                    hash_code=hash_code).exists())):
+
                         skipped_hashcodes.append(hash_code)
                         continue
 
@@ -649,6 +656,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 old_finding.notes.create(author=self.context['request'].user,
                                          entry="This finding has been automatically closed"
                                          " as it is not present anymore in recent scans.")
+                Tag.objects.add_tag(old_finding, 'stale')
                 old_finding.save()
                 title = 'An old finding has been closed for "{}".' \
                         .format(test.engagement.product.name)
@@ -696,6 +704,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         try:
             parser = import_parser_factory(data['file'],
                                            test,
+                                           active,
+                                           verified,
                                            data['scan_type'],)
         except ValueError:
             raise Exception("Parser ValueError")

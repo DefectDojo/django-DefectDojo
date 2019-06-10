@@ -7,7 +7,6 @@ import re
 from urlparse import urlparse
 import socket
 
-
 class ColumnMappingStrategy(object):
 
     mapped_column = None
@@ -295,13 +294,14 @@ class GenericFindingUploadCsvParser(object):
             self.column_names[index] = column
             index += 1
 
-    def __init__(self, filename, test):
+    def __init__(self, filename, test, active, verified):
         self.chain = None
         self.column_names = dict()
         self.dupes = dict()
         self.items = ()
         self.create_chain()
-
+        self.active = active
+        self.verified = verified
         if filename is None:
             self.items = ()
             return
@@ -321,8 +321,17 @@ class GenericFindingUploadCsvParser(object):
             column_number = 0
             for column in row:
                 self.chain.process_column(self.column_names[column_number], column, finding)
+
                 column_number += 1
 
+            if self.active:
+                finding.active = ActiveColumnMappingStrategy.evaluate_bool_value(row[9])
+            else:
+                finding.active = False
+            if self.verified:
+                finding.verified = VerifiedColumnMappingStrategy.evaluate_bool_value(row[10])
+            else:
+                finding.verified = False
             if finding is not None:
                 key = hashlib.md5(finding.severity + '|' + finding.title + '|' + finding.description).hexdigest()
 

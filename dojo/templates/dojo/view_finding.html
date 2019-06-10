@@ -195,6 +195,9 @@
                     {% if finding.cwe > 0 %}
                         <th>CWE</th>
                     {% endif %}
+                    {% if finding.cve %}
+                        <th>CVE</th>
+                    {% endif %}
                     <th>Found by</th>
                 </tr>
                 <tr>
@@ -259,6 +262,13 @@
                         <td>
                             <a target="_blank" href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
                                 <i class="fa fa-external-link"></i> {{ finding.cwe }}
+                            </a>
+                        </td>
+                    {% endif %}
+                    {% if finding.cve %}
+                        <td>
+                            <a target="_blank" href="https://cve.mitre.org/cgi-bin/cvename.cgi?name={{ finding.cve }}">
+                                <i class="fa fa-external-link"></i> {{ finding.cve }}
                             </a>
                         </td>
                     {% endif %}

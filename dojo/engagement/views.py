@@ -3,7 +3,6 @@ import logging
 import os
 from datetime import datetime
 import operator
-
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.contrib import messages
@@ -19,6 +18,7 @@ from time import strftime
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
 
+from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.filters import EngagementFilter
 from dojo.forms import CheckForm, \
     UploadThreatForm, UploadRiskForm, NoteForm, DoneForm, \
@@ -31,7 +31,7 @@ from dojo.models import Finding, Product, Engagement, Test, \
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, message, get_system_setting, create_notification, Product_Tab
-from dojo.tasks import update_epic_task, add_epic_task, close_epic_task
+from dojo.tasks import update_epic_task, add_epic_task
 
 logger = logging.getLogger(__name__)
 
@@ -245,7 +245,7 @@ def delete_engagement(request, eid):
 
 def view_engagement(request, eid):
     eng = get_object_or_404(Engagement, id=eid)
-    tests = Test.objects.filter(engagement=eng).order_by('test_type__name')
+    tests = Test.objects.filter(engagement=eng).order_by('test_type__name', '-updated')
     prod = eng.product
     auth = request.user.is_staff or request.user in prod.authorized_users.all()
     risks_accepted = eng.risk_acceptance.all()
@@ -448,7 +448,6 @@ def import_scan_results(request, eid=None, pid=None):
     form = ImportScanForm()
     cred_form = CredMappingForm()
     finding_count = 0
-
     if eid:
         engagement = get_object_or_404(Engagement, id=eid)
         cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(engagement=engagement).order_by('cred_id')
@@ -479,7 +478,6 @@ def import_scan_results(request, eid=None, pid=None):
             min_sev = form.cleaned_data['minimum_severity']
             active = form.cleaned_data['active']
             verified = form.cleaned_data['verified']
-
             scan_type = request.POST['scan_type']
             if not any(scan_type in code
                        for code in ImportScanForm.SCAN_TYPE_CHOICES):
@@ -516,7 +514,7 @@ def import_scan_results(request, eid=None, pid=None):
                     new_f.cred_id = cred_user.cred_id
                     new_f.save()
 
-            parser = import_parser_factory(file, t)
+            parser = import_parser_factory(file, t, active, verified)
 
             try:
                 for item in parser.items:
@@ -538,8 +536,9 @@ def import_scan_results(request, eid=None, pid=None):
                     item.reporter = request.user
                     item.last_reviewed = timezone.now()
                     item.last_reviewed_by = request.user
-                    item.active = active
-                    item.verified = verified
+                    if form.get_scan_type() != "Generic Findings Import":
+                        item.active = active
+                        item.verified = verified
                     item.save(dedupe_option=False, false_history=True)
 
                     if hasattr(item, 'unsaved_req_resp') and len(
@@ -627,15 +626,7 @@ def import_scan_results(request, eid=None, pid=None):
 @user_passes_test(lambda u: u.is_staff)
 def close_eng(request, eid):
     eng = Engagement.objects.get(id=eid)
-    eng.active = False
-    eng.status = 'Completed'
-    eng.updated = timezone.now()
-    eng.save()
-
-    if get_system_setting('enable_jira'):
-        jpkey_set = JIRA_PKey.objects.filter(product=eng.product)
-        if jpkey_set.count() >= 1:
-            close_epic_task(eng, True)
+    close_engagement(eng)
     messages.add_message(
         request,
         messages.SUCCESS,
@@ -650,9 +641,7 @@ def close_eng(request, eid):
 @user_passes_test(lambda u: u.is_staff)
 def reopen_eng(request, eid):
     eng = Engagement.objects.get(id=eid)
-    eng.active = True
-    eng.status = 'In Progress'
-    eng.save()
+    reopen_engagement(eng)
     messages.add_message(
         request,
         messages.SUCCESS,
