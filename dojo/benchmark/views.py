@@ -41,19 +41,15 @@ def return_score(queryset):
 def score_asvs(product, benchmark_type):
     # Compliant to ASVS level 1 benchmarks
     asvs_level_1 = Benchmark_Product.objects.filter(enabled=True, control__enabled=True, product=product, control__category__type=benchmark_type, control__category__enabled=True, control__level_1=True).values('pass_fail').annotate(Count('pass_fail')).order_by()
-
     asvs_level_1_benchmark, asvs_level_1_score = return_score(asvs_level_1)
 
     # Compliant to ASVS level 2 benchmarks
     asvs_level_2 = Benchmark_Product.objects.filter(~Q(control__level_1=True), enabled=True, control__enabled=True, product=product, control__category__type=benchmark_type, control__category__enabled=True, control__level_2=True).values('pass_fail').annotate(Count('pass_fail')).order_by()
-
     asvs_level_2_benchmark, asvs_level_2_score = return_score(asvs_level_2)
 
     # Compliant to ASVS level 3 benchmarks
     asvs_level_3 = Benchmark_Product.objects.filter(~Q(control__level_1=True), ~Q(control__level_2=True), enabled=True, control__enabled=True, control__category__enabled=True, product=product, control__category__type=benchmark_type, control__level_3=True).values('pass_fail').annotate(Count('pass_fail')).order_by()
-
     asvs_level_3_benchmark, asvs_level_3_score = return_score(asvs_level_3)
-
     benchmark_product_summary = Benchmark_Product_Summary.objects.get(product=product, benchmark_type=benchmark_type)
 
     benchmark_product_summary.asvs_level_1_benchmark = asvs_level_1_benchmark
