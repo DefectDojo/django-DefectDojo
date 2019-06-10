@@ -45,7 +45,7 @@ class ClairKlarParser(object):
             unique_key = str(node['Name']) + str(node['FeatureName'])
             items[unique_key] = item
 
-        return items.values()
+        return list(items.values())
 
 
 def get_item(item_node, test):

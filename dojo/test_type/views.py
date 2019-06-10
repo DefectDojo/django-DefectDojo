@@ -1,16 +1,15 @@
 # # test types
 import logging
 
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from dojo.filters import TestTypeFilter
 from dojo.forms import Test_TypeForm
 from dojo.models import Test_Type
-from dojo.utils import get_page_items, add_breadcrumb, get_system_setting
+from dojo.utils import get_page_items, add_breadcrumb
 
 logger = logging.getLogger(__name__)
 

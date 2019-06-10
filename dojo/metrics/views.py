@@ -9,10 +9,9 @@ from math import ceil
 from operator import itemgetter
 
 from dateutil.relativedelta import relativedelta
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
@@ -26,6 +25,7 @@ from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
     Risk_Acceptance, Dojo_User
 from dojo.utils import get_page_items, add_breadcrumb, findings_this_period, opened_in_period, count_findings, \
     get_period_counts, get_punchcard_data, get_system_setting
+from functools import reduce
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +34,7 @@ Greg, Jay
 status: in production
 generic metrics method
 """
+
 
 def critical_product_metrics(request, mtype):
     template = 'dojo/metrics.html'
@@ -45,6 +46,7 @@ def critical_product_metrics(request, mtype):
         'critical_prods': critical_products,
         'url_prefix': get_system_setting('url_prefix')
     })
+
 
 @cache_page(60 * 5)  # cache for 5 minutes
 def metrics(request, mtype):
@@ -78,7 +80,7 @@ def metrics(request, mtype):
                         'dojo_risk_acceptance_accepted_findings ON '
                         '( dojo_risk_acceptance.id = dojo_risk_acceptance_accepted_findings.risk_acceptance_id ) '
                         'WHERE dojo_risk_acceptance_accepted_findings.finding_id = dojo_finding.id',
-    },
+        },
     )
 
     if mtype != 'All':
@@ -609,9 +611,9 @@ and root can view others metrics
 @cache_page(60 * 5)  # cache for 5 minutes
 def view_engineer(request, eid):
     user = get_object_or_404(Dojo_User, pk=eid)
-    if not (request.user.is_superuser
-            or request.user.username == 'root'
-            or request.user.username == user.username):
+    if not (request.user.is_superuser or
+            request.user.username == 'root' or
+            request.user.username == user.username):
         return HttpResponseRedirect(reverse('engineer_metrics'))
     now = timezone.now()
 
@@ -732,8 +734,8 @@ def view_engineer(request, eid):
                                            mitigated__isnull=True,
                                            active=True).count()
         vulns[product.id] = f_count
-    od = OrderedDict(sorted(vulns.items(), key=itemgetter(1)))
-    items = od.items()
+    od = OrderedDict(sorted(list(vulns.items()), key=itemgetter(1)))
+    items = list(od.items())
     items.reverse()
     top = items[: 10]
     update = []
@@ -956,7 +958,7 @@ def research_metrics(request):
                             'S3': closed_findings.filter(severity='Low')}
 
     time_to_close = {}
-    for sev, finds in closed_findings_dict.items():
+    for sev, finds in list(closed_findings_dict.items()):
         total = 0
         for f in finds:
             total += (datetime.date(f.mitigated) - f.date).days

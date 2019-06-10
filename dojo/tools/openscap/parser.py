@@ -1,6 +1,6 @@
 from xml.dom import NamespaceErr
 import hashlib
-from urlparse import urlparse
+from urllib.parse import urlparse
 import re
 from defusedxml import ElementTree as ET
 from dojo.models import Endpoint, Finding
@@ -61,7 +61,7 @@ class OpenscapXMLParser(object):
                 references = "**name** : " + check_content['name'] + "\n" + \
                             "**href** : " + check_content['href'] + "\n"
 
-                dupe_key = hashlib.md5(references).hexdigest()
+                dupe_key = hashlib.md5(references.encode('utf-8')).hexdigest()
 
                 if dupe_key in self.dupes:
                     finding = self.dupes[dupe_key]
@@ -91,7 +91,7 @@ class OpenscapXMLParser(object):
                     for ip in ips:
                         self.process_endpoints(finding, ip)
 
-            self.items = self.dupes.values()
+            self.items = list(self.dupes.values())
 
     # this function is extract namespace present in xml file.
     def get_namespace(self, element):

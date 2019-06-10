@@ -13,12 +13,9 @@ from dojo.finding import views
 from django.test import TestCase
 from django.test.client import RequestFactory
 from django.contrib.auth.models import User
-from django.contrib.contenttypes.models import ContentType
-from custom_field.models import CustomFieldValue, CustomField
 from django.contrib.messages.storage.fallback import FallbackStorage
-from django.http import HttpResponseRedirect
-from django.http import HttpResponse
 from django.utils import timezone
+
 
 class FindingMother:
 
@@ -73,6 +70,7 @@ class FindingTemplateMother:
         tmp.mitigation = 'Finding Template Mitigation'
         tmp.impact = 'Finding Template Impact'
         tmp.save()
+
 
 class FindingTemplateTestUtil:
 
@@ -131,22 +129,22 @@ class TestApplyFindingTemplate(TestCase):
 
     def test_apply_template_to_finding_with_data_does_not_display_error_success(self):
         result = self.make_request(True, 1, 1,
-                                   {'title':'Finding for Testing Apply Template functionality',
-                                    'cwe':'89',
-                                    'severity':'High',
-                                    'description':'Finding for Testing Apply Template Functionality',
-                                    'mitigation':'template mitigation',
-                                    'impact':'template impact'})
+                                   {'title': 'Finding for Testing Apply Template functionality',
+                                    'cwe': '89',
+                                    'severity': 'High',
+                                    'description': 'Finding for Testing Apply Template Functionality',
+                                    'mitigation': 'template mitigation',
+                                    'impact': 'template impact'})
         self.assertNotContains(result, 'There appears to be errors on the form', 302)
 
     def test_apply_template_to_finding_with_data_returns_to_view_success(self):
         result = self.make_request(True, 1, 1,
-                                   {'title':'Finding for Testing Apply Template functionality',
-                                    'cwe':'89',
-                                    'severity':'High',
-                                    'description':'Finding for Testing Apply Template Functionality',
-                                    'mitigation':'template mitigation',
-                                    'impact':'template impact'})
+                                   {'title': 'Finding for Testing Apply Template functionality',
+                                    'cwe': '89',
+                                    'severity': 'High',
+                                    'description': 'Finding for Testing Apply Template Functionality',
+                                    'mitigation': 'template mitigation',
+                                    'impact': 'template impact'})
         self.assertIsNotNone(result)
         self.assertEqual(302, result.status_code)
         self.assertEqual('/finding/1', result.url)
@@ -173,16 +171,16 @@ class TestApplyFindingTemplate(TestCase):
         self.assertEqual(test_severity, f.severity)
         self.assertEqual(test_description, f.description)
         self.assertEqual(test_mitigation, f.mitigation)
-        self.assertEquals(test_impact, f.impact)
+        self.assertEqual(test_impact, f.impact)
 
     def test_unauthorized_apply_template_to_finding_fails(self):
         result = self.make_request(False, 1, 1,
-                                   {'title':'Finding for Testing Apply Template functionality',
-                                    'cwe':'89',
-                                    'severity':'High',
-                                    'description':'Finding for Testing Apply Template Functionality',
-                                    'mitigation':'template mitigation',
-                                    'impact':'template impact'}
+                                   {'title': 'Finding for Testing Apply Template functionality',
+                                    'cwe': '89',
+                                    'severity': 'High',
+                                    'description': 'Finding for Testing Apply Template Functionality',
+                                    'mitigation': 'template mitigation',
+                                    'impact': 'template impact'}
                                    )
         self.assertEqual(302, result.status_code)
         self.assertIn('login', result.url)
@@ -203,22 +201,22 @@ class TestApplyFindingTemplate(TestCase):
 
     def test_apply_template_to_finding_without_required_field_displays_field_title_success(self):
         result = self.make_request(True, 1, 1,
-                                   {'title':'',
-                                    'cwe':'89',
-                                    'severity':'High',
-                                    'description':'Finding for Testing Apply Template Functionality',
-                                    'mitigation':'template mitigation',
-                                    'impact':'template impact'})
+                                   {'title': '',
+                                    'cwe': '89',
+                                    'severity': 'High',
+                                    'description': 'Finding for Testing Apply Template Functionality',
+                                    'mitigation': 'template mitigation',
+                                    'impact': 'template impact'})
         self.assertContains(result, 'The title is required.')
 
     def test_apply_template_to_finding_without_required_field_displays_error_success(self):
         result = self.make_request(True, 1, 1,
-                                   {'title':'',
-                                    'cwe':'89',
-                                    'severity':'High',
-                                    'description':'Finding for Testing Apply Template Functionality',
-                                    'mitigation':'template mitigation',
-                                    'impact':'template impact'})
+                                   {'title': '',
+                                    'cwe': '89',
+                                    'severity': 'High',
+                                    'description': 'Finding for Testing Apply Template Functionality',
+                                    'mitigation': 'template mitigation',
+                                    'impact': 'template impact'})
         self.assertContains(result, 'There appears to be errors on the form')
 
 

@@ -1,6 +1,6 @@
 from xml.dom import NamespaceErr
 import hashlib
-from urlparse import urlparse
+from urllib.parse import urlparse
 import re
 from defusedxml import ElementTree as ET
 from dojo.models import Endpoint, Finding
@@ -18,7 +18,7 @@ class Severityfilter():
         self.severity = None
 
     def eval_column(self, column_value):
-        if column_value in self.severity_mapping.keys():
+        if column_value in list(self.severity_mapping.keys()):
             self.severity = self.severity_mapping[column_value]
         else:
             self.severity = 'Info'
@@ -56,11 +56,11 @@ class WapitiXMLParser(object):
                 # get reference
                 reference = result.find('nvt/xref').text
                 # get description and encode to utf-8.
-                description = (result.find('description').text).encode('utf-8')
+                description = (result.find('description').text)
                 mitigation = "N/A"
                 impact = "N/A"
                 # make dupe hash key
-                dupe_key = hashlib.md5(description + title + severity).hexdigest()
+                dupe_key = hashlib.md5(str(description + title + severity).encode('utf-8')).hexdigest()
                 # check if dupes are present.
                 if dupe_key in self.dupes:
                     finding = self.dupes[dupe_key]
@@ -88,7 +88,7 @@ class WapitiXMLParser(object):
                     self.dupes[dupe_key] = finding
                     self.process_endpoints(finding, host)
 
-            self.items = self.dupes.values()
+            self.items = list(self.dupes.values())
 
     def process_endpoints(self, finding, host):
         protocol = "http"

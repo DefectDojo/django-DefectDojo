@@ -3,7 +3,7 @@
 umask 0002
 
 echo -n "Waiting for database to be reachable "
-until echo "select 1;" | python manage.py dbshell > /dev/null
+until echo "select 1;" | python3 manage.py dbshell > /dev/null
 do
   echo -n "."
   sleep 1

@@ -1,4 +1,4 @@
-import StringIO
+import io
 import csv
 import hashlib
 from dojo.models import Finding
@@ -17,7 +17,7 @@ class Severityfilter():
         self.severity = None
 
     def eval_column(self, column_value):
-        if column_value in self.severity_mapping.keys():
+        if column_value in list(self.severity_mapping.keys()):
             self.severity = self.severity_mapping[column_value]
         else:
             self.severity = 'Info'
@@ -32,8 +32,8 @@ class KiuwanCSVParser(object):
             self.items = ()
             return
 
-        content = filename.read()
-        reader = csv.DictReader(StringIO.StringIO(content), delimiter=',', quotechar='"')
+        content = filename.read().decode("utf-8")
+        reader = csv.DictReader(io.StringIO(content), delimiter=',', quotechar='"')
         csvarray = []
 
         for row in reader:
@@ -78,9 +78,9 @@ class KiuwanCSVParser(object):
                 if finding.description is None:
                     finding.description = ""
 
-                key = hashlib.md5(finding.severity + '|' + finding.title + '|' + finding.description).hexdigest()
+                key = hashlib.md5((finding.severity + '|' + finding.title + '|' + finding.description).encode("utf-8")).hexdigest()
 
                 if key not in self.dupes:
                     self.dupes[key] = finding
 
-        self.items = self.dupes.values()
+        self.items = list(self.dupes.values())

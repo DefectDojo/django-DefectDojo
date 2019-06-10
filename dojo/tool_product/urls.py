@@ -1,7 +1,7 @@
 from django.conf.urls import url
 from django.contrib import admin
 from django.apps import apps
-import views
+from . import views
 
 urlpatterns = [
     url(r'^product/(?P<pid>\d+)/tool_product/add$', views.new_tool_product, name='new_tool_product'),

@@ -67,4 +67,4 @@ class BundlerAuditParser(object):
 
                 dupes[dupe_key] = find
 
-        self.items = dupes.values()
+        self.items = list(dupes.values())

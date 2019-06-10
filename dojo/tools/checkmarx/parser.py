@@ -95,7 +95,7 @@ class CheckmarxXMLParser(object):
         for lang in self.language_list:
             add_language(test.engagement.product, lang)
 
-        self.items = dupes.values()
+        self.items = list(dupes.values())
 
     def get_finding_detail(self, query, result):
         findingdetail = ""

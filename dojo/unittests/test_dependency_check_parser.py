@@ -2,7 +2,7 @@ from defusedxml import ElementTree
 from django.test import TestCase
 
 from dojo.models import Test
-from dojo.tools.dependencycheck.parser import DependencyCheckParser
+from dojo.tools.dependency_check.parser import DependencyCheckParser
 
 
 class TestFile(object):

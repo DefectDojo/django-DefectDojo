@@ -29,7 +29,7 @@ class NspParser(object):
             unique_key = node['title'] + str(node['path'])
             items[unique_key] = item
 
-        return items.values()
+        return list(items.values())
 
 
 def get_item(item_node, test):

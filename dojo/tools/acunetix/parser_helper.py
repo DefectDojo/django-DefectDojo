@@ -1,8 +1,8 @@
 import logging
 from lxml import etree
 from lxml.etree import XMLSyntaxError
-from parser_models import AcunetixScanReport
-from parser_models import DefectDojoFinding
+from .parser_models import AcunetixScanReport
+from .parser_models import DefectDojoFinding
 # from memory_profiler import profile #Comment out this and profile in defectdojo repo
 import html2text
 

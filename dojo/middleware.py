@@ -22,24 +22,38 @@ class LoginRequiredMiddleware:
     loaded. You'll get an error if they aren't.
     """
 
-    def process_request(self, request):
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+
         assert hasattr(request, 'user'), "The Login Required middleware\
  requires authentication middleware to be installed. Edit your\
  MIDDLEWARE_CLASSES setting to insert\
  'django.contrib.auth.middleware.AuthenticationMiddleware'. If that doesn't\
  work, ensure your TEMPLATE_CONTEXT_PROCESSORS setting includes\
  'django.core.context_processors.auth'."
-        if not request.user.is_authenticated():
+        if not request.user.is_authenticated:
             path = request.path_info.lstrip('/')
             if not any(m.match(path) for m in EXEMPT_URLS):
-                fullURL = "%s?next=%s" % (settings.LOGIN_URL,
-                                          urlquote(request.get_full_path()))
+                if path == 'logout':
+                    fullURL = "%s?next=%s" % (settings.LOGIN_URL, '/')
+                else:
+                    fullURL = "%s?next=%s" % (settings.LOGIN_URL, urlquote(request.get_full_path()))
                 return HttpResponseRedirect(fullURL)
+        return response
+
 
 class TimezoneMiddleware:
     """
     Middleware that checks the configured timezone to use in each request
     """
 
-    def process_request(self, request):
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
         timezone.activate(get_system_setting('time_zone'))
+        return response
