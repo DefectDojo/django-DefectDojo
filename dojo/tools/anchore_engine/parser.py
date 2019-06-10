@@ -39,7 +39,7 @@ class AnchoreEngineScanParser(object):
 
             sev = item['severity']
             if sev == "Negligible" or sev == "Unknown":
-                sev = u'Info'
+                sev = 'Info'
 
             mitigation += "Upgrade to " + item['package_name'] + ' ' + item['fix'] + '\n'
             mitigation += "URL: " + item['url'] + '\n'
@@ -72,4 +72,4 @@ class AnchoreEngineScanParser(object):
 
                 dupes[dupe_key] = find
 
-        self.items = dupes.values()
+        self.items = list(dupes.values())

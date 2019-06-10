@@ -1,14 +1,11 @@
-from __future__ import with_statement
-
 import json
-import re
 from base64 import b64encode
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 import html2text
 
 from dojo.models import Finding, Endpoint
-from django.utils.encoding import smart_text, force_str
+from django.utils.encoding import force_str
 
 __author__ = "Jay Paz"
 
@@ -59,7 +56,7 @@ class ArachniJSONParser(object):
             else:
                 items[dupe_key] = item
 
-        return items.values()
+        return list(items.values())
 
 
 def do_clean(value):
@@ -107,14 +104,14 @@ def get_item(item_node, test):
     #
     req = ''
     #
-    for key, value in request.iteritems():
+    for key, value in request.items():
         req += str(key) + ": " + str(value) + "\n\n"
     #
     respz = item_node['response']
 
     resp = ''
 
-    for key, value in respz.iteritems():
+    for key, value in respz.items():
         if key != 'body':
             resp += str(key) + ": " + str(value) + "\n\n"
 
@@ -122,7 +119,7 @@ def get_item(item_node, test):
     unsaved_req_resp = list()
 
     if request is not None and respz is not None:
-        unsaved_req_resp.append({"req": b64encode(req), "resp": b64encode(resp)})
+        unsaved_req_resp.append({"req": b64encode(req.encode("utf-8")), "resp": b64encode(resp.encode("utf-8"))})
 
     try:
         dupe_endpoint = Endpoint.objects.get(protocol=protocol,
@@ -157,7 +154,7 @@ def get_item(item_node, test):
     if remediation:
         remediation = html2text.html2text(remediation)
 
-    references = item_node['references'].values() if 'references' in item_node else None
+    references = list(item_node['references'].values()) if 'references' in item_node else None
     references = '<br/><br/>'.join(reference for reference in references)
 
     if references:

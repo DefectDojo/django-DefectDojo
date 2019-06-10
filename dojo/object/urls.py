@@ -1,7 +1,7 @@
 from django.conf.urls import url
 from django.contrib import admin
 from django.apps import apps
-import views
+from . import views
 
 urlpatterns = [
     url(r'^engagement/(?P<id>\d+)/object/view$', views.view_object_eng, name='view_object_eng'),

@@ -6,7 +6,7 @@ from math import ceil
 
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth.decorators import user_passes_test
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils import timezone
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 def home(request):
-    if request.user.is_authenticated() and request.user.is_staff:
+    if request.user.is_authenticated and request.user.is_staff:
         return HttpResponseRedirect(reverse('dashboard'))
     return HttpResponseRedirect(reverse('product'))
 

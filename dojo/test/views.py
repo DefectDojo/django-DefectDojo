@@ -7,7 +7,7 @@ from datetime import datetime
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.shortcuts import render, get_object_or_404
@@ -24,6 +24,7 @@ from dojo.models import Product, Finding, Test, Notes, BurpRawRequestResponse, E
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, create_notification, Product_Tab, calculate_grade, log_jira_alert
 from dojo.tasks import add_issue_task, update_issue_task
+from functools import reduce
 
 logger = logging.getLogger(__name__)
 
@@ -317,9 +318,9 @@ def add_temp_finding(request, tid, fid):
             new_finding.endpoints = form.cleaned_data['endpoints']
             new_finding.save(false_history=True)
             if 'jiraform-push_to_jira' in request.POST:
-                    jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=True)
-                    if jform.is_valid():
-                        add_issue_task.delay(new_finding, jform.cleaned_data.get('push_to_jira'))
+                jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=True)
+                if jform.is_valid():
+                    add_issue_task.delay(new_finding, jform.cleaned_data.get('push_to_jira'))
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Finding from template added successfully.',
@@ -491,7 +492,7 @@ def re_import_scan_results(request, tid):
             ts = ", ".join(tags)
             t.tags = ts
             try:
-                parser = import_parser_factory(file, t)
+                parser = import_parser_factory(file, t, active, verified)
             except ValueError:
                 raise Http404()
 
@@ -557,16 +558,16 @@ def re_import_scan_results(request, tid):
                         if hasattr(item, 'unsaved_req_resp') and len(item.unsaved_req_resp) > 0:
                             for req_resp in item.unsaved_req_resp:
                                 burp_rr = BurpRawRequestResponse(finding=find,
-                                                                 burpRequestBase64=req_resp["req"],
-                                                                 burpResponseBase64=req_resp["resp"],
+                                                                 burpRequestBase64=req_resp["req"].encode("utf-8"),
+                                                                 burpResponseBase64=req_resp["resp"].encode("utf-8"),
                                                                  )
                                 burp_rr.clean()
                                 burp_rr.save()
 
                         if item.unsaved_request is not None and item.unsaved_response is not None:
                             burp_rr = BurpRawRequestResponse(finding=find,
-                                                             burpRequestBase64=item.unsaved_request,
-                                                             burpResponseBase64=item.unsaved_response,
+                                                             burpRequestBase64=item.unsaved_request.encode("utf-8"),
+                                                             burpResponseBase64=item.unsaved_response.encode("utf-8"),
                                                              )
                             burp_rr.clean()
                             burp_rr.save()

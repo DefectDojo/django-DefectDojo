@@ -1,4 +1,4 @@
-from parser_helper import get_defectdojo_findings
+from .parser_helper import get_defectdojo_findings
 from dojo.models import Finding
 import re
 
@@ -48,7 +48,7 @@ class AcunetixScannerParser(object):
                 )
                 defectdojo_findings.append(finding)
             else:
-                print("Duplicate finding : {defectdojo_title}".format(defectdojo_title=defectdojo_title))
+                print(("Duplicate finding : {defectdojo_title}".format(defectdojo_title=defectdojo_title)))
 
         self.items = defectdojo_findings
 
@@ -61,7 +61,7 @@ def get_defectdojo_date(date):
     """
     regex = r"([0-9]{2})\/([0-9]{2})\/([0-9]{4})"
     matches = re.finditer(regex, date, re.MULTILINE)
-    match = enumerate(matches).next()
+    match = next(enumerate(matches))
     date = match[1].groups()
     day = date[0]
     mon = date[1]

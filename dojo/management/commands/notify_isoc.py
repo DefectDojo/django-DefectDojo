@@ -28,11 +28,11 @@ class Command(BaseCommand):
         type = options['type']
 
         if not options:
-            print "Must specify an argument: Weekly, Monthly, or Quarterly"
+            print("Must specify an argument: Weekly, Monthly, or Quarterly")
             sys.exit(0)
         if type not in ["Weekly", "Monthly", "Quarterly"]:
-            print("Unexpected frequency: " + str(type) +
-                  "\nMust specify an argument: Weekly, Monthly, or Quarterly.")
+            print(("Unexpected frequency: " + str(type) +
+                  "\nMust specify an argument: Weekly, Monthly, or Quarterly."))
             sys.exit(0)
 
         scSettings = ScanSettings.objects.filter(frequency=type)

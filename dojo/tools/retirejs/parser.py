@@ -38,7 +38,7 @@ class RetireJsParser(object):
                         unique_key = item.title + hashlib.md5(item.references).hexdigest() + hashlib.md5(node['file']).hexdigest()
                         items[unique_key] = item
 
-        return items.values()
+        return list(items.values())
 
 
 def get_item(item_node, test, file):

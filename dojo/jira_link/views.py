@@ -6,7 +6,7 @@ import logging
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.admin.utils import NestedObjects
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db import DEFAULT_DB_ALIAS
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404
@@ -33,7 +33,7 @@ def webhook(request):
 
     if request.method == 'POST':
         parsed = json.loads(request.body)
-        if 'issue' in parsed.keys():
+        if 'issue' in list(parsed.keys()):
             jid = parsed['issue']['id']
             jissue = get_object_or_404(JIRA_Issue, jira_id=jid)
             if jissue.finding is not None:

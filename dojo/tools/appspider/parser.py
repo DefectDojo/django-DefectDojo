@@ -1,4 +1,4 @@
-from __future__ import with_statement
+
 
 from datetime import datetime
 from xml.dom import NamespaceErr
@@ -7,7 +7,7 @@ from defusedxml import ElementTree
 
 from dojo.models import Endpoint, Finding
 import html2text
-import urlparse
+import urllib.parse
 
 __author__ = "Jay Paz"
 
@@ -49,7 +49,7 @@ class AppSpiderXMLParser(object):
             mitigation = finding.find("Recommendation").text
             vuln_url = finding.find("VulnUrl").text
 
-            parts = urlparse.urlparse(vuln_url)
+            parts = urllib.parse.urlparse(vuln_url)
 
             cwe = int(finding.find("CweId").text)
 
@@ -99,4 +99,4 @@ class AppSpiderXMLParser(object):
                                                        fragment=parts.fragment,
                                                        product=test.engagement.product))
 
-        self.items = dupes.values()
+        self.items = list(dupes.values())

@@ -1,12 +1,12 @@
 # Based on CSV, but rewrote because
 # values in different columns required concatinaton
 
-import StringIO
+import io
 import csv
 import hashlib
 from dojo.models import Finding, Endpoint
 import re
-from urlparse import urlparse
+from urllib.parse import urlparse
 import socket
 
 MAPPINGS = {"title": "Vulnerability Name",
@@ -83,7 +83,7 @@ class Severityfilter():
         self.severity = None
 
     def eval_column(self, column_value):
-        if column_value in self.severity_mapping.keys():
+        if column_value in list(self.severity_mapping.keys()):
             self.severity = self.severity_mapping[column_value]
         else:
             self.severity = 'Info'
@@ -100,7 +100,7 @@ class TrustwaveUploadCsvParser(object):
             return
 
         content = filename.read()
-        reader = csv.DictReader(StringIO.StringIO(content), delimiter=',', quotechar='"')
+        reader = csv.DictReader(io.StringIO(content), delimiter=',', quotechar='"')
         csvarray = []
 
         for row in reader:
@@ -112,7 +112,7 @@ class TrustwaveUploadCsvParser(object):
             endpointdict = {}
             referencesarray = []
 
-            for field, column_name in MAPPINGS.items():
+            for field, column_name in list(MAPPINGS.items()):
                 if column_name == 'IP':
                     urlfilter = Urlfilter()
                     urlfilter.eval_column(row[column_name])
@@ -130,7 +130,7 @@ class TrustwaveUploadCsvParser(object):
                 elif column_name in ['Evidence', 'CVE']:
                     referencesarray.append(row[column_name])
                 else:
-                    if column_name in row.keys():
+                    if column_name in list(row.keys()):
                         findingdict[field] = row[column_name]
 
             try:
@@ -180,4 +180,4 @@ class TrustwaveUploadCsvParser(object):
                 if key not in self.dupes:
                     self.dupes[key] = finding
 
-        self.items = self.dupes.values()
+        self.items = list(self.dupes.values())

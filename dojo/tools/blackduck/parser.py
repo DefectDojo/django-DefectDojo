@@ -50,7 +50,7 @@ class BlackduckHubCSVParser(object):
             impact = df.ix[i, 'Impact']
             references = self.format_reference(df, i)
 
-            dupe_key = hashlib.md5(title + '|' + df.ix[i, 'Vulnerability source']).hexdigest()
+            dupe_key = hashlib.md5((title + '|' + df.ix[i, 'Vulnerability source']).encode("utf-8")).hexdigest()
 
             if dupe_key in dupes:
                 finding = dupes[dupe_key]
@@ -79,7 +79,7 @@ class BlackduckHubCSVParser(object):
 
                 dupes[dupe_key] = finding
 
-        self.items = dupes.values()
+        self.items = list(dupes.values())
 
     def format_title(self, df, i):
         return "{} - {}".format(df.ix[i, 'Vulnerability id'], df.ix[i, 'Channel version origin id'])

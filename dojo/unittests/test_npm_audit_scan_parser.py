@@ -1,5 +1,5 @@
 from django.test import TestCase
-from dojo.tools.npmaudit.parser import NpmAuditParser
+from dojo.tools.npm_audit.parser import NpmAuditParser
 from dojo.models import Test
 
 
