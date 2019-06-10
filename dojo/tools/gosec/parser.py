@@ -17,23 +17,38 @@ class GosecScannerParser(object):
             title = ''
             group = ''
             status = ''
+            filename = item.get("file")
+            line = item.get("line")
+            scanner_confidence = item.get("confidence")
 
-            title = item["details"] + "-" + item["rule_id"]
+            title = item["details"] + " - rule " + item["rule_id"]
 
 #           Finding details information
-            findingdetail += "Filename: " + item["file"] + "\n"
-            findingdetail += "Line number: " + str(item["line"]) + "\n"
-            findingdetail += "Issue Confidence: " + item["confidence"] + "\n\n"
-            findingdetail += "Code:\n"
-            findingdetail += item["code"] + "\n"
+            findingdetail += "Filename: {}\n\n".format(filename)
+            findingdetail += "Line number: {}\n\n".format(str(line))
+            findingdetail += "Issue Confidence: {}\n\n".format(scanner_confidence)
+            findingdetail += "Code:\n\n"
+            findingdetail += "```{}```".format(item["code"])
 
             sev = item["severity"]
-#            mitigation = item["issue_text"]
             mitigation = "coming soon"
-#            references = item["test_id"]
-            referencesxs = "coming soon"
+            # Best attempt at ongoing documentation provided by gosec, based on rule id
+            references = "https://securego.io/docs/rules/{}.html".format(item['rule_id']).lower()
 
-            dupe_key = title + item["file"] + str(item["line"])
+            if scanner_confidence:
+                # Assign integer value to confidence.
+                if scanner_confidence == "HIGH":
+                    scanner_confidence = 1
+                elif scanner_confidence == "MEDIUM":
+                    scanner_confidence = 4
+                elif scanner_confidence == "LOW":
+                    scanner_confidence = 7
+
+            if '-' in line:
+                # if this is a range, only point to the beginning.
+                line = line.split('-', 1)[0]
+
+            dupe_key = title + item["file"] + str(line)
 
             if dupe_key in dupes:
                 find = dupes[dupe_key]
@@ -50,9 +65,10 @@ class GosecScannerParser(object):
                                mitigation=mitigation,
                                impact=impact,
                                references=references,
-                               file_path=item["file"],
-#                               line = item["line"],
+                               file_path=filename,
+                               line=line,
                                url='N/A',
+                               scanner_confidence=scanner_confidence,
                                static_finding=True)
 
                 dupes[dupe_key] = find

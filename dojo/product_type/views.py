@@ -1,16 +1,14 @@
-# #  product type
 import logging
 
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from dojo.filters import ProductTypeFilter
-from dojo.forms import Product_TypeForm, Product_TypeProductForm
+from dojo.forms import Product_TypeForm, Product_TypeProductForm, Delete_Product_TypeForm
 from dojo.models import Product_Type
-from dojo.utils import get_page_items, add_breadcrumb, get_system_setting
+from dojo.utils import get_page_items, add_breadcrumb
 
 logger = logging.getLogger(__name__)
 
@@ -62,22 +60,36 @@ def add_product_type(request):
 @user_passes_test(lambda u: u.is_staff)
 def edit_product_type(request, ptid):
     pt = get_object_or_404(Product_Type, pk=ptid)
-    form = Product_TypeForm(instance=pt)
-    if request.method == 'POST':
-        form = Product_TypeForm(request.POST, instance=pt)
-        if form.is_valid():
-            pt = form.save()
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 'Product type updated successfully.',
-                                 extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('product_type'))
+    pt_form = Product_TypeForm(instance=pt)
+    delete_pt_form = Delete_Product_TypeForm(instance=pt)
+    if request.method == "POST" and request.POST.get('edit_product_type'):
+        pt_form = Product_TypeForm(request.POST, instance=pt)
+        if pt_form.is_valid():
+            pt = pt_form.save()
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Product type updated successfully.',
+                extra_tags="alert-success",
+            )
+            return HttpResponseRedirect(reverse("product_type"))
+    if request.method == "POST" and request.POST.get("delete_product_type"):
+        form2 = Delete_Product_TypeForm(request.POST, instance=pt)
+        if form2.is_valid():
+            pt.delete()
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                "Product type Deleted successfully.",
+                extra_tags="alert-success",
+            )
+            return HttpResponseRedirect(reverse("product_type"))
     add_breadcrumb(title="Edit Product Type", top_level=False, request=request)
     return render(request, 'dojo/edit_product_type.html', {
         'name': 'Edit Product Type',
         'metric': False,
         'user': request.user,
-        'form': form,
+        'pt_form': pt_form,
         'pt': pt})
 
 

@@ -27,6 +27,9 @@ credentials.
 ```sh
 git clone https://github.com/DefectDojo/django-DefectDojo
 cd django-DefectDojo
+# building
+docker-compose build
+# running
 docker-compose up
 ```
 
@@ -66,7 +69,7 @@ should give you an idea of how to use DefectDojo for your own team.
 ![Slack](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/slack_rgb.png)
 
 Realtime discussion is done in the OWASP Slack Channel, #defectdojo.
-[Get Access.](http://owaspslack.com/)
+[Get Access.](https://join.slack.com/t/owasp/shared_invite/enQtNjExMTc3MTg0MzU4LTViMDg1MmJiMzMwZGUxZjgxZWQ1MTE0NTBlOTBhNjhhZDIzZTZiNmEwOTJlYjdkMzAxMGVhNDkwNDNiNjZiOWQ)
 
 ![Twitter](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/Twitter_Logo.png)
 
@@ -99,7 +102,6 @@ Project Moderators can help you with pull requests or feedback on dev ideas.
 
 * [Alex Dracea](https://www.linkedin.com/in/alexandru-marin-dracea-910b51122/)
 * [Valentijn Scholten](https://www.linkedin.com/in/valentijn-scholten/)
-* [Piotr Pawlicki](https://www.linkedin.com/in/piotrpawlicki/)
 
 ## Hall of Fame
 

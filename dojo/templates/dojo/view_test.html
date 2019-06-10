@@ -21,7 +21,7 @@
     <div class="panel panel-default">
         <div class="panel-heading">
             <div class="clearfix">
-                <h3 class="pull-left"> {{ test.test_type }}
+                <h3 class="pull-left"> {{ test }}
                 {% if test.tags %}
                     <sup>
                         {% for tag in test.tags %}
@@ -141,7 +141,7 @@
               <span class="caret"></span>
           </button>
           <div class="btn-group mr-2" role="group" aria-label="Bulk Actions">
-            {% if tab_product %}
+            {% if product_tab %}
             <button type="button" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Merge Findings">
               <a class="white-color merge" href="#" alt="Merge Findings">
                 <i class="fa fa-compress"></i>

@@ -24,7 +24,7 @@ class DependencyCheckParser(object):
         description = self.get_field_value(vulnerability, 'description')
 
         title = u'{0} | {1}'.format(filename, name)
-
+        cve = name
         # Use CWE-1035 as fallback
         cwe = 1035  # Vulnerable Third Party Component
         if cwe_field:
@@ -56,6 +56,7 @@ class DependencyCheckParser(object):
             file_path=filename,
             test=test,
             cwe=cwe,
+            cve=cve,
             active=False,
             verified=False,
             description=description,
