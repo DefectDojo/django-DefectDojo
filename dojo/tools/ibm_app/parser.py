@@ -98,38 +98,6 @@ class IbmAppScanXMLParser(object):
 
             self.items = self.dupes.values()
 
-
-
-
-
-
-
-
-
-
-
-    # # Loop through xml and fetch hosts
-    # def fetch_host_details(self):
-    #     hosts = []
-    #     hosts_dict = {}
-    #     for scan in self.root.iter("scan-configuration"):
-    #         for host in scan.iter("scanned-hosts"):
-    #             for item in host.iter("item"):
-    #                 hosts_dict['hostname'] = item.find('host').text
-    #                 hosts_dict['os'] = item.find('operating-system').text
-    #                 hosts_dict['port'] = item.find('port').text
-    #
-    #                 # The schema/protocol from the AppScanner Can either be
-    #                 # 'http' or 'https'
-    #                 if item.find('port').text == '443':
-    #                     hosts_dict['scheme'] = 'https'
-    #                 else:
-    #                     hosts_dict['scheme'] = 'http'
-    #
-    #                 hosts.append(hosts_dict)
-    #                 hosts_dict = {}
-    #     return hosts
-
     # Loop through file and fetch all issue-types found
     def fetch_issue_types(self):
         issues = {}
@@ -161,5 +129,3 @@ class IbmAppScanXMLParser(object):
             for item in url_group.iter('item'):
                 if item.attrib['id'] == ref:
                     return item.find('name').text
-
-
