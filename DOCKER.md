@@ -4,28 +4,105 @@ Docker compose is not intended for production use.
 If you want to deploy a containerized DefectDojo to a production environment,
 use the [Helm and Kubernetes](KUBERNETES.md) approach.
 
-## Setup via Docker Compose
+## Prerequisites
+*  Docker version
+    *  Installing with docker-compose requires at least docker 18.09.4 and docker-compose 1.24.0. See "Checking Docker versions" below for version errors during running docker-compose.
+*  Proxies
+    *  If you're behind a corporate proxy check https://docs.docker.com/network/proxy/ . 
 
-To start your DefectDojo instance on Docker Compose for the first time, just
-run:
+
+## Setup via Docker Compose - introduction
+
+DefectDojo needs several docker images to run. Two of them depend on DefectDojo code:
+
+*  django service - defectdojo/defectdojo-django image 
+*  nginx service - defectdojo/defectdojo-nginx image
+
+The nginx image is build based on the django image.
+
+Before running the application, it's advised to build local images to make sure that you'll be working on images consistent with your current code base.
+When running the application without building images, the application will run based on: 
+*  a previously locally built image if it exists in the docker cache
+*  else the images pulled from dockerhub
+    *  https://hub.docker.com/r/defectdojo/defectdojo-django
+    *  https://hub.docker.com/r/defectdojo/defectdojo-nginx
+
+
+## Setup via Docker Compose - building and running the application
+### Building images
+
+To build images and put them in your local docker cache, run:
 
 ```zsh
-. docker/aliases_release.sh
+docker-compose build
+```
+
+To build a single image, run: 
+
+```zsh
+docker-compose build django
+```
+or
+
+```
+docker-compose build nginx
+```
+
+
+### Run with Docker compose in release mode
+To run the application based on previously built image (or based on dockerhub images if none was locally built), run: 
+
+```zsh
+docker/setEnv.sh release
 docker-compose up
 ```
 
-or
+This will run the application based on docker-compose.yml only.
+
+In this setup, you need to rebuild django and/or nginx images after each code change and restart the containers. 
+
+
+### Run with Docker compose in development mode with hot-reloading
+
+For development, use: 
 
 ```zsh
-docker-compose -f docker-compose_base.yml -f docker-compose_uwsgi-release.yml up
+cp dojo/settings/settings.dist.py dojo/settings/settings.py
+docker/setEnv.sh dev
+docker-compose up
 ```
 
-This command will run the application based on images commited on dockerhub (or the last images built locally). If you need to be more up to date, see "Build images locally" below
+This will run the application based on merged configurations from docker-compose.yml and docker-compose.override.dev.yml.
 
-**NOTE:** Installing with docker-compose requires the latest version of docker and docker-compose - at least docker 18.09.4 and docker-compose 1.24.0. See "Checking Docker versions" below for version errors during running docker-compose up.
+*  Volumes are mounted to synchronize between the host and the containers :
+    *  static resources (nginx container)
+    *  python code (uwsgi and celeryworker containers). 
 
+*  The `--py-autoreload 1` parameter in entrypoint-uwsgi-dev.sh will make uwsgi handle python hot-reloading for the **uwsgi** container.
+* Hot-reloading for the **celeryworker** container is not yet implemented. When working on deduplication for example, restart the celeryworker container with: 
+
+```
+docker restart django-defectdojo_celeryworker_1
+```
+
+*  The mysql port is forwarded to the host so that you can access your database from outside the container. 
+
+To update changes in static resources, served by nginx, just refresh the browser with ctrl + F5.
+
+
+*Notes about volume permissions*
+
+*The manual copy of settings.py is sometimes required once after cloning the repository, on linux hosts when the host files cannot be modified from within the django container. In that case that copy in entrypoint-uwsgi-dev.sh fails.* 
+
+*Another way to fix this is changing `USER 1001` in Dockerfile.django to match your user uid and then rebuild the images. Get your user id with* 
+
+```
+id -u
+```
+
+### Access the application
 Navigate to <http://localhost:8080> where you can log in with username admin.
-To find out the admin user’s password, check the very beginning of the console
+To find out the admin password, check the very beginning of the console
 output of the initializer container, typically name 'django-defectdojo_initializer_1', or run the following:
 
 ```zsh
@@ -41,45 +118,38 @@ or:
 docker logs django-defectdojo_initializer_1
 ```
 
-If you ran DefectDojo with compose before and you want to prevent the
-initializer container from running again, define an environment variable
-DD_INITIALIZE=false to prevent re-initialization.
+Beware that when re-running the application several times, there may be several occurrences of "Admin password". In that case you should use the last occurrence.
 
-### Develop with Docker Compose
+### Disable the database initialization
+The initializer container can be disabled by exporting: `export DD_INITIALIZE=false`. 
 
-For developing the easiset way to make changes is to startup DefectDojo in debug by running:
+This will ensure that the database remains unchanged when re-running the application, keeping your previous settings and admin password.
 
-```zsh
-. docker/aliases_dev.sh
-docker-compose up
+### Versioning
+In order to use a specific version when building the images and running the containers, set the environment with 
+*  For the nginx image: `NGINX_VERSION=x.y.z`
+*  For the django image: `DJANGO_VERSION=x.y.z`
+
+Building will tag the images with "x.y.z", then you can run the application based on a specific tagged images.
+
+*  Tagged images can be seen with: 
+
+```
+$ docker images
+REPOSITORY                     TAG                 IMAGE ID            CREATED             SIZE
+defectdojo/defectdojo-nginx    1.0.0               bc9c5f7bb4e5        About an hour ago   191MB
 ```
 
-or
+*  This will show on which tagged images the containers are running:
 
-```zsh
-docker-compose -f docker-compose_base.yml -f docker-compose_uwsgi-dev.yml up
+``` 
+$ docker ps
+CONTAINER ID        IMAGE                                 COMMAND                  CREATED             STATUS              PORTS                                NAMES
+aedc404d6dee        defectdojo/defectdojo-nginx:1.0.0     "/entrypoint-nginx.sh"   2 minutes ago       Up 2 minutes        80/tcp, 0.0.0.0:8080->8080/tcp       django-defectdojo_nginx_1
 ```
 
-This starts the DefectDojo (uwsgi) container with manage.py and shares the local source directory so that changes to the code immediately restart the process.
 
-Navigate to the container directly, <http://localhost:8000>
 
-The initializer container can be disabled by exporting: `export DD_INITIALIZE=false`
-
-### Build Images Locally
-
-Build the docker containers locally for testing purposes.
-
-```zsh
-# Build Dev Compose
-docker-compose build
-
-or:
-
-# Build images
-docker build -t defectdojo/defectdojo-django -f Dockerfile.django .
-docker build -t defectdojo/defectdojo-nginx -f Dockerfile.nginx .
-```
 
 ### Clean up Docker Compose
 
@@ -93,6 +163,43 @@ Removes all containers, networks and the database volume
 
 ```zsh
 docker-compose down --volumes
+```
+
+### Run the unit-tests with docker
+#### Introduction
+The unit-tests are under `dojo/unittests`
+
+
+
+#### Running the unit-tests 
+This will run all the tests and leave the uwsgi container up: 
+
+```
+cp dojo/settings/settings.dist.py dojo/settings/settings.py
+docker/setEnv.sh unit_tests
+docker-compose up
+```
+Enter the container to run more tests:
+
+```
+docker exec -it django-defectdojo_uwsgi_1 bash
+```
+Rerun all the tests:
+
+```
+python manage.py test dojo.unittests --keepdb
+```
+
+Run all the tests from a python file. Example:
+
+```
+python manage.py test dojo.unittests.test_dependency_check_parser --keepdb
+```
+
+Run a single test. Example:
+
+```
+python manage.py test dojo.unittests.test_dependency_check_parser.TestDependencyCheckParser.test_parse_without_file_has_no_findings --keepdb
 ```
 
 ## Checking Docker versions
@@ -127,7 +234,7 @@ OpenSSL version: OpenSSL 1.0.1t  3 May 2016
 
 In this case, both docker (version 17.09.0-ce) and docker-compose (1.18.0) need to be updated.
 
-Follow [Dockers' documentation](https://docs.docker.com/install/) for your OS to get the lastest version of Docker. For the docker command, most OSes have a built-in update mechanism like "apt upgrade".
+Follow [Dockers' documentation](https://docs.docker.com/install/) for your OS to get the latest version of Docker. For the docker command, most OSes have a built-in update mechanism like "apt upgrade".
 
 Docker Compose isn't packaged like Docker and you'll need to manually update an existing install if using Linux. For Linux, either follow the instructions in the [Docker Compose documentation](https://docs.docker.com/compose/install/) or use the shell script below. The script below will update docker-compose to the latest version automatically. You will need to make the script executable and have sudo privileges to upgrade docker-compose:
 
@@ -145,7 +252,7 @@ echo "Note: docker-compose version $VERSION will be downloaded from:"
 echo "https://github.com/docker/compose/releases/download/${VERSION}/docker-compose-$(uname -s)-$(uname -m)"
 echo "Enter sudo password to install docker-compose"
 
-# Download and install lastest docker compose
+# Download and install latest docker compose
 sudo curl -L https://github.com/docker/compose/releases/download/${VERSION}/docker-compose-$(uname -s)-$(uname -m) -o $DESTINATION
 sudo chmod +x $DESTINATION
 

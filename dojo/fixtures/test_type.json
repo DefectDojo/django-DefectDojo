@@ -319,14 +319,14 @@
     },
     "model": "dojo.test_type",
     "pk": 53
-  },
-  {
-    "fields":{
-      "name": "Openscap Vulnerability Scan"
-    },
-    "model": "dojo.test_type",
-    "pk": 54
-  },
+	},
+	{
+		"fields":{
+			"name": "Openscap Vulnerability Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 54
+	},
   {
     "fields": {
       "name": "Wapiti Scan"
@@ -335,10 +335,25 @@
     "pk": 55
   },
   {
+		"fields": {
+			"name": "Immuniweb Scan"
+		},
+		"model": "dojo.test_type",
+		"pk":56
+	},
+	{
+		"fields": {
+      "name": "Cobalt.io Scan"
+    },
+    "model": "dojo.test_type",
+    "pk": 57
+
+	},
+  {
     "fields": {
       "name": "IBM App Scan"
     },
     "model": "dojo.test_type",
-    "pk": 56
+    "pk": 58
   }
 ]
