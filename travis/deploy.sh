@@ -2,22 +2,22 @@
 ORG="defectdojo"
 
 deploy_demo() {
-  # Deploy to dev or prod demo once merged to master or dev
+  # Deploy to dev or prod once merged to master or dev
   if [ "$HEROKU_API_KEY" != "" ]; then
-    if [ $TRAVIS_PULL_REQUEST == "false" ]; then
-      # Deploy
-      if [ $TRAVIS_BRANCH == "dev" ] || [ $TRAVIS_BRANCH == "master" ]; then
-        DEPLOY_ENV="-dev"
-        if [ $TRAVIS_BRANCH == "master" ]; then
-          DEPLOY_ENV=""
-        fi
-        echo "Deploying to: defectdojo${DEPLOY_ENV}"
-        docker tag "defectdojo/defectdojo-django" "registry.heroku.com/defectdojo${DEPLOY_ENV}/web"
-        docker login -u "$HEROKU_EMAIL" -p "$HEROKU_API_KEY" registry.heroku.com
-        docker push registry.heroku.com/defectdojo${DEPLOY_ENV}/web
-        heroku container:release web -a defectdojo${DEPLOY_ENV}
-        heroku run bash /opt/heroku-DefectDojo/scripts/migrate.bash -a defectdojo${DEPLOY_ENV}
+    # Deploy
+    echo "Heroku Deployment"
+    if [ $TRAVIS_BRANCH == "dev" ] || [ $TRAVIS_BRANCH == "master" ]; then
+      DEPLOY_ENV="-dev"
+      if [ $TRAVIS_BRANCH == "master" ]; then
+        DEPLOY_ENV=""
       fi
+      echo "Deploying to: defectdojo${DEPLOY_ENV}"
+      docker tag "defectdojo/defectdojo-django" "registry.heroku.com/defectdojo${DEPLOY_ENV}/web"
+      docker login -u "$HEROKU_EMAIL" -p "$HEROKU_API_KEY" registry.heroku.com
+      docker push registry.heroku.com/defectdojo${DEPLOY_ENV}/web
+      heroku container:release web -a defectdojo${DEPLOY_ENV}
+      echo "Running migrations"
+      heroku run bash /opt/heroku-DefectDojo/scripts/migrate.bash -a defectdojo${DEPLOY_ENV}
     fi
   fi
 }
