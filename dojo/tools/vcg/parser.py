@@ -162,7 +162,9 @@ class VCGCsvParser(object):
 
     def parse(self, content, test):
         dupes = dict()
-        reader = csv.reader(io.StringIO(str(content, 'utf-8')), delimiter=',', quotechar='"')
+        if type(content) is bytes:
+            content = content.decode('utf-8')
+        reader = csv.reader(io.StringIO(content), delimiter=',', quotechar='"')
         for row in reader:
             finding = self.parse_issue(row, test)
 
