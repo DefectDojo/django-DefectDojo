@@ -153,6 +153,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = BundlerAuditParser(file, test)
     elif scan_type == 'Twistlock Image Scan':
         parser = TwistlockParser(file, test)
+    elif scan_type == 'IBM App Scan':
+        parser = IbmAppScanXMLParser(file, test)
     elif scan_type == 'Kiuwan Scan':
         parser = KiuwanCSVParser(file, test)
     elif scan_type == 'Blackduck Hub Scan':
