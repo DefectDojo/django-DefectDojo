@@ -1,5 +1,4 @@
 import hashlib
-from urllib.parse import urlparse
 import json
 from dojo.models import Finding
 
@@ -12,7 +11,7 @@ class WhitesourceJSONParser(object):
         self.items = ()
         if file is None:
             return
-        
+
         content = json.load(file)
         if "vulnerabilities" in content:
             tree_node = content['vulnerabilities']
@@ -34,7 +33,7 @@ class WhitesourceJSONParser(object):
                     cve = node['name']
                 else:
                     cve = None
-                
+
                 dupe_key = hashlib.md5(description.encode('utf-8') + title.encode('utf-8')).hexdigest()
 
                 if dupe_key in self.dupes:
@@ -59,4 +58,3 @@ class WhitesourceJSONParser(object):
                     self.dupes[dupe_key] = finding
 
             self.items = self.dupes.values()
-
