@@ -15,8 +15,8 @@ class CobaltCSVParser(object):
             self.items = ()
             return
 
-        content = filename.read().decode("utf-8")
-        reader = csv.DictReader(io.StringIO(content), delimiter=',', quotechar='"')
+        content = filename.read()
+        reader = csv.DictReader(io.StringIO(content.decode('utf-8')), delimiter=',', quotechar='"')
         csvarray = []
 
         for row in reader:

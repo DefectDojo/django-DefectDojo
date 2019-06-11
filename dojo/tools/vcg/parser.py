@@ -88,10 +88,10 @@ class VCGXmlParser(object):
         data.severity = self.get_field_from_xml(issue, 'Severity')
         data.description = self.get_field_from_xml(issue, 'Description')
         data.filename = self.get_field_from_xml(issue, 'FileName')
-        #data.file_path = self.get_field_from_xml(issue, 'FileName')
+        # data.file_path = self.get_field_from_xml(issue, 'FileName')
         data.line = self.get_field_from_xml(issue, 'Line')
         data.code_line = self.get_field_from_xml(issue, 'CodeLine')
-        #data.line = self.get_field_from_xml(issue, 'CodeLine')
+        # data.line = self.get_field_from_xml(issue, 'CodeLine')
 
         finding = data.to_finding(test)
         return finding
@@ -109,7 +109,7 @@ class VCGXmlParser(object):
             finding = self.parse_issue(issue, test)
 
             if finding is not None:
-                key = hashlib.md5(finding.severity + '|' + finding.title + '|' + finding.description).hexdigest()
+                key = hashlib.md5((finding.severity + '|' + finding.title + '|' + finding.description).encode('utf-8')).hexdigest()
 
                 if key not in dupes:
                     dupes[key] = finding
@@ -162,12 +162,12 @@ class VCGCsvParser(object):
 
     def parse(self, content, test):
         dupes = dict()
-        reader = csv.reader(io.StringIO(content), delimiter=',', quotechar='"')
+        reader = csv.reader(io.StringIO(content.decode('utf-8')), delimiter=',', quotechar='"')
         for row in reader:
             finding = self.parse_issue(row, test)
 
             if finding is not None:
-                key = hashlib.md5(finding.severity + '|' + finding.title + '|' + finding.description).hexdigest()
+                key = hashlib.md5((finding.severity + '|' + finding.title + '|' + finding.description).encode('utf-8')).hexdigest()
 
                 if key not in dupes:
                     dupes[key] = finding

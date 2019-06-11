@@ -71,7 +71,7 @@ RUN \
   chmod g=u dojo/migrations && \
   chmod g=u /var/run && \
   true
-USER root
+USER 1001
 ENV \
   DD_ADMIN_USER=admin \
   DD_ADMIN_MAIL=admin@defectdojo.local \
