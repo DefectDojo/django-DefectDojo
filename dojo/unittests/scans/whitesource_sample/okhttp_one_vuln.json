@@ -1,0 +1,29 @@
+{  
+   "vulnerabilities":[  
+      {  
+         "name":"WS-2009-0001",
+         "type":"WS",
+         "severity":"low",
+         "score":"0.0",
+         "publishDate":"2007-10-07",
+         "lastUpdatedDate":"2009-08-06",
+         "url":"https://issues.apache.org/jira/browse/CODEC-55",
+         "description":"Not all \"business\" method implementations of public API in Apache Commons Codec 1.x are thread safe, which might disclose the wrong data or allow an attacker to change non-private fields.\n\nUpdated 2018-10-07 - an additional review by WhiteSource research team could not indicate on a clear security vulnerability",
+         "project":"okhttp",
+         "product":"okhttp",
+         "library":{  
+            "keyUuid":"9aa14ac7-e415-4ed5-be35-bd2957fd7fd2",
+            "filename":"commons-codec-1.3.jar",
+            "name":"Codec",
+            "groupId":"commons-codec",
+            "artifactId":"commons-codec",
+            "version":"1.3",
+            "sha1":"fd32786786e2adb664d5ecc965da47629dca14ba",
+            "type":"MAVEN_ARTIFACT",
+            "description":"The codec package contains simple encoder and decoders for\n   various formats such as Base64 and Hexadecimal.  In addition to these\n   widely used encoders and decoders, the codec package also maintains a\n   collection of phonetic encoding utilities.",
+            "architecture":"",
+            "languageVersion":""
+         }
+      }
+   ]
+}
