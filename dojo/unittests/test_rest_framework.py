@@ -145,7 +145,7 @@ class FindingsTest(BaseClass.RESTEndpointTest):
             "mitigation": "MITIGATION",
             "impact": "HIGH",
             "references": "",
-            "reporter": 3,
+            "reporter": "admin",
             "is_template": False,
             "active": False,
             "verified": False,
@@ -180,7 +180,6 @@ class FindingTemplatesTest(BaseClass.RESTEndpointTest):
             "mitigation": "None",
             "impact": "MEDIUM",
             "references": "",
-            "reporter_id": 3
         }
         self.update_fields = {'references': 'some reference'}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
@@ -310,9 +309,8 @@ class StubFindingsTest(BaseClass.RESTEndpointTest):
             "date": "2017-12-31",
             "severity": "HIGH",
             "description": "test stub finding",
-            "reporter": 3,
+            "reporter": "admin",
             "test": 3,
-            "reporter_id": 3,
         }
         self.update_fields = {'severity': 'LOW'}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)

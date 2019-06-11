@@ -1203,36 +1203,39 @@ def manage_images(request, fid):
 
             images_formset.save()
 
-            for obj in images_formset.deleted_objects:
-                os.remove(settings.MEDIA_ROOT + obj.image.name)
-                if obj.image_thumbnail is not None and os.path.isfile(
-                        settings.MEDIA_ROOT + obj.image_thumbnail.name):
-                    os.remove(settings.MEDIA_ROOT + obj.image_thumbnail.name)
-                if obj.image_medium is not None and os.path.isfile(
-                        settings.MEDIA_ROOT + obj.image_medium.name):
-                    os.remove(settings.MEDIA_ROOT + obj.image_medium.name)
-                if obj.image_large is not None and os.path.isfile(
-                        settings.MEDIA_ROOT + obj.image_large.name):
-                    os.remove(settings.MEDIA_ROOT + obj.image_large.name)
+            try:
+                for obj in images_formset.deleted_objects:
+                    os.remove(os.path.join(settings.MEDIA_ROOT, obj.image.name))
+                    if obj.image_thumbnail is not None and os.path.isfile(
+                            settings.MEDIA_ROOT + obj.image_thumbnail.name):
+                        os.remove(os.path.join(settings.MEDIA_ROOT, obj.image_thumbnail.name))
+                    if obj.image_medium is not None and os.path.isfile(
+                            settings.MEDIA_ROOT + obj.image_medium.name):
+                        os.remove(os.path.join(settings.MEDIA_ROOT, obj.image_medium.name))
+                    if obj.image_large is not None and os.path.isfile(
+                            settings.MEDIA_ROOT + obj.image_large.name):
+                        os.remove(os.path.join(settings.MEDIA_ROOT, obj.image_large.name))
 
-            for obj in images_formset.new_objects:
-                finding.images.add(obj)
+                for obj in images_formset.new_objects:
+                    finding.images.add(obj)
 
-            orphan_images = FindingImage.objects.filter(finding__isnull=True)
-            for obj in orphan_images:
-                os.remove(settings.MEDIA_ROOT + obj.image.name)
-                if obj.image_thumbnail is not None and os.path.isfile(
-                        settings.MEDIA_ROOT + obj.image_thumbnail.name):
-                    os.remove(settings.MEDIA_ROOT + obj.image_thumbnail.name)
-                if obj.image_medium is not None and os.path.isfile(
-                        settings.MEDIA_ROOT + obj.image_medium.name):
-                    os.remove(settings.MEDIA_ROOT + obj.image_medium.name)
-                if obj.image_large is not None and os.path.isfile(
-                        settings.MEDIA_ROOT + obj.image_large.name):
-                    os.remove(settings.MEDIA_ROOT + obj.image_large.name)
-                obj.delete()
+                orphan_images = FindingImage.objects.filter(finding__isnull=True)
+                for obj in orphan_images:
+                    os.remove(os.path.join(settings.MEDIA_ROOT, obj.image.name))
+                    if obj.image_thumbnail is not None and os.path.isfile(
+                            settings.MEDIA_ROOT + obj.image_thumbnail.name):
+                        os.remove(os.path.join(settings.MEDIA_ROOT, obj.image_thumbnail.name))
+                    if obj.image_medium is not None and os.path.isfile(
+                            settings.MEDIA_ROOT + obj.image_medium.name):
+                        os.remove(os.path.join(settings.MEDIA_ROOT, obj.image_medium.name))
+                    if obj.image_large is not None and os.path.isfile(
+                            settings.MEDIA_ROOT + obj.image_large.name):
+                        os.remove(os.path.join(settings.MEDIA_ROOT, obj.image_large.name))
+                    obj.delete()
+            except:
+                pass
 
-            files = os.listdir(settings.MEDIA_ROOT + 'finding_images')
+            files = os.listdir(settings.MEDIA_ROOT + '/finding_images')
 
             for file in files:
                 with_media_root = settings.MEDIA_ROOT + 'finding_images/' + file

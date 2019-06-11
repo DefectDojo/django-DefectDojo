@@ -29,7 +29,7 @@ class ScanImportOptionsTest(APITestCase):
         if upload_empty_scan:
             file = SimpleUploadedFile("zap_sample.xml",
                                       self.EMPTY_ZAP_SCAN,
-                                      content_type=b'text/xml')
+                                      content_type='text/xml'.encode())
         else:
             file = open('tests/zap_sample.xml')
         payload = {
