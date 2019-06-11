@@ -26,6 +26,8 @@ spec:
       volumes:
         - name: run
           emptyDir: {}
+        - name: app-volume
+          emptyDir: {}
       containers:
         - name: uwsgi
           image: '{{ .Values.django.uwsgi.repository }}:{{ .Values.tag }}'
@@ -33,6 +35,8 @@ spec:
           volumeMounts:
             - name: run
               mountPath: /run
+            - name: app-volume
+              mountPath: /app/media
           envFrom:
             - configMapRef:
                 name: {{ $fullName }}
@@ -55,6 +59,8 @@ spec:
           volumeMounts:
             - name: run
               mountPath: /run
+            - name: app-volume
+              mountPath: /app/media
           ports:
             - name: http
               containerPort: 8080

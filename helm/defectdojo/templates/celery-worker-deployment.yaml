@@ -23,10 +23,16 @@ spec:
         app.kubernetes.io/name: {{ include "defectdojo.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
+      volumes:
+        - name: app-volume
+          emptyDir: {}
       containers:
         - name: celery
           image: "{{ .Values.celery.repository }}:{{ .Values.tag }}"
           imagePullPolicy: {{ .Values.imagePullPolicy }}
+          volumeMounts:
+            - name: app-volume
+              mountPath: /app/media
           command: ['/entrypoint-celery-worker.sh']
           envFrom:
             - configMapRef:
