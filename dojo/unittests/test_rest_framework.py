@@ -145,6 +145,7 @@ class FindingsTest(BaseClass.RESTEndpointTest):
             "mitigation": "MITIGATION",
             "impact": "HIGH",
             "references": "",
+            "reporter_id": "",
             "is_template": False,
             "active": False,
             "verified": False,
@@ -178,7 +179,8 @@ class FindingTemplatesTest(BaseClass.RESTEndpointTest):
             "description": "test template",
             "mitigation": "None",
             "impact": "MEDIUM",
-            "references": ""
+            "references": "",
+            "reporter_id": ""
         }
         self.update_fields = {'references': 'some reference'}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
