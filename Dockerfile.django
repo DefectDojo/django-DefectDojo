@@ -56,6 +56,7 @@ COPY \
   docker/entrypoint-uwsgi.sh \
   docker/entrypoint-uwsgi-dev.sh \
   docker/entrypoint-unit-tests.sh \
+  docker/entrypoint-unit-tests-devDocker.sh \
   docker/wait-for-it.sh \
   /
 COPY wsgi.py manage.py tests/unit-tests.sh ./

@@ -27,6 +27,7 @@ lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
 logging.basicConfig(format=fmt, level=lvl)
 
 logger = get_task_logger(__name__)
+deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 
 # Logs the error to the alerts table, which appears in the notification toolbar
@@ -261,7 +262,7 @@ def add_comment_task(find, note):
 
 @app.task(name='async_dedupe')
 def async_dedupe(new_finding, *args, **kwargs):
-    logger.info("running deduplication")
+    deduplicationLogger.debug("running deduplication")
     sync_dedupe(new_finding, *args, **kwargs)
 
 

@@ -381,11 +381,9 @@ class OpenFindingFilter(DojoFilter):
                    if finding.cwe > 0 and finding.cwe not in cwe)
         cwe = collections.OrderedDict(sorted(cwe.items()))
         self.form.fields['cwe'].choices = cwe.items()
-        sevs = dict()
-        sevs = dict([finding.severity, finding.severity]
-                    for finding in self.queryset.distinct()
-                    if finding.severity not in sevs)
-        self.form.fields['severity'].choices = sevs.items()
+        self.form.fields['severity'].choices = self.queryset.order_by(
+            'numerical_severity'
+        ).values_list('severity', 'severity').distinct()
         if self.user is not None and not self.user.is_staff:
             if self.form.fields.get('test__engagement__product'):
                 qs = Product.objects.filter(authorized_users__in=[self.user])
@@ -462,11 +460,9 @@ class ClosedFindingFilter(DojoFilter):
                    if finding.cwe > 0 and finding.cwe not in cwe)
         cwe = collections.OrderedDict(sorted(cwe.items()))
         self.form.fields['cwe'].choices = cwe.items()
-        sevs = dict()
-        sevs = dict([finding.severity, finding.severity]
-                    for finding in self.queryset.distinct()
-                    if finding.severity not in sevs)
-        self.form.fields['severity'].choices = sevs.items()
+        self.form.fields['severity'].choices = self.queryset.order_by(
+            'numerical_severity'
+        ).values_list('severity', 'severity').distinct()
 
 
 class ClosedFingingSuperFilter(ClosedFindingFilter):
@@ -533,11 +529,9 @@ class AcceptedFindingFilter(DojoFilter):
                    if finding.cwe > 0 and finding.cwe not in cwe)
         cwe = collections.OrderedDict(sorted(cwe.items()))
         self.form.fields['cwe'].choices = cwe.items()
-        sevs = dict()
-        sevs = dict([finding.severity, finding.severity]
-                    for finding in self.queryset.distinct()
-                    if finding.severity not in sevs)
-        self.form.fields['severity'].choices = sevs.items()
+        self.form.fields['severity'].choices = self.queryset.order_by(
+            'numerical_severity'
+        ).values_list('severity', 'severity').distinct()
 
 
 class AcceptedFingingSuperFilter(AcceptedFindingFilter):
@@ -597,11 +591,9 @@ class ProductFindingFilter(DojoFilter):
                    if finding.cwe > 0 and finding.cwe not in cwe)
         cwe = collections.OrderedDict(sorted(cwe.items()))
         self.form.fields['cwe'].choices = cwe.items()
-        sevs = dict()
-        sevs = dict([finding.severity, finding.severity]
-                    for finding in self.queryset.distinct()
-                    if finding.severity not in sevs)
-        self.form.fields['severity'].choices = sevs.items()
+        self.form.fields['severity'].choices = self.queryset.order_by(
+            'numerical_severity'
+        ).values_list('severity', 'severity').distinct()
 
 
 class TemplateFindingFilter(DojoFilter):
@@ -707,8 +699,8 @@ class MetricsFindingFilter(FilterSet):
     def __init__(self, *args, **kwargs):
         super(MetricsFindingFilter, self).__init__(*args, **kwargs)
         self.form.fields['severity'].choices = self.queryset.order_by(
-            'numerical_severity') \
-            .values_list('severity', 'severity').distinct()
+            'numerical_severity'
+        ).values_list('severity', 'severity').distinct()
 
     class Meta:
         model = Finding
