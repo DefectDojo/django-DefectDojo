@@ -67,5 +67,5 @@ ENV \
   DD_UWSGI_PASS="uwsgi_server" \
   DD_UWSGI_HOST="uwsgi" \
   DD_UWSGI_PORT="3031"
-USER root
+USER 1001
 ENTRYPOINT ["/entrypoint-nginx.sh"]

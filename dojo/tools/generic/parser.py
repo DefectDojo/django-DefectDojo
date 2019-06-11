@@ -307,10 +307,10 @@ class GenericFindingUploadCsvParser(object):
             self.items = ()
             return
 
-        content = filename.read().decode("utf-8")
+        content = filename.read()
 
         row_number = 0
-        reader = csv.reader(io.StringIO(content), delimiter=',', quotechar='"')
+        reader = csv.reader(io.StringIO(content.decode("utf-8")), delimiter=',', quotechar='"')
         for row in reader:
             finding = Finding(test=test)
 
