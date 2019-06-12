@@ -120,6 +120,11 @@
                               </li>
                             {% endif %}
                             <li role="presentation">
+                                <a href ="{% url 'upload_risk_acceptance$' finding.test.engagement.id%}">
+                                    <i class="fa fa-exclamation-circle"></i> Add Risk Exception
+                                </a>
+                            </li>
+                            <li role="presentation">
                                 <a href="{% url 'action_history' finding|content_type finding.id %}">
                                     <i class="fa fa-history"></i> View History
                                 </a>
