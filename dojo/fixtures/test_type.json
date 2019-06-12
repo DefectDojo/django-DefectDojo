@@ -359,7 +359,7 @@
 	},
   {
     "fields": {
-      "name": "IBM App Scan"
+      "name": "IBM AppScan DAST"
     },
     "model": "dojo.test_type",
     "pk": 59
