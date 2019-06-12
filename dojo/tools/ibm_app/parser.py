@@ -125,9 +125,11 @@ class IbmAppScanXMLParser(object):
             for item in advisory_group.iter("item"):
                 if item.attrib['id'] == advisory:
                     return item.find('advisory/testTechnicalDescription/text').text
+        return ""
 
     def get_url(self, ref):
         for url_group in self.root.iter('url-group'):
             for item in url_group.iter('item'):
                 if item.attrib['id'] == ref:
                     return item.find('name').text
+        return ""
