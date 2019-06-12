@@ -277,6 +277,18 @@ class Contact(models.Model):
     is_globally_read_only = models.BooleanField(default=False)
     updated = models.DateTimeField(editable=False)
 
+class Notes(models.Model):
+    entry = models.TextField()
+    date = models.DateTimeField(null=False, editable=False,
+                                default=get_current_datetime)
+    author = models.ForeignKey(User, editable=False)
+
+    class Meta:
+        ordering = ['-date']
+
+    def __unicode__(self):
+        return self.entry
+
 
 class Product_Type(models.Model):
     name = models.CharField(max_length=255, unique=True)
@@ -454,7 +466,7 @@ class Product(models.Model):
 
     name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=4000)
-
+    notes=models.ManyToManyField(Notes, editable=True)
     '''
     The following three fields are deprecated and no longer in use.
     They remain in model for backwards compatibility and will be removed
@@ -932,19 +944,6 @@ class Endpoint(models.Model):
             return self.host[:self.host.index(":")]
         else:
             return self.host
-
-
-class Notes(models.Model):
-    entry = models.TextField()
-    date = models.DateTimeField(null=False, editable=False,
-                                default=get_current_datetime)
-    author = models.ForeignKey(User, editable=False)
-
-    class Meta:
-        ordering = ['-date']
-
-    def __unicode__(self):
-        return self.entry
 
 
 class Development_Environment(models.Model):
