@@ -7,7 +7,7 @@ from defusedxml import ElementTree
 __author__ = 'propersam'
 
 
-class IbmAppScanXMLParser(object):
+class IbmAppScanDASTXMLParser(object):
     def __init__(self, file, test):
         self.items = ()
 
@@ -19,7 +19,7 @@ class IbmAppScanXMLParser(object):
 
         # validate XML file
         if 'xml-report' not in self.root.tag:
-            raise NamespaceErr("This does not look like a valid expected Ibm App Scan XML file.")
+            raise NamespaceErr("This does not look like a valid expected Ibm AppScan DAST XML file.")
 
         self.issue_list = []
         # self.hosts = self.fetch_host_details()
