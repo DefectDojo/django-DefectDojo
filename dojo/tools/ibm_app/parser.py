@@ -64,7 +64,7 @@ class IbmAppScanXMLParser(object):
 
                                 for link in data.iter('link'):
                                     if link is not None:
-                                        ref_link += link.text
+                                        ref_link += link.text + "\n"
 
                     # Now time to start assigning issues to findings and endpoints
                     dupe_key = hashlib.md5(issue_description + name + severity).hexdigest()
