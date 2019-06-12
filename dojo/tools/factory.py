@@ -51,6 +51,7 @@ from dojo.tools.openscap.parser import OpenscapXMLParser
 from dojo.tools.immuniweb.parser import ImmuniwebXMLParser
 from dojo.tools.wapiti.parser import WapitiXMLParser
 from dojo.tools.cobalt.parser import CobaltCSVParser
+from dojo.tools.whitesource.parser import WhitesourceJSONParser
 
 __author__ = 'Jay Paz'
 
@@ -168,6 +169,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = WapitiXMLParser(file, test)
     elif scan_type == 'Cobalt.io Scan':
         parser = CobaltCSVParser(file, test)
+    elif scan_type == 'Whitesource Scan':
+        parser = WhitesourceJSONParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 
