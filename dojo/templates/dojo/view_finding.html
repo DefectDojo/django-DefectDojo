@@ -425,7 +425,7 @@
                     {% for pic in finding.images.all %}
                         <div class="col-md-1">
                             <a href="#"
-                               data-imageurl="{{ request.scheme }}://{{ request.get_host}}{{ pic.image_large.url }}"
+                               data-imageurl="{{ request.scheme }}://{{ request.get_host }}{{ pic.image_large.url }}"
                                data-origurl="{{ request.scheme }}://{{ request.get_host }}{{ pic.image.url }}"
                                class="thumbnail" data-toggle="modal"
                                data-target="#findingImageModal" id="finding_pic">

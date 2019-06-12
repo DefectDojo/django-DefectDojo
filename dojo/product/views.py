@@ -19,19 +19,15 @@ from django.db import DEFAULT_DB_ALIAS
 from dojo.templatetags.display_tags import get_level
 from dojo.filters import ProductFilter, ProductFindingFilter, EngagementFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm, \
-                       EngagementPresetsForm, DeleteEngagementPresetsForm, NoteForm
+                       EngagementPresetsForm, DeleteEngagementPresetsForm
 from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, Finding_Template, \
     Tool_Product_Settings, Cred_Mapping, Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, \
-    Endpoint, Engagement_Presets, DojoMeta, JIRA_Issue
-from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, get_system_setting, create_notification, Product_Tab, process_notifications, \
-    add_comment
+    Endpoint, Engagement_Presets, DojoMeta
+from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, get_system_setting, create_notification, Product_Tab
 from custom_field.models import CustomFieldValue, CustomField
-from dojo.tasks import add_epic_task, add_issue_task, add_comment_task
+from dojo.tasks import add_epic_task, add_issue_task
 from tagging.models import Tag
 from tagging.utils import get_tag_list
-import sys
-
-import operator
 
 logger = logging.getLogger(__name__)
 
