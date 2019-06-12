@@ -1,6 +1,6 @@
 import json
 import hashlib
-from urlparse import urlparse
+from urllib.parse import urlparse
 from dojo.models import Endpoint, Finding
 
 __author__ = 'dr3dd589'
@@ -40,7 +40,7 @@ class MozillaObservatoryJSONParser(object):
                 except:
                     url = None
 
-                dupe_key = hashlib.md5(description + title).hexdigest()
+                dupe_key = hashlib.md5(str(description + title).encode('utf-8')).hexdigest()
 
                 if dupe_key in self.dupes:
                     finding = self.dupes[dupe_key]
