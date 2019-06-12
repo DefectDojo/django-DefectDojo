@@ -454,6 +454,7 @@ class Product(models.Model):
 
     name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=4000)
+
     '''
     The following three fields are deprecated and no longer in use.
     They remain in model for backwards compatibility and will be removed
