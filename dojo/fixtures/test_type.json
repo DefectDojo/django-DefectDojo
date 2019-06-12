@@ -367,11 +367,18 @@
     "model": "dojo.test_type",
     "pk": 144
   },
+  {
+		"fields": {
+      "name": "Whitesource Scan"
+    },
+    "model": "dojo.test_type",
+	"pk": 145
+  },
 	{
 		"fields": {
 			"name": "ZAP Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 145
+		"pk": 146
 	}
-]
+
