@@ -43,14 +43,24 @@ class IbmAppScanXMLParser(object):
                         cve = issue_data['cve']
 
                     url = self.get_url(item.find('url/ref').text)
-                    host = urlparse(url).netloc
-                    path = urlparse(url).path
-                    scheme = urlparse(url).scheme
-                    if scheme == "https":
-                        port = '443'
+                    # in case empty string is returned as url
+                    # this condition is very rare to occur
+                    # As most of the actions of any vuln scanner depends on urls
+                    if url == "N/A":
+                        host = "N/A"
+                        path = ""
+                        scheme = "N/A"
+                        port = ""
+                        query = ""
                     else:
-                        port = '80'
-                    query = urlparse(url).query
+                        host = urlparse(url).netloc
+                        path = urlparse(url).path
+                        scheme = urlparse(url).scheme
+                        if scheme == "https":
+                            port = '443'
+                        else:
+                            port = '80'
+                        query = urlparse(url).query
 
                     severity = item.find('severity').text
                     issue_description = self.fetch_advisory_group(issue_data['advisory'])
@@ -125,11 +135,12 @@ class IbmAppScanXMLParser(object):
             for item in advisory_group.iter("item"):
                 if item.attrib['id'] == advisory:
                     return item.find('advisory/testTechnicalDescription/text').text
-        return ""
+        return "N/A"
 
     def get_url(self, ref):
         for url_group in self.root.iter('url-group'):
             for item in url_group.iter('item'):
                 if item.attrib['id'] == ref:
                     return item.find('name').text
-        return ""
+
+        return "N/A"  # This case is very rare to occur
