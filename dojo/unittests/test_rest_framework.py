@@ -145,7 +145,7 @@ class FindingsTest(BaseClass.RESTEndpointTest):
             "mitigation": "MITIGATION",
             "impact": "HIGH",
             "references": "",
-            "reporter": "admin",
+            "reporter": 3,
             "is_template": False,
             "active": False,
             "verified": False,
@@ -309,7 +309,7 @@ class StubFindingsTest(BaseClass.RESTEndpointTest):
             "date": "2017-12-31",
             "severity": "HIGH",
             "description": "test stub finding",
-            "reporter": "admin",
+            "reporter": 3,
             "test": 3,
         }
         self.update_fields = {'severity': 'LOW'}

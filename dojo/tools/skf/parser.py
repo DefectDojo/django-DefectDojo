@@ -2,9 +2,9 @@ import io
 import csv
 import hashlib
 from dojo.models import Finding, Notes
-from dateutil.parser import parse
 from django.contrib.auth.models import User
 from datetime import datetime
+
 
 class ColumnMappingStrategy(object):
 
@@ -73,9 +73,9 @@ class NotesColumnMappingStrategy(ColumnMappingStrategy):
     def map_column_value(self, finding, column_value):
         if (column_value != ""):
             user = User.objects.all().first()
-            note = Notes(entry=column_value,author=user)
+            note = Notes(entry=column_value, author=user)
             note.save()
-            finding.reporter_id = user.id
+            finding.reporter = user.id
             finding.save()
             finding.notes.add(note)
 
@@ -113,14 +113,14 @@ class SKFCsvParser(object):
             self.items = ()
             return
 
-        content = filename.read()
+        content = filename.read().decode('utf-8')
 
         row_number = 0
         reader = csv.reader(io.StringIO(content), delimiter=',', quotechar='"', escapechar='\\')
         for row in reader:
             finding = Finding(test=test)
             finding.severity = 'Info'
-            
+
             if row_number == 0:
                 self.read_column_names(row)
                 row_number += 1
@@ -132,7 +132,7 @@ class SKFCsvParser(object):
                 column_number += 1
 
             if finding is not None:
-                key = hashlib.md5(finding.severity + '|' + finding.title + '|' + finding.description).hexdigest()
+                key = hashlib.md5(str(finding.severity + '|' + finding.title + '|' + finding.description).encode('utf-8')).hexdigest()
 
                 if key not in self.dupes:
                     self.dupes[key] = finding
