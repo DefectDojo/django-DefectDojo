@@ -1220,31 +1220,31 @@ def manage_images(request, fid):
 
             orphan_images = FindingImage.objects.filter(finding__isnull=True)
             for obj in orphan_images:
-                os.remove(settings.MEDIA_ROOT + obj.image.name)
+                os.remove(os.path.join(settings.MEDIA_ROOT, obj.image.name))
                 if obj.image_thumbnail is not None and os.path.isfile(
-                        settings.MEDIA_ROOT + obj.image_thumbnail.name):
-                    os.remove(settings.MEDIA_ROOT + obj.image_thumbnail.name)
+                        os.path.join(settings.MEDIA_ROOT, obj.image_thumbnail.name)):
+                    os.remove(os.path.join(settings.MEDIA_ROOT, obj.image_thumbnail.name))
                 if obj.image_medium is not None and os.path.isfile(
-                        settings.MEDIA_ROOT + obj.image_medium.name):
-                    os.remove(settings.MEDIA_ROOT + obj.image_medium.name)
+                        os.path.join(settings.MEDIA_ROOT, obj.image_medium.name)):
+                    os.remove(os.path.join(settings.MEDIA_ROOT, obj.image_medium.name))
                 if obj.image_large is not None and os.path.isfile(
-                        settings.MEDIA_ROOT + obj.image_large.name):
-                    os.remove(settings.MEDIA_ROOT + obj.image_large.name)
+                        os.path.join(settings.MEDIA_ROOT, obj.image_large.name)):
+                    os.remove(os.path.join(settings.MEDIA_ROOT, obj.image_large.name))
                 obj.delete()
 
-            files = os.listdir(settings.MEDIA_ROOT + 'finding_images')
+            files = os.listdir(os.path.join(settings.MEDIA_ROOT, 'finding_images'))
 
             for file in files:
-                with_media_root = settings.MEDIA_ROOT + 'finding_images/' + file
-                with_part_root_only = 'finding_images/' + file
+                with_media_root = os.path.join(settings.MEDIA_ROOT, 'finding_images', file)
+                with_part_root_only = os.path.join('finding_images', file)
                 if os.path.isfile(with_media_root):
                     pic = FindingImage.objects.filter(
                         image=with_part_root_only)
 
                     if len(pic) == 0:
                         os.remove(with_media_root)
-                        cache_to_remove = settings.MEDIA_ROOT + '/CACHE/images/finding_images/' + \
-                                          os.path.splitext(file)[0]
+                        cache_to_remove = os.path.join(settings.MEDIA_ROOT, 'CACHE','images','finding_images', \
+                                          os.path.splitext(file)[0])
                         if os.path.isdir(cache_to_remove):
                             shutil.rmtree(cache_to_remove)
                     else:
