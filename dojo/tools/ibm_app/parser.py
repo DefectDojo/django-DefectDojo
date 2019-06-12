@@ -58,11 +58,13 @@ class IbmAppScanXMLParser(object):
                     for fix_recommendation_group in self.root.iter("fix-recommendation-group"):
                         for recommendation in fix_recommendation_group.iter("item"):
                             if recommendation.attrib['id'] == issue_data["fix-recommendation"]:
-                                for data in recommendation.find("general/fixRecommendation/text").text:
-                                    recommendation_data += data  # some texts are being repeated
+                                data = recommendation.find("general/fixRecommendation")
+                                for data_text in data.iter("text"):
+                                    recommendation_data += data_text.text + "\n"  # some texts are being repeated
 
-                                if recommendation.find('general/fixRecommendation/link') is not None:
-                                    ref_link = recommendation.find('general/fixRecommendation/link').text
+                                for link in data.iter('link'):
+                                    if link is not None:
+                                        ref_link += link.text
 
                     # Now time to start assigning issues to findings and endpoints
                     dupe_key = hashlib.md5(issue_description + name + severity).hexdigest()
