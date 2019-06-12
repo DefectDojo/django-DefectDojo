@@ -18,6 +18,13 @@ Please use [these test scripts](./tests) to test your changes. These are the exa
 
 For changes that require additional settings, settings.dist.py is the file you want to change. Settings.py is created by setup.bash from settings.dist.py
 
+## Transition to python3
+
+With the nearing deprecation of python 2.7, the conversion to python3 will be
+executed as smoothly as possible. During this process, DefectDojo will also be
+upgraded to Django 2.2.1. Going forward, the 'dev' branch will only accept
+bug fixes, Please instead contribute features / bug fixes  to the ‘python3_dev’ branch.
+
 ## Submitting Pull Requests
 
 The following are things to consider before submitting a pull request to

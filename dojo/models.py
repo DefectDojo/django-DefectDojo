@@ -1135,7 +1135,7 @@ class Finding(models.Model):
     mitigated = models.DateTimeField(editable=False, null=True, blank=True)
     mitigated_by = models.ForeignKey(User, null=True, editable=False,
                                      related_name="mitigated_by", on_delete=models.CASCADE)
-    reporter = models.ForeignKey(User, editable=False, related_name='reporter', on_delete=models.CASCADE)
+    reporter = models.ForeignKey(User, editable=False, default=1, related_name='reporter', on_delete=models.CASCADE)
     notes = models.ManyToManyField(Notes, blank=True,
                                    editable=False)
     numerical_severity = models.CharField(max_length=4)
@@ -1332,9 +1332,12 @@ class Finding(models.Model):
         if self.hash_code is None:
             self.hash_code = self.compute_hash_code()
         self.found_by.add(self.test.test_type)
-        if self.test.test_type.static_tool:
+        if self.test.test_type.static_tool and self.test.test_type.dynamic_tool:
             self.static_finding = True
-        else:
+            self.dynamic_finding = True
+        elif self.test.test_type.static_tool:
+            self.static_finding = True
+        elif self.test.test_type.dynamic_tool:
             self.dynamic_finding = True
         if rules_option:
             from dojo.tasks import async_rules
@@ -1452,7 +1455,7 @@ class Stub_Finding(models.Model):
     severity = models.CharField(max_length=200, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     test = models.ForeignKey(Test, editable=False, on_delete=models.CASCADE)
-    reporter = models.ForeignKey(User, editable=False, on_delete=models.CASCADE)
+    reporter = models.ForeignKey(User, editable=False, default=1, on_delete=models.CASCADE)
 
     class Meta:
         ordering = ('-date', 'title')

@@ -27,9 +27,7 @@ class ScanImportOptionsTest(APITestCase):
 
     def import_zap_scan(self, skip_duplicates=False, close_old_findings=False, upload_empty_scan=False):
         if upload_empty_scan:
-            file = SimpleUploadedFile("zap_sample.xml",
-                                      self.EMPTY_ZAP_SCAN,
-                                      content_type='text/xml')
+            file = SimpleUploadedFile('zap_sample.xml', self.EMPTY_ZAP_SCAN.encode('utf-8'))
         else:
             file = open('tests/zap_sample.xml')
         payload = {
