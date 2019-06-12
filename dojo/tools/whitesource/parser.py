@@ -25,7 +25,7 @@ class WhitesourceJSONParser(object):
                             "**Library Type** : " + node['library']['type'] + "\n"
                 try:
                     mitigation = "**fixResolution** : " + node['topFix']['fixResolution'] + "\n" + \
-                                "**message** : " + node['topFix']['message'] + "\n"
+                                "**Message** : " + node['topFix']['message'] + "\n"
                 except:
                     mitigation = "N/A"
 
