@@ -124,7 +124,7 @@ def remove_string(string, value):
 @register.filter(name='percentage')
 def percentage(fraction, value):
     return_value = ''
-    if value > 0 and fraction > 0:
+    if int(value) > 0 and int(fraction) > 0:
         try:
             return_value = "%.1f%%" % ((float(fraction) / float(value)) * 100)
         except ValueError:
@@ -163,6 +163,7 @@ def get_level(benchmark_score):
     benchmark_score.desired_level, level, total_pass, total = asvs_calc_level(benchmark_score)
     level = percentage(total_pass, total)
     return level
+
 
 @register.filter(name='asvs_level')
 def asvs_level(benchmark_score):
