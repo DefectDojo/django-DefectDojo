@@ -647,7 +647,7 @@ def request_finding_review(request, fid):
             finding.last_reviewed_by = request.user
 
             users = form.cleaned_data['reviewers']
-            finding.reviewers = users
+            finding.reviewers.set(users)
             finding.save()
 
             create_notification(event='review_requested',
@@ -706,7 +706,7 @@ def clear_finding_review(request, fid):
             finding.last_reviewed = now
             finding.last_reviewed_by = request.user
 
-            finding.reviewers = []
+            finding.reviewers.set([])
             finding.save()
 
             finding.notes.add(new_note)
