@@ -1243,8 +1243,8 @@ def manage_images(request, fid):
 
                     if len(pic) == 0:
                         os.remove(with_media_root)
-                        cache_to_remove = os.path.join(settings.MEDIA_ROOT, 'CACHE','images','finding_images', \
-                                          os.path.splitext(file)[0])
+                        cache_to_remove = os.path.join(settings.MEDIA_ROOT, 'CACHE', 'images', 'finding_images',
+                            os.path.splitext(file)[0])
                         if os.path.isdir(cache_to_remove):
                             shutil.rmtree(cache_to_remove)
                     else:
@@ -1382,7 +1382,7 @@ def merge_finding_product(request, pid):
                                 Tag.objects.add_tag(finding, "merged-inactive")
 
                     # Update the finding to merge into
-                    if finding_descriptions is not '':
+                    if finding_descriptions != '':
                         finding_to_merge_into.description = "{}\n\n{}".format(finding_to_merge_into.description, finding_descriptions)
 
                     if finding_to_merge_into.static_finding:
