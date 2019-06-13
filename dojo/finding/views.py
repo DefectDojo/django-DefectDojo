@@ -1189,38 +1189,38 @@ def manage_images(request, fid):
             images_formset.save()
 
             for obj in images_formset.deleted_objects:
-                os.remove(settings.MEDIA_ROOT + obj.image.name)
+                os.remove(settings.MEDIA_ROOT + "/" + obj.image.name)
                 if obj.image_thumbnail is not None and os.path.isfile(
-                        settings.MEDIA_ROOT + obj.image_thumbnail.name):
-                    os.remove(settings.MEDIA_ROOT + obj.image_thumbnail.name)
+                        settings.MEDIA_ROOT + "/" + obj.image_thumbnail.name):
+                    os.remove(settings.MEDIA_ROOT + "/" + obj.image_thumbnail.name)
                 if obj.image_medium is not None and os.path.isfile(
                         settings.MEDIA_ROOT + obj.image_medium.name):
-                    os.remove(settings.MEDIA_ROOT + obj.image_medium.name)
+                    os.remove(settings.MEDIA_ROOT + "/" + obj.image_medium.name)
                 if obj.image_large is not None and os.path.isfile(
                         settings.MEDIA_ROOT + obj.image_large.name):
-                    os.remove(settings.MEDIA_ROOT + obj.image_large.name)
+                    os.remove(settings.MEDIA_ROOT + "/" + obj.image_large.name)
 
             for obj in images_formset.new_objects:
                 finding.images.add(obj)
 
             orphan_images = FindingImage.objects.filter(finding__isnull=True)
             for obj in orphan_images:
-                os.remove(settings.MEDIA_ROOT + obj.image.name)
+                os.remove(settings.MEDIA_ROOT + "/" + obj.image.name)
                 if obj.image_thumbnail is not None and os.path.isfile(
-                        settings.MEDIA_ROOT + obj.image_thumbnail.name):
+                        settings.MEDIA_ROOT + "/" + obj.image_thumbnail.name):
                     os.remove(settings.MEDIA_ROOT + obj.image_thumbnail.name)
                 if obj.image_medium is not None and os.path.isfile(
-                        settings.MEDIA_ROOT + obj.image_medium.name):
+                        settings.MEDIA_ROOT + "/" + obj.image_medium.name):
                     os.remove(settings.MEDIA_ROOT + obj.image_medium.name)
                 if obj.image_large is not None and os.path.isfile(
-                        settings.MEDIA_ROOT + obj.image_large.name):
-                    os.remove(settings.MEDIA_ROOT + obj.image_large.name)
+                        settings.MEDIA_ROOT + "/" + obj.image_large.name):
+                    os.remove(settings.MEDIA_ROOT + "/" + obj.image_large.name)
                 obj.delete()
 
-            files = os.listdir(settings.MEDIA_ROOT + 'finding_images')
+            files = os.listdir(settings.MEDIA_ROOT + '/finding_images')
 
             for file in files:
-                with_media_root = settings.MEDIA_ROOT + 'finding_images/' + file
+                with_media_root = settings.MEDIA_ROOT + '/finding_images/' + file
                 with_part_root_only = 'finding_images/' + file
                 if os.path.isfile(with_media_root):
                     pic = FindingImage.objects.filter(
