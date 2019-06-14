@@ -30,7 +30,7 @@ class ContrastCSVParser(object):
             impact = "N/A"
             references = "N/A"
 
-            dupe_key = hashlib.md5(category + '|' + str(cwe) + '|' + title + '|').hexdigest()
+            dupe_key = hashlib.md5(category.encode('utf-8') + str(cwe).encode('utf-8') + title.encode('utf-8')).hexdigest()
 
             if dupe_key in dupes:
                 finding = dupes[dupe_key]
