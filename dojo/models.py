@@ -1098,7 +1098,6 @@ class Finding(models.Model):
             hash_string = hash_string.strip()
             return hashlib.sha256(hash_string).hexdigest()
 
-
     def duplicate_finding_set(self):
         return self.duplicate_list.all().order_by('title')
 
@@ -1282,16 +1281,16 @@ class Finding(models.Model):
                     async_dedupe.delay(self, *args, **kwargs)
                     pass
         if system_settings.false_positive_history and false_history:
-                from dojo.tasks import async_false_history
-                from dojo.utils import sync_false_history
-                try:
-                    if self.reporter.usercontactinfo.block_execution:
-                        sync_false_history(self, *args, **kwargs)
-                    else:
-                        async_false_history.delay(self, *args, **kwargs)
-                except:
+            from dojo.tasks import async_false_history
+            from dojo.utils import sync_false_history
+            try:
+                if self.reporter.usercontactinfo.block_execution:
+                    sync_false_history(self, *args, **kwargs)
+                else:
                     async_false_history.delay(self, *args, **kwargs)
-                    pass
+            except:
+                async_false_history.delay(self, *args, **kwargs)
+                pass
         # Title Casing
         from titlecase import titlecase
         self.title = titlecase(self.title)
