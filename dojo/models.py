@@ -1013,6 +1013,7 @@ class Notes(models.Model):
     date = models.DateTimeField(null=False, editable=False,
                                 default=get_current_datetime)
     author = models.ForeignKey(User, editable=False, on_delete=models.CASCADE)
+    private = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['-date']
