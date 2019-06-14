@@ -70,7 +70,7 @@ class IBMAppScanTest(unittest.TestCase):
         # Query the site to determine if the finding has been added
         productTxt = driver.find_element_by_tag_name("BODY").text
         # Assert the query to determine status or failure
-        self.assertTrue(re.search(r'IBM App Scan processed, a total of 27 findings were processed', productTxt))
+        self.assertTrue(re.search(r'IBM AppScan DAST processed, a total of 27 findings were processed', productTxt))
 
     def tearDown(self):
         self.driver.quit()
