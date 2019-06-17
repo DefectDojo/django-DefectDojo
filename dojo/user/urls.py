@@ -24,4 +24,5 @@ urlpatterns = [
         name='delete_user'),
     url(r'^api/key$', views.api_key, name='api_key'),
     url(r'^api/key-v2$', views.api_v2_key, name='api_v2_key'),
+    url(r'^delete_alerts$', views.delete_alerts, name='delete_alerts'),
 ]
