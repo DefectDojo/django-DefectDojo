@@ -171,7 +171,9 @@
         <p class="m20">
             {% if test.notes.all %}
                 {% for note in test.notes.all %}
-                    {{ note.author }} - {{ note.date }} - {{ note }} +<br>
+                    {% if not note.private %}
+                        {{ note.author }} - {{ note.date }} - {{ note }} +<br>
+                    {% endif %}
                 {% endfor %}
             {% endif %}
         </p>
@@ -182,9 +184,9 @@
         <p>
             {% for test in engagement.test_set.all %}
                 {% if test.notes.all %}
-                    {% for note in test.notes.all %}
+                    {% if not note.private %}
                         {{ note.author }} - {{ note.date }} - {{ note }} +<br>
-                    {% endfor %}
+                    {% endif %}
                 {% endif %}
             {% endfor %}
         </p>
@@ -281,7 +283,9 @@
                 <br>
                 {% if find.notes.all %}
                     {% for note in find.notes.all %}
-                        {{ note.author }} - {{ note.date }} - {{ note }} +<br>
+                        {% if not note.private %}
+                            {{ note.author }} - {{ note.date }} - {{ note }} +<br>
+                        {% endif %}
                     {% endfor %}
                 {% else %}
                     No notes found.
@@ -332,7 +336,9 @@
                     <br>
                     {% if find.notes.all %}
                         {% for note in find.notes.all %}
-                            {{ note.author }} - {{ note.date }} - {{ note }} +<br>
+                            {% if not note.private %}
+                                {{ note.author }} - {{ note.date }} - {{ note }} +<br>
+                            {% endif %}
                         {% endfor %}
                     {% else %}
                         No notes found.
@@ -418,7 +424,9 @@
                         <br>
                         {% if find.notes.all %}
                             {% for note in find.notes.all %}
-                                {{ note.author }} - {{ note.date }} - {{ note }} +<br>
+                                {% if not note.private %}
+                                    {{ note.author }} - {{ note.date }} - {{ note }} +<br>
+                                {% endif %}
                             {% endfor %}
                         {% else %}
                             No notes found.

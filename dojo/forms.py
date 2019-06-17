@@ -300,7 +300,8 @@ class ImportScanForm(forms.Form):
                          ("Sonatype Application Scan", "Sonatype Application Scan"),
                          ("Cobalt.io Scan", "Cobalt.io Scan"),
                          ("Mozilla Observatory Scan", "Mozilla Observatory Scan"),
-                         ("Whitesource Scan", "Whitesource Scan"))
+                         ("Whitesource Scan", "Whitesource Scan"),
+                         ("Contrast Scan","Contrast Scan"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
     scan_date = forms.DateTimeField(
@@ -1212,7 +1213,7 @@ class NoteForm(forms.ModelForm):
 
     class Meta:
         model = Notes
-        fields = ['entry']
+        fields = ['entry', 'private']
 
 
 class CloseFindingForm(forms.ModelForm):
