@@ -28,8 +28,8 @@
             <div class="pull-right">
                 <form method="post" action="{% url 'delete_note' note.id destination object.id %}">
                     {% csrf_token %}
-                    <input type="hidden" name="id" value="{{note.id}}" id="id_id" />
-                    <button type="submit" class="btn-delete">
+                    <input type="hidden" aria-label="id" name="id" value="{{note.id}}" id="id_id" />
+                    <button type="submit" aria-label="Delete Note" class="btn-delete">
                       <i class="fa fa-trash"></i>
                     </button>
                 </form>
