@@ -25,6 +25,13 @@ class EndPointViewSet(mixins.ListModelMixin,
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'host', 'product')
 
+    def get_queryset(self):
+        if not self.request.user.is_staff:
+            return Endpoint.objects.filter(
+                product__authorized_users__in=[self.request.user])
+        else:
+            return Endpoint.objects.all()
+
 
 class EngagementViewSet(mixins.ListModelMixin,
                         mixins.RetrieveModelMixin,
@@ -39,6 +46,13 @@ class EngagementViewSet(mixins.ListModelMixin,
                      'target_end', 'requester', 'report_type',
                      'updated', 'threat_model', 'api_test',
                      'pen_test', 'status', 'product')
+
+    def get_queryset(self):
+        if not self.request.user.is_staff:
+            return Engagement.objects.filter(
+                product__authorized_users__in=[self.request.user])
+        else:
+            return Engagement.objects.all()
 
     @detail_route(methods=["post"])
     def close(self, request, pk=None):
@@ -64,6 +78,13 @@ class FindingTemplatesViewSet(mixins.ListModelMixin,
     filter_fields = ('id', 'title', 'cwe', 'severity', 'description',
                      'mitigation')
 
+    # def get_queryset(self):
+    #     if not self.request.user.is_staff:
+    #         return Finding_Template.objects.filter(
+    #             id__in=[self.request.user])
+    #     else:
+    #         return Finding_Template.objects.all()
+
 
 class FindingViewSet(mixins.ListModelMixin,
                      mixins.RetrieveModelMixin,
@@ -79,6 +100,13 @@ class FindingViewSet(mixins.ListModelMixin,
                      'false_p', 'reporter', 'url', 'out_of_scope',
                      'duplicate', 'test__engagement__product',
                      'test__engagement')
+
+    def get_queryset(self):
+        if not self.request.user.is_staff:
+            return Finding.objects.filter(
+                reporter_id__in=[self.request.user])
+        else:
+            return Finding.objects.all()
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -169,6 +197,13 @@ class ProductTypeViewSet(mixins.ListModelMixin,
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'name', 'critical_product', 'key_product', 'created', 'updated')
 
+    def get_queryset(self):
+        if not self.request.user.is_staff:
+            return Product_Type.objects.filter(
+                prod_type__authorized_users__in=[self.request.user])
+        else:
+            return Product_Type.objects.all()
+
 
 class ScanSettingsViewSet(mixins.ListModelMixin,
                           mixins.RetrieveModelMixin,
@@ -226,6 +261,13 @@ class StubFindingsViewSet(mixins.ListModelMixin,
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'title', 'date', 'severity', 'description')
 
+    def get_queryset(self):
+        if not self.request.user.is_staff:
+            return Finding.objects.filter(
+                reporter_id__in=[self.request.user])
+        else:
+            return Finding.objects.all()
+
     def get_serializer_class(self):
         if self.request.method == 'POST':
             return serializers.StubFindingCreateSerializer
@@ -255,6 +297,13 @@ class TestsViewSet(mixins.ListModelMixin,
     filter_fields = ('id', 'title', 'test_type', 'target_start',
                      'target_end', 'notes', 'percent_complete',
                      'actual_time', 'engagement')
+
+    def get_queryset(self):
+        if not self.request.user.is_staff:
+            return Test.objects.filter(
+                engagement__product__authorized_users__in=[self.request.user])
+        else:
+            return Test.objects.all()
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
