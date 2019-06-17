@@ -134,7 +134,9 @@
                         {% for test in engagement.test_set.all %}
                             {% if test.notes.all %}
                                 {% for note in test.notes.all %}
-                                    {{ note.author }} - {{ note.date }} - {{ note }} <br>
+                                    {% if not note.private %}
+                                        {{ note.author }} - {{ note.date }} - {{ note }} <br>
+                                    {% endif %}
                                 {% endfor %}
                             {% endif %}
                         {% endfor %}
@@ -344,17 +346,19 @@
                                 </thead>
                                 <tbody>
                                 {% for note in finding.notes.all %}
-                                    <tr>
-                                        <td>
-                                            {{ note.author.username }}
-                                        </td>
-                                        <td>
-                                            {{ note.date }}
-                                        </td>
-                                        <td>
-                                            {{ note }}
-                                        </td>
-                                    </tr>
+                                    {% if not note.private %}
+                                        <tr>
+                                            <td>
+                                                {{ note.author.username }}
+                                            </td>
+                                            <td>
+                                                {{ note.date }}
+                                            </td>
+                                            <td>
+                                                {{ note }}
+                                            </td>
+                                        </tr>
+                                    {% endif %}
                                 {% endfor %}
 
                                 </tbody>
