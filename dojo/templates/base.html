@@ -623,6 +623,8 @@
                 });
                 $('.dropdown-alerts').append('<li><a class="text-center" href="{% url "alerts" %}"><strong>See All Alerts </strong>' +
                                              '<i class="fa fa-angle-right"></i></a></li>');
+                $('.dropdown-alerts').append('<li><a class="text-center" href="{% url "delete_alerts" %}"><strong>Clear All Alerts </strong>' +
+                                           '<i class="fa fa-angle-right"></i></a></li>');
             });
         }
     });
