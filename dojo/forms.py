@@ -1213,7 +1213,7 @@ class NoteForm(forms.ModelForm):
 
     class Meta:
         model = Notes
-        fields = ['entry']
+        fields = ['entry', 'private']
 
 
 class CloseFindingForm(forms.ModelForm):
