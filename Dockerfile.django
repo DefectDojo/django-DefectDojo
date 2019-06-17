@@ -5,6 +5,7 @@ WORKDIR /app
 RUN \
   apt-get -y update && \
   apt-get -y install \
+    cloc \
     dnsutils \
     mysql-client \
     postgresql-client \
