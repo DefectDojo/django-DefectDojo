@@ -159,17 +159,19 @@
                                 </thead>
                                 <tbody>
                                 {% for note in finding.notes.all %}
-                                    <tr>
-                                        <td>
-                                            {{ note.author.username }}
-                                        </td>
-                                        <td>
-                                            {{ note.date }}
-                                        </td>
-                                        <td>
-                                            {{ note }}
-                                        </td>
-                                    </tr>
+                                    {% if not note.private%}
+                                        <tr>
+                                            <td>
+                                                {{ note.author.username }}
+                                            </td>
+                                            <td>
+                                                {{ note.date }}
+                                            </td>
+                                            <td>
+                                                {{ note }}
+                                            </td>
+                                        </tr>
+                                    {% endif %}
                                 {% endfor %}
 
                                 </tbody>

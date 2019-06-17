@@ -380,5 +380,12 @@
 		},
 		"model": "dojo.test_type",
 		"pk": 146
-	}
-
+	},	
+{
+	"fields": {
+		"name": "Contrast Scan"
+	},
+	"model":"dojo.test_type",
+	"pk": 147
+}
+]
