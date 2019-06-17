@@ -16,7 +16,7 @@ class Severityfilter:
             '1': 'Low',
             '2': 'Medium',
             '3': 'High',
-            }
+                                }
         self.severity = None
 
     def eval_column(self, column_value):
@@ -24,6 +24,7 @@ class Severityfilter:
             self.severity = self.severity_mapping[column_value]
         else:
             self.severity = 'Info'
+
 
 class MicrofocusWebinspectXMLParser(object):
     def __init__(self, file, test):
