@@ -198,6 +198,16 @@ def closed_findings(request, pid=None):
 
 def view_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
+    findings = Finding.objects.filter(test=finding.test).order_by('numerical_severity')
+    try:
+        prev_finding = findings[(list(findings).index(finding))-1]
+    except AssertionError:
+        prev_finding = finding
+    try:
+        next_finding = findings[(list(findings).index(finding))+1]
+    except IndexError:
+        next_finding = finding
+    findings = [finding.id for finding in findings]
     cred_finding = Cred_Mapping.objects.filter(
         finding=finding.id).select_related('cred_id').order_by('cred_id')
     creds = Cred_Mapping.objects.filter(
@@ -268,7 +278,7 @@ def view_finding(request, fid):
         burp_response = None
 
     product_tab = Product_Tab(finding.test.engagement.product.id, title="View Finding", tab="findings")
-
+    lastPos = (len(findings)) - 1
     return render(
         request, 'dojo/view_finding.html', {
             'product_tab': product_tab,
@@ -285,7 +295,11 @@ def view_finding(request, fid):
             'notes': notes,
             'form': form,
             'cwe_template': cwe_template,
-            'found_by': finding.found_by.all().distinct()
+            'found_by': finding.found_by.all().distinct(),
+            'findings_list': findings,
+            'findings_list_lastElement': findings[lastPos],
+            'prev_finding': prev_finding,
+            'next_finding': next_finding
         })
 
 
