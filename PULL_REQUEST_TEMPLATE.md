@@ -1,4 +1,4 @@
-**Note: DefectDojo is now on Python3 and Django 2.2. Please submit your pull requests to the 'python3_dev' branch as the 'dev' branch is only for bug fixes. Any PR's submitted to the 'dev' branch should also be converted to Python3 and submited to the 'python3_dev' branch. 
+**Note: DefectDojo is now on Python3 and Django 2.2.1 Please submit your pull requests to the 'dev' branch as the 'legacy-2.7-dev' branch is only for bug fixes. Any new features submitted to the legacy branch will be ignored and closed.**
 
 When submitting a pull request, please make sure you have completed the following checklist:
 

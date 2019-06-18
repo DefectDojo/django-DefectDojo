@@ -301,7 +301,7 @@ class ImportScanForm(forms.Form):
                          ("Cobalt.io Scan", "Cobalt.io Scan"),
                          ("Mozilla Observatory Scan", "Mozilla Observatory Scan"),
                          ("Whitesource Scan", "Whitesource Scan"),
-                         ("Contrast Scan","Contrast Scan"))
+                         ("Contrast Scan", "Contrast Scan"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
     scan_date = forms.DateTimeField(
@@ -1216,6 +1216,15 @@ class NoteForm(forms.ModelForm):
         fields = ['entry', 'private']
 
 
+class DeleteNoteForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = Notes
+        fields = ('id',)
+
+
 class CloseFindingForm(forms.ModelForm):
     entry = forms.CharField(
         required=True, max_length=2400,
@@ -1368,15 +1377,6 @@ class AddDojoUserForm(forms.ModelForm):
                   'is_staff', 'is_superuser']
         exclude = ['password', 'last_login', 'groups',
                    'date_joined', 'user_permissions']
-
-
-class DeleteNoteForm(forms.ModelForm):
-    id = forms.IntegerField(required=True,
-                            widget=forms.widgets.HiddenInput())
-
-    class Meta:
-        model = Notes
-        fields = ('id',)
 
 
 class DeleteUserForm(forms.ModelForm):
