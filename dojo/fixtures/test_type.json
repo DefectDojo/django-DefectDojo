@@ -349,11 +349,18 @@
     "pk": 57
 
 	},
+	{ "fields":{
+		"name": "Mozilla Observatory Scan"
+	  },
+	  "model": "dojo.test_type",
+	  "pk": 58
+  
+	  },
 	{
 		"fields": {
 			"name": "Contrast Scan"
 		},
 		"model":"dojo.test_type",
-		"pk": 58
+		"pk": 59
 	}
 ]

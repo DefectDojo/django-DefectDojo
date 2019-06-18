@@ -299,7 +299,8 @@ class ImportScanForm(forms.Form):
                          ("Immuniweb Scan", "Immuniweb Scan"),
                          ("Sonatype Application Scan", "Sonatype Application Scan"),
                          ("Cobalt.io Scan", "Cobalt.io Scan"),
-                         ("Contrast Scan","Contrast Scan"))
+                         ("Contrast Scan","Contrast Scan"),
+                         ("Mozilla Observatory Scan", "Mozilla Observatory Scan"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
     scan_date = forms.DateTimeField(
