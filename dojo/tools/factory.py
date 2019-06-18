@@ -38,6 +38,7 @@ from dojo.tools.awsscout2.parser import AWSScout2Parser
 from dojo.tools.awsprowler.parser import AWSProwlerParser
 from dojo.tools.brakeman.parser import BrakemanScanParser
 from dojo.tools.spotbugs.parser import SpotbugsXMLParser
+from dojo.tools.ibm_app.parser import IbmAppScanDASTXMLParser
 from dojo.tools.safety.parser import SafetyParser
 from dojo.tools.clair_klar.parser import ClairKlarParser
 from dojo.tools.dawnscanner.parser import DawnScannerParser
@@ -157,6 +158,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = BundlerAuditParser(file, test)
     elif scan_type == 'Twistlock Image Scan':
         parser = TwistlockParser(file, test)
+    elif scan_type == 'IBM AppScan DAST':
+        parser = IbmAppScanDASTXMLParser(file, test)
     elif scan_type == 'Kiuwan Scan':
         parser = KiuwanCSVParser(file, test)
     elif scan_type == 'Blackduck Hub Scan':
