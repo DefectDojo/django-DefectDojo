@@ -338,14 +338,6 @@ function ubuntu_dojo_install() {
     export PATH="$VIRTUAL_ENV/bin:$PATH"
 
     cd $DOJO_SOURCE/setup
-    if [ "$PY" = python3 ]; then
-        # Python3 requirements
-        cp requirements-3.txt requirements.txt
-    else
-        # Python 2.x requirements
-        cp requirements-2.txt requirements.txt
-    fi
-
     if [ "$DB_TYPE" = MySQL ]; then
         $PIP install -r $SETUP_BASE/mysql.txt
     #else
