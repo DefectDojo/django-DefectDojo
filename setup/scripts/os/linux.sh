@@ -340,8 +340,11 @@ function ubuntu_dojo_install() {
     cd $DOJO_SOURCE/setup
     if [ "$DB_TYPE" = MySQL ]; then
         $PIP install -r $SETUP_BASE/mysql.txt
-    #else
-    #TODO Add PostgreSQL here
+    elif [ "$DB_TYPE" = PostgreSQL]; then
+        $PIP install -r $SETUP_BASE/postgresql.txt
+    else
+        echo "ERROR: Unsupported DB type, exiting..."
+        exit 1
     fi
 
 	# Detect if we're in a a virtualenv
