@@ -1,3 +1,4 @@
+# requirements.txt for DefectDojo using Python 3.x
 asteval==0.9.14
 bleach>=3.1.0
 bleach-whitelist>=0.0.10
