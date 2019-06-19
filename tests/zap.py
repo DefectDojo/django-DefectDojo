@@ -5,6 +5,7 @@ import socket
 from zapv2 import ZAPv2
 from urllib.parse import urlparse
 from prettytable import PrettyTable
+import re
 
 
 class Main:
@@ -28,7 +29,9 @@ class Main:
         # user_input_obj = User_Input() #Creating object for class User_Input
         targetURL = "http://dojo:8000"
 
-        targetURLregex = "\Q" + targetURL + "\E.*"  # Regular expression to be considered within our context.
+        # targetURLregex = "\Q" + targetURL + "\E.*"  # Regular expression to be considered within our context.
+        # The above line is flake8 violation as \Q and \E are not supported by python
+        targetURLregex = re.escape(targetURL)
 
         # Defining context name as hostname from URL and creating context using it.
         contextname = urlparse(targetURL).netloc
@@ -47,7 +50,9 @@ class Main:
         print(("Session method defined: " + result))
 
         loginUrl = "http://localhost:8000/login"
-        loginUrlregex = "\Q" + loginUrl + "\E.*"
+        # loginUrlregex = "\Q" + loginUrl + "\E.*"
+        # The above line is flake8 violation as \Q and \E are not supported by python
+        loginURLregex = re.escape(loginURL)
         result = zap.context.exclude_from_context(contextname, ".*logout.*", apikey)
         result = zap.context.exclude_from_context(contextname, ".*/static/.*", apikey)
 
