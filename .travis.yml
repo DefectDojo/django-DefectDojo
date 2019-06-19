@@ -11,19 +11,19 @@ env:
     - CHANGE_MINIKUBE_NONE_USER=true
   matrix:
     - BROKER=rabbitmq DATABASE=mysql
-    # - BROKER=rabbitmq DATABASE=postgresql
-    # - BROKER=redis DATABASE=mysql
-    # - BROKER=redis DATABASE=postgresql
+    - BROKER=rabbitmq DATABASE=postgresql
+    - BROKER=redis DATABASE=mysql
+    - BROKER=redis DATABASE=postgresql
     - TEST=flake8
-    # - TEST=snyk
-    # - TEST=docker
+    - TEST=snyk
+    - TEST=docker
 matrix: 
   allow_failures:
     - env: TEST=snyk
 jobs:
   include:  
     - stage: deploy
-      env: # TEST=deploy
+      env: TEST=deploy
 before_install: ['./travis/before-install.sh']
 before_script: ['./travis/before-script.sh']
 script: ['./travis/script.sh']
