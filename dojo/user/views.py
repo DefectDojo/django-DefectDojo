@@ -1,5 +1,4 @@
 import logging
-
 from django.contrib import messages
 from django.contrib.auth import authenticate, logout
 from django.contrib.auth.decorators import user_passes_test
@@ -313,21 +312,23 @@ def edit_user(request, uid):
         'contact_form': contact_form,
         'to_edit': user})
 
+
 def delete_alerts(request):
-   alerts = Alerts.objects.filter(user_id=request.user)
+    alerts = Alerts.objects.filter(user_id=request.user)
 
-   if request.method == 'POST':
-       removed_alerts = request.POST.getlist('alert_select')
-       alerts.filter().delete()
-       messages.add_message(request,
-                                    messages.SUCCESS,
-                                    'Alerts removed.',
-                                    extra_tags='alert-success')
-       return HttpResponseRedirect('alerts')
+    if request.method == 'POST':
+        removed_alerts = request.POST.getlist('alert_select')
+        alerts.filter().delete()
+        messages.add_message(request,
+                                        messages.SUCCESS,
+                                        'Alerts removed.',
+                                        extra_tags='alert-success')
+        return HttpResponseRedirect('alerts')
 
-   return render(request,
-                 'dojo/delete_alerts.html',
-                 {'alerts': alerts})
+    return render(request,
+                    'dojo/delete_alerts.html',
+                    {'alerts': alerts})
+
 
 @user_passes_test(lambda u: u.is_superuser)
 def delete_user(request, uid):

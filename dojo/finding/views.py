@@ -200,11 +200,11 @@ def view_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     findings = Finding.objects.filter(test=finding.test).order_by('numerical_severity')
     try:
-        prev_finding = findings[(list(findings).index(finding))-1]
+        prev_finding = findings[(list(findings).index(finding)) - 1]
     except AssertionError:
         prev_finding = finding
     try:
-        next_finding = findings[(list(findings).index(finding))+1]
+        next_finding = findings[(list(findings).index(finding)) + 1]
     except IndexError:
         next_finding = finding
     findings = [finding.id for finding in findings]

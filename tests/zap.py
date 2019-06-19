@@ -1,14 +1,11 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 import time
-import os
-import subprocess
 import collections
-import urllib.request, urllib.parse, urllib.error
 import socket
-from pprint import pprint
 from zapv2 import ZAPv2
 from urllib.parse import urlparse
 from prettytable import PrettyTable
+
 
 class Main:
     if __name__ == "__main__":
@@ -28,53 +25,53 @@ class Main:
         zap = ZAPv2(proxies={'http': 'http://127.0.0.1:8080', 'https': 'http://127.0.0.1:8080'})
         apikey = ""
 
-        #user_input_obj = User_Input() #Creating object for class User_Input
+        # user_input_obj = User_Input() #Creating object for class User_Input
         targetURL = "http://dojo:8000"
 
-        targetURLregex = "\Q"+targetURL+"\E.*" #Regular expression to be considered within our context.
+        targetURLregex = "\Q" + targetURL + "\E.*"  # Regular expression to be considered within our context.
 
-        #Defining context name as hostname from URL and creating context using it.
+        # Defining context name as hostname from URL and creating context using it.
         contextname = urlparse(targetURL).netloc
         print(("Context Name: " + contextname))
 
         # Step1: Create context
-        contextid = zap.context.new_context(contextname,apikey)
-        print(("ContextID: "+contextid))
+        contextid = zap.context.new_context(contextname, apikey)
+        print(("ContextID: " + contextid))
 
-        #Step2: Include in the context
-        result = zap.context.include_in_context(contextname,targetURLregex,apikey)
+        # Step2: Include in the context
+        result = zap.context.include_in_context(contextname, targetURLregex, apikey)
         print(("URL regex defined in context: " + result))
 
-        #Step3: Session Management - Default is cookieBasedSessionManagement
-        result = zap.sessionManagement.set_session_management_method(contextid, "cookieBasedSessionManagement",None,apikey)
-        print(("Session method defined: "+ result))
+        # Step3: Session Management - Default is cookieBasedSessionManagement
+        result = zap.sessionManagement.set_session_management_method(contextid, "cookieBasedSessionManagement", None, apikey)
+        print(("Session method defined: " + result))
 
         loginUrl = "http://localhost:8000/login"
-        loginUrlregex = "\Q"+loginUrl+"\E.*"
+        loginUrlregex = "\Q" + loginUrl + "\E.*"
         result = zap.context.exclude_from_context(contextname, ".*logout.*", apikey)
         result = zap.context.exclude_from_context(contextname, ".*/static/.*", apikey)
 
         # Wait for passive scanning to complete
         while (int(zap.pscan.records_to_scan) > 0):
-          print(('Records to passive scan : ' + zap.pscan.records_to_scan))
-          time.sleep(15)
-        print ('Passive scanning complete')
+            print(('Records to passive scan : ' + zap.pscan.records_to_scan))
+            time.sleep(15)
+        print('Passive scanning complete')
 
         print(('Actively Scanning target ' + targetURL))
-        ascan_id = zap.ascan.scan(targetURL,None,None,None,None,None,apikey) #Can provide more options for active scan here instead of using None.
+        ascan_id = zap.ascan.scan(targetURL, None, None, None, None, None, apikey)  # Can provide more options for active scan here instead of using None.
         while (int(zap.ascan.status(ascan_id)) < 100):
             print(('Scan progress %: ' + zap.ascan.status(ascan_id)))
             time.sleep(15)
 
-        print ('Scan completed')
+        print('Scan completed')
 
         # Report the results
         sort_by_url = collections.defaultdict(list)
         for alert in zap.core.alerts():
             sort_by_url[alert['url']].append({
-                                        'risk':  alert['risk'],
+                                        'risk': alert['risk'],
                                         'alert': alert['alert']
-                                        })
+                                            })
 
         summary = PrettyTable(["Risk", "Count"])
         summary.padding_width = 1
