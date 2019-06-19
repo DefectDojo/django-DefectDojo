@@ -16,30 +16,58 @@
     </div>
 </div>
 {% for note in notes %}
-<div>
-  <div class="panel panel-default">
-  <div class="panel-comments">
-    <strong>{{ note.author.username }}</strong> 
-      <span class="text-muted">commented {{ note.date | naturalday}}</span>
-        {% if note.private %}
-          <br><span class="text-muted tab">(will not appear in report)</br></span>
-        {% endif %}
-        {% ifequal user.username note.author.username %}
-            <div class="pull-right">
-                <form method="post" action="{% url 'delete_note' note.id destination object.id %}">
-                    {% csrf_token %}
-                    <input type="hidden" aria-label="id" name="id" value="{{note.id}}" id="id_id" />
-                    <button type="submit" aria-label="Delete Note" class="btn-delete">
-                      <i class="fa fa-trash"></i>
-                    </button>
-                </form>
+  <div>  
+    <div class="panel panel-default">
+      <div class="panel-comments">
+          {% if user.username == note.author.username or user.is_superuser %}
+          <div class="pull-right">
+            <form method="post" action="{% url 'delete_note' note.id destination object.id %}">
+                {% csrf_token %}
+                <input type="hidden" aria-label="id" name="id" value="{{note.id}}" id="id_id" />
+                <button type="submit" aria-label="Delete Note" class="btn-delete">
+                  <i class="fa fa-trash"></i>
+                </button>
+            </form>
+          </div>
+          <div class="pull-right">
+            <form method="get" action="{% url 'edit_note' note.id destination object.id %}">
+                {% csrf_token %}
+                <input type="hidden" aria-label="id" name="id" value="{{note.id}}" id="id_id" />
+                <button type="submit" aria-label="Edit Note" class="btn-edit">
+                  <i class="fa fa-edit"></i>
+                </button>
+            </form>
+          </div>
+          {% endif %}
+          <div class="pull-right">
+            <form method="get" action="{% url 'note_history' note.id destination object.id %}">
+                {% csrf_token %}
+                <input type="hidden" aria-label="id" name="id" value="{{note.id}}" id="id_id" />
+                <button type="submit" aria-label="history" class="btn-history">
+                  <i class="fa fa-history"></i>
+                </button>
+            </form>
+          </div>
+
+          <div class="row-sm-2">
+            <strong>{{ note.author.username }}</strong> 
+            <span class="text-muted">commented {{ note.date }}</span>
+          </div>
+          {% if note.edited %}
+            <div class="row-sm-2">
+              <strong>{{ note.editor.username }}</strong>
+              <span class="text-muted">edited {{ note.edit_time }}</span>
             </div>
-        {% endifequal %}
+          {% endif %}
+          {% if note.private %}
+            <div class="row-sm-2">
+              <span class="text-muted">(will not appear in report)</span>
+            </div>
+          {% endif %} 
+      </div>
+      <div class="panel-body">
+        {{ note }}
+      </div>
+    </div>
   </div>
-  <div class="panel-body">
-    {{ note }}
-  </div>
-  </div>
-</div>
 {% endfor %}
-</div>
