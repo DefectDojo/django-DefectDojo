@@ -2,8 +2,6 @@
 
 sudo apt-get -y update
 sudo apt-get -y install socat curl python3-software-properties
-sudo apt install python3-pip
-pip3 install -U pip
 
 # Install Snyk
 curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
