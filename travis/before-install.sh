@@ -2,7 +2,7 @@
 
 sudo apt-get -y update
 sudo apt-get -y install socat curl python3-software-properties
-sudo apt install python3-pip
+sudo apt install python3-pipp
 pip3 install -U pip
 
 # Install Snyk
