@@ -14,8 +14,6 @@ from tastypie.serializers import Serializer
 from tastypie.validation import FormValidation, Validation
 from django.urls.exceptions import Resolver404
 from django.utils import timezone
-import dojo.models
-
 
 from dojo.models import Product, Engagement, Test, Finding, \
     User, ScanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance, \
