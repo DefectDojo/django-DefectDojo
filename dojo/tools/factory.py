@@ -22,7 +22,7 @@ from dojo.tools.qualys_webapp.parser import QualysWebAppParser
 from dojo.tools.snyk.parser import SnykParser
 from dojo.tools.gosec.parser import GosecScannerParser
 from dojo.tools.openvas_csv.parser import OpenVASUploadCsvParser
-from dojo.tools.trustwave_csv.parser import TrustwaveUploadCsvParser
+from dojo.tools.trustwave.parser import TrustwaveUploadCsvParser
 from dojo.tools.skf.parser import SKFCsvParser
 from dojo.tools.ssl_labs.parser import SSLlabsParser
 from dojo.tools.nikto.parser import NiktoXMLParser
@@ -34,8 +34,8 @@ from dojo.tools.fortify.parser import FortifyXMLParser
 from dojo.tools.sonarqube.parser import SonarQubeHtmlParser
 from dojo.tools.clair.parser import ClairParser
 from dojo.tools.mobsf.parser import MobSFParser
-from dojo.tools.awsscout2.parser import AWSScout2Parser
-from dojo.tools.awsprowler.parser import AWSProwlerParser
+from dojo.tools.aws_scout2.parser import AWSScout2Parser
+from dojo.tools.aws_prowler.parser import AWSProwlerParser
 from dojo.tools.brakeman.parser import BrakemanScanParser
 from dojo.tools.spotbugs.parser import SpotbugsXMLParser
 from dojo.tools.ibm_app.parser import IbmAppScanDASTXMLParser
