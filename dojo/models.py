@@ -1132,7 +1132,7 @@ class Finding(models.Model):
                                                    related_name='defect_review_requested_by', on_delete=models.CASCADE)
 
     thread_id = models.IntegerField(default=0, editable=False)
-    mitigated = models.DateTimeField(editable=True, null=True, blank=True)
+    mitigated = models.DateTimeField(editable=False, null=True, blank=True)
     mitigated_by = models.ForeignKey(User, null=True, editable=False,
                                      related_name="mitigated_by", on_delete=models.CASCADE)
     reporter = models.ForeignKey(User, editable=False, default=1, related_name='reporter', on_delete=models.CASCADE)
