@@ -15,7 +15,6 @@ from tastypie.validation import FormValidation, Validation
 from django.urls.exceptions import Resolver404
 from django.utils import timezone
 import dojo.models
-import sys
 
 from dojo.models import Product, Engagement, Test, Finding, \
     User, ScanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance, \
@@ -381,7 +380,7 @@ class ProductResource(BaseModelResource):
         filtering = {
             'id': ALL,
             'name': ALL,
-            'product_type': ALL,
+            'prod_type': ALL,
             'created': ALL,
             'findings_count': ALL
         }
