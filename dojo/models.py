@@ -1125,14 +1125,14 @@ class Finding(models.Model):
     review_requested_by = models.ForeignKey(Dojo_User, null=True, blank=True,
                                             related_name='review_requested_by', on_delete=models.CASCADE)
     reviewers = models.ManyToManyField(User, blank=True)
-
+    mitigated_status = models.BooleanField(default=False)
     # Defect Tracking Review
     under_defect_review = models.BooleanField(default=False)
     defect_review_requested_by = models.ForeignKey(Dojo_User, null=True, blank=True,
                                                    related_name='defect_review_requested_by', on_delete=models.CASCADE)
 
     thread_id = models.IntegerField(default=0, editable=False)
-    mitigated = models.DateTimeField(editable=False, null=True, blank=True)
+    mitigated = models.DateTimeField(editable=True, null=True, blank=True)
     mitigated_by = models.ForeignKey(User, null=True, editable=False,
                                      related_name="mitigated_by", on_delete=models.CASCADE)
     reporter = models.ForeignKey(User, editable=False, default=1, related_name='reporter', on_delete=models.CASCADE)
@@ -1239,7 +1239,7 @@ class Finding(models.Model):
             status += ['Inactive']
         if self.verified:
             status += ['Verified']
-        if self.mitigated:
+        if self.mitigated_status:
             status += ['Mitigated']
         if self.false_p:
             status += ['False Positive']

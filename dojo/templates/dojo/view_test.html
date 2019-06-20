@@ -182,6 +182,10 @@
                           <input id="id_out_of_scope" name="out_of_scope" type="checkbox" disabled/>
                           <span>Out of scope</span>
                       </label>
+                      <label style="font-size: 80%; font-weight: normal; display: block">
+                          <input id="id_mitigated_status" name="mitigated_status" type="checkbox" disabled/>
+                          <span>Mitigated</span>
+                      </label>
                       {% if "enable_jira"|get_system_setting %}
                       <b>Push to JIRA</b> <input id="id_push_tojira" name="push_to_jira" type="checkbox" alt="Select to push to JIRA"/><br/>
                       {% endif %}
@@ -642,6 +646,7 @@
                 $('#id_verified').prop('disabled', !checked);
                 $('#id_false_p').prop('disabled', !checked);
                 $('#id_out_of_scope').prop('disabled', !checked);
+                $('#id_mitigated_status').prop('disabled', !checked);
             })
             //Ensures dropdown has proper zindex
             $('.table-responsive').on('show.bs.dropdown', function () {
