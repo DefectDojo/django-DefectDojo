@@ -16,7 +16,7 @@
                             <ul class="dropdown-menu dropdown-menu-right" role="menu"
                                 aria-labelledby="dropdownMenu1">
                                     <li role="presentation">
-                                        <a href="{% url 'add_report_interval' %}">
+                                        <a href="{% url 'add_report_interval' %}" aria-label="Add Schedule">
                                             <i class="fa fa-plus"></i> Add Schedule
                                         </a>
                                     </li>
@@ -63,11 +63,11 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <a class="btn btn-warning" href="{% url 'edit_report_interval' conf.id %}">Edit</a>
+                                    <a class="btn btn-warning" href="{% url 'edit_report_interval' conf.id %}" aria-label="Edit">Edit</a>
                                     <form method="post" action="{% url 'delete_report_interval' conf.id %}" style="display: inline" class="form-inline form">
                                         {% csrf_token %}
-                                        <input type="hidden" name="delete_now" value="1"/>
-                                        <button type="submit" class="btn btn-danger report-delete">
+                                        <input type="hidden" name="delete_now" aria-label="Delete Now" value="1"/>
+                                        <button type="submit" class="btn btn-danger report-delete" aria-label="Delete">
                                             Delete <span class="fa fa-trash"></span>
                                         </button>
                                     </form>
