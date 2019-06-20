@@ -285,6 +285,7 @@ class ImportScanForm(forms.Form):
                          ("SpotBugs Scan", "SpotBugs Scan"),
                          ("AWS Scout2 Scan", "AWS Scout2 Scan"),
                          ("AWS Prowler Scan", "AWS Prowler Scan"),
+                         ("IBM AppScan DAST", "IBM AppScan DAST"),
                          ("PHP Security Audit v2", "PHP Security Audit v2"),
                          ("Symfony Security Check", "PHP Symfony Security Check"),
                          ("Safety Scan", "Safety Scan"),
@@ -300,7 +301,9 @@ class ImportScanForm(forms.Form):
                          ("Sonatype Application Scan", "Sonatype Application Scan"),
                          ("Cobalt.io Scan", "Cobalt.io Scan"),
                          ("Mozilla Observatory Scan", "Mozilla Observatory Scan"),
-                         ("Whitesource Scan", "Whitesource Scan"))
+                         ("Whitesource Scan", "Whitesource Scan"),
+                         ("Contrast Scan", "Contrast Scan"),
+                         ("Microfocus Webinspect Scan", "Microfocus Webinspect Scan"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
     scan_date = forms.DateTimeField(
@@ -1212,7 +1215,16 @@ class NoteForm(forms.ModelForm):
 
     class Meta:
         model = Notes
-        fields = ['entry']
+        fields = ['entry', 'private']
+
+
+class DeleteNoteForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = Notes
+        fields = ('id',)
 
 
 class CloseFindingForm(forms.ModelForm):
@@ -1367,15 +1379,6 @@ class AddDojoUserForm(forms.ModelForm):
                   'is_staff', 'is_superuser']
         exclude = ['password', 'last_login', 'groups',
                    'date_joined', 'user_permissions']
-
-
-class DeleteNoteForm(forms.ModelForm):
-    id = forms.IntegerField(required=True,
-                            widget=forms.widgets.HiddenInput())
-
-    class Meta:
-        model = Notes
-        fields = ('id',)
 
 
 class DeleteUserForm(forms.ModelForm):

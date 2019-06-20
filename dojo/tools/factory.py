@@ -22,7 +22,7 @@ from dojo.tools.qualys_webapp.parser import QualysWebAppParser
 from dojo.tools.snyk.parser import SnykParser
 from dojo.tools.gosec.parser import GosecScannerParser
 from dojo.tools.openvas_csv.parser import OpenVASUploadCsvParser
-from dojo.tools.trustwave_csv.parser import TrustwaveUploadCsvParser
+from dojo.tools.trustwave.parser import TrustwaveUploadCsvParser
 from dojo.tools.skf.parser import SKFCsvParser
 from dojo.tools.ssl_labs.parser import SSLlabsParser
 from dojo.tools.nikto.parser import NiktoXMLParser
@@ -34,10 +34,11 @@ from dojo.tools.fortify.parser import FortifyXMLParser
 from dojo.tools.sonarqube.parser import SonarQubeHtmlParser
 from dojo.tools.clair.parser import ClairParser
 from dojo.tools.mobsf.parser import MobSFParser
-from dojo.tools.awsscout2.parser import AWSScout2Parser
-from dojo.tools.awsprowler.parser import AWSProwlerParser
+from dojo.tools.aws_scout2.parser import AWSScout2Parser
+from dojo.tools.aws_prowler.parser import AWSProwlerParser
 from dojo.tools.brakeman.parser import BrakemanScanParser
 from dojo.tools.spotbugs.parser import SpotbugsXMLParser
+from dojo.tools.ibm_app.parser import IbmAppScanDASTXMLParser
 from dojo.tools.safety.parser import SafetyParser
 from dojo.tools.clair_klar.parser import ClairKlarParser
 from dojo.tools.dawnscanner.parser import DawnScannerParser
@@ -53,6 +54,7 @@ from dojo.tools.wapiti.parser import WapitiXMLParser
 from dojo.tools.cobalt.parser import CobaltCSVParser
 from dojo.tools.mozilla_observatory.parser import MozillaObservatoryJSONParser
 from dojo.tools.whitesource.parser import WhitesourceJSONParser
+from dojo.tools.microfocus_webinspect.parser import MicrofocusWebinspectXMLParser
 
 __author__ = 'Jay Paz'
 
@@ -156,6 +158,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = BundlerAuditParser(file, test)
     elif scan_type == 'Twistlock Image Scan':
         parser = TwistlockParser(file, test)
+    elif scan_type == 'IBM AppScan DAST':
+        parser = IbmAppScanDASTXMLParser(file, test)
     elif scan_type == 'Kiuwan Scan':
         parser = KiuwanCSVParser(file, test)
     elif scan_type == 'Blackduck Hub Scan':
@@ -174,6 +178,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = MozillaObservatoryJSONParser(file, test)
     elif scan_type == 'Whitesource Scan':
         parser = WhitesourceJSONParser(file, test)
+    elif scan_type == 'Microfocus Webinspect Scan':
+        parser = MicrofocusWebinspectXMLParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 

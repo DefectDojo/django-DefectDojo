@@ -39,7 +39,7 @@ class ScannerTest(unittest.TestCase):
             os.mkdir('scans')
         scan_types = git.Repo.clone_from('https://github.com/DefectDojo/sample-scan-files', self.repo_path)
         self.remove_items = ['__init__.py', '__init__.pyc', 'factory.py', 'factory.pyc',
-                        'factory.py', 'LICENSE', 'README.md', '.gitignore', '.git']
+                        'factory.py', 'LICENSE', 'README.md', '.gitignore', '.git', '__pycache__']
         tool_path = dir_path[:-5] + 'dojo/tools'
         tools = sorted(os.listdir(tool_path))
         tests = sorted(os.listdir(self.repo_path))
@@ -148,6 +148,84 @@ class ScannerTest(unittest.TestCase):
             print()
         assert len(missing_fixtures) == 0
 
+    def test_check_for_forms(self):
+        forms_path = dir_path[:-5] + 'dojo/forms.py'
+        file = open(forms_path, 'r+')
+        forms = file.readlines()
+        file.close()
+
+        forms = [form.strip().lower() for form in forms]
+        forms = forms[forms.index('scan_type_choices = (("", "please select a scan type"),') + 1:
+                      forms.index('sorted_scan_type_choices = sorted(scan_type_choices, key=lambda x: x[1])') - 1]
+        forms = [form.replace('(', '').replace(')', '').replace('-', ' ').replace('"', '').replace('.', '') for form in forms]
+        forms = [form[:form.index(',')] for form in forms]
+        remove_patterns = [' scanner', ' scan']
+        for pattern in remove_patterns:
+            forms = [re.sub(pattern, '', fix) for fix in sorted(forms)]
+
+        acronyms = []
+        for words in forms:
+            acronyms += ["".join(word[0] for word in words.split())]
+
+        missing_forms = []
+        for tool in self.tools:
+            reg = re.compile(tool.replace('_', ' '))
+            matches = list(filter(reg.search, forms)) + list(filter(reg.search, acronyms))
+            matches = [m.strip() for m in matches]
+            if len(matches) != 1:
+                if tool not in matches:
+                    missing_forms += [tool]
+
+        if len(missing_forms) > 0:
+            print('The following scanners are missing forms')
+            print('Names must match those listed in /dojo/tools')
+            print('forms can be added here:')
+            print('https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/forms.py\n')
+            for tool in missing_forms:
+                print(tool)
+            print()
+        assert len(missing_forms) == 0
+
+    def test_check_for_options(self):
+        template_path = dir_path[:-5] + 'dojo/templates/dojo/import_scan_results.html'
+        file = open(template_path, 'r+')
+        templates = file.readlines()
+        file.close()
+
+        templates = [temp.strip().lower() for temp in templates]
+        templates = templates[templates.index('<ul>') + 1:
+                                templates.index('</ul>')]
+        remove_patterns = ['<li><b>', '</b>', '</li>', ' scanner', ' scan']
+        for pattern in remove_patterns:
+            templates = [re.sub(pattern, '', temp) for temp in templates]
+
+        templates = [temp[:temp.index(' - ')] for temp in sorted(templates) if ' - ' in temp]
+        templates = [temp.replace('-', ' ').replace('.', '').replace('(', '').replace(')', '') for temp in templates]
+
+        acronyms = []
+        for words in templates:
+            acronyms += ["".join(word[0] for word in words.split())]
+
+        missing_templates = []
+        for tool in self.tools:
+            temp_tool = tool.replace('_', ' ')
+            reg = re.compile(temp_tool)
+            matches = list(filter(reg.search, templates)) + list(filter(reg.search, acronyms))
+            matches = [m.strip() for m in matches]
+            if len(matches) == 0:
+                if temp_tool not in matches:
+                    missing_templates += [tool]
+
+        if len(missing_templates) > 0:
+            print('The following scanners are missing templates')
+            print('Names must match those listed in /dojo/tools')
+            print('templates can be added here:')
+            print('https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/templates/dojo/import_scan_results.html\n')
+            for tool in missing_templates:
+                print(tool)
+            print()
+        assert len(missing_templates) == 0
+
     def test_engagement_import_scan_result(self):
         driver = self.login_page()
         driver.get(self.base_url + "product")
@@ -245,6 +323,8 @@ def suite():
     suite.addTest(ScannerTest('test_check_test_file'))
     suite.addTest(ScannerTest('test_check_for_doc'))
     suite.addTest(ScannerTest('test_check_for_fixtures'))
+    suite.addTest(ScannerTest('test_check_for_forms'))
+    suite.addTest(ScannerTest('test_check_for_options'))
     suite.addTest(product_unit_test.ProductTest('test_create_product'))
     suite.addTest(ScannerTest('test_engagement_import_scan_result'))
     suite.addTest(product_unit_test.ProductTest('test_delete_product'))

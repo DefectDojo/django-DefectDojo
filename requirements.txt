@@ -1,3 +1,4 @@
+# requirements.txt for DefectDojo using Python 3.x
 asteval==0.9.14
 bleach>=3.1.0
 bleach-whitelist>=0.0.10
@@ -14,7 +15,7 @@ django-imagekit==4.0.2
 django-multiselectfield==0.1.8
 django-overextends==0.4.3
 django-polymorphic==2.0.1
-django-rest-swagger==2.2.0
+django-rest-swagger==2.1.2
 django-slack==5.13.0
 django-tagging==0.4.6
 django-taggit-serializer==0.1.7
