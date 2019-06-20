@@ -1239,6 +1239,8 @@ class Finding(models.Model):
             status += ['Inactive']
         if self.verified:
             status += ['Verified']
+        if self.mitigated:
+            status += ['Mitigated']
         if self.mitigated_status:
             status += ['Mitigated']
         if self.false_p:
