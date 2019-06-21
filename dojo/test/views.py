@@ -437,7 +437,7 @@ def finding_bulk_update(request, tid):
                                  verified=form.cleaned_data['verified'],
                                  false_p=form.cleaned_data['false_p'],
                                  out_of_scope=form.cleaned_data['out_of_scope'],
-                                 mitigated_status=form.cleaned_data['mitigated_status'],
+                                 Mitigated=form.cleaned_data['Mitigated'],
                                  last_reviewed=timezone.now(),
                                  last_reviewed_by=request.user)
 
