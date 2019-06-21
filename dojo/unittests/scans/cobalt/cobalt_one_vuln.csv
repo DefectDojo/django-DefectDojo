@@ -1,0 +1,4 @@
+Token,Tag,Title,Type,CreatedAt,BrowserUrl,HttpRequest,CriticalityJustification,Description,StepsToReproduce,ToolsUsed,SuggestedFix,RequestParams,Prerequisites,AssignedTo,EvaluatedResult,ReportUrl,ReportedBy,ResearcherUrl,RefKey
+'vu_6db7imx,#TBD_1,'Stored XSS in comment field,Cross-Site Scripting (XSS),2015-09-02 08:14:15 UTC,'https://www.example.com/users/comments,"",'Here the tester will describe the reason why he/she thinks it is of the criticality specified,'here the tester will fill out details on the vulnerability,"'1. Here the tester will describe how to reproduce the issue
+2. then we do this
+3. then we do this","",'Here the tester will describe how to fix the issue,,"",,Valid,https://app.cobalt.io/xyz/acme-web-201702/findings/1,esben-cb,https://app.cobalt.io/esben-cb
