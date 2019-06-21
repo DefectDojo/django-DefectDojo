@@ -1,0 +1,20 @@
+{
+    "imageDigest": "sha256:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "vulnerabilities": [
+        {
+            "feed": "vulnerabilities",
+            "feed_group": "debian:9",
+            "fix": "None",
+            "package": "libgnutls30-3.5.8-5+deb9u4",
+            "package_cpe": "None",
+            "package_name": "libgnutls30",
+            "package_path": "None",
+            "package_type": "dpkg",
+            "package_version": "3.5.8-5+deb9u4",
+            "severity": "Medium",
+            "url": "https://security-tracker.debian.org/tracker/CVE-2011-3389",
+            "vuln": "CVE-2011-3389"
+        }
+    ],
+    "vulnerability_type": "os"
+}

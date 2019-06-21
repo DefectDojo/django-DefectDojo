@@ -27,6 +27,9 @@ credentials.
 ```sh
 git clone https://github.com/DefectDojo/django-DefectDojo
 cd django-DefectDojo
+# building
+docker-compose build
+# running
 docker-compose up
 ```
 
@@ -66,11 +69,11 @@ should give you an idea of how to use DefectDojo for your own team.
 ![Slack](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/slack_rgb.png)
 
 Realtime discussion is done in the OWASP Slack Channel, #defectdojo.
-[Get Access.](http://owaspslack.com/)
+[Get Access.](https://join.slack.com/t/owasp/shared_invite/enQtNjExMTc3MTg0MzU4LTViMDg1MmJiMzMwZGUxZjgxZWQ1MTE0NTBlOTBhNjhhZDIzZTZiNmEwOTJlYjdkMzAxMGVhNDkwNDNiNjZiOWQ)
 
 ![Twitter](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/Twitter_Logo.png)
 
-[DefectDojo Twitter Account](https://twitter.com/defect_dojo) tweets project
+[DefectDojo Twitter Account](https://twitter.com/defectdojo) tweets project
 updates and changes.
 
 ## Available Plugins
@@ -91,6 +94,14 @@ DefectDojo is maintained by:
 * [Greg Anderson](https://www.linkedin.com/in/g-anderson/)
 * [Aaron Weaver](https://www.linkedin.com/in/aweaver/) ([@weavera](https://twitter.com/weavera))
 * [Matt Tesauro](https://www.linkedin.com/in/matttesauro/) ([@matt_tesauro](https://twitter.com/matt_tesauro))
+
+
+## Project Moderators
+
+Project Moderators can help you with pull requests or feedback on dev ideas.
+
+* [Alex Dracea](https://www.linkedin.com/in/alexandru-marin-dracea-910b51122/)
+* [Valentijn Scholten](https://www.linkedin.com/in/valentijn-scholten/)
 
 ## Hall of Fame
 
@@ -126,6 +137,10 @@ Proceeds are used for testing, infrastructure, etc.
 [![10Security](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/10Security-logo.png)](https://10security.com/services-by-technology/defectdojo-commercial-support/)
 [![GCSecurity](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/gc_logo_2018.png)](https://gcsec.com.br/)
 [![ISAAC](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/isaac.png)](https://isaac.nl "ISAAC")
+[![Timo-Pagel](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/timo-pagel-logo.png )](https://pagel.pro/)
+[![SDA-SE](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/sda-se-logo.png)](https://sda-se.com/)
+[![Signal-Iduna](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/signal-iduna.png)](https://signal-iduna.de/)
+
 
 Interested in becoming a sponsor and having your logo displayed? Please review
 our [sponsorship information](SPONSORING.md) or email greg.anderson@owasp.org

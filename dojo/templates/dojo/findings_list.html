@@ -57,6 +57,9 @@
                                     <input id="id_out_of_scope" name="out_of_scope" type="checkbox" disabled/>
                                     <span>Out of scope</span>
                                 </label>
+                                {% if "enable_jira"|get_system_setting %}
+                                <b>Push to JIRA</b> <input id="id_push_tojira" name="push_to_jira" type="checkbox" alt="Select to push to JIRA"/><br/>
+                                {% endif %}
                                 <input type="submit" class="btn btn-sm btn-primary" value="Submit"/>
                             </form>
                         </li>
@@ -285,7 +288,8 @@
                                 <td class="nowrap">
                                   {% if "enable_jira"|get_system_setting %}
                                     {% if finding.jira.jira_key %}
-                                      <a href="{{finding.jira_conf.url}}/browse/{{finding.jira.jira_key}}" target="_blank" alt="Jira Bug - {{finding.jira.jira_key}}"><i class="fa fa-bug fa-fw"></i></a>
+                                      <a href="{{finding.jira_conf.url}}/browse/{{finding.jira.jira_key}}" target="_blank" 
+                                           alt="Jira Bug - {{finding.jira.jira_key}}" data-toggle="tooltip" data-placement="bottom" title="{{finding.jira.jira_key}}"><i class="fa fa-bug fa-fw"></i></a>
                                     {% endif %}
                                     {% if finding.notes.count %}
                                       <a href="{% url 'view_finding' finding.id %}#vuln_notes" alt="{{ finding.notes.count }} comment{{ finding.notes.count|pluralize }}">

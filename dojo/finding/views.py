@@ -31,10 +31,10 @@ from dojo.forms import NoteForm, CloseFindingForm, FindingForm, PromoteFindingFo
     FindingFormID, FindingBulkUpdateForm, MergeFindings
 from dojo.models import Product_Type, Finding, Notes, \
     Risk_Acceptance, BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, \
-    FindingImageAccessToken, JIRA_Issue, JIRA_PKey, Dojo_User, Cred_Mapping, Test, Product, User
+    FindingImageAccessToken, JIRA_Issue, JIRA_PKey, Dojo_User, Cred_Mapping, Test, Product, User, Engagement
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
     add_comment, jira_get_resolution_id, jira_change_resolution_id, get_jira_connection, \
-    get_system_setting, create_notification, apply_cwe_to_template, Product_Tab, calculate_grade
+    get_system_setting, create_notification, apply_cwe_to_template, Product_Tab, calculate_grade, log_jira_alert
 
 from dojo.tasks import add_issue_task, update_issue_task, add_comment_task
 from django.template.defaultfilters import pluralize
@@ -42,17 +42,26 @@ from django.template.defaultfilters import pluralize
 logger = logging.getLogger(__name__)
 
 
-def open_findings(request, pid=None, view=None):
+def open_findings(request, pid=None, eid=None, view=None):
     show_product_column = True
     title = None
     custom_breadcrumb = None
     filter_name = "Open"
+    pid_local = None
     if pid:
         if view == "All":
             filter_name = "All"
             findings = Finding.objects.filter(test__engagement__product__id=pid).order_by('numerical_severity')
         else:
             findings = Finding.objects.filter(test__engagement__product__id=pid, active=True, duplicate=False).order_by('numerical_severity')
+    elif eid:
+        eng = get_object_or_404(Engagement, id=eid)
+        pid_local = eng.product.id
+        if view == "All":
+            filter_name = "All"
+            findings = Finding.objects.filter(test__engagement=eid).order_by('numerical_severity')
+        else:
+            findings = Finding.objects.filter(test__engagement=eid, active=True, duplicate=False).order_by('numerical_severity')
     else:
         if view == "All":
             filter_name = "All"
@@ -103,10 +112,13 @@ def open_findings(request, pid=None, view=None):
     product_tab = None
     active_tab = None
 
-    # Only show product tab view in product
+    # Only show product tab view in product or engagement
     if pid:
         show_product_column = False
         product_tab = Product_Tab(pid, title="Findings", tab="findings")
+    elif eid and pid_local:
+        show_product_column = False
+        product_tab = Product_Tab(pid_local, title=eng.name, tab="engagements")
     else:
         add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
 
@@ -347,10 +359,13 @@ def defect_finding_review(request, fid):
                 finding.last_reviewed = finding.mitigated
                 finding.last_reviewed_by = request.user
                 finding.endpoints.clear()
-                jira = get_jira_connection(finding)
-                if jira:
-                    j_issue = JIRA_Issue.objects.get(finding=finding)
-                    issue = jira.issue(j_issue.jira_id)
+
+            jira = get_jira_connection(finding)
+            if jira and JIRA_Issue.objects.filter(finding=finding).exists():
+                j_issue = JIRA_Issue.objects.get(finding=finding)
+                issue = jira.issue(j_issue.jira_id)
+
+                if defect_choice == "Close Finding":
                     # If the issue id is closed jira will return Reopen Issue
                     resolution_id = jira_get_resolution_id(jira, issue,
                                                            "Reopen Issue")
@@ -359,16 +374,13 @@ def defect_finding_review(request, fid):
                             jira, issue, "Resolve Issue")
                         jira_change_resolution_id(jira, issue, resolution_id)
                         new_note.entry = new_note.entry + "\nJira issue set to resolved."
-            else:
-                # Re-open finding with notes stating why re-open
-                jira = get_jira_connection(finding)
-                j_issue = JIRA_Issue.objects.get(finding=finding)
-                issue = jira.issue(j_issue.jira_id)
-                resolution_id = jira_get_resolution_id(jira, issue,
-                                                       "Resolve Issue")
-                if resolution_id is not None:
-                    jira_change_resolution_id(jira, issue, resolution_id)
-                    new_note.entry = new_note.entry + "\nJira issue re-opened."
+                else:
+                    # Re-open finding with notes stating why re-open
+                    resolution_id = jira_get_resolution_id(jira, issue,
+                                                        "Resolve Issue")
+                    if resolution_id is not None:
+                        jira_change_resolution_id(jira, issue, resolution_id)
+                        new_note.entry = new_note.entry + "\nJira issue re-opened."
 
             # Update Dojo and Jira with a notes
             add_comment(finding, new_note, force_push=True)
@@ -568,6 +580,7 @@ def edit_finding(request, fid):
                         page_value = "&page=" + str(page)
                 except:
                     pass
+
             if source == "test":
                 return HttpResponseRedirect(reverse('view_test', args=(new_finding.test.id, )))
             elif source == "product_findings":
@@ -733,6 +746,7 @@ def mktemplate(request, fid):
         template = Finding_Template(
             title=finding.title,
             cwe=finding.cwe,
+            cve=finding.cve,
             severity=finding.severity,
             description=finding.description,
             mitigation=finding.mitigation,
@@ -805,6 +819,7 @@ def apply_template_to_finding(request, fid, tid):
         if form.is_valid():
             finding.title = form.cleaned_data['title']
             finding.cwe = form.cleaned_data['cwe']
+            finding.cve = form.cleaned_data['cve']
             finding.severity = form.cleaned_data['severity']
             finding.description = form.cleaned_data['description']
             finding.mitigation = form.cleaned_data['mitigation']
@@ -1311,6 +1326,7 @@ def merge_finding_product(request, pid):
                 finding_to_merge_into = form.cleaned_data['finding_to_merge_into']
                 findings_to_merge = form.cleaned_data['findings_to_merge']
                 finding_descriptions = ''
+                finding_references = ''
                 notes_entry = ''
                 static = False
                 dynamic = False
@@ -1336,6 +1352,10 @@ def merge_finding_product(request, pid):
                             # Workaround until file path is one to many
                             if finding.file_path:
                                 finding_descriptions = "{}\n**File Path:** {}\n".format(finding_descriptions, finding.file_path)
+
+                        # If checked merge the Reference
+                        if form.cleaned_data['append_reference']:
+                            finding_references = "{}\n{}".format(finding_references, finding.references)
 
                         # if checked merge the endpoints
                         if form.cleaned_data['add_endpoints']:
@@ -1376,6 +1396,9 @@ def merge_finding_product(request, pid):
 
                     if finding_to_merge_into.file_path is None:
                         file_path = finding_to_merge_into.file_path
+
+                    if finding_references != '':
+                        finding_to_merge_into.references = "{}\n{}".format(finding_to_merge_into.references, finding_references)
 
                     finding_to_merge_into.static_finding = static
                     finding_to_merge_into.dynamic_finding = dynamic
@@ -1471,6 +1494,17 @@ def finding_bulk_update_all(request, pid=None):
                             calculate_grade(finding.test.engagement.product)
                             prev_prod = finding.test.engagement.product.id
 
+                for finding in finds:
+                    if JIRA_PKey.objects.filter(product=finding.test.engagement.product).count() == 0:
+                        log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', finding)
+                    else:
+                        old_status = finding.status()
+                        if form.cleaned_data['push_to_jira']:
+                            if JIRA_Issue.objects.filter(finding=finding).exists():
+                                update_issue_task.delay(finding, old_status, True)
+                            else:
+                                add_issue_task.delay(finding, True)
+
                 messages.add_message(request,
                                      messages.SUCCESS,
                                      'Bulk edit of findings was successful.  Check to make sure it is what you intended.',
@@ -1480,6 +1514,7 @@ def finding_bulk_update_all(request, pid=None):
                                      messages.ERROR,
                                      'Unable to process bulk update. Required fields were not selected.',
                                      extra_tags='alert-danger')
+
     if pid:
         return HttpResponseRedirect(reverse('product_open_findings', args=(pid, )) + '?test__engagement__product=' + pid)
     else:

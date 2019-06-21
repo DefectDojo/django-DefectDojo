@@ -1,6 +1,10 @@
 
 # code: language=Dockerfile
-FROM python:2
+
+# The code for the build image should be idendical with the code in
+# Dockerfile.nginx to use the caching mechanism of Docker.
+
+FROM python:2 as build
 WORKDIR /app
 RUN \
   apt-get -y update && \
@@ -8,18 +12,51 @@ RUN \
     dnsutils \
     mysql-client \
     postgresql-client \
+    xmlsec1 \
     && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
   true
 COPY requirements.txt ./
-RUN pip install -r ./requirements.txt
+RUN pip wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
+
+FROM python:2-slim
+WORKDIR /app
+RUN \
+  apt-get -y update && \
+  # ugly fix to install postgresql-client without errors
+  mkdir -p /usr/share/man/man1 /usr/share/man/man7 && \
+  apt-get -y install --no-install-recommends \
+    # libopenjp2-7 libjpeg62 libtiff5 are required by the pillow package
+    libopenjp2-7 \
+    libjpeg62 \
+    libtiff5 \
+    dnsutils \
+    mysql-client \
+    libmariadbclient18 \
+    xmlsec1 \
+    # only required for the dbshell (used by the initializer job)
+    postgresql-client \
+    && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists && \
+  true
+RUN pip install --no-cache-dir --upgrade pip
+COPY --from=build /tmp/wheels /tmp/wheels
+COPY requirements.txt ./
+RUN pip install \
+	--no-cache-dir \
+	--no-index \
+  --find-links=/tmp/wheels \
+  -r ./requirements.txt
 COPY \
   docker/entrypoint-celery-beat.sh \
   docker/entrypoint-celery-worker.sh \
   docker/entrypoint-initializer.sh \
   docker/entrypoint-uwsgi.sh \
+  docker/entrypoint-uwsgi-dev.sh \
   docker/entrypoint-unit-tests.sh \
+  docker/entrypoint-unit-tests-devDocker.sh \
   docker/wait-for-it.sh \
   /
 COPY wsgi.py manage.py tests/unit-tests.sh ./
@@ -37,7 +74,7 @@ USER 1001
 ENV \
   DD_ADMIN_USER=admin \
   DD_ADMIN_MAIL=admin@defectdojo.local \
-  DD_ADMIN_PASSWORD= \
+  DD_ADMIN_PASSWORD='' \
   DD_ADMIN_FIRST_NAME=Administrator \
   DD_ADMIN_LAST_NAME=User \
   DD_ALLOWED_HOSTS="*" \
@@ -60,5 +97,6 @@ ENV \
   DD_INITIALIZE=true \
   DD_UWSGI_MODE="socket" \
   DD_UWSGI_ENDPOINT="0.0.0.0:3031" \
-  DD_DJANGO_ADMIN_ENABLED="on"
+  DD_DJANGO_ADMIN_ENABLED="on" \
+  DD_TRACK_MIGRATIONS="on"
 ENTRYPOINT ["/entrypoint-uwsgi.sh"]

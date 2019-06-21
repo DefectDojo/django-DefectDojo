@@ -34,6 +34,8 @@ class NetsparkerParser(object):
             findingdetail = cleantags(item["Description"])
             cwe = item["Classification"]["Cwe"]
             sev = item["Severity"]
+            if sev not in ['Info', 'Low', 'Medium', 'High', 'Critical']:
+                sev = 'Info'
             mitigation = cleantags(item["RemedialProcedure"])
             references = cleantags(item["RemedyReferences"])
             url = item["Url"]

@@ -228,7 +228,7 @@ def delete_endpoint(request, eid):
                                      messages.SUCCESS,
                                      'Endpoint and relationships removed.',
                                      extra_tags='alert-success')
-                return HttpResponseRedirect(reverse('view_endpoint', args=(product.id,)))
+                return HttpResponseRedirect(reverse('view_product', args=(product.id,)))
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)
     collector.collect([endpoint])
