@@ -13,10 +13,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='system_settings',
-            name='product_grade_',
-        ),
         migrations.AddField(
             model_name='system_settings',
             name='product_grade_b',
