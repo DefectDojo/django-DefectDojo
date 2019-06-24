@@ -660,6 +660,9 @@
 
     {% include "dojo/snippets/comments.html" with notes=notes object=finding destination="finding" %}
 
+    <div class="PrevAndNext_Buttons">
+    </div>
+
     <div class="protip">
        <i class="fa fa-lightbulb-o"></i> <strong>ProTip!</strong> Type <kbd>e</kbd> to edit any finding.
     </div>
@@ -668,6 +671,17 @@
     <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
     <script type="text/javascript">
+        var firstID = {{findings_list.0}};
+        var currentID = {{finding.id}};
+        var lastID = {{findings_list_lastElement}};
+        if(currentID != firstID)
+        {
+            $('.PrevAndNext_Buttons').append('<a href="{% url 'view_finding' prev_finding.id %}" class="btn btn-primary">Previous Finding</a> ');
+        }
+        if(currentID != lastID)
+        {
+            $('.PrevAndNext_Buttons').append('<a href="{% url 'view_finding' next_finding.id %}" class="btn btn-primary">Next Finding</a>');
+        }
         //Ensures dropdown has proper zindex
         $('.table-responsive').on('show.bs.dropdown', function () {
           $('.table-responsive').css( "overflow", "inherit" );

@@ -338,18 +338,13 @@ function ubuntu_dojo_install() {
     export PATH="$VIRTUAL_ENV/bin:$PATH"
 
     cd $DOJO_SOURCE/setup
-    # if [ "$PY" = python3 ]; then
-    #     # Python3 requirements
-    #     cp requirements-3.txt requirements.txt
-    # else
-    #     # Python 2.x requirements
-    #     cp requirements-2.txt requirements.txt
-    # fi
-
     if [ "$DB_TYPE" = MySQL ]; then
         $PIP install -r $SETUP_BASE/mysql.txt
-    #else
-    #TODO Add PostgreSQL here
+    elif [ "$DB_TYPE" = PostgreSQL]; then
+        $PIP install -r $SETUP_BASE/postgresql.txt
+    else
+        echo "ERROR: Unsupported DB type, exiting..."
+        exit 1
     fi
 
 	# Detect if we're in a a virtualenv

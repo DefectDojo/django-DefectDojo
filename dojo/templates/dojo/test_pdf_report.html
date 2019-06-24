@@ -136,7 +136,9 @@
                 <h3>Test Notes</h3>
                 {% if test.notes.all %}
                     {% for note in test.notes.all %}
-                        <p>{{ note.author }} - {{ note.date }} - {{ note }}</p>
+                        {% if not note.private %}
+                            <p>{{ note.author }} - {{ note.date }} - {{ note }}</p>
+                        {% endif %}
                     {% endfor %}
                 {% else %}
                     <p>No notes found.</p>
@@ -345,17 +347,19 @@
                                 </thead>
                                 <tbody>
                                 {% for note in finding.notes.all %}
-                                    <tr>
-                                        <td>
-                                            {{ note.author.username }}
-                                        </td>
-                                        <td>
-                                            {{ note.date }}
-                                        </td>
-                                        <td>
-                                            {{ note }}
-                                        </td>
-                                    </tr>
+                                    {% if not note.private%}
+                                        <tr>
+                                            <td>
+                                                {{ note.author.username }}
+                                            </td>
+                                            <td>
+                                                {{ note.date }}
+                                            </td>
+                                            <td>
+                                                {{ note }}
+                                            </td>
+                                        </tr>
+                                    {% endif %}
                                 {% endfor %}
 
                                 </tbody>
