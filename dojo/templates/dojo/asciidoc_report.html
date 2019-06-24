@@ -3,6 +3,8 @@
     {% load event_tags %}
     {% load display_tags %}
     {% load humanize %}
+    {% load get_endpoint_status %}
+    {% load get_note_status %}
     {% if product_type %}
         <h2>= {{ product_type }} =</h2>
     {% elif product %}
@@ -167,31 +169,35 @@
     {% endif %}
     <br>
     {% if test %}
-        <h3>== Test Notes ==</h3>
-        <p class="m20">
-            {% if test.notes.all %}
-                {% for note in test.notes.all %}
-                    {% if not note.private %}
+        {% with notes=test.notes.all|get_public_notes %}
+            <h3>== Test Notes ==</h3>
+            <p class="m20">
+                {% if notes %}
+                    {% for note in notes reversed %}
                         {{ note.author }} - {{ note.date }} - {{ note }} +<br>
-                    {% endif %}
-                {% endfor %}
-            {% endif %}
-        </p>
-        <br>
+                    {% endfor %}
+                {% endif %}
+            </p>
+            <br>
+        {% endwith %}
     {% endif %}
+
     {% if engagement.test_set.all %}
         <h3 id="test_notes">== Test Notes ==</h3>
         <p>
             {% for test in engagement.test_set.all %}
-                {% if test.notes.all %}
-                    {% if not note.private %}
-                        {{ note.author }} - {{ note.date }} - {{ note }} +<br>
+                {% with notes=test.notes.all|get_public_notes %}
+                    {% if notes %}
+                        {% for note in notes reversed %}
+                            {{ note.author }} - {{ note.date }} - {{ note }} +<br>
+                        {% endfor %}
                     {% endif %}
-                {% endif %}
+                {% endwith %}
             {% endfor %}
         </p>
         <br>
     {% endif %}
+
     {% if engagement.risk_acceptance.count %}
         <h3 id="risk_acceptance">== Accepted Findings ==</h3>
         |===<br>
@@ -206,10 +212,12 @@
         |===<br>
         <br>
     {% endif %}
+
     {% if findings %}
         <h3>== Findings ==</h3>
         <br>
     {% endif %}
+
     {% for find in findings %}
         <h4>=== Finding {{ find.id }}: {{ find.title | nice_title }} {% if find.mitigated %}
             Mitigated on: {{ find.mitigated }} {% endif %}===</h4>
@@ -245,14 +253,28 @@
             {{ find.impact|linebreaksasciidocbr }}
         </p>
         <br>
-        {% if find.endpoints.all %}
-            <p><b>==== Systems Vulnerable: ====</b><br>
-                {% for endpoint in  find.endpoints.all %}
-                    {{ endpoint }} +<br/>
-                {% endfor %}
-            </p>
-            <br>
-        {% endif %}
+
+        {% with endpoints=find.endpoints.all|get_vulnerable_endpoints %}
+            {% if endpoints %}
+                <p><b>==== Systems Vulnerable: ====</b><br>
+                    {% for endpoint in endpoints %}
+                        {{ endpoint }} +<br/>
+                    {% endfor %}
+                </p>
+                <br>
+            {% endif %}
+        {% endwith %}
+
+        {% with endpoints=find.endpoints.all|get_remediated_endpoints %}
+            {% if endpoints %}
+                <p><b>==== Systems Remediated: ====</b><br>
+                    {% for endpoint in endpoints %}
+                        {{ endpoint }} +<br/>
+                    {% endfor %}
+                </p>
+                <br>
+            {% endif %}
+        {% endwith %}
 
         <p><b>==== Suggested Mitigation: ====</b>
             <br>
@@ -278,23 +300,22 @@
         {% else %}
             <br>
         {% endif %}
+
         {% if include_finding_notes %}
-            <p><b>==== Finding Notes: ====</b>
-                <br>
-                {% if find.notes.all %}
-                    {% for note in find.notes.all %}
-                        {% if not note.private %}
-                            {{ note.author }} - {{ note.date }} - {{ note }} +<br>
-                        {% endif %}
-                    {% endfor %}
-                {% else %}
-                    No notes found.
+            {% with notes=find.notes.all|get_public_notes %}
+                {% if notes.count > 0 %}
+                    <p><b>==== Finding Notes: ====</b>
+                        <br>
+                            {% for note in notes reversed %}
+                                    {{ note.author }} - {{ note.date }} - {{ note }} +<br>
+                            {% endfor %}
+                    </p><br>
                 {% endif %}
-            </p><br>
-        {% else %}
-            <br>
+            {% endwith %}
         {% endif %}
+
     {% endfor %}
+
     {% if mitigated_findings %}
         <h3>== Mitigated Findings ==</h3>
         <br>
@@ -330,22 +351,19 @@
             {% else %}
                 <br>
             {% endif %}
+
             {% if include_finding_notes %}
-                <br>
-                <p><b>==== Finding Notes: ====</b>
-                    <br>
-                    {% if find.notes.all %}
-                        {% for note in find.notes.all %}
-                            {% if not note.private %}
-                                {{ note.author }} - {{ note.date }} - {{ note }} +<br>
-                            {% endif %}
-                        {% endfor %}
-                    {% else %}
-                        No notes found.
+                {% with notes=find.notes.all|get_public_notes %}
+                    {% if notes.count > 0 %}
+                        <br>
+                        <p><b>==== Finding Notes: ====</b>
+                            <br>
+                                {% for note in notes reversed %}
+                                        {{ note.author }} - {{ note.date }} - {{ note }} +<br>
+                                {% endfor %}
+                        </p><br>
                     {% endif %}
-                </p><br>
-            {% else %}
-                <br>
+                {% endwith %}
             {% endif %}
         {% endfor %}
     {% endif %}
@@ -388,11 +406,27 @@
                     {{ find.impact|linebreaksasciidocbr }}
                 </p>
                 <br>
-                <p><b>==== Systems Vulnerable: ====</b><br>
-                    {% for endpoint in  find.endpoints.all %}
-                        {{ endpoint }} +<br/>
-                    {% endfor %}
-                </p>
+                {% with endpoints=find.endpoints.all|get_vulnerable_endpoints %}
+                    {% if endpoints %}
+                        <p><b>==== Systems Vulnerable: ====</b><br>
+                            {% for endpoint in endpoints %}
+                                {{ endpoint }} +<br/>
+                            {% endfor %}
+                        </p>
+                        <br>
+                    {% endif %}
+                {% endwith %}
+
+                {% with endpoints=find.endpoints.all|get_remediated_endpoints %}
+                    {% if endpoints %}
+                        <p><b>==== Systems Remediated: ====</b><br>
+                            {% for endpoint in endpoints %}
+                                {{ endpoint }} +<br/>
+                            {% endfor %}
+                        </p>
+                        <br>
+                    {% endif %}
+                {% endwith %}
                 <br>
                 <p><b>==== Suggested Mitigation: ====</b>
                     <br>
@@ -419,21 +453,19 @@
                     <br>
                 {% endif %}
                 <br>
+
                 {% if include_finding_notes %}
-                    <p><b>==== Finding Notes: ====</b>
-                        <br>
-                        {% if find.notes.all %}
-                            {% for note in find.notes.all %}
-                                {% if not note.private %}
-                                    {{ note.author }} - {{ note.date }} - {{ note }} +<br>
-                                {% endif %}
-                            {% endfor %}
-                        {% else %}
-                            No notes found.
+                    {% with notes=find.notes.all|get_public_notes %}
+                        {% if notes.count > 0 %}
+                            <br>
+                            <p><b>==== Finding Notes: ====</b>
+                                <br>
+                                    {% for note in notes reversed %}
+                                            {{ note.author }} - {{ note.date }} - {{ note }} +<br>
+                                    {% endfor %}
+                            </p><br>
                         {% endif %}
-                    </p><br>
-                {% else %}
-                    <br>
+                    {% endwith %}
                 {% endif %}
             {% endfor %}
         {% endfor %}

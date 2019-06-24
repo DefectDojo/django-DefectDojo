@@ -22,4 +22,6 @@ urlpatterns = [
         name='add_endpoint_meta_data'),
     url(r'^endpoint/(?P<eid>\d+)/edit_meta_data$', views.edit_meta_data,
         name='edit_endpoint_meta_data'),
+    url(r'^endpoint/bulk$', views.endpoint_bulk_update_all,
+        name='endpoints_bulk_all'),
 ]

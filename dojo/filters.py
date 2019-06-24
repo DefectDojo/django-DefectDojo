@@ -726,6 +726,7 @@ class EndpointFilter(DojoFilter):
     path = CharFilter(lookup_expr='icontains')
     query = CharFilter(lookup_expr='icontains')
     fragment = CharFilter(lookup_expr='icontains')
+    remediated = CharFilter(lookup_expr='icontains')
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -746,7 +747,7 @@ class EndpointFilter(DojoFilter):
 
     class Meta:
         model = Endpoint
-        exclude = []
+        exclude = ['remediated']
 
 
 class EndpointReportFilter(DojoFilter):
