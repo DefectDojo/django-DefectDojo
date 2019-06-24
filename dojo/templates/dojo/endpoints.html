@@ -59,7 +59,7 @@
                         <tr>
                             <th class="hidden-sm centered" title="Select all visible endpoint." id="bulk_edit">
                                 <form class="inline-form cenetered" action="#">
-                                    <input type="checkbox" name="select_all" id="select_all"></input>
+                                    <input type="checkbox" title="Select All" name="select_all" id="select_all"></input>
                                 </form>
                             </th>
                             <th>{% dojo_sort request 'Endpoint' 'host' %}</th>
@@ -72,7 +72,7 @@
                             <tr>
                                 <td class="hidden-sm centered">
                                     <form action="#">
-                                        <input type="checkbox" name="select_{{ e.id }}" id="{{ e.id }}"
+                                        <input type="checkbox" title= "Select_{{ e.id }}" name="select_{{ e.id }}" id="{{ e.id }}"
                                                 class="select_one {{ e.id }}"></input>
                                     </form>
                                 </td>
