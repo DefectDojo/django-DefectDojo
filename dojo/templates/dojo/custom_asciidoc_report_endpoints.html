@@ -76,7 +76,9 @@
                     <br>
                     {% if find.notes.all %}
                         {% for note in find.notes.all %}
-                            {{ note.author }} - {{ note.date }} - {{ note }} +<br>
+                            {% if not note.private %}
+                                {{ note.author }} - {{ note.date }} - {{ note }} +<br>
+                            {% endif %}
                         {% endfor %}
                     {% else %}
                         No notes found.
