@@ -231,7 +231,7 @@ def add_findings(request, tid):
             # always false now since this will be deprecated soon in favor of new Finding_Template model
             new_finding.is_template = False
             new_finding.save(dedupe_option=False)
-            new_finding.endpoints = form.cleaned_data['endpoints']
+            new_finding.endpoints.set(form.cleaned_data['endpoints'])
             new_finding.save(false_history=True)
             if 'jiraform-push_to_jira' in request.POST:
                 jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=enabled)
@@ -437,6 +437,7 @@ def finding_bulk_update(request, tid):
                                  verified=form.cleaned_data['verified'],
                                  false_p=form.cleaned_data['false_p'],
                                  out_of_scope=form.cleaned_data['out_of_scope'],
+                                 is_Mitigated=form.cleaned_data['is_Mitigated'],
                                  last_reviewed=timezone.now(),
                                  last_reviewed_by=request.user)
 

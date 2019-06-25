@@ -1503,6 +1503,7 @@ def finding_bulk_update_all(request, pid=None):
                                  verified=form.cleaned_data['verified'],
                                  false_p=form.cleaned_data['false_p'],
                                  out_of_scope=form.cleaned_data['out_of_scope'],
+                                 is_Mitigated=form.cleaned_data['is_Mitigated'],
                                  last_reviewed=timezone.now(),
                                  last_reviewed_by=request.user)
                 # Update the grade as bulk edits don't go through save
