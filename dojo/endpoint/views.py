@@ -17,14 +17,14 @@ from dojo.filters import EndpointFilter
 from dojo.forms import EditEndpointForm, \
     DeleteEndpointForm, AddEndpointForm, DojoMetaDataForm
 from dojo.models import Product, Endpoint, Finding, System_Settings, DojoMeta
-from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_system_setting, Product_Tab
+from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_system_setting, Product_Tab, calculate_grade
 
 logger = logging.getLogger(__name__)
 
 
 def vulnerable_endpoints(request):
     endpoints = Endpoint.objects.filter(finding__active=True, finding__verified=True, finding__false_p=False,
-                                        finding__duplicate=False, finding__out_of_scope=False).distinct()
+                                        finding__duplicate=False, finding__out_of_scope=False, remediated=False).distinct()
 
     # are they authorized
     if request.user.is_staff:
@@ -362,3 +362,33 @@ def edit_meta_data(request, eid):
                   {'endpoint': endpoint,
                    'product_tab': product_tab,
                    })
+
+
+@user_passes_test(lambda u: u.is_staff)
+def endpoint_bulk_update_all(request, pid=None):
+    if request.method == "POST":
+        endpoints_to_update = request.POST.getlist('endpoints_to_update')
+        if request.POST.get('delete_bulk_endpoints') and endpoints_to_update:
+            finds = Endpoint.objects.filter(id__in=endpoints_to_update)
+            product_calc = list(Product.objects.filter(endpoint__id__in=endpoints_to_update).distinct())
+            finds.delete()
+            for prod in product_calc:
+                calculate_grade(prod)
+        else:
+            if endpoints_to_update:
+                endpoints_to_update = request.POST.getlist('endpoints_to_update')
+                finds = Endpoint.objects.filter(id__in=endpoints_to_update).order_by("endpoint_meta__product__id")
+                for endpoint in finds:
+                    endpoint.remediated = not endpoint.remediated
+                    endpoint.save()
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'Bulk edit of endpoints was successful.  Check to make sure it is what you intended.',
+                                     extra_tags='alert-success')
+            else:
+                # raise Exception('STOP')
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     'Unable to process bulk update. Required fields were not selected.',
+                                     extra_tags='alert-danger')
+    return HttpResponseRedirect(reverse('endpoints', args=()))

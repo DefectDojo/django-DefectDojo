@@ -1,6 +1,8 @@
 {% load display_tags %}
 {% load humanize %}
 {% load event_tags %}
+{% load get_endpoint_status %}
+{% load get_note_status %}
 {% if findings %}
     <h3>== Findings ==</h3>
     <br>
@@ -40,14 +42,27 @@
         {{ find.impact|linebreaksasciidocbr }}
     </p>
     <br>
-    {% if find.endpoints.all %}
-        <p><b>==== Systems Vulnerable: ====</b><br>
-            {% for endpoint in  find.endpoints.all %}
-                {{ endpoint }} +<br/>
-            {% endfor %}
-        </p>
-        <br>
-    {% endif %}
+    {% with endpoints=find.endpoints.all|get_vulnerable_endpoints %}
+        {% if endpoints %}
+            <p><b>==== Systems Vulnerable: ====</b><br>
+                {% for endpoint in endpoints %}
+                    {{ endpoint }} +<br/>
+                {% endfor %}
+            </p>
+            <br>
+        {% endif %}
+    {% endwith %}
+
+    {% with endpoints=find.endpoints.all|get_remediated_endpoints %}
+        {% if endpoints %}
+            <p><b>==== Systems Remediated: ====</b><br>
+                {% for endpoint in endpoints %}
+                    {{ endpoint }} +<br/>
+                {% endfor %}
+            </p>
+            <br>
+        {% endif %}
+    {% endwith %}
 
     <p><b>==== Suggested Mitigation: ====</b>
         <br>
@@ -79,19 +94,15 @@
     {% endif %}
     <br>
     {% if include_finding_notes %}
-        <p><b>==== Finding Notes: ====</b>
-            <br>
-            {% if find.notes.all %}
-                {% for note in find.notes.all %}
-                    {% if not note.private %}
-                        {{ note.author }} - {{ note.date }} - {{ note }} +<br>
-                    {% endif %}
-                {% endfor %}
-            {% else %}
-                No notes found.
+        {% with notes=find.notes.all|get_public_notes %}
+            {% if notes.count > 0 %}
+                <p><b>==== Finding Notes: ====</b>
+                    <br>
+                        {% for note in notes reversed %}
+                                {{ note.author }} - {{ note.date }} - {{ note }} +<br>
+                        {% endfor %}
+                </p><br>
             {% endif %}
-        </p><br>
-    {% else %}
-        <br>
+        {% endwith %}
     {% endif %}
 {% endfor %}
