@@ -776,7 +776,7 @@ class AddFindingForm(forms.ModelForm):
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
-                   'review_requested_by')
+                   'review_requested_by', 'is_Mitigated')
 
 
 class AdHocFindingForm(forms.ModelForm):
@@ -814,7 +814,7 @@ class AdHocFindingForm(forms.ModelForm):
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
-                   'review_requested_by')
+                   'review_requested_by', 'is_Mitigated')
 
 
 class PromoteFindingForm(forms.ModelForm):
@@ -839,7 +839,7 @@ class PromoteFindingForm(forms.ModelForm):
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'active', 'false_p', 'verified', 'is_template',
-                   'duplicate', 'out_of_scope', 'images', 'under_review', 'reviewers', 'review_requested_by')
+                   'duplicate', 'out_of_scope', 'images', 'under_review', 'reviewers', 'review_requested_by', 'is_Mitigated')
 
 
 class FindingForm(forms.ModelForm):
@@ -896,7 +896,7 @@ class StubFindingForm(forms.ModelForm):
         model = Stub_Finding
         order = ('title',)
         exclude = (
-            'date', 'description', 'severity', 'reporter', 'test')
+            'date', 'description', 'severity', 'reporter', 'test', 'is_Mitigated')
 
     def clean(self):
         cleaned_data = super(StubFindingForm, self).clean()
@@ -940,7 +940,7 @@ class ApplyFindingTemplateForm(forms.Form):
 
     class Meta:
         fields = ['title', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'references']
-        order = ('title', 'cwe', 'cve', 'severity', 'description', 'impact')
+        order = ('title', 'cwe', 'cve', 'severity', 'description', 'impact', 'is_Mitigated')
 
 
 class FindingTemplateForm(forms.ModelForm):
@@ -970,7 +970,7 @@ class FindingTemplateForm(forms.ModelForm):
     class Meta:
         model = Finding_Template
         order = ('title', 'cwe', 'cve', 'severity', 'description', 'impact')
-        exclude = ('numerical_severity',)
+        exclude = ('numerical_severity', 'is_Mitigated')
 
 
 class DeleteFindingTemplateForm(forms.ModelForm):
