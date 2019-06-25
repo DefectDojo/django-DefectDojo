@@ -1526,13 +1526,14 @@ class Report(models.Model):
     type = models.CharField(max_length=100, default='Finding')
     format = models.CharField(max_length=15, default='AsciiDoc')
     requester = models.ForeignKey(User)
-    task_id = models.CharField(max_length=50)
+    task_id = models.CharField(max_length=50, null=True)
     file = models.FileField(upload_to='reports/%Y/%m/%d',
                             verbose_name='Report File', null=True)
     status = models.CharField(max_length=10, default='requested')
     options = models.TextField()
     datetime = models.DateTimeField(auto_now_add=True)
     done_datetime = models.DateTimeField(null=True)
+    host = models.CharField(max_length=100, null=False, editable=False, default='http://example.com')
 
     def __unicode__(self):
         return self.name
@@ -1565,6 +1566,55 @@ class FindingImage(models.Model):
 
     def __unicode__(self):
         return self.image.name or u'No Image'
+
+
+class Report_Interval(models.Model):
+    TIME_UNIT_CHOICES = ((1, 'Seconds'),
+                       (60, 'Minutes'),
+                       (3600, 'Hours'),
+                       (86400, 'Days'),
+                       (604800, 'Weeks'),
+                       (2592000, 'Months'),
+                       (31536000, 'Years'))
+
+    EVENT_CHOICES = ((1, 'Start of Day'),
+                   (2, 'Start of Week'),
+                   (3, 'Start of Month'),
+                   (4, 'Start of Year'),
+                   (5, 'Start of Engagements'))
+
+    report = models.ForeignKey(Report, null=False, blank=False)
+    event = models.IntegerField(choices=EVENT_CHOICES)
+    time_unit = models.IntegerField(choices=TIME_UNIT_CHOICES)
+    time_count = models.IntegerField(default=0, help_text='Negative numbers are before the chosen event, positive ones after')
+    recipients = models.TextField(null=False, blank=False, help_text="Email recipients, one per line. You can use the following placeholders, depending on the event: {product.owner}")
+    last_run = models.DateTimeField(null=True, editable=False)
+
+    def search_tuple(self, searchKey, tuples):
+        for key, value in tuples:
+            if(key == searchKey):
+                return value
+
+        return None
+
+    def __unicode__(self):
+        offsetText = ''
+        if(self.time_count < 0):
+            offset_text = 'before'
+        elif self.time_count > 0:
+            offset_text = 'after'
+        else:
+            return self.search_tuple(self.event, self.EVENT_CHOICES)
+
+        event_choice_label = self.search_tuple(self.event, self.EVENT_CHOICES).lower()
+        time_unit_label = self.search_tuple(self.time_unit, self.TIME_UNIT_CHOICES).lower()
+        if(abs(self.time_count) == 1):
+            time_unit_label = time_unit_label[:-1]
+
+        return str(abs(self.time_count)) + " " + time_unit_label + " " + offset_text + " the " + event_choice_label
+
+    class Meta:
+        ordering = ['time_unit']
 
 
 class FindingImageAccessToken(models.Model):

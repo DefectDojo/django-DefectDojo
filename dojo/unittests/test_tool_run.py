@@ -4,14 +4,13 @@ from dojo.models import Product, Tool_Type, Tool_Configuration, Endpoint, Tool_P
 from django.test import TransactionTestCase
 from django.contrib.auth.models import User
 from django.core.management import call_command
-from tagging.models import Tag
 from django.conf import settings
 from StringIO import StringIO
 import os
 
 
 class TestToolRun(TransactionTestCase):
-    
+
     project_root = os.path.abspath(os.path.dirname(__name__))
     devnull = open(os.devnull, 'w')
 
@@ -68,7 +67,7 @@ class TestToolRun(TransactionTestCase):
 
     def test_tool_run_execute_localhost_denied(self):
         settings.ALLOW_TOOL_RUN["ssh-localhost"] = False
-        
+
         out = StringIO()
         call_command('run_tool', config=1, engagement=0, stdout=out)
         self.assertIn("Denied tool run", out.getvalue())

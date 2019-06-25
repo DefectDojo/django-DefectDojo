@@ -9,7 +9,6 @@ from django.contrib.auth.models import User
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.http import HttpResponseRedirect
 from django.core.management import call_command
-from tagging.models import Tag
 from django.utils import timezone
 
 

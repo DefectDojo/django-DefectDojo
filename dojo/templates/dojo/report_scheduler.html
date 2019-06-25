@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load navigation_tags %}
+{% block content %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading tight">
+                    <h3 class="has-filters">
+                        Report Scheduler
+                        <div class="dropdown pull-right">
+                            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                                    data-toggle="dropdown" aria-expanded="true">
+                                <span class="fa fa-wrench"></span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu"
+                                aria-labelledby="dropdownMenu1">
+                                    <li role="presentation">
+                                        <a href="{% url 'add_report_interval' %}" aria-label="Add Schedule">
+                                            <i class="fa fa-plus"></i> Add Schedule
+                                        </a>
+                                    </li>
+                            </ul>
+                        </div>
+                    </h3>
+                </div>
+
+            </div>
+            {% if confs %}
+
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=confs page_size=True %}
+                </div>
+                <div class="panel panel-default table-responsive">
+                    <table id="products"
+                           class="tablesorter-bootstrap table table-bordered table-condensed table-striped">
+                        <thead>
+                        <tr>
+                            <th>Report</th>
+                            <th>Interval</th>
+                            <th>Recipients</th>
+                            <th>Last Run</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for conf in confs %}
+                            <tr>
+                                <td>
+                                    {{ conf.report.name }}
+                                </td>
+                                <td>
+                                    {{ conf }}
+                                </td>
+                                <td>
+                                    {{ conf.numRecipients }}
+                                </td>
+                                <td>
+                                    {% if conf.last_run %}
+                                    {{ conf.last_run }}
+                                    {% else %}
+                                    Never
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a class="btn btn-warning" href="{% url 'edit_report_interval' conf.id %}" aria-label="Edit">Edit</a>
+                                    <form method="post" action="{% url 'delete_report_interval' conf.id %}" style="display: inline" class="form-inline form">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="delete_now" aria-label="Delete Now" value="1"/>
+                                        <button type="submit" class="btn btn-danger report-delete" aria-label="Delete">
+                                            Delete <span class="fa fa-trash"></span>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=confs page_size=True %}
+                </div>
+            {% else %}
+                <p class="text-center">No schedules found.</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+{% block postscript %}
+    {% include "dojo/filter_js_snippet.html" %}
+{% endblock %}

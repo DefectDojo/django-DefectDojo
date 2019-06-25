@@ -84,6 +84,37 @@
                 $('a.run_report').removeClass('disabled');
             }
         }
+        
+        // Workaround, as original library has bug. Can be removed with minor changes as soon as this PR is merged: https://github.com/steveathon/bootstrap-wysiwyg/pull/145
+        function cleanHtml( o ) {
+            var self = o;
+            if ( $( self ).data( "wysiwyg-html-mode" ) === true ) {
+                $( self ).html( $( self ).text() );
+                $( self ).attr( "contenteditable", true );
+                $( self ).data( "wysiwyg-html-mode", false );
+            }
+
+            // Strip the images with src="data:image/.." out;
+            if ( o === true && $( self ).parent().is( "form" ) ) {
+                var gGal = $( self ).html;
+                if ( $( gGal ).has( "img" ).length ) {
+                    var gImages = $( "img", $( gGal ) );
+                    var gResults = [];
+                    var gEditor = $( self ).parent();
+                    $.each( gImages, function( i, v ) {
+                        if ( $( v ).attr( "src" ).match( /^data:image\/.*$/ ) ) {
+                            gResults.push( gImages[ i ] );
+                            $( gEditor ).prepend( "<input value='" + $( v ).attr( "src" ) + "' type='hidden' name='postedimage/" + i + "' />" );
+                            $( v ).attr( "src", "postedimage/" + i );
+                        }
+                    } );
+                }
+            }
+
+            var html = $( self ).html();
+            return html && html.replace( /(<br>|\s|<div><br><\/div>|&nbsp;)*$/, "" );
+        };
+        
         $(function () {
             $(".available-widgets ul").sortable({
                 handle: "div.panel div.panel-heading",
@@ -152,8 +183,8 @@
                     if (ui.item.attr('class') === 'wysiwyg-content') {
                         $(ui.item.find(".editor").get(0)).removeAttr('id');
                         $(ui.item.find(".editor").get(0)).uniqueId();
+                        
                         $('#' + ui.item.find(".editor").get(0).id).wysiwyg();
-
                     }
 
                 },
@@ -212,7 +243,6 @@
             });
 
             $('a.run_report').on('click', function (event) {
-
                 var valid = true;
 
                 $('.in-use-widgets .form-control').not('#finding-list .form-control')
@@ -229,7 +259,8 @@
                         var _form = $(this);
 
                         $(this).find('.editor').each(function () {
-                            _form.find('input[name="hidden_content"]').attr('value', $(this).cleanHtml());
+                            var cleanedHtml = cleanHtml(this);
+                            _form.find('input[name="hidden_content"]').attr('value', cleanedHtml);
                         });
 
                         sr = $(this).serializeArray();
