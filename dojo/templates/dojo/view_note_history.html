@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% load static from staticfiles %}
+{% block content %}
+    <h3>Note History</h3><br></br>
+    <form class="form-horizontal" action="{% url 'note_history' note.id page objid %}" method="post">{% csrf_token %}
+        {% for entry in history %}
+            <div>
+                <div class="panel panel-default">
+                <div class="panel-comments">
+                    <div class="row-sm-2">
+                        <strong>{{ entry.current_editor }}</strong> 
+                        {% if forloop.first %}
+                            <span class="text-muted">commented {{ entry.time }}</span>
+                        {% else %}
+                            <span class="text-muted">made changes on {{ entry.time }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="panel-body">
+                    {{ entry.data }}
+                </div>
+                </div>
+            </div>
+        {% endfor %}
+        <div class="form-group">
+            <div class="col-sm-5">
+                <input class="btn btn-primary" aria-label="Return" type="submit" value="Return"/>
+            </div>
+        </div>
+    </form>
+{% endblock %}

@@ -29,7 +29,7 @@ from dojo.forms import NoteForm, CloseFindingForm, FindingForm, PromoteFindingFo
     DeleteFindingTemplateForm, FindingImageFormSet, JIRAFindingForm, ReviewFindingForm, ClearFindingReviewForm, \
     DefectFindingForm, StubFindingForm, DeleteFindingForm, DeleteStubFindingForm, ApplyFindingTemplateForm, \
     FindingFormID, FindingBulkUpdateForm, MergeFindings
-from dojo.models import Product_Type, Finding, Notes, \
+from dojo.models import Product_Type, Finding, Notes, NoteHistory, \
     Risk_Acceptance, BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, \
     FindingImageAccessToken, JIRA_Issue, JIRA_PKey, Dojo_User, Cred_Mapping, Test, Product, User, Engagement
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
@@ -249,6 +249,11 @@ def view_finding(request, fid):
             new_note.author = request.user
             new_note.date = timezone.now()
             new_note.save()
+            history = NoteHistory(data=new_note.entry,
+                                    time=new_note.date,
+                                    current_editor=new_note.author)
+            history.save()
+            new_note.history.add(history)
             finding.notes.add(new_note)
             finding.last_reviewed = new_note.date
             finding.last_reviewed_by = user
@@ -1498,6 +1503,7 @@ def finding_bulk_update_all(request, pid=None):
                                  verified=form.cleaned_data['verified'],
                                  false_p=form.cleaned_data['false_p'],
                                  out_of_scope=form.cleaned_data['out_of_scope'],
+                                 is_Mitigated=form.cleaned_data['is_Mitigated'],
                                  last_reviewed=timezone.now(),
                                  last_reviewed_by=request.user)
                 # Update the grade as bulk edits don't go through save
