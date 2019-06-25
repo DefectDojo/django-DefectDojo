@@ -11,7 +11,7 @@
 {% endblock %}
 {% block content %}
     <div>
-        <h3> Add Findings to a Test</h3>
+        <h3> Add Findings to a Test </h3>
     </div>
     <div>
         <form class="form-horizontal" action="{% url 'ad_hoc_finding' pid %}" method="post">
@@ -46,7 +46,7 @@
                 }
 
                 var mde = new SimpleMDE({
-                    spellChecker: false,
+                    spellChecker: true,
                     element: elem,
                     autofocus: false,
                     forceSync: true,
