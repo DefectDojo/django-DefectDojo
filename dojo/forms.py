@@ -287,7 +287,7 @@ class ImportScanForm(forms.Form):
                          ("AWS Prowler Scan", "AWS Prowler Scan"),
                          ("IBM AppScan DAST", "IBM AppScan DAST"),
                          ("PHP Security Audit v2", "PHP Security Audit v2"),
-                         ("Symfony Security Check", "PHP Symfony Security Check"),
+                         ("PHP Symfony Security Check", "PHP Symfony Security Check"),
                          ("Safety Scan", "Safety Scan"),
                          ("DawnScanner Scan", "DawnScanner Scan"),
                          ("Anchore Engine Scan", "Anchore Engine Scan"),
