@@ -1169,7 +1169,7 @@ class Finding(models.Model):
 
     line = models.IntegerField(null=True, blank=True,
                                verbose_name="Line number")
-    file_path = models.CharField(null=True, blank=True, max_length=1000)
+    file_path = models.CharField(null=True, blank=True, max_length=4000)
     found_by = models.ManyToManyField(Test_Type, editable=False)
     static_finding = models.BooleanField(default=False)
     dynamic_finding = models.BooleanField(default=False)
