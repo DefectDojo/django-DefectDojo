@@ -1,6 +1,5 @@
 import hashlib
 from dojo.models import Finding
-import pathlib
 import dojo.tools.blackduck.importer as import_helper
 
 
@@ -54,7 +53,7 @@ class BlackduckHubCSVParser(object):
             impact = i.impact
             references = self.format_reference(i)
 
-            dupe_key = hashlib.md5("{} | {}".format(title, i.vuln_source) \
+            dupe_key = hashlib.md5("{} | {}".format(title, i.vuln_source)
                 .encode("utf-8")) \
                 .hexdigest()
 

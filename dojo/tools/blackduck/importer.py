@@ -43,19 +43,19 @@ class BlackduckImporter(Importer):
                     locations.add(path)
             for issue in security_issues[project_id]:
                 yield BlackduckFinding(
-                    issue[8],  # vuln ID 
+                    issue[8],  # vuln ID
                     issue[9],  # description
                     issue[21],  # security_risk
                     issue[14],  # impact
                     issue[15],  # vulnerability source
-                    issue[20],  # url 
-                    issue[6],  # channel version origin id 
-                    issue[10],  # published date 
-                    issue[11],  # updated on 
-                    issue[12],  # base score 
+                    issue[20],  # url
+                    issue[6],  # channel version origin id
+                    issue[10],  # published date
+                    issue[11],  # updated on
+                    issue[12],  # base score
                     issue[13],  # exploitability
-                    issue[16],  # remediation status 
-                    issue[17],  # remediation target date 
+                    issue[16],  # remediation status
+                    issue[17],  # remediation target date
                     issue[18],  # remediation actual date
                     issue[19],  # remediation comment
                     ', '.join([location for location in locations])
