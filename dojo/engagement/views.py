@@ -733,7 +733,7 @@ def upload_risk(request, eid):
             risk.compensating_control = form.cleaned_data['compensating_control']
             risk.path = form.cleaned_data['path']
             risk.save()  # have to save before findings can be added
-            risk.accepted_findings = findings
+            risk.accepted_findings.set(findings)
             if form.cleaned_data['notes']:
                 notes = Notes(
                     entry=form.cleaned_data['notes'],
