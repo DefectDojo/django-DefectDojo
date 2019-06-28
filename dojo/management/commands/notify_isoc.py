@@ -1,3 +1,4 @@
+from __future__ import print_function
 import datetime
 import sys
 
@@ -28,7 +29,7 @@ class Command(BaseCommand):
         type = options['type']
 
         if not options:
-            print "Must specify an argument: Weekly, Monthly, or Quarterly"
+            print("Must specify an argument: Weekly, Monthly, or Quarterly")
             sys.exit(0)
         if type not in ["Weekly", "Monthly", "Quarterly"]:
             print("Unexpected frequency: " + str(type) +

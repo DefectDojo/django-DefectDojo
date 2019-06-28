@@ -1,4 +1,5 @@
 #!/usr/bin/python
+from __future__ import print_function
 import time
 import os
 import subprocess
@@ -21,8 +22,8 @@ class Main:
 
         try:
             s.connect((address, port))
-        except socket.error, e:
-            print "Error connecting to ZAP, exiting."
+        except socket.error as e:
+            print("Error connecting to ZAP, exiting.")
             sys.exit(0)
 
         zap = ZAPv2(proxies={'http': 'http://127.0.0.1:8080', 'https': 'http://127.0.0.1:8080'})
@@ -100,11 +101,11 @@ class Main:
         summary.add_row(["Low", low])
         summary.add_row(["Medium", medium])
         summary.add_row(["High", high])
-        print summary
+        print(summary)
 
         for url in sort_by_url:
-            print
-            print url
+            print()
+            print(url)
 
             results = PrettyTable(["Risk", "Description"])
             results.padding_width = 1
@@ -114,4 +115,4 @@ class Main:
             for details in sort_by_url[url]:
                 results.add_row([details['risk'], details['alert']])
 
-            print results
+            print(results)

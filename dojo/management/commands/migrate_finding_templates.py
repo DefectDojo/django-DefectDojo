@@ -1,3 +1,4 @@
+from __future__ import print_function
 from django.core.management.base import BaseCommand
 
 from pytz import timezone
@@ -36,4 +37,4 @@ class Command(BaseCommand):
             finding.save()
             count += 1
 
-        print 'A totla of %d findings have been turned into templates.' % count
+        print('A totla of %d findings have been turned into templates.' % count)

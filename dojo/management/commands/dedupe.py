@@ -1,3 +1,4 @@
+from __future__ import print_function
 from django.core.management.base import BaseCommand
 from pytz import timezone
 
@@ -19,11 +20,11 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         findings = Finding.objects.all()
-        print "######## Updating Hashcodes ########"
+        print("######## Updating Hashcodes ########")
         for finding in findings:
             finding.hash_code = finding.compute_hash_code()
             finding.save()
         findings = findings.filter(verified=True, active=True, duplicate_finding__id=None).order_by('created')
-        print "######## Deduping ########"
+        print("######## Deduping ########")
         for finding in findings:
             sync_dedupe(finding)

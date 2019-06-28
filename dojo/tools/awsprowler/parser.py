@@ -1,3 +1,4 @@
+from __future__ import print_function
 __author__ = 'Aaron Weaver'
 
 from dojo.models import Finding
@@ -61,7 +62,7 @@ class AWSProwlerParser(object):
     def formatview(self, depth):
         if depth > 1:
             return "* "
-            print "depth hit"
+            print("depth hit")
         else:
             return ""
 

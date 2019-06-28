@@ -61,7 +61,7 @@ class BurpXmlParser(object):
         tree = None
         try:
             tree = etree.parse(xml_file, etree.XMLParser(resolve_entities=False))
-        except Exception, e:
+        except Exception as e:
             # Solution to remove unicode characters in xml, tried several
             xml_file.seek(0)
             data = xml_file.read()

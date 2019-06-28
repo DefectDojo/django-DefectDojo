@@ -1,3 +1,4 @@
+from __future__ import print_function
 # see tastypie documentation at http://django-tastypie.readthedocs.org/en
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.core.urlresolvers import resolve, get_script_prefix
@@ -1457,8 +1458,8 @@ class ImportScanResource(MultipartResource, Resource):
         try:
             t.full_clean()
         except ValidationError as e:
-            print "Error Validating Test Object"
-            print e
+            print("Error Validating Test Object")
+            print(e)
 
         t.save()
         t.tags = bundle.data['tags']

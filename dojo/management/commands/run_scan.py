@@ -1,3 +1,4 @@
+from __future__ import print_function
 import Queue
 from datetime import datetime
 import sys
@@ -99,10 +100,10 @@ class Command(BaseCommand):
             try:
                 nm = PortScannerAsync()
             except PortScannerError:
-                print('Nmap not found', sys.exc_info()[0])
+                print(('Nmap not found', sys.exc_info()[0]))
                 sys.exit(0)
             except:
-                print("Unexpected error:", sys.exc_info()[0])
+                print(("Unexpected error:", sys.exc_info()[0]))
                 sys.exit(0)
 
             def callback_result(host, scan_result, service_dict=service_dict):
@@ -201,16 +202,16 @@ class Command(BaseCommand):
             target frequency is specified by the cron job scheduler.
         """
         if not options:
-            print "Must specify an argument: Weekly, Monthly, Quarterly, or ID",\
-                " of Scan Settings to use."
+            print("Must specify an argument: Weekly, Monthly, Quarterly, or ID",\
+                " of Scan Settings to use.")
             sys.exit(0)
         if (type in ["Weekly", "Monthly", "Quarterly"]
                 or type.isdigit()):
             pass
         else:
             print("Unexpected parameter: " + str(args[0]))
-            print "\nMust specify an argument: Weekly, Monthly, Quarterly",\
-                  " or ID of Scan Settings to use."
+            print("\nMust specify an argument: Weekly, Monthly, Quarterly",\
+                  " or ID of Scan Settings to use.")
             sys.exit(0)
 
         if type.isdigit():
