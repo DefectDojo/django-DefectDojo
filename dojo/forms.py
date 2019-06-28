@@ -1768,7 +1768,7 @@ class JIRAFindingForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.enabled = kwargs.pop('enabled')
         super(JIRAFindingForm, self).__init__(*args, **kwargs)
-        self.fields['push_to_jira'] = forms.BooleanField(initial=self.enabled)
+        self.fields['push_to_jira'] = forms.BooleanField()
         self.fields['push_to_jira'].required = False
 
     push_to_jira = forms.BooleanField(required=False)
