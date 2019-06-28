@@ -547,8 +547,8 @@ def import_scan_results(request, eid=None, pid=None):
                         for req_resp in item.unsaved_req_resp:
                             burp_rr = BurpRawRequestResponse(
                                 finding=item,
-                                burpRequestBase64=req_resp["req"].encode("utf-8"),
-                                burpResponseBase64=req_resp["resp"].encode("utf-8"),
+                                burpRequestBase64=req_resp["req"],
+                                burpResponseBase64=req_resp["resp"],
                             )
                             burp_rr.clean()
                             burp_rr.save()
