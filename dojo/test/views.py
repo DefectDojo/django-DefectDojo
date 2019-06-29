@@ -558,10 +558,18 @@ def re_import_scan_results(request, tid):
 
                         if hasattr(item, 'unsaved_req_resp') and len(item.unsaved_req_resp) > 0:
                             for req_resp in item.unsaved_req_resp:
-                                burp_rr = BurpRawRequestResponse(finding=find,
-                                                                 burpRequestBase64=req_resp["req"].encode("utf-8"),
-                                                                 burpResponseBase64=req_resp["resp"].encode("utf-8"),
-                                                                 )
+                                if form.get_scan_type() == "Arachni Scan":
+                                    burp_rr = BurpRawRequestResponse(
+                                        finding=item,
+                                        burpRequestBase64=req_resp["req"],
+                                        burpResponseBase64=req_resp["resp"],
+                                    )
+                                else:
+                                    burp_rr = BurpRawRequestResponse(
+                                        finding=item,
+                                        burpRequestBase64=req_resp["req"].encode("utf-8"),
+                                        burpResponseBase64=req_resp["resp"].encode("utf-8"),
+                                    )
                                 burp_rr.clean()
                                 burp_rr.save()
 
