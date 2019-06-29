@@ -104,8 +104,7 @@ class Main:
         print(summary)
 
         for url in sort_by_url:
-            print()
-            print(url)
+            print("\n()".format(url))
 
             results = PrettyTable(["Risk", "Description"])
             results.padding_width = 1
