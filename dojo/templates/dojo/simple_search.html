@@ -108,6 +108,7 @@
                         <tr>
                             <th>Severity</th>
                             <th>Title</th>
+                            <th>Status</th>
                             <th>Date</th>
                             <th>Product</th>
                             <th>Engagement</th>
@@ -130,6 +131,11 @@
                                                href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                         {% endfor %}
                                     </sup>
+                                </td>
+                                <td>
+                                    {% if finding.object.under_review %}Under Review, {% endif %}
+                                    {{ finding.object.status }}
+                                    {% if finding.object.duplicate_finding.id %}, <a href="{% url 'view_finding' finding.object.duplicate_finding.id%}" data-toggle="tooltip" data-placement="top" title="{{ finding.object.title }}, {{ finding.object.created }}">Original</a>{% endif %}
                                 </td>
                                 <td>{{ finding.object.date }}</td>
                                 <td><a href="{% url 'view_product' finding.object.test.engagement.product.id %}">{{ finding.object.test.engagement.product.name }}</a>
