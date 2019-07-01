@@ -97,7 +97,7 @@ def get_item(vulnerability, test):
 
         finding_description = "Hash {}\n\n".format(vulnerability['hash'])
         finding_description += component_id
-        finding_description += "\n\nPlease check the CVE details for a detailed description. If a sonatype issue, you're out of luck."
+        finding_description += "\n\nPlease check the CVE details of this finding for a detailed description. The details of issues beginning with \"SONATYPE-\" can be found by contacting Sonatype, Inc. or through mechanisms they have provided in their product."
         threat_category = main_finding.get("threatCategory", "CVSS vector not provided. ").title()
         status = main_finding['status']
         score = main_finding.get('severity', "No CVSS score yet.")

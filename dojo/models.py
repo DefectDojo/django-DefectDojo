@@ -882,6 +882,7 @@ class Endpoint(models.Model):
     product = models.ForeignKey(Product, null=True, blank=True, on_delete=models.CASCADE)
     endpoint_params = models.ManyToManyField(Endpoint_Params, blank=True,
                                              editable=False)
+    remediated = models.BooleanField(default=False, blank=True)
 
     class Meta:
         ordering = ['product', 'protocol', 'host', 'path', 'query', 'fragment']
@@ -1144,7 +1145,7 @@ class Finding(models.Model):
     under_defect_review = models.BooleanField(default=False)
     defect_review_requested_by = models.ForeignKey(Dojo_User, null=True, blank=True,
                                                    related_name='defect_review_requested_by', on_delete=models.CASCADE)
-
+    is_Mitigated = models.BooleanField(default=False)
     thread_id = models.IntegerField(default=0, editable=False)
     mitigated = models.DateTimeField(editable=False, null=True, blank=True)
     mitigated_by = models.ForeignKey(User, null=True, editable=False,
@@ -1253,7 +1254,7 @@ class Finding(models.Model):
             status += ['Inactive']
         if self.verified:
             status += ['Verified']
-        if self.mitigated:
+        if self.mitigated or self.is_Mitigated:
             status += ['Mitigated']
         if self.false_p:
             status += ['False Positive']

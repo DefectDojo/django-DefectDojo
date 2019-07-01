@@ -56,8 +56,6 @@ class AnchoreEngineScanParser(object):
                 find = Finding(
                     title=title,
                     test=test,
-                    active=False,
-                    verified=False,
                     cve=cve,
                     description=findingdetail,
                     severity=sev,
@@ -68,7 +66,8 @@ class AnchoreEngineScanParser(object):
                     file_path=item["package_path"],
                     url=item['url'],
                     date=find_date,
-                    static_finding=True)
+                    static_finding=True,
+                    dynamic_finding=False)
 
                 dupes[dupe_key] = find
 

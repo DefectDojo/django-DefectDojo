@@ -545,11 +545,18 @@ def import_scan_results(request, eid=None, pid=None):
                     if hasattr(item, 'unsaved_req_resp') and len(
                             item.unsaved_req_resp) > 0:
                         for req_resp in item.unsaved_req_resp:
-                            burp_rr = BurpRawRequestResponse(
-                                finding=item,
-                                burpRequestBase64=req_resp["req"].encode("utf-8"),
-                                burpResponseBase64=req_resp["resp"].encode("utf-8"),
-                            )
+                            if form.get_scan_type() == "Arachni Scan":
+                                burp_rr = BurpRawRequestResponse(
+                                    finding=item,
+                                    burpRequestBase64=req_resp["req"],
+                                    burpResponseBase64=req_resp["resp"],
+                                )
+                            else:
+                                burp_rr = BurpRawRequestResponse(
+                                    finding=item,
+                                    burpRequestBase64=req_resp["req"].encode("utf-8"),
+                                    burpResponseBase64=req_resp["resp"].encode("utf-8"),
+                                )
                             burp_rr.clean()
                             burp_rr.save()
 
@@ -733,7 +740,7 @@ def upload_risk(request, eid):
             risk.compensating_control = form.cleaned_data['compensating_control']
             risk.path = form.cleaned_data['path']
             risk.save()  # have to save before findings can be added
-            risk.accepted_findings = findings
+            risk.accepted_findings.set(findings)
             if form.cleaned_data['notes']:
                 notes = Notes(
                     entry=form.cleaned_data['notes'],
