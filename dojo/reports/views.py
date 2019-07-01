@@ -30,6 +30,10 @@ from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, get_p
 logger = logging.getLogger(__name__)
 
 
+def down(request):
+    return render(request, 'disabled.html')
+
+
 def report_url_resolver(request):
     try:
         url_resolver = request.META['HTTP_X_FORWARDED_PROTO'] + "://" + request.META['HTTP_X_FORWARDED_FOR']
