@@ -9,6 +9,7 @@ from dojo.tools.factory import import_parser_factory
 from dojo.utils import create_notification
 from django.core.validators import URLValidator, validate_ipv46_address
 from django.core.urlresolvers import reverse
+from django.conf import settings
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
 from django.utils import timezone
@@ -652,6 +653,10 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 old_finding.mitigated = datetime.datetime.combine(
                     test.target_start,
                     timezone.now().time())
+                if settings.USE_TZ:
+                   old_finding.mitigated = timezone.make_aware(
+                        old_finding.mitigated,
+                        timezone.get_default_timezone()) 
                 old_finding.mitigated_by = self.context['request'].user
                 old_finding.notes.create(author=self.context['request'].user,
                                          entry="This finding has been automatically closed"
@@ -807,6 +812,10 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 finding.mitigated = datetime.datetime.combine(
                     scan_date,
                     timezone.now().time())
+                if settings.USE_TZ:
+                    finding.mitigated = timezone.make_aware(
+                        finding.mitigated,
+                        timezone.get_default_timezone())
                 finding.mitigated_by = self.context['request'].user
                 finding.active = False
                 finding.save()
