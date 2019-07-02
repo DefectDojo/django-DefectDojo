@@ -655,9 +655,9 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     test.target_start,
                     timezone.now().time())
                 if settings.USE_TZ:
-                   old_finding.mitigated = timezone.make_aware(
+                    old_finding.mitigated = timezone.make_aware(
                         old_finding.mitigated,
-                        timezone.get_default_timezone()) 
+                        timezone.get_default_timezone())
                 old_finding.mitigated_by = self.context['request'].user
                 old_finding.notes.create(author=self.context['request'].user,
                                          entry="This finding has been automatically closed"
