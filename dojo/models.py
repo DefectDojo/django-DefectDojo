@@ -484,11 +484,11 @@ class Product(models.Model):
     manager = models.CharField(default=0, max_length=200, null=True, blank=True)  # unused
 
     product_manager = models.ForeignKey(Dojo_User, null=True, blank=True,
-                                        related_name='product_manager', on_delete=models.CASCADE)
+                                          related_name='technical_contact', on_delete=models.CASCADE)
     technical_contact = models.ForeignKey(Dojo_User, null=True, blank=True,
                                           related_name='technical_contact', on_delete=models.CASCADE)
     team_manager = models.ForeignKey(Dojo_User, null=True, blank=True,
-                                     related_name='team_manager', on_delete=models.CASCADE)
+                                     related_name='team_manager',  on_delete=models.CASCADE)
 
     created = models.DateTimeField(editable=False, null=True, blank=True)
     prod_type = models.ForeignKey(Product_Type, related_name='prod_type',
