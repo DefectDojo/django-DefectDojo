@@ -39,7 +39,10 @@ class WpscanJSONParser(object):
             	title = vul['title']
             	references = '\n'.join(vul['references']['url']) + "\n" + \
             				"**wpvulndb : **" + str(vul['references']['wpvulndb'])
-            	mitigation = "fixed in : " + vul['fixed_in']
+            	try:
+            		mitigation = "fixed in : " + vul['fixed_in']
+            	except:
+            		mitigation = "N/A"
             	severity = "Info"
             	description = "**Title : **" + title
             	dupe_key = hashlib.md5(str(references + title).encode('utf-8')).hexdigest()
