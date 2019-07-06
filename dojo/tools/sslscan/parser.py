@@ -1,7 +1,6 @@
 from xml.dom import NamespaceErr
 import hashlib
 from urllib.parse import urlparse
-import re
 from defusedxml import ElementTree as ET
 from dojo.models import Endpoint, Finding
 
@@ -43,12 +42,12 @@ class SslscanXMLParser(object):
                     description = "**heartbleed** :" + "\n\n" + \
                                 "**sslversion** : " + target.attrib['sslversion'] + "\n"
                 if target.tag == "cipher" and target.attrib['strength'] not in ['acceptable', 'strong']:
-                    title = "cipher" + " | "+ target.attrib['sslversion']
+                    title = "cipher" + " | " + target.attrib['sslversion']
                     description = "**Cipher** : " + target.attrib['cipher'] + "\n\n" + \
                                 "**Status** : " + target.attrib['status'] + "\n\n" + \
                                 "**strength** : " + target.attrib['strength'] + "\n\n" + \
                                 "**sslversion** : " + target.attrib['sslversion'] + "\n"
-                
+
                 if title and description is not None:
                     dupe_key = hashlib.md5(str(description + title).encode('utf-8')).hexdigest()
                     if dupe_key in self.dupes:
@@ -80,4 +79,3 @@ class SslscanXMLParser(object):
                                 query=query,
                                 fragment=fragment,))
                 self.items = self.dupes.values()
-    
