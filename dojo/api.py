@@ -536,6 +536,8 @@ class EngagementResource(BaseModelResource):
             'pen_test': ALL,
             'status': ALL,
             'product': ALL,
+            'name': ALL,
+            'product_id': ALL,
         }
         authentication = DojoApiKeyAuthentication()
         authorization = DjangoAuthorization()
