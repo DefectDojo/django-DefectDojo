@@ -48,10 +48,10 @@
 		"model": "dojo.test_type",
 		"pk": 7
 	},
-	 
-	
-	
-	
+
+
+
+
 	{
 		"fields": {
 			"name": "Acunetix Scan"
@@ -388,74 +388,88 @@
 		"model": "dojo.test_type",
 		"pk": 146
 	},
-	{
+  {
 		"fields": {
-			"name": "SonarQube"
+			"name": "Sslscan"
 		},
 		"model": "dojo.test_type",
 		"pk": 147
 	},
 	{
 		"fields": {
-			"name": "SpotBugs"
+			"name": "SonarQube"
 		},
 		"model": "dojo.test_type",
 		"pk": 148
 	},
 	{
 		"fields": {
-			"name": "Trufflehog"
+			"name": "SpotBugs"
 		},
 		"model": "dojo.test_type",
 		"pk": 149
 	},
 	{
 		"fields": {
-			"name": "Trustwave"
+			"name": "Trufflehog"
 		},
 		"model": "dojo.test_type",
 		"pk": 150
 	},
 	{
-    	"fields": {
-      		"name": "Twistlock Image Scan"
-    	},
-    	"model": "dojo.test_type",
-    	"pk": 151
-	},
-	{
 		"fields": {
-			"name": "VCG Scan"
+			"name": "Trustwave"
 		},
 		"model": "dojo.test_type",
-		"pk": 152
+		"pk": 151
 	},
 	{
-		"fields": {
-			"name": "Veracode Scan"
+    "fields": {
+    		"name": "Twistlock Image Scan"
+    },
+    "model": "dojo.test_type",
+    "pk": 152
+	},
+	{
+		 "fields": {
+		     "name": "VCG Scan"
 		},
 		"model": "dojo.test_type",
 		"pk": 153
 	},
-  	{
-    	"fields": {
-      		"name": "Wapiti Scan"
-    	},
-    	"model": "dojo.test_type",
-    	"pk": 154
-  	},
-  	{
-		"fields": {
-     	"name": "Whitesource Scan"
-    	},
-    	"model": "dojo.test_type",
-	  	"pk": 155
-  	},
 	{
 		"fields": {
-			"name": "ZAP Scan"
+		    "name": "Veracode Scan"
 		},
 		"model": "dojo.test_type",
+		"pk": 154
+	},
+  {
+  	"fields": {
+    		"name": "Wapiti Scan"
+  	},
+  	"model": "dojo.test_type",
+  	"pk": 155
+  },
+  {
+	   "fields": {
+		     "name": "Wpscan"
+	   },
+		"model": "dojo.test_type",
 		"pk": 156
-	}	
+	},
+  {
+		"fields": {
+     	  "name": "Whitesource Scan"
+    },
+    "model": "dojo.test_type",
+	  "pk": 157
+  },
+	{
+	   "fields": {
+	      "name": "ZAP Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 158
+	}
 ]
