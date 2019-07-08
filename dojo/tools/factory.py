@@ -55,6 +55,8 @@ from dojo.tools.cobalt.parser import CobaltCSVParser
 from dojo.tools.mozilla_observatory.parser import MozillaObservatoryJSONParser
 from dojo.tools.whitesource.parser import WhitesourceJSONParser
 from dojo.tools.microfocus_webinspect.parser import MicrofocusWebinspectXMLParser
+from dojo.tools.wpscan.parser import WpscanJSONParser
+from dojo.tools.sslscan.parser import SslscanXMLParser
 
 __author__ = 'Jay Paz'
 
@@ -180,6 +182,10 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = WhitesourceJSONParser(file, test)
     elif scan_type == 'Microfocus Webinspect Scan':
         parser = MicrofocusWebinspectXMLParser(file, test)
+    elif scan_type == 'Wpscan':
+        parser = WpscanJSONParser(file, test)
+    elif scan_type == 'Sslscan':
+        parser = SslscanXMLParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 
