@@ -1,6 +1,6 @@
 from dojo.models import Product, Engagement, Test, Finding, \
     User, ScanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance, \
-    Finding_Template, Test_Type, Development_Environment, \
+    Finding_Template, Test_Type, Development_Environment, NoteHistory, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Product_Type, JIRA_Conf, Endpoint, BurpRawRequestResponse, JIRA_PKey, \
     Notes, DojoMeta
@@ -827,3 +827,21 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             raise serializers.ValidationError(
                 'The date cannot be in the future!')
         return value
+
+
+class NoteHistorySerializer(serializers.ModelSerializer):
+    current_editor = UserSerializer(required = True)
+
+    class Meta:
+        model = NoteHistory
+        fields = '__all__'
+
+
+class NoteSerializer(serializers.ModelSerializer):
+    author = UserSerializer(required = True)
+    editor = UserSerializer(required = False)
+    history = NoteHistorySerializer(read_only = False, many = True)
+    
+    class Meta:
+        model = Notes
+        fields = '__all__'
