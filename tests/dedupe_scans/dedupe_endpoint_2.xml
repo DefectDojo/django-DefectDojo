@@ -17,26 +17,11 @@
 
 	<Vulnerability>
 		<ID></ID>
-		<Name>Matching CWE and Endpoints (DUPE)</Name>
-		<Date></Date>
-		<Status></Status>
-		<Type></Type>
-		<CWE-ID>CWE-99</CWE-ID>
-		<CVE-ID></CVE-ID>
-		<CVSSv3></CVSSv3>
-		<Risk>CRITICAL</Risk>
-		<URL>0.0.0.0</URL>
-		<Description>Test Description</Description>
-		<PoC></PoC>
-	</Vulnerability>
-
-	<Vulnerability>
-		<ID></ID>
 		<Name>Matching title not Endpoints</Name>
 		<Date></Date>
 		<Status></Status>
 		<Type></Type>
-		<CWE-ID>CWE-24</CWE-ID>
+		<CWE-ID>CWE-23</CWE-ID>
 		<CVE-ID></CVE-ID>
 		<CVSSv3></CVSSv3>
 		<Risk>CRITICAL</Risk>

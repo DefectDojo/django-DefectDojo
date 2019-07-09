@@ -81,7 +81,7 @@ def sync_dedupe(new_finding, *args, **kwargs):
     deduplicationLogger.debug('sync_dedupe for: ' + str(new_finding.id) +
                  ":" + str(new_finding.title))
     sys.stderr.write('\n\nsync_dedupe for: ' + str(new_finding.id) +
-                 ":" + str(new_finding.title) + '\n\n')
+                 " :: " + str(new_finding.title) + " :: " + str(new_finding.cwe) + '\n\n')
     # ---------------------------------------------------------
     # 1) Collects all the findings that have the same:
     #      (title  and static_finding and dynamic_finding)
@@ -90,39 +90,60 @@ def sync_dedupe(new_finding, *args, **kwargs):
     #    (this is "cond1")
     # ---------------------------------------------------------
     if new_finding.test.engagement.deduplication_on_engagement:
+        sys.stderr.write('Deduping on Engagements')
         eng_findings_cwe = Finding.objects.filter(
             test__engagement=new_finding.test.engagement,
-            cwe=new_finding.cwe,
-            static_finding=new_finding.static_finding,
-            dynamic_finding=new_finding.dynamic_finding
-                                                  ).exclude(id=new_finding.id
-                                                            ).exclude(cwe=0
-                                                                      ).exclude(duplicate=True)
+            cwe=new_finding.cwe).exclude(id=new_finding.id).exclude(cwe=0).exclude(duplicate=True)
         eng_findings_title = Finding.objects.filter(
             test__engagement=new_finding.test.engagement,
-            title=new_finding.title,
-            static_finding=new_finding.static_finding,
-            dynamic_finding=new_finding.dynamic_finding
-                                                   ).exclude(id=new_finding.id
-                                                             ).exclude(duplicate=True)
+            title=new_finding.title).exclude(id=new_finding.id).exclude(duplicate=True)
     else:
+        sys.stderr.write('Deduping on Products')
         eng_findings_cwe = Finding.objects.filter(
             test__engagement__product=new_finding.test.engagement.product,
-            cwe=new_finding.cwe,
-            static_finding=new_finding.static_finding,
-            dynamic_finding=new_finding.dynamic_finding
-                                                  ).exclude(id=new_finding.id
-                                                            ).exclude(cwe=0
-                                                                      ).exclude(duplicate=True)
+            cwe=new_finding.cwe).exclude(id=new_finding.id).exclude(cwe=0).exclude(duplicate=True)
         eng_findings_title = Finding.objects.filter(
             test__engagement__product=new_finding.test.engagement.product,
-            title=new_finding.title,
-            static_finding=new_finding.static_finding,
-            dynamic_finding=new_finding.dynamic_finding
-                                                    ).exclude(id=new_finding.id
-                                                              ).exclude(duplicate=True)
+            title=new_finding.title).exclude(id=new_finding.id).exclude(duplicate=True)
+
+    prods = Finding.objects.filter(test__engagement__product=new_finding.test.engagement.product).exclude(id=new_finding.id).exclude(duplicate=True)
+    sys.stderr.write("\n\nTotal Findings in object :: " + str(len(prods)) + '\n')
+    for find in prods:
+        sys.stderr.write(str(find.id) + " :: " + find.title + " :: " + str(find.cwe) + "\n")
+        if find.title == new_finding.title and find.cwe == new_finding.cwe:
+            sys.stderr.write(" - MATCH")
+
+    prod1 = prods.filter(title=new_finding.title).exclude(id=new_finding.id).exclude(duplicate=True)
+    sys.stderr.write("\n\nTotal Findings (Title) in object :: " + str(len(prod1)) + '\n')
+    for find in prod1:
+        sys.stderr.write(str(find.id) + " :: " + find.title + " :: " + str(find.cwe) + "\n")
+        if find.title == new_finding.title and find.cwe == new_finding.cwe:
+            sys.stderr.write(" - MATCH")
+
+    prod2 = prods.filter(title=new_finding.title, cwe=new_finding.cwe).exclude(id=new_finding.id).exclude(duplicate=True)
+    sys.stderr.write("\n\nTotal Findings (Title, CWE) in object :: " + str(len(prod2)) + '\n')
+    for find in prod2:
+        sys.stderr.write(str(find.id) + " :: " + find.title + " :: " + str(find.cwe) + "\n")
+        if find.title == new_finding.title and find.cwe == new_finding.cwe:
+            sys.stderr.write(" - MATCH")
+
+    prod3 = Finding.objects.filter(static_finding=new_finding.static_finding, dynamic_finding=new_finding.dynamic_finding, cwe=new_finding.cwe, title=new_finding.title).exclude(id=new_finding.id).exclude(duplicate=True)
+    sys.stderr.write("\n\nTotal Findings (Static/Dynamic, CWE, Title) in object :: " + str(len(prod3)) + '\n')
+    for find in prod3:
+        sys.stderr.write(str(find.id) + " :: " + find.title + " :: " + str(find.cwe) + "\n")
+        if find.title == new_finding.title and find.cwe == new_finding.cwe:
+            sys.stderr.write(" - MATCH")
+
+    sys.stderr.write("\n\nCWE Findings in object :: " + str(len(eng_findings_cwe)) + '\n')
+    for find in eng_findings_cwe:
+        sys.stderr.write(str(find.id) + " :: " + find.title + " :: " + str(find.cwe) + "\n")
+
+    sys.stderr.write("\n\nTitle Findings in object :: " + str(len(eng_findings_title)) + '\n')
+    for find in eng_findings_title:
+        sys.stderr.write(str(find.id) + " :: " + find.title + " :: " + str(find.cwe) + "\n")
 
     total_findings = eng_findings_cwe | eng_findings_title
+
     deduplicationLogger.debug("Found " +
         str(len(eng_findings_cwe)) + " findings with same cwe, " +
         str(len(eng_findings_title)) + " findings with same title: " +
