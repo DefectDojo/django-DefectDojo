@@ -7,7 +7,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Finding, \
-    User, ScanSettings, Scan, Stub_Finding, Finding_Template, \
+    User, ScanSettings, Scan, Stub_Finding, Finding_Template, Notes, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Endpoint, JIRA_PKey, JIRA_Conf, DojoMeta, Development_Environment
 
@@ -378,3 +378,16 @@ class ReImportScanView(mixins.CreateModelMixin,
                        viewsets.GenericViewSet):
     serializer_class = serializers.ReImportScanSerializer
     queryset = Test.objects.all()
+
+class NotesViewSet(mixins.ListModelMixin,
+                   mixins.RetrieveModelMixin,
+                   mixins.UpdateModelMixin,
+                   mixins.DestroyModelMixin,
+                   mixins.CreateModelMixin,
+                   viewsets.GenericViewSet):
+    serializer_class = serializers.NoteSerializer
+    queryset = Notes.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'entry', 'author', 
+                    'private', 'date', 'edited', 
+                    'edit_time', 'editor', 'history')
