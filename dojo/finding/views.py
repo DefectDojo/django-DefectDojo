@@ -652,8 +652,8 @@ def request_finding_review(request, fid):
         if form.is_valid():
             now = timezone.now()
             new_note = Notes()
-
             new_note.entry = "Review Request: " + form.cleaned_data['entry']
+            new_note.private = True
             new_note.author = request.user
             new_note.date = now
             new_note.save()
