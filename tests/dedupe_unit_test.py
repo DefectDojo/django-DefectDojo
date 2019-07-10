@@ -26,7 +26,7 @@ class DedupeTest(unittest.TestCase):
     def setUp(self):
         self.driver = webdriver.Chrome('chromedriver')
         self.driver.implicitly_wait(30)
-        self.base_url = "http://localhost:8080/"
+        self.base_url = "http://localhost:8000/"
         self.verificationErrors = []
         self.accept_next_alert = True
 
@@ -35,9 +35,9 @@ class DedupeTest(unittest.TestCase):
         driver.get(self.base_url + "login")
         driver.find_element_by_id("id_username").clear()
         # os.environ['DD_ADMIN_USER']
-        driver.find_element_by_id("id_username").send_keys('admin')
+        driver.find_element_by_id("id_username").send_keys(os.environ['DD_ADMIN_USER'])
         driver.find_element_by_id("id_password").clear()
-        driver.find_element_by_id("id_password").send_keys('admin')
+        driver.find_element_by_id("id_password").send_keys(os.environ['DD_ADMIN_PASSWORD'])
         driver.find_element_by_css_selector("button.btn.btn-success").click()
         return driver
 
@@ -355,30 +355,30 @@ class DedupeTest(unittest.TestCase):
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(product_unit_test.ProductTest('test_create_product'))
-    # suite.addTest(DedupeTest('test_enable_deduplication'))
+    suite.addTest(DedupeTest('test_enable_deduplication'))
     # Test same scanners - same engagement - static - dedupe
     suite.addTest(DedupeTest('test_delete_findings'))
     suite.addTest(DedupeTest('test_add_path_test_suite'))
     suite.addTest(DedupeTest('test_import_path_tests'))
-    # suite.addTest(DedupeTest('test_check_path_status'))
-    # # Test same scanners - same engagement - dynamic - dedupe
-    # suite.addTest(DedupeTest('test_delete_findings'))
-    # suite.addTest(DedupeTest('test_add_endpoint_test_suite'))
-    # suite.addTest(DedupeTest('test_import_endpoint_tests'))
-    # suite.addTest(DedupeTest('test_check_endpoint_status'))
-    # # Test different scanners - same engagement - dynamic - dedupe
-    # suite.addTest(DedupeTest('test_delete_findings'))
-    # suite.addTest(DedupeTest('test_add_same_eng_test_suite'))
-    # suite.addTest(DedupeTest('test_import_same_eng_tests'))
-    # suite.addTest(DedupeTest('test_check_same_eng_status'))
-    # # Test different scanners - different engagement - dynamic - dedupe
-    # suite.addTest(DedupeTest('test_delete_findings'))
-    # suite.addTest(DedupeTest('test_add_cross_test_suite'))
-    # suite.addTest(DedupeTest('test_import_cross_test'))
-    # suite.addTest(DedupeTest('test_check_cross_status'))
-    # # Clean up
-    # suite.addTest(DedupeTest('test_remove_blank_endpoints'))
-    # suite.addTest(product_unit_test.ProductTest('test_delete_product'))
+    suite.addTest(DedupeTest('test_check_path_status'))
+    # Test same scanners - same engagement - dynamic - dedupe
+    suite.addTest(DedupeTest('test_delete_findings'))
+    suite.addTest(DedupeTest('test_add_endpoint_test_suite'))
+    suite.addTest(DedupeTest('test_import_endpoint_tests'))
+    suite.addTest(DedupeTest('test_check_endpoint_status'))
+    # Test different scanners - same engagement - dynamic - dedupe
+    suite.addTest(DedupeTest('test_delete_findings'))
+    suite.addTest(DedupeTest('test_add_same_eng_test_suite'))
+    suite.addTest(DedupeTest('test_import_same_eng_tests'))
+    suite.addTest(DedupeTest('test_check_same_eng_status'))
+    # Test different scanners - different engagement - dynamic - dedupe
+    suite.addTest(DedupeTest('test_delete_findings'))
+    suite.addTest(DedupeTest('test_add_cross_test_suite'))
+    suite.addTest(DedupeTest('test_import_cross_test'))
+    suite.addTest(DedupeTest('test_check_cross_status'))
+    # Clean up
+    suite.addTest(DedupeTest('test_remove_blank_endpoints'))
+    suite.addTest(product_unit_test.ProductTest('test_delete_product'))
     return suite
 
 

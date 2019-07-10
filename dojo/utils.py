@@ -87,7 +87,7 @@ def sync_dedupe(new_finding, *args, **kwargs):
     #     request_finished.connect(sync_dedupe, dispatch_uid="DefectDojo")
     #     new_finding = kwargs['instance']
     deduplicationLogger.debug('sync_dedupe for: ' + str(new_finding.id) +
-                ":" + str(new_finding.title))
+                 ":" + str(new_finding.title))
     # sys.stderr.write('\n\nsync_dedupe for: ' + str(new_finding.id) +
     #             " :: " + str(new_finding.title) + " :: " + str(new_finding.cwe) + '\n\n')
     # ---------------------------------------------------------
@@ -98,7 +98,7 @@ def sync_dedupe(new_finding, *args, **kwargs):
     #    (this is "cond1")
     # ---------------------------------------------------------
     if new_finding.test.engagement.deduplication_on_engagement:
-        sys.stderr.write('Deduping on Engagements')
+        # sys.stderr.write('Deduping on Engagements')
         eng_findings_cwe = Finding.objects.filter(
             test__engagement=new_finding.test.engagement,
             cwe=new_finding.cwe).exclude(id=new_finding.id).exclude(cwe=0).exclude(duplicate=True)
@@ -106,7 +106,7 @@ def sync_dedupe(new_finding, *args, **kwargs):
             test__engagement=new_finding.test.engagement,
             title=new_finding.title).exclude(id=new_finding.id).exclude(duplicate=True)
     else:
-        sys.stderr.write('Deduping on Products')
+        # sys.stderr.write('Deduping on Products')
         eng_findings_cwe = Finding.objects.filter(
             test__engagement__product=new_finding.test.engagement.product,
             cwe=new_finding.cwe).exclude(id=new_finding.id).exclude(cwe=0).exclude(duplicate=True)
