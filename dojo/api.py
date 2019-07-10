@@ -915,6 +915,8 @@ class TestTypeResource(BaseModelResource):
         filtering = {
             'id': ALL,
             'name': ALL,
+	    'title': ALL,
+	    'engagement': ALL,
         }
         authentication = DojoApiKeyAuthentication()
         authorization = DjangoAuthorization()
