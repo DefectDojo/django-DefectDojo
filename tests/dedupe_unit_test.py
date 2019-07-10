@@ -355,29 +355,30 @@ class DedupeTest(unittest.TestCase):
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(product_unit_test.ProductTest('test_create_product'))
-    suite.addTest(DedupeTest('test_enable_deduplication'))
+    # suite.addTest(DedupeTest('test_enable_deduplication'))
     # Test same scanners - same engagement - static - dedupe
+    suite.addTest(DedupeTest('test_delete_findings'))
     suite.addTest(DedupeTest('test_add_path_test_suite'))
     suite.addTest(DedupeTest('test_import_path_tests'))
-    suite.addTest(DedupeTest('test_check_path_status'))
-    # Test same scanners - same engagement - dynamic - dedupe
-    suite.addTest(DedupeTest('test_delete_findings'))
-    suite.addTest(DedupeTest('test_add_endpoint_test_suite'))
-    suite.addTest(DedupeTest('test_import_endpoint_tests'))
-    suite.addTest(DedupeTest('test_check_endpoint_status'))
-    # Test different scanners - same engagement - dynamic - dedupe
-    suite.addTest(DedupeTest('test_delete_findings'))
-    suite.addTest(DedupeTest('test_add_same_eng_test_suite'))
-    suite.addTest(DedupeTest('test_import_same_eng_tests'))
-    suite.addTest(DedupeTest('test_check_same_eng_status'))
-    # Test different scanners - different engagement - dynamic - dedupe
-    suite.addTest(DedupeTest('test_delete_findings'))
-    suite.addTest(DedupeTest('test_add_cross_test_suite'))
-    suite.addTest(DedupeTest('test_import_cross_test'))
-    suite.addTest(DedupeTest('test_check_cross_status'))
-    # Clean up
-    suite.addTest(DedupeTest('test_remove_blank_endpoints'))
-    suite.addTest(product_unit_test.ProductTest('test_delete_product'))
+    # suite.addTest(DedupeTest('test_check_path_status'))
+    # # Test same scanners - same engagement - dynamic - dedupe
+    # suite.addTest(DedupeTest('test_delete_findings'))
+    # suite.addTest(DedupeTest('test_add_endpoint_test_suite'))
+    # suite.addTest(DedupeTest('test_import_endpoint_tests'))
+    # suite.addTest(DedupeTest('test_check_endpoint_status'))
+    # # Test different scanners - same engagement - dynamic - dedupe
+    # suite.addTest(DedupeTest('test_delete_findings'))
+    # suite.addTest(DedupeTest('test_add_same_eng_test_suite'))
+    # suite.addTest(DedupeTest('test_import_same_eng_tests'))
+    # suite.addTest(DedupeTest('test_check_same_eng_status'))
+    # # Test different scanners - different engagement - dynamic - dedupe
+    # suite.addTest(DedupeTest('test_delete_findings'))
+    # suite.addTest(DedupeTest('test_add_cross_test_suite'))
+    # suite.addTest(DedupeTest('test_import_cross_test'))
+    # suite.addTest(DedupeTest('test_check_cross_status'))
+    # # Clean up
+    # suite.addTest(DedupeTest('test_remove_blank_endpoints'))
+    # suite.addTest(product_unit_test.ProductTest('test_delete_product'))
     return suite
 
 

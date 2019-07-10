@@ -23,6 +23,9 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from jira import JIRA
 from jira.exceptions import JIRAError
+from django.dispatch import receiver
+from django.core.signals import request_finished
+from dojo.signals import dedupe_signal
 
 from dojo.models import Finding, Engagement, Finding_Template, Product, JIRA_PKey, JIRA_Issue, \
     Dojo_User, User, Alerts, System_Settings, Notifications, UserContactInfo, Endpoint, Benchmark_Type, \
@@ -76,12 +79,17 @@ def is_deduplication_on_engagement_mismatch(new_finding, to_duplicate_finding):
     return not new_finding.test.engagement.deduplication_on_engagement and to_duplicate_finding.test.engagement.deduplication_on_engagement
 
 
+# @receiver(dedupe_signal)
 def sync_dedupe(new_finding, *args, **kwargs):
-    import sys
+    # import sys
+    # system_settings = System_Settings.objects.get()
+    # if system_settings.enable_deduplication:
+    #     request_finished.connect(sync_dedupe, dispatch_uid="DefectDojo")
+    #     new_finding = kwargs['instance']
     deduplicationLogger.debug('sync_dedupe for: ' + str(new_finding.id) +
-                 ":" + str(new_finding.title))
-    sys.stderr.write('\n\nsync_dedupe for: ' + str(new_finding.id) +
-                 " :: " + str(new_finding.title) + " :: " + str(new_finding.cwe) + '\n\n')
+                ":" + str(new_finding.title))
+    # sys.stderr.write('\n\nsync_dedupe for: ' + str(new_finding.id) +
+    #             " :: " + str(new_finding.title) + " :: " + str(new_finding.cwe) + '\n\n')
     # ---------------------------------------------------------
     # 1) Collects all the findings that have the same:
     #      (title  and static_finding and dynamic_finding)
@@ -106,41 +114,41 @@ def sync_dedupe(new_finding, *args, **kwargs):
             test__engagement__product=new_finding.test.engagement.product,
             title=new_finding.title).exclude(id=new_finding.id).exclude(duplicate=True)
 
-    prods = Finding.objects.filter(test__engagement__product=new_finding.test.engagement.product).exclude(id=new_finding.id).exclude(duplicate=True)
-    sys.stderr.write("\n\nTotal Findings in object :: " + str(len(prods)) + '\n')
-    for find in prods:
-        sys.stderr.write(str(find.id) + " :: " + find.title + " :: " + str(find.cwe) + "\n")
-        if find.title == new_finding.title and find.cwe == new_finding.cwe:
-            sys.stderr.write(" - MATCH")
+    # prods = Finding.objects.filter(test__engagement__product=new_finding.test.engagement.product).exclude(id=new_finding.id).exclude(duplicate=True)
+    # sys.stderr.write("\n\nTotal Findings in object :: " + str(len(prods)) + '\n')
+    # for find in prods:
+    #     sys.stderr.write(str(find.id) + " :: " + find.title + " :: " + str(find.cwe) + "\n")
+    #     if find.title == new_finding.title and find.cwe == new_finding.cwe:
+    #         sys.stderr.write(" - MATCH")
 
-    prod1 = prods.filter(title=new_finding.title).exclude(id=new_finding.id).exclude(duplicate=True)
-    sys.stderr.write("\n\nTotal Findings (Title) in object :: " + str(len(prod1)) + '\n')
-    for find in prod1:
-        sys.stderr.write(str(find.id) + " :: " + find.title + " :: " + str(find.cwe) + "\n")
-        if find.title == new_finding.title and find.cwe == new_finding.cwe:
-            sys.stderr.write(" - MATCH")
+    # prod1 = prods.filter(title=new_finding.title).exclude(id=new_finding.id).exclude(duplicate=True)
+    # sys.stderr.write("\n\nTotal Findings (Title) in object :: " + str(len(prod1)) + '\n')
+    # for find in prod1:
+    #     sys.stderr.write(str(find.id) + " :: " + find.title + " :: " + str(find.cwe) + "\n")
+    #     if find.title == new_finding.title and find.cwe == new_finding.cwe:
+    #         sys.stderr.write(" - MATCH")
 
-    prod2 = prods.filter(title=new_finding.title, cwe=new_finding.cwe).exclude(id=new_finding.id).exclude(duplicate=True)
-    sys.stderr.write("\n\nTotal Findings (Title, CWE) in object :: " + str(len(prod2)) + '\n')
-    for find in prod2:
-        sys.stderr.write(str(find.id) + " :: " + find.title + " :: " + str(find.cwe) + "\n")
-        if find.title == new_finding.title and find.cwe == new_finding.cwe:
-            sys.stderr.write(" - MATCH")
+    # prod2 = prods.filter(title=new_finding.title, cwe=new_finding.cwe).exclude(id=new_finding.id).exclude(duplicate=True)
+    # sys.stderr.write("\n\nTotal Findings (Title, CWE) in object :: " + str(len(prod2)) + '\n')
+    # for find in prod2:
+    #     sys.stderr.write(str(find.id) + " :: " + find.title + " :: " + str(find.cwe) + "\n")
+    #     if find.title == new_finding.title and find.cwe == new_finding.cwe:
+    #         sys.stderr.write(" - MATCH")
 
-    prod3 = Finding.objects.filter(static_finding=new_finding.static_finding, dynamic_finding=new_finding.dynamic_finding, cwe=new_finding.cwe, title=new_finding.title).exclude(id=new_finding.id).exclude(duplicate=True)
-    sys.stderr.write("\n\nTotal Findings (Static/Dynamic, CWE, Title) in object :: " + str(len(prod3)) + '\n')
-    for find in prod3:
-        sys.stderr.write(str(find.id) + " :: " + find.title + " :: " + str(find.cwe) + "\n")
-        if find.title == new_finding.title and find.cwe == new_finding.cwe:
-            sys.stderr.write(" - MATCH")
+    # prod3 = Finding.objects.filter(static_finding=new_finding.static_finding, dynamic_finding=new_finding.dynamic_finding, cwe=new_finding.cwe, title=new_finding.title).exclude(id=new_finding.id).exclude(duplicate=True)
+    # sys.stderr.write("\n\nTotal Findings (Static/Dynamic, CWE, Title) in object :: " + str(len(prod3)) + '\n')
+    # for find in prod3:
+    #     sys.stderr.write(str(find.id) + " :: " + find.title + " :: " + str(find.cwe) + "\n")
+    #     if find.title == new_finding.title and find.cwe == new_finding.cwe:
+    #         sys.stderr.write(" - MATCH")
 
-    sys.stderr.write("\n\nCWE Findings in object :: " + str(len(eng_findings_cwe)) + '\n')
-    for find in eng_findings_cwe:
-        sys.stderr.write(str(find.id) + " :: " + find.title + " :: " + str(find.cwe) + "\n")
+    # sys.stderr.write("\n\nCWE Findings in object :: " + str(len(eng_findings_cwe)) + '\n')
+    # for find in eng_findings_cwe:
+    #     sys.stderr.write(str(find.id) + " :: " + find.title + " :: " + str(find.cwe) + "\n")
 
-    sys.stderr.write("\n\nTitle Findings in object :: " + str(len(eng_findings_title)) + '\n')
-    for find in eng_findings_title:
-        sys.stderr.write(str(find.id) + " :: " + find.title + " :: " + str(find.cwe) + "\n")
+    # sys.stderr.write("\n\nTitle Findings in object :: " + str(len(eng_findings_title)) + '\n')
+    # for find in eng_findings_title:
+    #     sys.stderr.write(str(find.id) + " :: " + find.title + " :: " + str(find.cwe) + "\n")
 
     total_findings = eng_findings_cwe | eng_findings_title
 
@@ -149,10 +157,10 @@ def sync_dedupe(new_finding, *args, **kwargs):
         str(len(eng_findings_title)) + " findings with same title: " +
         str(len(total_findings)) + " findings with either same title or same cwe")
 
-    sys.stderr.write("Found " +
-        str(len(eng_findings_cwe)) + " findings with same cwe, " +
-        str(len(eng_findings_title)) + " findings with same title: " +
-        str(len(total_findings)) + " findings with either same title or same cwe")
+    # sys.stderr.write("Found " +
+    #     str(len(eng_findings_cwe)) + " findings with same cwe, " +
+    #     str(len(eng_findings_title)) + " findings with same title: " +
+    #     str(len(total_findings)) + " findings with either same title or same cwe")
     # total_findings = total_findings.order_by('date')
 
     for find in total_findings:
@@ -162,7 +170,7 @@ def sync_dedupe(new_finding, *args, **kwargs):
         if is_deduplication_on_engagement_mismatch(new_finding, find):
             deduplicationLogger.debug(
                 'deduplication_on_engagement_mismatch, skipping dedupe.')
-            sys.stderr.write('deduplication_on_engagement_mismatch, skipping dedupe.')
+            # sys.stderr.write('deduplication_on_engagement_mismatch, skipping dedupe.')
             continue
         # ---------------------------------------------------------
         # 2) If existing and new findings have endpoints: compare them all
@@ -174,28 +182,28 @@ def sync_dedupe(new_finding, *args, **kwargs):
             list2 = find.endpoints.all()
             if all(x in list1 for x in list2):
                 flag_endpoints = True
-                sys.stderr.write("Endpoints match!")
+                # sys.stderr.write("Endpoints match!")
         elif new_finding.static_finding and len(new_finding.file_path) > 0:
             if find.line == new_finding.line and find.file_path == new_finding.file_path:
                 flag_line_path = True
-                sys.stderr.write("Line number and file path match!")
+                # sys.stderr.write("Line number and file path match!")
             else:
                 deduplicationLogger.debug("no endpoints on one of the findings and file_path doesn't match")
-                sys.stderr.write("no endpoints on one of the findings and file_path doesn't match")
-                sys.stderr.write("old line# :: " + str(find.line) + "\told path :: " + str(find.file_path))
-                sys.stderr.write("new line# :: " + str(new_finding.line) + "\tnew path :: " + str(new_finding.file_path))
+                # sys.stderr.write("no endpoints on one of the findings and file_path doesn't match")
+                # sys.stderr.write("old line# :: " + str(find.line) + "\told path :: " + str(find.file_path))
+                # sys.stderr.write("new line# :: " + str(new_finding.line) + "\tnew path :: " + str(new_finding.file_path))
         else:
             deduplicationLogger.debug("no endpoints on one of the findings and the new finding is either dynamic or doesn't have a file_path; Deduplication will not occur")
         if find.hash_code == new_finding.hash_code:
             flag_hash = True
-            sys.stderr.write("Hashcodes match!")
-        else:
-            sys.stderr.write("old hash :: " + str(find.hash_code) + "\nnew hash :: " + str(new_finding.hash_code))
+            # sys.stderr.write("Hashcodes match!")
+        # else:
+            # sys.stderr.write("old hash :: " + str(find.hash_code) + "\nnew hash :: " + str(new_finding.hash_code))
         deduplicationLogger.debug(
             'deduplication flags for new finding ' + str(new_finding.id) + ' and existing finding ' + str(find.id) +
             ' flag_endpoints: ' + str(flag_endpoints) + ' flag_line_path:' + str(flag_line_path) + ' flag_hash:' + str(flag_hash))
-        sys.stderr.write('deduplication flags for new finding ' + str(new_finding.id) + ' and existing finding ' + str(find.id) +
-            ' flag_endpoints: ' + str(flag_endpoints) + ' flag_line_path:' + str(flag_line_path) + ' flag_hash:' + str(flag_hash))
+        # sys.stderr.write('deduplication flags for new finding ' + str(new_finding.id) + ' and existing finding ' + str(find.id) +
+        #     ' flag_endpoints: ' + str(flag_endpoints) + ' flag_line_path:' + str(flag_line_path) + ' flag_hash:' + str(flag_hash))
         # ---------------------------------------------------------
         # 3) Findings are duplicate if (cond1 is true) and they have the same:
         #    hash
@@ -203,7 +211,7 @@ def sync_dedupe(new_finding, *args, **kwargs):
         # ---------------------------------------------------------
         if ((flag_endpoints or flag_line_path) and flag_hash):
             deduplicationLogger.debug('New finding ' + str(new_finding.id) + ' is a duplicate of existing finding ' + str(find.id))
-            sys.stderr.write('New finding ' + str(new_finding.id) + ' is a duplicate of existing finding ' + str(find.id))
+            # sys.stderr.write('New finding ' + str(new_finding.id) + ' is a duplicate of existing finding ' + str(find.id))
             new_finding.duplicate = True
             new_finding.active = False
             new_finding.verified = False
