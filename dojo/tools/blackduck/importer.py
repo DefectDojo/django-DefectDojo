@@ -19,17 +19,25 @@ class BlackduckImporter(Importer):
     def parse_findings(self, report: Path) -> Iterable[BlackduckFinding]:
         files = dict()
         security_issues = dict()
-        if zipfile.is_zipfile(report):
-            with zipfile.ZipFile(report) as zip:
-                for file_name in zip.namelist():
-                    if file_name.endswith('files.csv'):
-                        with io.TextIOWrapper(zip.open(file_name), newline='') as f:
-                            files = self.__partition_by_project_id(f)
-                    elif file_name.endswith('security.csv'):
-                        with io.TextIOWrapper(zip.open(file_name), newline='') as f:
-                            security_issues = self.__partition_by_project_id(f)
-        else:
-            raise ValueError
+        try:
+            if zipfile.is_zipfile(report):
+                print("This is a zip file")
+                with zipfile.ZipFile(report) as zip:
+                    for file_name in zip.namelist():
+                        if file_name.endswith('files.csv'):
+                            print("dealing with files")
+                            with io.TextIOWrapper(zip.open(file_name), newline='') as f:
+                                files = self.__partition_by_project_id(f)
+                        elif file_name.endswith('security.csv'):
+                            print("dealing with security")
+                            with io.TextIOWrapper(zip.open(file_name), newline='') as f:
+                                security_issues = self.__partition_by_project_id(f)
+            else:
+                print("Not a zip file?")
+                print(report)
+                # raise ValueError
+        except Exception as e:
+            print("Could not process zip file: {}".format(e))
 
         project_ids = set(files.keys()) & set(security_issues.keys())
         for project_id in project_ids:
