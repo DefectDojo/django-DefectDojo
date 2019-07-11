@@ -765,7 +765,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     new_items.append(finding)
                 else:
                     item.test = test
-                    item.date = test.target_start
+                    item.date = scan_date
                     item.reporter = self.context['request'].user
                     item.last_reviewed = timezone.now()
                     item.last_reviewed_by = self.context['request'].user
