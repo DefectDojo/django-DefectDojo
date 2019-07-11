@@ -96,13 +96,6 @@
 	},
 	{
 		"fields": {
-			"name": "Arachni Scan"
-		},
-		"model": "dojo.test_type",
-		"pk": 105
-	},
-	{
-		"fields": {
 			"name": "Bandit Scan"
 		},
 		"model": "dojo.test_type",
