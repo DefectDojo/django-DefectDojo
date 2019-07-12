@@ -57,6 +57,7 @@ from dojo.tools.whitesource.parser import WhitesourceJSONParser
 from dojo.tools.microfocus_webinspect.parser import MicrofocusWebinspectXMLParser
 from dojo.tools.wpscan.parser import WpscanJSONParser
 from dojo.tools.sslscan.parser import SslscanXMLParser
+from dojo.tools.jfrogxray.parser import XrayJSONParser
 
 __author__ = 'Jay Paz'
 
@@ -186,6 +187,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = WpscanJSONParser(file, test)
     elif scan_type == 'Sslscan':
         parser = SslscanXMLParser(file, test)
+    elif scan_type == 'JFrog Xray Scan':
+        parser = XrayJSONParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 
