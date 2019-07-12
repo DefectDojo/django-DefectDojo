@@ -519,13 +519,9 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         default=None,
         queryset=User.objects.all())
     tags = TagListSerializerField(required=False)
-    skip_duplicates = serializers.BooleanField(required=False, default=False)
-    close_old_findings = serializers.BooleanField(required=False, default=False)
 
     def save(self):
         data = self.validated_data
-        skip_duplicates = data['skip_duplicates']
-        close_old_findings = data['close_old_findings']
         active = data['active']
         verified = data['verified']
         test_type, created = Test_Type.objects.get_or_create(
@@ -560,21 +556,6 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         skipped_hashcodes = []
         try:
             for item in parser.items:
-                if skip_duplicates:
-                    hash_code = item.compute_hash_code()
-
-                    if ((test.engagement.deduplication_on_engagement and
-                             Finding.objects.filter(Q(active=True) | Q(false_p=True) | Q(duplicate=True),
-                             test__engagement=test.engagement,
-                             hash_code=hash_code).exists()) or
-                        (not test.engagement.deduplication_on_engagement and
-                            Finding.objects.filter(Q(active=True) | Q(false_p=True) | Q(duplicate=True),
-                                                    test__engagement__product=test.engagement.product,
-                                                    hash_code=hash_code).exists())):
-
-                        skipped_hashcodes.append(hash_code)
-                        continue
-
                 sev = item.severity
                 if sev == 'Information' or sev == 'Informational':
                     sev = 'Info'
@@ -592,7 +573,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 item.last_reviewed_by = self.context['request'].user
                 item.active = data['active']
                 item.verified = data['verified']
-                item.save()
+                item.save(dedupe_option=False)
 
                 if (hasattr(item, 'unsaved_req_resp') and
                         len(item.unsaved_req_resp) > 0):
@@ -624,51 +605,13 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
 
                     item.endpoints.add(ep)
 
-                # if item.unsaved_tags is not None:
-                #    item.tags = item.unsaved_tags
+                if item.unsaved_tags is not None:
+                    item.tags = item.unsaved_tags
+
+                item.save()
+
         except SyntaxError:
             raise Exception('Parser SyntaxError')
-
-        if close_old_findings:
-            # Close old active findings that are not reported by this scan.
-            new_hash_codes = test.finding_set.values('hash_code')
-            old_findings = None
-            if test.engagement.deduplication_on_engagement:
-                old_findings = Finding.objects.exclude(test=test) \
-                                              .exclude(hash_code__in=new_hash_codes) \
-                                              .exclude(hash_code__in=skipped_hashcodes) \
-                                              .filter(test__engagement=test.engagement,
-                                                  test__test_type=test_type,
-                                                  active=True)
-            else:
-                old_findings = Finding.objects.exclude(test=test) \
-                                              .exclude(hash_code__in=new_hash_codes) \
-                                              .exclude(hash_code__in=skipped_hashcodes) \
-                                              .filter(test__engagement__product=test.engagement.product,
-                                                  test__test_type=test_type,
-                                                  active=True)
-
-            for old_finding in old_findings:
-                old_finding.active = False
-                old_finding.mitigated = datetime.datetime.combine(
-                    test.target_start,
-                    timezone.now().time())
-                old_finding.mitigated_by = self.context['request'].user
-                old_finding.notes.create(author=self.context['request'].user,
-                                         entry="This finding has been automatically closed"
-                                         " as it is not present anymore in recent scans.")
-                Tag.objects.add_tag(old_finding, 'stale')
-                old_finding.save()
-                title = 'An old finding has been closed for "{}".' \
-                        .format(test.engagement.product.name)
-                description = 'See <a href="{}">{}</a>' \
-                        .format(reverse('view_finding', args=(old_finding.id, )),
-                                old_finding.title)
-                create_notification(event='other',
-                                    title=title,
-                                    description=description,
-                                    icon='bullseye',
-                                    objowner=self.context['request'].user)
 
         return test
 
@@ -766,7 +709,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     item.last_reviewed_by = self.context['request'].user
                     item.verified = verified
                     item.active = active
-                    item.save()
+                    item.save(dedupe_option=False)
                     finding_added_count += 1
                     new_items.append(item.id)
                     finding = item
@@ -800,8 +743,10 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                             product=test.engagement.product)
                         finding.endpoints.add(ep)
 
-                    # if item.unsaved_tags:
-                    #    finding.tags = item.unsaved_tags
+                    if item.unsaved_tags:
+                        finding.tags = item.unsaved_tags
+
+                finding.save()
 
             to_mitigate = set(original_items) - set(new_items)
             for finding in to_mitigate:

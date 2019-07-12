@@ -1199,8 +1199,12 @@ class Finding(models.Model):
         hash_string = self.title + str(self.cwe) + str(self.line) + str(self.file_path) + self.description
         if self.dynamic_finding:
             endpoint_str = ''
-            for e in self.endpoints.all():
-                endpoint_str += str(e.host_with_port)
+            if len(self.unsaved_endpoints) > 0 and self.id is None:
+                for e in self.unsaved_endpoints:
+                    endpoint_str += str(e.host_with_port)
+            else:
+                for e in self.endpoints.all():
+                    endpoint_str += str(e.host_with_port)
             if endpoint_str:
                 hash_string = hash_string + endpoint_str
         try:

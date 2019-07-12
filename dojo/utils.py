@@ -133,7 +133,7 @@ def sync_dedupe(sender, *args, **kwargs):
                 if all(x in list1 for x in list2):
                     flag_endpoints = True
             elif new_finding.static_finding and len(new_finding.file_path) > 0:
-                if find.line == new_finding.line and find.file_path == new_finding.file_path:
+                if str(find.line) == str(new_finding.line) and find.file_path == new_finding.file_path:
                     flag_line_path = True
                 else:
                     deduplicationLogger.debug("no endpoints on one of the findings and file_path doesn't match")
