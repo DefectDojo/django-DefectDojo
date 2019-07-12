@@ -839,7 +839,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
 
 
 class NoteHistorySerializer(serializers.ModelSerializer):
-    current_editor = UserSerializer(required=True)
+    current_editor = UserSerializer(read_only=True)
 
     class Meta:
         model = NoteHistory
@@ -847,10 +847,10 @@ class NoteHistorySerializer(serializers.ModelSerializer):
 
 
 class NoteSerializer(serializers.ModelSerializer):
-    author = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all())
-    editor = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all())
+    author = UserSerializer(
+        many=False, read_only=True)
+    editor = UserSerializer(
+        read_only=True, many=False)
 
     history = NoteHistorySerializer(read_only=True, many=True)
 
