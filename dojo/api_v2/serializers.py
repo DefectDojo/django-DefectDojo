@@ -6,18 +6,14 @@ from dojo.models import Product, Engagement, Test, Finding, \
     Notes, DojoMeta
 from dojo.forms import ImportScanForm, SEVERITY_CHOICES
 from dojo.tools.factory import import_parser_factory
-from dojo.utils import create_notification
 from django.core.validators import URLValidator, validate_ipv46_address
-from django.urls import reverse
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
 from django.utils import timezone
-from django.db.models import Q
 import datetime
 import six
 from django.utils.translation import ugettext_lazy as _
 import json
-from tagging.models import Tag
 
 
 class TagList(list):
@@ -553,7 +549,6 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         except ValueError:
             raise Exception('FileParser ValueError')
 
-        skipped_hashcodes = []
         try:
             for item in parser.items:
                 sev = item.severity

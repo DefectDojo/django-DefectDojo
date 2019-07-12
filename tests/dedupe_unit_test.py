@@ -26,7 +26,7 @@ class DedupeTest(unittest.TestCase):
     def setUp(self):
         self.driver = webdriver.Chrome('chromedriver')
         self.driver.implicitly_wait(30)
-        self.base_url = "http://localhost:8080/"
+        self.base_url = "http://localhost:8000/"
         self.verificationErrors = []
         self.accept_next_alert = True
 
@@ -34,9 +34,9 @@ class DedupeTest(unittest.TestCase):
         driver = self.driver
         driver.get(self.base_url + "login")
         driver.find_element_by_id("id_username").clear()
-        driver.find_element_by_id("id_username").send_keys('admin')#os.environ['DD_ADMIN_USER'])
+        driver.find_element_by_id("id_username").send_keys(os.environ['DD_ADMIN_USER'])
         driver.find_element_by_id("id_password").clear()
-        driver.find_element_by_id("id_password").send_keys('admin')#os.environ['DD_ADMIN_PASSWORD'])
+        driver.find_element_by_id("id_password").send_keys(os.environ['DD_ADMIN_PASSWORD'])
         driver.find_element_by_css_selector("button.btn.btn-success").click()
         return driver
 
