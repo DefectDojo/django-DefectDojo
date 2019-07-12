@@ -158,7 +158,7 @@ class Migration(migrations.Migration):
             name='product_grade_a',
             field=models.IntegerField(default=90, help_text="Percentage score for an 'A' >=", verbose_name='Grade A'),
         ),
-				migrations.AlterField(
+	migrations.AlterField(
             model_name='system_settings',
             name='product_grade_b',
             field=models.IntegerField(default=80, help_text="Percentage score for a 'B' >=", verbose_name='Grade B'),
