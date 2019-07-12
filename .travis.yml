@@ -1,6 +1,5 @@
 dist: xenial
 language: minimal
-sudo: required
 services:
   - docker
 env:

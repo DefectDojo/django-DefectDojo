@@ -545,7 +545,7 @@ def re_import_scan_results(request, tid):
                         new_items.append(find.id)
                     else:
                         item.test = t
-                        item.date = t.target_start
+                        item.date = scan_date
                         item.reporter = request.user
                         item.last_reviewed = timezone.now()
                         item.last_reviewed_by = request.user
@@ -558,7 +558,7 @@ def re_import_scan_results(request, tid):
 
                         if hasattr(item, 'unsaved_req_resp') and len(item.unsaved_req_resp) > 0:
                             for req_resp in item.unsaved_req_resp:
-                                if form.get_scan_type() == "Arachni Scan":
+                                if scan_type == "Arachni Scan":
                                     burp_rr = BurpRawRequestResponse(
                                         finding=item,
                                         burpRequestBase64=req_resp["req"],
