@@ -382,10 +382,11 @@ class ReImportScanView(mixins.CreateModelMixin,
 
 class NotesViewSet(mixins.ListModelMixin,
                    mixins.RetrieveModelMixin,
+                   mixins.UpdateModelMixin,
                    viewsets.GenericViewSet):
     serializer_class = serializers.NoteSerializer
     queryset = Notes.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'entry', 'author',
                     'private', 'date', 'edited',
-                    'edit_time', 'editor', 'history')
+                    'edit_time', 'editor')
