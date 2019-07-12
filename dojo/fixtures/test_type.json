@@ -464,5 +464,12 @@
 		},
 		"model": "dojo.test_type",
 		"pk": 158
+	},
+	{
+	   "fields": {
+	      "name": "JFrog Xray Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 159
 	}
 ]
