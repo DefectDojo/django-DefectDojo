@@ -847,9 +847,12 @@ class NoteHistorySerializer(serializers.ModelSerializer):
 
 
 class NoteSerializer(serializers.ModelSerializer):
-    author = UserSerializer(required=True)
-    editor = UserSerializer(required=False)
-    history = NoteHistorySerializer(read_only=False, many=True)
+    author = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all())
+    editor = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all())
+
+    history = NoteHistorySerializer(read_only=True, many=True)
 
     class Meta:
         model = Notes
