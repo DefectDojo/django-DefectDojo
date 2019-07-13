@@ -1,10 +1,9 @@
 from xml.dom import NamespaceErr
 import hashlib
-try:
-    from lxml import etree as ET
-except ImportError:
-    import xml.etree.ElementTree as ET
-import re
+from defusedxml import ElementTree as ET
+from urllib.parse import urlparse
+from dojo.models import Endpoint, Finding
+
 
 __author__ = 'dr3dd589'
 
@@ -22,6 +21,15 @@ WEAK_CIPHER_LIST = [
     "TLS_RSA_WITH_CAMELLIA_128_CBC_SHA" 
 ]
 
+PROTOCOLS = [
+    "sslv2",
+    "sslv3",
+    "tlsv1",
+    "tlsv1_1",
+    "tlsv1_2",
+    "tlsv1_3"
+]
+
 
 class SslyzeXmlParser(object):
 
@@ -31,55 +39,89 @@ class SslyzeXmlParser(object):
         if file is None:
             return
 
-        self.tree = ET.parse(file)
+        tree = ET.parse(file)
         # get root of tree.
-        self.root = self.tree.getroot()
-        if 'document' not in self.root.tag:
+        root = tree.getroot()
+        if 'document' not in root.tag:
             raise NamespaceErr("This doesn't seem to be a valid sslyze xml file.")
 
-        targets = get_target(self.tree)
-        for target in targets:
-                    
+        results = root.find('results')
+        for target in results:
+            url = target.attrib['host']
+            port = target.attrib['port']
+            parsedUrl = urlparse(url)
+            protocol = parsedUrl.scheme
+            query = parsedUrl.query
+            fragment = parsedUrl.fragment
+            path = parsedUrl.path
+            try:
+                (host, port) = parsedUrl.netloc.split(':')
+            except:
+                host = parsedUrl.netloc
+            for element in target:
+                title = ""
+                severity = ""
+                description = ""
+                severity = "Info"
+                weak_cipher = {}
+                if element.tag == 'heartbleed':
+                    heartbleed_element = element.find('openSslHeartbleed')
+                    if heartbleed_element.attrib['isVulnerable'] == 'True':
+                        title = element.attrib['title'] + " | " + url
+                        description = "**heartbleed** : Vulnerable" + "\n\n" + \
+                                    "**title** : " + element.attrib['title']
+                if element.tag == 'openssl_ccs':
+                    openssl_ccs_element = element.find('openSslCcsInjection')
+                    if openssl_ccs_element.attrib['isVulnerable'] == 'True':
+                        title = element.attrib['title'] + " | " + url
+                        description = "**openssl_ccs** : Vulnerable" + "\n\n" + \
+                                    "**title** : " + element.attrib['title']
+                if element.tag == 'reneg':
+                    reneg_element = element.find('sessionRenegotiation')
+                    if reneg_element.attrib['isSecure'] == 'False':
+                        title = element.attrib['title'] + " | " + url
+                        description = "**Session Renegotiation** : Vulnerable" + "\n\n" + \
+                                    "**title** : " + element.attrib['title']
+                if element.tag in PROTOCOLS and element.attrib['isProtocolSupported'] == "True":
+                    weak_cipher[element.tag] = []
+                    for ciphers in element:
+                        if ciphers.tag == 'preferredCipherSuite' or ciphers.tag == 'acceptedCipherSuites':
+                            for cipher in ciphers:
+                                if cipher.attrib['name'] in WEAK_CIPHER_LIST:
+                                    if not cipher.attrib['name'] in weak_cipher[element.tag]:
+                                        weak_cipher[element.tag].append(cipher.attrib['name'])
+                    if len(weak_cipher[element.tag]) > 0:
+                        title = element.tag + " | " + "Weak Ciphers" + " | " + url
+                        description = "**Protocol** : " + element.tag + "\n\n" + \
+                                    "**Weak Ciphers** : " + ",\n\n".join(weak_cipher[element.tag])
+                if title and description is not None:
+                    dupe_key = hashlib.md5(str(description + title).encode('utf-8')).hexdigest()
+                    if dupe_key in self.dupes:
+                        finding = self.dupes[dupe_key]
+                        if finding.references:
+                            finding.references = finding.references
+                        self.dupes[dupe_key] = finding
+                    else:
+                        self.dupes[dupe_key] = True
 
-    def get_target(self, tree):
-        return tree.xpath('//target')
-                
-    def get_hostname_validation(self, tree):
-        return tree.xpath('//hostnameValidation')
+                        finding = Finding(
+                            title=title,
+                            test=test,
+                            active=False,
+                            verified=False,
+                            description=description,
+                            severity=severity,
+                            numerical_severity=Finding.get_numerical_severity(severity),
+                            dynamic_finding=True,)
+                        finding.unsaved_endpoints = list()
+                        self.dupes[dupe_key] = finding
 
-    def get_protocol_name(self, tree):
-        protocol_supported = []
-        protocols = []
-        protocols.append(tree.xpath('//sslv2'))
-        protocols.append(tree.xpath('//sslv3'))
-        protocols.append(tree.xpath('//tlsv1'))
-        protocols.append(tree.xpath('//tlsv1_1'))
-        protocols.append(tree.xpath('//tlsv1_2'))
-        protocols.append(tree.xpath('//tlsv1_3'))
-
-        for protocol in protocols:
-            if protocol[0].attrib['isProtocolSupported'] == "True":
-                protocol_supported.append(protocol[0])
-
-        return protocol_supported
-
-    def get_weak_cipher_suite(self, tree):
-        protocols = self.get_protocol_name(tree)
-        weak_cipher = {}
-
-        for protocol in protocols:
-            weak_cipher[protocol.tag] = []
-            for ciphers in protocol:
-                if ciphers.tag == 'preferredCipherSuite' or ciphers.tag == 'acceptedCipherSuites':
-                    for cipher in ciphers:
-                        if cipher.attrib['name'] in WEAK_CIPHER_LIST:
-                            if not cipher.attrib['name'] in weak_cipher[protocol.tag]:
-                                weak_cipher[protocol.tag].append(cipher.attrib['name'])
-                            
-        return weak_cipher
-
-    def get_heartbleed(self, tree):
-        return tree.xpath('//heartbleed')
-
-    def get_openssl_ccs(self, tree):
-        return tree.xpath('//openssl_ccs')
+                        if url is not None:
+                            finding.unsaved_endpoints.append(Endpoint(
+                                host=host,
+                                port=port,
+                                path=path,
+                                protocol=protocol,
+                                query=query,
+                                fragment=fragment,))
+                self.items = self.dupes.values()
