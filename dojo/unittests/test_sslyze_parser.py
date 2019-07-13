@@ -10,16 +10,16 @@ class TestSslyzeXMLParser(TestCase):
         self.assertEqual(0, len(parser.items))
 
     def test_parse_file_with_one_target_has_one_vuln(self):
-        testfile = open("/home/dr3dd/gsoc2/sample-scan-files/sslyze/report_one_target_one_vuln.xml")
+        testfile = open("/home/dr3dd/gsoc/sample-scan-files/sslyze/report_one_target_one_vuln.xml")
         parser = SslyzeXmlParser(testfile, Test())
         self.assertEqual(1, len(parser.items))
 
     def test_parse_file_with_one_target_has_three_vuln(self):
-        testfile = open("/home/dr3dd/gsoc2/sample-scan-files/sslyze/report_one_target_three_vuln.xml")
+        testfile = open("/home/dr3dd/gsoc/sample-scan-files/sslyze/report_one_target_three_vuln.xml")
         parser = SslyzeXmlParser(testfile, Test())
         self.assertEqual(3, len(parser.items))
 
     def test_parse_file_with_two_target_has_many_vuln(self):
-        testfile = open("/home/dr3dd/gsoc2/sample-scan-files/sslyze/report_two_target_many_vuln.xml")
+        testfile = open("/home/dr3dd/gsoc/sample-scan-files/sslyze/report_two_target_many_vuln.xml")
         parser = SslyzeXmlParser(testfile, Test())
         self.assertEqual(7, len(parser.items))
