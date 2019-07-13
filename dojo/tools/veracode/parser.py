@@ -99,7 +99,7 @@ class VeracodeXMLParser(object):
                         try:
                             file_path = flaw.attrib['sourcefilepath'] + flaw.attrib['sourcefile']
                         except:
-                            file_path = "Not provided"
+                            file_path = "Not Provided"
                         if mitigatedTest == 1:
                             find = Finding(
                                 title=flaw.attrib['categoryname'],
