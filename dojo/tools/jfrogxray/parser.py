@@ -102,7 +102,7 @@ def get_item(vulnerability, test):
         description=(vulnerability['summary'] + "\n\n" + extra_desc).strip(),
         mitigation=mitigation,
         file_path=vulnerability.get('source_comp_id'),
-        severity_justification=f"CVSS v3 base score: {cvss_v3}\nCVSS v2 base score: {cvss_v2}",
+        severity_justification="CVSS v3 base score: {}\nCVSS v2 base score: {}".format(cvss_v3, cvss_v2),
         static_finding=True,
         dynamic_finding=False,
         references=vulnerability.get('component_versions').get('more_details').get('provider'),
