@@ -34,6 +34,7 @@ RUN \
     libtiff5 \
     dnsutils \
     default-mysql-client \
+    libmariadb3 \
     xmlsec1 \
     git \
     # only required for the dbshell (used by the initializer job)
