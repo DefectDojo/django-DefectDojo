@@ -21,6 +21,10 @@ class NiktoXMLParser(object):
         tree = ET.parse(filename)
         root = tree.getroot()
         scan = root.find('scandetails')
+        # New versions of Nikto have a new file type (nxvmlversion="1.2") which adds an additional niktoscan tag
+        # This find statement below is to support new file format while not breaking older Nikto scan files versions.
+        if scan is None:
+            scan = root.find('./niktoscan/scandetails')
 
         for item in scan.findall('item'):
             # Title
@@ -44,8 +48,10 @@ class NiktoXMLParser(object):
             severity = "Info"  # Nikto doesn't assign severity, default to Info
 
             # Description
-            description = "\nHost: " + ip + "\n" + \
-                item.find("description").text
+            description = "\n \n".join((("Host: " + ip),
+                                    ("Description: " + item.find("description").text),
+                                    ("HTTP Method: " + item.attrib["method"]),
+                                    ))
             mitigation = "N/A"
             impact = "N/A"
             references = "N/A"
