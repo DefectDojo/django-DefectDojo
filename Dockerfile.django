@@ -10,7 +10,7 @@ RUN \
   apt-get -y update && \
   apt-get -y install \
     dnsutils \
-    mysql-client \
+    default-mysql-client \
     postgresql-client \
     xmlsec1 \
     && \
@@ -32,8 +32,8 @@ RUN \
     libjpeg62 \
     libtiff5 \
     dnsutils \
-    mysql-client \
-    libmariadbclient18 \
+    default-mysql-client \
+    libmariadb3 \
     xmlsec1 \
     # only required for the dbshell (used by the initializer job)
     postgresql-client \
