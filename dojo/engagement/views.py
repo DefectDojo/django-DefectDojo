@@ -413,8 +413,7 @@ def add_tests(request, eid):
                 title=new_test.test_type.name + " for " + eng.product.name,
                 test=new_test,
                 engagement=eng,
-                url=request.build_absolute_uri(
-                    reverse('view_engagement', args=(eng.id, ))))
+                url=reverse('view_engagement', args=(eng.id, )))
 
             if '_Add Another Test' in request.POST:
                 return HttpResponseRedirect(
@@ -599,8 +598,7 @@ def import_scan_results(request, eid=None, pid=None):
                     finding_count=finding_count,
                     test=t,
                     engagement=engagement,
-                    url=request.build_absolute_uri(
-                        reverse('view_test', args=(t.id, ))))
+                    url=reverse('view_test', args=(t.id, )))
 
                 return HttpResponseRedirect(
                     reverse('view_test', args=(t.id, )))

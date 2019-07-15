@@ -673,7 +673,7 @@ def request_finding_review(request, fid):
                                 title='Finding review requested',
                                 description='User %s has requested that you please review the finding "%s" for accuracy:\n\n%s' % (user, finding.title, new_note),
                                 icon='check',
-                                url=request.build_absolute_uri(reverse("view_finding", args=(finding.id,))))
+                                url=request.reverse("view_finding", args=(finding.id,)))
 
             messages.add_message(
                 request,
