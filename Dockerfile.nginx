@@ -9,7 +9,7 @@ RUN \
   apt-get -y update && \
   apt-get -y install \
     dnsutils \
-    mysql-client \
+    default-mysql-client \
     postgresql-client \
     xmlsec1 \
     git \
