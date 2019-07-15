@@ -106,9 +106,15 @@ class CheckmarxXMLParser(object):
             for pathnode in path.findall('PathNode'):
                 result_dupes_key = pathnode.find('Line').text + "|" + pathnode.find('Column').text
                 if result_dupes_key not in self.result_dupes:
-                    findingdetail = "{}**Line Number:** {}\n".format(findingdetail, pathnode.find('Line').text)
-                    findingdetail = "{}**Column:** {}\n".format(findingdetail, pathnode.find('Column').text)
-                    findingdetail = "{}**Source Object:** {}\n".format(findingdetail, pathnode.find('Name').text)
+
+                    if pathnode.find('Line').text is not None:
+                        findingdetail = "{}**Line Number:** {}\n".format(findingdetail, pathnode.find('Line').text.encode('utf-8'))
+
+                    if pathnode.find('Column').text is not None:
+                        findingdetail = "{}**Column:** {}\n".format(findingdetail, pathnode.find('Column').text.encode('utf-8'))
+
+                    if pathnode.find('Name').text is not None:
+                        findingdetail = "{}**Source Object:** {}\n".format(findingdetail, pathnode.find('Name').text.encode('utf-8'))
 
                     for codefragment in pathnode.findall('Snippet/Line'):
                         findingdetail = "{}**Number:** {}\n**Code:** {}\n".format(findingdetail, codefragment.find('Number').text, codefragment.find('Code').text.encode('utf-8').strip())
