@@ -70,16 +70,18 @@ class SSLlabsParser(object):
                 if protocol_str:
                     description += "\nProtocols:\n" + protocol_str
 
-                description += "\nSuites List:\n\n"
+                description += "\nSuites List: "
                 suite_info = ""
-
-                if "list" in endpoints["details"]["suites"]:
-                    for suites in endpoints["details"]["suites"]["list"]:
-                        suite_info = suite_info + self.suite_data(suites)
-                elif "suites" in endpoints["details"]:
-                    for item in endpoints["details"]["suites"]:
-                        for suites in item["list"]:
+                try:
+                    if "list" in endpoints["details"]["suites"]:
+                        for suites in endpoints["details"]["suites"]["list"]:
                             suite_info = suite_info + self.suite_data(suites)
+                    elif "suites" in endpoints["details"]:
+                        for item in endpoints["details"]["suites"]:
+                            for suites in item["list"]:
+                                suite_info = suite_info + self.suite_data(suites)
+                except:
+                    suite_info = "Not provided." + "\n\n"
 
                 description += suite_info
                 description += "Additional Information:\n\n"
