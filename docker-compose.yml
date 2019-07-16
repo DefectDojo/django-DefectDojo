@@ -60,14 +60,16 @@ services:
       DD_ADMIN_LAST_NAME: ${DD_ADMIN_LAST_NAME:-User}
       DD_INITIALIZE: ${DD_INITIALIZE:-true}
   mysql:
-    image: mysql:5.7
+    image: mysql:latest
+    security_opt:
+      - seccomp:unconfined
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
       DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}
       MYSQL_USER: ${DD_DATABASE_USER:-defectdojo}
       MYSQL_PASSWORD: ${DD_DATABASE_PASSWORD:-defectdojo}
       MYSQL_DATABASE: ${DD_DATABASE_NAME:-defectdojo}
-    command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
+    command: ['mysqld', '--default-authentication-plugin=mysql_native_password', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
     volumes:
        - defectdojo_data:/var/lib/mysql
   rabbitmq:
