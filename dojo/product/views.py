@@ -454,7 +454,7 @@ def new_product(request):
                                                 messages.SUCCESS,
                                                 'JIRA information added successfully.',
                                                 extra_tags='alert-success')
-            create_notification(event='product_added', title=product.name, url=request.build_absolute_uri(reverse('view_product', args=(product.id,))))
+            create_notification(event='product_added', title=product.name, url=reverse('view_product', args=(product.id,)))
             return HttpResponseRedirect(reverse('view_product', args=(product.id,)))
     else:
         form = ProductForm()
@@ -632,7 +632,7 @@ def new_eng_for_app(request, pid, cicd=False):
                                  'Engagement added successfully.',
                                  extra_tags='alert-success')
 
-            create_notification(event='engagement_added', title=new_eng.name + " for " + prod.name, engagement=new_eng, url=request.build_absolute_uri(reverse('view_engagement', args=(new_eng.id,))), objowner=new_eng.lead)
+            create_notification(event='engagement_added', title=new_eng.name + " for " + prod.name, engagement=new_eng, url=reverse('view_engagement', args=(new_eng.id,)), objowner=new_eng.lead)
 
             if "_Add Tests" in request.POST:
                 return HttpResponseRedirect(reverse('add_tests', args=(new_eng.id,)))
