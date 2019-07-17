@@ -1703,7 +1703,7 @@ class ReImportScanResource(MultipartResource, Resource):
                     item.last_reviewed_by = bundle.request.user
                     item.verified = verified
                     item.active = active
-                    item.save()
+                    item.save(dedupe_option=False)
                     finding_added_count += 1
                     new_items.append(item.id)
                     find = item
@@ -1737,6 +1737,7 @@ class ReImportScanResource(MultipartResource, Resource):
 
                     if item.unsaved_tags is not None:
                         find.tags = item.unsaved_tags
+                find.save()
             # calculate the difference
             to_mitigate = set(original_items) - set(new_items)
             for finding_id in to_mitigate:
