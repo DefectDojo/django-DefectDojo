@@ -52,3 +52,4 @@ titlecase==0.12.0
 social-auth-app-django==3.1.0
 Python-jose==3.0.1
 gitpython>=2.1.13
+ptvsd>=4.2.7
