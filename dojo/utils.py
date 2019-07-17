@@ -5,7 +5,8 @@ import os
 import hashlib
 import json
 import io
-from Crypto.Cipher import AES
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
 from calendar import monthrange
 from datetime import date, datetime
 from math import pi, sqrt
@@ -1354,17 +1355,21 @@ def send_atmention_email(user, users, parent_url, parent_title, new_note):
 def encrypt(key, iv, plaintext):
     text = ""
     if plaintext and plaintext is not None:
-        aes = AES.new(key, AES.MODE_CBC, iv, segment_size=128)
+        backend = default_backend()
+        cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
+        encryptor = cipher.encryptor()
         plaintext = _pad_string(plaintext)
-        encrypted_text = aes.encrypt(plaintext)
+        encrypted_text = encryptor.update(plaintext) + encryptor.finalize()
         text = binascii.b2a_hex(encrypted_text).rstrip()
     return text
 
 
 def decrypt(key, iv, encrypted_text):
-    aes = AES.new(key, AES.MODE_CBC, iv, segment_size=128)
+    backend = default_backend()
+    cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
     encrypted_text_bytes = binascii.a2b_hex(encrypted_text)
-    decrypted_text = aes.decrypt(encrypted_text_bytes)
+    decryptor = cipher.decryptor()
+    decrypted_text = decryptor.update(encrypted_text_bytes) + decryptor.finalize()
     decrypted_text = _unpad_string(decrypted_text)
     return decrypted_text
 
@@ -1372,13 +1377,12 @@ def decrypt(key, iv, encrypted_text):
 def _pad_string(value):
     length = len(value)
     pad_size = 16 - (length % 16)
-    return value.ljust(length + pad_size, '\x00')
+    return value.ljust(length + pad_size, b'\x00')
 
 
 def _unpad_string(value):
     if value and value is not None:
-        while value[-1] == '\x00':
-            value = value[:-1]
+        value = value.rstrip(b'\x00')
     return value
 
 
@@ -1390,7 +1394,7 @@ def dojo_crypto_encrypt(plaintext):
 
         iv = os.urandom(16)
         data = prepare_for_save(
-            iv, encrypt(key, iv, plaintext.encode('ascii', 'ignore')))
+            iv, encrypt(key, iv, plaintext.encode('utf-8')))
 
     return data
 
@@ -1400,7 +1404,7 @@ def prepare_for_save(iv, encrypted_value):
 
     if encrypted_value and encrypted_value is not None:
         binascii.b2a_hex(encrypted_value).rstrip()
-        stored_value = "AES.1:" + binascii.b2a_hex(iv) + ":" + encrypted_value
+        stored_value = "AES.1:" + binascii.b2a_hex(iv).decode('utf-8') + ":" + encrypted_value.decode('utf-8')
     return stored_value
 
 
@@ -1409,7 +1413,7 @@ def get_db_key():
     if hasattr(settings, 'DB_KEY'):
         db_key = settings.DB_KEY
         db_key = binascii.b2a_hex(
-            hashlib.sha256(db_key).digest().rstrip())[:32]
+            hashlib.sha256(db_key.encode('utf-8')).digest().rstrip())[:32]
 
     return db_key
 
@@ -1430,7 +1434,7 @@ def prepare_for_view(encrypted_value):
 
             try:
                 decrypted_value = decrypt(key, iv, value)
-                decrypted_value.decode('ascii')
+                decrypted_value = decrypted_value.decode('utf-8')
             except UnicodeDecodeError:
                 decrypted_value = ""
 

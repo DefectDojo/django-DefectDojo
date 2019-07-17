@@ -303,7 +303,10 @@ class ImportScanForm(forms.Form):
                          ("Mozilla Observatory Scan", "Mozilla Observatory Scan"),
                          ("Whitesource Scan", "Whitesource Scan"),
                          ("Contrast Scan", "Contrast Scan"),
-                         ("Microfocus Webinspect Scan", "Microfocus Webinspect Scan"))
+                         ("Microfocus Webinspect Scan", "Microfocus Webinspect Scan"),
+                         ("Wpscan", "Wpscan"),
+                         ("Sslscan", "Sslscan"),
+                         ("Sslyze Scan", "Sslyze Scan"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
     scan_date = forms.DateTimeField(

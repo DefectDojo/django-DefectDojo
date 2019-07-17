@@ -400,6 +400,13 @@
 			"name": "ZAP Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 149
+		"pk": 158
+	},
+	{
+		"fields": {
+			"name": "Sslyze Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 159
 	}	
 ]
