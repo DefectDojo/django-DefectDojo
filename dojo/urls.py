@@ -8,6 +8,7 @@ from tastypie_swagger.views import SwaggerView, ResourcesView, SchemaView
 from rest_framework.routers import DefaultRouter
 from rest_framework.authtoken import views as tokenviews
 from django.http import HttpResponse
+from defectDojo_engagement_survey.urls import urlpatterns as survey_urls
 
 from dojo import views
 from dojo.api import UserResource, ProductResource, EngagementResource, \
@@ -168,6 +169,8 @@ urlpatterns = [
     url(r'^robots.txt', lambda x: HttpResponse("User-Agent: *\nDisallow: /", content_type="text/plain"), name="robots_file"),
 
 ]
+
+urlpatterns += survey_urls
 
 if hasattr(settings, 'DJANGO_ADMIN_ENABLED'):
     if settings.DJANGO_ADMIN_ENABLED:
