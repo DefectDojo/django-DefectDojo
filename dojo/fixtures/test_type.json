@@ -471,5 +471,12 @@
 		},
 		"model": "dojo.test_type",
 		"pk": 159
+	},
+	{
+		"fields": {
+			"name": "Testssl Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 160
 	}	
 ]
