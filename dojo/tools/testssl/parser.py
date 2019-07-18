@@ -31,13 +31,12 @@ class TestsslCSVParser(object):
         for row in csvarray:
             if row['severity'] in SEV:
                 url = row['fqdn/ip'].split('/')[0]
-                port = row['port']
                 title = row['id']
                 severity = row['severity'].lower().capitalize()
                 if severity == 'Warn':
                     severity = 'Info'
                 cves = row['cve'].split(' ')
-                description = "**finding** : " + row['finding'] + "\n\n"
+                description = "**Finding** : " + row['finding'] + "\n\n"
                 if len(cves) > 1:
                     cve_desc = ""
                     cve = cves[0]
@@ -58,8 +57,6 @@ class TestsslCSVParser(object):
                     dupe_key = hashlib.md5(str(description + title).encode('utf-8')).hexdigest()
                     if dupe_key in self.dupes:
                         finding = self.dupes[dupe_key]
-                        if finding.references:
-                            finding.references = finding.references
                         self.process_endpoints(finding, url)
                         self.dupes[dupe_key] = finding
                     else:
