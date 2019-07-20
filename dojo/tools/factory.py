@@ -59,6 +59,7 @@ from dojo.tools.wpscan.parser import WpscanJSONParser
 from dojo.tools.sslscan.parser import SslscanXMLParser
 from dojo.tools.sslyze.parser import SslyzeXmlParser
 from dojo.tools.testssl.parser import TestsslCSVParser
+from dojo.tools.hadolint.parser import HadolintParser
 
 __author__ = 'Jay Paz'
 
@@ -178,6 +179,7 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = WapitiXMLParser(file, test)
     elif scan_type == 'Cobalt.io Scan':
         parser = CobaltCSVParser(file, test)
+<<<<<<<
     elif scan_type == 'Mozilla Observatory Scan':
         parser = MozillaObservatoryJSONParser(file, test)
     elif scan_type == 'Whitesource Scan':
@@ -192,6 +194,10 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = SslyzeXmlParser(file, test)
     elif scan_type == 'Testssl Scan':
         parser = TestsslCSVParser(file, test)
+=======
+    elif scan_type == 'Hadolint Dockerfile check':
+        parser = HadolintParser(file, test)    
+>>>>>>>
     else:
         raise ValueError('Unknown Test Type')
 
