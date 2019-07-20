@@ -478,19 +478,13 @@
 		},
 		"model": "dojo.test_type",
 		"pk": 160
-	}	
-      "name": "Cobalt.io Scan"
-    },
-    "model": "dojo.test_type",
-    "pk": 57
-
 	},
 	{
 		"fields": {
       		"name": "Hadolint Dockerfile check"
     	},
     	"model": "dojo.test_type",
-    	"pk": 58
+    	"pk": 161
 
 	}
 ]
