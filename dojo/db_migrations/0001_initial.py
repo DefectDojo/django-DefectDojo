@@ -722,7 +722,7 @@ class Migration(migrations.Migration):
                 ('enable_product_grade', models.BooleanField(default=False, help_text='Displays a grade letter next to a product to show the overall health.', verbose_name='Enable Product Grading')),
                 ('product_grade', models.CharField(blank=True, max_length=800)),
                 ('product_grade_a', models.IntegerField(default=90, help_text=b"Percentage score for an 'A' >=", verbose_name='Grade A')),
-                ('product_grade_', models.IntegerField(default=80, help_text=b"Percentage score for a '' >=", verbose_name='Grade ')),
+                ('product_grade_b', models.IntegerField(default=80, help_text=b"Percentage score for a '' >=", verbose_name='Grade ')),
                 ('product_grade_c', models.IntegerField(default=70, help_text=b"Percentage score for a 'C' >=", verbose_name='Grade C')),
                 ('product_grade_d', models.IntegerField(default=60, help_text=b"Percentage score for a 'D' >=", verbose_name='Grade D')),
                 ('product_grade_f', models.IntegerField(default=59, help_text=b"Percentage score for an 'F' <=", verbose_name='Grade F')),

@@ -52,11 +52,13 @@ class VeracodeXMLParser(object):
                             '{https://www.veracode.com/schema/reports/export/1.0}bulletitem'
                     ):
                         mitigation += "    * " + bullet.attrib['text'] + '\n'
-
                 for flaw in category.iter(
                         '{https://www.veracode.com/schema/reports/export/1.0}flaw'
                 ):
-                    dupe_key = sev + flaw.attrib['cweid'] + flaw.attrib['module'] + flaw.attrib['type'] + flaw.attrib['line'] + flaw.attrib['issueid']
+                    try:
+                        dupe_key = sev + flaw.attrib['cweid'] + flaw.attrib['module'] + flaw.attrib['type'] + flaw.attrib['line'] + flaw.attrib['issueid']
+                    except:
+                        dupe_key = sev + flaw.attrib['cweid'] + flaw.attrib['module'] + flaw.attrib['type'] + flaw.attrib['issueid']
 
                     if dupe_key in dupes:
                         find = dupes[dupe_key]
@@ -90,11 +92,19 @@ class VeracodeXMLParser(object):
                             mitigated_by_id = 4
                         else:
                             pass
+                        try:
+                            line_number = flaw.attrib['line']
+                        except:
+                            line_number = None
+                        try:
+                            file_path = flaw.attrib['sourcefilepath'] + flaw.attrib['sourcefile']
+                        except:
+                            file_path = "Not Provided"
                         if mitigatedTest == 1:
                             find = Finding(
                                 title=flaw.attrib['categoryname'],
-                                line_number=flaw.attrib['line'],
-                                file_path=flaw.attrib['sourcefilepath'] + flaw.attrib['sourcefile'],
+                                line_number=line_number,
+                                file_path=file_path,
                                 line=flaw.attrib['line'],
                                 static_finding=True,
                                 sourcefile=flaw.attrib['sourcefile'],
@@ -121,11 +131,11 @@ class VeracodeXMLParser(object):
                         else:
                             find = Finding(
                                 title=flaw.attrib['categoryname'],
-                                line_number=flaw.attrib['line'],
-                                file_path=flaw.attrib['sourcefilepath'] + flaw.attrib['sourcefile'],
-                                line=flaw.attrib['line'],
+                                line_number=line_number,
+                                file_path=file_path,
+                                line=line_number,
                                 static_finding=True,
-                                sourcefile=flaw.attrib['sourcefile'],
+                                sourcefile=file_path,
                                 cwe=int(flaw.attrib['cweid']),
                                 test=test,
                                 active=False,
