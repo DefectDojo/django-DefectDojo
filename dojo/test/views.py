@@ -15,6 +15,7 @@ from django.views.decorators.cache import cache_page
 from django.utils import timezone
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
+from tagging.models import Tag
 
 from dojo.filters import TemplateFindingFilter
 from dojo.forms import NoteForm, TestForm, FindingForm, \
@@ -33,6 +34,7 @@ def view_test(request, tid):
     test = Test.objects.get(id=tid)
     prod = test.engagement.product
     auth = request.user.is_staff or request.user in prod.authorized_users.all()
+    tags = Tag.objects.usage_for_model(Finding)
     if not auth:
         # will render 403
         raise PermissionDenied
@@ -80,7 +82,8 @@ def view_test(request, tid):
                    'request': request,
                    'show_re_upload': show_re_upload,
                    'creds': creds,
-                   'cred_test': cred_test
+                   'cred_test': cred_test,
+                   'tag_input': tags
                    })
 
 
@@ -440,6 +443,11 @@ def finding_bulk_update(request, tid):
                                  is_Mitigated=form.cleaned_data['is_Mitigated'],
                                  last_reviewed=timezone.now(),
                                  last_reviewed_by=request.user)
+                if form.cleaned_data['tags']:
+                    for finding in finds:
+                        tags = request.POST.getlist('tags')
+                        ts = ", ".join(tags)
+                        finding.tags = ts
 
                 # Update the grade as bulk edits don't go through save
                 if form.cleaned_data['severity'] or form.cleaned_data['status']:

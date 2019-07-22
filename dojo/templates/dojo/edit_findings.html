@@ -15,7 +15,7 @@
     }
 {% endblock %}
 {% block content %}
-    <h3> Edit a Finding</h3>
+    <h3> Edit a Finding </h3>
     {% if temp %}
 
         <form id="add_finding" class="form-horizontal" action="{% url 'edit_finding' finding.id %}" method="post">
@@ -75,7 +75,7 @@
         $(function () {
             $('[data-toggle="tooltip"]').tooltip()
             $('#id_tags').chosen({
-                'placeholder_text_multiple': 'Select or add some tags...',
+                'placeholder_text_multiple': 'Select or add some tags',
                 'no_results_text': "Tag not found, press TAB key to add.",
             });
 
