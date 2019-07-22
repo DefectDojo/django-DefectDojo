@@ -37,6 +37,9 @@
                 </div>
                 <button class="btn btn-primary pull-right" type="submit">Remove selected</button>
             </form>
+            <form method="get" action="{% url 'migrate_alerts' %}">
+                <button class="btn btn-primary pull-left" type="submit">Migrate Alerts</button>
+            </form>
         </div>
         <div class="col-md-12">
             <div class="clearfix">
