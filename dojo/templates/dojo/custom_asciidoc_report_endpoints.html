@@ -9,7 +9,17 @@
         <h4>=== {{ endpoint }} with {{ endpoint.active_findings|length|apnumber }} active findings ===</h4>
         {% for find in endpoint.active_findings %}
             <h5>==== Finding {{ find.id }}: {{ find.title | nice_title }} {% if find.mitigated %}
-                Mitigated on: {{ find.mitigated }} {% endif %}====</h5>
+                Mitigated on: {{ find.mitigated }} {% endif %}
+                {% if find.tags %}
+                    <sup>
+                        [
+                        {% for tag in find.tags %}
+                        {{ tag }}
+                        {% endfor %}
+                        ]
+                    </sup>
+                {% endif %}  ====
+            </h5>
             <br>
             <p><b>==== Product: ====</b>
                 <br>
