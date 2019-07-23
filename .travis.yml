@@ -5,7 +5,7 @@ services:
 env:
   global:
     - K8S_VERSION=v1.13.4
-    - MINIKUBE_VERSION=v0.35.0
+    - MINIKUBE_VERSION=v1.2.0
     - HELM_VERSION=v2.13.0
     - CHANGE_MINIKUBE_NONE_USER=true
   matrix:
