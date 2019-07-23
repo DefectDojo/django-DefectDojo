@@ -333,7 +333,7 @@ class OpenFindingFilter(DojoFilter):
         queryset=Product.objects.all(),
         label="Product")
     if get_system_setting('enable_jira'):
-        jira_issue = BooleanFilter(name='jira_issue',
+        jira_issue = BooleanFilter(field_name='jira_issue',
                                    lookup_expr='isnull',
                                    exclude=True,
                                    label='JIRA issue')
