@@ -73,7 +73,7 @@ class NessusCSVParser(object):
                         dat['endpoint'] = var
                         endpoint = Endpoint(host=var)
                     elif heading[i] == "Port":
-                        if var is not "None":
+                        if var != "None":
                             if dat['description'] is not None:
                                 dat['description'] = "Ports:"
                                 + var + "\n" + dat['description']
@@ -181,7 +181,9 @@ class NessusXMLParser(object):
                     nessus_severity_id = int(item.attrib["severity"])
                     severity = get_text_severity(nessus_severity_id)
 
-                    impact = item.find("description").text + "\n\n"
+                    impact = ""
+                    if item.find("description"):
+                        impact = item.find("description").text + "\n\n"
                     if item.findtext("cvss_vector"):
                         impact += "CVSS Vector: " + item.find("cvss_vector").text + "\n"
                     if item.findtext("cvss_base_score"):
