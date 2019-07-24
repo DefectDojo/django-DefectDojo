@@ -10,10 +10,11 @@ from celery.utils.log import get_task_logger
 from celery.decorators import task
 from dojo.models import Product, Finding, Engagement, System_Settings
 from django.utils import timezone
+from dojo.signals import dedupe_signal
 
 import pdfkit
 from dojo.celery import app
-from dojo.utils import sync_dedupe, sync_false_history, calculate_grade
+from dojo.utils import sync_false_history, calculate_grade
 from dojo.reports.widgets import report_widget_factory
 from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, \
                        close_epic, create_notification, sync_rules
@@ -260,7 +261,7 @@ def add_comment_task(find, note):
 @app.task(name='async_dedupe')
 def async_dedupe(new_finding, *args, **kwargs):
     deduplicationLogger.debug("running deduplication")
-    sync_dedupe(new_finding, *args, **kwargs)
+    dedupe_signal.send(sender=new_finding.__class__, new_finding=new_finding)
 
 
 @app.task(name='applying rules')
