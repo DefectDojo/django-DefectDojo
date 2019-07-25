@@ -1056,7 +1056,7 @@ def log_jira_message(text, finding):
 def add_labels(find, issue):
     # Update Label with system setttings label
     system_settings = System_Settings.objects.get()
-    labels = system_settings.jira_labels.split()
+    labels = (system_settings.jira_labels or '').split()
     if len(labels) > 0:
         for label in labels:
             issue.fields.labels.append(label)
