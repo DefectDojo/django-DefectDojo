@@ -15,4 +15,9 @@ class Migration(migrations.Migration):
             name='remediated',
             field=models.BooleanField(blank=True, default=False),
         ),
+        migrations.AlterField(
+            model_name='finding',
+            name='dynamic_finding',
+            field=models.BooleanField(default=True),
+        ),
     ]

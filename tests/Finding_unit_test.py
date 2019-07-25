@@ -30,7 +30,7 @@ class FindingTest(unittest.TestCase):
         # Allow a little time for the driver to initialize
         self.driver.implicitly_wait(30)
         # Set the base address of the dojo
-        self.base_url = "http://localhost:8080/"
+        self.base_url = "http://localhost:8000/"
         self.verificationErrors = []
         self.accept_next_alert = True
 

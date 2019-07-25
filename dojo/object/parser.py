@@ -102,7 +102,7 @@ def import_object_eng(request, engagement, json_data):
 
     # Create the notification
     if create_alert:
-        create_notification(event='code_review', title='Manual Code Review Requested', description="Manual code review requested as tracked file changes were found in the latest build.", engagement=engagement, url=request.build_absolute_uri(reverse('view_object_eng', args=(engagement.id,))))
+        create_notification(event='code_review', title='Manual Code Review Requested', description="Manual code review requested as tracked file changes were found in the latest build.", engagement=engagement, url=reverse('view_object_eng', args=(engagement.id,)))
 
     # Create the test within the engagement
     if create_test_code_review:

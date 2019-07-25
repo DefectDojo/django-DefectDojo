@@ -15,6 +15,7 @@ from django.views.decorators.cache import cache_page
 from django.utils import timezone
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
+from tagging.models import Tag
 
 from dojo.filters import TemplateFindingFilter
 from dojo.forms import NoteForm, TestForm, FindingForm, \
@@ -33,6 +34,7 @@ def view_test(request, tid):
     test = Test.objects.get(id=tid)
     prod = test.engagement.product
     auth = request.user.is_staff or request.user in prod.authorized_users.all()
+    tags = Tag.objects.usage_for_model(Finding)
     if not auth:
         # will render 403
         raise PermissionDenied
@@ -80,7 +82,8 @@ def view_test(request, tid):
                    'request': request,
                    'show_re_upload': show_re_upload,
                    'creds': creds,
-                   'cred_test': cred_test
+                   'cred_test': cred_test,
+                   'tag_input': tags
                    })
 
 
@@ -440,6 +443,11 @@ def finding_bulk_update(request, tid):
                                  is_Mitigated=form.cleaned_data['is_Mitigated'],
                                  last_reviewed=timezone.now(),
                                  last_reviewed_by=request.user)
+                if form.cleaned_data['tags']:
+                    for finding in finds:
+                        tags = request.POST.getlist('tags')
+                        ts = ", ".join(tags)
+                        finding.tags = ts
 
                 # Update the grade as bulk edits don't go through save
                 if form.cleaned_data['severity'] or form.cleaned_data['status']:
@@ -551,7 +559,7 @@ def re_import_scan_results(request, tid):
                         item.last_reviewed_by = request.user
                         item.verified = verified
                         item.active = active
-                        item.save()
+                        item.save(dedupe_option=False)
                         finding_added_count += 1
                         new_items.append(item.id)
                         find = item
@@ -594,6 +602,7 @@ def re_import_scan_results(request, tid):
                         if item.unsaved_tags is not None:
                             find.tags = item.unsaved_tags
 
+                    find.save()
                 # calculate the difference
                 to_mitigate = set(original_items) - set(new_items)
                 for finding_id in to_mitigate:
@@ -631,7 +640,7 @@ def re_import_scan_results(request, tid):
                                                                  'mitigated') + '. Please manually verify each one.',
                                          extra_tags='alert-success')
 
-                create_notification(event='results_added', title=str(finding_count) + " findings for " + engagement.product.name, finding_count=finding_count, test=t, engagement=engagement, url=request.build_absolute_uri(reverse('view_test', args=(t.id,))))
+                create_notification(event='results_added', title=str(finding_count) + " findings for " + engagement.product.name, finding_count=finding_count, test=t, engagement=engagement, url=reverse('view_test', args=(t.id,)))
 
                 return HttpResponseRedirect(reverse('view_test', args=(t.id,)))
             except SyntaxError:
