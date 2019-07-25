@@ -32,11 +32,9 @@ class ScannerTest(unittest.TestCase):
         self.verificationErrors = []
         self.accept_next_alert = True
         self.repo_path = dir_path + '/scans'
-        try:
-            os.mkdir('scans')
-        except:
-            shutil.rmtree('scans')
-            os.mkdir('scans')
+        if os.path.isdir(self.repo_path):
+            shutil.rmtree(self.repo_path)
+        os.mkdir(self.repo_path)
         scan_types = git.Repo.clone_from('https://github.com/DefectDojo/sample-scan-files', self.repo_path)
         self.remove_items = ['__init__.py', '__init__.pyc', 'factory.py', 'factory.pyc',
                         'factory.py', 'LICENSE', 'README.md', '.gitignore', '.git', '__pycache__']
@@ -315,7 +313,7 @@ class ScannerTest(unittest.TestCase):
     def tearDown(self):
         self.driver.quit()
         self.assertEqual([], self.verificationErrors)
-        shutil.rmtree('scans')
+        shutil.rmtree(self.repo_path)
 
 
 def suite():

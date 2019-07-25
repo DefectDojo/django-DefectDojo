@@ -465,11 +465,25 @@
 		"model": "dojo.test_type",
 		"pk": 158
 	},
-	{
+    {
 		"fields": {
 			"name": "Sslyze Scan"
 		},
 		"model": "dojo.test_type",
 		"pk": 159
-	}	
+	},
+	{
+		"fields": {
+			"name": "Testssl Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 160
+	},	
+	{
+	   "fields": {
+	      "name": "JFrog Xray Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 161
+	}
 ]

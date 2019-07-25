@@ -329,24 +329,6 @@ class DedupeTest(unittest.TestCase):
                 dupe_count += 1
         self.assertEqual(dupe_count, 1)
 
-    def test_remove_blank_endpoints(self):
-        driver = self.login_page()
-        driver.get(self.base_url + "endpoint")
-        while True:
-            text = driver.find_element_by_tag_name("BODY").text
-            if 'No endpoints' in text:
-                return
-            else:
-                driver.find_element_by_id("select_all").click()
-                driver.find_element_by_css_selector("i.fa.fa-trash").click()
-                try:
-                    WebDriverWait(driver, 1).until(EC.alert_is_present(),
-                                                'Timed out waiting for PA creation ' +
-                                                'confirmation popup to appear.')
-                    driver.switch_to.alert.accept()
-                except TimeoutException:
-                    print("Alert did not show.")
-
     def tearDown(self):
         self.driver.quit()
         self.assertEqual([], self.verificationErrors)
@@ -377,7 +359,6 @@ def suite():
     suite.addTest(DedupeTest('test_import_cross_test'))
     suite.addTest(DedupeTest('test_check_cross_status'))
     # Clean up
-    suite.addTest(DedupeTest('test_remove_blank_endpoints'))
     suite.addTest(product_unit_test.ProductTest('test_delete_product'))
     return suite
 
