@@ -310,7 +310,7 @@ class ImportScanForm(forms.Form):
                          ("Immuniweb Scan", "Immuniweb Scan"),
                          ("Sonatype Application Scan", "Sonatype Application Scan"),
                          ("Cobalt.io Scan", "Cobalt.io Scan"),
-                         ("Mozilla Observatory Scan", "Mozilla Observatory Scan"),A
+                         ("Mozilla Observatory Scan", "Mozilla Observatory Scan"),
                          ("Whitesource Scan", "Whitesource Scan"),
                          ("Contrast Scan", "Contrast Scan"),
                          ("Microfocus Webinspect Scan", "Microfocus Webinspect Scan"),
