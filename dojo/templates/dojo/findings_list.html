@@ -2,6 +2,7 @@
 {% load navigation_tags %}
 {% load display_tags %}
 {% load get_system_setting %}
+{% load static from staticfiles %}
 {% block content %}
     <div class="row">
         <div class="col-md-12">
@@ -64,6 +65,14 @@
                                 {% if "enable_jira"|get_system_setting %}
                                 <b>Push to JIRA</b> <input id="id_push_tojira" name="push_to_jira" type="checkbox" alt="Select to push to JIRA"/><br/>
                                 {% endif %}
+                                <label style="display: block">Tags</label>
+                                <label style="font-size: 80%; font-weight: normal; display: block; padding-right: 8px;">
+                                    <select multiple class="chosen-select" style="display: none;" name="tags" id="tag_choices">
+                                        {% for tag in tag_input %}
+                                            <option value="{{tag}}">{{tag}}</option>
+                                        {% endfor %}`
+                                    </select>
+                               </label>
                                 <input type="submit" class="btn btn-sm btn-primary" value="Submit"/>
                             </form>
                         </li>
@@ -325,12 +334,29 @@
 
 {% endblock %}
 {% block postscript %}
-    <script>
+    <script type="application/javascript" src="{% static "chosen/chosen.jquery.min.js" %}"></script>
+    <script type="application/javascript">
+        $(function () {
+          $(".chosen-select").chosen({
+            'placeholder_text_multiple': 'Select or add some tags...',
+            'no_results_text': "Tag not found, press TAB key to add."
+            });
+
+          $(".search-field").find("input").on("keydown", function (evt) {
+            var stroke;
+            stroke = (_ref = evt.which) != null ? _ref : evt.keyCode;
+                if (stroke == 9) { // 9 = tab key
+                    var o = new Option($(this).val(), $(this).val(), true, true);
+                    $('#tag_choices').append(o);
+                    $('#tag_choices').trigger('chosen:updated');
+                    $('#tag_choices').focus();
+                }
+            });
+        });
         var checkbox_count = 0;
         function check_checked_finding()
         {
           var checkbox_values = $("input[type=checkbox][name^='select_']");
-
           for (var i = 0; i < checkbox_values.length; i++) {
             if ($(checkbox_values[i]).prop("checked")) {
               if (checkbox_values[i].name != 'select_all') {
@@ -512,6 +538,7 @@
             };
 
         });
+
     </script>
     {% include "dojo/filter_js_snippet.html" %}
 {% endblock %}
