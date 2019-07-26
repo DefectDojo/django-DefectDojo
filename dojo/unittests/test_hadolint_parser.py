@@ -14,4 +14,4 @@ class TesthadolintParser(TestCase):
         testfile = open("dojo/unittests/scans/hadolint/many_dockerfile.json")
         parser = HadolintParser(testfile, Test())
         testfile.close()
-        self.assertEqual(4, len(parser.items))
+        self.assertEqual(12, len(parser.items))
