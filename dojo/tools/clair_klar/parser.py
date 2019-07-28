@@ -62,7 +62,7 @@ def get_item(item_node, test):
 
     mitigation = ""
     if 'FixedBy' in item_node:
-        description = description + "\n Fixed by: "+ str(item_node['FixedBy'])
+        description = description + "\n Fixed by: " + str(item_node['FixedBy'])
         mitigation = "Please use version " + item_node['FixedBy'] + " of library " + item_node['FeatureName']
     else:
         mitigation = "A patch could not been found"
