@@ -13,7 +13,7 @@ DefectDojo on AWS Fargate uses a single AWS Cloudformation template
 requirements 2 + 3 should be in place if your organisation has experience with AWS Fargate
 
 ### Preperation
-Modify the parameters in [aws-farget.yml](aws-farget.yml) with the correct values for your AWS account and target environment.
+Modify the parameters in [aws-fargate.yml](aws-fargate.yml) with the correct values for your AWS account and target environment.
 
 ### Execution
 ```
