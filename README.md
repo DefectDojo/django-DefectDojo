@@ -44,6 +44,7 @@ For detailed documentation you can visit
 
 * [Kubernetes](KUBERNETES.md)
 * [Docker](DOCKER.md)
+* [AWS Fargate](AWSFARGATE.md)
 
 ## Getting Started
 

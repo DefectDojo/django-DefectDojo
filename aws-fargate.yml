@@ -1,0 +1,270 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description:
+  CloudFormation template for DefectDojo deployment on AWS Fargate
+  Depencencies (not in scope of this template)
+    - Creation of Fargate cluster including its VPC and Subnet(s)
+    - Creation of the AWS IAM Role allowing the containertaskrole on runtime
+    - Creation of external SQL database (like AWS RDS MySQL)
+
+Parameters:
+  # Fargate
+  FargateClusterName:
+    Description: Cluster Name
+    Type: String
+    Default: existing-fargate-cluster
+  FargateRole:
+    Description: AWS IAM Role
+    Type: String
+    Default: arn:aws:iam::xxxxxxx:role/xxxxx-containertaskrole
+  # Database
+  DdDatabaseUrl:
+    Description: Database URL
+    Type: String
+    Default: mysql://defectdojouser:defectdojopassword@defectdojo.xxxxxxx.region.rds.amazonaws.com:3306/defectdojo
+  DdDatabasePort:
+    Description: Database Port
+    Type: Number
+    Default: 3306
+  DdDatabaseEngine:
+    Description: Database Engine
+    Type: String
+    AllowedValues: 
+      - django.db.backends.mysql
+      - django.db.backends.postgresql
+    Default: django.db.backends.mysql
+  # Logging
+  LogGroupName:
+    Description: CloudWatch LogGroup /name
+    Type: String
+    Default: /ecs/fargate/defectdojo
+  # Network
+  NetworkVpcId:
+    Description: Fargate vpc
+    Type: String
+    Default: vpc-xxxxxx
+  NetworkSubnet1Id:
+    Description: Fargate VPC subnet1
+    Type: String
+    Default: subnet-xxxxxx   
+  NetworkIpIngress:
+    Description: Allowed Inbound IP for NGINX traffic on 8080 (used by SG)
+    Type: String
+    Default: 0.0.0.0/32
+  # Region
+  Region:
+    Description: AWS Region
+    Type: String
+    Default: eu-central-1
+
+Resources:
+  ## Logging
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Ref LogGroupName
+      RetentionInDays: 1
+
+  ## Fargate Task
+  TaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    DependsOn: LogGroup
+    Properties:
+      RequiresCompatibilities:
+      - FARGATE
+      NetworkMode: awsvpc
+      Family: defectdojo
+      ExecutionRoleArn: !Ref FargateRole
+      Cpu: '1024'
+      Memory: '2048'
+      ContainerDefinitions:
+
+      - Name: nginx
+        Image: defectdojo/defectdojo-nginx:latest
+        DependsOn: 
+        - ContainerName: uwsgi
+          Condition: START
+        Essential: true
+        LogConfiguration:
+          LogDriver: awslogs
+          Options:
+            awslogs-group: !Ref LogGroupName
+            awslogs-region: !Ref Region
+            awslogs-stream-prefix: ecs
+        PortMappings:
+        - ContainerPort: 8080
+          Protocol: tcp
+        Environment:
+        - Name:  DD_UWSGI_HOST
+          Value: 127.0.0.1  
+
+      - Name: uwsgi
+        Image: defectdojo/defectdojo-django:latest
+        Essential: true
+        EntryPoint: 
+          - '/entrypoint-uwsgi.sh'
+        LogConfiguration:
+          LogDriver: awslogs
+          Options:
+            awslogs-group: !Ref LogGroupName
+            awslogs-region: !Ref Region
+            awslogs-stream-prefix: ecs
+        PortMappings:
+        - ContainerPort: 3031
+          Protocol: tcp
+        Environment:
+        - Name: DD_DEBUG
+          Value: "on"
+        - Name : DD_ALLOWED_HOSTSs
+          Value: "*"
+        - Name:  DD_DATABASE_URL
+          Value: !Ref DdDatabaseUrl
+        - Name:  DD_DATABASE_PORT
+          Value: !Ref DdDatabasePort
+        - Name:  DD_DATABASE_ENGINE
+          Value: !Ref DdDatabaseEngine
+        - Name : DD_CELERY_BROKER_USER
+          Value: guest
+        - Name: DD_CELERY_BROKER_PASSWORD
+          Value: guest
+
+      - Name: celerybeat
+        Image: defectdojo/defectdojo-django:latest
+        DependsOn: 
+        - ContainerName: rabbitmq
+          Condition: START
+        Essential: true
+        EntryPoint:
+          - '/entrypoint-celery-beat.sh'
+        LogConfiguration:
+          LogDriver: awslogs
+          Options:
+            awslogs-group: !Ref LogGroupName
+            awslogs-region: !Ref Region
+            awslogs-stream-prefix: ecs
+        Environment:
+        - Name:  DD_DATABASE_URL
+          Value: !Ref DdDatabaseUrl
+        - Name:  DD_DATABASE_PORT
+          Value: !Ref DdDatabasePort
+        - Name:  DD_DATABASE_ENGINE
+          Value: !Ref DdDatabaseEngine
+        - Name : DD_CELERY_BROKER_USER
+          Value: guest
+        - Name: DD_CELERY_BROKER_PASSWORD
+          Value: guest
+        - Name: DD_CELERY_BROKER_HOST
+          Value: 127.0.0.1
+
+      - Name: celeryworker
+        Image: defectdojo/defectdojo-django:latest
+        Essential: true
+        DependsOn: 
+        - ContainerName: rabbitmq
+          Condition: START        
+        EntryPoint: 
+          - '/entrypoint-celery-worker.sh'
+        LogConfiguration:
+          LogDriver: awslogs
+          Options:
+            awslogs-group: !Ref LogGroupName
+            awslogs-region: !Ref Region
+            awslogs-stream-prefix: ecs
+        Environment:
+        - Name:  DD_DATABASE_URL
+          Value: !Ref DdDatabaseUrl
+        - Name:  DD_DATABASE_PORT
+          Value: !Ref DdDatabasePort
+        - Name:  DD_DATABASE_ENGINE
+          Value: !Ref DdDatabaseEngine
+        - Name : DD_CELERY_BROKER_USER
+          Value: guest
+        - Name: DD_CELERY_BROKER_PASSWORD
+          Value: guest   
+        - Name: DD_CELERY_BROKER_HOST
+          Value: 127.0.0.1                          
+
+      - Name: initializer
+        Image: defectdojo/defectdojo-django:latest
+        Essential: false    
+        EntryPoint: 
+          - '/entrypoint-initializer.sh'
+        LogConfiguration:
+          LogDriver: awslogs
+          Options:
+            awslogs-group: !Ref LogGroupName
+            awslogs-region: !Ref Region
+            awslogs-stream-prefix: ecs
+        Environment:
+        - Name:  DD_DATABASE_URL
+          Value: !Ref DdDatabaseUrl
+        - Name:  DD_ADMIN_USER
+          Value: admin
+        - Name : DD_ADMIN_MAIL
+          Value: admin@defectdojo.local
+        - Name: DD_ADMIN_FIRST_NAME
+          Value: Admin   
+        - Name:  DD_ADMIN_LAST_NAME
+          Value: User
+        - Name:  DD_INITIALIZE
+          Value: true
+
+      - Name: rabbitmq
+        Image: rabbitmq:3.7
+        Essential: true
+        LogConfiguration:
+          LogDriver: awslogs
+          Options:
+            awslogs-group: !Ref LogGroupName
+            awslogs-region: !Ref Region
+            awslogs-stream-prefix: ecs
+        PortMappings:
+        - ContainerPort: 5672
+          Protocol: tcp
+  
+  ## Fargate Service
+  Service:
+    Type: AWS::ECS::Service
+    Properties:
+      Cluster: !Ref FargateClusterName
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+      DesiredCount: 1
+      # EnableECSManagedTags: true
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          SecurityGroups:
+          - !Ref SecurityGroupDefectDojo
+          Subnets:
+          - !Ref NetworkSubnet1Id
+      # PropagateTags: SERVICE
+      TaskDefinition: !Ref TaskDefinition
+
+  ## Security Group
+  SecurityGroupDefectDojo:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: defectdojo
+      GroupDescription: defectdojo      
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 8080
+        ToPort: 8080
+        CidrIp: !Ref NetworkIpIngress
+      VpcId: !Ref NetworkVpcId
+      Tags:
+        - Key: Name
+          Value: sg-defectdojo
+  SecurityGroupIngressDefectDojo:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: SecurityGroupDefectDojo
+    Properties:
+      GroupId: !Ref SecurityGroupDefectDojo
+      IpProtocol: tcp
+      FromPort: 0
+      ToPort: 65535
+      SourceSecurityGroupId: !Ref SecurityGroupDefectDojo
