@@ -16,7 +16,11 @@ requirements 2 + 3 should be in place if your organisation has experience with A
 Modify the parameters in [aws-farget.yml](aws-farget.yml) with the correct values for your AWS account and target environment.
 
 ### Execution
+```
 aws cloudformation create-stack --stack-name defectdojo --template-body file:///$PWD/aws-fargate.yml
+```
 
 ### Clean up
+```
 aws cloudformation delete-stack --stack-name defectdojo
+```
