@@ -258,7 +258,7 @@ Resources:
       VpcId: !Ref NetworkVpcId
       Tags:
         - Key: Name
-          Value: sg-defectdojo
+          Value: defectdojo
   SecurityGroupIngressDefectDojo:
     Type: AWS::EC2::SecurityGroupIngress
     DependsOn: SecurityGroupDefectDojo
