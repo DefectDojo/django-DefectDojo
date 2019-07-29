@@ -197,7 +197,7 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
     elif scan_type == 'Testssl Scan':
         parser = TestsslCSVParser(file, test)
     elif scan_type == 'Hadolint Dockerfile check':
-        parser = HadolintParser(file, test)    
+        parser = HadolintParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 
