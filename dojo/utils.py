@@ -16,6 +16,7 @@ from dateutil.relativedelta import relativedelta, MO
 from django.conf import settings
 from django.core.mail import send_mail
 from django.core.mail import EmailMessage
+from django.core.mail import get_connection
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.urls import get_resolver, reverse
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
@@ -27,6 +28,7 @@ from jira.exceptions import JIRAError
 # from django.dispatch import receiver
 # from django.core.signals import request_finished
 # from dojo.signals import dedupe_signal
+import sys
 
 from dojo.models import Finding, Engagement, Finding_Template, Product, JIRA_PKey, JIRA_Issue, \
     Dojo_User, User, Alerts, System_Settings, Notifications, UserContactInfo, Endpoint, Benchmark_Type, \
@@ -1385,13 +1387,15 @@ def process_notifications(request, note, parent_url, parent_title):
         if User.objects.filter(is_active=True, username=username).exists()
     ]  # is_staff also?
     user_posting = request.user
-
+    if len(note.entry) > 20:
+        note.entry = note.entry[:20]
+        note.entry += "..."
     create_notification(
         event='user_mentioned',
         section=parent_title,
         note=note,
         user=request.user,
-        title='%s mentioned you in a note' % request.user,
+        title='%s jotted a note' % request.user,
         url=parent_url,
         icon='commenting',
         recipients=users_to_notify)
@@ -1531,16 +1535,23 @@ def get_slack_user_id(user_email):
 
     return user_id
 
-
 def create_notification(event=None, **kwargs):
+    def create_description(event):
+        if "description" not in kwargs.keys():
+            if event =='product_added':
+                kwargs["description"] = "Product " + kwargs['title'] + " has been created successfully."
+            else:
+                kwargs["description"] = "Event " + str(event) + " has occured."
+
     def create_notification_message(event, notification_type):
         template = 'notifications/%s.tpl' % event.replace('/', '')
         kwargs.update({'type': notification_type})
-
         try:
             notification = render_to_string(template, kwargs)
         except:
+            create_description(event)
             notification = render_to_string('notifications/other.tpl', kwargs)
+
 
         return notification
 
@@ -1576,6 +1587,8 @@ def create_notification(event=None, **kwargs):
             pass
 
     def send_mail_notification(address):
+        sys.stderr.write("Address is type " + str(type(address)) + "\n")
+        sys.stderr.write("TGT Mail Address is " + str(get_connection()))
         subject = '%s notification' % get_system_setting('team_name')
         if 'title' in kwargs:
             subject += ': %s' % kwargs['title']
@@ -1633,7 +1646,7 @@ def create_notification(event=None, **kwargs):
         send_hipchat_notification(get_system_setting('hipchat_channel'))
 
     if mail_enabled and 'mail' in getattr(notifications, event):
-        send_slack_notification(get_system_setting('mail_notifications_from'))
+        send_mail_notification(get_system_setting('mail_notifications_to'))
 
     if 'alert' in getattr(notifications, event, None):
         send_alert_notification()
@@ -1666,6 +1679,7 @@ def create_notification(event=None, **kwargs):
         # HipChat doesn't seem to offer direct message functionality, so no HipChat PM functionality here...
 
         if mail_enabled and 'mail' in getattr(notifications, event):
+            sys.stderr.write(" The TGT Address of the personal: " + str(user.email) + "\n")
             send_mail_notification(user.email)
 
         if 'alert' in getattr(notifications, event):
