@@ -224,6 +224,12 @@ def delete_engagement(request, eid):
                     messages.SUCCESS,
                     'Engagement and relationships removed.',
                     extra_tags='alert-success')
+                create_notification(event='other',
+                                    title='Deletion of %s' % engagement.name,
+                                    description='The engagement "%s" was deleted by %s' % (engagement.name, request.user),
+                                    url=request.build_absolute_uri(reverse('view_engagements', args=(product.id, ))),
+                                    recipients=[engagement.lead],
+                                    icon="exclamation-triangle")
 
                 if engagement.engagement_type == 'CI/CD':
                     return HttpResponseRedirect(reverse("view_engagements_cicd", args=(product.id, )))
@@ -236,6 +242,7 @@ def delete_engagement(request, eid):
 
     product_tab = Product_Tab(product.id, title="Delete Engagement", tab="engagements")
     product_tab.setEngagement(engagement)
+
     return render(request, 'dojo/delete_engagement.html', {
         'product_tab': product_tab,
         'engagement': engagement,
@@ -640,6 +647,10 @@ def close_eng(request, eid):
         messages.SUCCESS,
         'Engagement closed successfully.',
         extra_tags='alert-success')
+    create_notification(event='other',
+                        title='Closure of %s' % eng.name,
+                        description='The engagement "%s" was closed' % (eng.name),
+                        url=request.build_absolute_uri(reverse('view_engagements', args=(eng.product.id, ))),)
     if eng.engagement_type == 'CI/CD':
         return HttpResponseRedirect(reverse("view_engagements_cicd", args=(eng.product.id, )))
     else:
@@ -655,6 +666,10 @@ def reopen_eng(request, eid):
         messages.SUCCESS,
         'Engagement reopened successfully.',
         extra_tags='alert-success')
+    create_notification(event='other',
+                        title='Reopening of %s' % eng.name,
+                        description='The engagement "%s" was reopened' % (eng.name),
+                        url=request.build_absolute_uri(reverse('view_engagements', args=(eng.product.id, ))),)
     if eng.engagement_type == 'CI/CD':
         return HttpResponseRedirect(reverse("view_engagements_cicd", args=(eng.product.id, )))
     else:

@@ -338,6 +338,12 @@ def close_finding(request, fid):
                 messages.SUCCESS,
                 'Finding closed.',
                 extra_tags='alert-success')
+            create_notification(event='other',
+                                title='Closing of %s' % finding.title,
+                                description='The finding "%s" was closed by %s' % (finding.title, request.user),
+                                url=request.build_absolute_uri(reverse('view_test', args=(finding.test.id, ))),
+                                )
+
             return HttpResponseRedirect(
                 reverse('view_test', args=(finding.test.id, )))
 
@@ -443,6 +449,11 @@ def reopen_finding(request, fid):
         messages.SUCCESS,
         'Finding Reopened.',
         extra_tags='alert-success')
+    create_notification(event='other',
+                        title='Reopening of %s' % finding.title,
+                        description='The finding "%s" was reopened by %s' % (finding.title, request.user),
+                        url=request.build_absolute_uri(reverse('view_test', args=(finding.test.id, ))),
+                        )
     return HttpResponseRedirect(reverse('view_finding', args=(finding.id, )))
 
 
@@ -489,6 +500,12 @@ def delete_finding(request, fid):
                 messages.SUCCESS,
                 'Finding deleted successfully.',
                 extra_tags='alert-success')
+            create_notification(event='other',
+                                title='Deletion of %s' % finding.title,
+                                description='The finding "%s" was deleted by %s' % (finding.title, request.user),
+                                url=request.build_absolute_uri(reverse('all_findings')),
+                                recipients=[finding.test.engagement.lead],
+                                icon="exclamation-triangle")
             return HttpResponseRedirect(reverse('view_test', args=(tid, )))
         else:
             messages.add_message(
@@ -670,10 +687,14 @@ def request_finding_review(request, fid):
             users = form.cleaned_data['reviewers']
             finding.reviewers.set(users)
             finding.save()
+            reviewers = ""
+            for suser in form.cleaned_data['reviewers']:
+                reviewers += str(suser) + ", "
+            reviewers = reviewers[:-2]
 
             create_notification(event='review_requested',
                                 title='Finding review requested',
-                                description='User %s has requested that you please review the finding "%s" for accuracy:\n\n%s' % (user, finding.title, new_note),
+                                description='User %s has requested that users %s review the finding "%s" for accuracy:\n\n%s' % (user, reviewers, finding.title, new_note),
                                 icon='check',
                                 url=request.build_absolute_uri(reverse("view_finding", args=(finding.id,))))
 

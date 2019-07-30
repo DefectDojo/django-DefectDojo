@@ -552,6 +552,11 @@ def delete_product(request, pid):
                                      messages.SUCCESS,
                                      'Product and relationships removed.',
                                      extra_tags='alert-success')
+                create_notification(event='other',
+                                    title='Deletion of %s' % product.name,
+                                    description='The product "%s" was deleted by %s' % (product.name, request.user),
+                                    url=request.build_absolute_uri(reverse('product')),
+                                    icon="exclamation-triangle")
                 return HttpResponseRedirect(reverse('product'))
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)
