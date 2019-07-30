@@ -775,7 +775,9 @@ def mktemplate(request, fid):
             references=finding.references,
             numerical_severity=finding.numerical_severity)
         template.save()
-        template.tags = finding.tags
+        tags = [tag.name for tag in list(finding.tags)]
+        t = ", ".join(tags)
+        template.tags = t
         messages.add_message(
             request,
             messages.SUCCESS,
