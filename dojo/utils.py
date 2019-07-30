@@ -1475,7 +1475,8 @@ def get_db_key():
     db_key = None
     if hasattr(settings, 'DB_KEY'):
         db_key = settings.DB_KEY
-        db_key = binascii.b2a_hex(hashlib.sha256(db_key.encode('utf-8')).digest().rstrip())[:32]
+        db_key = binascii.b2a_hex(
+            hashlib.sha256(db_key.encode('utf-8')).digest().rstrip())[:32]
 
     return db_key
 
