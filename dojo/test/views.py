@@ -255,7 +255,6 @@ def add_findings(request, tid):
                                      messages.SUCCESS,
                                      'Finding added successfully.',
                                      extra_tags='alert-success')
-
             if create_template:
                 templates = Finding_Template.objects.filter(title=new_finding.title)
                 if len(templates) > 0:

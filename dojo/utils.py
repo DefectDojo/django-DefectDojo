@@ -16,7 +16,6 @@ from dateutil.relativedelta import relativedelta, MO
 from django.conf import settings
 from django.core.mail import send_mail
 from django.core.mail import EmailMessage
-from django.core.mail import get_connection
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.urls import get_resolver, reverse
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
@@ -28,7 +27,6 @@ from jira.exceptions import JIRAError
 # from django.dispatch import receiver
 # from django.core.signals import request_finished
 # from dojo.signals import dedupe_signal
-import sys
 
 from dojo.models import Finding, Engagement, Finding_Template, Product, JIRA_PKey, JIRA_Issue, \
     Dojo_User, User, Alerts, System_Settings, Notifications, UserContactInfo, Endpoint, Benchmark_Type, \
@@ -1552,7 +1550,6 @@ def create_notification(event=None, **kwargs):
             create_description(event)
             notification = render_to_string('notifications/other.tpl', kwargs)
 
-
         return notification
 
     def send_slack_notification(channel):
@@ -1587,8 +1584,6 @@ def create_notification(event=None, **kwargs):
             pass
 
     def send_mail_notification(address):
-        sys.stderr.write("Address is type " + str(type(address)) + "\n")
-        sys.stderr.write("TGT Mail Address is " + str(get_connection()))
         subject = '%s notification' % get_system_setting('team_name')
         if 'title' in kwargs:
             subject += ': %s' % kwargs['title']
@@ -1679,7 +1674,6 @@ def create_notification(event=None, **kwargs):
         # HipChat doesn't seem to offer direct message functionality, so no HipChat PM functionality here...
 
         if mail_enabled and 'mail' in getattr(notifications, event):
-            sys.stderr.write(" The TGT Address of the personal: " + str(user.email) + "\n")
             send_mail_notification(user.email)
 
         if 'alert' in getattr(notifications, event):
