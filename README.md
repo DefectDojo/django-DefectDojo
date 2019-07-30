@@ -73,6 +73,8 @@ Realtime discussion is done in the OWASP Slack Channel, #defectdojo.
 
 ![Twitter](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/Twitter_Logo.png)
 
+More info: [Contributing guideline](CONTRIBUTING.md)
+
 [DefectDojo Twitter Account](https://twitter.com/defectdojo) tweets project
 updates and changes.
 

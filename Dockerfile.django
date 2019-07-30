@@ -4,7 +4,10 @@
 # The code for the build image should be idendical with the code in
 # Dockerfile.nginx to use the caching mechanism of Docker.
 
-FROM python:3.7.4-buster@sha256:7dd57761929672e7c2c18348d257ed5148fc6a971a13cfd8a3d1d8573226a5c2 as build
+# Using 3.5.7 to avoid compatibility issues that may be introduced by python 3.5.6 and 3.5.7. 
+# Please upgrade before end-of-life in september 2020!
+# Ref: https://devguide.python.org/#branchstatus
+FROM python:3.5.7-buster@sha256:4598d4365bb7a8628ba840f87406323e699c4da01ae6f926ff33787c63230779 as build
 WORKDIR /app
 RUN \
   apt-get -y update && \
@@ -21,7 +24,7 @@ RUN \
 COPY requirements.txt ./
 RUN pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 
-FROM python:3.7.4-slim-buster@sha256:93cb70c52a4351871557f1daa6cfaf6081840804f3f69a3c55b291bd58f75793
+FROM python:3.5.7-slim-buster@sha256:127fee645393d311c7fbc5e8c2e5034f10a4e66b47c9273d4dbe5da2926fc3f2
 WORKDIR /app
 RUN \
   apt-get -y update && \
