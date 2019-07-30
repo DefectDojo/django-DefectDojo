@@ -3,7 +3,7 @@
 # The code for the build image should be idendical with the code in
 # Dockerfile.django to use the caching mechanism of Docker.
 
-FROM python:3.7.4-buster@sha256:7dd57761929672e7c2c18348d257ed5148fc6a971a13cfd8a3d1d8573226a5c2 as build
+FROM python:3.5.7-buster@sha256:4598d4365bb7a8628ba840f87406323e699c4da01ae6f926ff33787c63230779 as build
 WORKDIR /app
 RUN \
   apt-get -y update && \
