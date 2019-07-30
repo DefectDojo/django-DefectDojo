@@ -48,6 +48,7 @@ def open_findings(request, pid=None, eid=None, view=None):
     custom_breadcrumb = None
     filter_name = "Open"
     pid_local = None
+    tags = Tag.objects.usage_for_model(Finding)
     if pid:
         if view == "All":
             filter_name = "All"
@@ -132,7 +133,8 @@ def open_findings(request, pid=None, eid=None, view=None):
             'found_by': found_by,
             'custom_breadcrumb': custom_breadcrumb,
             'filter_name': filter_name,
-            'title': title
+            'title': title,
+            'tag_input': tags,
         })
 
 
@@ -773,7 +775,9 @@ def mktemplate(request, fid):
             references=finding.references,
             numerical_severity=finding.numerical_severity)
         template.save()
-        template.tags = finding.tags
+        tags = [tag.name for tag in list(finding.tags)]
+        t = ", ".join(tags)
+        template.tags = t
         messages.add_message(
             request,
             messages.SUCCESS,
@@ -1506,6 +1510,12 @@ def finding_bulk_update_all(request, pid=None):
                                  is_Mitigated=form.cleaned_data['is_Mitigated'],
                                  last_reviewed=timezone.now(),
                                  last_reviewed_by=request.user)
+                if form.cleaned_data['tags']:
+                    for finding in finds:
+                        tags = request.POST.getlist('tags')
+                        ts = ", ".join(tags)
+                        finding.tags = ts
+
                 # Update the grade as bulk edits don't go through save
                 if form.cleaned_data['severity'] or form.cleaned_data['status']:
                     prev_prod = None

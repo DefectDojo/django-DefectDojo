@@ -316,6 +316,7 @@ class ImportScanForm(forms.Form):
                          ("Microfocus Webinspect Scan", "Microfocus Webinspect Scan"),
                          ("Wpscan", "Wpscan"),
                          ("Sslscan", "Sslscan"),
+                         ("JFrog Xray Scan", "JFrog Xray Scan"),
                          ("Sslyze Scan", "Sslyze Scan"),
                          ("Testssl Scan", "Testssl Scan"))
 
@@ -999,6 +1000,8 @@ class DeleteFindingTemplateForm(forms.ModelForm):
 class FindingBulkUpdateForm(forms.ModelForm):
     status = forms.BooleanField(required=False)
     push_to_jira = forms.BooleanField(required=False)
+    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
+                           required=False)
 
     def __init__(self, *args, **kwargs):
         super(FindingBulkUpdateForm, self).__init__(*args, **kwargs)
