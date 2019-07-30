@@ -123,7 +123,7 @@ class CheckmarxXMLParser(object):
 
                 self.result_dupes[result_dupes_key] = True
 
-        if title and pathnode.find('FileName') != None:
+        if title and pathnode.find('FileName').text:
             title = "{} ({})".format(title, ntpath.basename(pathnode.find('FileName').text))
 
         return title, findingdetail, pathnode
