@@ -4,7 +4,7 @@
 # The code for the build image should be idendical with the code in
 # Dockerfile.nginx to use the caching mechanism of Docker.
 
-FROM python:3 as build
+FROM python:3.7.4-buster@sha256:7dd57761929672e7c2c18348d257ed5148fc6a971a13cfd8a3d1d8573226a5c2 as build
 WORKDIR /app
 RUN \
   apt-get -y update && \
@@ -21,7 +21,7 @@ RUN \
 COPY requirements.txt ./
 RUN pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 
-FROM python:3-slim
+FROM python:3.7.4-slim-buster@sha256:93cb70c52a4351871557f1daa6cfaf6081840804f3f69a3c55b291bd58f75793
 WORKDIR /app
 RUN \
   apt-get -y update && \

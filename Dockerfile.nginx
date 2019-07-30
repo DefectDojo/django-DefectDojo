@@ -3,7 +3,7 @@
 # The code for the build image should be idendical with the code in
 # Dockerfile.django to use the caching mechanism of Docker.
 
-FROM python:3 as build
+FROM python:3.7.4-buster@sha256:7dd57761929672e7c2c18348d257ed5148fc6a971a13cfd8a3d1d8573226a5c2 as build
 WORKDIR /app
 RUN \
   apt-get -y update && \
@@ -55,7 +55,7 @@ RUN \
   python3 manage.py collectstatic --noinput && \
   true
 
-FROM nginx
+FROM nginx:1.17.2@sha256:eb3320e2f9ca409b7c0aa71aea3cf7ce7d018f03a372564dbdb023646958770b
 COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/
 COPY wsgi_params nginx/nginx.conf /etc/nginx/
 COPY docker/entrypoint-nginx.sh /
