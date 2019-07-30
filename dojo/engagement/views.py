@@ -242,7 +242,6 @@ def delete_engagement(request, eid):
 
     product_tab = Product_Tab(product.id, title="Delete Engagement", tab="engagements")
     product_tab.setEngagement(engagement)
-
     return render(request, 'dojo/delete_engagement.html', {
         'product_tab': product_tab,
         'engagement': engagement,
