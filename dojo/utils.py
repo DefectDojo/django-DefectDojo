@@ -1476,7 +1476,7 @@ def get_db_key():
     if hasattr(settings, 'DB_KEY'):
         db_key = settings.DB_KEY
         db_key = binascii.b2a_hex(
-            hashlib.sha256(db_key.encode('utf-8')).digest().rstrip()) [:32]
+            hashlib.sha256(db_key.encode('utf-8')).digest().rstrip())[:32]
 
     return db_key
 
@@ -1533,10 +1533,11 @@ def get_slack_user_id(user_email):
 
     return user_id
 
+
 def create_notification(event=None, **kwargs):
     def create_description(event):
         if "description" not in kwargs.keys():
-            if event =='product_added':
+            if event == 'product_added':
                 kwargs["description"] = "Product " + kwargs['title'] + " has been created successfully."
             else:
                 kwargs["description"] = "Event " + str(event) + " has occured."
