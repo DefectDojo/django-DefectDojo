@@ -115,9 +115,18 @@
                     forceSync: true,
                     toolbar: ["bold", "italic", "heading", "|",
                         "quote", "unordered-list", "ordered-list", "|",
-                        "link", "image", "|",
+                        "link", "|",
                         "table", "horizontal-rule", "code", "|",
-                        "guide"
+                        {
+                            name: "custom",
+                            action: function customFunction(editor){
+                                // Add your own code
+                                alert('yes');
+                            },
+                            className: "fa fa-picture-o",
+                            title: "Custom Button",
+                        },
+                        "guide",
                     ]
                 });
                 mde.render();

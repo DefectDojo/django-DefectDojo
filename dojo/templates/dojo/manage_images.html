@@ -4,6 +4,33 @@
     <link rel="stylesheet" href="{% static "chosen-bootstrap/chosen.bootstrap.min.css" %}">
 {% endblock %}
 {% block content %}
+    {% if finding.images.all %}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4>
+                Uploaded Images
+                <div class="pull-right btn-group" role="group">
+                    <a data-toggle="collapse" href="#vuln_pics" class="btn btn-sm btn-primary">
+                        <i class="glyphicon glyphicon-chevron-up"></i>
+                    </a>
+                </div>
+            </h4>
+        </div>
+        <div class="panel-body  collapse in" id="vuln_pics">
+            {% for pic in finding.images.all %}
+                <div class="col-md-1">
+                    <a href="{{ pic.image.url }}" target="_blank"
+                    data-imageurl="{{ request.scheme }}://{{ request.get_host }}{{ pic.image_large.url }}"
+                    data-origurl="{{ request.scheme }}://{{ request.get_host }}{{ pic.image.url }}"
+                    class="thumbnail" data-toggle="modal"
+                    id="finding_pic">
+                        <img src="{{ request.scheme }}://{{ request.get_host }}{{ pic.image_thumbnail.url }}">
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
     <h3> Add images to {{ finding }}</h3>
     <div class="alert alert-info" role="alert">
         You may add as many images to this finding as needed (three new images at a time). To delete an image, check the
