@@ -45,11 +45,10 @@ class ClairKlarParser(object):
             unique_key = str(node['Name']) + str(node['FeatureName'])
             items[unique_key] = item
 
-        return list(items.values())
+        return items.values()
 
 
 def get_item(item_node, test):
-
     if item_node['Severity'] == 'Negligible':
         severity = 'Info'
     elif item_node['Severity'] == 'Unknown':
@@ -59,16 +58,25 @@ def get_item(item_node, test):
     else:
         severity = item_node['Severity']
 
+    description = item_node['Description'] + "\n<br /> Vulnerable feature: " + item_node['FeatureName'] + "\n<br /> Vulnerable Versions: " + str(item_node['FeatureVersion'])
+
+    mitigation = ""
+    if 'FixedBy' in item_node:
+        description = description + "\n Fixed by: " + str(item_node['FixedBy'])
+        mitigation = "Please use version " + item_node['FixedBy'] + " of library " + item_node['FeatureName']
+    else:
+        mitigation = "A patch could not been found"
+
+    link = ""
+    if 'Link' in item_node:
+        link = item_node['Link']
+
     finding = Finding(title=item_node['Name'] + " - " + "(" + item_node['FeatureName'] + ", " + item_node['FeatureVersion'] + ")",
                       test=test,
                       severity=severity,
-                      description=item_node['Description'] + "\n Vulnerable feature: " +
-                                  item_node['FeatureName'] + "\n Vulnerable Versions: " +
-                                  str(item_node['FeatureVersion']) + "\n Fixed by: " +
-                                  str(item_node['FixedBy']) + "\n Namespace: " + str(item_node['NamespaceName']) + "\n CVE: " +
-                                  str(item_node['Name']),
-                      mitigation="Please use version " + item_node['FixedBy'] + " of library " + item_node['FeatureName'],
-                      references=item_node['Link'],
+                      description=description,
+                      mitigation=mitigation,
+                      references=link,
                       active=False,
                       verified=False,
                       false_p=False,
