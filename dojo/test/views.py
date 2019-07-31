@@ -491,7 +491,7 @@ def re_import_scan_results(request, tid):
             ts = ", ".join(tags)
             t.tags = ts
             try:
-                parser = import_parser_factory(file, t)
+                parser = import_parser_factory(file, t, active, verified)
             except ValueError:
                 raise Http404()
 
