@@ -286,7 +286,7 @@ class ImportScanForm(forms.Form):
                          ("Acunetix Scan", "Acunetix Scan"),
                          ("Fortify Scan", "Fortify Scan"),
                          ("Gosec Scanner", "Gosec Scanner"),
-                         # ("SonarQube Scan", "SonarQube Scan"),
+                         ("SonarQube Scan", "SonarQube Scan"),
                          ("MobSF Scan", "MobSF Scan"),
                          ("Trufflehog Scan", "Trufflehog Scan"),
                          ("Nikto Scan", "Nikto Scan"),
@@ -341,13 +341,21 @@ class ImportScanForm(forms.Form):
     file = forms.FileField(widget=forms.widgets.FileInput(
         attrs={"accept": ".xml, .csv, .nessus, .json, .html, .js"}),
         label="Choose report file",
-        required=True)
+        required=False)
 
     def __init__(self, *args, **kwargs):
         tags = Tag.objects.usage_for_model(Test)
         t = [(tag.name, tag.name) for tag in tags]
         super(ImportScanForm, self).__init__(*args, **kwargs)
         self.fields['tags'].widget.choices = t
+
+    def clean(self):
+        cleaned_data = super().clean()
+        scan_type = cleaned_data.get("scan_type")
+        file = cleaned_data.get("file")
+        if scan_type and scan_type != 'SonarQube Scan' and not file:
+            raise forms.ValidationError(f'Uploading a Report File is required for {scan_type}')
+        return cleaned_data
 
     # date can only be today or in the past, not the future
     def clean_scan_date(self):
@@ -380,13 +388,21 @@ class ReImportScanForm(forms.Form):
     file = forms.FileField(widget=forms.widgets.FileInput(
         attrs={"accept": ".xml, .csv, .nessus, .json, .html"}),
         label="Choose report file",
-        required=True)
+        required=False)
 
     def __init__(self, *args, **kwargs):
         tags = Tag.objects.usage_for_model(Test)
         t = [(tag.name, tag.name) for tag in tags]
         super(ReImportScanForm, self).__init__(*args, **kwargs)
         self.fields['tags'].widget.choices = t
+
+    def clean(self):
+        cleaned_data = super().clean()
+        scan_type = cleaned_data.get("scan_type")
+        file = cleaned_data.get("file")
+        if scan_type and scan_type != 'SonarQube Scan' and not file:
+            raise forms.ValidationError(f'Uploading a Report File is required for {scan_type}')
+        return cleaned_data
 
     # date can only be today or in the past, not the future
     def clean_scan_date(self):
@@ -902,7 +918,7 @@ class FindingForm(forms.ModelForm):
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
-                   'review_requested_by', 'is_Mitigated')
+                   'review_requested_by', 'is_Mitigated', 'sonarqube_issue')
 
 
 class StubFindingForm(forms.ModelForm):

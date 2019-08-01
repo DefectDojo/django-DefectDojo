@@ -508,7 +508,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
     scan_type = serializers.ChoiceField(
         choices=ImportScanForm.SCAN_TYPE_CHOICES)
     test_type = serializers.CharField(required=False)
-    file = serializers.FileField()
+    file = serializers.FileField(required=False)
     engagement = serializers.PrimaryKeyRelatedField(
         queryset=Engagement.objects.all())
     lead = serializers.PrimaryKeyRelatedField(
@@ -546,7 +546,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         if 'tags' in data:
             test.tags = ' '.join(data['tags'])
         try:
-            parser = import_parser_factory(data['file'],
+            parser = import_parser_factory(data.get('file'),
                                            test,
                                            active,
                                            verified,
@@ -616,6 +616,13 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
 
         return test
 
+    def validate(self, data):
+        scan_type = data.get("scan_type")
+        file = data.get("file")
+        if scan_type and scan_type != 'SonarQube Scan' and not file:
+            raise serializers.ValidationError(f'Uploading a Report File is required for {scan_type}')
+        return data
+
     def validate_scan_data(self, value):
         if value.date() > datetime.today().date():
             raise serializers.ValidationError(
@@ -633,7 +640,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     scan_type = serializers.ChoiceField(
         choices=ImportScanForm.SCAN_TYPE_CHOICES)
     tags = TagListSerializerField(required=False)
-    file = serializers.FileField()
+    file = serializers.FileField(required=False)
     test = serializers.PrimaryKeyRelatedField(
         queryset=Test.objects.all())
 
@@ -647,7 +654,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         active = data['active']
 
         try:
-            parser = import_parser_factory(data['file'],
+            parser = import_parser_factory(data.get('file'),
                                            test,
                                            active,
                                            verified,
@@ -771,6 +778,13 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             raise Exception("Parser SyntaxError")
 
         return test
+
+    def validate(self, data):
+        scan_type = data.get("scan_type")
+        file = data.get("file")
+        if scan_type and scan_type != 'SonarQube Scan' and not file:
+            raise serializers.ValidationError(f'Uploading a Report File is required for {scan_type}')
+        return data
 
     def validate_scan_data(self, value):
         if value.date() > datetime.today().date():

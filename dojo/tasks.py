@@ -14,6 +14,7 @@ from dojo.signals import dedupe_signal
 
 import pdfkit
 from dojo.celery import app
+from dojo.tools.tool_issue_updater import tool_issue_updater
 from dojo.utils import sync_false_history, calculate_grade
 from dojo.reports.widgets import report_widget_factory
 from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, \
@@ -274,6 +275,15 @@ def async_rules(new_finding, *args, **kwargs):
 def async_false_history(new_finding, *args, **kwargs):
     logger.info("running false_history")
     sync_false_history(new_finding, *args, **kwargs)
+
+
+@app.task(name='tool_issue_updater')
+def async_tool_issue_updater(finding, *args, **kwargs):
+    """
+    # Run async the tool issue update to update original issue with Defect Dojo updates
+    """
+    logger.info("running tool_issue_updater")
+    tool_issue_updater(finding, *args, **kwargs)
 
 
 @app.task(bind=True)
