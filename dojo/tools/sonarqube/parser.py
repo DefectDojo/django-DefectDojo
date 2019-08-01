@@ -58,7 +58,8 @@ class SonarQubeHtmlParser(object):
                            out_of_scope=False,
                            mitigated=None,
                            impact="No impact provided",
-                           numerical_severity=Finding.get_numerical_severity(vuln_severity))
+                           numerical_severity=Finding.get_numerical_severity(vuln_severity),
+                           static_finding=True)
             items.append(find)
         return items
 
@@ -89,7 +90,7 @@ class SonarQubeHtmlParser(object):
         return None
 
     def get_description(self, vuln_details):
-        rule_description = etree.tostring(vuln_details, pretty_print=True)
+        rule_description = etree.tostring(vuln_details, pretty_print=True).decode('utf-8', errors='replace')
         rule_description = rule_description.split("<h2>See", 1)[0]
         rule_description = (str(rule_description)).replace("<h2>", "**")
         rule_description = (str(rule_description)).replace("</h2>", "**")
