@@ -73,7 +73,8 @@ def webhook(request):
                         # Reopen / Open Jira issue
                         finding.active = True
                         finding.mitigated = None
-                        finding.save()
+                        finding.false_p = False
+                        finding.remove_from_any_risk_acceptance()
                     finding.save()
             """
             if jissue.engagement is not None:
