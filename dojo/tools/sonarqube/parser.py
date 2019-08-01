@@ -16,51 +16,57 @@ class SonarQubeHtmlParser(object):
 
     def get_items(self, tree, test):
         items = list()
-        tables = list(tree.iter("tbody"))
-        if len(tables) != 3:
-            raise Exception('Parser ValueError')
-        vulnerabilities_table = list(tables[1].iter("tr"))
-        rules_table = list(tables[2].iter("tr"))
+        # Check that there is at least one vulnerability (the vulnerabilities table is absent when no vuln are found)
+        detailTbody = tree.xpath("/html/body/div[contains(@class,'detail')]/table/tbody")
+        if(len(detailTbody) == 2):
+            # First is "Detail of the Detected Vulnerabilities" (not present if no vuln)
+            # Second is "Known Security Rules"
+            vulnerabilities_table = list(detailTbody[0].iter("tr"))
+            rules_table = list(detailTbody[1].iter("tr"))
+            for vuln in vulnerabilities_table:
+                try:
+                    vuln_properties = list(vuln.iter("td"))
+                    vuln_rule_name = list(vuln_properties[0].iter("a"))[0].text
+                    vuln_severity = self.convert_sonar_severity(vuln_properties[1].text)
+                    vuln_file_path = vuln_properties[2].text
+                    vuln_line = vuln_properties[3].text
+                    vuln_title = vuln_properties[4].text
+                    vuln_mitigation = vuln_properties[5].text
+                except:
+                    raise Exception('Parser ValueError')
+                if vuln_title is None or vuln_mitigation is None:
+                    raise Exception('Parser ValueError')
 
-        for vuln in vulnerabilities_table:
-            try:
-                vuln_properties = list(vuln.iter("td"))
-                vuln_rule_name = list(vuln_properties[0].iter("a"))[0].text
-                vuln_severity = self.convert_sonar_severity(vuln_properties[1].text)
-                vuln_title = vuln_properties[2].text
-                vuln_mitigation = vuln_properties[3].text
-            except:
-                raise Exception('Parser ValueError')
-            if vuln_title is None or vuln_mitigation is None:
-                raise Exception('Parser ValueError')
+                vuln_details = self.get_rule_details(vuln_rule_name, rules_table)
+                if vuln_details is not None:
+                    vuln_description = self.get_description(vuln_details)
+                    vuln_references = self.get_references(vuln_details)
+                    vuln_cwe = self.get_cwe(vuln_references)
+                else:
+                    vuln_description = "No description provided"
+                    vuln_references = ""
+                    vuln_cwe = 0
 
-            vuln_details = self.get_rule_details(vuln_rule_name, rules_table)
-            if vuln_details is not None:
-                vuln_description = self.get_description(vuln_details)
-                vuln_references = self.get_references(vuln_details)
-                vuln_cwe = self.get_cwe(vuln_references)
-            else:
-                vuln_description = "No description provided"
-                vuln_references = ""
-                vuln_cwe = 0
-
-            find = Finding(title=vuln_title,
-                           cwe=vuln_cwe,
-                           description=vuln_description,
-                           test=test,
-                           severity=vuln_severity,
-                           mitigation=vuln_mitigation,
-                           references=vuln_references,
-                           active=False,
-                           verified=False,
-                           false_p=False,
-                           duplicate=False,
-                           out_of_scope=False,
-                           mitigated=None,
-                           impact="No impact provided",
-                           numerical_severity=Finding.get_numerical_severity(vuln_severity),
-                           static_finding=True)
-            items.append(find)
+                find = Finding(title=vuln_title,
+                               cwe=int(vuln_cwe),
+                               description=vuln_description,
+                               file_path=vuln_file_path,
+                               line=vuln_line,
+                               test=test,
+                               severity=vuln_severity,
+                               mitigation=vuln_mitigation,
+                               references=vuln_references,
+                               active=False,
+                               verified=False,
+                               false_p=False,
+                               duplicate=False,
+                               out_of_scope=False,
+                               mitigated=None,
+                               impact="No impact provided",
+                               numerical_severity=Finding.get_numerical_severity(vuln_severity),
+                               static_finding=True,
+                               dynamic_finding=False)
+                items.append(find)
         return items
 
     def convert_sonar_severity(self, sonar_severity):
