@@ -114,7 +114,7 @@ class SonarQubeApiImporter(object):
 
     @staticmethod
     def clean_rule_description_html(raw_html):
-        search = re.search(r"^(.*?)(?:(<h2>See</h2>)|(<b>References</b>))", raw_html, re.RegexFlag.DOTALL)
+        search = re.search(r"^(.*?)(?:(<h2>See</h2>)|(<b>References</b>))", raw_html, re.DOTALL)
         if search:
             raw_html = search.group(1)
         h = html2text.HTML2Text()
