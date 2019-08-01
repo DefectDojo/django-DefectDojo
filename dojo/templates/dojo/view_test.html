@@ -238,7 +238,7 @@
                           <option value="High">High</option>
                           <option value="Critical">Critical</option>
                       </select><br/><br/>
-                      <b>Status</b> <input id="id_status" name="status" type="checkbox" alt="Select to enable"/><br/>
+                      <b>Status</b> <input id="id_status" name="status" type="checkbox" alt="Select to enable" title="status_checkbox"/><br/>
                       <label style="font-size: 80%; font-weight: normal; display: block">
                           <input id="id_active" name="active" type="checkbox" disabled/> <span>Active</span>
                       </label>
@@ -257,7 +257,7 @@
                           <span>Mitigated</span>
                       </label>
                       {% if "enable_jira"|get_system_setting %}
-                      <b>Push to JIRA</b> <input id="id_push_tojira" name="push_to_jira" type="checkbox" alt="Select to push to JIRA"/><br/>
+                      <b>Push to JIRA</b> <input id="id_push_tojira" name="push_to_jira" type="checkbox" alt="Select to push to JIRA" title="Push_To_Jira"/><br/>
                       {% endif %}
                       <label style="display: block">Tags</label>
                       <label style="font-size: 80%; font-weight: normal; display: block; padding-right: 8px;">
@@ -267,7 +267,7 @@
                               {% endfor %}`
                           </select>
                       </label>
-                      <input type="submit" class="btn btn-sm btn-primary" value="Submit"/>
+                      <input type="submit" class="btn btn-sm btn-primary" value="Submit" title="sub-button"/>
                   </form>
               </li>
           </ul>
