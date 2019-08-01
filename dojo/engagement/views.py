@@ -473,7 +473,7 @@ def import_scan_results(request, eid=None, pid=None):
                 engagement.active = True
                 engagement.status = 'In Progress'
                 engagement.save()
-            file = request.FILES['file']
+            file = request.FILES.get('file')
             scan_date = form.cleaned_data['scan_date']
             min_sev = form.cleaned_data['minimum_severity']
             active = form.cleaned_data['active']
@@ -536,7 +536,7 @@ def import_scan_results(request, eid=None, pid=None):
                     item.reporter = request.user
                     item.last_reviewed = timezone.now()
                     item.last_reviewed_by = request.user
-                    if form.get_scan_type() != "Generic Findings Import":
+                    if form.get_scan_type() not in ["Generic Findings Import", "SonarQube Scan"]:
                         item.active = active
                         item.verified = verified
                     item.save(dedupe_option=False, false_history=True)

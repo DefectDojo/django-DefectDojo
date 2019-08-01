@@ -1117,6 +1117,20 @@ class VA(models.Model):
     start = models.CharField(max_length=100)
 
 
+class Sonarqube_Issue(models.Model):
+    key = models.CharField(max_length=30, primary_key=True, help_text="SonarQube issue key")
+    status = models.CharField(max_length=20, help_text="SonarQube issue status")
+    type = models.CharField(max_length=15, help_text="SonarQube issue type")
+
+
+class Sonarqube_Issue_Transition(models.Model):
+    sonarqube_issue = models.ForeignKey(Sonarqube_Issue, on_delete=models.CASCADE, db_index=True)
+    created = models.DateTimeField(null=False, editable=False, default=now)
+    finding_status = models.CharField(max_length=100)
+    sonarqube_status = models.CharField(max_length=50)
+    transitions = models.CharField(max_length=100)
+
+
 class Finding(models.Model):
     title = models.TextField(max_length=1000)
     date = models.DateField(default=get_current_date)
@@ -1188,6 +1202,7 @@ class Finding(models.Model):
     dynamic_finding = models.BooleanField(default=True)
     created = models.DateTimeField(auto_now_add=True, null=True)
     scanner_confidence = models.IntegerField(null=True, blank=True, default=None, editable=False, help_text="Confidence level of vulnerability which is supplied by the scannner.")
+    sonarqube_issue = models.OneToOneField(Sonarqube_Issue, null=True, blank=True, help_text="SonarQube issue", on_delete=models.CASCADE)
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
@@ -1412,6 +1427,11 @@ class Finding(models.Model):
             except:
                 async_false_history.delay(self, *args, **kwargs)
                 pass
+
+        # Run async the tool issue update to update original issue with Defect Dojo updates
+        from dojo.tasks import async_tool_issue_updater
+        async_tool_issue_updater.delay(self)
+
         # Title Casing
         from titlecase import titlecase
         self.title = titlecase(self.title)
@@ -2350,3 +2370,7 @@ watson.register(Finding_Template)
 watson.register(Endpoint)
 watson.register(Engagement)
 watson.register(App_Analysis)
+
+# SonarQube Integration
+admin.site.register(Sonarqube_Issue)
+admin.site.register(Sonarqube_Issue_Transition)

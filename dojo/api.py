@@ -1294,7 +1294,7 @@ class ImportScanValidation(Validation):
         errors = {}
 
         # Make sure file is present
-        if 'file' not in bundle.data:
+        if 'file' not in bundle.data and bundle.data.get('scan_type') != 'SonarQube Scan':
             errors.setdefault('file', []).append('You must pass a file in to be imported')
 
         # Make sure scan_date matches required format
@@ -1463,7 +1463,7 @@ class ImportScanResource(MultipartResource, Resource):
         t.tags = bundle.data['tags']
 
         try:
-            parser = import_parser_factory(bundle.data['file'], t, bundle.data['active'], bundle.data['verified'],
+            parser = import_parser_factory(bundle.data.get('file'), t, bundle.data['active'], bundle.data['verified'],
                                            bundle.data['scan_type'])
         except ValueError:
             raise NotFound("Parser ValueError")
@@ -1536,8 +1536,8 @@ class ReImportScanValidation(Validation):
 
         errors = {}
 
-        # Make sure file is present
-        if 'file' not in bundle.data:
+        # Make sure file is present if scanner requires a file
+        if 'file' not in bundle.data and bundle.data['scan_type'] != 'SonarType Scan':
             errors.setdefault('file', []).append('You must pass a file in to be imported')
 
         # Make sure scan_date matches required format
@@ -1646,7 +1646,7 @@ class ReImportScanResource(MultipartResource, Resource):
         active = bundle.obj.__getattr__('active')
 
         try:
-            parser = import_parser_factory(bundle.data['file'], test, active, verified, scan_type)
+            parser = import_parser_factory(bundle.data.get('file'), test, active, verified, scan_type)
         except ValueError:
             raise NotFound("Parser ValueError")
 

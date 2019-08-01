@@ -31,6 +31,7 @@ from dojo.tools.netsparker.parser import NetsparkerParser
 from dojo.tools.php_security_audit_v2.parser import PhpSecurityAuditV2
 from dojo.tools.acunetix.parser import AcunetixScannerParser
 from dojo.tools.fortify.parser import FortifyXMLParser
+from dojo.tools.sonarqube.importer import SonarQubeApiImporter
 from dojo.tools.sonarqube.parser import SonarQubeHtmlParser
 from dojo.tools.clair.parser import ClairParser
 from dojo.tools.mobsf.parser import MobSFParser
@@ -143,7 +144,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
     elif scan_type == 'Fortify Scan':
         parser = FortifyXMLParser(file, test)
     elif scan_type == 'SonarQube Scan':
-        parser = SonarQubeHtmlParser(file, test)
+        #parser = SonarQubeHtmlParser(file, test)
+        parser = SonarQubeApiImporter(test)
     elif scan_type == 'MobSF Scan':
         parser = MobSFParser(file, test)
     elif scan_type == 'AWS Scout2 Scan':
