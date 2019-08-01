@@ -90,11 +90,13 @@ def dojo_version():
     from dojo import __version__
     return 'v. ' + __version__
 
+
 @register.simple_tag
 def dojo_current_hash():
     repo = git.Repo(search_parent_directories=True)
     sha = repo.head.object.hexsha
     return sha[:8]
+
 
 @register.simple_tag
 def display_date():
