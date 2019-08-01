@@ -132,9 +132,6 @@
     </div>
     {% endif %}
 
-    <div class="row">
-    </div>
-
     <div class="panel panel-default to_highlight table-responsive">
         <div class="panel-heading">
             <div class="clearfix">
@@ -384,6 +381,7 @@
                                 " data-placement="right" data-container="body" data-original-title="Endpoints" title="">
                               {% endif %}
                             {% endif %}
+                                </i>
                              {% if finding.notes.all %}
                                     <i class="fa fa-comment has-popover" data-trigger="hover" data-content="{{ finding.notes.all.0 }}" data-placement="left" data-container="body" data-original-title="Most Recent Note" title=""></i>
                              {% endif %}
