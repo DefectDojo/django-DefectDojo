@@ -8,7 +8,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 class ScanImportOptionsTest(APITestCase):
     """
     Test the options `skip_duplicates` and `close_old_findings` for the scan
-    import APIv2 endpoint.
+    import APIv2 endpoint with ZAP
     """
     fixtures = ['dojo_testdata.json']
     EMPTY_ZAP_SCAN = """<?xml version="1.0"?>
