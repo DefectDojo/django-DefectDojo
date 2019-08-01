@@ -620,7 +620,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         scan_type = data.get("scan_type")
         file = data.get("file")
         if scan_type and scan_type != 'SonarQube Scan' and not file:
-            raise serializers.ValidationError(f'Uploading a Report File is required for {scan_type}')
+            raise serializers.ValidationError('Uploading a Report File is required for {}'.format(scan_type))
         return data
 
     def validate_scan_data(self, value):
@@ -783,7 +783,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         scan_type = data.get("scan_type")
         file = data.get("file")
         if scan_type and scan_type != 'SonarQube Scan' and not file:
-            raise serializers.ValidationError(f'Uploading a Report File is required for {scan_type}')
+            raise serializers.ValidationError('Uploading a Report File is required for {}'.format(scan_type))
         return data
 
     def validate_scan_data(self, value):
