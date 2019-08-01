@@ -354,7 +354,7 @@ class ImportScanForm(forms.Form):
         scan_type = cleaned_data.get("scan_type")
         file = cleaned_data.get("file")
         if scan_type and scan_type != 'SonarQube Scan' and not file:
-            raise forms.ValidationError(f'Uploading a Report File is required for {scan_type}')
+            raise forms.ValidationError('Uploading a Report File is required for {}'.format(scan_type))
         return cleaned_data
 
     # date can only be today or in the past, not the future
@@ -401,7 +401,7 @@ class ReImportScanForm(forms.Form):
         scan_type = cleaned_data.get("scan_type")
         file = cleaned_data.get("file")
         if scan_type and scan_type != 'SonarQube Scan' and not file:
-            raise forms.ValidationError(f'Uploading a Report File is required for {scan_type}')
+            raise forms.ValidationError('Uploading a Report File is required for {}'.format(scan_type))
         return cleaned_data
 
     # date can only be today or in the past, not the future
