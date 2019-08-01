@@ -540,8 +540,7 @@
                     <p>
                         <a href="{% url 'home' %}"><img class="logo" src="{% static "dojo/img/chop.png" %}"
                                                         alt="DefectDojo Chop" height="45"/></a><br/>
-                        {% dojo_version %} <br>
-                        Head commit hash: {% dojo_current_hash %}
+                        {% dojo_version %} ( {% dojo_current_hash %} )
                     </p>
                     <p>
                         Detailed DefectDojo documentation can be found at  <a

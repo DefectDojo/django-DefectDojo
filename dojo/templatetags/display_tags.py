@@ -20,8 +20,7 @@ from ast import literal_eval
 from urllib.parse import urlparse
 import bleach
 from bleach_whitelist import markdown_tags, markdown_attrs
-from dealer.git import git
-
+import git
 register = template.Library()
 
 
@@ -93,8 +92,9 @@ def dojo_version():
 
 @register.simple_tag
 def dojo_current_hash():
-    hash = git.revision
-    return hash
+    repo = git.Repo(search_parent_directories=True)
+    sha = repo.head.object.hexsha
+    return sha[:8]
 
 @register.simple_tag
 def display_date():
