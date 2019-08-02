@@ -4,11 +4,11 @@ from dojo.models import Finding
 
 class GosecScannerParser(object):
     def __init__(self, filename, test):
-        data = filename.read()
-        if isinstance(type(data), (bytes, bytearray)):
-            tree = json.loads(str(data, 'utf-8'))
+        tree = filename.read()
+        if isinstance(type(tree), (bytes, bytearray)):
+            data = json.loads(str(tree, 'utf-8'))
         else:
-            tree = json.loads(data)
+            data = json.loads(tree)
         dupes = dict()
 
         for item in data["Issues"]:
