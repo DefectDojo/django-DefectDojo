@@ -9,7 +9,11 @@ from django.utils.html import strip_tags
 
 class MobSFParser(object):
     def __init__(self, filename, test):
-        data = json.loads(str(filename.read(), 'utf-8'))
+        data = filename.read()
+        if isinstance(type(data), (bytes, bytearray)):
+            tree = json.loads(str(data, 'utf-8'))
+        else:
+            tree = json.loads(data)
         find_date = datetime.now()
         dupes = {}
         test_description = ""

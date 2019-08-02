@@ -14,7 +14,11 @@ class WpscanJSONParser(object):
         self.items = ()
         if file is None:
             return
-        tree = json.loads(str(file.read(), 'utf-8'))
+        data = file.read()
+        if isinstance(type(data), (bytes, bytearray)):
+            tree = json.loads(str(data, 'utf-8'))
+        else:
+            tree = json.loads(data)
         for content in tree:
             node = tree[content]
             vuln_arr = []
