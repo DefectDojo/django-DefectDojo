@@ -7,7 +7,7 @@ from datetime import datetime
 
 class AnchoreEngineScanParser(object):
     def __init__(self, filename, test):
-        data = json.load(filename)
+        data = json.loads(filename.read().decode())
         dupes = dict()
         find_date = datetime.now()
 

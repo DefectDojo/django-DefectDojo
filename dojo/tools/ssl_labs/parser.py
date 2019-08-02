@@ -7,7 +7,7 @@ import json
 
 class SSLlabsParser(object):
     def __init__(self, filename, test):
-        data = json.load(filename)
+        data = json.loads(filename.read().decode())
 
         find_date = datetime.now()
         dupes = {}

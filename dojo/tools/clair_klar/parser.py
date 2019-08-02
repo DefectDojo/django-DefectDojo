@@ -21,7 +21,7 @@ class ClairKlarParser(object):
 
     def parse_json(self, json_output):
         try:
-            tree = json.load(json_output)
+            tree = json.loads(json_output.read().decode())
             subtree = tree.get('Vulnerabilities')
         except:
             raise Exception("Invalid format")

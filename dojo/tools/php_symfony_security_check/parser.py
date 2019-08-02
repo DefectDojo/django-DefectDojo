@@ -18,7 +18,7 @@ class PhpSymfonySecurityCheckParser(object):
             self.items = []
             return
         try:
-            tree = json.load(json_file)
+            tree = json.loads(json_file.read().decode())
         except:
             raise Exception("Invalid format")
 
