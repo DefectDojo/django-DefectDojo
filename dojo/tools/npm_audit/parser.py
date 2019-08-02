@@ -18,7 +18,11 @@ class NpmAuditParser(object):
             self.items = []
             return
         try:
-            tree = json.loads(str(json_output.read(), 'utf-8'))
+            data = json_output.read()
+            if isinstance(type(data), (bytes, bytearray)):
+                tree = json.loads(str(data, 'utf-8'))
+            else:
+                tree = json.loads(data)
             subtree = tree.get('advisories')
         except:
             raise Exception("Invalid format")
