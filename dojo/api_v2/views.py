@@ -1,4 +1,4 @@
-from django.http import HttpResponse, Http404, JsonResponse
+from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
@@ -14,13 +14,12 @@ from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Find
 
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver
-from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter, EndpointReportFilter, ReportFilter, \
-    EndpointFilter
+from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from datetime import datetime
 from django.utils import timezone
-from dojo.utils import get_system_setting, get_period_counts_legacy
+from dojo.utils import get_period_counts_legacy
 
 from dojo.api_v2 import serializers, permissions
 
@@ -56,7 +55,7 @@ class EndPointViewSet(mixins.ListModelMixin,
             options['include_executive_summary'] = report_options.validated_data['include_executive_summary']
             options['include_table_of_contents'] = report_options.validated_data['include_table_of_contents']
         else:
-            return Response(report_options.errors, 
+            return Response(report_options.errors,
                 status=status.HTTP_400_BAD_REQUEST)
 
         data = report_generate(request, endpoint, options)
@@ -110,7 +109,7 @@ class EngagementViewSet(mixins.ListModelMixin,
             options['include_executive_summary'] = report_options.validated_data['include_executive_summary']
             options['include_table_of_contents'] = report_options.validated_data['include_table_of_contents']
         else:
-            return Response(report_options.errors, 
+            return Response(report_options.errors,
                 status=status.HTTP_400_BAD_REQUEST)
 
         data = report_generate(request, engagement, options)
@@ -164,7 +163,7 @@ class FindingViewSet(mixins.ListModelMixin,
             return serializers.FindingCreateSerializer
         else:
             return serializers.FindingSerializer
-    
+
     @action(detail=False, methods=['post'])
     def generate_report(self, request):
         # finding = get_object_or_404(Endpoint.objects, id=pk)
@@ -178,7 +177,7 @@ class FindingViewSet(mixins.ListModelMixin,
             options['include_executive_summary'] = report_options.validated_data['include_executive_summary']
             options['include_table_of_contents'] = report_options.validated_data['include_table_of_contents']
         else:
-            return Response(report_options.errors, 
+            return Response(report_options.errors,
                 status=status.HTTP_400_BAD_REQUEST)
 
         data = report_generate(request, findings, options)
@@ -270,7 +269,7 @@ class ProductViewSet(mixins.ListModelMixin,
             options['include_executive_summary'] = report_options.validated_data['include_executive_summary']
             options['include_table_of_contents'] = report_options.validated_data['include_table_of_contents']
         else:
-            return Response(report_options.errors, 
+            return Response(report_options.errors,
                 status=status.HTTP_400_BAD_REQUEST)
 
         data = report_generate(request, product, options)
@@ -294,6 +293,7 @@ class ProductTypeViewSet(mixins.ListModelMixin,
                 prod_type__authorized_users__in=[self.request.user])
         else:
             return Product_Type.objects.all()
+
     @detail_route(methods=['post'], permission_classes=[permissions.UserHasReportGeneratePermission])
     def generate_report(self, request, pk=None):
         product_type = get_object_or_404(Product_Type.objects, id=pk)
@@ -307,7 +307,7 @@ class ProductTypeViewSet(mixins.ListModelMixin,
             options['include_executive_summary'] = report_options.validated_data['include_executive_summary']
             options['include_table_of_contents'] = report_options.validated_data['include_table_of_contents']
         else:
-            return Response(report_options.errors, 
+            return Response(report_options.errors,
                 status=status.HTTP_400_BAD_REQUEST)
 
         data = report_generate(request, product_type, options)
@@ -420,7 +420,7 @@ class TestsViewSet(mixins.ListModelMixin,
             return serializers.TestCreateSerializer
         else:
             return serializers.TestSerializer
-    
+
     @detail_route(methods=['post'], permission_classes=[permissions.UserHasReportGeneratePermission])
     def generate_report(self, request, pk=None):
         test = get_object_or_404(Test.objects, id=pk)
@@ -434,7 +434,7 @@ class TestsViewSet(mixins.ListModelMixin,
             options['include_executive_summary'] = report_options.validated_data['include_executive_summary']
             options['include_table_of_contents'] = report_options.validated_data['include_table_of_contents']
         else:
-            return Response(report_options.errors, 
+            return Response(report_options.errors,
                 status=status.HTTP_400_BAD_REQUEST)
 
         data = report_generate(request, test, options)
@@ -544,7 +544,7 @@ def report_generate(request, obj, options):
     include_finding_images = False
     include_executive_summary = False
     include_table_of_contents = False
-    
+
     report_info = "Generated By %s on %s" % (
         user.get_full_name(), (timezone.now().strftime("%m/%d/%Y %I:%M%p %Z")))
 
@@ -608,13 +608,13 @@ def report_generate(request, obj, options):
 
     elif type(obj).__name__ == "Engagement":
         engagement = obj
-        findings = ReportFindingFilter(request.GET,
-                                       queryset=Finding.objects.filter(test__engagement=engagement,
-                                            ).prefetch_related(
-                                                'test',
-                                                'test__engagement__product',
-                                                'test__engagement__product__prod_type').distinct()
-                                            )
+        findings = ReportFindingFilter(request.GET, queryset=Finding.objects.filter(
+            test__engagement=engagement,
+        ).prefetch_related(
+            'test',
+            'test__engagement__product',
+            'test__engagement__product__prod_type'
+        ).distinct())
         report_name = "Engagement Report: " + str(engagement)
 
         report_title = "Engagement Report"
@@ -646,20 +646,23 @@ def report_generate(request, obj, options):
         report_title = "Endpoint Report"
         report_subtitle = host
         findings = ReportFindingFilter(request.GET,
-                                       queryset=Finding.objects.filter(endpoints__in=endpoints,
-                                            ).prefetch_related(
-                                                'test',
-                                                'test__engagement__product',
-                                                'test__engagement__product__prod_type').distinct()
-                                            )
+            queryset=Finding.objects.filter(
+                endpoints__in=endpoints,
+            ).prefetch_related(
+                'test',
+                'test__engagement__product',
+                'test__engagement__product__prod_type'
+            ).distinct())
 
     elif type(obj).__name__ == "QuerySet":
         findings = ReportAuthedFindingFilter(request.GET,
-                                             queryset=obj.prefetch_related(
-                                                'test',
-                                                'test__engagement__product',
-                                                'test__engagement__product__prod_type').distinct(),
-                                             user=request.user)
+            queryset=obj.prefetch_related(
+                'test',
+                'test__engagement__product',
+                'test__engagement__product__prod_type'
+            ).distinct(),
+            user=request.user
+        )
         report_name = 'Finding'
         report_type = 'Finding'
         report_title = "Finding Report"
@@ -682,25 +685,25 @@ def report_generate(request, obj, options):
                     }
                 )
 
-
-    result = {  'product_type': product_type,
-                'product': product,
-                'engagement': engagement,
-                'report_name': report_name,
-                'report_info': report_info,
-                'test': test,
-                'endpoint': endpoint,
-                'endpoints': endpoints,
-                'findings': findings.qs.order_by('numerical_severity'),
-                'include_finding_notes': include_finding_notes,
-                'finding_images': finding_images,
-                'include_executive_summary': include_executive_summary,
-                'include_table_of_contents': include_table_of_contents,
-                'user': user,
-                'team_name': settings.TEAM_NAME,
-                'title': 'Generate Report',
-                'user_id': request.user.id,
-                'host': report_url_resolver(request),
-            }
+    result = {
+        'product_type': product_type,
+        'product': product,
+        'engagement': engagement,
+        'report_name': report_name,
+        'report_info': report_info,
+        'test': test,
+        'endpoint': endpoint,
+        'endpoints': endpoints,
+        'findings': findings.qs.order_by('numerical_severity'),
+        'include_finding_notes': include_finding_notes,
+        'finding_images': finding_images,
+        'include_executive_summary': include_executive_summary,
+        'include_table_of_contents': include_table_of_contents,
+        'user': user,
+        'team_name': settings.TEAM_NAME,
+        'title': 'Generate Report',
+        'user_id': request.user.id,
+        'host': report_url_resolver(request),
+    }
 
     return result
