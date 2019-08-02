@@ -8,7 +8,7 @@ from dojo.models import Finding
 
 class DawnScannerParser(object):
     def __init__(self, filename, test):
-        data = json.loads(filename.read().decode())
+        data = json.loads(str(filename.read(), 'utf-8'))
 
         dupes = dict()
         find_date = parser.parse(data['scan_started'])
