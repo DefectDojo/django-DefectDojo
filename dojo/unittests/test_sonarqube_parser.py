@@ -90,7 +90,6 @@ class TestSonarQubeParser(TestCase):
         self.assertEqual(bool, type(item.dynamic_finding))
         self.assertEqual(False, item.dynamic_finding)
 
-
     def test_parse_file_with_multiple_vulnerabilities_has_multiple_findings(self):
         my_file_handle = open("dojo/unittests/scans/sonarqube/sonar-6-findings.html")
         product = Product()
