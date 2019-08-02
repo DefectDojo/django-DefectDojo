@@ -4,7 +4,7 @@ from dojo.models import Finding
 
 class GosecScannerParser(object):
     def __init__(self, filename, test):
-        data = json.load(filename)
+        data = json.loads(filename.read().decode())
         dupes = dict()
 
         for item in data["Issues"]:

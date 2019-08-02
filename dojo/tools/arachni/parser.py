@@ -24,7 +24,7 @@ class ArachniJSONParser(object):
 
     def parse_json(self, json_output):
         try:
-            tree = json.load(json_output)
+            tree = json.loads(json_output.read().decode())
         except:
             raise Exception("Invalid format")
 

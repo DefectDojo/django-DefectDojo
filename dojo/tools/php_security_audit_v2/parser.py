@@ -5,7 +5,7 @@ from dojo.models import Finding
 
 class PhpSecurityAuditV2(object):
     def __init__(self, filename, test):
-        data = json.load(filename)
+        data = json.loads(filename.read().decode())
         dupes = dict()
 
         for filepath, report in list(data["files"].items()):
