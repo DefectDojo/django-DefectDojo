@@ -673,6 +673,119 @@ def report_generate(request, obj, options):
 
     finding_notes = []
     finding_images = []
+    executive_summary = {}
+
+    # Generating Executive summary based on obj type
+    if include_executive_summary and type(obj).__name__ != "Endpoint":
+        # Declare all required fields for executive summary
+        engagement_name = None
+        engagement_target_start = None
+        engagement_target_end = None
+        test_type_name = None
+        test_target_start = None
+        test_target_end = None
+        test_environment_name = "unknown" # a default of "unknown"
+        test_strategy_ref = None
+        total_findings = 0
+        
+        if type(obj).__name__ == "Product_Type":    
+            for prod_typ in obj.prod_type.all():
+                engmnts = prod_typ.engagement_set.all()
+                if engmnts:
+                    for eng in engmnts:
+                        engagement_name = eng.name
+                        engagement_target_start = eng.target_start
+                        if eng.target_end:
+                            engagement_target_end = eng.target_end
+                        else:
+                            engagement_target_end = "ongoing"
+                        if eng.test_set.all():
+                            for t in eng.test_set.all():
+                                test_type_name = t.test_type.name
+                                test_environment_name = t.environment.name
+                                test_target_start = t.target_start
+                                if t.target_end:
+                                    test_target_end = t.target_end
+                                else:
+                                    test_target_end = "ongoing"
+                            if eng.test_strategy:
+                                test_strategy_ref = eng.test_strategy
+                            else:
+                                test_strategy_ref = ""
+                total_findings = len(findings.qs.all())
+        
+        elif type(obj).__name__ == "Product":
+            engs = obj.engagement_set.all()
+            if engs:
+                for eng in engs:
+                    engagement_name = eng.name
+                    engagement_target_start = eng.target_start
+                    if eng.target_end:
+                        engagement_target_end = eng.target_end
+                    else:
+                        engagement_target_end = "ongoing"
+
+                    if eng.test_set.all():
+                        for t in eng.test_set.all():
+                            test_type_name = t.test_type.name
+                            test_environment_name = t.environment.name
+                    if eng.test_strategy:
+                        test_strategy_ref = eng.test_strategy
+                    else:
+                        test_strategy_ref = ""
+                total_findings = len(findings.qs.all())
+
+        elif type(obj).__name__ == "Engagement":
+            eng = obj
+            engagement_name = eng.name
+            engagement_target_start = eng.target_start
+            if eng.target_end:
+                engagement_target_end = eng.target_end
+            else:
+                engagement_target_end = "ongoing"
+
+            if eng.test_set.all():
+                for t in eng.test_set.all():
+                    test_type_name = t.test_type.name
+                    test_environment_name = t.environment.name
+            if eng.test_strategy:
+                test_strategy_ref = eng.test_strategy
+            else:
+                test_strategy_ref = ""
+            total_findings = len(findings.qs.all())
+        
+        elif type(obj).__name__ == "Test":
+            t = obj
+            test_type_name = t.test_type.name
+            test_target_start = t.target_start
+            if t.target_end:
+                test_target_end = t.target_end
+            else:
+                test_target_end = "ongoing"
+            total_findings = len(findings.qs.all())
+            if t.engagement.name:
+                engagement_name = t.engagement.name
+            engagement_target_start = t.engagement.target_start
+            if t.engagement.target_end:
+                engagement_target_end = t.engagement.target_end
+            else:
+                engagement_target_end = "ongoing"
+        else:
+            pass # do nothing
+        
+        executive_summary = {
+            'engagement_name': engagement_name,
+            'engagement_target_start': engagement_target_start,
+            'engagement_target_end': engagement_target_end,
+            'test_type_name': test_type_name,
+            'test_target_start': test_target_start,
+            'test_target_end': test_target_end,
+            'test_environment_name': test_environment_name,
+            'test_strategy_ref': test_strategy_ref,
+            'total_findings': total_findings
+        }
+        print("\n\n$%$%$%$%$^%$%#", executive_summary, "\n\n$%$$$^$^RGFG%$%$RGRG")
+        # End of executive summary generation
 
     if include_finding_images:
         for finding in findings.qs.order_by('numerical_severity'):
@@ -697,6 +810,7 @@ def report_generate(request, obj, options):
                 )
 
     result = {
+        'executive_summary': executive_summary,
         'product_type': product_type,
         'product': product,
         'engagement': engagement,
@@ -708,7 +822,6 @@ def report_generate(request, obj, options):
         'findings': findings.qs.order_by('numerical_severity'),
         'finding_notes': finding_notes,
         'finding_images': finding_images,
-        'include_executive_summary': include_executive_summary,
         'include_table_of_contents': include_table_of_contents,
         'user': user,
         'team_name': settings.TEAM_NAME,
