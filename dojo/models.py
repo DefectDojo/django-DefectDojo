@@ -1130,6 +1130,9 @@ class Sonarqube_Issue_Transition(models.Model):
     sonarqube_status = models.CharField(max_length=50)
     transitions = models.CharField(max_length=100)
 
+    class Meta:
+        ordering = ('-created', )
+
 
 class Finding(models.Model):
     title = models.TextField(max_length=1000)
