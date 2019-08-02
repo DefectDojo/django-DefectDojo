@@ -684,6 +684,17 @@ def report_generate(request, obj, options):
                         "images": images
                     }
                 )
+    
+    if include_finding_notes:
+        for finding in findings.qs.order_by('numerical_severity'):
+            notes = finding.notes.all()
+            if notes:
+                finding_notes.append(
+                    {
+                        "finding_id": finding,
+                        "notes": notes.filter(private=False) # fetching only public notes for report
+                    }
+                )
 
     result = {
         'product_type': product_type,
@@ -695,7 +706,7 @@ def report_generate(request, obj, options):
         'endpoint': endpoint,
         'endpoints': endpoints,
         'findings': findings.qs.order_by('numerical_severity'),
-        'include_finding_notes': include_finding_notes,
+        'finding_notes': finding_notes,
         'finding_images': finding_images,
         'include_executive_summary': include_executive_summary,
         'include_table_of_contents': include_table_of_contents,
