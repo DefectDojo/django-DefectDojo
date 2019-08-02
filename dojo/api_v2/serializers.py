@@ -3,7 +3,7 @@ from dojo.models import Product, Engagement, Test, Finding, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Product_Type, JIRA_Conf, Endpoint, BurpRawRequestResponse, JIRA_PKey, \
-    Notes, DojoMeta
+    Notes, DojoMeta, FindingImage
 from dojo.forms import ImportScanForm, SEVERITY_CHOICES
 from dojo.tools.factory import import_parser_factory
 from django.core.validators import URLValidator, validate_ipv46_address
@@ -799,6 +799,17 @@ class NoteSerializer(serializers.ModelSerializer):
         model = Notes
         fields = '__all__'
 
+class FindingImageSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = FindingImage
+        fields = '__all__'
+
+
+class FindingToFindingImageSerializer(serializers.Serializer):
+    finding_id = serializers.PrimaryKeyRelatedField(queryset=Finding.objects.all(), many=False, allow_null=True)
+    images = FindingImageSerializer(many=True)
+
 
 class ReportGenerateOptionSerializer(serializers.Serializer):
     include_finding_notes = serializers.BooleanField(default=False)
@@ -817,6 +828,7 @@ class ReportGenerateSerializer(serializers.Serializer):
     endpoint = EndpointSerializer(many=False, read_only=True)
     endpoints = EndpointSerializer(many=True, read_only=True)
     findings = FindingSerializer(many=True, read_only=True)
+    finding_images = FindingToFindingImageSerializer(many=True, allow_null=True)
     user = UserSerializer(many=False, read_only=True)
     team_name = serializers.CharField(max_length=200)
     title = serializers.CharField(max_length=200)
