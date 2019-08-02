@@ -684,11 +684,11 @@ def report_generate(request, obj, options):
         test_type_name = None
         test_target_start = None
         test_target_end = None
-        test_environment_name = "unknown" # a default of "unknown"
+        test_environment_name = "unknown"  # a default of "unknown"
         test_strategy_ref = None
         total_findings = 0
-        
-        if type(obj).__name__ == "Product_Type":    
+
+        if type(obj).__name__ == "Product_Type":
             for prod_typ in obj.prod_type.all():
                 engmnts = prod_typ.engagement_set.all()
                 if engmnts:
@@ -713,7 +713,7 @@ def report_generate(request, obj, options):
                             else:
                                 test_strategy_ref = ""
                 total_findings = len(findings.qs.all())
-        
+
         elif type(obj).__name__ == "Product":
             engs = obj.engagement_set.all()
             if engs:
@@ -753,7 +753,7 @@ def report_generate(request, obj, options):
             else:
                 test_strategy_ref = ""
             total_findings = len(findings.qs.all())
-        
+
         elif type(obj).__name__ == "Test":
             t = obj
             test_type_name = t.test_type.name
@@ -771,8 +771,8 @@ def report_generate(request, obj, options):
             else:
                 engagement_target_end = "ongoing"
         else:
-            pass # do nothing
-        
+            pass  # do nothing
+
         executive_summary = {
             'engagement_name': engagement_name,
             'engagement_target_start': engagement_target_start,
@@ -797,7 +797,7 @@ def report_generate(request, obj, options):
                         "images": images
                     }
                 )
-    
+
     if include_finding_notes:
         for finding in findings.qs.order_by('numerical_severity'):
             notes = finding.notes.all()
@@ -805,7 +805,7 @@ def report_generate(request, obj, options):
                 finding_notes.append(
                     {
                         "finding_id": finding,
-                        "notes": notes.filter(private=False) # fetching only public notes for report
+                        "notes": notes.filter(private=False)  # fetching only public notes for report
                     }
                 )
 
