@@ -1324,13 +1324,15 @@ def process_notifications(request, note, parent_url, parent_title):
         if User.objects.filter(is_active=True, username=username).exists()
     ]  # is_staff also?
     user_posting = request.user
-
+    if len(note.entry) > 20:
+        note.entry = note.entry[:20]
+        note.entry += "..."
     create_notification(
         event='user_mentioned',
         section=parent_title,
         note=note,
         user=request.user,
-        title='%s mentioned you in a note' % request.user,
+        title='%s jotted a note' % request.user,
         url=parent_url,
         icon='commenting',
         recipients=users_to_notify)
@@ -1472,13 +1474,20 @@ def get_slack_user_id(user_email):
 
 
 def create_notification(event=None, **kwargs):
+    def create_description(event):
+        if "description" not in kwargs.keys():
+            if event == 'product_added':
+                kwargs["description"] = "Product " + kwargs['title'] + " has been created successfully."
+            else:
+                kwargs["description"] = "Event " + str(event) + " has occured."
+
     def create_notification_message(event, notification_type):
         template = 'notifications/%s.tpl' % event.replace('/', '')
         kwargs.update({'type': notification_type})
-
         try:
             notification = render_to_string(template, kwargs)
         except:
+            create_description(event)
             notification = render_to_string('notifications/other.tpl', kwargs)
 
         return notification
@@ -1572,7 +1581,7 @@ def create_notification(event=None, **kwargs):
         send_hipchat_notification(get_system_setting('hipchat_channel'))
 
     if mail_enabled and 'mail' in getattr(notifications, event):
-        send_slack_notification(get_system_setting('mail_notifications_from'))
+        send_mail_notification(get_system_setting('mail_notifications_to'))
 
     if 'alert' in getattr(notifications, event, None):
         send_alert_notification()
