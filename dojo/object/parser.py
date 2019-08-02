@@ -81,13 +81,13 @@ def import_object_eng(request, engagement, json_data):
                     Tag.objects.update_tags(object, tag.name)
 
         full_url = None
-        type = None
+        file_type = None
         percentUnchanged = None
         build_id = None
         if "full_url" in file:
             full_url = file["full_url"]
         if "type" in file:
-            type = file["type"]
+            file_type = file["type"]
         if "percentUnchanged" in file:
             percentUnchanged = file["percentUnchanged"]
         if "build_id" in file:
@@ -101,7 +101,7 @@ def import_object_eng(request, engagement, json_data):
             create_alert = True
 
         # Save the changed files to the engagement view
-        object_eng = Objects_Engagement(engagement=engagement, object_id=found_object, full_url=full_url, type=type, percentUnchanged=percentUnchanged, build_id=build_id)
+        object_eng = Objects_Engagement(engagement=engagement, object_id=found_object, full_url=full_url, type=file_type, percentUnchanged=percentUnchanged, build_id=build_id)
         object_eng.save()
 
     # Create the notification
