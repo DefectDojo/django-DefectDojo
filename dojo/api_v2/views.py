@@ -668,6 +668,20 @@ def report_generate(request, obj, options):
     else:
         raise Http404()
 
+    finding_notes = []
+    finding_images = []
+
+    if include_finding_images:
+        for finding in findings.qs.order_by('numerical_severity'):
+            images = finding.images.all()
+            if images:
+                finding_images.append(
+                    {
+                        "finding_id": finding,
+                        "images": images
+                    }
+                )
+
 
     result = {  'product_type': product_type,
                 'product': product,
@@ -679,7 +693,7 @@ def report_generate(request, obj, options):
                 'endpoints': endpoints,
                 'findings': findings.qs.order_by('numerical_severity'),
                 'include_finding_notes': include_finding_notes,
-                'include_finding_images': include_finding_images,
+                'finding_images': finding_images,
                 'include_executive_summary': include_executive_summary,
                 'include_table_of_contents': include_table_of_contents,
                 'user': user,
