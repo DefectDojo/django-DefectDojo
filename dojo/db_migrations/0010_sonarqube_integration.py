@@ -45,6 +45,9 @@ class Migration(migrations.Migration):
                 ('transitions', models.CharField(max_length=100)),
                 ('sonarqube_issue', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='dojo.Sonarqube_Issue')),
             ],
+            options={
+                'ordering': ('-created',),
+            },
         ),
         migrations.AddField(
             model_name='finding',
