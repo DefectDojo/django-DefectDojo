@@ -798,3 +798,27 @@ class NoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notes
         fields = '__all__'
+
+
+class ReportGenerateOptionSerializer(serializers.Serializer):
+    include_finding_notes = serializers.BooleanField(default=False)
+    include_finding_images = serializers.BooleanField(default=False)
+    include_executive_summary = serializers.BooleanField(default=False)
+    include_table_of_contents = serializers.BooleanField(default=False)
+
+
+class ReportGenerateSerializer(serializers.Serializer):
+    product_type = ProductTypeSerializer(many=False, read_only=True)
+    product = ProductSerializer(many=False, read_only=True)
+    engagement = EngagementSerializer(many=False, read_only=True)
+    report_name = serializers.CharField(max_length=200)
+    report_info = serializers.CharField(max_length=200)
+    test = TestSerializer(many=False, read_only=True)
+    endpoint = EndpointSerializer(many=False, read_only=True)
+    endpoints = EndpointSerializer(many=True, read_only=True)
+    findings = FindingSerializer(many=True, read_only=True)
+    user = UserSerializer(many=False, read_only=True)
+    team_name = serializers.CharField(max_length=200)
+    title = serializers.CharField(max_length=200)
+    user_id = serializers.IntegerField()
+    host = serializers.CharField(max_length=200)
