@@ -18,7 +18,7 @@ class SafetyParser(object):
             self.items = []
 
     def parse_json(self, json_output):
-        json_obj = json.loads(json_output.read().decode())
+        json_obj = json.loads(str(json_output.read(), 'utf-8'))
         tree = {l[4]: {'package': str(l[0]),
                        'affected': str(l[1]),
                        'installed': str(l[2]),
