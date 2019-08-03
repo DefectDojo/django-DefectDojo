@@ -32,10 +32,13 @@ class DependencyCheckParser(object):
             if m:
                 cwe = int(m.group(2))
         cvssv2_node = vulnerability.find(self.namespace + 'cvssV2')
-        if cvssv2_node is not None:
-            severity = self.get_field_value(cvssv2_node, 'severity').lower().capitalize()
-        else:
-            severity = self.get_field_value(vulnerability, 'severity').lower().capitalize()
+        try:
+            if cvssv2_node is not None:
+                severity = self.get_field_value(cvssv2_node, 'severity').lower().capitalize()
+            else:
+                severity = self.get_field_value(vulnerability, 'severity').lower().capitalize()
+        except:
+            severity = 'Info'
 
         reference_detail = None
         references_node = vulnerability.find(self.namespace + 'references')
@@ -81,7 +84,10 @@ class DependencyCheckParser(object):
         scan = ElementTree.fromstring(content)
         regex = r"{.*}"
         matches = re.match(regex, scan.tag)
-        self.namespace = matches.group(0)
+        try:
+            self.namespace = matches.group(0)
+        except:
+            self.namespace = ""
 
         dependencies = scan.find(self.namespace + 'dependencies')
 
