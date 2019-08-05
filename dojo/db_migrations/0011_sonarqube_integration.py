@@ -8,7 +8,7 @@ import django.utils.timezone
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0009_endpoint_remediation'),
+        ('dojo', '0010_jira_conf_configuration_name'),
     ]
 
     operations = [
