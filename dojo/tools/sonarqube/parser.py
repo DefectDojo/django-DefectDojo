@@ -22,18 +22,15 @@ class SonarQubeHtmlParser(object):
             # First is "Detail of the Detected Vulnerabilities" (not present if no vuln)
             # Second is "Known Security Rules"
             vulnerabilities_table = list(detailTbody[0].iter("tr"))
-            rules_table = list(detailTbody[1].iter("tr"))
+            rules_table = list(detailTbody[1].xpath("tr"))
             for vuln in vulnerabilities_table:
-                try:
-                    vuln_properties = list(vuln.iter("td"))
-                    vuln_rule_name = list(vuln_properties[0].iter("a"))[0].text
-                    vuln_severity = self.convert_sonar_severity(vuln_properties[1].text)
-                    vuln_file_path = vuln_properties[2].text
-                    vuln_line = vuln_properties[3].text
-                    vuln_title = vuln_properties[4].text
-                    vuln_mitigation = vuln_properties[5].text
-                except:
-                    raise Exception('Parser ValueError')
+                vuln_properties = list(vuln.iter("td"))
+                vuln_rule_name = list(vuln_properties[0].iter("a"))[0].text
+                vuln_severity = self.convert_sonar_severity(vuln_properties[1].text)
+                vuln_file_path = vuln_properties[2].text
+                vuln_line = vuln_properties[3].text
+                vuln_title = vuln_properties[4].text
+                vuln_mitigation = vuln_properties[5].text
                 if vuln_title is None or vuln_mitigation is None:
                     raise Exception('Parser ValueError')
 
@@ -85,14 +82,11 @@ class SonarQubeHtmlParser(object):
     def get_rule_details(self, vuln_rule_name, rules_table):
         if vuln_rule_name is not None:
             for rule in rules_table:
-                try:
                     rule_properties = list(rule.iter("td"))
                     rule_name = list(rule_properties[0].iter("a"))[0].text
                     if rule_name == vuln_rule_name:
                         rule_details = list(rule_properties[1].iter("details"))[0]
                         return rule_details
-                except:
-                    raise Exception('Parser ValueError')
         return None
 
     def get_description(self, vuln_details):
