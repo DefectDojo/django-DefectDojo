@@ -671,12 +671,55 @@ def report_generate(request, obj, options):
     else:
         raise Http404()
 
+    result = {
+        'product_type': product_type,
+        'product': product,
+        'engagement': engagement,
+        'report_name': report_name,
+        'report_info': report_info,
+        'test': test,
+        'endpoint': endpoint,
+        'endpoints': endpoints,
+        'findings': findings.qs.order_by('numerical_severity'),
+        'include_table_of_contents': include_table_of_contents,
+        'user': user,
+        'team_name': settings.TEAM_NAME,
+        'title': 'Generate Report',
+        'user_id': request.user.id,
+        'host': report_url_resolver(request),
+    }
+
     finding_notes = []
     finding_images = []
-    executive_summary = {}
+
+    if include_finding_images:
+        for finding in findings.qs.order_by('numerical_severity'):
+            images = finding.images.all()
+            if images:
+                finding_images.append(
+                    {
+                        "finding_id": finding,
+                        "images": images
+                    }
+                )
+        result['finding_images'] = finding_images
+    
+    if include_finding_notes:
+        for finding in findings.qs.order_by('numerical_severity'):
+            notes = finding.notes.all()
+            if notes:
+                finding_notes.append(
+                    {
+                        "finding_id": finding,
+                        "notes": notes.filter(private=False)  # fetching only public notes for report
+                    }
+                )
+        result['finding_notes'] = finding_notes
 
     # Generating Executive summary based on obj type
     if include_executive_summary and type(obj).__name__ != "Endpoint":
+        executive_summary = {}
+
         # Declare all required fields for executive summary
         engagement_name = None
         engagement_target_start = None
@@ -784,50 +827,8 @@ def report_generate(request, obj, options):
             'test_strategy_ref': test_strategy_ref,
             'total_findings': total_findings
         }
-        print("\n\n$%$%$%$%$^%$%#", executive_summary, "\n\n$%$$$^$^RGFG%$%$RGRG")
         # End of executive summary generation
 
-    if include_finding_images:
-        for finding in findings.qs.order_by('numerical_severity'):
-            images = finding.images.all()
-            if images:
-                finding_images.append(
-                    {
-                        "finding_id": finding,
-                        "images": images
-                    }
-                )
-
-    if include_finding_notes:
-        for finding in findings.qs.order_by('numerical_severity'):
-            notes = finding.notes.all()
-            if notes:
-                finding_notes.append(
-                    {
-                        "finding_id": finding,
-                        "notes": notes.filter(private=False)  # fetching only public notes for report
-                    }
-                )
-
-    result = {
-        'executive_summary': executive_summary,
-        'product_type': product_type,
-        'product': product,
-        'engagement': engagement,
-        'report_name': report_name,
-        'report_info': report_info,
-        'test': test,
-        'endpoint': endpoint,
-        'endpoints': endpoints,
-        'findings': findings.qs.order_by('numerical_severity'),
-        'finding_notes': finding_notes,
-        'finding_images': finding_images,
-        'include_table_of_contents': include_table_of_contents,
-        'user': user,
-        'team_name': settings.TEAM_NAME,
-        'title': 'Generate Report',
-        'user_id': request.user.id,
-        'host': report_url_resolver(request),
-    }
+        result['executive_summary'] = executive_summary
 
     return result
