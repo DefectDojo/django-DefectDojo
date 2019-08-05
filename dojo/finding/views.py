@@ -1076,9 +1076,11 @@ def templates(request):
             'title_words': title_words,
         })
 
+
 def export_templates_to_json(request):
     leads_as_json = serializers.serialize('json', Finding_Template.objects.all())
     return HttpResponse(leads_as_json, content_type='json')
+
 
 def apply_cwe_mitigation(apply_to_findings, template, update=True):
     count = 0
