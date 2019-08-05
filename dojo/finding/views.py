@@ -13,7 +13,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.core import serializers
 from django.urls import reverse
-from django.http import Http404, HttpResponse, JsonResponse
+from django.http import Http404, HttpResponse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.http import StreamingHttpResponse
 from django.shortcuts import render, get_object_or_404
@@ -1079,7 +1079,6 @@ def templates(request):
 def export_templates_to_json(request):
     leads_as_json = serializers.serialize('json', Finding_Template.objects.all())
     return HttpResponse(leads_as_json, content_type='json')
-    # return JsonResponse(leads_as_json, json_dumps_params={'indent': 2}, safe=False)
 
 def apply_cwe_mitigation(apply_to_findings, template, update=True):
     count = 0
