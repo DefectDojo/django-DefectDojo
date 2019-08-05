@@ -18,7 +18,11 @@ class SonatypeJSONParser(object):
 
     def parse_json(self, json_output):
         try:
-            tree = json.load(json_output)
+            data = json_output.read()
+            if isinstance(type(data), (bytes, bytearray)):
+                tree = json.loads(str(data, 'utf-8'))
+            else:
+                tree = json.loads(data)
         except:
             raise Exception("Invalid format")
 
