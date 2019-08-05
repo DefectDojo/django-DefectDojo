@@ -736,7 +736,8 @@ def report_generate(request, obj, options):
                 engmnts = prod_typ.engagement_set.all()
                 if engmnts:
                     for eng in engmnts:
-                        engagement_name = eng.name
+                        if eng.name:
+                            engagement_name = eng.name
                         engagement_target_start = eng.target_start
                         if eng.target_end:
                             engagement_target_end = eng.target_end
@@ -745,7 +746,8 @@ def report_generate(request, obj, options):
                         if eng.test_set.all():
                             for t in eng.test_set.all():
                                 test_type_name = t.test_type.name
-                                test_environment_name = t.environment.name
+                                if test.environment:
+                                    test_environment_name = t.environment.name
                                 test_target_start = t.target_start
                                 if t.target_end:
                                     test_target_end = t.target_end
@@ -761,7 +763,8 @@ def report_generate(request, obj, options):
             engs = obj.engagement_set.all()
             if engs:
                 for eng in engs:
-                    engagement_name = eng.name
+                    if eng.name:
+                        engagement_name = eng.name
                     engagement_target_start = eng.target_start
                     if eng.target_end:
                         engagement_target_end = eng.target_end
@@ -771,7 +774,8 @@ def report_generate(request, obj, options):
                     if eng.test_set.all():
                         for t in eng.test_set.all():
                             test_type_name = t.test_type.name
-                            test_environment_name = t.environment.name
+                            if t.environment:
+                                test_environment_name = t.environment.name
                     if eng.test_strategy:
                         test_strategy_ref = eng.test_strategy
                     else:
@@ -780,7 +784,8 @@ def report_generate(request, obj, options):
 
         elif type(obj).__name__ == "Engagement":
             eng = obj
-            engagement_name = eng.name
+            if eng.name:
+                engagement_name = eng.name
             engagement_target_start = eng.target_start
             if eng.target_end:
                 engagement_target_end = eng.target_end
@@ -790,7 +795,8 @@ def report_generate(request, obj, options):
             if eng.test_set.all():
                 for t in eng.test_set.all():
                     test_type_name = t.test_type.name
-                    test_environment_name = t.environment.name
+                    if t.environment:
+                        test_environment_name = t.environment.name
             if eng.test_strategy:
                 test_strategy_ref = eng.test_strategy
             else:
