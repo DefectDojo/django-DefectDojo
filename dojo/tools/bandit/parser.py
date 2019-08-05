@@ -7,7 +7,11 @@ from dojo.models import Finding
 
 class BanditParser(object):
     def __init__(self, filename, test):
-        data = json.load(filename)
+        tree = filename.read()
+        if isinstance(type(tree), (bytes, bytearray)):
+            data = json.loads(str(tree, 'utf-8'))
+        else:
+            data = json.loads(tree)
         dupes = dict()
         if "generated_at" in data:
             find_date = datetime.strptime(data["generated_at"], '%Y-%m-%dT%H:%M:%SZ')
