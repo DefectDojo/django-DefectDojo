@@ -703,7 +703,7 @@ def report_generate(request, obj, options):
                     }
                 )
         result['finding_images'] = finding_images
-    
+
     if include_finding_notes:
         for finding in findings.qs.order_by('numerical_severity'):
             notes = finding.notes.all()
