@@ -18,6 +18,9 @@
                 </div>
             </div>
             {% if findings %}
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=findings page_size=True %}
+                </div>
             <div class="hidden" style="padding-bottom: 5px;" id="bulk_edit_menu">
                 <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
                   <div class="btn-group mr-2" role="group" aria-label="Second group">
@@ -94,9 +97,6 @@
                   </div>
                 </div>
             </div>
-                <div class="clearfix">
-                    {% include "dojo/paging_snippet.html" with page=findings page_size=True %}
-                </div>
                 <div class="panel panel-default table-responsive">
                     <table id="open_findings"
                            class="tablesorter-bootstrap table table-condensed table-striped table-hover">
@@ -263,6 +263,9 @@
                                       {% endfor %}
                                       " data-placement="right" data-container="body" data-original-title="Endpoints" title="">
                                     {% endif %}
+                                  {% endif %}
+                                  {% if finding.notes.all %}
+                                    <i class="fa fa-comment has-popover" data-trigger="hover" data-content="{{ finding.notes.all.0 }}" data-placement="left" data-container="body" data-original-title="Most Recent Note" title="">
                                   {% endif %}
                                   </i>
                                     <sup>

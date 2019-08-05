@@ -35,7 +35,9 @@ class RetireJsParser(object):
                         item = get_item(vulnerability, test, node['file'])
                         item.title += " (" + result['component'] + ", " + result['version'] + ")"
                         item.description += "\n\n Raw Result: " + str(json.dumps(vulnerability, indent=4, sort_keys=True))
-                        unique_key = item.title + hashlib.md5(item.references).hexdigest() + hashlib.md5(node['file']).hexdigest()
+                        item.references = item.references.encode('utf-8')
+                        encrypted_file = node['file'].encode('utf-8')
+                        unique_key = item.title + hashlib.md5(item.references).hexdigest() + hashlib.md5(encrypted_file).hexdigest()
                         items[unique_key] = item
 
         return list(items.values())

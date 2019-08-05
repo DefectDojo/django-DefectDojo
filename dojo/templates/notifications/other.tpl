@@ -3,9 +3,7 @@
 {% if type == 'mail' %}
     Hello,
 
-    {{ description|safe }}
-
-    {% if url is not None %}
+    {{ description|safe }}{% if url is not None %}
     More information on this event can be found here: {{ url }}
     {% endif %}
 
@@ -14,9 +12,7 @@
 {% elif type == 'alert' %}
     {{ description|safe }}
 {% elif type == 'slack' %}
-    {{ description|safe }}
-
-    {% if url is not None %}
-        More information on this event can be found here: {{ url }}
+    {{ description|safe }}{% if url is not None %}
+More information on this event can be found here: {{ url }}
     {% endif %}
 {% endif %}
