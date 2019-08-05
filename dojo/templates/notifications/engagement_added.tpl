@@ -3,12 +3,12 @@
 {% if type == 'mail' %}
     Hello,
 
-    the engagement "{{ engagement.product }}" has been created. It can be viewed here: {{ url }}
+    The engagement "{{ engagement.name }}" has been created in the product "{{ engagement.product }}". It can be viewed here: {{ url }}
 
     Kind regards,
     {{ "team_name"|get_system_setting }}
 {% elif type == 'alert' %}
-    The engagement "{{ engagement.product }}" has been created.
+    The engagement "{{ engagement.name }}" has been created in the product "{{ engagement.product }}".
 {% elif type == 'slack' %}
-    The engagement "{{ engagement.product }}" has been created. It can be viewed here: {{ url }}
+    The engagement "{{ engagement.name }}" has been created in the product "{{ engagement.product }}". It can be viewed here: {{ url }}
 {% endif %}

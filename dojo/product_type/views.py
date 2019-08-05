@@ -8,7 +8,8 @@ from django.shortcuts import render, get_object_or_404
 from dojo.filters import ProductTypeFilter
 from dojo.forms import Product_TypeForm, Product_TypeProductForm, Delete_Product_TypeForm
 from dojo.models import Product_Type
-from dojo.utils import get_page_items, add_breadcrumb
+from dojo.utils import get_page_items, add_breadcrumb, create_notification
+
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +84,11 @@ def edit_product_type(request, ptid):
                 "Product type Deleted successfully.",
                 extra_tags="alert-success",
             )
+            create_notification(event='other',
+                                title='Deletion of %s' % pt.name,
+                                description='The product type "%s" was deleted by %s' % (pt.name, request.user),
+                                url=request.build_absolute_uri(reverse('product_type')),
+                                icon="exclamation-triangle")
             return HttpResponseRedirect(reverse("product_type"))
     add_breadcrumb(title="Edit Product Type", top_level=False, request=request)
     return render(request, 'dojo/edit_product_type.html', {

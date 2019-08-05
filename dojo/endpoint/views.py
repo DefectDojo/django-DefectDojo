@@ -17,7 +17,7 @@ from dojo.filters import EndpointFilter
 from dojo.forms import EditEndpointForm, \
     DeleteEndpointForm, AddEndpointForm, DojoMetaDataForm
 from dojo.models import Product, Endpoint, Finding, System_Settings, DojoMeta
-from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_system_setting, Product_Tab, calculate_grade
+from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_system_setting, Product_Tab, calculate_grade, create_notification
 
 logger = logging.getLogger(__name__)
 
@@ -226,6 +226,11 @@ def delete_endpoint(request, eid):
                                      messages.SUCCESS,
                                      'Endpoint and relationships removed.',
                                      extra_tags='alert-success')
+                create_notification(event='other',
+                                    title='Deletion of %s' % endpoint,
+                                    description='The endpoint "%s" was deleted by %s' % (endpoint, request.user),
+                                    url=request.build_absolute_uri(reverse('endpoints')),
+                                    icon="exclamation-triangle")
                 return HttpResponseRedirect(reverse('view_product', args=(product.id,)))
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)
