@@ -33,9 +33,9 @@
                         <li class="dropdown-header">Choose wisely...</li>
                         <li style="padding-left: 8px;">
                           {% if product_tab %}
-                            <form action="{% url 'findings_bulk_all_product' product_tab.product.id %}" method="post" id="bulk_change_form">
+                            <form action="{{ request.get_full_path }}" method="post" id="bulk_change_form">
                           {% else %}
-                            <form action="{% url 'findings_bulk_all' %}" method="post" id="bulk_change_form">
+                            <form action="{{ request.get_full_path }}" method="post" id="bulk_change_form">
                           {% endif %}
                                 {% csrf_token %}
                                 <label style="display: block" for="severity">Severity</label>
