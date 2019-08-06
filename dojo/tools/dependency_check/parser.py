@@ -8,6 +8,7 @@ from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
 
+SEVERITY = ['Info', 'Low', 'Medium', 'High', 'Critical']
 
 class DependencyCheckParser(object):
     def get_field_value(self, parent_node, field_name):
@@ -32,14 +33,16 @@ class DependencyCheckParser(object):
             if m:
                 cwe = int(m.group(2))
         cvssv2_node = vulnerability.find(self.namespace + 'cvssV2')
-        try:
-            if cvssv2_node is not None:
-                severity = self.get_field_value(cvssv2_node, 'severity').lower().capitalize()
-            else:
-                severity = self.get_field_value(vulnerability, 'severity').lower().capitalize()
-        except:
-            severity = 'Info'
-
+        if cvssv2_node is not None:
+            severity = self.get_field_value(cvssv2_node, 'severity').lower().capitalize()
+        else:
+            severity = self.get_field_value(vulnerability, 'severity').lower().capitalize()
+        
+        if severity in SEVERITY:
+            severity = severity
+        else:
+            severity = "Info"
+        
         reference_detail = None
         references_node = vulnerability.find(self.namespace + 'references')
 
