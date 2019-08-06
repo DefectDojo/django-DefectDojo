@@ -42,7 +42,10 @@ class DependencyCheckParser(object):
         if severity in SEVERITY:
             severity = severity
         else:
-            severity = "Info"
+            tag = "Severity is inaccurate : " + str(severity)
+            title += " | " + tag
+            print("Warning: Inaccurate severity detected. Setting it's severity to Medium level.\n" + "Title is :" + title)
+            severity = "Medium"
 
         reference_detail = None
         references_node = vulnerability.find(self.namespace + 'references')
