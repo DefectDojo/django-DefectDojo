@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 SEVERITY = ['Info', 'Low', 'Medium', 'High', 'Critical']
 
+
 class DependencyCheckParser(object):
     def get_field_value(self, parent_node, field_name):
         field_node = parent_node.find(self.namespace + field_name)
@@ -37,12 +38,12 @@ class DependencyCheckParser(object):
             severity = self.get_field_value(cvssv2_node, 'severity').lower().capitalize()
         else:
             severity = self.get_field_value(vulnerability, 'severity').lower().capitalize()
-        
+
         if severity in SEVERITY:
             severity = severity
         else:
             severity = "Info"
-        
+
         reference_detail = None
         references_node = vulnerability.find(self.namespace + 'references')
 
