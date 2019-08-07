@@ -2,7 +2,7 @@
 version: '3.7'
 services:
   nginx:
-    build: 
+    build:
       context: ./
       dockerfile: Dockerfile.nginx
     image: defectdojo/defectdojo-nginx:${NGINX_VERSION:-latest}
@@ -14,7 +14,7 @@ services:
         protocol: tcp
         mode: host
   uwsgi:
-    build: 
+    build:
       context: ./
       dockerfile: Dockerfile.django
     image: defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}
@@ -69,8 +69,6 @@ services:
       MYSQL_DATABASE: ${DD_DATABASE_NAME:-defectdojo}
     command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
     volumes:
-       - defectdojo_data:/var/lib/mysql
+       - ${PWD}/data:/var/lib/mysql
   rabbitmq:
     image: rabbitmq:3.7
-volumes:
-  defectdojo_data: {}

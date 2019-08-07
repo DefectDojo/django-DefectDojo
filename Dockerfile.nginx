@@ -56,7 +56,7 @@ RUN \
 
 FROM nginx
 COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/
-COPY wsgi_params nginx/nginx.conf /etc/nginx/
+COPY wsgi_params nginx/* /etc/nginx/
 COPY docker/entrypoint-nginx.sh /
 RUN \
   chmod -R g=u /var/cache/nginx && \

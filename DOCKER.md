@@ -8,20 +8,20 @@ use the [Helm and Kubernetes](KUBERNETES.md) approach.
 *  Docker version
     *  Installing with docker-compose requires at least docker 18.09.4 and docker-compose 1.24.0. See "Checking Docker versions" below for version errors during running docker-compose.
 *  Proxies
-    *  If you're behind a corporate proxy check https://docs.docker.com/network/proxy/ . 
+    *  If you're behind a corporate proxy check https://docs.docker.com/network/proxy/ .
 
 
 ## Setup via Docker Compose - introduction
 
 DefectDojo needs several docker images to run. Two of them depend on DefectDojo code:
 
-*  django service - defectdojo/defectdojo-django image 
+*  django service - defectdojo/defectdojo-django image
 *  nginx service - defectdojo/defectdojo-nginx image
 
 The nginx image is build based on the django image.
 
 Before running the application, it's advised to build local images to make sure that you'll be working on images consistent with your current code base.
-When running the application without building images, the application will run based on: 
+When running the application without building images, the application will run based on:
 *  a previously locally built image if it exists in the docker cache
 *  else the images pulled from dockerhub
     *  https://hub.docker.com/r/defectdojo/defectdojo-django
@@ -37,7 +37,7 @@ To build images and put them in your local docker cache, run:
 docker-compose build
 ```
 
-To build a single image, run: 
+To build a single image, run:
 
 ```zsh
 docker-compose build django
@@ -50,7 +50,7 @@ docker-compose build nginx
 
 
 ### Run with Docker compose in release mode
-To run the application based on previously built image (or based on dockerhub images if none was locally built), run: 
+To run the application based on previously built image (or based on dockerhub images if none was locally built), run:
 
 ```zsh
 docker/setEnv.sh release
@@ -59,12 +59,12 @@ docker-compose up
 
 This will run the application based on docker-compose.yml only.
 
-In this setup, you need to rebuild django and/or nginx images after each code change and restart the containers. 
+In this setup, you need to rebuild django and/or nginx images after each code change and restart the containers.
 
 
 ### Run with Docker compose in development mode with hot-reloading
 
-For development, use: 
+For development, use:
 
 ```zsh
 cp dojo/settings/settings.dist.py dojo/settings/settings.py
@@ -76,32 +76,32 @@ This will run the application based on merged configurations from docker-compose
 
 *  Volumes are mounted to synchronize between the host and the containers :
     *  static resources (nginx container)
-    *  python code (uwsgi and celeryworker containers). 
+    *  python code (uwsgi and celeryworker containers).
 
 *  The `--py-autoreload 1` parameter in entrypoint-uwsgi-dev.sh will make uwsgi handle python hot-reloading for the **uwsgi** container.
-* Hot-reloading for the **celeryworker** container is not yet implemented. When working on deduplication for example, restart the celeryworker container with: 
+* Hot-reloading for the **celeryworker** container is not yet implemented. When working on deduplication for example, restart the celeryworker container with:
 
 ```
 docker restart django-defectdojo_celeryworker_1
 ```
 
-*  The mysql port is forwarded to the host so that you can access your database from outside the container. 
+*  The mysql port is forwarded to the host so that you can access your database from outside the container.
 
 To update changes in static resources, served by nginx, just refresh the browser with ctrl + F5.
 
 
 *Notes about volume permissions*
 
-*The manual copy of settings.py is sometimes required once after cloning the repository, on linux hosts when the host files cannot be modified from within the django container. In that case that copy in entrypoint-uwsgi-dev.sh fails.* 
+*The manual copy of settings.py is sometimes required once after cloning the repository, on linux hosts when the host files cannot be modified from within the django container. In that case that copy in entrypoint-uwsgi-dev.sh fails.*
 
-*Another way to fix this is changing `USER 1001` in Dockerfile.django to match your user uid and then rebuild the images. Get your user id with* 
+*Another way to fix this is changing `USER 1001` in Dockerfile.django to match your user uid and then rebuild the images. Get your user id with*
 
 ```
 id -u
 ```
 
 ### Access the application
-Navigate to <http://localhost:8080> where you can log in with username admin.
+Navigate to <https://localhost:8080> where you can log in with username admin.
 To find out the admin password, check the very beginning of the console
 output of the initializer container, typically name 'django-defectdojo_initializer_1', or run the following:
 
@@ -121,18 +121,18 @@ docker logs django-defectdojo_initializer_1
 Beware that when re-running the application several times, there may be several occurrences of "Admin password". In that case you should use the last occurrence.
 
 ### Disable the database initialization
-The initializer container can be disabled by exporting: `export DD_INITIALIZE=false`. 
+The initializer container can be disabled by exporting: `export DD_INITIALIZE=false`.
 
 This will ensure that the database remains unchanged when re-running the application, keeping your previous settings and admin password.
 
 ### Versioning
-In order to use a specific version when building the images and running the containers, set the environment with 
+In order to use a specific version when building the images and running the containers, set the environment with
 *  For the nginx image: `NGINX_VERSION=x.y.z`
 *  For the django image: `DJANGO_VERSION=x.y.z`
 
 Building will tag the images with "x.y.z", then you can run the application based on a specific tagged images.
 
-*  Tagged images can be seen with: 
+*  Tagged images can be seen with:
 
 ```
 $ docker images
@@ -142,7 +142,7 @@ defectdojo/defectdojo-nginx    1.0.0               bc9c5f7bb4e5        About an 
 
 *  This will show on which tagged images the containers are running:
 
-``` 
+```
 $ docker ps
 CONTAINER ID        IMAGE                                 COMMAND                  CREATED             STATUS              PORTS                                NAMES
 aedc404d6dee        defectdojo/defectdojo-nginx:1.0.0     "/entrypoint-nginx.sh"   2 minutes ago       Up 2 minutes        80/tcp, 0.0.0.0:8080->8080/tcp       django-defectdojo_nginx_1
@@ -171,8 +171,8 @@ The unit-tests are under `dojo/unittests`
 
 
 
-#### Running the unit-tests 
-This will run all the tests and leave the uwsgi container up: 
+#### Running the unit-tests
+This will run all the tests and leave the uwsgi container up:
 
 ```
 cp dojo/settings/settings.dist.py dojo/settings/settings.py

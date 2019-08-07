@@ -33,7 +33,7 @@ docker-compose build
 docker-compose up
 ```
 
-Navigate to <http://localhost:8080>.
+Navigate to <https://localhost:8080>.
 
 ## Documentation
 

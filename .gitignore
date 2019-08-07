@@ -104,3 +104,6 @@ quick.bash
 
 #visual studio code
 *.code-workspace
+
+#localStorage
+data/*
