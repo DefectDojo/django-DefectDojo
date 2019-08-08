@@ -421,13 +421,12 @@
             })
 
             $('[id^=delete-finding-menu-]').on('click', function () {
-              if (confirm('Are you sure you want to delete this finding?'))
+              if (confirm('Are you sure you want to delete these findings?'))
               {
                   var form_element = "form#" + this.id + "-form";
                   $( form_element ).submit();
               }
             });
-
             $('[data-toggle="tooltip"]').tooltip();
 
             var availableTags = [
