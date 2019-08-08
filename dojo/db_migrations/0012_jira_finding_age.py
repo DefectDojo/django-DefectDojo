@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0011_finding_template_activity.py'),
+        ('dojo', '0011_finding_template_activity'),
     ]
 
     operations = [
