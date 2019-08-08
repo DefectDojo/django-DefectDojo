@@ -68,4 +68,5 @@ ENV \
   DD_UWSGI_HOST="uwsgi" \
   DD_UWSGI_PORT="3031"
 USER 1001
+EXPOSE 8080
 ENTRYPOINT ["/entrypoint-nginx.sh"]
