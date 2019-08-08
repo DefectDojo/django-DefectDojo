@@ -504,7 +504,7 @@ def delete_finding(request, fid):
 def edit_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     old_status = finding.status()
-    form = FindingForm(instance=finding)
+    form = FindingForm(instance=finding, template=False)
     form.initial['tags'] = [tag.name for tag in finding.tags]
     form_error = False
     jform = None
@@ -520,7 +520,7 @@ def edit_finding(request, fid):
         jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
 
     if request.method == 'POST':
-        form = FindingForm(request.POST, instance=finding)
+        form = FindingForm(request.POST, instance=finding, template=False)
         source = request.POST.get("source", "")
         page = request.POST.get("page", "")
 
@@ -820,8 +820,9 @@ def find_template_to_apply(request, fid):
 def choose_finding_template_options(request, tid, fid):
     finding = get_object_or_404(Finding, id=fid)
     template = get_object_or_404(Finding_Template, id=tid)
-    form = ApplyFindingTemplateForm(data=finding.__dict__, template=template)
-
+    data = finding.__dict__
+    data['tags'] = [tag.name for tag in template.tags]
+    form = ApplyFindingTemplateForm(data=data, template=template)
     product_tab = Product_Tab(finding.test.engagement.product.id, title="Finding Template Options", tab="findings")
     return render(request, 'dojo/apply_finding_template.html', {
         'finding': finding,
@@ -850,7 +851,9 @@ def apply_template_to_finding(request, fid, tid):
             finding.references = form.cleaned_data['references']
             finding.last_reviewed = timezone.now()
             finding.last_reviewed_by = request.user
-
+            tags = request.POST.getlist('tags')
+            t = ", ".join(tags)
+            finding.tags = t
             finding.save()
         else:
             messages.add_message(

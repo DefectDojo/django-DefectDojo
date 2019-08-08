@@ -882,7 +882,14 @@ class FindingForm(forms.ModelForm):
                                      help_text="A new finding template will be created from this finding.")
 
     def __init__(self, *args, **kwargs):
-        tags = Tag.objects.usage_for_model(Finding)
+        template = kwargs.pop('template')
+        # Get tags from a template
+        if template:
+            tags = Tag.objects.usage_for_model(Finding_Template)
+        # Get tags from a finding
+        else:
+            tags = Tag.objects.usage_for_model(Finding)
+
         t = [(tag.name, tag.name) for tag in tags]
         super(FindingForm, self).__init__(*args, **kwargs)
         self.fields['tags'].widget.choices = t
@@ -937,9 +944,16 @@ class ApplyFindingTemplateForm(forms.Form):
     mitigation = forms.CharField(widget=forms.Textarea)
     impact = forms.CharField(widget=forms.Textarea)
     references = forms.CharField(widget=forms.Textarea, required=False)
+    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
+                           required=False,
+                           help_text="Add tags that help describe this finding template.  "
+                                     "Choose from the list or add new tags.  Press TAB key to add.")
 
     def __init__(self, template=None, *args, **kwargs):
+        tags = Tag.objects.usage_for_model(Finding_Template)
+        t = [(tag.name, tag.name) for tag in tags]
         super(ApplyFindingTemplateForm, self).__init__(*args, **kwargs)
+        self.fields['tags'].widget.choices = t
         self.template = template
 
     def clean(self):
@@ -954,7 +968,7 @@ class ApplyFindingTemplateForm(forms.Form):
         return cleaned_data
 
     class Meta:
-        fields = ['title', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'references']
+        fields = ['title', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'references', 'tags']
         order = ('title', 'cwe', 'cve', 'severity', 'description', 'impact', 'is_Mitigated')
 
 
