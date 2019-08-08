@@ -406,25 +406,6 @@
                   $( form_element ).submit();
               }
             });
-            /*
-            $('button#dropdownMenu2').on('click', function(e){
-              var path = window.location.href;
-              var half_url = path.slice(path.lastIndexOf("?"), path.length());
-              var current_url = document.getElementById("bulk_change_form".getattr("action"));
-              //$('div#bulk_edit_menu').append("<a> 1" + window.location.href + "2" + path.slice(path.lastIndexOf("?"), path.length()) + "3" + document.getElementById("bulk_change_form".getattr("action")) + "</a>");
-              //window.location.href = current_url + half_url
-              //$("form#bulk_change_form").attr("action", current_url+half_url);
-
-            });*/
-            /*
-            function saveFilterOptions(contentAfterQuestion)
-            {
-                var currentRef = window.location.href;
-                if(currentRef.indexOf("?") > -1)
-                {
-                    window.location.href = currentRef + contentAfterQuestion
-                }
-            }*/
             $('[data-toggle="tooltip"]').tooltip();
 
             var availableTags = [
@@ -471,7 +452,6 @@
 
               }
             });
-
             $('form#bulk_change_form').on('submit', function(e){
                 $('input[type=checkbox].select_one:checked').each(function(){
                     var hidden_input = $('<input type="hidden" value="' + this.id + '" name="finding_to_update">')
