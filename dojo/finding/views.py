@@ -13,6 +13,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
+from django.core import serializers
 from django.urls import reverse
 from django.http import Http404, HttpResponse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
@@ -1090,13 +1091,17 @@ def templates(request):
 
     title_words = sorted(set(title_words))
     add_breadcrumb(title="Template Listing", top_level=True, request=request)
-
     return render(
         request, 'dojo/templates.html', {
             'templates': paged_templates,
             'filtered': templates,
             'title_words': title_words,
         })
+
+
+def export_templates_to_json(request):
+    leads_as_json = serializers.serialize('json', Finding_Template.objects.all())
+    return HttpResponse(leads_as_json, content_type='json')
 
 
 def apply_cwe_mitigation(apply_to_findings, template, update=True):
