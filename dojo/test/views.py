@@ -314,6 +314,8 @@ def add_temp_finding(request, tid, fid):
     if request.method == 'POST':
         form = FindingForm(request.POST, template=True)
         if form.is_valid():
+            finding.last_used = timezone.now()
+            finding.save()
             new_finding = form.save(commit=False)
             new_finding.test = test
             new_finding.reporter = request.user

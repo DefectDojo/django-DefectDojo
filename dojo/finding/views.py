@@ -7,6 +7,8 @@ import os
 import shutil
 
 from collections import OrderedDict
+from django.db import models
+from django.db.models.functions import Length
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
@@ -813,7 +815,22 @@ def mktemplate(request, fid):
 def find_template_to_apply(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     test = get_object_or_404(Test, id=finding.test.id)
-    templates = Finding_Template.objects.all()
+    templates_by_CVE = Finding_Template.objects.annotate(
+                                            cve_len=Length('cve'), order=models.Value(1, models.IntegerField())).filter(
+                                                cve=finding.cve, cve_len__gt=0).order_by('-last_used')
+    if templates_by_CVE.count() == 0:
+
+        templates_by_last_used = Finding_Template.objects.all().order_by(
+                                                '-last_used').annotate(
+                                                    cve_len=Length('cve'), order=models.Value(2, models.IntegerField()))
+        templates = templates_by_last_used
+    else:
+        templates_by_last_used = Finding_Template.objects.all().exclude(
+                                                cve=finding.cve).order_by(
+                                                    '-last_used').annotate(
+                                                        cve_len=Length('cve'), order=models.Value(2, models.IntegerField()))
+        templates = templates_by_last_used.union(templates_by_CVE).order_by('order', '-last_used')
+
     templates = TemplateFindingFilter(request.GET, queryset=templates)
     paged_templates = get_page_items(request, templates.qs, 25)
 
@@ -862,6 +879,8 @@ def apply_template_to_finding(request, fid, tid):
         form = ApplyFindingTemplateForm(data=request.POST)
 
         if form.is_valid():
+            template.last_used = timezone.now()
+            template.save()
             finding.title = form.cleaned_data['title']
             finding.cwe = form.cleaned_data['cwe']
             finding.cve = form.cleaned_data['cve']
@@ -1112,6 +1131,8 @@ def apply_cwe_mitigation(apply_to_findings, template, update=True):
                     finding.mitigation = template.mitigation
                     finding.impact = template.impact
                     finding.references = template.references
+                    template.last_used = timezone.now()
+                    template.save()
                     new_note = Notes()
                     new_note.entry = 'CWE remediation text applied to finding for CWE: %s using template: %s.' % (template.cwe, template.title)
                     new_note.author, created = User.objects.get_or_create(username='System')

@@ -1770,5 +1770,7 @@ def apply_cwe_to_template(finding, override=False):
             finding.mitigation = template.mitigation
             finding.impact = template.impact
             finding.references = template.references
+            template.last_used = timezone.now()
+            template.save()
 
     return finding
