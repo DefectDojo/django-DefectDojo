@@ -51,6 +51,7 @@ def webhook(request):
                         finding.active = True
                         finding.mitigated = None
                         finding.save()
+                    finding.jira_change = timezone.now()
                     finding.save()
             """
             if jissue.engagement is not None:
@@ -71,6 +72,7 @@ def webhook(request):
             new_note.author, created = User.objects.get_or_create(username='JIRA')
             new_note.save()
             finding.notes.add(new_note)
+            finding.jira_change = timezone.now()
             finding.save()
     return HttpResponse('')
 

@@ -792,7 +792,7 @@ class AddFindingForm(forms.ModelForm):
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
-                   'review_requested_by', 'is_Mitigated')
+                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change')
 
 
 class AdHocFindingForm(forms.ModelForm):
@@ -830,7 +830,7 @@ class AdHocFindingForm(forms.ModelForm):
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
-                   'review_requested_by', 'is_Mitigated')
+                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change')
 
 
 class PromoteFindingForm(forms.ModelForm):
@@ -855,7 +855,7 @@ class PromoteFindingForm(forms.ModelForm):
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'active', 'false_p', 'verified', 'is_template',
-                   'duplicate', 'out_of_scope', 'images', 'under_review', 'reviewers', 'review_requested_by', 'is_Mitigated')
+                   'duplicate', 'out_of_scope', 'images', 'under_review', 'reviewers', 'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change')
 
 
 class FindingForm(forms.ModelForm):
@@ -909,7 +909,7 @@ class FindingForm(forms.ModelForm):
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
-                   'review_requested_by', 'is_Mitigated')
+                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change')
 
 
 class StubFindingForm(forms.ModelForm):
