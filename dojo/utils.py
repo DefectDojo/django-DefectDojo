@@ -1026,7 +1026,7 @@ def add_issue(find, push_to_jira):
     if push_to_jira:
         if 'Active' in find.status() and 'Verified' in find.status():
             if ((jpkey.push_all_issues and Finding.get_number_severity(
-                    System_Settings.objects.get().jira_minimum_severity) >
+                    System_Settings.objects.get().jira_minimum_severity) >=
                  Finding.get_number_severity(find.severity))):
                 log_jira_alert(
                     'Finding below jira_minimum_severity threshold.', find)
