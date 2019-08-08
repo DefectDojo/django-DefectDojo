@@ -85,4 +85,6 @@ urlpatterns = [
         views.edit_template, name='edit_template'),
     url(r'^template/(?P<tid>\d+)/delete',
         views.delete_template, name='delete_template'),
+    url(r'^template/export$',
+        views.export_templates_to_json, name='export_template'),
 ]

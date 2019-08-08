@@ -995,7 +995,11 @@ def log_jira_message(text, finding):
 def add_labels(find, issue):
     # Update Label with system setttings label
     system_settings = System_Settings.objects.get()
-    labels = system_settings.jira_labels.split()
+    labels = system_settings.jira_labels
+    if labels is None:
+        return
+    else:
+        labels = labels.split()
     if len(labels) > 0:
         for label in labels:
             issue.fields.labels.append(label)
@@ -1068,6 +1072,9 @@ def add_issue(find, push_to_jira):
                     j_issue = JIRA_Issue(
                         jira_id=new_issue.id, jira_key=new_issue, finding=find)
                     j_issue.save()
+                    find.jira_creation = timezone.now()
+                    find.jira_change = find.jira_creation
+                    find.save()
                     issue = jira.issue(new_issue.id)
 
                     # Add labels (security & product)
@@ -1164,7 +1171,9 @@ def update_issue(find, old_status, push_to_jira):
                                                   jira_conf.finding_text),
                 priority={'name': jira_conf.get_priority(find.severity)},
                 fields=fields)
-
+            print('\n\nSaving jira_change\n\n')
+            find.jira_change = timezone.now()
+            find.save()
             # Add labels(security & product)
             add_labels(find, issue)
         except JIRAError as e:
@@ -1181,6 +1190,8 @@ def update_issue(find, old_status, push_to_jira):
                     url=req_url,
                     auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
                     json=json_data)
+                find.jira_change = timezone.now()
+                find.save()
         elif 'Active' in find.status() and 'Verified' in find.status():
             if 'Inactive' in old_status:
                 json_data = {'transition': {'id': jira_conf.open_status_key}}
@@ -1188,6 +1199,8 @@ def update_issue(find, old_status, push_to_jira):
                     url=req_url,
                     auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
                     json=json_data)
+                find.jira_change = timezone.now()
+                find.save()
 
 
 def close_epic(eng, push_to_jira):
@@ -1324,13 +1337,15 @@ def process_notifications(request, note, parent_url, parent_title):
         if User.objects.filter(is_active=True, username=username).exists()
     ]  # is_staff also?
     user_posting = request.user
-
+    if len(note.entry) > 20:
+        note.entry = note.entry[:20]
+        note.entry += "..."
     create_notification(
         event='user_mentioned',
         section=parent_title,
         note=note,
         user=request.user,
-        title='%s mentioned you in a note' % request.user,
+        title='%s jotted a note' % request.user,
         url=parent_url,
         icon='commenting',
         recipients=users_to_notify)
@@ -1472,13 +1487,20 @@ def get_slack_user_id(user_email):
 
 
 def create_notification(event=None, **kwargs):
+    def create_description(event):
+        if "description" not in kwargs.keys():
+            if event == 'product_added':
+                kwargs["description"] = "Product " + kwargs['title'] + " has been created successfully."
+            else:
+                kwargs["description"] = "Event " + str(event) + " has occured."
+
     def create_notification_message(event, notification_type):
         template = 'notifications/%s.tpl' % event.replace('/', '')
         kwargs.update({'type': notification_type})
-
         try:
             notification = render_to_string(template, kwargs)
         except:
+            create_description(event)
             notification = render_to_string('notifications/other.tpl', kwargs)
 
         return notification
@@ -1572,7 +1594,7 @@ def create_notification(event=None, **kwargs):
         send_hipchat_notification(get_system_setting('hipchat_channel'))
 
     if mail_enabled and 'mail' in getattr(notifications, event):
-        send_slack_notification(get_system_setting('mail_notifications_from'))
+        send_mail_notification(get_system_setting('mail_notifications_to'))
 
     if 'alert' in getattr(notifications, event, None):
         send_alert_notification()
@@ -1761,5 +1783,7 @@ def apply_cwe_to_template(finding, override=False):
             finding.mitigation = template.mitigation
             finding.impact = template.impact
             finding.references = template.references
+            template.last_used = timezone.now()
+            template.save()
 
     return finding
