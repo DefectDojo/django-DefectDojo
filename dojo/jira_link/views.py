@@ -18,7 +18,7 @@ from jira import JIRA
 # Local application/library imports
 from dojo.forms import JIRAForm, DeleteJIRAConfForm
 from dojo.models import User, JIRA_Conf, JIRA_Issue, Notes
-from dojo.utils import add_breadcrumb, get_system_setting
+from dojo.utils import add_breadcrumb, get_system_setting, create_notification
 
 logger = logging.getLogger(__name__)
 
@@ -96,6 +96,12 @@ def new_jira(request):
                                      messages.SUCCESS,
                                      'JIRA Configuration Successfully Created.',
                                      extra_tags='alert-success')
+                create_notification(event='other',
+                                    title='New addition of JIRA URL %s' % jform.cleaned_data.get('url').rstrip('/'),
+                                    description='JIRA url "%s" was added by %s' %
+                                                (jform.cleaned_data.get('url').rstrip('/'), request.user),
+                                    url=request.build_absolute_uri(reverse('jira')),
+                                    )
                 return HttpResponseRedirect(reverse('jira', ))
             except Exception:
                 messages.add_message(request,
@@ -131,6 +137,12 @@ def edit_jira(request, jid):
                                      messages.SUCCESS,
                                      'JIRA Configuration Successfully Created.',
                                      extra_tags='alert-success')
+                create_notification(event='other',
+                                    title='Edit of JIRA URL %s' % jform.cleaned_data.get('url').rstrip('/'),
+                                    description='JIRA url "%s" was edited by %s' %
+                                                (jform.cleaned_data.get('url').rstrip('/'), request.user),
+                                    url=request.build_absolute_uri(reverse('jira')),
+                                    )
                 return HttpResponseRedirect(reverse('jira', ))
             except Exception:
                 messages.add_message(request,
@@ -185,6 +197,11 @@ def delete_jira(request, tid):
                                      messages.SUCCESS,
                                      'JIRA Conf and relationships removed.',
                                      extra_tags='alert-success')
+                create_notification(event='other',
+                                    title='Deletion of JIRA URL %s' % jira_instance.url,
+                                    description='JIRA url "%s" was deleted by %s' % (jira_instance.url, request.user),
+                                    url=request.build_absolute_uri(reverse('jira')),
+                                    )
                 return HttpResponseRedirect(reverse('jira'))
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)

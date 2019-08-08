@@ -3,7 +3,7 @@
 {% if type == 'mail' %}
     Greetings,
 
-    your report "{{ report.name }}" is ready. It can be downloaded here: {{ url }}
+    Your report "{{ report.name }}" is ready. It can be downloaded here: {{ url }}
 
     Kind regards,
     {{ "team_name"|get_system_setting }}
