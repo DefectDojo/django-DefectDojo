@@ -1505,8 +1505,11 @@ def merge_finding_product(request, pid):
 
 @user_passes_test(lambda u: u.is_staff)
 def finding_bulk_update_all(request, pid=None):
+
     form = FindingBulkUpdateForm(request.POST)
     if request.method == "POST":
+        # TGT_Request = request.POST
+        # raise Exception("Check the Request")
         finding_to_update = request.POST.getlist('finding_to_update')
         if request.POST.get('delete_bulk_findings') and finding_to_update:
             finds = Finding.objects.filter(id__in=finding_to_update)
@@ -1565,8 +1568,7 @@ def finding_bulk_update_all(request, pid=None):
                                      messages.ERROR,
                                      'Unable to process bulk update. Required fields were not selected.',
                                      extra_tags='alert-danger')
-
     if pid:
-        return HttpResponseRedirect(reverse('product_open_findings', args=(pid, )) + '?test__engagement__product=' + pid)
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
     else:
         return HttpResponseRedirect(reverse('open_findings', args=()))
