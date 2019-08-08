@@ -15,9 +15,9 @@ class WpscanJSONParser(object):
         if file is None:
             return
         data = file.read()
-        if isinstance(type(data), (bytes, bytearray)):
+        try:
             tree = json.loads(str(data, 'utf-8'))
-        else:
+        except:
             tree = json.loads(data)
         for content in tree:
             node = tree[content]
