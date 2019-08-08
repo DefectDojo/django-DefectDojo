@@ -1595,7 +1595,4 @@ def finding_bulk_update_all(request, pid=None):
                                      'Unable to process bulk update. Required fields were not selected.',
                                      extra_tags='alert-danger')
 
-    if pid:
-        return HttpResponseRedirect(reverse('product_open_findings', args=(pid, )) + '?test__engagement__product=' + pid)
-    else:
-        return HttpResponseRedirect(reverse('open_findings', args=()))
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
