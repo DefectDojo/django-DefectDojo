@@ -32,6 +32,10 @@
                                     <i class="fa fa-ban"></i> Cancel
                                 </a>
                             {% endif %}
+                            <button class="btn btn-primary download_templates" type="submit"
+                                   title="Export to file">
+                                    <i class="fa fa-archive"></i>
+                            </button>
                         </div>
                     </h3>
                 </div>
@@ -161,12 +165,36 @@
             $("#id_title").autocomplete({
                 source: availableTags
             });
-
             $('button.template-delete').on('click', function (e) {
                 return confirm('Are you sure you want to delete this template?')
             });
 
             $('[data-toggle="popover"]').popover();
+
+            function JsonFileDownload() {
+            fetch('template/export')
+                .then(resp => resp.blob())
+                .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                // the filename you want
+                a.download = 'FindingTemplates.json';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                alert('All finding templates have successfully been exported and downloaded.');
+            })
+                .catch(() => alert('An error occurred when exporting the templates.'));
+            }
+
+            $('button.download_templates').on('click', function (e) {
+                if (confirm('Do you wish to download these templates as a file?'))
+                {
+                    JsonFileDownload();
+                }
+            });
 
         });
     </script>
