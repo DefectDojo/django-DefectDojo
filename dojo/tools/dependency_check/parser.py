@@ -36,7 +36,6 @@ class DependencyCheckParser(object):
         cvssv2_node = vulnerability.find(self.namespace + 'cvssV2')
         cvssv3_node = vulnerability.find(self.namespace + 'cvssV3')
         if cvssv3_node is not None:
-            print("#####################used me")
             severity = self.get_field_value(cvssv3_node, 'baseSeverity').lower().capitalize()
         elif cvssv2_node is not None:
             severity = self.get_field_value(cvssv2_node, 'severity').lower().capitalize()
