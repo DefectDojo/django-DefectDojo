@@ -13,9 +13,9 @@ class WhitesourceJSONParser(object):
             return
 
         data = file.read()
-        if isinstance(type(data), (bytes, bytearray)):
+        try:
             content = json.loads(str(data, 'utf-8'))
-        else:
+        except:
             content = json.loads(data)
         if "vulnerabilities" in content:
             tree_node = content['vulnerabilities']
