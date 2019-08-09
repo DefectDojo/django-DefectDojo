@@ -31,7 +31,7 @@ FINDING_STATUS = (('verified', 'Verified'),
 SEVERITY_CHOICES = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
                     ('High', 'High'), ('Critical', 'Critical'))
 
-                    
+
 class SelectWithPop(forms.Select):
     def render(self, name, *args, **kwargs):
         html = super(SelectWithPop, self).render(name, *args, **kwargs)
