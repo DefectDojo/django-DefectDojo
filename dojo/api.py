@@ -1464,7 +1464,7 @@ class ImportScanResource(MultipartResource, Resource):
         t.tags = bundle.data['tags']
 
         try:
-            parser = import_parser_factory(bundle.data['file'], t, bundle.data['scan_type'])
+            parser = import_parser_factory(bundle.data['file'], t, bundle.data['active'], bundle.data['verified'], bundle.data['scan_type'])
         except ValueError:
             raise NotFound("Parser ValueError")
 
@@ -1646,7 +1646,7 @@ class ReImportScanResource(MultipartResource, Resource):
         active = bundle.obj.__getattr__('active')
 
         try:
-            parser = import_parser_factory(bundle.data['file'], test, scan_type)
+            parser = import_parser_factory(bundle.data['file'], test, active, verified, scan_type)
         except ValueError:
             raise NotFound("Parser ValueError")
 

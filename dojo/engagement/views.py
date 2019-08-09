@@ -8,7 +8,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db.models import Q
 from django.http import HttpResponseRedirect, StreamingHttpResponse, Http404, HttpResponse
 from django.shortcuts import render, get_object_or_404
@@ -32,6 +32,7 @@ from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, message, get_system_setting, create_notification, Product_Tab
 from dojo.tasks import update_epic_task, add_epic_task
+from functools import reduce
 
 logger = logging.getLogger(__name__)
 
@@ -518,8 +519,8 @@ def import_scan_results(request, eid=None, pid=None):
 
             try:
                 for item in parser.items:
-                    print "item blowup"
-                    print item
+                    print("item blowup")
+                    print(item)
                     sev = item.severity
                     if sev == 'Information' or sev == 'Informational':
                         sev = 'Info'
@@ -544,19 +545,26 @@ def import_scan_results(request, eid=None, pid=None):
                     if hasattr(item, 'unsaved_req_resp') and len(
                             item.unsaved_req_resp) > 0:
                         for req_resp in item.unsaved_req_resp:
-                            burp_rr = BurpRawRequestResponse(
-                                finding=item,
-                                burpRequestBase64=req_resp["req"],
-                                burpResponseBase64=req_resp["resp"],
-                            )
+                            if form.get_scan_type() == "Arachni Scan":
+                                burp_rr = BurpRawRequestResponse(
+                                    finding=item,
+                                    burpRequestBase64=req_resp["req"],
+                                    burpResponseBase64=req_resp["resp"],
+                                )
+                            else:
+                                burp_rr = BurpRawRequestResponse(
+                                    finding=item,
+                                    burpRequestBase64=req_resp["req"].encode("utf-8"),
+                                    burpResponseBase64=req_resp["resp"].encode("utf-8"),
+                                )
                             burp_rr.clean()
                             burp_rr.save()
 
                     if item.unsaved_request is not None and item.unsaved_response is not None:
                         burp_rr = BurpRawRequestResponse(
                             finding=item,
-                            burpRequestBase64=item.unsaved_request,
-                            burpResponseBase64=item.unsaved_response,
+                            burpRequestBase64=item.unsaved_request.encode("utf-8"),
+                            burpResponseBase64=item.unsaved_response.encode("utf-8"),
                         )
                         burp_rr.clean()
                         burp_rr.save()
@@ -732,7 +740,7 @@ def upload_risk(request, eid):
             risk.compensating_control = form.cleaned_data['compensating_control']
             risk.path = form.cleaned_data['path']
             risk.save()  # have to save before findings can be added
-            risk.accepted_findings = findings
+            risk.accepted_findings.set(findings)
             if form.cleaned_data['notes']:
                 notes = Notes(
                     entry=form.cleaned_data['notes'],
