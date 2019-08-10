@@ -31,7 +31,7 @@ class DawnScannerParser(object):
 
             title = item['name'].upper()
             if "CVE" in title:
-                cve = re.findall('CVE-\d{4}-\d{4,7}', title)[0]
+                cve = re.findall(r'CVE-\d{4}-\d{4,7}', title)[0]
             else:
                 cve = None
             # Finding details information
