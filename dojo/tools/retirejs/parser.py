@@ -20,9 +20,9 @@ class RetireJsParser(object):
     def parse_json(self, json_output):
         try:
             data = json_output.read()
-            if isinstance(type(data), (bytes, bytearray)):
+            try:
                 tree = json.loads(str(data, 'utf-8'))
-            else:
+            except:
                 tree = json.loads(data)
         except:
             raise Exception("Invalid format")

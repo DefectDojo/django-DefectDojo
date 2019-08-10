@@ -8,9 +8,9 @@ import json
 class SSLlabsParser(object):
     def __init__(self, filename, test):
         tree = json_output.read()
-        if isinstance(type(tree), (bytes, bytearray)):
+        try:
             data = json.loads(str(tree, 'utf-8'))
-        else:
+        except:
             data = json.loads(tree)
 
         find_date = datetime.now()
