@@ -2,6 +2,7 @@ __author__ = "phylu"
 
 from defusedxml import ElementTree as ET
 from dojo.models import Finding
+import re
 
 
 class CrashtestSecurityXmlParser(object):
@@ -49,7 +50,7 @@ class CrashtestSecurityXmlParser(object):
 
             title = node.get('name').upper()
             if "CVE" in title:
-                cve = title
+                cve = re.findall('CVE-\d{4}-\d{4,7}', title)[0]
             else:
                 cve = None
             description = failure.get('message')
