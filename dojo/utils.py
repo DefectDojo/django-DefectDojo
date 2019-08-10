@@ -995,7 +995,11 @@ def log_jira_message(text, finding):
 def add_labels(find, issue):
     # Update Label with system setttings label
     system_settings = System_Settings.objects.get()
-    labels = system_settings.jira_labels.split()
+    labels = system_settings.jira_labels
+    if labels is None:
+        return
+    else:
+        labels = labels.split()
     if len(labels) > 0:
         for label in labels:
             issue.fields.labels.append(label)
@@ -1068,6 +1072,9 @@ def add_issue(find, push_to_jira):
                     j_issue = JIRA_Issue(
                         jira_id=new_issue.id, jira_key=new_issue, finding=find)
                     j_issue.save()
+                    find.jira_creation = timezone.now()
+                    find.jira_change = find.jira_creation
+                    find.save()
                     issue = jira.issue(new_issue.id)
 
                     # Add labels (security & product)
@@ -1164,7 +1171,9 @@ def update_issue(find, old_status, push_to_jira):
                                                   jira_conf.finding_text),
                 priority={'name': jira_conf.get_priority(find.severity)},
                 fields=fields)
-
+            print('\n\nSaving jira_change\n\n')
+            find.jira_change = timezone.now()
+            find.save()
             # Add labels(security & product)
             add_labels(find, issue)
         except JIRAError as e:
@@ -1181,6 +1190,8 @@ def update_issue(find, old_status, push_to_jira):
                     url=req_url,
                     auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
                     json=json_data)
+                find.jira_change = timezone.now()
+                find.save()
         elif 'Active' in find.status() and 'Verified' in find.status():
             if 'Inactive' in old_status:
                 json_data = {'transition': {'id': jira_conf.open_status_key}}
@@ -1188,6 +1199,8 @@ def update_issue(find, old_status, push_to_jira):
                     url=req_url,
                     auth=HTTPBasicAuth(jira_conf.username, jira_conf.password),
                     json=json_data)
+                find.jira_change = timezone.now()
+                find.save()
 
 
 def close_epic(eng, push_to_jira):
@@ -1770,5 +1783,7 @@ def apply_cwe_to_template(finding, override=False):
             finding.mitigation = template.mitigation
             finding.impact = template.impact
             finding.references = template.references
+            template.last_used = timezone.now()
+            template.save()
 
     return finding

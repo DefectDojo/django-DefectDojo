@@ -48,9 +48,9 @@ def import_object_eng(request, engagement, json_data):
     # Retrieve the files currently set for this product
     object_queryset = Objects.objects.filter(product=engagement.product.id).order_by('-path')
     tree = json_data.read()
-    if isinstance(type(tree), (bytes, bytearray)):
+    try:
         data = json.loads(str(tree, 'utf-8'))
-    else:
+    except:
         data = json.loads(tree)
 
     # Set default review status

@@ -22,9 +22,9 @@ class ClairKlarParser(object):
     def parse_json(self, json_output):
         try:
             data = json_output.read()
-            if isinstance(type(data), (bytes, bytearray)):
+            try:
                 tree = json.loads(str(data, 'utf-8'))
-            else:
+            except:
                 tree = json.loads(data)
             subtree = tree.get('Vulnerabilities')
         except:
@@ -61,8 +61,13 @@ def get_item(item_node, test):
         severity = 'Critical'
     else:
         severity = item_node['Severity']
-
-    description = item_node['Description'] + "\n<br /> Vulnerable feature: " + item_node['FeatureName'] + "\n<br /> Vulnerable Versions: " + str(item_node['FeatureVersion'])
+    description = ""
+    if "Description" in item_node:
+        description += item_node['Description'] + "\n<br /> "
+    if "FeatureName" in item_node:
+        description += "Vulnerable feature: " + item_node['FeatureName'] + "\n<br />"
+    if "FeatureVersion" in item_node:
+        description += " Vulnerable Versions: " + str(item_node['FeatureVersion'])
 
     mitigation = ""
     if 'FixedBy' in item_node:
