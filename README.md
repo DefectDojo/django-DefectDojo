@@ -27,6 +27,8 @@ credentials.
 ```sh
 git clone https://github.com/DefectDojo/django-DefectDojo
 cd django-DefectDojo
+# QuickFix
+cp dojo/settings/settings.dist.py dojo/settings/settings.py
 # building
 docker-compose build
 # running
