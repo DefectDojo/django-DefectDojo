@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from pathlib import Path
-from typing import Iterable, Mapping, Set, Tuple
+from typing import Iterable, Mapping, Set, Tuple, Union
 from dojo.tools.blackduck.model import BlackduckFinding
 import csv
 import io
@@ -20,9 +20,9 @@ class BlackduckImporter(Importer):
         files = dict()
         security_issues = dict()
         try:
-            if zipfile.is_zipfile(report):
+            if zipfile.is_zipfile(str(report)):
                 print("This is a zip file")
-                with zipfile.ZipFile(report) as zip:
+                with zipfile.ZipFile(str(report)) as zip:
                     for file_name in zip.namelist():
                         if file_name.endswith('files.csv'):
                             print("dealing with files")
@@ -46,7 +46,7 @@ class BlackduckImporter(Importer):
                 path = file_entry[8]
                 archive_context = file_entry[9]
                 if archive_context:
-                    locations.add(f"{archive_context}{path[1:]}")
+                    locations.add("{}{}".format(archive_context, path[1:]))
                 else:
                     locations.add(path)
             for issue in security_issues[project_id]:
@@ -69,7 +69,8 @@ class BlackduckImporter(Importer):
                     ', '.join([location for location in locations])
                 )
 
-    def __partition_by_project_id(self, csv_file) -> Mapping[str, Set[Tuple[str]]]:
+    # return type elided due to higher kinded types bug in Python 3.5
+    def __partition_by_project_id(self, csv_file: Union[Path, zipfile.ZipFile]): # -> Mapping[str, Set[Tuple[str]]]:
         records = csv.reader(csv_file)
         next(csv_file)
         findings = defaultdict(set)
