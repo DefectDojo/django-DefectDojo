@@ -59,7 +59,7 @@ class SonarQubeApiImporter(object):
             for security_issue in security_issues:
 
                 status = security_issue['status']
-                from_hotspot = security_issue['fromHotspot']
+                from_hotspot = security_issue.get('fromHotspot', False)
 
                 if self.is_closed(status) or from_hotspot:
                     continue
