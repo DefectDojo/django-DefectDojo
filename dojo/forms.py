@@ -1471,7 +1471,7 @@ class CustomReportOptionsForm(forms.Form):
     report_name = forms.CharField(required=False, max_length=100)
     include_finding_notes = forms.ChoiceField(required=False, choices=yes_no)
     include_finding_images = forms.ChoiceField(choices=yes_no, label="Finding Images")
-    report_type = forms.ChoiceField(required=False, choices=(('AsciiDoc', 'AsciiDoc')))
+    report_type = forms.ChoiceField(required=False, choices=(('AsciiDoc', 'AsciiDoc'),))
 
 
 class DeleteReportForm(forms.ModelForm):
