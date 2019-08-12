@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0012_jira_finding_age'),
+        ('dojo', '0013_jira_info_level'),
     ]
 
     operations = [
