@@ -86,7 +86,8 @@ class System_Settings(models.Model):
     jira_choices = (('Critical', 'Critical'),
                     ('High', 'High'),
                     ('Medium', 'Medium'),
-                    ('Low', 'Low'))
+                    ('Low', 'Low'),
+                    ('Info', 'Info'))
     jira_minimum_severity = models.CharField(max_length=20, blank=True,
                                              null=True, choices=jira_choices,
                                              default='None')
@@ -1242,8 +1243,10 @@ class Finding(models.Model):
             return 'S2'
         elif severity == 'Low':
             return 'S3'
-        else:
+        elif severity == 'Info':
             return 'S4'
+        else:
+            return 'S5'
 
     @staticmethod
     def get_number_severity(severity):
@@ -1255,6 +1258,8 @@ class Finding(models.Model):
             return 2
         elif severity == 'Low':
             return 1
+        elif severity == 'Info':
+            return 0
         else:
             return 5
 
@@ -1736,6 +1741,7 @@ class JIRA_Conf(models.Model):
     epic_name_id = models.IntegerField(help_text="To obtain the 'Epic name id' visit https://<YOUR JIRA URL>/rest/api/2/field and search for Epic Name. Copy the number out of cf[number] and paste it here.")
     open_status_key = models.IntegerField(help_text="To obtain the 'open status key' visit https://<YOUR JIRA URL>/rest/api/latest/issue/<ANY VALID ISSUE KEY>/transitions?expand=transitions.fields")
     close_status_key = models.IntegerField(help_text="To obtain the 'open status key' visit https://<YOUR JIRA URL>/rest/api/latest/issue/<ANY VALID ISSUE KEY>/transitions?expand=transitions.fields")
+    info_mapping_severity = models.CharField(max_length=200, help_text="Maps to the 'Priority' field in Jira. For example: Info")
     low_mapping_severity = models.CharField(max_length=200, help_text="Maps to the 'Priority' field in Jira. For example: Low")
     medium_mapping_severity = models.CharField(max_length=200, help_text="Maps to the 'Priority' field in Jira. For example: Medium")
     high_mapping_severity = models.CharField(max_length=200, help_text="Maps to the 'Priority' field in Jira. For example: High")
@@ -1749,7 +1755,9 @@ class JIRA_Conf(models.Model):
         return self.url + " | " + self.username
 
     def get_priority(self, status):
-        if status == 'Low':
+        if status == 'Info':
+            return self.info_mapping_severity
+        elif status == 'Low':
             return self.low_mapping_severity
         elif status == 'Medium':
             return self.medium_mapping_severity
