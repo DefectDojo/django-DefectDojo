@@ -6,7 +6,8 @@
     {{ description|safe }}
 
     {% if url is not None %}
-    More information on this event can be found here: {{ url }}
+    {{ test }} results have been uploaded.
+They can be viewed here: {{ url }}
     {% endif %}
 
     Kind regards,
@@ -17,6 +18,7 @@
     {{ description|safe }}
 
     {% if url is not None %}
-        More information on this event can be found here: {{ url }}
+         {{ test }} results have been uploaded.
+They can be viewed here: {{ url }}
     {% endif %}
 {% endif %}

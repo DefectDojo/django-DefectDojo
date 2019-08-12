@@ -36,6 +36,7 @@
                            class="tablesorter-bootstrap table table-bordered table-condensed table-striped">
                         <thead>
                         <tr>
+                            <th>Name</th>
                             <th>URL</th>
                             <th> Username</th>
                             <th></th>
@@ -44,6 +45,9 @@
                         <tbody>
                         {% for conf in confs %}
                             <tr>
+                                <td>
+                                        {{ conf.configuration_name }}
+                                </td>
                                 <td>
                                     <a href="{% url 'edit_jira' conf.id %}"><b>{{ conf.url }}</b></a>
                                 </td>

@@ -1187,6 +1187,8 @@ class Finding(models.Model):
     static_finding = models.BooleanField(default=False)
     dynamic_finding = models.BooleanField(default=True)
     created = models.DateTimeField(auto_now_add=True, null=True)
+    jira_creation = models.DateTimeField(editable=True, null=True)
+    jira_change = models.DateTimeField(editable=True, null=True)
     scanner_confidence = models.IntegerField(null=True, blank=True, default=None, editable=False, help_text="Confidence level of vulnerability which is supplied by the scannner.")
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
@@ -1524,6 +1526,7 @@ class Finding_Template(models.Model):
     mitigation = models.TextField(null=True, blank=True)
     impact = models.TextField(null=True, blank=True)
     references = models.TextField(null=True, blank=True, db_column="refs")
+    last_used = models.DateTimeField(null=True, editable=False)
     numerical_severity = models.CharField(max_length=4, null=True, blank=True, editable=False)
     template_match = models.BooleanField(default=False, verbose_name='Template Match Enabled', help_text="Enables this template for matching remediation advice. Match will be applied to all active, verified findings by CWE.")
     template_match_title = models.BooleanField(default=False, verbose_name='Match Template by Title and CWE', help_text="Matches by title text (contains search) and CWE.")
@@ -1722,6 +1725,7 @@ class FindingImageAccessToken(models.Model):
 
 
 class JIRA_Conf(models.Model):
+    configuration_name = models.CharField(max_length=2000, help_text="Enter a name to give to this configuration", default='')
     url = models.URLField(max_length=2000, verbose_name="JIRA URL", help_text="For configuring Jira, view: https://defectdojo.readthedocs.io/en/latest/features.html#jira-integration")
     #    product = models.ForeignKey(Product)
     username = models.CharField(max_length=2000)
