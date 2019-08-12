@@ -245,3 +245,17 @@ function togglePassVisibility() {
     }
 } 
 
+function asciidocDownload() {
+    var element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + 
+        encodeURIComponent(document.getElementById('base-content').innerText));
+    element.setAttribute('download', 'asciidoc-report.txt');
+  
+    element.style.display = 'none';
+    document.body.appendChild(element);
+  
+    element.click();
+  
+    document.body.removeChild(element);
+  }
+

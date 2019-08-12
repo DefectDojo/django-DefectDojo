@@ -5,6 +5,11 @@
     {% load humanize %}
     {% load get_endpoint_status %}
     {% load get_note_status %}
+    
+    <button onclick="asciidocDownload()" class="btn btn-primary" type="button">
+        Dowload Report
+    </button>
+
     {% if product_type %}
         <h2>= {{ product_type }} =</h2>
     {% elif product %}
@@ -481,3 +486,4 @@
         {% endfor %}
     {% endif %}
 {% endblock %}
+

@@ -18,7 +18,11 @@ class PhpSymfonySecurityCheckParser(object):
             self.items = []
             return
         try:
-            tree = json.load(json_file)
+            data = json_file.read()
+            try:
+                tree = json.loads(str(data, 'utf-8'))
+            except:
+                tree = json.loads(data)
         except:
             raise Exception("Invalid format")
 
