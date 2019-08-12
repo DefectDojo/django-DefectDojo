@@ -339,7 +339,7 @@ class ImportScanForm(forms.Form):
                            help_text="Add tags that help describe this scan.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
     file = forms.FileField(widget=forms.widgets.FileInput(
-        attrs={"accept": ".xml, .csv, .nessus, .json, .html, .js"}),
+        attrs={"accept": ".xml, .csv, .nessus, .json, .html, .js, .zip"}),
         label="Choose report file",
         required=True)
 
