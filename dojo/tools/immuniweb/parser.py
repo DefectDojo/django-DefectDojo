@@ -33,6 +33,10 @@ class ImmuniwebXMLParser(object):
             title = vulnerability.find('Name').text
             reference = vulnerability.find('ID').text
             cwe = ''.join(i for i in vulnerability.find('CWE-ID').text if i.isdigit())
+            if cwe:
+                cwe = cwe
+            else:
+                cwe = None
             cve = vulnerability.find('CVE-ID').text
             steps_to_reproduce = vulnerability.find('PoC').text
             # just to make sure severity is in the recognised sentence casing form
