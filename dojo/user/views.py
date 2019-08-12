@@ -322,7 +322,10 @@ def edit_user(request, uid):
         contact_form = UserContactInfoForm(instance=user_contact)
 
     if request.method == 'POST':
-        form = AddDojoUserForm(request.POST, instance=user, initial={'authorized_products': authed_products})
+        for init_auth_prods in authed_products:
+            init_auth_prods.authorized_users.remove(user)
+            init_auth_prods.save()
+        form = AddDojoUserForm(request.POST, instance=user)
         if user_contact is None:
             contact_form = UserContactInfoForm(request.POST)
         else:

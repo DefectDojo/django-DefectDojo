@@ -1,7 +1,7 @@
 import json
 
-from dojo.models import Finding, Endpoint
-from django.utils.encoding import smart_text, force_str
+from dojo.models import Finding
+
 
 class NspParser(object):
     def __init__(self, json_output, test):
@@ -15,7 +15,11 @@ class NspParser(object):
 
     def parse_json(self, json_output):
         try:
-            tree = json.load(json_output)
+            data = json_output.read()
+            try:
+                tree = json.loads(str(data, 'utf-8'))
+            except:
+                tree = json.loads(data)
         except:
             raise Exception("Invalid format")
 
@@ -36,7 +40,7 @@ def get_item(item_node, test):
 
     # Following the CVSS Scoring per https://nvd.nist.gov/vuln-metrics/cvss
 
-    if item_node['cvss_score'] <= 3.9 :
+    if item_node['cvss_score'] <= 3.9:
         severity = "Low"
     elif item_node['cvss_score'] > 4.0 and item_node['cvss_score'] <= 6.9:
         severity = "Medium"
