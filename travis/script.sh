@@ -192,7 +192,7 @@ echo "Running test ${TEST}"
       sleep 80
       echo "Testing DefectDojo Service"
       curl -s -o "/dev/null" http://localhost:8080 -m 120
-      CR=$(curl -s -o -m 120 -I http://localhost:8080/login?next= | egrep "^HTTP" | cut  -d' ' -f2)
+      CR=$(curl -s -o "/dev/null" -m 10 -I http://localhost:8080/login?next= | egrep "^HTTP" | cut  -d' ' -f2)
       if [ "$CR" != 200 ]; then
         echo "ERROR: cannot display login screen; got HTTP code $CR"
         exit 1
