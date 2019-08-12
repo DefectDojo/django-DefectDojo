@@ -5,6 +5,9 @@
 {% load humanize %}
 
 {% block content %}
+    <button onclick="asciidocDownload()" class="btn btn-primary" type="button">
+        Download Report
+    </button>
     {% for widget in widgets %}
         {{ widget.get_asciidoc }}
     {% endfor %}
