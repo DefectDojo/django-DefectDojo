@@ -3,7 +3,7 @@ from dojo.models import Product, Engagement, Test, Finding, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Product_Type, JIRA_Conf, Endpoint, BurpRawRequestResponse, JIRA_PKey, \
-    Notes, DojoMeta
+    Notes, DojoMeta, FindingImage
 from dojo.forms import ImportScanForm, SEVERITY_CHOICES
 from dojo.tools.factory import import_parser_factory
 from django.core.validators import URLValidator, validate_ipv46_address
@@ -812,3 +812,59 @@ class NoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notes
         fields = '__all__'
+
+
+class FindingImageSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = FindingImage
+        fields = '__all__'
+
+
+class FindingToFindingImagesSerializer(serializers.Serializer):
+    finding_id = serializers.PrimaryKeyRelatedField(queryset=Finding.objects.all(), many=False, allow_null=True)
+    images = FindingImageSerializer(many=True)
+
+
+class FindingToNotesSerializer(serializers.Serializer):
+    finding_id = serializers.PrimaryKeyRelatedField(queryset=Finding.objects.all(), many=False, allow_null=True)
+    notes = NoteSerializer(many=True)
+
+
+class ReportGenerateOptionSerializer(serializers.Serializer):
+    include_finding_notes = serializers.BooleanField(default=False)
+    include_finding_images = serializers.BooleanField(default=False)
+    include_executive_summary = serializers.BooleanField(default=False)
+    include_table_of_contents = serializers.BooleanField(default=False)
+
+
+class ExecutiveSummarySerializer(serializers.Serializer):
+    engagement_name = serializers.CharField(max_length=200)
+    engagement_target_start = serializers.DateField()
+    engagement_target_end = serializers.DateField()
+    test_type_name = serializers.CharField(max_length=200)
+    test_target_start = serializers.DateTimeField()
+    test_target_end = serializers.DateTimeField()
+    test_environment_name = serializers.CharField(max_length=200)
+    test_strategy_ref = serializers.URLField(max_length=200, min_length=None, allow_blank=True)
+    total_findings = serializers.IntegerField()
+
+
+class ReportGenerateSerializer(serializers.Serializer):
+    executive_summary = ExecutiveSummarySerializer(many=False, allow_null=True)
+    product_type = ProductTypeSerializer(many=False, read_only=True)
+    product = ProductSerializer(many=False, read_only=True)
+    engagement = EngagementSerializer(many=False, read_only=True)
+    report_name = serializers.CharField(max_length=200)
+    report_info = serializers.CharField(max_length=200)
+    test = TestSerializer(many=False, read_only=True)
+    endpoint = EndpointSerializer(many=False, read_only=True)
+    endpoints = EndpointSerializer(many=True, read_only=True)
+    findings = FindingSerializer(many=True, read_only=True)
+    user = UserSerializer(many=False, read_only=True)
+    team_name = serializers.CharField(max_length=200)
+    title = serializers.CharField(max_length=200)
+    user_id = serializers.IntegerField()
+    host = serializers.CharField(max_length=200)
+    finding_images = FindingToFindingImagesSerializer(many=True, allow_null=True)
+    finding_notes = FindingToNotesSerializer(many=True, allow_null=True)
