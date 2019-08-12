@@ -23,6 +23,7 @@ from tagging.registry import register as tag_register
 from multiselectfield import MultiSelectField
 from django import forms
 from django.utils.translation import gettext as _
+from dojo.signals import dedupe_signal
 
 fmt = getattr(settings, 'LOG_FORMAT', None)
 lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
@@ -1008,6 +1009,18 @@ class Endpoint(models.Model):
         else:
             return self.host
 
+    @property
+    def host_with_port(self):
+        host = self.host
+        port = self.port
+        scheme = self.protocol
+        if ":" in host:
+            return host
+        elif (port is None) and (scheme == "https"):
+            return host + ':443'
+        elif (port is None) and (scheme == "http"):
+            return host + ':80'
+
 
 class NoteHistory(models.Model):
     data = models.TextField()
@@ -1172,8 +1185,10 @@ class Finding(models.Model):
     file_path = models.CharField(null=True, blank=True, max_length=4000)
     found_by = models.ManyToManyField(Test_Type, editable=False)
     static_finding = models.BooleanField(default=False)
-    dynamic_finding = models.BooleanField(default=False)
+    dynamic_finding = models.BooleanField(default=True)
     created = models.DateTimeField(auto_now_add=True, null=True)
+    jira_creation = models.DateTimeField(editable=True, null=True)
+    jira_change = models.DateTimeField(editable=True, null=True)
     scanner_confidence = models.IntegerField(null=True, blank=True, default=None, editable=False, help_text="Confidence level of vulnerability which is supplied by the scannner.")
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
@@ -1184,11 +1199,14 @@ class Finding(models.Model):
 
     def compute_hash_code(self):
         hash_string = self.title + str(self.cwe) + str(self.line) + str(self.file_path) + self.description
-
         if self.dynamic_finding:
             endpoint_str = ''
-            for e in self.endpoints.all():
-                endpoint_str += str(e)
+            if len(self.unsaved_endpoints) > 0 and self.id is None:
+                for e in self.unsaved_endpoints:
+                    endpoint_str += str(e.host_with_port)
+            else:
+                for e in self.endpoints.all():
+                    endpoint_str += str(e.host_with_port)
             if endpoint_str:
                 hash_string = hash_string + endpoint_str
         try:
@@ -1314,8 +1332,8 @@ class Finding(models.Model):
     def long_desc(self):
         long_desc = ''
         long_desc += '*' + self.title + '*\n\n'
-        long_desc += '*Severity:* ' + self.severity + '\n\n'
-        long_desc += '*Cve:* ' + self.cve + '\n\n'
+        long_desc += '*Severity:* ' + str(self.severity) + '\n\n'
+        long_desc += '*Cve:* ' + str(self.cve) + '\n\n'
         long_desc += '*Product/Engagement:* ' + self.test.engagement.product.name + ' / ' + self.test.engagement.name + '\n\n'
         if self.test.engagement.branch_tag:
             long_desc += '*Branch/Tag:* ' + self.test.engagement.branch_tag + '\n\n'
@@ -1343,17 +1361,20 @@ class Finding(models.Model):
             super(Finding, self).save(*args, **kwargs)
         else:
             super(Finding, self).save(*args, **kwargs)
+
+        if (self.line is not None and self.file_path is not None) and (self.endpoints.count() == 0):
+            self.static_finding = True
+            self.dynamic_finding = False
+        elif (self.line is not None and self.file_path is not None):
+            self.static_finding = True
+
         # Compute hash code before dedupe
-        if self.hash_code is None:
-            self.hash_code = self.compute_hash_code()
+        if (self.hash_code is None):
+            if((self.dynamic_finding and (self.endpoints.count() > 0)) or
+                    (self.static_finding and (self.line is not None and self.file_path is not None))):
+                self.hash_code = self.compute_hash_code()
         self.found_by.add(self.test.test_type)
-        if self.test.test_type.static_tool and self.test.test_type.dynamic_tool:
-            self.static_finding = True
-            self.dynamic_finding = True
-        elif self.test.test_type.static_tool:
-            self.static_finding = True
-        elif self.test.test_type.dynamic_tool:
-            self.dynamic_finding = True
+
         if rules_option:
             from dojo.tasks import async_rules
             from dojo.utils import sync_rules
@@ -1371,13 +1392,12 @@ class Finding(models.Model):
         self.numerical_severity = Finding.get_numerical_severity(self.severity)
         super(Finding, self).save()
         system_settings = System_Settings.objects.get()
-        if (dedupe_option):
+        if dedupe_option and self.hash_code is not None:
             if system_settings.enable_deduplication:
                 from dojo.tasks import async_dedupe
-                from dojo.utils import sync_dedupe
                 try:
                     if self.reporter.usercontactinfo.block_execution:
-                        sync_dedupe(self, *args, **kwargs)
+                        dedupe_signal.send(sender=self.__class__, new_finding=self)
                     else:
                         async_dedupe.delay(self, *args, **kwargs)
                 except:
@@ -1499,6 +1519,7 @@ class Finding_Template(models.Model):
     mitigation = models.TextField(null=True, blank=True)
     impact = models.TextField(null=True, blank=True)
     references = models.TextField(null=True, blank=True, db_column="refs")
+    last_used = models.DateTimeField(null=True, editable=False)
     numerical_severity = models.CharField(max_length=4, null=True, blank=True, editable=False)
     template_match = models.BooleanField(default=False, verbose_name='Template Match Enabled', help_text="Enables this template for matching remediation advice. Match will be applied to all active, verified findings by CWE.")
     template_match_title = models.BooleanField(default=False, verbose_name='Match Template by Title and CWE', help_text="Matches by title text (contains search) and CWE.")
@@ -1697,6 +1718,7 @@ class FindingImageAccessToken(models.Model):
 
 
 class JIRA_Conf(models.Model):
+    configuration_name = models.CharField(max_length=2000, help_text="Enter a name to give to this configuration", default='')
     url = models.URLField(max_length=2000, verbose_name="JIRA URL", help_text="For configuring Jira, view: https://defectdojo.readthedocs.io/en/latest/features.html#jira-integration")
     #    product = models.ForeignKey(Product)
     username = models.CharField(max_length=2000)

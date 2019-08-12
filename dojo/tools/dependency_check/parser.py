@@ -8,6 +8,8 @@ from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
 
+SEVERITY = ['Info', 'Low', 'Medium', 'High', 'Critical']
+
 
 class DependencyCheckParser(object):
     def get_field_value(self, parent_node, field_name):
@@ -36,6 +38,14 @@ class DependencyCheckParser(object):
             severity = self.get_field_value(cvssv2_node, 'severity').lower().capitalize()
         else:
             severity = self.get_field_value(vulnerability, 'severity').lower().capitalize()
+
+        if severity in SEVERITY:
+            severity = severity
+        else:
+            tag = "Severity is inaccurate : " + str(severity)
+            title += " | " + tag
+            print("Warning: Inaccurate severity detected. Setting it's severity to Medium level.\n" + "Title is :" + title)
+            severity = "Medium"
 
         reference_detail = None
         references_node = vulnerability.find(self.namespace + 'references')
@@ -81,7 +91,10 @@ class DependencyCheckParser(object):
         scan = ElementTree.fromstring(content)
         regex = r"{.*}"
         matches = re.match(regex, scan.tag)
-        self.namespace = matches.group(0)
+        try:
+            self.namespace = matches.group(0)
+        except:
+            self.namespace = ""
 
         dependencies = scan.find(self.namespace + 'dependencies')
 

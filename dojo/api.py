@@ -1463,7 +1463,8 @@ class ImportScanResource(MultipartResource, Resource):
         t.tags = bundle.data['tags']
 
         try:
-            parser = import_parser_factory(bundle.data['file'], t, bundle.data['scan_type'])
+            parser = import_parser_factory(bundle.data['file'], t, bundle.data['active'], bundle.data['verified'],
+                                           bundle.data['scan_type'])
         except ValueError:
             raise NotFound("Parser ValueError")
 
@@ -1645,7 +1646,7 @@ class ReImportScanResource(MultipartResource, Resource):
         active = bundle.obj.__getattr__('active')
 
         try:
-            parser = import_parser_factory(bundle.data['file'], test, scan_type)
+            parser = import_parser_factory(bundle.data['file'], test, active, verified, scan_type)
         except ValueError:
             raise NotFound("Parser ValueError")
 
@@ -1702,7 +1703,7 @@ class ReImportScanResource(MultipartResource, Resource):
                     item.last_reviewed_by = bundle.request.user
                     item.verified = verified
                     item.active = active
-                    item.save()
+                    item.save(dedupe_option=False)
                     finding_added_count += 1
                     new_items.append(item.id)
                     find = item
@@ -1736,6 +1737,7 @@ class ReImportScanResource(MultipartResource, Resource):
 
                     if item.unsaved_tags is not None:
                         find.tags = item.unsaved_tags
+                find.save()
             # calculate the difference
             to_mitigate = set(original_items) - set(new_items)
             for finding_id in to_mitigate:

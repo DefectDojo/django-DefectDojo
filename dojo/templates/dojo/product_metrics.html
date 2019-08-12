@@ -370,6 +370,38 @@
                     </div>
                 </div>
             </div>
+
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Open CWE Vulnerabilities
+                    </div>
+                    <div class="panel-body">
+                        <div id="open_vulnerabilities" class="graph"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i class="text-info fa fa-info-circle"></i>
+                        <small>Showing {{ open_vulnerabilities|length|apnumber }}
+                            vulnerabilit{{ open_vulnerabilities|length|pluralize:"y,ies"}} from Open findings</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Total CWE Vulnerabilities
+                    </div>
+                    <div class="panel-body">
+                        <div id="all_vulnerabilities" class="graph"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i class="text-info fa fa-info-circle"></i>
+                        <small>Showing {{ all_vulnerabilities|length|apnumber }}
+                            vulnerabilit{{ all_vulnerabilities|length|pluralize:"y,ies"}} from all findings</small>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
     </div>
@@ -386,9 +418,9 @@
     <script src="{% static "flot-axis/jquery.flot.axislabels.js" %}"></script>
 
     {% if punchcard %}
-        <script src="{% static "JUMFlot/JUMFlot.min.js" %}"></script>
-        <script src="{% static "JUMFlot/jquery.flot.mouse.js" %}"></script>
-        <script src="{% static "JUMFlot/jquery.flot.bubbles.js" %}"></script>
+        <script src="{% static "JUMFlot/javascripts/JUMFlot.min.js" %}"></script>
+        <script src="{% static "JUMFlot/javascripts/jquery.flot.mouse.js" %}"></script>
+        <script src="{% static "JUMFlot/javascripts/jquery.flot.bubbles.js" %}"></script>
     {% endif %}
     <script src="{% static "flot/jquery.flot.time.js" %}"></script>
     <script src="{% static "flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
@@ -430,6 +462,8 @@
             severity_counts_weekly();
             test_type();
             finding_age();
+            open_vulnerabilities();
+            all_vulnerabilities();
             //$(".product-graphs").hide();
             $("#meta_accordion").accordion();
         });
@@ -1181,6 +1215,51 @@
                 },
 
             });
+        }
+
+        function _draw_vulnerabilities_graph(tag, data) {
+            $.plot(tag, [data], {
+                series: {
+                    stack: true,
+                    bars: {
+                        show: true,
+                        barWidth: .7,
+                        'align': "center"
+                    }
+                },
+                grid: {
+                    hoverable: false,
+                    borderWidth: 1,
+                    borderColor: '#e7e7e7'
+                },
+                tooltip: false,
+                legend: {
+                    show: false,
+                    position: "ne"
+                },
+                xaxis: {
+                    mode: "categories",
+                    tickLength: 4
+                }
+            });
+        }
+
+        function open_vulnerabilities() {
+            var data = [];
+            {% for x in open_vulnerabilities %}
+                data.push(['CWE-{{x.cwe}}', {{x.count}}]);
+            {% endfor %}
+
+            _draw_vulnerabilities_graph("#open_vulnerabilities", data);
+        }
+
+        function all_vulnerabilities() {
+            var data = [];
+            {% for x in all_vulnerabilities %}
+                data.push(['CWE-{{x.cwe}}', {{x.count}}]);
+            {% endfor %}
+
+            _draw_vulnerabilities_graph("#all_vulnerabilities", data);
         }
 
         function finding_age() {

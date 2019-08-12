@@ -7,10 +7,13 @@ import os
 import shutil
 
 from collections import OrderedDict
+from django.db import models
+from django.db.models.functions import Length
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
+from django.core import serializers
 from django.urls import reverse
 from django.http import Http404, HttpResponse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
@@ -48,6 +51,7 @@ def open_findings(request, pid=None, eid=None, view=None):
     custom_breadcrumb = None
     filter_name = "Open"
     pid_local = None
+    tags = Tag.objects.usage_for_model(Finding)
     if pid:
         if view == "All":
             filter_name = "All"
@@ -132,7 +136,8 @@ def open_findings(request, pid=None, eid=None, view=None):
             'found_by': found_by,
             'custom_breadcrumb': custom_breadcrumb,
             'filter_name': filter_name,
-            'title': title
+            'title': title,
+            'tag_input': tags,
         })
 
 
@@ -336,6 +341,12 @@ def close_finding(request, fid):
                 messages.SUCCESS,
                 'Finding closed.',
                 extra_tags='alert-success')
+            create_notification(event='other',
+                                title='Closing of %s' % finding.title,
+                                description='The finding "%s" was closed by %s' % (finding.title, request.user),
+                                url=request.build_absolute_uri(reverse('view_test', args=(finding.test.id, ))),
+                                )
+
             return HttpResponseRedirect(
                 reverse('view_test', args=(finding.test.id, )))
 
@@ -441,6 +452,11 @@ def reopen_finding(request, fid):
         messages.SUCCESS,
         'Finding Reopened.',
         extra_tags='alert-success')
+    create_notification(event='other',
+                        title='Reopening of %s' % finding.title,
+                        description='The finding "%s" was reopened by %s' % (finding.title, request.user),
+                        url=request.build_absolute_uri(reverse('view_test', args=(finding.test.id, ))),
+                        )
     return HttpResponseRedirect(reverse('view_finding', args=(finding.id, )))
 
 
@@ -487,6 +503,12 @@ def delete_finding(request, fid):
                 messages.SUCCESS,
                 'Finding deleted successfully.',
                 extra_tags='alert-success')
+            create_notification(event='other',
+                                title='Deletion of %s' % finding.title,
+                                description='The finding "%s" was deleted by %s' % (finding.title, request.user),
+                                url=request.build_absolute_uri(reverse('all_findings')),
+                                recipients=[finding.test.engagement.lead],
+                                icon="exclamation-triangle")
             return HttpResponseRedirect(reverse('view_test', args=(tid, )))
         else:
             messages.add_message(
@@ -502,7 +524,7 @@ def delete_finding(request, fid):
 def edit_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     old_status = finding.status()
-    form = FindingForm(instance=finding)
+    form = FindingForm(instance=finding, template=False)
     form.initial['tags'] = [tag.name for tag in finding.tags]
     form_error = False
     jform = None
@@ -518,7 +540,7 @@ def edit_finding(request, fid):
         jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
 
     if request.method == 'POST':
-        form = FindingForm(request.POST, instance=finding)
+        form = FindingForm(request.POST, instance=finding, template=False)
         source = request.POST.get("source", "")
         page = request.POST.get("page", "")
 
@@ -652,8 +674,8 @@ def request_finding_review(request, fid):
         if form.is_valid():
             now = timezone.now()
             new_note = Notes()
-
             new_note.entry = "Review Request: " + form.cleaned_data['entry']
+            new_note.private = True
             new_note.author = request.user
             new_note.date = now
             new_note.save()
@@ -668,12 +690,16 @@ def request_finding_review(request, fid):
             users = form.cleaned_data['reviewers']
             finding.reviewers.set(users)
             finding.save()
+            reviewers = ""
+            for suser in form.cleaned_data['reviewers']:
+                reviewers += str(suser) + ", "
+            reviewers = reviewers[:-2]
 
             create_notification(event='review_requested',
                                 title='Finding review requested',
-                                description='User %s has requested that you please review the finding "%s" for accuracy:\n\n%s' % (user, finding.title, new_note),
+                                description='User %s has requested that users %s review the finding "%s" for accuracy:\n\n%s' % (user, reviewers, finding.title, new_note),
                                 icon='check',
-                                url=request.build_absolute_uri(reverse("view_finding", args=(finding.id,))))
+                                url=reverse("view_finding", args=(finding.id,)))
 
             messages.add_message(
                 request,
@@ -773,7 +799,9 @@ def mktemplate(request, fid):
             references=finding.references,
             numerical_severity=finding.numerical_severity)
         template.save()
-        template.tags = finding.tags
+        tags = [tag.name for tag in list(finding.tags)]
+        t = ", ".join(tags)
+        template.tags = t
         messages.add_message(
             request,
             messages.SUCCESS,
@@ -788,7 +816,22 @@ def mktemplate(request, fid):
 def find_template_to_apply(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     test = get_object_or_404(Test, id=finding.test.id)
-    templates = Finding_Template.objects.all()
+    templates_by_CVE = Finding_Template.objects.annotate(
+                                            cve_len=Length('cve'), order=models.Value(1, models.IntegerField())).filter(
+                                                cve=finding.cve, cve_len__gt=0).order_by('-last_used')
+    if templates_by_CVE.count() == 0:
+
+        templates_by_last_used = Finding_Template.objects.all().order_by(
+                                                '-last_used').annotate(
+                                                    cve_len=Length('cve'), order=models.Value(2, models.IntegerField()))
+        templates = templates_by_last_used
+    else:
+        templates_by_last_used = Finding_Template.objects.all().exclude(
+                                                cve=finding.cve).order_by(
+                                                    '-last_used').annotate(
+                                                        cve_len=Length('cve'), order=models.Value(2, models.IntegerField()))
+        templates = templates_by_last_used.union(templates_by_CVE).order_by('order', '-last_used')
+
     templates = TemplateFindingFilter(request.GET, queryset=templates)
     paged_templates = get_page_items(request, templates.qs, 25)
 
@@ -816,8 +859,9 @@ def find_template_to_apply(request, fid):
 def choose_finding_template_options(request, tid, fid):
     finding = get_object_or_404(Finding, id=fid)
     template = get_object_or_404(Finding_Template, id=tid)
-    form = ApplyFindingTemplateForm(data=finding.__dict__, template=template)
-
+    data = finding.__dict__
+    data['tags'] = [tag.name for tag in template.tags]
+    form = ApplyFindingTemplateForm(data=data, template=template)
     product_tab = Product_Tab(finding.test.engagement.product.id, title="Finding Template Options", tab="findings")
     return render(request, 'dojo/apply_finding_template.html', {
         'finding': finding,
@@ -836,6 +880,8 @@ def apply_template_to_finding(request, fid, tid):
         form = ApplyFindingTemplateForm(data=request.POST)
 
         if form.is_valid():
+            template.last_used = timezone.now()
+            template.save()
             finding.title = form.cleaned_data['title']
             finding.cwe = form.cleaned_data['cwe']
             finding.cve = form.cleaned_data['cve']
@@ -846,7 +892,9 @@ def apply_template_to_finding(request, fid, tid):
             finding.references = form.cleaned_data['references']
             finding.last_reviewed = timezone.now()
             finding.last_reviewed_by = request.user
-
+            tags = request.POST.getlist('tags')
+            t = ", ".join(tags)
+            finding.tags = t
             finding.save()
         else:
             messages.add_message(
@@ -1043,13 +1091,17 @@ def templates(request):
 
     title_words = sorted(set(title_words))
     add_breadcrumb(title="Template Listing", top_level=True, request=request)
-
     return render(
         request, 'dojo/templates.html', {
             'templates': paged_templates,
             'filtered': templates,
             'title_words': title_words,
         })
+
+
+def export_templates_to_json(request):
+    leads_as_json = serializers.serialize('json', Finding_Template.objects.all())
+    return HttpResponse(leads_as_json, content_type='json')
 
 
 def apply_cwe_mitigation(apply_to_findings, template, update=True):
@@ -1084,6 +1136,8 @@ def apply_cwe_mitigation(apply_to_findings, template, update=True):
                     finding.mitigation = template.mitigation
                     finding.impact = template.impact
                     finding.references = template.references
+                    template.last_used = timezone.now()
+                    template.save()
                     new_note = Notes()
                     new_note.entry = 'CWE remediation text applied to finding for CWE: %s using template: %s.' % (template.cwe, template.title)
                     new_note.author, created = User.objects.get_or_create(username='System')
@@ -1506,6 +1560,12 @@ def finding_bulk_update_all(request, pid=None):
                                  is_Mitigated=form.cleaned_data['is_Mitigated'],
                                  last_reviewed=timezone.now(),
                                  last_reviewed_by=request.user)
+                if form.cleaned_data['tags']:
+                    for finding in finds:
+                        tags = request.POST.getlist('tags')
+                        ts = ", ".join(tags)
+                        finding.tags = ts
+
                 # Update the grade as bulk edits don't go through save
                 if form.cleaned_data['severity'] or form.cleaned_data['status']:
                     prev_prod = None
@@ -1535,7 +1595,4 @@ def finding_bulk_update_all(request, pid=None):
                                      'Unable to process bulk update. Required fields were not selected.',
                                      extra_tags='alert-danger')
 
-    if pid:
-        return HttpResponseRedirect(reverse('product_open_findings', args=(pid, )) + '?test__engagement__product=' + pid)
-    else:
-        return HttpResponseRedirect(reverse('open_findings', args=()))
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
