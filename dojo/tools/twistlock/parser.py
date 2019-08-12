@@ -14,7 +14,11 @@ class TwistlockParser(object):
 
     def parse_json(self, json_output):
         try:
-            tree = json.load(json_output)
+            data = json_output.read()
+            try:
+                tree = json.loads(str(data, 'utf-8'))
+            except:
+                tree = json.loads(data)
         except:
             raise Exception("Invalid format")
 
@@ -37,16 +41,14 @@ class TwistlockParser(object):
 
 def get_item(vulnerability, test):
     # Following the CVSS Scoring per https://nvd.nist.gov/vuln-metrics/cvss
-    if 'cvss' in vulnerability:
+    if 'severity' in vulnerability:
         # If we're dealing with a license finding, there will be no cvssScore
-        if vulnerability['cvss'] <= 3.9:
-            severity = "Low"
-        elif vulnerability['cvss'] > 4.0 and vulnerability['cvss'] <= 6.9:
-            severity = "Medium"
-        elif vulnerability['cvss'] > 7.0 and vulnerability['cvss'] <= 8.9:
+        if vulnerability['severity'] == 'important':
             severity = "High"
+        elif vulnerability['severity'] == 'moderate':
+            severity = "Medium"
         else:
-            severity = "Critical"
+            severity = vulnerability['severity'].title()
     # TODO: some seem to not have anything. Needs UNKNOWN new status in the model. Some vuln do not yet have cvss assigned.
     else:
         severity = "Info"
@@ -65,7 +67,7 @@ def get_item(vulnerability, test):
         description=vulnerability['description'] + "<p> Vulnerable Package: " +
         vulnerability['packageName'] + "</p><p> Current Version: " + str(
             vulnerability['packageVersion']) + "</p>",
-        mitigation=status,
+        mitigation=status.title(),
         references=vulnerability['link'],
         active=False,
         verified=False,
@@ -73,7 +75,7 @@ def get_item(vulnerability, test):
         duplicate=False,
         out_of_scope=False,
         mitigated=None,
-        severity_justification="{}({})\n\n{}".format(vector, cvss, riskFactors),
+        severity_justification="{} (CVSS v3 base score: {})\n\n{}".format(vector, cvss, riskFactors),
         impact=severity)
 
     finding.description = finding.description.strip()

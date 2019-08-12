@@ -53,7 +53,7 @@ setup(
         'django-custom-field',
         'django-imagekit',
         'jira',
-        'pycrypto',
+        'cryptography',
         'lxml',
         'django-multiselectfield',
         'pbr',

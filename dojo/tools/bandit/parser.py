@@ -1,14 +1,17 @@
 __author__ = 'aaronweaver'
 
 from datetime import datetime
-from dateutil import parser
 import json
 from dojo.models import Finding
 
 
 class BanditParser(object):
     def __init__(self, filename, test):
-        data = json.load(filename)
+        tree = filename.read()
+        try:
+            data = json.loads(str(tree, 'utf-8'))
+        except:
+            data = json.loads(tree)
         dupes = dict()
         if "generated_at" in data:
             find_date = datetime.strptime(data["generated_at"], '%Y-%m-%dT%H:%M:%SZ')
@@ -26,7 +29,7 @@ class BanditParser(object):
 
             title = "Test Name: " + item["test_name"] + " Test ID: " + item["test_id"]
 
-            ###### Finding details information ######
+            #  ##### Finding details information ######
             findingdetail += "Filename: " + item["filename"] + "\n"
             findingdetail += "Line number: " + str(item["line_number"]) + "\n"
             findingdetail += "Issue Confidence: " + item["issue_confidence"] + "\n\n"
@@ -49,13 +52,13 @@ class BanditParser(object):
                                active=False,
                                verified=False,
                                description=findingdetail,
-                               severity= sev.title(),
+                               severity=sev.title(),
                                numerical_severity=Finding.get_numerical_severity(sev),
                                mitigation=mitigation,
                                impact=impact,
                                references=references,
-                               file_path = item["filename"],
-                               line = item["line_number"],
+                               file_path=item["filename"],
+                               line=item["line_number"],
                                url='N/A',
                                date=find_date,
                                static_finding=True)
@@ -64,4 +67,3 @@ class BanditParser(object):
                 findingdetail = ''
 
         self.items = list(dupes.values())
-    

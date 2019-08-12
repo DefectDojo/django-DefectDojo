@@ -145,7 +145,8 @@ def do_clean(value):
     if value is not None:
         if len(value) > 0:
             for x in value:
-                myreturn += x.text
+                if x.text is not None:
+                    myreturn += x.text
     return myreturn
 
 

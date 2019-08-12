@@ -132,71 +132,6 @@
     </div>
     {% endif %}
 
-    <div class="row">
-      <div class="col-md-12" id="cred">
-          <div class="dropdown pull-left hidden" style="padding-bottom: 5px;" id="bulk_edit_menu">
-          <button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="dropdownMenu2"
-                  data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-              Bulk Edit
-              <span class="caret"></span>
-          </button>
-          <div class="btn-group mr-2" role="group" aria-label="Bulk Actions">
-            {% if product_tab %}
-            <button type="button" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Merge Findings">
-              <a class="white-color merge" href="#" alt="Merge Findings">
-                <i class="fa fa-compress"></i>
-              </a>
-            </button>
-            {% endif %}
-            <button type="button" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Delete Findings">
-              <a class="white-color delete-bulk" href="#" alt="Delete Findings">
-                <i class="fa fa-trash"></i>
-              </a>
-            </button>
-          </div>
-          <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" id="bulk_edit">
-              <li class="dropdown-header">Choose wisely...</li>
-              <li style="padding-left: 8px;">
-                  <form action="{% url 'finding_bulk_update' test.id %}" method="post" id="bulk_change_form">
-                      {% csrf_token %}
-                      <label style="display: block" for="severity">Severity</label>
-                      <select name="severity" id="severity" style="font-size: 80%">
-                          <option value="">Choose...</option>
-                          <option value="Info">Info</option>
-                          <option value="Low">Low</option>
-                          <option value="Medium">Medium</option>
-                          <option value="High">High</option>
-                          <option value="Critical">Critical</option>
-                      </select><br/><br/>
-                      <b>Status</b> <input id="id_status" name="status" type="checkbox" alt="Select to enable"/><br/>
-                      <label style="font-size: 80%; font-weight: normal; display: block">
-                          <input id="id_active" name="active" type="checkbox" disabled/> <span>Active</span>
-                      </label>
-                      <label style="font-size: 80%; font-weight: normal; display: block">
-                          <input id="id_verified" name="verified" type="checkbox" disabled/> <span>Verified</span>
-                      </label>
-                      <label style="font-size: 80%; font-weight: normal; display: block">
-                          <input id="id_false_p" name="false_p" type="checkbox" disabled/> <span>False Positive</span>
-                      </label>
-                      <label style="font-size: 80%; font-weight: normal; display: block">
-                          <input id="id_out_of_scope" name="out_of_scope" type="checkbox" disabled/>
-                          <span>Out of scope</span>
-                      </label>
-                      <label style="font-size: 80%; font-weight: normal; display: block">
-                          <input id="id_is_Mitigated" name="is_Mitigated" type="checkbox" disabled/>
-                          <span>Mitigated</span>
-                      </label>
-                      {% if "enable_jira"|get_system_setting %}
-                      <b>Push to JIRA</b> <input id="id_push_tojira" name="push_to_jira" type="checkbox" alt="Select to push to JIRA"/><br/>
-                      {% endif %}
-                      <input type="submit" class="btn btn-sm btn-primary" value="Submit"/>
-                  </form>
-              </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
     <div class="panel panel-default to_highlight table-responsive">
         <div class="panel-heading">
             <div class="clearfix">
@@ -262,10 +197,85 @@
                     <th>Status</th>
                     {% if "enable_jira"|get_system_setting %}
                     <th>Jira</th>
+                    <th>Jira Age</th>
+                    <th>Jira Change</th>
                     {% endif %}
                 </tr>
                 </thead>
                 <tbody>
+                <div class="panel-body borderless">
+                    {% include "dojo/paging_snippet.html" with page=findings %}
+                    <div class="col-md-12" id="cred">
+          <div class="dropdown pull-left hidden" style="padding-bottom: 5px;" id="bulk_edit_menu">
+          <button class="btn btn-info btn-sm btn-secondary dropdown-toggle" type="button" id="dropdownMenu2"
+                  data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+              Bulk Edit
+              <span class="caret"></span>
+          </button>
+          <div class="btn-group mr-2" role="group" aria-label="Bulk Actions">
+            {% if product_tab %}
+            <button type="button" class="btn btn-info btn-sm  btn-secondary" data-toggle="tooltip" data-placement="bottom" title="Merge Findings">
+              <a class="white-color merge" href="#" alt="Merge Findings">
+                <i class="fa fa-compress"></i>
+              </a>
+            </button>
+            {% endif %}
+            <button type="button" class="btn btn-info btn-sm  btn-secondary" data-toggle="tooltip" data-placement="bottom" title="Delete Findings">
+              <a class="white-color delete-bulk" href="#" alt="Delete Findings">
+                <i class="fa fa-trash"></i>
+              </a>
+            </button>
+          </div>
+          <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" id="bulk_edit">
+              <li class="dropdown-header">Choose wisely...</li>
+              <li style="padding-left: 8px;">
+                  <form action="{% url 'finding_bulk_update' test.id %}" method="post" id="bulk_change_form">
+                      {% csrf_token %}
+                      <label style="display: block" for="severity">Severity</label>
+                      <select name="severity" id="severity" style="font-size: 80%">
+                          <option value="">Choose...</option>
+                          <option value="Info">Info</option>
+                          <option value="Low">Low</option>
+                          <option value="Medium">Medium</option>
+                          <option value="High">High</option>
+                          <option value="Critical">Critical</option>
+                      </select><br/><br/>
+                      <b>Status</b> <input id="id_status" name="status" type="checkbox" alt="Select to enable" title="status_checkbox"/><br/>
+                      <label style="font-size: 80%; font-weight: normal; display: block">
+                          <input id="id_active" name="active" type="checkbox" disabled/> <span>Active</span>
+                      </label>
+                      <label style="font-size: 80%; font-weight: normal; display: block">
+                          <input id="id_verified" name="verified" type="checkbox" disabled/> <span>Verified</span>
+                      </label>
+                      <label style="font-size: 80%; font-weight: normal; display: block">
+                          <input id="id_false_p" name="false_p" type="checkbox" disabled/> <span>False Positive</span>
+                      </label>
+                      <label style="font-size: 80%; font-weight: normal; display: block">
+                          <input id="id_out_of_scope" name="out_of_scope" type="checkbox" disabled/>
+                          <span>Out of scope</span>
+                      </label>
+                      <label style="font-size: 80%; font-weight: normal; display: block">
+                          <input id="id_is_Mitigated" name="is_Mitigated" type="checkbox" disabled/>
+                          <span>Mitigated</span>
+                      </label>
+                      {% if "enable_jira"|get_system_setting %}
+                      <b>Push to JIRA</b> <input id="id_push_tojira" name="push_to_jira" type="checkbox" alt="Select to push to JIRA" title="Push_To_Jira"/><br/>
+                      {% endif %}
+                      <label style="display: block">Tags</label>
+                      <label style="font-size: 80%; font-weight: normal; display: block; padding-right: 8px;">
+                          <select multiple class="chosen-select" style="display: none;" name="tags" id="tag_choices">
+                              {% for tag in tag_input %}
+                                <option value="{{tag}}">{{tag}}</option>
+                              {% endfor %}`
+                          </select>
+                      </label>
+                      <input type="submit" class="btn btn-sm btn-primary" value="Submit" title="sub-button"/>
+                  </form>
+              </li>
+          </ul>
+        </div>
+      </div>
+                </div>
                 {% for finding in findings %}
                     <tr class="{% if finding.active %}active_finding{% else %}inactive_finding{% endif %}">
                         <td class="hidden-sm centered">
@@ -373,7 +383,10 @@
                                 " data-placement="right" data-container="body" data-original-title="Endpoints" title="">
                               {% endif %}
                             {% endif %}
-                        </i>
+                                </i>
+                             {% if finding.notes.all %}
+                                    <i class="fa fa-comment has-popover" data-trigger="hover" data-content="{{ finding.notes.all.0 }}" data-placement="left" data-container="body" data-original-title="Most Recent Note" title=""></i>
+                             {% endif %}
                           {% if finding.tags %}
                               <sup>
                                   {% for tag in finding.tags %}
@@ -403,21 +416,32 @@
                               {{ finding.reporter }}
                           {% endif %}
                         </td>
-                        <td>{% if finding.under_review %}Under Review, {% endif %}{{ finding.status }}{% if finding.duplicate_finding.id %}, <a href="{% url 'view_finding' finding.duplicate_finding.id%}" data-toggle="tooltip" data-placement="top" title="{{ finding.title }}, {{ finding.created }}">Original</a>
+                        <td>{% if finding.under_defect_review %}Under Review, {% endif %}{{ finding.status }}{% if finding.duplicate_finding.id %}, <a href="{% url 'view_finding' finding.duplicate_finding.id%}" data-toggle="tooltip" data-placement="top" title="{{ finding.title }}, {{ finding.created }}">Original</a>
                         {% endif %}
                         </td>
                         {% if "enable_jira"|get_system_setting %}
-                        <td>
-                        <a href="{{finding.jira_conf.url}}/browse/{{finding.jira.jira_key}}" target="_blank"> {{finding.jira.jira_key}} </a>
-                        </td>
+                            <td>
+                            <a href="{{finding.jira_conf.url}}/browse/{{finding.jira.jira_key}}" target="_blank"> {{finding.jira.jira_key}} </a>
+                            </td>
+                            <td class="nowrap">
+                                {% if "enable_jira"|get_system_setting %}
+                                {% if finding.jira_creation %}
+                                    {{ finding.jira_creation|timesince }} 
+                                {% endif %} 
+                                {% endif %}
+                            </td>
+                            <td class="nowrap">
+                                {% if "enable_jira"|get_system_setting %}
+                                {% if finding.jira_change %}
+                                    {{ finding.jira_change|timesince }} 
+                                {% endif %} 
+                                {% endif %}
+                            </td>
                         {% endif %}
                     </tr>
                 {% endfor %}
                 </tbody>
             </table>
-            <div class="panel-body borderless">
-                {% include "dojo/paging_snippet.html" with page=findings %}
-            </div>
         {% else %}
             <div class="panel-body">
                 <p class="text-center">No findings found.</p>
@@ -607,7 +631,25 @@
 {% block postscript %}
     <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
+    <script type="application/javascript" src="{% static "chosen/chosen.jquery.min.js" %}"></script>
     <script type="text/javascript">
+        $(function () {
+          $(".chosen-select").chosen({
+            'placeholder_text_multiple': 'Select or add some tags...',
+            'no_results_text': "Tag not found, press TAB key to add."
+            });
+
+          $(".search-field").find("input").on("keydown", function (evt) {
+            var stroke;
+            stroke = (_ref = evt.which) != null ? _ref : evt.keyCode;
+                if (stroke == 9) { // 9 = tab key
+                    var o = new Option($(this).val(), $(this).val(), true, true);
+                    $('#tag_choices').append(o);
+                    $('#tag_choices').trigger('chosen:updated');
+                    $('#tag_choices').focus();
+                }
+            });
+        });
         var checkbox_count = 0;
         function check_checked_finding()
         {

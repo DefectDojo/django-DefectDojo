@@ -125,6 +125,47 @@ def alerts(request):
                   {'alerts': paged_alerts})
 
 
+def delete_alerts(request):
+    alerts = Alerts.objects.filter(user_id=request.user)
+
+    if request.method == 'POST':
+        removed_alerts = request.POST.getlist('alert_select')
+        alerts.filter().delete()
+        messages.add_message(request,
+                                        messages.SUCCESS,
+                                        'Alerts removed.',
+                                        extra_tags='alert-success')
+        return HttpResponseRedirect('alerts')
+
+    return render(request,
+                    'dojo/delete_alerts.html',
+                    {'alerts': alerts})
+
+
+def migrate_alerts(request):
+    alerts = Alerts.objects.filter(user_id=request.user)
+    dojo_types = ['engagement', 'test', 'product', 'finding']
+
+    if request.method == 'POST':
+        for alert in alerts:
+            url = alert.url
+            split_url = url.split('/')
+            item = set(dojo_types).intersection(split_url)
+            new_url = url[url.index(next(iter(item))) - 1:]
+            alert.url = new_url
+            alert.save()
+
+        messages.add_message(request,
+                                        messages.SUCCESS,
+                                        'Alerts migrated.',
+                                        extra_tags='alert-success')
+        return HttpResponseRedirect('alerts')
+
+    return render(request,
+                    'dojo/migrate_alerts.html',
+                    {'alerts': alerts})
+
+
 def alerts_json(request, limit=None):
     limit = request.GET.get('limit')
     if limit:
@@ -281,7 +322,10 @@ def edit_user(request, uid):
         contact_form = UserContactInfoForm(instance=user_contact)
 
     if request.method == 'POST':
-        form = AddDojoUserForm(request.POST, instance=user, initial={'authorized_products': authed_products})
+        for init_auth_prods in authed_products:
+            init_auth_prods.authorized_users.remove(user)
+            init_auth_prods.save()
+        form = AddDojoUserForm(request.POST, instance=user)
         if user_contact is None:
             contact_form = UserContactInfoForm(request.POST)
         else:
@@ -311,23 +355,6 @@ def edit_user(request, uid):
         'form': form,
         'contact_form': contact_form,
         'to_edit': user})
-
-
-def delete_alerts(request):
-    alerts = Alerts.objects.filter(user_id=request.user)
-
-    if request.method == 'POST':
-        removed_alerts = request.POST.getlist('alert_select')
-        alerts.filter().delete()
-        messages.add_message(request,
-                                        messages.SUCCESS,
-                                        'Alerts removed.',
-                                        extra_tags='alert-success')
-        return HttpResponseRedirect('alerts')
-
-    return render(request,
-                    'dojo/delete_alerts.html',
-                    {'alerts': alerts})
 
 
 @user_passes_test(lambda u: u.is_superuser)

@@ -129,6 +129,13 @@
                                 <div class="clearfix">
                                     <h5>
                                         Finding {{ finding.id }}: {{ finding.title }}
+                                        {% if finding.tags %}
+                                            <sup>
+                                                {% for tag in finding.tags %}
+                                                {{ tag }}
+                                                {% endfor %}
+                                            </sup>
+                                        {% endif %}
                                     </h5>
                                 </div>
                             </div>
@@ -370,9 +377,9 @@
     <script src="{{ host }}{% static "flot-axis/jquery.flot.axislabels.js" %}"></script>
     {% if punchcard %}
         <script src="{{ host }}{% static "flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
-        <script src="{{ host }}{% static "JUMFlot/JUMFlot.min.js" %}"></script>
-        <script src="{{ host }}{% static "JUMFlot/jquery.flot.mouse.js" %}"></script>
-        <script src="{{ host }}{% static "JUMFlot/jquery.flot.bubbles.js" %}"></script>
+        <script src="{{ host }}{% static "JUMFlot/javascripts/JUMFlot.min.js" %}"></script>
+        <script src="{{ host }}{% static "JUMFlot/javascripts/jquery.flot.mouse.js" %}"></script>
+        <script src="{{ host }}{% static "JUMFlot/javascripts/jquery.flot.bubbles.js" %}"></script>
     {% endif %}
     <script type="text/javascript">
         $(function () {

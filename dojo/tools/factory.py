@@ -55,6 +55,12 @@ from dojo.tools.cobalt.parser import CobaltCSVParser
 from dojo.tools.mozilla_observatory.parser import MozillaObservatoryJSONParser
 from dojo.tools.whitesource.parser import WhitesourceJSONParser
 from dojo.tools.microfocus_webinspect.parser import MicrofocusWebinspectXMLParser
+from dojo.tools.wpscan.parser import WpscanJSONParser
+from dojo.tools.sslscan.parser import SslscanXMLParser
+from dojo.tools.jfrogxray.parser import XrayJSONParser
+from dojo.tools.sslyze.parser import SslyzeXmlParser
+from dojo.tools.testssl.parser import TestsslCSVParser
+from dojo.tools.hadolint.parser import HadolintParser
 
 __author__ = 'Jay Paz'
 
@@ -180,6 +186,18 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = WhitesourceJSONParser(file, test)
     elif scan_type == 'Microfocus Webinspect Scan':
         parser = MicrofocusWebinspectXMLParser(file, test)
+    elif scan_type == 'Wpscan':
+        parser = WpscanJSONParser(file, test)
+    elif scan_type == 'Sslscan':
+        parser = SslscanXMLParser(file, test)
+    elif scan_type == 'JFrog Xray Scan':
+        parser = XrayJSONParser(file, test)
+    elif scan_type == 'Sslyze Scan':
+        parser = SslyzeXmlParser(file, test)
+    elif scan_type == 'Testssl Scan':
+        parser = TestsslCSVParser(file, test)
+    elif scan_type == 'Hadolint Dockerfile check':
+        parser = HadolintParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 

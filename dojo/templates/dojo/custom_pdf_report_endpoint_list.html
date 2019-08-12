@@ -31,6 +31,13 @@
                             <div class="clearfix">
                                 <h5>
                                     Finding {{ finding.id }}: {{ finding.title }}
+                                    {% if finding.tags %}
+                                        <sup>
+                                            {% for tag in finding.tags %}
+                                            {{ tag }}
+                                            {% endfor %}
+                                        </sup>
+                                    {% endif %}
                                 </h5>
                             </div>
                         </div>

@@ -3,7 +3,7 @@
 {% if type == 'mail' %}
     Hello,
 
-    User {{ user }} mentioned you in a note on {{ section }}:
+    User {{ user }} jotted a note on {{ section }}:
 
     {{ note }}
 
@@ -12,13 +12,13 @@
     Kind regards,
     {{ "team_name"|get_system_setting }}
 {% elif type == 'alert' %}
-    User {{ user }} mentioned you in a note on {{ section }}:
+    User {{ user }} jotted a note on {{ section }}:
 
     {{ note }}
 {% elif type == 'slack' %}
-    User {{ user.usercontactinfo.slack_username }} mentioned you in a note on {{ section }}:
+    User {{ user }} jotted a note on {{ section }}:
 
-    {{ note }}
+{{ note }}
 
-    It can be reviewed at {{ url }}
+Full details of the note can be reviewed at {{ url }}
 {% endif %}

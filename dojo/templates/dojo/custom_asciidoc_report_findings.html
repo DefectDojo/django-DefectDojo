@@ -8,8 +8,18 @@
     <br>
 {% endif %}
 {% for find in findings %}
-    <h4>=== {{ find.title | nice_title }} {% if find.mitigated %}
-        Mitigated on: {{ find.mitigated }} {% endif %}===</h4>
+    <h4>==== {{ find.title | nice_title }} {% if find.mitigated %}
+        Mitigated on: {{ find.mitigated }} {% endif %}
+        {% if find.tags %}
+            <sup>
+                [
+                {% for tag in find.tags %}
+                {{ tag }}
+                {% endfor %}
+                ]
+            </sup>
+        {% endif %}  ====
+    </h4>
     <br>
     <p><b>==== Product: ====</b>
         <br>

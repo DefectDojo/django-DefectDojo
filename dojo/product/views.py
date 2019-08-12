@@ -213,6 +213,29 @@ def view_product_metrics(request, pid):
                                              out_of_scope=False,
                                              mitigated__isnull=False)
 
+    open_vulnerabilities = Finding.objects.filter(
+        test__engagement__product=prod,
+        false_p=False,
+        verified=True,
+        duplicate=False,
+        out_of_scope=False,
+        active=True,
+        mitigated__isnull=True,
+    ).order_by('cwe').values(
+        'cwe'
+    ).annotate(
+        count=Count('cwe')
+    )
+
+    all_vulnerabilities = Finding.objects.filter(
+        test__engagement__product=prod,
+        duplicate=False,
+    ).order_by('cwe').values(
+        'cwe'
+    ).annotate(
+        count=Count('cwe')
+    )
+
     start_date = timezone.make_aware(datetime.combine(start_date, datetime.min.time()))
 
     r = relativedelta(end_date, start_date)
@@ -315,6 +338,8 @@ def view_product_metrics(request, pid):
                    'closed_findings': closed_findings,
                    'accepted_findings': accepted_findings,
                    'new_findings': new_verified_findings,
+                   'open_vulnerabilities': open_vulnerabilities,
+                   'all_vulnerabilities': all_vulnerabilities,
                    'start_date': start_date,
                    'punchcard': punchcard,
                    'ticks': ticks,
@@ -454,7 +479,7 @@ def new_product(request):
                                                 messages.SUCCESS,
                                                 'JIRA information added successfully.',
                                                 extra_tags='alert-success')
-            create_notification(event='product_added', title=product.name, url=request.build_absolute_uri(reverse('view_product', args=(product.id,))))
+            create_notification(event='product_added', title=product.name, url=reverse('view_product', args=(product.id,)))
             return HttpResponseRedirect(reverse('view_product', args=(product.id,)))
     else:
         form = ProductForm()
@@ -552,6 +577,11 @@ def delete_product(request, pid):
                                      messages.SUCCESS,
                                      'Product and relationships removed.',
                                      extra_tags='alert-success')
+                create_notification(event='other',
+                                    title='Deletion of %s' % product.name,
+                                    description='The product "%s" was deleted by %s' % (product.name, request.user),
+                                    url=request.build_absolute_uri(reverse('product')),
+                                    icon="exclamation-triangle")
                 return HttpResponseRedirect(reverse('product'))
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)
@@ -632,7 +662,7 @@ def new_eng_for_app(request, pid, cicd=False):
                                  'Engagement added successfully.',
                                  extra_tags='alert-success')
 
-            create_notification(event='engagement_added', title=new_eng.name + " for " + prod.name, engagement=new_eng, url=request.build_absolute_uri(reverse('view_engagement', args=(new_eng.id,))), objowner=new_eng.lead)
+            create_notification(event='engagement_added', title=new_eng.name + " for " + prod.name, engagement=new_eng, url=reverse('view_engagement', args=(new_eng.id,)), objowner=new_eng.lead)
 
             if "_Add Tests" in request.POST:
                 return HttpResponseRedirect(reverse('add_tests', args=(new_eng.id,)))

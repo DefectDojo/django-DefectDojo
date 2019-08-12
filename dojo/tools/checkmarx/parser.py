@@ -84,7 +84,7 @@ class CheckmarxXMLParser(object):
                                    mitigation=mitigation,
                                    impact=impact,
                                    references=references,
-                                   file_path=pathnode.find('FileName').text.encode('utf-8'),
+                                   file_path=pathnode.find('FileName').text,
                                    line=pathnode.find('Line').text,
                                    url='N/A',
                                    date=find_date,
@@ -106,18 +106,24 @@ class CheckmarxXMLParser(object):
             for pathnode in path.findall('PathNode'):
                 result_dupes_key = pathnode.find('Line').text + "|" + pathnode.find('Column').text
                 if result_dupes_key not in self.result_dupes:
-                    findingdetail = "{}**Line Number:** {}\n".format(findingdetail, pathnode.find('Line').text)
-                    findingdetail = "{}**Column:** {}\n".format(findingdetail, pathnode.find('Column').text)
-                    findingdetail = "{}**Source Object:** {}\n".format(findingdetail, pathnode.find('Name').text)
+
+                    if pathnode.find('Line').text is not None:
+                        findingdetail = "{}**Line Number:** {}\n".format(findingdetail, pathnode.find('Line').text)
+
+                    if pathnode.find('Column').text is not None:
+                        findingdetail = "{}**Column:** {}\n".format(findingdetail, pathnode.find('Column').text)
+
+                    if pathnode.find('Name').text is not None:
+                        findingdetail = "{}**Source Object:** {}\n".format(findingdetail, pathnode.find('Name').text)
 
                     for codefragment in pathnode.findall('Snippet/Line'):
-                        findingdetail = "{}**Number:** {}\n**Code:** {}\n".format(findingdetail, codefragment.find('Number').text, codefragment.find('Code').text.encode('utf-8').strip())
+                        findingdetail = "{}**Number:** {}\n**Code:** {}\n".format(findingdetail, codefragment.find('Number').text, codefragment.find('Code').text.strip())
 
                     findingdetail = '{}-----\n'.format(findingdetail)
 
                 self.result_dupes[result_dupes_key] = True
 
-        if title and pathnode.find('FileName').text.encode('utf-8'):
-            title = "{} ({})".format(title, ntpath.basename(pathnode.find('FileName').text.encode('utf-8')))
+        if title and pathnode.find('FileName').text:
+            title = "{} ({})".format(title, ntpath.basename(pathnode.find('FileName').text))
 
         return title, findingdetail, pathnode
