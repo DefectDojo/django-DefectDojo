@@ -164,7 +164,7 @@ class FindingViewSet(mixins.ListModelMixin,
         else:
             return serializers.FindingSerializer
 
-    @detail_route(methods=['get', 'post', 'delete'])
+    @action(detail=True, methods=['get', 'post'])
     def tags(self, request, pk=None):
         finding = get_object_or_404(Finding.objects, id=pk)
 
@@ -182,34 +182,36 @@ class FindingViewSet(mixins.ListModelMixin,
                 finding.save()
             else:
                 return Response(new_tags.errors,
-                    status=status.HTTP_400_BAD_REQUEST)
-
-        elif request.method == 'DELETE':
-            delete_tags = serializers.TagSerializer(data=request.data)
-            if delete_tags.is_valid():
-                all_tags = finding.tags
-                all_tags = serializers.TagSerializer({"tags": all_tags}).data['tags']
-                del_tags = delete_tags.validated_data['tags']
-                if len(del_tags) < 1:
-                    return Response({"error": "Empty Tag List Not Allowed"},
-                            status=status.HTTP_400_BAD_REQUEST)
-                for tag in del_tags:
-                    if tag not in all_tags:
-                        return Response({"error": "'{}' is not a valid tag in list".format(tag)},
-                            status=status.HTTP_400_BAD_REQUEST)
-                    all_tags.remove(tag)
-                t = ", ".join(all_tags)
-                finding.tags = t
-                finding.save()
-                return Response({"success": "Tag(s) Deleted"},
-                    status=status.HTTP_200_OK)
-            else:
-                return Response(delete_tags.errors,
-                    status=status.HTTP_400_BAD_REQUEST)
-
+                    status=status.HTTP_400_BAD_REQUEST)        
         tags = finding.tags
         serialized_tags = serializers.TagSerializer({"tags": tags})
         return Response(serialized_tags.data)
+        
+    @detail_route(methods=["put", "patch"])
+    def remove_tags(self, request, pk=None):
+        """ Remove Tag(s) from finding list of tags """
+        finding = get_object_or_404(Finding.objects, id=pk)
+        delete_tags = serializers.TagSerializer(data=request.data)
+        if delete_tags.is_valid():
+            all_tags = finding.tags
+            all_tags = serializers.TagSerializer({"tags": all_tags}).data['tags']
+            del_tags = delete_tags.validated_data['tags']
+            if len(del_tags) < 1:
+                return Response({"error": "Empty Tag List Not Allowed"},
+                        status=status.HTTP_400_BAD_REQUEST)
+            for tag in del_tags:
+                if tag not in all_tags:
+                    return Response({"error": "'{}' is not a valid tag in list".format(tag)},
+                        status=status.HTTP_400_BAD_REQUEST)
+                all_tags.remove(tag)
+            t = ", ".join(all_tags)
+            finding.tags = t
+            finding.save()
+            return Response({"success": "Tag(s) Removed"},
+                status=status.HTTP_200_OK)
+        else:
+            return Response(delete_tags.errors,
+                status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, methods=['post'])
     def generate_report(self, request):
