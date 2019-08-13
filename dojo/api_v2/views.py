@@ -182,11 +182,11 @@ class FindingViewSet(mixins.ListModelMixin,
                 finding.save()
             else:
                 return Response(new_tags.errors,
-                    status=status.HTTP_400_BAD_REQUEST)        
+                    status=status.HTTP_400_BAD_REQUEST)
         tags = finding.tags
         serialized_tags = serializers.TagSerializer({"tags": tags})
         return Response(serialized_tags.data)
-        
+
     @detail_route(methods=["put", "patch"])
     def remove_tags(self, request, pk=None):
         """ Remove Tag(s) from finding list of tags """
