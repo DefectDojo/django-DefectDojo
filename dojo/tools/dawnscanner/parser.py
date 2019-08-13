@@ -4,6 +4,7 @@ from dateutil import parser
 import json
 import hashlib
 from dojo.models import Finding
+import re
 
 
 class DawnScannerParser(object):
@@ -28,8 +29,11 @@ class DawnScannerParser(object):
             group = ''
             status = ''
 
-            title = item['name']
-
+            title = item['name'].upper()
+            if "CVE" in title:
+                cve = re.findall(r'CVE-\d{4}-\d{4,7}', title)[0]
+            else:
+                cve = None
             # Finding details information
             findingdetail = item['message'] if item['message'][0:2] != 'b,' else item['message'][0:-1]
             sev = item['severity'].capitalize()
@@ -47,6 +51,7 @@ class DawnScannerParser(object):
                     title=title,
                     test=test,
                     active=False,
+                    cve=cve,
                     verified=False,
                     description=findingdetail,
                     severity=sev,
