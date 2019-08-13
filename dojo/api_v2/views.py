@@ -190,7 +190,11 @@ class FindingViewSet(mixins.ListModelMixin,
             if delete_tags.is_valid():
                 all_tags = finding.tags
                 all_tags = serializers.TagSerializer({"tags": all_tags}).data['tags']
-                for tag in delete_tags.validated_data['tags']:
+                del_tags = delete_tags.validated_data['tags']
+                if len(del_tags) < 1:
+                    return Response({"error": "Empty Tag List Not Allowed"},
+                            status=status.HTTP_400_BAD_REQUEST)
+                for tag in del_tags:
                     if tag not in all_tags:
                         return Response({"error": "'{}' is not a valid tag in list".format(tag)},
                             status=status.HTTP_400_BAD_REQUEST)
