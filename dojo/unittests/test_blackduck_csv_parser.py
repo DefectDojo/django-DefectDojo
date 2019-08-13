@@ -1,6 +1,7 @@
 from django.test import TestCase
 from dojo.tools.blackduck.parser import BlackduckHubCSVParser
 from dojo.models import Test
+from pathlib import Path
 
 
 class TestBlackduckHubParser(TestCase):
@@ -22,7 +23,6 @@ class TestBlackduckHubParser(TestCase):
     #     self.assertEqual(24, len(parser.items))
 
     def test_blackduck_enhanced_has_many_findings(self):
-        testfile = open("dojo/unittests/scans/blackduck/blackduck_enhanced_py3_unittest.zip")
+        testfile = Path("dojo/unittests/scans/blackduck/blackduck_enhanced_py3_unittest.zip")
         parser = BlackduckHubCSVParser(testfile, Test())
-        testfile.close()
         self.assertEqual(11, len(parser.items))

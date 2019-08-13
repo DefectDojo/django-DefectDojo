@@ -66,7 +66,7 @@ class BlackduckImporter(Importer):
                     issue[17],  # remediation target date
                     issue[18],  # remediation actual date
                     issue[19],  # remediation comment
-                    ', '.join([location for location in locations])
+                    ', '.join(locations)
                 )
 
     # return type elided due to higher kinded types bug in Python 3.5
