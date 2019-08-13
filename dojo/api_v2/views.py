@@ -175,9 +175,8 @@ class FindingViewSet(mixins.ListModelMixin,
                 all_tags = serializers.TagSerializer({"tags": all_tags}).data['tags']
 
                 for tag in new_tags.validated_data['tags']:
-                    tag = str(tag)
                     if tag not in all_tags:
-                        all_tags += tag
+                        all_tags.append(tag)
                 t = ", ".join(all_tags)
                 finding.tags = t
                 finding.save()
