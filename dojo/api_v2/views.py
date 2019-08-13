@@ -163,7 +163,7 @@ class FindingViewSet(mixins.ListModelMixin,
             return serializers.FindingCreateSerializer
         else:
             return serializers.FindingSerializer
-    
+
     @detail_route(methods=['get', 'post', 'delete'])
     def tags(self, request, pk=None):
         finding = get_object_or_404(Finding.objects, id=pk)
@@ -184,7 +184,7 @@ class FindingViewSet(mixins.ListModelMixin,
             else:
                 return Response(new_tags.errors,
                     status=status.HTTP_400_BAD_REQUEST)
-        
+
         elif request.method == 'DELETE':
             delete_tags = serializers.TagSerializer(data=request.data)
             if delete_tags.is_valid():
@@ -203,7 +203,7 @@ class FindingViewSet(mixins.ListModelMixin,
             else:
                 return Response(delete_tags.errors,
                     status=status.HTTP_400_BAD_REQUEST)
-        
+
         tags = finding.tags
         serialized_tags = serializers.TagSerializer({"tags": tags})
         return Response(serialized_tags.data)
