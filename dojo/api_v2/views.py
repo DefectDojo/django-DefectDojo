@@ -163,10 +163,53 @@ class FindingViewSet(mixins.ListModelMixin,
             return serializers.FindingCreateSerializer
         else:
             return serializers.FindingSerializer
+    
+    @detail_route(methods=['get', 'post', 'delete'])
+    def tags(self, request, pk=None):
+        finding = get_object_or_404(Finding.objects, id=pk)
+
+        if request.method == 'POST':
+            new_tags = serializers.TagSerializer(data=request.data)
+            if new_tags.is_valid():
+                all_tags = finding.tags
+                all_tags = serializers.TagSerializer({"tags": all_tags}).data['tags']
+
+                for tag in new_tags.validated_data['tags']:
+                    tag = str(tag)
+                    if tag not in all_tags:
+                        all_tags += tag
+                t = ", ".join(all_tags)
+                finding.tags = t
+                finding.save()
+            else:
+                return Response(new_tags.errors,
+                    status=status.HTTP_400_BAD_REQUEST)
+        
+        elif request.method == 'DELETE':
+            delete_tags = serializers.TagSerializer(data=request.data)
+            if delete_tags.is_valid():
+                all_tags = finding.tags
+                all_tags = serializers.TagSerializer({"tags": all_tags}).data['tags']
+                for tag in delete_tags.validated_data['tags']:
+                    if tag not in all_tags:
+                        return Response({"error": "'{}' is not a valid tag in list".format(tag)},
+                            status=status.HTTP_400_BAD_REQUEST)
+                    all_tags.remove(tag)
+                t = ", ".join(all_tags)
+                finding.tags = t
+                finding.save()
+                return Response({"success": "Tag(s) Deleted"},
+                    status=status.HTTP_200_OK)
+            else:
+                return Response(delete_tags.errors,
+                    status=status.HTTP_400_BAD_REQUEST)
+        
+        tags = finding.tags
+        serialized_tags = serializers.TagSerializer({"tags": tags})
+        return Response(serialized_tags.data)
 
     @action(detail=False, methods=['post'])
     def generate_report(self, request):
-        # finding = get_object_or_404(Endpoint.objects, id=pk)
         findings = Finding.objects.all()
         options = {}
         # prepare post data

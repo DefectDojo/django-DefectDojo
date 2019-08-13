@@ -854,3 +854,8 @@ class ReportGenerateSerializer(serializers.Serializer):
     host = serializers.CharField(max_length=200)
     finding_images = FindingToFindingImagesSerializer(many=True, allow_null=True)
     finding_notes = FindingToNotesSerializer(many=True, allow_null=True)
+
+ 
+class TagSerializer(serializers.Serializer):
+    tags = TagListSerializerField()
+    
