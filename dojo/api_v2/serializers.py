@@ -63,25 +63,25 @@ class TagListSerializerField(serializers.ListField):
 
         self.pretty_print = pretty_print
 
-    def to_internal_value(self, value):
-        if isinstance(value, six.string_types):
-            if not value:
-                value = "[]"
+    def to_internal_value(self, data):
+        if isinstance(data, six.string_types):
+            if not data:
+                data = []
             try:
-                value = json.loads(value)
+                data = json.loads(data)
             except ValueError:
                 self.fail('invalid_json')
 
-        if not isinstance(value, list):
-            self.fail('not_a_list', input_type=type(value).__name__)
+        if not isinstance(data, list):
+            self.fail('not_a_list', input_type=type(data).__name__)
 
-        for s in value:
+        for s in data:
             if not isinstance(s, six.string_types):
                 self.fail('not_a_str')
 
             self.child.run_validation(s)
 
-        return value
+        return data
 
     def to_representation(self, value):
         if not isinstance(value, TagList):
@@ -854,3 +854,7 @@ class ReportGenerateSerializer(serializers.Serializer):
     host = serializers.CharField(max_length=200)
     finding_images = FindingToFindingImagesSerializer(many=True, allow_null=True)
     finding_notes = FindingToNotesSerializer(many=True, allow_null=True)
+
+
+class TagSerializer(serializers.Serializer):
+    tags = TagListSerializerField(required=True)
