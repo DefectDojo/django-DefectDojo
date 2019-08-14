@@ -316,7 +316,7 @@ class ImportScanForm(forms.Form):
                          ("Microfocus Webinspect Scan", "Microfocus Webinspect Scan"),
                          ("Wpscan", "Wpscan"),
                          ("Sslscan", "Sslscan"),
-                         ("JFrog Xray Scan", "JFrog Xray Scan"),
+                         ("JFrogXray Scan", "JFrog Xray Scan"),
                          ("Sslyze Scan", "Sslyze Scan"),
                          ("Testssl Scan", "Testssl Scan"),
                          ("Hadolint Dockerfile check", "Hadolint Dockerfile check"))
