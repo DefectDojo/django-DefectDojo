@@ -69,7 +69,10 @@ class TruffleHogJSONParser(object):
 
     def parse_json(self, json_output):
         try:
-            json_data = json.loads(json_output)
+            try:
+                json_data = json.loads(str(json_output, 'utf-8'))
+            except:
+                json_data = json.loads(json_output)
         except ValueError:
             raise Exception("Invalid format")
 
