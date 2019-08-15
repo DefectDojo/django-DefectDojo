@@ -54,12 +54,12 @@ class TableOfContentsForm(forms.Form):
 class Div(form_widget):
     def __init__(self, attrs=None):
         # Use slightly better defaults than HTML's 20x2 box
-        default_attrs = {'style': 'width:100%;min-height:400px',}
+        default_attrs = {'style': 'width:100%;min-height:400px'}
         if attrs:
             default_attrs.update(attrs)
         super(Div, self).__init__(default_attrs)
 
-    def render(self, name, value, attrs=None):
+    def render(self, name, value, attrs=None, renderer=None):
         if value is None:
             value = ''
         final_attrs = self.build_attrs(attrs)

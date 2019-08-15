@@ -33,9 +33,11 @@ def _process_field_attributes(field, attr, process):
 def subtract(value, arg):
     return value - arg
 
+
 @register.filter
 def modulo(num, val):
     return num % val
+
 
 @register.filter
 def addcss(field, attr):
@@ -69,6 +71,7 @@ def is_radio(field):
 def is_file(field):
     return isinstance(field.field.widget, forms.FileInput) or \
            isinstance(field, forms.ClearableFileInput)
+
 
 @register.filter
 def is_text(field):

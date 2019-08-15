@@ -481,7 +481,7 @@
 	},
 	{
 	   "fields": {
-	      "name": "JFrog Xray Scan"
+	      "name": "JFrogXray Scan"
 		},
 		"model": "dojo.test_type",
 		"pk": 161
