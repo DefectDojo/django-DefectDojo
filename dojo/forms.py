@@ -1534,6 +1534,18 @@ class JIRAForm(forms.ModelForm):
         exclude = ['product']
 
 
+class ExpressJIRAForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput, required=True)
+    issue_key = forms.CharField(required=True, help_text='A valid issue ID is required to gather the necessary information.')
+
+    class Meta:
+        model = JIRA_Conf
+        exclude = ['product', 'epic_name_id', 'open_status_key',
+                    'close_status_key', 'info_mapping_severity',
+                    'low_mapping_severity', 'medium_mapping_severity',
+                    'high_mapping_severity', 'critical_mapping_severity', 'finding_text']
+
+
 class Benchmark_Product_SummaryForm(forms.ModelForm):
 
     class Meta:
