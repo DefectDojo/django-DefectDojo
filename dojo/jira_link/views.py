@@ -18,7 +18,7 @@ import requests
 
 # Local application/library imports
 from dojo.forms import JIRAForm, DeleteJIRAConfForm, ExpressJIRAForm
-from dojo.models import User, JIRA_Conf, JIRA_Issue, Notes
+from dojo.models import User, JIRA_Conf, JIRA_Issue, Notes, Risk_Acceptance
 from dojo.utils import add_breadcrumb, get_system_setting, create_notification
 
 logger = logging.getLogger(__name__)
@@ -39,19 +39,43 @@ def webhook(request):
             jissue = get_object_or_404(JIRA_Issue, jira_id=jid)
             if jissue.finding is not None:
                 finding = jissue.finding
+                jira_conf = finding.jira_conf()
                 resolved = True
-                if parsed['issue']['fields']['resolution'] is None:
+                resolution = parsed['issue']['fields']['resolution']
+                if resolution is None:
                     resolved = False
                 if finding.active == resolved:
                     if finding.active:
-                        now = timezone.now()
-                        finding.active = False
-                        finding.mitigated = now
-                        finding.endpoints.clear()
+                        if jira_conf and resolution['name'] in jira_conf.accepted_resolutions:
+                            finding.active = False
+                            finding.mitigated = None
+                            finding.false_p = False
+                            assignee = parsed['issue']['fields'].get('assignee')
+                            assignee_name = assignee['name'] if assignee else None
+                            Risk_Acceptance.objects.create(
+                                accepted_by=assignee_name,
+                                reporter=finding.reporter,
+                            ).accepted_findings.set([finding])
+                        elif jira_conf and resolution['name'] in jira_conf.false_positive_resolutions:
+                            finding.active = False
+                            finding.verified = False
+                            finding.mitigated = None
+                            finding.false_p = True
+                            finding.remove_from_any_risk_acceptance()
+                        else:
+                            # Mitigated by default as before
+                            now = timezone.now()
+                            finding.active = False
+                            finding.mitigated = now
+                            finding.endpoints.clear()
+                            finding.false_p = False
+                            finding.remove_from_any_risk_acceptance()
                     else:
+                        # Reopen / Open Jira issue
                         finding.active = True
                         finding.mitigated = None
-                        finding.save()
+                        finding.false_p = False
+                        finding.remove_from_any_risk_acceptance()
                     finding.jira_change = timezone.now()
                     finding.save()
             """

@@ -93,9 +93,12 @@ def dojo_version():
 
 @register.simple_tag
 def dojo_current_hash():
-    repo = git.Repo(search_parent_directories=True)
-    sha = repo.head.object.hexsha
-    return sha[:8]
+    try:
+        repo = git.Repo(search_parent_directories=True)
+        sha = repo.head.object.hexsha
+        return sha[:8]
+    except:
+        return "release mode"
 
 
 @register.simple_tag
