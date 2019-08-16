@@ -8,6 +8,7 @@ from tastypie_swagger.views import SwaggerView, ResourcesView, SchemaView
 from rest_framework.routers import DefaultRouter
 from rest_framework.authtoken import views as tokenviews
 from django.http import HttpResponse
+from defectDojo_engagement_survey.urls import urlpatterns as survey_urls
 
 from dojo import views
 from dojo.api import UserResource, ProductResource, EngagementResource, \
@@ -51,6 +52,7 @@ from dojo.object.urls import urlpatterns as object_urls
 from dojo.benchmark.urls import urlpatterns as benchmark_urls
 from dojo.rules.urls import urlpatterns as rule_urls
 from dojo.notes.urls import urlpatterns as notes_urls
+from dojo.note_type.urls import urlpatterns as note_type_urls
 
 admin.autodiscover()
 
@@ -137,6 +139,7 @@ ur += object_urls
 ur += benchmark_urls
 ur += rule_urls
 ur += notes_urls
+ur += note_type_urls
 
 swagger_urls = [
     url(r'^$', SwaggerView.as_view(), name='index'),
@@ -166,8 +169,9 @@ urlpatterns = [
     url(r'^api/v2/api-token-auth/', tokenviews.obtain_auth_token),
     url(r'^api/v2/doc/', schema_view, name="api_v2_schema"),
     url(r'^robots.txt', lambda x: HttpResponse("User-Agent: *\nDisallow: /", content_type="text/plain"), name="robots_file"),
-
 ]
+
+urlpatterns += survey_urls
 
 if hasattr(settings, 'DJANGO_ADMIN_ENABLED'):
     if settings.DJANGO_ADMIN_ENABLED:

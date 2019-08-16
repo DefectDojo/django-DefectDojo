@@ -200,6 +200,15 @@ echo "Running test ${TEST}"
       echo "Docker compose container status"
       docker-compose -f docker-compose.yml ps
       ;;
+    unittests)
+      echo "run unittests scripts"
+      # change user id withn Docker container to user id of travis user
+      sed -i -e "s/USER\ 1001/USER\ `id -u`/g" ./Dockerfile.django
+      cp ./dojo/settings/settings.dist.py ./dojo/settings/settings.py
+      source ./docker/setEnv.sh release
+      docker-compose build
+      source ./travis/unittest-script.sh
+      ;;
     snyk)
       echo "Snyk security testing on containers"
       build_containers

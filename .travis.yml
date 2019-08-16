@@ -16,6 +16,7 @@ env:
     - TEST=flake8
     - TEST=snyk
     - TEST=docker
+    - TEST=unittests
 matrix: 
   allow_failures:
     - env: TEST=snyk

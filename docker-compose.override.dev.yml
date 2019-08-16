@@ -10,6 +10,12 @@ services:
   celeryworker:
     volumes:
       - '.:/app:z'
+  celerybeat:
+    volumes:
+      - '.:/app:z'
+  initializer:
+    volumes:
+      - '.:/app:z'
   nginx:
     volumes:
       - './dojo/static/dojo:/usr/share/nginx/html/static/dojo'

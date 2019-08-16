@@ -55,6 +55,8 @@ EOD
   python3 manage.py loaddata language_type
   python3 manage.py loaddata objects_review
   python3 manage.py loaddata regulation
+  python3 manage.py import_surveys
+  python3 manage.py loaddata initial_surveys
   python3 manage.py installwatson
   exec python3 manage.py buildwatson
 fi

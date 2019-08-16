@@ -7,7 +7,7 @@ from math import ceil
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
@@ -20,9 +20,9 @@ from dojo.templatetags.display_tags import get_level
 from dojo.filters import ProductFilter, ProductFindingFilter, EngagementFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm, \
                        EngagementPresetsForm, DeleteEngagementPresetsForm
-from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, Finding_Template, \
+from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, Finding_Template, \
     Tool_Product_Settings, Cred_Mapping, Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, \
-    Endpoint, Engagement_Presets, DojoMeta
+    Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product
 from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, get_system_setting, create_notification, Product_Tab
 from custom_field.models import CustomFieldValue, CustomField
 from dojo.tasks import add_epic_task, add_issue_task
@@ -199,7 +199,6 @@ def view_product_metrics(request, pid):
     open_findings = Finding.objects.filter(test__engagement__product=prod,
                                            date__range=[start_date, end_date],
                                            false_p=False,
-                                           verified=True,
                                            duplicate=False,
                                            out_of_scope=False,
                                            active=True,
@@ -208,7 +207,7 @@ def view_product_metrics(request, pid):
     closed_findings = Finding.objects.filter(test__engagement__product=prod,
                                              date__range=[start_date, end_date],
                                              false_p=False,
-                                             verified=True,
+                                             verified=False,
                                              duplicate=False,
                                              out_of_scope=False,
                                              mitigated__isnull=False)
@@ -216,11 +215,12 @@ def view_product_metrics(request, pid):
     open_vulnerabilities = Finding.objects.filter(
         test__engagement__product=prod,
         false_p=False,
-        verified=True,
+        verified=False,
         duplicate=False,
         out_of_scope=False,
         active=True,
         mitigated__isnull=True,
+        cwe__isnull=False,
     ).order_by('cwe').values(
         'cwe'
     ).annotate(
@@ -230,6 +230,7 @@ def view_product_metrics(request, pid):
     all_vulnerabilities = Finding.objects.filter(
         test__engagement__product=prod,
         duplicate=False,
+        cwe__isnull=False,
     ).order_by('cwe').values(
         'cwe'
     ).annotate(
@@ -253,7 +254,7 @@ def view_product_metrics(request, pid):
     high_weekly = OrderedDict()
     medium_weekly = OrderedDict()
 
-    for v in verified_findings:
+    for v in open_findings:
         iso_cal = v.date.isocalendar()
         x = iso_to_gregorian(iso_cal[0], iso_cal[1], 1)
         y = x.strftime("<span class='small'>%m/%d<br/>%Y</span>")
@@ -271,7 +272,6 @@ def view_product_metrics(request, pid):
             else:
                 open_close_weekly[x]['open'] += 1
         else:
-
             if v.mitigated:
                 open_close_weekly[x] = {'closed': 1, 'open': 0, 'accepted': 0}
             else:
@@ -479,6 +479,14 @@ def new_product(request):
                                                 messages.SUCCESS,
                                                 'JIRA information added successfully.',
                                                 extra_tags='alert-success')
+
+            # SonarQube API Configuration
+            sonarqube_form = Sonarqube_ProductForm(request.POST)
+            if sonarqube_form.is_valid():
+                sonarqube_product = sonarqube_form.save(commit=False)
+                sonarqube_product.product = product
+                sonarqube_product.save()
+
             create_notification(event='product_added', title=product.name, url=reverse('view_product', args=(product.id,)))
             return HttpResponseRedirect(reverse('view_product', args=(product.id,)))
     else:
@@ -487,10 +495,12 @@ def new_product(request):
             jform = JIRAPKeyForm()
         else:
             jform = None
+
     add_breadcrumb(title="New Product", top_level=False, request=request)
     return render(request, 'dojo/new_product.html',
                   {'form': form,
-                   'jform': jform})
+                   'jform': jform,
+                   'sonarqube_form': Sonarqube_ProductForm()})
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -500,11 +510,15 @@ def edit_product(request, pid):
     jira_enabled = system_settings.enable_jira
     jira_inst = None
     jform = None
+    sonarqube_form = None
     try:
         jira_inst = JIRA_PKey.objects.get(product=prod)
     except:
         jira_inst = None
         pass
+
+    sonarqube_conf = Sonarqube_Product.objects.filter(product=prod).first()
+
     if request.method == 'POST':
         form = ProductForm(request.POST, instance=prod)
         if form.is_valid():
@@ -535,6 +549,13 @@ def edit_product(request, pid):
                                             'JIRA information updated successfully.',
                                             extra_tags='alert-success')
 
+            # SonarQube API Configuration
+            sonarqube_form = Sonarqube_ProductForm(request.POST, instance=sonarqube_conf)
+            if sonarqube_form.is_valid():
+                new_conf = sonarqube_form.save(commit=False)
+                new_conf.product_id = pid
+                new_conf.save()
+
             return HttpResponseRedirect(reverse('view_product', args=(pid,)))
     else:
         form = ProductForm(instance=prod,
@@ -550,6 +571,9 @@ def edit_product(request, pid):
             jform = JIRAPKeyForm()
         else:
             jform = None
+
+        sonarqube_form = Sonarqube_ProductForm(instance=sonarqube_conf)
+
     form.initial['tags'] = [tag.name for tag in prod.tags]
     product_tab = Product_Tab(pid, title="Edit Product", tab="settings")
     return render(request,
@@ -557,6 +581,7 @@ def edit_product(request, pid):
                   {'form': form,
                    'product_tab': product_tab,
                    'jform': jform,
+                   'sonarqube_form': sonarqube_form,
                    'product': prod
                    })
 
@@ -635,7 +660,7 @@ def new_eng_for_app(request, pid, cicd=False):
             new_eng.api_test = False
             new_eng.pen_test = False
             new_eng.check_list = False
-            new_eng.product = prod
+            new_eng.product_id = form.cleaned_data.get('product').id
             if new_eng.threat_model:
                 new_eng.progress = 'threat_model'
             else:
@@ -671,7 +696,7 @@ def new_eng_for_app(request, pid, cicd=False):
             else:
                 return HttpResponseRedirect(reverse('view_engagement', args=(new_eng.id,)))
     else:
-        form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(), 'target_end': timezone.now().date() + timedelta(days=7)}, cicd=cicd, product=prod.id)
+        form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(), 'target_end': timezone.now().date() + timedelta(days=7), 'product': prod.id}, cicd=cicd, product=prod.id)
         if(get_system_setting('enable_jira')):
             if JIRA_PKey.objects.filter(product=prod).count() != 0:
                 jform = JIRAFindingForm(prefix='jiraform', enabled=JIRA_PKey.objects.get(product=prod).push_all_issues)
@@ -778,6 +803,21 @@ def ad_hoc_finding(request, pid):
         jform = None
     if request.method == 'POST':
         form = AdHocFindingForm(request.POST)
+        if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
+            closing_disabled = Note_Type.objects.filter(is_mandatory=True, is_active=True).count()
+            if closing_disabled != 0:
+                error_inactive = ValidationError('Can not set a finding as inactive without adding all mandatory notes',
+                                        code='inactive_without_mandatory_notes')
+                error_false_p = ValidationError('Can not set a finding as false positive without adding all mandatory notes',
+                                        code='false_p_without_mandatory_notes')
+                if form['active'].value() is False:
+                    form.add_error('active', error_inactive)
+                if form['false_p'].value():
+                    form.add_error('false_p', error_false_p)
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     'Can not set a finding as inactive or false positive without adding all mandatory notes',
+                                     extra_tags='alert-danger')
         if form.is_valid():
             new_finding = form.save(commit=False)
             new_finding.test = test
