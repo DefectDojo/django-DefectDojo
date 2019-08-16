@@ -29,6 +29,7 @@ class DedupeTest(unittest.TestCase):
         self.base_url = "http://localhost:8000/"
         self.verificationErrors = []
         self.accept_next_alert = True
+        self.relative_path = dir_path = os.path.dirname(os.path.realpath(__file__))
 
     def login_page(self):
         driver = self.driver
@@ -105,7 +106,7 @@ class DedupeTest(unittest.TestCase):
         driver.find_element_by_link_text("Re-Upload Scan").click()
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[3]/div/div').click()
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
-        driver.find_element_by_id('id_file').send_keys("/Users/codymaffucci/Desktop/dedupe/tests/dedupe_scans/dedupe_path_1.json")
+        driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_path_1.json")
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
         # Second test
         driver.get(self.base_url + "engagement")
@@ -115,7 +116,7 @@ class DedupeTest(unittest.TestCase):
         driver.find_element_by_link_text("Re-Upload Scan").click()
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[3]/div/div').click()
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
-        driver.find_element_by_id('id_file').send_keys("/Users/codymaffucci/Desktop/dedupe/tests/dedupe_scans/dedupe_path_2.json")
+        driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_path_2.json")
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
 
     def test_check_path_status(self):
@@ -168,7 +169,7 @@ class DedupeTest(unittest.TestCase):
         driver.find_element_by_link_text("Re-Upload Scan").click()
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[3]/div/div').click()
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
-        driver.find_element_by_id('id_file').send_keys("/Users/codymaffucci/Desktop/dedupe/tests/dedupe_scans/dedupe_endpoint_1.xml")
+        driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_1.xml")
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
         # Second test
         driver.get(self.base_url + "engagement")
@@ -178,7 +179,7 @@ class DedupeTest(unittest.TestCase):
         driver.find_element_by_link_text("Re-Upload Scan").click()
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[3]/div/div').click()
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
-        driver.find_element_by_id('id_file').send_keys("/Users/codymaffucci/Desktop/dedupe/tests/dedupe_scans/dedupe_endpoint_2.xml")
+        driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_2.xml")
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
 
     def test_check_endpoint_status(self):
@@ -231,7 +232,7 @@ class DedupeTest(unittest.TestCase):
         driver.find_element_by_link_text("Re-Upload Scan").click()
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[3]/div/div').click()
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
-        driver.find_element_by_id('id_file').send_keys("/Users/codymaffucci/Desktop/dedupe/tests/dedupe_scans/dedupe_endpoint_1.xml")
+        driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_1.xml")
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
         # Second test
         driver.get(self.base_url + "engagement")
@@ -241,7 +242,7 @@ class DedupeTest(unittest.TestCase):
         driver.find_element_by_link_text("Re-Upload Scan").click()
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[3]/div/div').click()
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
-        driver.find_element_by_id('id_file').send_keys("/Users/codymaffucci/Desktop/dedupe/tests/dedupe_scans/dedupe_cross_1.csv")
+        driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_cross_1.csv")
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
 
     def test_check_same_eng_status(self):
@@ -303,7 +304,7 @@ class DedupeTest(unittest.TestCase):
         driver.find_element_by_link_text("Re-Upload Scan Results").click()
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[3]/div/div').click()
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
-        driver.find_element_by_id('id_file').send_keys("/Users/codymaffucci/Desktop/dedupe/tests/dedupe_scans/dedupe_endpoint_1.xml")
+        driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_1.xml")
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
         # Second test
         driver.get(self.base_url + "engagement")
@@ -313,7 +314,7 @@ class DedupeTest(unittest.TestCase):
         driver.find_element_by_link_text("Re-Upload Scan Results").click()
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[3]/div/div').click()
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
-        driver.find_element_by_id('id_file').send_keys("/Users/codymaffucci/Desktop/dedupe/tests/dedupe_scans/dedupe_cross_1.csv")
+        driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_cross_1.csv")
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
 
     def test_check_cross_status(self):

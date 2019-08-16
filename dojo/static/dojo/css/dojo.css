@@ -1029,7 +1029,7 @@ div.custom-search-form {
         box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
     }
 
-    #side-menu > li.mm-active ul,
+    /* #side-menu > li.mm-active ul, */
     #side-menu > li:hover ul {
         display: block !important;
     }

@@ -200,6 +200,7 @@ class JiraConfigurationsTest(BaseClass.RESTEndpointTest):
             "epic_name_id": 1111,
             "open_status_key": 111,
             "close_status_key": 111,
+            "info_mapping_severity": "LOW",
             "low_mapping_severity": "LOW",
             "medium_mapping_severity": "LOW",
             "high_mapping_severity": "LOW",
