@@ -28,6 +28,7 @@ from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Type, Notes, \
     Risk_Acceptance, Development_Environment, BurpRawRequestResponse, Endpoint, \
     JIRA_PKey, JIRA_Issue, Cred_Mapping, Dojo_User, System_Settings
+from dojo.tools import handles_active_verified_statuses
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, message, get_system_setting, create_notification, Product_Tab
@@ -99,6 +100,39 @@ def engagement(request):
 
 
 @user_passes_test(lambda u: u.is_staff)
+def engagements_all(request):
+    filtered = EngagementFilter(
+        request.GET,
+        queryset=Product.objects.filter(
+            ~Q(engagement=None),
+        ).distinct())
+    prods = get_page_items(request, filtered.qs, 25)
+    name_words = [
+        product.name for product in Product.objects.filter(
+            ~Q(engagement=None),
+        ).distinct()
+    ]
+    eng_words = [
+        engagement.name for product in Product.objects.filter(
+            ~Q(engagement=None),
+        ).distinct() for engagement in product.engagement_set.all()
+    ]
+
+    add_breadcrumb(
+        title="All Engagements",
+        top_level=not len(request.GET),
+        request=request)
+
+    return render(
+        request, 'dojo/engagements_all.html', {
+            'products': prods,
+            'filtered': filtered,
+            'name_words': sorted(set(name_words)),
+            'eng_words': sorted(set(eng_words)),
+        })
+
+
+@user_passes_test(lambda u: u.is_staff)
 def new_engagement(request):
     if request.method == 'POST':
         form = EngForm(request.POST)
@@ -109,6 +143,7 @@ def new_engagement(request):
             new_eng.api_test = False
             new_eng.pen_test = False
             new_eng.check_list = False
+            new_eng.product_id = form.cleaned_data.get('product').id
             new_eng.save()
             tags = request.POST.getlist('tags')
             t = ", ".join(tags)
@@ -126,7 +161,6 @@ def new_engagement(request):
                     reverse('view_engagement', args=(new_eng.id, )))
     else:
         form = EngForm(initial={'date': timezone.now().date()})
-
     add_breadcrumb(title="New Engagement", top_level=False, request=request)
     return render(request, 'dojo/new_eng.html', {
         'form': form,
@@ -161,6 +195,7 @@ def edit_engagement(request, eid):
                 temp_form.active = False
             elif(temp_form.active is False):
                 temp_form.active = True
+            temp_form.product_id = form.cleaned_data.get('product').id
             temp_form.save()
             tags = request.POST.getlist('tags')
             t = ", ".join(tags)
@@ -177,7 +212,7 @@ def edit_engagement(request, eid):
                 return HttpResponseRedirect(
                     reverse('view_engagement', args=(eng.id, )))
     else:
-        form = EngForm(instance=eng, cicd=ci_cd_form, product=eng.product.id)
+        form = EngForm(initial={'product': eng.product.id}, instance=eng, cicd=ci_cd_form, product=eng.product.id)
         try:
             # jissue = JIRA_Issue.objects.get(engagement=eng)
             enabled = True
@@ -479,7 +514,7 @@ def import_scan_results(request, eid=None, pid=None):
                 engagement.active = True
                 engagement.status = 'In Progress'
                 engagement.save()
-            file = request.FILES['file']
+            file = request.FILES.get('file')
             scan_date = form.cleaned_data['scan_date']
             min_sev = form.cleaned_data['minimum_severity']
             active = form.cleaned_data['active']
@@ -542,7 +577,7 @@ def import_scan_results(request, eid=None, pid=None):
                     item.reporter = request.user
                     item.last_reviewed = timezone.now()
                     item.last_reviewed_by = request.user
-                    if form.get_scan_type() != "Generic Findings Import":
+                    if not handles_active_verified_statuses(form.get_scan_type()):
                         item.active = active
                         item.verified = verified
                     item.save(dedupe_option=False, false_history=True)

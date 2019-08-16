@@ -21,7 +21,7 @@ from dojo.filters import TemplateFindingFilter
 from dojo.forms import NoteForm, TestForm, FindingForm, \
     DeleteTestForm, AddFindingForm, \
     ImportScanForm, ReImportScanForm, FindingBulkUpdateForm, JIRAFindingForm
-from dojo.models import Product, Finding, Test, Notes, BurpRawRequestResponse, Endpoint, Stub_Finding, Finding_Template, JIRA_PKey, Cred_Mapping, Dojo_User, JIRA_Issue
+from dojo.models import Product, Finding, Test, Notes, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, Finding_Template, JIRA_PKey, Cred_Mapping, Dojo_User, JIRA_Issue
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, create_notification, Product_Tab, calculate_grade, log_jira_alert
 from dojo.tasks import add_issue_task, update_issue_task
@@ -70,6 +70,9 @@ def view_test(request, tid):
 
     product_tab = Product_Tab(prod.id, title="Test", tab="engagements")
     product_tab.setEngagement(test.engagement)
+    jira_config = JIRA_PKey.objects.filter(product=prod.id).first()
+    if jira_config:
+        jira_config = jira_config.conf_id
     return render(request, 'dojo/view_test.html',
                   {'test': test,
                    'product_tab': product_tab,
@@ -83,7 +86,8 @@ def view_test(request, tid):
                    'show_re_upload': show_re_upload,
                    'creds': creds,
                    'cred_test': cred_test,
-                   'tag_input': tags
+                   'tag_input': tags,
+                   'jira_config': jira_config,
                    })
 
 
@@ -227,6 +231,22 @@ def add_findings(request, tid):
         if form['severity'].value() == 'Info' and 'jiraform-push_to_jira' in request.POST:
             error = ValidationError('Findings with Informational severity cannot be pushed to JIRA.',
                                     code='info-severity-to-jira')
+
+        if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
+            closing_disabled = Note_Type.objects.filter(is_mandatory=True, is_active=True).count()
+            if closing_disabled != 0:
+                error_inactive = ValidationError('Can not set a finding as inactive without adding all mandatory notes',
+                                        code='inactive_without_mandatory_notes')
+                error_false_p = ValidationError('Can not set a finding as false positive without adding all mandatory notes',
+                                        code='false_p_without_mandatory_notes')
+                if form['active'].value() is False:
+                    form.add_error('active', error_inactive)
+                if form['false_p'].value():
+                    form.add_error('false_p', error_false_p)
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     'Can not set a finding as inactive or false positive without adding all mandatory notes',
+                                     extra_tags='alert-danger')
         if form.is_valid():
             new_finding = form.save(commit=False)
             new_finding.test = test
@@ -313,6 +333,21 @@ def add_temp_finding(request, tid, fid):
 
     if request.method == 'POST':
         form = FindingForm(request.POST, template=True)
+        if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
+            closing_disabled = Note_Type.objects.filter(is_mandatory=True, is_active=True).count()
+            if closing_disabled != 0:
+                error_inactive = ValidationError('Can not set a finding as inactive without adding all mandatory notes',
+                                        code='not_active_or_false_p_true')
+                error_false_p = ValidationError('Can not set a finding as false positive without adding all mandatory notes',
+                                        code='not_active_or_false_p_true')
+                if form['active'].value() is False:
+                    form.add_error('active', error_inactive)
+                if form['false_p'].value():
+                    form.add_error('false_p', error_false_p)
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     'Can not set a finding as inactive or false positive without adding all mandatory notes',
+                                     extra_tags='alert-danger')
         if form.is_valid():
             finding.last_used = timezone.now()
             finding.save()
@@ -470,6 +505,9 @@ def finding_bulk_update(request, tid):
                     calculate_grade(test.engagement.product)
 
                 for finding in finds:
+                    from dojo.tasks import async_tool_issue_updater
+                    async_tool_issue_updater.delay(finding)
+
                     if JIRA_PKey.objects.filter(product=finding.test.engagement.product).count() == 0:
                         log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', finding)
                     else:

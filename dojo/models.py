@@ -14,6 +14,7 @@ from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
+from django.utils.deconstruct import deconstructible
 from django.utils.timezone import now
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToCover
@@ -29,6 +30,32 @@ fmt = getattr(settings, 'LOG_FORMAT', None)
 lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
 
 logging.basicConfig(format=fmt, level=lvl)
+
+
+@deconstructible
+class UniqueUploadNameProvider:
+    """
+    A callable to be passed as upload_to parameter to FileField.
+
+    Uploaded files will get random names based on UUIDs inside the given directory;
+    strftime-style formatting is supported within the directory path. If keep_basename
+    is True, the original file name is prepended to the UUID. If keep_ext is disabled,
+    the filename extension will be dropped.
+    """
+
+    def __init__(self, directory=None, keep_basename=False, keep_ext=True):
+        self.directory = directory
+        self.keep_basename = keep_basename
+        self.keep_ext = keep_ext
+
+    def __call__(self, model_instance, filename):
+        base, ext = os.path.splitext(filename)
+        filename = "%s_%s" % (base, uuid4()) if self.keep_basename else str(uuid4())
+        if self.keep_ext:
+            filename += ext
+        if self.directory is None:
+            return filename
+        return os.path.join(now().strftime(self.directory), filename)
 
 
 class Regulation(models.Model):
@@ -205,6 +232,12 @@ class System_Settings(models.Model):
     sla_low = models.IntegerField(default=120,
                                           verbose_name="Low Finding SLA Days",
                                           help_text="# of days to remediate a low finding.")
+    allow_anonymous_survey_repsonse = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name="Allow Anonymous Survey Responses",
+        help_text="Enable anyone with a link to the survey to answer a survey"
+    )
 
 
 class SystemSettingsFormAdmin(forms.ModelForm):
@@ -281,6 +314,20 @@ class Contact(models.Model):
     is_admin = models.BooleanField(default=False)
     is_globally_read_only = models.BooleanField(default=False)
     updated = models.DateTimeField(editable=False)
+
+
+class Note_Type(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    description = models.CharField(max_length=200)
+    is_single = models.BooleanField(default=False, null=False)
+    is_active = models.BooleanField(default=True, null=False)
+    is_mandatory = models.BooleanField(default=True, null=False)
+
+    def __unicode__(self):
+        return self.name
+
+    def __str__(self):
+        return self.name
 
 
 class Product_Type(models.Model):
@@ -620,6 +667,19 @@ class Product(models.Model):
     def get_product_type(self):
         return self.prod_type if self.prod_type is not None else 'unknown'
 
+    def open_findings_list(self):
+        findings = Finding.objects.filter(test__engagement__product=self,
+                                          mitigated__isnull=True,
+                                          verified=True,
+                                          false_p=False,
+                                          duplicate=False,
+                                          out_of_scope=False
+                                          )
+        findings_list = []
+        for i in findings:
+            findings_list.append(i.id)
+        return findings_list
+
 
 class ScanSettings(models.Model):
     product = models.ForeignKey(Product, default=1, editable=False, on_delete=models.CASCADE)
@@ -657,8 +717,7 @@ class Scan(models.Model):
                                 default=get_current_datetime)
     protocol = models.CharField(max_length=10, default='TCP')
     status = models.CharField(max_length=10, default='Pending', editable=False)
-    baseline = models.BooleanField(default=False,
-                                   verbose_name="Current Baseline")
+    baseline = models.BooleanField(default=False, verbose_name="Current Baseline")
 
     def __unicode__(self):
         return self.scan_settings.protocol + " Scan " + str(self.date)
@@ -1024,6 +1083,7 @@ class Endpoint(models.Model):
 
 
 class NoteHistory(models.Model):
+    note_type = models.ForeignKey(Note_Type, null=True, blank=True, on_delete=models.CASCADE)
     data = models.TextField()
     time = models.DateTimeField(null=True, editable=False,
                                 default=get_current_datetime)
@@ -1031,6 +1091,7 @@ class NoteHistory(models.Model):
 
 
 class Notes(models.Model):
+    note_type = models.ForeignKey(Note_Type, related_name='note_type', null=True, blank=True, on_delete=models.CASCADE)
     entry = models.TextField()
     date = models.DateTimeField(null=False, editable=False,
                                 default=get_current_datetime)
@@ -1118,6 +1179,43 @@ class VA(models.Model):
     start = models.CharField(max_length=100)
 
 
+class Sonarqube_Issue(models.Model):
+    key = models.CharField(max_length=30, unique=True, help_text="SonarQube issue key")
+    status = models.CharField(max_length=20, help_text="SonarQube issue status")
+    type = models.CharField(max_length=15, help_text="SonarQube issue type")
+
+    def __str__(self):
+        return self.key
+
+
+class Sonarqube_Issue_Transition(models.Model):
+    sonarqube_issue = models.ForeignKey(Sonarqube_Issue, on_delete=models.CASCADE, db_index=True)
+    created = models.DateTimeField(null=False, editable=False, default=now)
+    finding_status = models.CharField(max_length=100)
+    sonarqube_status = models.CharField(max_length=50)
+    transitions = models.CharField(max_length=100)
+
+    class Meta:
+        ordering = ('-created', )
+
+
+class Sonarqube_Product(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    sonarqube_project_key = models.CharField(
+        max_length=200, null=True, blank=True, verbose_name="SonarQube Project Key"
+    )
+    sonarqube_tool_config = models.ForeignKey(
+        Tool_Configuration, verbose_name="SonarQube Configuration",
+        null=True, blank=True, on_delete=models.CASCADE
+    )
+
+    def __unicode__(self):
+        return '{} | {}'.format(self.product.name, self.sonarqube_project_key)
+
+    def __str__(self):
+        return '{} | {}'.format(self.product.name, self.sonarqube_project_key)
+
+
 class Finding(models.Model):
     title = models.TextField(max_length=1000)
     date = models.DateField(default=get_current_date)
@@ -1183,7 +1281,7 @@ class Finding(models.Model):
 
     line = models.IntegerField(null=True, blank=True,
                                verbose_name="Line number")
-    file_path = models.CharField(null=True, blank=True, max_length=1000)
+    file_path = models.CharField(null=True, blank=True, max_length=4000)
     found_by = models.ManyToManyField(Test_Type, editable=False)
     static_finding = models.BooleanField(default=False)
     dynamic_finding = models.BooleanField(default=True)
@@ -1191,6 +1289,7 @@ class Finding(models.Model):
     jira_creation = models.DateTimeField(editable=True, null=True)
     jira_change = models.DateTimeField(editable=True, null=True)
     scanner_confidence = models.IntegerField(null=True, blank=True, default=None, editable=False, help_text="Confidence level of vulnerability which is supplied by the scannner.")
+    sonarqube_issue = models.ForeignKey(Sonarqube_Issue, null=True, blank=True, help_text="SonarQube issue", on_delete=models.CASCADE)
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
@@ -1363,7 +1462,7 @@ class Finding(models.Model):
         long_desc += '*References*:' + self.references
         return long_desc
 
-    def save(self, dedupe_option=True, false_history=False, rules_option=True, *args, **kwargs):
+    def save(self, dedupe_option=True, false_history=False, rules_option=True, issue_updater_option=True, *args, **kwargs):
         # Make changes to the finding before it's saved to add a CWE template
         new_finding = False
         if self.pk is None:
@@ -1374,16 +1473,21 @@ class Finding(models.Model):
         else:
             super(Finding, self).save(*args, **kwargs)
 
-        if (self.line is not None and self.file_path is not None) and (self.endpoints.count() == 0):
+            # Run async the tool issue update to update original issue with Defect Dojo updates
+            if issue_updater_option:
+                from dojo.tasks import async_tool_issue_updater
+                async_tool_issue_updater.delay(self)
+
+        if (self.file_path is not None) and (self.endpoints.count() == 0):
             self.static_finding = True
             self.dynamic_finding = False
-        elif (self.line is not None and self.file_path is not None):
+        elif (self.file_path is not None):
             self.static_finding = True
 
         # Compute hash code before dedupe
         if (self.hash_code is None):
             if((self.dynamic_finding and (self.endpoints.count() > 0)) or
-                    (self.static_finding and (self.line is not None and self.file_path is not None))):
+                    (self.static_finding and (self.file_path is not None))):
                 self.hash_code = self.compute_hash_code()
         self.found_by.add(self.test.test_type)
 
@@ -1426,6 +1530,7 @@ class Finding(models.Model):
             except:
                 async_false_history.delay(self, *args, **kwargs)
                 pass
+
         # Title Casing
         from titlecase import titlecase
         self.title = titlecase(self.title)
@@ -1682,7 +1787,8 @@ class Report(models.Model):
 
 
 class FindingImage(models.Model):
-    image = models.ImageField(upload_to='finding_images', null=True)
+    image = models.ImageField(upload_to=UniqueUploadNameProvider('finding_images'))
+    caption = models.CharField(max_length=500, blank=True)
     image_thumbnail = ImageSpecField(source='image',
                                      processors=[ResizeToCover(100, 100)],
                                      format='JPEG',
@@ -1787,7 +1893,7 @@ class JIRA_Conf(models.Model):
 
 
 class JIRA_Issue(models.Model):
-    jira_id = models.CharField(max_length=200, unique=True)
+    jira_id = models.CharField(max_length=200)
     jira_key = models.CharField(max_length=200)
     finding = models.OneToOneField(Finding, null=True, blank=True, on_delete=models.CASCADE)
     engagement = models.OneToOneField(Engagement, null=True, blank=True, on_delete=models.CASCADE)
@@ -2354,6 +2460,7 @@ admin.site.register(Product_Type)
 admin.site.register(Dojo_User)
 admin.site.register(UserContactInfo)
 admin.site.register(Notes)
+admin.site.register(Note_Type)
 admin.site.register(Report)
 admin.site.register(Scan)
 admin.site.register(ScanSettings)
@@ -2379,3 +2486,8 @@ watson.register(Finding_Template)
 watson.register(Endpoint)
 watson.register(Engagement)
 watson.register(App_Analysis)
+
+# SonarQube Integration
+admin.site.register(Sonarqube_Issue)
+admin.site.register(Sonarqube_Issue_Transition)
+admin.site.register(Sonarqube_Product)

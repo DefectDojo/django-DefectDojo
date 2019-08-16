@@ -1,5 +1,6 @@
 #!/bin/sh
 # Run available unittests with a simple setup
+umask 0002
 
 cd /app
 
@@ -24,8 +25,4 @@ EOF
 
 ./manage.py migrate
 
-./tests/Product_unit_test.py
-./tests/Product__type_unit_test.py
-
 exec ./manage.py test dojo.unittests
-

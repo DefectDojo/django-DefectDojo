@@ -1,5 +1,6 @@
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
 from rest_framework.permissions import DjangoModelPermissions
@@ -18,7 +19,6 @@ from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from datetime import datetime
-from django.utils import timezone
 from dojo.utils import get_period_counts_legacy
 
 from dojo.api_v2 import serializers, permissions
@@ -186,6 +186,68 @@ class FindingViewSet(mixins.ListModelMixin,
         tags = finding.tags
         serialized_tags = serializers.TagSerializer({"tags": tags})
         return Response(serialized_tags.data)
+
+    @detail_route(methods=["get", "post"])
+    def notes(self, request, pk=None):
+        finding = get_object_or_404(Finding.objects, id=pk)
+        if request.method == 'POST':
+            new_note = serializers.AddNewNoteOptionSerializer(data=request.data)
+            if new_note.is_valid():
+                entry = new_note.validated_data['entry']
+                private = new_note.validated_data['private']
+            else:
+                return Response(new_note.errors,
+                    status=status.HTTP_400_BAD_REQUEST)
+
+            author = request.user
+            note = Notes(entry=entry, author=author, private=private)
+            note.save()
+            finding.notes.add(note)
+
+            serialized_note = serializers.NoteSerializer({
+                "author": author, "entry": entry,
+                "private": private
+            })
+            result = serializers.FindingToNotesSerializer({
+                "finding_id": finding, "notes": [serialized_note.data]
+            })
+            return Response(serialized_note.data,
+                status=status.HTTP_200_OK)
+        notes = finding.notes.all()
+
+        serialized_notes = []
+        if notes:
+            serialized_notes = serializers.FindingToNotesSerializer({
+                    "finding_id": finding, "notes": notes
+            })
+            return Response(serialized_notes.data,
+                    status=status.HTTP_200_OK)
+
+        return Response(serialized_notes,
+                status=status.HTTP_200_OK)
+
+    @detail_route(methods=["put", "patch"])
+    def remove_note(self, request, pk=None):
+        """Remove Note From Finding Note"""
+        finding = get_object_or_404(Finding.objects, id=pk)
+        notes = finding.notes.all()
+        if request.data['note_id']:
+            note = get_object_or_404(Notes.objects, id=request.data['note_id'])
+            if note not in notes:
+                return Response({"error": "Selected Note is not assigned to this Finding"},
+                status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({"error": "('note_id') parameter missing"},
+                status=status.HTTP_400_BAD_REQUEST)
+        if note.author.username == request.user.username:
+            finding.notes.remove(note)
+            note.delete()
+        else:
+            return Response({"error": "Delete Failed, You are not the Note's author"},
+                status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({"Success": "Selected Note has been Removed successfully"},
+            status=status.HTTP_200_OK)
 
     @detail_route(methods=["put", "patch"])
     def remove_tags(self, request, pk=None):
