@@ -70,6 +70,7 @@ def view_test(request, tid):
 
     product_tab = Product_Tab(prod.id, title="Test", tab="engagements")
     product_tab.setEngagement(test.engagement)
+    jira_config = JIRA_PKey.objects.filter(product=prod.id)[0].conf_id
     return render(request, 'dojo/view_test.html',
                   {'test': test,
                    'product_tab': product_tab,
@@ -83,7 +84,8 @@ def view_test(request, tid):
                    'show_re_upload': show_re_upload,
                    'creds': creds,
                    'cred_test': cred_test,
-                   'tag_input': tags
+                   'tag_input': tags,
+                   'jira_config': jira_config,
                    })
 
 

@@ -138,8 +138,10 @@
                             <th>Status</th>
                             <th></th>
                             {% if "enable_jira"|get_system_setting %}
-                              <th>JIRA Age</th>
-                              <th>JIRA Change</th>
+                              {% if jira_config and product_tab or not product_tab %}
+                                <th>JIRA Age</th>
+                                <th>JIRA Change</th>
+                              {% endif %}
                             {% endif%}
                             {% if show_product_column and product_tab is None %}
                             <th class="nowrap">{% dojo_sort request 'Product' 'test__engagement__product__name'%}</th>
@@ -318,21 +320,21 @@
                                     {% endif %}
                                   {% endif %}
                                 </td>
-
-                                <td class="nowrap">
-                                  {% if "enable_jira"|get_system_setting %}
-                                    {% if finding.jira_creation %}
-                                      {{ finding.jira_creation|timesince }} 
-                                    {% endif %} 
+                                {% if "enable_jira"|get_system_setting %}
+                                  {% if jira_config and product_tab or not product_tab %}
+                                      <td class="nowrap">
+                                        {% if finding.jira_creation %}
+                                          {{ finding.jira_creation|timesince }} 
+                                        {% endif %} 
+                                      </td>
+                                      <td class="nowrap">
+                                        {% if finding.jira_change %}
+                                          {{ finding.jira_change|timesince }} 
+                                        {% endif %}
+                                      </td> 
                                   {% endif %}
-                                </td>
-                                <td class="nowrap">
-                                  {% if "enable_jira"|get_system_setting %}
-                                    {% if finding.jira_change %}
-                                      {{ finding.jira_change|timesince }} 
-                                    {% endif %} 
-                                  {% endif %}
-                                </td>
+                                {% endif %}
+                                
 
 
                                 {% if show_product_column and product_tab is None %}
