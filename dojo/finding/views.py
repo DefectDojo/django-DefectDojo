@@ -115,17 +115,20 @@ def open_findings(request, pid=None, eid=None, view=None):
 
     product_tab = None
     active_tab = None
+    jira_config = None
 
     # Only show product tab view in product or engagement
     if pid:
         show_product_column = False
         product_tab = Product_Tab(pid, title="Findings", tab="findings")
+        jira_config = JIRA_PKey.objects.filter(product=pid)[0].conf_id
     elif eid and pid_local:
         show_product_column = False
         product_tab = Product_Tab(pid_local, title=eng.name, tab="engagements")
+        jira_config = JIRA_PKey.objects.filter(product__engagement=eid)[0].conf_id
     else:
         add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
-
+    # raise Exception('Stop')
     return render(
         request, 'dojo/findings_list.html', {
             'show_product_column': show_product_column,
@@ -138,6 +141,7 @@ def open_findings(request, pid=None, eid=None, view=None):
             'filter_name': filter_name,
             'title': title,
             'tag_input': tags,
+            'jira_config': jira_config,
         })
 
 
