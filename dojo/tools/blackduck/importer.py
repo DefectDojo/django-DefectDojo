@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from pathlib import Path
-from typing import Iterable, Mapping, Set, Tuple, Union
+from typing import Iterable, Union
 from dojo.tools.blackduck.model import BlackduckFinding
 import csv
 import io
@@ -17,25 +17,24 @@ class Importer(ABC):
 
 class BlackduckImporter(Importer):
     def parse_findings(self, report: Path) -> Iterable[BlackduckFinding]:
+        if not issubclass(type(report), Path):
+            report = Path(report.temporary_file_path())
+
         files = dict()
         security_issues = dict()
         try:
             if zipfile.is_zipfile(str(report)):
-                print("This is a zip file")
                 with zipfile.ZipFile(str(report)) as zip:
                     for file_name in zip.namelist():
                         if file_name.endswith('files.csv'):
-                            print("dealing with files")
                             with io.TextIOWrapper(zip.open(file_name), newline='') as f:
                                 files = self.__partition_by_project_id(f)
                         elif file_name.endswith('security.csv'):
-                            print("dealing with security")
                             with io.TextIOWrapper(zip.open(file_name), newline='') as f:
                                 security_issues = self.__partition_by_project_id(f)
             else:
                 print("Not a zip file?")
-                print(report)
-                # raise ValueError
+                raise ValueError
         except Exception as e:
             print("Could not process zip file: {}".format(e))
 
@@ -70,7 +69,7 @@ class BlackduckImporter(Importer):
                 )
 
     # return type elided due to higher kinded types bug in Python 3.5
-    def __partition_by_project_id(self, csv_file: Union[Path, zipfile.ZipFile]): # -> Mapping[str, Set[Tuple[str]]]:
+    def __partition_by_project_id(self, csv_file: Union[Path, zipfile.ZipFile]):
         records = csv.reader(csv_file)
         next(csv_file)
         findings = defaultdict(set)
