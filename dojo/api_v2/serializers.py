@@ -6,6 +6,9 @@ from dojo.models import Product, Engagement, Test, Finding, \
     Notes, DojoMeta, FindingImage
 from dojo.forms import ImportScanForm, SEVERITY_CHOICES
 from dojo.tools.factory import import_parser_factory
+from dojo.utils import create_notification
+from django.urls import reverse
+from tagging.models import Tag
 from django.core.validators import URLValidator, validate_ipv46_address
 from django.conf import settings
 from rest_framework import serializers
@@ -516,12 +519,10 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         default=None,
         queryset=User.objects.all())
     tags = TagListSerializerField(required=False)
-    skip_duplicates = serializers.BooleanField(required=False, default=False)
     close_old_findings = serializers.BooleanField(required=False, default=False)
 
     def save(self):
         data = self.validated_data
-        skip_duplicates = data['skip_duplicates']
         close_old_findings = data['close_old_findings']
         active = data['active']
         verified = data['verified']
@@ -613,6 +614,52 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
 
         except SyntaxError:
             raise Exception('Parser SyntaxError')
+
+        if close_old_findings:
+            # Close old active findings that are not reported by this scan.
+            new_hash_codes = test.finding_set.values('hash_code')
+
+            old_findings = None
+            if test.engagement.deduplication_on_engagement:
+                old_findings = Finding.objects.exclude(test=test) \
+                                              .exclude(hash_code__in=new_hash_codes) \
+                                              .exclude(hash_code__in=skipped_hashcodes) \
+                                              .filter(test__engagement=test.engagement,
+                                                  test__test_type=test_type,
+                                                  active=True)
+            else:
+                old_findings = Finding.objects.exclude(test=test) \
+                                              .exclude(hash_code__in=new_hash_codes) \
+                                              .exclude(hash_code__in=skipped_hashcodes) \
+                                              .filter(test__engagement__product=test.engagement.product,
+                                                  test__test_type=test_type,
+                                                  active=True)
+
+            for old_finding in old_findings:
+                old_finding.active = False
+                old_finding.mitigated = datetime.datetime.combine(
+                    test.target_start,
+                    timezone.now().time())
+                if settings.USE_TZ:
+                    old_finding.mitigated = timezone.make_aware(
+                        old_finding.mitigated,
+                        timezone.get_default_timezone())
+                old_finding.mitigated_by = self.context['request'].user
+                old_finding.notes.create(author=self.context['request'].user,
+                                         entry="This finding has been automatically closed"
+                                         " as it is not present anymore in recent scans.")
+                Tag.objects.add_tag(old_finding, 'stale')
+                old_finding.save()
+                title = 'An old finding has been closed for "{}".' \
+                        .format(test.engagement.product.name)
+                description = 'See <a href="{}">{}</a>' \
+                        .format(reverse('view_finding', args=(old_finding.id, )),
+                                old_finding.title)
+                create_notification(event='other',
+                                    title=title,
+                                    description=description,
+                                    icon='bullseye',
+                                    objowner=self.context['request'].user)
 
         return test
 
