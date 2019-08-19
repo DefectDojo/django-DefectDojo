@@ -121,11 +121,11 @@ def open_findings(request, pid=None, eid=None, view=None):
     if pid:
         show_product_column = False
         product_tab = Product_Tab(pid, title="Findings", tab="findings")
-        jira_config = JIRA_PKey.objects.filter(product=pid)[0].conf_id
+        jira_config = JIRA_PKey.objects.filter(product=pid).first()
     elif eid and pid_local:
         show_product_column = False
         product_tab = Product_Tab(pid_local, title=eng.name, tab="engagements")
-        jira_config = JIRA_PKey.objects.filter(product__engagement=eid)[0].conf_id
+        jira_config = JIRA_PKey.objects.filter(product__engagement=eid).first()
     else:
         add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
     # raise Exception('Stop')
