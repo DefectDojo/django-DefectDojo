@@ -1374,16 +1374,16 @@ class Finding(models.Model):
         else:
             super(Finding, self).save(*args, **kwargs)
 
-        if (self.line is not None and self.file_path is not None) and (self.endpoints.count() == 0):
+        if (self.file_path is not None) and (self.endpoints.count() == 0):
             self.static_finding = True
             self.dynamic_finding = False
-        elif (self.line is not None and self.file_path is not None):
+        elif (self.file_path is not None):
             self.static_finding = True
 
         # Compute hash code before dedupe
         if (self.hash_code is None):
             if((self.dynamic_finding and (self.endpoints.count() > 0)) or
-                    (self.static_finding and (self.line is not None and self.file_path is not None))):
+                    (self.static_finding and (self.file_path is not None))):
                 self.hash_code = self.compute_hash_code()
         self.found_by.add(self.test.test_type)
 
