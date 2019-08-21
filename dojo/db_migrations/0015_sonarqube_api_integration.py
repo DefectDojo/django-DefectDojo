@@ -8,7 +8,7 @@ import django.utils.timezone
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0012_jira_finding_age'),
+        ('dojo', '0014_jira_conf_resolution_mappings'),
     ]
 
     operations = [
