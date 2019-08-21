@@ -326,7 +326,7 @@ class ImportScanForm(forms.Form):
         required=True,
         label="Scan Completion Date",
         help_text="Scan completion date will be used on all findings.",
-        initial=datetime.now().strftime("%m/%d/%Y"),
+        initial=datetime.now().strftime("%Y-%m-%d"),
         widget=forms.TextInput(attrs={'class': 'datepicker'}))
     minimum_severity = forms.ChoiceField(help_text='Minimum severity level to be imported',
                                          required=True,
@@ -1548,6 +1548,18 @@ class JIRAForm(forms.ModelForm):
     class Meta:
         model = JIRA_Conf
         exclude = ['product']
+
+
+class ExpressJIRAForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput, required=True)
+    issue_key = forms.CharField(required=True, help_text='A valid issue ID is required to gather the necessary information.')
+
+    class Meta:
+        model = JIRA_Conf
+        exclude = ['product', 'epic_name_id', 'open_status_key',
+                    'close_status_key', 'info_mapping_severity',
+                    'low_mapping_severity', 'medium_mapping_severity',
+                    'high_mapping_severity', 'critical_mapping_severity', 'finding_text']
 
 
 class Benchmark_Product_SummaryForm(forms.ModelForm):

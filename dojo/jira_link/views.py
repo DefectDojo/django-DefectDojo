@@ -14,9 +14,10 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import PermissionDenied
 from jira import JIRA
+import requests
 
 # Local application/library imports
-from dojo.forms import JIRAForm, DeleteJIRAConfForm
+from dojo.forms import JIRAForm, DeleteJIRAConfForm, ExpressJIRAForm
 from dojo.models import User, JIRA_Conf, JIRA_Issue, Notes, Risk_Acceptance
 from dojo.utils import add_breadcrumb, get_system_setting, create_notification
 
@@ -102,8 +103,89 @@ def webhook(request):
 
 
 @user_passes_test(lambda u: u.is_staff)
+def express_new_jira(request):
+    if request.method == 'POST':
+        jform = ExpressJIRAForm(request.POST, instance=JIRA_Conf())
+        if jform.is_valid():
+            try:
+                jira_server = jform.cleaned_data.get('url').rstrip('/')
+                jira_username = jform.cleaned_data.get('username')
+                jira_password = jform.cleaned_data.get('password')
+                # Instantiate JIRA instance for validating url, username and password
+                try:
+                    jira = JIRA(server=jira_server,
+                         basic_auth=(jira_username, jira_password))
+                except Exception:
+                    messages.add_message(request,
+                                     messages.ERROR,
+                                     'Unable to authenticate. Please check the URL, username, and password.',
+                                     extra_tags='alert-danger')
+                    return render(request, 'dojo/express_new_jira.html',
+                                            {'jform': jform})
+                # authentication successful
+                # Get the open and close keys
+                issue_id = jform.cleaned_data.get('issue_key')
+                key_url = jira_server + '/rest/api/latest/issue/' + issue_id + '/transitions?expand=transitions.fields'
+                data = json.loads(requests.get(key_url, auth=(jira_username, jira_password)).text)
+                for node in data['transitions']:
+                    if node['to']['name'] == 'To Do':
+                        open_key = int(node['to']['id'])
+                    if node['to']['name'] == 'Done':
+                        close_key = int(node['to']['id'])
+                # Get the epic id name
+                key_url = jira_server + '/rest/api/2/field'
+                data = json.loads(requests.get(key_url, auth=(jira_username, jira_password)).text)
+                for node in data:
+                    if 'Epic Name' in node['clauseNames']:
+                        epic_name = int(node['clauseNames'][0][3:-1])
+                        break
+
+                jira_conf = JIRA_Conf(username=jira_username,
+                                        password=jira_password,
+                                        url=jira_server,
+                                        configuration_name=jform.cleaned_data.get('configuration_name'),
+                                        info_mapping_severity='Lowest',
+                                        low_mapping_severity='Low',
+                                        medium_mapping_severity='Medium',
+                                        high_mapping_severity='High',
+                                        critical_mapping_severity='Highest',
+                                        epic_name_id=epic_name,
+                                        open_status_key=open_key,
+                                        close_status_key=close_key,
+                                        finding_text='',
+                                        default_issue_type=jform.cleaned_data.get('default_issue_type'))
+                jira_conf.save()
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'JIRA Configuration Successfully Created.',
+                                     extra_tags='alert-success')
+                create_notification(event='other',
+                                    title='New addition of JIRA URL %s' % jform.cleaned_data.get('url').rstrip('/'),
+                                    description='JIRA url "%s" was added by %s' %
+                                                (jform.cleaned_data.get('url').rstrip('/'), request.user),
+                                    url=request.build_absolute_uri(reverse('jira')),
+                                    )
+                return HttpResponseRedirect(reverse('jira', ))
+            except:
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     'Unable to query other reuierd fields. They must be entered manually.',
+                                     extra_tags='alert-danger')
+                return HttpResponseRedirect(reverse('add_jira', ))
+            return render(request, 'dojo/express_new_jira.html',
+                {'jform': jform})
+    else:
+        jform = ExpressJIRAForm()
+        add_breadcrumb(title="New Jira Configuration (Express)", top_level=False, request=request)
+    return render(request, 'dojo/express_new_jira.html',
+                  {'jform': jform})
+
+
+@user_passes_test(lambda u: u.is_staff)
 def new_jira(request):
     if request.method == 'POST':
+        if '_Express' in request.POST:
+            return HttpResponseRedirect(reverse('express_jira', ))
         jform = JIRAForm(request.POST, instance=JIRA_Conf())
         if jform.is_valid():
             try:
