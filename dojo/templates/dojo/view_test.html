@@ -196,9 +196,11 @@
                     <th>Reporter</th>
                     <th>Status</th>
                     {% if "enable_jira"|get_system_setting %}
-                    <th>Jira</th>
-                    <th>Jira Age</th>
-                    <th>Jira Change</th>
+                        {% if jira_config and product_tab or not product_tab %}
+                            <th>Jira</th>
+                            <th>Jira Age</th>
+                            <th>Jira Change</th>
+                        {% endif %}
                     {% endif %}
                 </tr>
                 </thead>
@@ -420,23 +422,24 @@
                         {% endif %}
                         </td>
                         {% if "enable_jira"|get_system_setting %}
-                            <td>
-                            <a href="{{finding.jira_conf.url}}/browse/{{finding.jira.jira_key}}" target="_blank"> {{finding.jira.jira_key}} </a>
-                            </td>
-                            <td class="nowrap">
-                                {% if "enable_jira"|get_system_setting %}
+                            {% if jira_config and product_tab or not product_tab %}
+                                <td>
+                                    <a href="{{finding.jira_conf.url}}/browse/{{finding.jira.jira_key}}" target="_blank"> {{finding.jira.jira_key}} </a>
+                                </td>
+                                
                                 {% if finding.jira_creation %}
-                                    {{ finding.jira_creation|timesince }} 
+                                    <td class="nowrap">
+                                        {{ finding.jira_creation|timesince }} 
+                                    </td>
                                 {% endif %} 
-                                {% endif %}
-                            </td>
-                            <td class="nowrap">
-                                {% if "enable_jira"|get_system_setting %}
+                            
                                 {% if finding.jira_change %}
-                                    {{ finding.jira_change|timesince }} 
+                                    <td class="nowrap">
+                                        {{ finding.jira_change|timesince }} 
+                                    </td>
                                 {% endif %} 
-                                {% endif %}
-                            </td>
+                                    
+                            {% endif %}
                         {% endif %}
                     </tr>
                 {% endfor %}
