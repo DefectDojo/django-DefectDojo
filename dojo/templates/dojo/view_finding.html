@@ -456,7 +456,7 @@
             </div>
         </div>
 
-        {% if finding.images.all %}
+        {% if finding.images.exists %}
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h4>
@@ -478,9 +478,10 @@
                             <a href="#"
                                data-imageurl="{{ request.scheme }}://{{ request.get_host }}{{ pic.image_large.url }}"
                                data-origurl="{{ request.scheme }}://{{ request.get_host }}{{ pic.image.url }}"
+                               data-caption="{{ pic.caption }}"
                                class="thumbnail" data-toggle="modal"
                                data-target="#findingImageModal" id="finding_pic">
-                                <img src="{{ request.scheme }}://{{ request.get_host }}{{ pic.image_thumbnail.url }}">
+                                <img src="{{ request.scheme }}://{{ request.get_host }}{{ pic.image_thumbnail.url }}" alt="{{ pic.caption }}" title="{{ pic.caption }}" />
                             </a>
                         </div>
                     {% endfor %}
@@ -506,6 +507,7 @@
                            title="View original image.">
                             <img id="to_replace" src="{{ pic.image_large.url }}" class="img-responsive"/>
                         </a>
+                        <p id="caption_to_replace">{{ pic.caption }}</p>
                     </div>
                     <div class="modal-footer">
                         <a href="#" id="next" class="btn btn-default bnt-xs pull-right"><span
@@ -786,11 +788,13 @@
             var link = $(event.relatedTarget);
             var loc = link.data('imageurl')
             var loco = link.data('origurl')
+            var caption = link.data('caption');
             console.log(link);
             console.log(loc);
             var modal = $(this);
             modal.find('#to_replace').attr('src', loc);
             modal.find('#a_to_replace').attr('href', loco);
+            modal.find('#caption_to_replace').html(caption);
         });
         $("a#next").on('click', function (e) {
             e.preventDefault();
@@ -803,9 +807,11 @@
                     if (index == thumbnails.length - 1) {
                         // at the end
                         $("img#to_replace").attr('src', $(thumbnails[0]).data('imageurl'));
+                        $("#caption_to_replace").html($(thumbnails[0]).data('caption'));
                     }
                     else {
                         $("img#to_replace").attr('src', $(thumbnails[index + 1]).data('imageurl'));
+                        $("#caption_to_replace").html($(thumbnails[index + 1]).data('caption'));
                     }
                 }
             });
