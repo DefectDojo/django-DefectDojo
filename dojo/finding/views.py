@@ -667,11 +667,11 @@ def edit_finding(request, fid):
     if finding.test.engagement.deduplication_on_engagement:
         finding_dupes = Finding.objects.all().filter(
             test__engagement=finding.test.engagement).filter(
-            title=finding.title).exclude(
+            title=finding.title, description=finding.description).exclude(
             id=finding.id)
     else:
         finding_dupes = Finding.objects.all().filter(
-            title=finding.title).exclude(
+            title=finding.title, description=finding.description).exclude(
             id=finding.id)
     product_tab = Product_Tab(finding.test.engagement.product.id, title="Edit Finding", tab="findings")
     return render(request, 'dojo/edit_findings.html', {
