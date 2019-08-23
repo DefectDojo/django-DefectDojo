@@ -285,6 +285,7 @@ LOGIN_EXEMPT_URLS = (
     r'^%sapi/v2/' % URL_PREFIX,
     r'complete/google-oauth2/',
     r'complete/okta-oauth2/',
+    r'engagement/([\d]+)/survey/([\d]+)/answer'
 )
 
 # ------------------------------------------------------------------------------
