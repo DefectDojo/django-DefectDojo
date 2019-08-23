@@ -19,7 +19,11 @@ class RetireJsParser(object):
 
     def parse_json(self, json_output):
         try:
-            tree = json.load(json_output)
+            data = json_output.read()
+            try:
+                tree = json.loads(str(data, 'utf-8'))
+            except:
+                tree = json.loads(data)
         except:
             raise Exception("Invalid format")
 
@@ -27,7 +31,8 @@ class RetireJsParser(object):
 
     def get_items(self, tree, test):
         items = {}
-
+        if 'data' in tree:
+            tree = tree['data']
         for node in tree:
             for result in node['results']:
                 if 'vulnerabilities' in result:
@@ -35,21 +40,22 @@ class RetireJsParser(object):
                         item = get_item(vulnerability, test, node['file'])
                         item.title += " (" + result['component'] + ", " + result['version'] + ")"
                         item.description += "\n\n Raw Result: " + str(json.dumps(vulnerability, indent=4, sort_keys=True))
-                        unique_key = item.title + hashlib.md5(item.references).hexdigest() + hashlib.md5(node['file']).hexdigest()
+                        item.references = item.references
+                        encrypted_file = node['file']
+                        unique_key = hashlib.md5((item.title + item.references + encrypted_file).encode()).hexdigest()
                         items[unique_key] = item
-
         return list(items.values())
 
 
 def get_item(item_node, test, file):
     title = ""
-
-    if 'summary' in item_node['identifiers']:
-        title = item_node['identifiers']['summary']
-    elif 'CVE' in item_node['identifiers']:
-        title = "".join(item_node['identifiers']['CVE'])
-    elif 'osvdb' in item_node['identifiers']:
-        title = "".join(item_node['identifiers']['osvdb'])
+    if 'identifiers' in item_node:
+        if 'summary' in item_node['identifiers']:
+            title = item_node['identifiers']['summary']
+        elif 'CVE' in item_node['identifiers']:
+            title = "".join(item_node['identifiers']['CVE'])
+        elif 'osvdb' in item_node['identifiers']:
+            title = "".join(item_node['identifiers']['osvdb'])
 
     finding = Finding(title=title,
                       test=test,
@@ -58,7 +64,7 @@ def get_item(item_node, test, file):
                       description=title + "\n\n Affected File - " + file,
                       file_path=file,
                       mitigation="No Mitigation Provided",
-                      references="\n\n".join(item_node['info']),
+                      references="\n".join(item_node['info']),
                       active=False,
                       verified=False,
                       false_p=False,

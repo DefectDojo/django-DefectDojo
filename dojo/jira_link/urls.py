@@ -8,4 +8,5 @@ urlpatterns = [
         name='edit_jira'),
     url(r'^jira/(?P<tid>\d+)/delete$', views.delete_jira,
         name='delete_jira'),
-    url(r'^jira$', views.jira, name='jira'), ]
+    url(r'^jira$', views.jira, name='jira'),
+    url(r'^jira/express', views.express_new_jira, name='express_jira')]

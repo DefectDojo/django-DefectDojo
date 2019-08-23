@@ -333,7 +333,7 @@ class OpenFindingFilter(DojoFilter):
         queryset=Product.objects.all(),
         label="Product")
     if get_system_setting('enable_jira'):
-        jira_issue = BooleanFilter(name='jira_issue',
+        jira_issue = BooleanFilter(field_name='jira_issue',
                                    lookup_expr='isnull',
                                    exclude=True,
                                    label='JIRA issue')
@@ -358,7 +358,7 @@ class OpenFindingFilter(DojoFilter):
                    'thread_id', 'notes', 'scanner_confidence', 'mitigated',
                    'numerical_severity', 'reporter', 'last_reviewed', 'line',
                    'duplicate_list', 'duplicate_finding', 'hash_code', 'images',
-                   'line_number', 'reviewers', 'mitigated_by', 'sourcefile']
+                   'line_number', 'reviewers', 'mitigated_by', 'sourcefile', 'jira_creation', 'jira_change']
 
     def __init__(self, *args, **kwargs):
         self.user = None
@@ -445,7 +445,7 @@ class ClosedFindingFilter(DojoFilter):
                    'duplicate', 'thread_id', 'date', 'notes',
                    'numerical_severity', 'reporter', 'endpoints',
                    'last_reviewed', 'review_requested_by', 'defect_review_requested_by',
-                   'last_reviewed_by', 'created']
+                   'last_reviewed_by', 'created', 'jira_creation', 'jira_change']
 
     def __init__(self, *args, **kwargs):
         super(ClosedFindingFilter, self).__init__(*args, **kwargs)
@@ -514,7 +514,7 @@ class AcceptedFindingFilter(DojoFilter):
                    'active', 'verified', 'out_of_scope', 'false_p',
                    'duplicate', 'thread_id', 'mitigated', 'notes',
                    'numerical_severity', 'reporter', 'endpoints',
-                   'last_reviewed', 'o']
+                   'last_reviewed', 'o', 'jira_creation', 'jira_change']
 
     def __init__(self, *args, **kwargs):
         super(AcceptedFindingFilter, self).__init__(*args, **kwargs)
@@ -576,7 +576,7 @@ class ProductFindingFilter(DojoFilter):
                    'active', 'verified', 'out_of_scope', 'false_p',
                    'duplicate_list', 'duplicate_finding', 'thread_id', 'mitigated', 'notes',
                    'numerical_severity', 'reporter', 'endpoints',
-                   'last_reviewed']
+                   'last_reviewed', 'jira_creation', 'jira_change']
 
     def __init__(self, *args, **kwargs):
         super(ProductFindingFilter, self).__init__(*args, **kwargs)
@@ -715,7 +715,9 @@ class MetricsFindingFilter(FilterSet):
                    'last_reviewed_by',
                    'images',
                    'endpoints',
-                   'is_template']
+                   'is_template',
+                   'jira_creation',
+                   'jira_change']
 
 
 class EndpointFilter(DojoFilter):
@@ -780,7 +782,7 @@ class ReportFindingFilter(DojoFilter):
         exclude = ['date', 'cwe', 'url', 'description', 'mitigation', 'impact',
                    'endpoint', 'references', 'test', 'is_template',
                    'thread_id', 'notes', 'endpoints',
-                   'numerical_severity', 'reporter', 'last_reviewed', 'images']
+                   'numerical_severity', 'reporter', 'last_reviewed', 'images', 'jira_creation', 'jira_change']
 
 
 class ReportAuthedFindingFilter(DojoFilter):
@@ -824,7 +826,7 @@ class ReportAuthedFindingFilter(DojoFilter):
         exclude = ['date', 'cwe', 'url', 'description', 'mitigation', 'impact',
                    'endpoint', 'references', 'test', 'is_template',
                    'thread_id', 'notes', 'endpoints',
-                   'numerical_severity', 'reporter', 'last_reviewed']
+                   'numerical_severity', 'reporter', 'last_reviewed', 'jira_creation', 'jira_change']
 
 
 class UserFilter(DojoFilter):

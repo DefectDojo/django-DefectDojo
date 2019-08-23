@@ -12,7 +12,11 @@ class MozillaObservatoryJSONParser(object):
         self.items = ()
         if file is None:
             return
-        tree = json.load(file)
+        data = file.read()
+        try:
+            tree = json.loads(str(data, 'utf-8'))
+        except:
+            tree = json.loads(data)
         for content in tree:
             node = tree[content]
             if not node['pass']:

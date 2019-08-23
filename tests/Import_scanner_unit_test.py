@@ -94,8 +94,8 @@ class ScannerTest(unittest.TestCase):
         missing_docs = []
         for tool in self.tools:
             reg = re.compile('.*' + tool.replace('_', ' ') + '.*')
-            if len(list(filter(reg.search, integration_text))) != 1:
-                if len(list(filter(reg.search, acronyms))) != 1:
+            if len(list(filter(reg.search, integration_text))) < 1:
+                if len(list(filter(reg.search, acronyms))) < 1:
                     missing_docs += [tool]
 
         if len(missing_docs) > 0:

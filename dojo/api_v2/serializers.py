@@ -3,22 +3,21 @@ from dojo.models import Product, Engagement, Test, Finding, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Product_Type, JIRA_Conf, Endpoint, BurpRawRequestResponse, JIRA_PKey, \
-    Notes, DojoMeta
+    Notes, DojoMeta, FindingImage
 from dojo.forms import ImportScanForm, SEVERITY_CHOICES
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import create_notification
+from django.urls import reverse
+from tagging.models import Tag
 from django.core.validators import URLValidator, validate_ipv46_address
 from django.conf import settings
-from django.urls import reverse
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
 from django.utils import timezone
-from django.db.models import Q
 import datetime
 import six
 from django.utils.translation import ugettext_lazy as _
 import json
-from tagging.models import Tag
 
 
 class TagList(list):
@@ -67,25 +66,25 @@ class TagListSerializerField(serializers.ListField):
 
         self.pretty_print = pretty_print
 
-    def to_internal_value(self, value):
-        if isinstance(value, six.string_types):
-            if not value:
-                value = "[]"
+    def to_internal_value(self, data):
+        if isinstance(data, six.string_types):
+            if not data:
+                data = []
             try:
-                value = json.loads(value)
+                data = json.loads(data)
             except ValueError:
                 self.fail('invalid_json')
 
-        if not isinstance(value, list):
-            self.fail('not_a_list', input_type=type(value).__name__)
+        if not isinstance(data, list):
+            self.fail('not_a_list', input_type=type(data).__name__)
 
-        for s in value:
+        for s in data:
             if not isinstance(s, six.string_types):
                 self.fail('not_a_str')
 
             self.child.run_validation(s)
 
-        return value
+        return data
 
     def to_representation(self, value):
         if not isinstance(value, TagList):
@@ -520,12 +519,10 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         default=None,
         queryset=User.objects.all())
     tags = TagListSerializerField(required=False)
-    skip_duplicates = serializers.BooleanField(required=False, default=False)
     close_old_findings = serializers.BooleanField(required=False, default=False)
 
     def save(self):
         data = self.validated_data
-        skip_duplicates = data['skip_duplicates']
         close_old_findings = data['close_old_findings']
         active = data['active']
         verified = data['verified']
@@ -561,21 +558,6 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         skipped_hashcodes = []
         try:
             for item in parser.items:
-                if skip_duplicates:
-                    hash_code = item.compute_hash_code()
-
-                    if ((test.engagement.deduplication_on_engagement and
-                             Finding.objects.filter(Q(active=True) | Q(false_p=True) | Q(duplicate=True),
-                             test__engagement=test.engagement,
-                             hash_code=hash_code).exists()) or
-                        (not test.engagement.deduplication_on_engagement and
-                            Finding.objects.filter(Q(active=True) | Q(false_p=True) | Q(duplicate=True),
-                                                    test__engagement__product=test.engagement.product,
-                                                    hash_code=hash_code).exists())):
-
-                        skipped_hashcodes.append(hash_code)
-                        continue
-
                 sev = item.severity
                 if sev == 'Information' or sev == 'Informational':
                     sev = 'Info'
@@ -593,7 +575,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 item.last_reviewed_by = self.context['request'].user
                 item.active = data['active']
                 item.verified = data['verified']
-                item.save()
+                item.save(dedupe_option=False)
 
                 if (hasattr(item, 'unsaved_req_resp') and
                         len(item.unsaved_req_resp) > 0):
@@ -625,14 +607,18 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
 
                     item.endpoints.add(ep)
 
-                # if item.unsaved_tags is not None:
-                #    item.tags = item.unsaved_tags
+                if item.unsaved_tags is not None:
+                    item.tags = item.unsaved_tags
+
+                item.save()
+
         except SyntaxError:
             raise Exception('Parser SyntaxError')
 
         if close_old_findings:
             # Close old active findings that are not reported by this scan.
             new_hash_codes = test.finding_set.values('hash_code')
+
             old_findings = None
             if test.engagement.deduplication_on_engagement:
                 old_findings = Finding.objects.exclude(test=test) \
@@ -771,7 +757,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     item.last_reviewed_by = self.context['request'].user
                     item.verified = verified
                     item.active = active
-                    item.save()
+                    item.save(dedupe_option=False)
                     finding_added_count += 1
                     new_items.append(item.id)
                     finding = item
@@ -805,8 +791,10 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                             product=test.engagement.product)
                         finding.endpoints.add(ep)
 
-                    # if item.unsaved_tags:
-                    #    finding.tags = item.unsaved_tags
+                    if item.unsaved_tags:
+                        finding.tags = item.unsaved_tags
+
+                    finding.save()
 
             to_mitigate = set(original_items) - set(new_items)
             for finding in to_mitigate:
@@ -857,3 +845,63 @@ class NoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notes
         fields = '__all__'
+
+
+class FindingImageSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = FindingImage
+        fields = '__all__'
+
+
+class FindingToFindingImagesSerializer(serializers.Serializer):
+    finding_id = serializers.PrimaryKeyRelatedField(queryset=Finding.objects.all(), many=False, allow_null=True)
+    images = FindingImageSerializer(many=True)
+
+
+class FindingToNotesSerializer(serializers.Serializer):
+    finding_id = serializers.PrimaryKeyRelatedField(queryset=Finding.objects.all(), many=False, allow_null=True)
+    notes = NoteSerializer(many=True)
+
+
+class ReportGenerateOptionSerializer(serializers.Serializer):
+    include_finding_notes = serializers.BooleanField(default=False)
+    include_finding_images = serializers.BooleanField(default=False)
+    include_executive_summary = serializers.BooleanField(default=False)
+    include_table_of_contents = serializers.BooleanField(default=False)
+
+
+class ExecutiveSummarySerializer(serializers.Serializer):
+    engagement_name = serializers.CharField(max_length=200)
+    engagement_target_start = serializers.DateField()
+    engagement_target_end = serializers.DateField()
+    test_type_name = serializers.CharField(max_length=200)
+    test_target_start = serializers.DateTimeField()
+    test_target_end = serializers.DateTimeField()
+    test_environment_name = serializers.CharField(max_length=200)
+    test_strategy_ref = serializers.URLField(max_length=200, min_length=None, allow_blank=True)
+    total_findings = serializers.IntegerField()
+
+
+class ReportGenerateSerializer(serializers.Serializer):
+    executive_summary = ExecutiveSummarySerializer(many=False, allow_null=True)
+    product_type = ProductTypeSerializer(many=False, read_only=True)
+    product = ProductSerializer(many=False, read_only=True)
+    engagement = EngagementSerializer(many=False, read_only=True)
+    report_name = serializers.CharField(max_length=200)
+    report_info = serializers.CharField(max_length=200)
+    test = TestSerializer(many=False, read_only=True)
+    endpoint = EndpointSerializer(many=False, read_only=True)
+    endpoints = EndpointSerializer(many=True, read_only=True)
+    findings = FindingSerializer(many=True, read_only=True)
+    user = UserSerializer(many=False, read_only=True)
+    team_name = serializers.CharField(max_length=200)
+    title = serializers.CharField(max_length=200)
+    user_id = serializers.IntegerField()
+    host = serializers.CharField(max_length=200)
+    finding_images = FindingToFindingImagesSerializer(many=True, allow_null=True)
+    finding_notes = FindingToNotesSerializer(many=True, allow_null=True)
+
+
+class TagSerializer(serializers.Serializer):
+    tags = TagListSerializerField(required=True)
