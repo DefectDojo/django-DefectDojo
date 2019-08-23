@@ -7,7 +7,11 @@ import json
 
 class SSLlabsParser(object):
     def __init__(self, filename, test):
-        data = json.load(filename)
+        tree = json_output.read()
+        try:
+            data = json.loads(str(tree, 'utf-8'))
+        except:
+            data = json.loads(tree)
 
         find_date = datetime.now()
         dupes = {}

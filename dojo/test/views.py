@@ -15,6 +15,7 @@ from django.views.decorators.cache import cache_page
 from django.utils import timezone
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
+from tagging.models import Tag
 
 from dojo.filters import TemplateFindingFilter
 from dojo.forms import NoteForm, TestForm, FindingForm, \
@@ -33,6 +34,7 @@ def view_test(request, tid):
     test = Test.objects.get(id=tid)
     prod = test.engagement.product
     auth = request.user.is_staff or request.user in prod.authorized_users.all()
+    tags = Tag.objects.usage_for_model(Finding)
     if not auth:
         # will render 403
         raise PermissionDenied
@@ -68,6 +70,7 @@ def view_test(request, tid):
 
     product_tab = Product_Tab(prod.id, title="Test", tab="engagements")
     product_tab.setEngagement(test.engagement)
+    jira_config = JIRA_PKey.objects.filter(product=prod.id).first()
     return render(request, 'dojo/view_test.html',
                   {'test': test,
                    'product_tab': product_tab,
@@ -80,7 +83,9 @@ def view_test(request, tid):
                    'request': request,
                    'show_re_upload': show_re_upload,
                    'creds': creds,
-                   'cred_test': cred_test
+                   'cred_test': cred_test,
+                   'tag_input': tags,
+                   'jira_config': jira_config,
                    })
 
 
@@ -130,6 +135,12 @@ def delete_test(request, tid):
                                      messages.SUCCESS,
                                      'Test and relationships removed.',
                                      extra_tags='alert-success')
+                create_notification(event='other',
+                                    title='Deletion of %s' % test.title,
+                                    description='The test "%s" was deleted by %s' % (test.title, request.user),
+                                    url=request.build_absolute_uri(reverse('view_engagement', args=(eng.id, ))),
+                                    recipients=[test.engagement.lead],
+                                    icon="exclamation-triangle")
                 return HttpResponseRedirect(reverse('view_engagement', args=(eng.id,)))
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)
@@ -233,6 +244,11 @@ def add_findings(request, tid):
             new_finding.save(dedupe_option=False)
             new_finding.endpoints.set(form.cleaned_data['endpoints'])
             new_finding.save(false_history=True)
+            create_notification(event='other',
+                                title='Addition of %s' % new_finding.title,
+                                description='Finding "%s" was added by %s' % (new_finding.title, request.user),
+                                url=request.build_absolute_uri(reverse('view_finding', args=(new_finding.id,))),
+                                icon="exclamation-triangle")
             if 'jiraform-push_to_jira' in request.POST:
                 jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=enabled)
                 if jform.is_valid():
@@ -298,8 +314,10 @@ def add_temp_finding(request, tid, fid):
     findings = Finding_Template.objects.all()
 
     if request.method == 'POST':
-        form = FindingForm(request.POST)
+        form = FindingForm(request.POST, template=True)
         if form.is_valid():
+            finding.last_used = timezone.now()
+            finding.save()
             new_finding = form.save(commit=False)
             new_finding.test = test
             new_finding.reporter = request.user
@@ -315,8 +333,11 @@ def add_temp_finding(request, tid, fid):
             # no further action needed here since this is already adding from template.
             new_finding.is_template = False
             new_finding.save(dedupe_option=False, false_history=False)
-            new_finding.endpoints = form.cleaned_data['endpoints']
+            new_finding.endpoints.set(form.cleaned_data['endpoints'])
             new_finding.save(false_history=True)
+            tags = request.POST.getlist('tags')
+            t = ", ".join(tags)
+            new_finding.tags = t
             if 'jiraform-push_to_jira' in request.POST:
                 jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=True)
                 if jform.is_valid():
@@ -355,9 +376,8 @@ def add_temp_finding(request, tid, fid):
                                  messages.ERROR,
                                  'The form has errors, please correct them below.',
                                  extra_tags='alert-danger')
-
     else:
-        form = FindingForm(initial={'active': False,
+        form = FindingForm(template=True, initial={'active': False,
                                     'date': timezone.now().date(),
                                     'verified': False,
                                     'false_p': False,
@@ -370,7 +390,8 @@ def add_temp_finding(request, tid, fid):
                                     'mitigation': finding.mitigation,
                                     'impact': finding.impact,
                                     'references': finding.references,
-                                    'numerical_severity': finding.numerical_severity})
+                                    'numerical_severity': finding.numerical_severity,
+                                    'tags': [tag.name for tag in finding.tags]})
         if get_system_setting('enable_jira'):
             enabled = JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues
             jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
@@ -440,6 +461,11 @@ def finding_bulk_update(request, tid):
                                  is_Mitigated=form.cleaned_data['is_Mitigated'],
                                  last_reviewed=timezone.now(),
                                  last_reviewed_by=request.user)
+                if form.cleaned_data['tags']:
+                    for finding in finds:
+                        tags = request.POST.getlist('tags')
+                        ts = ", ".join(tags)
+                        finding.tags = ts
 
                 # Update the grade as bulk edits don't go through save
                 if form.cleaned_data['severity'] or form.cleaned_data['status']:
@@ -551,7 +577,7 @@ def re_import_scan_results(request, tid):
                         item.last_reviewed_by = request.user
                         item.verified = verified
                         item.active = active
-                        item.save()
+                        item.save(dedupe_option=False)
                         finding_added_count += 1
                         new_items.append(item.id)
                         find = item
@@ -594,6 +620,7 @@ def re_import_scan_results(request, tid):
                         if item.unsaved_tags is not None:
                             find.tags = item.unsaved_tags
 
+                    find.save()
                 # calculate the difference
                 to_mitigate = set(original_items) - set(new_items)
                 for finding_id in to_mitigate:

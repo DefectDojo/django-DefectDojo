@@ -20,7 +20,7 @@ from ast import literal_eval
 from urllib.parse import urlparse
 import bleach
 from bleach_whitelist import markdown_tags, markdown_attrs
-
+import git
 register = template.Library()
 
 
@@ -89,6 +89,16 @@ def linebreaksasciidocbr(value, autoescape=None):
 def dojo_version():
     from dojo import __version__
     return 'v. ' + __version__
+
+
+@register.simple_tag
+def dojo_current_hash():
+    try:
+        repo = git.Repo(search_parent_directories=True)
+        sha = repo.head.object.hexsha
+        return sha[:8]
+    except:
+        return "release mode"
 
 
 @register.simple_tag

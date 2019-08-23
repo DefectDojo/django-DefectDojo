@@ -23,6 +23,7 @@ from tagging.registry import register as tag_register
 from multiselectfield import MultiSelectField
 from django import forms
 from django.utils.translation import gettext as _
+from dojo.signals import dedupe_signal
 
 fmt = getattr(settings, 'LOG_FORMAT', None)
 lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
@@ -85,7 +86,8 @@ class System_Settings(models.Model):
     jira_choices = (('Critical', 'Critical'),
                     ('High', 'High'),
                     ('Medium', 'Medium'),
-                    ('Low', 'Low'))
+                    ('Low', 'Low'),
+                    ('Info', 'Info'))
     jira_minimum_severity = models.CharField(max_length=20, blank=True,
                                              null=True, choices=jira_choices,
                                              default='None')
@@ -1014,6 +1016,18 @@ class Endpoint(models.Model):
         else:
             return self.host
 
+    @property
+    def host_with_port(self):
+        host = self.host
+        port = self.port
+        scheme = self.protocol
+        if ":" in host:
+            return host
+        elif (port is None) and (scheme == "https"):
+            return host + ':443'
+        elif (port is None) and (scheme == "http"):
+            return host + ':80'
+
 
 class NoteHistory(models.Model):
     data = models.TextField()
@@ -1178,8 +1192,10 @@ class Finding(models.Model):
     file_path = models.CharField(null=True, blank=True, max_length=1000)
     found_by = models.ManyToManyField(Test_Type, editable=False)
     static_finding = models.BooleanField(default=False)
-    dynamic_finding = models.BooleanField(default=False)
+    dynamic_finding = models.BooleanField(default=True)
     created = models.DateTimeField(auto_now_add=True, null=True)
+    jira_creation = models.DateTimeField(editable=True, null=True)
+    jira_change = models.DateTimeField(editable=True, null=True)
     scanner_confidence = models.IntegerField(null=True, blank=True, default=None, editable=False, help_text="Confidence level of vulnerability which is supplied by the scannner.")
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
@@ -1190,11 +1206,14 @@ class Finding(models.Model):
 
     def compute_hash_code(self):
         hash_string = self.title + str(self.cwe) + str(self.line) + str(self.file_path) + self.description
-
         if self.dynamic_finding:
             endpoint_str = ''
-            for e in self.endpoints.all():
-                endpoint_str += str(e)
+            if len(self.unsaved_endpoints) > 0 and self.id is None:
+                for e in self.unsaved_endpoints:
+                    endpoint_str += str(e.host_with_port)
+            else:
+                for e in self.endpoints.all():
+                    endpoint_str += str(e.host_with_port)
             if endpoint_str:
                 hash_string = hash_string + endpoint_str
         try:
@@ -1203,6 +1222,13 @@ class Finding(models.Model):
         except:
             hash_string = hash_string.strip()
             return hashlib.sha256(hash_string).hexdigest()
+
+    def remove_from_any_risk_acceptance(self):
+        risk_acceptances = Risk_Acceptance.objects.filter(accepted_findings__in=[self])
+        for r in risk_acceptances:
+            r.accepted_findings.remove(self)
+            if not r.accepted_findings.exists():
+                r.delete()
 
     def duplicate_finding_set(self):
         return self.duplicate_list.all().order_by('title')
@@ -1230,8 +1256,10 @@ class Finding(models.Model):
             return 'S2'
         elif severity == 'Low':
             return 'S3'
-        else:
+        elif severity == 'Info':
             return 'S4'
+        else:
+            return 'S5'
 
     @staticmethod
     def get_number_severity(severity):
@@ -1243,6 +1271,8 @@ class Finding(models.Model):
             return 2
         elif severity == 'Low':
             return 1
+        elif severity == 'Info':
+            return 0
         else:
             return 5
 
@@ -1349,17 +1379,20 @@ class Finding(models.Model):
             super(Finding, self).save(*args, **kwargs)
         else:
             super(Finding, self).save(*args, **kwargs)
+
+        if (self.file_path is not None) and (self.endpoints.count() == 0):
+            self.static_finding = True
+            self.dynamic_finding = False
+        elif (self.file_path is not None):
+            self.static_finding = True
+
         # Compute hash code before dedupe
-        if self.hash_code is None:
-            self.hash_code = self.compute_hash_code()
+        if (self.hash_code is None):
+            if((self.dynamic_finding and (self.endpoints.count() > 0)) or
+                    (self.static_finding and (self.file_path is not None))):
+                self.hash_code = self.compute_hash_code()
         self.found_by.add(self.test.test_type)
-        if self.test.test_type.static_tool and self.test.test_type.dynamic_tool:
-            self.static_finding = True
-            self.dynamic_finding = True
-        elif self.test.test_type.static_tool:
-            self.static_finding = True
-        elif self.test.test_type.dynamic_tool:
-            self.dynamic_finding = True
+
         if rules_option:
             from dojo.tasks import async_rules
             from dojo.utils import sync_rules
@@ -1377,13 +1410,12 @@ class Finding(models.Model):
         self.numerical_severity = Finding.get_numerical_severity(self.severity)
         super(Finding, self).save()
         system_settings = System_Settings.objects.get()
-        if (dedupe_option):
+        if dedupe_option and self.hash_code is not None:
             if system_settings.enable_deduplication:
                 from dojo.tasks import async_dedupe
-                from dojo.utils import sync_dedupe
                 try:
                     if self.reporter.usercontactinfo.block_execution:
-                        sync_dedupe(self, *args, **kwargs)
+                        dedupe_signal.send(sender=self.__class__, new_finding=self)
                     else:
                         async_dedupe.delay(self, *args, **kwargs)
                 except:
@@ -1505,6 +1537,7 @@ class Finding_Template(models.Model):
     mitigation = models.TextField(null=True, blank=True)
     impact = models.TextField(null=True, blank=True)
     references = models.TextField(null=True, blank=True, db_column="refs")
+    last_used = models.DateTimeField(null=True, editable=False)
     numerical_severity = models.CharField(max_length=4, null=True, blank=True, editable=False)
     template_match = models.BooleanField(default=False, verbose_name='Template Match Enabled', help_text="Enables this template for matching remediation advice. Match will be applied to all active, verified findings by CWE.")
     template_match_title = models.BooleanField(default=False, verbose_name='Match Template by Title and CWE', help_text="Matches by title text (contains search) and CWE.")
@@ -1703,6 +1736,7 @@ class FindingImageAccessToken(models.Model):
 
 
 class JIRA_Conf(models.Model):
+    configuration_name = models.CharField(max_length=2000, help_text="Enter a name to give to this configuration", default='')
     url = models.URLField(max_length=2000, verbose_name="JIRA URL", help_text="For configuring Jira, view: https://defectdojo.readthedocs.io/en/latest/features.html#jira-integration")
     #    product = models.ForeignKey(Product)
     username = models.CharField(max_length=2000)
@@ -1720,11 +1754,22 @@ class JIRA_Conf(models.Model):
     epic_name_id = models.IntegerField(help_text="To obtain the 'Epic name id' visit https://<YOUR JIRA URL>/rest/api/2/field and search for Epic Name. Copy the number out of cf[number] and paste it here.")
     open_status_key = models.IntegerField(help_text="To obtain the 'open status key' visit https://<YOUR JIRA URL>/rest/api/latest/issue/<ANY VALID ISSUE KEY>/transitions?expand=transitions.fields")
     close_status_key = models.IntegerField(help_text="To obtain the 'open status key' visit https://<YOUR JIRA URL>/rest/api/latest/issue/<ANY VALID ISSUE KEY>/transitions?expand=transitions.fields")
+    info_mapping_severity = models.CharField(max_length=200, help_text="Maps to the 'Priority' field in Jira. For example: Info")
     low_mapping_severity = models.CharField(max_length=200, help_text="Maps to the 'Priority' field in Jira. For example: Low")
     medium_mapping_severity = models.CharField(max_length=200, help_text="Maps to the 'Priority' field in Jira. For example: Medium")
     high_mapping_severity = models.CharField(max_length=200, help_text="Maps to the 'Priority' field in Jira. For example: High")
     critical_mapping_severity = models.CharField(max_length=200, help_text="Maps to the 'Priority' field in Jira. For example: Critical")
     finding_text = models.TextField(null=True, blank=True, help_text="Additional text that will be added to the finding in Jira. For example including how the finding was created or who to contact for more information.")
+    accepted_mapping_resolution = models.CharField(null=True, blank=True, max_length=300, help_text="JIRA resolution names (comma-separated values) that maps to an Accepted Finding")
+    false_positive_mapping_resolution = models.CharField(null=True, blank=True, max_length=300, help_text="JIRA resolution names (comma-separated values) that maps to a False Positive Finding")
+
+    @property
+    def accepted_resolutions(self):
+        return [m.strip() for m in (self.accepted_mapping_resolution or '').split(',')]
+
+    @property
+    def false_positive_resolutions(self):
+        return [m.strip() for m in (self.false_positive_mapping_resolution or '').split(',')]
 
     def __unicode__(self):
         return self.url + " | " + self.username
@@ -1733,7 +1778,9 @@ class JIRA_Conf(models.Model):
         return self.url + " | " + self.username
 
     def get_priority(self, status):
-        if status == 'Low':
+        if status == 'Info':
+            return self.info_mapping_severity
+        elif status == 'Low':
             return self.low_mapping_severity
         elif status == 'Medium':
             return self.medium_mapping_severity

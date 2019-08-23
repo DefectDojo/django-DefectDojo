@@ -10,7 +10,7 @@
 		<CVE-ID></CVE-ID>
 		<CVSSv3></CVSSv3>
 		<Risk>CRITICAL</Risk>
-		<URL>0.0.0.0</URL>
+		<URL>https://www.same.com/samesies</URL>
 		<Description>Test Description</Description>
 		<PoC></PoC>
 	</Vulnerability>
@@ -25,7 +25,7 @@
 		<CVE-ID></CVE-ID>
 		<CVSSv3></CVSSv3>
 		<Risk>CRITICAL</Risk>
-		<URL>0.0.0.0</URL>
+		<URL>https://www.same.com/samesies</URL>
 		<Description>Test Description</Description>
 		<PoC></PoC>
 	</Vulnerability>
@@ -40,7 +40,7 @@
 		<CVE-ID></CVE-ID>
 		<CVSSv3></CVSSv3>
 		<Risk>CRITICAL</Risk>
-		<URL>0.0.0.0</URL>
+		<URL>https://www.same.com/samesies</URL>
 		<Description>Test Description</Description>
 		<PoC></PoC>
 	</Vulnerability>
