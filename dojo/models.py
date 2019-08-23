@@ -203,6 +203,12 @@ class System_Settings(models.Model):
     sla_low = models.IntegerField(default=120,
                                           verbose_name="Low Finding SLA Days",
                                           help_text="# of days to remediate a low finding.")
+    allow_anonymous_survey_repsonse = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name="Allow Anonymous Survey Responses",
+        help_text="Enable anyone with a link to the survey to answer a survey"
+    )
 
 
 class SystemSettingsFormAdmin(forms.ModelForm):

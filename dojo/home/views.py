@@ -14,6 +14,8 @@ from django.utils import timezone
 from dojo.models import Finding, Engagement, Risk_Acceptance
 from dojo.utils import add_breadcrumb, get_punchcard_data
 
+from defectDojo_engagement_survey.models import Answered_Survey
+
 logger = logging.getLogger(__name__)
 
 
@@ -117,6 +119,10 @@ def dashboard(request):
     if weeks_between <= 0:
         weeks_between += 2
 
+    unassigned_surveys = Answered_Survey.objects.all().filter(
+        responder_id__isnull=False).filter(
+        assignee_id__isnull=True)
+
     punchcard, ticks, highest_count = get_punchcard_data(findings, weeks_between, start_date)
     add_breadcrumb(request=request, clear=True)
     return render(request,
@@ -133,4 +139,5 @@ def dashboard(request):
                    'by_month': by_month,
                    'punchcard': punchcard,
                    'ticks': ticks,
+                   'surveys': unassigned_surveys,
                    'highest_count': highest_count})
