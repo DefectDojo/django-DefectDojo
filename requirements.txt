@@ -22,7 +22,7 @@ django-taggit-serializer==0.1.7
 git+https://github.com/Maffooch/django-tastypie-swagger@master#egg=django-tastypie-swagger
 django-tastypie==0.14.2
 django-watson==1.5.2
-Django==2.2.1
+Django==2.2.4
 djangorestframework==3.9.4
 gunicorn==19.9.0
 html2text==2018.1.9
