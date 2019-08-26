@@ -1,7 +1,7 @@
 import json
 from unittest import mock
 
-from dojo.tools.sonarqube.importer import SonarQubeApiImporter
+from dojo.tools.sonarqube_api.importer import SonarQubeApiImporter
 from django.test import TestCase
 from dojo.models import Test, Tool_Configuration, Tool_Type, Engagement, Product
 
@@ -19,23 +19,23 @@ class TestSonarqubeImporter(TestCase):
         )
 
     def dummy_product(self, *args, **kwargs):
-        with open('dojo/unittests/scans/sonarqube/product.json') as json_file:
+        with open('dojo/unittests/scans/sonarqube_api/product.json') as json_file:
             data = json.load(json_file)
             return data
 
     def dummy_issues(self, *args, **kwargs):
-        with open('dojo/unittests/scans/sonarqube/issues.json') as json_file:
+        with open('dojo/unittests/scans/sonarqube_api/issues.json') as json_file:
             data = json.load(json_file)
             return data
 
     def dummy_rule(self, *args, **kwargs):
-        with open('dojo/unittests/scans/sonarqube/rule.json') as json_file:
+        with open('dojo/unittests/scans/sonarqube_api/rule.json') as json_file:
             data = json.load(json_file)
             return data
 
-    @mock.patch('dojo.tools.sonarqube.api_client.SonarQubeAPI.find_project', dummy_product)
-    @mock.patch('dojo.tools.sonarqube.api_client.SonarQubeAPI.get_rule', dummy_rule)
-    @mock.patch('dojo.tools.sonarqube.api_client.SonarQubeAPI.find_issues', dummy_issues)
-    def test_parse_file_with_one_vuln(self):
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_project', dummy_product)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_rule', dummy_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_issues', dummy_issues)
+    def test_parse_file_with_one_cwe_and_one_no_cwe_vulns(self):
         parser = SonarQubeApiImporter(self.test)
-        self.assertEqual(1, len(parser.items))
+        self.assertEqual(2, len(parser.items))

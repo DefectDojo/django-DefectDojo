@@ -19,10 +19,10 @@ from django.db import DEFAULT_DB_ALIAS
 from dojo.templatetags.display_tags import get_level
 from dojo.filters import ProductFilter, ProductFindingFilter, EngagementFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm, \
-                       EngagementPresetsForm, DeleteEngagementPresetsForm
+                       EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm
 from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, Finding_Template, \
     Tool_Product_Settings, Cred_Mapping, Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, \
-    Endpoint, Engagement_Presets, DojoMeta
+    Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product
 from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, get_system_setting, create_notification, Product_Tab
 from custom_field.models import CustomFieldValue, CustomField
 from dojo.tasks import add_epic_task, add_issue_task
@@ -221,6 +221,7 @@ def view_product_metrics(request, pid):
         out_of_scope=False,
         active=True,
         mitigated__isnull=True,
+        cwe__isnull=False,
     ).order_by('cwe').values(
         'cwe'
     ).annotate(
@@ -230,6 +231,7 @@ def view_product_metrics(request, pid):
     all_vulnerabilities = Finding.objects.filter(
         test__engagement__product=prod,
         duplicate=False,
+        cwe__isnull=False,
     ).order_by('cwe').values(
         'cwe'
     ).annotate(
@@ -479,6 +481,14 @@ def new_product(request):
                                                 messages.SUCCESS,
                                                 'JIRA information added successfully.',
                                                 extra_tags='alert-success')
+
+            # SonarQube API Configuration
+            sonarqube_form = Sonarqube_ProductForm(request.POST)
+            if sonarqube_form.is_valid():
+                sonarqube_product = sonarqube_form.save(commit=False)
+                sonarqube_product.product = product
+                sonarqube_product.save()
+
             create_notification(event='product_added', title=product.name, url=reverse('view_product', args=(product.id,)))
             return HttpResponseRedirect(reverse('view_product', args=(product.id,)))
     else:
@@ -487,10 +497,12 @@ def new_product(request):
             jform = JIRAPKeyForm()
         else:
             jform = None
+
     add_breadcrumb(title="New Product", top_level=False, request=request)
     return render(request, 'dojo/new_product.html',
                   {'form': form,
-                   'jform': jform})
+                   'jform': jform,
+                   'sonarqube_form': Sonarqube_ProductForm()})
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -500,11 +512,15 @@ def edit_product(request, pid):
     jira_enabled = system_settings.enable_jira
     jira_inst = None
     jform = None
+    sonarqube_form = None
     try:
         jira_inst = JIRA_PKey.objects.get(product=prod)
     except:
         jira_inst = None
         pass
+
+    sonarqube_conf = Sonarqube_Product.objects.filter(product=prod).first()
+
     if request.method == 'POST':
         form = ProductForm(request.POST, instance=prod)
         if form.is_valid():
@@ -535,6 +551,13 @@ def edit_product(request, pid):
                                             'JIRA information updated successfully.',
                                             extra_tags='alert-success')
 
+            # SonarQube API Configuration
+            sonarqube_form = Sonarqube_ProductForm(request.POST, instance=sonarqube_conf)
+            if sonarqube_form.is_valid():
+                new_conf = sonarqube_form.save(commit=False)
+                new_conf.product_id = pid
+                new_conf.save()
+
             return HttpResponseRedirect(reverse('view_product', args=(pid,)))
     else:
         form = ProductForm(instance=prod,
@@ -550,6 +573,9 @@ def edit_product(request, pid):
             jform = JIRAPKeyForm()
         else:
             jform = None
+
+        sonarqube_form = Sonarqube_ProductForm(instance=sonarqube_conf)
+
     form.initial['tags'] = [tag.name for tag in prod.tags]
     product_tab = Product_Tab(pid, title="Edit Product", tab="settings")
     return render(request,
@@ -557,6 +583,7 @@ def edit_product(request, pid):
                   {'form': form,
                    'product_tab': product_tab,
                    'jform': jform,
+                   'sonarqube_form': sonarqube_form,
                    'product': prod
                    })
 

@@ -1135,6 +1135,23 @@ class Sonarqube_Issue_Transition(models.Model):
         ordering = ('-created', )
 
 
+class Sonarqube_Product(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    sonarqube_project_key = models.CharField(
+        max_length=200, null=True, blank=True, verbose_name="SonarQube Project Key"
+    )
+    sonarqube_tool_config = models.ForeignKey(
+        Tool_Configuration, verbose_name="SonarQube Configuration",
+        null=True, blank=True, on_delete=models.CASCADE
+    )
+
+    def __unicode__(self):
+        return '{} | {}'.format(self.product.name, self.sonarqube_project_key)
+
+    def __str__(self):
+        return '{} | {}'.format(self.product.name, self.sonarqube_project_key)
+
+
 class Finding(models.Model):
     title = models.TextField(max_length=1000)
     date = models.DateField(default=get_current_date)
@@ -1392,6 +1409,10 @@ class Finding(models.Model):
         else:
             super(Finding, self).save(*args, **kwargs)
 
+            # Run async the tool issue update to update original issue with Defect Dojo updates
+            from dojo.tasks import async_tool_issue_updater
+            async_tool_issue_updater.delay(self)
+
         if (self.file_path is not None) and (self.endpoints.count() == 0):
             self.static_finding = True
             self.dynamic_finding = False
@@ -1444,10 +1465,6 @@ class Finding(models.Model):
             except:
                 async_false_history.delay(self, *args, **kwargs)
                 pass
-
-        # Run async the tool issue update to update original issue with Defect Dojo updates
-        from dojo.tasks import async_tool_issue_updater
-        async_tool_issue_updater.delay(self)
 
         # Title Casing
         from titlecase import titlecase
@@ -2406,3 +2423,4 @@ watson.register(App_Analysis)
 # SonarQube Integration
 admin.site.register(Sonarqube_Issue)
 admin.site.register(Sonarqube_Issue_Transition)
+admin.site.register(Sonarqube_Product)

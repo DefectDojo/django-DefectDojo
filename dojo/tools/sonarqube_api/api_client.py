@@ -6,37 +6,84 @@ from dojo.utils import prepare_for_view
 
 class SonarQubeAPI:
 
-    def __init__(self):
+    def __init__(self, tool_config=None):
         tool_type, _ = Tool_Type.objects.get_or_create(name='SonarQube')
-        config = Tool_Configuration.objects.filter(tool_type=tool_type).get()
+
+        if not tool_config:
+            try:
+                tool_config = Tool_Configuration.objects.get(tool_type=tool_type)
+            except Tool_Configuration.DoesNotExist:
+                raise Exception(
+                    'No SonarQube tool is configured. \n'
+                    'Create a new Tool at Settings -> Tool Configuration'
+                )
+            except Tool_Configuration.MultipleObjectsReturned:
+                raise Exception(
+                    'It has configured more than one SonarQube tool. \n'
+                    'Please specify at Product configuration which one should be used.'
+                )
 
         self.session = requests.Session()
-        self.sonar_api_url = config.url
-        if config.authentication_type == "Password":
-            self.session.auth = (config.username, prepare_for_view(config.password))
-        elif config.authentication_type == "API":
-            self.session.auth = (config.api_key, '')
+        self.sonar_api_url = tool_config.url
+        if tool_config.authentication_type == "Password":
+            self.session.auth = (tool_config.username, prepare_for_view(tool_config.password))
+        elif tool_config.authentication_type == "API":
+            self.session.auth = (tool_config.api_key, '')
         else:
-            raise Exception('Authentication type not supported')
+            raise Exception('SonarQube Authentication type {} not supported'.format(tool_config.authentication_type))
 
-    def find_project(self, project):
+    def find_project(self, project_name):
         """
-        Search for projects or views to administrate them.
-        Requires 'System Administrator' permission
-        :param project:
+        Search for projects by name.
+        :param project_name:
         :return:
         """
         response = self.session.get(
-            url='{}/projects/search'.format(self.sonar_api_url),
-            params={'q': project},
+            url='{}/components/search'.format(self.sonar_api_url),
+            params={
+                'q': project_name,
+                'qualifiers': 'TRK'
+            },
         )
 
         if response.ok:
-            return response.json()['components']
-        else:
+            for component in response.json().get('components', []):
+                if component['name'] == project_name:
+                    return component
             raise Exception(
-                "Unable to find the product {} due to {} - {}".format(project, response.status_code, response.content)
+                'Expected Project "{}", but it returned {}. \n'
+                'Project Name is case sensitive and must match the DefectDojo Product Name. \n'
+                'Alternatively it can also be specified the Project Key at Product configuration.'.format(
+                    project_name,
+                    [x.get('name') for x in response.json().get('components')]
+                )
             )
+
+        else:
+            raise Exception("Unable to find the project {} due to {} - {}".format(
+                project_name, response.status_code, response.content
+            ))
+
+    def get_project(self, project_key):
+        """
+        Returns a component (project).
+        Requires the following permission: 'Browse' on the project of the specified component.
+        :param project_key:
+        :return:
+        """
+        response = self.session.get(
+            url='{}/components/show'.format(self.sonar_api_url),
+            params={
+                'component': project_key,
+            },
+        )
+
+        if response.ok:
+            return response.json().get('component')
+        else:
+            raise Exception("Unable to find the project {} due to {} - {}".format(
+                project_key, response.status_code, response.content
+            ))
 
     def find_issues(self, component_key):
         """
@@ -97,13 +144,15 @@ class SonarQubeAPI:
         )
 
         if response.ok:
-            issue = response.json().get('issues')[0]
-            if issue['key'] == issue_key:
-                print(issue)
-                return issue
-            else:
-                raise Exception("Wrong issue returned!")
-
+            for issue in response.json().get('issues', []):
+                if issue['key'] == issue_key:
+                    return issue
+            raise Exception(
+                'Expected Issue "{}", but it returned {}.'.format(
+                    issue_key,
+                    [x.get('key') for x in response.json().get('issues')]
+                )
+            )
         else:
             raise Exception(
                 "Unable to get issue {} due to {} - {}".format(

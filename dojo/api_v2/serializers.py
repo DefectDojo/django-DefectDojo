@@ -5,6 +5,7 @@ from dojo.models import Product, Engagement, Test, Finding, \
     Product_Type, JIRA_Conf, Endpoint, BurpRawRequestResponse, JIRA_PKey, \
     Notes, DojoMeta, FindingImage
 from dojo.forms import ImportScanForm, SEVERITY_CHOICES
+from dojo.tools import requires_file
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import create_notification
 from django.urls import reverse
@@ -666,7 +667,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
     def validate(self, data):
         scan_type = data.get("scan_type")
         file = data.get("file")
-        if scan_type and scan_type != 'SonarQube Scan' and not file:
+        if not file and requires_file(scan_type):
             raise serializers.ValidationError('Uploading a Report File is required for {}'.format(scan_type))
         return data
 
@@ -829,7 +830,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     def validate(self, data):
         scan_type = data.get("scan_type")
         file = data.get("file")
-        if scan_type and scan_type != 'SonarQube Scan' and not file:
+        if not file and requires_file(scan_type):
             raise serializers.ValidationError('Uploading a Report File is required for {}'.format(scan_type))
         return data
 

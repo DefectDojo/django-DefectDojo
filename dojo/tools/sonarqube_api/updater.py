@@ -1,6 +1,6 @@
 from collections import deque
 
-from dojo.tools.sonarqube.api_client import SonarQubeAPI
+from dojo.tools.sonarqube_api.api_client import SonarQubeAPI
 from dojo.models import Sonarqube_Issue_Transition
 
 import logging
@@ -19,6 +19,11 @@ class SonarQubeApiUpdater(object):
     """
 
     MAPPING_SONARQUBE_STATUS_TRANSITION = [
+        {
+            'from': ['OPEN', 'REOPENED'],
+            'to': 'REOPENED',
+            'transition': None
+        },
         {
             'from': ['OPEN', 'REOPENED'],
             'to': 'CONFIRMED',
@@ -46,9 +51,6 @@ class SonarQubeApiUpdater(object):
         },
     ]
 
-    def __init__(self):
-        self.client = SonarQubeAPI()
-
     @staticmethod
     def get_sonarqube_status_for(finding):
         target_status = None
@@ -67,6 +69,10 @@ class SonarQubeApiUpdater(object):
 
     def get_sonarqube_required_transitions_for(self, current_status, target_status):
 
+        # If current and target is the same... do nothing
+        if current_status == target_status:
+            return
+
         # Check if there is at least one transition from current_status...
         if not [x for x in self.MAPPING_SONARQUBE_STATUS_TRANSITION if current_status in x.get('from')]:
             return
@@ -77,7 +83,8 @@ class SonarQubeApiUpdater(object):
             for transition in transitions:
                 # There is a direct transition from current status...
                 if current_status in transition.get('from'):
-                    return [transition.get('transition')]
+                    t = transition.get('transition')
+                    return [t] if t else None
 
             # We have the last transition to get to our target status but there is no direct transition
             transitions_result = deque()
@@ -97,30 +104,35 @@ class SonarQubeApiUpdater(object):
         if not sonarqube_issue:
             return
 
-        logger.info("Updating finding '{}' in SonarQube".format(finding))
+        logger.debug("Checking if finding '{}' needs to be updated in SonarQube".format(finding))
+
+        product = finding.test.engagement.product
+        config = product.sonarqube_product_set.all().first()
+        client = SonarQubeAPI(
+            tool_config=config.sonarqube_tool_config if config else None
+        )
 
         target_status = self.get_sonarqube_status_for(finding)
 
-        issue = self.client.get_issue(sonarqube_issue.key)
+        issue = client.get_issue(sonarqube_issue.key)
         if issue.get('resolution'):
             current_status = '{} / {}'.format(issue.get('status'), issue.get('resolution'))
         else:
             current_status = issue.get('status')
 
-        if current_status != target_status:
-            transitions = self.get_sonarqube_required_transitions_for(current_status, target_status)
+        logger.debug("--> SQ Current status: {}. Current target status: {}".format(current_status, target_status))
 
-            if transitions:
-                for transition in transitions:
-                    self.client.transition_issue(sonarqube_issue.key, transition)
+        transitions = self.get_sonarqube_required_transitions_for(current_status, target_status)
+        if transitions:
+            logger.info("Updating finding '{}' in SonarQube".format(finding))
 
-                # Track Defect Dojo has updated the SonarQube issue
-                Sonarqube_Issue_Transition.objects.create(
-                    sonarqube_issue=finding.sonarqube_issue,
-                    finding_status=finding.status(),
-                    sonarqube_status=current_status,
-                    transitions=','.join(transitions),
-                )
+            for transition in transitions:
+                client.transition_issue(sonarqube_issue.key, transition)
 
-            else:
-                logger.warning('No available transition from {} to {}'.format(current_status, target_status))
+            # Track Defect Dojo has updated the SonarQube issue
+            Sonarqube_Issue_Transition.objects.create(
+                sonarqube_issue=finding.sonarqube_issue,
+                finding_status=finding.status(),
+                sonarqube_status=current_status,
+                transitions=','.join(transitions),
+            )
