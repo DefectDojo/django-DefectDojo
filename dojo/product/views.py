@@ -183,7 +183,7 @@ def view_product_metrics(request, pid):
     verified_findings = Finding.objects.filter(test__engagement__product=prod,
                                                date__range=[start_date, end_date],
                                                false_p=False,
-                                               verified=False,
+                                               verified=True,
                                                duplicate=False,
                                                out_of_scope=False).order_by("date")
 
@@ -199,7 +199,6 @@ def view_product_metrics(request, pid):
     open_findings = Finding.objects.filter(test__engagement__product=prod,
                                            date__range=[start_date, end_date],
                                            false_p=False,
-                                           verified=False,
                                            duplicate=False,
                                            out_of_scope=False,
                                            active=True,
