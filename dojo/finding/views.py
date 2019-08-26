@@ -128,7 +128,8 @@ def open_findings(request, pid=None, eid=None, view=None):
         jira_config = JIRA_PKey.objects.filter(product__engagement=eid).first()
     else:
         add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
-    # raise Exception('Stop')
+    if jira_config:
+        jira_config = jira_config.conf_id
     return render(
         request, 'dojo/findings_list.html', {
             'show_product_column': show_product_column,
