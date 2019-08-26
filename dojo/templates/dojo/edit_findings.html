@@ -54,7 +54,13 @@
                         <select class="form-control" name=duplicate_choice id="dupe_choice">
                             {% for dupe in dupes %}
                                 <option>{{ dupe.id }}: {{ dupe.title }},
-                                        {{ dupe.test.engagement.product.name }}/{{ dupe.test.engagement.name }}
+                                        {{ dupe.test.engagement.product.name }}/
+                                        {{ dupe.test.engagement.name }}/
+                                        {% if dupe.test.title %}
+                                            {{dupe.test.title}}
+                                        {% else %}
+                                            {{dupe.test.test_type}}
+                                        {% endif %}
                                 </option>
                             {% endfor %}
                         </select>
