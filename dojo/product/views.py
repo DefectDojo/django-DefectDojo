@@ -635,7 +635,7 @@ def new_eng_for_app(request, pid, cicd=False):
             new_eng.api_test = False
             new_eng.pen_test = False
             new_eng.check_list = False
-            new_eng.product = prod
+            new_eng.product_id = form.cleaned_data.get('product').id
             if new_eng.threat_model:
                 new_eng.progress = 'threat_model'
             else:
@@ -671,7 +671,7 @@ def new_eng_for_app(request, pid, cicd=False):
             else:
                 return HttpResponseRedirect(reverse('view_engagement', args=(new_eng.id,)))
     else:
-        form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(), 'target_end': timezone.now().date() + timedelta(days=7)}, cicd=cicd, product=prod.id)
+        form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(), 'target_end': timezone.now().date() + timedelta(days=7), 'product': prod.id}, cicd=cicd, product=prod.id)
         if(get_system_setting('enable_jira')):
             if JIRA_PKey.objects.filter(product=prod).count() != 0:
                 jform = JIRAFindingForm(prefix='jiraform', enabled=JIRA_PKey.objects.get(product=prod).push_all_issues)

@@ -589,6 +589,9 @@ class EngForm(forms.ModelForm):
                   "listings.")
     description = forms.CharField(widget=forms.Textarea(attrs={}),
                                   required=False, help_text="Description of the engagement and details regarding the engagement.")
+    product = forms.ModelChoiceField(label='Product',
+                                       queryset=Product.objects.all().order_by('name'),
+                                       required=True)
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False,
                            help_text="Add tags that help describe this engagement.  "
