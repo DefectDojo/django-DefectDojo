@@ -5,8 +5,9 @@ from lxml import etree
 import html2text
 
 from dojo.models import Finding
-from dojo.tools.sonarqube.api_client import SonarQubeAPI
+from dojo.tools.sonarqube_api.api_client import SonarQubeAPI
 from dojo.models import Sonarqube_Issue
+from dojo.utils import create_notification
 
 logger = logging.getLogger(__name__)
 
@@ -18,8 +19,7 @@ class SonarQubeApiImporter(object):
     """
 
     def __init__(self, test):
-        self.client = SonarQubeAPI()
-        self.items = self.import_issues(self.client, test)
+        self.items = self.import_issues(test)
 
     @staticmethod
     def is_confirmed(state):
@@ -40,35 +40,38 @@ class SonarQubeApiImporter(object):
             'rejected'
         ]
 
-    def import_issues(self, client, test):
+    def import_issues(self, test):
 
         items = list()
-        product_name = test.engagement.product.name
 
-        components = client.find_project(product_name)
-        logging.info('Found {} components for product {}'.format(len(components), product_name))
+        try:
+            product = test.engagement.product
+            config = product.sonarqube_product_set.all().first()
 
-        for component in components:
+            client = SonarQubeAPI(
+                tool_config=config.sonarqube_tool_config if config else None
+            )
+
+            if config and config.sonarqube_project_key:
+                component = client.get_project(config.sonarqube_project_key)
+            else:
+                component = client.find_project(product.name)
 
             issues = client.find_issues(component['key'])
             logging.info('Found {} issues for component {}'.format(len(issues), component["key"]))
 
-            security_issues = [i for i in issues if ('cwe' in i['tags'])]
-            logging.info('Found {} security issues for component {}'.format(len(security_issues), component["key"]))
-
-            for security_issue in security_issues:
-
-                status = security_issue['status']
-                from_hotspot = security_issue.get('fromHotspot', False)
+            for issue in issues:
+                status = issue['status']
+                from_hotspot = issue.get('fromHotspot', False)
 
                 if self.is_closed(status) or from_hotspot:
                     continue
 
-                type = security_issue['type']
-                title = security_issue['message']
-                component_key = security_issue['component']
-                line = security_issue['line']
-                rule_id = security_issue['rule']
+                type = issue['type']
+                title = issue['message']
+                component_key = issue['component']
+                line = issue.get('line')
+                rule_id = issue['rule']
                 rule = client.get_rule(rule_id)
                 severity = self.convert_sonar_severity(rule['severity'])
                 description = self.clean_rule_description_html(rule['htmlDesc'])
@@ -76,7 +79,7 @@ class SonarQubeApiImporter(object):
                 references = self.get_references(rule['htmlDesc'])
 
                 sonarqube_issue, _ = Sonarqube_Issue.objects.update_or_create(
-                    key=security_issue['key'],
+                    key=issue['key'],
                     defaults={
                         'status': status,
                         'type': type,
@@ -109,6 +112,16 @@ class SonarQubeApiImporter(object):
                     sonarqube_issue=sonarqube_issue,
                 )
                 items.append(find)
+
+        except Exception as e:
+            logger.exception(e)
+            create_notification(
+                event='other',
+                title='SonarQube API import issue',
+                description=e,
+                icon='exclamation-triangle',
+                source='SonarQube API'
+            )
 
         return items
 

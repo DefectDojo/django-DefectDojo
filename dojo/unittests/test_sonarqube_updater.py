@@ -1,6 +1,6 @@
 from django.test import TestCase
 from dojo.models import Tool_Configuration, Tool_Type
-from dojo.tools.sonarqube.updater import SonarQubeApiUpdater
+from dojo.tools.sonarqube_api.updater import SonarQubeApiUpdater
 
 
 class TestSonarQubeApiUpdater(TestCase):
@@ -75,4 +75,22 @@ class TestSonarQubeApiUpdater(TestCase):
         self.assertEquals(
             self.updater.get_sonarqube_required_transitions_for('CONFIRMED', 'RESOLVED / FIXED'),
             ['resolve']
+        )
+
+    def test_transitions_for_open_reopen_status_1(self):
+        self.assertEquals(
+            self.updater.get_sonarqube_required_transitions_for('OPEN', 'REOPENED'),
+            None
+        )
+
+    def test_transitions_for_open_reopen_status_2(self):
+        self.assertEquals(
+            self.updater.get_sonarqube_required_transitions_for('REOPENED', 'OPEN'),
+            None
+        )
+
+    def test_transitions_for_open_reopen_status_3(self):
+        self.assertEquals(
+            self.updater.get_sonarqube_required_transitions_for('REOPENED', 'REOPENED'),
+            None
         )

@@ -27,6 +27,7 @@ from dojo.forms import ProductForm, EngForm, TestForm, \
     JIRA_IssueForm, ToolConfigForm, ToolProductSettingsForm, \
     ToolTypeForm, LanguagesTypeForm, Languages_TypeTypeForm, App_AnalysisTypeForm, \
     Development_EnvironmentForm, Product_TypeForm, Test_TypeForm
+from dojo.tools import requires_file
 from dojo.tools.factory import import_parser_factory
 from datetime import datetime
 from .object.parser import import_object_eng
@@ -1294,7 +1295,7 @@ class ImportScanValidation(Validation):
         errors = {}
 
         # Make sure file is present
-        if 'file' not in bundle.data and bundle.data.get('scan_type') != 'SonarQube Scan':
+        if 'file' not in bundle.data and requires_file(bundle.data.get('scan_type')):
             errors.setdefault('file', []).append('You must pass a file in to be imported')
 
         # Make sure scan_date matches required format
@@ -1537,7 +1538,7 @@ class ReImportScanValidation(Validation):
         errors = {}
 
         # Make sure file is present if scanner requires a file
-        if 'file' not in bundle.data and bundle.data['scan_type'] != 'SonarType Scan':
+        if 'file' not in bundle.data and requires_file(bundle.data['scan_type']):
             errors.setdefault('file', []).append('You must pass a file in to be imported')
 
         # Make sure scan_date matches required format
