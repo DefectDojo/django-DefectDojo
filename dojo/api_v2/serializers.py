@@ -375,7 +375,19 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class FindingImageSerializer(serializers.ModelSerializer):
+    url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = FindingImage
+        fields = ["caption", "id", "url"]
+
+    def get_url(self, obj):
+        return obj.image.url
+
+
 class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
+    images = FindingImageSerializer(many=True, read_only=True)
     tags = TagListSerializerField(required=False)
 
     class Meta:
@@ -421,7 +433,7 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Finding
-        fields = '__all__'
+        exclude = ['images']
         extra_kwargs = {
             'reporter': {'default': serializers.CurrentUserDefault()},
         }
@@ -859,13 +871,6 @@ class NoteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Notes
-        fields = '__all__'
-
-
-class FindingImageSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = FindingImage
         fields = '__all__'
 
 

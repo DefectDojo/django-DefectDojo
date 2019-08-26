@@ -14,6 +14,7 @@ from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
+from django.utils.deconstruct import deconstructible
 from django.utils.timezone import now
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToCover
@@ -29,6 +30,32 @@ fmt = getattr(settings, 'LOG_FORMAT', None)
 lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
 
 logging.basicConfig(format=fmt, level=lvl)
+
+
+@deconstructible
+class UniqueUploadNameProvider:
+    """
+    A callable to be passed as upload_to parameter to FileField.
+
+    Uploaded files will get random names based on UUIDs inside the given directory;
+    strftime-style formatting is supported within the directory path. If keep_basename
+    is True, the original file name is prepended to the UUID. If keep_ext is disabled,
+    the filename extension will be dropped.
+    """
+
+    def __init__(self, directory=None, keep_basename=False, keep_ext=True):
+        self.directory = directory
+        self.keep_basename = keep_basename
+        self.keep_ext = keep_ext
+
+    def __call__(self, model_instance, filename):
+        base, ext = os.path.splitext(filename)
+        filename = "%s_%s" % (base, uuid4()) if self.keep_basename else str(uuid4())
+        if self.keep_ext:
+            filename += ext
+        if self.directory is None:
+            return filename
+        return os.path.join(now().strftime(self.directory), filename)
 
 
 class Regulation(models.Model):
@@ -1217,7 +1244,7 @@ class Finding(models.Model):
 
     line = models.IntegerField(null=True, blank=True,
                                verbose_name="Line number")
-    file_path = models.CharField(null=True, blank=True, max_length=1000)
+    file_path = models.CharField(null=True, blank=True, max_length=4000)
     found_by = models.ManyToManyField(Test_Type, editable=False)
     static_finding = models.BooleanField(default=False)
     dynamic_finding = models.BooleanField(default=True)
@@ -1722,7 +1749,8 @@ class Report(models.Model):
 
 
 class FindingImage(models.Model):
-    image = models.ImageField(upload_to='finding_images', null=True)
+    image = models.ImageField(upload_to=UniqueUploadNameProvider('finding_images'))
+    caption = models.CharField(max_length=500, blank=True)
     image_thumbnail = ImageSpecField(source='image',
                                      processors=[ResizeToCover(100, 100)],
                                      format='JPEG',
