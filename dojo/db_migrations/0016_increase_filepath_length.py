@@ -4,7 +4,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0014_jira_conf_resolution_mappings'),
+        ('dojo', '0015_findingimage_caption'),
     ]
 
     operations = [
