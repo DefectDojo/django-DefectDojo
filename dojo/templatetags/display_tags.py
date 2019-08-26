@@ -19,7 +19,6 @@ import datetime
 from ast import literal_eval
 from urllib.parse import urlparse
 import bleach
-from bleach_whitelist import markdown_tags, markdown_attrs
 import git
 
 register = template.Library()
