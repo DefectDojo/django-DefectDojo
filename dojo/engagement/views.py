@@ -110,6 +110,7 @@ def new_engagement(request):
             new_eng.api_test = False
             new_eng.pen_test = False
             new_eng.check_list = False
+            new_eng.product_id = form.cleaned_data.get('product').id
             new_eng.save()
             tags = request.POST.getlist('tags')
             t = ", ".join(tags)
@@ -127,7 +128,6 @@ def new_engagement(request):
                     reverse('view_engagement', args=(new_eng.id, )))
     else:
         form = EngForm(initial={'date': timezone.now().date()})
-
     add_breadcrumb(title="New Engagement", top_level=False, request=request)
     return render(request, 'dojo/new_eng.html', {
         'form': form,
@@ -162,6 +162,7 @@ def edit_engagement(request, eid):
                 temp_form.active = False
             elif(temp_form.active is False):
                 temp_form.active = True
+            temp_form.product_id = form.cleaned_data.get('product').id
             temp_form.save()
             tags = request.POST.getlist('tags')
             t = ", ".join(tags)
@@ -178,7 +179,7 @@ def edit_engagement(request, eid):
                 return HttpResponseRedirect(
                     reverse('view_engagement', args=(eng.id, )))
     else:
-        form = EngForm(instance=eng, cicd=ci_cd_form, product=eng.product.id)
+        form = EngForm(initial={'product': eng.product.id}, instance=eng, cicd=ci_cd_form, product=eng.product.id)
         try:
             # jissue = JIRA_Issue.objects.get(engagement=eng)
             enabled = True
