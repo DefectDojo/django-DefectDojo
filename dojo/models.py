@@ -1815,7 +1815,7 @@ class JIRA_Conf(models.Model):
 
 
 class JIRA_Issue(models.Model):
-    jira_id = models.CharField(max_length=200, unique=True)
+    jira_id = models.CharField(max_length=200)
     jira_key = models.CharField(max_length=200)
     finding = models.OneToOneField(Finding, null=True, blank=True, on_delete=models.CASCADE)
     engagement = models.OneToOneField(Engagement, null=True, blank=True, on_delete=models.CASCADE)
