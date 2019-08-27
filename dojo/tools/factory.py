@@ -1,4 +1,3 @@
-from dojo.tools import *
 from dojo.tools.burp.parser import BurpXmlParser
 from dojo.tools.nessus.parser import NessusCSVParser, NessusXMLParser
 from dojo.tools.nmap.parser import NmapXMLParser
@@ -63,6 +62,7 @@ from dojo.tools.jfrogxray.parser import XrayJSONParser
 from dojo.tools.sslyze.parser import SslyzeXmlParser
 from dojo.tools.testssl.parser import TestsslCSVParser
 from dojo.tools.hadolint.parser import HadolintParser
+from dojo.tools import SCAN_SONARQUBE_API
 
 __author__ = 'Jay Paz'
 
