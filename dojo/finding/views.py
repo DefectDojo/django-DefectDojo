@@ -561,6 +561,22 @@ def edit_finding(request, fid):
                 new_finding.false_p = False
                 new_finding.mitigated = None
                 new_finding.mitigated_by = None
+            if new_finding.duplicate:
+                new_finding.duplicate = True
+                new_finding.active = False
+                new_finding.verified = False
+                parent_find_string = request.POST.get('duplicate_choice', '')
+                if parent_find_string:
+                    parent_find = Finding.objects.get(id=int(parent_find_string.split(':')[0]))
+                    new_finding.duplicate_finding = parent_find
+                    parent_find.duplicate_list.add(new_finding)
+                    parent_find.found_by.add(new_finding.test.test_type)
+            if not new_finding.duplicate and new_finding.duplicate_finding:
+                parent_find = new_finding.duplicate_finding
+                if parent_find.found_by is not new_finding.found_by:
+                    parent_find.duplicate_list.remove(new_finding)
+                parent_find.found_by.remove(new_finding.test.test_type)
+                new_finding.duplicate_finding = None
 
             create_template = new_finding.is_template
             # always false now since this will be deprecated soon in favor of new Finding_Template model
@@ -649,12 +665,22 @@ def edit_finding(request, fid):
         form.fields['endpoints'].queryset = finding.endpoints.all()
     form.initial['tags'] = [tag.name for tag in finding.tags]
 
+    if finding.test.engagement.deduplication_on_engagement:
+        finding_dupes = Finding.objects.all().filter(
+            test__engagement=finding.test.engagement).filter(
+            title=finding.title).exclude(
+            id=finding.id)
+    else:
+        finding_dupes = Finding.objects.all().filter(
+            title=finding.title).exclude(
+            id=finding.id)
     product_tab = Product_Tab(finding.test.engagement.product.id, title="Edit Finding", tab="findings")
     return render(request, 'dojo/edit_findings.html', {
         'product_tab': product_tab,
         'form': form,
         'finding': finding,
-        'jform': jform
+        'jform': jform,
+        'dupes': finding_dupes,
     })
 
 
