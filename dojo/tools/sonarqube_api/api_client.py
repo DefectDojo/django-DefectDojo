@@ -7,6 +7,9 @@ from dojo.utils import prepare_for_view
 class SonarQubeAPI:
 
     def __init__(self, tool_config=None):
+
+        self.rules_cache = dict()
+
         tool_type, _ = Tool_Type.objects.get_or_create(name='SonarQube')
 
         if not tool_config:
@@ -85,13 +88,14 @@ class SonarQubeAPI:
                 project_key, response.status_code, response.content
             ))
 
-    def find_issues(self, component_key):
+    def find_issues(self, component_key, types='VULNERABILITY'):
         """
         Search for issues.
         At most one of the following parameters can be provided at the same time:
             componentKeys, componentUuids, components, componentRootUuids, componentRoots.
         Requires the 'Browse' permission on the specified project(s).
-        :param component_key:
+        :param component_key: component key
+        :param types: issue types (comma separated values). e.g. BUG,VULNERABILITY,CODE_SMELL
         :return:
         """
         page = 1
@@ -101,7 +105,7 @@ class SonarQubeAPI:
         while page <= max_page:
             request_filter = {
                 'componentKeys': component_key,
-                'types': 'BUG,VULNERABILITY,CODE_SMELL',
+                'types': types,
                 'p': page
             }
             response = self.session.get(
@@ -166,17 +170,20 @@ class SonarQubeAPI:
         :param rule_id:
         :return:
         """
-
-        response = self.session.get(
-            url='{}/rules/show'.format(self.sonar_api_url),
-            params={'key': rule_id},
-        )
-        if response.ok:
-            return response.json()['rule']
-        else:
-            raise Exception("Unable to get the rule {} due to {} - {}".format(
-                rule_id, response.status_code, response.content
-            ))
+        rule = self.rules_cache.get(rule_id)
+        if not rule:
+            response = self.session.get(
+                url='{}/rules/show'.format(self.sonar_api_url),
+                params={'key': rule_id},
+            )
+            if response.ok:
+                rule = response.json()['rule']
+                self.rules_cache.update({rule_id: rule})
+            else:
+                raise Exception("Unable to get the rule {} due to {} - {}".format(
+                    rule_id, response.status_code, response.content
+                ))
+        return rule
 
     def transition_issue(self, issue_key, transition):
         """
