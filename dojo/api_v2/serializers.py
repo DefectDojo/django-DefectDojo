@@ -14,6 +14,7 @@ from django.conf import settings
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+import base64
 import datetime
 import six
 from django.utils.translation import ugettext_lazy as _
@@ -375,14 +376,14 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
 
 
 class FindingImageSerializer(serializers.ModelSerializer):
-    url = serializers.SerializerMethodField()
+    base64 = serializers.SerializerMethodField()
 
     class Meta:
         model = FindingImage
-        fields = ["caption", "id", "url"]
+        fields = ["base64", "caption", "id"]
 
-    def get_url(self, obj):
-        return obj.image.url
+    def get_base64(self, obj):
+        return base64.b64encode(obj.image.read())
 
 
 class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
