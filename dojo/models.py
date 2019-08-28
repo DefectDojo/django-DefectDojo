@@ -1146,9 +1146,12 @@ class VA(models.Model):
 
 
 class Sonarqube_Issue(models.Model):
-    key = models.CharField(max_length=30, primary_key=True, help_text="SonarQube issue key")
+    key = models.CharField(max_length=30, unique=True, help_text="SonarQube issue key")
     status = models.CharField(max_length=20, help_text="SonarQube issue status")
     type = models.CharField(max_length=15, help_text="SonarQube issue type")
+
+    def __str__(self):
+        return self.key
 
 
 class Sonarqube_Issue_Transition(models.Model):
@@ -1252,7 +1255,7 @@ class Finding(models.Model):
     jira_creation = models.DateTimeField(editable=True, null=True)
     jira_change = models.DateTimeField(editable=True, null=True)
     scanner_confidence = models.IntegerField(null=True, blank=True, default=None, editable=False, help_text="Confidence level of vulnerability which is supplied by the scannner.")
-    sonarqube_issue = models.OneToOneField(Sonarqube_Issue, null=True, blank=True, help_text="SonarQube issue", on_delete=models.CASCADE)
+    sonarqube_issue = models.ForeignKey(Sonarqube_Issue, null=True, blank=True, help_text="SonarQube issue", on_delete=models.CASCADE)
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
