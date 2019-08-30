@@ -13,7 +13,7 @@ from django_filters.filters import ChoiceFilter, _truncate, DateTimeFilter
 from pytz import timezone
 
 from dojo.models import Dojo_User, Product_Type, Finding, Product, Test_Type, \
-    Endpoint, Development_Environment, Finding_Template, Report
+    Endpoint, Development_Environment, Finding_Template, Report, Note_Type
 from dojo.utils import get_system_setting
 
 local_tz = timezone(get_system_setting('time_zone'))
@@ -994,3 +994,22 @@ class DevelopmentEnvironmentFilter(DojoFilter):
         model = Development_Environment
         exclude = []
         include = ('name',)
+
+
+class NoteTypesFilter(DojoFilter):
+    name = CharFilter(lookup_expr='icontains')
+
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('name', 'name'),
+            ('description', 'description'),
+            ('is_single', 'is_single'),
+            ('is_mandatory', 'is_mandatory'),
+        ),
+    )
+
+    class Meta:
+        model = Note_Type
+        exclude = []
+        include = ('name', 'is_single', 'description')

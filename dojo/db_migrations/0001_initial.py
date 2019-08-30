@@ -489,6 +489,17 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
+            name='Note_Type',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(max_length=100, unique=True)),
+                ('description', models.CharField(max_length=200)),
+                ('is_single', models.BooleanField(default=False)),
+                ('is_active', models.BooleanField(default=True)),
+                ('is_mandatory', models.BooleanField(default=True)),
+            ],
+        ),
+        migrations.CreateModel(
             name='Notifications',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
@@ -1002,6 +1013,11 @@ class Migration(migrations.Migration):
             model_name='notes',
             name='author',
             field=models.ForeignKey(editable=False, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+        ),
+        migrations.AddField(
+            model_name='notes',
+            name='note_type',
+            field=models.ForeignKey(blank=True, null=True, related_name='note_type', on_delete=django.db.models.deletion.CASCADE, to='dojo.Note_Type'),
         ),
         migrations.AddField(
             model_name='languages',
