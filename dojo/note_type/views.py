@@ -3,7 +3,7 @@ import logging
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render, get_object_or_404
 from django.contrib import messages
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import HttpResponseRedirect
 
 from dojo.forms import NoteTypeForm, EditNoteTypeForm, DisableOrEnableNoteTypeForm
