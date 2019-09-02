@@ -18,7 +18,10 @@
                     </div>
                 </div>
                 <div class="panel-body">
-                    {{ entry.data }}
+                  {% if note.note_type != None %}
+                    <strong>Note type : {{ note.note_type }}</strong><br>
+                  {% endif %}
+                  {{ entry.data }}
                 </div>
                 </div>
             </div>

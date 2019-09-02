@@ -358,7 +358,7 @@ def close_finding(request, fid):
                 'Note Saved.',
                 extra_tags='alert-success')
 
-            if len(note_types) == 0:
+            if len(missing_note_types) == 0:
                 finding.active = False
                 now = timezone.now()
                 finding.mitigated = now
@@ -395,7 +395,7 @@ def close_finding(request, fid):
         'active_tab': 'findings',
         'user': request.user,
         'form': form,
-        'note_types': note_types
+        'note_types': missing_note_types
     })
 
 
