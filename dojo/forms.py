@@ -1310,7 +1310,7 @@ class CloseFindingForm(forms.ModelForm):
         error_messages={'required': ('The reason for closing a finding is '
                                      'required, please use the text area '
                                      'below to provide documentation.')})
-                                     
+
     def __init__(self, *args, **kwargs):
         queryset = kwargs.pop('missing_note_types')
         super(CloseFindingForm, self).__init__(*args, **kwargs)

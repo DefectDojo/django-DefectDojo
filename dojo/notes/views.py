@@ -85,13 +85,13 @@ def edit_issue(request, id, page, objid):
             note.edit_time = timezone.now()
             if page == "finding" and note_type_activation:
                 history = NoteHistory(note_type=note.note_type,
-                                        data=note.entry,
-                                        time=note.edit_time,
-                                        current_editor=note.editor)
+                                      data=note.entry,
+                                      time=note.edit_time,
+                                      current_editor=note.editor)
             else:
                 history = NoteHistory(data=note.entry,
-                                        time=note.edit_time,
-                                        current_editor=note.editor)
+                                      time=note.edit_time,
+                                      current_editor=note.editor)
             history.save()
             note.history.add(history)
             note.save()
@@ -151,6 +151,7 @@ def note_history(request, id, page, objid):
             'page': page,
             'objid': objid,
         })
+
 
 def find_available_notetypes(finding, editing_note):
     notes = finding.notes.all()
