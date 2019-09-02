@@ -293,6 +293,9 @@ class Note_Type(models.Model):
     def __unicode__(self):
         return self.name
 
+    def __str__(self):
+        return self.name
+
 
 class Product_Type(models.Model):
     name = models.CharField(max_length=255, unique=True)
@@ -1035,6 +1038,7 @@ class Endpoint(models.Model):
 
 
 class NoteHistory(models.Model):
+    note_type = models.ForeignKey(Note_Type, null=True, blank=True, on_delete=models.CASCADE)
     data = models.TextField()
     time = models.DateTimeField(null=True, editable=False,
                                 default=get_current_datetime)
