@@ -264,8 +264,8 @@ def view_finding(request, fid):
             new_note.date = timezone.now()
             new_note.save()
             history = NoteHistory(data=new_note.entry,
-                                    time=new_note.date,
-                                    current_editor=new_note.author)
+                                  time=new_note.date,
+                                  current_editor=new_note.author)
             history.save()
             new_note.history.add(history)
             finding.notes.add(new_note)
@@ -586,9 +586,9 @@ def edit_finding(request, fid):
                     closing_disabled = len(get_missing_mandatory_notetypes(finding))
                 if closing_disabled != 0:
                     error_inactive = ValidationError('Can not set a finding as inactive without adding all mandatory notes',
-                                            code='inactive_without_mandatory_notes')
+                                                     code='inactive_without_mandatory_notes')
                     error_false_p = ValidationError('Can not set a finding as false positive without adding all mandatory notes',
-                                            code='false_p_without_mandatory_notes')
+                                                    code='false_p_without_mandatory_notes')
                     if form['active'].value() is False:
                         form.add_error('active', error_inactive)
                     if form['false_p'].value():
@@ -1649,6 +1649,7 @@ def finding_bulk_update_all(request, pid=None):
                                      extra_tags='alert-danger')
 
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
 
 def find_available_notetypes(notes):
     single_note_types = Note_Type.objects.filter(is_single=True, is_active=True).values_list('id', flat=True)
