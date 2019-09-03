@@ -119,4 +119,9 @@ def add_note_type(request):
                                  extra_tags='alert-success')
             return HttpResponseRedirect(reverse('note_type'))
     add_breadcrumb(title="Add Note Type", top_level=False, request=request)
-    return render(request, 'dojo/add_note_type.html', {'form': form})
+    return render(request, 'dojo/add_note_type.html', {
+        'name': 'Add Note Type',
+        'metric': False,
+        'user': request.user,
+        'form': form,
+    })
