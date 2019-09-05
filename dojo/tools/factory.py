@@ -92,6 +92,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = VeracodeXMLParser(file, test)
     elif scan_type == "Checkmarx Scan":
         parser = CheckmarxXMLParser(file, test)
+    elif scan_type == "Checkmarx Scan detailed":
+        parser = CheckmarxXMLParser(file, test, 'detailed')
     elif scan_type == "Contrast Scan":
         parser = ContrastCSVParser(file, test)
     elif scan_type == "Crashtest Security Scan":

@@ -540,6 +540,30 @@ CELERY_BEAT_SCHEDULE = {
     }
 }
 
+
+# ------------------------------------
+# Deduplication configuration
+# ------------------------------------
+# List of algorithms
+# legacy one with multiple conditions (default mode)
+DEDUPE_ALGO_LEGACY = 'legacy'
+# based on dojo_finding.unique_id_from_tool only (for checkmarx non aggregated, or sonarQube for example)
+DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL = 'unique_id_from_tool'
+# based on dojo_finding.hash_code only
+DEDUPE_ALGO_HASH_CODE = 'hash_code'
+# unique_id_from_tool or hash_code
+# Makes it possible to deduplicate on a technical id (same parser) and also on some functional fields (cross-parsers deduplication)
+DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE = 'unique_id_from_tool_or_hash_code'
+
+# Choice of deduplication algorithm per parser
+# Key = the scan_type from factory.py (= the test_type)
+# Default is DEDUPE_ALGO_LEGACY
+DEDUPLICATION_ALGORITHM_PER_PARSER = {
+    'Checkmarx Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'SonarQube Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL
+}
+
+
 # ------------------------------------------------------------------------------
 # LOGGING
 # ------------------------------------------------------------------------------
