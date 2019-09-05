@@ -289,6 +289,62 @@
         </div>
     </div>
     {% if finding.static_finding or finding.line > 0 %}
+        {% if finding.sast_source_object or finding.sast_sink_object or finding.sast_source_file_path or finding.sast_source_line > 0 %}
+        {# For tools that give information on both source (start) and sink (end) of the attack vector #}
+        
+        <div class="panel panel-default">
+            <table id="sast_source" class="table-striped table table-condensed table-hover centered">
+                <tr>
+                    <th>Source Filepath</th>
+                    <th>Source Line Number</th>
+                    <th>Source Object</th>
+                </tr>
+                <tr>
+                    <td>
+                        <span>
+                           {{ finding.sast_source_file_path }}
+                        </span>
+                    </td>
+                    <td>
+                        <span>
+                           {{ finding.sast_source_line }}
+                        </span>
+                    </td>
+                    <td>
+                        <span>
+                           {{ finding.sast_source_object }}
+                        </span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="panel panel-default">
+            <table id="sast_sink" class="table-striped table table-condensed table-hover centered">
+                <tr>
+                    <th>Sink Filepath</th>
+                    <th>Sink Line Number</th>
+                    <th>Sink Object</th>
+                </tr>
+                <tr>
+                    <td>
+                        <span>
+                           {{ finding.file_path }}
+                        </span>
+                    </td>
+                    <td>
+                        <span>
+                           {{ finding.line }}
+                        </span>
+                    </td>
+                    <td>
+                        <span>
+                           {{ finding.sast_sink_object }}
+                        </span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        {% else %}
         <div class="panel panel-default">
             <table id="error_notes" class="table-striped table table-condensed table-hover centered">
                 <tr>
@@ -309,6 +365,7 @@
                 </tr>
             </table>
         </div>
+        {% endif %}
     {% endif %}
     {% if finding.param or finding.payload %}
         <div class="panel panel-default">

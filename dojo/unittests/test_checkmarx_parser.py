@@ -6,27 +6,62 @@ import datetime
 
 
 class TestCheckmarxParser(TestCase):
+    #maxDiff = None
 
-    def test_parse_file_with_no_vulnerabilities_has_no_findings(self):
-        my_file_handle = open("dojo/unittests/scans/checkmarx/no_finding.xml")
+    def init(self, reportFilename):
+        my_file_handle = open(reportFilename)
         product = Product()
         engagement = Engagement()
         test = Test()
         engagement.product = product
         test.engagement = engagement
-        self.parser = CheckmarxXMLParser(my_file_handle, test)
-        my_file_handle.close()
-        self.assertEqual(0, len(self.parser.items))
+        return my_file_handle, product, engagement, test
 
-    def test_parse_file_with_single_vulnerability_has_single_finding(self):
-        my_file_handle = open("dojo/unittests/scans/checkmarx/single_finding.xml")
-        product = Product()
-        engagement = Engagement()
-        test = Test()
-        engagement.product = product
-        test.engagement = engagement
-        self.parser = CheckmarxXMLParser(my_file_handle, test)
+    def teardown(self, my_file_handle):
         my_file_handle.close()
+
+    # Checkmarx aggregated by sink file_path / sink line_number
+    def test_aggregated_parse_file_with_no_vulnerabilities_has_no_findings(self):
+        my_file_handle, product, engagement, test = self.init('dojo/unittests/scans/checkmarx/no_finding.xml')
+        self.parser = CheckmarxXMLParser(my_file_handle, test, 'aggregated')
+        self.teardown(my_file_handle)
+        self.check_parse_file_with_no_vulnerabilities_has_no_findings(self.parser)
+
+    # Default checkmarx parser with all vulnerabilities from checkmarx
+    def test_non_aggregated_parse_file_with_no_vulnerabilities_has_no_findings(self):
+        my_file_handle, product, engagement, test = self.init("dojo/unittests/scans/checkmarx/no_finding.xml")
+        self.parser = CheckmarxXMLParser(my_file_handle, test)
+        self.teardown(my_file_handle)
+        self.check_parse_file_with_no_vulnerabilities_has_no_findings(self.parser)
+
+    def check_parse_file_with_no_vulnerabilities_has_no_findings(self, parser):
+        self.assertEqual(0, len(parser.items))
+
+    def test_aggregated_parse_file_with_single_vulnerability_has_single_finding(self):
+        my_file_handle, product, engagement, test = self.init("dojo/unittests/scans/checkmarx/single_finding.xml")
+        self.parser = CheckmarxXMLParser(my_file_handle, test, 'aggregated')
+        self.teardown(my_file_handle)
+        self.check_parse_file_with_single_vulnerability_has_single_finding(self.parser)
+
+    def test_non_aggregated_parse_file_with_single_vulnerability_has_single_finding(self):
+        my_file_handle, product, engagement, test = self.init("dojo/unittests/scans/checkmarx/single_finding.xml")
+        self.parser = CheckmarxXMLParser(my_file_handle, test)
+        self.teardown(my_file_handle)
+        self.check_parse_file_with_single_vulnerability_has_single_finding(self.parser)
+        # Specific field for non aggregated scanner
+        item = self.parser.items[0]
+        self.assertEqual(str, type(item.unique_id_from_tool))
+        self.assertEqual("28", item.unique_id_from_tool)
+        self.assertEqual(str, type(item.sast_source_object))
+        self.assertEqual("executeQuery", item.sast_source_object)
+        self.assertEqual(str, type(item.sast_sink_object))
+        self.assertEqual("allUsersMap", item.sast_sink_object)
+        self.assertEqual(str, type(item.sast_source_line))
+        self.assertEqual("39", item.sast_source_line)
+        self.assertEqual(str, type(item.sast_source_file_path))
+        self.assertEqual("WebGoat/webgoat-lessons/missing-function-ac/src/main/java/org/owasp/webgoat/plugin/Users.java", item.sast_source_file_path)
+
+    def check_parse_file_with_single_vulnerability_has_single_finding(self, parser):
         self.assertEqual(1, len(self.parser.items))
         # check content
         item = self.parser.items[0]
@@ -45,6 +80,7 @@ class TestCheckmarxParser(TestCase):
             "**Status:** New\n"
             "**Finding Link:** [https://checkmarxserver.com/CxWebClient/ViewerMain.aspx?scanid=1000227&projectid=121&pathid=28](https://checkmarxserver.com/CxWebClient/ViewerMain.aspx?scanid=1000227&projectid=121&pathid=28)\n"
             "\n"
+            "-----\n"
             "**Line Number:** 39\n"
             "**Column:** 59\n"
             "**Source Object:** executeQuery\n"
@@ -126,27 +162,32 @@ class TestCheckmarxParser(TestCase):
         self.assertEqual(bool, type(item.static_finding))
         self.assertEqual(True, item.static_finding)
 
-    def test_parse_file_with_multiple_vulnerabilities_has_multiple_findings(self):
-        my_file_handle = open("dojo/unittests/scans/checkmarx/multiple_findings.xml")
-        product = Product()
-        engagement = Engagement()
-        test = Test()
-        engagement.product = product
-        test.engagement = engagement
-        self.parser = CheckmarxXMLParser(my_file_handle, test)
-        my_file_handle.close()
+    def test_aggregated_parse_file_with_multiple_vulnerabilities_has_multiple_findings(self):
+        my_file_handle, product, engagement, test = self.init("dojo/unittests/scans/checkmarx/multiple_findings.xml")
+        self.parser = CheckmarxXMLParser(my_file_handle, test, 'aggregated')
+        self.teardown(my_file_handle)
         # checkmarx says 3 but we're down to 2 due to the aggregation on sink filename rather than source filename + source line number + sink filename + sink line number
         self.assertEqual(2, len(self.parser.items))
 
-    def test_parse_file_with_utf8_replacement_char(self):
-        my_file_handle = open("dojo/unittests/scans/checkmarx/utf8_replacement_char.xml")
-        product = Product()
-        engagement = Engagement()
-        test = Test()
-        engagement.product = product
-        test.engagement = engagement
+    def test_non_aggregated_parse_file_with_multiple_vulnerabilities_has_multiple_findings(self):
+        my_file_handle, product, engagement, test = self.init("dojo/unittests/scans/checkmarx/multiple_findings.xml")
         self.parser = CheckmarxXMLParser(my_file_handle, test)
-        my_file_handle.close()
+        self.teardown(my_file_handle)
+        self.assertEqual(3, len(self.parser.items))
+
+    def test_aggregated_parse_file_with_utf8_replacement_char(self):
+        my_file_handle, product, engagement, test = self.init("dojo/unittests/scans/checkmarx/utf8_replacement_char.xml")
+        self.parser = CheckmarxXMLParser(my_file_handle, test, 'aggregated')
+        self.teardown(my_file_handle)
+        self.check_parse_file_with_utf8_replacement_char(self.parser)
+
+    def test_non_aggregated_parse_file_with_utf8_replacement_char(self):
+        my_file_handle, product, engagement, test = self.init("dojo/unittests/scans/checkmarx/utf8_replacement_char.xml")
+        self.parser = CheckmarxXMLParser(my_file_handle, test)
+        self.teardown(my_file_handle)
+        self.check_parse_file_with_utf8_replacement_char(self.parser)
+
+    def check_parse_file_with_utf8_replacement_char(self, parser):
         self.assertEqual(1, len(self.parser.items))
         # check content
         item = self.parser.items[0]
@@ -165,6 +206,7 @@ class TestCheckmarxParser(TestCase):
             "**Status:** New\n"
             "**Finding Link:** [https://checkmarxserver.com/CxWebClient/ViewerMain.aspx?scanid=1000227&projectid=121&pathid=28](https://checkmarxserver.com/CxWebClient/ViewerMain.aspx?scanid=1000227&projectid=121&pathid=28)\n"
             "\n"
+            "-----\n"
             "**Line Number:** 39\n"
             "**Column:** 59\n"
             "**Source Object:** executeQuery\n"
@@ -246,15 +288,19 @@ class TestCheckmarxParser(TestCase):
         self.assertEqual(bool, type(item.static_finding))
         self.assertEqual(True, item.static_finding)
 
-    def test_parse_file_with_utf8_various_non_ascii_char(self):
-        my_file_handle = open("dojo/unittests/scans/checkmarx/utf8_various_non_ascii_char.xml")
-        product = Product()
-        engagement = Engagement()
-        test = Test()
-        engagement.product = product
-        test.engagement = engagement
+    def test_aggregated_parse_file_with_utf8_various_non_ascii_char(self):
+        my_file_handle, product, engagement, test = self.init("dojo/unittests/scans/checkmarx/utf8_various_non_ascii_char.xml")
+        self.parser = CheckmarxXMLParser(my_file_handle, test, 'aggregated')
+        self.teardown(my_file_handle)
+        self.check_parse_file_with_utf8_various_non_ascii_char(self.parser)
+
+    def test_non_aggregated_parse_file_with_utf8_various_non_ascii_char(self):
+        my_file_handle, product, engagement, test = self.init("dojo/unittests/scans/checkmarx/utf8_various_non_ascii_char.xml")
         self.parser = CheckmarxXMLParser(my_file_handle, test)
-        my_file_handle.close()
+        self.teardown(my_file_handle)
+        self.check_parse_file_with_utf8_various_non_ascii_char(self.parser)
+
+    def check_parse_file_with_utf8_various_non_ascii_char(self, parser):
         self.assertEqual(1, len(self.parser.items))
         # check content
         item = self.parser.items[0]
@@ -273,6 +319,7 @@ class TestCheckmarxParser(TestCase):
             "**Status:** New\n"
             "**Finding Link:** [https://checkmarxserver.com/CxWebClient/ViewerMain.aspx?scanid=1000227&projectid=121&pathid=28](https://checkmarxserver.com/CxWebClient/ViewerMain.aspx?scanid=1000227&projectid=121&pathid=28)\n"
             "\n"
+            "-----\n"
             "**Line Number:** 39\n"
             "**Column:** 59\n"
             "**Source Object:** executeQuery\n"

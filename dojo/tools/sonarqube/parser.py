@@ -44,6 +44,7 @@ class SonarQubeHtmlParser(object):
                 vuln_line = vuln_properties[3].text
                 vuln_title = vuln_properties[4].text
                 vuln_mitigation = vuln_properties[5].text
+                vuln_key = vuln_properties[6].text
                 if vuln_title is None or vuln_mitigation is None:
                     raise Exception("Parser ValueError: can't find a title or a mitigation for vulnerability of name " + vuln_rule_name)
                 try:
@@ -73,7 +74,8 @@ class SonarQubeHtmlParser(object):
                                impact="No impact provided",
                                numerical_severity=Finding.get_numerical_severity(vuln_severity),
                                static_finding=True,
-                               dynamic_finding=False)
+                               dynamic_finding=False,
+                               unique_id_from_tool=vuln_key)
                 items.append(find)
         return items
 

@@ -1202,15 +1202,20 @@ class Finding(models.Model):
 
     line_number = models.CharField(null=True, blank=True, max_length=200,
                                    editable=False)  # Deprecated will be removed, use line
-    sourcefilepath = models.TextField(null=True, blank=True, editable=False)
+    sourcefilepath = models.TextField(null=True, blank=True, editable=False)  # Not used? to remove
     sourcefile = models.TextField(null=True, blank=True, editable=False)
     param = models.TextField(null=True, blank=True, editable=False)
     payload = models.TextField(null=True, blank=True, editable=False)
     hash_code = models.TextField(null=True, blank=True, editable=False)
 
     line = models.IntegerField(null=True, blank=True,
-                               verbose_name="Line number")
-    file_path = models.CharField(null=True, blank=True, max_length=4000)
+                               verbose_name="Line number",
+                               help_text="Line number. For SAST, when source (start of the attack vector) and sink (end of the attack vector) information are available, put sink information here")
+    file_path = models.CharField(
+        null=True,
+        blank=True,
+        max_length=4000,
+        help_text="File name with path. For SAST, when source (start of the attack vector) and sink (end of the attack vector) information are available, put sink information here")
     found_by = models.ManyToManyField(Test_Type, editable=False)
     static_finding = models.BooleanField(default=False)
     dynamic_finding = models.BooleanField(default=True)
@@ -1218,6 +1223,13 @@ class Finding(models.Model):
     jira_creation = models.DateTimeField(editable=True, null=True)
     jira_change = models.DateTimeField(editable=True, null=True)
     scanner_confidence = models.IntegerField(null=True, blank=True, default=None, editable=False, help_text="Confidence level of vulnerability which is supplied by the scannner.")
+    unique_id_from_tool = models.CharField(null=True, blank=True, max_length=500, help_text="Vulnerability technical id from the source tool. Allows to track unique vulnerabilities")
+    sast_source_object = models.CharField(null=True, blank=True, max_length=500, help_text="Source object (variable, function...) of the attack vector")
+    sast_sink_object = models.CharField(null=True, blank=True, max_length=500, help_text="Sink object (variable, function...) of the attack vector")
+    sast_source_line = models.IntegerField(null=True, blank=True,
+                               verbose_name="Line number",
+                               help_text="Source line number of the attack vector")
+    sast_source_file_path = models.CharField(null=True, blank=True, max_length=4000, help_text="Source filepath of the attack vector")
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
