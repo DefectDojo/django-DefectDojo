@@ -200,7 +200,3 @@ class CheckmarxXMLParser(object):
 
         findingdetail = '{}-----\n'.format(findingdetail)
         return findingdetail
-
-#        def setTitle(self, title, pathnode):
-#            if title and pathnode.find('FileName').text:
-#                return "{} ({})".format(title, ntpath.basename(pathnode.find('FileName').text))
