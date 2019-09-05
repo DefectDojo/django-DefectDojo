@@ -17,9 +17,9 @@
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
               {% if note_types|length == 0 %}
-                <input class="btn btn-primary" name='submit' type="submit" value="Close Finding"/>
+                <input class="btn btn-primary" name='submit' type="submit" value="Close Finding" aria-label="Close Finding"/>
               {% elif note_types|length > 0 %}
-                <input class="btn btn-primary" name='submit' type="submit" value="Add Note"/>
+                <input class="btn btn-primary" name='submit' type="submit" value="Add Note" aria-label="Add Note"/>
               {% endif %}
             </div>
         </div>
