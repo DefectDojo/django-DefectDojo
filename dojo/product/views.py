@@ -199,7 +199,6 @@ def view_product_metrics(request, pid):
     open_findings = Finding.objects.filter(test__engagement__product=prod,
                                            date__range=[start_date, end_date],
                                            false_p=False,
-                                           verified=True,
                                            duplicate=False,
                                            out_of_scope=False,
                                            active=True,
@@ -208,7 +207,7 @@ def view_product_metrics(request, pid):
     closed_findings = Finding.objects.filter(test__engagement__product=prod,
                                              date__range=[start_date, end_date],
                                              false_p=False,
-                                             verified=True,
+                                             verified=False,
                                              duplicate=False,
                                              out_of_scope=False,
                                              mitigated__isnull=False)
@@ -216,7 +215,7 @@ def view_product_metrics(request, pid):
     open_vulnerabilities = Finding.objects.filter(
         test__engagement__product=prod,
         false_p=False,
-        verified=True,
+        verified=False,
         duplicate=False,
         out_of_scope=False,
         active=True,
@@ -253,7 +252,7 @@ def view_product_metrics(request, pid):
     high_weekly = OrderedDict()
     medium_weekly = OrderedDict()
 
-    for v in verified_findings:
+    for v in open_findings:
         iso_cal = v.date.isocalendar()
         x = iso_to_gregorian(iso_cal[0], iso_cal[1], 1)
         y = x.strftime("<span class='small'>%m/%d<br/>%Y</span>")
@@ -271,7 +270,6 @@ def view_product_metrics(request, pid):
             else:
                 open_close_weekly[x]['open'] += 1
         else:
-
             if v.mitigated:
                 open_close_weekly[x] = {'closed': 1, 'open': 0, 'accepted': 0}
             else:
