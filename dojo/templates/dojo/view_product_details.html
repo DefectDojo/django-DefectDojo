@@ -283,15 +283,15 @@
         <tbody>
           <tr>
             <td style="width: 150px;"><strong>Team Manager</strong></td>
-            <td>{% if prod.manager != "0" %}{{ prod.manager | default:"Unknown" }}{% endif %}</td>
+            <td>{% if prod.team_manager != "0" %}{{ prod.team_manager | default:"Unknown" }}{% endif %}</td>
           </tr>
           <tr>
             <td><strong>Product Manager</strong></td>
-            <td>{% if prod.prod_manager != "0" %}{{ prod.prod_manager | default:"Unknown" }}{% endif %}</td>
+            <td>{% if prod.product_manager != "0" %}{{ prod.product_manager | default:"Unknown" }}{% endif %}</td>
           </tr>
           <tr>
             <td><strong>Technical Contact</strong></td>
-            <td>{% if prod.tech_contact != "0" %}{{ prod.tech_contact | default:"Unknown" }}{% endif %}</td>
+            <td>{% if prod.technical_contact != "0" %}{{ prod.technical_contact | default:"Unknown" }}{% endif %}</td>
           </tr>
           <tr>
             <td><strong>Authorized Users</strong></td>
