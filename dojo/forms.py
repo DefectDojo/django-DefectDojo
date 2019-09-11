@@ -1079,7 +1079,7 @@ class EditEndpointForm(forms.ModelForm):
         query = cleaned_data['query']
         fragment = cleaned_data['fragment']
 
-        if protocol:
+        if protocol and path:
             endpoint = urlunsplit((protocol, host, path, query, fragment))
         else:
             endpoint = host
