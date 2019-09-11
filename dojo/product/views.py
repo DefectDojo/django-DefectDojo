@@ -199,7 +199,6 @@ def view_product_metrics(request, pid):
     open_findings = Finding.objects.filter(test__engagement__product=prod,
                                            date__range=[start_date, end_date],
                                            false_p=False,
-                                           verified=True,
                                            duplicate=False,
                                            out_of_scope=False,
                                            active=True,
@@ -208,7 +207,7 @@ def view_product_metrics(request, pid):
     closed_findings = Finding.objects.filter(test__engagement__product=prod,
                                              date__range=[start_date, end_date],
                                              false_p=False,
-                                             verified=True,
+                                             verified=False,
                                              duplicate=False,
                                              out_of_scope=False,
                                              mitigated__isnull=False)
@@ -216,7 +215,7 @@ def view_product_metrics(request, pid):
     open_vulnerabilities = Finding.objects.filter(
         test__engagement__product=prod,
         false_p=False,
-        verified=True,
+        verified=False,
         duplicate=False,
         out_of_scope=False,
         active=True,
@@ -253,7 +252,7 @@ def view_product_metrics(request, pid):
     high_weekly = OrderedDict()
     medium_weekly = OrderedDict()
 
-    for v in verified_findings:
+    for v in open_findings:
         iso_cal = v.date.isocalendar()
         x = iso_to_gregorian(iso_cal[0], iso_cal[1], 1)
         y = x.strftime("<span class='small'>%m/%d<br/>%Y</span>")
@@ -271,7 +270,6 @@ def view_product_metrics(request, pid):
             else:
                 open_close_weekly[x]['open'] += 1
         else:
-
             if v.mitigated:
                 open_close_weekly[x] = {'closed': 1, 'open': 0, 'accepted': 0}
             else:
@@ -635,7 +633,7 @@ def new_eng_for_app(request, pid, cicd=False):
             new_eng.api_test = False
             new_eng.pen_test = False
             new_eng.check_list = False
-            new_eng.product = prod
+            new_eng.product_id = form.cleaned_data.get('product').id
             if new_eng.threat_model:
                 new_eng.progress = 'threat_model'
             else:
@@ -671,7 +669,7 @@ def new_eng_for_app(request, pid, cicd=False):
             else:
                 return HttpResponseRedirect(reverse('view_engagement', args=(new_eng.id,)))
     else:
-        form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(), 'target_end': timezone.now().date() + timedelta(days=7)}, cicd=cicd, product=prod.id)
+        form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(), 'target_end': timezone.now().date() + timedelta(days=7), 'product': prod.id}, cicd=cicd, product=prod.id)
         if(get_system_setting('enable_jira')):
             if JIRA_PKey.objects.filter(product=prod).count() != 0:
                 jform = JIRAFindingForm(prefix='jiraform', enabled=JIRA_PKey.objects.get(product=prod).push_all_issues)
