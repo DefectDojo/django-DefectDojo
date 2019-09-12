@@ -1145,6 +1145,43 @@ class VA(models.Model):
     start = models.CharField(max_length=100)
 
 
+class Sonarqube_Issue(models.Model):
+    key = models.CharField(max_length=30, unique=True, help_text="SonarQube issue key")
+    status = models.CharField(max_length=20, help_text="SonarQube issue status")
+    type = models.CharField(max_length=15, help_text="SonarQube issue type")
+
+    def __str__(self):
+        return self.key
+
+
+class Sonarqube_Issue_Transition(models.Model):
+    sonarqube_issue = models.ForeignKey(Sonarqube_Issue, on_delete=models.CASCADE, db_index=True)
+    created = models.DateTimeField(null=False, editable=False, default=now)
+    finding_status = models.CharField(max_length=100)
+    sonarqube_status = models.CharField(max_length=50)
+    transitions = models.CharField(max_length=100)
+
+    class Meta:
+        ordering = ('-created', )
+
+
+class Sonarqube_Product(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    sonarqube_project_key = models.CharField(
+        max_length=200, null=True, blank=True, verbose_name="SonarQube Project Key"
+    )
+    sonarqube_tool_config = models.ForeignKey(
+        Tool_Configuration, verbose_name="SonarQube Configuration",
+        null=True, blank=True, on_delete=models.CASCADE
+    )
+
+    def __unicode__(self):
+        return '{} | {}'.format(self.product.name, self.sonarqube_project_key)
+
+    def __str__(self):
+        return '{} | {}'.format(self.product.name, self.sonarqube_project_key)
+
+
 class Finding(models.Model):
     title = models.TextField(max_length=1000)
     date = models.DateField(default=get_current_date)
@@ -1218,6 +1255,7 @@ class Finding(models.Model):
     jira_creation = models.DateTimeField(editable=True, null=True)
     jira_change = models.DateTimeField(editable=True, null=True)
     scanner_confidence = models.IntegerField(null=True, blank=True, default=None, editable=False, help_text="Confidence level of vulnerability which is supplied by the scannner.")
+    sonarqube_issue = models.ForeignKey(Sonarqube_Issue, null=True, blank=True, help_text="SonarQube issue", on_delete=models.CASCADE)
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
@@ -1401,6 +1439,10 @@ class Finding(models.Model):
         else:
             super(Finding, self).save(*args, **kwargs)
 
+            # Run async the tool issue update to update original issue with Defect Dojo updates
+            from dojo.tasks import async_tool_issue_updater
+            async_tool_issue_updater.delay(self)
+
         if (self.file_path is not None) and (self.endpoints.count() == 0):
             self.static_finding = True
             self.dynamic_finding = False
@@ -1453,6 +1495,7 @@ class Finding(models.Model):
             except:
                 async_false_history.delay(self, *args, **kwargs)
                 pass
+
         # Title Casing
         from titlecase import titlecase
         self.title = titlecase(self.title)
@@ -2407,3 +2450,8 @@ watson.register(Finding_Template)
 watson.register(Endpoint)
 watson.register(Engagement)
 watson.register(App_Analysis)
+
+# SonarQube Integration
+admin.site.register(Sonarqube_Issue)
+admin.site.register(Sonarqube_Issue_Transition)
+admin.site.register(Sonarqube_Product)
