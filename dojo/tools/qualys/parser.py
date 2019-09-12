@@ -10,6 +10,7 @@
 import argparse
 import csv
 import re
+import datetime
 from dojo.models import Finding, Endpoint
 ################################################################
 
@@ -44,14 +45,7 @@ CUSTOM_HEADERS = {'CVSS_score': 'CVSS Score',
                   'vuln_description': 'Description',
                   'solution': 'Solution',
                   'links': 'Links',
-                  'cve': 'CVE',
-                  'vuln_severity': 'Severity',
-                  'QID': 'QID',
-                  'first_found': 'First Found',
-                  'last_found': 'Last Found',
-                  'found_times': 'Found Times',
-                  'category': 'Category'
-                  }
+                  'cve': 'CVE'}
 
 REPORT_HEADERS = ['CVSS_score',
                   'ip_address',
@@ -62,14 +56,7 @@ REPORT_HEADERS = ['CVSS_score',
                   'vuln_description',
                   'solution',
                   'links',
-                  'cve',
-                  'Severity',
-                  'QID',
-                  'first_found',
-                  'last_found',
-                  'found_times',
-                  'category',
-                  ]
+                  'cve']
 
 ################################################################
 
@@ -117,11 +104,6 @@ def issue_r(raw_row, vuln):
         _port = vuln_details.findtext('PORT')
         _temp['port_status'] = _port
 
-        _category = str(vuln_details.findtext('CATEGORY'))
-        _result = str(vuln_details.findtext('RESULT'))
-        _first_found = str(vuln_details.findtext('FIRST_FOUND'))
-        _last_found = str(vuln_details.findtext('LAST_FOUND'))
-        _times_found = str(vuln_details.findtext('TIMES_FOUND'))
         search = "//GLOSSARY/VULN_DETAILS_LIST/VULN_DETAILS[@id='{}']".format(_gid)
         vuln_item = vuln.find(search)
         if vuln_item is not None:
@@ -129,27 +111,34 @@ def issue_r(raw_row, vuln):
             # Vuln name
             _temp['vuln_name'] = vuln_item.findtext('TITLE')
 
-            # Vuln Description
-            _description = str(vuln_item.findtext('THREAT'))
             # Solution Strips Heading Workaround(s)
-            # _temp['solution'] = re.sub('Workaround(s)?:.+\n', '', htmltext(vuln_item.findtext('SOLUTION')))
-            _temp['solution'] = htmltext(vuln_item.findtext('SOLUTION'))
+            _temp['solution'] = re.sub('Workaround(s)?:.+\n', '', htmltext(vuln_item.findtext('SOLUTION')))
 
             # Vuln_description
-            _temp['vuln_description'] = "\n".join([htmltext(_description),
-                                                   htmltext("Category: " + _category),
-                                                   htmltext("QID: " + str(_gid)),
-                                                   htmltext("Port: " + str(_port)),
-                                                   htmltext("Result Evidence: " + _result),
-                                                   htmltext("First Found: " + _first_found),
-                                                   htmltext("Last Found: " + _last_found),
-                                                   htmltext("Times Found: " + _times_found),
-                                                   ])
-            # Impact description
-            _temp['IMPACT'] = htmltext(vuln_item.findtext('IMPACT'))
+            _temp['vuln_description'] = htmltext(vuln_item.findtext('THREAT'))
+
+            # Vuln_impact
+            _temp['vuln_impact'] =  htmltext(vuln_item.findtext('IMPACT'))
 
             # CVSS
             _temp['CVSS_score'] = vuln_item.findtext('CVSS_SCORE/CVSS_BASE')
+            
+            # Date
+            _temp['date'] = datetime.datetime.strptime(vuln_details.findtext('LAST_FOUND'), "%Y-%m-%dT%H:%M:%SZ").date()
+
+            # Vuln_status
+
+            status = vuln_details.findtext('VULN_STATUS')
+            if status == "Active" or status == "Re-Openend" or status == "New":
+                _temp['active'] = True
+                _temp['mitigated'] = False
+                _temp['mitigation_date'] = None
+            else:
+                _temp['active'] = False
+                _temp['mitigated'] = True
+                _temp['mitigation_date'] = datetime.datetime.strptime(vuln_details.findtext('LAST_FIXED'), "%Y-%m-%dT%H:%M:%SZ").date()
+                
+
 
             # CVE and LINKS
             _temp_cve_details = vuln_item.iterfind('CVE_ID_LIST/CVE_ID')
@@ -157,53 +146,30 @@ def issue_r(raw_row, vuln):
                 _cl = {cve_detail.findtext('ID'): cve_detail.findtext('URL') for cve_detail in _temp_cve_details}
                 _temp['cve'] = "\n".join(list(_cl.keys()))
                 _temp['links'] = "\n".join(list(_cl.values()))
-        # The CVE in Qualys report might not have a CVSS score, so findings are informational by default
-        # unless we can find map to a Severity OR a CVSS score from the findings detail.
-        sev = None
-        if _temp['CVSS_score'] is not None:
+            sev = 'Low'
             if 0.1 <= float(_temp['CVSS_score']) <= 3.9:
                 sev = 'Low'
             elif 4.0 <= float(_temp['CVSS_score']) <= 6.9:
                 sev = 'Medium'
             elif 7.0 <= float(_temp['CVSS_score']) <= 8.9:
                 sev = 'High'
-            elif float(_temp['CVSS_score']) >= 9.0:
+            else:
                 sev = 'Critical'
-        elif vuln_item.findtext('SEVERITY') is not None:
-            if int(vuln_item.findtext('SEVERITY')) == 1:
-                sev = 'Informational'
-            elif int(vuln_item.findtext('SEVERITY')) == 2:
-                sev = 'Low'
-            elif int(vuln_item.findtext('SEVERITY')) == 3:
-                sev = 'Medium'
-            elif int(vuln_item.findtext('SEVERITY')) == 4:
-                sev = 'High'
-            elif int(vuln_item.findtext('SEVERITY')) == 5:
-                sev = 'Critical'
-        elif sev is None:
-            sev = 'Informational'
-        finding = None
-        if _temp_cve_details:
-            refs = "\n".join(list(_cl.values()))
-            finding = Finding(title=_temp['vuln_name'],
-                              mitigation=_temp['solution'],
-                              description=_temp['vuln_description'],
-                              severity=sev,
-                              references=refs,
-                              impact=_temp['IMPACT'],
-                              )
+            finding = None
+            if _temp_cve_details:
+                refs = "\n".join(list(_cl.values()))
+                finding = Finding(title=_temp['vuln_name'], mitigation=_temp['solution'], date=_temp['date'], description=_temp['vuln_description'], severity=sev, impact=_temp['vuln_impact'], references=refs)
 
-        else:
-            finding = Finding(title=_temp['vuln_name'],
-                              mitigation=_temp['solution'],
-                              description=_temp['vuln_description'],
-                              severity=sev,
-                              references=_gid,
-                              impact=_temp['IMPACT'],
-                              )
-        finding.unsaved_endpoints = list()
-        finding.unsaved_endpoints.append(ep)
-        ret_rows.append(finding)
+            else:
+                finding = Finding(title=_temp['vuln_name'], mitigation=_temp['solution'], date=_temp['date'], description=_temp['vuln_description'], impact=_temp['vuln_impact'], severity=sev)
+            
+            finding.mitigated = _temp['mitigation_date']
+            finding.is_Mitigated = _temp['mitigated']
+            finding.active = _temp['active']
+            finding.verified = True
+            finding.unsaved_endpoints = list()
+            finding.unsaved_endpoints.append(ep)
+            ret_rows.append(finding)
     return ret_rows
 
 
@@ -215,6 +181,8 @@ def qualys_parser(qualys_xml_file):
 
     for issue in r:
         master_list += issue_r(issue, d)
+    print("=================")
+    print(master_list)
     return master_list
     # report_writer(master_list, args.outfile)
 
