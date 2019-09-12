@@ -1066,7 +1066,7 @@ def promote_to_finding(request, fid):
             new_finding.out_of_scope = False
 
             new_finding.save()
-            new_finding.endpoints = form.cleaned_data['endpoints']
+            new_finding.endpoints.set(form.cleaned_data['endpoints'])
             new_finding.save()
 
             finding.delete()
