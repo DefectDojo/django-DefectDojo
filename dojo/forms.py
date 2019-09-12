@@ -19,7 +19,9 @@ from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
     Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
     JIRA_Issue, JIRA_PKey, JIRA_Conf, UserContactInfo, Tool_Type, Tool_Configuration, Tool_Product_Settings, \
     Cred_User, Cred_Mapping, System_Settings, Notifications, Languages, Language_Type, App_Analysis, Objects, \
-    Benchmark_Product, Benchmark_Requirement, Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta
+    Benchmark_Product, Benchmark_Requirement, Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, \
+    DojoMeta, Sonarqube_Product
+from dojo.tools import requires_file, SCAN_SONARQUBE_API
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
 
@@ -287,6 +289,7 @@ class ImportScanForm(forms.Form):
                          ("Fortify Scan", "Fortify Scan"),
                          ("Gosec Scanner", "Gosec Scanner"),
                          ("SonarQube Scan", "SonarQube Scan"),
+                         (SCAN_SONARQUBE_API, SCAN_SONARQUBE_API),
                          ("MobSF Scan", "MobSF Scan"),
                          ("Trufflehog Scan", "Trufflehog Scan"),
                          ("Nikto Scan", "Nikto Scan"),
@@ -342,13 +345,21 @@ class ImportScanForm(forms.Form):
     file = forms.FileField(widget=forms.widgets.FileInput(
         attrs={"accept": ".xml, .csv, .nessus, .json, .html, .js, .zip"}),
         label="Choose report file",
-        required=True)
+        required=False)
 
     def __init__(self, *args, **kwargs):
         tags = Tag.objects.usage_for_model(Test)
         t = [(tag.name, tag.name) for tag in tags]
         super(ImportScanForm, self).__init__(*args, **kwargs)
         self.fields['tags'].widget.choices = t
+
+    def clean(self):
+        cleaned_data = super().clean()
+        scan_type = cleaned_data.get("scan_type")
+        file = cleaned_data.get("file")
+        if requires_file(scan_type) and not file:
+            raise forms.ValidationError('Uploading a Report File is required for {}'.format(scan_type))
+        return cleaned_data
 
     # date can only be today or in the past, not the future
     def clean_scan_date(self):
@@ -381,13 +392,21 @@ class ReImportScanForm(forms.Form):
     file = forms.FileField(widget=forms.widgets.FileInput(
         attrs={"accept": ".xml, .csv, .nessus, .json, .html"}),
         label="Choose report file",
-        required=True)
+        required=False)
 
     def __init__(self, *args, **kwargs):
         tags = Tag.objects.usage_for_model(Test)
         t = [(tag.name, tag.name) for tag in tags]
         super(ReImportScanForm, self).__init__(*args, **kwargs)
         self.fields['tags'].widget.choices = t
+
+    def clean(self):
+        cleaned_data = super().clean()
+        scan_type = cleaned_data.get("scan_type")
+        file = cleaned_data.get("file")
+        if requires_file(scan_type) and not file:
+            raise forms.ValidationError('Uploading a Report File is required for {}'.format(scan_type))
+        return cleaned_data
 
     # date can only be today or in the past, not the future
     def clean_scan_date(self):
@@ -913,7 +932,7 @@ class FindingForm(forms.ModelForm):
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
-                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change')
+                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change', 'sonarqube_issue')
 
 
 class StubFindingForm(forms.ModelForm):
@@ -1570,6 +1589,23 @@ class JIRA_PKeyForm(forms.ModelForm):
 
     class Meta:
         model = JIRA_PKey
+        exclude = ['product']
+
+
+class Sonarqube_ProductForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(Sonarqube_ProductForm, self).__init__(*args, **kwargs)
+        Tool_Type.objects.get_or_create(name='SonarQube')
+
+    sonarqube_tool_config = forms.ModelChoiceField(
+        label='SonarQube Configuration',
+        queryset=Tool_Configuration.objects.filter(tool_type__name="SonarQube").order_by('name'),
+        required=False
+    )
+
+    class Meta:
+        model = Sonarqube_Product
         exclude = ['product']
 
 

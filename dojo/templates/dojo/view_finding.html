@@ -709,6 +709,8 @@
         {% endif %}
     </div>
 
+    {% include "dojo/snippets/sonarqube_history.html" with finding=finding only %}
+
     {% include "dojo/snippets/comments.html" with notes=notes object=finding destination="finding" %}
 
     <div class="PrevAndNext_Buttons">
