@@ -19,7 +19,7 @@ def rollback_collation(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0016_increase_filepath_length'),
+        ('dojo', '0017_auto_20190827_1421'),
     ]
 
     operations = [
