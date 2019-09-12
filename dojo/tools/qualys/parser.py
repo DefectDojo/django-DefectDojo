@@ -118,11 +118,11 @@ def issue_r(raw_row, vuln):
             _temp['vuln_description'] = htmltext(vuln_item.findtext('THREAT'))
 
             # Vuln_impact
-            _temp['vuln_impact'] =  htmltext(vuln_item.findtext('IMPACT'))
+            _temp['vuln_impact'] = htmltext(vuln_item.findtext('IMPACT'))
 
             # CVSS
             _temp['CVSS_score'] = vuln_item.findtext('CVSS_SCORE/CVSS_BASE')
-            
+
             # Date
             _temp['date'] = datetime.datetime.strptime(vuln_details.findtext('LAST_FOUND'), "%Y-%m-%dT%H:%M:%SZ").date()
 
@@ -137,8 +137,6 @@ def issue_r(raw_row, vuln):
                 _temp['active'] = False
                 _temp['mitigated'] = True
                 _temp['mitigation_date'] = datetime.datetime.strptime(vuln_details.findtext('LAST_FIXED'), "%Y-%m-%dT%H:%M:%SZ").date()
-                
-
 
             # CVE and LINKS
             _temp_cve_details = vuln_item.iterfind('CVE_ID_LIST/CVE_ID')
@@ -162,7 +160,7 @@ def issue_r(raw_row, vuln):
 
             else:
                 finding = Finding(title=_temp['vuln_name'], mitigation=_temp['solution'], date=_temp['date'], description=_temp['vuln_description'], impact=_temp['vuln_impact'], severity=sev)
-            
+
             finding.mitigated = _temp['mitigation_date']
             finding.is_Mitigated = _temp['mitigated']
             finding.active = _temp['active']
