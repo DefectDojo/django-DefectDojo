@@ -544,8 +544,10 @@ def import_scan_results(request, eid=None, pid=None):
                     item.last_reviewed = timezone.now()
                     item.last_reviewed_by = request.user
                     if form.get_scan_type() != "Generic Findings Import":
-                        item.active = active
-                        item.verified = verified
+                        if not item.active:
+                            item.active = active
+                        if not item.verified:
+                            item.verified = verified
                     item.save(dedupe_option=False, false_history=True)
 
                     if hasattr(item, 'unsaved_req_resp') and len(
