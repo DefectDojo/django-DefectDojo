@@ -493,5 +493,13 @@
     	"model": "dojo.test_type",
     	"pk": 162
 
+	},
+	{
+		"fields": {
+      		"name": "Aqua Scan"
+    	},
+    	"model": "dojo.test_type",
+    	"pk": 163
+
 	}
 ]
