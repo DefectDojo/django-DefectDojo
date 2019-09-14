@@ -182,11 +182,7 @@
                                     </td> 
                                     <td><a href="/product/{{ survey.engagement.product_id }}">{{ survey.engagement.product.name }}</a></td>
                                     <td>
-                                        {% if survey.engagement %}
-                                            <a href="/engagement/{{ survey.engagement.id }}">{{ survey.engagement.name }}</a> 
-                                        {% else %}
-                                            <a href="empty_survey/{{ survey.id }}/new_engagement">Create Engagement</a>
-                                        {% endif %}
+                                        <a href="/engagement/{{ survey.engagement.id }}">{{ survey.engagement.name }}</a> 
                                     </td> 
                                     <td>{{ survey.responder }}</td>
                                     <td>
@@ -207,6 +203,7 @@
                                             {% else %}
                                                 <a class="btn btn-sm btn-primary"
                                                 href="/empty_survey/{{ survey.id }}"> View Responses </a>
+                                                <a class="btn btn-sm btn-success" href="empty_survey/{{ survey.id }}/new_engagement">Create Engagement</a>
                                                 <button class="btn btn-sm btn-info" disabled
                                                 href="/engagement/{{ survey.engagement.id }}/survey/{{ survey.id }}/assign"> Assign User </button>
                                             {% endif %}

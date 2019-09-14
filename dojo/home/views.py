@@ -120,8 +120,7 @@ def dashboard(request):
         weeks_between += 2
 
     unassigned_surveys = Answered_Survey.objects.all().filter(
-        responder_id__isnull=False).filter(
-        assignee_id__isnull=True)
+        assignee_id__isnull=True, completed__gt=0)
 
     punchcard, ticks, highest_count = get_punchcard_data(findings, weeks_between, start_date)
     add_breadcrumb(request=request, clear=True)
