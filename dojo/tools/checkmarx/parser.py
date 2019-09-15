@@ -11,40 +11,47 @@ from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
 
+# ----------------------------------------
+# Structure of the checkmarx xml report:
+# ----------------------------------------
+# - Query:
+#    the kind of vulnerabilities. Contains for example cweId
+# - Result: One vulnerability in checkmarx = 1 pathId
+#    Includes filename and linenumber from source of vulnerability (start of the attack vector)
+# - Path: There should be only one.Parent tag of Pathnodes
+# - Pathnode: all the calls from the source (start) to the sink (end) of the attack vector
+
 
 class CheckmarxXMLParser(object):
-    result_dupes = dict()
     language_list = []
-    checkmarxAggregated = False
+    mode = None
+    test = None
+    mitigation = 'N/A'
+    impact = 'N/A'
+    references = ''
 
     # mode:
-    # None (default): import all vunlerabilities from checkmarx
-    # 'aggregated' : aggregates on sink filename, sink line number for each type of vunlnerability
+    # None (default): aggregates vulnerabilites per sink filename (legacy behavior)
+    # 'detailed' : No aggregation
     def __init__(self, filename, test, mode=None):
         cxscan = ElementTree.parse(filename)
+        self.test = test
         root = cxscan.getroot()
+        if(mode in [None, 'detailed']):
+            self.mode = mode
+        else:
+            raise Exception("Internal error: Invalid mode " + mode + ". Expected: one of None, 'detailed'")
 
-        if(mode == "aggregated"):
-            self.checkmarxAggregated = True
-
+        # Dictonary to hold the aggregated findings with:
+        #  - key: the concatenated aggregate keys
+        #  - value: the finding
         dupes = dict()
         for query in root.findall('Query'):
-            categories = ''
+            name, cwe, categories = self.getQueryElements(query)
             language = ''
-            mitigation = 'N/A'
-            impact = 'N/A'
-            references = ''
             findingdetail = ''
-            title = ''
             group = ''
-            status = ''
-            self.result_dupes = dict()
             find_date = parser.parse(root.get("ScanStart"))
-            name = query.get('name')
-            cwe = query.get('cweId')
-
-            if query.get('categories') is not None:
-                categories = query.get('categories')
 
             if query.get('Language') is not None:
                 language = query.get('Language')
@@ -70,122 +77,134 @@ class CheckmarxXMLParser(object):
                 deeplink = "[{}]({})".format(result.get('DeepLink'), result.get('DeepLink'))
                 findingdetail = "{}**Finding Link:** {}\n\n".format(findingdetail, deeplink)
 
-                if(self.checkmarxAggregated):
-                    dupe_key = "{}{}{}{}".format(categories, cwe, name, result.get('FileName').encode('utf-8'))
+                if(self.mode is None):
+                    self.process_result_file_name_aggregated(dupes, findingdetail, query, result, find_date)
+                elif (self.mode == 'detailed'):
+                    self.process_result_detailed(dupes, findingdetail, query, result, find_date)
+                findingdetail = ''
 
-                    if dupe_key in dupes:
-                        # Those 4 lines aren't doing anything??
-                        find = dupes[dupe_key]
-                        title, description, pathnode = self.get_finding_detail_aggregated(query, result)
-                        "{}\n{}".format(find.description, description)
-                        dupes[dupe_key] = find
-                    else:
-                        dupes[dupe_key] = True
-
-                        sev = result.get('Severity')
-                        result.get('FileName')
-                        title, description, pathnode = self.get_finding_detail_aggregated(query, result)
-                        find = Finding(title=title,
-                                       cwe=int(cwe),
-                                       test=test,
-                                       active=False,
-                                       verified=False,
-                                       description=findingdetail + '-----\n' + description,
-                                       severity=sev,
-                                       numerical_severity=Finding.get_numerical_severity(sev),
-                                       mitigation=mitigation,
-                                       impact=impact,
-                                       references=references,
-                                       # this is not the same as in the dupe_key
-                                       file_path=pathnode.find('FileName').text,
-                                       line=pathnode.find('Line').text,
-                                       url='N/A',
-                                       date=find_date,
-                                       static_finding=True)
-                        dupes[dupe_key] = find
-                        findingdetail = ''
-                else:
-                    dupe_key = "{}{}{}{}".format(categories, cwe, name, result.get('FileName').encode('utf-8'))
-                    sev = result.get('Severity')
-                    # Get directly the filename from Result tag, whereas aggregated mode was fetching it from the last pathNode under the first path
-                    # filename = result.find('FileName').text
-                    # Get directly the line from Result tag (it is the source line), whereas aggregated mode was fetching the sink line from the last pathNode under the first path
-                    # This is more coherent with the information we have in checkmarx
-                    # lineNumber = result.find('Line').text
-                    # title = query name + filename
-                    title = query.get('name').replace('_', ' ')
-                    # Loop over findings
-                    for path in result.findall('Path'):
-                        sourceFilename = ''
-                        sinkFilename = ''
-                        sourceLineNumber = None
-                        sinkLineNumber = None
-                        sourceObject = ''
-                        sinkObject = ''
-                        pathId = path.get('PathId')
-                        findingdetail = '{}-----\n'.format(findingdetail)
-                        # Loop over function calls / assignments in the data flow graph
-                        for pathnode in path.findall('PathNode'):
-                            findingdetail = self.get_description(pathnode, findingdetail)
-                            nodeId = pathnode.find('NodeId').text
-                            if(nodeId == "1"):
-                                sourceFilename = pathnode.find('FileName').text
-                                sourceLineNumber = pathnode.find('Line').text
-                                sourceObject = pathnode.find('Name').text
-                        # the last pathnode is the sink
-                        sinkFilename = pathnode.find('FileName').text
-                        sinkLineNumber = pathnode.find('Line').text
-                        sinkObject = pathnode.find('Name').text
-                        dupe_key = "{}{}{}{}{}".format(categories, cwe, name, sinkFilename, pathId)
-                        if title and sinkFilename:
-                            title = "{} ({})".format(title, ntpath.basename(sinkFilename))
-
-                        find = Finding(title=title,
-                                   cwe=int(cwe),
-                                   test=test,
-                                   active=False,
-                                   verified=False,
-                                   description=findingdetail,
-                                   severity=sev,
-                                   numerical_severity=Finding.get_numerical_severity(sev),
-                                   mitigation=mitigation,
-                                   impact=impact,
-                                   references=references,
-                                   file_path=sinkFilename,
-                                   line=sinkLineNumber,
-                                   url='N/A',
-                                   date=find_date,
-                                   static_finding=True,
-                                   unique_id_from_tool=pathId,
-                                   sast_source_object=sourceObject,
-                                   sast_sink_object=sinkObject,
-                                   sast_source_line=sourceLineNumber,
-                                   sast_source_file_path=sourceFilename)
-                    dupes[dupe_key] = find
-                    findingdetail = ''
         for lang in self.language_list:
             add_language(test.engagement.product, lang)
 
         self.items = list(dupes.values())
 
-    def get_finding_detail_aggregated(self, query, result):
-        findingdetail = ""
-        title = ""
+    # Process one result = one pathId for default "Checkmarx Scan"
+    # Create the finding and add it into the dupes list
+    # If a vuln with the same file_path was found before, updates the description
+    def process_result_file_name_aggregated(self, dupes, findingdetail, query, result, find_date):
+        name, cwe, categories = self.getQueryElements(query)
+        titleStart = query.get('name').replace('_', ' ')
+        description, lastPathnode = self.get_description_file_name_aggregated(query, result)
+        sinkFilename = lastPathnode.find('FileName').text
+        title = "{} ({})".format(titleStart, ntpath.basename(sinkFilename))
 
+        aggregateKeys = "{}{}{}{}".format(categories, cwe, name, sinkFilename)
+
+        if not(aggregateKeys in dupes):
+            sev = result.get('Severity')
+            find = Finding(title=title,
+                           cwe=int(cwe),
+                           test=self.test,
+                           active=False,
+                           verified=False,
+                           # Concatenates the query information with this specific finding information
+                           description=findingdetail + '-----\n' + description,
+                           severity=sev,
+                           numerical_severity=Finding.get_numerical_severity(sev),
+                           mitigation=self.mitigation,
+                           impact=self.impact,
+                           references=self.references,
+                           file_path=sinkFilename,
+                           # No line number because we have aggregated different vulnerabilities that may have different line numbers
+                           url='N/A',
+                           date=find_date,
+                           static_finding=True,
+                           nb_occurences=1)
+            dupes[aggregateKeys] = find
+        else:
+            # We have already created a finding for this aggregate: updates the description and the nb_occurences
+            find = dupes[aggregateKeys]
+            find.description = "{}\n-----\n{}".format(find.description, description)
+            find.nb_occurences = find.nb_occurences + 1
+
+    # Iterate over function calls / assignments to extract finding description and last pathnode
+    def get_description_file_name_aggregated(self, query, result):
+        description = ""
+
+        # Loop over <Path> (there should be only one)
         for path in result.findall('Path'):
-            title = query.get('name').replace('_', ' ')
+            firstPathnode = True
             for pathnode in path.findall('PathNode'):
-                result_dupes_key = pathnode.find('Line').text + "|" + pathnode.find('Column').text
-                if result_dupes_key not in self.result_dupes:
-                    findingdetail = self.get_description(pathnode, findingdetail)
-                self.result_dupes[result_dupes_key] = True
+                if(firstPathnode):
+                    sourceFilename, sourceLineNumber, sourceObject = self.get_pathnode_elements(pathnode)
+                    firstPathnode = False
+        # At this point we have iterated over all path nodes (function calls) and pathnode is at the sink of the vulnerability
+        sinkFilename, sinkLineNumber, sinkObject = self.get_pathnode_elements(pathnode)
+        description = "<b>Source filename: </b>{}\n<b>Source line number: </b> {}\n<b>Source object: </b> {}".format(sourceFilename, sourceLineNumber, sourceObject)
+        description = "{}\n\n<b>Sink filename: </b>{}\n<b>Sink line number: </b> {}\n<b>Sink object: </b> {}".format(description, sinkFilename, sinkLineNumber, sinkObject)
+        return description, pathnode
 
-        # At this point we have iterated over all paths and pathnode is at the sink of the vulnerability
-        if title and pathnode.find('FileName').text:
-            title = "{} ({})".format(title, ntpath.basename(pathnode.find('FileName').text))
-        return title, findingdetail, pathnode
+    # Process one result = one pathId for scanner "Checkmarx Scan detailed"
+    # Create the finding and add it into the dupes list
+    def process_result_detailed(self, dupes, findingdetail, query, result, find_date):
+        name, cwe, categories = self.getQueryElements(query)
+        title = ''
+        sev = result.get('Severity')
+        title = query.get('name').replace('_', ' ')
+        # Loop over <Path> (there should be only one)
+        paths = result.findall('Path')
+        if(len(paths)) > 1:
+            logger.warning("Checkmarx scan: more than one path found: " + str(len(paths)) + ". Only the last one will be used")
+        for path in paths:
+            sourceFilename = ''
+            sinkFilename = ''
+            sourceLineNumber = None
+            sinkLineNumber = None
+            sourceObject = ''
+            sinkObject = ''
+            pathId = path.get('PathId')
+            findingdetail = '{}-----\n'.format(findingdetail)
+            # Loop over function calls / assignments in the data flow graph
+            for pathnode in path.findall('PathNode'):
+                findingdetail = self.get_description_detailed(pathnode, findingdetail)
+                nodeId = pathnode.find('NodeId').text
+                if(nodeId == "1"):
+                    sourceFilename, sourceLineNumber, sourceObject = self.get_pathnode_elements(pathnode)
+            # the last pathnode is the sink
+            sinkFilename, sinkLineNumber, sinkObject = self.get_pathnode_elements(pathnode)
+            aggregateKeys = "{}{}{}{}{}".format(categories, cwe, name, sinkFilename, pathId)
+            if title and sinkFilename:
+                title = "{} ({})".format(title, ntpath.basename(sinkFilename))
 
-    def get_description(self, pathnode, findingdetail):
+            find = Finding(title=title,
+                       cwe=int(cwe),
+                       test=self.test,
+                       active=False,
+                       verified=False,
+                       description=findingdetail,
+                       severity=sev,
+                       numerical_severity=Finding.get_numerical_severity(sev),
+                       mitigation=self.mitigation,
+                       impact=self.impact,
+                       references=self.references,
+                       file_path=sinkFilename,
+                       line=sinkLineNumber,
+                       url='N/A',
+                       date=find_date,
+                       static_finding=True,
+                       unique_id_from_tool=pathId,
+                       sast_source_object=sourceObject,
+                       sast_sink_object=sinkObject,
+                       sast_source_line=sourceLineNumber,
+                       sast_source_file_path=sourceFilename)
+        dupes[aggregateKeys] = find
+
+    # Return filename, lineNumber and object (function/parameter...) for a given pathnode
+    def get_pathnode_elements(self, pathnode):
+        return pathnode.find('FileName').text, pathnode.find('Line').text, pathnode.find('Name').text
+
+    # Builds the finding description for scanner "Checkmarx Scan detailed"
+    def get_description_detailed(self, pathnode, findingdetail):
         if pathnode.find('Line').text is not None:
             findingdetail = "{}**Line Number:** {}\n".format(findingdetail, pathnode.find('Line').text)
 
@@ -200,3 +219,12 @@ class CheckmarxXMLParser(object):
 
         findingdetail = '{}-----\n'.format(findingdetail)
         return findingdetail
+
+    # Get name, cwe and categories from the global query tag (1 query = 1 type of vulnerability)
+    def getQueryElements(self, query):
+        categories = ''
+        name = query.get('name')
+        cwe = query.get('cweId')
+        if query.get('categories') is not None:
+            categories = query.get('categories')
+        return name, cwe, categories

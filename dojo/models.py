@@ -30,6 +30,7 @@ fmt = getattr(settings, 'LOG_FORMAT', None)
 lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
 
 logging.basicConfig(format=fmt, level=lvl)
+logger = logging.getLogger(__name__)
 
 
 @deconstructible
@@ -1230,6 +1231,9 @@ class Finding(models.Model):
                                verbose_name="Line number",
                                help_text="Source line number of the attack vector")
     sast_source_file_path = models.CharField(null=True, blank=True, max_length=4000, help_text="Source filepath of the attack vector")
+    nb_occurences = models.IntegerField(null=True, blank=True,
+                               verbose_name="Number of occurences",
+                               help_text="Number of occurences in the source tool when several vulnerabilites were found and aggregated by the scanner")
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
@@ -1403,6 +1407,7 @@ class Finding(models.Model):
         return long_desc
 
     def save(self, dedupe_option=True, false_history=False, rules_option=True, *args, **kwargs):
+        logger.debug("Saving finding of id " + str(self.id))
         # Make changes to the finding before it's saved to add a CWE template
         new_finding = False
         if self.pk is None:

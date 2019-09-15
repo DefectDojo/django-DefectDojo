@@ -350,6 +350,9 @@
                 <tr>
                     <th>Location</th>
                     <th>Line Number</th>
+                    {% if finding.nb_occurences %}
+                    <th>Nb occurences</th>
+                    {% endif %}
                 </tr>
                 <tr>
                     <td>
@@ -362,6 +365,13 @@
                            {{ finding.line }}
                         </span>
                     </td>
+                    {% if finding.nb_occurences %}
+                    <td>
+                        <span>
+                           {{ finding.nb_occurences }}
+                        </span>
+                    </td>
+                    {% endif %}
                 </tr>
             </table>
         </div>

@@ -265,7 +265,7 @@ class ImportScanForm(forms.Form):
                          ("AppSpider Scan", "AppSpider Scan"),
                          ("Veracode Scan", "Veracode Scan"),
                          ("Checkmarx Scan", "Checkmarx Scan"),
-                         ("Checkmarx Scan Aggregated", "Checkmarx Scan Aggregated"),
+                         ("Checkmarx Scan detailed", "Checkmarx Scan detailed"),
                          ("Crashtest Security Scan", "Crashtest Security Scan"),
                          ("ZAP Scan", "ZAP Scan"),
                          ("Arachni Scan", "Arachni Scan"),
