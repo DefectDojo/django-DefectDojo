@@ -482,7 +482,7 @@
                             <p><b>==== Finding Notes: ====</b>
                                 <br>
                                     {% for note in notes reversed %}
-                                            {{ note.author }} - {{ note.date }} - {{ note }} +<br>
+                                            {{ note.author }} - {{ note.date }} - {{ note|linebreaks }} +<br>
                                     {% endfor %}
                             </p><br>
                         {% endif %}
