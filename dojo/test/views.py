@@ -71,6 +71,8 @@ def view_test(request, tid):
     product_tab = Product_Tab(prod.id, title="Test", tab="engagements")
     product_tab.setEngagement(test.engagement)
     jira_config = JIRA_PKey.objects.filter(product=prod.id).first()
+    if jira_config:
+        jira_config = jira_config.conf_id
     return render(request, 'dojo/view_test.html',
                   {'test': test,
                    'product_tab': product_tab,
@@ -472,6 +474,9 @@ def finding_bulk_update(request, tid):
                     calculate_grade(test.engagement.product)
 
                 for finding in finds:
+                    from dojo.tasks import async_tool_issue_updater
+                    async_tool_issue_updater.delay(finding)
+
                     if JIRA_PKey.objects.filter(product=finding.test.engagement.product).count() == 0:
                         log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', finding)
                     else:
