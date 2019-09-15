@@ -217,15 +217,16 @@
                                   {% endif %}
                                 </td>
                                 <td>
-                                  {% if prod.prod_manager %}
-                                    {% if prod.prod_manager != "0" %}
-                                      {{ prod.prod_manager }}, <i>Manager</i>
-                                        {% if prod.tech_contact or prod.technical_contact %}<br>{% endif %}
+                                  {% if prod.product_manager %}
+                                    {% if prod.product_manager != "0" %}
+                                      {{ prod.product_manager }}, <i>Manager</i>
+                                        {% if prod.team_manager or prod.technical_contact %}<br>{% endif %}
                                     {% endif %}
                                   {% endif %}
-                                  {% if prod.tech_contact %}
-                                    {% if prod.tech_contact != "0" %}
-                                      {{ prod.tech_contact }}, <i>Technical</i>
+                                  {% if prod.team_manager %}
+                                    {% if prod.team_manager != "0" %}
+                                      {{ prod.team_manager }}, <i>Team Lead</i>
+                                        {% if prod.product_manager or prod.technical_contact %}<br>{% endif %}
                                     {% endif %}
                                   {% endif %}
                                   {% if prod.technical_contact %}
