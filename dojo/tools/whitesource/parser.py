@@ -22,11 +22,11 @@ class WhitesourceJSONParser(object):
             for node in tree_node:
                 title = node['name'] + " | " + node['project']
                 severity = node['severity'].lower().capitalize()
-                description = "**Description** : " + node['description'] + "\n\n" + \
-                            "**Library Name** : " + node['library']['name'] + "\n\n" + \
-                            "**Library Filename** : " + node['library']['filename'] + "\n\n" + \
-                            "**Library Description** : " + node['library']['description'] + "\n\n" + \
-                            "**Library Type** : " + node['library']['type'] + "\n"
+                description = "**Description** : " + node.get('description', "") + "\n\n" + \
+                            "**Library Name** : " + node['library'].get('name', "") + "\n\n" + \
+                            "**Library Filename** : " + node['library'].get('filename', "") + "\n\n" + \
+                            "**Library Description** : " + node['library'].get('description', "") + "\n\n" + \
+                            "**Library Type** : " + node['library'].get('type', "") + "\n"
                 try:
                     mitigation = "**fixResolution** : " + node['topFix']['fixResolution'] + "\n" + \
                                 "**Message** : " + node['topFix']['message'] + "\n"
