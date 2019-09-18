@@ -6,9 +6,9 @@ from dojo.models import Finding
 class PhpSecurityAuditV2(object):
     def __init__(self, filename, test):
         tree = filename.read()
-        if isinstance(type(tree), (bytes, bytearray)):
+        try:
             data = json.loads(str(tree, 'utf-8'))
-        else:
+        except:
             data = json.loads(tree)
         dupes = dict()
 

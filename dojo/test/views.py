@@ -70,6 +70,9 @@ def view_test(request, tid):
 
     product_tab = Product_Tab(prod.id, title="Test", tab="engagements")
     product_tab.setEngagement(test.engagement)
+    jira_config = JIRA_PKey.objects.filter(product=prod.id).first()
+    if jira_config:
+        jira_config = jira_config.conf_id
     return render(request, 'dojo/view_test.html',
                   {'test': test,
                    'product_tab': product_tab,
@@ -83,7 +86,8 @@ def view_test(request, tid):
                    'show_re_upload': show_re_upload,
                    'creds': creds,
                    'cred_test': cred_test,
-                   'tag_input': tags
+                   'tag_input': tags,
+                   'jira_config': jira_config,
                    })
 
 
@@ -312,8 +316,10 @@ def add_temp_finding(request, tid, fid):
     findings = Finding_Template.objects.all()
 
     if request.method == 'POST':
-        form = FindingForm(request.POST)
+        form = FindingForm(request.POST, template=True)
         if form.is_valid():
+            finding.last_used = timezone.now()
+            finding.save()
             new_finding = form.save(commit=False)
             new_finding.test = test
             new_finding.reporter = request.user
@@ -329,8 +335,11 @@ def add_temp_finding(request, tid, fid):
             # no further action needed here since this is already adding from template.
             new_finding.is_template = False
             new_finding.save(dedupe_option=False, false_history=False)
-            new_finding.endpoints = form.cleaned_data['endpoints']
+            new_finding.endpoints.set(form.cleaned_data['endpoints'])
             new_finding.save(false_history=True)
+            tags = request.POST.getlist('tags')
+            t = ", ".join(tags)
+            new_finding.tags = t
             if 'jiraform-push_to_jira' in request.POST:
                 jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=True)
                 if jform.is_valid():
@@ -369,9 +378,8 @@ def add_temp_finding(request, tid, fid):
                                  messages.ERROR,
                                  'The form has errors, please correct them below.',
                                  extra_tags='alert-danger')
-
     else:
-        form = FindingForm(initial={'active': False,
+        form = FindingForm(template=True, initial={'active': False,
                                     'date': timezone.now().date(),
                                     'verified': False,
                                     'false_p': False,
@@ -384,7 +392,8 @@ def add_temp_finding(request, tid, fid):
                                     'mitigation': finding.mitigation,
                                     'impact': finding.impact,
                                     'references': finding.references,
-                                    'numerical_severity': finding.numerical_severity})
+                                    'numerical_severity': finding.numerical_severity,
+                                    'tags': [tag.name for tag in finding.tags]})
         if get_system_setting('enable_jira'):
             enabled = JIRA_PKey.objects.get(product=test.engagement.product).push_all_issues
             jform = JIRAFindingForm(enabled=enabled, prefix='jiraform')
@@ -465,6 +474,9 @@ def finding_bulk_update(request, tid):
                     calculate_grade(test.engagement.product)
 
                 for finding in finds:
+                    from dojo.tasks import async_tool_issue_updater
+                    async_tool_issue_updater.delay(finding)
+
                     if JIRA_PKey.objects.filter(product=finding.test.engagement.product).count() == 0:
                         log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', finding)
                     else:

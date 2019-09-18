@@ -19,7 +19,9 @@ from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
     Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
     JIRA_Issue, JIRA_PKey, JIRA_Conf, UserContactInfo, Tool_Type, Tool_Configuration, Tool_Product_Settings, \
     Cred_User, Cred_Mapping, System_Settings, Notifications, Languages, Language_Type, App_Analysis, Objects, \
-    Benchmark_Product, Benchmark_Requirement, Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta
+    Benchmark_Product, Benchmark_Requirement, Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, \
+    DojoMeta, Sonarqube_Product
+from dojo.tools import requires_file, SCAN_SONARQUBE_API
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
 
@@ -286,7 +288,8 @@ class ImportScanForm(forms.Form):
                          ("Acunetix Scan", "Acunetix Scan"),
                          ("Fortify Scan", "Fortify Scan"),
                          ("Gosec Scanner", "Gosec Scanner"),
-                         # ("SonarQube Scan", "SonarQube Scan"),
+                         ("SonarQube Scan", "SonarQube Scan"),
+                         (SCAN_SONARQUBE_API, SCAN_SONARQUBE_API),
                          ("MobSF Scan", "MobSF Scan"),
                          ("Trufflehog Scan", "Trufflehog Scan"),
                          ("Nikto Scan", "Nikto Scan"),
@@ -316,17 +319,18 @@ class ImportScanForm(forms.Form):
                          ("Microfocus Webinspect Scan", "Microfocus Webinspect Scan"),
                          ("Wpscan", "Wpscan"),
                          ("Sslscan", "Sslscan"),
-                         ("JFrog Xray Scan", "JFrog Xray Scan"),
+                         ("JFrogXray Scan", "JFrog Xray Scan"),
                          ("Sslyze Scan", "Sslyze Scan"),
                          ("Testssl Scan", "Testssl Scan"),
-                         ("Hadolint Dockerfile check", "Hadolint Dockerfile check"))
+                         ("Hadolint Dockerfile check", "Hadolint Dockerfile check"),
+                         ("Aqua Scan", "Aqua Scan"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
     scan_date = forms.DateTimeField(
         required=True,
         label="Scan Completion Date",
         help_text="Scan completion date will be used on all findings.",
-        initial=datetime.now().strftime("%m/%d/%Y"),
+        initial=datetime.now().strftime("%Y-%m-%d"),
         widget=forms.TextInput(attrs={'class': 'datepicker'}))
     minimum_severity = forms.ChoiceField(help_text='Minimum severity level to be imported',
                                          required=True,
@@ -339,15 +343,23 @@ class ImportScanForm(forms.Form):
                            help_text="Add tags that help describe this scan.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
     file = forms.FileField(widget=forms.widgets.FileInput(
-        attrs={"accept": ".xml, .csv, .nessus, .json, .html, .js"}),
+        attrs={"accept": ".xml, .csv, .nessus, .json, .html, .js, .zip"}),
         label="Choose report file",
-        required=True)
+        required=False)
 
     def __init__(self, *args, **kwargs):
         tags = Tag.objects.usage_for_model(Test)
         t = [(tag.name, tag.name) for tag in tags]
         super(ImportScanForm, self).__init__(*args, **kwargs)
         self.fields['tags'].widget.choices = t
+
+    def clean(self):
+        cleaned_data = super().clean()
+        scan_type = cleaned_data.get("scan_type")
+        file = cleaned_data.get("file")
+        if requires_file(scan_type) and not file:
+            raise forms.ValidationError('Uploading a Report File is required for {}'.format(scan_type))
+        return cleaned_data
 
     # date can only be today or in the past, not the future
     def clean_scan_date(self):
@@ -380,13 +392,21 @@ class ReImportScanForm(forms.Form):
     file = forms.FileField(widget=forms.widgets.FileInput(
         attrs={"accept": ".xml, .csv, .nessus, .json, .html"}),
         label="Choose report file",
-        required=True)
+        required=False)
 
     def __init__(self, *args, **kwargs):
         tags = Tag.objects.usage_for_model(Test)
         t = [(tag.name, tag.name) for tag in tags]
         super(ReImportScanForm, self).__init__(*args, **kwargs)
         self.fields['tags'].widget.choices = t
+
+    def clean(self):
+        cleaned_data = super().clean()
+        scan_type = cleaned_data.get("scan_type")
+        file = cleaned_data.get("file")
+        if requires_file(scan_type) and not file:
+            raise forms.ValidationError('Uploading a Report File is required for {}'.format(scan_type))
+        return cleaned_data
 
     # date can only be today or in the past, not the future
     def clean_scan_date(self):
@@ -589,6 +609,9 @@ class EngForm(forms.ModelForm):
                   "listings.")
     description = forms.CharField(widget=forms.Textarea(attrs={}),
                                   required=False, help_text="Description of the engagement and details regarding the engagement.")
+    product = forms.ModelChoiceField(label='Product',
+                                       queryset=Product.objects.all().order_by('name'),
+                                       required=True)
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False,
                            help_text="Add tags that help describe this engagement.  "
@@ -792,7 +815,7 @@ class AddFindingForm(forms.ModelForm):
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
-                   'review_requested_by', 'is_Mitigated')
+                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change')
 
 
 class AdHocFindingForm(forms.ModelForm):
@@ -830,7 +853,7 @@ class AdHocFindingForm(forms.ModelForm):
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
-                   'review_requested_by', 'is_Mitigated')
+                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change')
 
 
 class PromoteFindingForm(forms.ModelForm):
@@ -855,7 +878,7 @@ class PromoteFindingForm(forms.ModelForm):
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'active', 'false_p', 'verified', 'is_template',
-                   'duplicate', 'out_of_scope', 'images', 'under_review', 'reviewers', 'review_requested_by', 'is_Mitigated')
+                   'duplicate', 'out_of_scope', 'images', 'under_review', 'reviewers', 'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change')
 
 
 class FindingForm(forms.ModelForm):
@@ -883,7 +906,14 @@ class FindingForm(forms.ModelForm):
                                      help_text="A new finding template will be created from this finding.")
 
     def __init__(self, *args, **kwargs):
-        tags = Tag.objects.usage_for_model(Finding)
+        template = kwargs.pop('template')
+        # Get tags from a template
+        if template:
+            tags = Tag.objects.usage_for_model(Finding_Template)
+        # Get tags from a finding
+        else:
+            tags = Tag.objects.usage_for_model(Finding)
+
         t = [(tag.name, tag.name) for tag in tags]
         super(FindingForm, self).__init__(*args, **kwargs)
         self.fields['tags'].widget.choices = t
@@ -902,7 +932,7 @@ class FindingForm(forms.ModelForm):
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
-                   'review_requested_by', 'is_Mitigated')
+                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change', 'sonarqube_issue')
 
 
 class StubFindingForm(forms.ModelForm):
@@ -938,9 +968,16 @@ class ApplyFindingTemplateForm(forms.Form):
     mitigation = forms.CharField(widget=forms.Textarea)
     impact = forms.CharField(widget=forms.Textarea)
     references = forms.CharField(widget=forms.Textarea, required=False)
+    tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
+                           required=False,
+                           help_text="Add tags that help describe this finding template.  "
+                                     "Choose from the list or add new tags.  Press TAB key to add.")
 
     def __init__(self, template=None, *args, **kwargs):
+        tags = Tag.objects.usage_for_model(Finding_Template)
+        t = [(tag.name, tag.name) for tag in tags]
         super(ApplyFindingTemplateForm, self).__init__(*args, **kwargs)
+        self.fields['tags'].widget.choices = t
         self.template = template
 
     def clean(self):
@@ -955,7 +992,7 @@ class ApplyFindingTemplateForm(forms.Form):
         return cleaned_data
 
     class Meta:
-        fields = ['title', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'references']
+        fields = ['title', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'references', 'tags']
         order = ('title', 'cwe', 'cve', 'severity', 'description', 'impact', 'is_Mitigated')
 
 
@@ -986,7 +1023,7 @@ class FindingTemplateForm(forms.ModelForm):
     class Meta:
         model = Finding_Template
         order = ('title', 'cwe', 'cve', 'severity', 'description', 'impact')
-        exclude = ('numerical_severity', 'is_Mitigated')
+        exclude = ('numerical_severity', 'is_Mitigated', 'last_used')
 
 
 class DeleteFindingTemplateForm(forms.ModelForm):
@@ -1062,7 +1099,7 @@ class EditEndpointForm(forms.ModelForm):
         query = cleaned_data['query']
         fragment = cleaned_data['fragment']
 
-        if protocol:
+        if protocol and path:
             endpoint = urlunsplit((protocol, host, path, query, fragment))
         else:
             endpoint = host
@@ -1457,7 +1494,7 @@ class CustomReportOptionsForm(forms.Form):
     report_name = forms.CharField(required=False, max_length=100)
     include_finding_notes = forms.ChoiceField(required=False, choices=yes_no)
     include_finding_images = forms.ChoiceField(choices=yes_no, label="Finding Images")
-    report_type = forms.ChoiceField(required=False, choices=(('AsciiDoc', 'AsciiDoc')))
+    report_type = forms.ChoiceField(required=False, choices=(('AsciiDoc', 'AsciiDoc'),))
 
 
 class DeleteReportForm(forms.ModelForm):
@@ -1520,6 +1557,18 @@ class JIRAForm(forms.ModelForm):
         exclude = ['product']
 
 
+class ExpressJIRAForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput, required=True)
+    issue_key = forms.CharField(required=True, help_text='A valid issue ID is required to gather the necessary information.')
+
+    class Meta:
+        model = JIRA_Conf
+        exclude = ['product', 'epic_name_id', 'open_status_key',
+                    'close_status_key', 'info_mapping_severity',
+                    'low_mapping_severity', 'medium_mapping_severity',
+                    'high_mapping_severity', 'critical_mapping_severity', 'finding_text']
+
+
 class Benchmark_Product_SummaryForm(forms.ModelForm):
 
     class Meta:
@@ -1540,6 +1589,23 @@ class JIRA_PKeyForm(forms.ModelForm):
 
     class Meta:
         model = JIRA_PKey
+        exclude = ['product']
+
+
+class Sonarqube_ProductForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(Sonarqube_ProductForm, self).__init__(*args, **kwargs)
+        Tool_Type.objects.get_or_create(name='SonarQube')
+
+    sonarqube_tool_config = forms.ModelChoiceField(
+        label='SonarQube Configuration',
+        queryset=Tool_Configuration.objects.filter(tool_type__name="SonarQube").order_by('name'),
+        required=False
+    )
+
+    class Meta:
+        model = Sonarqube_Product
         exclude = ['product']
 
 

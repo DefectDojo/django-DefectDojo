@@ -137,6 +137,12 @@
                             <th>Found By</th>
                             <th>Status</th>
                             <th></th>
+                            {% if "enable_jira"|get_system_setting %}
+                              {% if jira_config and product_tab or not product_tab %}
+                                <th>JIRA Age</th>
+                                <th>JIRA Change</th>
+                              {% endif %}
+                            {% endif%}
                             {% if show_product_column and product_tab is None %}
                             <th class="nowrap">{% dojo_sort request 'Product' 'test__engagement__product__name'%}</th>
                             {% endif %}
@@ -314,6 +320,23 @@
                                     {% endif %}
                                   {% endif %}
                                 </td>
+                                {% if "enable_jira"|get_system_setting %}
+                                  {% if jira_config and product_tab or not product_tab %}
+                                      <td class="nowrap">
+                                        {% if finding.jira_creation %}
+                                          {{ finding.jira_creation|timesince }} 
+                                        {% endif %} 
+                                      </td>
+                                      <td class="nowrap">
+                                        {% if finding.jira_change %}
+                                          {{ finding.jira_change|timesince }} 
+                                        {% endif %}
+                                      </td> 
+                                  {% endif %}
+                                {% endif %}
+                                
+
+
                                 {% if show_product_column and product_tab is None %}
                                 <td><a
                                         href="{% url 'view_product' finding.test.engagement.product.id %}"
@@ -400,13 +423,12 @@
             })
 
             $('[id^=delete-finding-menu-]').on('click', function () {
-              if (confirm('Are you sure you want to delete this finding?'))
+              if (confirm('Are you sure you want to delete these findings?'))
               {
                   var form_element = "form#" + this.id + "-form";
                   $( form_element ).submit();
               }
             });
-
             $('[data-toggle="tooltip"]').tooltip();
 
             var availableTags = [
