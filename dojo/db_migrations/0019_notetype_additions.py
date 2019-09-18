@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0014_jira_conf_resolution_mappings'),
+        ('dojo', '0018_sonarqube_api_integration'),
     ]
 
     operations = [
