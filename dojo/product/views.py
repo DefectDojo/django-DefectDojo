@@ -7,7 +7,7 @@ from math import ceil
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
@@ -20,7 +20,7 @@ from dojo.templatetags.display_tags import get_level
 from dojo.filters import ProductFilter, ProductFindingFilter, EngagementFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm, \
                        EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm
-from dojo.models import Product_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, Finding_Template, \
+from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, Finding_Template, \
     Tool_Product_Settings, Cred_Mapping, Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, \
     Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product
 from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, get_system_setting, create_notification, Product_Tab
@@ -803,6 +803,21 @@ def ad_hoc_finding(request, pid):
         jform = None
     if request.method == 'POST':
         form = AdHocFindingForm(request.POST)
+        if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
+            closing_disabled = Note_Type.objects.filter(is_mandatory=True, is_active=True).count()
+            if closing_disabled != 0:
+                error_inactive = ValidationError('Can not set a finding as inactive without adding all mandatory notes',
+                                        code='inactive_without_mandatory_notes')
+                error_false_p = ValidationError('Can not set a finding as false positive without adding all mandatory notes',
+                                        code='false_p_without_mandatory_notes')
+                if form['active'].value() is False:
+                    form.add_error('active', error_inactive)
+                if form['false_p'].value():
+                    form.add_error('false_p', error_false_p)
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     'Can not set a finding as inactive or false positive without adding all mandatory notes',
+                                     extra_tags='alert-danger')
         if form.is_valid():
             new_finding = form.save(commit=False)
             new_finding.test = test

@@ -310,6 +310,20 @@ class Contact(models.Model):
     updated = models.DateTimeField(editable=False)
 
 
+class Note_Type(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    description = models.CharField(max_length=200)
+    is_single = models.BooleanField(default=False, null=False)
+    is_active = models.BooleanField(default=True, null=False)
+    is_mandatory = models.BooleanField(default=True, null=False)
+
+    def __unicode__(self):
+        return self.name
+
+    def __str__(self):
+        return self.name
+
+
 class Product_Type(models.Model):
     name = models.CharField(max_length=255, unique=True)
     critical_product = models.BooleanField(default=False)
@@ -1051,6 +1065,7 @@ class Endpoint(models.Model):
 
 
 class NoteHistory(models.Model):
+    note_type = models.ForeignKey(Note_Type, null=True, blank=True, on_delete=models.CASCADE)
     data = models.TextField()
     time = models.DateTimeField(null=True, editable=False,
                                 default=get_current_datetime)
@@ -1058,6 +1073,7 @@ class NoteHistory(models.Model):
 
 
 class Notes(models.Model):
+    note_type = models.ForeignKey(Note_Type, related_name='note_type', null=True, blank=True, on_delete=models.CASCADE)
     entry = models.TextField()
     date = models.DateTimeField(null=False, editable=False,
                                 default=get_current_datetime)
@@ -2425,6 +2441,7 @@ admin.site.register(Product_Type)
 admin.site.register(Dojo_User)
 admin.site.register(UserContactInfo)
 admin.site.register(Notes)
+admin.site.register(Note_Type)
 admin.site.register(Report)
 admin.site.register(Scan)
 admin.site.register(ScanSettings)
