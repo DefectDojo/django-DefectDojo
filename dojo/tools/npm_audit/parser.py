@@ -19,9 +19,9 @@ class NpmAuditParser(object):
             return
         try:
             data = json_output.read()
-            if isinstance(type(data), (bytes, bytearray)):
+            try:
                 tree = json.loads(str(data, 'utf-8'))
-            else:
+            except:
                 tree = json.loads(data)
             subtree = tree.get('advisories')
         except:

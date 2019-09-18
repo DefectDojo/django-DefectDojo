@@ -1,15 +1,25 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, mixins
+from rest_framework import viewsets, mixins, status
+from rest_framework.response import Response
 from rest_framework.permissions import DjangoModelPermissions
-from rest_framework.decorators import detail_route
+from rest_framework.decorators import detail_route, action
 from django_filters.rest_framework import DjangoFilterBackend
 
 from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Finding, \
     User, ScanSettings, Scan, Stub_Finding, Finding_Template, Notes, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
-    Endpoint, JIRA_PKey, JIRA_Conf, DojoMeta, Development_Environment
+    Endpoint, JIRA_PKey, JIRA_Conf, DojoMeta, Development_Environment, Dojo_User
+
+from dojo.endpoint.views import get_endpoint_ids
+from dojo.reports.views import report_url_resolver
+from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter
+from dateutil.relativedelta import relativedelta
+from django.conf import settings
+from datetime import datetime
+from django.utils import timezone
+from dojo.utils import get_period_counts_legacy
 
 from dojo.api_v2 import serializers, permissions
 
@@ -31,6 +41,26 @@ class EndPointViewSet(mixins.ListModelMixin,
                 product__authorized_users__in=[self.request.user])
         else:
             return Endpoint.objects.all()
+
+    @detail_route(methods=['post'], permission_classes=[permissions.UserHasReportGeneratePermission])
+    def generate_report(self, request, pk=None):
+        endpoint = get_object_or_404(Endpoint.objects, id=pk)
+
+        options = {}
+        # prepare post data
+        report_options = serializers.ReportGenerateOptionSerializer(data=request.data)
+        if report_options.is_valid():
+            options['include_finding_notes'] = report_options.validated_data['include_finding_notes']
+            options['include_finding_images'] = report_options.validated_data['include_finding_images']
+            options['include_executive_summary'] = report_options.validated_data['include_executive_summary']
+            options['include_table_of_contents'] = report_options.validated_data['include_table_of_contents']
+        else:
+            return Response(report_options.errors,
+                status=status.HTTP_400_BAD_REQUEST)
+
+        data = report_generate(request, endpoint, options)
+        report = serializers.ReportGenerateSerializer(data)
+        return Response(report.data)
 
 
 class EngagementViewSet(mixins.ListModelMixin,
@@ -65,6 +95,26 @@ class EngagementViewSet(mixins.ListModelMixin,
         eng = get_object_or_404(Engagement.objects, id=pk)
         reopen_engagement(eng)
         return HttpResponse()
+
+    @detail_route(methods=['post'], permission_classes=[permissions.UserHasReportGeneratePermission])
+    def generate_report(self, request, pk=None):
+        engagement = get_object_or_404(Engagement.objects, id=pk)
+
+        options = {}
+        # prepare post data
+        report_options = serializers.ReportGenerateOptionSerializer(data=request.data)
+        if report_options.is_valid():
+            options['include_finding_notes'] = report_options.validated_data['include_finding_notes']
+            options['include_finding_images'] = report_options.validated_data['include_finding_images']
+            options['include_executive_summary'] = report_options.validated_data['include_executive_summary']
+            options['include_table_of_contents'] = report_options.validated_data['include_table_of_contents']
+        else:
+            return Response(report_options.errors,
+                status=status.HTTP_400_BAD_REQUEST)
+
+        data = report_generate(request, engagement, options)
+        report = serializers.ReportGenerateSerializer(data)
+        return Response(report.data)
 
 
 class FindingTemplatesViewSet(mixins.ListModelMixin,
@@ -113,6 +163,74 @@ class FindingViewSet(mixins.ListModelMixin,
             return serializers.FindingCreateSerializer
         else:
             return serializers.FindingSerializer
+
+    @action(detail=True, methods=['get', 'post'])
+    def tags(self, request, pk=None):
+        finding = get_object_or_404(Finding.objects, id=pk)
+
+        if request.method == 'POST':
+            new_tags = serializers.TagSerializer(data=request.data)
+            if new_tags.is_valid():
+                all_tags = finding.tags
+                all_tags = serializers.TagSerializer({"tags": all_tags}).data['tags']
+
+                for tag in new_tags.validated_data['tags']:
+                    if tag not in all_tags:
+                        all_tags.append(tag)
+                t = ", ".join(all_tags)
+                finding.tags = t
+                finding.save()
+            else:
+                return Response(new_tags.errors,
+                    status=status.HTTP_400_BAD_REQUEST)
+        tags = finding.tags
+        serialized_tags = serializers.TagSerializer({"tags": tags})
+        return Response(serialized_tags.data)
+
+    @detail_route(methods=["put", "patch"])
+    def remove_tags(self, request, pk=None):
+        """ Remove Tag(s) from finding list of tags """
+        finding = get_object_or_404(Finding.objects, id=pk)
+        delete_tags = serializers.TagSerializer(data=request.data)
+        if delete_tags.is_valid():
+            all_tags = finding.tags
+            all_tags = serializers.TagSerializer({"tags": all_tags}).data['tags']
+            del_tags = delete_tags.validated_data['tags']
+            if len(del_tags) < 1:
+                return Response({"error": "Empty Tag List Not Allowed"},
+                        status=status.HTTP_400_BAD_REQUEST)
+            for tag in del_tags:
+                if tag not in all_tags:
+                    return Response({"error": "'{}' is not a valid tag in list".format(tag)},
+                        status=status.HTTP_400_BAD_REQUEST)
+                all_tags.remove(tag)
+            t = ", ".join(all_tags)
+            finding.tags = t
+            finding.save()
+            return Response({"success": "Tag(s) Removed"},
+                status=status.HTTP_200_OK)
+        else:
+            return Response(delete_tags.errors,
+                status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['post'])
+    def generate_report(self, request):
+        findings = Finding.objects.all()
+        options = {}
+        # prepare post data
+        report_options = serializers.ReportGenerateOptionSerializer(data=request.data)
+        if report_options.is_valid():
+            options['include_finding_notes'] = report_options.validated_data['include_finding_notes']
+            options['include_finding_images'] = report_options.validated_data['include_finding_images']
+            options['include_executive_summary'] = report_options.validated_data['include_executive_summary']
+            options['include_table_of_contents'] = report_options.validated_data['include_table_of_contents']
+        else:
+            return Response(report_options.errors,
+                status=status.HTTP_400_BAD_REQUEST)
+
+        data = report_generate(request, findings, options)
+        report = serializers.ReportGenerateSerializer(data)
+        return Response(report.data)
 
 
 class JiraConfigurationsViewSet(mixins.ListModelMixin,
@@ -186,6 +304,26 @@ class ProductViewSet(mixins.ListModelMixin,
         else:
             return Product.objects.all()
 
+    @detail_route(methods=['post'], permission_classes=[permissions.UserHasReportGeneratePermission])
+    def generate_report(self, request, pk=None):
+        product = get_object_or_404(Product.objects, id=pk)
+
+        options = {}
+        # prepare post data
+        report_options = serializers.ReportGenerateOptionSerializer(data=request.data)
+        if report_options.is_valid():
+            options['include_finding_notes'] = report_options.validated_data['include_finding_notes']
+            options['include_finding_images'] = report_options.validated_data['include_finding_images']
+            options['include_executive_summary'] = report_options.validated_data['include_executive_summary']
+            options['include_table_of_contents'] = report_options.validated_data['include_table_of_contents']
+        else:
+            return Response(report_options.errors,
+                status=status.HTTP_400_BAD_REQUEST)
+
+        data = report_generate(request, product, options)
+        report = serializers.ReportGenerateSerializer(data)
+        return Response(report.data)
+
 
 class ProductTypeViewSet(mixins.ListModelMixin,
                          mixins.RetrieveModelMixin,
@@ -203,6 +341,26 @@ class ProductTypeViewSet(mixins.ListModelMixin,
                 prod_type__authorized_users__in=[self.request.user])
         else:
             return Product_Type.objects.all()
+
+    @detail_route(methods=['post'], permission_classes=[permissions.UserHasReportGeneratePermission])
+    def generate_report(self, request, pk=None):
+        product_type = get_object_or_404(Product_Type.objects, id=pk)
+
+        options = {}
+        # prepare post data
+        report_options = serializers.ReportGenerateOptionSerializer(data=request.data)
+        if report_options.is_valid():
+            options['include_finding_notes'] = report_options.validated_data['include_finding_notes']
+            options['include_finding_images'] = report_options.validated_data['include_finding_images']
+            options['include_executive_summary'] = report_options.validated_data['include_executive_summary']
+            options['include_table_of_contents'] = report_options.validated_data['include_table_of_contents']
+        else:
+            return Response(report_options.errors,
+                status=status.HTTP_400_BAD_REQUEST)
+
+        data = report_generate(request, product_type, options)
+        report = serializers.ReportGenerateSerializer(data)
+        return Response(report.data)
 
 
 class ScanSettingsViewSet(mixins.ListModelMixin,
@@ -311,6 +469,26 @@ class TestsViewSet(mixins.ListModelMixin,
         else:
             return serializers.TestSerializer
 
+    @detail_route(methods=['post'], permission_classes=[permissions.UserHasReportGeneratePermission])
+    def generate_report(self, request, pk=None):
+        test = get_object_or_404(Test.objects, id=pk)
+
+        options = {}
+        # prepare post data
+        report_options = serializers.ReportGenerateOptionSerializer(data=request.data)
+        if report_options.is_valid():
+            options['include_finding_notes'] = report_options.validated_data['include_finding_notes']
+            options['include_finding_images'] = report_options.validated_data['include_finding_images']
+            options['include_executive_summary'] = report_options.validated_data['include_executive_summary']
+            options['include_table_of_contents'] = report_options.validated_data['include_table_of_contents']
+        else:
+            return Response(report_options.errors,
+                status=status.HTTP_400_BAD_REQUEST)
+
+        data = report_generate(request, test, options)
+        report = serializers.ReportGenerateSerializer(data)
+        return Response(report.data)
+
 
 class TestTypesViewSet(mixins.ListModelMixin,
                        mixins.RetrieveModelMixin,
@@ -390,3 +568,321 @@ class NotesViewSet(mixins.ListModelMixin,
     filter_fields = ('id', 'entry', 'author',
                     'private', 'date', 'edited',
                     'edit_time', 'editor')
+
+
+def report_generate(request, obj, options):
+    user = Dojo_User.objects.get(id=request.user.id)
+    product_type = None
+    product = None
+    engagement = None
+    test = None
+    endpoint = None
+    endpoints = None
+    endpoint_all_findings = None
+    endpoint_monthly_counts = None
+    endpoint_active_findings = None
+    accepted_findings = None
+    open_findings = None
+    closed_findings = None
+    verified_findings = None
+    report_title = None
+    report_subtitle = None
+
+    include_finding_notes = False
+    include_finding_images = False
+    include_executive_summary = False
+    include_table_of_contents = False
+
+    report_info = "Generated By %s on %s" % (
+        user.get_full_name(), (timezone.now().strftime("%m/%d/%Y %I:%M%p %Z")))
+
+    # generate = "_generate" in request.GET
+    report_name = str(obj)
+    report_type = type(obj).__name__
+
+    include_finding_notes = options.get('include_finding_notes', False)
+    include_finding_images = options.get('include_finding_images', False)
+    include_executive_summary = options.get('include_executive_summary', False)
+    include_table_of_contents = options.get('include_table_of_contents', False)
+
+    if type(obj).__name__ == "Product_Type":
+        product_type = obj
+
+        report_name = "Product Type Report: " + str(product_type)
+        report_title = "Product Type Report"
+        report_subtitle = str(product_type)
+
+        findings = ReportFindingFilter(request.GET, queryset=Finding.objects.filter(
+            test__engagement__product__prod_type=product_type).distinct().prefetch_related('test',
+                                                                                           'test__engagement__product',
+                                                                                           'test__engagement__product__prod_type'))
+        products = Product.objects.filter(prod_type=product_type,
+                                          engagement__test__finding__in=findings.qs).distinct()
+        engagements = Engagement.objects.filter(product__prod_type=product_type,
+                                                test__finding__in=findings.qs).distinct()
+        tests = Test.objects.filter(engagement__product__prod_type=product_type,
+                                    finding__in=findings.qs).distinct()
+        if findings:
+            start_date = timezone.make_aware(datetime.combine(findings.qs.last().date, datetime.min.time()))
+        else:
+            start_date = timezone.now()
+
+        end_date = timezone.now()
+
+        r = relativedelta(end_date, start_date)
+        months_between = (r.years * 12) + r.months
+        # include current month
+        months_between += 1
+
+        endpoint_monthly_counts = get_period_counts_legacy(findings.qs.order_by('numerical_severity'), findings.qs.order_by('numerical_severity'), None,
+                                                            months_between, start_date,
+                                                            relative_delta='months')
+
+    elif type(obj).__name__ == "Product":
+        product = obj
+
+        report_name = "Product Report: " + str(product)
+        report_title = "Product Report"
+        report_subtitle = str(product)
+        findings = ReportFindingFilter(request.GET, queryset=Finding.objects.filter(
+            test__engagement__product=product).distinct().prefetch_related('test',
+                                                                           'test__engagement__product',
+                                                                           'test__engagement__product__prod_type'))
+        ids = set(finding.id for finding in findings.qs)
+        engagements = Engagement.objects.filter(test__finding__id__in=ids).distinct()
+        tests = Test.objects.filter(finding__id__in=ids).distinct()
+        ids = get_endpoint_ids(Endpoint.objects.filter(product=product).distinct())
+        endpoints = Endpoint.objects.filter(id__in=ids)
+
+    elif type(obj).__name__ == "Engagement":
+        engagement = obj
+        findings = ReportFindingFilter(request.GET, queryset=Finding.objects.filter(
+            test__engagement=engagement,
+        ).prefetch_related(
+            'test',
+            'test__engagement__product',
+            'test__engagement__product__prod_type'
+        ).distinct())
+        report_name = "Engagement Report: " + str(engagement)
+
+        report_title = "Engagement Report"
+        report_subtitle = str(engagement)
+
+        ids = set(finding.id for finding in findings.qs)
+        tests = Test.objects.filter(finding__id__in=ids).distinct()
+        ids = get_endpoint_ids(Endpoint.objects.filter(product=engagement.product).distinct())
+        endpoints = Endpoint.objects.filter(id__in=ids)
+
+    elif type(obj).__name__ == "Test":
+        test = obj
+        findings = ReportFindingFilter(request.GET,
+                                       queryset=Finding.objects.filter(test=test).prefetch_related(
+                                            'test',
+                                            'test__engagement__product',
+                                            'test__engagement__product__prod_type').distinct())
+        report_name = "Test Report: " + str(test)
+        report_title = "Test Report"
+        report_subtitle = str(test)
+
+    elif type(obj).__name__ == "Endpoint":
+        endpoint = obj
+        host = endpoint.host_no_port
+        report_name = "Endpoint Report: " + host
+        report_type = "Endpoint"
+        endpoints = Endpoint.objects.filter(host__regex="^" + host + ":?",
+                                            product=endpoint.product).distinct()
+        report_title = "Endpoint Report"
+        report_subtitle = host
+        findings = ReportFindingFilter(request.GET,
+            queryset=Finding.objects.filter(
+                endpoints__in=endpoints,
+            ).prefetch_related(
+                'test',
+                'test__engagement__product',
+                'test__engagement__product__prod_type'
+            ).distinct())
+
+    elif type(obj).__name__ == "QuerySet":
+        findings = ReportAuthedFindingFilter(request.GET,
+            queryset=obj.prefetch_related(
+                'test',
+                'test__engagement__product',
+                'test__engagement__product__prod_type'
+            ).distinct(),
+            user=request.user
+        )
+        report_name = 'Finding'
+        report_type = 'Finding'
+        report_title = "Finding Report"
+        report_subtitle = ''
+
+    else:
+        raise Http404()
+
+    result = {
+        'product_type': product_type,
+        'product': product,
+        'engagement': engagement,
+        'report_name': report_name,
+        'report_info': report_info,
+        'test': test,
+        'endpoint': endpoint,
+        'endpoints': endpoints,
+        'findings': findings.qs.order_by('numerical_severity'),
+        'include_table_of_contents': include_table_of_contents,
+        'user': user,
+        'team_name': settings.TEAM_NAME,
+        'title': 'Generate Report',
+        'user_id': request.user.id,
+        'host': report_url_resolver(request),
+    }
+
+    finding_notes = []
+    finding_images = []
+
+    if include_finding_images:
+        for finding in findings.qs.order_by('numerical_severity'):
+            images = finding.images.all()
+            if images:
+                finding_images.append(
+                    {
+                        "finding_id": finding,
+                        "images": images
+                    }
+                )
+        result['finding_images'] = finding_images
+
+    if include_finding_notes:
+        for finding in findings.qs.order_by('numerical_severity'):
+            notes = finding.notes.all()
+            if notes:
+                finding_notes.append(
+                    {
+                        "finding_id": finding,
+                        "notes": notes.filter(private=False)  # fetching only public notes for report
+                    }
+                )
+        result['finding_notes'] = finding_notes
+
+    # Generating Executive summary based on obj type
+    if include_executive_summary and type(obj).__name__ != "Endpoint":
+        executive_summary = {}
+
+        # Declare all required fields for executive summary
+        engagement_name = None
+        engagement_target_start = None
+        engagement_target_end = None
+        test_type_name = None
+        test_target_start = None
+        test_target_end = None
+        test_environment_name = "unknown"  # a default of "unknown"
+        test_strategy_ref = None
+        total_findings = 0
+
+        if type(obj).__name__ == "Product_Type":
+            for prod_typ in obj.prod_type.all():
+                engmnts = prod_typ.engagement_set.all()
+                if engmnts:
+                    for eng in engmnts:
+                        if eng.name:
+                            engagement_name = eng.name
+                        engagement_target_start = eng.target_start
+                        if eng.target_end:
+                            engagement_target_end = eng.target_end
+                        else:
+                            engagement_target_end = "ongoing"
+                        if eng.test_set.all():
+                            for t in eng.test_set.all():
+                                test_type_name = t.test_type.name
+                                if test.environment:
+                                    test_environment_name = t.environment.name
+                                test_target_start = t.target_start
+                                if t.target_end:
+                                    test_target_end = t.target_end
+                                else:
+                                    test_target_end = "ongoing"
+                            if eng.test_strategy:
+                                test_strategy_ref = eng.test_strategy
+                            else:
+                                test_strategy_ref = ""
+                total_findings = len(findings.qs.all())
+
+        elif type(obj).__name__ == "Product":
+            engs = obj.engagement_set.all()
+            if engs:
+                for eng in engs:
+                    if eng.name:
+                        engagement_name = eng.name
+                    engagement_target_start = eng.target_start
+                    if eng.target_end:
+                        engagement_target_end = eng.target_end
+                    else:
+                        engagement_target_end = "ongoing"
+
+                    if eng.test_set.all():
+                        for t in eng.test_set.all():
+                            test_type_name = t.test_type.name
+                            if t.environment:
+                                test_environment_name = t.environment.name
+                    if eng.test_strategy:
+                        test_strategy_ref = eng.test_strategy
+                    else:
+                        test_strategy_ref = ""
+                total_findings = len(findings.qs.all())
+
+        elif type(obj).__name__ == "Engagement":
+            eng = obj
+            if eng.name:
+                engagement_name = eng.name
+            engagement_target_start = eng.target_start
+            if eng.target_end:
+                engagement_target_end = eng.target_end
+            else:
+                engagement_target_end = "ongoing"
+
+            if eng.test_set.all():
+                for t in eng.test_set.all():
+                    test_type_name = t.test_type.name
+                    if t.environment:
+                        test_environment_name = t.environment.name
+            if eng.test_strategy:
+                test_strategy_ref = eng.test_strategy
+            else:
+                test_strategy_ref = ""
+            total_findings = len(findings.qs.all())
+
+        elif type(obj).__name__ == "Test":
+            t = obj
+            test_type_name = t.test_type.name
+            test_target_start = t.target_start
+            if t.target_end:
+                test_target_end = t.target_end
+            else:
+                test_target_end = "ongoing"
+            total_findings = len(findings.qs.all())
+            if t.engagement.name:
+                engagement_name = t.engagement.name
+            engagement_target_start = t.engagement.target_start
+            if t.engagement.target_end:
+                engagement_target_end = t.engagement.target_end
+            else:
+                engagement_target_end = "ongoing"
+        else:
+            pass  # do nothing
+
+        executive_summary = {
+            'engagement_name': engagement_name,
+            'engagement_target_start': engagement_target_start,
+            'engagement_target_end': engagement_target_end,
+            'test_type_name': test_type_name,
+            'test_target_start': test_target_start,
+            'test_target_end': test_target_end,
+            'test_environment_name': test_environment_name,
+            'test_strategy_ref': test_strategy_ref,
+            'total_findings': total_findings
+        }
+        # End of executive summary generation
+
+        result['executive_summary'] = executive_summary
+
+    return result

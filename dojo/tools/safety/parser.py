@@ -19,9 +19,9 @@ class SafetyParser(object):
 
     def parse_json(self, json_output):
         data = json_output.read()
-        if isinstance(type(data), (bytes, bytearray)):
+        try:
             json_obj = json.loads(str(data, 'utf-8'))
-        else:
+        except:
             json_obj = json.loads(data)
         tree = {l[4]: {'package': str(l[0]),
                        'affected': str(l[1]),

@@ -2,6 +2,9 @@
 docker/data/
 docker/static/
 
+# docker-compose override symbolic link
+docker-compose.override.yml
+
 # VS Code
 .vscode/
 
