@@ -12,10 +12,6 @@ services:
         published: 3000
         protocol: tcp
         mode: host
-      - target: 8000
-        published: 8000
-        protocol: tcp
-        mode: host
   celeryworker:
     volumes:
       - '.:/app:z'
