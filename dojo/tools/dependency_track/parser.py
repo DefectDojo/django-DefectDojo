@@ -111,7 +111,7 @@ class DependencyTrackParser(object):
         :param test: The test that the DefectDojo finding should be associated to
         :return: A DefectDojo Finding model
         """
-        # Build the title of the Dojo finding
+        # Validation of required fields
         if 'vulnerability' not in dependency_track_finding:
             raise Exception("Missing 'vulnerability' node from finding!")
         if 'vulnId' not in dependency_track_finding['vulnerability']:
@@ -122,10 +122,23 @@ class DependencyTrackParser(object):
         source = dependency_track_finding['vulnerability']['source']
         if 'component' not in dependency_track_finding:
             raise Exception("Missing 'component' node from finding!")
-        if 'purl' not in dependency_track_finding['component']:
-            raise Exception("Missing 'purl' node from component!")
-        component_purl = dependency_track_finding['component']['purl']
-        title = "Vulnerability Id {vuln_id} from {source} affecting package {purl}".format(vuln_id=vuln_id, source=source, purl=component_purl)
+        if 'name' not in dependency_track_finding['component']:
+            raise Exception("Missing 'name' node from component!")
+        component_name = dependency_track_finding['component']['name']
+
+        # Build the title of the Dojo finding
+        # Note: the 'version' of a component is not a requirement in the Dependency Track data model.
+        # As such we only add in version information if it is present.
+        if 'version' in dependency_track_finding['component'] and dependency_track_finding['component']['version'] is not None:
+            component_version = dependency_track_finding['component']['version']
+        else:
+            component_version = None
+        if component_version is not None:
+            version_description = 'version {component_version} of '.format(component_version=component_version)
+        else:
+            version_description = ''
+        title = "Vulnerability Id {vuln_id} from {source} affecting {version_description}the {component_name} component"\
+            .format(vuln_id=vuln_id, source=source, version_description=version_description, component_name=component_name)
 
         # The vulnId is not always a CVE (e.g. if the vulnerability is not from the NVD source)
         # So here we set the cve for the DefectDojo finding to null unless the source of the
@@ -138,12 +151,27 @@ class DependencyTrackParser(object):
         else:
             cwe = 1035
 
-        # Build description
-        vulnerability_description = "You are using a package with a known vulnerability. The " \
-                "package {purl} is affected by the vulnerability with an id of {vuln_id} as " \
-                "identified by {source}. The description of this vulnerability is: {description}" \
-            .format(purl=component_purl, vuln_id=vuln_id, source=source,
-                    description=dependency_track_finding['vulnerability']['description'])
+        # Build the description of the Dojo finding
+        # We already know (from above) that the version information is not always present
+        if component_version is not None:
+            component_description = "Version {component_version} of the {component_name} component".format(component_version=component_version, component_name=component_name)
+        else:
+            component_description = "The {component_name} component".format(component_name=component_name)
+        vulnerability_description = "You are using a component with a known vulnerability. " \
+                "{component_description} is affected by the vulnerability with an id of {vuln_id} as " \
+                "identified by {source}." \
+            .format(component_description=component_description, vuln_id=vuln_id, source=source)
+        # Append purl info if it is present
+        if 'purl' in dependency_track_finding['component'] and dependency_track_finding['component']['purl'] is not None:
+            component_purl = dependency_track_finding['component']['purl']
+            vulnerability_description = vulnerability_description + "\nThe purl of the affected component is: {purl}.".format(purl=component_purl)
+        # Append other info about vulnerability description info if it is present
+        if 'title' in dependency_track_finding['vulnerability'] and dependency_track_finding['vulnerability']['title'] is not None:
+            vulnerability_description = vulnerability_description + "\nVulnerability Title: {title}".format(title=dependency_track_finding['vulnerability']['title'])
+        if 'subtitle' in dependency_track_finding['vulnerability'] and dependency_track_finding['vulnerability']['subtitle'] is not None:
+            vulnerability_description = vulnerability_description + "\nVulnerability Subtitle: {subtitle}".format(subtitle=dependency_track_finding['vulnerability']['subtitle'])
+        if 'description' in dependency_track_finding['vulnerability'] and dependency_track_finding['vulnerability']['description'] is not None:
+            vulnerability_description = vulnerability_description + "\nVulnerability Description: {description}".format(description=dependency_track_finding['vulnerability']['description'])
 
         # Get severity according to Dependency Track and convert it to a severity DefectDojo understands
         dependency_track_severity = dependency_track_finding['vulnerability']['severity']
