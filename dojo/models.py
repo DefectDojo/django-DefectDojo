@@ -232,6 +232,7 @@ class System_Settings(models.Model):
     sla_low = models.IntegerField(default=120,
                                           verbose_name="Low Finding SLA Days",
                                           help_text="# of days to remediate a low finding.")
+    credentials = models.CharField(max_length=500, blank=True)
 
 
 class SystemSettingsFormAdmin(forms.ModelForm):
