@@ -12,12 +12,10 @@ if [ ! -f ${TARGET_SETTINGS_FILE} ]; then
   cp dojo/settings/settings.dist.py dojo/settings/settings.py
 fi
 
-PORT=8000
-echo "Serving directly on port ${PORT}"
-python manage.py runserver 0.0.0.0:${PORT} --noreload --nothreading
-
-#exec uwsgi \
-#  "--${DD_UWSGI_MODE}" "${DD_UWSGI_ENDPOINT}" \
-#  --protocol uwsgi \
-#  --wsgi dojo.wsgi:application \
-#  --py-autoreload 1
+exec uwsgi \
+  "--${DD_UWSGI_MODE}" "${DD_UWSGI_ENDPOINT}" \
+  --protocol uwsgi \
+  --wsgi dojo.wsgi:application \
+  --py-autoreload 1 \
+  --enable-threads --lazy-apps --honour-stdin
+  
