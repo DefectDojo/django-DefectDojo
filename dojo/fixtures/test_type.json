@@ -493,5 +493,13 @@
     	"model": "dojo.test_type",
     	"pk": 162
 
+	},
+	{
+		"fields": {
+			"name": "Dependency Track Finding Packaging Format (FPF) Export"
+		},
+		"model": "dojo.test_type",
+		"pk": 163
+
 	}
 ]
