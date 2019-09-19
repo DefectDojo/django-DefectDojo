@@ -43,9 +43,3 @@ class TestDependencyTrackParser(TestCase):
         parser = DependencyTrackParser(testfile, Test())
         testfile.close()
         self.assertEqual(1, len(parser.items))
-
-    def test_dependency_track_parser_has_one_finding(self):
-        testfile = open("dojo/unittests/scans/dependency_track_samples/one_finding.json")
-        parser = DependencyTrackParser(testfile, Test())
-        testfile.close()
-        self.assertEqual(1, len(parser.items))
