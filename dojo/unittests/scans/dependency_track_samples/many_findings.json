@@ -86,6 +86,25 @@
         "uuid": "900991f6-335a-49cb-9bf6-87b545f960ce",
         "vulnId": "CVE-2016-2097"
       }
+    },
+    {
+      "analysis": {
+        "isSuppressed": false
+      },
+      "component": {
+        "name": "actionview",
+        "uuid": "3e52f829-3317-48c3-bde1-342c610bd223"
+      },
+      "matrix": "8d7f5fcd-210b-491d-a29e-904c2e01b281:3e52f829-3317-48c3-bde1-342c610bd223:900991f6-335a-49cb-9bf6-87b545f960ce",
+      "vulnerability": {
+        "cweId": 22,
+        "cweName": "Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')",
+        "severity": "MEDIUM",
+        "severityRank": 2,
+        "source": "NVD",
+        "uuid": "900991f6-335a-49cb-9bf6-87b545f960ce",
+        "vulnId": "CVE-2016-2097"
+      }
     }
   ]
 }
