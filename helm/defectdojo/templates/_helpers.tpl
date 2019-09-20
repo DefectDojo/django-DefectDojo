@@ -36,7 +36,7 @@ Create chart name and version as used by the chart label.
   Determine the hostname to use for PostgreSQL/mySQL.
 */}}
 {{- define "postgresql.hostname" -}}
-{{- if eq .Values.database.type "postgresql" -}}
+{{- if eq .Values.database "postgresql" -}}
 {{- if .Values.postgresql.enabled -}}
 {{- printf "%s-%s" .Release.Name "postgresql" | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
@@ -45,7 +45,7 @@ Create chart name and version as used by the chart label.
 {{- end -}}
 {{- end -}}
 {{- define "mysql.hostname" -}}
-{{- if eq .Values.database.type "mysql" -}}
+{{- if eq .Values.database "mysql" -}}
 {{- if .Values.mysql.enabled -}}
 {{- printf "%s-%s" .Release.Name "mysql" | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
