@@ -46,7 +46,7 @@ spec:
                   {{- else if eq .Values.database "mysql" }}
                   name: {{- if .Values.mysql.enabled }} {{ template "mysql.fullname" .}} {{- else }} {{ .Values.mysql.mysqlPasswordSecret }} {{- end }}
                   key: mysql-password
-                  {{- end }}   }-password
+                  {{- end }}
           resources:
             {{- toYaml .Values.celery.beat.resources | nindent 12 }}
       {{- with .Values.celery.beat.nodeSelector }}
