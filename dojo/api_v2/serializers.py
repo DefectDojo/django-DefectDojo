@@ -5,6 +5,7 @@ from dojo.models import Product, Engagement, Test, Finding, \
     Product_Type, JIRA_Conf, Endpoint, BurpRawRequestResponse, JIRA_PKey, \
     Notes, DojoMeta, FindingImage
 from dojo.forms import ImportScanForm, SEVERITY_CHOICES
+from dojo.tools import requires_file
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import create_notification
 from django.urls import reverse
@@ -14,6 +15,7 @@ from django.conf import settings
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+import base64
 import datetime
 import six
 from django.utils.translation import ugettext_lazy as _
@@ -375,14 +377,14 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
 
 
 class FindingImageSerializer(serializers.ModelSerializer):
-    url = serializers.SerializerMethodField()
+    base64 = serializers.SerializerMethodField()
 
     class Meta:
         model = FindingImage
-        fields = ["caption", "id", "url"]
+        fields = ["base64", "caption", "id"]
 
-    def get_url(self, obj):
-        return obj.image.url
+    def get_base64(self, obj):
+        return base64.b64encode(obj.image.read())
 
 
 class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
@@ -523,7 +525,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
     scan_type = serializers.ChoiceField(
         choices=ImportScanForm.SCAN_TYPE_CHOICES)
     test_type = serializers.CharField(required=False)
-    file = serializers.FileField()
+    file = serializers.FileField(required=False)
     engagement = serializers.PrimaryKeyRelatedField(
         queryset=Engagement.objects.all())
     lead = serializers.PrimaryKeyRelatedField(
@@ -559,7 +561,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         if 'tags' in data:
             test.tags = ' '.join(data['tags'])
         try:
-            parser = import_parser_factory(data['file'],
+            parser = import_parser_factory(data.get('file'),
                                            test,
                                            active,
                                            verified,
@@ -675,6 +677,13 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
 
         return test
 
+    def validate(self, data):
+        scan_type = data.get("scan_type")
+        file = data.get("file")
+        if not file and requires_file(scan_type):
+            raise serializers.ValidationError('Uploading a Report File is required for {}'.format(scan_type))
+        return data
+
     def validate_scan_data(self, value):
         if value.date() > datetime.today().date():
             raise serializers.ValidationError(
@@ -692,7 +701,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     scan_type = serializers.ChoiceField(
         choices=ImportScanForm.SCAN_TYPE_CHOICES)
     tags = TagListSerializerField(required=False)
-    file = serializers.FileField()
+    file = serializers.FileField(required=False)
     test = serializers.PrimaryKeyRelatedField(
         queryset=Test.objects.all())
 
@@ -706,7 +715,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         active = data['active']
 
         try:
-            parser = import_parser_factory(data['file'],
+            parser = import_parser_factory(data.get('file'),
                                            test,
                                            active,
                                            verified,
@@ -830,6 +839,13 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             raise Exception("Parser SyntaxError")
 
         return test
+
+    def validate(self, data):
+        scan_type = data.get("scan_type")
+        file = data.get("file")
+        if not file and requires_file(scan_type):
+            raise serializers.ValidationError('Uploading a Report File is required for {}'.format(scan_type))
+        return data
 
     def validate_scan_data(self, value):
         if value.date() > datetime.today().date():

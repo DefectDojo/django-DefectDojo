@@ -28,6 +28,7 @@ from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Type, Notes, \
     Risk_Acceptance, Development_Environment, BurpRawRequestResponse, Endpoint, \
     JIRA_PKey, JIRA_Issue, Cred_Mapping, Dojo_User, System_Settings
+from dojo.tools import handles_active_verified_statuses
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, message, get_system_setting, create_notification, Product_Tab
@@ -480,7 +481,7 @@ def import_scan_results(request, eid=None, pid=None):
                 engagement.active = True
                 engagement.status = 'In Progress'
                 engagement.save()
-            file = request.FILES['file']
+            file = request.FILES.get('file')
             scan_date = form.cleaned_data['scan_date']
             min_sev = form.cleaned_data['minimum_severity']
             active = form.cleaned_data['active']
@@ -543,7 +544,7 @@ def import_scan_results(request, eid=None, pid=None):
                     item.reporter = request.user
                     item.last_reviewed = timezone.now()
                     item.last_reviewed_by = request.user
-                    if form.get_scan_type() != "Generic Findings Import":
+                    if not handles_active_verified_statuses(form.get_scan_type()):
                         item.active = active
                         item.verified = verified
                     item.save(dedupe_option=False, false_history=True)
