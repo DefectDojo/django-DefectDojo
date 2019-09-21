@@ -203,7 +203,7 @@ class CheckmarxXMLParser(object):
     def get_pathnode_elements(self, pathnode):
         return pathnode.find('FileName').text, pathnode.find('Line').text, pathnode.find('Name').text
 
-    # Builds the finding description for scanner "Checkmarx Scan detailed"
+    # Builds the finding description for scanner "Checkmarx Scan detailed"
     def get_description_detailed(self, pathnode, findingdetail):
         if pathnode.find('Line').text is not None:
             findingdetail = "{}**Line Number:** {}\n".format(findingdetail, pathnode.find('Line').text)
