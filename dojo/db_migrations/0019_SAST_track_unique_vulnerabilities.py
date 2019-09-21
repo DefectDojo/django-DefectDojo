@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0018_sonarqube_api_integration.py'),
+        ('dojo', '0018_sonarqube_api_integration'),
     ]
 
     operations = [
