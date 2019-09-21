@@ -23,6 +23,9 @@ except:  # This will work for python2 if above fails
 
 
 class DedupeTest(unittest.TestCase):
+    # --------------------------------------------------------------------------------------------------------
+    # Initialization
+    # --------------------------------------------------------------------------------------------------------
     def setUp(self):
         self.driver = webdriver.Chrome('chromedriver')
         self.driver.implicitly_wait(30)
@@ -69,6 +72,10 @@ class DedupeTest(unittest.TestCase):
         text = driver.find_element_by_tag_name("BODY").text
         self.assertTrue(re.search(r'No findings found.', text))
 
+# --------------------------------------------------------------------------------------------------------
+# Same scanner deduplication - Deduplication on engagement
+#   Test deduplication for Bandit SAST scanner
+# --------------------------------------------------------------------------------------------------------
     def test_add_path_test_suite(self):
         # Create engagement
         driver = self.login_page()
@@ -132,6 +139,10 @@ class DedupeTest(unittest.TestCase):
                 dupe_count += 1
         self.assertEqual(dupe_count, 1)
 
+# --------------------------------------------------------------------------------------------------------
+# Same scanner deduplication - Deduplication on engagement
+#   Test deduplication for Immuniweb dynamic scanner
+# --------------------------------------------------------------------------------------------------------
     def test_add_endpoint_test_suite(self):
         # Create engagement
         driver = self.login_page()
@@ -160,7 +171,7 @@ class DedupeTest(unittest.TestCase):
         self.assertTrue(re.search(r'Test added successfully', text))
 
     def test_import_endpoint_tests(self):
-        # First test
+        # First test : Immuniweb Scan (dynamic)
         driver = self.login_page()
         driver.get(self.base_url + "engagement")
         driver.find_element_by_partial_link_text("Dedupe Endpoint Test").click()
@@ -171,7 +182,7 @@ class DedupeTest(unittest.TestCase):
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
         driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_1.xml")
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
-        # Second test
+        # Second test : Immuniweb Scan (dynamic)
         driver.get(self.base_url + "engagement")
         driver.find_element_by_partial_link_text("Dedupe Endpoint Test").click()
         driver.find_element_by_partial_link_text("Endpoint Test 2").click()
@@ -223,7 +234,7 @@ class DedupeTest(unittest.TestCase):
         self.assertTrue(re.search(r'Test added successfully', text))
 
     def test_import_same_eng_tests(self):
-        # First test
+        # First test : Immuniweb Scan (dynamic)
         driver = self.login_page()
         driver.get(self.base_url + "engagement")
         driver.find_element_by_partial_link_text("Dedupe Same Eng Test").click()
@@ -234,7 +245,7 @@ class DedupeTest(unittest.TestCase):
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
         driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_1.xml")
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
-        # Second test
+        # Second test : Generic Findings Import with Url (dynamic)
         driver.get(self.base_url + "engagement")
         driver.find_element_by_partial_link_text("Dedupe Same Eng Test").click()
         driver.find_element_by_partial_link_text("Same Eng Test 2").click()
@@ -258,8 +269,82 @@ class DedupeTest(unittest.TestCase):
                 dupe_count += 1
         self.assertEqual(dupe_count, 1)
 
+# --------------------------------------------------------------------------------------------------------
+# Same scanner deduplication - Deduplication on engagement
+#   Test deduplication for Checkmarx SAST Scan with custom hash_code computation
+#   Upon import, Checkmarx Scan aggregates on : categories, cwe, name, sinkFilename
+#   That test shows that the custom hash_code (excluding line number, see settings.py)
+#     makes it possible to detect the duplicate even if the line number has changed (which will occur in a normal software lifecycle)
+# --------------------------------------------------------------------------------------------------------
+    def test_add_path_test_suite_checkmarx_scan(self):
+        # Create engagement
+        driver = self.login_page()
+        driver.get(self.base_url + "product")
+        driver.find_element_by_class_name("pull-left").click()
+        driver.find_element_by_link_text("Add New Engagement").click()
+        driver.find_element_by_id("id_name").send_keys("Dedupe Path Test")
+        driver.find_element_by_xpath('//*[@id="id_deduplication_on_engagement"]').click()
+        driver.find_element_by_name("_Add Tests").click()
+        text = driver.find_element_by_tag_name("BODY").text
+        self.assertTrue(re.search(r'Engagement added successfully.', text))
+        # Add the tests
+        # Test 1
+        driver.find_element_by_id("id_title").send_keys("Path Test 1")
+        Select(driver.find_element_by_id("id_test_type")).select_by_visible_text("Checkmarx Scan")
+        Select(driver.find_element_by_id("id_environment")).select_by_visible_text("Development")
+        driver.find_element_by_name("_Add Another Test").click()
+        text = driver.find_element_by_tag_name("BODY").text
+        self.assertTrue(re.search(r'Test added successfully', text))
+        # Test 2
+        driver.find_element_by_id("id_title").send_keys("Path Test 2")
+        Select(driver.find_element_by_id("id_test_type")).select_by_visible_text("Checkmarx Scan")
+        Select(driver.find_element_by_id("id_environment")).select_by_visible_text("Development")
+        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        text = driver.find_element_by_tag_name("BODY").text
+        self.assertTrue(re.search(r'Test added successfully', text))
+
+    def test_import_path_tests_checkmarx_scan(self):
+        # First test
+        driver = self.login_page()
+        driver.get(self.base_url + "engagement")
+        driver.find_element_by_partial_link_text("Dedupe Path Test").click()
+        driver.find_element_by_partial_link_text("Path Test 1").click()
+        driver.find_element_by_id("dropdownMenu1").click()
+        driver.find_element_by_link_text("Re-Upload Scan").click()
+        driver.find_element_by_xpath('//*[@id="base-content"]/form/div[3]/div/div').click()
+        driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
+        driver.find_element_by_id('id_file').send_keys(self.relative_path + "../unittests/scans/checkmarx/multiple_findings.xml")
+        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        # Second test
+        driver.get(self.base_url + "engagement")
+        driver.find_element_by_partial_link_text("Dedupe Path Test").click()
+        driver.find_element_by_partial_link_text("Path Test 2").click()
+        driver.find_element_by_id("dropdownMenu1").click()
+        driver.find_element_by_link_text("Re-Upload Scan").click()
+        driver.find_element_by_xpath('//*[@id="base-content"]/form/div[3]/div/div').click()
+        driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
+        driver.find_element_by_id('id_file').send_keys(self.relative_path + "../unittests/scans/checkmarx/multiple_findings_line_changed.xml")
+        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+
+    def test_check_path_status_checkmarx_scan(self):
+        driver = self.login_page()
+        driver.get(self.base_url + "finding")
+        text = driver.find_element_by_tag_name("BODY").text.split('\n')
+
+        start = text.index('Severity  Name  CWE Date  Age SLA Reporter Found By Status Product ') + 1
+        text = text[start:(start + 6)]
+        dupe_count = 0
+        for finding in text:
+            if 'Duplicate' in finding:
+                dupe_count += 1
+        self.assertEqual(dupe_count, 2)
+
+# --------------------------------------------------------------------------------------------------------
+# Cross scanners deduplication - product-wide deduplication
+#   Test deduplication for Generic Findings Import with URL (dynamic) vs Immuniweb dynamic scanner
+# --------------------------------------------------------------------------------------------------------
     def test_add_cross_test_suite(self):
-        # Create bandit engagement
+        # Create generic engagement
         driver = self.login_page()
         driver.get(self.base_url + "product")
         driver.find_element_by_class_name("pull-left").click()
@@ -295,7 +380,7 @@ class DedupeTest(unittest.TestCase):
         self.assertTrue(re.search(r'Test added successfully', text))
 
     def test_import_cross_test(self):
-        # First test
+        # First test : Immuniweb Scan (dynamic)
         driver = self.login_page()
         driver.get(self.base_url + "engagement")
         driver.find_element_by_partial_link_text("Dedupe Immuniweb Test").click()
@@ -306,7 +391,7 @@ class DedupeTest(unittest.TestCase):
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
         driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_1.xml")
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
-        # Second test
+        # Second test : generic scan with url (dynamic)
         driver.get(self.base_url + "engagement")
         driver.find_element_by_partial_link_text("Dedupe Generic Test").click()
         driver.find_element_by_partial_link_text("Generic Test").click()

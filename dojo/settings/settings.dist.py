@@ -515,6 +515,24 @@ CELERY_BEAT_SCHEDULE = {
 
 
 # ------------------------------------
+# Hashcode configuration
+# ------------------------------------
+# List of fields used to compute the hash_code
+# The fields must be one of HASHCODE_ALLOWED_FIELDS
+# If not present, default is the legacy behavior: see models.py, compute_hash_code_legacy function
+# legacy is:
+#   static scanner:  ['title', 'cwe', 'line', 'file_path', 'description']
+#   dynamic scanner: ['title', 'cwe', 'line', 'file_path', 'description', 'endpoints']
+HASHCODE_FIELDS_PER_SCANNER = {
+    'Checkmarx Scan': ['title', 'cwe', 'file_path', 'description']
+}
+
+# List of fields that are known to be usable in hash_code computation)
+# 'endpoints' is a pseudo field that uses the endpoints (for dynamic scanners)
+# 'unique_id_from_tool' is often not needed here as it can be used directly in the dedupe algorithm, but it's also possible to use it for hashing
+HASHCODE_ALLOWED_FIELDS = ['title', 'cwe', 'line', 'file_path', 'description', 'endpoints', 'unique_id_from_tool']
+
+# ------------------------------------
 # Deduplication configuration
 # ------------------------------------
 # List of algorithms
@@ -533,6 +551,7 @@ DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE = 'unique_id_from_tool_or_hash_code
 # Default is DEDUPE_ALGO_LEGACY
 DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Checkmarx Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'Checkmarx Scan': DEDUPE_ALGO_HASH_CODE,
     'SonarQube Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL
 }
 

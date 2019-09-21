@@ -30,7 +30,9 @@ fmt = getattr(settings, 'LOG_FORMAT', None)
 lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
 
 logging.basicConfig(format=fmt, level=lvl)
+import logging
 logger = logging.getLogger(__name__)
+deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 
 @deconstructible
@@ -1242,23 +1244,72 @@ class Finding(models.Model):
         ordering = ('numerical_severity', '-date', 'title')
 
     def compute_hash_code(self):
-        hash_string = self.title + str(self.cwe) + str(self.line) + str(self.file_path) + self.description
-        if self.dynamic_finding:
-            endpoint_str = ''
-            if len(self.unsaved_endpoints) > 0 and self.id is None:
-                for e in self.unsaved_endpoints:
-                    endpoint_str += str(e.host_with_port)
+        if hasattr(settings, 'HASHCODE_FIELDS_PER_SCANNER') and hasattr(settings, 'HASHCODE_ALLOWED_FIELDS'):
+            # Default fields
+            if self.dynamic_finding:
+                hashcodeFields = ['title', 'cwe', 'line', 'file_path', 'description', 'endpoints']
             else:
-                for e in self.endpoints.all():
-                    endpoint_str += str(e.host_with_port)
-            if endpoint_str:
-                hash_string = hash_string + endpoint_str
-        try:
-            hash_string = hash_string.encode('utf-8').strip()
-            return hashlib.sha256(hash_string.encode('utf-8')).hexdigest()
-        except:
-            hash_string = hash_string.strip()
-            return hashlib.sha256(hash_string).hexdigest()
+                hashcodeFields = ['title', 'cwe', 'line', 'file_path', 'description']
+
+            # Check for an override for this scan_type in the deduplication configuration
+            scan_type = self.test.test_type.name
+            if (scan_type in settings.HASHCODE_FIELDS_PER_SCANNER):
+                hashcodeFieldsCandidate = settings.HASHCODE_FIELDS_PER_SCANNER[scan_type]
+                # check that the configuration is valid: all elements of HASHCODE_FIELDS_PER_SCANNER should be in HASHCODE_ALLOWED_FIELDS
+                if (all(elem in settings.HASHCODE_ALLOWED_FIELDS for elem in hashcodeFieldsCandidate)):
+                    hashcodeFields = hashcodeFieldsCandidate
+                else:
+                    deduplicationLogger.debug(
+                        "compute_hash_code - configuration error: some elements of HASHCODE_FIELDS_PER_SCANNER are not in the allowed list HASHCODE_ALLOWED_FIELDS. "
+                        "Using default fields")
+            else:
+                deduplicationLogger.debug(
+                    "No configuration for hash_code computation found; using default fields for " + ('dynamic' if self.dynamic_finding else 'static') + ' scanners')
+            deduplicationLogger.debug("computing hash_code for finding id " + str(self.id) + " for scan_type " + scan_type + " based on: " + ', '.join(hashcodeFields))
+            fields_to_hash = ''
+            for hashcodeField in hashcodeFields:
+                if(hashcodeField != 'endpoints'):
+                    # Generically use the finding attribute having the same name, converts to str in case it's integer
+                    fields_to_hash = fields_to_hash + str(getattr(self, hashcodeField))
+                    deduplicationLogger.debug(hashcodeField + ' : ' + str(getattr(self, hashcodeField)))
+                else:
+                    # For endpoints, need to compute the field
+                    fields_to_hash = fields_to_hash + self.get_endpoints()
+            deduplicationLogger.debug("compute_hash_code - fields_to_hash = " + fields_to_hash)
+            return self.hash_fields(fields_to_hash)
+        else:
+            deduplicationLogger.debug("no configuration per hash_code found; using legacy algorithm")
+            return self.compute_hash_code_legacy()
+
+    def compute_hash_code_legacy(self):
+        fields_to_hash = self.title + str(self.cwe) + str(self.line) + str(self.file_path) + self.description
+        if self.dynamic_finding:
+            fields_to_hash = fields_to_hash + self.get_endpoints()
+        return self.hash_fields(fields_to_hash)
+
+    # Get endpoints from self.unsaved_endpoints
+    # This sometimes reports "None" for some endpoints but we keep it to avoid hash_code change due to this historically behavior
+    def get_endpoints(self):
+        endpoint_str = ''
+        if len(self.unsaved_endpoints) > 0 and self.id is None:
+            for e in self.unsaved_endpoints:
+                endpoint_str += str(e.host_with_port)
+        else:
+            for e in self.endpoints.all():
+                endpoint_str += str(e.host_with_port)
+        return endpoint_str
+
+    # Compute the hash_code from the fields to hash
+    def hash_fields(self, fields_to_hash):
+        # get bytes to hash
+        if(isinstance(fields_to_hash, str)):
+            hash_string = fields_to_hash.encode('utf-8').strip()
+        elif(isinstance(fields_to_hash, bytes)):
+            hash_string = fields_to_hash.strip()
+        else:
+            deduplicationLogger.debug("trying to convert hash_string of type " + str(type(fields_to_hash)) + " to str and then bytes")
+            hash_string = str(fields_to_hash).encode('utf-8').strip()
+        return hashlib.sha256(hash_string).hexdigest()
 
     def remove_from_any_risk_acceptance(self):
         risk_acceptances = Risk_Acceptance.objects.filter(accepted_findings__in=[self])
