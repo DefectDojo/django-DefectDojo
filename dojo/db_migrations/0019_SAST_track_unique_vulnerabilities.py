@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0016_increase_filepath_length'),
+        ('dojo', '0018_sonarqube_api_integration.py'),
     ]
 
     operations = [
