@@ -384,7 +384,6 @@ class TestCheckmarxParser(TestCase):
         self.assertEqual(bool, type(item.static_finding))
         self.assertEqual(True, item.static_finding)
 
-
 # ----------------------------------------------------------------------------
 # more utf-8 non-ascii chars.
 # ----------------------------------------------------------------------------
