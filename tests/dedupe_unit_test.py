@@ -439,6 +439,11 @@ def suite():
     suite.addTest(DedupeTest('test_add_same_eng_test_suite'))
     suite.addTest(DedupeTest('test_import_same_eng_tests'))
     suite.addTest(DedupeTest('test_check_same_eng_status'))
+    # Test same scanners - same engagement - static - dedupe with custom hash_code
+    suite.addTest(DedupeTest('test_delete_findings'))
+    suite.addTest(DedupeTest('test_add_path_test_suite_checkmarx_scan'))
+    suite.addTest(DedupeTest('test_import_path_tests_checkmarx_scan'))
+    suite.addTest(DedupeTest('test_check_path_status_checkmarx_scan'))
     # Test different scanners - different engagement - dynamic - dedupe
     suite.addTest(DedupeTest('test_delete_findings'))
     suite.addTest(DedupeTest('test_add_cross_test_suite'))
