@@ -10,4 +10,6 @@ urlpatterns = [
      name='drive_authentication'),
     url(r'^oauth2callback$', views.oauth2callback,
      name='oauth2callback'),
+     url(r'^google/drive/configuration$',
+        views.google_sheet_config, name='google_sheet_config'),
 ]
