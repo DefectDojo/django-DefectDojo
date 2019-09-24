@@ -232,8 +232,8 @@ class System_Settings(models.Model):
     sla_low = models.IntegerField(default=120,
                                           verbose_name="Low Finding SLA Days",
                                           help_text="# of days to remediate a low finding.")
-    credentials = models.CharField(max_length=500, blank=True)
-
+    credentials = models.CharField(max_length=800, blank=True, null=True)
+    column_widths = models.CharField(max_length=200, blank=True, null=True)
 
 class SystemSettingsFormAdmin(forms.ModelForm):
     product_grade = forms.CharField(widget=forms.Textarea)

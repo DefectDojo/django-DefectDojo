@@ -1857,3 +1857,16 @@ class JIRAFindingForm(forms.Form):
         self.fields['push_to_jira'].help_text = "Checking this will overwrite content of your JIRA issue, or create one."
 
     push_to_jira = forms.BooleanField(required=False)
+
+
+class GoogleSheetFieldsForm(forms.Form):
+    cred_file = forms.FileField(widget=forms.widgets.FileInput(
+        attrs={"accept": ".json"}),
+        label="Upload credentials file",
+        required=True,
+        allow_empty_file=False)
+    def __init__(self, *args, **kwargs):
+        self.all_fields = kwargs.pop('all_fields')
+        super(GoogleSheetFieldsForm, self).__init__(*args, **kwargs)
+        for i in self.all_fields:
+            self.fields[i.name] = forms.IntegerField(initial=0, required=True)
