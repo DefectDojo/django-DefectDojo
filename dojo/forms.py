@@ -1865,6 +1865,7 @@ class GoogleSheetFieldsForm(forms.Form):
         label="Upload credentials file",
         required=True,
         allow_empty_file=False)
+    drive_folder_ID = forms.CharField(required=False, label="Drive folder ID")
     def __init__(self, *args, **kwargs):
         self.all_fields = kwargs.pop('all_fields')
         super(GoogleSheetFieldsForm, self).__init__(*args, **kwargs)

@@ -13,11 +13,16 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='system_settings',
             name='credentials',
-            field=models.CharField(max_length=800, blank=True, null=True),
+            field=models.CharField(max_length=3000, blank=True, null=True),
         ),
         migrations.AddField(
             model_name='system_settings',
             name='column_widths',
             field=models.CharField(blank=True, max_length=200, null=True),
+        ),
+        migrations.AddField(
+            model_name='system_settings',
+            name='drive_folder_ID',
+            field=models.CharField(max_length=100, blank=True, null=True),
         ),
     ]
