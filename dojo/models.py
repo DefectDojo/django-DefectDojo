@@ -1428,7 +1428,7 @@ class Finding(models.Model):
         long_desc += '*References*:' + self.references
         return long_desc
 
-    def save(self, dedupe_option=True, false_history=False, rules_option=True, *args, **kwargs):
+    def save(self, dedupe_option=True, false_history=False, rules_option=True, issue_updater_option=True, *args, **kwargs):
         # Make changes to the finding before it's saved to add a CWE template
         new_finding = False
         if self.pk is None:
@@ -1440,8 +1440,9 @@ class Finding(models.Model):
             super(Finding, self).save(*args, **kwargs)
 
             # Run async the tool issue update to update original issue with Defect Dojo updates
-            from dojo.tasks import async_tool_issue_updater
-            async_tool_issue_updater.delay(self)
+            if issue_updater_option:
+                from dojo.tasks import async_tool_issue_updater
+                async_tool_issue_updater.delay(self)
 
         if (self.file_path is not None) and (self.endpoints.count() == 0):
             self.static_finding = True

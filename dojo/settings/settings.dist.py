@@ -511,6 +511,10 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': timedelta(minutes=1),
         'args': [timedelta(minutes=1)]
     },
+    'update-findings-from-source-issues': {
+        'task': 'dojo.tasks.async_update_findings_from_source_issues',
+        'schedule': timedelta(hours=3),
+    }
 }
 
 # ------------------------------------------------------------------------------
