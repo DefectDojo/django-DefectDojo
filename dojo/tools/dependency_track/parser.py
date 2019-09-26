@@ -205,15 +205,20 @@ class DependencyTrackParser(object):
         if file is None:
             return
 
-        # Read contents of file into string
-        content = file.read()
-
-        # Exit if contents of file are empty
-        if content is None or content == '':
-            return
-
         # Load the contents of the JSON file into a dictionary
-        findings_export_dict = json.loads(content)
+        try:
+            data = file.read()
+            try:
+                findings_export_dict = json.loads(str(data, 'utf-8'))
+            except:
+                findings_export_dict = json.loads(data)
+        except:
+            logger.exception("Invalid file format!")
+            raise
+
+        # Exit if file is an empty JSON dictionary
+        if len(findings_export_dict.keys()) == 0:
+            return
 
         # Make sure the findings key exists in the dictionary and that it is not null or an empty list
         # If it is null or an empty list then exit
