@@ -8,12 +8,6 @@ class TestDependencyTrackParser(TestCase):
         parser = DependencyTrackParser(None, Test())
         self.assertEqual(0, len(parser.items))
 
-    def test_dependency_track_parser_with_empty_file_has_no_findings(self):
-        testfile = open("dojo/unittests/scans/dependency_track_samples/no_findings_empty_file.json")
-        parser = DependencyTrackParser(testfile, Test())
-        testfile.close()
-        self.assertEqual(0, len(parser.items))
-
     def test_dependency_track_parser_with_empty_list_for_findings_key_has_no_findings(self):
         testfile = open("dojo/unittests/scans/dependency_track_samples/no_findings_because_findings_key_is_empty_list.json")
         parser = DependencyTrackParser(testfile, Test())
