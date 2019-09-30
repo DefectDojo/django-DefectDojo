@@ -33,6 +33,7 @@ from dojo.tools.php_security_audit_v2.parser import PhpSecurityAuditV2
 from dojo.tools.acunetix.parser import AcunetixScannerParser
 from dojo.tools.fortify.parser import FortifyXMLParser
 from dojo.tools.sonarqube.parser import SonarQubeHtmlParser
+from dojo.tools.sonarqube_api.importer import SonarQubeApiImporter
 from dojo.tools.clair.parser import ClairParser
 from dojo.tools.mobsf.parser import MobSFParser
 from dojo.tools.aws_scout2.parser import AWSScout2Parser
@@ -62,6 +63,8 @@ from dojo.tools.jfrogxray.parser import XrayJSONParser
 from dojo.tools.sslyze.parser import SslyzeXmlParser
 from dojo.tools.testssl.parser import TestsslCSVParser
 from dojo.tools.hadolint.parser import HadolintParser
+from dojo.tools import SCAN_SONARQUBE_API
+from dojo.tools.aqua.parser import AquaJSONParser
 
 __author__ = 'Jay Paz'
 
@@ -147,6 +150,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = FortifyXMLParser(file, test)
     elif scan_type == 'SonarQube Scan':
         parser = SonarQubeHtmlParser(file, test)
+    elif scan_type == SCAN_SONARQUBE_API:
+        parser = SonarQubeApiImporter(test)
     elif scan_type == 'MobSF Scan':
         parser = MobSFParser(file, test)
     elif scan_type == 'AWS Scout2 Scan':
@@ -201,6 +206,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = TestsslCSVParser(file, test)
     elif scan_type == 'Hadolint Dockerfile check':
         parser = HadolintParser(file, test)
+    elif scan_type == 'Aqua Scan':
+        parser = AquaJSONParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 
