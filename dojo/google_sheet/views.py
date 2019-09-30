@@ -1,5 +1,6 @@
 import json
 import googleapiclient.discovery
+from googleapiclient.errors import HttpError
 from google.oauth2 import service_account
 
 from django.shortcuts import render, get_object_or_404, redirect
@@ -28,11 +29,11 @@ def configure_google_drive(request):
 
             #Save uploaded json file in database
             cred_file = request.FILES['cred_file']
-            cred_byte=cred_file.read() #read data from the temporary uploaded file
-            cred_str = cred_byte.decode('utf8') #convert bytes object to string
+            cred_byte=cred_file.read()                          #read data from the temporary uploaded file
+            cred_str = cred_byte.decode('utf8')                 #convert bytes object to string
             system_settings.credentials=cred_str
 
-            #Save the google drive folder url in database
+            #Save the google drive folder ID in database
             drive_folder_ID = form.cleaned_data['drive_folder_ID']
             system_settings.drive_folder_ID=drive_folder_ID
             system_settings.save()
@@ -49,35 +50,80 @@ def connect_to_google_apis(request):
     SCOPES = ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/spreadsheets']
     system_settings=get_object_or_404(System_Settings, id=1)
     service_account_info = json.loads(system_settings.credentials)
-    credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
-    sheets_service = googleapiclient.discovery.build('sheets', 'v4', credentials=credentials)
-    drive_service = googleapiclient.discovery.build('drive', 'v3', credentials=credentials)
-    #Test the sheets API by creating s spreadsheet
-    spreadsheet = {
-    'properties': {
-        'title': 'Test spreadsheet'
+    try:
+        #Validate the uploaded credentials file
+        credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
+    except ValueError :
+        print ('Invalid credentials file')
+        messages.add_message(
+            request,
+            messages.ERROR,
+            'Invalid credentials file.',
+            extra_tags='alert-danger')
+        return redirect('configure_google_drive')
+    else:
+        sheets_service = googleapiclient.discovery.build('sheets', 'v4', credentials=credentials)
+        drive_service = googleapiclient.discovery.build('drive', 'v3', credentials=credentials)
+        spreadsheet = {
+        'properties': {
+            'title': 'Test spreadsheet'
+            }
         }
-    }
-    spreadsheet = sheets_service.spreadsheets().create(body=spreadsheet, fields='spreadsheetId').execute()
-    spreadsheetId = spreadsheet.get('spreadsheetId')
-    #Test the drive API
-    system_settings = get_object_or_404(System_Settings, id=1)
-    folder_id = system_settings.drive_folder_ID
-    file = drive_service.files().get(fileId=spreadsheetId, fields='parents').execute() # Retrieve the existing parents to remove
-    previous_parents = ",".join(file.get('parents'))
-    file = drive_service.files().update(fileId=spreadsheetId,                          # Move the file to the new folder
-                                        addParents=folder_id,
-                                        removeParents=previous_parents,
-                                        fields='id, parents').execute()
-    # drive_service.permissions().create(body={'type':'user', 'role':'writer', 'emailAddress': 'lakmalip@wso2.com'}, fileId=spreadsheetId).execute()
-    drive_service.files().delete(fileId=spreadsheetId).execute()                       # Delete 'test spreadsheet'
-    messages.add_message(
-        request,
-        messages.SUCCESS,
-        "Google drive configuration successful.",
-        extra_tags="alert-success",
-    )
-    return HttpResponseRedirect(reverse('dashboard'))
+        try:
+            #Check the sheets API is enabled or not
+            spreadsheet = sheets_service.spreadsheets().create(body=spreadsheet, fields='spreadsheetId').execute()
+        except googleapiclient.errors.HttpError:
+            messages.add_message(
+                request,
+                messages.ERROR,
+                'Enable the sheets API from the google developer console.',
+                extra_tags='alert-danger')
+            return redirect('configure_google_drive')
+        else:
+            spreadsheetId = spreadsheet.get('spreadsheetId')
+            try:
+                #Check the drive API is enabled or not
+                file = drive_service.files().get(fileId=spreadsheetId, fields='parents').execute() # Retrieve the existing parents to remove
+            except googleapiclient.errors.HttpError:
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    'Enable the drive API from the google developer console.',
+                    extra_tags='alert-danger')
+                return redirect('configure_google_drive')
+            else:
+                previous_parents = ",".join(file.get('parents'))
+                system_settings = get_object_or_404(System_Settings, id=1)
+                folder_id = system_settings.drive_folder_ID
+                try:
+                    #Validate the drive folder id and it's permissions
+                    file = drive_service.files().update(fileId=spreadsheetId,              # Move the file to the new folder
+                                                        addParents=folder_id,
+                                                        removeParents=previous_parents,
+                                                        fields='id, parents').execute()
+                except googleapiclient.errors.HttpError as error:
+                    if error.resp.status == 403:
+                        messages.add_message(
+                            request,
+                            messages.ERROR,
+                            'Application does not have write access to the given google drive folder',
+                            extra_tags='alert-danger')
+                    if error.resp.status == 404:
+                        messages.add_message(
+                            request,
+                            messages.ERROR,
+                            'Google drive folder ID is invalid',
+                            extra_tags='alert-danger')
+                    return redirect('configure_google_drive')
+                else:
+                    drive_service.files().delete(fileId=spreadsheetId).execute()           # Delete 'test spreadsheet'
+                    messages.add_message(
+                        request,
+                        messages.SUCCESS,
+                        "Google drive configuration successful.",
+                        extra_tags="alert-success",
+                    )
+                    return HttpResponseRedirect(reverse('dashboard'))
 
 
 def export_findings(request, tid):
@@ -88,7 +134,6 @@ def export_findings(request, tid):
     system_settings=get_object_or_404(System_Settings, id=1)
     service_account_info = json.loads(system_settings.credentials)
     credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
-    # sheets_service = googleapiclient.discovery.build('sheets', 'v4', credentials=credentials)
     drive_service = googleapiclient.discovery.build('drive', 'v3', credentials=credentials)
     system_settings = get_object_or_404(System_Settings, id=1)
     folder_id = system_settings.drive_folder_ID
@@ -101,21 +146,31 @@ def export_findings(request, tid):
     if len(spreadsheets) > 0:
         spreadsheetId = spreadsheets[0].get('id')
         sync_findings(tid, spreadsheetId, credentials)
+        messages.add_message(
+            request,
+            messages.SUCCESS,
+            "Google sheet data synced with database",
+            extra_tags="alert-success",
+        )
     else:
         create_spreadsheet(tid, spreadsheet_name, credentials)
+        messages.add_message(
+            request,
+            messages.SUCCESS,
+            "Finding details successfully exported to google sheet",
+            extra_tags="alert-success",
+        )
     return HttpResponseRedirect(reverse('view_test', args=(tid, )))
 
 def sync_findings(tid, spreadsheetId, credentials):
-    sheets_service = googleapiclient.discovery.build('sheets', 'v4', credentials=credentials)
-    drive_service = googleapiclient.discovery.build('drive', 'v3', credentials=credentials)
-
-    print ('syncing')
+    print ('---------------------------------------syncing-----------------------------------')
 
 
 def create_spreadsheet(tid, spreadsheet_name, credentials):
+    print ('------------------------------------------Creating------------------------------------')
     sheets_service = googleapiclient.discovery.build('sheets', 'v4', credentials=credentials)
     drive_service = googleapiclient.discovery.build('drive', 'v3', credentials=credentials)
-    findings_list = get_findings_list(tid)
+    #Create a new spreadsheet
     spreadsheet = {
     'properties': {
         'title': spreadsheet_name
@@ -125,17 +180,21 @@ def create_spreadsheet(tid, spreadsheet_name, credentials):
     spreadsheetId = spreadsheet.get('spreadsheetId')
     system_settings = get_object_or_404(System_Settings, id=1)
     folder_id = system_settings.drive_folder_ID
-    file = drive_service.files().get(fileId=spreadsheetId, fields='parents').execute() # Retrieve the existing parents to remove
+    #Move the spreadsheet inside the drive folder
+    file = drive_service.files().get(fileId=spreadsheetId, fields='parents').execute()
     previous_parents = ",".join(file.get('parents'))
-    file = drive_service.files().update(fileId=spreadsheetId,                          # Move the file to the new folder
+    file = drive_service.files().update(fileId=spreadsheetId,
                                         addParents=folder_id,
                                         removeParents=previous_parents,
                                         fields='id, parents').execute()
+    #Update created spredsheet with finding details
+    findings_list = get_findings_list(tid)
     result = sheets_service.spreadsheets().values().update(spreadsheetId=spreadsheetId,
                                                     range='Sheet1!A1',
                                                     valueInputOption='RAW',
                                                     body = {'values': findings_list}).execute()
-    requests = {
+    #Format the header raw
+    body = {
       "requests": [
         {
           "repeatCell": {
@@ -179,25 +238,42 @@ def create_spreadsheet(tid, spreadsheet_name, credentials):
         }
       ]
     }
-    sheets_service.spreadsheets().batchUpdate(spreadsheetId=spreadsheetId, body=requests).execute()
+    sheets_service.spreadsheets().batchUpdate(spreadsheetId=spreadsheetId, body=body).execute()
+    #Format columns with input field widths
+    field_widths=system_settings.column_widths.split(",")
+    body = {}
+    body["requests"]=[]
+    for i in range (len(field_widths)):
+        body["requests"].append({
+            "updateDimensionProperties": {
+                "range": {
+                    "sheetId": 0,
+                    "dimension": "COLUMNS",
+                    "startIndex": i,
+                    "endIndex": i+1
+                },
+                "properties": {
+                    "pixelSize": int(field_widths[i])
+                },
+                "fields": "pixelSize"
+            }
+        })
+    sheets_service.spreadsheets().batchUpdate(spreadsheetId=spreadsheetId, body=body).execute()
+
 
 def get_findings_list(tid):
     test = Test.objects.get(id=tid)
     findings = Finding.objects.filter(test=test).order_by('numerical_severity')
+    fields = Finding._meta.fields
     findings_list = []
-    headings = ['id', 'title', 'date', 'cwe', 'cve', 'url', 'severity', 'description', 'mitigation', 'impact', 'steps_to_reproduce',
-    'severity_justification', 'references', 'test', 'is_template', 'active', 'verified', 'false_p', 'duplicate', 'duplicate_finding',
-    'out_of_scope', 'under_review', 'review_requested_by', 'under_defect_review', 'defect_review_requested_by', 'is_Mitigated',
-    'thread_id', 'mitigated', 'mitigated_by', 'reporter', 'numerical_severity', 'last_reviewed', 'last_reviewed_by', 'line_number',
-    'sourcefilepath', 'sourcefile', 'param', 'payload', 'hash_code', 'line', 'file_path', 'static_finding', 'dynamic_finding',
-    'created', 'jira_creation', 'jira_change', 'scanner_confidence']
+    headings = []
+    for i in fields:
+        headings.append(i.name)
     findings_list.append(headings)
     for finding in findings:
-        finding_details = [finding.id, finding.title, str(finding.date), finding.cwe, finding.cve, finding.url, finding.severity,
-                finding.description, finding.mitigation, finding.impact, finding.steps_to_reproduce, finding.severity_justification,
-                finding.references, str(finding.test), finding.is_template, finding.active, finding.verified, finding.false_p,
-                finding.duplicate, finding.duplicate_finding, finding.out_of_scope, finding.under_review, str(finding.review_requested_by),
-                finding.under_defect_review, str(finding.defect_review_requested_by), finding.is_Mitigated, finding.thread_id, finding.mitigated,
-                str(finding.mitigated_by), str(finding.reporter)]
+        finding_details = []
+        for i in headings:
+            val=str(eval("finding." + i))
+            finding_details.append(val)
         findings_list.append(finding_details)
     return findings_list
