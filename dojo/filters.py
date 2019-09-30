@@ -521,7 +521,7 @@ class AcceptedFindingFilter(DojoFilter):
         cwe = dict()
         cwe = dict([finding.cwe, finding.cwe]
                    for finding in self.queryset.distinct()
-                   if finding.cwe > 0 and finding.cwe not in cwe)
+                   if type(finding.cwe) is int and finding.cwe > 0 and finding.cwe not in cwe)
         cwe = collections.OrderedDict(sorted(cwe.items()))
         self.form.fields['cwe'].choices = list(cwe.items())
         self.form.fields['severity'].choices = self.queryset.order_by(
