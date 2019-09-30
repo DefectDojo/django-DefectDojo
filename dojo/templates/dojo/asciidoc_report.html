@@ -5,7 +5,8 @@
     {% load humanize %}
     {% load get_endpoint_status %}
     {% load get_note_status %}
-    
+    {% load get_notetype_availability %}
+
     <button onclick="asciidocDownload()" class="btn btn-primary" type="button">
         Download Report
     </button>
@@ -327,9 +328,15 @@
                 {% if notes.count > 0 %}
                     <p><b>==== Finding Notes: ====</b>
                         <br>
+                        {% if notes|get_notetype_notes_count > 0 %}
+                            {% for note in notes reversed %}
+                                    {{ note.author }} - {{ note.date }} - {% if note.note_type != None %}{{ note.note_type }}{% endif %} - {{ note }} +<br>
+                            {% endfor %}
+                        {% else %}
                             {% for note in notes reversed %}
                                     {{ note.author }} - {{ note.date }} - {{ note }} +<br>
                             {% endfor %}
+                        {% endif %}
                     </p><br>
                 {% endif %}
             {% endwith %}
@@ -379,9 +386,15 @@
                         <br>
                         <p><b>==== Finding Notes: ====</b>
                             <br>
+                            {% if notes|get_notetype_notes_count > 0 %}
+                                {% for note in notes reversed %}
+                                        {{ note.author }} - {{ note.date }} - {% if note.note_type != None %}{{ note.note_type }}{% endif %} - {{ note }} +<br>
+                                {% endfor %}
+                            {% else %}
                                 {% for note in notes reversed %}
                                         {{ note.author }} - {{ note.date }} - {{ note }} +<br>
                                 {% endfor %}
+                            {% endif %}
                         </p><br>
                     {% endif %}
                 {% endwith %}
@@ -481,9 +494,15 @@
                             <br>
                             <p><b>==== Finding Notes: ====</b>
                                 <br>
+                                {% if notes|get_notetype_notes_count > 0 %}
+                                    {% for note in notes reversed %}
+                                            {{ note.author }} - {{ note.date }} - {% if note.note_type != None %}{{ note.note_type }}{% endif %} - {{ note }} +<br>
+                                    {% endfor %}
+                                {% else %}
                                     {% for note in notes reversed %}
                                             {{ note.author }} - {{ note.date }} - {{ note|linebreaks }} +<br>
                                     {% endfor %}
+                                {% endif %}
                             </p><br>
                         {% endif %}
                     {% endwith %}
