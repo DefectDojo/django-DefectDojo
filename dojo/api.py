@@ -953,7 +953,7 @@ class TestResource(BaseModelResource):
         include_resource_uri = True
         filtering = {
             'id': ALL,
-	    'title': ALL,
+            'title': ALL,
             'test_type': ALL,
             'target_start': ALL,
             'target_end': ALL,
