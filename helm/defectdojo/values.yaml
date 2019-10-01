@@ -1,6 +1,9 @@
 ---
 # Global settings
 createSecret: true
+## Configuration value to select database type
+## Option to use "postgresql" or "mysql" database type, by default "postgresql" is chosen
+## Set the "enable" field to true of the database type you select (if you want to use internal database) and false of the one you don't select
 database: mysql
 host: defectdojo.default.minikube.local
 imagePullPolicy: Always
@@ -73,6 +76,14 @@ mysql:
   enabled: true
   mysqlUser: defectdojo
   mysqlDatabase: defectdojo
+  service:
+    port: 3306  
+  # To use an external mySQL instance, set enabled to false and uncomment
+  # the line below:
+  # mysqlServer: ""
+  # To use an external secret for the password for an external mySQL instance,
+  # set enabled to false and provide the name of the secret on the line below:
+  # mysqlPasswordSecret: ""  
 
 postgresql:
   enabled: false
@@ -82,6 +93,15 @@ postgresql:
     enabled: false
   replication:
     enabled: false
+  service:
+    port: 5432  
+  # To use an external PostgreSQL instance, set enabled to false and uncomment
+  # the line below:
+  # postgresServer: ""
+  # To use an external secret for the password for PostgreSQL
+  # instance, set enabled to false and provide the name of the secret on the
+  # line below:
+  # existingSecret: ""    
 
 rabbitmq:
   enabled: true
