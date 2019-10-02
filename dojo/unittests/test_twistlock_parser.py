@@ -4,6 +4,12 @@ from dojo.tools.twistlock.parser import TwistlockParser
 
 
 class TestTwistlockParser(TestCase):
+    def test_parse_file_with_no_vuln(self):
+        testfile = open("dojo/unittests/scans/twistlock/no_vuln.json")
+        parser = TwistlockParser(testfile, Test())
+        testfile.close()
+        self.assertEqual(0, len(parser.items))
+
     def test_parse_file_with_one_vuln(self):
         testfile = open("dojo/unittests/scans/twistlock/one_vuln.json")
         parser = TwistlockParser(testfile, Test())
