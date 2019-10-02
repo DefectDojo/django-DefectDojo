@@ -38,7 +38,7 @@ def configure_google_drive(request):
             system_settings.drive_folder_ID=drive_folder_ID
             system_settings.save()
             return redirect ('connect_to_google_apis')
-    add_breadcrumb(title="Google Sheet Configuration", top_level=False, request=request)
+    add_breadcrumb(title="Google Sheet sync Configuration", top_level=not len(request.GET), request=request)
     return render(request, 'dojo/google_sheet_configuration.html', {
         'name': 'Google Sheet Configuration',
         'metric': False,
@@ -131,11 +131,10 @@ def export_findings(request, tid):
     engagement = Engagement.objects.get(id=test.engagement_id)
     product = Product.objects.get(id=engagement.product_id)
     SCOPES = ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/spreadsheets']
-    system_settings=get_object_or_404(System_Settings, id=1)
+    system_settings = get_object_or_404(System_Settings, id=1)
     service_account_info = json.loads(system_settings.credentials)
     credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
     drive_service = googleapiclient.discovery.build('drive', 'v3', credentials=credentials)
-    system_settings = get_object_or_404(System_Settings, id=1)
     folder_id = system_settings.drive_folder_ID
     spreadsheet_name = product.name + "-" + engagement.name + "-" + str(test.id)
     files = drive_service.files().list(q="mimeType='application/vnd.google-apps.spreadsheet' and parents in '%s' and name='%s'" %(folder_id, spreadsheet_name),
@@ -164,6 +163,11 @@ def export_findings(request, tid):
 
 def sync_findings(tid, spreadsheetId, credentials):
     print ('---------------------------------------syncing-----------------------------------')
+    sheets_service = googleapiclient.discovery.build('sheets', 'v4', credentials=credentials)
+    test = Test.objects.get(id=tid)
+    findings = Finding.objects.filter(test=test).order_by('numerical_severity')
+    result = sheets_service.spreadsheets().values().get(spreadsheetId=spreadsheetId, range='Sheet1').execute()
+    # print (result)
 
 
 def create_spreadsheet(tid, spreadsheet_name, credentials):
@@ -189,6 +193,7 @@ def create_spreadsheet(tid, spreadsheet_name, credentials):
                                         fields='id, parents').execute()
     #Update created spredsheet with finding details
     findings_list = get_findings_list(tid)
+    raw_count = len(findings_list)
     result = sheets_service.spreadsheets().values().update(spreadsheetId=spreadsheetId,
                                                     range='Sheet1!A1',
                                                     valueInputOption='RAW',
@@ -258,6 +263,27 @@ def create_spreadsheet(tid, spreadsheet_name, credentials):
                 "fields": "pixelSize"
             }
         })
+    sheets_service.spreadsheets().batchUpdate(spreadsheetId=spreadsheetId, body=body).execute()
+    # Protect all columns excepy notes
+    body = {
+    "requests": [
+        {
+          "addProtectedRange": {
+            "protectedRange": {
+              "range": {
+                "sheetId": 0,
+                "startRowIndex": 0,
+                "endRowIndex": raw_count,
+                "startColumnIndex": 0,
+                "endColumnIndex": len(field_widths),
+              },
+              # "description": "Protecting total row",
+              "warningOnly": False
+            }
+          }
+        }
+      ]
+    }
     sheets_service.spreadsheets().batchUpdate(spreadsheetId=spreadsheetId, body=body).execute()
 
 
