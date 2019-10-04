@@ -13,16 +13,21 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='system_settings',
             name='credentials',
-            field=models.CharField(max_length=3000, blank=True, null=True),
+            field=models.CharField(max_length=3000, blank=True),
         ),
         migrations.AddField(
             model_name='system_settings',
             name='column_widths',
-            field=models.CharField(blank=True, max_length=200, null=True),
+            field=models.CharField(max_length=1000, blank=True),
         ),
         migrations.AddField(
             model_name='system_settings',
             name='drive_folder_ID',
-            field=models.CharField(max_length=100, blank=True, null=True),
+            field=models.CharField(max_length=100, blank=True),
+        ),
+        migrations.AddField(
+            model_name='system_settings',
+            name='enable_google_sheets',
+            field=models.BooleanField(null=True, blank=True, default=False),
         ),
     ]

@@ -21,7 +21,7 @@ from dojo.filters import TemplateFindingFilter
 from dojo.forms import NoteForm, TestForm, FindingForm, \
     DeleteTestForm, AddFindingForm, \
     ImportScanForm, ReImportScanForm, FindingBulkUpdateForm, JIRAFindingForm
-from dojo.models import Product, Finding, Test, Notes, BurpRawRequestResponse, Endpoint, Stub_Finding, Finding_Template, JIRA_PKey, Cred_Mapping, Dojo_User, JIRA_Issue
+from dojo.models import Product, Finding, Test, Notes, BurpRawRequestResponse, Endpoint, Stub_Finding, Finding_Template, JIRA_PKey, Cred_Mapping, Dojo_User, JIRA_Issue, System_Settings
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_page_items, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, create_notification, Product_Tab, calculate_grade, log_jira_alert
 from dojo.tasks import add_issue_task, update_issue_task
@@ -44,7 +44,8 @@ def view_test(request, tid):
     stub_findings = Stub_Finding.objects.filter(test=test)
     cred_test = Cred_Mapping.objects.filter(test=test).select_related('cred_id').order_by('cred_id')
     creds = Cred_Mapping.objects.filter(engagement=test.engagement).select_related('cred_id').order_by('cred_id')
-
+    system_settings = get_object_or_404(System_Settings, id=1)
+    google_sheets_enabled = system_settings.enable_google_sheets
     if request.method == 'POST' and request.user.is_staff:
         form = NoteForm(request.POST)
         if form.is_valid():
@@ -88,6 +89,7 @@ def view_test(request, tid):
                    'cred_test': cred_test,
                    'tag_input': tags,
                    'jira_config': jira_config,
+                   'show_export':google_sheets_enabled,
                    })
 
 
