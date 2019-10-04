@@ -1,17 +1,17 @@
-# Run with Docker Compose
+# Running with Docker Compose
 
 Docker compose is not intended for production use.
 If you want to deploy a containerized DefectDojo to a production environment,
 use the [Helm and Kubernetes](KUBERNETES.md) approach.
 
-## Prerequisites
+# Prerequisites
 *  Docker version
     *  Installing with docker-compose requires at least docker 18.09.4 and docker-compose 1.24.0. See "Checking Docker versions" below for version errors during running docker-compose.
 *  Proxies
     *  If you're behind a corporate proxy check https://docs.docker.com/network/proxy/ . 
 
 
-## Setup via Docker Compose - introduction
+# Setup via Docker Compose - introduction
 
 DefectDojo needs several docker images to run. Two of them depend on DefectDojo code:
 
@@ -28,8 +28,8 @@ When running the application without building images, the application will run b
     *  https://hub.docker.com/r/defectdojo/defectdojo-nginx
 
 
-## Setup via Docker Compose - building and running the application
-### Building images
+# Setup via Docker Compose - building and running the application
+## Building images
 
 To build images and put them in your local docker cache, run:
 
@@ -49,7 +49,7 @@ docker-compose build nginx
 ```
 
 
-### Run with Docker compose in release mode
+## Run with Docker compose in release mode
 To run the application based on previously built image (or based on dockerhub images if none was locally built), run: 
 
 ```zsh
@@ -62,7 +62,7 @@ This will run the application based on docker-compose.yml only.
 In this setup, you need to rebuild django and/or nginx images after each code change and restart the containers. 
 
 
-### Run with Docker compose in development mode with hot-reloading
+## Run with Docker compose in development mode with hot-reloading
 
 For development, use: 
 
@@ -100,7 +100,7 @@ To update changes in static resources, served by nginx, just refresh the browser
 id -u
 ```
 
-### Access the application
+## Access the application
 Navigate to <http://localhost:8080> where you can log in with username admin.
 To find out the admin password, check the very beginning of the console
 output of the initializer container, typically name 'django-defectdojo_initializer_1', or run the following:
@@ -120,12 +120,13 @@ docker logs django-defectdojo_initializer_1
 
 Make sure you write down the first password generated as you'll need it when re-starting the application.
 
-### Disable the database initialization
+# Exploitation, versioning
+## Disable the database initialization
 The initializer container can be disabled by exporting: `export DD_INITIALIZE=false`. 
 
 This will ensure that the database remains unchanged when re-running the application, keeping your previous settings and admin password.
 
-### Versioning
+## Versioning
 In order to use a specific version when building the images and running the containers, set the environment with 
 *  For the nginx image: `NGINX_VERSION=x.y.z`
 *  For the django image: `DJANGO_VERSION=x.y.z`
@@ -149,9 +150,7 @@ aedc404d6dee        defectdojo/defectdojo-nginx:1.0.0     "/entrypoint-nginx.sh"
 ```
 
 
-
-
-### Clean up Docker Compose
+## Clean up Docker Compose
 
 Removes all containers
 
@@ -165,13 +164,48 @@ Removes all containers, networks and the database volume
 docker-compose down --volumes
 ```
 
-### Run the unit-tests with docker
-#### Introduction
+# Run with docker using https
+To secure the application by https, follow those steps
+*  Generate a private key without password
+*  Generate a CSR (Certificate Signing Request)
+*  Have the CSR signed by a certificate authority
+*  Place the private key and the certificate under the nginx folder
+*  Replace nginx/nginx.conf by nginx/nginx_TLS.conf
+*  In nginx.conf, update that part: 
+```
+        server_name                 your.servername.com;
+        ssl_certificate             /yourCertificate.cer;
+        ssl_certificate_key         /yourPrivateKey.key;
+```
+* Protect your private key from other users: 
+```
+chmod 400 nginx/*.key
+```
+* Rebuild the nginx image in order to place the private key and the certificate where nginx will find them (under / in the nginx container):
+
+```docker build  -t defectdojo/defectdojo-nginx -f Dockerfile.nginx .```
+
+
+* Run defectDojo with: 
+```
+export DD_PORT=8083
+docker-compose up
+```
+
+To change the port:
+- update `nginx.conf`, `docker-compose.yml`
+- restart the application
+
+NB: some third party software may require to change the exposed port in Dockerfile.nginx as they use docker-compose declarations to discover which ports to map when publishing the application.
+
+
+# Run the unit-tests with docker
+## Introduction
 The unit-tests are under `dojo/unittests`
 
 
 
-#### Running the unit-tests 
+## Running the unit-tests 
 This will run all the tests and leave the uwsgi container up: 
 
 ```
@@ -202,7 +236,7 @@ Run a single test. Example:
 python manage.py test dojo.unittests.test_dependency_check_parser.TestDependencyCheckParser.test_parse_without_file_has_no_findings --keepdb
 ```
 
-## Checking Docker versions
+# Checking Docker versions
 
 Run the following to determine the versions for docker and docker-compose:
 
