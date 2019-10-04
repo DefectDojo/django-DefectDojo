@@ -1864,10 +1864,24 @@ class GoogleSheetFieldsForm(forms.Form):
         attrs={"accept": ".json"}),
         label="Upload credentials file",
         required=True,
-        allow_empty_file=False)
-    drive_folder_ID = forms.CharField(required=False, label="Drive folder ID")
+        allow_empty_file=False,
+        help_text="Upload the credentials file downloaded from the google developer console")
+    drive_folder_ID = forms.CharField(
+        required=True,
+        label="Drive folder ID",
+        help_text="Extract the drive folder id from the url and provide it here")
+    enable_service = forms.BooleanField(
+        initial=False,
+        required=False,
+        help_text = 'Tick this check box if you want to enale the google sheets export & import feature in your application')
+    revoke_access = forms.BooleanField(widget=forms.widgets.HiddenInput(), required=False, initial=False)
     def __init__(self, *args, **kwargs):
+        self.credentials_required = kwargs.pop('credentials_required')
+        options = ((0, 'Hide'), (50, 'Small'), (100, 'Medium'), (200, 'Large'), (500, 'Custom'))
         self.all_fields = kwargs.pop('all_fields')
         super(GoogleSheetFieldsForm, self).__init__(*args, **kwargs)
+        if not self.credentials_required:
+            self.fields['revoke_access'] = forms.BooleanField(initial=False, required=False)
+            self.fields['cred_file'].required = False
         for i in self.all_fields:
-            self.fields[i.name] = forms.IntegerField(initial=0, required=True)
+            self.fields[i.name] = forms.ChoiceField(choices=options)

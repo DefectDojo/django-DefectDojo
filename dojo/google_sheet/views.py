@@ -14,53 +14,73 @@ from dojo.utils import add_breadcrumb
 
 def configure_google_drive(request):
     fields = Finding._meta.fields
-    form = GoogleSheetFieldsForm(all_fields=fields)
+    system_settings=get_object_or_404(System_Settings, id=1)
+    if system_settings.credentials :
+        initial = json.loads(system_settings.column_widths.replace("'",'"'))
+        initial['drive_folder_ID']=system_settings.drive_folder_ID
+        initial['enable_service']=system_settings.enable_google_sheets
+        form = GoogleSheetFieldsForm(all_fields=fields, initial=initial, credentials_required=False)
+    else:
+        form = GoogleSheetFieldsForm(all_fields=fields, credentials_required=True)
     if request.method=='POST':
-        form = GoogleSheetFieldsForm(request.POST, request.FILES, all_fields=fields)
+        if system_settings.credentials :
+            form = GoogleSheetFieldsForm(request.POST, request.FILES, all_fields=fields, credentials_required=False)
+        else:
+            form = GoogleSheetFieldsForm(request.POST, request.FILES, all_fields=fields, credentials_required=True)
         if form.is_valid():
-            #Save column width to database
-            cleaned_data = form.cleaned_data
-            column_widths=''
-            for i in fields:
-                column_widths += str(cleaned_data[i.name]) + ','
-            column_widths = column_widths[:-1]
-            system_settings=get_object_or_404(System_Settings, id=1)
-            system_settings.column_widths=column_widths
+            if form.cleaned_data['revoke_access']:
+                revoke_access()
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    "Access revoked",
+                    extra_tags="alert-success",)
+                return HttpResponseRedirect(reverse('dashboard'))
+            else:
+                #Create a dictionary of column names and widths
+                column_widths={}
+                for i in fields:
+                    column_widths[i.name] = form.cleaned_data[i.name]
 
-            #Save uploaded json file in database
-            cred_file = request.FILES['cred_file']
-            cred_byte=cred_file.read()                          #read data from the temporary uploaded file
-            cred_str = cred_byte.decode('utf8')                 #convert bytes object to string
-            system_settings.credentials=cred_str
+                #Create a dictionary object from the uploaded credentials file
+                if len(request.FILES) != 0:
+                    cred_file = request.FILES['cred_file']
+                    cred_byte=cred_file.read()                          #read data from the temporary uploaded file
+                    cred_str = cred_byte.decode('utf8')                 #convert bytes object to string
+                else:
+                    cred_str = system_settings.credentials
 
-            #Save the google drive folder ID in database
-            drive_folder_ID = form.cleaned_data['drive_folder_ID']
-            system_settings.drive_folder_ID=drive_folder_ID
-            system_settings.save()
-            return redirect ('connect_to_google_apis')
+                #Get the drive folder ID
+                drive_folder_ID = form.cleaned_data['drive_folder_ID']
+                validate_inputs = validate_drive_authentication(request, cred_str, drive_folder_ID)
+                if validate_inputs :
+                    system_settings.column_widths=column_widths
+                    system_settings.credentials=cred_str
+                    system_settings.drive_folder_ID=drive_folder_ID
+                    system_settings.enable_google_sheets=form.cleaned_data['enable_service']
+                    system_settings.save()
+                    return HttpResponseRedirect(reverse('dashboard'))
     add_breadcrumb(title="Google Sheet sync Configuration", top_level=not len(request.GET), request=request)
     return render(request, 'dojo/google_sheet_configuration.html', {
-        'name': 'Google Sheet Configuration',
+        'name': 'Google Sheet Sync Configuration',
         'metric': False,
         'form':form,
     })
 
 
-def connect_to_google_apis(request):
+def validate_drive_authentication(request, cred_str, drive_folder_ID):
     SCOPES = ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/spreadsheets']
-    system_settings=get_object_or_404(System_Settings, id=1)
-    service_account_info = json.loads(system_settings.credentials)
+    service_account_info = json.loads(cred_str)
     try:
         #Validate the uploaded credentials file
         credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
     except ValueError :
-        print ('Invalid credentials file')
         messages.add_message(
             request,
             messages.ERROR,
             'Invalid credentials file.',
             extra_tags='alert-danger')
-        return redirect('configure_google_drive')
+        return False
     else:
         sheets_service = googleapiclient.discovery.build('sheets', 'v4', credentials=credentials)
         drive_service = googleapiclient.discovery.build('drive', 'v3', credentials=credentials)
@@ -78,7 +98,7 @@ def connect_to_google_apis(request):
                 messages.ERROR,
                 'Enable the sheets API from the google developer console.',
                 extra_tags='alert-danger')
-            return redirect('configure_google_drive')
+            return False
         else:
             spreadsheetId = spreadsheet.get('spreadsheetId')
             try:
@@ -90,11 +110,10 @@ def connect_to_google_apis(request):
                     messages.ERROR,
                     'Enable the drive API from the google developer console.',
                     extra_tags='alert-danger')
-                return redirect('configure_google_drive')
+                return False
             else:
                 previous_parents = ",".join(file.get('parents'))
-                system_settings = get_object_or_404(System_Settings, id=1)
-                folder_id = system_settings.drive_folder_ID
+                folder_id = drive_folder_ID
                 try:
                     #Validate the drive folder id and it's permissions
                     file = drive_service.files().update(fileId=spreadsheetId,              # Move the file to the new folder
@@ -114,7 +133,7 @@ def connect_to_google_apis(request):
                             messages.ERROR,
                             'Google drive folder ID is invalid',
                             extra_tags='alert-danger')
-                    return redirect('configure_google_drive')
+                    return False
                 else:
                     drive_service.files().delete(fileId=spreadsheetId).execute()           # Delete 'test spreadsheet'
                     messages.add_message(
@@ -123,20 +142,29 @@ def connect_to_google_apis(request):
                         "Google drive configuration successful.",
                         extra_tags="alert-success",
                     )
-                    return HttpResponseRedirect(reverse('dashboard'))
+                    return True
+
+
+def revoke_access():
+    system_settings = get_object_or_404(System_Settings, id=1)
+    system_settings.column_widths=""
+    system_settings.credentials=""
+    system_settings.drive_folder_ID=""
+    system_settings.enable_google_sheets=False
+    system_settings.save()
 
 
 def export_findings(request, tid):
     test = Test.objects.get(id=tid)
     engagement = Engagement.objects.get(id=test.engagement_id)
     product = Product.objects.get(id=engagement.product_id)
-    SCOPES = ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/spreadsheets']
+    spreadsheet_name = product.name + "-" + engagement.name + "-" + str(test.id)
     system_settings = get_object_or_404(System_Settings, id=1)
     service_account_info = json.loads(system_settings.credentials)
+    SCOPES = ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/spreadsheets']
     credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
     drive_service = googleapiclient.discovery.build('drive', 'v3', credentials=credentials)
     folder_id = system_settings.drive_folder_ID
-    spreadsheet_name = product.name + "-" + engagement.name + "-" + str(test.id)
     files = drive_service.files().list(q="mimeType='application/vnd.google-apps.spreadsheet' and parents in '%s' and name='%s'" %(folder_id, spreadsheet_name),
                                           spaces='drive',
                                           pageSize=10,
@@ -160,6 +188,7 @@ def export_findings(request, tid):
             extra_tags="alert-success",
         )
     return HttpResponseRedirect(reverse('view_test', args=(tid, )))
+
 
 def sync_findings(tid, spreadsheetId, credentials):
     print ('---------------------------------------syncing-----------------------------------')

@@ -60,6 +60,13 @@
                                 <i class="fa fa-file-text-o"></i> Report
                             </a>
                         </li>
+                      {% if show_export %}
+                          <li role="presentation">
+                              <a href="{% url 'export_findings' test.id %}">
+                                  <i class="fa fa-file-excel-o"></i> Export to sheet
+                              </a>
+                          </li>
+                      {% endif %}
                         <li role="presentation">
                             <a href="{% url 'test_ics' test.id %}">
                                 <i class="fa fa-calendar-plus-o"></i> Add To Calendar
