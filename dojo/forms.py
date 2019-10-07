@@ -1885,3 +1885,7 @@ class GoogleSheetFieldsForm(forms.Form):
             self.fields['cred_file'].required = False
         for i in self.all_fields:
             self.fields[i.name] = forms.ChoiceField(choices=options)
+            if i.editable:
+                self.fields['Protect ' + i.name] = forms.BooleanField(initial=False, required=False)
+            else:
+                self.fields['Protect ' + i.name] = forms.BooleanField(initial=True, required=False, disabled=True)

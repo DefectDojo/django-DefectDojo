@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='system_settings',
             name='column_widths',
-            field=models.CharField(max_length=1000, blank=True),
+            field=models.CharField(max_length=1500, blank=True),
         ),
         migrations.AddField(
             model_name='system_settings',
