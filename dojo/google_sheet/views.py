@@ -16,7 +16,14 @@ def configure_google_drive(request):
     fields = Finding._meta.fields
     system_settings=get_object_or_404(System_Settings, id=1)
     if system_settings.credentials :
-        initial = json.loads(system_settings.column_widths.replace("'",'"'))
+        column_details = json.loads(system_settings.column_widths.replace("'",'"'))
+        initial = {}
+        for field in fields:
+            initial[field.name]=column_details[field.name][0]
+            if column_details[field.name][1] == 0:
+                initial['Protect ' + field.name]=False
+            else:
+                initial['Protect ' + field.name]=True
         initial['drive_folder_ID']=system_settings.drive_folder_ID
         initial['enable_service']=system_settings.enable_google_sheets
         form = GoogleSheetFieldsForm(all_fields=fields, initial=initial, credentials_required=False)
@@ -40,7 +47,13 @@ def configure_google_drive(request):
                 #Create a dictionary of column names and widths
                 column_widths={}
                 for i in fields:
-                    column_widths[i.name] = form.cleaned_data[i.name]
+                    column_widths[i.name] = []
+                    column_widths[i.name].append(form.cleaned_data[i.name])
+                    # column_widths[i.name].append(form.cleaned_data['Protect ' + i.name])
+                    if form.cleaned_data['Protect ' + i.name]:
+                        column_widths[i.name].append(1)
+                    else:
+                        column_widths[i.name].append(0)
 
                 #Create a dictionary object from the uploaded credentials file
                 if len(request.FILES) != 0:

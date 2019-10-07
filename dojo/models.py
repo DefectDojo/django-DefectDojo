@@ -233,7 +233,7 @@ class System_Settings(models.Model):
                                           verbose_name="Low Finding SLA Days",
                                           help_text="# of days to remediate a low finding.")
     credentials = models.CharField(max_length=3000, blank=True)
-    column_widths = models.CharField(max_length=1000, blank=True)
+    column_widths = models.CharField(max_length=1500, blank=True)
     drive_folder_ID = models.CharField(max_length=100, blank=True)
     enable_google_sheets = models.BooleanField(default=False, null=True, blank=True)
 
