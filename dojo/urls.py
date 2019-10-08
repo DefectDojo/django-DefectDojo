@@ -51,6 +51,7 @@ from dojo.object.urls import urlpatterns as object_urls
 from dojo.benchmark.urls import urlpatterns as benchmark_urls
 from dojo.rules.urls import urlpatterns as rule_urls
 from dojo.notes.urls import urlpatterns as notes_urls
+from dojo.note_type.urls import urlpatterns as note_type_urls
 from dojo.google_sheet.urls import urlpatterns as google_sheets_urls
 
 admin.autodiscover()
@@ -138,6 +139,7 @@ ur += object_urls
 ur += benchmark_urls
 ur += rule_urls
 ur += notes_urls
+ur += note_type_urls
 ur += google_sheets_urls
 
 swagger_urls = [
