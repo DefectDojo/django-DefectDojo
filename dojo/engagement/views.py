@@ -100,6 +100,39 @@ def engagement(request):
 
 
 @user_passes_test(lambda u: u.is_staff)
+def engagements_all(request):
+    filtered = EngagementFilter(
+        request.GET,
+        queryset=Product.objects.filter(
+            ~Q(engagement=None),
+        ).distinct())
+    prods = get_page_items(request, filtered.qs, 25)
+    name_words = [
+        product.name for product in Product.objects.filter(
+            ~Q(engagement=None),
+        ).distinct()
+    ]
+    eng_words = [
+        engagement.name for product in Product.objects.filter(
+            ~Q(engagement=None),
+        ).distinct() for engagement in product.engagement_set.all()
+    ]
+
+    add_breadcrumb(
+        title="All Engagements",
+        top_level=not len(request.GET),
+        request=request)
+
+    return render(
+        request, 'dojo/engagements_all.html', {
+            'products': prods,
+            'filtered': filtered,
+            'name_words': sorted(set(name_words)),
+            'eng_words': sorted(set(eng_words)),
+        })
+
+
+@user_passes_test(lambda u: u.is_staff)
 def new_engagement(request):
     if request.method == 'POST':
         form = EngForm(request.POST)
