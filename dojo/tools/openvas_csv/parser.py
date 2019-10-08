@@ -316,7 +316,7 @@ class OpenVASUploadCsvParser(object):
         reportCSV = io.TextIOWrapper(content, encoding='utf-8 ', errors='replace')
         reader = csv.reader(reportCSV, delimiter=',',quotechar='"')
 
-	row_number = 0
+        row_number = 0
         for row in reader:
             finding = Finding(test=test)
 
