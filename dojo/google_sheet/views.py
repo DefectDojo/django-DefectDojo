@@ -10,7 +10,7 @@ from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth.models import User
 
-from dojo.models import Finding, System_Settings, Test, Engagement, Product, Dojo_User
+from dojo.models import Finding, System_Settings, Test, Engagement, Product, Dojo_User, Note_Type
 from dojo.forms import GoogleSheetFieldsForm
 from dojo.utils import add_breadcrumb
 
@@ -309,11 +309,16 @@ def create_spreadsheet(tid, spreadsheet_name, credentials):
     result = sheets_service.spreadsheets().values().get(spreadsheetId=spreadsheetId, range='Sheet1!1:1').execute()
     rows = result.get('values', [])
     header_raw = rows[0]
+    start_index=0
+    active_note_types = Note_Type.objects.filter(is_active=True)
+    note_type_activation = active_note_types.count()
     column_details = json.loads(system_settings.column_widths.replace("'",'"'))
     body = {}
     body["requests"]=[]
-    for i in range (len(header_raw)):
-        if header_raw[i] == 'Note_1':
+    for column in header_raw:
+        if note_type_activation and column == (active_note_types[0].name + '_' + str(1)):
+            break
+        elif column == 'Note_1':
             break
         else:
             body["requests"].append({
@@ -321,16 +326,16 @@ def create_spreadsheet(tid, spreadsheet_name, credentials):
                     "range": {
                         "sheetId": 0,
                         "dimension": "COLUMNS",
-                        "startIndex": i,
-                        "endIndex": i+1
+                        "startIndex": start_index,
+                        "endIndex": start_index+1
                     },
                     "properties": {
-                        "pixelSize": column_details[header_raw[i]][0]
+                        "pixelSize": column_details[column][0]
                     },
                     "fields": "pixelSize"
                 }
             })
-            if column_details[header_raw[i]][1] == 1:
+            if column_details[column][1] == 1:
                 body["requests"].append({
                   "addProtectedRange": {
                     "protectedRange": {
@@ -338,65 +343,100 @@ def create_spreadsheet(tid, spreadsheet_name, credentials):
                         "sheetId": 0,
                         "startRowIndex": 1,
                         "endRowIndex": raw_count,
-                        "startColumnIndex": i,
-                        "endColumnIndex": i+1,
+                        "startColumnIndex": start_index,
+                        "endColumnIndex": start_index+1,
                       },
                       # "description": "Protecting total row",
                       "warningOnly": False
                     }
                   }
                 })
+            start_index += 1
     sheets_service.spreadsheets().batchUpdate(spreadsheetId=spreadsheetId, body=body).execute()
 
 
 def get_findings_list(tid):
     test = Test.objects.get(id=tid)
     findings = Finding.objects.filter(test=test).order_by('numerical_severity')
-    #Get maximum note count per finding
-    max_notes = 0
-    for finding in findings:
-        note_count = len(finding.notes.all())
-        if note_count > max_notes:
-            max_notes = note_count
-    fields = Finding._meta.fields
-    findings_list = []
-    column_count=len(fields)
-    #Create the header raw
-    headings = []
-    for i in fields:
-        headings.append(i.name)
-    for i in range(1,max_notes+1):
-        headings.append("Note_" + str(i))
-    findings_list.append(headings)
+    active_note_types = Note_Type.objects.filter(is_active=True)
+    note_type_activation = active_note_types.count()
+    if note_type_activation:
+        #Get maximum note counts
+        max_note_count = {}
+        for note_type in active_note_types:
+            max_note_count[note_type.name]=0
+        for finding in findings:
+            for note_type in active_note_types:
+                note_count = finding.notes.filter(note_type=note_type).count()
+                if max_note_count[note_type.name] < note_count :
+                    max_note_count[note_type.name]=note_count
 
-    #Create finding raws
-    for finding in findings:
-        finding_details = []
-        for field in fields:
-            # if i.many_to_one and (i.related_model==User or i.related_model==Dojo_User):
-            #     user  = eval("finding." + i.name)
-            #     if user == None:
-            #         val=None
-            #     else:
-            #         val = user.username
-            #         # if i.related_model==User:
-            #         #     user=get_object_or_404(User, id=id)
-            #         # else:
-            #         #     user=get_object_or_404(Dojo_User, id=id)
-            #         # val=user.username
-            # else:
-            # type=field.get_internal_type()
-            # print (field.name)
-            value=eval("finding." + field.name)
-            if type(value)==datetime.date or type(value)==Test or type(value)==datetime.datetime:
-                var=str(eval("finding." + field.name))
-            elif type(value)==User:
-                var=value.username
-            else:
-                var=value
-            finding_details.append(var)
-        notes = finding.notes.all()
-        for note in notes:
-            finding_details.append(note.entry)
-        findings_list.append(finding_details)
+        #Create the header raw
+        fields = Finding._meta.fields
+        column_count=len(fields)
+        findings_list = []
+        headings = []
+        for i in fields:
+            headings.append(i.name)
+        for note_type in active_note_types:
+            for i in range(max_note_count[note_type.name]):
+                headings.append(note_type.name + '_' + str(i+1))
+        findings_list.append(headings)
+
+        #Create finding raws
+        for finding in findings:
+            finding_details = []
+            for field in fields:
+                value=eval("finding." + field.name)
+                if type(value)==datetime.date or type(value)==Test or type(value)==datetime.datetime:
+                    var=str(eval("finding." + field.name))
+                elif type(value)==User:
+                    var=value.username
+                else:
+                    var=value
+                finding_details.append(var)
+            for note_type in active_note_types:
+                notes = finding.notes.filter(note_type=note_type).order_by('id')
+                for note in notes:
+                    finding_details.append(note.entry)
+                empty_notes = max_note_count[note_type.name] - notes.count()
+                for i in range(empty_notes):
+                    finding_details.append('')
+            findings_list.append(finding_details)
+
+    else:
+        #Get maximum note countst
+        max_notes = 0
+        for finding in findings:
+            note_count = len(finding.notes.all())
+            if note_count > max_notes:
+                max_notes = note_count
+
+        #Create the header raw
+        fields = Finding._meta.fields
+        column_count=len(fields)
+        findings_list = []
+        headings = []
+        for i in fields:
+            headings.append(i.name)
+        for i in range(1,max_notes+1):
+            headings.append("Note_" + str(i))
+        findings_list.append(headings)
+
+        #Create finding raws
+        for finding in findings:
+            finding_details = []
+            for field in fields:
+                value=eval("finding." + field.name)
+                if type(value)==datetime.date or type(value)==Test or type(value)==datetime.datetime:
+                    var=str(eval("finding." + field.name))
+                elif type(value)==User:
+                    var=value.username
+                else:
+                    var=value
+                finding_details.append(var)
+            notes = finding.notes.all()
+            for note in notes:
+                finding_details.append(note.entry)
+            findings_list.append(finding_details)
     return findings_list, column_count
