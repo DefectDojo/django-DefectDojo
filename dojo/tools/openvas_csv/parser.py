@@ -1,9 +1,7 @@
 # Sorry for the lazyness but I just update the column name fields
 # Didn't change the class names, only the main one..
-#Import Scan Result Fix
 
 import io
-from io import TextIOWrapper
 import csv
 import hashlib
 from dojo.models import Finding, Endpoint
@@ -313,18 +311,14 @@ class OpenVASUploadCsvParser(object):
         if filename is None:
             self.items = ()
             return
-
-        row_number = 0
+        
         content = open(filename.temporary_file_path(),'rb')
         reportCSV = io.TextIOWrapper(content, encoding='utf-8 ', errors='replace')
-		
         reader = csv.reader(reportCSV, delimiter=',',quotechar='"')
-        print("Reader type is :")
-        print(type(reader))		
+
+	row_number = 0
         for row in reader:
             finding = Finding(test=test)
-            print("Row type is :")
-            print(type(row))
 
             if row_number == 0:
                 self.read_column_names(row)
@@ -334,7 +328,6 @@ class OpenVASUploadCsvParser(object):
             column_number = 0
             for column in row:
                 self.chain.process_column(self.column_names[column_number], column, finding)
-                print(self.column_names[column_number], column)
                 column_number += 1
 
             if finding is not None and row_number > 0:
