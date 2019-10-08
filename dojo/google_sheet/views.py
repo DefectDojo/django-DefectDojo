@@ -236,13 +236,14 @@ def create_spreadsheet(tid, spreadsheet_name, credentials):
                                         removeParents=previous_parents,
                                         fields='id, parents').execute()
     #Update created spredsheet with finding details
-    findings_list = get_findings_list(tid)[0]
+    findings_list = get_findings_list(tid)
+    values = findings_list[0]
     raw_count = len(findings_list)
-    column_count = get_findings_list(tid)[1]
+    column_count = findings_list[1]
     result = sheets_service.spreadsheets().values().update(spreadsheetId=spreadsheetId,
                                                     range='Sheet1!A1',
                                                     valueInputOption='RAW',
-                                                    body = {'values': findings_list}).execute()
+                                                    body = {'values': values}).execute()
     #Format the header raw
     body = {
       "requests": [
@@ -310,7 +311,7 @@ def create_spreadsheet(tid, spreadsheet_name, credentials):
     rows = result.get('values', [])
     header_raw = rows[0]
     start_index=0
-    active_note_types = Note_Type.objects.filter(is_active=True)
+    active_note_types = Note_Type.objects.filter(is_active=True).order_by('id')
     note_type_activation = active_note_types.count()
     column_details = json.loads(system_settings.column_widths.replace("'",'"'))
     body = {}
@@ -357,86 +358,69 @@ def create_spreadsheet(tid, spreadsheet_name, credentials):
 
 def get_findings_list(tid):
     test = Test.objects.get(id=tid)
-    findings = Finding.objects.filter(test=test).order_by('numerical_severity')
-    active_note_types = Note_Type.objects.filter(is_active=True)
+    findings = Finding.objects.filter(test=test).order_by('id')
+    active_note_types = Note_Type.objects.filter(is_active=True).order_by('id')
     note_type_activation = active_note_types.count()
+
+    #Create the header raw
+    fields = Finding._meta.fields
+    column_count=len(fields)
+    findings_list = []
+    headings = []
+    for i in fields:
+        headings.append(i.name)
+    findings_list.append(headings)
+
+    #Create finding raws
+    for finding in findings:
+        finding_details = []
+        for field in fields:
+            value=eval("finding." + field.name)
+            if type(value)==datetime.date or type(value)==Test or type(value)==datetime.datetime:
+                var=str(eval("finding." + field.name))
+            elif type(value)==User:
+                var=value.username
+            else:
+                var=value
+            finding_details.append(var)
+        findings_list.append(finding_details)
+
+    #Add notes into the findings_list
     if note_type_activation:
-        #Get maximum note counts
         max_note_count = {}
         for note_type in active_note_types:
-            max_note_count[note_type.name]=0
-        for finding in findings:
-            for note_type in active_note_types:
-                note_count = finding.notes.filter(note_type=note_type).count()
-                if max_note_count[note_type.name] < note_count :
-                    max_note_count[note_type.name]=note_count
-
-        #Create the header raw
-        fields = Finding._meta.fields
-        column_count=len(fields)
-        findings_list = []
-        headings = []
-        for i in fields:
-            headings.append(i.name)
-        for note_type in active_note_types:
-            for i in range(max_note_count[note_type.name]):
-                headings.append(note_type.name + '_' + str(i+1))
-        findings_list.append(headings)
-
-        #Create finding raws
-        for finding in findings:
-            finding_details = []
-            for field in fields:
-                value=eval("finding." + field.name)
-                if type(value)==datetime.date or type(value)==Test or type(value)==datetime.datetime:
-                    var=str(eval("finding." + field.name))
-                elif type(value)==User:
-                    var=value.username
-                else:
-                    var=value
-                finding_details.append(var)
+            if note_type.is_single:
+                max_note_count[note_type.name]=1
+                findings_list[0].append(note_type.name)
+            else:
+                max_note_count[note_type.name]=0
+                for finding in findings:
+                    note_count = finding.notes.filter(note_type=note_type).count()
+                    if max_note_count[note_type.name] < note_count :
+                        max_note_count[note_type.name]=note_count
+                for n in range(max_note_count[note_type.name]):
+                    findings_list[0].append(note_type.name + '_' + str(n+1))
+        for f in range(findings.count()):
+            finding = findings[f]
             for note_type in active_note_types:
                 notes = finding.notes.filter(note_type=note_type).order_by('id')
                 for note in notes:
-                    finding_details.append(note.entry)
-                empty_notes = max_note_count[note_type.name] - notes.count()
-                for i in range(empty_notes):
-                    finding_details.append('')
-            findings_list.append(finding_details)
-
+                    findings_list[f+1].append(note.entry)
+                missing_notes_count = max_note_count[note_type.name] - notes.count()
+                print (missing_notes_count)
+                for i in range(missing_notes_count):
+                    findings_list[f+1].append('')
     else:
-        #Get maximum note countst
         max_notes = 0
         for finding in findings:
             note_count = len(finding.notes.all())
             if note_count > max_notes:
                 max_notes = note_count
-
-        #Create the header raw
-        fields = Finding._meta.fields
-        column_count=len(fields)
-        findings_list = []
-        headings = []
-        for i in fields:
-            headings.append(i.name)
         for i in range(1,max_notes+1):
-            headings.append("Note_" + str(i))
-        findings_list.append(headings)
-
-        #Create finding raws
-        for finding in findings:
-            finding_details = []
-            for field in fields:
-                value=eval("finding." + field.name)
-                if type(value)==datetime.date or type(value)==Test or type(value)==datetime.datetime:
-                    var=str(eval("finding." + field.name))
-                elif type(value)==User:
-                    var=value.username
-                else:
-                    var=value
-                finding_details.append(var)
-            notes = finding.notes.all()
+            findings_list[0].append("Note_" + str(i))
+        for i in range(findings.count()):
+            finding = findings[i]
+            notes = finding.notes.all().order_by('id')
             for note in notes:
-                finding_details.append(note.entry)
-            findings_list.append(finding_details)
+                findings_list[i+1].append(note.entry)
     return findings_list, column_count
