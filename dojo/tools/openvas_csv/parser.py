@@ -10,8 +10,6 @@ import re
 from urllib.parse import urlparse
 import socket
 
-
-
 class ColumnMappingStrategy(object):
 
     mapped_column = None
