@@ -620,6 +620,19 @@ class Product(models.Model):
     def get_product_type(self):
         return self.prod_type if self.prod_type is not None else 'unknown'
 
+    def open_findings_list(self):
+        findings = Finding.objects.filter(test__engagement__product=self,
+                                          mitigated__isnull=True,
+                                          verified=True,
+                                          false_p=False,
+                                          duplicate=False,
+                                          out_of_scope=False
+                                          )
+        findings_list = []
+        for i in findings:
+          findings_list.append(i.id)
+          print((i.id))
+
 
 class ScanSettings(models.Model):
     product = models.ForeignKey(Product, default=1, editable=False, on_delete=models.CASCADE)
