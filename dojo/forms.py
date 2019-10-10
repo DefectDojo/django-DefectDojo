@@ -176,9 +176,9 @@ class ProductForm(forms.ModelForm):
                                        queryset=Product_Type.objects.all().order_by('name'),
                                        required=True)
 
-    authorized_users = forms.ModelMultipleChoiceField(
-        queryset=None,
-        required=False, label="Authorized Users")
+    #    authorized_users = forms.ModelMultipleChoiceField(
+    #        queryset=None,
+    #        required=False, label="Authorized Users")
 
     def __init__(self, *args, **kwargs):
         non_staff = User.objects.exclude(is_staff=True) \
@@ -186,13 +186,13 @@ class ProductForm(forms.ModelForm):
         tags = Tag.objects.usage_for_model(Product)
         t = [(tag.name, tag.name) for tag in tags]
         super(ProductForm, self).__init__(*args, **kwargs)
-        self.fields['authorized_users'].queryset = non_staff
+        # self.fields['authorized_users'].queryset = non_staff
         self.fields['tags'].widget.choices = t
 
     class Meta:
         model = Product
         fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'regulations',
-                  'authorized_users', 'business_criticality', 'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience', 'internet_accessible']
+                  'platform', 'lifecycle', 'origin', 'external_audience', 'internet_accessible']
 
 
 class DeleteProductForm(forms.ModelForm):
@@ -202,9 +202,9 @@ class DeleteProductForm(forms.ModelForm):
     class Meta:
         model = Product
         exclude = ['name', 'description', 'prod_manager', 'tech_contact', 'manager', 'created',
-                   'prod_type', 'updated', 'tid', 'authorized_users', 'product_manager',
-                   'technical_contact', 'team_manager', 'prod_numeric_grade', 'business_criticality',
-                   'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience',
+                   'prod_type', 'updated', 'tid', 'product_manager',
+                   'technical_contact', 'team_manager', 'prod_numeric_grade',
+                   'platform', 'lifecycle', 'origin', 'external_audience',
                    'internet_accessible', 'regulations', 'product_meta']
 
 
@@ -233,12 +233,13 @@ class Product_TypeProductForm(forms.ModelForm):
                            required=False,
                            help_text="Add tags that help describe this product.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
-    authorized_users = forms.ModelMultipleChoiceField(
-        queryset=None,
-        required=False, label="Authorized Users")
-    prod_type = forms.ModelChoiceField(label='Product Type',
-                                       queryset=Product_Type.objects.all().order_by('name'),
-                                       required=True)
+
+    #    authorized_users = forms.ModelMultipleChoiceField(
+    #        queryset=None,
+    #        required=False, label="Authorized Users")
+    #    prod_type = forms.ModelChoiceField(label='Product Type',
+    #                                       queryset=Product_Type.objects.all().order_by('name'),
+    #                                       required=True)
 
     def __init__(self, *args, **kwargs):
         non_staff = User.objects.exclude(is_staff=True) \
@@ -246,13 +247,13 @@ class Product_TypeProductForm(forms.ModelForm):
         tags = Tag.objects.usage_for_model(Product)
         t = [(tag.name, tag.name) for tag in tags]
         super(Product_TypeProductForm, self).__init__(*args, **kwargs)
-        self.fields['authorized_users'].queryset = non_staff
+        ##self.fields['authorized_users'].queryset = non_staff
         self.fields['tags'].widget.choices = t
 
     class Meta:
         model = Product
         fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'regulations',
-                  'authorized_users', 'business_criticality', 'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience', 'internet_accessible']
+                  'platform', 'lifecycle', 'origin', 'external_audience', 'internet_accessible']
 
 
 class ImportScanForm(forms.Form):

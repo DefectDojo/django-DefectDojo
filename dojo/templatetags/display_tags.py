@@ -585,18 +585,18 @@ def lifecycle_icon(value):
 
 @register.filter
 def origin_icon(value):
-    if value == Product.THIRD_PARTY_LIBRARY_ORIGIN:
-        return mark_safe(icon('book', 'Third-Party Library'))
-    if value == Product.PURCHASED_ORIGIN:
-        return mark_safe(icon('money', 'Purchased'))
-    if value == Product.CONTRACTOR_ORIGIN:
-        return mark_safe(icon('suitcase', 'Contractor Developed'))
-    if value == Product.INTERNALLY_DEVELOPED_ORIGIN:
-        return mark_safe(icon('home', 'Internally Developed'))
-    if value == Product.OPEN_SOURCE_ORIGIN:
-        return mark_safe(icon('code', 'Open Source'))
-    if value == Product.OUTSOURCED_ORIGIN:
-        return mark_safe(icon('globe', 'Outsourced'))
+    if value == Product.QUEST_ORIGIN:
+        return mark_safe(icon('book', 'Quest Diagnostics'))
+    #    if value == Product.PURCHASED_ORIGIN:
+    #        return mark_safe(icon('money', 'Purchased'))
+    #    if value == Product.CONTRACTOR_ORIGIN:
+    #        return mark_safe(icon('suitcase', 'Contractor Developed'))
+    if value == Product.COALFIRE_ORIGIN:
+        return mark_safe(icon('home', 'Coalfire'))
+    #    if value == Product.OPEN_SOURCE_ORIGIN:
+    #        return mark_safe(icon('code', 'Open Source'))
+    #    if value == Product.OUTSOURCED_ORIGIN:
+    #        return mark_safe(icon('globe', 'Outsourced'))
     else:
         return ""  # mark_safe(not_specified_icon('Origin Not Specified'))
 

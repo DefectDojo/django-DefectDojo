@@ -439,19 +439,19 @@ class Product(models.Model):
         (RETIREMENT, _('Retirement')),
     )
 
-    THIRD_PARTY_LIBRARY_ORIGIN = 'third party library'
-    PURCHASED_ORIGIN = 'purchased'
-    CONTRACTOR_ORIGIN = 'contractor'
-    INTERNALLY_DEVELOPED_ORIGIN = 'internal'
-    OPEN_SOURCE_ORIGIN = 'open source'
-    OUTSOURCED_ORIGIN = 'outsourced'
+    QUEST_ORIGIN = 'Quest Diagnostics'
+    #    PURCHASED_ORIGIN = 'purchased'
+    #    CONTRACTOR_ORIGIN = 'contractor'
+    COALFIRE_ORIGIN = 'Coalfire'
+    #    OPEN_SOURCE_ORIGIN = 'open source'
+    #    OUTSOURCED_ORIGIN = 'outsourced'
     ORIGIN_CHOICES = (
-        (THIRD_PARTY_LIBRARY_ORIGIN, _('Third Party Library')),
-        (PURCHASED_ORIGIN, _('Purchased')),
-        (CONTRACTOR_ORIGIN, _('Contractor Developed')),
-        (INTERNALLY_DEVELOPED_ORIGIN, _('Internally Developed')),
-        (OPEN_SOURCE_ORIGIN, _('Open Source')),
-        (OUTSOURCED_ORIGIN, _('Outsourced')),
+        (QUEST_ORIGIN, _('Quest Diagnostics')),
+        #        (PURCHASED_ORIGIN, _('Purchased')),
+        #        (CONTRACTOR_ORIGIN, _('Contractor Developed')),
+        (COALFIRE_ORIGIN, _('Coalfire')),
+        #        (OPEN_SOURCE_ORIGIN, _('Open Source')),
+        #        (OUTSOURCED_ORIGIN, _('Outsourced')),
     )
 
     VERY_HIGH_CRITICALITY = 'very high'
@@ -497,7 +497,7 @@ class Product(models.Model):
                                   null=True, blank=True, on_delete=models.CASCADE)
     updated = models.DateTimeField(editable=False, null=True, blank=True)
     tid = models.IntegerField(default=0, editable=False)
-    authorized_users = models.ManyToManyField(User, blank=True)
+    #    authorized_users = models.ManyToManyField(User, blank=True)
     prod_numeric_grade = models.IntegerField(null=True, blank=True)
 
     # Metadata
