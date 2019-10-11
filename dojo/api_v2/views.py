@@ -19,7 +19,6 @@ from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from datetime import datetime
-from django.utils import timezone
 from dojo.utils import get_period_counts_legacy
 
 from dojo.api_v2 import serializers, permissions
@@ -181,7 +180,7 @@ class FindingViewSet(mixins.ListModelMixin,
                 t = ", ".join(all_tags)
                 finding.tags = t
                 finding.save()
-            else: 
+            else:
                 return Response(new_tags.errors,
                     status=status.HTTP_400_BAD_REQUEST)
         tags = finding.tags
@@ -192,7 +191,7 @@ class FindingViewSet(mixins.ListModelMixin,
     def notes(self, request, pk=None):
         finding = get_object_or_404(Finding.objects, id=pk)
         if request.method == 'POST':
-            new_note = serializers.AddNewNoteOptionSerializer(data = request.data)
+            new_note = serializers.AddNewNoteOptionSerializer(data=request.data)
             if new_note.is_valid():
                 entry = new_note.validated_data['entry']
                 private = new_note.validated_data['private']
@@ -201,10 +200,10 @@ class FindingViewSet(mixins.ListModelMixin,
                     status=status.HTTP_400_BAD_REQUEST)
 
             author = request.user
-            note = Notes( entry = entry, author = author, private = private)
+            note = Notes(entry=entry, author=author, private=private)
             note.save()
             finding.notes.add(note)
-            
+
             serialized_note = serializers.NoteSerializer({
                 "author": author, "entry": entry,
                 "private": private
@@ -220,7 +219,7 @@ class FindingViewSet(mixins.ListModelMixin,
             serialized_notes = serializers.FindingToNotesSerializer({
                     "finding_id": finding, "notes": notes
             })
-            
+
         return Response(serialized_notes.data,
                 status=status.HTTP_200_OK)
 
@@ -232,21 +231,20 @@ class FindingViewSet(mixins.ListModelMixin,
         if request.data['note_id']:
             note = get_object_or_404(Notes.objects, id=request.data['note_id'])
             if note not in notes:
-                return Response({"error" : "Selected Note is not assigned to this Finding"},
+                return Response({"error": "Selected Note is not assigned to this Finding"},
                 status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({"error" : "('note_id') parameter missing"},
+            return Response({"error": "('note_id') parameter missing"},
                 status=status.HTTP_400_BAD_REQUEST)
         if note.author.username == request.user.username:
             finding.notes.remove(note)
             note.delete()
         else:
-            return Response({"error" : "Delete Failed, You are note the Note's author"},
+            return Response({"error": "Delete Failed, You are note the Note's author"},
                 status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({"Success": "Selected Note has been Removed successfully"}, 
+        return Response({"Success": "Selected Note has been Removed successfully"},
             status=status.HTTP_200_OK)
-
 
     @detail_route(methods=["put", "patch"])
     def remove_tags(self, request, pk=None):
