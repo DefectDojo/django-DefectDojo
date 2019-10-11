@@ -315,42 +315,43 @@ def create_spreadsheet(tid, spreadsheet_name, credentials):
     body = {}
     body["requests"]=[]
     for field in fields:
-        body["requests"].append({
-            "updateDimensionProperties": {
-                "range": {
-                    "sheetId": 0,
-                    "dimension": "COLUMNS",
-                    "startIndex": start_index,
-                    "endIndex": start_index+1
-                },
-                "properties": {
-                    "pixelSize": column_details[field.name][0]
-                },
-                "fields": "pixelSize"
-            }
-        })
-        if column_details[field.name][1] == 1:
+        if field in column_details:
             body["requests"].append({
-              "addProtectedRange": {
-                "protectedRange": {
-                  "range": {
-                    "sheetId": 0,
-                    "startRowIndex": 1,
-                    "endRowIndex": row_count,
-                    "startColumnIndex": start_index,
-                    "endColumnIndex": start_index+1,
-                  },
-                  "warningOnly": False
+                "updateDimensionProperties": {
+                    "range": {
+                        "sheetId": 0,
+                        "dimension": "COLUMNS",
+                        "startIndex": start_index,
+                        "endIndex": start_index+1
+                    },
+                    "properties": {
+                        "pixelSize": column_details[field.name][0]
+                    },
+                    "fields": "pixelSize"
                 }
-              }
             })
+            if column_details[field.name][1] == 1:
+                body["requests"].append({
+                  "addProtectedRange": {
+                    "protectedRange": {
+                      "range": {
+                        "sheetId": 0,
+                        "startRowIndex": 1,
+                        "endRowIndex": row_count,
+                        "startColumnIndex": start_index,
+                        "endColumnIndex": start_index+1,
+                      },
+                      "warningOnly": False
+                    }
+                  }
+                })
         start_index += 1
     sheets_service.spreadsheets().batchUpdate(spreadsheetId=spreadsheetId, body=body).execute()
 
 
 def get_findings_list(tid):
     test = Test.objects.get(id=tid)
-    findings = Finding.objects.filter(test=test).order_by('id')
+    findings = Finding.objects.filter(test=test).order_by('numerical_severity')
     active_note_types = Note_Type.objects.filter(is_active=True).order_by('id')
     note_type_activation = active_note_types.count()
 
