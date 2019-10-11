@@ -17,7 +17,9 @@ from dojo.utils import add_breadcrumb
 def configure_google_drive(request):
     fields = Finding._meta.fields
     system_settings=get_object_or_404(System_Settings, id=1)
+    revoke_access = False
     if system_settings.credentials :
+        revoke_access = True
         column_details = json.loads(system_settings.column_widths.replace("'",'"'))
         initial = {}
         for field in fields:
@@ -31,21 +33,27 @@ def configure_google_drive(request):
         form = GoogleSheetFieldsForm(all_fields=fields, initial=initial, credentials_required=False)
     else:
         form = GoogleSheetFieldsForm(all_fields=fields, credentials_required=True)
-    if request.method=='POST':
+    if request.method == 'POST':
         if system_settings.credentials :
             form = GoogleSheetFieldsForm(request.POST, request.FILES, all_fields=fields, credentials_required=False)
         else:
             form = GoogleSheetFieldsForm(request.POST, request.FILES, all_fields=fields, credentials_required=True)
-        if form.is_valid():
-            if form.cleaned_data['revoke_access']:
-                revoke_access()
-                messages.add_message(
+
+        if request.POST.get('revoke'):
+            system_settings.column_widths=""
+            system_settings.credentials=""
+            system_settings.drive_folder_ID=""
+            system_settings.enable_google_sheets=False
+            system_settings.save()
+            messages.add_message(
                     request,
                     messages.SUCCESS,
                     "Access revoked",
                     extra_tags="alert-success",)
-                return HttpResponseRedirect(reverse('dashboard'))
-            else:
+            return HttpResponseRedirect(reverse('dashboard'))
+
+        if request.POST.get('update'):
+            if form.is_valid():
                 #Create a dictionary of column names and widths
                 column_widths={}
                 for i in fields:
@@ -80,6 +88,7 @@ def configure_google_drive(request):
         'name': 'Google Sheet Sync Configuration',
         'metric': False,
         'form':form,
+        'revoke_access':revoke_access,
     })
 
 
@@ -160,15 +169,6 @@ def validate_drive_authentication(request, cred_str, drive_folder_ID):
                     return True
 
 
-def revoke_access():
-    system_settings = get_object_or_404(System_Settings, id=1)
-    system_settings.column_widths=""
-    system_settings.credentials=""
-    system_settings.drive_folder_ID=""
-    system_settings.enable_google_sheets=False
-    system_settings.save()
-
-
 def export_findings(request, tid):
     test = Test.objects.get(id=tid)
     engagement = Engagement.objects.get(id=test.engagement_id)
@@ -228,6 +228,7 @@ def create_spreadsheet(tid, spreadsheet_name, credentials):
     spreadsheetId = spreadsheet.get('spreadsheetId')
     system_settings = get_object_or_404(System_Settings, id=1)
     folder_id = system_settings.drive_folder_ID
+
     #Move the spreadsheet inside the drive folder
     file = drive_service.files().get(fileId=spreadsheetId, fields='parents').execute()
     previous_parents = ",".join(file.get('parents'))
@@ -235,15 +236,16 @@ def create_spreadsheet(tid, spreadsheet_name, credentials):
                                         addParents=folder_id,
                                         removeParents=previous_parents,
                                         fields='id, parents').execute()
+
     #Update created spredsheet with finding details
     findings_list = get_findings_list(tid)
-    values = findings_list[0]
-    raw_count = len(findings_list)
-    column_count = findings_list[1]
+    row_count = len(findings_list)
+    column_count = len(findings_list[0])
     result = sheets_service.spreadsheets().values().update(spreadsheetId=spreadsheetId,
                                                     range='Sheet1!A1',
                                                     valueInputOption='RAW',
-                                                    body = {'values': values}).execute()
+                                                    body = {'values': findings_list}).execute()
+
     #Format the header raw
     body = {
       "requests": [
@@ -307,52 +309,42 @@ def create_spreadsheet(tid, spreadsheet_name, credentials):
     sheets_service.spreadsheets().batchUpdate(spreadsheetId=spreadsheetId, body=body).execute()
 
     #Format columns with input field widths and protect columns
-    result = sheets_service.spreadsheets().values().get(spreadsheetId=spreadsheetId, range='Sheet1!1:1').execute()
-    rows = result.get('values', [])
-    header_raw = rows[0]
+    fields = Finding._meta.fields
     start_index=0
-    active_note_types = Note_Type.objects.filter(is_active=True).order_by('id')
-    note_type_activation = active_note_types.count()
     column_details = json.loads(system_settings.column_widths.replace("'",'"'))
     body = {}
     body["requests"]=[]
-    for column in header_raw:
-        if note_type_activation and column == (active_note_types[0].name + '_' + str(1)):
-            break
-        elif column == 'Note_1':
-            break
-        else:
+    for field in fields:
+        body["requests"].append({
+            "updateDimensionProperties": {
+                "range": {
+                    "sheetId": 0,
+                    "dimension": "COLUMNS",
+                    "startIndex": start_index,
+                    "endIndex": start_index+1
+                },
+                "properties": {
+                    "pixelSize": column_details[field.name][0]
+                },
+                "fields": "pixelSize"
+            }
+        })
+        if column_details[field.name][1] == 1:
             body["requests"].append({
-                "updateDimensionProperties": {
-                    "range": {
-                        "sheetId": 0,
-                        "dimension": "COLUMNS",
-                        "startIndex": start_index,
-                        "endIndex": start_index+1
-                    },
-                    "properties": {
-                        "pixelSize": column_details[column][0]
-                    },
-                    "fields": "pixelSize"
+              "addProtectedRange": {
+                "protectedRange": {
+                  "range": {
+                    "sheetId": 0,
+                    "startRowIndex": 1,
+                    "endRowIndex": row_count,
+                    "startColumnIndex": start_index,
+                    "endColumnIndex": start_index+1,
+                  },
+                  "warningOnly": False
                 }
+              }
             })
-            if column_details[column][1] == 1:
-                body["requests"].append({
-                  "addProtectedRange": {
-                    "protectedRange": {
-                      "range": {
-                        "sheetId": 0,
-                        "startRowIndex": 1,
-                        "endRowIndex": raw_count,
-                        "startColumnIndex": start_index,
-                        "endColumnIndex": start_index+1,
-                      },
-                      # "description": "Protecting total row",
-                      "warningOnly": False
-                    }
-                  }
-                })
-            start_index += 1
+        start_index += 1
     sheets_service.spreadsheets().batchUpdate(spreadsheetId=spreadsheetId, body=body).execute()
 
 
@@ -364,7 +356,6 @@ def get_findings_list(tid):
 
     #Create the header raw
     fields = Finding._meta.fields
-    column_count=len(fields)
     findings_list = []
     headings = []
     for i in fields:
@@ -378,7 +369,7 @@ def get_findings_list(tid):
             value=eval("finding." + field.name)
             if type(value)==datetime.date or type(value)==Test or type(value)==datetime.datetime:
                 var=str(eval("finding." + field.name))
-            elif type(value)==User:
+            elif type(value)==User or type(value)==Dojo_User:
                 var=value.username
             else:
                 var=value
@@ -387,40 +378,56 @@ def get_findings_list(tid):
 
     #Add notes into the findings_list
     if note_type_activation:
-        max_note_count = {}
         for note_type in active_note_types:
             if note_type.is_single:
-                max_note_count[note_type.name]=1
+                max_note_count=1
                 findings_list[0].append(note_type.name)
             else:
-                max_note_count[note_type.name]=0
+                max_note_count=0
                 for finding in findings:
                     note_count = finding.notes.filter(note_type=note_type).count()
-                    if max_note_count[note_type.name] < note_count :
-                        max_note_count[note_type.name]=note_count
-                for n in range(max_note_count[note_type.name]):
+                    if max_note_count < note_count :
+                        max_note_count=note_count
+                for n in range(max_note_count):
                     findings_list[0].append(note_type.name + '_' + str(n+1))
-        for f in range(findings.count()):
-            finding = findings[f]
-            for note_type in active_note_types:
+            for f in range(findings.count()):
+                finding = findings[f]
                 notes = finding.notes.filter(note_type=note_type).order_by('id')
                 for note in notes:
                     findings_list[f+1].append(note.entry)
-                missing_notes_count = max_note_count[note_type.name] - notes.count()
-                print (missing_notes_count)
+                missing_notes_count = max_note_count - notes.count()
+                for i in range(missing_notes_count):
+                    findings_list[f+1].append('')
+        max_note_count = 0
+        for finding in findings:
+            note_count = finding.notes.filter(note_type=None).count()
+            if max_note_count < note_count:
+                max_note_count=note_count
+        if max_note_count > 0:
+            for i in range(max_note_count):
+                findings_list[0].append("Note_" + str(i+1))
+            for f in range(findings.count()):
+                finding = findings[f]
+                notes = finding.notes.filter(note_type=None).order_by('id')
+                for note in notes:
+                    findings_list[f+1].append(note.entry)
+                missing_notes_count = max_note_count - notes.count()
                 for i in range(missing_notes_count):
                     findings_list[f+1].append('')
     else:
-        max_notes = 0
+        max_note_count = 0
         for finding in findings:
             note_count = len(finding.notes.all())
-            if note_count > max_notes:
-                max_notes = note_count
-        for i in range(1,max_notes+1):
-            findings_list[0].append("Note_" + str(i))
-        for i in range(findings.count()):
-            finding = findings[i]
+            if note_count > max_note_count:
+                max_note_count = note_count
+        for i in range(max_note_count):
+            findings_list[0].append("Note_" + str(f+1))
+        for f in range(findings.count()):
+            finding = findings[f]
             notes = finding.notes.all().order_by('id')
             for note in notes:
-                findings_list[i+1].append(note.entry)
-    return findings_list, column_count
+                findings_list[f+1].append(note.entry)
+            missing_notes_count = max_note_count - notes.count()
+            for i in range(missing_notes_count):
+                findings_list[f+1].append('')
+    return findings_list
