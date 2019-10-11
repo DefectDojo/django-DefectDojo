@@ -5,7 +5,10 @@
         {% include "dojo/form_fields.html" with form=form %}
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
-                <input class="btn btn-primary" type="submit" value="Submit"/>
+                <input class="btn btn-primary" name="update" type="submit" value="Submit"/>
+                {% if revoke_access %}
+                <input class="btn btn-danger" name="revoke" type="submit" value="Revoke Access"/>
+                {% endif %}
             </div>
         </div>
     </form>

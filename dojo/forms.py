@@ -1927,18 +1927,16 @@ class GoogleSheetFieldsForm(forms.Form):
         initial=False,
         required=False,
         help_text = 'Tick this check box if you want to enale the google sheets export & import feature in your application')
-    revoke_access = forms.BooleanField(widget=forms.widgets.HiddenInput(), required=False, initial=False)
     def __init__(self, *args, **kwargs):
         self.credentials_required = kwargs.pop('credentials_required')
         options = ((0, 'Hide'), (50, 'Small'), (100, 'Medium'), (200, 'Large'), (500, 'Custom'))
         self.all_fields = kwargs.pop('all_fields')
         super(GoogleSheetFieldsForm, self).__init__(*args, **kwargs)
         if not self.credentials_required:
-            self.fields['revoke_access'] = forms.BooleanField(initial=False, required=False)
             self.fields['cred_file'].required = False
         for i in self.all_fields:
             self.fields[i.name] = forms.ChoiceField(choices=options)
             if i.editable:
                 self.fields['Protect ' + i.name] = forms.BooleanField(initial=False, required=False)
             else:
-                self.fields['Protect ' + i.name] = forms.BooleanField(initial=True, required=False, disabled=True)
+                self.fields['Protect ' + i.name] = forms.BooleanField(initial=True, required=True, disabled=True)
