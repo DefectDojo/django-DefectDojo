@@ -133,7 +133,7 @@
             var fileDated = 'Engagements_List_' + date;
             var buttonCommon = {
                 exportOptions: {
-                    columns: ':visible',
+                    columns: ':not(:eq(8))',
                     stripHtml: true,
                     stripNewlines: true,
                     trim: true,
@@ -173,6 +173,9 @@
                     { "data": "action", render: function (data, type, row) {
                             return type === 'export' ?  "" :  data;
                     }},
+                ],
+                "columnDefs": [
+                    { "orderable": false, "targets": [8] }
                 ],
                 dom: 'Bfrtip',
                 paging: false,
