@@ -571,7 +571,7 @@
             var fileDated = 'Findings_List_' + date;
             var buttonCommon = {
                 exportOptions: {
-                    columns: ':visible',
+                    columns: ':not(:eq(0), :eq(1))',
                     stripHtml: true,
                     stripNewlines: true,
                     trim: true,
@@ -633,6 +633,10 @@
                             return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
                         }},
                     {% endif %}
+                ],
+                order: [2],
+                "columnDefs": [
+                    { "orderable": false, "targets": [0, 1] }
                 ],
                 dom: 'Bfrtip',
                 paging: false,

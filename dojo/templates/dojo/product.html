@@ -283,7 +283,7 @@
             var fileDated = 'Product_List_' + date;
             var buttonCommon = {
                 exportOptions: {
-                    columns: ':visible',
+                    columns: ':not(:eq(0))',
                     stripHtml: true,
                     stripNewlines: true,
                     trim: true,
@@ -322,6 +322,10 @@
                     }},
                     { "data": "contacts" },
                     { "data": "product_type" },
+                ],
+                order: [1],
+                "columnDefs": [
+                    { "orderable": false, "targets": [0] }
                 ],
                 dom: 'Bfrtip',
                 paging: false,
