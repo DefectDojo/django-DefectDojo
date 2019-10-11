@@ -106,6 +106,7 @@
                     <table class="table table-bordered table-striped">
                         <thead>
                         <tr>
+                            <th>ID</th>
                             <th>Severity</th>
                             <th>Title</th>
                             <th>Status</th>
@@ -118,6 +119,7 @@
                         <tbody>
                         {% for finding in findings %}
                             <tr>
+                                <td> {{ finding.object.id }}</td>
                                 <td>
                                   <span class="label severity severity-{{ finding.object.severity }}">
                                      {{ finding.object.severity_display }}
@@ -147,7 +149,14 @@
                                   </sup>
                                 </td>
                                 <td>
-                                    <a href="{% url 'view_engagement' finding.object.test.engagement.id %}">{{ finding.object.test.engagement.name }}</a>
+                                    <a href="{% url 'view_engagement' finding.object.test.engagement.id %}">{{ finding.object.test.engagement.name }}</a><br>
+                                    <i class="tag-label tag-version">Ver.{{ finding.object.test.engagement.version }}</i>
+                                    <sup>
+                                      {% for tag in finding.object.test.engagement.tags %}
+                                          <a title="Search {{ tag }}" class="tag-label tag-color"
+                                             href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                      {% endfor %}
+                                  </sup>
                                 </td>
                                 <td>
                                     <a href="{% url 'view_test' finding.object.test.id %}">
