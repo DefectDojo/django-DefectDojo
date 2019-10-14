@@ -1,3 +1,4 @@
+
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from pathlib import Path
@@ -27,10 +28,10 @@ class BlackduckImporter(Importer):
                 with zipfile.ZipFile(str(report)) as zip:
                     for file_name in zip.namelist():
                         if file_name.endswith('files.csv'):
-                            with io.TextIOWrapper(zip.open(file_name), newline='') as f:
+                            with io.TextIOWrapper(zip.open(file_name)) as f:
                                 files = self.__partition_by_project_id(f)
                         elif file_name.endswith('security.csv'):
-                            with io.TextIOWrapper(zip.open(file_name), newline='') as f:
+                            with io.TextIOWrapper(zip.open(file_name)) as f:
                                 security_issues = self.__partition_by_project_id(f)
             else:
                 print("Not a zip file?")
@@ -42,37 +43,38 @@ class BlackduckImporter(Importer):
         for project_id in project_ids:
             locations = set()
             for file_entry in files[project_id]:
-                path = file_entry[8]
-                archive_context = file_entry[9]
+                file_entry_dict = dict(file_entry)
+                path = file_entry_dict['Path']
+                archive_context = file_entry_dict['Archive context']
                 if archive_context:
                     locations.add("{}{}".format(archive_context, path[1:]))
                 else:
                     locations.add(path)
             for issue in security_issues[project_id]:
+                security_issue_dict = dict(issue)
                 yield BlackduckFinding(
-                    issue[8],  # vuln ID
-                    issue[9],  # description
-                    issue[21],  # security_risk
-                    issue[14],  # impact
-                    issue[15],  # vulnerability source
-                    issue[20],  # url
-                    issue[6],  # channel version origin id
-                    issue[10],  # published date
-                    issue[11],  # updated on
-                    issue[12],  # base score
-                    issue[13],  # exploitability
-                    issue[16],  # remediation status
-                    issue[17],  # remediation target date
-                    issue[18],  # remediation actual date
-                    issue[19],  # remediation comment
+                    security_issue_dict['Vulnerability id'],
+                    security_issue_dict['Description'],
+                    security_issue_dict['Security Risk'],
+                    security_issue_dict['Impact'],
+                    security_issue_dict['Vulnerability source'],
+                    security_issue_dict['URL'],
+                    security_issue_dict['Channel version origin id'],
+                    security_issue_dict['Published on'],
+                    security_issue_dict['Updated on'],
+                    security_issue_dict['Base score'],
+                    security_issue_dict['Exploitability'],
+                    security_issue_dict['Remediation status'],
+                    security_issue_dict['Remediation target date'],
+                    security_issue_dict['Remediation actual date'],
+                    security_issue_dict['Remediation comment'],
                     ', '.join(locations)
                 )
 
     # return type elided due to higher kinded types bug in Python 3.5
     def __partition_by_project_id(self, csv_file: Union[Path, zipfile.ZipFile]):
-        records = csv.reader(csv_file)
-        next(csv_file)
+        records = csv.DictReader(csv_file)
         findings = defaultdict(set)
         for record in records:
-            findings[record[0]].add(tuple(record))
+            findings[record['Project id']].add(frozenset(record.items()))
         return findings
