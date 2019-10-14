@@ -214,7 +214,7 @@ class FindingViewSet(mixins.ListModelMixin,
             return Response(serialized_note.data,
                 status=status.HTTP_200_OK)
         notes = finding.notes.all()
-        
+
         serialized_notes = []
         if notes:
             serialized_notes = serializers.FindingToNotesSerializer({
@@ -222,7 +222,7 @@ class FindingViewSet(mixins.ListModelMixin,
             })
             return Response(serialized_notes.data,
                     status=status.HTTP_200_OK)
-        
+
         return Response(serialized_notes,
                 status=status.HTTP_200_OK)
 
