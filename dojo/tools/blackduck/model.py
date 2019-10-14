@@ -11,6 +11,7 @@ BlackduckFinding = namedtuple('BlackduckFinding', [
     'vuln_source',
     'url',
     'channel_version_origin_id',
+    'channel_origin_id',
     'published_date',
     'updated_date',
     'base_score',

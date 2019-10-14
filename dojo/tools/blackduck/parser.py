@@ -89,7 +89,12 @@ class BlackduckHubCSVParser(object):
         self.items = dupes.values()
 
     def format_title(self, i):
-        return "{} - {}".format(i.vuln_id, i.channel_version_origin_id)
+        if (i.channel_version_origin_id is not None):
+            component_title = i.channel_version_origin_id
+        else:
+            component_title = i.channel_origin_id
+
+        return "{} - {}".format(i.vuln_id, component_title)
 
     def format_description(self, i):
         description = "Published on: {}\n\n".format(str(i.published_date))
