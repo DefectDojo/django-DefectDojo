@@ -214,13 +214,16 @@ class FindingViewSet(mixins.ListModelMixin,
             return Response(serialized_note.data,
                 status=status.HTTP_200_OK)
         notes = finding.notes.all()
+        
         serialized_notes = []
         if notes:
             serialized_notes = serializers.FindingToNotesSerializer({
                     "finding_id": finding, "notes": notes
             })
-
-        return Response(serialized_notes.data,
+            return Response(serialized_notes.data,
+                    status=status.HTTP_200_OK)
+        
+        return Response(serialized_notes,
                 status=status.HTTP_200_OK)
 
     @detail_route(methods=["put", "patch"])
@@ -240,7 +243,7 @@ class FindingViewSet(mixins.ListModelMixin,
             finding.notes.remove(note)
             note.delete()
         else:
-            return Response({"error": "Delete Failed, You are note the Note's author"},
+            return Response({"error": "Delete Failed, You are not the Note's author"},
                 status=status.HTTP_400_BAD_REQUEST)
 
         return Response({"Success": "Selected Note has been Removed successfully"},
