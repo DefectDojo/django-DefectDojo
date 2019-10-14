@@ -44,8 +44,8 @@ class BlackduckImporter(Importer):
             locations = set()
             for file_entry in files[project_id]:
                 file_entry_dict = dict(file_entry)
-                path = file_entry_dict['Path']
-                archive_context = file_entry_dict['Archive context']
+                path = file_entry_dict.get('Path')
+                archive_context = file_entry_dict.get('Archive context')
                 if archive_context:
                     locations.add("{}{}".format(archive_context, path[1:]))
                 else:
@@ -53,21 +53,22 @@ class BlackduckImporter(Importer):
             for issue in security_issues[project_id]:
                 security_issue_dict = dict(issue)
                 yield BlackduckFinding(
-                    security_issue_dict['Vulnerability id'],
-                    security_issue_dict['Description'],
-                    security_issue_dict['Security Risk'],
-                    security_issue_dict['Impact'],
-                    security_issue_dict['Vulnerability source'],
-                    security_issue_dict['URL'],
-                    security_issue_dict['Channel version origin id'],
-                    security_issue_dict['Published on'],
-                    security_issue_dict['Updated on'],
-                    security_issue_dict['Base score'],
-                    security_issue_dict['Exploitability'],
-                    security_issue_dict['Remediation status'],
-                    security_issue_dict['Remediation target date'],
-                    security_issue_dict['Remediation actual date'],
-                    security_issue_dict['Remediation comment'],
+                    security_issue_dict.get('Vulnerability id'),
+                    security_issue_dict.get('Description'),
+                    security_issue_dict.get('Security Risk'),
+                    security_issue_dict.get('Impact'),
+                    security_issue_dict.get('Vulnerability source'),
+                    security_issue_dict.get('URL'),
+                    security_issue_dict.get('Channel version origin id'),
+                    security_issue_dict.get('Channel origin id'),
+                    security_issue_dict.get('Published on'),
+                    security_issue_dict.get('Updated on'),
+                    security_issue_dict.get('Base score'),
+                    security_issue_dict.get('Exploitability'),
+                    security_issue_dict.get('Remediation status'),
+                    security_issue_dict.get('Remediation target date'),
+                    security_issue_dict.get('Remediation actual date'),
+                    security_issue_dict.get('Remediation comment'),
                     ', '.join(locations)
                 )
 
@@ -76,5 +77,5 @@ class BlackduckImporter(Importer):
         records = csv.DictReader(csv_file)
         findings = defaultdict(set)
         for record in records:
-            findings[record['Project id']].add(frozenset(record.items()))
+            findings[record.get('Project id')].add(frozenset(record.items()))
         return findings
