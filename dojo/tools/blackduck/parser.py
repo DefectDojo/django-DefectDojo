@@ -72,7 +72,7 @@ class BlackduckHubCSVParser(object):
         if (i.channel_version_origin_id is not None):
             component_title = i.channel_version_origin_id
         else:
-            component_title = i.channel_origin_id
+            component_title = i.component_origin_id
 
         return "{} - {}".format(i.vuln_id, component_title)
 

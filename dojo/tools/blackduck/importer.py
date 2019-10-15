@@ -94,7 +94,7 @@ class BlackduckImporter(Importer):
                     security_issue_dict.get('Vulnerability source'),
                     security_issue_dict.get('URL'),
                     security_issue_dict.get('Channel version origin id'),
-                    security_issue_dict.get('Channel origin id'),
+                    security_issue_dict.get('Component origin id'),
                     security_issue_dict.get('Published on'),
                     security_issue_dict.get('Updated on'),
                     security_issue_dict.get('Base score'),
