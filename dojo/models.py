@@ -631,7 +631,7 @@ class Product(models.Model):
         findings_list = []
         for i in findings:
           findings_list.append(i.id)
-          print((i.id))
+        return fidings_list
 
 
 class ScanSettings(models.Model):
