@@ -630,7 +630,7 @@ class Product(models.Model):
                                           )
         findings_list = []
         for i in findings:
-          findings_list.append(i.id)
+            findings_list.append(i.id)
         return findings_list
 
 
@@ -670,8 +670,7 @@ class Scan(models.Model):
                                 default=get_current_datetime)
     protocol = models.CharField(max_length=10, default='TCP')
     status = models.CharField(max_length=10, default='Pending', editable=False)
-    baseline = models.BooleanField(default=False,
-                                   verbose_name="Current Baseline")
+    baseline = models.BooleanField(default=False, verbose_name="Current Baseline")
 
     def __unicode__(self):
         return self.scan_settings.protocol + " Scan " + str(self.date)
