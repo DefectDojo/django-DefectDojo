@@ -169,7 +169,6 @@ urlpatterns = [
     url(r'^api/v2/api-token-auth/', tokenviews.obtain_auth_token),
     url(r'^api/v2/doc/', schema_view, name="api_v2_schema"),
     url(r'^robots.txt', lambda x: HttpResponse("User-Agent: *\nDisallow: /", content_type="text/plain"), name="robots_file"),
-
 ]
 
 urlpatterns += survey_urls

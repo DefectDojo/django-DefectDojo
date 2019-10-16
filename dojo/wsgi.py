@@ -14,6 +14,8 @@ framework.
 
 """
 import os
+import socket
+from socket import error as socket_error
 
 # We defer to a DJANGO_SETTINGS_MODULE already in the environment. This breaks
 # if running multiple sites in the same mod_wsgi process. To fix this, use
@@ -31,3 +33,24 @@ application = get_wsgi_application()
 # Apply WSGI middleware here.
 # from helloworld.wsgi import HelloWorldApplication
 # application = HelloWorldApplication(application)
+
+
+def _check_ptvsd_port_not_in_use(port):
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.bind(('127.0.0.1', port))
+    except socket_error as se:
+        return False
+
+    return True
+
+
+ptvsd_port = 3000
+if os.environ.get("DD_DEBUG") == "on" and _check_ptvsd_port_not_in_use(ptvsd_port):
+    try:
+        # enable remote debugging
+        import ptvsd
+        ptvsd.enable_attach(address=('0.0.0.0', ptvsd_port))
+        print("ptvsd listening on port " + ptvsd_port)
+    except Exception as e:
+        print("Generic exception caught with DD_DEBUG on. Passing.")
