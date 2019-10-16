@@ -10,33 +10,42 @@
                     <i class="fa fa-eye"></i>
                     <span><b>Show Password</b></span>
                 </div>
-                {% if GOOGLE_ENABLED == False and OKTA_ENABLED == False %}
+                {% if GOOGLE_ENABLED is False and OKTA_ENABLED is False and AZUREAD_TENANT_OAUTH2_ENABLED is False %}
                     <div class="col-sm-offset-1 col-sm-1">
                         <button class="btn btn-success">Login</button>
                     </div>
                 {% endif %}
             </div>
             <div class="form-group">
-                {% if GOOGLE_ENABLED == True or OKTA_ENABLED == True %}
+                {% if GOOGLE_ENABLED or OKTA_ENABLED or AZUREAD_TENANT_OAUTH2_ENABLED is True %}
                     <div class="col-sm-offset-1 col-sm-1">
                             <button class="btn btn-success">Login</button>
                     </div>
                 {% endif %}
-                {% if GOOGLE_ENABLED == True %}
-                    <div class="col-sm-offset-1 col-sm-3">
+                {% if GOOGLE_ENABLED is True %}
+                    <div class="col-sm-offset-1 col-sm-2">
                         <button class="btn btn-success" type="button">
                             <a href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)">Login with Google</a>
                         </button>
                     </div>
                 {% endif %}
 
-                {% if OKTA_ENABLED == True %}
-                    <div class="col-sm-offset-1 col-sm-1">
+                {% if OKTA_ENABLED is True %}
+                    <div class="col-sm-offset-1 col-sm-2">
                         <button class="btn btn-success" type="button">
                             <a href="{% url 'social:begin' 'okta-oauth2' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)">Login with OKTA</a>
                         </button>
                     </div>
                 {% endif %}
+
+                {% if AZUREAD_TENANT_OAUTH2_ENABLED is True %}
+                    <div class="col-sm-offset-1 col-sm-2">
+                        <button class="btn btn-success" type="button">
+                            <a href="{% url 'social:begin' 'azuread-tenant-oauth2' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)">Login with Azure AD</a>
+                        </button>
+                    </div>
+                {% endif %}
+
             </div>
         </fieldset>
     </form>
