@@ -4,6 +4,7 @@
 {% load humanize %}
 {% load get_endpoint_status %}
 {% load get_note_status %}
+{% load get_notetype_availability %}
 {% load event_tags %}
 {% block content %}
     <div class="container">
@@ -19,7 +20,7 @@
         {% if include_table_of_contents%}
 			<div class="row">
 				<div class="col-lg-12" id="toc">
-					<h3 id="table_of_contents">Table of Contents for {{ product.name }}</h3>
+					<h3 id="table_of_contents">Table of Contents for {{ engagement.name }}</h3>
 				</div>
 			</div>
 
@@ -434,6 +435,10 @@
                                         <tr>
                                             <th>User</th>
                                             <th>Date</th>
+                                            {% with notes_with_type=notes|get_notetype_notes_count %}
+                                              {% if notes_with_type > 0 %}
+                                                  <th>Note Type</th>
+                                              {% endif %}
                                             <th>Note</th>
                                         </tr>
                                     </thead>
@@ -446,12 +451,20 @@
                                                 <td>
                                                     {{ note.date }}
                                                 </td>
+                                                {% if notes_with_type > 0 %}
                                                 <td>
-                                                    {{ note }}
+                                                    {% if note.note_type != None %}
+                                                      {{ note.note_type }}
+                                                    {% endif %}
+                                                </td>
+                                                {% endif %}
+                                                <td>
+                                                    {{ note|linebreaks }}
                                                 </td>
                                             </tr>
                                         {% endfor %}
                                     </tbody>
+                                  {% endwith %}
                                 </table>
                             {% endif %}
                         {% endwith %}
@@ -756,13 +769,20 @@
             var toc = "";
             var level = 3;
 
-            // Handle all elements exclusive of tags
             document.getElementById("contents").innerHTML =
                 document.getElementById("contents").innerHTML.replace(
-                    /<h([\d])([^<]*)>([^<]+)<\/h([\d])>/gi,
-                    function (str, openLevel, id, titleText, closeLevel) {
+                    /<h([\d])([^<]*)>([^<]+)<\/h([\d])>|<h([\d])([^>]*)>([^<]+)<sup>([^<]*)<\/sup>([^<]*)<\/h([\d])>/gi,
+                    function (str, openLevel, id, titleText, closeLevel, openLevel_t, id_t, titleText_t, tags, junk, closeLevel_t) {
                         if (openLevel != closeLevel || openLevel > 5) {
                             return str;
+                        }
+
+                        if(tags)
+                        {
+                            openLevel = openLevel_t;
+                            id = id_t;
+                            titleText = titleText_t;
+                            closeLevel = closeLevel_t;
                         }
 
                         if (openLevel > level) {
@@ -775,50 +795,35 @@
                         
                         var anchor = titleText.trim().replace(/ /g, "_");
 
-                        if (['Info', 'Low', 'Medium', 'High', 'Critical'].indexOf(titleText) >= 0) {
-                            toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
-                            "<span class=\"label severity severity-" + titleText + "\">" + titleText + "</span></a></li>";
-                        }
-                        else {
-                            toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
-                            titleText + "</a></li>";
-                        }
-                        
-                        
-                        return "<a style=\"color:black;\" name=\"" + anchor + "\"><h" + openLevel + "" + id + ">"
-                            + titleText + "</h" + closeLevel + "></a>";
-                    }
-                );
+                        if(tags)
+                        {
+                            if (['Info', 'Low', 'Medium', 'High', 'Critical'].indexOf(titleText) >= 0) {
+                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                                "<span class=\"label severity severity-" + titleText + "\">" + titleText + "</span></a></li>";
+                            }
+                            else {
+                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                                titleText + "<sup>" + tags + "</sup></a></li>";
+                            }
 
-                // Handle findings with tags
-                document.getElementById("contents").innerHTML =
-                document.getElementById("contents").innerHTML.replace(
-                    /<h([\d])([^<]*)>([^<]+)<sup>([^<]+)<\/sup>([^<]*)<\/h([\d])>/gi,
-                    function (str, openLevel, id, titleText, tags, junk, closeLevel) {
-                        if (openLevel != closeLevel || openLevel > 5) {
-                            return str;
+                            return "<a style=\"color:black;\" name=\"" + anchor + "\"><h" + openLevel + "" + id + ">"
+                                + titleText + "<sup>" + tags + "</sup></h" + closeLevel + "></a>";
+                        }
+                        else
+                        {
+                            if (['Info', 'Low', 'Medium', 'High', 'Critical'].indexOf(titleText) >= 0) {
+                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                                "<span class=\"label severity severity-" + titleText + "\">" + titleText + "</span></a></li>";
+                            }
+                            else {
+                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                                titleText + "</a></li>";
+                            }
+
+                            return "<a style=\"color:black;\" name=\"" + anchor + "\"><h" + openLevel + "" + id + ">"
+                                + titleText + "</h" + closeLevel + "></a>";
                         }
 
-                        if (openLevel > level) {
-                            toc += (new Array(openLevel - level + 1)).join("<ul>");
-                        } else if (openLevel < level) {
-                            toc += (new Array(level - openLevel + 1)).join("</ul>");
-                        }
-
-                        level = parseInt(openLevel);
-                        
-                        var anchor = titleText.trim().replace(/ /g, "_");
-
-                        if (['Info', 'Low', 'Medium', 'High', 'Critical'].indexOf(titleText) >= 0) {
-                            toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
-                            "<span class=\"label severity severity-" + titleText + "\">" + titleText + "</span></a></li>";
-                        }
-                        else {
-                            toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
-                            titleText + "<sup>" + tags + "</sup></a></li>";
-                        }
-                        
-                        
                         return "<a style=\"color:black;\" name=\"" + anchor + "\"><h" + openLevel + "" + id + ">"
                             + titleText + "<sup>" + tags + "</sup></h" + closeLevel + "></a>";
                     }
