@@ -309,10 +309,10 @@ class OpenVASUploadCsvParser(object):
         if filename is None:
             self.items = ()
             return
-        
-        content = open(filename.temporary_file_path(),'rb')
+
+        content = open(filename.temporary_file_path(), 'rb')
         reportCSV = io.TextIOWrapper(content, encoding='utf-8 ', errors='replace')
-        reader = csv.reader(reportCSV, delimiter=',',quotechar='"')
+        reader = csv.reader(reportCSV, delimiter=',', quotechar='"')
 
         row_number = 0
         for row in reader:
