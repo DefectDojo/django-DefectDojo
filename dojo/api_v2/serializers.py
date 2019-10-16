@@ -864,15 +864,22 @@ class NoteHistorySerializer(serializers.ModelSerializer):
 
 class NoteSerializer(serializers.ModelSerializer):
     author = UserSerializer(
-        many=False, read_only=True)
+        many=False, read_only=False)
     editor = UserSerializer(
-        read_only=True, many=False)
+        read_only=False, many=False, allow_null=True)
 
     history = NoteHistorySerializer(read_only=True, many=True)
 
     class Meta:
         model = Notes
         fields = '__all__'
+
+
+class AddNewNoteOptionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Notes
+        fields = ['entry', 'private']
 
 
 class FindingToFindingImagesSerializer(serializers.Serializer):
