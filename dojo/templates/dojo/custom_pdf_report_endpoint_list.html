@@ -3,6 +3,7 @@
 {% load humanize %}
 {% load get_endpoint_status %}
 {% load get_note_status %}
+{% load get_notetype_availability %}
 {% load event_tags %}
 <div class="container">
     <h1>{{ title }}</h1>
@@ -237,6 +238,10 @@
                                         <tr>
                                             <th>User</th>
                                             <th>Date</th>
+                                            {% with notes_with_type=notes|get_notetype_notes_count %}
+                                              {% if notes_with_type > 0 %}
+                                                  <th>Note Type</th>
+                                              {% endif %}
                                             <th>Note</th>
                                         </tr>
                                     </thead>
@@ -249,12 +254,20 @@
                                                 <td>
                                                     {{ note.date }}
                                                 </td>
+                                                {% if notes_with_type > 0 %}
+                                                <td>
+                                                    {% if note.note_type != None %}
+                                                      {{ note.note_type }}
+                                                    {% endif %}
+                                                </td>
+                                                {% endif %}
                                                 <td>
                                                     {{ note }}
                                                 </td>
                                             </tr>
                                         {% endfor %}
                                     </tbody>
+                                  {% endwith %}
                                 </table>
                             {% endif %}
                         {% endwith %}

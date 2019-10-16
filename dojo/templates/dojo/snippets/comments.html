@@ -16,7 +16,7 @@
     </div>
 </div>
 {% for note in notes %}
-  <div>  
+  <div>
     <div class="panel panel-default">
       <div class="panel-comments">
           {% if user.username == note.author.username or user.is_superuser %}
@@ -50,7 +50,7 @@
           </div>
 
           <div class="row-sm-2">
-            <strong>{{ note.author.username }}</strong> 
+            <strong>{{ note.author.username }}</strong>
             <span class="text-muted">commented {{ note.date }}</span>
           </div>
           {% if note.edited %}
@@ -63,10 +63,14 @@
             <div class="row-sm-2">
               <span class="text-muted">(will not appear in report)</span>
             </div>
-          {% endif %} 
+          {% endif %}
       </div>
       <div class="panel-body">
-        {{ note }}
+        {% if note.note_type != None %}
+          <strong>Note type : {{ note.note_type }}</strong>
+          <br><br>
+        {% endif %}
+        {{ note|linebreaks }}
       </div>
     </div>
   </div>

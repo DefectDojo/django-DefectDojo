@@ -481,7 +481,7 @@
 	},
 	{
 	   "fields": {
-	      "name": "JFrogXray Scan"
+	      "name": "JFrog Xray Scan"
 		},
 		"model": "dojo.test_type",
 		"pk": 161
@@ -492,14 +492,20 @@
     	},
     	"model": "dojo.test_type",
     	"pk": 162
-
 	},
 	{
 		"fields": {
-      		"name": "Aqua Scan"
-    	},
-    	"model": "dojo.test_type",
-    	"pk": 163
+			"name": "Aqua Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 163
+	},
+	{
+		"fields": {
+			"name": "Dependency Track Finding Packaging Format (FPF) Export"
+		},
+		"model": "dojo.test_type",
+		"pk": 164
 
 	}
 ]

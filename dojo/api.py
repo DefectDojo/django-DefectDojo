@@ -537,6 +537,8 @@ class EngagementResource(BaseModelResource):
             'pen_test': ALL,
             'status': ALL,
             'product': ALL,
+            'name': ALL,
+            'product_id': ALL,
         }
         authentication = DojoApiKeyAuthentication()
         authorization = DjangoAuthorization()
@@ -914,6 +916,8 @@ class TestTypeResource(BaseModelResource):
         filtering = {
             'id': ALL,
             'name': ALL,
+            'title': ALL,
+            'engagement': ALL,
         }
         authentication = DojoApiKeyAuthentication()
         authorization = DjangoAuthorization()
@@ -950,6 +954,7 @@ class TestResource(BaseModelResource):
         include_resource_uri = True
         filtering = {
             'id': ALL,
+            'title': ALL,
             'test_type': ALL,
             'target_start': ALL,
             'target_end': ALL,
