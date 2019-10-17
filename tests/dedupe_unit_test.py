@@ -1,4 +1,5 @@
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -7,7 +8,6 @@ import unittest
 import re
 import sys
 import os
-
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 try:  # First Try for python 3
@@ -27,9 +27,11 @@ class DedupeTest(unittest.TestCase):
     # Initialization
     # --------------------------------------------------------------------------------------------------------
     def setUp(self):
-        self.driver = webdriver.Chrome('chromedriver')
+        self.options = Options()
+        #self.options.add_argument("--headless")
+        self.driver = webdriver.Chrome('chromedriver', chrome_options=self.options)
         self.driver.implicitly_wait(30)
-        self.base_url = "http://localhost:8000/"
+        self.base_url = "http://localhost:8080/"
         self.verificationErrors = []
         self.accept_next_alert = True
         self.relative_path = dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -114,7 +116,7 @@ class DedupeTest(unittest.TestCase):
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[3]/div/div').click()
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
         driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_path_1.json")
-        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
         # Second test
         driver.get(self.base_url + "engagement")
         driver.find_element_by_partial_link_text("Dedupe Path Test").click()
@@ -124,7 +126,7 @@ class DedupeTest(unittest.TestCase):
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[3]/div/div').click()
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
         driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_path_2.json")
-        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
 
     def test_check_path_status(self):
         driver = self.login_page()
@@ -181,7 +183,7 @@ class DedupeTest(unittest.TestCase):
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[3]/div/div').click()
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
         driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_1.xml")
-        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
         # Second test : Immuniweb Scan (dynamic)
         driver.get(self.base_url + "engagement")
         driver.find_element_by_partial_link_text("Dedupe Endpoint Test").click()
@@ -191,7 +193,7 @@ class DedupeTest(unittest.TestCase):
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[3]/div/div').click()
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
         driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_2.xml")
-        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
 
     def test_check_endpoint_status(self):
         driver = self.login_page()
@@ -244,7 +246,7 @@ class DedupeTest(unittest.TestCase):
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[3]/div/div').click()
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
         driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_1.xml")
-        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
         # Second test : Generic Findings Import with Url (dynamic)
         driver.get(self.base_url + "engagement")
         driver.find_element_by_partial_link_text("Dedupe Same Eng Test").click()
@@ -254,7 +256,7 @@ class DedupeTest(unittest.TestCase):
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[3]/div/div').click()
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
         driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_cross_1.csv")
-        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
 
     def test_check_same_eng_status(self):
         driver = self.login_page()
@@ -282,7 +284,7 @@ class DedupeTest(unittest.TestCase):
         driver.get(self.base_url + "product")
         driver.find_element_by_class_name("pull-left").click()
         driver.find_element_by_link_text("Add New Engagement").click()
-        driver.find_element_by_id("id_name").send_keys("Dedupe Path Test")
+        driver.find_element_by_id("id_name").send_keys("Dedupe on hash_code only")
         driver.find_element_by_xpath('//*[@id="id_deduplication_on_engagement"]').click()
         driver.find_element_by_name("_Add Tests").click()
         text = driver.find_element_by_tag_name("BODY").text
@@ -307,24 +309,25 @@ class DedupeTest(unittest.TestCase):
         # First test
         driver = self.login_page()
         driver.get(self.base_url + "engagement")
-        driver.find_element_by_partial_link_text("Dedupe Path Test").click()
+        driver.find_element_by_partial_link_text("Dedupe on hash_code only").click()
         driver.find_element_by_partial_link_text("Path Test 1").click()
         driver.find_element_by_id("dropdownMenu1").click()
         driver.find_element_by_link_text("Re-Upload Scan").click()
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[3]/div/div').click()
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
-        driver.find_element_by_id('id_file').send_keys(self.relative_path + "../unittests/scans/checkmarx/multiple_findings.xml")
-        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        # os.path.realpath makes the path canonical
+        driver.find_element_by_id('id_file').send_keys(os.path.realpath(self.relative_path + "/../dojo/unittests/scans/checkmarx/multiple_findings.xml"))
+        driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
         # Second test
         driver.get(self.base_url + "engagement")
-        driver.find_element_by_partial_link_text("Dedupe Path Test").click()
+        driver.find_element_by_partial_link_text("Dedupe on hash_code only").click()
         driver.find_element_by_partial_link_text("Path Test 2").click()
         driver.find_element_by_id("dropdownMenu1").click()
         driver.find_element_by_link_text("Re-Upload Scan").click()
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[3]/div/div').click()
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
-        driver.find_element_by_id('id_file').send_keys(self.relative_path + "../unittests/scans/checkmarx/multiple_findings_line_changed.xml")
-        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        driver.find_element_by_id('id_file').send_keys(os.path.realpath(self.relative_path + "/../dojo/unittests/scans/checkmarx/multiple_findings_line_changed.xml"))
+        driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
 
     def test_check_path_status_checkmarx_scan(self):
         driver = self.login_page()
@@ -390,7 +393,7 @@ class DedupeTest(unittest.TestCase):
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[3]/div/div').click()
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
         driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_1.xml")
-        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
         # Second test : generic scan with url (dynamic)
         driver.get(self.base_url + "engagement")
         driver.find_element_by_partial_link_text("Dedupe Generic Test").click()
@@ -400,7 +403,7 @@ class DedupeTest(unittest.TestCase):
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[3]/div/div').click()
         driver.find_element_by_xpath('//*[@id="base-content"]/form/div[4]/div/div').click()
         driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_cross_1.csv")
-        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
 
     def test_check_cross_status(self):
         driver = self.login_page()

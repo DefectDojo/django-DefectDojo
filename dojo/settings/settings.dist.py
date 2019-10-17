@@ -524,7 +524,7 @@ CELERY_BEAT_SCHEDULE = {
 #   static scanner:  ['title', 'cwe', 'line', 'file_path', 'description']
 #   dynamic scanner: ['title', 'cwe', 'line', 'file_path', 'description', 'endpoints']
 HASHCODE_FIELDS_PER_SCANNER = {
-    'Checkmarx Scan': ['title', 'cwe', 'file_path', 'description']
+    'Checkmarx Scan': ['cwe', 'file_path']
 }
 
 # List of fields that are known to be usable in hash_code computation)
