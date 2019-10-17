@@ -667,6 +667,19 @@ class Product(models.Model):
     def get_product_type(self):
         return self.prod_type if self.prod_type is not None else 'unknown'
 
+    def open_findings_list(self):
+        findings = Finding.objects.filter(test__engagement__product=self,
+                                          mitigated__isnull=True,
+                                          verified=True,
+                                          false_p=False,
+                                          duplicate=False,
+                                          out_of_scope=False
+                                          )
+        findings_list = []
+        for i in findings:
+            findings_list.append(i.id)
+        return findings_list
+
 
 class ScanSettings(models.Model):
     product = models.ForeignKey(Product, default=1, editable=False, on_delete=models.CASCADE)
@@ -704,8 +717,7 @@ class Scan(models.Model):
                                 default=get_current_datetime)
     protocol = models.CharField(max_length=10, default='TCP')
     status = models.CharField(max_length=10, default='Pending', editable=False)
-    baseline = models.BooleanField(default=False,
-                                   verbose_name="Current Baseline")
+    baseline = models.BooleanField(default=False, verbose_name="Current Baseline")
 
     def __unicode__(self):
         return self.scan_settings.protocol + " Scan " + str(self.date)
