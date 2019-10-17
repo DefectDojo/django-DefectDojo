@@ -148,15 +148,17 @@ class SonarQubeAPI:
         )
 
         if response.ok:
-            for issue in response.json().get('issues', []):
-                if issue['key'] == issue_key:
-                    return issue
-            raise Exception(
-                'Expected Issue "{}", but it returned {}.'.format(
-                    issue_key,
-                    [x.get('key') for x in response.json().get('issues')]
+            issues = response.json().get('issues', [])
+            if issues:
+                for issue in response.json().get('issues', []):
+                    if issue['key'] == issue_key:
+                        return issue
+                raise Exception(
+                    'Expected Issue "{}", but it returned {}.'.format(
+                        issue_key,
+                        [x.get('key') for x in response.json().get('issues')]
+                    )
                 )
-            )
         else:
             raise Exception(
                 "Unable to get issue {} due to {} - {}".format(
