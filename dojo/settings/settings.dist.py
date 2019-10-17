@@ -301,6 +301,7 @@ LOGIN_EXEMPT_URLS = (
     r'^%sapi/v2/' % URL_PREFIX,
     r'complete/google-oauth2/',
     r'complete/okta-oauth2/',
+    r'empty_survey/([\d]+)/answer'
     r'complete/azuread-tenant-oauth2/',
 )
 
@@ -442,6 +443,7 @@ INSTALLED_APPS = (
     'gunicorn',
     'tastypie',
     'auditlog',
+    'defectDojo_engagement_survey',
     'dojo',
     'tastypie_swagger',
     'watson',
