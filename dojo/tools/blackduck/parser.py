@@ -5,29 +5,9 @@ import dojo.tools.blackduck.importer as import_helper
 
 class BlackduckHubCSVParser(object):
     """
-    security.csv fields, base 1
-    1 project id -- ignore
-    2 version id -- ignore
-    3 chan version id -- ignore
-    4 Project name
-    5 Version NO -- part of channel id
-    6 channel version origin (i.e maven)
-    7 Channel version origin id YES
-    8 channel version origin name NO, part of ID already
-    9 Vulnerability id (either a CVE or some random number from VULNDB?)
-    10 Description
-    11 Published on
-    12 Updated on
-    13 Base score
-    14 Exploitability
-    15 Impact
-    16 Vulnerability source
-    17 Remediation status (NEW, DUPLICATE...)
-    18 Remediation target date
-    19 Remediation actual date
-    20 Remediation comment
-    21 URL (can be empty)
-    22 Security Risk
+    Can import as exported from Blackduck:
+    - from a zip file containing a security.csv and files.csv
+    - a single security.csv file
     """
     def __init__(self, filename, test):
         normalized_findings = self.normalize_findings(filename)
@@ -89,7 +69,12 @@ class BlackduckHubCSVParser(object):
         self.items = dupes.values()
 
     def format_title(self, i):
-        return "{} - {}".format(i.vuln_id, i.channel_version_origin_id)
+        if (i.channel_version_origin_id is not None):
+            component_title = i.channel_version_origin_id
+        else:
+            component_title = i.component_origin_id
+
+        return "{} - {}".format(i.vuln_id, component_title)
 
     def format_description(self, i):
         description = "Published on: {}\n\n".format(str(i.published_date))
