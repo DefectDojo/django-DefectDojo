@@ -1,26 +1,30 @@
+import logging
 import tempfile
 from datetime import timedelta
-from django.db.models import Count
-from django.conf import settings
-from django.core.files.base import ContentFile
-from django.urls import reverse
-from django.template.loader import render_to_string
-from django.utils.http import urlencode
-from celery.utils.log import get_task_logger
-from celery.decorators import task
-from dojo.models import Product, Finding, Engagement, System_Settings
-from django.utils import timezone
-from dojo.signals import dedupe_signal
 
 import pdfkit
-from dojo.celery import app
-from dojo.tools.tool_issue_updater import tool_issue_updater
-from dojo.utils import sync_false_history, calculate_grade
-from dojo.reports.widgets import report_widget_factory
-from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, \
-                       close_epic, create_notification, sync_rules
+from celery import chord
+from celery.decorators import task
+from celery.utils.log import get_task_logger
+from django.conf import settings
+from django.core.files.base import ContentFile
+from django.db.models import Count
+from django.template.loader import render_to_string
+from django.urls import reverse
+from django.utils import timezone
+from django.utils.http import urlencode
 
-import logging
+from dojo.celery import app
+from dojo.models import Product, Finding, Engagement, System_Settings, Vulnerability, VulnerabilityMirrorState
+from dojo.reports.widgets import report_widget_factory
+from dojo.settings import settings
+from dojo.signals import dedupe_signal
+from dojo.tools.tool_issue_updater import tool_issue_updater
+from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, \
+    close_epic, create_notification, sync_rules
+from dojo.utils import sync_false_history, calculate_grade
+from dojo.vulnerability import VulnerabilityMirror
+
 fmt = getattr(settings, 'LOG_FORMAT', None)
 lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
 logging.basicConfig(format=fmt, level=lvl)
@@ -310,3 +314,45 @@ def async_dupe_delete(*args, **kwargs):
 @task(name='celery_status', ignore_result=False)
 def celery_status():
     return True
+
+
+@app.task(rate_limit=1, ignore_result=True)
+def synchronize_vulnerability_mirrors():
+    def chunk_task(task, file_names, chunk_size):
+        files = list(file_names)
+        count = len(files)
+        file_chunks = (files[i:i + chunk_size] for i in range(0, count, chunk_size))
+        return [task.s(chunk) for chunk in file_chunks]
+
+    # FIXME: this should check the updated time of the state to avoid re-processing in-progress data
+    last_processed_revision = VulnerabilityMirrorState.get_last_processed_revision(settings.VULNDB_URL)
+    mirror = VulnerabilityMirror(logger=logger)
+    checkpoint_revision = mirror.revision
+    header = chunk_task(process_new_vulnerability_files, mirror.added_files(last_processed_revision), 2000)
+    if last_processed_revision is not None and len(last_processed_revision) > 0:
+        header.extend(
+            chunk_task(process_updated_vulnerability_files, mirror.updated_files(last_processed_revision), 2000))
+    chord(header)(checkpoint_vulnerability_state.si(checkpoint_revision))
+
+
+@app.task(ignore_result=False)
+def process_new_vulnerability_files(files) -> int:
+    mirror = VulnerabilityMirror(logger=logger)
+    vulnerabilities = [v for v in (mirror.parse_file(filename) for filename in files) if v is not None]
+    count = len(vulnerabilities)
+    Vulnerability.objects.bulk_create(vulnerabilities)
+    return count
+
+
+@app.task(ignore_result=False)
+def process_updated_vulnerability_files(files) -> int:
+    mirror = VulnerabilityMirror(logger=logger)
+    vulnerabilities = [v for v in (mirror.parse_file(filename) for filename in files) if v is not None]
+    count = len(vulnerabilities)
+    Vulnerability.objects.bulk_update(vulnerabilities, fields=['url', 'title', 'description', 'cwe'])
+    return count
+
+
+@app.task(ignore_result=True)
+def checkpoint_vulnerability_state(revision: str):
+    VulnerabilityMirrorState.checkpoint_remote(settings.VULNDB_URL, revision)

@@ -1272,6 +1272,8 @@ class Finding(models.Model):
     jira_change = models.DateTimeField(editable=True, null=True)
     scanner_confidence = models.IntegerField(null=True, blank=True, default=None, editable=False, help_text="Confidence level of vulnerability which is supplied by the scannner.")
     sonarqube_issue = models.ForeignKey(Sonarqube_Issue, null=True, blank=True, help_text="SonarQube issue", on_delete=models.CASCADE)
+    vulnerabilities = models.ManyToManyField(to='Vulnerability', related_name='findings',
+                                             help_text='Vulnerabilities referenced by this finding.')
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
@@ -1924,6 +1926,49 @@ class JIRA_PKey(models.Model):
 
     def __str__(self):
         return self.product.name + " | " + self.project_key
+
+
+class Vulnerability(models.Model):
+    """
+    Models an external vulnerability entry such as a CVE.
+    """
+    vulnerability_id = models.CharField(primary_key=True, max_length=200,
+                                        help_text='Vulnerability id such as CVE-2000-0001.')
+    url = models.URLField(help_text='URL for more details about this vulnerability.')
+    title = models.CharField(max_length=1000, help_text='Title or summary of this vulnerability.')
+    description = models.TextField(blank=True, help_text='Further details of this vulnerability.')
+    # FIXME: this should likely use a ForeignKey to CWE
+    cwe = models.PositiveIntegerField(null=True, blank=True, default=None,
+                                      help_text='Common Weakness Enumeration identifier for this vulnerability.')
+    updated = models.DateTimeField(auto_now=True,
+                                   help_text='Time this vulnerability entry was last checked for updates.')
+
+
+class VulnerabilityMirrorState(models.Model):
+    remote_url = models.URLField(primary_key=True,
+                                 help_text='Git remote URL to repository containing vulnerability data.')
+    last_processed_revision = models.CharField(max_length=40, blank=True,
+                                               help_text='Last revision in vulnerability mirror that was processed.')
+    updated = models.DateTimeField(auto_now=True, help_text='Time this vulnerability mirror was last processed.')
+
+    @classmethod
+    def __state(cls, remote_url: str):
+        """Gets or creates the mirror state for the given vulnerability repository remote URL."""
+        state, created = cls.objects.get_or_create(remote_url=remote_url)
+        return state
+
+    @classmethod
+    def checkpoint_remote(cls, remote_url: str, revision: str):
+        return cls.__state(remote_url).checkpoint(revision)
+
+    @classmethod
+    def get_last_processed_revision(cls, remote_url: str) -> str:
+        return cls.__state(remote_url).last_processed_revision
+
+    def checkpoint(self, revision: str):
+        """Saves the given revision as the last processed revision for this vulnerability mirror."""
+        self.last_processed_revision = revision
+        self.save()
 
 
 NOTIFICATION_CHOICES = (
