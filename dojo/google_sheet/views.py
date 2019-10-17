@@ -208,10 +208,11 @@ def export_findings(request, tid):
 def sync_findings(tid, spreadsheetId, credentials):
     print ('---------------------------------------syncing-----------------------------------')
     sheets_service = googleapiclient.discovery.build('sheets', 'v4', credentials=credentials)
-    test = Test.objects.get(id=tid)
-    findings = Finding.objects.filter(test=test).order_by('numerical_severity')
     result = sheets_service.spreadsheets().values().get(spreadsheetId=spreadsheetId, range='Sheet1').execute()
-    # print (result)
+    rows = result.get('values', [])
+    header_row_sheet = rows[0]
+    finding_rows_sheet = rows[1:]
+    fields = Finding._meta.fields
 
 
 def create_spreadsheet(tid, spreadsheet_name, credentials):
@@ -246,7 +247,7 @@ def create_spreadsheet(tid, spreadsheet_name, credentials):
                                                     valueInputOption='RAW',
                                                     body = {'values': findings_list}).execute()
 
-    #Format the header raw
+    #Format the header row
     body = {
       "requests": [
         {
@@ -315,7 +316,7 @@ def create_spreadsheet(tid, spreadsheet_name, credentials):
     body = {}
     body["requests"]=[]
     for field in fields:
-        if field in column_details:
+        if field.name in column_details:
             body["requests"].append({
                 "updateDimensionProperties": {
                     "range": {
@@ -355,7 +356,7 @@ def get_findings_list(tid):
     active_note_types = Note_Type.objects.filter(is_active=True).order_by('id')
     note_type_activation = active_note_types.count()
 
-    #Create the header raw
+    #Create the header row
     fields = Finding._meta.fields
     findings_list = []
     headings = []
@@ -363,7 +364,7 @@ def get_findings_list(tid):
         headings.append(i.name)
     findings_list.append(headings)
 
-    #Create finding raws
+    #Create finding rows
     for finding in findings:
         finding_details = []
         for field in fields:
@@ -382,6 +383,7 @@ def get_findings_list(tid):
         for note_type in active_note_types:
             if note_type.is_single:
                 max_note_count=1
+                findings_list[0].append(note_type.name + '_id')
                 findings_list[0].append(note_type.name)
             else:
                 max_note_count=0
@@ -390,14 +392,17 @@ def get_findings_list(tid):
                     if max_note_count < note_count :
                         max_note_count=note_count
                 for n in range(max_note_count):
+                    findings_list[0].append(note_type.name + '_' + str(n+1) + '_id')
                     findings_list[0].append(note_type.name + '_' + str(n+1))
             for f in range(findings.count()):
                 finding = findings[f]
                 notes = finding.notes.filter(note_type=note_type).order_by('id')
                 for note in notes:
+                    findings_list[f+1].append(note.id)
                     findings_list[f+1].append(note.entry)
                 missing_notes_count = max_note_count - notes.count()
                 for i in range(missing_notes_count):
+                    findings_list[f+1].append('')
                     findings_list[f+1].append('')
         max_note_count = 0
         for finding in findings:
@@ -406,14 +411,17 @@ def get_findings_list(tid):
                 max_note_count=note_count
         if max_note_count > 0:
             for i in range(max_note_count):
+                findings_list[0].append("Note_" + str(i+1) + '_id')
                 findings_list[0].append("Note_" + str(i+1))
             for f in range(findings.count()):
                 finding = findings[f]
                 notes = finding.notes.filter(note_type=None).order_by('id')
                 for note in notes:
+                    findings_list[f+1].append(note.id)
                     findings_list[f+1].append(note.entry)
                 missing_notes_count = max_note_count - notes.count()
                 for i in range(missing_notes_count):
+                    findings_list[f+1].append('')
                     findings_list[f+1].append('')
     else:
         max_note_count = 0
@@ -422,13 +430,16 @@ def get_findings_list(tid):
             if note_count > max_note_count:
                 max_note_count = note_count
         for i in range(max_note_count):
-            findings_list[0].append("Note_" + str(f+1))
+            findings_list[0].append("Note_" + str(i+1) + '_id')
+            findings_list[0].append("Note_" + str(i+1))
         for f in range(findings.count()):
             finding = findings[f]
             notes = finding.notes.all().order_by('id')
             for note in notes:
+                findings_list[f+1].append(note.id)
                 findings_list[f+1].append(note.entry)
             missing_notes_count = max_note_count - notes.count()
             for i in range(missing_notes_count):
+                findings_list[f+1].append('')
                 findings_list[f+1].append('')
     return findings_list
