@@ -1,10 +1,12 @@
 import logging
 import tempfile
 from datetime import timedelta
+from itertools import chain
 
 import pdfkit
 from celery import chord
 from celery.decorators import task
+from celery.exceptions import Ignore
 from celery.utils.log import get_task_logger
 from django.conf import settings
 from django.core.files.base import ContentFile
@@ -316,41 +318,40 @@ def celery_status():
     return True
 
 
-@app.task(rate_limit=1, ignore_result=True)
+@app.task(ignore_result=True)
 def synchronize_vulnerability_mirrors():
     def chunk_task(task, file_names, chunk_size):
         files = list(file_names)
         count = len(files)
-        file_chunks = (files[i:i + chunk_size] for i in range(0, count, chunk_size))
-        return [task.s(chunk) for chunk in file_chunks]
+        for i in range(0, count, chunk_size):
+            yield task.s(files[i:i + chunk_size])
 
-    # FIXME: this should check the updated time of the state to avoid re-processing in-progress data
-    last_processed_revision = VulnerabilityMirrorState.get_last_processed_revision(settings.VULNDB_URL)
+    state, _ = VulnerabilityMirrorState.objects.get_or_create(remote_url=settings.VULNDB_URL)
+    if state.locked:
+        raise Ignore
+    state.lock()
+    last_processed_revision = state.last_processed_revision
     mirror = VulnerabilityMirror(logger=logger)
     checkpoint_revision = mirror.revision
-    header = chunk_task(process_new_vulnerability_files, mirror.added_files(last_processed_revision), 2000)
-    if last_processed_revision is not None and len(last_processed_revision) > 0:
-        header.extend(
-            chunk_task(process_updated_vulnerability_files, mirror.updated_files(last_processed_revision), 2000))
-    chord(header)(checkpoint_vulnerability_state.si(checkpoint_revision))
+    tasks = chunk_task(process_new_vulnerability_files, mirror.added_files(last_processed_revision), 2000)
+    if last_processed_revision:
+        updates = chunk_task(process_updated_vulnerability_files, mirror.updated_files(last_processed_revision), 2000)
+        tasks = chain(tasks, updates)
+    chord(tasks, checkpoint_vulnerability_state.si(checkpoint_revision)).apply_async()
 
 
 @app.task(ignore_result=False)
-def process_new_vulnerability_files(files) -> int:
+def process_new_vulnerability_files(files):
     mirror = VulnerabilityMirror(logger=logger)
-    vulnerabilities = [v for v in (mirror.parse_file(filename) for filename in files) if v is not None]
-    count = len(vulnerabilities)
-    Vulnerability.objects.bulk_create(vulnerabilities)
-    return count
+    vulnerabilities = mirror.parse_files(files)
+    return len(Vulnerability.objects.bulk_create(vulnerabilities))
 
 
 @app.task(ignore_result=False)
-def process_updated_vulnerability_files(files) -> int:
+def process_updated_vulnerability_files(files):
     mirror = VulnerabilityMirror(logger=logger)
-    vulnerabilities = [v for v in (mirror.parse_file(filename) for filename in files) if v is not None]
-    count = len(vulnerabilities)
-    Vulnerability.objects.bulk_update(vulnerabilities, fields=['url', 'title', 'description', 'cwe'])
-    return count
+    vulnerabilities = mirror.parse_files(files)
+    return len(Vulnerability.objects.bulk_update(vulnerabilities, fields=['url', 'title', 'description', 'cwe']))
 
 
 @app.task(ignore_result=True)

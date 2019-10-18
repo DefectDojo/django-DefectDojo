@@ -3,27 +3,30 @@ import hashlib
 import logging
 import os
 import re
+from datetime import timedelta
 from uuid import uuid4
-from django.conf import settings
-from watson import search as watson
+
 from auditlog.registry import auditlog
+from django import forms
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import get_user_model
-from django.urls import reverse
-from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import Q
+from django.urls import reverse
+from django.utils import timezone
 from django.utils.deconstruct import deconstructible
 from django.utils.timezone import now
+from django.utils.translation import gettext as _
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToCover
-from django.utils import timezone
+from multiselectfield import MultiSelectField
 from pytz import all_timezones
 from tagging.registry import register as tag_register
-from multiselectfield import MultiSelectField
-from django import forms
-from django.utils.translation import gettext as _
+from watson import search as watson
+
 from dojo.signals import dedupe_signal
 
 fmt = getattr(settings, 'LOG_FORMAT', None)
@@ -1447,6 +1450,8 @@ class Finding(models.Model):
         return long_desc
 
     def save(self, dedupe_option=True, false_history=False, rules_option=True, *args, **kwargs):
+        if self.vulnerabilities is None and self.cve is not None:
+            self.vulnerabilities = Vulnerability.objects.filter(pk=self.cve)
         # Make changes to the finding before it's saved to add a CWE template
         new_finding = False
         if self.pk is None:
@@ -1937,11 +1942,8 @@ class Vulnerability(models.Model):
     url = models.URLField(help_text='URL for more details about this vulnerability.')
     title = models.CharField(max_length=1000, help_text='Title or summary of this vulnerability.')
     description = models.TextField(blank=True, help_text='Further details of this vulnerability.')
-    # FIXME: this should likely use a ForeignKey to CWE
-    cwe = models.PositiveIntegerField(null=True, blank=True, default=None,
-                                      help_text='Common Weakness Enumeration identifier for this vulnerability.')
-    updated = models.DateTimeField(auto_now=True,
-                                   help_text='Time this vulnerability entry was last checked for updates.')
+    cwe = models.ForeignKey(CWE, on_delete=models.SET_NULL, null=True)
+    updated = models.DateTimeField(auto_now=True, help_text='Time this vulnerability entry was last updated.')
 
 
 class VulnerabilityMirrorState(models.Model):
@@ -1949,26 +1951,29 @@ class VulnerabilityMirrorState(models.Model):
                                  help_text='Git remote URL to repository containing vulnerability data.')
     last_processed_revision = models.CharField(max_length=40, blank=True,
                                                help_text='Last revision in vulnerability mirror that was processed.')
-    updated = models.DateTimeField(auto_now=True, help_text='Time this vulnerability mirror was last processed.')
-
-    @classmethod
-    def __state(cls, remote_url: str):
-        """Gets or creates the mirror state for the given vulnerability repository remote URL."""
-        state, created = cls.objects.get_or_create(remote_url=remote_url)
-        return state
+    locked_until = models.DateTimeField(null=True, help_text='Time that this mirror is locked for processing until.')
 
     @classmethod
     def checkpoint_remote(cls, remote_url: str, revision: str):
-        return cls.__state(remote_url).checkpoint(revision)
-
-    @classmethod
-    def get_last_processed_revision(cls, remote_url: str) -> str:
-        return cls.__state(remote_url).last_processed_revision
+        state, _ = cls.objects.get_or_create(remote_url=remote_url)
+        state.checkpoint(revision)
 
     def checkpoint(self, revision: str):
         """Saves the given revision as the last processed revision for this vulnerability mirror."""
         self.last_processed_revision = revision
+        # unlock the mirror
+        self.locked_until = None
         self.save()
+
+    def lock(self, max_processing_time: timedelta = timedelta(hours=4)):
+        """Locks this mirror for processing until a checkpoint is made or the given time limit is reached."""
+        self.locked_until = timezone.now() + max_processing_time
+        self.save()
+
+    @property
+    def locked(self) -> bool:
+        """Indicates if this mirror is currently locked."""
+        return self.locked_until is not None and self.locked_until > timezone.now()
 
 
 NOTIFICATION_CHOICES = (
