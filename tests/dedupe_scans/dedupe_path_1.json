@@ -13,7 +13,7 @@
         524
       ],
       "test_id": "B110",
-      "test_name": "BANDIT Matching Title, Matching Line Number/Path"
+      "test_name": "BANDIT Matching Title, Matching Line Number/Path (DUPE)"
     },
     {
       "code": "523         cred = Cred_Mapping.objects.get(pk=ttid)\n524     except:\n525         pass\n",
