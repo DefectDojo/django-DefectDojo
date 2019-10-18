@@ -29,6 +29,7 @@ class DedupeTest(unittest.TestCase):
     def setUp(self):
         self.options = Options()
         self.options.add_argument("--headless")
+        self.options.add_argument("--window-size=1280,768")
         self.driver = webdriver.Chrome('chromedriver', chrome_options=self.options)
         self.driver.implicitly_wait(30)
         self.base_url = "http://localhost:8080/"
@@ -47,7 +48,21 @@ class DedupeTest(unittest.TestCase):
         driver.find_element_by_css_selector("button.btn.btn-success").click()
         return driver
 
+    def check_nb_duplicates(self, expected_number_of_duplicates):
+        print("checking duplicates...")
+        driver = self.login_page()
+        driver.get(self.base_url + "finding")
+        dupe_count = 0
+        # iterate over the rows of the findings table and concatenates all columns into td.text
+        trs = driver.find_elements_by_xpath('//*[@id="open_findings"]/tbody/tr')
+        for row in trs:
+            concatRow = ' '.join([td.text for td in row.find_elements_by_xpath(".//td")])
+            if '(DUPE)' and 'Duplicate' in concatRow:
+                dupe_count += 1
+        self.assertEqual(dupe_count, expected_number_of_duplicates)
+
     def test_enable_deduplication(self):
+        print("enabling deduplication...")
         driver = self.login_page()
         driver.get(self.base_url + 'system_settings')
         if not driver.find_element_by_id('id_enable_deduplication').is_selected():
@@ -56,6 +71,7 @@ class DedupeTest(unittest.TestCase):
             self.assertTrue(driver.find_element_by_id('id_enable_deduplication').is_selected())
 
     def test_delete_findings(self):
+        print("removing previous findings...")
         driver = self.login_page()
         driver.get(self.base_url + "finding")
         text = driver.find_element_by_tag_name("BODY").text
@@ -79,6 +95,7 @@ class DedupeTest(unittest.TestCase):
 #   Test deduplication for Bandit SAST scanner
 # --------------------------------------------------------------------------------------------------------
     def test_add_path_test_suite(self):
+        print("Same scanner deduplication - Deduplication on engagement - static. Creating tests...")
         # Create engagement
         driver = self.login_page()
         driver.get(self.base_url + "product")
@@ -106,6 +123,7 @@ class DedupeTest(unittest.TestCase):
         self.assertTrue(re.search(r'Test added successfully', text))
 
     def test_import_path_tests(self):
+        print("importing reports...")
         # First test
         driver = self.login_page()
         driver.get(self.base_url + "engagement")
@@ -129,23 +147,17 @@ class DedupeTest(unittest.TestCase):
         driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
 
     def test_check_path_status(self):
-        driver = self.login_page()
-        driver.get(self.base_url + "finding")
-        text = driver.find_element_by_tag_name("BODY").text.split('\n')
-
-        start = text.index('Severity  Name  CWE Date  Age SLA Reporter Found By Status Product ') + 1
-        text = text[start:(start + 6)]
-        dupe_count = 0
-        for finding in text:
-            if '(DUPE)' and 'Duplicate' in finding:
-                dupe_count += 1
-        self.assertEqual(dupe_count, 1)
+        # comparing tests/dedupe_scans/dedupe_path_1.json and tests/dedupe_scans/dedupe_path_2.json
+        # Counts the findings that have on the same line "(DUPE)" (in the title) and "Duplicate" (marked as duplicate by DD)
+        # We have imported 3 findings twice, but one only is a duplicate because for the 2 others, we have changed either the line number or the file_path
+        self.check_nb_duplicates(1)
 
 # --------------------------------------------------------------------------------------------------------
 # Same scanner deduplication - Deduplication on engagement
 #   Test deduplication for Immuniweb dynamic scanner
 # --------------------------------------------------------------------------------------------------------
     def test_add_endpoint_test_suite(self):
+        print("Same scanner deduplication - Deduplication on engagement - dynamic. Creating tests...")
         # Create engagement
         driver = self.login_page()
         driver.get(self.base_url + "product")
@@ -173,6 +185,7 @@ class DedupeTest(unittest.TestCase):
         self.assertTrue(re.search(r'Test added successfully', text))
 
     def test_import_endpoint_tests(self):
+        print("Importing reports...")
         # First test : Immuniweb Scan (dynamic)
         driver = self.login_page()
         driver.get(self.base_url + "engagement")
@@ -196,19 +209,13 @@ class DedupeTest(unittest.TestCase):
         driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
 
     def test_check_endpoint_status(self):
-        driver = self.login_page()
-        driver.get(self.base_url + "finding")
-        text = driver.find_element_by_tag_name("BODY").text.split('\n')
-
-        start = text.index('Severity  Name  CWE Date  Age SLA Reporter Found By Status Product ') + 1
-        text = text[start:(start + 6)]
-        dupe_count = 0
-        for finding in text:
-            if '(DUPE)' and 'Duplicate' in finding:
-                dupe_count += 1
-        self.assertEqual(dupe_count, 1)
+        # comparing dedupe_endpoint_1.xml and dedupe_endpoint_2.xml
+        # Counts the findings that have on the same line "(DUPE)" (in the title) and "Duplicate" (marked as duplicate by DD)
+        # We have imported 3 findings twice, but one only is a duplicate because for the 2 others, we have changed either (the URL) or (the name and cwe)
+        self.check_nb_duplicates(1)
 
     def test_add_same_eng_test_suite(self):
+        print("Test different scanners - same engagement - dynamic; Adding tests on the same engagement...")
         # Create engagement
         driver = self.login_page()
         driver.get(self.base_url + "product")
@@ -236,6 +243,7 @@ class DedupeTest(unittest.TestCase):
         self.assertTrue(re.search(r'Test added successfully', text))
 
     def test_import_same_eng_tests(self):
+        print("Importing reports")
         # First test : Immuniweb Scan (dynamic)
         driver = self.login_page()
         driver.get(self.base_url + "engagement")
@@ -259,17 +267,10 @@ class DedupeTest(unittest.TestCase):
         driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
 
     def test_check_same_eng_status(self):
-        driver = self.login_page()
-        driver.get(self.base_url + "finding")
-        text = driver.find_element_by_tag_name("BODY").text.split('\n')
-
-        start = text.index('Severity  Name  CWE Date  Age SLA Reporter Found By Status Product ') + 1
-        text = text[start:(start + 6)]
-        dupe_count = 0
-        for finding in text:
-            if '(DUPE)' and 'Duplicate' in finding:
-                dupe_count += 1
-        self.assertEqual(dupe_count, 1)
+        # comparing dedupe_endpoint_1.xml and dedupe_endpoint_2.xml
+        # Counts the findings that have on the same line "(DUPE)" (in the title) and "Duplicate" (marked as duplicate by DD)
+        # We have imported 3 findings twice, but one only is a duplicate because for the 2 others, we have changed either (the URL) or (the name and cwe)
+        self.check_nb_duplicates(1)
 
 # --------------------------------------------------------------------------------------------------------
 # Same scanner deduplication - Deduplication on engagement
@@ -279,6 +280,7 @@ class DedupeTest(unittest.TestCase):
 #     makes it possible to detect the duplicate even if the line number has changed (which will occur in a normal software lifecycle)
 # --------------------------------------------------------------------------------------------------------
     def test_add_path_test_suite_checkmarx_scan(self):
+        print("Same scanner deduplication - Deduplication on engagement. Test dedupe on checkmarx aggregated with custom hash_code computation")
         # Create engagement
         driver = self.login_page()
         driver.get(self.base_url + "product")
@@ -330,23 +332,17 @@ class DedupeTest(unittest.TestCase):
         driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
 
     def test_check_path_status_checkmarx_scan(self):
-        driver = self.login_page()
-        driver.get(self.base_url + "finding")
-        text = driver.find_element_by_tag_name("BODY").text.split('\n')
-
-        start = text.index('Severity  Name  CWE Date  Age SLA Reporter Found By Status Product ') + 1
-        text = text[start:(start + 6)]
-        dupe_count = 0
-        for finding in text:
-            if 'Duplicate' in finding:
-                dupe_count += 1
-        self.assertEqual(dupe_count, 2)
+        # After aggregation, it's only two findings. Both are duplicates even though the line number has changed
+        # because we ignore the line number when computing the hash_code for this scanner
+        # (so that findings keep being found as duplicate even if the code changes slightly)
+        self.check_nb_duplicates(2)
 
 # --------------------------------------------------------------------------------------------------------
 # Cross scanners deduplication - product-wide deduplication
 #   Test deduplication for Generic Findings Import with URL (dynamic) vs Immuniweb dynamic scanner
 # --------------------------------------------------------------------------------------------------------
     def test_add_cross_test_suite(self):
+        print("Cross scanners deduplication dynamic; generic finding vs immuniweb. Creating tests...")
         # Create generic engagement
         driver = self.login_page()
         driver.get(self.base_url + "product")
@@ -383,6 +379,7 @@ class DedupeTest(unittest.TestCase):
         self.assertTrue(re.search(r'Test added successfully', text))
 
     def test_import_cross_test(self):
+        print("Importing findings...")
         # First test : Immuniweb Scan (dynamic)
         driver = self.login_page()
         driver.get(self.base_url + "engagement")
@@ -406,17 +403,7 @@ class DedupeTest(unittest.TestCase):
         driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
 
     def test_check_cross_status(self):
-        driver = self.login_page()
-        driver.get(self.base_url + "finding")
-        text = driver.find_element_by_tag_name("BODY").text.split('\n')
-
-        start = text.index('Severity  Name  CWE Date  Age SLA Reporter Found By Status Product ') + 1
-        text = text[start:(start + 6)]
-        dupe_count = 0
-        for finding in text:
-            if '(DUPE)' and 'Duplicate' in finding:
-                dupe_count += 1
-        self.assertEqual(dupe_count, 1)
+        self.check_nb_duplicates(1)
 
     def tearDown(self):
         self.driver.quit()

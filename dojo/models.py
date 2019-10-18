@@ -1336,7 +1336,7 @@ class Finding(models.Model):
         return filtered.exclude(pk=self.pk)
 
     def compute_hash_code(self):
-        if hasattr(settings, 'HASHCODE_FIELDS_PER_SCANNER') and hasattr(settings, 'HASHCODE_ALLOWED_FIELDS'):
+        if hasattr(settings, 'HASHCODE_FIELDS_PER_SCANNER') and hasattr(settings, 'HASHCODE_ALLOWS_NULL_CWE') and hasattr(settings, 'HASHCODE_ALLOWED_FIELDS'):
             # Default fields
             if self.dynamic_finding:
                 hashcodeFields = ['title', 'cwe', 'line', 'file_path', 'description', 'endpoints']
@@ -1349,7 +1349,21 @@ class Finding(models.Model):
                 hashcodeFieldsCandidate = settings.HASHCODE_FIELDS_PER_SCANNER[scan_type]
                 # check that the configuration is valid: all elements of HASHCODE_FIELDS_PER_SCANNER should be in HASHCODE_ALLOWED_FIELDS
                 if (all(elem in settings.HASHCODE_ALLOWED_FIELDS for elem in hashcodeFieldsCandidate)):
-                    hashcodeFields = hashcodeFieldsCandidate
+                    # Makes sure that we have a cwe if we need one
+                    if (scan_type in settings.HASHCODE_ALLOWS_NULL_CWE):
+                        if (settings.HASHCODE_ALLOWS_NULL_CWE[scan_type] or self.cwe != 0):
+                            hashcodeFields = hashcodeFieldsCandidate
+                        else:
+                            deduplicationLogger.warn(
+                                "Cannot compute hash_code based on configured fields because cwe is 0 for finding of title '" + self.title + "' found in file '" + str(self.file_path) +
+                                "'. Fallback to legacy mode for this finding.")
+                    else:
+                        # no configuration found for this scanner: defaulting to accepting null cwe when we find one
+                        hashcodeFields = hashcodeFieldsCandidate
+                        if(self.cwe == 0):
+                            deduplicationLogger.debug(
+                                "Accepting null cwe by default for finding of title '" + self.title + "' found in file '" + str(self.file_path) +
+                                "'. This is because no configuration was found for scanner " + scan_type + " in HASHCODE_ALLOWS_NULL_CWE")
                 else:
                     deduplicationLogger.debug(
                         "compute_hash_code - configuration error: some elements of HASHCODE_FIELDS_PER_SCANNER are not in the allowed list HASHCODE_ALLOWED_FIELDS. "
@@ -1370,7 +1384,7 @@ class Finding(models.Model):
             deduplicationLogger.debug("compute_hash_code - fields_to_hash = " + fields_to_hash)
             return self.hash_fields(fields_to_hash)
         else:
-            deduplicationLogger.debug("no configuration per hash_code found; using legacy algorithm")
+            deduplicationLogger.debug("no or incomplete configuration per hash_code found; using legacy algorithm")
             return self.compute_hash_code_legacy()
 
     def compute_hash_code_legacy(self):
@@ -1574,9 +1588,7 @@ class Finding(models.Model):
 
         # Compute hash code before dedupe
         if (self.hash_code is None):
-            if((self.dynamic_finding and (self.endpoints.count() > 0)) or
-                    (self.static_finding and (self.file_path is not None))):
-                self.hash_code = self.compute_hash_code()
+            self.hash_code = self.compute_hash_code()
         self.found_by.add(self.test.test_type)
 
         if rules_option:
