@@ -436,6 +436,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'defectDojo_engagement_survey',
     'polymorphic',  # provides admin templates
     'overextends',
     'django.contrib.admin',
