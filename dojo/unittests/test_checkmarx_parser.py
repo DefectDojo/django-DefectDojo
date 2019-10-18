@@ -6,7 +6,8 @@ import datetime
 
 
 class TestCheckmarxParser(TestCase):
-    maxDiff = None
+    # comment out to get full diff with big reports
+    # maxDiff = None
 
     def init(self, reportFilename):
         my_file_handle = open(reportFilename)

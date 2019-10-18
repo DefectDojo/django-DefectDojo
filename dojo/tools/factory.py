@@ -149,6 +149,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = FortifyXMLParser(file, test)
     elif scan_type == 'SonarQube Scan':
         parser = SonarQubeHtmlParser(file, test)
+    elif scan_type == 'SonarQube Scan detailed':
+        parser = SonarQubeHtmlParser(file, test, 'detailed')
     elif scan_type == SCAN_SONARQUBE_API:
         parser = SonarQubeApiImporter(test)
     elif scan_type == 'MobSF Scan':

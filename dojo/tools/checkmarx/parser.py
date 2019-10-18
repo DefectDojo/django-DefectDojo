@@ -172,6 +172,7 @@ class CheckmarxXMLParser(object):
                     sourceFilename, sourceLineNumber, sourceObject = self.get_pathnode_elements(pathnode)
             # the last pathnode is the sink
             sinkFilename, sinkLineNumber, sinkObject = self.get_pathnode_elements(pathnode)
+            # pathId is the unique id from tool which means that there is basically no aggregation except real duplicates
             aggregateKeys = "{}{}{}{}{}".format(categories, cwe, name, sinkFilename, pathId)
             if title and sinkFilename:
                 title = "{} ({})".format(title, ntpath.basename(sinkFilename))

@@ -524,7 +524,8 @@ CELERY_BEAT_SCHEDULE = {
 #   static scanner:  ['title', 'cwe', 'line', 'file_path', 'description']
 #   dynamic scanner: ['title', 'cwe', 'line', 'file_path', 'description', 'endpoints']
 HASHCODE_FIELDS_PER_SCANNER = {
-    'Checkmarx Scan': ['cwe', 'file_path']
+    'Checkmarx Scan': ['cwe', 'file_path'],
+    'SonarQube Scan': ['cwe', 'file_path']
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -552,7 +553,8 @@ DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE = 'unique_id_from_tool_or_hash_code
 DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Checkmarx Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Checkmarx Scan': DEDUPE_ALGO_HASH_CODE,
-    'SonarQube Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL
+    'SonarQube Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'SonarQube Scan': DEDUPE_ALGO_HASH_CODE
 }
 
 

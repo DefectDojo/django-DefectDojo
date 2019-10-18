@@ -290,6 +290,7 @@ class ImportScanForm(forms.Form):
                          ("Fortify Scan", "Fortify Scan"),
                          ("Gosec Scanner", "Gosec Scanner"),
                          ("SonarQube Scan", "SonarQube Scan"),
+                         ("SonarQube Scan detailed", "SonarQube Scan detailed"),
                          (SCAN_SONARQUBE_API, SCAN_SONARQUBE_API),
                          ("MobSF Scan", "MobSF Scan"),
                          ("Trufflehog Scan", "Trufflehog Scan"),
