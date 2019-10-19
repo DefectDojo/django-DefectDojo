@@ -525,13 +525,14 @@ CELERY_BEAT_SCHEDULE = {
 #   dynamic scanner: ['title', 'cwe', 'line', 'file_path', 'description', 'endpoints']
 HASHCODE_FIELDS_PER_SCANNER = {
     'Checkmarx Scan': ['cwe', 'file_path'],
-    'SonarQube Scan': ['cwe', 'file_path']
+    'SonarQube Scan': ['cwe', 'file_path'],
+    'Dependency Check Scan': ['cve', 'file_path']
 }
 
 # List of fields that are known to be usable in hash_code computation)
 # 'endpoints' is a pseudo field that uses the endpoints (for dynamic scanners)
 # 'unique_id_from_tool' is often not needed here as it can be used directly in the dedupe algorithm, but it's also possible to use it for hashing
-HASHCODE_ALLOWED_FIELDS = ['title', 'cwe', 'line', 'file_path', 'description', 'endpoints', 'unique_id_from_tool']
+HASHCODE_ALLOWED_FIELDS = ['title', 'cwe', 'line', 'file_path', 'description', 'endpoints', 'unique_id_from_tool', 'cve']
 
 # ------------------------------------
 # Deduplication configuration
@@ -539,7 +540,7 @@ HASHCODE_ALLOWED_FIELDS = ['title', 'cwe', 'line', 'file_path', 'description', '
 # List of algorithms
 # legacy one with multiple conditions (default mode)
 DEDUPE_ALGO_LEGACY = 'legacy'
-# based on dojo_finding.unique_id_from_tool only (for checkmarx non aggregated, or sonarQube for example)
+# based on dojo_finding.unique_id_from_tool only (for checkmarx detailed, or sonarQube detailed for example)
 DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL = 'unique_id_from_tool'
 # based on dojo_finding.hash_code only
 DEDUPE_ALGO_HASH_CODE = 'hash_code'
@@ -554,7 +555,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Checkmarx Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Checkmarx Scan': DEDUPE_ALGO_HASH_CODE,
     'SonarQube Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
-    'SonarQube Scan': DEDUPE_ALGO_HASH_CODE
+    'SonarQube Scan': DEDUPE_ALGO_HASH_CODE,
+    'Dependency Check Scan': DEDUPE_ALGO_HASH_CODE
 }
 
 
