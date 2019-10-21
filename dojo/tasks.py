@@ -1,7 +1,6 @@
 import logging
 import tempfile
 from datetime import timedelta
-from itertools import chain
 
 import pdfkit
 from celery import chord
@@ -333,25 +332,19 @@ def synchronize_vulnerability_mirrors():
     last_processed_revision = state.last_processed_revision
     mirror = VulnerabilityMirror(logger=logger)
     checkpoint_revision = mirror.revision
-    tasks = chunk_task(process_new_vulnerability_files, mirror.added_files(last_processed_revision), 2000)
-    if last_processed_revision:
-        updates = chunk_task(process_updated_vulnerability_files, mirror.updated_files(last_processed_revision), 2000)
-        tasks = chain(tasks, updates)
+    tasks = chunk_task(process_unprocessed_vulnerability_files, mirror.unprocessed_files(last_processed_revision), 2000)
     chord(tasks, checkpoint_vulnerability_state.si(checkpoint_revision)).apply_async()
 
 
 @app.task(ignore_result=False)
-def process_new_vulnerability_files(files):
+def process_unprocessed_vulnerability_files(files):
     mirror = VulnerabilityMirror(logger=logger)
     vulnerabilities = mirror.parse_files(files)
-    return len(Vulnerability.objects.bulk_create(vulnerabilities))
-
-
-@app.task(ignore_result=False)
-def process_updated_vulnerability_files(files):
-    mirror = VulnerabilityMirror(logger=logger)
-    vulnerabilities = mirror.parse_files(files)
-    return len(Vulnerability.objects.bulk_update(vulnerabilities, fields=['url', 'title', 'description', 'cwe']))
+    # pre-create issues so we can bulk update them
+    # some of these issues may have already been created from previous findings
+    Vulnerability.objects.bulk_create((Vulnerability(vulnerability_id=v.vulnerability_id) for v in vulnerabilities),
+                                      ignore_conflicts=True)
+    Vulnerability.objects.bulk_update(vulnerabilities, fields=['url', 'title', 'description', 'cwe'])
 
 
 @app.task(ignore_result=True)

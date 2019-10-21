@@ -1451,7 +1451,7 @@ class Finding(models.Model):
 
     def save(self, dedupe_option=True, false_history=False, rules_option=True, *args, **kwargs):
         if self.vulnerabilities is None and self.cve is not None:
-            self.vulnerabilities = Vulnerability.objects.filter(pk=self.cve)
+            self.vulnerabilities = Vulnerability.objects.filter(vulnerability_id=self.cve)
         # Make changes to the finding before it's saved to add a CWE template
         new_finding = False
         if self.pk is None:
@@ -1937,12 +1937,14 @@ class Vulnerability(models.Model):
     """
     Models an external vulnerability entry such as a CVE.
     """
-    vulnerability_id = models.CharField(primary_key=True, max_length=200,
+    vulnerability_id = models.CharField(unique=True, max_length=200,
                                         help_text='Vulnerability id such as CVE-2000-0001.')
+    vulnerability_id_index = models.Index(fields=['vulnerability_id'])
     url = models.URLField(help_text='URL for more details about this vulnerability.')
     title = models.CharField(max_length=1000, help_text='Title or summary of this vulnerability.')
     description = models.TextField(blank=True, help_text='Further details of this vulnerability.')
-    cwe = models.ForeignKey(CWE, on_delete=models.SET_NULL, null=True)
+    cwe = models.ForeignKey(CWE, on_delete=models.SET_NULL, null=True,
+                            help_text='Common weakness enumeration this vulnerability is categorized under.')
     updated = models.DateTimeField(auto_now=True, help_text='Time this vulnerability entry was last updated.')
 
 
