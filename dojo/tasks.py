@@ -16,7 +16,7 @@ from django.utils import timezone
 from django.utils.http import urlencode
 
 from dojo.celery import app
-from dojo.models import Product, Finding, Engagement, System_Settings, Vulnerability, VulnerabilityMirrorState
+from dojo.models import Product, Finding, Engagement, System_Settings, VulnerabilityMirrorState
 from dojo.reports.widgets import report_widget_factory
 from dojo.settings import settings
 from dojo.signals import dedupe_signal
