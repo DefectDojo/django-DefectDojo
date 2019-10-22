@@ -339,12 +339,7 @@ def synchronize_vulnerability_mirrors():
 @app.task(ignore_result=False)
 def process_unprocessed_vulnerability_files(files):
     mirror = VulnerabilityMirror(logger=logger)
-    vulnerabilities = mirror.parse_files(files)
-    # pre-create issues so we can bulk update them
-    # some of these issues may have already been created from previous findings
-    Vulnerability.objects.bulk_create((Vulnerability(vulnerability_id=v.vulnerability_id) for v in vulnerabilities),
-                                      ignore_conflicts=True)
-    Vulnerability.objects.bulk_update(vulnerabilities, fields=['url', 'title', 'description', 'cwe'])
+    mirror.process_files(files)
 
 
 @app.task(ignore_result=True)

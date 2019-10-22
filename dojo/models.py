@@ -1275,7 +1275,7 @@ class Finding(models.Model):
     jira_change = models.DateTimeField(editable=True, null=True)
     scanner_confidence = models.IntegerField(null=True, blank=True, default=None, editable=False, help_text="Confidence level of vulnerability which is supplied by the scannner.")
     sonarqube_issue = models.ForeignKey(Sonarqube_Issue, null=True, blank=True, help_text="SonarQube issue", on_delete=models.CASCADE)
-    vulnerabilities = models.ManyToManyField(to='Vulnerability', related_name='findings',
+    vulnerabilities = models.ManyToManyField(to='Vulnerability',
                                              help_text='Vulnerabilities referenced by this finding.')
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
@@ -1450,8 +1450,6 @@ class Finding(models.Model):
         return long_desc
 
     def save(self, dedupe_option=True, false_history=False, rules_option=True, *args, **kwargs):
-        if self.vulnerabilities is None and self.cve is not None:
-            self.vulnerabilities = Vulnerability.objects.filter(vulnerability_id=self.cve)
         # Make changes to the finding before it's saved to add a CWE template
         new_finding = False
         if self.pk is None:
@@ -1494,6 +1492,14 @@ class Finding(models.Model):
         calculate_grade(self.test.engagement.product)
         # Assign the numerical severity for correct sorting order
         self.numerical_severity = Finding.get_numerical_severity(self.severity)
+        # synchronize with Vulnerability before deduplication
+        if self.vulnerabilities.count() == 0:
+            if self.cve is not None:
+                self.vulnerabilities.set(Vulnerability.objects.filter(vulnerability_id=self.cve))
+        elif self.cwe is None:
+            vulnerability = self.vulnerabilities.first()
+            if vulnerability is not None:
+                self.cwe = self.vulnerabilities.first().cwe
         super(Finding, self).save()
         system_settings = System_Settings.objects.get()
         if dedupe_option and self.hash_code is not None:
@@ -1937,14 +1943,13 @@ class Vulnerability(models.Model):
     """
     Models an external vulnerability entry such as a CVE.
     """
-    vulnerability_id = models.CharField(unique=True, max_length=200,
+    vulnerability_id = models.CharField(primary_key=True, max_length=200,
                                         help_text='Vulnerability id such as CVE-2000-0001.')
-    vulnerability_id_index = models.Index(fields=['vulnerability_id'])
     url = models.URLField(help_text='URL for more details about this vulnerability.')
     title = models.CharField(max_length=1000, help_text='Title or summary of this vulnerability.')
     description = models.TextField(blank=True, help_text='Further details of this vulnerability.')
-    cwe = models.ForeignKey(CWE, on_delete=models.SET_NULL, null=True,
-                            help_text='Common weakness enumeration this vulnerability is categorized under.')
+    cwe = models.PositiveSmallIntegerField(null=True,
+                                           help_text='Common weakness enumeration this vulnerability is categorized under.')
     updated = models.DateTimeField(auto_now=True, help_text='Time this vulnerability entry was last updated.')
 
 
