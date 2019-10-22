@@ -339,7 +339,7 @@ def synchronize_vulnerability_mirrors():
 @app.task(ignore_result=False)
 def process_unprocessed_vulnerability_files(files):
     mirror = VulnerabilityMirror(logger=logger)
-    mirror.process_files(files)
+    return len(list(mirror.process_files(files)))
 
 
 @app.task(ignore_result=True)
