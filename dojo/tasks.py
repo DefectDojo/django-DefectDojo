@@ -20,7 +20,7 @@ from dojo.models import Product, Finding, Engagement, System_Settings, Vulnerabi
 from dojo.reports.widgets import report_widget_factory
 from dojo.settings import settings
 from dojo.signals import dedupe_signal
-from dojo.tools.tool_issue_updater import tool_issue_updater
+from dojo.tools.tool_issue_updater import tool_issue_updater, update_findings_from_source_issues
 from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, \
     close_epic, create_notification, sync_rules
 from dojo.utils import sync_false_history, calculate_grade
@@ -284,11 +284,14 @@ def async_false_history(new_finding, *args, **kwargs):
 
 @app.task(name='tool_issue_updater')
 def async_tool_issue_updater(finding, *args, **kwargs):
-    """
-    # Run async the tool issue update to update original issue with Defect Dojo updates
-    """
     logger.info("running tool_issue_updater")
     tool_issue_updater(finding, *args, **kwargs)
+
+
+@app.task(bind=True)
+def async_update_findings_from_source_issues(*args, **kwargs):
+    logger.info("running update_findings_from_source_issues")
+    update_findings_from_source_issues()
 
 
 @app.task(bind=True)

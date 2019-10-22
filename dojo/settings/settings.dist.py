@@ -302,6 +302,7 @@ LOGIN_EXEMPT_URLS = (
     r'^%sapi/v2/' % URL_PREFIX,
     r'complete/google-oauth2/',
     r'complete/okta-oauth2/',
+    r'empty_survey/([\d]+)/answer'
     r'complete/azuread-tenant-oauth2/',
 )
 
@@ -445,6 +446,7 @@ INSTALLED_APPS = (
     'gunicorn',
     'tastypie',
     'auditlog',
+    'defectDojo_engagement_survey',
     'dojo',
     'tastypie_swagger',
     'watson',
@@ -531,10 +533,14 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': timedelta(minutes=1),
         'args': [timedelta(minutes=1)]
     },
+    'update-findings-from-source-issues': {
+        'task': 'dojo.tasks.async_update_findings_from_source_issues',
+        'schedule': timedelta(hours=3),
+    },
     'synchronize-vulnerability-mirror': {
         'task': 'dojo.tasks.synchronize_vulnerability_mirrors',
         'schedule': timedelta(hours=1)
-    }
+    },
 }
 
 # ------------------------------------------------------------------------------
