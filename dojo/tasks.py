@@ -345,3 +345,6 @@ def process_unprocessed_vulnerability_files(files):
 @app.task(ignore_result=True)
 def checkpoint_vulnerability_state(revision: str):
     VulnerabilityMirrorState.checkpoint_remote(settings.VULNDB_URL, revision)
+    create_notification(event='vulnerability_mirrors_synchronized', title='Vulnerability mirror synchronized',
+                        description='Vulnerability mirror {} has been updated to revision {}.'.format(
+                            settings.VULNDB_URL, revision))
