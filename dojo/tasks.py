@@ -325,26 +325,33 @@ def synchronize_vulnerability_mirrors():
         for i in range(0, count, chunk_size):
             yield task.s(files[i:i + chunk_size])
 
-    state, _ = VulnerabilityMirrorState.objects.get_or_create(remote_url=settings.VULNDB_URL)
+    s = System_Settings.objects.get()
+    if not s.enable_vulnerability_database:
+        raise Ignore
+    remote_url = s.vulnerability_database_remote_url
+    state, _ = VulnerabilityMirrorState.objects.get_or_create(remote_url=remote_url)
     if state.locked:
         raise Ignore
     state.lock()
     last_processed_revision = state.last_processed_revision
-    mirror = VulnerabilityMirror(logger=logger)
+    mirror = VulnerabilityMirror(remote_url=remote_url, logger=logger)
     checkpoint_revision = mirror.revision
-    tasks = chunk_task(process_unprocessed_vulnerability_files, mirror.unprocessed_files(last_processed_revision), 2000)
-    chord(tasks, checkpoint_vulnerability_state.si(checkpoint_revision)).apply_async()
+    tasks = chunk_task(process_unprocessed_vulnerability_files.s(remote_url),
+                       mirror.unprocessed_files(last_processed_revision), 2000)
+    on_complete = checkpoint_vulnerability_state.si(remote_url, checkpoint_revision, not last_processed_revision)
+    chord(tasks, on_complete).apply_async()
 
 
 @app.task(ignore_result=False)
-def process_unprocessed_vulnerability_files(files):
-    mirror = VulnerabilityMirror(logger=logger)
+def process_unprocessed_vulnerability_files(remote_url: str, files):
+    mirror = VulnerabilityMirror(remote_url=remote_url, logger=logger)
     return len(list(mirror.process_files(files)))
 
 
 @app.task(ignore_result=True)
-def checkpoint_vulnerability_state(revision: str):
-    VulnerabilityMirrorState.checkpoint_remote(settings.VULNDB_URL, revision)
-    create_notification(event='vulnerability_mirrors_synchronized', title='Vulnerability mirror synchronized',
-                        description='Vulnerability mirror {} has been updated to revision {}.'.format(
-                            settings.VULNDB_URL, revision))
+def checkpoint_vulnerability_state(remote_url: str, revision: str, first_import: bool):
+    VulnerabilityMirrorState.checkpoint_remote(remote_url, revision)
+    if first_import:
+        create_notification(event='vulnerability_mirrors_synchronized', title='Vulnerability mirror synchronized',
+                            description='Vulnerability mirror {} has been initialized to revision {}.'.format(
+                                remote_url, revision))

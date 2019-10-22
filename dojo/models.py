@@ -153,6 +153,11 @@ class System_Settings(models.Model):
                                                blank=True)
     mail_notifications_to = models.CharField(max_length=200, default='',
                                              blank=True)
+    enable_vulnerability_database = models.BooleanField(default=False,
+                                                        help_text='Enable vulnerability database mirroring.')
+    vulnerability_database_remote_url = models.CharField(blank=True, max_length=200,
+                                                         default='https://github.com/CVEProject/cvelist.git',
+                                                         help_text='Git repository to synchronize vulnerability data.')
     s_finding_severity_naming = \
         models.BooleanField(default=False, blank=False,
                             help_text='With this setting turned on, Dojo '
@@ -1962,11 +1967,11 @@ class VulnerabilityMirrorState(models.Model):
 
     @classmethod
     def checkpoint_remote(cls, remote_url: str, revision: str):
+        """Unlocks the given remote URL mirror and marks the given revision as the last processed commit."""
         state, _ = cls.objects.get_or_create(remote_url=remote_url)
-        state.checkpoint(revision)
+        state.__checkpoint(revision)
 
-    def checkpoint(self, revision: str):
-        """Saves the given revision as the last processed revision for this vulnerability mirror."""
+    def __checkpoint(self, revision: str):
         self.last_processed_revision = revision
         # unlock the mirror
         self.locked_until = None

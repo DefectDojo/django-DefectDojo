@@ -78,9 +78,7 @@ env = environ.Env(
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET=(str, ''),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID=(str, ''),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE=(str, 'https://graph.microsoft.com/'),
-    DD_VULNDB_ENABLED=(bool, False),
     DD_VULNDB_ROOT=(str, root('var/vulndb')),
-    DD_VULNDB_URL=(str, 'https://github.com/CVEProject/cvelist.git'),
 )
 
 
@@ -363,10 +361,7 @@ FORCE_LOWERCASE_TAGS = env('DD_FORCE_LOWERCASE_TAGS')
 MAX_TAG_LENGTH = env('DD_MAX_TAG_LENGTH')
 
 # Vulnerability database settings
-# FIXME: this should be a checkbox in System_Settings
-VULNDB_ENABLED = env('DD_VULNDB_ENABLED')
 VULNDB_ROOT = env('DD_VULNDB_ROOT')
-VULNDB_URL = env('DD_VULNDB_URL')
 
 # ------------------------------------------------------------------------------
 # ADMIN
@@ -536,13 +531,11 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': timedelta(minutes=1),
         'args': [timedelta(minutes=1)]
     },
-}
-
-if VULNDB_ENABLED:
-    CELERY_BEAT_SCHEDULE['update-vulndb'] = {
+    'synchronize-vulnerability-mirror': {
         'task': 'dojo.tasks.synchronize_vulnerability_mirrors',
         'schedule': timedelta(hours=1)
     }
+}
 
 # ------------------------------------------------------------------------------
 # LOGGING
