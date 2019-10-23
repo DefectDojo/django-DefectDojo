@@ -266,41 +266,25 @@
                         <td>{{ finding.mitigated }}</td>
                         <td>{{ finding.mitigated_by }}</td>
                     {% endif %}
+
                     {% if finding.cwe > 0 %}
                         <td>
                             <a target="_blank" href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
                                 <i class="fa fa-external-link"></i> {{ finding.cwe }}
                             </a>
                         </td>
-                    {% endif %}
-                    <!-- {% if finding.cve %}
-                        <td>
-                            <a target="_blank" href="https://cve.mitre.org/cgi-bin/cvename.cgi?name={{ finding.cve }}">
-                                <i class="fa fa-external-link"></i> {{ finding.cve }}
-                            </a>
-                        </td>
-                    {% endif %} -->
-
-                    <!-- {% if finding.cve.startswith('CVE') %}
-                        <td>
-                            <a target="_blank" href="https://cve.mitre.org/cgi-bin/cvename.cgi?name={{ finding.cve }}">
-                                <i class="fa fa-external-link"></i> {{ finding.cve }}
-                            </a>
-                        </td>
-                    {% endif %} -->
-
-                    {% if finding.cve|slice:":3" == 'CVE' %}
+                    {% elif finding.cve|slice:":3" == 'CVE' %}
                         <td>
                             <a target="_blank" href="https://cve.mitre.org/cgi-bin/cvename.cgi?name={{ finding.cve }}">
                                 <i class="fa fa-external-link"></i> {{ finding.cve }}
                             </a>
                         </td>
                     {% elif finding.cve|slice:":2" == 'WS' %}
-                    <td>
-                        <a target="_blank" href="https://URL/cgi-bin/cvename.cgi?name={{ finding.cve }}">
-                            <i class="fa fa-external-link"></i> {{ finding.cve }}
-                        </a>
-                    </td>
+                        <td>
+                            <a target="_blank" href="https://URL/cgi-bin/cvename.cgi?name={{ finding.cve }}">
+                                <i class="fa fa-external-link"></i> {{ finding.cve }}
+                            </a>
+                        </td>
                     {% elif finding.cve|slice:":2" == 'BD' %}
                         <td>
                             <a target="_blank" href="https://URL/cgi-bin/cvename.cgi?name={{ finding.cve }}">
