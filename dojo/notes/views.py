@@ -51,27 +51,31 @@ def delete_issue(request, id, page, objid):
     return HttpResponseRedirect(reverse(reverse_url, args=(object_id, )))
 
 
-@user_passes_test(lambda u: u.is_staff)
 def edit_issue(request, id, page, objid):
     note = get_object_or_404(Notes, id=id)
     reverse_url = None
     object_id = None
 
-    if page is None or str(request.user) != note.author.username and not request.user.is_superuser:
+    if page is None:
         raise PermissionDenied
 
     if page == "test":
         object = get_object_or_404(Test, id=objid)
         object_id = object.id
         reverse_url = "view_test"
+        auth = request.user.is_staff and (request.user in object.engagement.product.authorized_users.all() or str(request.user) == note.author.username)
         note_type_activation = 0
     elif page == "finding":
         object = get_object_or_404(Finding, id=objid)
         object_id = object.id
         reverse_url = "view_finding"
+        auth = str(request.user) == note.author.username or (request.user.is_staff and request.user in object.test.engagement.product.authorized_users.all())
         note_type_activation = Note_Type.objects.filter(is_active=True).count()
         if note_type_activation:
             available_note_types = find_available_notetypes(object, note)
+
+    if not auth:
+        raise PermissionDenied
 
     if request.method == 'POST':
         if page == "finding" and note_type_activation:
