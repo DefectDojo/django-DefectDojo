@@ -1298,7 +1298,7 @@ class Finding(models.Model):
     jira_change = models.DateTimeField(editable=True, null=True)
     scanner_confidence = models.IntegerField(null=True, blank=True, default=None, editable=False, help_text="Confidence level of vulnerability which is supplied by the scannner.")
     sonarqube_issue = models.ForeignKey(Sonarqube_Issue, null=True, blank=True, help_text="SonarQube issue", on_delete=models.CASCADE)
-    vulnerabilities = models.ManyToManyField(to='Vulnerability',
+    vulnerabilities = models.ManyToManyField(to='Vulnerability', blank=True,
                                              help_text='Vulnerabilities referenced by this finding.')
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
