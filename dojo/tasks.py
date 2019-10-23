@@ -18,7 +18,6 @@ from django.utils.http import urlencode
 from dojo.celery import app
 from dojo.models import Product, Finding, Engagement, System_Settings, VulnerabilityMirrorState
 from dojo.reports.widgets import report_widget_factory
-from dojo.settings import settings
 from dojo.signals import dedupe_signal
 from dojo.tools.tool_issue_updater import tool_issue_updater, update_findings_from_source_issues
 from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, \
