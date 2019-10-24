@@ -7,12 +7,13 @@ from google.oauth2 import service_account
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from django.utils import timezone
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
 
-from dojo.models import Finding, System_Settings, Test, Engagement, Product, Dojo_User, Note_Type
+from dojo.models import Finding, System_Settings, Test, Engagement, Product, Dojo_User, Note_Type, NoteHistory, Notes
 from dojo.forms import GoogleSheetFieldsForm
 from dojo.utils import add_breadcrumb
 
@@ -172,13 +173,22 @@ def validate_drive_authentication(request, cred_str, drive_folder_ID):
                     return True
 
 
+@user_passes_test(lambda u: u.is_staff)
 def export_findings(request, tid):
     test = Test.objects.get(id=tid)
     prod = test.engagement.product
-    auth = request.user.is_staff or request.user in prod.authorized_users.all()
+    auth = request.user.is_superuser or request.user in prod.authorized_users.all()
     if not auth:
         # will render 403
         raise PermissionDenied
+    # user_email = request.user.email
+    # if user_email == '' :
+    #     messages.add_message(
+    #         request,
+    #         messages.ERROR,
+    #         'User must have an email address',
+    #         extra_tags='alert-danger')
+    #     return HttpResponseRedirect(reverse('view_test', args=(tid, )))
     engagement = Engagement.objects.get(id=test.engagement_id)
     product = Product.objects.get(id=engagement.product_id)
     spreadsheet_name = product.name + "-" + engagement.name + "-" + str(test.id)
@@ -195,7 +205,8 @@ def export_findings(request, tid):
     spreadsheets = files.get('files')
     if len(spreadsheets) > 0:
         spreadsheetId = spreadsheets[0].get('id')
-        sync_findings(tid, spreadsheetId, credentials)
+        user = request.user
+        sync_findings(user, tid, spreadsheetId, credentials)
         messages.add_message(
             request,
             messages.SUCCESS,
@@ -213,24 +224,98 @@ def export_findings(request, tid):
     return HttpResponseRedirect(reverse('view_test', args=(tid, )))
 
 
-def sync_findings(tid, spreadsheetId, credentials):
+def sync_findings(user, tid, spreadsheetId, credentials):
     print ('---------------------------------------syncing-----------------------------------')
     sheets_service = googleapiclient.discovery.build('sheets', 'v4', credentials=credentials)
     result = sheets_service.spreadsheets().values().get(spreadsheetId=spreadsheetId, range='Sheet1').execute()
     rows = result.get('values', [])
     header_raw = rows[0]
-    finding_rows_sheet = rows[1:]
-
-    test = Test.objects.filter(id=tid)
-    findings = Finding.objects.filter(test=test).order_by('numerical_severity')
+    findings_sheet = rows[1:]
+    test = Test.objects.get(id=tid)
+    findings_db = Finding.objects.filter(test=test).order_by('numerical_severity')
+    system_settings = get_object_or_404(System_Settings, id=1)
     column_details = json.loads(system_settings.column_widths.replace("'",'"'))
-    fields = Finding._meta.fields
-    for finding in findings:
-        for column in finding_rows_sheet:
-            index_of_column = header_raw.index(column_name)
-            if column_name in column_details:
-                if int(column_details[column][1])==0:
-                    print ('a')
+    active_note_types = Note_Type.objects.filter(is_active=True)
+    note_type_activation = len(active_note_types)
+    error_findings = {}
+    index_of_active = header_raw.index('active')
+    index_of_verified = header_raw.index('verified')
+    index_of_duplicate = header_raw.index('duplicate')
+    index_of_false_p = header_raw.index('false_p')
+    index_of_id = header_raw.index('id')
+    for finding_sheet in findings_sheet:
+
+        finding_id = finding_sheet[index_of_id]
+        active = finding_sheet[index_of_active]
+        verified = finding_sheet[index_of_verified]
+        duplicate = finding_sheet[index_of_duplicate]
+        false_p = finding_sheet[index_of_false_p]
+
+        if (active == 'TRUE' or verified == 'TRUE') and duplicate == 'TRUE':
+             error_findings[finding_id] = 'Duplicate findings cannot be verified or active'
+        if false_p == 'TRUE' and verified == 'TRUE':
+            error_findings[finding_id] = 'False positive findings cannot be verified.'
+        else:
+            finding_db = findings_db.get(id=finding_id)
+            finding_notes = finding_db.notes.all()
+            for column_name in header_raw:
+                if column_name in column_details:
+                    if int(column_details[column_name][1])==0 :
+                        index_of_column = header_raw.index(column_name)
+                        if finding_sheet[index_of_column] == 'TRUE':
+                            setattr(finding_db, column_name, True)
+                        elif finding_sheet[index_of_column] == 'FALSE':
+                            setattr(finding_db, column_name, False)
+                        else:
+                            setattr(finding_db, column_name, finding_sheet[index_of_column])
+                elif column_name[:6]=='[note]' and column_name[-3:]=='_id':
+                    note_column_name = column_name[:-3]
+                    index_of_note_column = header_raw.index(note_column_name)
+                    index_of_id_column = header_raw.index(column_name)
+                    note_id = finding_sheet[index_of_id_column]
+                    note_entry = finding_sheet[index_of_note_column].rstrip()
+                    if note_entry != '':
+                        if note_id != '':
+                            note_db = finding_notes.get(id=note_id)
+                            if note_entry != note_db.entry.rstrip():
+                                note_db.entry = note_entry
+                                note_db.edited = True
+                                note_db.editor = user
+                                note_db.edit_time = timezone.now()
+                                history = NoteHistory(data=note_db.entry,
+                                                      time=note_db.edit_time,
+                                                      current_editor=note_db.editor)
+                                history.save()
+                                note_db.history.add(history)
+                                note_db.save()
+                        else:
+                            if note_type_activation and note_column_name[7:12] != 'Note_':
+                                note_type_name = note_column_name[7:][:-2]
+                                print (note_type_name)
+                                note_type = active_note_types.get(name=note_type_name)
+                                new_note = Notes(note_type=note_type,
+                                                entry=note_entry,
+                                                date=timezone.now(),
+                                                author=user)
+                                new_note.save()
+                                history = NoteHistory(data=new_note.entry,
+                                                      time=new_note.date,
+                                                      current_editor=new_note.author,
+                                                      note_type=new_note.note_type)
+                            else:
+                                new_note = Notes(entry=note_entry,
+                                                date=timezone.now(),
+                                                author=user)
+                                new_note.save()
+                                history = NoteHistory(data=new_note.entry,
+                                                      time=new_note.date,
+                                                      current_editor=new_note.author)
+                            history.save()
+                            new_note.history.add(history)
+                            finding_db.notes.add(new_note)
+            finding_db.last_reviewed = timezone.now()
+            finding_db.last_reviewed_by = user
+            finding_db.save()
 
 
 def create_spreadsheet(tid, spreadsheet_name, credentials):
@@ -407,7 +492,7 @@ def populate_sheet(tid, spreadsheetId, credentials):
                       }
                     }
                   })
-            if (fields[index_of_column].get_internal_type()) == "IntegerField":
+            elif (fields[index_of_column].get_internal_type()) == "IntegerField":
                 body["requests"].append({
                     "setDataValidation": {
                       "range": {
@@ -427,6 +512,51 @@ def populate_sheet(tid, spreadsheetId, credentials):
                             ]
                         },
                         "inputMessage": "Value must be an integer",
+                        "strict": True
+                      }
+                    }
+                  })
+            elif (fields[index_of_column].get_internal_type()) == "DateField":
+                body["requests"].append({
+                    "setDataValidation": {
+                      "range": {
+                        "sheetId": 0,
+                        "startRowIndex": 1,
+                        "endRowIndex": row_count,
+                        "startColumnIndex": index_of_column,
+                        "endColumnIndex": index_of_column+1,
+                      },
+                      "rule": {
+                        "condition": {
+                          "type": "DATE_IS_VALID",
+                        },
+                        "inputMessage": "Value must be a valid date",
+                        "strict": True
+                      }
+                    }
+                  })
+            elif column_name == "severity":
+                body["requests"].append({
+                    "setDataValidation": {
+                      "range": {
+                        "sheetId": 0,
+                        "startRowIndex": 1,
+                        "endRowIndex": row_count,
+                        "startColumnIndex": index_of_column,
+                        "endColumnIndex": index_of_column+1,
+                      },
+                      "rule": {
+                        "condition": {
+                          "type": "ONE_OF_LIST",
+                          "values": [
+                              {"userEnteredValue": "Info"},
+                              {"userEnteredValue": "Low"},
+                              {"userEnteredValue": "Medium"},
+                              {"userEnteredValue": "High"},
+                              {"userEnteredValue": "Critical"},
+                            ]
+                        },
+                        "inputMessage": "Value must be an one of list",
                         "strict": True
                       }
                     }
@@ -555,7 +685,7 @@ def get_findings_list(tid):
             for i in range(missing_notes_count):
                 findings_list[f+1].append('')
                 findings_list[f+1].append('')
-    # findings_list[0].append('Last column')
+    findings_list[0].append('Last column')
     for f in range(findings.count()):
         findings_list[f+1].append('-')
     return findings_list

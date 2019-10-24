@@ -1930,13 +1930,15 @@ class GoogleSheetFieldsForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.credentials_required = kwargs.pop('credentials_required')
         options = ((0, 'Hide'), (50, 'Small'), (100, 'Medium'), (200, 'Large'), (500, 'Custom'))
+        protect = ['reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
+                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change', 'sonarqube_issue','is_template']
         self.all_fields = kwargs.pop('all_fields')
         super(GoogleSheetFieldsForm, self).__init__(*args, **kwargs)
         if not self.credentials_required:
             self.fields['cred_file'].required = False
         for i in self.all_fields:
             self.fields[i.name] = forms.ChoiceField(choices=options)
-            if i.name == 'id' or i.editable == False or i.many_to_one:
+            if i.name == 'id' or i.editable == False or i.many_to_one or i.name in protect:
                 self.fields['Protect ' + i.name] = forms.BooleanField(initial=True, required=True, disabled=True)
             else:
                 self.fields['Protect ' + i.name] = forms.BooleanField(initial=False, required=False)
