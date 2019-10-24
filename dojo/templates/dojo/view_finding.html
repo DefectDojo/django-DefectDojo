@@ -273,27 +273,10 @@
                                 <i class="fa fa-external-link"></i> {{ finding.cwe }}
                             </a>
                         </td>
-                    {% elif finding.cve|slice:":3" == 'CVE' %}
+                    {% endif %}
+                    {% if finding.cve|slice:":3" == 'CVE' %}
                         <td>
                             <a target="_blank" href="https://cve.mitre.org/cgi-bin/cvename.cgi?name={{ finding.cve }}">
-                                <i class="fa fa-external-link"></i> {{ finding.cve }}
-                            </a>
-                        </td>
-                    {% elif finding.cve|slice:":2" == 'WS' %}
-                        <td>
-                            <a target="_blank" href="https://URL/cgi-bin/cvename.cgi?name={{ finding.cve }}">
-                                <i class="fa fa-external-link"></i> {{ finding.cve }}
-                            </a>
-                        </td>
-                    {% elif finding.cve|slice:":2" == 'BD' %}
-                        <td>
-                            <a target="_blank" href="https://URL/cgi-bin/cvename.cgi?name={{ finding.cve }}">
-                                <i class="fa fa-external-link"></i> {{ finding.cve }}
-                            </a>
-                        </td>
-                    {% elif finding.cve|slice:":2" == 'ST' %}
-                        <td>
-                            <a target="_blank" href="https://URL/cgi-bin/cvename.cgi?name={{ finding.cve }}">
                                 <i class="fa fa-external-link"></i> {{ finding.cve }}
                             </a>
                         </td>
