@@ -321,25 +321,22 @@ def celery_status():
 
 @app.task(ignore_result=True)
 def synchronize_vulnerability_mirrors():
-    def chunk_task(task, file_names, chunk_size):
-        files = list(file_names)
-        count = len(files)
-        for i in range(0, count, chunk_size):
-            yield task.s(files[i:i + chunk_size])
-
     s = System_Settings.objects.get()
     if not s.enable_vulnerability_database:
+        logger.info('Vulnerability mirror synchronization disabled.')
         raise Ignore
     remote_url = s.vulnerability_database_remote_url
     state, _ = VulnerabilityMirrorState.objects.get_or_create(remote_url=remote_url)
     if state.locked:
+        logger.info('Vulnerability mirror for %s is currently locked.', remote_url)
         raise Ignore
     state.lock()
     last_processed_revision = state.last_processed_revision
     mirror = VulnerabilityMirror(remote_url=remote_url, logger=logger)
     checkpoint_revision = mirror.revision
-    tasks = chunk_task(process_unprocessed_vulnerability_files.s(remote_url),
-                       mirror.unprocessed_files(last_processed_revision), 2000)
+    files = list(mirror.unprocessed_files(last_processed_revision))
+    tasks = (process_unprocessed_vulnerability_files.si(remote_url, chunk) for chunk in
+             (files[i:i + 2000] for i in range(0, len(files), 2000)))
     on_complete = checkpoint_vulnerability_state.si(remote_url, checkpoint_revision, not last_processed_revision)
     chord(tasks, on_complete).apply_async()
 
