@@ -146,7 +146,7 @@ def new_engagement(request):
             new_eng.product_id = form.cleaned_data.get('product').id
             new_eng.save()
             tags = request.POST.getlist('tags')
-            t = ", ".join(tags)
+            t = ", ".join('"{0}"'.format(w) for w in tags)
             new_eng.tags = t
             messages.add_message(
                 request,
@@ -198,7 +198,7 @@ def edit_engagement(request, eid):
             temp_form.product_id = form.cleaned_data.get('product').id
             temp_form.save()
             tags = request.POST.getlist('tags')
-            t = ", ".join(tags)
+            t = ", ".join('"{0}"'.format(w) for w in tags)
             eng.tags = t
             messages.add_message(
                 request,
@@ -427,7 +427,7 @@ def add_tests(request, eid):
 
             new_test.save()
             tags = request.POST.getlist('tags')
-            t = ", ".join(tags)
+            t = ", ".join('"{0}"'.format(w) for w in tags)
             new_test.tags = t
 
             # Save the credential to the test
