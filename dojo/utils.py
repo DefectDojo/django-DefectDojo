@@ -1451,8 +1451,8 @@ def process_notifications(request, note, parent_url, parent_title):
         if User.objects.filter(is_active=True, username=username).exists()
     ]  # is_staff also?
     user_posting = request.user
-    if len(note.entry) > 20:
-        note.entry = note.entry[:20]
+    if len(note.entry) > 200:
+        note.entry = note.entry[:200]
         note.entry += "..."
     create_notification(
         event='user_mentioned',

@@ -13,7 +13,7 @@ from django_filters.filters import ChoiceFilter, _truncate, DateTimeFilter
 from pytz import timezone
 
 from dojo.models import Dojo_User, Product_Type, Finding, Product, Test_Type, \
-    Endpoint, Development_Environment, Finding_Template, Report
+    Endpoint, Development_Environment, Finding_Template, Report, Note_Type
 from dojo.utils import get_system_setting
 
 local_tz = timezone(get_system_setting('time_zone'))
@@ -282,16 +282,33 @@ class ProductFilter(DojoFilter):
     prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all().order_by('name'),
         label="Product Type")
-
+    business_criticality = MultipleChoiceFilter(choices=Product.BUSINESS_CRITICALITY_CHOICES)
+    platform = MultipleChoiceFilter(choices=Product.PLATFORM_CHOICES)
+    lifecycle = MultipleChoiceFilter(choices=Product.LIFECYCLE_CHOICES)
+    origin = MultipleChoiceFilter(choices=Product.ORIGIN_CHOICES)
+    external_audience = BooleanFilter(field_name='external_audience')
+    internet_accessible = BooleanFilter(field_name='internet_accessible')
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
             ('name', 'name'),
             ('prod_type__name', 'prod_type__name'),
+            ('business_criticality', 'business_criticality'),
+            ('platform', 'platform'),
+            ('lifecycle', 'lifecycle'),
+            ('origin', 'origin'),
+            ('external_audience', 'external_audience'),
+            ('internet_accessible', 'internet_accessible'),
         ),
         field_labels={
             'name': 'Product Name',
             'prod_type__name': 'Product Type',
+            'business_criticality': 'Business Criticality',
+            'platform': 'Platform ',
+            'lifecycle': 'Lifecycle ',
+            'origin': 'Origin ',
+            'external_audience': 'External Audience ',
+            'internet_accessible': 'Internet Accessible ',
         }
 
     )
@@ -312,7 +329,8 @@ class ProductFilter(DojoFilter):
 
     class Meta:
         model = Product
-        fields = ['name', 'prod_type']
+        fields = ['name', 'prod_type', 'business_criticality', 'platform', 'lifecycle', 'origin', 'external_audience',
+                  'internet_accessible', ]
         exclude = ['tags']
 
 
@@ -373,7 +391,7 @@ class OpenFindingFilter(DojoFilter):
         cwe = dict()
         cwe = dict([finding.cwe, finding.cwe]
                    for finding in self.queryset.distinct()
-                   if finding.cwe is not None and finding.cwe > 0 and finding.cwe not in cwe)
+                   if type(finding.cwe) is int and finding.cwe is not None and finding.cwe > 0 and finding.cwe not in cwe)
         cwe = collections.OrderedDict(sorted(cwe.items()))
         self.form.fields['cwe'].choices = list(cwe.items())
         self.form.fields['severity'].choices = self.queryset.order_by(
@@ -452,7 +470,7 @@ class ClosedFindingFilter(DojoFilter):
         cwe = dict()
         cwe = dict([finding.cwe, finding.cwe]
                    for finding in self.queryset.distinct()
-                   if finding.cwe > 0 and finding.cwe not in cwe)
+                   if type(finding.cwe) is int and finding.cwe is not None and finding.cwe > 0 and finding.cwe not in cwe)
         cwe = collections.OrderedDict(sorted(cwe.items()))
         self.form.fields['cwe'].choices = list(cwe.items())
         self.form.fields['severity'].choices = self.queryset.order_by(
@@ -521,7 +539,7 @@ class AcceptedFindingFilter(DojoFilter):
         cwe = dict()
         cwe = dict([finding.cwe, finding.cwe]
                    for finding in self.queryset.distinct()
-                   if type(finding.cwe) is int and finding.cwe > 0 and finding.cwe not in cwe)
+                   if type(finding.cwe) is int and finding.cwe is not None and finding.cwe > 0 and finding.cwe not in cwe)
         cwe = collections.OrderedDict(sorted(cwe.items()))
         self.form.fields['cwe'].choices = list(cwe.items())
         self.form.fields['severity'].choices = self.queryset.order_by(
@@ -583,7 +601,7 @@ class ProductFindingFilter(DojoFilter):
         cwe = dict()
         cwe = dict([finding.cwe, finding.cwe]
                    for finding in self.queryset.distinct()
-                   if finding.cwe > 0 and finding.cwe not in cwe)
+                   if type(finding.cwe) is int and finding.cwe is not None and finding.cwe > 0 and finding.cwe not in cwe)
         cwe = collections.OrderedDict(sorted(cwe.items()))
         self.form.fields['cwe'].choices = list(cwe.items())
         self.form.fields['severity'].choices = self.queryset.order_by(
@@ -620,7 +638,7 @@ class TemplateFindingFilter(DojoFilter):
         cwe = dict()
         cwe = dict([finding.cwe, finding.cwe]
                    for finding in self.queryset.distinct()
-                   if finding.cwe is not None and finding.cwe > 0 and finding.cwe not in cwe)
+                   if type(finding.cwe) is int and finding.cwe is not None and finding.cwe > 0 and finding.cwe not in cwe)
         cwe = collections.OrderedDict(sorted(cwe.items()))
         self.form.fields['cwe'].choices = list(cwe.items())
 
@@ -994,3 +1012,22 @@ class DevelopmentEnvironmentFilter(DojoFilter):
         model = Development_Environment
         exclude = []
         include = ('name',)
+
+
+class NoteTypesFilter(DojoFilter):
+    name = CharFilter(lookup_expr='icontains')
+
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('name', 'name'),
+            ('description', 'description'),
+            ('is_single', 'is_single'),
+            ('is_mandatory', 'is_mandatory'),
+        ),
+    )
+
+    class Meta:
+        model = Note_Type
+        exclude = []
+        include = ('name', 'is_single', 'description')

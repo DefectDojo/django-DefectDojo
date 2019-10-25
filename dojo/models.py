@@ -235,6 +235,12 @@ class System_Settings(models.Model):
     sla_low = models.IntegerField(default=120,
                                           verbose_name="Low Finding SLA Days",
                                           help_text="# of days to remediate a low finding.")
+    allow_anonymous_survey_repsonse = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name="Allow Anonymous Survey Responses",
+        help_text="Enable anyone with a link to the survey to answer a survey"
+    )
 
 
 class SystemSettingsFormAdmin(forms.ModelForm):
@@ -311,6 +317,20 @@ class Contact(models.Model):
     is_admin = models.BooleanField(default=False)
     is_globally_read_only = models.BooleanField(default=False)
     updated = models.DateTimeField(editable=False)
+
+
+class Note_Type(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    description = models.CharField(max_length=200)
+    is_single = models.BooleanField(default=False, null=False)
+    is_active = models.BooleanField(default=True, null=False)
+    is_mandatory = models.BooleanField(default=True, null=False)
+
+    def __unicode__(self):
+        return self.name
+
+    def __str__(self):
+        return self.name
 
 
 class Product_Type(models.Model):
@@ -650,6 +670,19 @@ class Product(models.Model):
     def get_product_type(self):
         return self.prod_type if self.prod_type is not None else 'unknown'
 
+    def open_findings_list(self):
+        findings = Finding.objects.filter(test__engagement__product=self,
+                                          mitigated__isnull=True,
+                                          verified=True,
+                                          false_p=False,
+                                          duplicate=False,
+                                          out_of_scope=False
+                                          )
+        findings_list = []
+        for i in findings:
+            findings_list.append(i.id)
+        return findings_list
+
 
 class ScanSettings(models.Model):
     product = models.ForeignKey(Product, default=1, editable=False, on_delete=models.CASCADE)
@@ -687,8 +720,7 @@ class Scan(models.Model):
                                 default=get_current_datetime)
     protocol = models.CharField(max_length=10, default='TCP')
     status = models.CharField(max_length=10, default='Pending', editable=False)
-    baseline = models.BooleanField(default=False,
-                                   verbose_name="Current Baseline")
+    baseline = models.BooleanField(default=False, verbose_name="Current Baseline")
 
     def __unicode__(self):
         return self.scan_settings.protocol + " Scan " + str(self.date)
@@ -1054,6 +1086,7 @@ class Endpoint(models.Model):
 
 
 class NoteHistory(models.Model):
+    note_type = models.ForeignKey(Note_Type, null=True, blank=True, on_delete=models.CASCADE)
     data = models.TextField()
     time = models.DateTimeField(null=True, editable=False,
                                 default=get_current_datetime)
@@ -1061,6 +1094,7 @@ class NoteHistory(models.Model):
 
 
 class Notes(models.Model):
+    note_type = models.ForeignKey(Note_Type, related_name='note_type', null=True, blank=True, on_delete=models.CASCADE)
     entry = models.TextField()
     date = models.DateTimeField(null=False, editable=False,
                                 default=get_current_datetime)
@@ -1509,7 +1543,7 @@ class Finding(models.Model):
         long_desc += '*References*:' + self.references
         return long_desc
 
-    def save(self, dedupe_option=True, false_history=False, rules_option=True, *args, **kwargs):
+    def save(self, dedupe_option=True, false_history=False, rules_option=True, issue_updater_option=True, *args, **kwargs):
         logger.debug("Saving finding of id " + str(self.id))
         # Make changes to the finding before it's saved to add a CWE template
         new_finding = False
@@ -1522,8 +1556,9 @@ class Finding(models.Model):
             super(Finding, self).save(*args, **kwargs)
 
             # Run async the tool issue update to update original issue with Defect Dojo updates
-            from dojo.tasks import async_tool_issue_updater
-            async_tool_issue_updater.delay(self)
+            if issue_updater_option:
+                from dojo.tasks import async_tool_issue_updater
+                async_tool_issue_updater.delay(self)
 
         if (self.file_path is not None) and (self.endpoints.count() == 0):
             self.static_finding = True
@@ -2507,6 +2542,7 @@ admin.site.register(Product_Type)
 admin.site.register(Dojo_User)
 admin.site.register(UserContactInfo)
 admin.site.register(Notes)
+admin.site.register(Note_Type)
 admin.site.register(Report)
 admin.site.register(Scan)
 admin.site.register(ScanSettings)

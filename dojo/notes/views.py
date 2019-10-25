@@ -12,8 +12,8 @@ from django.utils import timezone
 
 
 # Local application/library imports
-from dojo.forms import DeleteNoteForm, NoteForm
-from dojo.models import Notes, Test, Finding, NoteHistory
+from dojo.forms import DeleteNoteForm, NoteForm, FindingNoteForm
+from dojo.models import Notes, Test, Finding, NoteHistory, Note_Type
 
 logger = logging.getLogger(__name__)
 
@@ -64,21 +64,34 @@ def edit_issue(request, id, page, objid):
         object = get_object_or_404(Test, id=objid)
         object_id = object.id
         reverse_url = "view_test"
+        note_type_activation = 0
     elif page == "finding":
         object = get_object_or_404(Finding, id=objid)
         object_id = object.id
         reverse_url = "view_finding"
+        note_type_activation = Note_Type.objects.filter(is_active=True).count()
+        if note_type_activation:
+            available_note_types = find_available_notetypes(object, note)
 
     if request.method == 'POST':
-        form = NoteForm(request.POST, instance=note)
+        if page == "finding" and note_type_activation:
+            form = FindingNoteForm(request.POST, available_note_types=available_note_types, instance=note)
+        else:
+            form = NoteForm(request.POST, instance=note)
         if form.is_valid():
             note = form.save(commit=False)
             note.edited = True
             note.editor = request.user
             note.edit_time = timezone.now()
-            history = NoteHistory(data=note.entry,
-                                    time=note.edit_time,
-                                    current_editor=note.editor)
+            if page == "finding" and note_type_activation:
+                history = NoteHistory(note_type=note.note_type,
+                                      data=note.entry,
+                                      time=note.edit_time,
+                                      current_editor=note.editor)
+            else:
+                history = NoteHistory(data=note.entry,
+                                      time=note.edit_time,
+                                      current_editor=note.editor)
             history.save()
             note.history.add(history)
             note.save()
@@ -97,7 +110,10 @@ def edit_issue(request, id, page, objid):
                                 'Note was not succesfully edited.',
                                 extra_tags='alert-danger')
     else:
-        form = NoteForm(instance=note)
+        if page == "finding" and note_type_activation:
+            form = FindingNoteForm(available_note_types=available_note_types, instance=note)
+        else:
+            form = NoteForm(instance=note)
 
     return render(
         request, 'dojo/edit_note.html', {
@@ -135,3 +151,22 @@ def note_history(request, id, page, objid):
             'page': page,
             'objid': objid,
         })
+
+
+def find_available_notetypes(finding, editing_note):
+    notes = finding.notes.all()
+    single_note_types = Note_Type.objects.filter(is_single=True, is_active=True).values_list('id', flat=True)
+    multiple_note_types = Note_Type.objects.filter(is_single=False, is_active=True).values_list('id', flat=True)
+    available_note_types = []
+    for note_type_id in multiple_note_types:
+        available_note_types.append(note_type_id)
+    for note_type_id in single_note_types:
+        for note in notes:
+            if note_type_id == note.note_type_id:
+                break
+        else:
+            available_note_types.append(note_type_id)
+    available_note_types.append(editing_note.note_type_id)
+    available_note_types = list(set(available_note_types))
+    queryset = Note_Type.objects.filter(id__in=available_note_types).order_by('-id')
+    return queryset

@@ -14,7 +14,7 @@ from django.utils.dates import MONTHS
 from django.utils.safestring import mark_safe
 from django.utils import timezone
 from tagging.models import Tag
-from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
+from dojo.models import Finding, Product_Type, Product, Note_Type, ScanSettings, VA, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
     JIRA_Issue, JIRA_PKey, JIRA_Conf, UserContactInfo, Tool_Type, Tool_Configuration, Tool_Product_Settings, \
@@ -210,6 +210,38 @@ class DeleteProductForm(forms.ModelForm):
                    'internet_accessible', 'regulations', 'product_meta']
 
 
+class NoteTypeForm(forms.ModelForm):
+    description = forms.CharField(widget=forms.Textarea(attrs={}),
+                                  required=True)
+
+    class Meta:
+        model = Note_Type
+        fields = ['name', 'description', 'is_single', 'is_mandatory']
+
+
+class EditNoteTypeForm(NoteTypeForm):
+
+    def __init__(self, *args, **kwargs):
+        is_single = kwargs.pop('is_single')
+        super(EditNoteTypeForm, self).__init__(*args, **kwargs)
+        if is_single is False:
+            self.fields['is_single'].widget = forms.HiddenInput()
+
+
+class DisableOrEnableNoteTypeForm(NoteTypeForm):
+    def __init__(self, *args, **kwargs):
+        super(DisableOrEnableNoteTypeForm, self).__init__(*args, **kwargs)
+        self.fields['name'].disabled = True
+        self.fields['description'].disabled = True
+        self.fields['is_single'].disabled = True
+        self.fields['is_mandatory'].disabled = True
+        self.fields['is_active'].disabled = True
+
+    class Meta:
+        model = Note_Type
+        fields = '__all__'
+
+
 class DojoMetaDataForm(forms.ModelForm):
     value = forms.CharField(widget=forms.Textarea(attrs={}),
                             required=True)
@@ -273,6 +305,7 @@ class ImportScanForm(forms.Form):
                          ("Arachni Scan", "Arachni Scan"),
                          ("VCG Scan", "VCG Scan"),
                          ("Dependency Check Scan", "Dependency Check Scan"),
+                         ("Dependency Track Finding Packaging Format (FPF) Export", "Dependency Track Finding Packaging Format (FPF) Export"),
                          ("Retire.js Scan", "Retire.js Scan"),
                          ("Node Security Platform Scan", "Node Security Platform Scan"),
                          ("NPM Audit Scan", "NPM Audit Scan"),
@@ -321,7 +354,7 @@ class ImportScanForm(forms.Form):
                          ("Microfocus Webinspect Scan", "Microfocus Webinspect Scan"),
                          ("Wpscan", "Wpscan"),
                          ("Sslscan", "Sslscan"),
-                         ("JFrogXray Scan", "JFrog Xray Scan"),
+                         ("JFrog Xray Scan", "JFrog Xray Scan"),
                          ("Sslyze Scan", "Sslyze Scan"),
                          ("Testssl Scan", "Testssl Scan"),
                          ("Hadolint Dockerfile check", "Hadolint Dockerfile check"),
@@ -1275,6 +1308,18 @@ class NoteForm(forms.ModelForm):
         fields = ['entry', 'private']
 
 
+class FindingNoteForm(NoteForm):
+
+    def __init__(self, *args, **kwargs):
+        queryset = kwargs.pop('available_note_types')
+        super(FindingNoteForm, self).__init__(*args, **kwargs)
+        self.fields['note_type'] = forms.ModelChoiceField(queryset=queryset, label='Note Type', required=True)
+
+    class Meta():
+        model = Notes
+        fields = ['note_type', 'entry', 'private']
+
+
 class DeleteNoteForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())
@@ -1292,9 +1337,17 @@ class CloseFindingForm(forms.ModelForm):
                                      'required, please use the text area '
                                      'below to provide documentation.')})
 
+    def __init__(self, *args, **kwargs):
+        queryset = kwargs.pop('missing_note_types')
+        super(CloseFindingForm, self).__init__(*args, **kwargs)
+        if len(queryset) == 0:
+            self.fields['note_type'].widget = forms.HiddenInput()
+        else:
+            self.fields['note_type'] = forms.ModelChoiceField(queryset=queryset, label='Note Type', required=True)
+
     class Meta:
         model = Notes
-        fields = ['entry']
+        fields = ['note_type', 'entry']
 
 
 class DefectFindingForm(forms.ModelForm):

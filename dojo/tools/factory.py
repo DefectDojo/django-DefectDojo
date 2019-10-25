@@ -12,6 +12,7 @@ from dojo.tools.appspider.parser import AppSpiderXMLParser
 from dojo.tools.arachni.parser import ArachniJSONParser
 from dojo.tools.vcg.parser import VCGParser
 from dojo.tools.dependency_check.parser import DependencyCheckParser
+from dojo.tools.dependency_track.parser import DependencyTrackParser
 from dojo.tools.retirejs.parser import RetireJsParser
 from dojo.tools.nsp.parser import NspParser
 from dojo.tools.npm_audit.parser import NpmAuditParser
@@ -109,6 +110,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = VCGParser(file, test)
     elif scan_type == 'Dependency Check Scan':
         parser = DependencyCheckParser(file, test)
+    elif scan_type == 'Dependency Track Finding Packaging Format (FPF) Export':
+        parser = DependencyTrackParser(file, test)
     elif scan_type == 'Retire.js Scan':
         parser = RetireJsParser(file, test)
     elif scan_type == 'Node Security Platform Scan':
