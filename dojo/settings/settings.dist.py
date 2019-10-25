@@ -529,6 +529,15 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Dependency Check Scan': ['cve', 'file_path']
 }
 
+# This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
+# If False and cwe = 0, then the hash_code computation will fallback to legacy algorithm for the concerned finding
+# Default is True (if scanner is not configured here but is configured in HASHCODE_FIELDS_PER_SCANNER, it allows null cwe)
+HASHCODE_ALLOWS_NULL_CWE = {
+    'Checkmarx Scan': False,
+    'SonarQube Scan': False,
+    'Dependency Check Scan': True
+}
+
 # List of fields that are known to be usable in hash_code computation)
 # 'endpoints' is a pseudo field that uses the endpoints (for dynamic scanners)
 # 'unique_id_from_tool' is often not needed here as it can be used directly in the dedupe algorithm, but it's also possible to use it for hashing
