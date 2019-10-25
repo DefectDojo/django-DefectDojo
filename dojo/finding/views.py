@@ -634,7 +634,7 @@ def edit_finding(request, fid):
             new_finding.last_reviewed = timezone.now()
             new_finding.last_reviewed_by = request.user
             tags = request.POST.getlist('tags')
-            t = ", ".join(tags)
+            t = ", ".join('"{0}"'.format(w) for w in tags)
             new_finding.tags = t
             new_finding.save()
             if 'jiraform-push_to_jira' in request.POST:
@@ -650,7 +650,7 @@ def edit_finding(request, fid):
                             new_finding,
                             jform.cleaned_data.get('push_to_jira'))
             tags = request.POST.getlist('tags')
-            t = ", ".join(tags)
+            t = ", ".join('"{0}"'.format(w) for w in tags)
             new_finding.tags = t
 
             messages.add_message(
@@ -880,7 +880,7 @@ def mktemplate(request, fid):
             numerical_severity=finding.numerical_severity)
         template.save()
         tags = [tag.name for tag in list(finding.tags)]
-        t = ", ".join(tags)
+        t = ", ".join('"{0}"'.format(w) for w in tags)
         template.tags = t
         messages.add_message(
             request,
@@ -973,7 +973,7 @@ def apply_template_to_finding(request, fid, tid):
             finding.last_reviewed = timezone.now()
             finding.last_reviewed_by = request.user
             tags = request.POST.getlist('tags')
-            t = ", ".join(tags)
+            t = ", ".join('"{0}"'.format(w) for w in tags)
             finding.tags = t
             finding.save()
         else:
@@ -1240,7 +1240,7 @@ def add_template(request):
             template.numerical_severity = Finding.get_numerical_severity(template.severity)
             template.save()
             tags = request.POST.getlist('tags')
-            t = ", ".join(tags)
+            t = ", ".join('"{0}"'.format(w) for w in tags)
             template.tags = t
             count = apply_cwe_mitigation(form.cleaned_data["apply_to_findings"], template)
             if count > 0:
@@ -1283,7 +1283,7 @@ def edit_template(request, tid):
                 apply_message = " and " + str(count) + " " + pluralize(count, 'finding,findings') + " "
 
             tags = request.POST.getlist('tags')
-            t = ", ".join(tags)
+            t = ", ".join('"{0}"'.format(w) for w in tags)
             template.tags = t
             messages.add_message(
                 request,
