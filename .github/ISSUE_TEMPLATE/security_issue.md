@@ -2,7 +2,7 @@
 name: Security issue
 about: Report a security issue
 title: Please submit via our security reporting program, not GitHub
-labels: 'security'
+labels: security
 assignees: ''
 
 ---

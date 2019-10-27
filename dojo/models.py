@@ -232,6 +232,12 @@ class System_Settings(models.Model):
     sla_low = models.IntegerField(default=120,
                                           verbose_name="Low Finding SLA Days",
                                           help_text="# of days to remediate a low finding.")
+    allow_anonymous_survey_repsonse = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name="Allow Anonymous Survey Responses",
+        help_text="Enable anyone with a link to the survey to answer a survey"
+    )
 
 
 class SystemSettingsFormAdmin(forms.ModelForm):
@@ -661,6 +667,19 @@ class Product(models.Model):
     def get_product_type(self):
         return self.prod_type if self.prod_type is not None else 'unknown'
 
+    def open_findings_list(self):
+        findings = Finding.objects.filter(test__engagement__product=self,
+                                          mitigated__isnull=True,
+                                          verified=True,
+                                          false_p=False,
+                                          duplicate=False,
+                                          out_of_scope=False
+                                          )
+        findings_list = []
+        for i in findings:
+            findings_list.append(i.id)
+        return findings_list
+
 
 class ScanSettings(models.Model):
     product = models.ForeignKey(Product, default=1, editable=False, on_delete=models.CASCADE)
@@ -698,8 +717,7 @@ class Scan(models.Model):
                                 default=get_current_datetime)
     protocol = models.CharField(max_length=10, default='TCP')
     status = models.CharField(max_length=10, default='Pending', editable=False)
-    baseline = models.BooleanField(default=False,
-                                   verbose_name="Current Baseline")
+    baseline = models.BooleanField(default=False, verbose_name="Current Baseline")
 
     def __unicode__(self):
         return self.scan_settings.protocol + " Scan " + str(self.date)
@@ -1444,7 +1462,7 @@ class Finding(models.Model):
         long_desc += '*References*:' + self.references
         return long_desc
 
-    def save(self, dedupe_option=True, false_history=False, rules_option=True, *args, **kwargs):
+    def save(self, dedupe_option=True, false_history=False, rules_option=True, issue_updater_option=True, *args, **kwargs):
         # Make changes to the finding before it's saved to add a CWE template
         new_finding = False
         if self.pk is None:
@@ -1456,8 +1474,9 @@ class Finding(models.Model):
             super(Finding, self).save(*args, **kwargs)
 
             # Run async the tool issue update to update original issue with Defect Dojo updates
-            from dojo.tasks import async_tool_issue_updater
-            async_tool_issue_updater.delay(self)
+            if issue_updater_option:
+                from dojo.tasks import async_tool_issue_updater
+                async_tool_issue_updater.delay(self)
 
         if (self.file_path is not None) and (self.endpoints.count() == 0):
             self.static_finding = True
