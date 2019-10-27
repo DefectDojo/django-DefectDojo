@@ -47,11 +47,12 @@
                            class="tablesorter-bootstrap table table-condensed table-striped">
                         <thead>
                         <tr>
-                            <th></th>
+                            <th>Act.</th> <!-- Action 3-dots hamburger menu button -->
                             <th>{% dojo_sort request 'Product' 'name' 'asc' %}</th>
+                            <th>Tags</th>
                             <th> Criticality</th>
-                            <th> Metadata
-                            <th></th>
+                            <th> Metadata</th>
+                            <th>Eng.</th>
                             {% if "enable_jira"|get_system_setting %}
                             <th>Jira</th>
                             {% endif %}
@@ -163,12 +164,16 @@
                                         <sup><div class="tag-label {{ grade }}">{{ grade }}</div></sup>
                                       {% endif %}
                                     {% endwith %}
+                                </td>
+                                <!-- Tags column -->
+                                <td>
                                     <sup>
                                     {% for tag in prod.tags %}
                                       <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
                                     {% endfor %}
                                   </sup>
                                 </td>
+                                <!-- End of Tags Column -->
                                 <td class="text-center">{{ prod.business_criticality|business_criticality_icon }}</td>
                                 <td>
                                   {{ prod.platform|platform_icon }}
@@ -268,6 +273,86 @@
             ];
             $("#id_name").autocomplete({
                 source: availableTags
+            });
+        });
+    </script>
+    <script>
+        // DataTables setup
+        $(document).ready(function() {
+            date =  new Date().toISOString().slice(0, 10);
+            var fileDated = 'Product_List_' + date;
+            var buttonCommon = {
+                exportOptions: {
+                    columns: ':not(:eq(0))',
+                    stripHtml: true,
+                    stripNewlines: true,
+                    trim: true,
+                    orthogonal: 'export'
+                },
+                filename: fileDated,
+                title: 'Product List'
+            };
+
+            // Mapping of table columns to objects for proper cleanup and data formatting
+            var dojoTable = $('#products').DataTable({
+                "columns": [
+                    { "data": "action", render: function (data, type, row) {
+                            return type === 'export' ?  "" :  data;
+                    }},
+                    { "data": "product" , render: function (data, type, row) {
+                            return type === 'export' ? getDojoExportValueFromTag(data, 'b') :  data;
+                    }},
+                    { "data": "tags" , render: function (data, type, row) {
+                            return type === 'export' ?  getDojoExportValueFromTag(data, 'a') :  data;
+                    }},
+                    { "data": "criticality" , render: function (data, type, row) {
+                            return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
+                    }},
+                    { "data": "metadata", render: function (data, type, row) {
+                            return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
+                    } },
+                    { "data": "engagements", render: function (data, type, row) {
+                            return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
+                    }},
+                    { "data": "findings" , render: function (data, type, row) {
+                            return type === 'export' ? getDojoExportValueFromTag(data, 'b') :  data;
+                    }},
+                    { "data": "endpoints" , render: function (data, type, row) {
+                            return type === 'export' ? getDojoExportValueFromTag(data, 'b') :  data;
+                    }},
+                    { "data": "contacts" },
+                    { "data": "product_type" },
+                ],
+                order: [1],
+                "columnDefs": [
+                    { "orderable": false, "targets": [0] }
+                ],
+                dom: 'Bfrtip',
+                paging: false,
+                buttons: [
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'colvis'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'copyHtml5'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'excelHtml5',
+                        autoFilter: true,
+                        sheetName: 'Exported data',
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'csvHtml5'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'pdfHtml5',
+                        orientation: 'landscape',
+                        pageSize: 'LETTER'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'print'
+                    }),
+                ],
             });
         });
     </script>

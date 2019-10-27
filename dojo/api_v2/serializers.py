@@ -169,6 +169,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
     findings_count = serializers.SerializerMethodField()
+    findings_list = serializers.SerializerMethodField()
+
     tags = TagListSerializerField(required=False)
     product_meta = ProductMetaSerializer(read_only=True, many=True)
 
@@ -183,6 +185,8 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
     def get_findings_count(self, obj):
         return obj.findings_count
 
+    def get_findings_list(self, obj):
+        return obj.open_findings_list()
 
 class ProductTypeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -864,15 +868,22 @@ class NoteHistorySerializer(serializers.ModelSerializer):
 
 class NoteSerializer(serializers.ModelSerializer):
     author = UserSerializer(
-        many=False, read_only=True)
+        many=False, read_only=False)
     editor = UserSerializer(
-        read_only=True, many=False)
+        read_only=False, many=False, allow_null=True)
 
     history = NoteHistorySerializer(read_only=True, many=True)
 
     class Meta:
         model = Notes
         fields = '__all__'
+
+
+class AddNewNoteOptionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Notes
+        fields = ['entry', 'private']
 
 
 class FindingToFindingImagesSerializer(serializers.Serializer):
