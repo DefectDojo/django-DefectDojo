@@ -6,7 +6,7 @@ services:
     volumes:
       - '.:/app:z'
     environment:
-      DD_DEBUG: 'on'
+      DD_DEBUG: 'True'
     ports:
       - target: 3000
         published: 3000
