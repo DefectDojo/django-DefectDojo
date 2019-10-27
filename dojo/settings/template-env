@@ -29,19 +29,19 @@ DD_WHITENOISE=on
 # DD_TIME_ZONE=America/New_York
 
 # Track migrations through source control rather than making migrations locally
-# DD_TRACK_MIGRATIONS=on
+# DD_TRACK_MIGRATIONS=False
 
 # Whether to use HTTPOnly flag on the session cookie.
-# DD_SESSION_COOKIE_HTTPONLY=on
+# DD_SESSION_COOKIE_HTTPONLY=True
 
 # Whether to use HttpOnly flag on the CSRF cookie.
-# DD_CSRF_COOKIE_HTTPONLY=on
+# DD_CSRF_COOKIE_HTTPONLY=True
 
 # If True, the SecurityMiddleware redirects all non-HTTPS requests to HTTPS
-# DD_SECURE_SSL_REDIRECT=off
+# DD_SECURE_SSL_REDIRECT=False
 
 # Whether to use a secure cookie for the CSRF cookie.
-# DD_CSRF_COOKIE_SECURE=off
+# DD_CSRF_COOKIE_SECURE=False
 
 # If True, the SecurityMiddleware sets the X-XSS-Protection: 1;
 # DD_SECURE_BROWSER_XSS_FILTER=True
