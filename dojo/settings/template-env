@@ -1,8 +1,8 @@
 # Django Debug, don't enable on production!
-DD_DEBUG=off
+DD_DEBUG=False
 
 # Enables Django Admin
-DD_DJANGO_ADMIN_ENABLED=on
+DD_DJANGO_ADMIN_ENABLED=True
 
 # A secret key for a particular Django installation.
 DD_SECRET_KEY=#DD_SECRET_KEY#
@@ -19,7 +19,7 @@ DD_ALLOWED_HOSTS=#DD_ALLOWED_HOSTS#
 # WhiteNoise allows your web app to serve its own static files,
 # making it a self-contained unit that can be deployed anywhere without relying on nginx,
 # if using nginx then disable Whitenoise
-DD_WHITENOISE=on
+DD_WHITENOISE=True
 
 # -------------------------------------------------------
 # Additional Settings / Override defaults in settings.py

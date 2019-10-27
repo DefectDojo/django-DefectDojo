@@ -22,7 +22,7 @@ services:
       - mysql
     entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/entrypoint-uwsgi.sh']
     environment:
-      DD_DEBUG: 'off'
+      DD_DEBUG: 'False'
       DD_ALLOWED_HOSTS: ${DD_ALLOWED_HOSTS:-*}
       DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}
       DD_CELERY_BROKER_USER: ${DD_CELERY_BROKER_USER:-guest}
