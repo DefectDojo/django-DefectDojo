@@ -100,6 +100,48 @@ To update changes in static resources, served by nginx, just refresh the browser
 id -u
 ```
 
+## Run with Docker compose in development mode with ptvsd (remote debug)
+
+If you want to be able to step in your code, you can activate ptvsd.Server.
+
+You can launch your local dev instance of DefectDojo as
+
+```zsh
+cp dojo/settings/settings.dist.py dojo/settings/settings.py
+docker/setEnv.sh ptvsd
+docker-compose up
+```
+
+This will run the application based on merged configurations from docker-compose.yml and docker-compose.override.ptvsd.yml.
+
+The default configuration assumes port 3000 by default for ptvsd, and you should access the DefectDojo UI on port 8000 instead of port 8080, as the uwsgi container will serve directly.
+
+### VS code
+Add the following python debug configuration (You would have to install the `ms-python.python`. Other setup may work.)
+
+```
+  {
+      "name": "Remote DefectDojo",
+      "type": "python",
+      "request": "attach",
+      "pathMappings": [
+          {
+              "localRoot": "${workspaceFolder}",
+              "remoteRoot": "/app"
+          }
+      ],
+      "port": 3000,
+      "host": "localhost"
+  }
+```
+
+You can now launch the remote debug from VS Code, place your breakpoints and step through the code.
+
+> At present, 2 caveats:
+> - Static will not be present. You would have to `docker cp` them over from the nginx container
+> - For some reason, the page loading may hang. You can stop the loading and reload, the page will ultimately appear.
+
+
 ## Access the application
 Navigate to <http://localhost:8080> where you can log in with username admin.
 To find out the admin password, check the very beginning of the console
@@ -188,12 +230,16 @@ chmod 400 nginx/*.key
 
 * Run defectDojo with: 
 ```
-export DD_PORT=8083
+rm -f docker-compose.override.yml
+ln -s docker-compose.override.https.yml docker-compose.override.yml
 docker-compose up
 ```
 
+The default https port is 8083.
+
 To change the port:
-- update `nginx.conf`, `docker-compose.yml`
+- update `nginx.conf`
+- update `docker-compose.override.https.yml` or set DD_PORT in the environment)
 - restart the application
 
 NB: some third party software may require to change the exposed port in Dockerfile.nginx as they use docker-compose declarations to discover which ports to map when publishing the application.
