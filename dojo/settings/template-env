@@ -43,8 +43,11 @@ DD_WHITENOISE=on
 # Whether to use a secure cookie for the CSRF cookie.
 # DD_CSRF_COOKIE_SECURE=off
 
-# If on, the SecurityMiddleware sets the X-XSS-Protection: 1;
-# DD_SECURE_BROWSER_XSS_FILTER=on
+# If True, the SecurityMiddleware sets the X-XSS-Protection: 1;
+# DD_SECURE_BROWSER_XSS_FILTER=True
+
+# If True, the SecurityMiddleware sets the X-Content-Type-Options: nosniff;
+# DD_SECURE_CONTENT_TYPE_NOSNIFF=True
 
 # Change the default language set
 # DD_LANG=en-us
