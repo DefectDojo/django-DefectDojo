@@ -66,6 +66,8 @@ urlpatterns = [
         views.merge_finding_product, name='merge_finding'),
     url(r'^product/(?P<pid>\d+)/merge$', views.merge_finding_product,
         name='merge_finding_product'),
+    url(r'^finding/(?P<duplicate_id>\d+)/duplicate/(?P<original_id>\d+)$',
+        views.mark_finding_duplicate, name='mark_finding_duplicate'),
 
     # stub findings
     url(r'^stub_finding/(?P<tid>\d+)/add$',
