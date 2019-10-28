@@ -351,6 +351,6 @@ def process_unprocessed_vulnerability_files(remote_url: str, files):
 def checkpoint_vulnerability_state(remote_url: str, revision: str, first_import: bool):
     VulnerabilityMirrorState.checkpoint_remote(remote_url, revision)
     if first_import:
-        create_notification(event='vulnerability_mirrors_synchronized', title='Vulnerability mirror synchronized',
+        create_notification(event='other', title='Vulnerability mirror synchronized',
                             description='Vulnerability mirror {} has been initialized to revision {}.'.format(
                                 remote_url, revision))
