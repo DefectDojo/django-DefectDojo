@@ -174,6 +174,88 @@ def validate_drive_authentication(request, cred_str, drive_folder_ID):
 
 
 @user_passes_test(lambda u: u.is_staff)
+def export_to_sheet(request, tid):
+    test = Test.objects.get(id=tid)
+    spreadsheet_name = test.engagement.product.name + "-" + test.engagement.name + "-" + str(test.id)
+    system_settings = get_object_or_404(System_Settings, id=1)
+    service_account_info = json.loads(system_settings.credentials)
+    SCOPES = ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/spreadsheets']
+    credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
+    drive_service = googleapiclient.discovery.build('drive', 'v3', credentials=credentials)
+    folder_id = system_settings.drive_folder_ID
+    files = drive_service.files().list(q="mimeType='application/vnd.google-apps.spreadsheet' and parents in '%s' and name='%s'" %(folder_id, spreadsheet_name),
+                                          spaces='drive',
+                                          pageSize=10,
+                                          fields='files(id, name)').execute()
+    spreadsheets = files.get('files')
+    if len(spreadsheets) == 1:
+        spreadsheetId = spreadsheets[0].get('id')
+        errors = sync_findings(request, tid, spreadsheetId)
+        if len(errors) > 0 :
+            add_breadcrumb(title="Errors", top_level=not len(request.GET), request=request)
+            return render(
+                request, 'dojo/syncing_errors.html', {
+                    'errors': errors
+                })
+        else:
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                "Google sheet data synced with database",
+                extra_tags="alert-success",
+            )
+            return HttpResponseRedirect(reverse('view_test', args=(tid, )))
+    elif len(spreadsheets) == 0:
+        create_googlesheet(request,tid)
+        return HttpResponseRedirect(reverse('view_test', args=(tid, )))
+    else:
+        messages.add_message(
+            request,
+            messages.ERROR,
+            "More than one Google sheet exists for this Test. Please contact your system admin to solve the issue",
+            extra_tags="alert-danger",
+        )
+        return HttpResponseRedirect(reverse('view_test', args=(tid, )))
+
+
+def create_googlesheet(request,tid):
+    print ('------------------------------------------Creating------------------------------------')
+    test = Test.objects.get(id=tid)
+    system_settings = get_object_or_404(System_Settings, id=1)
+    service_account_info = json.loads(system_settings.credentials)
+    SCOPES = ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/spreadsheets']
+    credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
+    sheets_service = googleapiclient.discovery.build('sheets', 'v4', credentials=credentials)
+    drive_service = googleapiclient.discovery.build('drive', 'v3', credentials=credentials)
+    #Create a new spreadsheet
+    spreadsheet_name = test.engagement.product.name + "-" + test.engagement.name + "-" + str(test.id)
+    spreadsheet = {
+    'properties': {
+        'title': spreadsheet_name
+        }
+    }
+    spreadsheet = sheets_service.spreadsheets().create(body=spreadsheet, fields='spreadsheetId').execute()
+    spreadsheetId = spreadsheet.get('spreadsheetId')
+    folder_id = system_settings.drive_folder_ID
+
+    #Move the spreadsheet inside the drive folder
+    file = drive_service.files().get(fileId=spreadsheetId, fields='parents').execute()
+    previous_parents = ",".join(file.get('parents'))
+    file = drive_service.files().update(fileId=spreadsheetId,
+                                        addParents=folder_id,
+                                        removeParents=previous_parents,
+                                        fields='id, parents').execute()
+    user_email = request.user.email
+    drive_service.permissions().create(body={'type':'user', 'role':'writer', 'emailAddress': user_email}, fileId=spreadsheetId).execute()
+    populate_sheet(tid, spreadsheetId)
+    messages.add_message(
+        request,
+        messages.SUCCESS,
+        "Finding details successfully exported to google sheet",
+        extra_tags="alert-success",
+    )
+
+
 def sync_findings(request, tid, spreadsheetId):
     print ('---------------------------------------syncing-----------------------------------')
     test = Test.objects.get(id=tid)
@@ -191,7 +273,7 @@ def sync_findings(request, tid, spreadsheetId):
     active_note_types = Note_Type.objects.filter(is_active=True)
     note_type_activation = len(active_note_types)
 
-    error_findings = {}
+    errors = {}
     index_of_active = header_raw.index('active')
     index_of_verified = header_raw.index('verified')
     index_of_duplicate = header_raw.index('duplicate')
@@ -206,9 +288,9 @@ def sync_findings(request, tid, spreadsheetId):
         false_p = finding_sheet[index_of_false_p]
 
         if (active == 'TRUE' or verified == 'TRUE') and duplicate == 'TRUE':                     #Check update finding conditions
-            error_findings[finding_id] = 'Duplicate findings cannot be verified or active'
+            errors[finding_id] = 'Duplicate findings cannot be verified or active'
         if false_p == 'TRUE' and verified == 'TRUE':
-            error_findings[finding_id] = 'False positive findings cannot be verified.'
+            errors[finding_id] = 'False positive findings cannot be verified.'
         else:
             finding_db = findings_db.get(id=finding_id)                                          #Update finding attributes
             finding_notes = finding_db.notes.all()
@@ -247,18 +329,24 @@ def sync_findings(request, tid, spreadsheetId):
                                     note_db.history.add(history)
                                     note_db.save()
                             else:                                                                    #If the note is a newly added one
-                                if note_type_activation and note_column_name[7:12] != 'Note_':       #If belongs to a note-type
-                                    note_type_name = note_column_name[7:][:-2]
-                                    note_type = active_note_types.get(name=note_type_name)
-                                    new_note = Notes(note_type=note_type,
-                                                    entry=note_entry,
-                                                    date=timezone.now(),
-                                                    author=request.user)
-                                    new_note.save()
-                                    history = NoteHistory(data=new_note.entry,
-                                                          time=new_note.date,
-                                                          current_editor=new_note.author,
-                                                          note_type=new_note.note_type)
+                                if note_type_activation :
+                                    if note_column_name[7:12] == 'Note_':                            
+                                        errors[finding_id + ' ' + note_column_name] = "Can not add new notes without a note-type"
+                                    else:
+                                        note_type_name = note_column_name[7:][:-2]
+                                        note_type = active_note_types.get(name=note_type_name)
+                                        new_note = Notes(note_type=note_type,
+                                                        entry=note_entry,
+                                                        date=timezone.now(),
+                                                        author=request.user)
+                                        new_note.save()
+                                        history = NoteHistory(data=new_note.entry,
+                                                              time=new_note.date,
+                                                              current_editor=new_note.author,
+                                                              note_type=new_note.note_type)
+                                        history.save()
+                                        new_note.history.add(history)
+                                        finding_db.notes.add(new_note)
                                 else:
                                     new_note = Notes(entry=note_entry,
                                                     date=timezone.now(),
@@ -267,74 +355,24 @@ def sync_findings(request, tid, spreadsheetId):
                                     history = NoteHistory(data=new_note.entry,
                                                           time=new_note.date,
                                                           current_editor=new_note.author)
-                                history.save()
-                                new_note.history.add(history)
-                                finding_db.notes.add(new_note)
+                                    history.save()
+                                    new_note.history.add(history)
+                                    finding_db.notes.add(new_note)
             finding_db.last_reviewed = timezone.now()
             finding_db.last_reviewed_by = request.user
             finding_db.save()
     clear_sheet = sheets_service.spreadsheets().values().clear(spreadsheetId=spreadsheetId, range='Sheet1').execute()
     populate_sheet(tid, spreadsheetId, credentials)
-    print (error_findings)
-    if len(error_findings) > 0 :
-        add_breadcrumb(title="Errors", top_level=not len(request.GET), request=request)
-        return render(
-            request, 'dojo/syncing_errors.html', {
-                'error_findings': error_findings
-            })
-    else:
-        messages.add_message(
-            request,
-            messages.SUCCESS,
-            "Google sheet data synced with database",
-            extra_tags="alert-success",
-        )
-        return HttpResponseRedirect(reverse('view_test', args=(tid, )))
+    return errors
 
 
-@user_passes_test(lambda u: u.is_staff)
-def export_to_sheet(request, tid):
-    print ('------------------------------------------Creating------------------------------------')
-    test = Test.objects.get(id=tid)
+def populate_sheet(tid, spreadsheetId):
     system_settings = get_object_or_404(System_Settings, id=1)
     service_account_info = json.loads(system_settings.credentials)
-    SCOPES = ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/spreadsheets']
+    service_account_email = service_account_info['client_email']
+    SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
     credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
     sheets_service = googleapiclient.discovery.build('sheets', 'v4', credentials=credentials)
-    drive_service = googleapiclient.discovery.build('drive', 'v3', credentials=credentials)
-    #Create a new spreadsheet
-    spreadsheet_name = test.engagement.product.name + "-" + test.engagement.name + "-" + str(test.id)
-    spreadsheet = {
-    'properties': {
-        'title': spreadsheet_name
-        }
-    }
-    spreadsheet = sheets_service.spreadsheets().create(body=spreadsheet, fields='spreadsheetId').execute()
-    spreadsheetId = spreadsheet.get('spreadsheetId')
-    folder_id = system_settings.drive_folder_ID
-
-    #Move the spreadsheet inside the drive folder
-    file = drive_service.files().get(fileId=spreadsheetId, fields='parents').execute()
-    previous_parents = ",".join(file.get('parents'))
-    file = drive_service.files().update(fileId=spreadsheetId,
-                                        addParents=folder_id,
-                                        removeParents=previous_parents,
-                                        fields='id, parents').execute()
-    # user_email = request.user.email
-    # drive_service.permissions().create(body={'type':'user', 'role':'writer', 'emailAddress': user_email}, fileId=spreadsheetId).execute()
-    populate_sheet(tid, spreadsheetId, credentials)
-    messages.add_message(
-        request,
-        messages.SUCCESS,
-        "Finding details successfully exported to google sheet",
-        extra_tags="alert-success",
-    )
-    return HttpResponseRedirect(reverse('view_test', args=(tid, )))
-
-
-def populate_sheet(tid, spreadsheetId, credentials):
-    sheets_service = googleapiclient.discovery.build('sheets', 'v4', credentials=credentials)
-    system_settings = get_object_or_404(System_Settings, id=1)
     #Update created spredsheet with finding details
     findings_list = get_findings_list(tid)
     row_count = len(findings_list)
@@ -397,6 +435,11 @@ def populate_sheet(tid, spreadsheetId, credentials):
                 "startColumnIndex": 0,
                 "endColumnIndex": column_count,
               },
+              "editors": {
+                "users": [
+                  service_account_email,
+                ]
+              },
               # "description": "Protecting total row",
               "warningOnly": False
             }
@@ -417,7 +460,8 @@ def populate_sheet(tid, spreadsheetId, credentials):
     for column_name in header_raw:
         index_of_column = header_raw.index(column_name)
         if column_name in column_details:
-            if int(column_details[column_name][0])==0:                          #If column width is 0 hide column
+            #If column width is 0 hide column
+            if int(column_details[column_name][0])==0:
                 body["requests"].append({
                     "updateDimensionProperties": {
                         "range": {
@@ -433,7 +477,8 @@ def populate_sheet(tid, spreadsheetId, credentials):
                     }
                 })
             else:
-                body["requests"].append({                                       #If column width is not 0 adjust column to given width
+                #If column width is not 0 adjust column to given width
+                body["requests"].append({
                     "updateDimensionProperties": {
                         "range": {
                             "sheetId": 0,
@@ -447,7 +492,8 @@ def populate_sheet(tid, spreadsheetId, credentials):
                         "fields": "pixelSize"
                     }
                 })
-            if column_details[column_name][1] == 1:                             #If protect column is true, protect in sheet
+            #If protect column is true, protect in sheet
+            if column_details[column_name][1] == 1:
                 body["requests"].append({
                   "addProtectedRange": {
                     "protectedRange": {
@@ -458,10 +504,16 @@ def populate_sheet(tid, spreadsheetId, credentials):
                         "startColumnIndex": index_of_column,
                         "endColumnIndex": index_of_column+1,
                       },
+                      "editors": {
+                        "users": [
+                          service_account_email,
+                        ]
+                      },
                       "warningOnly": False
                     }
                   }
                 })
+            #Format boolean fields in the google sheet
             if (fields[index_of_column].get_internal_type()) == "BooleanField":
                 body["requests"].append({
                     "setDataValidation": {
@@ -481,6 +533,7 @@ def populate_sheet(tid, spreadsheetId, credentials):
                       }
                     }
                   })
+            #Format integer fields in the google sheet
             elif (fields[index_of_column].get_internal_type()) == "IntegerField":
                 body["requests"].append({
                     "setDataValidation": {
@@ -505,6 +558,7 @@ def populate_sheet(tid, spreadsheetId, credentials):
                       }
                     }
                   })
+            #Format date fields in the google sheet
             elif (fields[index_of_column].get_internal_type()) == "DateField":
                 body["requests"].append({
                     "setDataValidation": {
@@ -524,6 +578,7 @@ def populate_sheet(tid, spreadsheetId, credentials):
                       }
                     }
                   })
+            #Make severity column a dropdown
             elif column_name == "severity":
                 body["requests"].append({
                     "setDataValidation": {
@@ -550,7 +605,8 @@ def populate_sheet(tid, spreadsheetId, credentials):
                       }
                     }
                   })
-        elif column_name[:6]=='[note]' and column_name[-3:]=='_id':             #Hide and protect note id columns
+        #Hide and protect note id columns and last column
+        elif (column_name[:6]=='[note]' and column_name[-3:]=='_id') or column_name == 'Last column':
             body["requests"].append({
                 "updateDimensionProperties": {
                     "range": {
@@ -574,6 +630,11 @@ def populate_sheet(tid, spreadsheetId, credentials):
                     "endRowIndex": row_count,
                     "startColumnIndex": index_of_column,
                     "endColumnIndex": index_of_column+1,
+                  },
+                  "editors": {
+                    "users": [
+                      service_account_email,
+                    ]
                   },
                   "warningOnly": False
                 }
