@@ -273,12 +273,16 @@
                             </a>
                         </td>
                     {% endif %}
-                    {% if finding.cve %}
+                    {% if finding.cve|slice:":3" == 'CVE' %}
                         <td>
                             <a target="_blank" href="https://cve.mitre.org/cgi-bin/cvename.cgi?name={{ finding.cve }}">
                                 <i class="fa fa-external-link"></i> {{ finding.cve }}
                             </a>
                         </td>
+                    {% else %}
+                         <td>
+                             {{ finding.cve }}
+                         </td>
                     {% endif %}
                     <td> {% for scanner in found_by %}
                         {{ scanner }}
