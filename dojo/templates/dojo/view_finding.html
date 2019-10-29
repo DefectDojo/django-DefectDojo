@@ -299,6 +299,7 @@
                         <tr>
                             <th>Finding</th>
                             <th>Status</th>
+                            <th>Tags</th>
                             <th>Test</th>
                             <th>Engagement</th>
                             <th>CVE</th>
@@ -314,6 +315,7 @@
                                     {% endwith %}
                                 </td>
                                 <td>{{ similar.status }}{% if similar.duplicate_finding_id %}, <a href="{% url 'view_finding' similar.duplicate_finding_id %}">Original</a> {% endif %}</td>
+                                <td>{{ similar.tags|join:', ' }}</td>
                                 <td><a href="{% url 'view_test' similar.test_id %}">{{ similar.test.test_type.name }}</a></td>
                                 <td><a href="{% url 'view_engagement' similar.test.engagement_id %}">{{ similar.test.engagement.name }}</a></td>
                                 <td>{{ similar.cve }}</td>
