@@ -69,7 +69,7 @@
                           </li>
                         {% else %}
                           <li role="presentation">
-                              <a href="{% url 'sync_findings' test.id spreadsheetId %}">
+                              <a href="{% url 'export_to_sheet' test.id %}">
                                   <i class="fa fa-file-excel-o"></i> Sync google sheet
                               </a>
                           </li>

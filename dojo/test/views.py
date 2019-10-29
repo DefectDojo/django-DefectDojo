@@ -91,7 +91,7 @@ def view_test(request, tid):
                                               pageSize=10,
                                               fields='files(id, name)').execute()
         spreadsheets = files.get('files')
-        if len(spreadsheets) > 0:
+        if len(spreadsheets) == 1:
             spreadsheetId = spreadsheets[0].get('id')
             # sheet_url = 'https://docs.google.com/spreadsheets/d/' + spreadsheetId
         else:
