@@ -19,7 +19,7 @@ from django.db import DEFAULT_DB_ALIAS
 from dojo.templatetags.display_tags import get_level
 from dojo.filters import ProductFilter, ProductFindingFilter, EngagementFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAPKeyForm, JIRAFindingForm, AdHocFindingForm, \
-                       EngagementPresetsForm, DeleteEngagementPresetsForm
+                       EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm
 from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, Finding_Template, \
     Tool_Product_Settings, Cred_Mapping, Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, \
     Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product
