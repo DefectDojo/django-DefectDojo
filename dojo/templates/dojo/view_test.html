@@ -61,7 +61,7 @@
                             </a>
                         </li>
                       {% if show_export %}
-                        {% if spreadsheetId is null %}
+                        {% if sheet_url is null %}
                           <li role="presentation">
                               <a href="{% url 'export_to_sheet' test.id %}">
                                   <i class="fa fa-file-excel-o"></i> Export to sheet
@@ -69,9 +69,16 @@
                           </li>
                         {% else %}
                           <li role="presentation">
-                              <a href="{% url 'export_to_sheet' test.id %}">
-                                  <i class="fa fa-file-excel-o"></i> Sync google sheet
+                              <a href="{% url 'export_to_sheet' test.id %}" aria-expanded="false" aria-label="Sync google sheet">
+                                  <i class="fa fa-file-excel-o"></i>
+                                  <span>Sync Google Sheet</span>
+                                  <span class="glyphicon arrow"></span>
                               </a>
+                              <ul>
+                                <li>
+                                    <a href="{{ sheet_url }}">View Google Sheet</a>
+                                </li>
+                              </ul>
                           </li>
                         {% endif %}
                       {% endif %}
