@@ -302,6 +302,7 @@
                             <th>Tags</th>
                             <th>Test</th>
                             <th>Engagement</th>
+                            <th>Version</th>
                             <th>CVE</th>
                             <th>File</th>
                             <th>Deduplicate?</th>
@@ -327,6 +328,7 @@
                                 </td>
                                 <td><a href="{% url 'view_test' similar.test_id %}">{{ similar.test.test_type.name }}</a></td>
                                 <td><a href="{% url 'view_engagement' similar.test.engagement_id %}">{{ similar.test.engagement.name }}</a></td>
+                                <td>{{ similar.test.engagement.version }}</td>
                                 <td>{{ similar.cve }}</td>
                                 <td>{{ similar.file_path }}{% if similar.line > 0 %} (Line {{ similar.line }}){% endif %}</td>
                                 <td>
