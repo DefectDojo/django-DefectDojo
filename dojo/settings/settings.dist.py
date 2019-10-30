@@ -302,6 +302,7 @@ LOGIN_EXEMPT_URLS = (
     r'complete/google-oauth2/',
     r'complete/okta-oauth2/',
     r'empty_survey/([\d]+)/answer'
+    r'complete/azuread-tenant-oauth2/',
 )
 
 # ------------------------------------------------------------------------------

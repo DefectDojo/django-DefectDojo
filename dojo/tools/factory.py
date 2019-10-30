@@ -63,6 +63,7 @@ from dojo.tools.jfrogxray.parser import XrayJSONParser
 from dojo.tools.sslyze.parser import SslyzeXmlParser
 from dojo.tools.testssl.parser import TestsslCSVParser
 from dojo.tools.hadolint.parser import HadolintParser
+from dojo.tools import SCAN_SONARQUBE_API
 from dojo.tools.aqua.parser import AquaJSONParser
 
 __author__ = 'Jay Paz'

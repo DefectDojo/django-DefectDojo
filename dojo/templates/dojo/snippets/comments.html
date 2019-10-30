@@ -66,6 +66,10 @@
           {% endif %}
       </div>
       <div class="panel-body">
+        {% if note.note_type != None %}
+          <strong>Note type : {{ note.note_type }}</strong>
+          <br><br>
+        {% endif %}
         {{ note|linebreaks }}
       </div>
     </div>

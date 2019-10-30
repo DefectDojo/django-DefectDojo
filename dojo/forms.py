@@ -965,7 +965,7 @@ class FindingForm(forms.ModelForm):
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
-                   'review_requested_by', 'is_Mitigated', 'sonarqube_issue')
+                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change', 'sonarqube_issue')
 
 
 class StubFindingForm(forms.ModelForm):
