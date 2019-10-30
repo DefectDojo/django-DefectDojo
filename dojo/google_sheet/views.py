@@ -292,77 +292,82 @@ def sync_findings(request, tid, spreadsheetId):
         if false_p == 'TRUE' and verified == 'TRUE':
             errors[finding_id] = 'False positive findings cannot be verified.'
         else:
-            finding_db = findings_db.get(id=finding_id)                                          #Update finding attributes
-            finding_notes = finding_db.notes.all()
-            for column_name in header_raw:
-                if column_name in column_details:
-                    if int(column_details[column_name][1])==0 :
-                        index_of_column = header_raw.index(column_name)
-                        if finding_sheet[index_of_column] == 'TRUE':
-                            setattr(finding_db, column_name, True)
-                        elif finding_sheet[index_of_column] == 'FALSE':
-                            setattr(finding_db, column_name, False)
+            try:
+                finding_db = findings_db.get(id=finding_id)                                          #Update finding attributes
+            except :
+                pass
+            else:
+                finding_notes = finding_db.notes.all()
+                for column_name in header_raw:
+                    if column_name in column_details:
+                        if int(column_details[column_name][1])==0 :
+                            index_of_column = header_raw.index(column_name)
+                            if finding_sheet[index_of_column] == 'TRUE':
+                                setattr(finding_db, column_name, True)
+                            elif finding_sheet[index_of_column] == 'FALSE':
+                                setattr(finding_db, column_name, False)
+                            else:
+                                setattr(finding_db, column_name, finding_sheet[index_of_column])
+                    elif column_name[:6]=='[note]' and column_name[-3:]=='_id':                      #Updating notes
+                        note_column_name = column_name[:-3]
+                        try:
+                            index_of_note_column = header_raw.index(note_column_name)
+                        except ValueError:
+                            pass
                         else:
-                            setattr(finding_db, column_name, finding_sheet[index_of_column])
-                elif column_name[:6]=='[note]' and column_name[-3:]=='_id':                      #Updating notes
-                    note_column_name = column_name[:-3]
-                    try:
-                        index_of_note_column = header_raw.index(note_column_name)
-                    except ValueError:
-                        pass
-                    else:
-                        index_of_id_column = header_raw.index(column_name)
-                        note_id = finding_sheet[index_of_id_column]
-                        note_entry = finding_sheet[index_of_note_column].rstrip()
-                        if note_entry != '':
-                            if note_id != '':                                                  #If the note is an existing one
-                                note_db = finding_notes.get(id=note_id)
-                                if note_entry != note_db.entry.rstrip():
-                                    note_db.entry = note_entry
-                                    note_db.edited = True
-                                    note_db.editor = request.user
-                                    note_db.edit_time = timezone.now()
-                                    history = NoteHistory(data=note_db.entry,
-                                                          time=note_db.edit_time,
-                                                          current_editor=note_db.editor)
-                                    history.save()
-                                    note_db.history.add(history)
-                                    note_db.save()
-                            else:                                                                    #If the note is a newly added one
-                                if note_type_activation :
-                                    if note_column_name[7:12] == 'Note_':                            
-                                        errors[finding_id + ' ' + note_column_name] = "Can not add new notes without a note-type"
-                                    else:
-                                        note_type_name = note_column_name[7:][:-2]
-                                        note_type = active_note_types.get(name=note_type_name)
-                                        new_note = Notes(note_type=note_type,
-                                                        entry=note_entry,
-                                                        date=timezone.now(),
-                                                        author=request.user)
-                                        new_note.save()
-                                        history = NoteHistory(data=new_note.entry,
-                                                              time=new_note.date,
-                                                              current_editor=new_note.author,
-                                                              note_type=new_note.note_type)
+                            index_of_id_column = header_raw.index(column_name)
+                            note_id = finding_sheet[index_of_id_column]
+                            note_entry = finding_sheet[index_of_note_column].rstrip()
+                            if note_entry != '':
+                                if note_id != '':                                                  #If the note is an existing one
+                                    note_db = finding_notes.get(id=note_id)
+                                    if note_entry != note_db.entry.rstrip():
+                                        note_db.entry = note_entry
+                                        note_db.edited = True
+                                        note_db.editor = request.user
+                                        note_db.edit_time = timezone.now()
+                                        history = NoteHistory(data=note_db.entry,
+                                                              time=note_db.edit_time,
+                                                              current_editor=note_db.editor)
                                         history.save()
-                                        new_note.history.add(history)
-                                        finding_db.notes.add(new_note)
-                                else:
-                                    new_note = Notes(entry=note_entry,
-                                                    date=timezone.now(),
-                                                    author=request.user)
-                                    new_note.save()
-                                    history = NoteHistory(data=new_note.entry,
-                                                          time=new_note.date,
-                                                          current_editor=new_note.author)
-                                    history.save()
-                                    new_note.history.add(history)
-                                    finding_db.notes.add(new_note)
-            finding_db.last_reviewed = timezone.now()
-            finding_db.last_reviewed_by = request.user
-            finding_db.save()
+                                        note_db.history.add(history)
+                                        note_db.save()
+                                else:                                                                    #If the note is a newly added one
+                                    if note_type_activation :
+                                        if note_column_name[7:12] == 'Note_':
+                                            errors[finding_id + ' ' + note_column_name] = "Can not add new notes without a note-type /n Add your note under the correct note-type column"
+                                        else:
+                                            note_type_name = note_column_name[7:][:-2]
+                                            note_type = active_note_types.get(name=note_type_name)
+                                            new_note = Notes(note_type=note_type,
+                                                            entry=note_entry,
+                                                            date=timezone.now(),
+                                                            author=request.user)
+                                            new_note.save()
+                                            history = NoteHistory(data=new_note.entry,
+                                                                  time=new_note.date,
+                                                                  current_editor=new_note.author,
+                                                                  note_type=new_note.note_type)
+                                            history.save()
+                                            new_note.history.add(history)
+                                            finding_db.notes.add(new_note)
+                                    else:
+                                        if note_column_name[7:12] == 'Note_':
+                                            new_note = Notes(entry=note_entry,
+                                                            date=timezone.now(),
+                                                            author=request.user)
+                                            new_note.save()
+                                            history = NoteHistory(data=new_note.entry,
+                                                                  time=new_note.date,
+                                                                  current_editor=new_note.author)
+                                            history.save()
+                                            new_note.history.add(history)
+                                            finding_db.notes.add(new_note)
+                                        else:
+                                            errors[finding_id + ' ' + note_column_name] = "Note-types are not activated, so new notes cannot have a note-type"
+                finding_db.save()
     clear_sheet = sheets_service.spreadsheets().values().clear(spreadsheetId=spreadsheetId, range='Sheet1').execute()
-    populate_sheet(tid, spreadsheetId, credentials)
+    populate_sheet(tid, spreadsheetId)
     return errors
 
 
@@ -677,8 +682,8 @@ def get_findings_list(tid):
         for note_type in active_note_types:
             max_note_count=1
             if note_type.is_single:
-                findings_list[0].append('[note] ' + note_type.name + '_id')
-                findings_list[0].append('[note] ' + note_type.name)
+                findings_list[0].append('[note] ' + note_type.name + '_1_id')
+                findings_list[0].append('[note] ' + note_type.name + '_1')
             else:
                 for finding in findings:
                     note_count = finding.notes.filter(note_type=note_type).count()

@@ -93,10 +93,9 @@ def view_test(request, tid):
         spreadsheets = files.get('files')
         if len(spreadsheets) == 1:
             spreadsheetId = spreadsheets[0].get('id')
-            # sheet_url = 'https://docs.google.com/spreadsheets/d/' + spreadsheetId
+            sheet_url = 'https://docs.google.com/spreadsheets/d/' + spreadsheetId
         else:
-            # sheet_url = None
-            spreadsheetId = None
+            sheet_url = None
     return render(request, 'dojo/view_test.html',
                   {'test': test,
                    'product_tab': product_tab,
@@ -113,8 +112,7 @@ def view_test(request, tid):
                    'tag_input': tags,
                    'jira_config': jira_config,
                    'show_export':google_sheets_enabled,
-                   'spreadsheetId':spreadsheetId
-                   # 'sheet_url':sheet_url
+                   'sheet_url':sheet_url
                    })
 
 
