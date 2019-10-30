@@ -1728,3 +1728,18 @@ def mark_finding_duplicate(request, original_id, duplicate_id):
     original.found_by.add(duplicate.test.test_type)
     original.save()
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+
+@user_passes_test(lambda u: u.is_staff)
+@require_POST
+def reset_finding_duplicate_status(request, duplicate_id):
+    duplicate = get_object_or_404(Finding, id=duplicate_id)
+    duplicate.duplicate = False
+    duplicate.active = True
+    if duplicate.duplicate_finding:
+        duplicate.duplicate_finding.duplicate_list.remove(duplicate)
+        duplicate.duplicate_finding = None
+    duplicate.last_reviewed = timezone.now()
+    duplicate.last_reviewed_by = request.user
+    duplicate.save()
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))

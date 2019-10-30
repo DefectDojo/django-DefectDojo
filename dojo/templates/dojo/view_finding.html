@@ -315,20 +315,41 @@
                                     {% endwith %}
                                 </td>
                                 <td>{{ similar.status }}{% if similar.duplicate_finding_id %}, <a href="{% url 'view_finding' similar.duplicate_finding_id %}">Original</a> {% endif %}</td>
-                                <td>{{ similar.tags|join:', ' }}</td>
+                                <td>
+                                    {% if similar.tags %}
+                                        <small>
+                                            {% for tag in similar.tags %}
+                                                <a title="Search {{ tag }}" class="tag-label tag-color"
+                                                   href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                            {% endfor %}
+                                        </small>
+                                    {% endif %}
+                                </td>
                                 <td><a href="{% url 'view_test' similar.test_id %}">{{ similar.test.test_type.name }}</a></td>
                                 <td><a href="{% url 'view_engagement' similar.test.engagement_id %}">{{ similar.test.engagement.name }}</a></td>
                                 <td>{{ similar.cve }}</td>
                                 <td>{{ similar.file_path }}{% if similar.line > 0 %} (Line {{ similar.line }}){% endif %}</td>
                                 <td>
-                                    <form method="post" action="{% url 'mark_finding_duplicate' original_id=similar.id duplicate_id=finding.id %}">
-                                        {% csrf_token %}
-                                        <input type="submit" value="Use as original"/>
-                                    </form>
-                                    <form method="post" action="{% url 'mark_finding_duplicate' duplicate_id=similar.id original_id=finding.id %}">
-                                        {% csrf_token %}
-                                        <input type="submit" value="Mark as duplicate"/>
-                                    </form>
+                                    {% if similar.duplicate %}
+                                        <form method="post"
+                                              action="{% url 'reset_finding_duplicate_status' similar.id %}">
+                                            {% csrf_token %}
+                                            <input type="submit" value="Reset duplicate status"/>
+                                        </form>
+                                    {% elif finding.duplicate_finding_id != similar.id %}
+                                        <form method="post"
+                                              action="{% url 'mark_finding_duplicate' original_id=similar.id duplicate_id=finding.id %}">
+                                            {% csrf_token %}
+                                            <input type="submit" value="Use as original"/>
+                                        </form>
+                                        <form method="post"
+                                              action="{% url 'mark_finding_duplicate' duplicate_id=similar.id original_id=finding.id %}">
+                                            {% csrf_token %}
+                                            <input type="submit" value="Mark as duplicate"/>
+                                        </form>
+                                    {% else %}
+                                        <i>N/A</i>
+                                    {% endif %}
                                 </td>
                             </tr>
                         {% endfor %}
