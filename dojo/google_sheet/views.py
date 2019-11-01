@@ -724,7 +724,17 @@ def populate_sheet(tid, spreadsheetId):
                 }
               }
             })
-
+        elif column_name[:6]=='[note]':
+            body["requests"].append({
+              "autoResizeDimensions": {
+                "dimensions": {
+                  "sheetId": sheet_id,
+                  "dimension": "COLUMNS",
+                  "startIndex": index_of_column,
+                  "endIndex": index_of_column+1
+                }
+              }
+            })
     sheets_service.spreadsheets().batchUpdate(spreadsheetId=spreadsheetId, body=body).execute()
 
 
