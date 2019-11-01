@@ -15,7 +15,7 @@ from django.core.exceptions import PermissionDenied
 
 from dojo.models import Finding, System_Settings, Test, Engagement, Product, Dojo_User, Note_Type, NoteHistory, Notes
 from dojo.forms import GoogleSheetFieldsForm
-from dojo.utils import add_breadcrumb
+from dojo.utils import add_breadcrumb, Product_Tab
 
 @user_passes_test(lambda u: u.is_superuser)
 def configure_google_drive(request):
@@ -190,12 +190,22 @@ def export_to_sheet(request, tid):
     spreadsheets = files.get('files')
     if len(spreadsheets) == 1:
         spreadsheetId = spreadsheets[0].get('id')
-        errors = sync_findings(request, tid, spreadsheetId)
+        sync = sync_findings(request, tid, spreadsheetId)
+        errors = sync[0]
+        print (errors)
+        sheet_title = sync[1]
         if len(errors) > 0 :
-            add_breadcrumb(title="Errors", top_level=not len(request.GET), request=request)
+            product_tab = Product_Tab(test.engagement.product.id, title="Syncing Errors", tab="engagements")
+            product_tab.setEngagement(test.engagement)
+            spreadsheet_url = 'https://docs.google.com/spreadsheets/d/' + spreadsheetId
             return render(
                 request, 'dojo/syncing_errors.html', {
-                    'errors': errors
+                    'errors': errors,
+                    'name':'Syncing Errors',
+                    'test':test,
+                    'product_tab':product_tab,
+                    'sheet_title':sheet_title,
+                    'spreadsheet_url':spreadsheet_url
                 })
         else:
             messages.add_message(
@@ -264,7 +274,19 @@ def sync_findings(request, tid, spreadsheetId):
     SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
     credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
     sheets_service = googleapiclient.discovery.build('sheets', 'v4', credentials=credentials)
-    result = sheets_service.spreadsheets().values().get(spreadsheetId=spreadsheetId, range='Sheet1').execute()
+
+    spreadsheet = sheets_service.spreadsheets().get(spreadsheetId=spreadsheetId).execute()
+    sheet_names = []
+    for sheet in spreadsheet['sheets']:
+        date = (sheet['properties']['title'])
+        try:
+            date = datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
+            sheet_names.append(date)
+        except:
+            pass
+    sheet_title = str(max(sheet_names))
+
+    result = sheets_service.spreadsheets().values().get(spreadsheetId=spreadsheetId, range=sheet_title).execute()
     rows = result.get('values', [])
     header_raw = rows[0]
     findings_sheet = rows[1:]
@@ -273,7 +295,7 @@ def sync_findings(request, tid, spreadsheetId):
     active_note_types = Note_Type.objects.filter(is_active=True)
     note_type_activation = len(active_note_types)
 
-    errors = {}
+    errors = []
     index_of_active = header_raw.index('active')
     index_of_verified = header_raw.index('verified')
     index_of_duplicate = header_raw.index('duplicate')
@@ -288,14 +310,19 @@ def sync_findings(request, tid, spreadsheetId):
         false_p = finding_sheet[index_of_false_p]
 
         if (active == 'TRUE' or verified == 'TRUE') and duplicate == 'TRUE':                     #Check update finding conditions
-            errors[finding_id] = 'Duplicate findings cannot be verified or active'
-        if false_p == 'TRUE' and verified == 'TRUE':
-            errors[finding_id] = 'False positive findings cannot be verified.'
+            error = 'Duplicate findings cannot be verified or active'
+            errors.append({'finding_id':finding_id,'column_names':'active, verified, duplicate','error':error})
+        elif false_p == 'TRUE' and verified == 'TRUE':
+            error = 'False positive findings cannot be verified.'
+            errors.append({'finding_id':finding_id,'column_names':'false_p, verified','error':error})
         else:
             try:
                 finding_db = findings_db.get(id=finding_id)                                          #Update finding attributes
             except :
-                pass
+                if finding_id==None:
+                    finding_id = 'Null'
+                error = 'Finding does not belong to the Test'
+                errors.append({'finding_id':finding_id,'column_names':'id','error':error})
             else:
                 finding_notes = finding_db.notes.all()
                 for column_name in header_raw:
@@ -335,22 +362,33 @@ def sync_findings(request, tid, spreadsheetId):
                                 else:                                                                    #If the note is a newly added one
                                     if note_type_activation :
                                         if note_column_name[7:12] == 'Note_':
-                                            errors[finding_id + ' ' + note_column_name] = "Can not add new notes without a note-type /n Add your note under the correct note-type column"
+                                            error = 'Can not add new notes without a note-type. Add your note under the correct note-type column'
+                                            errors.append({'finding_id':finding_id,'column_names':column_name,'error':error})
                                         else:
                                             note_type_name = note_column_name[7:][:-2]
-                                            note_type = active_note_types.get(name=note_type_name)
-                                            new_note = Notes(note_type=note_type,
-                                                            entry=note_entry,
-                                                            date=timezone.now(),
-                                                            author=request.user)
-                                            new_note.save()
-                                            history = NoteHistory(data=new_note.entry,
-                                                                  time=new_note.date,
-                                                                  current_editor=new_note.author,
-                                                                  note_type=new_note.note_type)
-                                            history.save()
-                                            new_note.history.add(history)
-                                            finding_db.notes.add(new_note)
+                                            try:
+                                                note_type = active_note_types.get(name=note_type_name)
+                                            except:
+                                                try:
+                                                    note_type = Note_Type.objects.get(name=note_type_name)
+                                                except:
+                                                    pass
+                                                else:
+                                                    error = '"'+note_type_name + '" Note-type is disabled. Can not add new notes of "' + note_type_name + '" type'
+                                                    errors.append({'finding_id':finding_id,'column_names':column_name,'error':error})
+                                            else:
+                                                new_note = Notes(note_type=note_type,
+                                                                entry=note_entry,
+                                                                date=timezone.now(),
+                                                                author=request.user)
+                                                new_note.save()
+                                                history = NoteHistory(data=new_note.entry,
+                                                                      time=new_note.date,
+                                                                      current_editor=new_note.author,
+                                                                      note_type=new_note.note_type)
+                                                history.save()
+                                                new_note.history.add(history)
+                                                finding_db.notes.add(new_note)
                                     else:
                                         if note_column_name[7:12] == 'Note_':
                                             new_note = Notes(entry=note_entry,
@@ -364,11 +402,12 @@ def sync_findings(request, tid, spreadsheetId):
                                             new_note.history.add(history)
                                             finding_db.notes.add(new_note)
                                         else:
-                                            errors[finding_id + ' ' + note_column_name] = "Note-types are not activated, so new notes cannot have a note-type"
+                                            error_location = finding_id + ' ' + note_column_name
+                                            error = 'Note-types are not activated, so newly added notes cannot have a note-type'
+                                            errors.append({'finding_id':finding_id,'column_names':column_name,'error':error})
                 finding_db.save()
-    clear_sheet = sheets_service.spreadsheets().values().clear(spreadsheetId=spreadsheetId, range='Sheet1').execute()
     populate_sheet(tid, spreadsheetId)
-    return errors
+    return errors, sheet_title
 
 
 def populate_sheet(tid, spreadsheetId):
@@ -378,12 +417,51 @@ def populate_sheet(tid, spreadsheetId):
     SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
     credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
     sheets_service = googleapiclient.discovery.build('sheets', 'v4', credentials=credentials)
-    #Update created spredsheet with finding details
     findings_list = get_findings_list(tid)
     row_count = len(findings_list)
     column_count = len(findings_list[0])
+
+    #Create new sheet in the spreadsheet
+    now = datetime.datetime.now()
+    sheet_title = now.strftime("%Y-%m-%d %H:%M:%S")
+    new_sheet = {
+      "requests": [
+        {
+          "addSheet": {
+            "properties": {
+              "title": sheet_title,
+              "gridProperties": {
+                "rowCount": row_count,
+                "columnCount": column_count
+              }
+            }
+          }
+        }
+      ]
+    }
+    sheets_service.spreadsheets().batchUpdate(spreadsheetId=spreadsheetId, body=new_sheet).execute()
+
+    #Move new sheet to the left most corner
+    spreadsheet = sheets_service.spreadsheets().get(spreadsheetId=spreadsheetId).execute()
+    for sheet in spreadsheet['sheets']:
+        if sheet['properties']['title'] == sheet_title:
+            sheet_id = sheet['properties']['sheetId']
+            break
+    reqs = {
+        'requests': [
+            {'updateSheetProperties': {
+                'properties': {
+                    'sheetId': sheet_id,
+                    'index': 0
+                },
+                "fields": "index"
+            }}
+        ]}
+    sheets_service.spreadsheets().batchUpdate(spreadsheetId=spreadsheetId, body=reqs).execute()
+
+    #Update created sheet with finding details
     result = sheets_service.spreadsheets().values().update(spreadsheetId=spreadsheetId,
-                                                    range='Sheet1!A1',
+                                                    range=sheet_title,
                                                     valueInputOption='RAW',
                                                     body = {'values': findings_list}).execute()
 
@@ -393,7 +471,7 @@ def populate_sheet(tid, spreadsheetId):
         {
           "repeatCell": {
             "range": {
-              "sheetId": 0,
+              "sheetId": sheet_id,
               "startRowIndex": 0,
               "endRowIndex": 1
             },
@@ -422,7 +500,7 @@ def populate_sheet(tid, spreadsheetId):
         {
           "updateSheetProperties": {
             "properties": {
-              "sheetId": 0,
+              "sheetId": sheet_id,
               "gridProperties": {
                 "frozenRowCount": 1
               }
@@ -434,7 +512,7 @@ def populate_sheet(tid, spreadsheetId):
           "addProtectedRange": {
             "protectedRange": {
               "range": {
-                "sheetId": 0,
+                "sheetId": sheet_id,
                 "startRowIndex": 0,
                 "endRowIndex": 1,
                 "startColumnIndex": 0,
@@ -455,7 +533,8 @@ def populate_sheet(tid, spreadsheetId):
     sheets_service.spreadsheets().batchUpdate(spreadsheetId=spreadsheetId, body=body).execute()
 
     #Format columns with input field widths and protect columns
-    result = sheets_service.spreadsheets().values().get(spreadsheetId=spreadsheetId, range='Sheet1!1:1').execute()
+    range = sheet_title + '!1:1'
+    result = sheets_service.spreadsheets().values().get(spreadsheetId=spreadsheetId, range=range).execute()
     rows = result.get('values', [])
     header_raw = rows[0]
     fields = Finding._meta.fields
@@ -470,7 +549,7 @@ def populate_sheet(tid, spreadsheetId):
                 body["requests"].append({
                     "updateDimensionProperties": {
                         "range": {
-                            "sheetId": 0,
+                            "sheetId": sheet_id,
                             "dimension": "COLUMNS",
                             "startIndex": index_of_column,
                             "endIndex": index_of_column+1
@@ -486,7 +565,7 @@ def populate_sheet(tid, spreadsheetId):
                 body["requests"].append({
                     "updateDimensionProperties": {
                         "range": {
-                            "sheetId": 0,
+                            "sheetId": sheet_id,
                             "dimension": "COLUMNS",
                             "startIndex": index_of_column,
                             "endIndex": index_of_column+1
@@ -503,7 +582,7 @@ def populate_sheet(tid, spreadsheetId):
                   "addProtectedRange": {
                     "protectedRange": {
                       "range": {
-                        "sheetId": 0,
+                        "sheetId": sheet_id,
                         "startRowIndex": 1,
                         "endRowIndex": row_count,
                         "startColumnIndex": index_of_column,
@@ -523,7 +602,7 @@ def populate_sheet(tid, spreadsheetId):
                 body["requests"].append({
                     "setDataValidation": {
                       "range": {
-                        "sheetId": 0,
+                        "sheetId": sheet_id,
                         "startRowIndex": 1,
                         "endRowIndex": row_count,
                         "startColumnIndex": index_of_column,
@@ -543,7 +622,7 @@ def populate_sheet(tid, spreadsheetId):
                 body["requests"].append({
                     "setDataValidation": {
                       "range": {
-                        "sheetId": 0,
+                        "sheetId": sheet_id,
                         "startRowIndex": 1,
                         "endRowIndex": row_count,
                         "startColumnIndex": index_of_column,
@@ -568,7 +647,7 @@ def populate_sheet(tid, spreadsheetId):
                 body["requests"].append({
                     "setDataValidation": {
                       "range": {
-                        "sheetId": 0,
+                        "sheetId": sheet_id,
                         "startRowIndex": 1,
                         "endRowIndex": row_count,
                         "startColumnIndex": index_of_column,
@@ -588,7 +667,7 @@ def populate_sheet(tid, spreadsheetId):
                 body["requests"].append({
                     "setDataValidation": {
                       "range": {
-                        "sheetId": 0,
+                        "sheetId": sheet_id,
                         "startRowIndex": 1,
                         "endRowIndex": row_count,
                         "startColumnIndex": index_of_column,
@@ -615,7 +694,7 @@ def populate_sheet(tid, spreadsheetId):
             body["requests"].append({
                 "updateDimensionProperties": {
                     "range": {
-                        "sheetId": 0,
+                        "sheetId": sheet_id,
                         "dimension": "COLUMNS",
                         "startIndex": index_of_column,
                         "endIndex": index_of_column+1
@@ -630,7 +709,7 @@ def populate_sheet(tid, spreadsheetId):
               "addProtectedRange": {
                 "protectedRange": {
                   "range": {
-                    "sheetId": 0,
+                    "sheetId": sheet_id,
                     "startRowIndex": 1,
                     "endRowIndex": row_count,
                     "startColumnIndex": index_of_column,
@@ -704,7 +783,7 @@ def get_findings_list(tid):
                     findings_list[f+1].append('')
         max_note_count = 0
         for finding in findings:
-            note_count = finding.notes.filter(note_type=None).count()
+            note_count = finding.notes.exclude(note_type__in=active_note_types).count()
             if max_note_count < note_count:
                 max_note_count=note_count
         if max_note_count > 0:
@@ -713,7 +792,7 @@ def get_findings_list(tid):
                 findings_list[0].append('[note] ' + "Note_" + str(i+1))
             for f in range(findings.count()):
                 finding = findings[f]
-                notes = finding.notes.filter(note_type=None).order_by('id')
+                notes = finding.notes.exclude(note_type__in=active_note_types).order_by('id')
                 for note in notes:
                     findings_list[f+1].append(note.id)
                     findings_list[f+1].append(note.entry)

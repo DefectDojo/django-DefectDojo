@@ -1,17 +1,47 @@
 {% extends "base.html" %}
-{% load display_tags %}
-{% load humanize %}
-{% load static from staticfiles %}
-{% load get_endpoint_status %}
-{% block add_styles %}
-  .tooltip-inner {
-    max-width: 650px;
-  }
-{% endblock %}
-{% block add_css_before %}
-<!-- Source Code Highlight CSS -->
-<link rel="stylesheet" href="{% static "dojo/css/highlight.css" %}">
-{% endblock %}
+{% load navigation_tags %}
 {% block content %}
-efjefejfejk
+    {% load display_tags %}
+    <p>
+        Synced with "{{ sheet_title }}" sheet
+    </p>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading tight">
+                    <h3 class="has-filters">
+                        {{ name }}
+                    </h3>
+                </div>
+            </div>
+            {% if errors %}
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=errors page_size=True %}
+                </div>
+                <div class="table-responsive panel panel-default">
+                    <table id="users"
+                           class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
+                        <tr>
+                            <th> Finding ID </th>
+                            <th> Column Names </th>
+                            <th> Error </th>
+                        </tr>
+                        {% for e in errors %}
+                            <tr>
+                                <td>{{ e.finding_id }}</td>
+                                <td>{{ e.column_names }}</td>
+                                <td>{{ e.error }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=errors page_size=True %}
+                </div>
+            {% else %}
+                <h5> No Errors </h5>
+            {% endif %}
+        </div>
+    </div>
+
 {% endblock %}

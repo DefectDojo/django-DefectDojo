@@ -69,16 +69,14 @@
                           </li>
                         {% else %}
                           <li role="presentation">
-                              <a href="{% url 'export_to_sheet' test.id %}" aria-expanded="false" aria-label="Sync google sheet">
-                                  <i class="fa fa-file-excel-o"></i>
-                                  <span>Sync Google Sheet</span>
-                                  <span class="glyphicon arrow"></span>
+                              <a href="{{ sheet_url }}">
+                                  <i class="fa fa-file-excel-o"></i> View Google Sheet
                               </a>
-                              <ul>
-                                <li>
-                                    <a href="{{ sheet_url }}">View Google Sheet</a>
-                                </li>
-                              </ul>
+                          </li>
+                          <li role="presentation">
+                              <a href="{% url 'export_to_sheet' test.id %}">
+                                  <i class="fa fa-refresh"></i> Sync Google Sheet
+                              </a>
                           </li>
                         {% endif %}
                       {% endif %}
@@ -915,4 +913,20 @@
         });
 
     </script>
+    <style>
+      .subsub {
+      position: absolute;
+      width: 200px;
+      left: 200px;
+      padding-top: 10px;
+      margin-top: -38px;
+      background-color: $theme-color-3;
+      display:none;
+      @include border-radius(0 2px 2px 2px);
+      }
+
+      li.drop:hover > .subsub {
+      display: block;
+      }
+    </style>
 {% endblock %}
