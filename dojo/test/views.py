@@ -86,7 +86,7 @@ def view_test(request, tid):
         credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
         drive_service = googleapiclient.discovery.build('drive', 'v3', credentials=credentials)
         folder_id = system_settings.drive_folder_ID
-        files = drive_service.files().list(q="mimeType='application/vnd.google-apps.spreadsheet' and parents in '%s' and name='%s'" %(folder_id, spreadsheet_name),
+        files = drive_service.files().list(q="mimeType='application/vnd.google-apps.spreadsheet' and parents in '%s' and name='%s'" % (folder_id, spreadsheet_name),
                                               spaces='drive',
                                               pageSize=10,
                                               fields='files(id, name)').execute()
@@ -111,8 +111,8 @@ def view_test(request, tid):
                    'cred_test': cred_test,
                    'tag_input': tags,
                    'jira_config': jira_config,
-                   'show_export':google_sheets_enabled,
-                   'sheet_url':sheet_url
+                   'show_export': google_sheets_enabled,
+                   'sheet_url': sheet_url
                    })
 
 
