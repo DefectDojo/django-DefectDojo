@@ -93,9 +93,13 @@ def view_test(request, tid):
                                                   pageSize=10,
                                                   fields='files(id, name)').execute()
         except googleapiclient.errors.HttpError:
+            messages.add_message(
+                request,
+                messages.ERROR,
+                "Google Drive API is disabled. Google Sheets Sync feature can not be used.",
+                extra_tags="alert-danger",
+            )
             google_sheets_enabled = False
-            error = "Google Drive API is not enabled."
-            return render(request, 'disabled.html')
         else:
             spreadsheets = files.get('files')
             if len(spreadsheets) == 1:
