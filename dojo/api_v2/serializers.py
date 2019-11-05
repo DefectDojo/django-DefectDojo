@@ -169,6 +169,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
     findings_count = serializers.SerializerMethodField()
+    findings_list = serializers.SerializerMethodField()
+
     tags = TagListSerializerField(required=False)
     product_meta = ProductMetaSerializer(read_only=True, many=True)
 
@@ -183,6 +185,8 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
     def get_findings_count(self, obj):
         return obj.findings_count
 
+    def get_findings_list(self, obj):
+        return obj.open_findings_list()
 
 class ProductTypeSerializer(serializers.ModelSerializer):
     class Meta:

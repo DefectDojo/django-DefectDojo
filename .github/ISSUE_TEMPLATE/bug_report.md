@@ -2,7 +2,7 @@
 name: Bug report
 about: Create a report to help us improve
 title: ''
-labels: 'bug'
+labels: bug
 assignees: ''
 
 ---
@@ -27,7 +27,7 @@ A clear and concise description of what you expected to happen.
 
 **Environment information**
  - Operating System: [e.g. Ubuntu 18.04]
- - DefectDojo version: [use `git show -s --format="%h: %s [%ci]"`]
+ - DefectDojo Commit Message: [use `git show -s --format="%h: %s [%ci]"`]
 
 **Sample scan files** (optional)
 If applicable, add sample scan files to help reproduce your problem.
