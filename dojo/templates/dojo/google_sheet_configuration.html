@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-    <form class="form-horizontal" action="{%  url 'configure_google_drive' %}" method="post" enctype="multipart/form-data">{% csrf_token %}
+    <form class="form-horizontal" action="{%  url 'configure_google_sheets' %}" method="post" enctype="multipart/form-data">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">

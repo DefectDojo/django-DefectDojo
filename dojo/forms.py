@@ -1918,15 +1918,15 @@ class GoogleSheetFieldsForm(forms.Form):
         label="Upload credentials file",
         required=True,
         allow_empty_file=False,
-        help_text="Upload the credentials file downloaded from the google developer console")
+        help_text="Upload the credentials file downloaded from the Google Developer Console")
     drive_folder_ID = forms.CharField(
         required=True,
         label="Drive folder ID",
-        help_text="Extract the drive folder id from the url and provide it here")
+        help_text="Extract the Drive folder iD from the url and provide it here")
     enable_service = forms.BooleanField(
         initial=False,
         required=False,
-        help_text='Tick this check box if you want to enale the google sheets export & import feature in your application')
+        help_text='Tick this check box if you want to enale the Google Sheets Sync feature in your application')
 
     def __init__(self, *args, **kwargs):
         self.credentials_required = kwargs.pop('credentials_required')
