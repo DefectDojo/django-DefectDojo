@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.contrib import messages
 from django.contrib.auth.models import User
+from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import user_passes_test
 
 from dojo.models import Finding, System_Settings, Test, Dojo_User, Note_Type, NoteHistory, Notes
@@ -17,7 +18,7 @@ from dojo.utils import add_breadcrumb, Product_Tab
 
 
 @user_passes_test(lambda u: u.is_superuser)
-def configure_google_drive(request):
+def configure_google_sheets(request):
     fields = Finding._meta.fields
     system_settings = get_object_or_404(System_Settings, id=1)
     revoke_access = False
@@ -62,8 +63,10 @@ def configure_google_drive(request):
                     cred_file = request.FILES['cred_file']
                     cred_byte = cred_file.read()                          # read data from the temporary uploaded file
                     cred_str = cred_byte.decode('utf8')                 # convert bytes object to string
+                    initial = True
                 else:
                     cred_str = system_settings.credentials
+                    initial = False
 
                 # Get the drive folder ID
                 drive_folder_ID = form.cleaned_data['drive_folder_ID']
@@ -85,7 +88,24 @@ def configure_google_drive(request):
                     system_settings.drive_folder_ID = drive_folder_ID
                     system_settings.enable_google_sheets = form.cleaned_data['enable_service']
                     system_settings.save()
+                    if initial:
+                        messages.add_message(
+                            request,
+                            messages.SUCCESS,
+                            "Google drive configuration successful.",
+                            extra_tags="alert-success",
+                        )
+                    else:
+                        messages.add_message(
+                            request,
+                            messages.SUCCESS,
+                            "Successfully Updated.",
+                            extra_tags="alert-success",
+                        )
                     return HttpResponseRedirect(reverse('dashboard'))
+                else:
+                    system_settings.enable_google_sheets = False
+                    system_settings.save()
     add_breadcrumb(title="Google Sheet sync Configuration", top_level=True, request=request)
     return render(request, 'dojo/google_sheet_configuration.html', {
         'name': 'Google Sheet Sync Configuration',
@@ -163,20 +183,17 @@ def validate_drive_authentication(request, cred_str, drive_folder_ID):
                     return False
                 else:
                     drive_service.files().delete(fileId=spreadsheetId).execute()           # Delete 'test spreadsheet'
-                    messages.add_message(
-                        request,
-                        messages.SUCCESS,
-                        "Google drive configuration successful.",
-                        extra_tags="alert-success",
-                    )
                     return True
 
 
 @user_passes_test(lambda u: u.is_staff)
 def export_to_sheet(request, tid):
+    system_settings = get_object_or_404(System_Settings, id=1)
+    google_sheets_enabled = system_settings.enable_google_sheets
+    if google_sheets_enabled is False:
+        raise PermissionDenied
     test = Test.objects.get(id=tid)
     spreadsheet_name = test.engagement.product.name + "-" + test.engagement.name + "-" + str(test.id)
-    system_settings = get_object_or_404(System_Settings, id=1)
     service_account_info = json.loads(system_settings.credentials)
     SCOPES = ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/spreadsheets']
     credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
@@ -216,6 +233,12 @@ def export_to_sheet(request, tid):
             return HttpResponseRedirect(reverse('view_test', args=(tid, )))
     elif len(spreadsheets) == 0:
         create_googlesheet(request, tid)
+        messages.add_message(
+            request,
+            messages.SUCCESS,
+            "Finding details successfully exported to google sheet",
+            extra_tags="alert-success",
+        )
         return HttpResponseRedirect(reverse('view_test', args=(tid, )))
     else:
         messages.add_message(
@@ -256,12 +279,6 @@ def create_googlesheet(request, tid):
     user_email = request.user.email
     drive_service.permissions().create(body={'type': 'user', 'role': 'writer', 'emailAddress': user_email}, fileId=spreadsheetId).execute()
     populate_sheet(tid, spreadsheetId)
-    messages.add_message(
-        request,
-        messages.SUCCESS,
-        "Finding details successfully exported to google sheet",
-        extra_tags="alert-success",
-    )
 
 
 def sync_findings(request, tid, spreadsheetId):
@@ -271,8 +288,8 @@ def sync_findings(request, tid, spreadsheetId):
     SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
     credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
     sheets_service = googleapiclient.discovery.build('sheets', 'v4', credentials=credentials)
-
     spreadsheet = sheets_service.spreadsheets().get(spreadsheetId=spreadsheetId).execute()
+
     sheet_names = []
     for sheet in spreadsheet['sheets']:
         date = (sheet['properties']['title'])

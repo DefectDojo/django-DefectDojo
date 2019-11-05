@@ -3,7 +3,7 @@
 {% block content %}
     {% load display_tags %}
     <p>
-        Synced with "{{ sheet_title }}" sheet of Spreadsheet ""{{ spreadsheet_name }}""
+        Synced with "{{ sheet_title }}" sheet of Spreadsheet "{{ spreadsheet_name }}"
     </p>
     <div class="row">
         <div class="col-md-12">
@@ -43,5 +43,5 @@
             {% endif %}
         </div>
     </div>
-
+    <a class="btn btn-primary" href={{spreadsheet_url}}>View Google Sheet</a>
 {% endblock %}

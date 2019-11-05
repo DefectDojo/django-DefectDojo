@@ -78,6 +78,7 @@ def view_test(request, tid):
         jira_config = jira_config.conf_id
 
     google_sheets_enabled = system_settings.enable_google_sheets
+    sheet_url = None
     if google_sheets_enabled:
         spreadsheet_name = test.engagement.product.name + "-" + test.engagement.name + "-" + str(test.id)
         system_settings = get_object_or_404(System_Settings, id=1)
@@ -86,16 +87,20 @@ def view_test(request, tid):
         credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
         drive_service = googleapiclient.discovery.build('drive', 'v3', credentials=credentials)
         folder_id = system_settings.drive_folder_ID
-        files = drive_service.files().list(q="mimeType='application/vnd.google-apps.spreadsheet' and parents in '%s' and name='%s'" % (folder_id, spreadsheet_name),
-                                              spaces='drive',
-                                              pageSize=10,
-                                              fields='files(id, name)').execute()
-        spreadsheets = files.get('files')
-        if len(spreadsheets) == 1:
-            spreadsheetId = spreadsheets[0].get('id')
-            sheet_url = 'https://docs.google.com/spreadsheets/d/' + spreadsheetId
+        try:
+            files = drive_service.files().list(q="mimeType='application/vnd.google-apps.spreadsheet' and parents in '%s' and name='%s'" % (folder_id, spreadsheet_name),
+                                                  spaces='drive',
+                                                  pageSize=10,
+                                                  fields='files(id, name)').execute()
+        except googleapiclient.errors.HttpError:
+            google_sheets_enabled = False
+            error = "Google Drive API is not enabled."
+            return render(request, 'disabled.html')
         else:
-            sheet_url = None
+            spreadsheets = files.get('files')
+            if len(spreadsheets) == 1:
+                spreadsheetId = spreadsheets[0].get('id')
+                sheet_url = 'https://docs.google.com/spreadsheets/d/' + spreadsheetId
     return render(request, 'dojo/view_test.html',
                   {'test': test,
                    'product_tab': product_tab,
