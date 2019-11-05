@@ -1,4 +1,4 @@
-## google sheets
+# google sheets
 
 import logging
 import json
@@ -211,7 +211,7 @@ def export_to_sheet(request, tid):
                                               fields='files(id, name)').execute()
     except googleapiclient.errors.HttpError:
         error_message = "Google Drive API is not enabled."
-        return render(request, 'google_sheet_error.html',{'error_message':error_message})
+        return render(request, 'google_sheet_error.html', {'error_message': error_message})
     else:
         spreadsheets = files.get('files')
         if len(spreadsheets) == 1:
@@ -219,7 +219,7 @@ def export_to_sheet(request, tid):
             sync = sync_findings(request, tid, spreadsheetId)
             if 'error_message' in sync:
                 error_message = sync['error_message']
-                return render(request, 'google_sheet_error.html',{'error_message':error_message})
+                return render(request, 'google_sheet_error.html', {'error_message': error_message})
             else:
                 errors = sync['errors']
                 sheet_title = sync['sheet_title']
@@ -249,7 +249,7 @@ def export_to_sheet(request, tid):
             res = create_googlesheet(request, tid)
             if 'error_message' in res:
                 error_message = res['error_message']
-                return render(request, 'google_sheet_error.html',{'error_message':error_message})
+                return render(request, 'google_sheet_error.html', {'error_message': error_message})
             else:
                 messages.add_message(
                     request,
@@ -327,8 +327,8 @@ def sync_findings(request, tid, spreadsheetId):
     try:
         spreadsheet = sheets_service.spreadsheets().get(spreadsheetId=spreadsheetId).execute()
     except googleapiclient.errors.HttpError:
-         error_message = "Google Sheets API is not enabled."
-         res['error_message'] = error_message
+        error_message = "Google Sheets API is not enabled."
+        res['error_message'] = error_message
     else:
         sheet_names = []
         for sheet in spreadsheet['sheets']:
