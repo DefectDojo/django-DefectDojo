@@ -3,6 +3,7 @@
 import logging
 import operator
 import json
+import httplib2
 from datetime import datetime
 import googleapiclient.discovery
 from google.oauth2 import service_account
@@ -83,11 +84,11 @@ def view_test(request, tid):
         spreadsheet_name = test.engagement.product.name + "-" + test.engagement.name + "-" + str(test.id)
         system_settings = get_object_or_404(System_Settings, id=1)
         service_account_info = json.loads(system_settings.credentials)
-        SCOPES = ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/spreadsheets']
+        SCOPES = ['https://www.googleapis.com/auth/drive']
         credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
-        drive_service = googleapiclient.discovery.build('drive', 'v3', credentials=credentials)
-        folder_id = system_settings.drive_folder_ID
         try:
+            drive_service = googleapiclient.discovery.build('drive', 'v3', credentials=credentials)
+            folder_id = system_settings.drive_folder_ID
             files = drive_service.files().list(q="mimeType='application/vnd.google-apps.spreadsheet' and parents in '%s' and name='%s'" % (folder_id, spreadsheet_name),
                                                   spaces='drive',
                                                   pageSize=10,
@@ -96,10 +97,17 @@ def view_test(request, tid):
             messages.add_message(
                 request,
                 messages.ERROR,
-                "Google Drive API is disabled. Google Sheets Sync feature can not be used.",
+                "There is a problem with the Google Sheets Sync Configuration. Contact your system admin to solve the issue. Until fixed Google Shet Sync feature can not be used.",
                 extra_tags="alert-danger",
             )
             google_sheets_enabled = False
+        except httplib2.ServerNotFoundError:
+            messages.add_message(
+                request,
+                messages.ERROR,
+                "Server Not Found. Check yor internet connection inorder to use the Google Sheets Sync feature",
+                extra_tags="alert-danger",
+            )
         else:
             spreadsheets = files.get('files')
             if len(spreadsheets) == 1:
