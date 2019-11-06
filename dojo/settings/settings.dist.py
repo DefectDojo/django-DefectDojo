@@ -547,8 +547,10 @@ CELERY_BEAT_SCHEDULE = {
 #   static scanner:  ['title', 'cwe', 'line', 'file_path', 'description']
 #   dynamic scanner: ['title', 'cwe', 'line', 'file_path', 'description', 'endpoints']
 HASHCODE_FIELDS_PER_SCANNER = {
-    'Checkmarx Scan': ['cwe', 'file_path'],
-    'SonarQube Scan': ['cwe', 'file_path'],
+    # In checkmarx, same CWE may appear with different severities: example "sql injection" (high) and "blind sql injection" (low).
+    # Including the severity in the hash_code keeps those findings not duplicate
+    'Checkmarx Scan': ['cwe', 'severity', 'file_path'],
+    'SonarQube Scan': ['cwe', 'severity', 'file_path'],
     'Dependency Check Scan': ['cve', 'file_path']
 }
 
@@ -564,7 +566,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
 # List of fields that are known to be usable in hash_code computation)
 # 'endpoints' is a pseudo field that uses the endpoints (for dynamic scanners)
 # 'unique_id_from_tool' is often not needed here as it can be used directly in the dedupe algorithm, but it's also possible to use it for hashing
-HASHCODE_ALLOWED_FIELDS = ['title', 'cwe', 'line', 'file_path', 'description', 'endpoints', 'unique_id_from_tool', 'cve']
+HASHCODE_ALLOWED_FIELDS = ['title', 'cwe', 'line', 'file_path', 'description', 'endpoints', 'unique_id_from_tool', 'cve', 'severity']
 
 # ------------------------------------
 # Deduplication configuration
