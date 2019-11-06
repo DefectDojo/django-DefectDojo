@@ -3,6 +3,7 @@
 import logging
 import json
 import datetime
+import httplib2
 import googleapiclient.discovery
 from google.oauth2 import service_account
 
@@ -111,7 +112,7 @@ def configure_google_sheets(request):
                 else:
                     system_settings.enable_google_sheets = False
                     system_settings.save()
-    add_breadcrumb(title="Google Sheet sync Configuration", top_level=True, request=request)
+    add_breadcrumb(title="Google Sheet Sync Configuration", top_level=True, request=request)
     return render(request, 'dojo/google_sheet_configuration.html', {
         'name': 'Google Sheet Sync Configuration',
         'metric': False,
@@ -202,62 +203,50 @@ def export_to_sheet(request, tid):
     service_account_info = json.loads(system_settings.credentials)
     SCOPES = ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/spreadsheets']
     credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
-    drive_service = googleapiclient.discovery.build('drive', 'v3', credentials=credentials)
-    folder_id = system_settings.drive_folder_ID
     try:
+        drive_service = googleapiclient.discovery.build('drive', 'v3', credentials=credentials)
+        folder_id = system_settings.drive_folder_ID
         files = drive_service.files().list(q="mimeType='application/vnd.google-apps.spreadsheet' and parents in '%s' and name='%s'" % (folder_id, spreadsheet_name),
                                               spaces='drive',
                                               pageSize=10,
                                               fields='files(id, name)').execute()
-    except googleapiclient.errors.HttpError:
-        error_message = "Google Drive API is not enabled."
-        return render(request, 'google_sheet_error.html', {'error_message': error_message})
-    else:
         spreadsheets = files.get('files')
         if len(spreadsheets) == 1:
             spreadsheetId = spreadsheets[0].get('id')
             sync = sync_findings(request, tid, spreadsheetId)
-            if 'error_message' in sync:
-                error_message = sync['error_message']
-                return render(request, 'google_sheet_error.html', {'error_message': error_message})
-            else:
-                errors = sync['errors']
-                sheet_title = sync['sheet_title']
-                if len(errors) > 0:
-                    product_tab = Product_Tab(test.engagement.product.id, title="Syncing Errors", tab="engagements")
-                    product_tab.setEngagement(test.engagement)
-                    spreadsheet_url = 'https://docs.google.com/spreadsheets/d/' + spreadsheetId
-                    return render(
-                        request, 'dojo/syncing_errors.html', {
-                            'test': test,
-                            'errors': errors,
-                            'name': 'Syncing Errors',
-                            'product_tab': product_tab,
-                            'sheet_title': sheet_title,
-                            'spreadsheet_name': spreadsheet_name,
-                            'spreadsheet_url': spreadsheet_url
-                        })
-                else:
-                    messages.add_message(
-                        request,
-                        messages.SUCCESS,
-                        "Google sheet data synced with database",
-                        extra_tags="alert-success",
-                    )
-                    return HttpResponseRedirect(reverse('view_test', args=(tid, )))
-        elif len(spreadsheets) == 0:
-            res = create_googlesheet(request, tid)
-            if 'error_message' in res:
-                error_message = res['error_message']
-                return render(request, 'google_sheet_error.html', {'error_message': error_message})
+            errors = sync['errors']
+            sheet_title = sync['sheet_title']
+            if len(errors) > 0:
+                product_tab = Product_Tab(test.engagement.product.id, title="Syncing Errors", tab="engagements")
+                product_tab.setEngagement(test.engagement)
+                spreadsheet_url = 'https://docs.google.com/spreadsheets/d/' + spreadsheetId
+                return render(
+                    request, 'dojo/syncing_errors.html', {
+                        'test': test,
+                        'errors': errors,
+                        'name': 'Syncing Errors',
+                        'product_tab': product_tab,
+                        'sheet_title': sheet_title,
+                        'spreadsheet_name': spreadsheet_name,
+                        'spreadsheet_url': spreadsheet_url
+                    })
             else:
                 messages.add_message(
                     request,
                     messages.SUCCESS,
-                    "Finding details successfully exported to google sheet",
+                    "Google sheet data synced with database",
                     extra_tags="alert-success",
                 )
                 return HttpResponseRedirect(reverse('view_test', args=(tid, )))
+        elif len(spreadsheets) == 0:
+            create_googlesheet(request, tid)
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                "Finding details successfully exported to google sheet",
+                extra_tags="alert-success",
+            )
+            return HttpResponseRedirect(reverse('view_test', args=(tid, )))
         else:
             messages.add_message(
                 request,
@@ -266,6 +255,12 @@ def export_to_sheet(request, tid):
                 extra_tags="alert-danger",
             )
             return HttpResponseRedirect(reverse('view_test', args=(tid, )))
+    except httplib2.ServerNotFoundError:
+        error_message = 'Server Not Found. Check yor internet connection.'
+        return render(request, 'google_sheet_error.html', {'error_message': error_message})
+    except googleapiclient.errors.HttpError as error:
+        error_message = 'There is a problem with the Google Sheets Sync Configuration. Contact your system admin to solve the issue.'
+        return render(request, 'google_sheet_error.html', {'error_message': error_message})
 
 
 def create_googlesheet(request, tid):
@@ -276,7 +271,6 @@ def create_googlesheet(request, tid):
     credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
     sheets_service = googleapiclient.discovery.build('sheets', 'v4', credentials=credentials)
     drive_service = googleapiclient.discovery.build('drive', 'v3', credentials=credentials)
-    res = {}
     # Create a new spreadsheet
     spreadsheet_name = test.engagement.product.name + "-" + test.engagement.name + "-" + str(test.id)
     spreadsheet = {
@@ -284,36 +278,20 @@ def create_googlesheet(request, tid):
             'title': spreadsheet_name
         }
     }
-    try:
-        spreadsheet = sheets_service.spreadsheets().create(body=spreadsheet, fields='spreadsheetId').execute()
-    except googleapiclient.errors.HttpError:
-        error_message = "Google Sheets API is not enabled."
-        res['error_message'] = error_message
-    else:
-        spreadsheetId = spreadsheet.get('spreadsheetId')
-        folder_id = system_settings.drive_folder_ID
+    spreadsheet = sheets_service.spreadsheets().create(body=spreadsheet, fields='spreadsheetId').execute()
+    spreadsheetId = spreadsheet.get('spreadsheetId')
+    folder_id = system_settings.drive_folder_ID
 
-        # Move the spreadsheet inside the drive folder
-        file = drive_service.files().get(fileId=spreadsheetId, fields='parents').execute()
-        previous_parents = ",".join(file.get('parents'))
-        try:
-            file = drive_service.files().update(fileId=spreadsheetId,
-                                                addParents=folder_id,
-                                                removeParents=previous_parents,
-                                                fields='id, parents').execute()
-        except googleapiclient.errors.HttpError as error:
-            if error.resp.status == 403:
-                error_message = 'Application does not have write access to the given Google Drive folder'
-            if error.resp.status == 404:
-                error_message = 'Google drive folder is not shared with the service account email.'
-            res['error_message'] = error_message
-            drive_service.files().delete(fileId=spreadsheetId).execute()
-        else:
-            user_email = request.user.email
-            drive_service.permissions().create(body={'type': 'user', 'role': 'writer', 'emailAddress': user_email}, fileId=spreadsheetId).execute()
-            populate_sheet(tid, spreadsheetId)
-            res['success'] = True
-    return res
+    # Move the spreadsheet inside the drive folder
+    file = drive_service.files().get(fileId=spreadsheetId, fields='parents').execute()
+    previous_parents = ",".join(file.get('parents'))
+    file = drive_service.files().update(fileId=spreadsheetId,
+                                        addParents=folder_id,
+                                        removeParents=previous_parents,
+                                        fields='id, parents').execute()
+    user_email = request.user.email
+    drive_service.permissions().create(body={'type': 'user', 'role': 'writer', 'emailAddress': user_email}, fileId=spreadsheetId).execute()
+    populate_sheet(tid, spreadsheetId)
 
 
 def sync_findings(request, tid, spreadsheetId):
@@ -324,147 +302,140 @@ def sync_findings(request, tid, spreadsheetId):
     credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
     sheets_service = googleapiclient.discovery.build('sheets', 'v4', credentials=credentials)
     res = {}
-    try:
-        spreadsheet = sheets_service.spreadsheets().get(spreadsheetId=spreadsheetId).execute()
-    except googleapiclient.errors.HttpError:
-        error_message = "Google Sheets API is not enabled."
-        res['error_message'] = error_message
-    else:
-        sheet_names = []
-        for sheet in spreadsheet['sheets']:
-            date = (sheet['properties']['title'])
+    spreadsheet = sheets_service.spreadsheets().get(spreadsheetId=spreadsheetId).execute()
+    sheet_names = []
+    for sheet in spreadsheet['sheets']:
+        date = (sheet['properties']['title'])
+        try:
+            date = datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
+            sheet_names.append(date)
+        except:
+            pass
+    sheet_title = str(max(sheet_names))
+    res['sheet_title'] = sheet_title
+
+    result = sheets_service.spreadsheets().values().get(spreadsheetId=spreadsheetId, range=sheet_title).execute()
+    rows = result.get('values', [])
+    header_raw = rows[0]
+    findings_sheet = rows[1:]
+    findings_db = Finding.objects.filter(test=test).order_by('numerical_severity')
+    column_details = json.loads(system_settings.column_widths.replace("'", '"'))
+    active_note_types = Note_Type.objects.filter(is_active=True)
+    note_type_activation = len(active_note_types)
+
+    errors = []
+    index_of_active = header_raw.index('active')
+    index_of_verified = header_raw.index('verified')
+    index_of_duplicate = header_raw.index('duplicate')
+    index_of_false_p = header_raw.index('false_p')
+    index_of_id = header_raw.index('id')
+
+    for finding_sheet in findings_sheet:
+        finding_id = finding_sheet[index_of_id]
+        active = finding_sheet[index_of_active]
+        verified = finding_sheet[index_of_verified]
+        duplicate = finding_sheet[index_of_duplicate]
+        false_p = finding_sheet[index_of_false_p]
+
+        if (active == 'TRUE' or verified == 'TRUE') and duplicate == 'TRUE':                     # Check update finding conditions
+            error = 'Duplicate findings cannot be verified or active'
+            errors.append({'finding_id': finding_id, 'column_names': 'active, verified, duplicate', 'error': error})
+        elif false_p == 'TRUE' and verified == 'TRUE':
+            error = 'False positive findings cannot be verified.'
+            errors.append({'finding_id': finding_id, 'column_names': 'false_p, verified', 'error': error})
+        else:
             try:
-                date = datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
-                sheet_names.append(date)
+                finding_db = findings_db.get(id=finding_id)                                          # Update finding attributes
             except:
-                pass
-        sheet_title = str(max(sheet_names))
-        print (sheet_title)
-        res['sheet_title'] = sheet_title
-
-        result = sheets_service.spreadsheets().values().get(spreadsheetId=spreadsheetId, range=sheet_title).execute()
-        rows = result.get('values', [])
-        print (rows)
-        header_raw = rows[0]
-        findings_sheet = rows[1:]
-        findings_db = Finding.objects.filter(test=test).order_by('numerical_severity')
-        column_details = json.loads(system_settings.column_widths.replace("'", '"'))
-        active_note_types = Note_Type.objects.filter(is_active=True)
-        note_type_activation = len(active_note_types)
-
-        errors = []
-        index_of_active = header_raw.index('active')
-        index_of_verified = header_raw.index('verified')
-        index_of_duplicate = header_raw.index('duplicate')
-        index_of_false_p = header_raw.index('false_p')
-        index_of_id = header_raw.index('id')
-
-        for finding_sheet in findings_sheet:
-            finding_id = finding_sheet[index_of_id]
-            active = finding_sheet[index_of_active]
-            verified = finding_sheet[index_of_verified]
-            duplicate = finding_sheet[index_of_duplicate]
-            false_p = finding_sheet[index_of_false_p]
-
-            if (active == 'TRUE' or verified == 'TRUE') and duplicate == 'TRUE':                     # Check update finding conditions
-                error = 'Duplicate findings cannot be verified or active'
-                errors.append({'finding_id': finding_id, 'column_names': 'active, verified, duplicate', 'error': error})
-            elif false_p == 'TRUE' and verified == 'TRUE':
-                error = 'False positive findings cannot be verified.'
-                errors.append({'finding_id': finding_id, 'column_names': 'false_p, verified', 'error': error})
+                if finding_id is None:
+                    finding_id = 'Null'
+                error = 'Finding does not belong to the Test'
+                errors.append({'finding_id': finding_id, 'column_names': 'id', 'error': error})
             else:
-                try:
-                    finding_db = findings_db.get(id=finding_id)                                          # Update finding attributes
-                except:
-                    if finding_id is None:
-                        finding_id = 'Null'
-                    error = 'Finding does not belong to the Test'
-                    errors.append({'finding_id': finding_id, 'column_names': 'id', 'error': error})
-                else:
-                    finding_notes = finding_db.notes.all()
-                    for column_name in header_raw:
-                        if column_name in column_details:
-                            if int(column_details[column_name][1]) == 0:
-                                index_of_column = header_raw.index(column_name)
-                                if finding_sheet[index_of_column] == 'TRUE':
-                                    setattr(finding_db, column_name, True)
-                                elif finding_sheet[index_of_column] == 'FALSE':
-                                    setattr(finding_db, column_name, False)
-                                else:
-                                    setattr(finding_db, column_name, finding_sheet[index_of_column])
-                        elif column_name[:6] == '[note]' and column_name[-3:] == '_id':                      # Updating notes
-                            note_column_name = column_name[:-3]
-                            try:
-                                index_of_note_column = header_raw.index(note_column_name)
-                            except ValueError:
-                                pass
+                finding_notes = finding_db.notes.all()
+                for column_name in header_raw:
+                    if column_name in column_details:
+                        if int(column_details[column_name][1]) == 0:
+                            index_of_column = header_raw.index(column_name)
+                            if finding_sheet[index_of_column] == 'TRUE':
+                                setattr(finding_db, column_name, True)
+                            elif finding_sheet[index_of_column] == 'FALSE':
+                                setattr(finding_db, column_name, False)
                             else:
-                                index_of_id_column = header_raw.index(column_name)
-                                note_id = finding_sheet[index_of_id_column]
-                                note_entry = finding_sheet[index_of_note_column].rstrip()
-                                if note_entry != '':
-                                    if note_id != '':                                                  # If the note is an existing one
-                                        note_db = finding_notes.get(id=note_id)
-                                        if note_entry != note_db.entry.rstrip():
-                                            note_db.entry = note_entry
-                                            note_db.edited = True
-                                            note_db.editor = request.user
-                                            note_db.edit_time = timezone.now()
-                                            history = NoteHistory(data=note_db.entry,
-                                                                  time=note_db.edit_time,
-                                                                  current_editor=note_db.editor)
-                                            history.save()
-                                            note_db.history.add(history)
-                                            note_db.save()
-                                    else:                                                                    # If the note is a newly added one
-                                        if note_type_activation:
-                                            if note_column_name[7:12] == 'Note_':
-                                                error = 'Can not add new notes without a note-type. Add your note under the correct note-type column'
-                                                errors.append({'finding_id': finding_id, 'column_names': note_column_name, 'error': error})
-                                            else:
-                                                note_type_name = note_column_name[7:][:-2]
-                                                try:
-                                                    note_type = active_note_types.get(name=note_type_name)
-                                                except:
-                                                    try:
-                                                        note_type = Note_Type.objects.get(name=note_type_name)
-                                                    except:
-                                                        pass
-                                                    else:
-                                                        error = '"' + note_type_name + '" Note-type is disabled. Can not add new notes of "' + note_type_name + '" type'
-                                                        errors.append({'finding_id': finding_id, 'column_names': note_column_name, 'error': error})
-                                                else:
-                                                    new_note = Notes(note_type=note_type,
-                                                                    entry=note_entry,
-                                                                    date=timezone.now(),
-                                                                    author=request.user)
-                                                    new_note.save()
-                                                    history = NoteHistory(data=new_note.entry,
-                                                                          time=new_note.date,
-                                                                          current_editor=new_note.author,
-                                                                          note_type=new_note.note_type)
-                                                    history.save()
-                                                    new_note.history.add(history)
-                                                    finding_db.notes.add(new_note)
+                                setattr(finding_db, column_name, finding_sheet[index_of_column])
+                    elif column_name[:6] == '[note]' and column_name[-3:] == '_id':                      # Updating notes
+                        note_column_name = column_name[:-3]
+                        try:
+                            index_of_note_column = header_raw.index(note_column_name)
+                        except ValueError:
+                            pass
+                        else:
+                            index_of_id_column = header_raw.index(column_name)
+                            note_id = finding_sheet[index_of_id_column]
+                            note_entry = finding_sheet[index_of_note_column].rstrip()
+                            if note_entry != '':
+                                if note_id != '':                                                  # If the note is an existing one
+                                    note_db = finding_notes.get(id=note_id)
+                                    if note_entry != note_db.entry.rstrip():
+                                        note_db.entry = note_entry
+                                        note_db.edited = True
+                                        note_db.editor = request.user
+                                        note_db.edit_time = timezone.now()
+                                        history = NoteHistory(data=note_db.entry,
+                                                              time=note_db.edit_time,
+                                                              current_editor=note_db.editor)
+                                        history.save()
+                                        note_db.history.add(history)
+                                        note_db.save()
+                                else:                                                                    # If the note is a newly added one
+                                    if note_type_activation:
+                                        if note_column_name[7:12] == 'Note_':
+                                            error = 'Can not add new notes without a note-type. Add your note under the correct note-type column'
+                                            errors.append({'finding_id': finding_id, 'column_names': note_column_name, 'error': error})
                                         else:
-                                            if note_column_name[7:12] == 'Note_':
-                                                new_note = Notes(entry=note_entry,
+                                            note_type_name = note_column_name[7:][:-2]
+                                            try:
+                                                note_type = active_note_types.get(name=note_type_name)
+                                            except:
+                                                try:
+                                                    note_type = Note_Type.objects.get(name=note_type_name)
+                                                except:
+                                                    pass
+                                                else:
+                                                    error = '"' + note_type_name + '" Note-type is disabled. Can not add new notes of "' + note_type_name + '" type'
+                                                    errors.append({'finding_id': finding_id, 'column_names': note_column_name, 'error': error})
+                                            else:
+                                                new_note = Notes(note_type=note_type,
+                                                                entry=note_entry,
                                                                 date=timezone.now(),
                                                                 author=request.user)
                                                 new_note.save()
                                                 history = NoteHistory(data=new_note.entry,
                                                                       time=new_note.date,
-                                                                      current_editor=new_note.author)
+                                                                      current_editor=new_note.author,
+                                                                      note_type=new_note.note_type)
                                                 history.save()
                                                 new_note.history.add(history)
                                                 finding_db.notes.add(new_note)
-                                            else:
-                                                error_location = finding_id + ' ' + note_column_name
-                                                error = 'Note-types are not activated, so newly added notes cannot have a note-type'
-                                                errors.append({'finding_id': finding_id, 'column_names': note_column_name, 'error': error})
-                    finding_db.save()
-        res['errors'] = errors
-        populate_sheet(tid, spreadsheetId)
+                                    else:
+                                        if note_column_name[7:12] == 'Note_':
+                                            new_note = Notes(entry=note_entry,
+                                                            date=timezone.now(),
+                                                            author=request.user)
+                                            new_note.save()
+                                            history = NoteHistory(data=new_note.entry,
+                                                                  time=new_note.date,
+                                                                  current_editor=new_note.author)
+                                            history.save()
+                                            new_note.history.add(history)
+                                            finding_db.notes.add(new_note)
+                                        else:
+                                            error_location = finding_id + ' ' + note_column_name
+                                            error = 'Note-types are not activated, so newly added notes cannot have a note-type'
+                                            errors.append({'finding_id': finding_id, 'column_names': note_column_name, 'error': error})
+                finding_db.save()
+    res['errors'] = errors
+    populate_sheet(tid, spreadsheetId)
     return res
 
 
