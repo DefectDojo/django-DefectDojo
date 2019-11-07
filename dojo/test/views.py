@@ -105,7 +105,7 @@ def view_test(request, tid):
             messages.add_message(
                 request,
                 messages.ERROR,
-                "Server Not Found. Check yor internet connection inorder to use the Google Sheets Sync feature",
+                "Unable to reach the Google Sheet API.",
                 extra_tags="alert-danger",
             )
         else:
