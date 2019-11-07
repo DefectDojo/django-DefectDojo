@@ -100,8 +100,6 @@ ENV \
   DD_DATABASE_PASSWORD="defectdojo" \
   DD_DATABASE_PORT="3306" \
   DD_DATABASE_USER="defectdojo" \
-  DD_SECRET_KEY="hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq" \
-  DD_CREDENTIAL_AES_256_KEY="&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw" \
   DD_INITIALIZE=true \
   DD_UWSGI_MODE="socket" \
   DD_UWSGI_ENDPOINT="0.0.0.0:3031" \
