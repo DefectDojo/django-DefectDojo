@@ -1915,18 +1915,18 @@ class JIRAFindingForm(forms.Form):
 class GoogleSheetFieldsForm(forms.Form):
     cred_file = forms.FileField(widget=forms.widgets.FileInput(
         attrs={"accept": ".json"}),
-        label="Upload credentials file",
+        label="Google credentials file",
         required=True,
         allow_empty_file=False,
         help_text="Upload the credentials file downloaded from the Google Developer Console")
     drive_folder_ID = forms.CharField(
         required=True,
-        label="Drive folder ID",
-        help_text="Extract the Drive folder iD from the url and provide it here")
+        label="Google Drive folder ID",
+        help_text="Extract the Drive folder ID from the URL and provide it here")
     enable_service = forms.BooleanField(
         initial=False,
         required=False,
-        help_text='Tick this check box if you want to enale the Google Sheets Sync feature in your application')
+        help_text='Tick this check box to enable Google Sheets Sync feature')
 
     def __init__(self, *args, **kwargs):
         self.credentials_required = kwargs.pop('credentials_required')

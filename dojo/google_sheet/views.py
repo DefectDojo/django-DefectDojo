@@ -98,14 +98,14 @@ def configure_google_sheets(request):
                         messages.add_message(
                             request,
                             messages.SUCCESS,
-                            "Google drive configuration successful.",
+                            "Google Drive configuration saved successfully.",
                             extra_tags="alert-success",
                         )
                     else:
                         messages.add_message(
                             request,
                             messages.SUCCESS,
-                            "Successfully Updated.",
+                            "Google Drive configuration updated successfully.",
                             extra_tags="alert-success",
                         )
                     return HttpResponseRedirect(reverse('dashboard'))
@@ -149,7 +149,7 @@ def validate_drive_authentication(request, cred_str, drive_folder_ID):
             messages.add_message(
                 request,
                 messages.ERROR,
-                'Enable the sheets API from the google developer console.',
+                'Enable the Google Sheets API from the Google Developer Console.',
                 extra_tags='alert-danger')
             return False
         else:
@@ -161,7 +161,7 @@ def validate_drive_authentication(request, cred_str, drive_folder_ID):
                 messages.add_message(
                     request,
                     messages.ERROR,
-                    'Enable the drive API from the google developer console.',
+                    'Enable the Google Drive API from the Google Developer Console.',
                     extra_tags='alert-danger')
                 return False
             else:
@@ -178,13 +178,13 @@ def validate_drive_authentication(request, cred_str, drive_folder_ID):
                         messages.add_message(
                             request,
                             messages.ERROR,
-                            'Application does not have write access to the given google drive folder',
+                            'Unable to write to the given Google Drive folder',
                             extra_tags='alert-danger')
                     if error.resp.status == 404:
                         messages.add_message(
                             request,
                             messages.ERROR,
-                            'Google drive folder ID is invalid',
+                            'Invalid Google Drive folder ID',
                             extra_tags='alert-danger')
                     return False
                 else:
@@ -224,7 +224,7 @@ def export_to_sheet(request, tid):
                     request, 'dojo/syncing_errors.html', {
                         'test': test,
                         'errors': errors,
-                        'name': 'Syncing Errors',
+                        'name': 'Google Drive Sync Errors',
                         'product_tab': product_tab,
                         'sheet_title': sheet_title,
                         'spreadsheet_name': spreadsheet_name,
@@ -234,7 +234,7 @@ def export_to_sheet(request, tid):
                 messages.add_message(
                     request,
                     messages.SUCCESS,
-                    "Google sheet data synced with database",
+                    "Synched Google Sheet with database.",
                     extra_tags="alert-success",
                 )
                 return HttpResponseRedirect(reverse('view_test', args=(tid, )))
@@ -243,7 +243,7 @@ def export_to_sheet(request, tid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Finding details successfully exported to google sheet",
+                "Successfully exported finding details to Google Sheet.",
                 extra_tags="alert-success",
             )
             return HttpResponseRedirect(reverse('view_test', args=(tid, )))
@@ -251,12 +251,12 @@ def export_to_sheet(request, tid):
             messages.add_message(
                 request,
                 messages.ERROR,
-                "More than one Google sheet exists for this Test. Please contact your system admin to solve the issue",
+                "More than one Google Sheet exists for this test. Please contact your system admin to solve the issue.",
                 extra_tags="alert-danger",
             )
             return HttpResponseRedirect(reverse('view_test', args=(tid, )))
     except httplib2.ServerNotFoundError:
-        error_message = 'Server Not Found. Check yor internet connection.'
+        error_message = 'Unable to reach the Google Sheet API.'
         return render(request, 'google_sheet_error.html', {'error_message': error_message})
     except googleapiclient.errors.HttpError as error:
         error_message = 'There is a problem with the Google Sheets Sync Configuration. Contact your system admin to solve the issue.'
@@ -402,7 +402,7 @@ def sync_findings(request, tid, spreadsheetId):
                                                 except:
                                                     pass
                                                 else:
-                                                    error = '"' + note_type_name + '" Note-type is disabled. Can not add new notes of "' + note_type_name + '" type'
+                                                    error = '"' + note_type_name + '" Note-type is disabled. Cannot add new notes of "' + note_type_name + '" type'
                                                     errors.append({'finding_id': finding_id, 'column_names': note_column_name, 'error': error})
                                             else:
                                                 new_note = Notes(note_type=note_type,
@@ -431,7 +431,7 @@ def sync_findings(request, tid, spreadsheetId):
                                             finding_db.notes.add(new_note)
                                         else:
                                             error_location = finding_id + ' ' + note_column_name
-                                            error = 'Note-types are not activated, so newly added notes cannot have a note-type'
+                                            error = 'Note-types are not enabled. Notes cannot have a note-type.'
                                             errors.append({'finding_id': finding_id, 'column_names': note_column_name, 'error': error})
                 finding_db.save()
     res['errors'] = errors
