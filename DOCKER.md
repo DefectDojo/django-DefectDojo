@@ -2,7 +2,7 @@
 
 Docker compose is not intended for production use.
 If you want to deploy a containerized DefectDojo to a production environment,
-use the [Helm and Kubernetes](KUBERNETES.md) approach.
+use the [Default installation](setup/README.md) approach.
 
 ## Prerequisites
 *  Docker version
@@ -118,7 +118,7 @@ or:
 docker logs django-defectdojo_initializer_1
 ```
 
-Beware that when re-running the application several times, there may be several occurrences of "Admin password". In that case you should use the last occurrence.
+Make sure you write down the first password generated as you'll need it when re-starting the application.
 
 ### Disable the database initialization
 The initializer container can be disabled by exporting: `export DD_INITIALIZE=false`. 
