@@ -60,6 +60,7 @@ DefectDojo.
 
 0. In dev branch, the code should be python 3.5 compliant.
 
+
 [dojo_settings]: /dojo/settings/settings.dist.py "DefectDojo settings file"
 [setup_py]: /setup.py "Python setup script"
 [setup_bash]: /setup.bash "Bash setup script"
