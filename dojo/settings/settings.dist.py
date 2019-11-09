@@ -551,7 +551,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     # Including the severity in the hash_code keeps those findings not duplicate
     'Checkmarx Scan': ['cwe', 'severity', 'file_path'],
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
-    'Dependency Check Scan': ['cve', 'file_path']
+    'Dependency Check Scan': ['cve', 'file_path'],
+    'NPM Audit Scan': ['title', 'severity']
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -560,7 +561,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
 HASHCODE_ALLOWS_NULL_CWE = {
     'Checkmarx Scan': False,
     'SonarQube Scan': False,
-    'Dependency Check Scan': True
+    'Dependency Check Scan': True,
+    'NPM Audit Scan': True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -590,7 +592,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Checkmarx Scan': DEDUPE_ALGO_HASH_CODE,
     'SonarQube Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'SonarQube Scan': DEDUPE_ALGO_HASH_CODE,
-    'Dependency Check Scan': DEDUPE_ALGO_HASH_CODE
+    'Dependency Check Scan': DEDUPE_ALGO_HASH_CODE,
+    'NPM Audit Scan': DEDUPE_ALGO_HASH_CODE
 }
 
 

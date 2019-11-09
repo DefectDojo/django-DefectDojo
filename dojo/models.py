@@ -1568,9 +1568,7 @@ class Finding(models.Model):
 
         # Compute hash code before dedupe
         if (self.hash_code is None):
-            if((self.dynamic_finding and (self.endpoints.count() > 0)) or
-                    (self.static_finding and (self.file_path is not None))):
-                self.hash_code = self.compute_hash_code()
+            self.hash_code = self.compute_hash_code()
         self.found_by.add(self.test.test_type)
 
         if rules_option:
