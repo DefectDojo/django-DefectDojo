@@ -2,7 +2,7 @@
 
 Docker compose is not intended for production use.
 If you want to deploy a containerized DefectDojo to a production environment,
-use the [Helm and Kubernetes](KUBERNETES.md) approach.
+use the [Default installation](setup/README.md) approach.
 
 ## Prerequisites
 *  Docker version

@@ -40,9 +40,9 @@ Navigate to <http://localhost:8080>.
 For detailed documentation you can visit
 [Read the Docs](https://defectdojo.readthedocs.io/).
 
-## Installation Options
+## Supported Installation Options
 
-* [Kubernetes](KUBERNETES.md)
+* [Setup.bash](setup/README.md)
 * [Docker](DOCKER.md)
 
 ## Getting Started
@@ -142,7 +142,6 @@ Proceeds are used for testing, infrastructure, etc.
 [![Timo-Pagel](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/timo-pagel-logo.png )](https://pagel.pro/)
 [![SDA-SE](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/sda-se-logo.png)](https://sda-se.com/)
 [![Signal-Iduna](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/signal-iduna.png)](https://signal-iduna.de/)
-
 
 Interested in becoming a sponsor and having your logo displayed? Please review
 our [sponsorship information](SPONSORING.md) or email greg.anderson@owasp.org
