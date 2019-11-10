@@ -1,8 +1,5 @@
 #!/bin/sh
 
-umask 0002
-
-
 
 # Copy settings.py (settings.py copied to allow for legacy installs and customizations)
 cd /app

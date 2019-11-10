@@ -1,4 +1,5 @@
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import Select
 import unittest
 import re
@@ -24,11 +25,13 @@ except:  # This will work for python2 if above fails
 
 class IBMAppScanTest(unittest.TestCase):
     def setUp(self):
-        self.driver = webdriver.Chrome('chromedriver')
+        self.options = Options()
+        self.options.add_argument("--headless")
+        self.driver = webdriver.Chrome('chromedriver', chrome_options=self.options)
         # Allow a little time for the driver to initialize
         self.driver.implicitly_wait(30)
         # Set the base address of the dojo
-        self.base_url = "http://localhost:8000/"
+        self.base_url = "http://localhost:8080/"
         self.verificationErrors = []
         self.accept_next_alert = True
 
@@ -66,7 +69,7 @@ class IBMAppScanTest(unittest.TestCase):
         scanner_file = os.path.join(dir_path, "ibm_appscan_xml_file.xml")
         driver.find_element_by_name("file").send_keys(scanner_file)
         # click on upload button
-        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
         # Query the site to determine if the finding has been added
         productTxt = driver.find_element_by_tag_name("BODY").text
         # Assert the query to determine status or failure
