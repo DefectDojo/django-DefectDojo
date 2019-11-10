@@ -4,7 +4,7 @@ umask 0002
 
 echo "Waiting for services to start"
 docker-compose up -d
-# wait for images to build and services to become available
+# wait for containers to start from images and services to become available
 sleep 100 # giving long enough time
 
 ## Installing Google Chrome browser
@@ -32,74 +32,74 @@ echo "export DD_ADMIN_USER=admin" >> ~/.profile && \
 # If any script is unsuccessful a failure message is printed and the test script
 # Exits with status code of 1
 
-echo "Running Product type unit tests"
+echo "Running Product type integration tests"
 if python3 tests/Product_type_unit_test.py ; then
-    echo "Success: Product type unit tests passed"
+    echo "Success: Product type integration tests passed"
 else
-    echo "Error: Product type unittest failed."; exit 1
+    echo "Error: Product type integration test failed."; exit 1
 fi
 
-echo "Running Product unit tests"
+echo "Running Product integration tests"
 if python3 tests/Product_unit_test.py ; then 
-    echo "Success: Product unit tests passed"
+    echo "Success: Product integration tests passed"
 else
-    echo "Error: Product unit tests failed"; exit 1
+    echo "Error: Product integration test failed"; exit 1
 fi
 
-echo "Running Endpoint unit tests"
+echo "Running Endpoint integration tests"
 if python3 tests/Endpoint_unit_test.py ; then
-    echo "Success: Endpoint unit tests passed"
+    echo "Success: Endpoint integration tests passed"
 else
-    echo "Error: Endpoint unit tests failed"; exit 1
+    echo "Error: Endpoint integration test failed"; exit 1
 fi
 
-echo "Running Engagement unit tests"
+echo "Running Engagement integration tests"
 if python3 tests/Engagement_unit_test.py ; then
-    echo "Success: Engagement unit tests passed"
+    echo "Success: Engagement integration tests passed"
 else
-    echo "Error: Engagement unittest failed"; exit 1
+    echo "Error: Engagement integration test failed"; exit 1
 fi
 
-echo "Running Environment unit tests"
+echo "Running Environment integration tests"
 if python3 tests/Environment_unit_test.py ; then 
-    echo "Success: Environment unit tests passed"
+    echo "Success: Environment integration tests passed"
 else
-    echo "Error: Environment unittest failed"; exit 1
+    echo "Error: Environment integration test failed"; exit 1
 fi
 
-echo "Running Finding unit tests"
+echo "Running Finding integration tests"
 if python3 tests/Finding_unit_test.py ; then
-    echo "Success: Finding unit tests passed"
+    echo "Success: Finding integration tests passed"
 else
-    echo "Error: Finding unittest failed"; exit 1
+    echo "Error: Finding integration test failed"; exit 1
 fi
 
-echo "Running Test unit tests"
+echo "Running Test integration tests"
 if python3 tests/Test_unit_test.py ; then
-    echo "Success: Test unit tests passed"
+    echo "Success: Test integration tests passed"
 else
-    echo "Error: Test unittest failed"; exit 1
+    echo "Error: Test integration test failed"; exit 1
 fi
 
-echo "Running User unit tests"
+echo "Running User integration tests"
 if python3 tests/User_unit_test.py ; then
-    echo "Success: User unit tests passed"
+    echo "Success: User integration tests passed"
 else
-    echo "Error: User unittest failed"; exit 1
+    echo "Error: User integration test failed"; exit 1
 fi
 
-echo "Running Ibm Appscan unit test"
+echo "Running Ibm Appscan integration test"
 if python3 tests/ibm_appscan_test.py ; then
-    echo "Success: Ibm AppScan unit tests passed"
+    echo "Success: Ibm AppScan integration tests passed"
 else
-    echo "Error: Ibm AppScan unittest failed"; exit 1
+    echo "Error: Ibm AppScan integration test failed"; exit 1
 fi
 
-echo "Running Smoke unit test"
+echo "Running Smoke integration test"
 if python3 tests/smoke_test.py ; then
-    echo "Success: Smoke unit tests passed"
+    echo "Success: Smoke integration tests passed"
 else
-    echo "Error: Smoke unittest failed"; exit 1
+    echo "Error: Smoke integration test failed"; exit 1
 fi
 
 echo "Running Check Status test"
@@ -109,35 +109,35 @@ else
     echo "Error: Check status tests failed"; exit 1
 fi
 
-# echo "Running Dedupe unit tests"
+# echo "Running Dedupe integration tests"
 # if python3 tests/dedupe_unit_test.py ; then
-#     echo "Success: Dedupe unit tests passed"
+#     echo "Success: Dedupe integration tests passed"
 # else
-#     echo "Error: Dedupe unittest failed"; exit 1
+#     echo "Error: Dedupe integration test failed"; exit 1
 # fi
 
 # The below tests are commented out because they are still an unstable work in progress
 ## Once Ready they can be uncommented.
 
-# echo "Running Import Scanner unit test"
+# echo "Running Import Scanner integration test"
 # if python3 tests/Import_scanner_unit_test.py ; then
-#     echo "Success: Import Scanner unit tests passed" 
+#     echo "Success: Import Scanner integration tests passed" 
 # else
-#     echo "Error: Import Scanner unit tests failed"; exit 1
+#     echo "Error: Import Scanner integration test failed"; exit 1
 # fi
 
-# echo "Running Check Status UI unit test"
+# echo "Running Check Status UI integration test"
 # if python3 tests/check_status_ui.py ; then
-#     echo "Success: Check Status UI unit tests passed"
+#     echo "Success: Check Status UI tests passed"
 # else
 #     echo "Error: Check Status UI test failed"; exit 1
 # fi
 
-# echo "Running Zap unit test"
+# echo "Running Zap integration test"
 # if python3 tests/zap.py ; then
-#     echo "Success: zap unit tests passed"
+#     echo "Success: zap integration tests passed"
 # else
-#     echo "Error: Zap unittest failed"; exit 1
+#     echo "Error: Zap integration test failed"; exit 1
 # fi
 
-exec echo "Done Running all configured unittests."
+exec echo "Done Running all configured integration tests."
