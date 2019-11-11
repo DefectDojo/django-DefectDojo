@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0020_system_settings_allow_anonymous_survey_repsonse'),
+        ('dojo', '0021_cve_index'),
     ]
 
     operations = [
