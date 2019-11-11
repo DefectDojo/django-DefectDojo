@@ -54,3 +54,6 @@ Python-jose==3.0.1
 git+https://github.com/DefectDojo/defectDojo-engagement-survey@master#egg=defectDojo-engagement-survey
 gitpython>=2.1.13
 ptvsd>=4.2.7
+google-api-python-client==1.7.11
+google-auth==1.6.3
+google-auth-oauthlib==0.3.0
