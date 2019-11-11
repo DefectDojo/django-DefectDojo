@@ -22,6 +22,7 @@ from django.shortcuts import render, get_object_or_404
 from django.utils import formats
 from django.utils.safestring import mark_safe
 from django.utils import timezone
+from django.views.decorators.http import require_POST
 from tagging.models import Tag
 from itertools import chain
 
@@ -1709,3 +1710,36 @@ def get_missing_mandatory_notetypes(finding):
             notes_to_be_added.append(note_type_id)
     queryset = Note_Type.objects.filter(id__in=notes_to_be_added)
     return queryset
+
+
+@user_passes_test(lambda u: u.is_staff)
+@require_POST
+def mark_finding_duplicate(request, original_id, duplicate_id):
+    original = get_object_or_404(Finding, id=original_id)
+    duplicate = get_object_or_404(Finding, id=duplicate_id)
+    duplicate.duplicate = True
+    duplicate.active = False
+    duplicate.verified = False
+    duplicate.duplicate_finding = original
+    duplicate.last_reviewed = timezone.now()
+    duplicate.last_reviewed_by = request.user
+    duplicate.save()
+    original.duplicate_list.add(duplicate)
+    original.found_by.add(duplicate.test.test_type)
+    original.save()
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+
+@user_passes_test(lambda u: u.is_staff)
+@require_POST
+def reset_finding_duplicate_status(request, duplicate_id):
+    duplicate = get_object_or_404(Finding, id=duplicate_id)
+    duplicate.duplicate = False
+    duplicate.active = True
+    if duplicate.duplicate_finding:
+        duplicate.duplicate_finding.duplicate_list.remove(duplicate)
+        duplicate.duplicate_finding = None
+    duplicate.last_reviewed = timezone.now()
+    duplicate.last_reviewed_by = request.user
+    duplicate.save()
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
