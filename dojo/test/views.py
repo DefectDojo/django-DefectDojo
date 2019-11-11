@@ -100,7 +100,7 @@ def edit_test(request, tid):
         if form.is_valid():
             new_test = form.save()
             tags = request.POST.getlist('tags')
-            t = ", ".join(tags)
+            t = ", ".join('"{0}"'.format(w) for w in tags)
             new_test.tags = t
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -369,7 +369,7 @@ def add_temp_finding(request, tid, fid):
             new_finding.endpoints.set(form.cleaned_data['endpoints'])
             new_finding.save(false_history=True)
             tags = request.POST.getlist('tags')
-            t = ", ".join(tags)
+            t = ", ".join('"{0}"'.format(w) for w in tags)
             new_finding.tags = t
             if 'jiraform-push_to_jira' in request.POST:
                 jform = JIRAFindingForm(request.POST, prefix='jiraform', enabled=True)
