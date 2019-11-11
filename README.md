@@ -40,9 +40,9 @@ Navigate to <http://localhost:8080>.
 For detailed documentation you can visit
 [Read the Docs](https://defectdojo.readthedocs.io/).
 
-## Installation Options
+## Supported Installation Options
 
-* [Kubernetes](KUBERNETES.md)
+* [Setup.bash](setup/README.md)
 * [Docker](DOCKER.md)
 
 ## Getting Started
