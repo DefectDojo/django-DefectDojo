@@ -58,10 +58,11 @@ RUN \
 FROM nginx:1.17.2@sha256:eb3320e2f9ca409b7c0aa71aea3cf7ce7d018f03a372564dbdb023646958770b
 COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/
 COPY wsgi_params nginx/nginx.conf /etc/nginx/
-COPY docker/entrypoint-nginx.sh /
+COPY docker/entrypoint-nginx.sh nginx/*.cer nginx/*.key /
 RUN \
   chmod -R g=u /var/cache/nginx && \
   chmod -R g=u /var/run && \
+  if [ -f /*.key -o -f /*.cer ]; then chown 1001 /*.key /*.cer; fi && \
   true
 ENV \
   DD_UWSGI_PASS="uwsgi_server" \
