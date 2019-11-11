@@ -24,7 +24,7 @@ def new_object(request, pid):
             new_prod.save()
 
             tags = request.POST.getlist('tags')
-            t = ", ".join(tags)
+            t = ", ".join('"{0}"'.format(w) for w in tags)
             new_prod.tags = t
 
             messages.add_message(request,
@@ -66,7 +66,7 @@ def edit_object(request, pid, ttid):
             tform.save()
 
             tags = request.POST.getlist('tags')
-            t = ", ".join(tags)
+            t = ", ".join('"{0}"'.format(w) for w in tags)
             object.tags = t
 
             messages.add_message(request,
