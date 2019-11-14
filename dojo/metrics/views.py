@@ -357,7 +357,8 @@ def simple_metrics(request):
                                        false_p=False,
                                        duplicate=False,
                                        out_of_scope=False,
-                                       date=now,
+                                       date__year=now.year,
+                                       date__month=now.month,
                                        ).distinct()
 
         for f in total.all():
