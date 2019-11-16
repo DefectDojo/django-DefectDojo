@@ -15,6 +15,7 @@ env = environ.Env(
     DD_SECURE_SSL_REDIRECT=(bool, False),
     DD_SECURE_HSTS_INCLUDE_SUBDOMAINS=(bool, False),
     DD_SECURE_HSTS_SECONDS=(int, 31536000),  # One year expiration
+    DD_SESSION_COOKIE_SECURE=(bool, False),
     DD_CSRF_COOKIE_SECURE=(bool, False),
     DD_SECURE_BROWSER_XSS_FILTER=(bool, False),
     DD_TIME_ZONE=(str, 'UTC'),
@@ -325,9 +326,12 @@ SESSION_COOKIE_HTTPONLY = env('DD_SESSION_COOKIE_HTTPONLY')
 # client-side JavaScript will not to be able to access the CSRF cookie.
 CSRF_COOKIE_HTTPONLY = env('DD_CSRF_COOKIE_HTTPONLY')
 
-# Whether to use a secure cookie for the CSRF cookie. If this is set to True,
+# Whether to use a secure cookie for the session cookie. If this is set to True,
 # the cookie will be marked as secure, which means browsers may ensure that the
 # cookie is only sent with an HTTPS connection.
+SESSION_COOKIE_SECURE = env('DD_SESSION_COOKIE_SECURE')
+
+# Whether to use a secure cookie for the CSRF cookie.
 CSRF_COOKIE_SECURE = env('DD_CSRF_COOKIE_SECURE')
 
 if env('DD_SECURE_PROXY_SSL_HEADER'):
