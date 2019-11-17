@@ -238,6 +238,10 @@ class System_Settings(models.Model):
         verbose_name="Allow Anonymous Survey Responses",
         help_text="Enable anyone with a link to the survey to answer a survey"
     )
+    credentials = models.CharField(max_length=3000, blank=True)
+    column_widths = models.CharField(max_length=1500, blank=True)
+    drive_folder_ID = models.CharField(max_length=100, blank=True)
+    enable_google_sheets = models.BooleanField(default=False, null=True, blank=True)
 
 
 class SystemSettingsFormAdmin(forms.ModelForm):
@@ -1222,7 +1226,7 @@ class Finding(models.Model):
     cwe = models.IntegerField(default=0, null=True, blank=True)
     cve_regex = RegexValidator(regex=r'^CVE-\d{4}-\d{4,7}$',
                                  message="CVE must be entered in the format: 'CVE-9999-9999'. ")
-    cve = models.TextField(validators=[cve_regex], max_length=20, null=True)
+    cve = models.CharField(validators=[cve_regex], max_length=20, null=True)
     url = models.TextField(null=True, blank=True, editable=False)
     severity = models.CharField(max_length=200, help_text="The severity level of this flaw (Critical, High, Medium, Low, Informational)")
     description = models.TextField()
@@ -1296,6 +1300,22 @@ class Finding(models.Model):
 
     class Meta:
         ordering = ('numerical_severity', '-date', 'title')
+        indexes = [
+            models.Index(fields=('cve',))
+        ]
+
+    @property
+    def similar_findings(self):
+        filtered = Finding.objects.filter(test__engagement__product=self.test.engagement.product)
+        if self.cve:
+            filtered = filtered.filter(cve=self.cve)
+        if self.cwe:
+            filtered = filtered.filter(cwe=self.cwe)
+        if self.file_path:
+            filtered = filtered.filter(file_path=self.file_path)
+        if self.line:
+            filtered = filtered.filter(line=self.line)
+        return filtered.exclude(pk=self.pk)
 
     def compute_hash_code(self):
         hash_string = self.title + str(self.cwe) + str(self.line) + str(self.file_path) + self.description

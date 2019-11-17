@@ -1827,7 +1827,7 @@ class SystemSettingsForm(forms.ModelForm):
 
     class Meta:
         model = System_Settings
-        exclude = ['product_grade']
+        exclude = ['product_grade', 'credentials', 'column_widths', 'drive_folder_ID', 'enable_google_sheets']
 
 
 class BenchmarkForm(forms.ModelForm):
@@ -1910,3 +1910,36 @@ class JIRAFindingForm(forms.Form):
         self.fields['push_to_jira'].help_text = "Checking this will overwrite content of your JIRA issue, or create one."
 
     push_to_jira = forms.BooleanField(required=False)
+
+
+class GoogleSheetFieldsForm(forms.Form):
+    cred_file = forms.FileField(widget=forms.widgets.FileInput(
+        attrs={"accept": ".json"}),
+        label="Google credentials file",
+        required=True,
+        allow_empty_file=False,
+        help_text="Upload the credentials file downloaded from the Google Developer Console")
+    drive_folder_ID = forms.CharField(
+        required=True,
+        label="Google Drive folder ID",
+        help_text="Extract the Drive folder ID from the URL and provide it here")
+    enable_service = forms.BooleanField(
+        initial=False,
+        required=False,
+        help_text='Tick this check box to enable Google Sheets Sync feature')
+
+    def __init__(self, *args, **kwargs):
+        self.credentials_required = kwargs.pop('credentials_required')
+        options = ((0, 'Hide'), (100, 'Small'), (200, 'Medium'), (400, 'Large'))
+        protect = ['reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
+                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change', 'sonarqube_issue', 'is_template']
+        self.all_fields = kwargs.pop('all_fields')
+        super(GoogleSheetFieldsForm, self).__init__(*args, **kwargs)
+        if not self.credentials_required:
+            self.fields['cred_file'].required = False
+        for i in self.all_fields:
+            self.fields[i.name] = forms.ChoiceField(choices=options)
+            if i.name == 'id' or i.editable is False or i.many_to_one or i.name in protect:
+                self.fields['Protect ' + i.name] = forms.BooleanField(initial=True, required=True, disabled=True)
+            else:
+                self.fields['Protect ' + i.name] = forms.BooleanField(initial=False, required=False)

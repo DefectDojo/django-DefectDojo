@@ -6,15 +6,18 @@ import unittest
 import sys
 import requests
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoAlertPresentException
 from selenium.common.exceptions import NoSuchElementException
 
 
 class Login(unittest.TestCase):
     def setUp(self):
-        self.driver = webdriver.Chrome('chromedriver')
+        self.options = Options()
+        self.options.add_argument("--headless")
+        self.driver = webdriver.Chrome('chromedriver', chrome_options=self.options)
         self.driver.implicitly_wait(500)
-        self.base_url = "http://localhost:8000/"
+        self.base_url = "http://localhost:8080/"
         self.verificationErrors = []
         self.accept_next_alert = True
 
@@ -35,14 +38,14 @@ class Login(unittest.TestCase):
         driver.get(self.base_url + "api/key")
         time.sleep(3)
         api_text = driver.find_element_by_tag_name("BODY").text
-        r_pattern = re.compile('Your current API key is (\w+)')
+        r_pattern = re.compile('Your current API key is (\\w+)')
         r_match = r_pattern.search(api_text)
         return r_match.group(1)
 
     def test_engagement_status(self):
         api_key = self.get_api_key()
         api_url = self.base_url + "api/v1/engagements"
-        user = os.environ['DOJO_ADMIN_USER']
+        user = os.environ['DD_ADMIN_USER']
         headers = {'content-type': 'application/json',
                    'Authorization': 'ApiKey %s:%s' % (user, api_key)}
         r = requests.get(api_url, headers=headers, verify=False)
@@ -51,7 +54,7 @@ class Login(unittest.TestCase):
     def test_finding_status(self):
         api_key = self.get_api_key()
         api_url = self.base_url + "api/v1/findings"
-        user = os.environ['DOJO_ADMIN_USER']
+        user = os.environ['DD_ADMIN_USER']
         headers = {'content-type': 'application/json',
                    'Authorization': 'ApiKey %s:%s' % (user, api_key)}
 
@@ -61,7 +64,7 @@ class Login(unittest.TestCase):
     def test_product_status(self):
         api_key = self.get_api_key()
         api_url = self.base_url + "api/v1/products"
-        user = os.environ['DOJO_ADMIN_USER']
+        user = os.environ['DD_ADMIN_USER']
         headers = {'content-type': 'application/json',
                    'Authorization': 'ApiKey %s:%s' % (user, api_key)}
         r = requests.get(api_url, headers=headers, verify=False)
@@ -70,7 +73,7 @@ class Login(unittest.TestCase):
     def test_t_status(self):
         api_key = self.get_api_key()
         api_url = self.base_url + "api/v1/tests"
-        user = os.environ['DOJO_ADMIN_USER']
+        user = os.environ['DD_ADMIN_USER']
         headers = {'content-type': 'application/json',
                    'Authorization': 'ApiKey %s:%s' % (user, api_key)}
         r = requests.get(api_url, headers=headers, verify=False)

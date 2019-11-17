@@ -1,4 +1,5 @@
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import NoAlertPresentException
@@ -10,9 +11,11 @@ import sys
 
 class DojoTests(unittest.TestCase):
     def setUp(self):
-        self.driver = webdriver.Chrome('chromedriver')
+        self.options = Options()
+        self.options.add_argument("--headless")
+        self.driver = webdriver.Chrome('chromedriver', chrome_options=self.options)
         self.driver.implicitly_wait(30)
-        self.base_url = "http://localhost:8000/"
+        self.base_url = "http://localhost:8080/"
         self.verificationErrors = []
         self.accept_next_alert = True
 
