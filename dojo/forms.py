@@ -195,6 +195,8 @@ class ProductForm(forms.ModelForm):
                   'platform', 'lifecycle', 'origin', 'external_audience', 'internet_accessible']
 
 
+# fields['product_manager'].label = ""
+
 class DeleteProductForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())
@@ -249,6 +251,8 @@ class Product_TypeProductForm(forms.ModelForm):
         super(Product_TypeProductForm, self).__init__(*args, **kwargs)
         ##self.fields['authorized_users'].queryset = non_staff
         self.fields['tags'].widget.choices = t
+
+    #        self.fields['team_manager'].label = "Primary PoC"
 
     class Meta:
         model = Product

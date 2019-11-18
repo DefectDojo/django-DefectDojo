@@ -497,7 +497,7 @@ class Product(models.Model):
                                   null=True, blank=True, on_delete=models.CASCADE)
     updated = models.DateTimeField(editable=False, null=True, blank=True)
     tid = models.IntegerField(default=0, editable=False)
-    #    authorized_users = models.ManyToManyField(User, blank=True)
+    authorized_users = models.ManyToManyField(User, blank=True)
     prod_numeric_grade = models.IntegerField(null=True, blank=True)
 
     # Metadata
