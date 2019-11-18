@@ -217,20 +217,18 @@
                                   {% endif %}
                                 </td>
                                 <td>
-                                  {% if prod.prod_manager %}
-                                    {% if prod.prod_manager != "0" %}
-                                      {{ prod.prod_manager }}, <i>Manager</i>
-                                        {% if prod.tech_contact or prod.technical_contact %}<br>{% endif %}
-                                    {% endif %}
+                                    {% if prod.product_manager %}
+                                    {{ prod.product_manager }}, <i>App Owner</i>
+                                    {% if prod.tech_contact or prod.technical_contact %}<br>{% endif %}
                                   {% endif %}
                                   {% if prod.tech_contact %}
                                     {% if prod.tech_contact != "0" %}
-                                      {{ prod.tech_contact }}, <i>Technical</i>
+                                    {{ prod.tech_contact }}, <i>Dev/Technical</i>
                                     {% endif %}
                                   {% endif %}
                                   {% if prod.technical_contact %}
                                     {% if prod.technical_contact != "0" %}
-                                      {{ prod.technical_contact }}, <i>Technical</i>
+                                    {{ prod.technical_contact }}, <i>Dev/Technical</i>
                                     {% endif %}
                                   {% endif %}
                                 </td>
