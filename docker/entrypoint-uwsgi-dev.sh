@@ -16,5 +16,7 @@ exec uwsgi \
   "--${DD_UWSGI_MODE}" "${DD_UWSGI_ENDPOINT}" \
   --protocol uwsgi \
   --wsgi dojo.wsgi:application \
-  --processes 4
+  --enable-threads \
+  --processes 2 \
+  --threads 2 \
   --py-autoreload 1
