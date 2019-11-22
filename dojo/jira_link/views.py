@@ -49,6 +49,7 @@ def webhook(request):
                         if jira_conf and resolution['name'] in jira_conf.accepted_resolutions:
                             finding.active = False
                             finding.mitigated = None
+                            finding.is_Mitigated = False
                             finding.false_p = False
                             assignee = parsed['issue']['fields'].get('assignee')
                             assignee_name = assignee['name'] if assignee else None
@@ -60,6 +61,7 @@ def webhook(request):
                             finding.active = False
                             finding.verified = False
                             finding.mitigated = None
+                            finding.is_Mitigated = False
                             finding.false_p = True
                             finding.remove_from_any_risk_acceptance()
                         else:
@@ -74,6 +76,7 @@ def webhook(request):
                         # Reopen / Open Jira issue
                         finding.active = True
                         finding.mitigated = None
+                        finding.is_Mitigated = False
                         finding.false_p = False
                         finding.remove_from_any_risk_acceptance()
                     finding.jira_change = timezone.now()

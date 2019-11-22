@@ -49,7 +49,7 @@ class Main:
         result = zap.sessionManagement.set_session_management_method(contextid, "cookieBasedSessionManagement", None, apikey)
         print(("Session method defined: " + result))
 
-        loginUrl = "http://localhost:8000/login"
+        loginUrl = "http://localhost:8080/login"
         # loginUrlregex = "\Q" + loginUrl + "\E.*"
         # The above line is flake8 violation as \Q and \E are not supported by python
         loginURLregex = re.escape(loginURL)

@@ -45,8 +45,13 @@ spec:
             - name: DD_DATABASE_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ $fullName }}-{{ .Values.database }}
-                  key: {{ .Values.database }}-password
+                  {{- if eq .Values.database "postgresql" }}
+                  name: {{- if .Values.postgresql.enabled }} {{ template "postgresql.fullname" .}} {{- else }} {{ .Values.postgresql.existingSecret }} {{- end }}
+                  key: postgres-password
+                  {{- else if eq .Values.database "mysql" }}
+                  name: {{- if .Values.mysql.enabled }} {{ template "mysql.fullname" .}} {{- else }} {{ .Values.mysql.mysqlPasswordSecret }} {{- end }}
+                  key: mysql-password
+                  {{- end }}   
           resources:
             {{- toYaml .Values.django.uwsgi.resources | nindent 12 }}
         - name: nginx
