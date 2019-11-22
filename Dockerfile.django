@@ -4,7 +4,7 @@
 # The code for the build image should be idendical with the code in
 # Dockerfile.nginx to use the caching mechanism of Docker.
 
-# Using 3.5.7 to avoid compatibility issues that may be introduced by python 3.5.6 and 3.5.7. 
+# Using 3.5.7 to avoid compatibility issues that may be introduced by python 3.6 and 3.7.
 # Please upgrade before end-of-life in september 2020!
 # Ref: https://devguide.python.org/#branchstatus
 FROM python:3.5.7-buster@sha256:4598d4365bb7a8628ba840f87406323e699c4da01ae6f926ff33787c63230779 as build
@@ -60,6 +60,7 @@ COPY \
   docker/entrypoint-initializer.sh \
   docker/entrypoint-uwsgi.sh \
   docker/entrypoint-uwsgi-dev.sh \
+  docker/entrypoint-uwsgi-ptvsd.sh \
   docker/entrypoint-unit-tests.sh \
   docker/entrypoint-unit-tests-devDocker.sh \
   docker/wait-for-it.sh \
@@ -76,7 +77,7 @@ RUN \
   chmod g=u /var/run && \
   true
 USER root
-RUN chmod 0777 /app
+RUN chmod -R 0777 /app
 USER 1001
 ENV \
   DD_ADMIN_USER=admin \

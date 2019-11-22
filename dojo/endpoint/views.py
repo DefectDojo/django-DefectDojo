@@ -189,7 +189,7 @@ def edit_endpoint(request, eid):
         if form.is_valid():
             endpoint = form.save()
             tags = request.POST.getlist('tags')
-            t = ", ".join(tags)
+            t = ", ".join('"{0}"'.format(w) for w in tags)
             endpoint.tags = t
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -260,7 +260,7 @@ def add_endpoint(request, pid):
         if form.is_valid():
             endpoints = form.save()
             tags = request.POST.getlist('tags')
-            t = ", ".join(tags)
+            t = ", ".join('"{0}"'.format(w) for w in tags)
             for e in endpoints:
                 e.tags = t
             messages.add_message(request,
@@ -295,7 +295,7 @@ def add_product_endpoint(request):
         if form.is_valid():
             endpoints = form.save()
             tags = request.POST.getlist('tags')
-            t = ", ".join(tags)
+            t = ", ".join('"{0}"'.format(w) for w in tags)
             for e in endpoints:
                 e.tags = t
             messages.add_message(request,

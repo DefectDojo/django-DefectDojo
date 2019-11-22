@@ -295,10 +295,10 @@
                                 </td>
                                 <td>{{ test.target_start.date }} - {{ test.target_end.date }}</td>
                                 <td>
-                                  {% if eng.lead.get_full_name and eng.lead.get_full_name.strip %}
-                                      {{ eng.lead.get_full_name }}
-                                  {% elif eng.lead %}
-                                      {{ eng.lead }}
+                                  {% if test.lead.get_full_name and test.lead.get_full_name.strip %}
+                                      {{ test.lead.get_full_name }}
+                                  {% elif test.lead %}
+                                      {{ test.lead }}
                                   {% endif %}
                                 </td>
                                 <td><a href="{% url 'view_test' test.id %}">{{ test|count_findings_test_all }}</a></td>

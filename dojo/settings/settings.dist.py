@@ -15,6 +15,7 @@ env = environ.Env(
     DD_SECURE_SSL_REDIRECT=(bool, False),
     DD_SECURE_HSTS_INCLUDE_SUBDOMAINS=(bool, False),
     DD_SECURE_HSTS_SECONDS=(int, 31536000),  # One year expiration
+    DD_SESSION_COOKIE_SECURE=(bool, False),
     DD_CSRF_COOKIE_SECURE=(bool, False),
     DD_SECURE_BROWSER_XSS_FILTER=(bool, False),
     DD_TIME_ZONE=(str, 'UTC'),
@@ -66,11 +67,18 @@ env = environ.Env(
     DD_SECRET_KEY=(str, '.'),
     DD_CREDENTIAL_AES_256_KEY=(str, '.'),
     DD_DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 8388608),  # Max post size set to 8mb
+    DD_SOCIAL_AUTH_GOOGLE_OAUTH2_ENABLE=(bool, 'False'),
     DD_SOCIAL_AUTH_GOOGLE_OAUTH2_KEY=(str, ''),
     DD_SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET=(str, ''),
+    DD_SOCIAL_AUTH_OKTA_OAUTH2_ENABLED=(bool, 'False'),
     DD_SOCIAL_AUTH_OKTA_OAUTH2_KEY=(str, ''),
     DD_SOCIAL_AUTH_OKTA_OAUTH2_SECRET=(str, ''),
     DD_SOCIAL_AUTH_OKTA_OAUTH2_API_URL=(str, 'https://{your-org-url}/oauth2/default'),
+    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_ENABLED=(bool, 'False'),
+    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_KEY=(str, ''),
+    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET=(str, ''),
+    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID=(str, ''),
+    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE=(str, 'https://graph.microsoft.com/'),
 )
 
 
@@ -246,6 +254,7 @@ LOGIN_URL = '/login'
 AUTHENTICATION_BACKENDS = (
     'social_core.backends.google.GoogleOAuth2',
     'dojo.okta.OktaOAuth2',
+    'social_core.backends.azuread_tenant.AzureADTenantOAuth2',
     'django.contrib.auth.backends.RemoteUserBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
@@ -256,6 +265,7 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.auth_allowed',
     'social_core.pipeline.social_auth.social_user',
     'social_core.pipeline.user.get_username',
+    'social_core.pipeline.social_auth.associate_by_email',
     'social_core.pipeline.user.create_user',
     'dojo.pipeline.modify_permissions',
     'social_core.pipeline.social_auth.associate_user',
@@ -266,15 +276,22 @@ SOCIAL_AUTH_PIPELINE = (
 SOCIAL_AUTH_STRATEGY = 'social_django.strategy.DjangoStrategy'
 SOCIAL_AUTH_STORAGE = 'social_django.models.DjangoStorage'
 SOCIAL_AUTH_ADMIN_USER_SEARCH_FIELDS = ['username', 'first_name', 'last_name', 'email']
+SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL = True
 
-GOOGLE_OAUTH_ENABLED = False
+GOOGLE_OAUTH_ENABLED = env('DD_SOCIAL_AUTH_GOOGLE_OAUTH2_ENABLE')
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = env('DD_SOCIAL_AUTH_GOOGLE_OAUTH2_KEY')
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = env('DD_SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET')
 
-OKTA_OAUTH_ENABLED = False
+OKTA_OAUTH_ENABLED = env('DD_SOCIAL_AUTH_OKTA_OAUTH2_ENABLED')
 SOCIAL_AUTH_OKTA_OAUTH2_KEY = env('DD_SOCIAL_AUTH_OKTA_OAUTH2_KEY')
 SOCIAL_AUTH_OKTA_OAUTH2_SECRET = env('DD_SOCIAL_AUTH_OKTA_OAUTH2_SECRET')
 SOCIAL_AUTH_OKTA_OAUTH2_API_URL = env('DD_SOCIAL_AUTH_OKTA_OAUTH2_API_URL')
+
+AZUREAD_TENANT_OAUTH2_ENABLED = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_ENABLED')
+SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_KEY = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_KEY')
+SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET')
+SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID')
+SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE')
 
 LOGIN_EXEMPT_URLS = (
     r'^%sstatic/' % URL_PREFIX,
@@ -285,6 +302,8 @@ LOGIN_EXEMPT_URLS = (
     r'^%sapi/v2/' % URL_PREFIX,
     r'complete/google-oauth2/',
     r'complete/okta-oauth2/',
+    r'empty_survey/([\d]+)/answer'
+    r'complete/azuread-tenant-oauth2/',
 )
 
 # ------------------------------------------------------------------------------
@@ -307,9 +326,12 @@ SESSION_COOKIE_HTTPONLY = env('DD_SESSION_COOKIE_HTTPONLY')
 # client-side JavaScript will not to be able to access the CSRF cookie.
 CSRF_COOKIE_HTTPONLY = env('DD_CSRF_COOKIE_HTTPONLY')
 
-# Whether to use a secure cookie for the CSRF cookie. If this is set to True,
+# Whether to use a secure cookie for the session cookie. If this is set to True,
 # the cookie will be marked as secure, which means browsers may ensure that the
 # cookie is only sent with an HTTPS connection.
+SESSION_COOKIE_SECURE = env('DD_SESSION_COOKIE_SECURE')
+
+# Whether to use a secure cookie for the CSRF cookie.
 CSRF_COOKIE_SECURE = env('DD_CSRF_COOKIE_SECURE')
 
 if env('DD_SECURE_PROXY_SSL_HEADER'):
@@ -425,6 +447,7 @@ INSTALLED_APPS = (
     'gunicorn',
     'tastypie',
     'auditlog',
+    'defectDojo_engagement_survey',
     'dojo',
     'tastypie_swagger',
     'watson',
@@ -511,6 +534,10 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': timedelta(minutes=1),
         'args': [timedelta(minutes=1)]
     },
+    'update-findings-from-source-issues': {
+        'task': 'dojo.tasks.async_update_findings_from_source_issues',
+        'schedule': timedelta(hours=3),
+    }
 }
 
 # ------------------------------------------------------------------------------
