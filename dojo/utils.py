@@ -271,11 +271,6 @@ def set_duplicate(new_finding, existing_finding):
     new_finding.active = False
     new_finding.verified = False
     new_finding.duplicate_finding = existing_finding
-    # New duplicate finding inherits from the original finding's state
-    new_finding.false_p = existing_finding.false_p
-    new_finding.out_of_scope = existing_finding.out_of_scope
-    new_finding.under_defect_review = existing_finding.under_defect_review
-
     existing_finding.duplicate_list.add(new_finding)
     existing_finding.found_by.add(new_finding.test.test_type)
 
