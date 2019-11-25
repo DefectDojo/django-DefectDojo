@@ -227,6 +227,11 @@ def view_product_metrics(request, pid):
                                              duplicate=False,
                                              out_of_scope=False,
                                              mitigated__isnull=False)
+    
+    out_of_scope_findings = Finding.objects.filter(test__engagement__product=prod,
+                                             date__range=[start_date, end_date],
+                                             duplicate=False,
+                                             out_of_scope=True)
 
     open_vulnerabilities = Finding.objects.filter(
         test__engagement__product=prod,
@@ -298,7 +303,7 @@ def view_product_metrics(request, pid):
             if v.severity in severity_weekly[x]:
                 severity_weekly[x][v.severity] += 1
             else:
-                severity_weekly[x][v.severity] = 666
+                severity_weekly[x][v.severity] = 1
         else:
             severity_weekly[x] = {'Critical': 0, 'High': 0,
                                   'Medium': 0, 'Low': 0, 'Info': 0}
@@ -354,6 +359,7 @@ def view_product_metrics(request, pid):
                    'inactive_findings': inactive_findings,
                    'closed_findings': closed_findings,
                    'false_positive_findings': false_positive_findings,
+                   'out_of_scope_findings': out_of_scope_findings,
                    'accepted_findings': accepted_findings,
                    'new_findings': new_verified_findings,
                    'open_vulnerabilities': open_vulnerabilities,
