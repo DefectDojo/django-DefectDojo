@@ -141,6 +141,7 @@ Proceeds are used for testing, infrastructure, etc.
 [![Timo-Pagel](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/timo-pagel-logo.png )](https://pagel.pro/)
 [![SDA-SE](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/sda-se-logo.png)](https://sda-se.com/)
 [![Signal-Iduna](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/signal-iduna.png)](https://signal-iduna.de/)
+[![WSO2](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/wso2-logo-for-screen.png)](https://wso2.com/)
 
 Interested in becoming a sponsor and having your logo displayed? Please review
 our [sponsorship information](SPONSORING.md) or email greg.anderson@owasp.org
