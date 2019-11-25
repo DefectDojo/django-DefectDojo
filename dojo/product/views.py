@@ -260,7 +260,7 @@ def view_product_metrics(request, pid):
     if weeks_between <= 0:
         weeks_between += 2
 
-    punchcard, ticks, highest_count = get_punchcard_data(verified_findings, weeks_between, start_date)
+    punchcard, ticks, highest_count = get_punchcard_data(open_findings, weeks_between, start_date)
     add_breadcrumb(parent=prod, top_level=False, request=request)
 
     open_close_weekly = OrderedDict()
@@ -298,7 +298,7 @@ def view_product_metrics(request, pid):
             if v.severity in severity_weekly[x]:
                 severity_weekly[x][v.severity] += 1
             else:
-                severity_weekly[x][v.severity] = 1
+                severity_weekly[x][v.severity] = 666
         else:
             severity_weekly[x] = {'Critical': 0, 'High': 0,
                                   'Medium': 0, 'Low': 0, 'Info': 0}
@@ -321,7 +321,7 @@ def view_product_metrics(request, pid):
             else:
                 medium_weekly[x] = {'count': 1, 'week': y}
 
-    for a in accepted_findings:
+    for a in open_findings:
         iso_cal = a.date.isocalendar()
         x = iso_to_gregorian(iso_cal[0], iso_cal[1], 1)
         y = x.strftime("<span class='small'>%m/%d<br/>%Y</span>")
