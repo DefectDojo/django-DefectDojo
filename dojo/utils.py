@@ -152,7 +152,7 @@ def sync_dedupe(sender, *args, **kwargs):
             # ---------------------------------------------------------
             if ((flag_endpoints or flag_line_path) and flag_hash):
                 deduplicationLogger.debug('New finding ' + str(new_finding.id) + ' is a duplicate of existing finding ' + str(find.id))
-                if (find.is_Mitigated or find.mitigated) and new_finding.active and not new_finding.is_Mitigated::
+                if (find.is_Mitigated or find.mitigated) and new_finding.active and not new_finding.is_Mitigated:
                     find.mitigated = new_finding.mitigated
                     find.is_Mitigated = new_finding.is_Mitigated
                     find.active = new_finding.active
