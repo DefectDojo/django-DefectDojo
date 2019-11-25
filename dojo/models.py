@@ -1318,7 +1318,14 @@ class Finding(models.Model):
         return filtered.exclude(pk=self.pk)
 
     def compute_hash_code(self):
-        hash_string = self.title + str(self.cwe) + str(self.line) + str(self.file_path) + self.description
+        hash_string = self.title + str(self.cwe) + str(self.line) + str(self.file_path)
+        # additional check to exclude unwanted information from description for the duplicate detection, e.g. dates, times_found, ...
+        end_position = self.description.find("================")
+        if end_position > -1:
+            hash_string += self.description[:end_position]
+        else:
+            hash_string += self.description
+
         if self.dynamic_finding:
             endpoint_str = ''
             if len(self.unsaved_endpoints) > 0 and self.id is None:

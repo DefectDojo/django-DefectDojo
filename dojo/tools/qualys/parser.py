@@ -141,6 +141,7 @@ def issue_r(raw_row, vuln):
                                                    htmltext("QID: " + str(_gid)),
                                                    htmltext("Port: " + str(_port)),
                                                    htmltext("Result Evidence: " + _result),
+                                                   htmltext("================"),
                                                    htmltext("First Found: " + _first_found),
                                                    htmltext("Last Found: " + _last_found),
                                                    htmltext("Times Found: " + _times_found),
