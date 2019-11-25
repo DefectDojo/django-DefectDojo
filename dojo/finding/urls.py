@@ -26,6 +26,8 @@ urlpatterns = [
         name='engagment_all_findings'),
     url(r'^product/(?P<pid>\d+)/finding/closed$', views.closed_findings,
         name='product_closed_findings'),
+    url(r'^product/(?P<pid>\d+)/finding/false_positive$', views.false_positive_findings,
+        name='product_false_positive_findings'),
     url(r'^product/(?P<pid>\d+)/finding/accepted$', views.accepted_findings,
         name='product_accepted_findings'),
     url(r'^finding/closed$', views.closed_findings,

@@ -219,6 +219,14 @@ def view_product_metrics(request, pid):
                                              duplicate=False,
                                              out_of_scope=False,
                                              mitigated__isnull=False)
+    
+    false_positive_findings = Finding.objects.filter(test__engagement__product=prod,
+                                             date__range=[start_date, end_date],
+                                             false_p=True,
+                                             verified=False,
+                                             duplicate=False,
+                                             out_of_scope=False,
+                                             mitigated__isnull=False)
 
     open_vulnerabilities = Finding.objects.filter(
         test__engagement__product=prod,
@@ -345,6 +353,7 @@ def view_product_metrics(request, pid):
                    'open_findings': open_findings,
                    'inactive_findings': inactive_findings,
                    'closed_findings': closed_findings,
+                   'false_positive_findings': false_positive_findings,
                    'accepted_findings': accepted_findings,
                    'new_findings': new_verified_findings,
                    'open_vulnerabilities': open_vulnerabilities,
