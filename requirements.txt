@@ -33,7 +33,7 @@ Markdown==3.1.1
 mysqlclient==1.4.2
 pandas>=0.24.2
 pdfkit==0.6.1
-Pillow==6.0.0  # required by django-imagekit
+Pillow==6.2.0  # required by django-imagekit
 psycopg2-binary==2.8.2
 cryptography==2.7
 pygments==2.4.2
