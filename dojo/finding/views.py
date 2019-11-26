@@ -146,6 +146,7 @@ def out_of_scope_findings(request, pid=None, eid=None, view=None):
             'jira_config': jira_config,
         })
 
+
 def false_positive_findings(request, pid=None, eid=None, view=None):
     show_product_column = True
     title = None
@@ -246,6 +247,7 @@ def false_positive_findings(request, pid=None, eid=None, view=None):
             'jira_config': jira_config,
         })
 
+
 def inactive_findings(request, pid=None, eid=None, view=None):
     show_product_column = True
     title = None
@@ -345,6 +347,7 @@ def inactive_findings(request, pid=None, eid=None, view=None):
             'tag_input': tags,
             'jira_config': jira_config,
         })
+
 
 def open_findings(request, pid=None, eid=None, view=None):
     show_product_column = True
@@ -479,6 +482,7 @@ def accepted_findings(request, pid=None):
             "filtered": findings,
             "title_words": title_words,
         })
+
 
 @user_passes_test(lambda u: u.is_staff)
 def closed_findings(request, pid=None):
