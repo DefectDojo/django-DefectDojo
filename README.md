@@ -104,6 +104,11 @@ Project Moderators can help you with pull requests or feedback on dev ideas.
 
 * [Alex Dracea](https://www.linkedin.com/in/alexandru-marin-dracea-910b51122/)
 * [Valentijn Scholten](https://www.linkedin.com/in/valentijn-scholten/)
+* Jannik Jürgens
+* Fred Blaise
+* Saurabh kumar
+* Cody Maffucci 
+
 
 ## Hall of Fame
 
