@@ -150,7 +150,6 @@ class TestCheckmarxParser(TestCase):
         self.assertEqual(str, type(item.line))
         self.assertEqual("58", item.line)
         # Added field for detailed scanner
-        item = self.parser.items[0]
         self.assertEqual(str, type(item.unique_id_from_tool))
         self.assertEqual("28", item.unique_id_from_tool)
         self.assertEqual(str, type(item.sast_source_object))
@@ -175,6 +174,8 @@ class TestCheckmarxParser(TestCase):
         self.assertEqual(False, item.active)
         self.assertEqual(bool, type(item.verified))
         self.assertEqual(False, item.verified)
+        self.assertEqual(bool, type(item.false_p))
+        self.assertEqual(False, item.false_p)
         self.assertEqual(str, type(item.severity))
         self.assertEqual("High", item.severity)
         self.assertEqual(str, type(item.numerical_severity))
@@ -192,6 +193,34 @@ class TestCheckmarxParser(TestCase):
         self.assertEqual(datetime.datetime(2018, 2, 25, 11, 35, 52), item.date)
         self.assertEqual(bool, type(item.static_finding))
         self.assertEqual(True, item.static_finding)
+
+# ----------------------------------------------------------------------------
+# single finding false positive
+# ----------------------------------------------------------------------------
+    def test_file_name_aggregated_parse_file_with_false_positive_is_false_positive(self):
+        my_file_handle, product, engagement, test = self.init("dojo/unittests/scans/checkmarx/single_finding_false_positive.xml")
+        self.parser = CheckmarxXMLParser(my_file_handle, test)
+        self.teardown(my_file_handle)
+        # Verifications common to both parsers
+        self.check_parse_file_with_false_positive_is_false_positive(self.parser)
+
+    def test_detailed_parse_file_with_false_positive_is_false_positive(self):
+        my_file_handle, product, engagement, test = self.init("dojo/unittests/scans/checkmarx/single_finding_false_positive.xml")
+        self.parser = CheckmarxXMLParser(my_file_handle, test, 'detailed')
+        self.teardown(my_file_handle)
+        # Verifications common to both parsers
+        self.check_parse_file_with_false_positive_is_false_positive(self.parser)
+
+    def check_parse_file_with_false_positive_is_false_positive(self, parser):
+        self.assertEqual(1, len(self.parser.items))
+        # check content
+        item = self.parser.items[0]
+        self.assertEqual(bool, type(item.active))
+        self.assertEqual(False, item.active)
+        self.assertEqual(bool, type(item.verified))
+        self.assertEqual(False, item.verified)
+        self.assertEqual(bool, type(item.false_p))
+        self.assertEqual(True, item.false_p)
 
 # ----------------------------------------------------------------------------
 # multiple_findings : source filename = sink filename.
@@ -367,6 +396,8 @@ class TestCheckmarxParser(TestCase):
         self.assertEqual(False, item.active)
         self.assertEqual(bool, type(item.verified))
         self.assertEqual(False, item.verified)
+        self.assertEqual(bool, type(item.false_p))
+        self.assertEqual(False, item.false_p)
         self.assertEqual(str, type(item.severity))
         self.assertEqual("High", item.severity)
         self.assertEqual(str, type(item.numerical_severity))
@@ -506,6 +537,8 @@ class TestCheckmarxParser(TestCase):
         self.assertEqual(False, item.active)
         self.assertEqual(bool, type(item.verified))
         self.assertEqual(False, item.verified)
+        self.assertEqual(bool, type(item.false_p))
+        self.assertEqual(False, item.false_p)
         self.assertEqual(str, type(item.severity))
         self.assertEqual("High", item.severity)
         self.assertEqual(str, type(item.numerical_severity))
