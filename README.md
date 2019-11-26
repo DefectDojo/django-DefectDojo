@@ -104,6 +104,10 @@ Project Moderators can help you with pull requests or feedback on dev ideas.
 
 * [Alex Dracea](https://www.linkedin.com/in/alexandru-marin-dracea-910b51122/)
 * [Valentijn Scholten](https://www.linkedin.com/in/valentijn-scholten/)
+* Jannik Jürgens
+* Fred Blaise
+* Saurabh kumar
+* Cody Maffucci 
 
 ## Hall of Fame
 
@@ -111,10 +115,7 @@ Project Moderators can help you with pull requests or feedback on dev ideas.
     DefectDojo Maintainer for years and wrote some of Dojo's core functionality.
 * Jay Paz ([@jjpaz](https://twitter.com/jjpaz)) – Jay was a DefectDojo
   maintainer for years. He performed Dojo's first UI overhaul, optomized code structure/features, and added numerous enhancements.
-* Jannik Jürgens
-* Fred Blaise
-* Saurabh kumar
-* Cody Maffucci 
+
 
 ## Contributing
 
