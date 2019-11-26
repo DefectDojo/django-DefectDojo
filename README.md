@@ -111,6 +111,10 @@ Project Moderators can help you with pull requests or feedback on dev ideas.
     DefectDojo Maintainer for years and wrote some of Dojo's core functionality.
 * Jay Paz ([@jjpaz](https://twitter.com/jjpaz)) – Jay was a DefectDojo
   maintainer for years. He performed Dojo's first UI overhaul, optomized code structure/features, and added numerous enhancements.
+* Jannik Jürgens
+* Fred Blaise
+* Saurabh kumar
+* Cody Maffucci 
 
 ## Contributing
 
