@@ -203,7 +203,7 @@ def view_product_metrics(request, pid):
                                            out_of_scope=False,
                                            active=True,
                                            mitigated__isnull=True)
-    
+
     inactive_findings = Finding.objects.filter(test__engagement__product=prod,
                                            date__range=[start_date, end_date],
                                            false_p=False,
@@ -219,7 +219,7 @@ def view_product_metrics(request, pid):
                                              duplicate=False,
                                              out_of_scope=False,
                                              mitigated__isnull=False)
-    
+
     false_positive_findings = Finding.objects.filter(test__engagement__product=prod,
                                              date__range=[start_date, end_date],
                                              false_p=True,
@@ -227,7 +227,7 @@ def view_product_metrics(request, pid):
                                              duplicate=False,
                                              out_of_scope=False,
                                              mitigated__isnull=False)
-    
+
     out_of_scope_findings = Finding.objects.filter(test__engagement__product=prod,
                                              date__range=[start_date, end_date],
                                              duplicate=False,
