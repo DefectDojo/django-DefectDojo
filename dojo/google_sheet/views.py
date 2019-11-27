@@ -795,9 +795,9 @@ def get_findings_list(tid):
     for finding in findings:
         finding_details = []
         for field in fields:
-            value = eval("finding." + field.name)
+            value = getattr(finding , field.name)
             if type(value) == datetime.date or type(value) == Test or type(value) == datetime.datetime:
-                var = str(eval("finding." + field.name))
+                var = str(value)
             elif type(value) == User or type(value) == Dojo_User:
                 var = value.username
             elif type(value) == Finding:
