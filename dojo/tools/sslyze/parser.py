@@ -66,21 +66,21 @@ class SslyzeXmlParser(object):
                 weak_cipher = {}
                 if element.tag == 'heartbleed':
                     heartbleed_element = element.find('openSslHeartbleed')
-                    if heartbleed_element:
+                    if 'isVulnerable' in heartbleed_element.attrib:
                         if heartbleed_element.attrib['isVulnerable'] == 'True':
                             title = element.attrib['title'] + " | " + url
                             description = "**heartbleed** : Vulnerable" + "\n\n" + \
                                         "**title** : " + element.attrib['title']
                 if element.tag == 'openssl_ccs':
                     openssl_ccs_element = element.find('openSslCcsInjection')
-                    if openssl_ccs_element:
+                    if 'isVulnerable' in openssl_ccs_element.attrib:
                         if openssl_ccs_element.attrib['isVulnerable'] == 'True':
                             title = element.attrib['title'] + " | " + url
                             description = "**openssl_ccs** : Vulnerable" + "\n\n" + \
                                         "**title** : " + element.attrib['title']
                 if element.tag == 'reneg':
                     reneg_element = element.find('sessionRenegotiation')
-                    if reneg_element:
+                    if 'isSecure' in reneg_element.attrib:
                         if reneg_element.attrib['isSecure'] == 'False':
                             title = element.attrib['title'] + " | " + url
                             description = "**Session Renegotiation** : Vulnerable" + "\n\n" + \
