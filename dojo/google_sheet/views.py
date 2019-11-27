@@ -16,7 +16,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import user_passes_test
 
-from dojo.models import Finding, System_Settings, Test, Dojo_User, Note_Type, NoteHistory, Notes
+from dojo.models import Finding, System_Settings, Test, Dojo_User, Note_Type, NoteHistory, Notes, Sonarqube_Issue
 from dojo.forms import GoogleSheetFieldsForm
 from dojo.utils import add_breadcrumb, Product_Tab
 
@@ -261,9 +261,15 @@ def export_to_sheet(request, tid):
     except googleapiclient.errors.HttpError as error:
         error_message = 'There is a problem with the Google Sheets Sync Configuration. Contact your system admin to solve the issue.'
         return render(request, 'google_sheet_error.html', {'error_message': error_message})
+    except Exception as e:
+        error_message = e
+        return render(request, 'google_sheet_error.html', {'error_message': error_message})
 
 
 def create_googlesheet(request, tid):
+    user_email = request.user.email
+    if not user_email:
+        raise Exception('User must have an email address to use this feature.')
     test = Test.objects.get(id=tid)
     system_settings = get_object_or_404(System_Settings, id=1)
     service_account_info = json.loads(system_settings.credentials)
@@ -289,8 +295,10 @@ def create_googlesheet(request, tid):
                                         addParents=folder_id,
                                         removeParents=previous_parents,
                                         fields='id, parents').execute()
-    user_email = request.user.email
     drive_service.permissions().create(body={'type': 'user', 'role': 'writer', 'emailAddress': user_email}, fileId=spreadsheetId).execute()
+    # drive_service.permissions().create(transferOwnership=True,
+    #                                    body={'type': 'user', 'role': 'owner', 'emailAddress': 'piyarathnalakmali@gmail.com'},
+    #                                    fileId=spreadsheetId).execute()
     populate_sheet(tid, spreadsheetId)
 
 
@@ -311,7 +319,10 @@ def sync_findings(request, tid, spreadsheetId):
             sheet_names.append(date)
         except:
             pass
-    sheet_title = str(max(sheet_names))
+    try:
+        sheet_title = str(max(sheet_names))
+    except:
+        raise Exception('Existing Google Spreadsheet has errors. Delete the speadsheet and export again.')
     res['sheet_title'] = sheet_title
 
     result = sheets_service.spreadsheets().values().get(spreadsheetId=spreadsheetId, range=sheet_title).execute()
@@ -751,7 +762,7 @@ def populate_sheet(tid, spreadsheetId):
                         }
                   }
             })
-        elif column_name[:6] == '[note]':
+        elif column_name[:6] == '[note]' or column_name[:11] == '[duplicate]':
             body["requests"].append({
                   "autoResizeDimensions": {
                         "dimensions": {
@@ -767,6 +778,7 @@ def populate_sheet(tid, spreadsheetId):
 
 def get_findings_list(tid):
     test = Test.objects.get(id=tid)
+    system_settings = get_object_or_404(System_Settings, id=1)
     findings = Finding.objects.filter(test=test).order_by('numerical_severity')
     active_note_types = Note_Type.objects.filter(is_active=True).order_by('id')
     note_type_activation = active_note_types.count()
@@ -788,6 +800,10 @@ def get_findings_list(tid):
                 var = str(eval("finding." + field.name))
             elif type(value) == User or type(value) == Dojo_User:
                 var = value.username
+            elif type(value) == Finding:
+                var = value.id
+            elif type(value) == Sonarqube_Issue:
+                var = value.key
             else:
                 var = value
             finding_details.append(var)
@@ -856,6 +872,31 @@ def get_findings_list(tid):
             for i in range(missing_notes_count):
                 findings_list[f + 1].append('')
                 findings_list[f + 1].append('')
+
+    if system_settings.enable_deduplication:
+        if note_type_activation:
+            for note_type in active_note_types:
+                findings_list[0].append('[duplicate] ' + note_type.name)
+            for f in range(findings.count()):
+                original_finding = findings[f].duplicate_finding
+                if original_finding:
+                    for note_type in active_note_types:
+                        try:
+                            note = original_finding.notes.filter(note_type=note_type).latest('date')
+                            findings_list[f + 1].append(note.entry)
+                        except Notes.DoesNotExist:
+                            findings_list[f + 1].append('')
+        else:
+            findings_list[0].append('[duplicate] note')
+            for f in range(findings.count()):
+                original_finding = findings[f].duplicate_finding
+                if original_finding:
+                    try:
+                        note = original_finding.notes.latest('date')
+                        findings_list[f + 1].append(note.entry)
+                    except Notes.DoesNotExist:
+                        findings_list[f + 1].append('')
+
     findings_list[0].append('Last column')
     for f in range(findings.count()):
         findings_list[f + 1].append('-')
