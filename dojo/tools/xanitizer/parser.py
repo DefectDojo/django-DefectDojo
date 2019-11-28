@@ -160,7 +160,7 @@ class XanitizerXMLParser(object):
 
     def find_cve(self, description):
         # copy from models.py
-        match = re.search('CVE-\d{4}-\d{4,7}', description)
+        match = re.search(r'CVE-\d{4}-\d{4,7}', description)
 
         if match:
             return match.group()
