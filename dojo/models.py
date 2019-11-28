@@ -1084,6 +1084,8 @@ class Endpoint(models.Model):
             return host + ':443'
         elif (port is None) and (scheme == "http"):
             return host + ':80'
+        else:
+            return str(self)
 
 
 class NoteHistory(models.Model):
