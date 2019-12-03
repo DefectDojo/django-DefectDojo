@@ -19,7 +19,7 @@
   <div>
     <div class="panel panel-default">
       <div class="panel-comments">
-          {% if user.username == note.author.username or user.is_superuser %}
+          {% if user.username == note.author.username and user.is_staff or user.is_superuser %}
           <div class="pull-right">
             <form method="post" action="{% url 'delete_note' note.id destination object.id %}">
                 {% csrf_token %}
@@ -29,6 +29,8 @@
                 </button>
             </form>
           </div>
+          {% endif %}
+          {% if user.username == note.author.username or user.is_staff %}
           <div class="pull-right">
             <form method="get" action="{% url 'edit_note' note.id destination object.id %}">
                 {% csrf_token %}
@@ -39,6 +41,7 @@
             </form>
           </div>
           {% endif %}
+          {% if user.is_staff %}
           <div class="pull-right">
             <form method="get" action="{% url 'note_history' note.id destination object.id %}">
                 {% csrf_token %}
@@ -48,7 +51,8 @@
                 </button>
             </form>
           </div>
-
+          {% endif %}
+          
           <div class="row-sm-2">
             <strong>{{ note.author.username }}</strong>
             <span class="text-muted">commented {{ note.date }}</span>
