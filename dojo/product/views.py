@@ -463,7 +463,7 @@ def new_product(request):
         if form.is_valid():
             product = form.save()
             tags = request.POST.getlist('tags')
-            t = ", ".join(tags)
+            t = ", ".join('"{0}"'.format(w) for w in tags)
             product.tags = t
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -524,7 +524,7 @@ def edit_product(request, pid):
         if form.is_valid():
             form.save()
             tags = request.POST.getlist('tags')
-            t = ", ".join(tags)
+            t = ", ".join('"{0}"'.format(w) for w in tags)
             prod.tags = t
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -671,7 +671,7 @@ def new_eng_for_app(request, pid, cicd=False):
 
             new_eng.save()
             tags = request.POST.getlist('tags')
-            t = ", ".join(tags)
+            t = ", ".join('"{0}"'.format(w) for w in tags)
             new_eng.tags = t
             if get_system_setting('enable_jira'):
                 # Test to make sure there is a Jira project associated the product

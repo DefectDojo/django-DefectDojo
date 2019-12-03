@@ -1,4 +1,5 @@
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.keys import Keys
 import unittest
@@ -26,11 +27,13 @@ class FindingTest(unittest.TestCase):
         # Initialize the driver
         # When used with Travis, chromdriver is stored in the same
         # directory as the unit tests
-        self.driver = webdriver.Chrome('chromedriver')
+        self.options = Options()
+        self.options.add_argument("--headless")  # comment out this Line To allow this run with browser visible
+        self.driver = webdriver.Chrome('chromedriver', chrome_options=self.options)
         # Allow a little time for the driver to initialize
         self.driver.implicitly_wait(30)
         # Set the base address of the dojo
-        self.base_url = "http://localhost:8000/"
+        self.base_url = "http://localhost:8080/"
         self.verificationErrors = []
         self.accept_next_alert = True
 
@@ -77,6 +80,7 @@ class FindingTest(unittest.TestCase):
         self.assertTrue(re.search(r'Finding saved successfully', productTxt))
 
     def test_add_image(self):
+        print("\n\nDebug Print Log: testing 'add image' \n")
         # The Name of the Finding created by test_add_product_finding => 'App Vulnerable to XSS'
         # Test To Add Finding To product
         # login to site, password set to fetch from environ
@@ -94,7 +98,8 @@ class FindingTest(unittest.TestCase):
         image_path = os.path.join(dir_path, 'finding_image.png')
         driver.find_element_by_id("id_form-0-image").send_keys(image_path)
         # Save uploaded image
-        driver.find_element_by_css_selector("button.btn.btn-success").click()
+        with product_unit_test.WaitForPageLoad(driver, timeout=50):
+            driver.find_element_by_css_selector("button.btn.btn-success").click()
         # Query the site to determine if the finding has been added
         productTxt = driver.find_element_by_tag_name("BODY").text
         # Assert ot the query to dtermine status of failure
@@ -234,7 +239,9 @@ class FindingTest(unittest.TestCase):
         # Select and click on the particular finding to edit
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
         # Click on `Delete Template` button
-        driver.find_element_by_name("delete_template").click()
+        driver.find_element_by_xpath("//button[text()='Delete Template']").click()
+        # Click 'Yes' on Alert popup
+        driver.switch_to.alert.accept()
         # Query the site to determine if the finding has been added
         productTxt = driver.find_element_by_tag_name("BODY").text
         # Assert ot the query to dtermine status of failure
@@ -256,9 +263,12 @@ class FindingTest(unittest.TestCase):
         file_path = os.path.join(dir_path, 'zap_sample.xml')
         driver.find_element_by_name("file").send_keys(file_path)
         # Click Submit button
-        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        with product_unit_test.WaitForPageLoad(driver, timeout=50):
+            driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
         # Query the site to determine if the finding has been added
         productTxt = driver.find_element_by_tag_name("BODY").text
+        print("\n\nDebug Print Log: findingTxt fetched: {}\n".format(productTxt))
+        print("Checking for '.*ZAP Scan processed, a total of 4 findings were processed.*'")
         # Assert ot the query to dtermine status of failure
         self.assertTrue(re.search(r'ZAP Scan processed, a total of 4 findings were processed', productTxt))
 

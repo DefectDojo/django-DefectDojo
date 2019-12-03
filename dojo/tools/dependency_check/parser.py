@@ -22,7 +22,11 @@ class DependencyCheckParser(object):
 
     def get_finding_from_vulnerability(self, vulnerability, filename, test):
         name = self.get_field_value(vulnerability, 'name')
-        cwe_field = self.get_field_value(vulnerability, 'cwe')
+        cwes_node = vulnerability.find(self.namespace + 'cwes')
+        if cwes_node is not None:
+            cwe_field = self.get_field_value(cwes_node, 'cwe')
+        else:
+            cwe_field = self.get_field_value(vulnerability, 'cwe')
         description = self.get_field_value(vulnerability, 'description')
 
         title = '{0} | {1}'.format(filename, name)

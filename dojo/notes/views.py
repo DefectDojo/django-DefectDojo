@@ -51,13 +51,12 @@ def delete_issue(request, id, page, objid):
     return HttpResponseRedirect(reverse(reverse_url, args=(object_id, )))
 
 
-@user_passes_test(lambda u: u.is_staff)
 def edit_issue(request, id, page, objid):
     note = get_object_or_404(Notes, id=id)
     reverse_url = None
     object_id = None
 
-    if page is None or str(request.user) != note.author.username and not request.user.is_superuser:
+    if page is None or str(request.user) != note.author.username and not request.user.is_staff:
         raise PermissionDenied
 
     if page == "test":

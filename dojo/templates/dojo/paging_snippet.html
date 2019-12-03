@@ -28,6 +28,10 @@
                             <li><a href="?{% url_replace request 'page_size' 75 %}">75</a></li>
                             <li><a href="?{% url_replace request 'page_size' 100 %}">100</a></li>
                             <li><a href="?{% url_replace request 'page_size' 150 %}">150</a></li>
+                            {% if page.paginator.count > 500 %}
+                            <li><a href="?{% url_replace request 'page_size' 500 %}">500</a></li>
+                            {% endif %}
+                            <li><a href="?{% url_replace request 'page_size' page.paginator.count %}">All</a></li>
                         </ul>
                     </div>
                 </li>

@@ -33,7 +33,7 @@ def webhook(request):
         raise PermissionDenied
 
     if request.method == 'POST':
-        parsed = json.loads(request.body)
+        parsed = json.loads(request.body.decode('utf-8'))
         if 'issue' in list(parsed.keys()):
             jid = parsed['issue']['id']
             jissue = get_object_or_404(JIRA_Issue, jira_id=jid)

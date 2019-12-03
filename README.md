@@ -40,9 +40,9 @@ Navigate to <http://localhost:8080>.
 For detailed documentation you can visit
 [Read the Docs](https://defectdojo.readthedocs.io/).
 
-## Installation Options
+## Supported Installation Options
 
-* [Kubernetes](KUBERNETES.md)
+* [Setup.bash](https://github.com/DefectDojo/django-DefectDojo/blob/dev/setup/README.MD)
 * [Docker](DOCKER.md)
 
 ## Getting Started
@@ -104,6 +104,11 @@ Project Moderators can help you with pull requests or feedback on dev ideas.
 
 * [Alex Dracea](https://www.linkedin.com/in/alexandru-marin-dracea-910b51122/)
 * [Valentijn Scholten](https://www.linkedin.com/in/valentijn-scholten/)
+* Jannik Jürgens
+* Fred Blaise
+* Saurabh kumar
+* Cody Maffucci 
+
 
 ## Hall of Fame
 
@@ -141,6 +146,7 @@ Proceeds are used for testing, infrastructure, etc.
 [![Timo-Pagel](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/timo-pagel-logo.png )](https://pagel.pro/)
 [![SDA-SE](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/sda-se-logo.png)](https://sda-se.com/)
 [![Signal-Iduna](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/signal-iduna.png)](https://signal-iduna.de/)
+[![WSO2](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/wso2-logo-for-screen.png)](https://wso2.com/)
 
 Interested in becoming a sponsor and having your logo displayed? Please review
 our [sponsorship information](SPONSORING.md) or email greg.anderson@owasp.org
