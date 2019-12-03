@@ -1,7 +1,6 @@
 # requirements.txt for DefectDojo using Python 3.x
 asteval==0.9.14
 bleach>=3.1.0
-bleach-whitelist>=0.0.10
 celery==4.3.0
 coverage==4.5.3
 defusedxml==0.6.0
@@ -51,5 +50,9 @@ whitenoise>=4.1.2
 titlecase==0.12.0
 social-auth-app-django==3.1.0
 Python-jose==3.0.1
+git+https://github.com/DefectDojo/defectDojo-engagement-survey@master#egg=defectDojo-engagement-survey
 gitpython>=2.1.13
 ptvsd>=4.2.7
+google-api-python-client==1.7.11
+google-auth==1.6.3
+google-auth-oauthlib==0.3.0

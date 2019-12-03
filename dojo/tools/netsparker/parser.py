@@ -10,8 +10,9 @@ __status__ = "Development"
 TAG_RE = re.compile(r'<[^>]+>')
 
 
-def cleantags(text):
-    return TAG_RE.sub('', text)
+def cleantags(text=''):
+    prepared_text = text if text else ''
+    return TAG_RE.sub('', prepared_text)
 
 
 class NetsparkerParser(object):
@@ -36,7 +37,7 @@ class NetsparkerParser(object):
 
             title = item["Name"]
             findingdetail = cleantags(item["Description"])
-            cwe = item["Classification"]["Cwe"]
+            cwe = item["Classification"]["Cwe"] if "Cwe" in item["Classification"] else None
             sev = item["Severity"]
             if sev not in ['Info', 'Low', 'Medium', 'High', 'Critical']:
                 sev = 'Info'

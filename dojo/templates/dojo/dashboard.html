@@ -152,6 +152,82 @@
         <!-- /.col-lg-6 -->
     </div>
     <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Unassigned Answered Engagement Surveys
+                </div>
+                <div class="panel-body">
+                    {% if surveys %}
+                        <table id="surveys" class="tablesorter-bootstrap table table-condensed table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Product</th>
+                                    <th>Engagement</th>
+                                    <th>Responder</th>
+                                    <th>Status</th>
+                                    <th>Completion Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            {% for survey in surveys %}
+                                <tr>
+                                    <td>
+                                        {% if survey.engagement %}
+                                            <a href="/engagement/{{ survey.engagement.id }}/survey/{{ survey.id }}">{{ survey.survey.name }}</a>
+                                        {% else %}
+                                            <a href="/empty_survey/{{ survey.id }}">{{ survey.survey.name }}</a>
+                                        {% endif %}
+                                    </td> 
+                                    <td><a href="/product/{{ survey.engagement.product_id }}">{{ survey.engagement.product.name }}</a></td>
+                                    <td>
+                                        <a href="/engagement/{{ survey.engagement.id }}">{{ survey.engagement.name }}</a> 
+                                    </td> 
+                                    <td>
+                                        {% if survey.responder %}
+                                            {{ survey.responder }}
+                                        {% else %}
+                                            Anonymous
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if survey.completed %}
+                                            <span class="pass_fail Pass">Completed</span>
+                                        {% else %}
+                                            <span class="pass_fail">Unanswered</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ survey.answered_on }}</td>
+                                    <td>
+                                        <div class="btn-group">
+                                            {% if survey.engagement %}
+                                                <a class="btn btn-sm btn-primary"
+                                                href="/engagement/{{ survey.engagement.id }}/survey/{{ survey.id }}"> View Responses </a>
+                                                <a class="btn btn-sm btn-info"
+                                                href="/engagement/{{ survey.engagement.id }}/survey/{{ survey.id }}/assign"> Assign User </a>
+                                            {% else %}
+                                                <a class="btn btn-sm btn-primary"
+                                                href="/empty_survey/{{ survey.id }}"> View Responses </a>
+                                                <a class="btn btn-sm btn-success" href="empty_survey/{{ survey.id }}/new_engagement">Create Engagement</a>
+                                                <button class="btn btn-sm btn-info" disabled
+                                                href="/engagement/{{ survey.engagement.id }}/survey/{{ survey.id }}/assign"> Assign User </button>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    {% else %}
+                        <div class="panel-body">
+                            <p>No surveys found.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
         {% if punchcard %}
             <div class="col-lg-12">
                 <div class="panel panel-default">

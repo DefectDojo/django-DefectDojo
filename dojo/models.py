@@ -232,6 +232,16 @@ class System_Settings(models.Model):
     sla_low = models.IntegerField(default=120,
                                           verbose_name="Low Finding SLA Days",
                                           help_text="# of days to remediate a low finding.")
+    allow_anonymous_survey_repsonse = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name="Allow Anonymous Survey Responses",
+        help_text="Enable anyone with a link to the survey to answer a survey"
+    )
+    credentials = models.CharField(max_length=3000, blank=True)
+    column_widths = models.CharField(max_length=1500, blank=True)
+    drive_folder_ID = models.CharField(max_length=100, blank=True)
+    enable_google_sheets = models.BooleanField(default=False, null=True, blank=True)
 
 
 class SystemSettingsFormAdmin(forms.ModelForm):
@@ -661,6 +671,19 @@ class Product(models.Model):
     def get_product_type(self):
         return self.prod_type if self.prod_type is not None else 'unknown'
 
+    def open_findings_list(self):
+        findings = Finding.objects.filter(test__engagement__product=self,
+                                          mitigated__isnull=True,
+                                          verified=True,
+                                          false_p=False,
+                                          duplicate=False,
+                                          out_of_scope=False
+                                          )
+        findings_list = []
+        for i in findings:
+            findings_list.append(i.id)
+        return findings_list
+
 
 class ScanSettings(models.Model):
     product = models.ForeignKey(Product, default=1, editable=False, on_delete=models.CASCADE)
@@ -698,8 +721,7 @@ class Scan(models.Model):
                                 default=get_current_datetime)
     protocol = models.CharField(max_length=10, default='TCP')
     status = models.CharField(max_length=10, default='Pending', editable=False)
-    baseline = models.BooleanField(default=False,
-                                   verbose_name="Current Baseline")
+    baseline = models.BooleanField(default=False, verbose_name="Current Baseline")
 
     def __unicode__(self):
         return self.scan_settings.protocol + " Scan " + str(self.date)
@@ -1062,6 +1084,8 @@ class Endpoint(models.Model):
             return host + ':443'
         elif (port is None) and (scheme == "http"):
             return host + ':80'
+        else:
+            return str(self)
 
 
 class NoteHistory(models.Model):
@@ -1204,7 +1228,7 @@ class Finding(models.Model):
     cwe = models.IntegerField(default=0, null=True, blank=True)
     cve_regex = RegexValidator(regex=r'^CVE-\d{4}-\d{4,7}$',
                                  message="CVE must be entered in the format: 'CVE-9999-9999'. ")
-    cve = models.TextField(validators=[cve_regex], max_length=20, null=True)
+    cve = models.CharField(validators=[cve_regex], max_length=20, null=True)
     url = models.TextField(null=True, blank=True, editable=False)
     severity = models.CharField(max_length=200, help_text="The severity level of this flaw (Critical, High, Medium, Low, Informational)")
     description = models.TextField()
@@ -1278,6 +1302,22 @@ class Finding(models.Model):
 
     class Meta:
         ordering = ('numerical_severity', '-date', 'title')
+        indexes = [
+            models.Index(fields=('cve',))
+        ]
+
+    @property
+    def similar_findings(self):
+        filtered = Finding.objects.filter(test__engagement__product=self.test.engagement.product)
+        if self.cve:
+            filtered = filtered.filter(cve=self.cve)
+        if self.cwe:
+            filtered = filtered.filter(cwe=self.cwe)
+        if self.file_path:
+            filtered = filtered.filter(file_path=self.file_path)
+        if self.line:
+            filtered = filtered.filter(line=self.line)
+        return filtered.exclude(pk=self.pk)
 
     def compute_hash_code(self):
         hash_string = self.title + str(self.cwe) + str(self.line) + str(self.file_path) + self.description
@@ -1444,7 +1484,7 @@ class Finding(models.Model):
         long_desc += '*References*:' + self.references
         return long_desc
 
-    def save(self, dedupe_option=True, false_history=False, rules_option=True, *args, **kwargs):
+    def save(self, dedupe_option=True, false_history=False, rules_option=True, issue_updater_option=True, *args, **kwargs):
         # Make changes to the finding before it's saved to add a CWE template
         new_finding = False
         if self.pk is None:
@@ -1456,8 +1496,9 @@ class Finding(models.Model):
             super(Finding, self).save(*args, **kwargs)
 
             # Run async the tool issue update to update original issue with Defect Dojo updates
-            from dojo.tasks import async_tool_issue_updater
-            async_tool_issue_updater.delay(self)
+            if issue_updater_option:
+                from dojo.tasks import async_tool_issue_updater
+                async_tool_issue_updater.delay(self)
 
         if (self.file_path is not None) and (self.endpoints.count() == 0):
             self.static_finding = True

@@ -9,7 +9,7 @@ services:
     depends_on:
       - uwsgi
     ports:
-      - target: 8080
+      - target: ${DD_PORT:-8080}
         published: ${DD_PORT:-8080}
         protocol: tcp
         mode: host

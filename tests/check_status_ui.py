@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import NoAlertPresentException
 import unittest
@@ -9,9 +10,11 @@ import requests
 
 class Login(unittest.TestCase):
     def setUp(self):
-        self.driver = webdriver.Firefox()
+        self.options = Options()
+        self.options.add_argument("--headless")
+        self.driver = webdriver.Chrome('chromedriver', options=self.options)
         self.driver.implicitly_wait(30)
-        self.base_url = "http://localhost:8000/"
+        self.base_url = "http://localhost:8080/"
         self.verificationErrors = []
         self.accept_next_alert = True
 

@@ -160,7 +160,7 @@ def issue_r(raw_row, vuln):
         # The CVE in Qualys report might not have a CVSS score, so findings are informational by default
         # unless we can find map to a Severity OR a CVSS score from the findings detail.
         sev = None
-        if _temp['CVSS_score'] is not None:
+        if _temp['CVSS_score'] is not None and float(_temp['CVSS_score']) > 0:
             if 0.1 <= float(_temp['CVSS_score']) <= 3.9:
                 sev = 'Low'
             elif 4.0 <= float(_temp['CVSS_score']) <= 6.9:
