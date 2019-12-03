@@ -27,7 +27,7 @@ All installs make these assumption:
 * * Running setup.bash without editing template-env assumes a single-server install.
 * * Running setup.bash without editing template-env non-interactively assumes a single-server install with MySQL
 * Any install configuration variable can be overridden by setting an environmental variable
-* One of the following OSes is used as the base for the install
+* One of the following Operating Systems is used as the base for the install
 * * Ubuntu Linux - officially supported versions: 16.04 LTS, 18.04 LTS
 * * CentOS - officially supported versions: ?
 * * Mac OS X - officially supported versions: ?
@@ -66,7 +66,7 @@ setup.bash => the main install program
         ├── prompt.sh
 ```
 
-Install configuration is in config-vars.sh contains the following install options and default values:
+Install configuration is in [config-vars.sh](scripts/common/config-vars.sh) contains the following install options and default values:
 
 **Format for this list:** *install option* [default value] - *definition*
 
@@ -94,7 +94,6 @@ Install configuration is in config-vars.sh contains the following install option
 
 Configuration items for setup.py are in template-env in ./dojo/settings/ and contain
 
-* 
 
 ### Installers workflow
 
@@ -111,6 +110,5 @@ Configuration items for setup.py are in template-env in ./dojo/settings/ and con
 * REPO_BASE : The full path to where the DefectDojo source was cloned usually /opt/dojo/django-DefectDojo
 * LIB_PATH : The full path to where the configuration values and libraries are for the DefectDojo installer which is SETUP_BASE + /scripts/common/
 * DB_TYPPE : The database type DefectDojo will use - currently either SQLite, MySQL or PostgreSQL
-* 
 
 
