@@ -39,22 +39,40 @@ class WhitesourceJSONParser(object):
             cve = node.get('name')
             title = cve + " | " + lib_name
             severity = node.get('severity').lower().capitalize()
-            cvss3_score = node.get('cvss3_score')
+            cvss3_score = node.get('cvss3_score', "N/A")
+            cvss3_vector = node.get('scoreMetadataVector', "N/A")
+            severity_justification = "CVSS v3 score: {} ({})".format(cvss3_score, cvss3_vector)
+            cwe = 1035 # default OWASP a9 until the report actually has them
 
-            try:
-                mitigation = "**fixResolution** : " + node['topFix']['fixResolution'] + "\n" + \
-                            "**Message** : " + node['topFix']['message'] + "\n"
-            except:
-                mitigation = "N/A"
+            mitigation = "N/A"
+            if 'topFix' in node:
+                try:
+                    topfix_node = node.get('topFix')
+                    mitigation = "**Resolution** ({}): {}\n" \
+                        .format(
+                            topfix_node.get('date'),
+                            topfix_node.get('fixResolution')
+                    )
+                except Exception as e:
+                    print("Error handling topFix node. {}").format(e)
 
-            # TODO, if file generated in a build pipeline, sourceFiles will likely be available to augment the file_path info
+            filepaths = []
+            if 'sourceFiles' in node:
+                try:
+                    sourceFiles_node = node.get('sourceFiles')
+                    for sfile in sourceFiles_node:
+                        filepaths.append(sfile.get('localPath'))
+                except Exception as e:
+                    print("Error handling local paths for vulnerability. {}").format(e)
             
             return { 'title': title, 
                      'description': description,
                      'severity': severity,
                      'mitigation': mitigation,
                      'cve': cve,
-                     'cvss3_score': cvss3_score
+                     'cwe': cwe,
+                     'severity_justification': severity_justification,
+                     'file_path': ", ".join(filepaths)
             }
 
         def _dedup_and_create_finding(vuln):
@@ -73,9 +91,13 @@ class WhitesourceJSONParser(object):
                                 description=vuln.get('description'),
                                 severity=vuln.get('severity'),
                                 cve=vuln.get('cve'),
+                                cwe=vuln.get('cwe'),
                                 mitigation=vuln.get('mitigation'),
                                 numerical_severity=Finding.get_numerical_severity(
                                     vuln.get('severity')),
+                                references=vuln.get('references'),
+                                file_path=vuln.get('file_path'),
+                                severity_justification=vuln.get('severity_justification'),
                                 dynamic_finding=True)
                 
                 self.dupes[dupe_key] = finding
@@ -86,7 +108,6 @@ class WhitesourceJSONParser(object):
             # which will output vulnerabilities as an array of a library
             # In this scenario, build up a an array
             tree_libs = content.get('libraries')
-            # output = []
             for lib_node in tree_libs:
                 # get the overall lib info here, before going into vulns
                 if 'vulnerabilities' in lib_node and len(lib_node.get('vulnerabilities')) > 0:
@@ -100,13 +121,7 @@ class WhitesourceJSONParser(object):
             for node in tree_node:
                 output.append(_build_common_output(node))
 
-        #if(isinstance(output, list)):
-            # dealing with possible multiple findings
         for vuln in output:
             _dedup_and_create_finding(vuln)
-        #else:
-            # or just one finding
-            #_dedup_and_create_finding(output)
 
-        # returns
         self.items = self.dupes.values()
