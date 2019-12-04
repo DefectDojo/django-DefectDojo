@@ -38,7 +38,7 @@ class BlackduckImporter(Importer):
         security_issues = dict()
         try:
             with open(str(report), 'r') as f:
-                security_issues = self.__partition_by_project_id(f)
+                security_issues = self.__partition_by_key(f)
 
         except Exception as e:
             print("Could not process csv file: {}".format(e))
@@ -57,12 +57,14 @@ class BlackduckImporter(Importer):
             with zipfile.ZipFile(str(report)) as zip:
                 for full_file_name in zip.namelist():
                     file_name = full_file_name.split("/")[-1]
-                    if 'source' in file_name:
+                    # Backwards compatibility, newer versions of Blackduck have a source file rather
+                    # than a "files" file.
+                    if 'source' in file_name or 'files' in file_name:
                         with io.TextIOWrapper(zip.open(full_file_name)) as f:
-                            files = self.__partition_by_project_id(f)
+                            files = self.__partition_by_key(f)
                     elif 'security' in file_name:
                         with io.TextIOWrapper(zip.open(full_file_name)) as f:
-                            security_issues = self.__partition_by_project_id(f)
+                            security_issues = self.__partition_by_key(f)
 
         except Exception as e:
             print("Could not process zip file: {}".format(e))
@@ -121,11 +123,16 @@ class BlackduckImporter(Importer):
                     location
                 )
 
-    def __partition_by_project_id(self, csv_file):
+    def __partition_by_key(self, csv_file):
         records = csv.DictReader(csv_file)
         findings = defaultdict(set)
+        # Backwards compatibility. Newer versions of Blackduck use Component id.
+        if "Project id" in records.fieldnames:
+            key = "Project id"
+        else:
+            key = "Component id"
         for record in records:
-            findings[record.get('Component id')].add(frozenset(record.items()))
+            findings[record.get(key)].add(frozenset(record.items()))
         return findings
 
     def get_cve(self, vuln_id):
