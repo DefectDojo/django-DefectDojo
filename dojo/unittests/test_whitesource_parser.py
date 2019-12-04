@@ -10,7 +10,6 @@ class TestWhitesourceJSONParser(TestCase):
         self.assertEqual(0, len(parser.items))
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
-
         testfile = open("dojo/unittests/scans/whitesource_sample/okhttp_no_vuln.json")
         parser = WhitesourceJSONParser(testfile, Test())
         self.assertEqual(0, len(parser.items))
@@ -24,3 +23,8 @@ class TestWhitesourceJSONParser(TestCase):
         testfile = open("dojo/unittests/scans/whitesource_sample/okhttp_many_vuln.json")
         parser = WhitesourceJSONParser(testfile, Test())
         self.assertEqual(6, len(parser.items))
+
+    def test_parse_file_with_multiple_vuln_cli_output(self):
+        testfile = open("dojo/unittests/scans/whitesource_sample/cli_generated_many_vulns.json")
+        parser = WhitesourceJSONParser(testfile, Test())
+        self.assertEqual(20, len(parser.items))
