@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0021_auto_20191102_0956'),
+        ('dojo', '0022_google_sheet_sync_additions'),
     ]
 
     operations = [

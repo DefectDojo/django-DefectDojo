@@ -238,6 +238,10 @@ class System_Settings(models.Model):
         verbose_name="Allow Anonymous Survey Responses",
         help_text="Enable anyone with a link to the survey to answer a survey"
     )
+    credentials = models.CharField(max_length=3000, blank=True)
+    column_widths = models.CharField(max_length=1500, blank=True)
+    drive_folder_ID = models.CharField(max_length=100, blank=True)
+    enable_google_sheets = models.BooleanField(default=False, null=True, blank=True)
 
 
 class SystemSettingsFormAdmin(forms.ModelForm):
@@ -1080,6 +1084,8 @@ class Endpoint(models.Model):
             return host + ':443'
         elif (port is None) and (scheme == "http"):
             return host + ':80'
+        else:
+            return str(self)
 
 
 class NoteHistory(models.Model):
@@ -1296,6 +1302,22 @@ class Finding(models.Model):
 
     class Meta:
         ordering = ('numerical_severity', '-date', 'title')
+        indexes = [
+            models.Index(fields=('cve',))
+        ]
+
+    @property
+    def similar_findings(self):
+        filtered = Finding.objects.filter(test__engagement__product=self.test.engagement.product)
+        if self.cve:
+            filtered = filtered.filter(cve=self.cve)
+        if self.cwe:
+            filtered = filtered.filter(cwe=self.cwe)
+        if self.file_path:
+            filtered = filtered.filter(file_path=self.file_path)
+        if self.line:
+            filtered = filtered.filter(line=self.line)
+        return filtered.exclude(pk=self.pk)
 
     def compute_hash_code(self):
         hash_string = self.title + str(self.cwe) + str(self.line) + str(self.file_path) + self.description

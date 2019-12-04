@@ -1,4 +1,5 @@
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 import unittest
 import re
 import sys
@@ -8,9 +9,11 @@ import os
 class EnvironmentTest(unittest.TestCase):
     def setUp(self):
         # change path of chromedriver according to which directory you have chromedriver.
-        self.driver = webdriver.Chrome('chromedriver')
+        self.options = Options()
+        self.options.add_argument("--headless")
+        self.driver = webdriver.Chrome('chromedriver', chrome_options=self.options)
         self.driver.implicitly_wait(30)
-        self.base_url = "http://localhost:8000/"
+        self.base_url = "http://localhost:8080/"
         self.verificationErrors = []
         self.accept_next_alert = True
 
