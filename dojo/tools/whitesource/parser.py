@@ -42,7 +42,7 @@ class WhitesourceJSONParser(object):
             cvss3_score = node.get('cvss3_score', "N/A")
             cvss3_vector = node.get('scoreMetadataVector', "N/A")
             severity_justification = "CVSS v3 score: {} ({})".format(cvss3_score, cvss3_vector)
-            cwe = 1035 # default OWASP a9 until the report actually has them
+            cwe = 1035  # default OWASP a9 until the report actually has them
 
             mitigation = "N/A"
             if 'topFix' in node:
@@ -52,7 +52,7 @@ class WhitesourceJSONParser(object):
                         .format(
                             topfix_node.get('date'),
                             topfix_node.get('fixResolution')
-                    )
+                        )
                 except Exception as e:
                     print("Error handling topFix node. {}").format(e)
 
@@ -64,8 +64,8 @@ class WhitesourceJSONParser(object):
                         filepaths.append(sfile.get('localPath'))
                 except Exception as e:
                     print("Error handling local paths for vulnerability. {}").format(e)
-            
-            return { 'title': title, 
+
+            return {'title': title,
                      'description': description,
                      'severity': severity,
                      'mitigation': mitigation,
@@ -73,7 +73,7 @@ class WhitesourceJSONParser(object):
                      'cwe': cwe,
                      'severity_justification': severity_justification,
                      'file_path': ", ".join(filepaths)
-            }
+                    }
 
         def _dedup_and_create_finding(vuln):
             dupe_key = hashlib.md5(vuln.get('description').encode('utf-8') + vuln.get('title').encode('utf-8')).hexdigest()
@@ -99,9 +99,9 @@ class WhitesourceJSONParser(object):
                                 file_path=vuln.get('file_path'),
                                 severity_justification=vuln.get('severity_justification'),
                                 dynamic_finding=True)
-                
+
                 self.dupes[dupe_key] = finding
-        
+
         output = []
         if "libraries" in content:
             # we are likely dealing with a report generated from CLI with -generateScanReport,
