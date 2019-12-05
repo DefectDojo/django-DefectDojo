@@ -136,5 +136,5 @@ class BlackduckImporter(Importer):
         return findings
 
     def get_cve(self, vuln_id):
-        cve_search = re.search("CVE-\d{4}-\d{4,7}", vuln_id, re.IGNORECASE)
+        cve_search = re.search(r"CVE-\d{4}-\d{4,7}", vuln_id, re.IGNORECASE)
         return cve_search.group(0) if cve_search else vuln_id
