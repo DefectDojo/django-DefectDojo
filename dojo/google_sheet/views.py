@@ -39,6 +39,7 @@ def configure_google_sheets(request):
             else:
                 initial['Protect ' + field.name] = True
         initial['drive_folder_ID'] = system_settings.drive_folder_ID
+        initial['gamil_address'] = system_settings.gmail_address
         initial['enable_service'] = system_settings.enable_google_sheets
         form = GoogleSheetFieldsForm(all_fields=fields, initial=initial, credentials_required=False)
     else:
@@ -53,6 +54,7 @@ def configure_google_sheets(request):
             system_settings.column_widths = ""
             system_settings.credentials = ""
             system_settings.drive_folder_ID = ""
+            system_settings.gmail_address = ""
             system_settings.enable_google_sheets = False
             system_settings.save()
             messages.add_message(
@@ -92,6 +94,7 @@ def configure_google_sheets(request):
                     system_settings.column_widths = column_widths
                     system_settings.credentials = cred_str
                     system_settings.drive_folder_ID = drive_folder_ID
+                    system_settings.gmail_address = form.cleaned_data['gmail_address']
                     system_settings.enable_google_sheets = form.cleaned_data['enable_service']
                     system_settings.save()
                     if initial:
@@ -295,10 +298,8 @@ def create_googlesheet(request, tid):
                                         addParents=folder_id,
                                         removeParents=previous_parents,
                                         fields='id, parents').execute()
+    # Share created Spreadsheet with current user
     drive_service.permissions().create(body={'type': 'user', 'role': 'writer', 'emailAddress': user_email}, fileId=spreadsheetId).execute()
-    # drive_service.permissions().create(transferOwnership=True,
-    #                                    body={'type': 'user', 'role': 'owner', 'emailAddress': 'piyarathnalakmali@gmail.com'},
-    #                                    fileId=spreadsheetId).execute()
     populate_sheet(tid, spreadsheetId)
 
 
@@ -454,6 +455,7 @@ def populate_sheet(tid, spreadsheetId):
     system_settings = get_object_or_404(System_Settings, id=1)
     service_account_info = json.loads(system_settings.credentials)
     service_account_email = service_account_info['client_email']
+    gmail_address = system_settings.gmail_address
     SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
     credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
     sheets_service = googleapiclient.discovery.build('sheets', 'v4', credentials=credentials)
@@ -559,6 +561,7 @@ def populate_sheet(tid, spreadsheetId):
                                   "editors": {
                                         "users": [
                                             service_account_email,
+                                            gmail_address
                                         ]
                                   },
                                   # "description": "Protecting total row",
@@ -629,6 +632,7 @@ def populate_sheet(tid, spreadsheetId):
                                   "editors": {
                                         "users": [
                                             service_account_email,
+                                            gmail_address
                                         ]
                                   },
                                   "warningOnly": False
@@ -756,6 +760,7 @@ def populate_sheet(tid, spreadsheetId):
                               "editors": {
                                     "users": [
                                         service_account_email,
+                                        gmail_address
                                     ]
                               },
                               "warningOnly": False
@@ -886,6 +891,9 @@ def get_findings_list(tid):
                             findings_list[f + 1].append(note.entry)
                         except Notes.DoesNotExist:
                             findings_list[f + 1].append('')
+                else:
+                    for note_type in active_note_types:
+                        findings_list[f + 1].append('')
         else:
             findings_list[0].append('[duplicate] note')
             for f in range(findings.count()):
@@ -896,6 +904,8 @@ def get_findings_list(tid):
                         findings_list[f + 1].append(note.entry)
                     except Notes.DoesNotExist:
                         findings_list[f + 1].append('')
+                else:
+                    findings_list[f + 1].append('')
 
     findings_list[0].append('Last column')
     for f in range(findings.count()):
