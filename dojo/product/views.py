@@ -92,7 +92,7 @@ def view_product(request, pid):
 
     product_metadata = dict(prod.product_meta.order_by('name').values_list('name', 'value'))
 
-    verified_findings = Finding.objects.filter(test__engagement__product=prod,
+    open_findings = Finding.objects.filter(test__engagement__product=prod,
                                                 false_p=False,
                                                 verified=False,
                                                 active=True,
@@ -105,7 +105,7 @@ def view_product(request, pid):
     low = 0
     info = 0
 
-    for v in verified_findings:
+    for v in open_findings:
         if v["severity"] == "Critical":
             critical = v["count"]
         elif v["severity"] == "High":
