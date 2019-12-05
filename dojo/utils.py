@@ -161,6 +161,75 @@ def sync_dedupe(sender, *args, **kwargs):
                 super(Finding, new_finding).save()
 
 
+def deduplication_attr_config(sender, *args, **kwargs):
+    # attributes = ['title', 'cwe', 'line', 'offset']
+    system_settings = System_Settings.objects.get()
+    if system_settings.enable_deduplication:
+        new_finding = kwargs['new_finding']
+        deduplicationLogger.debug('sync_dedupe for: ' + str(new_finding.id) + ":" + str(new_finding.title))
+
+        if new_finding.test.engagement.deduplication_on_engagement:
+            finding_filtered = Finding.objects.filter(
+                test__engagement=new_finding.test.engagement).exclude(
+                id=new_finding.id).exclude(duplicate=True)
+        else:
+            finding_filtered = Finding.objects.filter(
+                test__engagement__product=new_finding.test.engagement.product).exclude(
+                id=new_finding.id).exclude(duplicate=True)
+
+        if 'offset' in attributes and 'line' in attributes:
+            attributes.remove('line')
+        for attr in attributes:
+            if attr == 'endpoints' or attr == 'offset':
+                continue
+            my_filter = {}
+            my_filter[attr] = getattr(new_finding, attr)
+            finding_filtered = finding_filtered.filter(**my_filter)
+
+        original_findings = []
+        findings_set_for_offset = []
+        for finding in finding_filtered:
+            if is_deduplication_on_engagement_mismatch(new_finding, finding):
+                deduplicationLogger.debug(
+                    'deduplication_on_engagement_mismatch, skipping dedupe.')
+                continue
+            if new_finding.dynamic_finding == True:
+                if 'endpoints' in attributes:
+                    if finding.endpoints.count() != 0 and new_finding.endpoints.count() != 0:
+                        list1 = [e.host_with_port for e in new_finding.endpoints.all()]
+                        list2 = [e.host_with_port for e in finding.endpoints.all()]
+                        if all(x in list1 for x in list2):
+                            original_findings.append(finding)
+                else:
+                    original_findings.append(finding)
+
+            elif new_finding.static_finding == True:
+                if 'offset' in attributes:
+                    findings_set_for_offset.append(finding)
+                    if finding.line == new_finding.line:
+                        original_findings.append(finding)
+                else:
+                    original_findings.append(finding)
+
+        if not original_findings and new_finding.static_finding == True and 'offset' in attributes:
+            similar_findings_with_offset = list(filter(lambda i: abs(i.line - new_finding.line) <= 100, findings_set_for_offset))
+            if similar_findings_with_offset:
+                for finding in similar_findings_with_offset:
+                    finding.line_diff = abs(finding.line - new_finding.line)
+                original_findings = sorted(similar_findings_with_offset , key = lambda x : x.line_diff)[0]
+
+        if original_findings:
+            for finding in original_findings:
+                deduplicationLogger.debug('New finding ' + str(new_finding.id) + ' is a duplicate of existing finding ' + str(finding.id))
+                new_finding.duplicate = True
+                new_finding.active = False
+                new_finding.verified = False
+                new_finding.duplicate_finding = finding
+                finding.duplicate_list.add(new_finding)
+                finding.found_by.add(new_finding.test.test_type)
+                super(Finding, new_finding).save()
+
+
 def sync_rules(new_finding, *args, **kwargs):
     rules = Rule.objects.filter(applies_to='Finding', parent_rule=None)
     for rule in rules:
