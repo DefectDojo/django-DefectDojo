@@ -9,17 +9,28 @@ logger = logging.getLogger(__name__)
 
 class SonarQubeHtmlParser(object):
 
-    def __init__(self, filename, test):
+    def __init__(self, filename, test, mode=None):
         parser = etree.HTMLParser()
         tree = etree.parse(filename, parser)
+        if(mode in [None, 'detailed']):
+            self.mode = mode
+        else:
+            raise Exception("Internal error: Invalid mode " + mode + ". Expected: one of None, 'detailed'")
+
+        # Dictonary to hold the aggregated findings with:
+        #  - key: the concatenated aggregate keys
+        #  - value: the finding
+        self.dupes = dict()
+
+        self.test = test
+        self.impact = "No impact provided"
 
         if tree:
-            self.items = self.get_items(tree, test)
+            self.items = self.get_items(tree)
         else:
             self.items = []
 
-    def get_items(self, tree, test):
-        items = list()
+    def get_items(self, tree):
         # Check that there is at least one vulnerability (the vulnerabilities table is absent when no vuln are found)
         detailTbody = tree.xpath("/html/body/div[contains(@class,'detail')]/table/tbody")
         if(len(detailTbody) == 2):
@@ -44,6 +55,7 @@ class SonarQubeHtmlParser(object):
                 vuln_line = vuln_properties[3].text
                 vuln_title = vuln_properties[4].text
                 vuln_mitigation = vuln_properties[5].text
+                vuln_key = vuln_properties[6].text
                 if vuln_title is None or vuln_mitigation is None:
                     raise Exception("Parser ValueError: can't find a title or a mitigation for vulnerability of name " + vuln_rule_name)
                 try:
@@ -55,27 +67,81 @@ class SonarQubeHtmlParser(object):
                     vuln_description = "No description provided"
                     vuln_references = ""
                     vuln_cwe = 0
-                find = Finding(title=vuln_title,
-                               cwe=int(vuln_cwe),
-                               description=vuln_description,
-                               file_path=vuln_file_path,
-                               line=vuln_line,
-                               test=test,
-                               severity=vuln_severity,
-                               mitigation=vuln_mitigation,
-                               references=vuln_references,
-                               active=False,
-                               verified=False,
-                               false_p=False,
-                               duplicate=False,
-                               out_of_scope=False,
-                               mitigated=None,
-                               impact="No impact provided",
-                               numerical_severity=Finding.get_numerical_severity(vuln_severity),
-                               static_finding=True,
-                               dynamic_finding=False)
-                items.append(find)
+                if(self.mode is None):
+                    self.process_result_file_name_aggregated(
+                        vuln_title, vuln_cwe, vuln_description, vuln_file_path, vuln_line, vuln_severity, vuln_mitigation, vuln_references)
+                elif (self.mode == 'detailed'):
+                    self.process_result_detailed(
+                        vuln_title, vuln_cwe, vuln_description, vuln_file_path, vuln_line, vuln_severity, vuln_mitigation, vuln_references, vuln_key)
+            items = list(self.dupes.values())
+        else:
+            # No vuln were found
+            items = list()
         return items
+
+    # Process one vuln from the report for "SonarQube Scan detailed"
+    # Create the finding and add it into the dupes list
+    def process_result_detailed(self, vuln_title, vuln_cwe, vuln_description, vuln_file_path, vuln_line, vuln_severity, vuln_mitigation, vuln_references, vuln_key):
+        # vuln_key is the unique id from tool which means that there is basically no aggregation except real duplicates
+        aggregateKeys = "{}{}{}{}{}".format(vuln_cwe, vuln_title, vuln_description, vuln_file_path, vuln_key)
+        find = Finding(title=vuln_title,
+                       cwe=int(vuln_cwe),
+                       description=vuln_description,
+                       file_path=vuln_file_path,
+                       line=vuln_line,
+                       test=self.test,
+                       severity=vuln_severity,
+                       mitigation=vuln_mitigation,
+                       references=vuln_references,
+                       active=False,
+                       verified=False,
+                       false_p=False,
+                       duplicate=False,
+                       out_of_scope=False,
+                       mitigated=None,
+                       impact=self.impact,
+                       numerical_severity=Finding.get_numerical_severity(vuln_severity),
+                       static_finding=True,
+                       dynamic_finding=False,
+                       unique_id_from_tool=vuln_key)
+        self.dupes[aggregateKeys] = find
+
+    # Process one vuln from the report for "SonarQube Scan"
+    # Create the finding and add it into the dupes list
+    # For aggregated findings:
+    #  - the description is enriched with each finding line number
+    #  - the mitigation (message) is concatenated with each finding's mitigation value
+    def process_result_file_name_aggregated(self, vuln_title, vuln_cwe, vuln_description, vuln_file_path, vuln_line, vuln_severity, vuln_mitigation, vuln_references):
+        aggregateKeys = "{}{}{}{}".format(vuln_cwe, vuln_title, vuln_description, vuln_file_path)
+        descriptionOneOccurence = "Line: {}".format(vuln_line)
+        if not(aggregateKeys in self.dupes):
+            find = Finding(title=vuln_title,
+                           cwe=int(vuln_cwe),
+                           description=vuln_description + '\n\n-----\nOccurences:\n' + descriptionOneOccurence,
+                           file_path=vuln_file_path,
+                           # No line number because we have aggregated different vulnerabilities that may have different line numbers
+                           test=self.test,
+                           severity=vuln_severity,
+                           mitigation=vuln_mitigation,
+                           references=vuln_references,
+                           active=False,
+                           verified=False,
+                           false_p=False,
+                           duplicate=False,
+                           out_of_scope=False,
+                           mitigated=None,
+                           impact=self.impact,
+                           numerical_severity=Finding.get_numerical_severity(vuln_severity),
+                           static_finding=True,
+                           dynamic_finding=False,
+                           nb_occurences=1)
+            self.dupes[aggregateKeys] = find
+        else:
+            # We have already created a finding for this aggregate: updates the description, nb_occurences and mitigation (message field in the report which may vary for each vuln)
+            find = self.dupes[aggregateKeys]
+            find.description = "{}\n{}".format(find.description, descriptionOneOccurence)
+            find.mitigation = "{}\n______\n{}".format(find.mitigation, vuln_mitigation)
+            find.nb_occurences = find.nb_occurences + 1
 
     def convert_sonar_severity(self, sonar_severity):
         sev = sonar_severity.lower()
