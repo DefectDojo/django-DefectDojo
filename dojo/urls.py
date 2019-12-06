@@ -161,7 +161,7 @@ schema_view = get_schema_view(
     # if public=False, includes only endpoints the current user has access to
     public=True,
     # The API of a OpenSource project should be public accessible
-    permission_classes=(permissions.AllowAny),
+    permission_classes=[permissions.AllowAny],
 )
 
 urlpatterns = [
