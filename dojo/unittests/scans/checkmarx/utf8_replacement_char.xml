@@ -4,11 +4,11 @@
     <Result NodeId="10002270028" FileName="WebGoat/webgoat-lessons/missing-function-ac/src/main/java/org/owasp/webgoat/plugin/Users.java" Status="New" Line="39" Column="59" FalsePositive="False" Severity="High" AssignToUser="" state="0" Remark="" DeepLink="https://checkmarxserver.com/CxWebClient/ViewerMain.aspx?scanid=1000227&amp;projectid=121&amp;pathid=28" SeverityIndex="3">
       <Path ResultId="1000227" PathId="28" SimilarityId="1574221060">
         <PathNode>
-          <FileName>WebGoat/webgoat-lessons/missing-function-ac/src/main/java/org/owasp/webgoat/plugin/Users.java</FileName>
+          <FileName>WebGoat/webgoat-lessons/missing-function-ac/src/main/java/org/owasp/webgoat/plugin/Users.java�</FileName>
           <Line>39</Line>
           <Column>59</Column>
           <NodeId>1</NodeId>
-          <Name>executeQuery</Name>
+          <Name>executeQuery�</Name>
           <Type></Type>
           <Length>1</Length>
           <Snippet>
@@ -139,11 +139,11 @@
           </Snippet>
         </PathNode>
         <PathNode>
-          <FileName>WebGoat/webgoat-lessons/missing-function-ac/src/main/java/org/owasp/webgoat/plugin/Users.java</FileName>
+          <FileName>WebGoat/webgoat-lessons/missing-function-ac/src/main/java/org/owasp/webgoat/plugin/Users.java�</FileName>
           <Line>58</Line>
           <Column>28</Column>
           <NodeId>10</NodeId>
-          <Name>allUsersMap</Name>
+          <Name>allUsersMap�</Name>
           <Type></Type>
           <Length>11</Length>
           <Snippet>

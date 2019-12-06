@@ -80,7 +80,7 @@
         </PathNode>
         <PathNode>
           <FileName>WebGoat/webgoat-lessons/challenge/src/main/java/org/owasp/webgoat/plugin/challenge5/challenge6/Assignment5.java</FileName>
-          <Line>50</Line>
+          <Line>51</Line>
           <Column>53</Column>
           <NodeId>6</NodeId>
           <Name>executeQuery</Name>
@@ -174,7 +174,7 @@
         </PathNode>
         <PathNode>
           <FileName>WebGoat/webgoat-lessons/challenge/src/main/java/org/owasp/webgoat/plugin/challenge5/challenge6/Assignment5.java</FileName>
-          <Line>50</Line>
+          <Line>52</Line>
           <Column>53</Column>
           <NodeId>6</NodeId>
           <Name>executeQuery</Name>
@@ -253,7 +253,7 @@
         </PathNode>
         <PathNode>
           <FileName>WebGoat/webgoat-lessons/challenge/src/main/java/org/owasp/webgoat/plugin/challenge6/Assignment6.java</FileName>
-          <Line>52</Line>
+          <Line>55</Line>
           <Column>57</Column>
           <NodeId>5</NodeId>
           <Name>executeQuery</Name>
