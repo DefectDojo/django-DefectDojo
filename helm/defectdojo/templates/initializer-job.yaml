@@ -19,27 +19,28 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       containers:
-        - name: initializer
-          image: "{{ .Values.initializer.repository }}:{{ .Values.tag }}"
-          imagePullPolicy: {{ .Values.imagePullPolicy }}
-          command: ['/entrypoint-initializer.sh']
-          envFrom:
-            - configMapRef:
-                name: {{ $fullName }}
-            - secretRef:
-                name: {{ $fullName }}
-          env:
-            - name: DD_DATABASE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  {{- if eq .Values.database "postgresql" }}
-                  name: {{- if .Values.postgresql.enabled }} {{ template "postgresql.fullname" .}} {{- else }} {{ .Values.postgresql.existingSecret }} {{- end }}
-                  key: postgres-password
-                  {{- else if eq .Values.database "mysql" }}
-                  name: {{- if .Values.mysql.enabled }} {{ template "mysql.fullname" .}} {{- else }} {{ .Values.mysql.mysqlPasswordSecret }} {{- end }}
-                  key: mysql-password
-                  {{- end }}   
-          resources:
-            {{- toYaml .Values.initializer.resources | nindent 12 }}
+      - name: initializer
+        image: "{{ .Values.initializer.repository }}:{{ .Values.tag }}"
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        command:
+          - /entrypoint-initializer.sh
+        envFrom:
+        - configMapRef:
+            name: {{ $fullName }}
+        - secretRef:
+            name: {{ $fullName }}
+        env:
+        - name: DD_DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              {{- if eq .Values.database "postgresql" }}
+              name: {{- if .Values.postgresql.enabled }} {{ template "postgresql.fullname" .}} {{- else }} {{ .Values.postgresql.existingSecret }} {{- end }}
+              key: postgres-password
+              {{- else if eq .Values.database "mysql" }}
+              name: {{- if .Values.mysql.enabled }} {{ template "mysql.fullname" .}} {{- else }} {{ .Values.mysql.mysqlPasswordSecret }} {{- end }}
+              key: mysql-password
+              {{- end }}   
+        resources:
+          {{- toYaml .Values.initializer.resources | nindent 10 }}
       restartPolicy: Never
   backoffLimit: 1

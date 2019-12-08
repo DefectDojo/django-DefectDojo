@@ -16,17 +16,17 @@ metadata:
 {{- end }}
 spec:
   tls:
-    - hosts:
-        - {{ .Values.host }}
-    {{- if .Values.django.ingress.secretName }}
-      secretName: {{ .Values.django.ingress.secretName }}
-    {{- end }}
+  - hosts:
+      - {{ .Values.host }}
+  {{- if .Values.django.ingress.secretName }}
+    secretName: {{ .Values.django.ingress.secretName }}
+  {{- end }}
   rules:
-    - host: {{ .Values.host }}
-      http:
-        paths:
-          - path: /
-            backend:
-              serviceName: {{ $fullName }}-django
-              servicePort: http
+  - host: {{ .Values.host }}
+    http:
+      paths:
+        - path: /
+          backend:
+            serviceName: {{ $fullName }}-django
+            servicePort: http
 {{- end }}
