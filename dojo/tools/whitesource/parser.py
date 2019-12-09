@@ -38,7 +38,13 @@ class WhitesourceJSONParser(object):
 
             cve = node.get('name')
             title = cve + " | " + lib_name
-            severity = node.get('severity').lower().capitalize()
+            # cvss2 by default in CLI, but cvss3 in UI. Adapting to have homogeneous behavior.
+            if 'cvss3_severity' in node:
+                cvss_sev = node.get('cvss3_severity')
+            else:
+                cvss_sev = node.get('severity')
+            severity = cvss_sev.lower().capitalize()
+
             cvss3_score = node.get('cvss3_score', "N/A")
             cvss3_vector = node.get('scoreMetadataVector', "N/A")
             severity_justification = "CVSS v3 score: {} ({})".format(cvss3_score, cvss3_vector)
