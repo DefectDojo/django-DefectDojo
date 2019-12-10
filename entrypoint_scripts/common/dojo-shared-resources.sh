@@ -458,7 +458,7 @@ function prepare_settings_file() {
         echo 'DD_ALLOWED_HOSTS="localhost"' >> ${ENV_SETTINGS_FILE}
     fi
 
-    echo 'DD_DEBUG="on"' >> ${ENV_SETTINGS_FILE}
+    echo 'DD_DEBUG="True"' >> ${ENV_SETTINGS_FILE}
     echo 'DD_SECRET_KEY="'${SECRET}'"' >> ${ENV_SETTINGS_FILE}
     echo 'DD_CREDENTIAL_AES_256_KEY="'${AES_PASSPHRASE}'"' >> ${ENV_SETTINGS_FILE}
 }
