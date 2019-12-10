@@ -45,14 +45,14 @@ class NetsparkerParser(object):
             url = item["Url"]
             endpoint_url = Endpoint(host=url)
             # Putting the full HTTP request and response in the "Steps to Reproduce"
-            steps_to_reproduce = "HTTP Request: \n" + item["HttpRequest"]["Content"] + "\n\nHTTP Response: \n" + \
+            steps_to_reproduce = "HTTP Request: \n\n" + item["HttpRequest"]["Content"] + "\n\nHTTP Response: \n\n" + \
                                  item["HttpResponse"]["Content"]
             # Put the URL in the Description
             findingdetail = cleantags(item["Description"])
             # Adding any "Extra Information" in the JSON to the justification field
             if len(item["ExtraInformation"]) > 0:
                 for info in item["ExtraInformation"]:
-                    severity_justification += info["Name"] + "\n\n" + info["Value"] + "\n\n"
+                    severity_justification += info["Name"] + ": " + info["Value"] + "\n\n"
             # Added try-catch for Vulnerabilites with no Cwe in JSON
             try:
                 cwe = item["Classification"]["Cwe"]
