@@ -46,7 +46,7 @@ def _check_ptvsd_port_not_in_use(port):
 
 
 ptvsd_port = 3000
-if os.environ.get("DD_DEBUG") == "on" and _check_ptvsd_port_not_in_use(ptvsd_port):
+if os.environ.get("DD_DEBUG") == "True" and _check_ptvsd_port_not_in_use(ptvsd_port):
     try:
         # enable remote debugging
         import ptvsd
