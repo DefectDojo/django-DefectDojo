@@ -11,26 +11,14 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveIndex(
-            model_name='finding',
-            name='dojo_findin_cve_dccd4b_idx'
-        ),
-        migrations.AddIndex(
-            model_name='finding',
-            index=models.Index(fields=['cve'], name='dojo_finding_cve_idx'),
-        ),
         migrations.AlterField(
             model_name='finding',
             name='cve',
-            field=models.TextField(max_length=28, null=True, validators=[django.core.validators.RegexValidator(message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'. ", regex='^[A-Z]{1,10}-\\d{4}-\\d{4,12}$')]),
-        ),
-        migrations.AddIndex(
-            model_name='finding_template',
-            index=models.Index(fields=['cve'], name='dojo_finding_template_cve_idx'),
+            field=models.CharField(max_length=28, null=True, validators=[django.core.validators.RegexValidator(message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'. ", regex='^[A-Z]{1,10}-\\d{4}-\\d{4,12}$')]),
         ),
         migrations.AlterField(
             model_name='finding_template',
             name='cve',
-            field=models.TextField(max_length=28, null=True, validators=[django.core.validators.RegexValidator(message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'. ", regex='^[A-Z]{1,10}-\\d{4}-\\d{4,12}$')]),
+            field=models.CharField(max_length=28, null=True, validators=[django.core.validators.RegexValidator(message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'. ", regex='^[A-Z]{1,10}-\\d{4}-\\d{4,12}$')]),
         ),
     ]
