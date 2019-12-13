@@ -18,9 +18,13 @@ spec:
         app.kubernetes.io/name: {{ include "defectdojo.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+      - name: {{ .Values.imagePullSecrets }}
+      {{- end }}
       containers:
       - name: initializer
-        image: "{{ .Values.initializer.repository }}:{{ .Values.tag }}"
+        image: "{{ template "initializer.repository" . }}:{{ .Values.tag }}"
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         command:
           - /entrypoint-initializer.sh
@@ -37,9 +41,12 @@ spec:
               name: {{- if .Values.postgresql.enabled }} {{ template "postgresql.fullname" .}} {{- else }} {{ .Values.postgresql.existingSecret }} {{- end }}
               key: postgres-password
               {{- else if eq .Values.database "mysql" }}
-              name: {{- if .Values.mysql.enabled }} {{ template "mysql.fullname" .}} {{- else }} {{ .Values.mysql.mysqlPasswordSecret }} {{- end }}
+              # Use mysql chart secret
+              # name: {{- if .Values.mysql.enabled }} {{ $fullName }}-{{ .Values.database }} {{- else }} {{ .Values.mysql.mysqlPasswordSecret }} {{- end }}
+              # Use secret handled outside of the chart
+              name: {{- if .Values.mysql.enabled }} defectdojo-mysql-specific {{- else }} {{ .Values.mysql.mysqlPasswordSecret }} {{- end }}
               key: mysql-password
-              {{- end }}   
+              {{- end }}
         resources:
           {{- toYaml .Values.initializer.resources | nindent 10 }}
       restartPolicy: Never
