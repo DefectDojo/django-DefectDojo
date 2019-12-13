@@ -1229,9 +1229,9 @@ class Finding(models.Model):
     title = models.TextField(max_length=1000)
     date = models.DateField(default=get_current_date)
     cwe = models.IntegerField(default=0, null=True, blank=True)
-    cve_regex = RegexValidator(regex=r'^[A-Z]{1,10}-\d{4}-\d{4,12}$',
-                                 message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'. ")
-    cve = models.CharField(validators=[cve_regex], max_length=28, null=True)
+    cve_regex = RegexValidator(regex=r'^CVE-\d{4}-\d{4,7}$',
+                                 message="CVE must be entered in the format: 'CVE-9999-9999'. ")
+    cve = models.CharField(validators=[cve_regex], max_length=20, null=True)
     url = models.TextField(null=True, blank=True, editable=False)
     severity = models.CharField(max_length=200, help_text="The severity level of this flaw (Critical, High, Medium, Low, Informational)")
     description = models.TextField()
@@ -1335,6 +1335,10 @@ class Finding(models.Model):
             filtered = filtered.filter(file_path=self.file_path)
         if self.line:
             filtered = filtered.filter(line=self.line)
+        if self.title:
+            filtered = filtered.filter(title=self.title)
+        if self.unique_id_from_tool:
+            filtered = filtered.filter(unique_id_from_tool=self.unique_id_from_tool)
         return filtered.exclude(pk=self.pk)
 
     def compute_hash_code(self):
@@ -1730,9 +1734,9 @@ class Stub_Finding(models.Model):
 class Finding_Template(models.Model):
     title = models.TextField(max_length=1000)
     cwe = models.IntegerField(default=None, null=True, blank=True)
-    cve_regex = RegexValidator(regex=r'^[A-Z]{1,10}-\d{4}-\d{4,12}$',
-                                 message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'. ")
-    cve = models.CharField(validators=[cve_regex], max_length=28, null=True)
+    cve_regex = RegexValidator(regex=r'^CVE-\d{4}-\d{4,7}$',
+                                 message="CVE must be entered in the format: 'CVE-9999-9999'. ")
+    cve = models.TextField(validators=[cve_regex], max_length=20, null=True)
     severity = models.CharField(max_length=200, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     mitigation = models.TextField(null=True, blank=True)
