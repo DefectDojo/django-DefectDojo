@@ -1232,7 +1232,7 @@ class Finding(models.Model):
     regex_pattern = re.compile(r'^[A-Z]{1,10}-\d{4}-\d{4,12}$', re.UNICODE)
     cve_regex = RegexValidator(regex_pattern,
                                  message="Vulnerability ID must comply with regex {}".format(regex_pattern.pattern))
-    cve = models.TextField(validators=[cve_regex], max_length=28, null=True)
+    cve = models.CharField(validators=[cve_regex], max_length=28, null=True)
     url = models.TextField(null=True, blank=True, editable=False)
     severity = models.CharField(max_length=200, help_text="The severity level of this flaw (Critical, High, Medium, Low, Informational)")
     description = models.TextField()
