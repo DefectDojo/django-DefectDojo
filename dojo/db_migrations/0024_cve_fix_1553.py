@@ -14,11 +14,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='finding',
             name='cve',
-            field=models.TextField(max_length=28, null=True, validators=[django.core.validators.RegexValidator(message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'. ", regex='^[A-Z]{1,10}-\\d{4}-\\d{4,12}$')]),
+            field=models.CharField(max_length=28, null=True, validators=[django.core.validators.RegexValidator(message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'. ", regex='^[A-Z]{1,10}-\\d{4}-\\d{4,12}$')]),
         ),
         migrations.AlterField(
             model_name='finding_template',
             name='cve',
-            field=models.TextField(max_length=28, null=True, validators=[django.core.validators.RegexValidator(message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'. ", regex='^[A-Z]{1,10}-\\d{4}-\\d{4,12}$')]),
+            field=models.CharField(max_length=28, null=True, validators=[django.core.validators.RegexValidator(message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'. ", regex='^[A-Z]{1,10}-\\d{4}-\\d{4,12}$')]),
         ),
     ]
