@@ -1,9 +1,10 @@
-# Author: apipia
 from abc import ABC, abstractmethod
 from pathlib import Path
 import csv
 import io
 import zipfile
+
+__author__ = 'Apipia'
 
 
 class Importer(ABC):

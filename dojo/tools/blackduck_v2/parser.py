@@ -1,7 +1,8 @@
-# Author: apipia
 import hashlib
 from dojo.models import Finding
 import dojo.tools.blackduck_v2.importer as import_helper
+
+__author__ = 'Apipia'
 
 
 class BlackduckHubParser(object):
