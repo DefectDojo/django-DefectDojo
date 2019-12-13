@@ -89,7 +89,7 @@ class BlackduckV2Importer(Importer):
         records = csv.DictReader(csv_file)
         for record in records:
             # Using component_id:version_id for unique identifier of each component
-            components[record.get("Component id") + ":" + record.get("Version id")] \
+            components[record.get("Component id") + ":" + record.get("Version id") + ":License"]\
                 = {x[0]: x[1] for x in record.items()}
         return components
 
@@ -109,7 +109,7 @@ class BlackduckV2Importer(Importer):
         securities = {}
         records = csv.DictReader(csv_file)
         for record in records:
-            key = record.get("Component id")+":"+record.get("Version id")
+            key = record.get("Component id")+":"+record.get("Version id")+":security"
             vulns = securities.get(key) or []
             vulns.append({x[0]: x[1] for x in record.items()})
             securities[key] = vulns

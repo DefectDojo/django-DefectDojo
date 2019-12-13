@@ -1335,8 +1335,6 @@ class Finding(models.Model):
             filtered = filtered.filter(file_path=self.file_path)
         if self.line:
             filtered = filtered.filter(line=self.line)
-        if self.title:
-            filtered = filtered.filter(title=self.title)
         if self.unique_id_from_tool:
             filtered = filtered.filter(unique_id_from_tool=self.unique_id_from_tool)
         return filtered.exclude(pk=self.pk)
