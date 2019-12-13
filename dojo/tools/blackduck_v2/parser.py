@@ -53,7 +53,6 @@ class BlackduckHubParser(object):
                 mitigation = self.license_mitigation(component)
                 impact = "N/A"
                 references = self.license_references(component)
-                uid = hashlib.md5(component_id.encode("utf-8")).hexdigest()
                 finding = Finding(title=title,
                                   test=test,
                                   active=False,
@@ -65,8 +64,7 @@ class BlackduckHubParser(object):
                                   impact=impact,
                                   references=references,
                                   static_finding=True,
-                                  unique_id_from_tool=component_id,
-                                  hash_code=uid)
+                                  unique_id_from_tool=component_id)
                 license_risk.append(finding)
         self.items.extend(license_risk)
 
@@ -81,8 +79,6 @@ class BlackduckHubParser(object):
             references = self.security_references(vulns)
             file_path = self.security_filepath(vulns)
 
-            uid = hashlib.md5(component_id.encode("utf-8")).hexdigest()
-
             finding = Finding(title=title,
                               test=test,
                               active=False,
@@ -95,8 +91,7 @@ class BlackduckHubParser(object):
                               references=references,
                               static_finding=True,
                               file_path=file_path,
-                              unique_id_from_tool=component_id,
-                              hash_code=uid)
+                              unique_id_from_tool=component_id)
             security_risk.append(finding)
         self.items.extend(security_risk)
 
