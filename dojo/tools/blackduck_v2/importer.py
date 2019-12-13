@@ -7,14 +7,7 @@ import zipfile
 __author__ = 'Apipia'
 
 
-class Importer(ABC):
-    @abstractmethod
-    def parse_findings(self, report: Path):
-        while False:
-            yield None
-
-
-class BlackduckV2Importer(Importer):
+class BlackduckV2Importer(object):
     """
     Importer for blackduck. V2 is different in that it creates a Finding in defect dojo
     for each vulnerable component version used in a project, and for each license that is
