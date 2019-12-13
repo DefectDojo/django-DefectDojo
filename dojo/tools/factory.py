@@ -65,6 +65,7 @@ from dojo.tools.testssl.parser import TestsslCSVParser
 from dojo.tools.hadolint.parser import HadolintParser
 from dojo.tools import SCAN_SONARQUBE_API
 from dojo.tools.aqua.parser import AquaJSONParser
+from dojo.tools.blackduck_v2.parser import BlackduckHubParser
 
 __author__ = 'Jay Paz'
 
@@ -182,6 +183,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = KiuwanCSVParser(file, test)
     elif scan_type == 'Blackduck Hub Scan':
         parser = BlackduckHubCSVParser(file, test)
+    elif scan_type == 'Blackduck Hub Scan V2':
+        parser = BlackduckHubParser(file, test)
     elif scan_type == 'Sonatype Application Scan':
         parser = SonatypeJSONParser(file, test)
     elif scan_type == 'Openscap Vulnerability Scan':
