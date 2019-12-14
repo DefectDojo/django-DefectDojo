@@ -17,7 +17,7 @@ TRIVY_SEVERITIES = {
 
 DESCRIPTION_TEMPLATE = """{title}
 Target: {target}
-Fixed version: {fixed_version}  
+Fixed version: {fixed_version}
 
 {description_text}
 """
@@ -42,7 +42,8 @@ class TrivyParser:
             if not isinstance(target_data, dict) or 'Target' not in target_data:
                 continue
             target = target_data['Target']
-            for vuln in target_data.get('Vulnerabilities', []):
+            vulnerabilities = target_data.get('Vulnerabilities', []) or []
+            for vuln in vulnerabilities:
                 if not isinstance(vuln, dict):
                     continue
                 try:
