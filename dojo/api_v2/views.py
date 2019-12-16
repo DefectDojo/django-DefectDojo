@@ -75,7 +75,7 @@ class EngagementViewSet(mixins.ListModelMixin,
     filter_fields = ('id', 'active', 'eng_type', 'target_start',
                      'target_end', 'requester', 'report_type',
                      'updated', 'threat_model', 'api_test',
-                     'pen_test', 'status', 'product')
+                     'pen_test', 'status', 'product', 'name')
 
     def get_queryset(self):
         if not self.request.user.is_staff:
