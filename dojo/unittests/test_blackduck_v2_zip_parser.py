@@ -6,6 +6,6 @@ from pathlib import Path
 
 class TestBlackduckHubV2Parser(TestCase):
     def test_blackduck_enhanced_zip_upload(self):
-        testfile = Path("dojo/unittests/scans/blackduck_V2/blackduck_hub_v2.zip")
+        testfile = Path("dojo/unittests/scans/blackduck_v2/blackduck_hub_v2.zip")
         parser = BlackduckHubParser(testfile, Test())
         self.assertEqual(12, len(parser.items))

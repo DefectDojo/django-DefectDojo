@@ -1,8 +1,6 @@
-import hashlib
+# Author: apipia
 from dojo.models import Finding
 import dojo.tools.blackduck_v2.importer as import_helper
-
-__author__ = 'Apipia'
 
 
 class BlackduckHubParser(object):
@@ -238,4 +236,3 @@ class BlackduckHubParser(object):
         else:
             component_key = vulns[0]["Component origin id"]
         return "{}:{}".format(vulns[0]["Component origin name"], component_key)
-
