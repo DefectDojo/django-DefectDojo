@@ -3,8 +3,11 @@ Parser for Aquasecurity trivy (https://github.com/aquasecurity/trivy) Docker ima
 """
 
 import json
+import logging
 
 from dojo.models import Finding
+
+logger = logging.getLogger(__name__)
 
 
 TRIVY_SEVERITIES = {
@@ -49,13 +52,14 @@ class TrivyParser:
                 try:
                     vuln_id = vuln['VulnerabilityID']
                     package_name = vuln['PkgName']
-                    package_version = vuln['InstalledVersion']
                     severity = TRIVY_SEVERITIES[vuln['Severity']]
-                except KeyError:
+                except KeyError as exc:
+                    logger.warning('skip vulnerability due %r', exc)
                     continue
+                package_version = vuln.get('InstalledVersion', '')
                 references = '\n'.join(vuln.get('References', []))
                 mitigation = vuln.get('FixedVersion', '')
-                title = '-'.join([
+                title = ' '.join([
                     vuln_id,
                     package_name,
                     package_version,
