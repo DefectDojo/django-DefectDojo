@@ -1,7 +1,5 @@
 version: 1
 update_configs:
-  # Keep package.json (& lockfiles) up to date as soon as
-  # new versions are published to the npm registry
   - package_manager: "python"
     directory: "/"
     target_branch: "dev"
