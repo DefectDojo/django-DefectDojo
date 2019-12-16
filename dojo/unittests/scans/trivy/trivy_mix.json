@@ -1,7 +1,11 @@
 [
   {
     "Target": "php-app/composer.lock",
-    "Vulnerabilities": null
+    "Vulnerabilities": [
+      {
+        "PkgName": "simplito/elliptic-php"
+      }
+    ]
   },
   {
     "Target": "node-app/package-lock.json",
