@@ -5,6 +5,7 @@ from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
 from rest_framework.permissions import DjangoModelPermissions
 from rest_framework.decorators import detail_route, action
+from rest_framework.parsers import MultiPartParser
 from django_filters.rest_framework import DjangoFilterBackend
 
 from dojo.engagement.services import close_engagement, reopen_engagement
@@ -611,12 +612,14 @@ class UsersViewSet(mixins.ListModelMixin,
 class ImportScanView(mixins.CreateModelMixin,
                      viewsets.GenericViewSet):
     serializer_class = serializers.ImportScanSerializer
+    parser_classes = [MultiPartParser]
     queryset = Test.objects.all()
 
 
 class ReImportScanView(mixins.CreateModelMixin,
                        viewsets.GenericViewSet):
     serializer_class = serializers.ReImportScanSerializer
+    parser_classes = [MultiPartParser]
     queryset = Test.objects.all()
 
 
