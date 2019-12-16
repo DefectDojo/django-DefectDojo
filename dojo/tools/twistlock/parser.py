@@ -27,14 +27,17 @@ class TwistlockParser(object):
     def get_items(self, tree, test):
         items = {}
         if 'results' in tree:
-            vulnerabilityTree = tree['results'][0]['vulnerabilities']
+            try:
+                vulnerabilityTree = tree['results'][0]['vulnerabilities']
 
-            for node in vulnerabilityTree:
+                for node in vulnerabilityTree:
 
-                item = get_item(node, test)
-                unique_key = node['id'] + str(node['packageName'] + str(
-                    node['packageVersion']) + str(node['severity']))
-                items[unique_key] = item
+                    item = get_item(node, test)
+                    unique_key = node['id'] + str(node['packageName'] + str(
+                        node['packageVersion']) + str(node['severity']))
+                    items[unique_key] = item
+            except KeyError as ke:
+                print("Could not find key {}".format(ke))
 
         return list(items.values())
 

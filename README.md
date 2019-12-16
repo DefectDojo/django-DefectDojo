@@ -69,7 +69,7 @@ should give you an idea of how to use DefectDojo for your own team.
 ![Slack](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/slack_rgb.png)
 
 Realtime discussion is done in the OWASP Slack Channel, #defectdojo.
-[Get Access.](https://join.slack.com/t/owasp/shared_invite/enQtNjExMTc3MTg0MzU4LTViMDg1MmJiMzMwZGUxZjgxZWQ1MTE0NTBlOTBhNjhhZDIzZTZiNmEwOTJlYjdkMzAxMGVhNDkwNDNiNjZiOWQ)
+[Get Access.](https://join.slack.com/t/owasp/shared_invite/enQtNjExMTc3MTg0MzU4LWQ2Nzg3NGJiZGQ2MjRmNzkzN2Q4YzU1MWYyZTdjYjA2ZTA5M2RkNzE2ZjdkNzI5ZThhOWY5MjljYWZmYmY4ZjM)
 
 ![Twitter](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/Twitter_Logo.png)
 
@@ -104,13 +104,18 @@ Project Moderators can help you with pull requests or feedback on dev ideas.
 
 * [Alex Dracea](https://www.linkedin.com/in/alexandru-marin-dracea-910b51122/)
 * [Valentijn Scholten](https://www.linkedin.com/in/valentijn-scholten/)
+* Jannik Jürgens
+* [Fred Blaise](https://www.linkedin.com/in/fredblaise/)
+* Saurabh kumar
+* Cody Maffucci 
+
 
 ## Hall of Fame
 
 * Charles Neill ([@ccneill](https://twitter.com/ccneill)) – Charles served as a
     DefectDojo Maintainer for years and wrote some of Dojo's core functionality.
 * Jay Paz ([@jjpaz](https://twitter.com/jjpaz)) – Jay was a DefectDojo
-  maintainer for years. He performed Dojo's first UI overhaul, optomized code structure/features, and added numerous enhancements.
+  maintainer for years. He performed Dojo's first UI overhaul, optimized code structure/features, and added numerous enhancements.
 
 ## Contributing
 

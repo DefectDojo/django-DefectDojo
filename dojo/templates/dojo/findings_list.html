@@ -123,7 +123,7 @@
                                   </ul>
                               </div>
                             </th>
-                            <th></th>
+                            <th>Act.</th>
                             {% endif %}
                             <th class="nowrap">{% dojo_sort request 'Severity' 'numerical_severity' 'asc' %}</th>
                             <th class="nowrap">{% dojo_sort request 'Name' 'title' %}</th>
@@ -136,7 +136,7 @@
                             <th>Reporter</th>
                             <th>Found By</th>
                             <th>Status</th>
-                            <th></th>
+                            <th>Jira</th>
                             {% if "enable_jira"|get_system_setting %}
                               {% if jira_config and product_tab or not product_tab %}
                                 <th>JIRA Age</th>
@@ -563,7 +563,109 @@
             };
 
         });
+    </script>
+    <script>
+        // DataTables Setup
+        $(document).ready(function() {
+            date =  new Date().toISOString().slice(0, 10);
+            var fileDated = 'Findings_List_' + date;
+            var buttonCommon = {
+                exportOptions: {
+                    columns: ':not(:eq(0), :eq(1))',
+                    stripHtml: true,
+                    stripNewlines: true,
+                    trim: true,
+                    orthogonal: 'export'
+                },
+                filename: fileDated,
+                title: 'Findings List'
+            };
 
+            // Mapping of table columns to objects for proper cleanup and data formatting
+            var dojoTable = $('#open_findings').DataTable({
+                "columns": [
+                    { "data": "checkbox", render: function (data, type, row) {
+                            return type === 'export' ?  "" :  data;
+                    }},
+                    { "data": "action", render: function (data, type, row) {
+                            return type === 'export' ?  "" :  data;
+                    }},
+                    { "data": "severity" , render: function (data, type, row) {
+                            return type === 'export' ?  getDojoExportValueFromTag(data, 'span') :  data;
+                    }},
+                    { "data": "finding" , render: function (data, type, row) {
+                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
+                    }},
+                    { "data": "cwe" , render: function (data, type, row) {
+                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
+                    }},
+                    { "data": "found_date", render: function (data, type, row) {
+                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
+                    }},
+                    { "data": "finding_age", render: function (data, type, row) {
+                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
+                    } },
+                    { "data": "finding_sla", render: function (data, type, row) {
+                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
+                    }},
+                    { "data": "reported_by", render: function (data, type, row) {
+                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
+                    }},
+                    { "data": "found_by_test", render: function (data, type, row) {
+                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
+                    }},
+                    { "data": "status", render: function (data, type, row) {
+                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
+                    }},
+                    { "data": "jira_id", render: function (data, type, row) {
+                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
+                    }},
+                    {% if "enable_jira"|get_system_setting %}
+                        { "data": "jira_age", render: function (data, type, row) {
+                                return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
+                        }},
+                        { "data": "jira_change", render: function (data, type, row) {
+                                return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
+                        }},
+                    {% endif %}
+                    {% if show_product_column and product_tab is None %}
+                        { "data": "product" , render: function (data, type, row) {
+                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
+                        }},
+                    {% endif %}
+                ],
+                order: [2],
+                "columnDefs": [
+                    { "orderable": false, "targets": [0, 1] }
+                ],
+                dom: 'Bfrtip',
+                paging: false,
+                buttons: [
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'colvis'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'copyHtml5'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'excelHtml5',
+                        autoFilter: true,
+                        sheetName: 'Exported data',
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'csvHtml5'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'pdfHtml5',
+                        orientation: 'landscape',
+                        pageSize: 'LETTER'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'print'
+                    }),
+                ],
+            });
+        });
     </script>
     {% include "dojo/filter_js_snippet.html" %}
 {% endblock %}

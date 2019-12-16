@@ -6,8 +6,14 @@ services:
     volumes:
       - '.:/app:z'
     environment:
-      DD_DEBUG: 'on'
+      DD_DEBUG: 'True'
   celeryworker:
+    volumes:
+      - '.:/app:z'
+  celerybeat:
+    volumes:
+      - '.:/app:z'
+  initializer:
     volumes:
       - '.:/app:z'
   nginx:

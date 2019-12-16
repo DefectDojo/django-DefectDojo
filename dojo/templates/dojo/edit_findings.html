@@ -47,6 +47,27 @@
               <input type="hidden" name="page" value="{{ request.GET.page|paginator_form }}">
             {% endif %}
             {% include "dojo/form_fields.html" with form=form %}
+            <div class="form-group hidden">
+                {% if dupes %}
+                    <label class="col-sm-2 control-label" for="dupe_choice">Parent Duplicate</label>
+                    <div class="col-sm-10">
+                        <select class="form-control" name=duplicate_choice id="dupe_choice">
+                            {% for dupe in dupes %}
+                                <option>{{ dupe.id }}: {{ dupe.title }},
+                                        {{ dupe.test.engagement.product.name }}/
+                                        {{ dupe.test.engagement.name }}/
+                                        {% if dupe.test.title %}
+                                            {{dupe.test.title}}
+                                        {% else %}
+                                            {{dupe.test.test_type}}
+                                        {% endif %}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                {% endif %}
+            </div>
+
             {% if jform %}
                 {% include "dojo/form_fields.html" with form=jform %}
             {% endif %}
@@ -122,6 +143,31 @@
                 });
                 mde.render();
             });
+        });
+
+        window.onload = function() {
+            var menu = document.getElementById("dupe_choice").parentElement.parentElement
+            var dupe_box = document.getElementById("id_duplicate").parentElement.parentElement.parentElement.parentElement
+            if ($("#id_duplicate").prop("checked")) {
+                dupe_box.insertAdjacentElement("afterend", menu)
+                menu.setAttribute("class", "form-group");
+            }
+            else {
+                menu.setAttribute("class", "form-group hidden");
+            }
+        };
+
+        $("#id_duplicate").change(function () {
+            var menu = document.getElementById("dupe_choice").parentElement.parentElement
+            var dupe_box = document.getElementById("id_duplicate").parentElement.parentElement.parentElement.parentElement
+            if ($(this).prop("checked")) {
+                dupe_box.insertAdjacentElement("afterend", menu)
+                menu.setAttribute("class", "form-group");
+            }
+            else {
+                menu.setAttribute("class", "form-group hidden");
+            }
+
         });
 
         $("#add_finding").submit(function () {

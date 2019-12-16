@@ -15,8 +15,10 @@ env = environ.Env(
     DD_SECURE_SSL_REDIRECT=(bool, False),
     DD_SECURE_HSTS_INCLUDE_SUBDOMAINS=(bool, False),
     DD_SECURE_HSTS_SECONDS=(int, 31536000),  # One year expiration
+    DD_SESSION_COOKIE_SECURE=(bool, False),
     DD_CSRF_COOKIE_SECURE=(bool, False),
-    DD_SECURE_BROWSER_XSS_FILTER=(bool, False),
+    DD_SECURE_BROWSER_XSS_FILTER=(bool, True),
+    DD_SECURE_CONTENT_TYPE_NOSNIFF=(bool, True),
     DD_TIME_ZONE=(str, 'UTC'),
     DD_LANG=(str, 'en-us'),
     DD_WKHTMLTOPDF=(str, '/usr/local/bin/wkhtmltopdf'),
@@ -66,11 +68,18 @@ env = environ.Env(
     DD_SECRET_KEY=(str, '.'),
     DD_CREDENTIAL_AES_256_KEY=(str, '.'),
     DD_DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 8388608),  # Max post size set to 8mb
+    DD_SOCIAL_AUTH_GOOGLE_OAUTH2_ENABLE=(bool, 'False'),
     DD_SOCIAL_AUTH_GOOGLE_OAUTH2_KEY=(str, ''),
     DD_SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET=(str, ''),
+    DD_SOCIAL_AUTH_OKTA_OAUTH2_ENABLED=(bool, 'False'),
     DD_SOCIAL_AUTH_OKTA_OAUTH2_KEY=(str, ''),
     DD_SOCIAL_AUTH_OKTA_OAUTH2_SECRET=(str, ''),
     DD_SOCIAL_AUTH_OKTA_OAUTH2_API_URL=(str, 'https://{your-org-url}/oauth2/default'),
+    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_ENABLED=(bool, 'False'),
+    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_KEY=(str, ''),
+    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET=(str, ''),
+    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID=(str, ''),
+    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE=(str, 'https://graph.microsoft.com/'),
 )
 
 
@@ -246,6 +255,7 @@ LOGIN_URL = '/login'
 AUTHENTICATION_BACKENDS = (
     'social_core.backends.google.GoogleOAuth2',
     'dojo.okta.OktaOAuth2',
+    'social_core.backends.azuread_tenant.AzureADTenantOAuth2',
     'django.contrib.auth.backends.RemoteUserBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
@@ -256,6 +266,7 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.auth_allowed',
     'social_core.pipeline.social_auth.social_user',
     'social_core.pipeline.user.get_username',
+    'social_core.pipeline.social_auth.associate_by_email',
     'social_core.pipeline.user.create_user',
     'dojo.pipeline.modify_permissions',
     'social_core.pipeline.social_auth.associate_user',
@@ -266,15 +277,22 @@ SOCIAL_AUTH_PIPELINE = (
 SOCIAL_AUTH_STRATEGY = 'social_django.strategy.DjangoStrategy'
 SOCIAL_AUTH_STORAGE = 'social_django.models.DjangoStorage'
 SOCIAL_AUTH_ADMIN_USER_SEARCH_FIELDS = ['username', 'first_name', 'last_name', 'email']
+SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL = True
 
-GOOGLE_OAUTH_ENABLED = False
+GOOGLE_OAUTH_ENABLED = env('DD_SOCIAL_AUTH_GOOGLE_OAUTH2_ENABLE')
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = env('DD_SOCIAL_AUTH_GOOGLE_OAUTH2_KEY')
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = env('DD_SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET')
 
-OKTA_OAUTH_ENABLED = False
+OKTA_OAUTH_ENABLED = env('DD_SOCIAL_AUTH_OKTA_OAUTH2_ENABLED')
 SOCIAL_AUTH_OKTA_OAUTH2_KEY = env('DD_SOCIAL_AUTH_OKTA_OAUTH2_KEY')
 SOCIAL_AUTH_OKTA_OAUTH2_SECRET = env('DD_SOCIAL_AUTH_OKTA_OAUTH2_SECRET')
 SOCIAL_AUTH_OKTA_OAUTH2_API_URL = env('DD_SOCIAL_AUTH_OKTA_OAUTH2_API_URL')
+
+AZUREAD_TENANT_OAUTH2_ENABLED = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_ENABLED')
+SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_KEY = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_KEY')
+SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET')
+SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID')
+SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE')
 
 LOGIN_EXEMPT_URLS = (
     r'^%sstatic/' % URL_PREFIX,
@@ -285,6 +303,8 @@ LOGIN_EXEMPT_URLS = (
     r'^%sapi/v2/' % URL_PREFIX,
     r'complete/google-oauth2/',
     r'complete/okta-oauth2/',
+    r'empty_survey/([\d]+)/answer'
+    r'complete/azuread-tenant-oauth2/',
 )
 
 # ------------------------------------------------------------------------------
@@ -299,6 +319,9 @@ SECURE_SSL_REDIRECT = env('DD_SECURE_SSL_REDIRECT')
 # mode=block header on all responses that do not already have it.
 SECURE_BROWSER_XSS_FILTER = env('DD_SECURE_BROWSER_XSS_FILTER')
 
+# If True, the SecurityMiddleware sets the X-Content-Type-Options: nosniff;
+SECURE_CONTENT_TYPE_NOSNIFF = env('DD_SECURE_CONTENT_TYPE_NOSNIFF')
+
 # Whether to use HTTPOnly flag on the session cookie.
 # If this is set to True, client-side JavaScript will not to be able to access the session cookie.
 SESSION_COOKIE_HTTPONLY = env('DD_SESSION_COOKIE_HTTPONLY')
@@ -307,9 +330,12 @@ SESSION_COOKIE_HTTPONLY = env('DD_SESSION_COOKIE_HTTPONLY')
 # client-side JavaScript will not to be able to access the CSRF cookie.
 CSRF_COOKIE_HTTPONLY = env('DD_CSRF_COOKIE_HTTPONLY')
 
-# Whether to use a secure cookie for the CSRF cookie. If this is set to True,
+# Whether to use a secure cookie for the session cookie. If this is set to True,
 # the cookie will be marked as secure, which means browsers may ensure that the
 # cookie is only sent with an HTTPS connection.
+SESSION_COOKIE_SECURE = env('DD_SESSION_COOKIE_SECURE')
+
+# Whether to use a secure cookie for the CSRF cookie.
 CSRF_COOKIE_SECURE = env('DD_CSRF_COOKIE_SECURE')
 
 if env('DD_SECURE_PROXY_SSL_HEADER'):
@@ -425,6 +451,7 @@ INSTALLED_APPS = (
     'gunicorn',
     'tastypie',
     'auditlog',
+    'defectDojo_engagement_survey',
     'dojo',
     'tastypie_swagger',
     'watson',
@@ -511,7 +538,77 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': timedelta(minutes=1),
         'args': [timedelta(minutes=1)]
     },
+    'update-findings-from-source-issues': {
+        'task': 'dojo.tasks.async_update_findings_from_source_issues',
+        'schedule': timedelta(hours=3),
+    }
 }
+
+
+# ------------------------------------
+# Hashcode configuration
+# ------------------------------------
+# List of fields used to compute the hash_code
+# The fields must be one of HASHCODE_ALLOWED_FIELDS
+# If not present, default is the legacy behavior: see models.py, compute_hash_code_legacy function
+# legacy is:
+#   static scanner:  ['title', 'cwe', 'line', 'file_path', 'description']
+#   dynamic scanner: ['title', 'cwe', 'line', 'file_path', 'description', 'endpoints']
+HASHCODE_FIELDS_PER_SCANNER = {
+    # In checkmarx, same CWE may appear with different severities: example "sql injection" (high) and "blind sql injection" (low).
+    # Including the severity in the hash_code keeps those findings not duplicate
+    'Checkmarx Scan': ['cwe', 'severity', 'file_path'],
+    'SonarQube Scan': ['cwe', 'severity', 'file_path'],
+    'Dependency Check Scan': ['cve', 'file_path'],
+    # possible improvment: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
+    'NPM Audit Scan': ['title', 'severity'],
+    # possible improvment: in the scanner put the library name into file_path, then dedup on cve + file_path + severity
+    'Whitesource Scan': ['title', 'severity', 'description']
+}
+
+# This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
+# If False and cwe = 0, then the hash_code computation will fallback to legacy algorithm for the concerned finding
+# Default is True (if scanner is not configured here but is configured in HASHCODE_FIELDS_PER_SCANNER, it allows null cwe)
+HASHCODE_ALLOWS_NULL_CWE = {
+    'Checkmarx Scan': False,
+    'SonarQube Scan': False,
+    'Dependency Check Scan': True,
+    'NPM Audit Scan': True,
+    'Whitesource Scan': True
+}
+
+# List of fields that are known to be usable in hash_code computation)
+# 'endpoints' is a pseudo field that uses the endpoints (for dynamic scanners)
+# 'unique_id_from_tool' is often not needed here as it can be used directly in the dedupe algorithm, but it's also possible to use it for hashing
+HASHCODE_ALLOWED_FIELDS = ['title', 'cwe', 'cve', 'line', 'file_path', 'description', 'endpoints', 'unique_id_from_tool', 'severity']
+
+# ------------------------------------
+# Deduplication configuration
+# ------------------------------------
+# List of algorithms
+# legacy one with multiple conditions (default mode)
+DEDUPE_ALGO_LEGACY = 'legacy'
+# based on dojo_finding.unique_id_from_tool only (for checkmarx detailed, or sonarQube detailed for example)
+DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL = 'unique_id_from_tool'
+# based on dojo_finding.hash_code only
+DEDUPE_ALGO_HASH_CODE = 'hash_code'
+# unique_id_from_tool or hash_code
+# Makes it possible to deduplicate on a technical id (same parser) and also on some functional fields (cross-parsers deduplication)
+DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE = 'unique_id_from_tool_or_hash_code'
+
+# Choice of deduplication algorithm per parser
+# Key = the scan_type from factory.py (= the test_type)
+# Default is DEDUPE_ALGO_LEGACY
+DEDUPLICATION_ALGORITHM_PER_PARSER = {
+    'Checkmarx Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'Checkmarx Scan': DEDUPE_ALGO_HASH_CODE,
+    'SonarQube Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'SonarQube Scan': DEDUPE_ALGO_HASH_CODE,
+    'Dependency Check Scan': DEDUPE_ALGO_HASH_CODE,
+    'NPM Audit Scan': DEDUPE_ALGO_HASH_CODE,
+    'Whitesource Scan': DEDUPE_ALGO_HASH_CODE
+}
+
 
 # ------------------------------------------------------------------------------
 # LOGGING

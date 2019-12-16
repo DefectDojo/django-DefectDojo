@@ -1,0 +1,13 @@
+---
+version: '3.7'
+services:
+  nginx:
+    ports:
+      - target: ${DD_PORT:-8083}
+        published: ${DD_PORT:-8083}
+        protocol: tcp
+        mode: host
+  uwsgi:
+    environment:
+      DD_SESSION_COOKIE_SECURE: 'True'
+      DD_CSRF_COOKIE_SECURE: 'True'
