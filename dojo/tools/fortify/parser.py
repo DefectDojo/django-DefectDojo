@@ -95,7 +95,6 @@ class FortifyXMLParser(object):
                     mitigation=self.format_mitigation(issue, cat_meta),
                     unique_id_from_tool=issue_key
                 ))
-            else:
                 dupes.add(title)
 
     def format_title(self, category, filename, line_no):
