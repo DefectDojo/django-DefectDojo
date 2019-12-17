@@ -40,7 +40,7 @@ docker-compose build
 To build a single image, run: 
 
 ```zsh
-docker-compose build django
+docker-compose build uwsgi
 ```
 or
 
@@ -82,7 +82,7 @@ This will run the application based on merged configurations from docker-compose
 * Hot-reloading for the **celeryworker** container is not yet implemented. When working on deduplication for example, restart the celeryworker container with: 
 
 ```
-docker restart django-defectdojo_celeryworker_1
+docker-compose restart celeryworker
 ```
 
 *  The mysql port is forwarded to the host so that you can access your database from outside the container. 
@@ -145,19 +145,10 @@ You can now launch the remote debug from VS Code, place your breakpoints and ste
 ## Access the application
 Navigate to <http://localhost:8080> where you can log in with username admin.
 To find out the admin password, check the very beginning of the console
-output of the initializer container, typically name 'django-defectdojo_initializer_1', or run the following:
+output of the initializer container by running:
 
 ```zsh
-container_id=(`docker ps -a \
---filter "name=django-defectdojo_initializer_1" \
-| awk 'FNR == 2 {print $1}'`) && \
-docker logs $container_id 2>&1 | grep "Admin password:"
-```
-
-or:
-
-```zsh
-docker logs django-defectdojo_initializer_1
+docker-compose logs initializer | grep "Admin password:"
 ```
 
 Make sure you write down the first password generated as you'll need it when re-starting the application.
@@ -262,7 +253,7 @@ docker-compose up
 Enter the container to run more tests:
 
 ```
-docker exec -it django-defectdojo_uwsgi_1 bash
+docker-compose exec uwsgi bash
 ```
 Rerun all the tests:
 

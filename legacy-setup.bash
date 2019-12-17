@@ -65,6 +65,7 @@ echo "        CSRF_COOKIE_SECURE = True"
 echo "        SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')"
 echo "        SECURE_SSL_REDIRECT = True"
 echo "        SECURE_BROWSER_XSS_FILTER = True"
+echo "        SECURE_CONTENT_TYPE_NOSNIFF = True"
 echo "        django.middleware.security.SecurityMiddleware"
 echo
 echo "When you're ready to start the DefectDojo server, type in this directory:"

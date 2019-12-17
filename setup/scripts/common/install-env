@@ -43,8 +43,11 @@ DD_SECURE_SSL_REDIRECT=#DD_SECURE_SSL_REDIRECT#
 # Whether to use a secure cookie for the CSRF cookie - default is off
 DD_CSRF_COOKIE_SECURE=#DD_CSRF_COOKIE_SECURE#
 
-# If on, the SecurityMiddleware sets the X-XSS-Protection: 1; - default is on
+# If True, the SecurityMiddleware sets the X-XSS-Protection: 1; - default is on
 DD_SECURE_BROWSER_XSS_FILTER=#DD_SECURE_BROWSER_XSS_FILTER#
+
+# If True, the SecurityMiddleware sets the X-Content-Type-Options: nosniff;
+DD_SECURE_CONTENT_TYPE_NOSNIFF=#DD_SECURE_CONTENT_TYPE_NOSNIFF#
 
 # Change the default language set - default is en-us
 DD_LANG=#DD_LANG#

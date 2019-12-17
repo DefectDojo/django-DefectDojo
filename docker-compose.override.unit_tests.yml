@@ -11,7 +11,7 @@ services:
     volumes:
       - '.:/app:z'
     environment:
-      DD_DEBUG: 'on'
+      DD_DEBUG: 'True'
       DD_TEST_DATABASE_NAME: ${DD_TEST_DATABASE_NAME:-test_defectdojo}
       DD_DATABASE_NAME: ${DD_TEST_DATABASE_NAME:-test_defectdojo}
   celerybeat:
