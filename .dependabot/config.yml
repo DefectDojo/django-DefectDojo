@@ -12,4 +12,5 @@ update_configs:
 
   - package_manager: "docker"
     directory: "/"
+    target_branch: "dev"
     update_schedule: "weekly"
