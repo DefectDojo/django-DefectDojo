@@ -15,5 +15,3 @@ required XML:
 ```
 ./path/to/ReportGenerator -format xml -f /path/to/output.xml -source /path/to/downloaded/artifact.fpr -template DefaultReportDefinitionAllIssues.xml
 ```
-
-
