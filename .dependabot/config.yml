@@ -9,3 +9,7 @@ update_configs:
     directory: "/"
     target_branch: "dev"
     update_schedule: "live"
+
+  - package_manager: "docker"
+    directory: "/"
+    update_schedule: "weekly"
