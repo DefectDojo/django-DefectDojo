@@ -620,5 +620,5 @@ function slim_defect_dojo_settings() {
   # Copy settings file
   ENV_SETTINGS_FILE=dojo/settings/.env.prod
   cp dojo/settings/template-env ${ENV_SETTINGS_FILE}
-  sed -i'' "s&# DD_TRACK_MIGRATIONS=on&#DD_TRACK_MIGRATIONS=on&g" ${ENV_SETTINGS_FILE}
+  sed -i'' "s&# DD_TRACK_MIGRATIONS=True&#DD_TRACK_MIGRATIONS=True&g" ${ENV_SETTINGS_FILE}
 }

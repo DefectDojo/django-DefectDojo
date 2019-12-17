@@ -73,7 +73,7 @@ DEV_ADMIN_PASS="admin"
 ADMIN_EMAIL=${ADMIN_EMAIL:-"ed@example.com"}
 
 # Django settings.py vars
-DD_DEBUG=${DD_DEBUG:="off"}                              # Django Debug, defaults to off and should be for production. Can be off or on
+DD_DEBUG=${DD_DEBUG:="False"}                              # Django Debug, defaults to False and should be for production. Can be False or True
 DD_DJANGO_ADMIN_ENABLED=${DD_DJANGO_ADMIN_ENABLED:-"on"} # Enables Django Admin, defaults to on - either off or on
 DD_SECRET_KEY="GENERATED-DYNAMICALLY-AT-INSTALL-TIME"    # A secret key for a particular Django installation.
 DD_CREDENTIAL_AES_256_KEY="GENERATED-DYNAMICALLY-AT-INSTALL-TIME" # Key for encrypting credentials in the manager
@@ -82,15 +82,16 @@ DD_ALLOWED_HOSTS=${DD_ALLOWED_HOSTS:-"*"}                # Hosts/domain names th
 # WhiteNoise allows your web app to serve its own static files,
 # making it a self-contained unit that can be deployed anywhere without relying on nginx,
 # if using nginx then disable Whitenoise
-DD_WHITENOISE=${DD_WHITENOISE:-"on"}   # Valid options: on, off 
+DD_WHITENOISE=${DD_WHITENOISE:-"True"}   # Valid options: True, False 
 # Additional Settings / Override defaults in settings.py
 DD_TIME_ZONE=${DD_TIME_ZONE:-"America/New_York"}         # Timezone - default America/New_York
-DD_TRACK_MIGRATIONS=${DD_TRACK_MIGRATIONS:-"on"}         # Track migrations through source control rather than making migrations locally
-DD_SESSION_COOKIE_HTTPONLY=${DD_SESSION_COOKIE_HTTPONLY:-"on"} # Whether to use HTTPOnly flag on the session cookie - either on or off
-DD_CSRF_COOKIE_HTTPONLY=${DD_CSRF_COOKIE_HTTPONLY:-"on"} # Whether to use HttpOnly flag on the CSRF cookie - either on or off
-DD_SECURE_SSL_REDIRECT=${DD_SECURE_SSL_REDIRECT:-"off"}  # If True, the SecurityMiddleware redirects all non-HTTPS requests to HTTPS - either on or off
-DD_CSRF_COOKIE_SECURE=${DD_CSRF_COOKIE_SECURE:-"off"}    # Whether to use a secure cookie for the CSRF cookie - either on or off
-DD_SECURE_BROWSER_XSS_FILTER=${DD_SECURE_BROWSER_XSS_FILTER:-"on"} # If on, the SecurityMiddleware sets the X-XSS-Protection: 1; - either on or off
+DD_TRACK_MIGRATIONS=${DD_TRACK_MIGRATIONS:-"True"}         # Track migrations through source control rather than making migrations locally
+DD_SESSION_COOKIE_HTTPONLY=${DD_SESSION_COOKIE_HTTPONLY:-"True"} # Whether to use HTTPOnly flag on the session cookie - either True or False
+DD_CSRF_COOKIE_HTTPONLY=${DD_CSRF_COOKIE_HTTPONLY:-"True"} # Whether to use HttpOnly flag on the CSRF cookie - either True or False
+DD_SECURE_SSL_REDIRECT=${DD_SECURE_SSL_REDIRECT:-"False"}  # If True, the SecurityMiddleware redirects all non-HTTPS requests to HTTPS - either True or False
+DD_CSRF_COOKIE_SECURE=${DD_CSRF_COOKIE_SECURE:-"False"}    # Whether to use a secure cookie for the CSRF cookie - either True or False
+DD_SECURE_BROWSER_XSS_FILTER=${DD_SECURE_BROWSER_XSS_FILTER:-"True"} # If True, the SecurityMiddleware sets the X-XSS-Protection: 1; - either True or False
+DD_SECURE_CONTENT_TYPE_NOSNIFF=${DD_SECURE_CONTENT_TYPE_NOSNIFF:-"True"} # If True, the SecurityMiddleware sets the X-Content-Type-Options: nosniff;
 DD_LANG=${DD_LANG:-"en-us"}                              # Change the default language set
 DD_WKHTMLTOPDF=${DD_WKHTMLTOPDF:-"/usr/local/bin/wkhtmltopdf"} # Path to PDF library
 DD_TEAM_NAME=${DD_TEAM_NAME:-"Security"}                 # Security team name, used for outgoing emails
