@@ -115,7 +115,7 @@ Project Moderators can help you with pull requests or feedback on dev ideas.
 * Charles Neill ([@ccneill](https://twitter.com/ccneill)) – Charles served as a
     DefectDojo Maintainer for years and wrote some of Dojo's core functionality.
 * Jay Paz ([@jjpaz](https://twitter.com/jjpaz)) – Jay was a DefectDojo
-  maintainer for years. He performed Dojo's first UI overhaul, optomized code structure/features, and added numerous enhancements.
+  maintainer for years. He performed Dojo's first UI overhaul, optimized code structure/features, and added numerous enhancements.
 
 ## Contributing
 

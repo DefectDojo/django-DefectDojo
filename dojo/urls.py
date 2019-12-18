@@ -2,11 +2,13 @@ from django.conf import settings
 from django.conf.urls import include, url
 from django.conf.urls.static import static
 from django.contrib import admin
-from rest_framework_swagger.views import get_swagger_view
 from tastypie.api import Api
 from tastypie_swagger.views import SwaggerView, ResourcesView, SchemaView
 from rest_framework.routers import DefaultRouter
 from rest_framework.authtoken import views as tokenviews
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
 from django.http import HttpResponse
 from defectDojo_engagement_survey.urls import urlpatterns as survey_urls
 
@@ -150,7 +152,17 @@ swagger_urls = [
     url(r'^schema/$', SchemaView.as_view(), name='schema'),
 ]
 
-schema_view = get_swagger_view(title='Defect Dojo API v2')
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Defect Dojo API",
+        default_version='v2',
+        description="To use the API you need be authorized.",
+    ),
+    # if public=False, includes only endpoints the current user has access to
+    public=True,
+    # The API of a OpenSource project should be public accessible
+    permission_classes=[permissions.AllowAny],
+)
 
 urlpatterns = [
     #  tastypie api
@@ -169,7 +181,7 @@ urlpatterns = [
         name='action_history'),
     url(r'^%s' % get_system_setting('url_prefix'), include(ur)),
     url(r'^api/v2/api-token-auth/', tokenviews.obtain_auth_token),
-    url(r'^api/v2/doc/', schema_view, name="api_v2_schema"),
+    url(r'^api/v2/doc/', schema_view.with_ui('swagger', cache_timeout=0), name='api_v2_schema'),
     url(r'^robots.txt', lambda x: HttpResponse("User-Agent: *\nDisallow: /", content_type="text/plain"), name="robots_file"),
 ]
 
