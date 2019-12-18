@@ -29,3 +29,8 @@ class TestBlackduckHubParser(TestCase):
         testfile = Path("dojo/unittests/scans/blackduck/blackduck_enhanced_py3_unittest.zip")
         parser = BlackduckHubCSVParser(testfile, Test())
         self.assertEqual(11, len(parser.items))
+
+    def test_blackduck_enhanced_zip_upload(self):
+        testfile = Path("dojo/unittests/scans/blackduck/blackduck_enhanced_py3_unittest_v2.zip")
+        parser = BlackduckHubCSVParser(testfile, Test())
+        self.assertEqual(11, len(parser.items))

@@ -30,6 +30,9 @@ fmt = getattr(settings, 'LOG_FORMAT', None)
 lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
 
 logging.basicConfig(format=fmt, level=lvl)
+import logging
+logger = logging.getLogger(__name__)
+deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 
 @deconstructible
@@ -1227,9 +1230,9 @@ class Finding(models.Model):
     title = models.TextField(max_length=1000)
     date = models.DateField(default=get_current_date)
     cwe = models.IntegerField(default=0, null=True, blank=True)
-    cve_regex = RegexValidator(regex=r'^CVE-\d{4}-\d{4,7}$',
-                                 message="CVE must be entered in the format: 'CVE-9999-9999'. ")
-    cve = models.CharField(validators=[cve_regex], max_length=20, null=True)
+    cve_regex = RegexValidator(regex=r'^[A-Z]{1,10}-\d{4}-\d{4,12}$',
+                                 message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'. ")
+    cve = models.CharField(validators=[cve_regex], max_length=28, null=True)
     url = models.TextField(null=True, blank=True, editable=False)
     severity = models.CharField(max_length=200, help_text="The severity level of this flaw (Critical, High, Medium, Low, Informational)")
     description = models.TextField()
@@ -1280,15 +1283,20 @@ class Finding(models.Model):
 
     line_number = models.CharField(null=True, blank=True, max_length=200,
                                    editable=False)  # Deprecated will be removed, use line
-    sourcefilepath = models.TextField(null=True, blank=True, editable=False)
+    sourcefilepath = models.TextField(null=True, blank=True, editable=False)  # Not used? to remove
     sourcefile = models.TextField(null=True, blank=True, editable=False)
     param = models.TextField(null=True, blank=True, editable=False)
     payload = models.TextField(null=True, blank=True, editable=False)
     hash_code = models.TextField(null=True, blank=True, editable=False)
 
     line = models.IntegerField(null=True, blank=True,
-                               verbose_name="Line number")
-    file_path = models.CharField(null=True, blank=True, max_length=4000)
+                               verbose_name="Line number",
+                               help_text="Line number. For SAST, when source (start of the attack vector) and sink (end of the attack vector) information are available, put sink information here")
+    file_path = models.CharField(
+        null=True,
+        blank=True,
+        max_length=4000,
+        help_text="File name with path. For SAST, when source (start of the attack vector) and sink (end of the attack vector) information are available, put sink information here")
     found_by = models.ManyToManyField(Test_Type, editable=False)
     static_finding = models.BooleanField(default=False)
     dynamic_finding = models.BooleanField(default=True)
@@ -1297,6 +1305,16 @@ class Finding(models.Model):
     jira_change = models.DateTimeField(editable=True, null=True)
     scanner_confidence = models.IntegerField(null=True, blank=True, default=None, editable=False, help_text="Confidence level of vulnerability which is supplied by the scannner.")
     sonarqube_issue = models.ForeignKey(Sonarqube_Issue, null=True, blank=True, help_text="SonarQube issue", on_delete=models.CASCADE)
+    unique_id_from_tool = models.CharField(null=True, blank=True, max_length=500, help_text="Vulnerability technical id from the source tool. Allows to track unique vulnerabilities")
+    sast_source_object = models.CharField(null=True, blank=True, max_length=500, help_text="Source object (variable, function...) of the attack vector")
+    sast_sink_object = models.CharField(null=True, blank=True, max_length=500, help_text="Sink object (variable, function...) of the attack vector")
+    sast_source_line = models.IntegerField(null=True, blank=True,
+                               verbose_name="Line number",
+                               help_text="Source line number of the attack vector")
+    sast_source_file_path = models.CharField(null=True, blank=True, max_length=4000, help_text="Source filepath of the attack vector")
+    nb_occurences = models.IntegerField(null=True, blank=True,
+                               verbose_name="Number of occurences",
+                               help_text="Number of occurences in the source tool when several vulnerabilites were found and aggregated by the scanner")
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
                   'High': 1, 'Critical': 0}
@@ -1321,23 +1339,86 @@ class Finding(models.Model):
         return filtered.exclude(pk=self.pk)
 
     def compute_hash_code(self):
-        hash_string = self.title + str(self.cwe) + str(self.line) + str(self.file_path) + self.description
-        if self.dynamic_finding:
-            endpoint_str = ''
-            if len(self.unsaved_endpoints) > 0 and self.id is None:
-                for e in self.unsaved_endpoints:
-                    endpoint_str += str(e.host_with_port)
+        if hasattr(settings, 'HASHCODE_FIELDS_PER_SCANNER') and hasattr(settings, 'HASHCODE_ALLOWS_NULL_CWE') and hasattr(settings, 'HASHCODE_ALLOWED_FIELDS'):
+            # Default fields
+            if self.dynamic_finding:
+                hashcodeFields = ['title', 'cwe', 'line', 'file_path', 'description', 'endpoints']
             else:
-                for e in self.endpoints.all():
-                    endpoint_str += str(e.host_with_port)
-            if endpoint_str:
-                hash_string = hash_string + endpoint_str
-        try:
-            hash_string = hash_string.encode('utf-8').strip()
-            return hashlib.sha256(hash_string.encode('utf-8')).hexdigest()
-        except:
-            hash_string = hash_string.strip()
-            return hashlib.sha256(hash_string).hexdigest()
+                hashcodeFields = ['title', 'cwe', 'line', 'file_path', 'description']
+
+            # Check for an override for this scan_type in the deduplication configuration
+            scan_type = self.test.test_type.name
+            if (scan_type in settings.HASHCODE_FIELDS_PER_SCANNER):
+                hashcodeFieldsCandidate = settings.HASHCODE_FIELDS_PER_SCANNER[scan_type]
+                # check that the configuration is valid: all elements of HASHCODE_FIELDS_PER_SCANNER should be in HASHCODE_ALLOWED_FIELDS
+                if (all(elem in settings.HASHCODE_ALLOWED_FIELDS for elem in hashcodeFieldsCandidate)):
+                    # Makes sure that we have a cwe if we need one
+                    if (scan_type in settings.HASHCODE_ALLOWS_NULL_CWE):
+                        if (settings.HASHCODE_ALLOWS_NULL_CWE[scan_type] or self.cwe != 0):
+                            hashcodeFields = hashcodeFieldsCandidate
+                        else:
+                            deduplicationLogger.warn(
+                                "Cannot compute hash_code based on configured fields because cwe is 0 for finding of title '" + self.title + "' found in file '" + str(self.file_path) +
+                                "'. Fallback to legacy mode for this finding.")
+                    else:
+                        # no configuration found for this scanner: defaulting to accepting null cwe when we find one
+                        hashcodeFields = hashcodeFieldsCandidate
+                        if(self.cwe == 0):
+                            deduplicationLogger.debug(
+                                "Accepting null cwe by default for finding of title '" + self.title + "' found in file '" + str(self.file_path) +
+                                "'. This is because no configuration was found for scanner " + scan_type + " in HASHCODE_ALLOWS_NULL_CWE")
+                else:
+                    deduplicationLogger.debug(
+                        "compute_hash_code - configuration error: some elements of HASHCODE_FIELDS_PER_SCANNER are not in the allowed list HASHCODE_ALLOWED_FIELDS. "
+                        "Using default fields")
+            else:
+                deduplicationLogger.debug(
+                    "No configuration for hash_code computation found; using default fields for " + ('dynamic' if self.dynamic_finding else 'static') + ' scanners')
+            deduplicationLogger.debug("computing hash_code for finding id " + str(self.id) + " for scan_type " + scan_type + " based on: " + ', '.join(hashcodeFields))
+            fields_to_hash = ''
+            for hashcodeField in hashcodeFields:
+                if(hashcodeField != 'endpoints'):
+                    # Generically use the finding attribute having the same name, converts to str in case it's integer
+                    fields_to_hash = fields_to_hash + str(getattr(self, hashcodeField))
+                    deduplicationLogger.debug(hashcodeField + ' : ' + str(getattr(self, hashcodeField)))
+                else:
+                    # For endpoints, need to compute the field
+                    fields_to_hash = fields_to_hash + self.get_endpoints()
+            deduplicationLogger.debug("compute_hash_code - fields_to_hash = " + fields_to_hash)
+            return self.hash_fields(fields_to_hash)
+        else:
+            deduplicationLogger.debug("no or incomplete configuration per hash_code found; using legacy algorithm")
+            return self.compute_hash_code_legacy()
+
+    def compute_hash_code_legacy(self):
+        fields_to_hash = self.title + str(self.cwe) + str(self.line) + str(self.file_path) + self.description
+        if self.dynamic_finding:
+            fields_to_hash = fields_to_hash + self.get_endpoints()
+        return self.hash_fields(fields_to_hash)
+
+    # Get endpoints from self.unsaved_endpoints
+    # This sometimes reports "None" for some endpoints but we keep it to avoid hash_code change due to this historically behavior
+    def get_endpoints(self):
+        endpoint_str = ''
+        if len(self.unsaved_endpoints) > 0 and self.id is None:
+            for e in self.unsaved_endpoints:
+                endpoint_str += str(e.host_with_port)
+        else:
+            for e in self.endpoints.all():
+                endpoint_str += str(e.host_with_port)
+        return endpoint_str
+
+    # Compute the hash_code from the fields to hash
+    def hash_fields(self, fields_to_hash):
+        # get bytes to hash
+        if(isinstance(fields_to_hash, str)):
+            hash_string = fields_to_hash.encode('utf-8').strip()
+        elif(isinstance(fields_to_hash, bytes)):
+            hash_string = fields_to_hash.strip()
+        else:
+            deduplicationLogger.debug("trying to convert hash_string of type " + str(type(fields_to_hash)) + " to str and then bytes")
+            hash_string = str(fields_to_hash).encode('utf-8').strip()
+        return hashlib.sha256(hash_string).hexdigest()
 
     def remove_from_any_risk_acceptance(self):
         risk_acceptances = Risk_Acceptance.objects.filter(accepted_findings__in=[self])
@@ -1486,6 +1567,7 @@ class Finding(models.Model):
         return long_desc
 
     def save(self, dedupe_option=True, false_history=False, rules_option=True, issue_updater_option=True, *args, **kwargs):
+        logger.debug("Saving finding of id " + str(self.id))
         # Make changes to the finding before it's saved to add a CWE template
         new_finding = False
         if self.pk is None:
@@ -1509,9 +1591,7 @@ class Finding(models.Model):
 
         # Compute hash code before dedupe
         if (self.hash_code is None):
-            if((self.dynamic_finding and (self.endpoints.count() > 0)) or
-                    (self.static_finding and (self.file_path is not None))):
-                self.hash_code = self.compute_hash_code()
+            self.hash_code = self.compute_hash_code()
         self.found_by.add(self.test.test_type)
 
         if rules_option:
@@ -1651,9 +1731,9 @@ class Stub_Finding(models.Model):
 class Finding_Template(models.Model):
     title = models.TextField(max_length=1000)
     cwe = models.IntegerField(default=None, null=True, blank=True)
-    cve_regex = RegexValidator(regex=r'^CVE-\d{4}-\d{4,7}$',
-                                 message="CVE must be entered in the format: 'CVE-9999-9999'. ")
-    cve = models.TextField(validators=[cve_regex], max_length=20, null=True)
+    cve_regex = RegexValidator(regex=r'^[A-Z]{1,10}-\d{4}-\d{4,12}$',
+                                 message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'. ")
+    cve = models.CharField(validators=[cve_regex], max_length=28, null=True)
     severity = models.CharField(max_length=200, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     mitigation = models.TextField(null=True, blank=True)
