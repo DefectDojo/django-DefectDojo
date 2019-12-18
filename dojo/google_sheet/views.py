@@ -884,27 +884,20 @@ def get_findings_list(tid):
                 findings_list[0].append('[duplicate] ' + note_type.name)
             for f in range(findings.count()):
                 original_finding = findings[f].duplicate_finding
-                if original_finding:
-                    for note_type in active_note_types:
-                        try:
-                            note = original_finding.notes.filter(note_type=note_type).latest('date')
-                            findings_list[f + 1].append(note.entry)
-                        except Notes.DoesNotExist:
-                            findings_list[f + 1].append('')
-                else:
-                    for note_type in active_note_types:
+                for note_type in active_note_types:
+                    try:
+                        note = original_finding.notes.filter(note_type=note_type).latest('date')
+                        findings_list[f + 1].append(note.entry)
+                    except:
                         findings_list[f + 1].append('')
         else:
             findings_list[0].append('[duplicate] note')
             for f in range(findings.count()):
                 original_finding = findings[f].duplicate_finding
-                if original_finding:
-                    try:
-                        note = original_finding.notes.latest('date')
-                        findings_list[f + 1].append(note.entry)
-                    except Notes.DoesNotExist:
-                        findings_list[f + 1].append('')
-                else:
+                try:
+                    note = original_finding.notes.latest('date')
+                    findings_list[f + 1].append(note.entry)
+                except:
                     findings_list[f + 1].append('')
 
     findings_list[0].append('Last column')
