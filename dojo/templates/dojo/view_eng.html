@@ -257,8 +257,8 @@
                                 </td>
                                 <td>
                                   <ul>
-                                   <li class="dropdown" style="list-style:none;">
-                                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                   <li class="dropdown" style="list-style:none;position:absolute">
+                                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
                                          <ul class="dropdown-menu">
                                            <li>
                                              <a class="" href="{% url 'view_test' test.id %}">
@@ -726,9 +726,6 @@
 </div>
 
 </div>
-</div>
-<div class="protip">
-   <i class="fa fa-lightbulb-o"></i> <strong>ProTip!</strong> Type <kbd>e</kbd> to edit this engagement. Type <kbd>i</kbd> to import scan results or <kbd>a</kbd> to add tests.
 </div>
 {% endblock %}
 {% block postscript %}
