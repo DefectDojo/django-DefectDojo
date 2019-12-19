@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<XanitizerFindingsList xanitizerVersion="version manualBuild, build no. 357 of 10/30/19" xanitizerVersionShort="manualBuild" timeStamp="2019-11-21 13:31:08" timeStampLong="1574339468791" allFindings="9" findingsNotRemovedByFilter="9" problemFindingsNotRemovedByFilter="7">
+
+
+  <finding id="365" kind="PATH">
+    <problemType>Injection: OS Command Injection</problemType>
+    <problemTypeId>ci:OSCommandInjection</problemTypeId>
+    <producer>BuiltIn:TAINTPATHS</producer>
+    <category>Taint Paths</category>
+    <rating>10.00</rating>
+    <classification>Warning</classification>
+    <matchCode>NOT</matchCode>
+    <reviewed>Not Reviewed</reviewed>
+    <date>2019-11-21 13:31:08 - new</date>
+    <package>org.owasp.webgoat.plugin</package>
+    <class>Exec</class>
+    <file>Exec.java</file>
+    <line>108</line>
+    <cweNumber>CWE-78</cweNumber>
+    <description><![CDATA[
+An identified taint path for the problem type 'Injection: OS Command Injection'
+
+Matching pattern in taint source kind 'Servlet Request Input':
+java.lang.String[] javax.servlet.ServletRequest.getParameterValues(java.lang.String)
+
+Matching pattern in taint sink kind 'OS Command Injection':
+java.lang.Process java.lang.Runtime.exec(java.lang.String[])
+]]></description>
+    <startNode lineNo="516" classFQN="org.owasp.webgoat.session.ParameterParser" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/session/ParameterParser.java"></startNode>
+    <endNode lineNo="108" classFQN="org.owasp.webgoat.plugin.Exec" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/Exec.java"></endNode>
+  </finding>
+
+
+  <finding id="364" kind="PATH">
+    <problemType>Injection: OS Command Injection</problemType>
+    <problemTypeId>ci:OSCommandInjection</problemTypeId>
+    <producer>BuiltIn:TAINTPATHS</producer>
+    <category>Taint Paths</category>
+    <rating>10.00</rating>
+    <classification>Warning</classification>
+    <matchCode>NOT</matchCode>
+    <reviewed>Not Reviewed</reviewed>
+    <date>2019-11-21 13:31:08 - new</date>
+    <package>org.owasp.webgoat.plugin</package>
+    <class>Exec</class>
+    <file>Exec.java</file>
+    <line>290</line>
+    <cweNumber>CWE-78</cweNumber>
+    <description><![CDATA[
+An identified taint path for the problem type 'Injection: OS Command Injection'
+
+Matching pattern in taint source kind 'Servlet Request Input':
+java.lang.String[] javax.servlet.ServletRequest.getParameterValues(java.lang.String)
+
+Matching pattern in taint sink kind 'OS Command Injection':
+java.lang.Process java.lang.Runtime.exec(java.lang.String)
+]]></description>
+    <startNode lineNo="516" classFQN="org.owasp.webgoat.session.ParameterParser" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/session/ParameterParser.java"></startNode>
+    <endNode lineNo="290" classFQN="org.owasp.webgoat.plugin.Exec" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/Exec.java"></endNode>
+  </finding>
+
+
+  <finding id="357" kind="PROTOCOL_CHECK">
+    <problemType>Cryptography: Check that only allowed hash algorithms are used</problemType>
+    <problemTypeId>protocolCheckProblemType:OnlyAllowedHashAlgorithms</problemTypeId>
+    <producer>BuiltIn:PROTOCOL_CHECK</producer>
+    <category>Protocol Check Findings</category>
+    <rating>5.00</rating>
+    <classification>Warning</classification>
+    <matchCode>NOT</matchCode>
+    <reviewed>Not Reviewed</reviewed>
+    <date>2019-11-21 13:31:08 - new</date>
+    <package>org.owasp.webgoat.plugin</package>
+    <class>EncodingLesson</class>
+    <file>EncodingLesson.java</file>
+    <line>461</line>
+    <cweNumber>CWE-328</cweNumber>
+    <description><![CDATA[
+An identified location for problem type 'Cryptography: Check that only allowed hash algorithms are used'.
+The protocol check detected something wrong when encountering symbol 'AnyAlgorithm_MessageDigestGetInstance'.
+
+Violated protocol: Check Allowed Hash Algorithms Protocol description:  Allow only a given set of hash algorithm names where algorithm names are expected.  The algorithm names are configured via constant value constraint variables.  Names to be checked against can be found here: https://docs.oracle.com/javase/8/docs/technotes/guides/security/StandardNames.html
+
+Matching pattern in protocol check kind 'AnyAlgorithm_MessageDigestGetInstance':
+static java.security.MessageDigest java.security.MessageDigest.getInstance(java.lang.String, ***)
+]]></description>
+    <node lineNo="461" classFQN="org.owasp.webgoat.plugin.EncodingLesson"></node>
+  </finding>
+
+
+  <finding id="356" kind="PROTOCOL_CHECK">
+    <problemType>Cryptography: Check that only allowed hash algorithms are used</problemType>
+    <problemTypeId>protocolCheckProblemType:OnlyAllowedHashAlgorithms</problemTypeId>
+    <producer>BuiltIn:PROTOCOL_CHECK</producer>
+    <category>Protocol Check Findings</category>
+    <rating>5.00</rating>
+    <classification>Warning</classification>
+    <matchCode>NOT</matchCode>
+    <reviewed>Not Reviewed</reviewed>
+    <date>2019-11-21 13:31:08 - new</date>
+    <package>org.owasp.webgoat.plugin</package>
+    <class>HttpOnly</class>
+    <file>HttpOnly.java</file>
+    <line>186</line>
+    <cweNumber>CWE-328</cweNumber>
+    <description><![CDATA[
+An identified location for problem type 'Cryptography: Check that only allowed hash algorithms are used'.
+The protocol check detected something wrong when encountering symbol 'AnyAlgorithm_MessageDigestGetInstance'.
+
+Violated protocol: Check Allowed Hash Algorithms Protocol description:  Allow only a given set of hash algorithm names where algorithm names are expected.  The algorithm names are configured via constant value constraint variables.  Names to be checked against can be found here: https://docs.oracle.com/javase/8/docs/technotes/guides/security/StandardNames.html
+
+Matching pattern in protocol check kind 'AnyAlgorithm_MessageDigestGetInstance':
+static java.security.MessageDigest java.security.MessageDigest.getInstance(java.lang.String, ***)
+]]></description>
+    <node lineNo="186" classFQN="org.owasp.webgoat.plugin.HttpOnly"></node>
+  </finding>
+
+
+  <finding id="679" kind="GENERIC">
+    <problemType>FindSecBugs: SHA-1 is a weak hash function</problemType>
+    <problemTypeId>WEAK_MESSAGE_DIGEST_SHA1</problemTypeId>
+    <producer>PlugIn:SpotBugs</producer>
+    <category>SpotBugs Security Issues</category>
+    <rating>8.00</rating>
+    <classification>Warning</classification>
+    <matchCode>NOT</matchCode>
+    <reviewed>Not Reviewed</reviewed>
+    <date>2019-11-21 13:31:08 - new</date>
+    <package>org.owasp.webgoat.plugin</package>
+    <class>HttpOnly</class>
+    <file>HttpOnly.java</file>
+    <line>186</line>
+    <cweNumber>CWE-328</cweNumber>
+    <description><![CDATA[
+A finding identified by the external 'SpotBugs' plugin:
+SHA is not a recommended cryptographic hash function
+
+- In method org.owasp.webgoat.plugin.HttpOnly.createCustomCookieValue()
+- Value SHA
+
+]]></description>
+    <node lineNo="186" classFQN="org.owasp.webgoat.plugin.HttpOnly" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/HttpOnly.java"></node>
+  </finding>
+
+
+  <finding id="848" kind="GENERIC">
+    <problemType>OWASP Dependency Check: Libraries with known vulnerabilities</problemType>
+    <problemTypeId>OWASPDependencyCheckBugTypeID</problemTypeId>
+    <producer>PlugIn:OWASPDependencyCheck</producer>
+    <category>OWASP Dependency Check</category>
+    <rating>9.30</rating>
+    <classification>Warning</classification>
+    <matchCode>NOT</matchCode>
+    <reviewed>Not Reviewed</reviewed>
+    <date>2019-11-21 13:31:08 - new</date>
+    <file>spring-aop-3.2.4.RELEASE.jar</file>
+    <line>-2</line>
+    <cweNumber>CWE-1,035</cweNumber>
+    <description><![CDATA[
+A finding identified by the external 'OWASP Dependency Check' plugin:
+spring-aop-3.2.4.RELEASE.jar: CVE-2015-5211
+
+National Vulnerability Database of NIST reports:
+Under some situations, the Spring Framework 4.2.0 to 4.2.1, 4.0.0 to 4.1.7, 3.2.0 to 3.2.14 and older unsupported versions is vulnerable to a Reflected File Download (RFD) attack. The attack involves a malicious user crafting a URL with a batch script extension that results in the response being downloaded rather than rendered and also includes some input reflected in the response.
+
+The vulnerability in the library is assigned by the National Vulnerability Database of NIST to the CWE: CWE-20
+
+The confidence level 'HIGH' based on the following CPE:
+ cpe:2.3:a:pivotal_software:spring_framework:3.2.4
+]]></description>
+    <node lineNo="-2" relativePath="WEB-INF/lib/spring-aop-3.2.4.RELEASE.jar"></node>
+  </finding>
+
+
+  <finding id="853" kind="GENERIC">
+    <problemType>OWASP Dependency Check: Libraries with known vulnerabilities</problemType>
+    <problemTypeId>OWASPDependencyCheckBugTypeID</problemTypeId>
+    <producer>PlugIn:OWASPDependencyCheck</producer>
+    <category>OWASP Dependency Check</category>
+    <rating>9.30</rating>
+    <classification>Warning</classification>
+    <matchCode>NOT</matchCode>
+    <reviewed>Not Reviewed</reviewed>
+    <date>2019-11-21 13:31:08 - new</date>
+    <file>spring-beans-3.2.4.RELEASE.jar</file>
+    <line>-2</line>
+    <cweNumber>CWE-1,035</cweNumber>
+    <description><![CDATA[
+A finding identified by the external 'OWASP Dependency Check' plugin:
+spring-beans-3.2.4.RELEASE.jar: CVE-2015-5211
+
+National Vulnerability Database of NIST reports:
+Under some situations, the Spring Framework 4.2.0 to 4.2.1, 4.0.0 to 4.1.7, 3.2.0 to 3.2.14 and older unsupported versions is vulnerable to a Reflected File Download (RFD) attack. The attack involves a malicious user crafting a URL with a batch script extension that results in the response being downloaded rather than rendered and also includes some input reflected in the response.
+
+The vulnerability in the library is assigned by the National Vulnerability Database of NIST to the CWE: CWE-20
+
+The confidence level 'HIGH' based on the following CPE:
+ cpe:2.3:a:pivotal_software:spring_framework:3.2.4
+]]></description>
+    <node lineNo="-2" relativePath="WEB-INF/lib/spring-beans-3.2.4.RELEASE.jar"></node>
+  </finding>
+
+
+  <finding id="3" kind="SPECIAL">
+    <problemType>Usage: Java Reflection</problemType>
+    <problemTypeId>SpecialMethodCall:AppliedReflection</problemTypeId>
+    <producer>BuiltIn:SPECIAL_CODE_CHECKER</producer>
+    <category>Special Code</category>
+    <rating>0.00</rating>
+    <classification>Information</classification>
+    <matchCode>NOT</matchCode>
+    <reviewed>Not Reviewed</reviewed>
+    <date>2019-11-21 13:31:08 - new</date>
+    <package>org.owasp.webgoat.plugin</package>
+    <class>BlindScript</class>
+    <file>BlindScript.java</file>
+    <line>281</line>
+    <cweNumber>CWE-545</cweNumber>
+    <description><![CDATA[
+An identified location for problem type 'Usage: Java Reflection'.
+Declared in: java.lang.reflect.Method
+
+Matching pattern in special code kind 'Usage: Java Reflection':
+java.lang.Object java.lang.reflect.Method.invoke(java.lang.Object, java.lang.Object[])
+]]></description>
+    <node lineNo="281" classFQN="org.owasp.webgoat.plugin.BlindScript"></node>
+  </finding>
+
+
+  <finding id="4" kind="SPECIAL">
+    <problemType>Usage: Java Reflection</problemType>
+    <problemTypeId>SpecialMethodCall:AppliedReflection</problemTypeId>
+    <producer>BuiltIn:SPECIAL_CODE_CHECKER</producer>
+    <category>Special Code</category>
+    <rating>0.00</rating>
+    <classification>Information</classification>
+    <matchCode>NOT</matchCode>
+    <reviewed>Not Reviewed</reviewed>
+    <date>2019-11-21 13:31:08 - new</date>
+    <package>org.owasp.webgoat.plugin</package>
+    <class>BlindScript</class>
+    <file>BlindScript.java</file>
+    <line>377</line>
+    <cweNumber>CWE-545</cweNumber>
+    <description><![CDATA[
+An identified location for problem type 'Usage: Java Reflection'.
+Declared in: java.lang.Class
+
+Matching pattern in special code kind 'Usage: Java Reflection':
+java.lang.Object java.lang.Class.newInstance()
+]]></description>
+    <node lineNo="377" classFQN="org.owasp.webgoat.plugin.BlindScript"></node>
+  </finding>
+</XanitizerFindingsList>
