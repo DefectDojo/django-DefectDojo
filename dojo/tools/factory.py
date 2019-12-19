@@ -65,6 +65,8 @@ from dojo.tools.testssl.parser import TestsslCSVParser
 from dojo.tools.hadolint.parser import HadolintParser
 from dojo.tools import SCAN_SONARQUBE_API
 from dojo.tools.aqua.parser import AquaJSONParser
+from dojo.tools.h1.parser import HackerOneJSONParser
+
 
 __author__ = 'Jay Paz'
 
@@ -208,6 +210,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = HadolintParser(file, test)
     elif scan_type == 'Aqua Scan':
         parser = AquaJSONParser(file, test)
+    elif scan_type == 'HackerOne Cases':
+        parser = HackerOneJSONParser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 
