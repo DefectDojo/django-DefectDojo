@@ -273,12 +273,16 @@
                             </a>
                         </td>
                     {% endif %}
-                    {% if finding.cve %}
+                    {% if finding.cve|slice:":3" == 'CVE' %}
                         <td>
                             <a target="_blank" href="https://cve.mitre.org/cgi-bin/cvename.cgi?name={{ finding.cve }}">
                                 <i class="fa fa-external-link"></i> {{ finding.cve }}
                             </a>
                         </td>
+                    {% else %}
+                         <td>
+                             {{ finding.cve }}
+                         </td>
                     {% endif %}
                     <td> {% for scanner in found_by %}
                         {{ scanner }}
@@ -361,11 +365,41 @@
         {% endif %}
     {% endwith %}
     {% if finding.static_finding or finding.line > 0 %}
+        {% if finding.sast_source_object or finding.sast_sink_object or finding.sast_source_file_path or finding.sast_source_line > 0 %}
+        {# For tools that give information on both source (start) and sink (end) of the attack vector #}
+        
         <div class="panel panel-default">
-            <table id="error_notes" class="table-striped table table-condensed table-hover centered">
+            <table id="sast_source" class="table-striped table table-condensed table-hover centered">
                 <tr>
-                    <th>Location</th>
-                    <th>Line Number</th>
+                    <th>Source Filepath</th>
+                    <th>Source Line Number</th>
+                    <th>Source Object</th>
+                </tr>
+                <tr>
+                    <td>
+                        <span>
+                           {{ finding.sast_source_file_path }}
+                        </span>
+                    </td>
+                    <td>
+                        <span>
+                           {{ finding.sast_source_line }}
+                        </span>
+                    </td>
+                    <td>
+                        <span>
+                           {{ finding.sast_source_object }}
+                        </span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="panel panel-default">
+            <table id="sast_sink" class="table-striped table table-condensed table-hover centered">
+                <tr>
+                    <th>Sink Filepath</th>
+                    <th>Sink Line Number</th>
+                    <th>Sink Object</th>
                 </tr>
                 <tr>
                     <td>
@@ -378,9 +412,46 @@
                            {{ finding.line }}
                         </span>
                     </td>
+                    <td>
+                        <span>
+                           {{ finding.sast_sink_object }}
+                        </span>
+                    </td>
                 </tr>
             </table>
         </div>
+        {% else %}
+        <div class="panel panel-default">
+            <table id="error_notes" class="table-striped table table-condensed table-hover centered">
+                <tr>
+                    <th>Location</th>
+                    <th>Line Number</th>
+                    {% if finding.nb_occurences %}
+                    <th>Nb occurences</th>
+                    {% endif %}
+                </tr>
+                <tr>
+                    <td>
+                        <span>
+                           {{ finding.file_path }}
+                        </span>
+                    </td>
+                    <td>
+                        <span>
+                           {{ finding.line }}
+                        </span>
+                    </td>
+                    {% if finding.nb_occurences %}
+                    <td>
+                        <span>
+                           {{ finding.nb_occurences }}
+                        </span>
+                    </td>
+                    {% endif %}
+                </tr>
+            </table>
+        </div>
+        {% endif %}
     {% endif %}
     {% if finding.param or finding.payload %}
         <div class="panel panel-default">

@@ -299,6 +299,7 @@ class ImportScanForm(forms.Form):
                          ("AppSpider Scan", "AppSpider Scan"),
                          ("Veracode Scan", "Veracode Scan"),
                          ("Checkmarx Scan", "Checkmarx Scan"),
+                         ("Checkmarx Scan detailed", "Checkmarx Scan detailed"),
                          ("Crashtest Security Scan", "Crashtest Security Scan"),
                          ("ZAP Scan", "ZAP Scan"),
                          ("Arachni Scan", "Arachni Scan"),
@@ -322,6 +323,7 @@ class ImportScanForm(forms.Form):
                          ("Fortify Scan", "Fortify Scan"),
                          ("Gosec Scanner", "Gosec Scanner"),
                          ("SonarQube Scan", "SonarQube Scan"),
+                         ("SonarQube Scan detailed", "SonarQube Scan detailed"),
                          (SCAN_SONARQUBE_API, SCAN_SONARQUBE_API),
                          ("MobSF Scan", "MobSF Scan"),
                          ("Trufflehog Scan", "Trufflehog Scan"),
@@ -358,6 +360,10 @@ class ImportScanForm(forms.Form):
                          ("Hadolint Dockerfile check", "Hadolint Dockerfile check"),
                          ("Aqua Scan", "Aqua Scan"),
                          ("HackerOne Cases", "HackerOne Cases"))
+                         ("Xanitizer Scan", "Xanitizer Scan"),
+                         ("Trivy Scan", "Trivy Scan"))
+
+
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
     scan_date = forms.DateTimeField(
