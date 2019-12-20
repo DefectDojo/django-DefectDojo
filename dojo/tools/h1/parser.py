@@ -1,7 +1,5 @@
 import json
 import hashlib
-from urllib.parse import urlparse
-from dojo.models import Endpoint, Finding
 
 __author__ = 'Kirill Gotsman'
 
@@ -47,9 +45,9 @@ class HackerOneJSONParser(object):
 
             # Set active state of the Dojo finding 
             if content["attributes"]["state"] in ["triaged", "new"]:
-                active=True
+                active = True
             else:
-                active=False
+                active = False
 
             # Set CWE of the Dojo finding 
             try:
