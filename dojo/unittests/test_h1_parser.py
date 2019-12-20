@@ -23,3 +23,4 @@ class TestHackerOneParser(TestCase):
         testfile = open("dojo/unittests/scans/h1/data_many.json")
         parser = HackerOneJSONParser(testfile, Test())
         self.assertEqual(2, len(parser.items))
+        
