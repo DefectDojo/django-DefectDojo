@@ -36,20 +36,20 @@ class HackerOneJSONParser(object):
             try:
                 severity = content["relationships"]["severity"]["data"]["attributes"]["rating"].capitalize()
                 if severity not in ["Low", "Medium", "Hight", "Critical"]:
-                    severity = "Info" 
+                    severity = "Info"
             except:
                 severity = "Info"
             # Build the references of the Dojo finding
             ref_link = "https://hackerone.com/reports/{}".format(content.get("id"))
             references = "[{}]({})".format(ref_link, ref_link)
 
-            # Set active state of the Dojo finding 
+            # Set active state of the Dojo finding
             if content["attributes"]["state"] in ["triaged", "new"]:
                 active = True
             else:
                 active = False
 
-            # Set CWE of the Dojo finding 
+            # Set CWE of the Dojo finding
             try:
                 cwe = int(content["relationships"]["weakness"]["data"]["attributes"]["external_id"][4:])
             except:
