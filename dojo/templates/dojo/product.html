@@ -295,6 +295,9 @@
 
             // Mapping of table columns to objects for proper cleanup and data formatting
             var dojoTable = $('#products').DataTable({
+                drawCallback: function(){
+                     $('.has-popover').popover({'trigger':'hover'});
+                 },
                 "columns": [
                     { "data": "action", render: function (data, type, row) {
                             return type === 'export' ?  "" :  data;
