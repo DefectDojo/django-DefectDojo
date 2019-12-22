@@ -188,11 +188,11 @@ def view_product_metrics(request, pid):
                                                out_of_scope=False).order_by("date")
 
     week_date = end_date - timedelta(days=7)  # seven days and /newnewer are considered "new"
-
     new_verified_findings = Finding.objects.filter(test__engagement__product=prod,
                                                    date__range=[week_date, end_date],
                                                    false_p=False,
                                                    verified=True,
+                                                   active=True,
                                                    duplicate=False,
                                                    out_of_scope=False).order_by("date")
 
@@ -202,6 +202,7 @@ def view_product_metrics(request, pid):
                                            duplicate=False,
                                            out_of_scope=False,
                                            active=True,
+                                           verified=False,
                                            mitigated__isnull=True)
 
     inactive_findings = Finding.objects.filter(test__engagement__product=prod,
@@ -218,6 +219,7 @@ def view_product_metrics(request, pid):
                                              verified=False,
                                              duplicate=False,
                                              out_of_scope=False,
+                                             active=False,
                                              mitigated__isnull=False)
 
     false_positive_findings = Finding.objects.filter(test__engagement__product=prod,
@@ -225,8 +227,7 @@ def view_product_metrics(request, pid):
                                              false_p=True,
                                              verified=False,
                                              duplicate=False,
-                                             out_of_scope=False,
-                                             mitigated__isnull=False)
+                                             out_of_scope=False)
 
     out_of_scope_findings = Finding.objects.filter(test__engagement__product=prod,
                                              date__range=[start_date, end_date],
@@ -326,7 +327,7 @@ def view_product_metrics(request, pid):
             else:
                 medium_weekly[x] = {'count': 1, 'week': y}
 
-    for a in open_findings:
+    for a in accepted_findings:
         iso_cal = a.date.isocalendar()
         x = iso_to_gregorian(iso_cal[0], iso_cal[1], 1)
         y = x.strftime("<span class='small'>%m/%d<br/>%Y</span>")

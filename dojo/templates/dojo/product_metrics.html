@@ -206,7 +206,7 @@
                         <div id="false_positive_findings" class="graph"></div>
                     </div>
                     <div class="panel-footer">
-                        <i title="Accepted since {{ start_date }}"
+                        <i title="Flagged since {{ start_date }}"
                            class="text-info fa fa-info-circle"></i>
                         <small>Flagged since {{ start_date|date:"D., M. d, Y" }}</small>
                     </div>
@@ -247,10 +247,10 @@
                                 <i class="fa fa-crosshairs fa-2x"></i>
 
                                 <div class="pull-right inline-block text-right">
-                                    <span class=" fa-2x">{{ new_findings|length }}</span>
+                                    <span class=" fa-2x">{{ verified_findings|length }}</span>
                                     <span><a
-                                            href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}&amp;date=2">New Verified
-                                        Finding{{ new_findings|length|pluralize }} <i
+                                            href="{% url 'product_verified_findings' prod.id %}?test__engagement__product={{ prod.id }}">Verified
+                                        Finding{{ verified_findings|length|pluralize }} <i
                                                 class="fa fa-arrow-circle-right"></i></a>
                                     </span>
                                 </div>
@@ -258,12 +258,12 @@
                         </div>
                     </div>
                     <div class="panel-body">
-                        <div id="new_findings" class="graph"></div>
+                        <div id="verified_findings" class="graph"></div>
                     </div>
                     <div class="panel-footer">
-                        <i title="Found in the last 7 days."
+                        <i title="Since {{ start_date }}."
                            class="text-info fa fa-info-circle"></i>
-                        <small>Found in the last 7 days.</small>
+                        <small>Verified since {{ start_date|date:"D., M. d, Y" }}</small>
                     </div>
                 </div>
             </div>
@@ -272,7 +272,7 @@
                     <div class="panel-heading">
                         <div class="row">
                             <div class="col-xs-12">
-                                <i class="fa fa-crosshairs fa-2x"></i>
+                                <i class="fa fa-fire-extinguisher fa-2x"></i>
 
                                 <div class="pull-right inline-block text-right">
                                     <span class=" fa-2x">{{ out_of_scope_findings|length }}</span>
@@ -536,6 +536,7 @@
             });
 
             accepted_findings();
+            verified_findings();
             inactive_findings();
             open_findings();
             closed_findings();
@@ -1082,6 +1083,137 @@
         }
         ;
 
+        function verified_findings() {
+            var critical = 0;
+            var high = 0;
+            var medium = 0;
+            var low = 0;
+            var info = 0;
+            var ticks = [
+                [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
+            ];
+
+            {% for f in verified_findings %}
+                {% if f.severity == 'Critical' %}
+                    critical += 1;
+                {% elif f.severity == 'High' %}
+                    high += 1;
+                {% elif f.severity == 'Medium' %}
+                    medium += 1;
+                {% elif f.severity == 'Low' %}
+                    low += 1;
+                {% elif f.severity == 'Info' %}
+                    info += 1;
+                {% endif %}
+            {% endfor %}
+
+            var d1 = [
+                [0, critical],
+            ];
+            var d2 = [
+                [1, high],
+            ];
+            var d3 = [
+                [2, medium],
+            ];
+            var d4 = [
+                [3, low],
+            ];
+            var d5 = [
+                [4, info],
+            ];
+
+            var data = [
+                {
+                    label: "Critical",
+                    data: d1,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 1,
+                        fillColor: "#d9534f"
+                    },
+                    color: "#d9534f"
+                },
+                {
+                    label: "High",
+                    data: d2,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 2,
+                        fillColor: "#f0ad4e"
+                    },
+                    color: "#f0ad4e"
+                },
+                {
+                    label: "Medium",
+                    data: d3,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 3,
+                        fillColor: "#f0de28"
+                    },
+                    color: "#f0de28"
+                },
+                {
+                    label: "Low",
+                    data: d4,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 4,
+                        fillColor: "#337ab7"
+                    },
+                    color: "#337ab7"
+                },
+                {
+                    label: "info",
+                    data: d5,
+                    bars: {
+                        show: true,
+                        fill: true,
+                        lineWidth: 1,
+                        order: 4,
+                        fillColor: "#80699B"
+                    },
+                    color: "#80699B"
+                }
+            ];
+
+            $.plot("#verified_findings", data, {
+                series: {
+                    stack: true,
+                    bars: {
+                        show: true,
+                        barWidth: .9,
+                        'align': "center",
+                    },
+
+                },
+                grid: {
+                    hoverable: false,
+                    borderWidth: 1,
+                    borderColor: '#e7e7e7',
+
+                },
+                tooltip: false,
+                legend: {
+                    show: false,
+                    position: "ne"
+                },
+                xaxis: {
+                    ticks: ticks,
+                },
+            });
+        }
+        ;
+
         function out_of_scope_findings() {
             var critical = 0;
             var high = 0;
@@ -1209,7 +1341,6 @@
                 xaxis: {
                     ticks: ticks,
                 },
-
             });
         }
         ;
@@ -1750,7 +1881,7 @@
             var data = {};
             var data_1 = []
             var ticks = []
-            {% for f in verified_findings %}
+            {% for f in open_findings %}
                 if (data[{{ f.age }}]) {
                     data[{{ f.age }}] += 1
                 }
