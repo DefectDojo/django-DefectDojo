@@ -1936,6 +1936,9 @@ class FindingImageAccessToken(models.Model):
             self.token = uuid4()
         return super(FindingImageAccessToken, self).save(*args, **kwargs)
 
+class BannerConf(models.Model):
+    banner_enable = models.BooleanField(default=False, null=True, blank=True)
+    banner_message = models.CharField(max_length=500, help_text="This message will be displayed on the login page", default='')
 
 class JIRA_Conf(models.Model):
     configuration_name = models.CharField(max_length=2000, help_text="Enter a name to give to this configuration", default='')
