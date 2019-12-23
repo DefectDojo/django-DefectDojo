@@ -500,6 +500,7 @@ function install_app() {
     if [ "$AUTO_DOCKER" == "yes" ]; then
       python manage.py loaddata dojo/fixtures/defect_dojo_sample_data.json
     else
+      python manage.py loaddata initial_banner_conf
       python manage.py loaddata product_type
       python manage.py loaddata test_type
       python manage.py loaddata development_environment
@@ -510,7 +511,6 @@ function install_app() {
       python manage.py loaddata language_type
       python manage.py loaddata objects_review
       python manage.py loaddata regulation
-      python manage.py loaddata initial_banner_conf
     fi
 
     python manage.py installwatson
