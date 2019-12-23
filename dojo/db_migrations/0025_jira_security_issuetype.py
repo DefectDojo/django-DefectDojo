@@ -16,4 +16,3 @@ class Migration(migrations.Migration):
             field=models.CharField(choices=[('Task', 'Task'), ('Story', 'Story'), ('Epic', 'Epic'), ('Spike', 'Spike'), ('Bug', 'Bug'), ('Security', 'Security')], default='Bug', max_length=9),
         ),
     ]
-
