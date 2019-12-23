@@ -510,6 +510,7 @@ function install_app() {
       python manage.py loaddata language_type
       python manage.py loaddata objects_review
       python manage.py loaddata regulation
+      python manage.py loaddata initial_banner_conf
     fi
 
     python manage.py installwatson

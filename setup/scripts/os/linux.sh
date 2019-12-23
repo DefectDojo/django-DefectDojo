@@ -399,6 +399,7 @@ function ubuntu_dojo_install() {
     $PY manage.py loaddata regulation
     $PY manage.py import_surveys
     $PY manage.py loaddata initial_surveys
+    $PY manage.py loaddata initial_banner_conf
     $PY manage.py buildwatson
     $PY manage.py installwatson
 

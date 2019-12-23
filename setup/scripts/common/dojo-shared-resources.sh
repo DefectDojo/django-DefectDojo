@@ -113,6 +113,7 @@ function setupdb() {
     python manage.py loaddata test_type
     python manage.py loaddata development_environment
     python manage.py loaddata system_settings
+    python manage.py loaddata initial_banner_conf
     python manage.py installwatson
     python manage.py buildwatson
 

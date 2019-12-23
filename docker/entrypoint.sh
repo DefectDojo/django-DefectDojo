@@ -38,6 +38,7 @@ if [ ! -f "/opt/django-DefectDojo/static/docker_complete" ]; then
   python3 manage.py loaddata language_type
   python3 manage.py loaddata objects_review
   python3 manage.py loaddata regulation
+  python3 manage.py loaddata initial_banner_conf
   python3 manage.py installwatson
   python3 manage.py buildwatson
   python3 manage.py collectstatic --noinput
