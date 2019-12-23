@@ -59,4 +59,5 @@ EOD
   python3 manage.py loaddata initial_surveys
   python3 manage.py installwatson
   exec python3 manage.py buildwatson
+  python3 manage.py loaddata initial_banner_conf
 fi
