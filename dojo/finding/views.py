@@ -45,6 +45,7 @@ from django.template.defaultfilters import pluralize
 
 logger = logging.getLogger(__name__)
 
+
 def verified_findings(request, pid=None, eid=None, view=None):
     show_product_column = True
     title = None
@@ -144,6 +145,7 @@ def verified_findings(request, pid=None, eid=None, view=None):
             'tag_input': tags,
             'jira_config': jira_config,
         })
+
 
 def out_of_scope_findings(request, pid=None, eid=None, view=None):
     show_product_column = True
