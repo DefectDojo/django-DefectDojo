@@ -13,5 +13,5 @@ def get_banner(banner_conf):
             return getattr(banner_config, banner_conf, None)
         else:
             return False
-    except Exception as e:
+    except Exception:
         return False
