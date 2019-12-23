@@ -29,8 +29,8 @@ def configure_banner(request):
                 extra_tags="alert-success",
             )
             return HttpResponseRedirect(reverse("configure_banner"))
-    else: 
-        # List the banner configuration 
+    else:
+        # List the banner configuration
         form = LoginBanner(initial={
             'banner_enable': banner_config.banner_enable,
             'banner_message': banner_config.banner_message

@@ -20,7 +20,7 @@ from dojo.models import Finding, Product_Type, Product, Note_Type, ScanSettings,
     JIRA_Issue, JIRA_PKey, JIRA_Conf, UserContactInfo, Tool_Type, Tool_Configuration, Tool_Product_Settings, \
     Cred_User, Cred_Mapping, System_Settings, Notifications, Languages, Language_Type, App_Analysis, Objects, \
     Benchmark_Product, Benchmark_Requirement, Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, \
-    DojoMeta, Sonarqube_Product, BannerConf
+    DojoMeta, Sonarqube_Product
 from dojo.tools import requires_file, SCAN_SONARQUBE_API
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
@@ -361,7 +361,6 @@ class ImportScanForm(forms.Form):
                          ("Aqua Scan", "Aqua Scan"),
                          ("Xanitizer Scan", "Xanitizer Scan"),
                          ("Trivy Scan", "Trivy Scan"))
-
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
     scan_date = forms.DateTimeField(
@@ -1948,6 +1947,7 @@ class GoogleSheetFieldsForm(forms.Form):
                 self.fields['Protect ' + i.name] = forms.BooleanField(initial=True, required=True, disabled=True)
             else:
                 self.fields['Protect ' + i.name] = forms.BooleanField(initial=False, required=False)
+
 
 class LoginBanner(forms.Form):
     banner_enable = forms.BooleanField(
