@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='endpoint',
             name='path',
-            field=models.CharField(blank=True, help_text="The location of the resource, it should start with a '/'. For example/endpoint/420/edit", max_length=500, null=True),
+            field=models.CharField(blank=True, help_text="The location of the resource, it should start with a '/'. For example/endpoint/420/edit", max_length=5000, null=True),
         ),
         migrations.AlterField(
             model_name='endpoint',
@@ -41,7 +41,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='endpoint',
             name='query',
-            field=models.CharField(blank=True, help_text="The query string, the question mark should be omitted.For example 'group=4&team=8'", max_length=1000, null=True),
+            field=models.CharField(blank=True, help_text="The query string, the question mark should be omitted.For example 'group=4&team=8'", max_length=5000, null=True),
         ),
         migrations.AlterField(
             model_name='engagement',

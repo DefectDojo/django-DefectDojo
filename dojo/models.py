@@ -872,10 +872,10 @@ class Endpoint(models.Model):
     fqdn = models.CharField(null=True, blank=True, max_length=500)
     port = models.IntegerField(null=True, blank=True,
                                help_text="The network port associated with the endpoint.")
-    path = models.CharField(null=True, blank=True, max_length=500,
+    path = models.CharField(null=True, blank=True, max_length=5000,
                             help_text="The location of the resource, it should start with a '/'. For example"
                                       "/endpoint/420/edit")
-    query = models.CharField(null=True, blank=True, max_length=1000,
+    query = models.CharField(null=True, blank=True, max_length=5000,
                              help_text="The query string, the question mark should be omitted."
                                        "For example 'group=4&team=8'")
     fragment = models.CharField(null=True, blank=True, max_length=500,

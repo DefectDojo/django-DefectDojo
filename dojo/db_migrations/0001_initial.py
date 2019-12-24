@@ -223,8 +223,8 @@ class Migration(migrations.Migration):
                 ('host', models.CharField(blank=True, help_text=b"The host name or IP address, you can also include the port number. For example'127.0.0.1', '127.0.0.1:8080', 'localhost', 'yourdomain.com'.", max_length=500, null=True)),
                 ('fqdn', models.CharField(blank=True, max_length=500, null=True)),
                 ('port', models.IntegerField(blank=True, help_text='The network port associated with the endpoint.', null=True)),
-                ('path', models.CharField(blank=True, help_text=b"The location of the resource, it should start with a '/'. For example/endpoint/420/edit", max_length=500, null=True)),
-                ('query', models.CharField(blank=True, help_text=b"The query string, the question mark should be omitted.For example 'group=4&team=8'", max_length=1000, null=True)),
+                ('path', models.CharField(blank=True, help_text=b"The location of the resource, it should start with a '/'. For example/endpoint/420/edit", max_length=5000, null=True)),
+                ('query', models.CharField(blank=True, help_text=b"The query string, the question mark should be omitted.For example 'group=4&team=8'", max_length=5000, null=True)),
                 ('fragment', models.CharField(blank=True, help_text=b"The fragment identifier which follows the hash mark. The hash mark should be omitted. For example 'section-13', 'paragraph-2'.", max_length=500, null=True)),
             ],
             options={
