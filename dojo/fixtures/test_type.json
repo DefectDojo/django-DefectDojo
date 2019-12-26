@@ -524,7 +524,7 @@
 	},
 	{
 		"fields": {
-			"name": "HackerOne"
+			"name": "HackerOne Cases"
 		},
 		"model": "dojo.test_type",
 		"pk": 167
