@@ -33,7 +33,6 @@ class AnchoreEngineScanParser(object):
                 cve = item['vuln']
 
             # Finding details information
-            findingdetail += 'Image hash: ' + data['imageDigest'] + '\n\n'
             findingdetail += 'Package: ' + item['package'] + '\n\n'
             findingdetail += 'Package path: ' + item['package_path'] + '\n\n'
             findingdetail += 'Package type: ' + item['package_type'] + '\n\n'
@@ -48,7 +47,8 @@ class AnchoreEngineScanParser(object):
             mitigation += "Upgrade to " + item['package_name'] + ' ' + item['fix'] + '\n'
             mitigation += "URL: " + item['url'] + '\n'
 
-            references = item['url']
+            references = 'Image hash: ' + data['imageDigest'] + '\n\n'
+            references += item['url']
 
             dupe_key = data['imageDigest'] + "|" + item['feed'] + "|" + item['feed_group'] + "|" + item['package'] + '|' + item['vuln']
 
