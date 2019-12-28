@@ -359,6 +359,7 @@ class ImportScanForm(forms.Form):
                          ("Testssl Scan", "Testssl Scan"),
                          ("Hadolint Dockerfile check", "Hadolint Dockerfile check"),
                          ("Aqua Scan", "Aqua Scan"),
+                         ("HackerOne Cases", "HackerOne Cases"),
                          ("Xanitizer Scan", "Xanitizer Scan"),
                          ("Trivy Scan", "Trivy Scan"))
 
