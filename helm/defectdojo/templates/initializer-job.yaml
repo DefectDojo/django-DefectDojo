@@ -40,6 +40,6 @@ spec:
                   key: mysql-password
                   {{- end }}   
           resources:
-            {{- toYaml .Values.initializer.resources | nindent 10 }}
+            {{- toYaml .Values.initializer.resources | nindent 12 }}
       restartPolicy: Never
   backoffLimit: 1
