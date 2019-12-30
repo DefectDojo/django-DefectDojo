@@ -1,3 +1,4 @@
+from defectdojo_api.defectdojo import DefectDojoAPI
 from defectdojo_api import defectdojo
 import os
 import datetime
@@ -5,7 +6,7 @@ from calendar import monthrange
 
 
 # Make a few tweaks to the api wrapper
-class DefectDojoExtended(defectdojo):
+class DefectDojoExtended(DefectDojoAPI):
     # Add in additional Product attributes (prod_type, origin, lifecycle, team_manager)
     def create_product(self, name, description, prod_type, origin="Quest Diagnostics", lifecycle="Production",
                        team_manager=0):
@@ -118,6 +119,43 @@ def create_product_quarterly_engagements(product_name, product_desc, start_year,
 ##### Create Products, Engagements and Tests ########
 quest_apps = {}
 
-quest_apps["applicant.examone.com"] = "https://applicant.examone.com"
-quest_apps["eLabs for Hospitals"] = "https://stagelc.questdiagnostics.com"
-quest_apps["CaseViewWeb"] = "https://caseviewweb.examone.com/CaseViewWeb"
+quest_apps["Applicant.ExamOne.com"] = "applicant.examone.com"
+quest_apps["eLabs for Hospitals"] = "stagelc.questdiagnostics.com"
+quest_apps["CaseViewWeb"] = "caseviewweb.examone.com/CaseViewWeb"
+quest_apps["eInvoice"] = "einvoice.questdiagnostics.com/einv/engine/quest/login"
+quest_apps["ESP.EmployerSolutions.com"] = "esp.employersolutions.com/"
+quest_apps["MyExamOne"] = "https://myexamone.com"
+quest_apps["ID.QuestForHealth.com"] = "id.questforhealth.com"
+quest_apps["Imaging.ExamOne.com"] = "imaging.examone.com"
+quest_apps["InteractiveInsights.Care360.com"] = "interactiveinsights.care360.com"
+quest_apps["Manage.QuestForHealth.com"] = "manage.questforhealth.com"
+quest_apps["MyQuest"] = "myquest.questdiagnostics.com"
+quest_apps["eHR and eLabs for Physicians"] = "portal.quanumsolutions.com"
+quest_apps["Portal.ExamOne.com"] = "portal.examone.com"
+quest_apps["QuestDiagnostics.com"] = "questdiagnostics.com"
+quest_apps["QuestDiagnostics-QIS.com"] = "questdiagnostics-qis.com"
+quest_apps["Client Billing"] = "secure.questdiagnostics.com/ClientBilling/ClientBilling.action"
+quest_apps["Patient Billing"] = "secure.questdiagnostics.com/PatientBilling/BillingMain.action"
+quest_apps["HCR Portal"] = "physician.quanum.questdiagnostics.com"
+quest_apps["PRS Portal"] = "patient.care360.com/patient/prs"
+quest_apps["Superior Mobile Medics"] = "SuperiorMobileMedics.com"
+quest_apps["SMM Insurance"] = "SMMInsurance.com"
+quest_apps["SMM Health"] = "SMMHealth.com"
+
+
+def main():
+    print("What do you want to do?\n")
+    print("1) Create a year's Engagements for all existing Products")
+    print("2) Create a year's Engagements for a single existing Product")
+    print("3) Create an Engagement for an existing Product")
+    print("4) Create a new Product")
+    answer = input('--> ')
+    if answer not in (1, 2, 3, 4):
+        if answer == "Exit" or "exit":
+            print("exit")
+        print("Please input a valid option above or 'exit' to quit")
+        main()
+
+
+if __name__ == "__main__":
+    main()
