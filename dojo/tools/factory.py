@@ -66,8 +66,10 @@ from dojo.tools.hadolint.parser import HadolintParser
 from dojo.tools import SCAN_SONARQUBE_API
 from dojo.tools.aqua.parser import AquaJSONParser
 from dojo.tools.blackduck_v2.parser import BlackduckHubParser
+from dojo.tools.h1.parser import HackerOneJSONParser
 from dojo.tools.xanitizer.parser import XanitizerXMLParser
 from dojo.tools.trivy.parser import TrivyParser
+
 
 
 __author__ = 'Jay Paz'
@@ -219,6 +221,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = HadolintParser(file, test)
     elif scan_type == 'Aqua Scan':
         parser = AquaJSONParser(file, test)
+    elif scan_type == 'HackerOne Cases':
+        parser = HackerOneJSONParser(file, test)
     elif scan_type == 'Xanitizer Scan':
         parser = XanitizerXMLParser(file, test)
     elif scan_type == 'Trivy Scan':
