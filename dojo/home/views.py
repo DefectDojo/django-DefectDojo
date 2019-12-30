@@ -19,6 +19,9 @@ logger = logging.getLogger(__name__)
 
 def home(request):
     if request.user.is_authenticated and request.user.is_staff:
+        groups = request.user.groups.all()
+        if "PenTester" in groups:
+            return HttpResponseRedirect(reverse('dashboard-pen_tester'))
         return HttpResponseRedirect(reverse('dashboard'))
     return HttpResponseRedirect(reverse('product'))
 
