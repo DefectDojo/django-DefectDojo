@@ -29,6 +29,8 @@
                 </div>
                 {% if request.user.is_superuser %}
                     <a href="{% url 'engagement' %}">
+                {% elif 'ProjectManagers' in groups %}
+                    <a href="{% url 'engagement' %}?project_manager={{ request.user.id }}">
                 {% else %}
                     <a href="{% url 'engagement' %}?engagement__lead={{ request.user.id }}">
                 {% endif %}
@@ -40,6 +42,7 @@
                 </a>
             </div>
         </div>
+        {% if 'ProjectManagers' in groups or 'ProjectDirectors' in groups or request.user.is_superuser %}
         <div class="col-lg-3 col-md-6">
             <div class="panel panel-red">
                 <div class="panel-heading">
@@ -58,25 +61,27 @@
                 {% else %}
                     <a href="{% url 'open_findings' %}?date=2&reporter={{ request.user.id }}&o=numerical_severity">
                 {% endif %}
-                    <div class="panel-footer">
-                        <span class="pull-left">View Finding Details</span>
-                        <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                <div class="panel-footer">
+                    <span class="pull-left">View Finding Details</span>
+                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
 
-                        <div class="clearfix"></div>
-                    </div>
+                    <div class="clearfix"></div>
+                </div>
                 </a>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="panel panel-green">
-                <div class="panel-heading">
-                    <div class="row">
-                        <div class="col-xs-3">
-                            <i class="fa fa-fire-extinguisher fa-5x"></i>
-                        </div>
-                        <div class="col-xs-9 text-right">
-                            <div class="huge">{{ mitigated_count }}</div>
-                            <div>Closed In Last Seven Days</div>
+        {% endif %}
+        {% if 'ProjectManager' in groups or request.user.is_superuser %}
+            <div class="col-lg-3 col-md-6">
+                <div class="panel panel-green">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-3">
+                                <i class="fa fa-fire-extinguisher fa-5x"></i>
+                            </div>
+                            <div class="col-xs-9 text-right">
+                                <div class="huge">{{ mitigated_count }}</div>
+                                <div>Closed In Last Seven Days</div>
                         </div>
                     </div>
                 </div>
@@ -91,19 +96,21 @@
 
                         <div class="clearfix"></div>
                     </div>
-                </a>
+                    </a>
+                </div>
             </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="panel panel-yellow">
-                <div class="panel-heading">
-                    <div class="row">
-                        <div class="col-xs-3">
-                            <i class="fa fa-check fa-5x"></i>
-                        </div>
-                        <div class="col-xs-9 text-right">
-                            <div class="huge">{{ accepted_count }}</div>
-                            <div>Accepted In Last Seven Days</div>
+        {% endif %}
+        {% if 'ProjectManager' in groups or request.user.is_superuser %}
+            <div class="col-lg-3 col-md-6">
+                <div class="panel panel-yellow">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-3">
+                                <i class="fa fa-check fa-5x"></i>
+                            </div>
+                            <div class="col-xs-9 text-right">
+                                <div class="huge">{{ accepted_count }}</div>
+                                <div>Accepted In Last Seven Days</div>
                         </div>
                     </div>
                 </div>
@@ -121,6 +128,7 @@
                 </a>
             </div>
         </div>
+        {% endif %}
     </div>
     <div class="row">
         <div class="col-lg-6">
@@ -136,6 +144,7 @@
             </div>
             <!-- /.panel -->
         </div>
+        {% if 'ProjectManager' in groups or request.user.is_superuser %}
         <div class="col-lg-6">
             <div class="panel panel-default">
                 <div class="panel-heading">
@@ -150,7 +159,9 @@
             <!-- /.panel -->
         </div>
         <!-- /.col-lg-6 -->
+        {% endif %}
     </div>
+    {% if 'ProjectManager' in groups or request.user.is_superuser %}
     <div class="row">
         {% if punchcard %}
             <div class="col-lg-12">
@@ -170,6 +181,7 @@
             </div>
         {% endif %}
     </div>
+    {% endif %}
 {% endblock %}
 {% block postscript %}
     <!-- Flot Charts JavaScript -->

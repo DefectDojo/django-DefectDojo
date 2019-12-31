@@ -605,6 +605,12 @@ class EngForm(forms.ModelForm):
     lead = forms.ModelChoiceField(
         queryset=User.objects.exclude(is_staff=False),
         required=True, label="Testing Lead")
+    project_manager = forms.ModelChoiceField(
+        queryset=User.objects.filter(groups__name__in=['ProjectManagers']),
+        required=True, label="Project Manager")
+    project_director = forms.ModelChoiceField(
+        queryset=User.objects.filter(groups__name__in=['ProjectDirectors']),
+        required=True, label="Project Director")
     test_strategy = forms.URLField(required=False, label="Test Strategy URL")
 
     def __init__(self, *args, **kwargs):
