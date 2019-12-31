@@ -18,16 +18,21 @@ logger = logging.getLogger(__name__)
 
 
 def home(request):
-    if request.user.is_authenticated and request.user.is_staff:
-        groups = request.user.groups.all()
-        if "PenTester" in groups:
-            return HttpResponseRedirect(reverse('dashboard-pen_tester'))
+    if request.user.is_authenticated and request.user.groups.filter(name='PenTesters'):
+        return HttpResponseRedirect(reverse('engagement'))
+    if request.user.is_superuser:
         return HttpResponseRedirect(reverse('dashboard'))
-    return HttpResponseRedirect(reverse('product'))
+    else:
+        return HttpResponseRedirect(reverse('product'))
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_passes_test(lambda u: (u.is_active and u.groups.exists()) or u.is_superuser)
 def dashboard(request):
+    g = request.user.groups.all().values_list()
+    groups = []
+    for group in g:
+        groups.append(group[1])
+
     now = timezone.now()
     seven_days_ago = now - timedelta(days=7)
     if request.user.is_superuser:
@@ -45,6 +50,25 @@ def dashboard(request):
 
         # forever counts
         findings = Finding.objects.filter(verified=True, duplicate=False)
+    elif request.user.groups.filter(name='ProjectManagers'):
+        engagement_count = Engagement.objects.filter(active=True, project_manager_id=request.user.id).count()
+        finding_count = Finding.objects.filter(notes__test__engagement__project_manager_id=request.user.id,
+                                               verified=True,
+                                               mitigated=None,
+                                               duplicate=False,
+                                               date__range=[seven_days_ago,
+                                                            now]).count()
+        mitigated_count = Finding.objects.filter(notes__test__engagement__project_manager_id=request.user.id,
+                                                 mitigated__range=[seven_days_ago,
+                                                                   now]).count()
+
+        accepted_count = len([finding for ra in Risk_Acceptance.objects.filter(
+            notes__test__engagement__project_manager_id=request.user.id, created__range=[seven_days_ago, now]) for
+                              finding in ra.accepted_findings.all()])
+
+        # forever counts
+        findings = Finding.objects.filter(notes__test__engagement__project_manager_id=request.user.id, verified=True,
+                                          duplicate=False)
     else:
         engagement_count = Engagement.objects.filter(lead=request.user,
                                                      active=True).count()
@@ -136,4 +160,5 @@ def dashboard(request):
                    'by_month': by_month,
                    'punchcard': punchcard,
                    'ticks': ticks,
-                   'highest_count': highest_count})
+                   'highest_count': highest_count,
+                   'groups': groups})
