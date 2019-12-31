@@ -281,7 +281,8 @@ class Contact(models.Model):
     is_admin = models.BooleanField(default=False)
     is_globally_read_only = models.BooleanField(default=False)
     updated = models.DateTimeField(editable=False)
-
+    dojo_user = models.ForeignKey(Dojo_User, null=True, editable=True, related_name='dojo_user',
+                                  on_delete=models.CASCADE)
 
 class Product_Type(models.Model):
     name = models.CharField(max_length=255, unique=True)
@@ -439,6 +440,7 @@ class Product(models.Model):
         (RETIREMENT, _('Retirement')),
     )
 
+    ## Could change this to a table lookup
     QUEST_ORIGIN = 'Quest Diagnostics'
     #    PURCHASED_ORIGIN = 'purchased'
     #    CONTRACTOR_ORIGIN = 'contractor'
@@ -491,7 +493,8 @@ class Product(models.Model):
                                           related_name='technical_contact', on_delete=models.CASCADE)
     team_manager = models.ForeignKey(Dojo_User, null=True, blank=True,
                                      related_name='team_manager', on_delete=models.CASCADE)
-
+    primary_poc = models.ForeignKey(Contact, null=True, blank=True,
+                                    related_name='primary_poc', on_delete=models.CASCADE)
     created = models.DateTimeField(editable=False, null=True, blank=True)
     prod_type = models.ForeignKey(Product_Type, related_name='prod_type',
                                   null=True, blank=True, on_delete=models.CASCADE)
@@ -773,23 +776,28 @@ class Engagement_Type(models.Model):
 class Engagement(models.Model):
     name = models.CharField(max_length=300, null=True, blank=True)
     description = models.CharField(max_length=2000, null=True, blank=True)
-    version = models.CharField(max_length=100, null=True, blank=True, help_text="Version of the product the engagement tested.")
+    version = models.CharField(max_length=100, null=True, blank=True,
+                               help_text="Version of the product the engagement tested.")
     eng_type = models.ForeignKey(Engagement_Type, null=True, blank=True, on_delete=models.CASCADE)
     first_contacted = models.DateField(null=True, blank=True)
     target_start = models.DateField(null=False, blank=False)
     target_end = models.DateField(null=False, blank=False)
     lead = models.ForeignKey(User, editable=True, null=True, on_delete=models.CASCADE)
-    project_manager = models.ForeignKey(User, default=7, editable=True, null=True, on_delete=models.SET_NULL,
+    project_director = models.ForeignKey(User, default=6, editable=True, null=True, on_delete=models.SET_DEFAULT,
+                                         related_name='project_director')
+    project_manager = models.ForeignKey(User, default=7, editable=True, null=True, on_delete=models.SET_DEFAULT,
                                         related_name='project_manager')
     requester = models.ForeignKey(Contact, null=True, blank=True, on_delete=models.CASCADE)
-    preset = models.ForeignKey(Engagement_Presets, null=True, blank=True, help_text="Settings and notes for performing this engagement.", on_delete=models.CASCADE)
+    preset = models.ForeignKey(Engagement_Presets, null=True, blank=True,
+                               help_text="Settings and notes for performing this engagement.", on_delete=models.CASCADE)
     reason = models.CharField(max_length=2000, null=True, blank=True)
     report_type = models.ForeignKey(Report_Type, null=True, blank=True, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     updated = models.DateTimeField(auto_now=True, null=True)
     created = models.DateTimeField(auto_now_add=True, null=True)
     active = models.BooleanField(default=True, editable=False)
-    tracker = models.URLField(max_length=200, help_text="Link to epic or ticket system with changes to version.", editable=True, blank=True, null=True)
+    tracker = models.URLField(max_length=200, help_text="Link to epic or ticket system with changes to version.",
+                              editable=True, blank=True, null=True)
     test_strategy = models.URLField(editable=True, blank=True, null=True)
     threat_model = models.BooleanField(default=True)
     api_test = models.BooleanField(default=True)
@@ -1140,7 +1148,7 @@ class Finding(models.Model):
     unsaved_response = None
     unsaved_tags = None
     references = models.TextField(null=True, blank=True, db_column="refs")
-    test = models.ForeignKey(Test, editable=False, on_delete=models.CASCADE)
+    test = models.ForeignKey(Test, editable=False, related_name='finding_from_test', on_delete=models.CASCADE)
     # TODO: Will be deprecated soon
     is_template = models.BooleanField(default=False)
     active = models.BooleanField(default=True)
@@ -2299,7 +2307,6 @@ class FieldRule(models.Model):
                         ('Replace', 'Replace'))
     update_type = models.CharField(max_length=30, choices=update_options)
     text = models.CharField(max_length=200)
-
 
 # Register for automatic logging to database
 auditlog.register(Dojo_User)
