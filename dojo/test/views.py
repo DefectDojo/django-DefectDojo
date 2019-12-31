@@ -21,7 +21,7 @@ from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
 from tagging.models import Tag
 
-from dojo.filters import TemplateFindingFilter
+from dojo.filters import TemplateFindingFilter, OpenFindingFilter
 from dojo.forms import NoteForm, TestForm, FindingForm, \
     DeleteTestForm, AddFindingForm, \
     ImportScanForm, ReImportScanForm, FindingBulkUpdateForm, JIRAFindingForm
@@ -45,6 +45,7 @@ def view_test(request, tid):
     notes = test.notes.all()
     person = request.user.username
     findings = Finding.objects.filter(test=test).order_by('numerical_severity')
+    findings = OpenFindingFilter(request.GET, queryset=findings)
     stub_findings = Stub_Finding.objects.filter(test=test)
     cred_test = Cred_Mapping.objects.filter(test=test).select_related('cred_id').order_by('cred_id')
     creds = Cred_Mapping.objects.filter(engagement=test.engagement).select_related('cred_id').order_by('cred_id')
@@ -68,7 +69,7 @@ def view_test(request, tid):
     else:
         form = NoteForm()
 
-    fpage = get_page_items(request, findings, 25)
+    fpage = get_page_items(request, findings.qs, 25)
     sfpage = get_page_items(request, stub_findings, 25)
     show_re_upload = any(test.test_type.name in code for code in ImportScanForm.SCAN_TYPE_CHOICES)
 
@@ -117,7 +118,8 @@ def view_test(request, tid):
                   {'test': test,
                    'product_tab': product_tab,
                    'findings': fpage,
-                   'findings_count': findings.count(),
+                   'filtered': findings,
+                   'findings_count': findings.qs.count(),
                    'stub_findings': sfpage,
                    'form': form,
                    'notes': notes,
