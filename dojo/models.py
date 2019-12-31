@@ -779,6 +779,8 @@ class Engagement(models.Model):
     target_start = models.DateField(null=False, blank=False)
     target_end = models.DateField(null=False, blank=False)
     lead = models.ForeignKey(User, editable=True, null=True, on_delete=models.CASCADE)
+    project_manager = models.ForeignKey(User, default=7, editable=True, null=True, on_delete=models.SET_NULL,
+                                        related_name='project_manager')
     requester = models.ForeignKey(Contact, null=True, blank=True, on_delete=models.CASCADE)
     preset = models.ForeignKey(Engagement_Presets, null=True, blank=True, help_text="Settings and notes for performing this engagement.", on_delete=models.CASCADE)
     reason = models.CharField(max_length=2000, null=True, blank=True)
