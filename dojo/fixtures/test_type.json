@@ -528,6 +528,13 @@
 		},
 		"model": "dojo.test_type",
 		"pk": 167
+	},
+	{
+		"fields": {
+			"name": "Blackduck Hub Scan V2"
+		},
+		"model": "dojo.test_type",
+		"pk": 168
 	}
 ]
 
