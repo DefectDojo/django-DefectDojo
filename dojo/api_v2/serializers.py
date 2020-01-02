@@ -528,6 +528,9 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
     verified = serializers.BooleanField(default=True)
     scan_type = serializers.ChoiceField(
         choices=ImportScanForm.SCAN_TYPE_CHOICES)
+    endpoint_to_add = serializers.PrimaryKeyRelatedField(queryset=Endpoint.objects.all(),
+                                                         required=False,
+                                                         default=None)
     test_type = serializers.CharField(required=False)
     file = serializers.FileField(required=False)
     engagement = serializers.PrimaryKeyRelatedField(
@@ -546,6 +549,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         verified = data['verified']
         test_type, created = Test_Type.objects.get_or_create(
             name=data.get('test_type', data['scan_type']))
+        endpoint_to_add = data['endpoint_to_add']
         environment, created = Development_Environment.objects.get_or_create(
             name='Development')
         test = Test(
@@ -624,6 +628,9 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                         product=test.engagement.product)
 
                     item.endpoints.add(ep)
+
+                if endpoint_to_add:
+                    item.endpoints.add(endpoint_to_add)
 
                 if item.unsaved_tags is not None:
                     item.tags = item.unsaved_tags
@@ -704,6 +711,9 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     verified = serializers.BooleanField(default=True)
     scan_type = serializers.ChoiceField(
         choices=ImportScanForm.SCAN_TYPE_CHOICES)
+    endpoint_to_add = serializers.PrimaryKeyRelatedField(queryset=Endpoint.objects.all(),
+                                                          default=None,
+                                                          required=False)
     tags = TagListSerializerField(required=False)
     file = serializers.FileField(required=False)
     test = serializers.PrimaryKeyRelatedField(
@@ -713,6 +723,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         data = self.validated_data
         test = data['test']
         scan_type = data['scan_type']
+        endpoint_to_add = data['endpoint_to_add']
         min_sev = data['minimum_severity']
         scan_date = data['scan_date']
         verified = data['verified']
@@ -815,7 +826,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                             fragment=endpoint.fragment,
                             product=test.engagement.product)
                         finding.endpoints.add(ep)
-
+                    if endpoint_to_add:
+                        finding.endpoints.add(endpoint_to_add)
                     if item.unsaved_tags:
                         finding.tags = item.unsaved_tags
 
