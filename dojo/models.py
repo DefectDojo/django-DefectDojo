@@ -1950,15 +1950,21 @@ class JIRA_Conf(models.Model):
     password = models.CharField(max_length=2000)
     #    project_key = models.CharField(max_length=200,null=True, blank=True)
     #    enabled = models.BooleanField(default=True)
-    default_issue_type = models.CharField(max_length=9,
-                                          choices=(
-                                              ('Task', 'Task'),
-                                              ('Story', 'Story'),
-                                              ('Epic', 'Epic'),
-                                              ('Spike', 'Spike'),
-                                              ('Bug', 'Bug'),
-                                              ('Security', 'Security')),
-                                          default='Bug')
+    if hasattr(settings, 'JIRA_ISSUE_TYPE_CHOICES_CONFIG'):
+        default_issue_type_choices = settings.JIRA_ISSUE_TYPE_CHOICES_CONFIG
+    else:
+        default_issue_type_choices = (
+                                        ('Task', 'Task'),
+                                        ('Story', 'Story'),
+                                        ('Epic', 'Epic'),
+                                        ('Spike', 'Spike'),
+                                        ('Bug', 'Bug'),
+                                        ('Security', 'Security')
+                                    )
+    default_issue_type = models.CharField(max_length=15,
+                                          choices=default_issue_type_choices,
+                                          default='Bug',
+                                          help_text='You can define extra issue types in settings.py')
     epic_name_id = models.IntegerField(help_text="To obtain the 'Epic name id' visit https://<YOUR JIRA URL>/rest/api/2/field and search for Epic Name. Copy the number out of cf[number] and paste it here.")
     open_status_key = models.IntegerField(help_text="To obtain the 'open status key' visit https://<YOUR JIRA URL>/rest/api/latest/issue/<ANY VALID ISSUE KEY>/transitions?expand=transitions.fields")
     close_status_key = models.IntegerField(help_text="To obtain the 'open status key' visit https://<YOUR JIRA URL>/rest/api/latest/issue/<ANY VALID ISSUE KEY>/transitions?expand=transitions.fields")
