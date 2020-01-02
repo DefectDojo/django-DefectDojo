@@ -714,7 +714,6 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     endpoint_to_add = serializers.PrimaryKeyRelatedField(queryset=Endpoint.objects.all(),
                                                           default=None,
                                                           required=False)
-    tags = TagListSerializerField(required=False)
     file = serializers.FileField(required=False)
     test = serializers.PrimaryKeyRelatedField(
         queryset=Test.objects.all())
