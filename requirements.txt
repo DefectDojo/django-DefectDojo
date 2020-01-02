@@ -19,7 +19,7 @@ django-rest-swagger==2.1.2
 django-slack==5.13.0
 django-tagging==0.4.6
 django-taggit-serializer==0.1.7
-git+https://github.com/DefectDojo/django-tastypie-swagger.git@1.0
+git+https://github.com/DefectDojo/django-tastypie-swagger.git@v1.0
 django-tastypie==0.14.2
 django-watson==1.5.2
 Django==2.2.4
