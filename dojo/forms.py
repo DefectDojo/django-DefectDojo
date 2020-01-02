@@ -191,8 +191,9 @@ class ProductForm(forms.ModelForm):
 
     class Meta:
         model = Product
-        fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'regulations',
-                  'platform', 'lifecycle', 'origin', 'external_audience', 'internet_accessible']
+        fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type',
+                  'regulations',
+                  'platform', 'lifecycle', 'origin', 'external_audience', 'internet_accessible', 'primary_poc']
 
 
 # fields['product_manager'].label = ""
