@@ -363,8 +363,6 @@ class ImportScanForm(forms.Form):
                          ("Xanitizer Scan", "Xanitizer Scan"),
                          ("Trivy Scan", "Trivy Scan"))
 
-
-
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
     scan_date = forms.DateTimeField(
         required=True,
@@ -1950,3 +1948,21 @@ class GoogleSheetFieldsForm(forms.Form):
                 self.fields['Protect ' + i.name] = forms.BooleanField(initial=True, required=True, disabled=True)
             else:
                 self.fields['Protect ' + i.name] = forms.BooleanField(initial=False, required=False)
+
+
+class LoginBanner(forms.Form):
+    banner_enable = forms.BooleanField(
+        label="Enable login banner",
+        initial=False,
+        required=False,
+        help_text='Tick this box to enable a text banner on the login page'
+    )
+
+    banner_message = forms.CharField(
+        required=False,
+        label="Message to display on the login page"
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        return cleaned_data

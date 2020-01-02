@@ -1937,6 +1937,11 @@ class FindingImageAccessToken(models.Model):
         return super(FindingImageAccessToken, self).save(*args, **kwargs)
 
 
+class BannerConf(models.Model):
+    banner_enable = models.BooleanField(default=False, null=True, blank=True)
+    banner_message = models.CharField(max_length=500, help_text="This message will be displayed on the login page", default='')
+
+
 class JIRA_Conf(models.Model):
     configuration_name = models.CharField(max_length=2000, help_text="Enter a name to give to this configuration", default='')
     url = models.URLField(max_length=2000, verbose_name="JIRA URL", help_text="For configuring Jira, view: https://defectdojo.readthedocs.io/en/latest/features.html#jira-integration")
