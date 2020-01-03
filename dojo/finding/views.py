@@ -1456,7 +1456,7 @@ def download_finding_pic(request, token):
     except:
         raise PermissionDenied
 
-    response = StreamingHttpResponse(FileIterWrapper(open(sizes[size].path)))
+    response = StreamingHttpResponse(FileIterWrapper(open(sizes[size].path, 'rb')))
     response['Content-Disposition'] = 'inline'
     mimetype, encoding = mimetypes.guess_type(sizes[size].name)
     response['Content-Type'] = mimetype
