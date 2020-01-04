@@ -7,7 +7,7 @@ coverage==4.5.3
 defusedxml==0.6.0
 django_celery_results==1.1.1
 django-auditlog==0.4.5
-git+https://github.com/Maffooch/django-custom-field.git@master#egg=django-custom-field
+git+https://github.com/DefectDojo/django-custom-field.git@4e095dd9119858e90fd21560e5618c6347e4ef1b#egg=django-custom-field
 django-dbbackup>=3.2.0
 django-environ==0.4.5
 django-filter==2.0.0
@@ -19,7 +19,7 @@ django-rest-swagger==2.1.2
 django-slack==5.13.0
 django-tagging==0.4.6
 django-taggit-serializer==0.1.7
-git+https://github.com/Maffooch/django-tastypie-swagger@master#egg=django-tastypie-swagger
+git+https://github.com/DefectDojo/django-tastypie-swagger.git@c7c5629480dc20cadd3015490a01bd8e70393c36#egg=django-tastypie-swagger
 django-tastypie==0.14.2
 django-watson==1.5.2
 Django==2.2.4
