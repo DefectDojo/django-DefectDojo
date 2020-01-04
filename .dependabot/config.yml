@@ -1,0 +1,17 @@
+version: 1
+update_configs:
+  - package_manager: "python"
+    directory: "/"
+    target_branch: "dev"
+    update_schedule: "live"
+
+  - package_manager: "javascript"
+    directory: "/"
+    target_branch: "dev"
+    update_schedule: "live"
+
+  - package_manager: "docker"
+    directory: "/"
+    target_branch: "dev"
+    update_schedule: "weekly"
+
