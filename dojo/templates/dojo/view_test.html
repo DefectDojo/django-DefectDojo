@@ -169,12 +169,10 @@
                             <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-
                             <li role="presentation">
                                 <a title="Add Finding" href="{% url 'add_findings' test.id %}">
                                     <span class="fa fa-bug"></span> New Finding
                                 </a>
-
                             </li>
                             <li role="presentation">
                                 <a title="Add Finding from Template" href="{% url 'search' test.id %}">
@@ -273,7 +271,7 @@
                             <th class="hidden-sm centered" title="Select all visible findings.">
                                 <div class="dropdown">
                                     <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
-                                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" aria-label="Severity Filter">
                                         <form class="inline-form" action="#"><input type="checkbox" name="select_all"
                                                                                     id="select_all"/></form>
                                         <span class="caret"></span>
