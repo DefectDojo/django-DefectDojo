@@ -60,11 +60,11 @@
 		"pk": 100
 	},
 	{
-    "fields": {
-      "name": "Anchore Engine Scan"
-    },
-    "model": "dojo.test_type",
-    "pk": 101
+		"fields": {
+		"name": "Anchore Engine Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 101
 	},
 	{
 		"fields": {
@@ -72,6 +72,13 @@
 		},
 		"model": "dojo.test_type",
 		"pk": 102
+	},
+	{
+		"fields": {
+			"name": "Aqua Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 163
 	},
 	{
 		"fields": {
@@ -187,6 +194,14 @@
 	},
 	{
 		"fields": {
+			"name": "Dependency Track Finding Packaging Format (FPF) Export"
+		},
+		"model": "dojo.test_type",
+		"pk": 164
+
+	},
+	{
+		"fields": {
 			"name": "Fortify"
 		},
 		"model": "dojo.test_type",
@@ -205,46 +220,60 @@
 		},
 		"model": "dojo.test_type",
 		"pk": 121
-  	},
+	},
+	{
+		"fields": {
+      		"name": "Hadolint Dockerfile check"
+    	},
+    	"model": "dojo.test_type",
+    	"pk": 162
+	},
   	{
     	"fields": {
       		"name": "IBM AppScan DAST"
-    },
+    	},
     	"model": "dojo.test_type",
     	"pk": 122
   	},
 	{
 		"fields": {
 			"name": "Immuniweb Scan"
-	},
+		},
 		"model": "dojo.test_type",
 		"pk": 123
 	},
 	{
+		"fields": {
+		   "name": "JFrog Xray Scan"
+		 },
+		 "model": "dojo.test_type",
+		 "pk": 161
+	},
+	{
     	"fields": {
       		"name": "Kiuwan Scan"
-    },
+    	},
     	"model": "dojo.test_type",
     	"pk": 124
   	},
   	{
     	"fields": {
       		"name": "Microfocus Webinspect Scan"
-    },
+    	},
     	"model":"dojo.test_type",
     	"pk": 125
   	},
   	{
     	"fields": {
       		"name": "MobSF Scanner"
-    },
+    	},
     	"model":"dojo.test_type",
     	"pk": 126
   	},
 	{
 		"fields": {
       		"name": "Mozilla Observatory Scan"
-    },
+    	},
     	"model": "dojo.test_type",
     	"pk": 127
 	},
@@ -258,7 +287,7 @@
 	{
     	"fields": {
       		"name": "Netsparker Scan"
-    },
+    	},
     	"model": "dojo.test_type",
     	"pk": 129
 	},
@@ -289,6 +318,13 @@
 		},
 		"model": "dojo.test_type",
 		"pk": 133
+	},
+	{
+		"fields": {
+			"name": "Node JS Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 167
 	},
 	{
 		"fields": {
@@ -348,7 +384,7 @@
 	},
 	{
 		"fields": {
-					"name": "Safety Scan"
+			"name": "Safety Scan"
 		},
 		"model": "dojo.test_type",
 		"pk": 142
@@ -376,20 +412,6 @@
 	},
 	{
 		"fields": {
-			"name": "SSL Labs Scan"
-		},
-		"model": "dojo.test_type",
-		"pk": 146
-	},
-  {
-		"fields": {
-			"name": "Sslscan"
-		},
-		"model": "dojo.test_type",
-		"pk": 147
-	},
-	{
-		"fields": {
 			"name": "SonarQube"
 		},
 		"model": "dojo.test_type",
@@ -401,6 +423,41 @@
 		},
 		"model": "dojo.test_type",
 		"pk": 149
+	},
+	{
+		"fields": {
+			"name": "SSL Labs Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 146
+	},
+  	{
+		"fields": {
+			"name": "Sslscan"
+		},
+		"model": "dojo.test_type",
+		"pk": 147
+	},
+	{
+		"fields": {
+			"name": "Sslyze Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 159
+	},
+	{
+		"fields": {
+			"name": "Testssl Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 160
+	},
+	{
+		"fields": {
+			"name": "Trivy Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 165
 	},
 	{
 		"fields": {
@@ -417,11 +474,11 @@
 		"pk": 151
 	},
 	{
-    "fields": {
-    		"name": "Twistlock Image Scan"
-    },
-    "model": "dojo.test_type",
-    "pk": 152
+		"fields": {
+			"name": "Twistlock Image Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 152
 	},
 	{
 		 "fields": {
@@ -437,90 +494,39 @@
 		"model": "dojo.test_type",
 		"pk": 154
 	},
-  {
-  	"fields": {
-    		"name": "Wapiti Scan"
-  	},
-  	"model": "dojo.test_type",
-  	"pk": 155
-  },
-  {
-	   "fields": {
-		     "name": "Wpscan"
-	   },
-		"model": "dojo.test_type",
-		"pk": 156
-	},
-  {
-		"fields": {
-     	  "name": "Whitesource Scan"
-    },
-    "model": "dojo.test_type",
-	  "pk": 157
-  },
 	{
-	   "fields": {
-	      "name": "ZAP Scan"
-		},
-		"model": "dojo.test_type",
-		"pk": 158
-	},
-    {
 		"fields": {
-			"name": "Sslyze Scan"
+			"name": "Wapiti Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 159
+		"pk": 155
 	},
 	{
 		"fields": {
-			"name": "Testssl Scan"
+			"name": "Whitesource Scan"
 		},
 		"model": "dojo.test_type",
-		"pk": 160
-	},
-	{
-	   "fields": {
-	      "name": "JFrog Xray Scan"
-		},
-		"model": "dojo.test_type",
-		"pk": 161
+		"pk": 157
 	},
 	{
 		"fields": {
-      		"name": "Hadolint Dockerfile check"
-    	},
-    	"model": "dojo.test_type",
-    	"pk": 162
-	},
-	{
-		"fields": {
-			"name": "Aqua Scan"
+			"name": "Wpscan"
 		},
-		"model": "dojo.test_type",
-		"pk": 163
+			"model": "dojo.test_type",
+			"pk": 156
 	},
-	{
-		"fields": {
-			"name": "Dependency Track Finding Packaging Format (FPF) Export"
-		},
-		"model": "dojo.test_type",
-		"pk": 164
-
-	},
-  {
-      "fields": {
-          "name": "Trivy Scan"
-      },
-      "model": "dojo.test_type",
-      "pk": 165
-  },
-  {
+  	{
 		"fields": {
 			"name": "Xanitizer Scan"
 		},
 		"model": "dojo.test_type",
 		"pk": 166
+	},
+	{
+		"fields": {
+		   "name": "ZAP Scan"
+		 },
+		 "model": "dojo.test_type",
+		 "pk": 158
 	}
 ]
-

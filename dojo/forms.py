@@ -307,6 +307,7 @@ class ImportScanForm(forms.Form):
                          ("Dependency Check Scan", "Dependency Check Scan"),
                          ("Dependency Track Finding Packaging Format (FPF) Export", "Dependency Track Finding Packaging Format (FPF) Export"),
                          ("Retire.js Scan", "Retire.js Scan"),
+                         ("Node JS Scan", "Node JS Scan"),
                          ("Node Security Platform Scan", "Node Security Platform Scan"),
                          ("NPM Audit Scan", "NPM Audit Scan"),
                          ("Qualys Scan", "Qualys Scan"),

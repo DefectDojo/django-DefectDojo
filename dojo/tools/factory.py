@@ -14,6 +14,7 @@ from dojo.tools.vcg.parser import VCGParser
 from dojo.tools.dependency_check.parser import DependencyCheckParser
 from dojo.tools.dependency_track.parser import DependencyTrackParser
 from dojo.tools.retirejs.parser import RetireJsParser
+from dojo.tools.node_js.parser import NodeJSParser
 from dojo.tools.nsp.parser import NspParser
 from dojo.tools.npm_audit.parser import NpmAuditParser
 from dojo.tools.php_symfony_security_check.parser import PhpSymfonySecurityCheckParser
@@ -118,6 +119,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = DependencyTrackParser(file, test)
     elif scan_type == 'Retire.js Scan':
         parser = RetireJsParser(file, test)
+    elif scan_type == 'Node JS Scan':
+        parser = NodeJSParser(file, test)
     elif scan_type == 'Node Security Platform Scan':
         parser = NspParser(file, test)
     elif scan_type == 'NPM Audit Scan':

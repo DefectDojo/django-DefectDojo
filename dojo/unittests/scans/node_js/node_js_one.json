@@ -1,0 +1,24 @@
+{
+    "sec_issues": {
+        "Remote Code Injection": [
+            {
+                "description": "User controlled data in 'unserialize()' or 'deserialize()' function can result in Object Injection or Remote Code Injection.",
+                "filename": "sonar-single-finding.html",
+                "line": 779,
+                "lines": "  < li > As a last resort, restrict deserialization to be possible only to specific, whitelisted classes. < /li> <\n      /ul> <\n      h2 > Noncompliant Code Example < /h2> <\n      pre >\n      $data = $_GET[\"data\"];\n  $object = unserialize($data);\n  // ...\n  <\n  /pre> <\n  h2 > Compliant Solution < /h2> <\n      pre >",
+                "path": "/dojo/unittests/scans/sonarqube/sonar-single-finding.html",
+                "sha2": "310ac828d9e1d6e12894817421c993f0b904e4c0629a53ebd64e061e970c3f14",
+                "tag": "rci",
+                "title": "Deserialization Remote Code Injection"
+            }
+        ]
+    },
+    "total_count": {
+        "good": 0,
+        "mis": 0,
+        "sec": 1
+    },
+    "vuln_count": {
+        "Deserialization Remote Code Injection": 1
+    }
+}

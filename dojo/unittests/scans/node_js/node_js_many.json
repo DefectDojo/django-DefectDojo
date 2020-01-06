@@ -1,0 +1,64 @@
+{
+    "sec_issues": {
+        "Remote Code Injection": [
+            {
+                "description": "User controlled data in 'unserialize()' or 'deserialize()' function can result in Object Injection or Remote Code Injection.",
+                "filename": "sonar-single-finding.html",
+                "line": 779,
+                "lines": "  < li > As a last resort, restrict deserialization to be possible only to specific, whitelisted classes. < /li> <\n      /ul> <\n      h2 > Noncompliant Code Example < /h2> <\n      pre >\n      $data = $_GET[\"data\"];\n  $object = unserialize($data);\n  // ...\n  <\n  /pre> <\n  h2 > Compliant Solution < /h2> <\n      pre >",
+                "path": "/dojo/unittests/scans/sonarqube/sonar-single-finding.html",
+                "sha2": "310ac828d9e1d6e12894817421c993f0b904e4c0629a53ebd64e061e970c3f14",
+                "tag": "rci",
+                "title": "Deserialization Remote Code Injection"
+            },
+            {
+                "description": "User controlled data in 'unserialize()' or 'deserialize()' function can result in Object Injection or Remote Code Injection.",
+                "filename": "sonar-single-finding.html",
+                "line": 791,
+                "lines": "list($hash, $data) = explode('|', $data, 2);\n$hash_confirm = hash_hmac(\"sha256\", $data, \"secret-key\");\n\n// Confirm that the data integrity is not compromised\nif ($hash === $hash_confirm) {\n    $object = unserialize($data);\n    // ...\n} <\n/pre> <\nh2 > See < /h2>",
+                "path": "/dojo/unittests/scans/sonarqube/sonar-single-finding.html",
+                "sha2": "fb4d46b8062f24fde2fc4c4733c975f5c32d2071a66e67500d8effc29da9139e",
+                "tag": "rci",
+                "title": "Deserialization Remote Code Injection"
+            },
+            {
+                "description": "User controlled data in 'unserialize()' or 'deserialize()' function can result in Object Injection or Remote Code Injection.",
+                "filename": "sonar-no-finding.html",
+                "line": 2829,
+                "lines": "  < li > As a last resort, restrict deserialization to be possible only to specific, whitelisted classes. < /li> <\n      /ul> <\n      h2 > Noncompliant Code Example < /h2> <\n      pre >\n      $data = $_GET[\"data\"];\n  $object = unserialize($data);\n  // ...\n  <\n  /pre> <\n  h2 > Compliant Solution < /h2> <\n      pre >",
+                "path": "/dojo/unittests/scans/sonarqube/sonar-no-finding.html",
+                "sha2": "310ac828d9e1d6e12894817421c993f0b904e4c0629a53ebd64e061e970c3f14",
+                "tag": "rci",
+                "title": "Deserialization Remote Code Injection"
+            },
+            {
+                "description": "User controlled data in 'unserialize()' or 'deserialize()' function can result in Object Injection or Remote Code Injection.",
+                "filename": "sonar-no-finding.html",
+                "line": 2841,
+                "lines": "list($hash, $data) = explode('|', $data, 2);\n$hash_confirm = hash_hmac(\"sha256\", $data, \"secret-key\");\n\n// Confirm that the data integrity is not compromised\nif ($hash === $hash_confirm) {\n    $object = unserialize($data);\n    // ...\n} <\n/pre> <\nh2 > See < /h2>",
+                "path": "/dojo/unittests/scans/sonarqube/sonar-no-finding.html",
+                "sha2": "fb4d46b8062f24fde2fc4c4733c975f5c32d2071a66e67500d8effc29da9139e",
+                "tag": "rci",
+                "title": "Deserialization Remote Code Injection"
+            },
+            {
+                "description": "User controlled data in 'unserialize()' or 'deserialize()' function can result in Object Injection or Remote Code Injection.",
+                "filename": "sonar-6-findings.html",
+                "line": 830,
+                "lines": "  < li > As a last resort, restrict deserialization to be possible only to specific, whitelisted classes. < /li> <\n      /ul> <\n      h2 > Noncompliant Code Example < /h2> <\n      pre >\n      $data = $_GET[\"data\"];\n  $object = unserialize($data);\n  // ...\n  <\n  /pre> <\n  h2 > Compliant Solution < /h2> <\n      pre >",
+                "path": "/dojo/unittests/scans/sonarqube/sonar-6-findings.html",
+                "sha2": "310ac828d9e1d6e12894817421c993f0b904e4c0629a53ebd64e061e970c3f14",
+                "tag": "rci",
+                "title": "Deserialization Remote Code Injection"
+            }
+        ]
+    },
+    "total_count": {
+        "good": 0,
+        "mis": 0,
+        "sec": 5
+    },
+    "vuln_count": {
+        "Deserialization Remote Code Injection": 1
+    }
+}

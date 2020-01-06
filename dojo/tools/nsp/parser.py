@@ -14,6 +14,10 @@ class NspParser(object):
             self.items = []
 
     def parse_json(self, json_output):
+        
+        if json_output is None:
+            return None
+            
         try:
             data = json_output.read()
             try:
