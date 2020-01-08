@@ -28,7 +28,7 @@ RUN \
     cd /opt && \ 
     virtualenv dojo && \ 
     cd /opt/dojo && \ 
-    git clone -b demo https://github.com/Maffooch/django-DefectDojo.git
+    git clone -b dev https://github.com/DefectDojo/django-DefectDojo.git
 
 # Activate virtualenv and install dojo
 RUN \
