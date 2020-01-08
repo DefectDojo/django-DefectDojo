@@ -1335,7 +1335,7 @@ class Finding(models.Model):
             filtered = filtered.filter(file_path=self.file_path)
         if self.line:
             filtered = filtered.filter(line=self.line)
-        return filtered.exclude(pk=self.pk)
+        return filtered.exclude(pk=self.pk)[:10]
 
     def compute_hash_code(self):
         if hasattr(settings, 'HASHCODE_FIELDS_PER_SCANNER') and hasattr(settings, 'HASHCODE_ALLOWS_NULL_CWE') and hasattr(settings, 'HASHCODE_ALLOWED_FIELDS'):
@@ -1937,6 +1937,11 @@ class FindingImageAccessToken(models.Model):
         return super(FindingImageAccessToken, self).save(*args, **kwargs)
 
 
+class BannerConf(models.Model):
+    banner_enable = models.BooleanField(default=False, null=True, blank=True)
+    banner_message = models.CharField(max_length=500, help_text="This message will be displayed on the login page", default='')
+
+
 class JIRA_Conf(models.Model):
     configuration_name = models.CharField(max_length=2000, help_text="Enter a name to give to this configuration", default='')
     url = models.URLField(max_length=2000, verbose_name="JIRA URL", help_text="For configuring Jira, view: https://defectdojo.readthedocs.io/en/latest/features.html#jira-integration")
@@ -1951,7 +1956,8 @@ class JIRA_Conf(models.Model):
                                               ('Story', 'Story'),
                                               ('Epic', 'Epic'),
                                               ('Spike', 'Spike'),
-                                              ('Bug', 'Bug')),
+                                              ('Bug', 'Bug'),
+                                              ('Security', 'Security')),
                                           default='Bug')
     epic_name_id = models.IntegerField(help_text="To obtain the 'Epic name id' visit https://<YOUR JIRA URL>/rest/api/2/field and search for Epic Name. Copy the number out of cf[number] and paste it here.")
     open_status_key = models.IntegerField(help_text="To obtain the 'open status key' visit https://<YOUR JIRA URL>/rest/api/latest/issue/<ANY VALID ISSUE KEY>/transitions?expand=transitions.fields")
