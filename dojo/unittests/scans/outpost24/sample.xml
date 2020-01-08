@@ -1,0 +1,3062 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE main SYSTEM "https://outscan.outpost24.com/dtd/XMLReport.dtd">
+<main>
+   <report>OUTSCAN Security Report</report>
+   <reportinfo>
+      <type>Vulnerability</type>
+      <id>723F6C483A35344CA2037989BB737CEC</id>
+      <reportdate>2019-10-04 19:00</reportdate>
+      <timezone>GMT+5:30</timezone>
+      <creator>Randstad Holding NV</creator>
+      <date>2019-10-01 19:01 - 2019-10-01 19:01</date>
+      <test>1</test>
+      <threat>50</threat>
+   </reportinfo>
+   <hostlist>
+      <host>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <name/>
+         <platform/>
+         <high>4</high>
+         <medium>28</medium>
+         <low>18</low>
+         <info>13</info>
+         <port>1</port>
+         <start>2019-10-01 19:01</start>
+         <end>2019-10-01 19:11</end>
+         <updated>2019-10-03 23:35</updated>
+         <template>Normal with webapp</template>
+         <completescan>true</completescan>
+      </host>
+   </hostlist>
+   <portlist>
+      <portlist-host>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <name/>
+         <date>2019-10-01 19:01</date>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+            <history>
+               <firstseen>2019-09-10 19:01</firstseen>
+            </history>
+         </portinfo>
+      </portlist-host>
+   </portlist>
+   <detaillist>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>54.246.138.90</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1345087</id>
+         <name>Eclipse Jetty: Transfer-Encoding Request Smuggling Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>7.5</cvss_score>
+         <cvss_vector>(AV:N/AC:L/Au:N/C:P/I:P/A:P) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with ease and network access to the system by an attacker who does not have access to credentials with some impact on confidentiality, some impact to the integrity of information and some impact on system or information availability. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>9.8</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H</cvss_v3_vector>
+         <risk>4</risk>
+         <family>eclipse</family>
+         <product>Eclipse Jetty</product>
+         <description>In Eclipse Jetty, transfer-encoding chunks are handled poorly. The chunk length parsing was vulnerable to an integer overflow. Thus a large chunk size could be interpreted as a smaller chunk size and content sent as chunk body could be interpreted as a pipelined request. If Jetty was deployed behind an intermediary that imposed some authorization and that intermediary allowed arbitrarily large chunks to be passed on unchanged, then this flaw could be used to bypass the authorization imposed by the intermediary as the fake pipelined request would not be interpreted by the intermediary as a request.</description>
+         <information>This vulnerability was identified because (1) the detected version of Eclipse Jetty, 9.4.z-SNAPSHOT, is less than 9.4.11.v20180605</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty</solutiontitle>
+         <solution>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.eclipse.org/jetty/</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://bugs.eclipse.org/bugs/show_bug.cgi?id=535668</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2017-7657</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-24 19:00</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1345088</id>
+         <name>Eclipse Jetty: Double Content-Length Authentication Bypass Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>7.5</cvss_score>
+         <cvss_vector>(AV:N/AC:L/Au:N/C:P/I:P/A:P) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with ease and network access to the system by an attacker who does not have access to credentials with some impact on confidentiality, some impact to the integrity of information and some impact on system or information availability. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>9.8</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H</cvss_v3_vector>
+         <risk>4</risk>
+         <family>eclipse</family>
+         <product>Eclipse Jetty</product>
+         <description>In Eclipse Jetty Serve, when presented with two content-lengths headers, Jetty ignored the second. When presented with a content-length and a chunked encoding header, the content-length was ignored (as per RFC 2616). If an intermediary decided on the shorter length, but still passed on the longer body, then body content could be interpreted by Jetty as a pipelined request. If the intermediary was imposing authorization, the fake pipelined request would bypass that authorization.</description>
+         <information>This vulnerability was identified because (1) the detected version of Eclipse Jetty, 9.4.z-SNAPSHOT, is less than 9.4.11.v20180605
+Paths:
+/</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty</solutiontitle>
+         <solution>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.eclipse.org/jetty/</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://bugs.eclipse.org/bugs/show_bug.cgi?id=535669</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2017-7658</id>
+         </cve>
+         <bug>
+            <id>106566</id>
+         </bug>
+         <verify/>
+         <history>
+            <firstseen>2019-09-10 19:01</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>54.246.138.90</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1345088</id>
+         <name>Eclipse Jetty: Double Content-Length Authentication Bypass Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>7.5</cvss_score>
+         <cvss_vector>(AV:N/AC:L/Au:N/C:P/I:P/A:P) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with ease and network access to the system by an attacker who does not have access to credentials with some impact on confidentiality, some impact to the integrity of information and some impact on system or information availability. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>9.8</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H</cvss_v3_vector>
+         <risk>4</risk>
+         <family>eclipse</family>
+         <product>Eclipse Jetty</product>
+         <description>In Eclipse Jetty Serve, when presented with two content-lengths headers, Jetty ignored the second. When presented with a content-length and a chunked encoding header, the content-length was ignored (as per RFC 2616). If an intermediary decided on the shorter length, but still passed on the longer body, then body content could be interpreted by Jetty as a pipelined request. If the intermediary was imposing authorization, the fake pipelined request would bypass that authorization.</description>
+         <information>This vulnerability was identified because (1) the detected version of Eclipse Jetty, 9.4.z-SNAPSHOT, is less than 9.4.11.v20180605</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty</solutiontitle>
+         <solution>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.eclipse.org/jetty/</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://bugs.eclipse.org/bugs/show_bug.cgi?id=535669</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2017-7658</id>
+         </cve>
+         <bug>
+            <id>106566</id>
+         </bug>
+         <verify/>
+         <history>
+            <firstseen>2019-09-24 19:00</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1345087</id>
+         <name>Eclipse Jetty: Transfer-Encoding Request Smuggling Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>7.5</cvss_score>
+         <cvss_vector>(AV:N/AC:L/Au:N/C:P/I:P/A:P) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with ease and network access to the system by an attacker who does not have access to credentials with some impact on confidentiality, some impact to the integrity of information and some impact on system or information availability. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>9.8</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H</cvss_v3_vector>
+         <risk>4</risk>
+         <family>eclipse</family>
+         <product>Eclipse Jetty</product>
+         <description>In Eclipse Jetty, transfer-encoding chunks are handled poorly. The chunk length parsing was vulnerable to an integer overflow. Thus a large chunk size could be interpreted as a smaller chunk size and content sent as chunk body could be interpreted as a pipelined request. If Jetty was deployed behind an intermediary that imposed some authorization and that intermediary allowed arbitrarily large chunks to be passed on unchanged, then this flaw could be used to bypass the authorization imposed by the intermediary as the fake pipelined request would not be interpreted by the intermediary as a request.</description>
+         <information>This vulnerability was identified because (1) the detected version of Eclipse Jetty, 9.4.z-SNAPSHOT, is less than 9.4.11.v20180605
+Paths:
+/</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty</solutiontitle>
+         <solution>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.eclipse.org/jetty/</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://bugs.eclipse.org/bugs/show_bug.cgi?id=535668</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2017-7657</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-10 19:01</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>289960</id>
+         <name>X-Frame-Options Header Missing or Malformed</name>
+         <portinfo>
+            <portnumber>General</portnumber>
+         </portinfo>
+         <cvss_score>5.0</cvss_score>
+         <cvss_vector>(AV:N/AC:L/Au:N/C:P/I:N/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with ease and network access to the system by an attacker who does not have access to credentials with some impact on confidentiality, no impact to integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <risk>2</risk>
+         <family>was</family>
+         <product>Web Application Scanning</product>
+         <description>The clickjacking attack vector consists of an attacker creating a malicious web page that includes a section of the application within an &lt;iframe&gt;-element. The attacker cannot directly interact with the application, but they can control the main page and are able to overlay elements on top of the &lt;iframe&gt;. This can be leveraged in order to fool the end user that they are interacting with one page, when they are in reality interacting with another page.
+
+The frameableness of a resource is determined by either the Content-Security-Policy header when used with the frame-ancestors directive, or using the X-Frame-Options header. 
+Both of these were missing or malformed on the found resource.</description>
+         <information>[HTTP Method][URI][POST Data][Time (ms)][reason]
+[get][https://ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com/][][][MISSING]
+</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Reconfigure</solutiontitle>
+         <solution>The Content-Security-Policy header with the frame-ancestors directive will resolve clickjacking in modern browsers that support it. Setting the frame-ancestors to &apos;self&apos; (SAMEORIGIN) or &apos;none&apos; (DENY) will limit which origins may frame this resource. Whitelisting external resources is possible using this method as well.
+
+To ensure legacy client compatibility, set the X-Frame-Options header to either DENY (which means the resource can not be framed) or SAMEORIGIN (which means that only the same origin may frame this resource). Note that the &apos;allow-from&apos; value is not implemented correctly in all browsers. If frameability in an external resource has to be permitted, use CSP.
+
+These headers must be set on all server responses.</solution>
+         <category>Reconfigure</category>
+         <referencelist>
+            <reference>
+               <type>advisory</type>
+               <url>https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options</url>
+            </reference>
+            <reference>
+               <type>advisory</type>
+               <url>https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/frame-ancestors</url>
+            </reference>
+         </referencelist>
+         <cve/>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-10 19:01</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1313228</id>
+         <name>Eclipse Jetty: Timing Channel Privilege Escalation Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>5.0</cvss_score>
+         <cvss_vector>(AV:N/AC:L/Au:N/C:P/I:N/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with ease and network access to the system by an attacker who does not have access to credentials with some impact on confidentiality, no impact to integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>7.5</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N</cvss_v3_vector>
+         <risk>2</risk>
+         <family>eclipse</family>
+         <product>Eclipse Jetty</product>
+         <description>Jetty is prone to a timing channel in, which makes it easier for remote attackers to obtain access by observing elapsed times before rejection of incorrect passwords.</description>
+         <information>This vulnerability was identified because (1) the detected version of Eclipse Jetty, 9.4.z-SNAPSHOT, is less than 9.4.6.v20170531
+Paths:
+/</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty</solutiontitle>
+         <solution>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.eclipse.org/jetty/</url>
+            </reference>
+            <reference>
+               <type>advisory</type>
+               <url>https://github.com/dropwizard/dropwizard/issues/2113</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2017-9735</id>
+         </cve>
+         <bug>
+            <id>99104</id>
+         </bug>
+         <verify/>
+         <history>
+            <firstseen>2019-09-10 19:01</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1377090</id>
+         <name>Cloudbees Jenkins: Cross-Site Request Forgery Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>5.1</cvss_score>
+         <cvss_vector>(AV:N/AC:H/Au:N/C:P/I:P/A:P) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with advanced skills and network access to the system by an attacker who does not have access to credentials with some impact on confidentiality, some impact to the integrity of information and some impact on system or information availability. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>7.5</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:H</cvss_v3_vector>
+         <risk>2</risk>
+         <family>cloudbees</family>
+         <product>Cloudbees Jenkins</product>
+         <description>By default, CSRF tokens in Jenkins only checked user authentication and IP address. This allowed attackers able to obtain a CSRF token for another user to implement CSRF attacks as long as the victim’s IP address remained unchanged.</description>
+         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than 2.186
+Paths:
+/</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
+         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+            </reference>
+            <reference>
+               <type>advisory</type>
+               <url>https://jenkins.io/security/advisory/2019-04-10/#SECURITY-1327</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2019-10353</id>
+         </cve>
+         <bug>
+            <id>109373</id>
+         </bug>
+         <verify/>
+         <history>
+            <firstseen>2019-09-10 19:01</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1363069</id>
+         <name>Eclipse Jetty: Cross-Site Scripting Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>4.3</cvss_score>
+         <cvss_vector>(AV:N/AC:M/Au:N/C:N/I:P/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with relative ease and network access to the system by an attacker who does not have access to credentials with no impact on confidentiality, some impact to the integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>6.1</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
+         <risk>2</risk>
+         <family>eclipse</family>
+         <product>Eclipse Jetty</product>
+         <description>In Eclipse Jetty, the server is vulnerable to XSS conditions if a remote client USES a specially formatted URL against the DefaultServlet or ResourceHandler that is configured for showing a Listing of directory contents.</description>
+         <information>This vulnerability was identified because (1) the detected version of Eclipse Jetty, 9.4.z-SNAPSHOT, is less than 9.4.16
+Paths:
+/</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty</solutiontitle>
+         <solution>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.eclipse.org/jetty/</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://bugs.eclipse.org/bugs/show_bug.cgi?id=546121</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2019-10241</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-10 19:01</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>54.246.138.90</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1380637</id>
+         <name>Cloudbees Jenkins LTS: CSRF Protection Bypass Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>6.8</cvss_score>
+         <cvss_vector>(AV:N/AC:M/Au:N/C:P/I:P/A:P) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with relative ease and network access to the system by an attacker who does not have access to credentials with some impact on confidentiality, some impact to the integrity of information and some impact on system or information availability. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>8.8</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H</cvss_v3_vector>
+         <risk>2</risk>
+         <family>cloudbees</family>
+         <product>Cloudbees Jenkins LTS</product>
+         <description>Jenkins, LTS allowed users to obtain CSRF tokens without an associated web session ID, resulting in CSRF tokens that did not expire and could be used to bypass CSRF protection for the anonymous user.</description>
+         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins LTS, 2.176.4, is less than or equal to 2.191</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to version 2.176.2 or later of Cloudbees Jenkins LTS</solutiontitle>
+         <solution>Upgrade to version 2.176.2 or later of Cloudbees Jenkins LTS.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://jenkins.io/download/</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2019-10384</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-24 19:00</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1344881</id>
+         <name>Eclipse Jetty: FileBasedSessionStore Session Stealing Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>6.5</cvss_score>
+         <cvss_vector>(AV:N/AC:L/Au:S/C:P/I:P/A:P) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with ease and network access to the system by an attacker with the possibility to log in once with some impact on confidentiality, some impact to the integrity of information and some impact on system or information availability. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>8.8</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H</cvss_v3_vector>
+         <risk>2</risk>
+         <family>eclipse</family>
+         <product>Eclipse Jetty</product>
+         <description>In Eclipse Jetty, when using the optional Jetty provided FileSessionDataStore for persistent storage of HttpSession details, it is possible for a malicious user to access/hijack other HttpSessions and even delete unmatched HttpSessions present in the FileSystem&apos;s storage for the FileSessionDataStore.</description>
+         <information>This vulnerability was identified because (1) the detected version of Eclipse Jetty, 9.4.z-SNAPSHOT, is less than 9.4.9
+Paths:
+/</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty</solutiontitle>
+         <solution>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.eclipse.org/jetty/</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://bugs.eclipse.org/bugs/show_bug.cgi?id=536018</url>
+            </reference>
+            <reference>
+               <type>advisory</type>
+               <url>https://github.com/eclipse/jetty.project/issues/2038</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2018-12538</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-10 19:01</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1345086</id>
+         <name>Eclipse Jetty: Cache Poisoning Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>5.0</cvss_score>
+         <cvss_vector>(AV:N/AC:L/Au:N/C:N/I:P/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with ease and network access to the system by an attacker who does not have access to credentials with no impact on confidentiality, some impact to the integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>7.5</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N</cvss_v3_vector>
+         <risk>2</risk>
+         <family>eclipse</family>
+         <product>Eclipse Jetty</product>
+         <description>In Eclipse Jetty, HTTP/0.9 is handled poorly. An HTTP/1 style request line (i.e. method space URI space version) that declares a version of HTTP/0.9 was accepted and treated as a 0.9 request. If deployed behind an intermediary that also accepted and passed through the 0.9 version (but did not act on it), then the response sent could be interpreted by the intermediary as HTTP/1 headers. This could be used to poison the cache if the server allowed the origin client to generate arbitrary content in the response.</description>
+         <information>This vulnerability was identified because (1) the detected version of Eclipse Jetty, 9.4.z-SNAPSHOT, is less than 9.4.11.v20180605
+Paths:
+/</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty</solutiontitle>
+         <solution>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.eclipse.org/jetty/</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://bugs.eclipse.org/bugs/show_bug.cgi?id=535667</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2017-7656</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-10 19:01</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>54.246.138.90</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1363067</id>
+         <name>Eclipse Jetty: Information Disclosure Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>5.0</cvss_score>
+         <cvss_vector>(AV:N/AC:L/Au:N/C:P/I:N/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with ease and network access to the system by an attacker who does not have access to credentials with some impact on confidentiality, no impact to integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>5.3</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N</cvss_v3_vector>
+         <risk>2</risk>
+         <family>eclipse</family>
+         <product>Eclipse Jetty</product>
+         <description>In Eclipse Jetty, the server running on any OS and Jetty version combination will reveal the configured fully qualified directory base resource location on the output of the 404 error for not finding a Context that matches the requested path. The default server behavior on jetty-distribution and jetty-home will include at the end of the Handler tree a DefaultHandler, which is responsible for reporting this 404 error, it presents the various configured contexts as HTML for users to click through to. This produced HTML includes output that contains the configured fully qualified directory base resource location for each context.</description>
+         <information>This vulnerability was identified because (1) the detected version of Eclipse Jetty, 9.4.z-SNAPSHOT, is less than 9.4.17</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty</solutiontitle>
+         <solution>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.eclipse.org/jetty/</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://bugs.eclipse.org/bugs/show_bug.cgi?id=546577</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2019-10247</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-24 19:00</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>54.246.138.90</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1361567</id>
+         <name>Eclipse Jetty: Denial of Service Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>5.0</cvss_score>
+         <cvss_vector>(AV:N/AC:L/Au:N/C:N/I:N/A:P) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with ease and network access to the system by an attacker who does not have access to credentials with no impact on confidentiality, no impact to integrity of information and some impact on system or information availability. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>7.5</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H</cvss_v3_vector>
+         <risk>2</risk>
+         <family>eclipse</family>
+         <product>Eclipse Jetty</product>
+         <description>In Eclipse Jetty, the server is vulnerable to Denial of Service conditions if a remote client sends either large SETTINGs frames container containing many settings, or many small SETTINGs frames. The vulnerability is due to the additional CPU and memory allocations required to handle changed settings.</description>
+         <information>This vulnerability was identified because (1) the detected version of Eclipse Jetty, 9.4.z-SNAPSHOT, is less than 9.4.12</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty</solutiontitle>
+         <solution>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.eclipse.org/jetty/</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://bugs.eclipse.org/bugs/show_bug.cgi?id=538096</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2018-12545</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-24 19:00</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>54.246.138.90</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1381851</id>
+         <name>Cloudbees Jenkins: Information Disclosure Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>4.0</cvss_score>
+         <cvss_vector>(AV:N/AC:L/Au:S/C:P/I:N/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with ease and network access to the system by an attacker with the possibility to log in once with some impact on confidentiality, no impact to integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>4.3</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N</cvss_v3_vector>
+         <risk>2</risk>
+         <family>cloudbees</family>
+         <product>Cloudbees Jenkins</product>
+         <description>Jenkins printed the value of the &quot;Cookie&quot; HTTP request header on the /whoAmI/ URL, allowing attackers exploiting another XSS vulnerability to obtain the HTTP session cookie despite it being marked HttpOnly.</description>
+         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than 2.197</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
+         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://jenkins.io/security/advisory/2019-09-25/#SECURITY-1505</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2019-10405</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-26 22:36</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1361567</id>
+         <name>Eclipse Jetty: Denial of Service Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>5.0</cvss_score>
+         <cvss_vector>(AV:N/AC:L/Au:N/C:N/I:N/A:P) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with ease and network access to the system by an attacker who does not have access to credentials with no impact on confidentiality, no impact to integrity of information and some impact on system or information availability. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>7.5</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H</cvss_v3_vector>
+         <risk>2</risk>
+         <family>eclipse</family>
+         <product>Eclipse Jetty</product>
+         <description>In Eclipse Jetty, the server is vulnerable to Denial of Service conditions if a remote client sends either large SETTINGs frames container containing many settings, or many small SETTINGs frames. The vulnerability is due to the additional CPU and memory allocations required to handle changed settings.</description>
+         <information>This vulnerability was identified because (1) the detected version of Eclipse Jetty, 9.4.z-SNAPSHOT, is less than 9.4.12
+Paths:
+/</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty</solutiontitle>
+         <solution>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.eclipse.org/jetty/</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://bugs.eclipse.org/bugs/show_bug.cgi?id=538096</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2018-12545</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-10 19:01</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1381851</id>
+         <name>Cloudbees Jenkins: Information Disclosure Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>4.0</cvss_score>
+         <cvss_vector>(AV:N/AC:L/Au:S/C:P/I:N/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with ease and network access to the system by an attacker with the possibility to log in once with some impact on confidentiality, no impact to integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>4.3</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N</cvss_v3_vector>
+         <risk>2</risk>
+         <family>cloudbees</family>
+         <product>Cloudbees Jenkins</product>
+         <description>Jenkins printed the value of the &quot;Cookie&quot; HTTP request header on the /whoAmI/ URL, allowing attackers exploiting another XSS vulnerability to obtain the HTTP session cookie despite it being marked HttpOnly.</description>
+         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than 2.197
+Paths:
+/</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
+         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://jenkins.io/security/advisory/2019-09-25/#SECURITY-1505</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2019-10405</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-10-01 19:01</firstseen>
+            <added>1</added>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1380638</id>
+         <name>Cloudbees Jenkins: CSRF Protection Bypass Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>6.8</cvss_score>
+         <cvss_vector>(AV:N/AC:M/Au:N/C:P/I:P/A:P) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with relative ease and network access to the system by an attacker who does not have access to credentials with some impact on confidentiality, some impact to the integrity of information and some impact on system or information availability. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>8.8</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H</cvss_v3_vector>
+         <risk>2</risk>
+         <family>cloudbees</family>
+         <product>Cloudbees Jenkins</product>
+         <description>Jenkins, LTS allowed users to obtain CSRF tokens without an associated web session ID, resulting in CSRF tokens that did not expire and could be used to bypass CSRF protection for the anonymous user.</description>
+         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than or equal to 2.191
+Paths:
+/</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
+         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2019-10384</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-10 19:01</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>54.246.138.90</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1344881</id>
+         <name>Eclipse Jetty: FileBasedSessionStore Session Stealing Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>6.5</cvss_score>
+         <cvss_vector>(AV:N/AC:L/Au:S/C:P/I:P/A:P) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with ease and network access to the system by an attacker with the possibility to log in once with some impact on confidentiality, some impact to the integrity of information and some impact on system or information availability. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>8.8</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H</cvss_v3_vector>
+         <risk>2</risk>
+         <family>eclipse</family>
+         <product>Eclipse Jetty</product>
+         <description>In Eclipse Jetty, when using the optional Jetty provided FileSessionDataStore for persistent storage of HttpSession details, it is possible for a malicious user to access/hijack other HttpSessions and even delete unmatched HttpSessions present in the FileSystem&apos;s storage for the FileSessionDataStore.</description>
+         <information>This vulnerability was identified because (1) the detected version of Eclipse Jetty, 9.4.z-SNAPSHOT, is less than 9.4.9</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty</solutiontitle>
+         <solution>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.eclipse.org/jetty/</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://bugs.eclipse.org/bugs/show_bug.cgi?id=536018</url>
+            </reference>
+            <reference>
+               <type>advisory</type>
+               <url>https://github.com/eclipse/jetty.project/issues/2038</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2018-12538</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-24 19:00</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1363068</id>
+         <name>Eclipse Jetty: Information Disclosure Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>5.0</cvss_score>
+         <cvss_vector>(AV:N/AC:L/Au:N/C:P/I:N/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with ease and network access to the system by an attacker who does not have access to credentials with some impact on confidentiality, no impact to integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>5.3</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N</cvss_v3_vector>
+         <risk>2</risk>
+         <family>eclipse</family>
+         <product>Eclipse Jetty</product>
+         <description>In Eclipse Jetty, the server running on Windows is vulnerable to exposure of the fully qualified Base Resource directory name on Windows to a remote client when it is configured for showing a Listing of directory contents. This information reveal is restricted to only the content in the configured base resource directories.</description>
+         <information>This vulnerability was identified because (1) the detected version of Eclipse Jetty, 9.4.z-SNAPSHOT, is less than 9.4.17
+Paths:
+/</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty</solutiontitle>
+         <solution>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.eclipse.org/jetty/</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://bugs.eclipse.org/bugs/show_bug.cgi?id=546576</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2019-10246</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-10 19:01</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1345317</id>
+         <name>Eclipse Jetty: Error Handler Information Disclosure Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>5.0</cvss_score>
+         <cvss_vector>(AV:N/AC:L/Au:N/C:P/I:N/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with ease and network access to the system by an attacker who does not have access to credentials with some impact on confidentiality, no impact to integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>5.3</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N</cvss_v3_vector>
+         <risk>2</risk>
+         <family>eclipse</family>
+         <product>Eclipse Jetty</product>
+         <description>In Eclipse Jetty Server, on webapps deployed using default Error Handling, when an intentionally bad query arrives that doesn&apos;t match a dynamic url-pattern, and is eventually handled by the DefaultServlet&apos;s static file serving, the bad characters can trigger a java.nio.file.InvalidPathException which includes the full path to the base resource directory that the DefaultServlet and/or webapp is using. If this InvalidPathException is then handled by the default Error Handler, the InvalidPathException message is included in the error response, revealing the full server path to the requesting system.</description>
+         <information>This vulnerability was identified because (1) the detected version of Eclipse Jetty, 9.4.z-SNAPSHOT, is less than 9.4.11.v20180605
+Paths:
+/</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty</solutiontitle>
+         <solution>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.eclipse.org/jetty/</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://bugs.eclipse.org/bugs/show_bug.cgi?id=535670</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2018-12536</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-10 19:01</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1377085</id>
+         <name>Cloudbees Jenkins: Permission Bypass Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>4.0</cvss_score>
+         <cvss_vector>(AV:N/AC:L/Au:S/C:P/I:N/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with ease and network access to the system by an attacker with the possibility to log in once with some impact on confidentiality, no impact to integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>4.3</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N</cvss_v3_vector>
+         <risk>2</risk>
+         <family>cloudbees</family>
+         <product>Cloudbees Jenkins</product>
+         <description>A vulnerability in the Stapler web framework used in Jenkins, LTS allowed attackers to access view fragments directly, bypassing permission checks and possibly obtain sensitive information.</description>
+         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than 2.186
+Paths:
+/</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
+         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+            </reference>
+            <reference>
+               <type>advisory</type>
+               <url>https://jenkins.io/security/advisory/2019-07-17/#SECURITY-534</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2019-10354</id>
+         </cve>
+         <bug>
+            <id>109373</id>
+         </bug>
+         <verify/>
+         <history>
+            <firstseen>2019-09-10 19:01</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1377087</id>
+         <name>Cloudbees Jenkins: Path Traversal Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>4.0</cvss_score>
+         <cvss_vector>(AV:N/AC:L/Au:S/C:N/I:P/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with ease and network access to the system by an attacker with the possibility to log in once with no impact on confidentiality, some impact to the integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>6.5</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:N</cvss_v3_vector>
+         <risk>2</risk>
+         <family>cloudbees</family>
+         <product>Cloudbees Jenkins</product>
+         <description>A path traversal vulnerability in Jenkins in core/src/main/java/hudson/model/FileParameterValue.java allowed attackers with Job/Configure permission to define a file parameter with a file name outside the intended directory, resulting in an arbitrary file write on the Jenkins master when scheduling a build.</description>
+         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than 2.186
+Paths:
+/</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
+         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+            </reference>
+            <reference>
+               <type>advisory</type>
+               <url>https://jenkins.io/security/advisory/2019-04-10/#SECURITY-1327</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2019-10352</id>
+         </cve>
+         <bug>
+            <id>109299</id>
+         </bug>
+         <verify/>
+         <history>
+            <firstseen>2019-09-10 19:01</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>54.246.138.90</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1380638</id>
+         <name>Cloudbees Jenkins: CSRF Protection Bypass Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>6.8</cvss_score>
+         <cvss_vector>(AV:N/AC:M/Au:N/C:P/I:P/A:P) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with relative ease and network access to the system by an attacker who does not have access to credentials with some impact on confidentiality, some impact to the integrity of information and some impact on system or information availability. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>8.8</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H</cvss_v3_vector>
+         <risk>2</risk>
+         <family>cloudbees</family>
+         <product>Cloudbees Jenkins</product>
+         <description>Jenkins, LTS allowed users to obtain CSRF tokens without an associated web session ID, resulting in CSRF tokens that did not expire and could be used to bypass CSRF protection for the anonymous user.</description>
+         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than or equal to 2.191</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
+         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2019-10384</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-24 19:00</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>54.246.138.90</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1377087</id>
+         <name>Cloudbees Jenkins: Path Traversal Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>4.0</cvss_score>
+         <cvss_vector>(AV:N/AC:L/Au:S/C:N/I:P/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with ease and network access to the system by an attacker with the possibility to log in once with no impact on confidentiality, some impact to the integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>6.5</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:N</cvss_v3_vector>
+         <risk>2</risk>
+         <family>cloudbees</family>
+         <product>Cloudbees Jenkins</product>
+         <description>A path traversal vulnerability in Jenkins in core/src/main/java/hudson/model/FileParameterValue.java allowed attackers with Job/Configure permission to define a file parameter with a file name outside the intended directory, resulting in an arbitrary file write on the Jenkins master when scheduling a build.</description>
+         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than 2.186</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
+         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+            </reference>
+            <reference>
+               <type>advisory</type>
+               <url>https://jenkins.io/security/advisory/2019-04-10/#SECURITY-1327</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2019-10352</id>
+         </cve>
+         <bug>
+            <id>109299</id>
+         </bug>
+         <verify/>
+         <history>
+            <firstseen>2019-09-24 19:00</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>54.246.138.90</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1377085</id>
+         <name>Cloudbees Jenkins: Permission Bypass Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>4.0</cvss_score>
+         <cvss_vector>(AV:N/AC:L/Au:S/C:P/I:N/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with ease and network access to the system by an attacker with the possibility to log in once with some impact on confidentiality, no impact to integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>4.3</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N</cvss_v3_vector>
+         <risk>2</risk>
+         <family>cloudbees</family>
+         <product>Cloudbees Jenkins</product>
+         <description>A vulnerability in the Stapler web framework used in Jenkins, LTS allowed attackers to access view fragments directly, bypassing permission checks and possibly obtain sensitive information.</description>
+         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than 2.186</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
+         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+            </reference>
+            <reference>
+               <type>advisory</type>
+               <url>https://jenkins.io/security/advisory/2019-07-17/#SECURITY-534</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2019-10354</id>
+         </cve>
+         <bug>
+            <id>109373</id>
+         </bug>
+         <verify/>
+         <history>
+            <firstseen>2019-09-24 19:00</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>54.246.138.90</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1345317</id>
+         <name>Eclipse Jetty: Error Handler Information Disclosure Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>5.0</cvss_score>
+         <cvss_vector>(AV:N/AC:L/Au:N/C:P/I:N/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with ease and network access to the system by an attacker who does not have access to credentials with some impact on confidentiality, no impact to integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>5.3</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N</cvss_v3_vector>
+         <risk>2</risk>
+         <family>eclipse</family>
+         <product>Eclipse Jetty</product>
+         <description>In Eclipse Jetty Server, on webapps deployed using default Error Handling, when an intentionally bad query arrives that doesn&apos;t match a dynamic url-pattern, and is eventually handled by the DefaultServlet&apos;s static file serving, the bad characters can trigger a java.nio.file.InvalidPathException which includes the full path to the base resource directory that the DefaultServlet and/or webapp is using. If this InvalidPathException is then handled by the default Error Handler, the InvalidPathException message is included in the error response, revealing the full server path to the requesting system.</description>
+         <information>This vulnerability was identified because (1) the detected version of Eclipse Jetty, 9.4.z-SNAPSHOT, is less than 9.4.11.v20180605</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty</solutiontitle>
+         <solution>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.eclipse.org/jetty/</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://bugs.eclipse.org/bugs/show_bug.cgi?id=535670</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2018-12536</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-24 19:00</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>54.246.138.90</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1363068</id>
+         <name>Eclipse Jetty: Information Disclosure Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>5.0</cvss_score>
+         <cvss_vector>(AV:N/AC:L/Au:N/C:P/I:N/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with ease and network access to the system by an attacker who does not have access to credentials with some impact on confidentiality, no impact to integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>5.3</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N</cvss_v3_vector>
+         <risk>2</risk>
+         <family>eclipse</family>
+         <product>Eclipse Jetty</product>
+         <description>In Eclipse Jetty, the server running on Windows is vulnerable to exposure of the fully qualified Base Resource directory name on Windows to a remote client when it is configured for showing a Listing of directory contents. This information reveal is restricted to only the content in the configured base resource directories.</description>
+         <information>This vulnerability was identified because (1) the detected version of Eclipse Jetty, 9.4.z-SNAPSHOT, is less than 9.4.17</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty</solutiontitle>
+         <solution>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.eclipse.org/jetty/</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://bugs.eclipse.org/bugs/show_bug.cgi?id=546576</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2019-10246</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-24 19:00</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>54.246.138.90</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1377090</id>
+         <name>Cloudbees Jenkins: Cross-Site Request Forgery Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>5.1</cvss_score>
+         <cvss_vector>(AV:N/AC:H/Au:N/C:P/I:P/A:P) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with advanced skills and network access to the system by an attacker who does not have access to credentials with some impact on confidentiality, some impact to the integrity of information and some impact on system or information availability. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>7.5</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:H</cvss_v3_vector>
+         <risk>2</risk>
+         <family>cloudbees</family>
+         <product>Cloudbees Jenkins</product>
+         <description>By default, CSRF tokens in Jenkins only checked user authentication and IP address. This allowed attackers able to obtain a CSRF token for another user to implement CSRF attacks as long as the victim’s IP address remained unchanged.</description>
+         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than 2.186</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
+         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+            </reference>
+            <reference>
+               <type>advisory</type>
+               <url>https://jenkins.io/security/advisory/2019-04-10/#SECURITY-1327</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2019-10353</id>
+         </cve>
+         <bug>
+            <id>109373</id>
+         </bug>
+         <verify/>
+         <history>
+            <firstseen>2019-09-24 19:00</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>54.246.138.90</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1313228</id>
+         <name>Eclipse Jetty: Timing Channel Privilege Escalation Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>5.0</cvss_score>
+         <cvss_vector>(AV:N/AC:L/Au:N/C:P/I:N/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with ease and network access to the system by an attacker who does not have access to credentials with some impact on confidentiality, no impact to integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>7.5</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N</cvss_v3_vector>
+         <risk>2</risk>
+         <family>eclipse</family>
+         <product>Eclipse Jetty</product>
+         <description>Jetty is prone to a timing channel in, which makes it easier for remote attackers to obtain access by observing elapsed times before rejection of incorrect passwords.</description>
+         <information>This vulnerability was identified because (1) the detected version of Eclipse Jetty, 9.4.z-SNAPSHOT, is less than 9.4.6.v20170531</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty</solutiontitle>
+         <solution>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.eclipse.org/jetty/</url>
+            </reference>
+            <reference>
+               <type>advisory</type>
+               <url>https://github.com/dropwizard/dropwizard/issues/2113</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2017-9735</id>
+         </cve>
+         <bug>
+            <id>99104</id>
+         </bug>
+         <verify/>
+         <history>
+            <firstseen>2019-09-24 19:00</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>54.246.138.90</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1363069</id>
+         <name>Eclipse Jetty: Cross-Site Scripting Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>4.3</cvss_score>
+         <cvss_vector>(AV:N/AC:M/Au:N/C:N/I:P/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with relative ease and network access to the system by an attacker who does not have access to credentials with no impact on confidentiality, some impact to the integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>6.1</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
+         <risk>2</risk>
+         <family>eclipse</family>
+         <product>Eclipse Jetty</product>
+         <description>In Eclipse Jetty, the server is vulnerable to XSS conditions if a remote client USES a specially formatted URL against the DefaultServlet or ResourceHandler that is configured for showing a Listing of directory contents.</description>
+         <information>This vulnerability was identified because (1) the detected version of Eclipse Jetty, 9.4.z-SNAPSHOT, is less than 9.4.16</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty</solutiontitle>
+         <solution>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.eclipse.org/jetty/</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://bugs.eclipse.org/bugs/show_bug.cgi?id=546121</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2019-10241</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-24 19:00</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>54.246.138.90</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1345086</id>
+         <name>Eclipse Jetty: Cache Poisoning Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>5.0</cvss_score>
+         <cvss_vector>(AV:N/AC:L/Au:N/C:N/I:P/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with ease and network access to the system by an attacker who does not have access to credentials with no impact on confidentiality, some impact to the integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>7.5</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N</cvss_v3_vector>
+         <risk>2</risk>
+         <family>eclipse</family>
+         <product>Eclipse Jetty</product>
+         <description>In Eclipse Jetty, HTTP/0.9 is handled poorly. An HTTP/1 style request line (i.e. method space URI space version) that declares a version of HTTP/0.9 was accepted and treated as a 0.9 request. If deployed behind an intermediary that also accepted and passed through the 0.9 version (but did not act on it), then the response sent could be interpreted by the intermediary as HTTP/1 headers. This could be used to poison the cache if the server allowed the origin client to generate arbitrary content in the response.</description>
+         <information>This vulnerability was identified because (1) the detected version of Eclipse Jetty, 9.4.z-SNAPSHOT, is less than 9.4.11.v20180605</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty</solutiontitle>
+         <solution>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.eclipse.org/jetty/</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://bugs.eclipse.org/bugs/show_bug.cgi?id=535667</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2017-7656</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-24 19:00</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1363067</id>
+         <name>Eclipse Jetty: Information Disclosure Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>5.0</cvss_score>
+         <cvss_vector>(AV:N/AC:L/Au:N/C:P/I:N/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with ease and network access to the system by an attacker who does not have access to credentials with some impact on confidentiality, no impact to integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>5.3</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N</cvss_v3_vector>
+         <risk>2</risk>
+         <family>eclipse</family>
+         <product>Eclipse Jetty</product>
+         <description>In Eclipse Jetty, the server running on any OS and Jetty version combination will reveal the configured fully qualified directory base resource location on the output of the 404 error for not finding a Context that matches the requested path. The default server behavior on jetty-distribution and jetty-home will include at the end of the Handler tree a DefaultHandler, which is responsible for reporting this 404 error, it presents the various configured contexts as HTML for users to click through to. This produced HTML includes output that contains the configured fully qualified directory base resource location for each context.</description>
+         <information>This vulnerability was identified because (1) the detected version of Eclipse Jetty, 9.4.z-SNAPSHOT, is less than 9.4.17
+Paths:
+/</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty</solutiontitle>
+         <solution>Upgrade to version 9.4.17.v20190418 or later of Eclipse Jetty.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.eclipse.org/jetty/</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://bugs.eclipse.org/bugs/show_bug.cgi?id=546577</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2019-10247</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-10 19:01</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>296252</id>
+         <name>Application Stack Trace</name>
+         <portinfo>
+            <portnumber>General</portnumber>
+         </portinfo>
+         <cvss_score>2.9</cvss_score>
+         <cvss_vector>(AV:A/AC:M/Au:N/C:N/I:P/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with relative ease and access to an adjacent network by an attacker who does not have access to credentials with no impact on confidentiality, some impact to the integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <risk>1</risk>
+         <family>was</family>
+         <product>Web Application Scanning</product>
+         <description>Information regarding the inner workings and structure of the application and deployment should be kept out of sight for non-privileged users and should, if necessary, only be visible for administrators.
+
+While being ignored by ordinary users, this information is invaluable to an adversary, whom is now able to leverage it in further attacks against the application.</description>
+         <information>[HTTP Method][URI][POST Data][Time (ms)]
+[get][https://ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com/assets/][][]
+</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Reconfigure the Web Application</solutiontitle>
+         <solution>Turn off or otherwise suppress all error- and debug-information. If necessary, give the user a very generic error page, and disclose no technical details. Such details could otherwise be helpful for an adversary trying to understand the inner structure of the system.</solution>
+         <category>Reconfigure</category>
+         <referencelist>
+            <reference>
+               <type>advisory</type>
+               <url>https://www.owasp.org/index.php/Error_Handling</url>
+            </reference>
+         </referencelist>
+         <cve/>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-10 19:01</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1337764</id>
+         <name>Missing &apos;X-Content-Type-Options: nosniff&apos; response header</name>
+         <portinfo>
+            <portnumber>General</portnumber>
+         </portinfo>
+         <cvss_score>0.0</cvss_score>
+         <cvss_vector>(AV:N/AC:L/Au:N/C:N/I:N/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with ease and network access to the system by an attacker who does not have access to credentials with no impact on confidentiality, no impact to integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>0.0</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:H/PR:N/UI:R/S:C/C:N/I:N/A:N</cvss_v3_vector>
+         <risk>1</risk>
+         <family>was</family>
+         <product>Web Application Scanning</product>
+         <description>The X-Content-Type-Options response HTTP header is a marker used by the server to indicate that the MIME types advertised in the Content-Type headers should not be changed and be followed. 
+This enables one to opt-out of MIME type sniffing.</description>
+         <information>[HTTP Method][URI][POST Data][Time (ms)][headers]
+[get][http://ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com:443/assets/][][][Content-Length: 638
+Content-Type: text/html
+Date: Tue, 01 Oct 2019 13:41:04 GMT
+Server: awselb/2.0]
+[get][https://ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com/%2f..%2f..%2f..%2f..%2f..%2f..%2fwindows%2fwin.ini][][][Content-Length: 138
+Content-Type: text/html
+Date: Tue, 01 Oct 2019 13:41:06 GMT
+Server: awselb/2.0]
+</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Reconfigure the Web Application</solutiontitle>
+         <solution>Consider setting the &apos;X-Content-Type-Options: nosniff&apos; HTTP response header on all responses.</solution>
+         <category>Reconfigure</category>
+         <referencelist>
+            <reference>
+               <type>advisory</type>
+               <url>https://fetch.spec.whatwg.org/#x-content-type-options-header</url>
+            </reference>
+            <reference>
+               <type>advisory</type>
+               <url>https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options</url>
+            </reference>
+         </referencelist>
+         <cve/>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-10 19:01</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1337718</id>
+         <name>HTTP Strict Transport Security not Configured</name>
+         <portinfo>
+            <portnumber>General</portnumber>
+         </portinfo>
+         <cvss_score>0.0</cvss_score>
+         <cvss_vector>(AV:N/AC:L/Au:N/C:N/I:N/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with ease and network access to the system by an attacker who does not have access to credentials with no impact on confidentiality, no impact to integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>0.0</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:H/PR:N/UI:R/S:C/C:N/I:N/A:N</cvss_v3_vector>
+         <risk>1</risk>
+         <family>was</family>
+         <product>Web Application Scanning</product>
+         <description>The web application accepts connections over encrypted HTTPS, but it does not instruct the client user agent to enforce HTTPS for future connections. This could by extension lead to that a user either directly or inadvertently accesses the application over unencrypted HTTP - a downgrade which could subsequently be exploited by an adjacent attacker.
+
+For example, an attacker could trick the victim user agent to perform a request over HTTP, and then intercept all non-Secure client cookies.
+
+Implementing HSTS require careful consideration of the security/convenience implications, as it would also prevent users from legitimately downgrading their connections.</description>
+         <information>[HTTP Method][URI][POST Data][Time (ms)][reason]
+[get][https://ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com/securityRealm/commenceLogin?from=%2F][][][MISSING]
+</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Reconfigure the Web Application</solutiontitle>
+         <solution>Consider setting the &quot;Strict-Transport-Security&quot; HTTP response header on all HTTPS responses.</solution>
+         <category>Reconfigure</category>
+         <referencelist>
+            <reference>
+               <type>advisory</type>
+               <url>https://tools.ietf.org/html/rfc6797</url>
+            </reference>
+            <reference>
+               <type>advisory</type>
+               <url>https://www.owasp.org/index.php/HTTP_Strict_Transport_Security</url>
+            </reference>
+         </referencelist>
+         <cve/>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-10 19:01</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1339250</id>
+         <name>Cookie not Utilizing SameSite</name>
+         <portinfo>
+            <portnumber>General</portnumber>
+         </portinfo>
+         <cvss_score>0.0</cvss_score>
+         <cvss_vector>(AV:L/AC:L/Au:N/C:N/I:N/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with ease and local access to the system by an attacker who does not have access to credentials with no impact on confidentiality, no impact to integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <risk>1</risk>
+         <family>was</family>
+         <product>Web Application Scanning</product>
+         <description>The SameSite cookie attribute prevents the browser from sending this cookie along with cross-site requests. This helps mitigate the risk of cross-origin information leakage.
+
+The SameSite attribute can have either the &apos;Strict&apos; or the &apos;Lax&apos; value set. The &apos;Strict&apos; value may impact usability of the web application, especially if frequently referenced from other origins. The &apos;Lax&apos; value exists as a compromise between usability and security, as it only prevents cross-domain cookie requests over CSRF-prone methods. 
+Because of this, it&apos;s advised to at least look in to setting the Lax value for cookies.</description>
+         <information>[HTTP Method][URI][POST Data][Time (ms)][name]
+[get][https://ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com/][][][JSESSIONID.cef9ef29]
+</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Consider setting SameSite on cookies</solutiontitle>
+         <solution>Setting the SameSite value to either Strict or Lax on cookies will let browsers know that the cookie isn&apos;t to be used in cross-domain requests, which will help mitigate Cross-Site Request Forgery attacks as well as information leakage.</solution>
+         <category>Reconfigure</category>
+         <referencelist>
+            <reference>
+               <type>advisory</type>
+               <url>https://www.owasp.org/index.php/SameSite</url>
+            </reference>
+         </referencelist>
+         <cve/>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-10 19:01</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1337889</id>
+         <name>Missing &apos;X-XSS-Protection:&apos; response header</name>
+         <portinfo>
+            <portnumber>General</portnumber>
+         </portinfo>
+         <cvss_score>0.0</cvss_score>
+         <cvss_vector>(AV:N/AC:L/Au:N/C:N/I:N/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with ease and network access to the system by an attacker who does not have access to credentials with no impact on confidentiality, no impact to integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>0.0</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:H/PR:N/UI:R/S:C/C:N/I:N/A:N</cvss_v3_vector>
+         <risk>1</risk>
+         <family>was</family>
+         <product>Web Application Scanning</product>
+         <description>The HTTP X-XSS-Protection response header is a feature of Internet Explorer, Chrome and Safari that stops pages from loading when they detect reflected cross-site scripting (XSS) attacks. Although these protections are largely unnecessary in modern browsers when sites implement a strong Content-Security-Policy that disables the use of inline JavaScript (&apos;unsafe-inline&apos;), they can still provide protections for users of older web browsers that don&apos;t yet support CSP.
+
+Note that Internet Explorer 8 (which is end-of-life) misinterprets this directive and becomes more vulnerable should the header be set. As such, it might not always be the best idea to enable it.</description>
+         <information>[HTTP Method][URI][POST Data][Time (ms)][headers]
+[get][https://ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com/][][][Connection: keep-alive
+Content-Length: 837
+Content-Type: text/html;charset=utf-8
+Date: Tue, 01 Oct 2019 13:40:59 GMT
+Expires: Thu, 01 Jan 1970 00:00:00 GMT
+Server: Jetty(9.4.z-SNAPSHOT)
+Set-Cookie: JSESSIONID.cef9ef29=node04zo8w6lnlzfs1fo51ulauc8rr25132.node0;Path=/;Secure;HttpOnly
+X-Content-Type-Options: nosniff
+X-Hudson: 1.395
+X-Jenkins: 2.176.4.3
+X-Jenkins-Session: 28a7d72a
+X-Permission-Implied-By: hudson.security.Permission.GenericRead
+X-Permission-Implied-By: hudson.model.Hudson.Administer
+X-Required-Permission: hudson.model.Hudson.Read
+X-You-Are-Authenticated-As: anonymous
+X-You-Are-In-Group-Disabled: JENKINS-39402: use -Dhudson.security.AccessDeniedException2.REPORT_GROUP_HEADERS=true or use /whoAmI to diagnose]
+[get][http://ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com:443/assets/][][][Content-Length: 638
+Content-Type: text/html
+Date: Tue, 01 Oct 2019 13:41:04 GMT
+Server: awselb/2.0]
+</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Reconfigure the Web Application</solutiontitle>
+         <solution>Consider setting the &apos;X-XSS-Protection:&apos; HTTP response header on all responses for browsers that aren&apos;t IE8.</solution>
+         <category>Reconfigure</category>
+         <referencelist>
+            <reference>
+               <type>advisory</type>
+               <url>https://hackademix.net/2009/11/21/ies-xss-filter-creates-xss-vulnerabilities/</url>
+            </reference>
+            <reference>
+               <type>advisory</type>
+               <url>https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xxxsp</url>
+            </reference>
+            <reference>
+               <type>advisory</type>
+               <url>https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection</url>
+            </reference>
+         </referencelist>
+         <cve/>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-10 19:01</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>54.246.138.90</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1380635</id>
+         <name>Cloudbees Jenkins LTS: Stored Cross-Site Scripting Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>3.5</cvss_score>
+         <cvss_vector>(AV:N/AC:M/Au:S/C:N/I:P/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with relative ease and network access to the system by an attacker with the possibility to log in once with no impact on confidentiality, some impact to the integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>4.8</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
+         <risk>1</risk>
+         <family>cloudbees</family>
+         <product>Cloudbees Jenkins LTS</product>
+         <description>A stored cross-site scripting vulnerability in Jenkins, LTS allowed attackers with Overall/Administer permission to configure the update site URL to inject arbitrary HTML and JavaScript in update center web pages.</description>
+         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins LTS, 2.176.4, is less than or equal to 2.191</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to version 2.176.2 or later of Cloudbees Jenkins LTS</solutiontitle>
+         <solution>Upgrade to version 2.176.2 or later of Cloudbees Jenkins LTS.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://jenkins.io/download/</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2019-10383</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-24 19:00</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>54.246.138.90</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1381853</id>
+         <name>Cloudbees Jenkins: Cross-Site Scripting Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>3.5</cvss_score>
+         <cvss_vector>(AV:N/AC:M/Au:S/C:N/I:P/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with relative ease and network access to the system by an attacker with the possibility to log in once with no impact on confidentiality, some impact to the integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>4.8</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
+         <risk>1</risk>
+         <family>cloudbees</family>
+         <product>Cloudbees Jenkins</product>
+         <description>Jenkins did not restrict or filter values set as Jenkins URL in the global configuration, resulting in a stored XSS vulnerability exploitable by attackers with Overall/Administer permission.</description>
+         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than 2.197</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
+         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://jenkins.io/security/advisory/2019-09-25/#SECURITY-1471</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2019-10406</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-26 22:36</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>54.246.138.90</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1381849</id>
+         <name>Cloudbees Jenkins: Cross-Site Scripting Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>3.5</cvss_score>
+         <cvss_vector>(AV:N/AC:M/Au:S/C:N/I:P/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with relative ease and network access to the system by an attacker with the possibility to log in once with no impact on confidentiality, some impact to the integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>5.4</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
+         <risk>1</risk>
+         <family>cloudbees</family>
+         <product>Cloudbees Jenkins</product>
+         <description>Jenkins did not escape the reason why a queue items is blcoked in tooltips, resulting in a stored XSS vulnerability exploitable by users able to control parts of the reason a queue item is blocked, such as label expressions not matching any idle executors.</description>
+         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than 2.197</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
+         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://jenkins.io/security/advisory/2019-09-25/#SECURITY-1537%20(2)</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2019-10404</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-26 22:36</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>54.246.138.90</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1381843</id>
+         <name>Cloudbees Jenkins: Stored Cross-Site Scripting Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>3.5</cvss_score>
+         <cvss_vector>(AV:N/AC:M/Au:S/C:N/I:P/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with relative ease and network access to the system by an attacker with the possibility to log in once with no impact on confidentiality, some impact to the integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>5.4</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
+         <risk>1</risk>
+         <family>cloudbees</family>
+         <product>Cloudbees Jenkins</product>
+         <description>In Jenkins, LTS, the f:expandableTextBox form control interpreted its content as HTML when expanded, resulting in a stored XSS vulnerability exploitable by users with permission to define its contents (typically Job/Configure).</description>
+         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than 2.197</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
+         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://jenkins.io/security/advisory/2019-09-25/#SECURITY-1498</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2019-10401</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-26 22:36</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1380636</id>
+         <name>Cloudbees Jenkins: Stored Cross-Site Scripting Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>3.5</cvss_score>
+         <cvss_vector>(AV:N/AC:M/Au:S/C:N/I:P/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with relative ease and network access to the system by an attacker with the possibility to log in once with no impact on confidentiality, some impact to the integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>4.8</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
+         <risk>1</risk>
+         <family>cloudbees</family>
+         <product>Cloudbees Jenkins</product>
+         <description>A stored cross-site scripting vulnerability in Jenkins, LTS allowed attackers with Overall/Administer permission to configure the update site URL to inject arbitrary HTML and JavaScript in update center web pages.</description>
+         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than or equal to 2.191
+Paths:
+/</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
+         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2019-10383</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-10 19:01</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>54.246.138.90</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1381845</id>
+         <name>Cloudbees Jenkins: Stored Cross-Site Scripting Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>3.5</cvss_score>
+         <cvss_vector>(AV:N/AC:M/Au:S/C:N/I:P/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with relative ease and network access to the system by an attacker with the possibility to log in once with no impact on confidentiality, some impact to the integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>5.4</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
+         <risk>1</risk>
+         <family>cloudbees</family>
+         <product>Cloudbees Jenkins</product>
+         <description>In Jenkins, LTS, the f:combobox form control interpreted its item labels as HTML, resulting in a stored XSS vulnerability exploitable by users with permission to define its contents.</description>
+         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than 2.197</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
+         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://jenkins.io/security/advisory/2019-09-25/#SECURITY-1525</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2019-10402</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-26 22:36</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1381853</id>
+         <name>Cloudbees Jenkins: Cross-Site Scripting Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>3.5</cvss_score>
+         <cvss_vector>(AV:N/AC:M/Au:S/C:N/I:P/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with relative ease and network access to the system by an attacker with the possibility to log in once with no impact on confidentiality, some impact to the integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>4.8</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
+         <risk>1</risk>
+         <family>cloudbees</family>
+         <product>Cloudbees Jenkins</product>
+         <description>Jenkins did not restrict or filter values set as Jenkins URL in the global configuration, resulting in a stored XSS vulnerability exploitable by attackers with Overall/Administer permission.</description>
+         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than 2.197
+Paths:
+/</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
+         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://jenkins.io/security/advisory/2019-09-25/#SECURITY-1471</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2019-10406</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-10-01 19:01</firstseen>
+            <added>1</added>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>54.246.138.90</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1380636</id>
+         <name>Cloudbees Jenkins: Stored Cross-Site Scripting Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>3.5</cvss_score>
+         <cvss_vector>(AV:N/AC:M/Au:S/C:N/I:P/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with relative ease and network access to the system by an attacker with the possibility to log in once with no impact on confidentiality, some impact to the integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>4.8</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
+         <risk>1</risk>
+         <family>cloudbees</family>
+         <product>Cloudbees Jenkins</product>
+         <description>A stored cross-site scripting vulnerability in Jenkins, LTS allowed attackers with Overall/Administer permission to configure the update site URL to inject arbitrary HTML and JavaScript in update center web pages.</description>
+         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than or equal to 2.191</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
+         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2019-10383</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-24 19:00</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>54.246.138.90</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1381847</id>
+         <name>Cloudbees Jenkins: Cross-Site Scripting Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>3.5</cvss_score>
+         <cvss_vector>(AV:N/AC:M/Au:S/C:N/I:P/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with relative ease and network access to the system by an attacker with the possibility to log in once with no impact on confidentiality, some impact to the integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>5.4</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
+         <risk>1</risk>
+         <family>cloudbees</family>
+         <product>Cloudbees Jenkins</product>
+         <description>Jenkins did not escape the SCM tag name on the tooltip for SCM tag actions, resulting in a stored XSS vulnerability exploitable by users able to control SCM tag names for these actions.</description>
+         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than 2.197</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
+         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://jenkins.io/security/advisory/2019-09-25/#SECURITY-1537%20(1)</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2019-10403</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-26 22:36</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1381845</id>
+         <name>Cloudbees Jenkins: Stored Cross-Site Scripting Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>3.5</cvss_score>
+         <cvss_vector>(AV:N/AC:M/Au:S/C:N/I:P/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with relative ease and network access to the system by an attacker with the possibility to log in once with no impact on confidentiality, some impact to the integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>5.4</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
+         <risk>1</risk>
+         <family>cloudbees</family>
+         <product>Cloudbees Jenkins</product>
+         <description>In Jenkins, LTS, the f:combobox form control interpreted its item labels as HTML, resulting in a stored XSS vulnerability exploitable by users with permission to define its contents.</description>
+         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than 2.197
+Paths:
+/</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
+         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://jenkins.io/security/advisory/2019-09-25/#SECURITY-1525</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2019-10402</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-10-01 19:01</firstseen>
+            <added>1</added>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1381843</id>
+         <name>Cloudbees Jenkins: Stored Cross-Site Scripting Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>3.5</cvss_score>
+         <cvss_vector>(AV:N/AC:M/Au:S/C:N/I:P/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with relative ease and network access to the system by an attacker with the possibility to log in once with no impact on confidentiality, some impact to the integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>5.4</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
+         <risk>1</risk>
+         <family>cloudbees</family>
+         <product>Cloudbees Jenkins</product>
+         <description>In Jenkins, LTS, the f:expandableTextBox form control interpreted its content as HTML when expanded, resulting in a stored XSS vulnerability exploitable by users with permission to define its contents (typically Job/Configure).</description>
+         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than 2.197
+Paths:
+/</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
+         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://jenkins.io/security/advisory/2019-09-25/#SECURITY-1498</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2019-10401</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-10-01 19:01</firstseen>
+            <added>1</added>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1381847</id>
+         <name>Cloudbees Jenkins: Cross-Site Scripting Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>3.5</cvss_score>
+         <cvss_vector>(AV:N/AC:M/Au:S/C:N/I:P/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with relative ease and network access to the system by an attacker with the possibility to log in once with no impact on confidentiality, some impact to the integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>5.4</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
+         <risk>1</risk>
+         <family>cloudbees</family>
+         <product>Cloudbees Jenkins</product>
+         <description>Jenkins did not escape the SCM tag name on the tooltip for SCM tag actions, resulting in a stored XSS vulnerability exploitable by users able to control SCM tag names for these actions.</description>
+         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than 2.197
+Paths:
+/</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
+         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://jenkins.io/security/advisory/2019-09-25/#SECURITY-1537%20(1)</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2019-10403</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-10-01 19:01</firstseen>
+            <added>1</added>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>1381849</id>
+         <name>Cloudbees Jenkins: Cross-Site Scripting Vulnerability</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <cvss_score>3.5</cvss_score>
+         <cvss_vector>(AV:N/AC:M/Au:S/C:N/I:P/A:N) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+         <cvss_vector_description>This vulnerability can be exploited with relative ease and network access to the system by an attacker with the possibility to log in once with no impact on confidentiality, some impact to the integrity of information and without affecting the availability of the information or system. There are currently no exploits in the public domain. However, attacks may be well described or privately held.</cvss_vector_description>
+         <cvss_v3_score>5.4</cvss_v3_score>
+         <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
+         <risk>1</risk>
+         <family>cloudbees</family>
+         <product>Cloudbees Jenkins</product>
+         <description>Jenkins did not escape the reason why a queue items is blcoked in tooltips, resulting in a stored XSS vulnerability exploitable by users able to control parts of the reason a queue item is blocked, such as label expressions not matching any idle executors.</description>
+         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than 2.197
+Paths:
+/</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
+         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <category>Update</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+            </reference>
+            <reference>
+               <type>solution</type>
+               <url>https://jenkins.io/security/advisory/2019-09-25/#SECURITY-1537%20(2)</url>
+            </reference>
+         </referencelist>
+         <cve>
+            <id>CVE-2019-10404</id>
+         </cve>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-10-01 19:01</firstseen>
+            <added>1</added>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>250129</id>
+         <name>URIs Crawled Statistics</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <risk>0</risk>
+         <family>was</family>
+         <product>Web Application Scanning</product>
+         <description>The following are summary statistics of URI&apos;s (Universal Resource Identifiers) discovered from the Web Application Scanner. For a full list of URIs see the Webapp Discovery report.</description>
+         <information>&lt;rtab&gt;&lt;columns&gt;2&lt;/columns&gt;&lt;hdr&gt;&lt;col&gt;Name&lt;/col&gt;&lt;col&gt;Value&lt;/col&gt;&lt;/hdr&gt;&lt;row&gt;&lt;col&gt;Crawled URIs&lt;/col&gt;&lt;col&gt;3&lt;/col&gt;&lt;/row&gt;&lt;/rtab&gt;</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle/>
+         <solution/>
+         <category>Not classified</category>
+         <referencelist>
+         </referencelist>
+         <cve/>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-10 19:01</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>269510</id>
+         <name>Paths Discovered</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <risk>0</risk>
+         <family>was</family>
+         <product>Web Application Scanning</product>
+         <description>The following is a list of the unique paths found during web application scanning:</description>
+         <information>&lt;rtab&gt;&lt;columns&gt;2&lt;/columns&gt;&lt;hdr&gt;&lt;col&gt;Path&lt;/col&gt;&lt;col&gt;Count&lt;/col&gt;&lt;/hdr&gt;&lt;row&gt;&lt;col&gt;https://ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com/securityRealm/commenceLogin&lt;/col&gt;&lt;col&gt;1&lt;/col&gt;&lt;/row&gt;&lt;row&gt;&lt;col&gt;https://ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com/&lt;/col&gt;&lt;col&gt;1&lt;/col&gt;&lt;/row&gt;&lt;row&gt;&lt;col&gt;http://ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com:443/&lt;/col&gt;&lt;col&gt;1&lt;/col&gt;&lt;/row&gt;&lt;/rtab&gt;</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle/>
+         <solution/>
+         <category>Not classified</category>
+         <referencelist>
+         </referencelist>
+         <cve/>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-10 19:01</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost/>
+         <targetopco>PT</targetopco>
+         <id>1221985</id>
+         <name>Products Installed</name>
+         <portinfo>
+            <portnumber>General</portnumber>
+         </portinfo>
+         <risk>0</risk>
+         <family>misc</family>
+         <product>Unspecified</product>
+         <description>This finding lists all the products that were detected by the scanner during the scan.</description>
+         <information>&lt;rtab&gt;&lt;columns&gt;3&lt;/columns&gt;&lt;hdr&gt;&lt;col&gt;Product&lt;/col&gt;&lt;col&gt;Version&lt;/col&gt;&lt;col&gt;Match&lt;/col&gt;&lt;/hdr&gt;&lt;row&gt;&lt;col&gt;Cloudbees Jenkins&lt;/col&gt;&lt;col&gt; 2.176.4.3&lt;/col&gt;&lt;col&gt;&lt;/col&gt;&lt;/row&gt;&lt;row&gt;&lt;col&gt;Cloudbees Jenkins LTS&lt;/col&gt;&lt;col&gt;2.176.4&lt;/col&gt;&lt;col&gt;&lt;/col&gt;&lt;/row&gt;&lt;row&gt;&lt;col&gt;Yui&lt;/col&gt;&lt;col&gt;&lt;/col&gt;&lt;col&gt;&quot;/static/28a7d72a/scripts[B:[/yui/]]yahoo/yahoo-min.js&quot;&gt;&lt;/scr&lt;/col&gt;&lt;/row&gt;&lt;row&gt;&lt;col&gt;Eclipse Jetty&lt;/col&gt;&lt;col&gt;9.4.z-SNAPSHOT&lt;/col&gt;&lt;col&gt;&lt;/col&gt;&lt;/row&gt;&lt;/rtab&gt;</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle/>
+         <solution/>
+         <category>No known solution</category>
+         <referencelist>
+         </referencelist>
+         <cve/>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-10 19:01</firstseen>
+            <lastseen>2019-10-04 00:31</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost/>
+         <targetopco>PT</targetopco>
+         <id>296164</id>
+         <name>Cloud target information</name>
+         <portinfo>
+            <portnumber>General</portnumber>
+         </portinfo>
+         <risk>0</risk>
+         <family>misc</family>
+         <product>Unspecified</product>
+         <description>Target information for cloud based scan. See gathered information for more info.</description>
+         <information>Public ip address: 54.246.138.90</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle/>
+         <solution/>
+         <category>Not classified</category>
+         <referencelist>
+         </referencelist>
+         <cve/>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-10 19:01</firstseen>
+            <lastseen>2019-10-04 00:31</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>54.246.138.90</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>200827</id>
+         <name>SSL/TLS Certificate Information</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <risk>0</risk>
+         <family>ssl</family>
+         <product>SSL/TLS</product>
+         <description>X.509 Certificate Information</description>
+         <information>Chain ID: 62c2a5492d444517
+Provided SNI-Name: (without-sni)
+
+Chain Depth: 0
+Certificate Issuer:
+    Country: US
+    Organization: DigiCert Inc
+    Organizational Unit: www.digicert.com
+    Common Name: DigiCert SHA2 High Assurance Server CA
+
+Certificate Subject:
+    Country: NL
+    Organization: Randstad Nederland B.V.
+    Organizational Unit: Randstad Nederland IT
+    Locality: Diemen
+    Province: Noord Holland
+    Common Name: *.randstadgis.com
+
+Valid not before:2017-02-15T00:00:00Z
+Valid not after: 2020-02-20T12:00:00Z
+Key algorithm: RSA, 2048 bits
+Signature algorithm: SHA256WithRSA
+SANs:
+
+ ---
+
+Chain Depth: 1
+Certificate Issuer:
+    Country: US
+    Organization: DigiCert Inc
+    Organizational Unit: www.digicert.com
+    Common Name: DigiCert High Assurance EV Root CA
+
+Certificate Subject:
+    Country: US
+    Organization: DigiCert Inc
+    Organizational Unit: www.digicert.com
+    Common Name: DigiCert SHA2 High Assurance Server CA
+
+Valid not before:2013-10-22T12:00:00Z
+Valid not after: 2028-10-22T12:00:00Z
+Key algorithm: RSA, 2048 bits
+Signature algorithm: SHA256WithRSA
+
+
+ ============</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle/>
+         <solution/>
+         <category>Not classified</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>http://tools.ietf.org/html/rfc6101</url>
+            </reference>
+         </referencelist>
+         <cve/>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-24 19:00</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost/>
+         <targetopco>PT</targetopco>
+         <id>125993</id>
+         <name>Traceroute</name>
+         <portinfo>
+            <portnumber>General</portnumber>
+         </portinfo>
+         <risk>0</risk>
+         <family>icmp</family>
+         <product>ICMP</product>
+         <description>This check tries to determine the path; traceroute, between our attacker
+and your target host. This path may give an attacker valuable information about
+through which routers; hops, traffic passes through. This is not a
+vulnerability in itself it is merely considered information, however, an
+attacker could possibly use this information to determine what ISP you have and
+so forth.
+
+Note:
+The path is not static and will most likely change depending on from which host
+you perform the traceroute. There is also no way you can fix this problem as it
+involves changing configurations on all the hops along the way.</description>
+         <information>host[:dport]/protocol (12 hops)
+1 91.216.32.1:35974/udp
+2 80.78.213.201:46220/udp
+3 212.247.52.214:61822/udp
+4 212.247.52.213:42437/udp
+5 130.244.75.28:27084/udp
+6 130.244.75.187:32409/udp
+7 99.82.176.78:57767/udp
+8 52.93.2.144:51383/udp
+9 52.93.2.123:8057/udp
+10 54.239.42.168:59042/udp
+11 52.93.130.78:38490/udp
+12 91.216.32.1/icmp
+12 * (destination was not reached)</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle/>
+         <solution/>
+         <category>Not classified</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>http://tools.ietf.org/html/rfc792</url>
+            </reference>
+         </referencelist>
+         <cve/>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-10 19:01</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>54.246.138.90</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>124463</id>
+         <name>HTTP Detection</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <risk>0</risk>
+         <family>http</family>
+         <product>HTTP</product>
+         <description>An HTTP server was detected.</description>
+         <information>HTTP/1.1 403 Forbidden
+Date: Tue, 01 Oct 2019 13:35:16 GMT
+Content-Type: text/html;charset=utf-8
+Content-Length: 837
+Connection: close
+X-Content-Type-Options: nosniff
+Set-Cookie: JSESSIONID.cef9ef29=node011eardib9er52nqye4bue2wn23254.node0;Path=/;Secure;HttpOnly
+Expires: Thu, 01 Jan 1970 00:00:00 GMT
+X-Hudson: 1.395
+X-Jenkins: 2.176.4.3
+X-Jenkins-Session: 28a7d72a
+X-You-Are-Authenticated-As: anonymous
+X-You-Are-In-Group-Disabled: JENKINS-39402: use -Dhudson.security.AccessDeniedException2.REPORT_GROUP_HEADERS=true or use /whoAmI to diagnose
+X-Required-Permission: hudson.model.Hudson.Read
+X-Permission-Implied-By: hudson.security.Permission.GenericRead
+X-Permission-Implied-By: hudson.model.Hudson.Administer
+Server: Jetty(9.4.z-SNAPSHOT)</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle/>
+         <solution/>
+         <category>Not classified</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>http://tools.ietf.org/html/rfc2616</url>
+            </reference>
+         </referencelist>
+         <cve/>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-24 19:00</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost/>
+         <targetopco>PT</targetopco>
+         <id>1229173</id>
+         <name>HTTP Reverse Proxy Detected</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <risk>0</risk>
+         <family>http-proxy</family>
+         <product>HTTP Proxy</product>
+         <description>A possible reverse proxy was detected based on certain HTTP headers. For accurate vulnerability reporting all IP addresses behind this device should be scanned individually. This may not always be practical or possible, but should be considered. Any vulnerability information reported for this IP address can contain information about multiple hosts.</description>
+         <information>This was determined by (1) detecting an HTTP Cache-Control directive.</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle/>
+         <solution/>
+         <category>Unknown</category>
+         <referencelist>
+         </referencelist>
+         <cve/>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-10 19:01</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>54.246.138.90</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>249067</id>
+         <name>SSL/TLS Signature-Signing Algorithm</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <risk>0</risk>
+         <family>ssl</family>
+         <product>SSL/TLS</product>
+         <description>Digital signatures are used to verify that data is received from the correct sender. Your signature can only be generated using your private key but can be verified by anyone with your public key.  If your private key is ever stolen someone else will be able to impersonate you and could send out malicious content with the trust that it&apos;s coming from you.</description>
+         <information>Your signature is signed using the algorithm: SHA256WithRSA</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle/>
+         <solution/>
+         <category>Not classified</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>http://tools.ietf.org/html/rfc6101</url>
+            </reference>
+         </referencelist>
+         <cve/>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-24 19:00</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>54.246.138.90</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>200826</id>
+         <name>HTTP Information</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <risk>0</risk>
+         <family>http</family>
+         <product>HTTP</product>
+         <description>HTTP Server Information</description>
+         <information>&lt;rtab&gt;&lt;columns&gt;4&lt;/columns&gt;&lt;hdr&gt;&lt;col&gt;HTTP Version&lt;/col&gt;&lt;col&gt;SSL&lt;/col&gt;&lt;col&gt;Request Pipelining&lt;/col&gt;&lt;col&gt;Connection Keep-Alive&lt;/col&gt;&lt;/hdr&gt;&lt;row&gt;&lt;col&gt;1.1&lt;/col&gt;&lt;col&gt;yes&lt;/col&gt;&lt;col&gt;no&lt;/col&gt;&lt;col&gt;yes&lt;/col&gt;&lt;/row&gt;&lt;/rtab&gt;</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle/>
+         <solution/>
+         <category>Not classified</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>http://tools.ietf.org/html/rfc2616</url>
+            </reference>
+         </referencelist>
+         <cve/>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-24 19:00</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost/>
+         <targetopco>PT</targetopco>
+         <id>1330525</id>
+         <name>SSL/TLS Certificate Transparency Validation Failure</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <risk>0</risk>
+         <family>ssl</family>
+         <product>SSL/TLS</product>
+         <description>Certificate Transparency helps eliminate these flaws by providing an open framework for monitoring and auditing SSL certificates in nearly real time. Specifically, Certificate Transparency makes it possible to detect SSL certificates that have been mistakenly issued by a certificate authority or maliciously acquired from an otherwise unimpeachable certificate authority. It also makes it possible to identify certificate authorities that have gone rogue and are maliciously issuing certificates.
+
+Google starts to report Certificate Validation Failures over Certificate Transparency from 2018-04-30.</description>
+         <information>At least two certificate transparency log servers are required to evaluate as valid. 
+Virtual host: no-sni&lt;rtab&gt;&lt;columns&gt;7&lt;/columns&gt;&lt;hdr&gt;&lt;col&gt;Chain-id&lt;/col&gt;&lt;col&gt;Timestamp&lt;/col&gt;&lt;col&gt;Log&lt;/col&gt;&lt;col&gt;Operator&lt;/col&gt;&lt;col&gt;url&lt;/col&gt;&lt;col&gt;Valid&lt;/col&gt;&lt;col&gt;information&lt;/col&gt;&lt;/hdr&gt;&lt;row&gt;&lt;col&gt;62c2a5492d444517&lt;/col&gt;&lt;col&gt;&lt;/col&gt;&lt;col&gt;&lt;/col&gt;&lt;col&gt;&lt;/col&gt;&lt;col&gt;&lt;/col&gt;&lt;col&gt;False&lt;/col&gt;&lt;col&gt;&lt;/col&gt;&lt;/row&gt;&lt;/rtab&gt;</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle>Add Certificate to CT Logs</solutiontitle>
+         <solution>Make sure the CA is adding the signed certificates to the Certificate Transparency Logs.</solution>
+         <category>Workaround</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>http://tools.ietf.org/html/rfc6101</url>
+            </reference>
+            <reference>
+               <type>advisory</type>
+               <url>https://www.certificate-transparency.org/</url>
+            </reference>
+            <reference>
+               <type>advisory</type>
+               <url>https://github.com/chromium/ct-policy/blob/master/log_policy.md</url>
+            </reference>
+         </referencelist>
+         <cve/>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-10 19:01</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost/>
+         <targetopco>PT</targetopco>
+         <id>1236903</id>
+         <name>Test Tracking Information</name>
+         <portinfo>
+            <portnumber>General</portnumber>
+         </portinfo>
+         <risk>0</risk>
+         <family>misc</family>
+         <product>Unspecified</product>
+         <description>This script reports information that is required for troubleshooting and tracking.</description>
+         <information>Host 54.246.138.90 tested from 91.216.32.35 with scan track ID 0GRhZnlVi1B02vKEShQdKCrM63KauBIl</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle/>
+         <solution/>
+         <category>Not classified</category>
+         <referencelist>
+         </referencelist>
+         <cve/>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-10 19:01</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+      <detail>
+         <ip>ssc-elb-pt-dta-ext-cloudbees-1456578524.eu-west-1.elb.amazonaws.com</ip>
+         <hostname/>
+         <platform/>
+         <date>2019-10-01 19:01</date>
+         <virtualhost>54.246.138.90</virtualhost>
+         <targetopco>PT</targetopco>
+         <id>217099</id>
+         <name>SSL/TLS Cipher Suite List</name>
+         <portinfo>
+            <portnumber>443</portnumber>
+            <protocol>TCP</protocol>
+            <service>http</service>
+         </portinfo>
+         <risk>0</risk>
+         <family>ssl</family>
+         <product>SSL/TLS</product>
+         <description>The service running on this port supports the following cipher suites.</description>
+         <information>&lt;rtab&gt;&lt;columns&gt;3&lt;/columns&gt;&lt;hdr&gt;&lt;col&gt;TLS1.2 Cipher Suite&lt;/col&gt;&lt;col&gt;OpenSSL Name&lt;/col&gt;&lt;col&gt;SNI Name&lt;/col&gt;&lt;/hdr&gt;&lt;row&gt;&lt;col&gt;TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256&lt;/col&gt;&lt;col&gt;ECDHE-RSA-AES128-GCM-SHA256&lt;/col&gt;&lt;col&gt;&lt;/col&gt;&lt;/row&gt;&lt;row&gt;&lt;col&gt;TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256&lt;/col&gt;&lt;col&gt;ECDHE-RSA-AES128-SHA256&lt;/col&gt;&lt;col&gt;&lt;/col&gt;&lt;/row&gt;&lt;row&gt;&lt;col&gt;TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA&lt;/col&gt;&lt;col&gt;ECDHE-RSA-AES128-SHA&lt;/col&gt;&lt;col&gt;&lt;/col&gt;&lt;/row&gt;&lt;row&gt;&lt;col&gt;TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384&lt;/col&gt;&lt;col&gt;ECDHE-RSA-AES256-GCM-SHA384&lt;/col&gt;&lt;col&gt;&lt;/col&gt;&lt;/row&gt;&lt;row&gt;&lt;col&gt;TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384&lt;/col&gt;&lt;col&gt;ECDHE-RSA-AES256-SHA384&lt;/col&gt;&lt;col&gt;&lt;/col&gt;&lt;/row&gt;&lt;row&gt;&lt;col&gt;TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA&lt;/col&gt;&lt;col&gt;ECDHE-RSA-AES256-SHA&lt;/col&gt;&lt;col&gt;&lt;/col&gt;&lt;/row&gt;&lt;row&gt;&lt;col&gt;TLS_RSA_WITH_AES_128_GCM_SHA256&lt;/col&gt;&lt;col&gt;AES128-GCM-SHA256&lt;/col&gt;&lt;col&gt;&lt;/col&gt;&lt;/row&gt;&lt;row&gt;&lt;col&gt;TLS_RSA_WITH_AES_128_CBC_SHA256&lt;/col&gt;&lt;col&gt;AES128-SHA256&lt;/col&gt;&lt;col&gt;&lt;/col&gt;&lt;/row&gt;&lt;row&gt;&lt;col&gt;TLS_RSA_WITH_AES_128_CBC_SHA&lt;/col&gt;&lt;col&gt;AES128-SHA&lt;/col&gt;&lt;col&gt;&lt;/col&gt;&lt;/row&gt;&lt;row&gt;&lt;col&gt;TLS_RSA_WITH_AES_256_GCM_SHA384&lt;/col&gt;&lt;col&gt;AES256-GCM-SHA384&lt;/col&gt;&lt;col&gt;&lt;/col&gt;&lt;/row&gt;&lt;row&gt;&lt;col&gt;TLS_RSA_WITH_AES_256_CBC_SHA256&lt;/col&gt;&lt;col&gt;AES256-SHA256&lt;/col&gt;&lt;col&gt;&lt;/col&gt;&lt;/row&gt;&lt;row&gt;&lt;col&gt;TLS_RSA_WITH_AES_256_CBC_SHA&lt;/col&gt;&lt;col&gt;AES256-SHA&lt;/col&gt;&lt;col&gt;&lt;/col&gt;&lt;/row&gt;&lt;/rtab&gt;</information>
+         <falsepositive>0</falsepositive>
+         <solutiontitle/>
+         <solution/>
+         <category>Not classified</category>
+         <referencelist>
+            <reference>
+               <type>url</type>
+               <url>http://tools.ietf.org/html/rfc6101</url>
+            </reference>
+         </referencelist>
+         <cve/>
+         <bug/>
+         <verify/>
+         <history>
+            <firstseen>2019-09-24 19:00</firstseen>
+            <lastseen>2019-10-01 19:01</lastseen>
+         </history>
+      </detail>
+   </detaillist>
+</main>
