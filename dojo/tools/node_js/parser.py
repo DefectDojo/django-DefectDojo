@@ -1,5 +1,5 @@
 import json
-import re
+# import re
 from dojo.models import Finding
 
 
@@ -53,7 +53,7 @@ def get_item(item_node, test):
     tag = item_node.get('tag', '')
     static_finding = False if tag == 'web' else True
     mitigation = 'Follow intstructions in description'
-    
+
     # The variable lines contains the actual code where the vuln is located.
     # Due to non standard characeters, it is being left out for now.
     # if len(lines) > 0:
