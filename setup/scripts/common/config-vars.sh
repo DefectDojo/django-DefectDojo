@@ -21,6 +21,7 @@
 ########################################################################
 PROMPT=${PROMPT:-"true"}
 INSTALL_TYPE=${INSTALL_TYPE:-"Single Server"}
+DEMO=${DEMO:-'false'} # Only used for GKE demo. This forces ubuntu distro. DO NOT ENABLE
 
 ########################################################################
 # DB vars

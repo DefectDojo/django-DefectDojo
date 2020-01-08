@@ -1,0 +1,23 @@
+#!/bin/bash
+
+echo "Startup MySQL"
+chown -R mysql:mysql /var/lib/mysql /var/run/mysqld
+service mysql start & 
+
+# Get into the Dojo source directory first
+cd /opt/dojo/django-DefectDojo
+
+echo "Startup 3 Celery workers"
+source /opt/dojo/bin/activate && C_FORCE_ROOT="true" celery -A dojo worker -l info --concurrency 3 &
+
+echo "Startup the Celery beat process"
+source /opt/dojo/bin/activate && C_FORCE_ROOT="true" celery beat -A dojo -l info &
+
+# USED FOR HTTPS
+# echo "Startup DefectDojo with uwsgi on port 5000"
+# source /opt/dojo/bin/activate &&  uwsgi --plugin python3 --socket :5000 --wsgi-file wsgi.py --workers 7 
+
+# USED FOR HTTP
+echo "Startup DefectDojo with 'runserver' on port 5000"
+source /opt/dojo/bin/activate && python manage.py runserver 0.0.0.0:5000
+

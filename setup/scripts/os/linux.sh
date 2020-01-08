@@ -223,6 +223,9 @@ function ubuntu_wkhtml_install() {
     echo ""
 	cd /tmp
 
+    if [ $DEMO == true ]; then
+       INSTALL_OS_VER="18.04"
+    fi
 	# case statement on Ubuntu version built against 18.04 or 16.04
 	case $INSTALL_OS_VER in
 	    "18.04")
@@ -240,8 +243,7 @@ function ubuntu_wkhtml_install() {
         echo "  Error: Unsupported OS version for wkthml - $INSTALL_OS_VER"
         echo "=============================================================================="
         echo ""
-		echo "    Error: Unsupported OS version - $INSTALL_OS_VER"
-		exit 1
+        exit 1
 		;;
 	esac
 
@@ -414,26 +416,31 @@ function install_linux() {
     echo "=============================================================================="
     echo ""
 
-	# Install DB if required
-	if [ "$DB_LOCAL" = true ] && [ "$DB_EXISTS" = false ]; then
+    if [ $DEMO == true ]; then
+        INSTALL_DISTRO="Ubuntu"
+    fi
+
+    # Install DB if required
+    if [ "$DB_LOCAL" = true ] && [ "$DB_EXISTS" = false ]; then
         # DB is local and needs to be installed
-		case $INSTALL_DISTRO in
-		    "Ubuntu")
-		    ubuntu_db_install
-		    ;;
-		    "centos")
-		    echo "  Installing database on CentOS"
-		    echo "  TBD: DB install for CentOS"
-		    ;;
-		    *)
-		    echo "    Error: Unsupported OS"
-		    exit 1
-		    ;;
-		esac
+        
+        case $INSTALL_DISTRO in
+            "Ubuntu")
+            ubuntu_db_install
+            ;;
+            "centos")
+            echo "  Installing database on CentOS"
+            echo "  TBD: DB install for CentOS"
+            ;;
+            *)
+            echo "    Error: Unsupported OS"
+            exit 1
+            ;;
+        esac
 
-	fi
+    fi
 
-	# Configure the database
+    # Configure the database
     case $INSTALL_DISTRO in
         "Ubuntu")
         ubuntu_db_config
@@ -448,27 +455,27 @@ function install_linux() {
         ;;
     esac
 
-	# Install OS packages and DefectDojo app
+    # Install OS packages and DefectDojo app
     echo "=============================================================================="
     echo "  Install OS packages on $INSTALL_DISTRO"
     echo "=============================================================================="
     echo ""
-	case $INSTALL_DISTRO in
-	    "Ubuntu")
-	    # OS Packages needed by DefectDojo
-	    ubuntu_os_packages
-	    ubuntu_wkhtml_install
-	    # Install DefectDojo
-	    create_dojo_settings
-	    ubuntu_dojo_install
-	    ;;
+    case $INSTALL_DISTRO in
+        "Ubuntu")
+        # OS Packages needed by DefectDojo
+        ubuntu_os_packages
+        ubuntu_wkhtml_install
+        # Install DefectDojo
+        create_dojo_settings
+        ubuntu_dojo_install
+        ;;
         "centos")
         echo "  Installing database on CentOS"
-		echo "  TBD: DB install for CentOS"
-		;;
-		*)
-		echo "    Error: Unsupported OS"
-		exit 1
-		;;
-  	esac
+        echo "  TBD: DB install for CentOS"
+        ;;
+        *)
+        echo "    Error: Unsupported OS"
+        exit 1
+        ;;
+    esac
 }

@@ -156,6 +156,10 @@ bootstrap_install() {
         echo ""
 	fi
 
+    if [ $DEMO == true ]; then
+        INSTALL_DISTRO="Ubuntu"
+    fi
+
 	# Install any programs needed by the installer
 	case $INSTALL_DISTRO in
 	    "Ubuntu")
@@ -180,7 +184,7 @@ bootstrap_install() {
         echo "#  ERROR: Unknown or NIY OS - exiting                                        #"
         echo "##############################################################################"
         echo ""
-	    exit 1
+        exit 1
 	    ;;
 	esac
 }
