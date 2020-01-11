@@ -568,7 +568,9 @@ HASHCODE_FIELDS_PER_SCANNER = {
     # possible improvment: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     'NPM Audit Scan': ['title', 'severity'],
     # possible improvment: in the scanner put the library name into file_path, then dedup on cve + file_path + severity
-    'Whitesource Scan': ['title', 'severity', 'description']
+    'Whitesource Scan': ['title', 'severity', 'description'],
+    'ZAP Scan': ['cwe', 'endpoints', 'severity'],
+    'Qualys Scan': ['title', 'endpoints', 'severity']
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -579,7 +581,9 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'SonarQube Scan': False,
     'Dependency Check Scan': True,
     'NPM Audit Scan': True,
-    'Whitesource Scan': True
+    'Whitesource Scan': True,
+    'ZAP Scan': False,
+    'Qualys Scan': True
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -611,7 +615,9 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'SonarQube Scan': DEDUPE_ALGO_HASH_CODE,
     'Dependency Check Scan': DEDUPE_ALGO_HASH_CODE,
     'NPM Audit Scan': DEDUPE_ALGO_HASH_CODE,
-    'Whitesource Scan': DEDUPE_ALGO_HASH_CODE
+    'Whitesource Scan': DEDUPE_ALGO_HASH_CODE,
+    'ZAP Scan': DEDUPE_ALGO_HASH_CODE,
+    'Qualys Scan': DEDUPE_ALGO_HASH_CODE
 }
 
 
@@ -662,10 +668,9 @@ LOGGING = {
         },
         'dojo': {
             'handlers': ['console'],
-            'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': False,
         },
-        # Can be very verbose when many findings exist
         'dojo.specific-loggers.deduplication': {
             'handlers': ['console'],
             'level': 'INFO',
