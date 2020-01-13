@@ -5,7 +5,16 @@ from dojo.models import Test
 
 class TestOutpost24Parser(TestCase):
 
+    def assert_file_has_n_items(self, filename, item_count):
+        with open(filename) as file:
+            parser = Outpost24Parser(file, Test())
+        self.assertEquals(item_count, len(parser.items))
+
+    def test_parser_no_items(self):
+        self.assert_file_has_n_items('dojo/unittests/scans/outpost24/none.xml', 0)
+
+    def test_parser_one_item(self):
+        self.assert_file_has_n_items('dojo/unittests/scans/outpost24/one.xml', 1)
+
     def test_parser_sample_items(self):
-        with open('dojo/unittests/scans/outpost24/sample.xml') as sample:
-            parser = Outpost24Parser(sample, Test())
-        self.assertEquals(24, len(parser.items))
+        self.assert_file_has_n_items('dojo/unittests/scans/outpost24/sample.xml', 24)

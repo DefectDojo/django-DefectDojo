@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE main SYSTEM "https://outscan.outpost24.com/dtd/XMLReport.dtd">
+<main>
+    <report>OUTSCAN Security Report</report>
+    <reportinfo>
+        <type>Vulnerability</type>
+        <id>1234567891234567891234567890ab</id>
+        <reportdate>2019-10-04 19:00</reportdate>
+        <timezone>GMT+0:00</timezone>
+        <creator>Matt Sicker</creator>
+        <date>2019-10-01 19:01 - 2019-10-01 19:01</date>
+        <test>1</test>
+        <threat>0</threat>
+    </reportinfo>
+    <hostlist>
+        <host>
+            <ip>localhost</ip>
+            <name/>
+            <platform/>
+            <high>0</high>
+            <medium>0</medium>
+            <low>0</low>
+            <info>0</info>
+            <port>1</port>
+            <start>2019-10-01 19:01</start>
+            <end>2019-10-01 19:11</end>
+            <updated>2019-10-03 23:35</updated>
+            <template>Normal with webapp</template>
+            <completescan>true</completescan>
+        </host>
+    </hostlist>
+    <portlist>
+        <portlist-host>
+            <ip>localhost</ip>
+            <name/>
+            <date>2019-10-01 19:01</date>
+            <portinfo>
+                <portnumber>443</portnumber>
+                <protocol>TCP</protocol>
+                <service>http</service>
+                <history>
+                    <firstseen>2019-09-10 19:01</firstseen>
+                </history>
+            </portinfo>
+        </portlist-host>
+    </portlist>
+    <detaillist/>
+</main>
