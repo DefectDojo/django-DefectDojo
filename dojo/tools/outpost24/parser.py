@@ -9,7 +9,7 @@ class Outpost24Parser:
         items = list()
         for detail in tree.iterfind('//detaillist/detail'):
             title = detail.findtext('name')
-            #date = detail.findtext('date') # can be used for Finding.date?
+            # date = detail.findtext('date') # can be used for Finding.date?
             cve = detail.findtext('./cve/id')
             url = detail.findtext('./referencelist/reference/[type=\'solution\']/../url')
             description = detail.findtext('description')
