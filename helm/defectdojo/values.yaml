@@ -8,6 +8,8 @@ createRabbitMqSecret: true
 createRedisSecret: true
 # create mysql secret outside of mysql chart
 createMysqlSecret: true
+# create postgresql secret outside of postgresql chart
+createPostgresqlSecret: true
 ## Configuration value to select database type
 ## Option to use "postgresql" or "mysql" database type, by default "postgresql" is chosen
 ## Set the "enable" field to true of the database type you select (if you want to use internal database) and false of the one you don't select
@@ -98,8 +100,9 @@ postgresql:
   enabled: false
   postgresqlUsername: defectdojo
   postgresqlDatabase: defectdojo
+  existingSecret: defectdojo-postgresql-specific
   persistence:
-    enabled: false
+    enabled: true
   replication:
     enabled: false
   service:
