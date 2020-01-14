@@ -11,7 +11,8 @@ class TestOutpost24Parser(TestCase):
         self.assertEquals(item_count, len(parser.items))
         if item_count > 0:
             for item in parser.items:
-                self.assertEquals(1, len(item.unsaved_endpoints), msg='Finding should have one endpoint')
+                endpoint_count = len(item.unsaved_endpoints)
+                self.assertGreater(endpoint_count, 0)
 
     def test_parser_no_items(self):
         self.assert_file_has_n_items('dojo/unittests/scans/outpost24/none.xml', 0)

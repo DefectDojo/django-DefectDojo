@@ -7,6 +7,7 @@ class Outpost24Parser:
         tree = ElementTree.parse(file)
         items = list()
         for detail in tree.iterfind('//detaillist/detail'):
+            # finding details
             title = detail.findtext('name')
             # date = detail.findtext('date') # can be used for Finding.date?
             cve = detail.findtext('./cve/id')
@@ -14,12 +15,9 @@ class Outpost24Parser:
             description = detail.findtext('description')
             mitigation = detail.findtext('solution')
             impact = detail.findtext('information')
-            protocol = detail.findtext('./portinfo/service')
-            host = detail.findtext('hostname') or detail.findtext('ip')
-            port = int(detail.findtext('./portinfo/portnumber'))
-            numerical_severity = detail.findtext('cvss_v3_score')
-            if numerical_severity:
-                score = float(numerical_severity)
+            cvss_score = detail.findtext('cvss_v3_score')
+            if cvss_score:
+                score = float(cvss_score)
                 if score < 4:
                     severity = 'Low'
                 elif score < 7:
@@ -39,8 +37,13 @@ class Outpost24Parser:
                 else:
                     severity = 'Critical'
             finding = Finding(title=title, test=test, cve=cve, url=url, description=description, mitigation=mitigation,
-                              impact=impact, severity=severity, numerical_severity=numerical_severity)
-            finding.unsaved_endpoints.append(Endpoint(protocol=protocol, host=host, port=port))
+                              impact=impact, severity=severity, numerical_severity=cvss_score)
+            # endpoint details
+            host = detail.findtext('ip')
+            if host:
+                protocol = detail.findtext('./portinfo/service')
+                port = int(detail.findtext('./portinfo/portnumber'))
+                finding.unsaved_endpoints.append(Endpoint(protocol=protocol, host=host, port=port))
             items.append(finding)
         self._items = items
 
