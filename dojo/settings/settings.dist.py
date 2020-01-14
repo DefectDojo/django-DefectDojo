@@ -620,6 +620,19 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Qualys Scan': DEDUPE_ALGO_HASH_CODE
 }
 
+# ------------------------------------------------------------------------------
+# JIRA
+# ------------------------------------------------------------------------------
+# The 'Bug' issue type is mandatory, as it is used as the default choice.
+JIRA_ISSUE_TYPE_CHOICES_CONFIG = (
+    ('Task', 'Task'),
+    ('Story', 'Story'),
+    ('Epic', 'Epic'),
+    ('Spike', 'Spike'),
+    ('Bug', 'Bug'),
+    ('Security', 'Security')
+)
+
 
 # ------------------------------------------------------------------------------
 # LOGGING
