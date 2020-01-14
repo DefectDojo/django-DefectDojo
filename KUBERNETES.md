@@ -66,7 +66,8 @@ Helm <= v2:
 helm install \
   ./helm/defectdojo \
   --name=defectdojo \
-  --set django.ingress.enabled=${DJANGO_INGRESS_ENABLED},django.ingress.activateTLS=${DJANGO_INGRESS_ACTIVATE_TLS}
+  --set django.ingress.enabled=${DJANGO_INGRESS_ENABLED} \
+  --set django.ingress.activateTLS=${DJANGO_INGRESS_ACTIVATE_TLS}
 
 ```
 
@@ -76,7 +77,8 @@ Helm >= v3:
 helm install \
   defectdojo \
   ./helm/defectdojo \
-  --set django.ingress.enabled=${DJANGO_INGRESS_ENABLED},django.ingress.activateTLS=${DJANGO_INGRESS_ACTIVATE_TLS}
+  --set django.ingress.enabled=${DJANGO_INGRESS_ENABLED} \
+  --set django.ingress.activateTLS=${DJANGO_INGRESS_ACTIVATE_TLS}
 ```
 
 It usually takes up to a minute for the services to startup and the
@@ -123,7 +125,9 @@ which ensures containers are not pulled from Docker hub
 helm install \
   ./helm/defectdojo \
   --name=defectdojo \
-  --set django.ingress.enabled=${DJANGO_INGRESS_ENABLED},django.ingress.activateTLS=${DJANGO_INGRESS_ACTIVATE_TLS},imagePullPolicy=Never
+  --set django.ingress.enabled=${DJANGO_INGRESS_ENABLED} \
+  --set django.ingress.activateTLS=${DJANGO_INGRESS_ACTIVATE_TLS} \
+  --set imagePullPolicy=Never
 ```
 
 ### Installing from a private registry
@@ -164,7 +168,14 @@ helm uninstall defectdojo
 helm install \
   defectdojo \
   ./helm/defectdojo \
-  --set django.ingress.enabled=${DJANGO_INGRESS_ENABLED},django.ingress.activateTLS=${DJANGO_INGRESS_ACTIVATE_TLS},createSecret=false,createRabbitMqSecret=false,createMysqlSecret=false,createRedisSecret=false
+  --set django.ingress.enabled=${DJANGO_INGRESS_ENABLED} \
+  --set django.ingress.activateTLS=${DJANGO_INGRESS_ACTIVATE_TLS} \
+  --set createSecret=false \
+  --set createRabbitMqSecret=false \
+  --set createRedisSecret=false \
+  --set createMysqlSecret=false \
+  --set createPostgresqlSecret=false
+
 ```
 
 ## Kubernetes Production
