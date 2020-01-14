@@ -694,6 +694,14 @@ def re_import_scan_results(request, tid):
                                                                          fragment=endpoint.fragment,
                                                                          product=t.engagement.product)
                             find.endpoints.add(ep)
+                        for endpoint in form.cleaned_data['endpoints']:
+                            ep, created = Endpoint.objects.get_or_create(protocol=endpoint.protocol,
+                                                                         host=endpoint.host,
+                                                                         path=endpoint.path,
+                                                                         query=endpoint.query,
+                                                                         fragment=endpoint.fragment,
+                                                                         product=t.engagement.product)
+                            find.endpoints.add(ep)
 
                         if item.unsaved_tags is not None:
                             find.tags = item.unsaved_tags
@@ -747,6 +755,7 @@ def re_import_scan_results(request, tid):
 
     product_tab = Product_Tab(engagement.product.id, title="Re-upload a %s" % scan_type, tab="engagements")
     product_tab.setEngagement(engagement)
+    form.fields['endpoints'].queryset = Endpoint.objects.filter(product__id=product_tab.product.id)
     return render(request,
                   'dojo/import_scan_results.html',
                   {'form': form,
