@@ -54,6 +54,7 @@ def get_item(item_node, test):
                       str(item_node['vulnerability']),
                       mitigation=item_node['fixedby'],
                       references=item_node['link'],
+                      cve=item_node['vulnerability'],
                       active=False,
                       verified=False,
                       false_p=False,
