@@ -160,7 +160,9 @@ helm upgrade  defectdojo ./helm/defectdojo/
 ```
 
 ### Re-install the chart
-In case of issue or in any other situation where you need to re-install the chart, you can do it and re-use the same secrets (note that this will create a new database; more information below): 
+In case of issue or in any other situation where you need to re-install the chart, you can do it and re-use the same secrets.
+
+**Note that when using mysql, this will create a new database, while with postgresql you'll keep the same database (more information below)**
 
 ```zsh
 # helm 3
