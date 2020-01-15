@@ -83,7 +83,7 @@ initializer:
       memory: 128Mi
 
 mysql:
-  enabled: true
+  enabled: false
   mysqlUser: defectdojo
   existingSecret: defectdojo-mysql-specific
   mysqlDatabase: defectdojo
@@ -97,7 +97,7 @@ mysql:
   # mysqlPasswordSecret: ""  
 
 postgresql:
-  enabled: false
+  enabled: true
   postgresqlUsername: defectdojo
   postgresqlDatabase: defectdojo
   existingSecret: defectdojo-postgresql-specific
