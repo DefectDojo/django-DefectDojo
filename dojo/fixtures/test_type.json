@@ -507,5 +507,27 @@
 		"model": "dojo.test_type",
 		"pk": 164
 
+	},
+  {
+      "fields": {
+          "name": "Trivy Scan"
+      },
+      "model": "dojo.test_type",
+      "pk": 165
+  },
+  {
+		"fields": {
+			"name": "Xanitizer Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 166
+	},
+	{
+		"fields": {
+			"name": "HackerOne Cases"
+		},
+		"model": "dojo.test_type",
+		"pk": 167
 	}
 ]
+

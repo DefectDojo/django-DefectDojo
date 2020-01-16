@@ -82,7 +82,7 @@ class MonthYearWidget(Widget):
             this_year = date.today().year
             self.years = list(range(this_year - 10, this_year + 1))
 
-    def render(self, name, value, attrs=None):
+    def render(self, name, value, attrs=None, renderer=None):
         try:
             year_val, month_val = value.year, value.month
         except AttributeError:
@@ -299,6 +299,7 @@ class ImportScanForm(forms.Form):
                          ("AppSpider Scan", "AppSpider Scan"),
                          ("Veracode Scan", "Veracode Scan"),
                          ("Checkmarx Scan", "Checkmarx Scan"),
+                         ("Checkmarx Scan detailed", "Checkmarx Scan detailed"),
                          ("Crashtest Security Scan", "Crashtest Security Scan"),
                          ("ZAP Scan", "ZAP Scan"),
                          ("Arachni Scan", "Arachni Scan"),
@@ -322,6 +323,7 @@ class ImportScanForm(forms.Form):
                          ("Fortify Scan", "Fortify Scan"),
                          ("Gosec Scanner", "Gosec Scanner"),
                          ("SonarQube Scan", "SonarQube Scan"),
+                         ("SonarQube Scan detailed", "SonarQube Scan detailed"),
                          (SCAN_SONARQUBE_API, SCAN_SONARQUBE_API),
                          ("MobSF Scan", "MobSF Scan"),
                          ("Trufflehog Scan", "Trufflehog Scan"),
@@ -356,7 +358,10 @@ class ImportScanForm(forms.Form):
                          ("Sslyze Scan", "Sslyze Scan"),
                          ("Testssl Scan", "Testssl Scan"),
                          ("Hadolint Dockerfile check", "Hadolint Dockerfile check"),
-                         ("Aqua Scan", "Aqua Scan"))
+                         ("Aqua Scan", "Aqua Scan"),
+                         ("HackerOne Cases", "HackerOne Cases"),
+                         ("Xanitizer Scan", "Xanitizer Scan"),
+                         ("Trivy Scan", "Trivy Scan"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
     scan_date = forms.DateTimeField(
@@ -371,6 +376,8 @@ class ImportScanForm(forms.Form):
     active = forms.BooleanField(help_text="Select if these findings are currently active.", required=False)
     verified = forms.BooleanField(help_text="Select if these findings have been verified.", required=False)
     scan_type = forms.ChoiceField(required=True, choices=SORTED_SCAN_TYPE_CHOICES)
+    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
+                                               widget=MultipleSelectWithPopPlusMinus(attrs={'size': '5'}))
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False,
                            help_text="Add tags that help describe this scan.  "
@@ -418,6 +425,8 @@ class ReImportScanForm(forms.Form):
                                          choices=SEVERITY_CHOICES[0:4])
     active = forms.BooleanField(help_text="Select if these findings are currently active.", required=False)
     verified = forms.BooleanField(help_text="Select if these findings have been verified.", required=False)
+    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
+                                               widget=MultipleSelectWithPopPlusMinus(attrs={'size': '5'}))
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False,
                            help_text="Add tags that help describe this scan.  "
@@ -818,7 +827,7 @@ class AddFindingForm(forms.ModelForm):
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
-    cve = forms.CharField(max_length=20, required=False)
+    cve = forms.CharField(max_length=28, required=False)
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -856,7 +865,7 @@ class AdHocFindingForm(forms.ModelForm):
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
-    cve = forms.CharField(max_length=20, required=False)
+    cve = forms.CharField(max_length=28, required=False)
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -894,7 +903,7 @@ class PromoteFindingForm(forms.ModelForm):
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
-    cve = forms.CharField(max_length=20, required=False)
+    cve = forms.CharField(max_length=28, required=False)
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -919,7 +928,7 @@ class FindingForm(forms.ModelForm):
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
-    cve = forms.CharField(max_length=20, required=False)
+    cve = forms.CharField(max_length=28, required=False)
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -993,7 +1002,7 @@ class ApplyFindingTemplateForm(forms.Form):
     title = forms.CharField(max_length=1000, required=True)
 
     cwe = forms.IntegerField(label="CWE", required=False)
-    cve = forms.CharField(label="CVE", max_length=20, required=False)
+    cve = forms.CharField(label="CVE", max_length=28, required=False)
 
     severity = forms.ChoiceField(required=False, choices=SEVERITY_CHOICES, error_messages={'required': 'Select valid choice: In Progress, On Hold, Completed', 'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
 
@@ -1037,7 +1046,7 @@ class FindingTemplateForm(forms.ModelForm):
                            help_text="Add tags that help describe this finding template.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
     cwe = forms.IntegerField(label="CWE", required=False)
-    cve = forms.CharField(label="CVE", max_length=20, required=False)
+    cve = forms.CharField(label="CVE", max_length=28, required=False)
     severity = forms.ChoiceField(
         required=False,
         choices=SEVERITY_CHOICES,
@@ -1943,3 +1952,21 @@ class GoogleSheetFieldsForm(forms.Form):
                 self.fields['Protect ' + i.name] = forms.BooleanField(initial=True, required=True, disabled=True)
             else:
                 self.fields['Protect ' + i.name] = forms.BooleanField(initial=False, required=False)
+
+
+class LoginBanner(forms.Form):
+    banner_enable = forms.BooleanField(
+        label="Enable login banner",
+        initial=False,
+        required=False,
+        help_text='Tick this box to enable a text banner on the login page'
+    )
+
+    banner_message = forms.CharField(
+        required=False,
+        label="Message to display on the login page"
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        return cleaned_data

@@ -17,7 +17,8 @@ env = environ.Env(
     DD_SECURE_HSTS_SECONDS=(int, 31536000),  # One year expiration
     DD_SESSION_COOKIE_SECURE=(bool, False),
     DD_CSRF_COOKIE_SECURE=(bool, False),
-    DD_SECURE_BROWSER_XSS_FILTER=(bool, False),
+    DD_SECURE_BROWSER_XSS_FILTER=(bool, True),
+    DD_SECURE_CONTENT_TYPE_NOSNIFF=(bool, True),
     DD_TIME_ZONE=(str, 'UTC'),
     DD_LANG=(str, 'en-us'),
     DD_WKHTMLTOPDF=(str, '/usr/local/bin/wkhtmltopdf'),
@@ -281,6 +282,10 @@ SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL = True
 GOOGLE_OAUTH_ENABLED = env('DD_SOCIAL_AUTH_GOOGLE_OAUTH2_ENABLE')
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = env('DD_SOCIAL_AUTH_GOOGLE_OAUTH2_KEY')
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = env('DD_SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET')
+SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS = ['']
+SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_EMAILS = ['']
+SOCIAL_AUTH_LOGIN_ERROR_URL = '/login'
+SOCIAL_AUTH_BACKEND_ERROR_URL = '/login'
 
 OKTA_OAUTH_ENABLED = env('DD_SOCIAL_AUTH_OKTA_OAUTH2_ENABLED')
 SOCIAL_AUTH_OKTA_OAUTH2_KEY = env('DD_SOCIAL_AUTH_OKTA_OAUTH2_KEY')
@@ -317,6 +322,9 @@ SECURE_SSL_REDIRECT = env('DD_SECURE_SSL_REDIRECT')
 # If True, the SecurityMiddleware sets the X-XSS-Protection: 1;
 # mode=block header on all responses that do not already have it.
 SECURE_BROWSER_XSS_FILTER = env('DD_SECURE_BROWSER_XSS_FILTER')
+
+# If True, the SecurityMiddleware sets the X-Content-Type-Options: nosniff;
+SECURE_CONTENT_TYPE_NOSNIFF = env('DD_SECURE_CONTENT_TYPE_NOSNIFF')
 
 # Whether to use HTTPOnly flag on the session cookie.
 # If this is set to True, client-side JavaScript will not to be able to access the session cookie.
@@ -463,6 +471,7 @@ INSTALLED_APPS = (
     # 'axes'
     'django_celery_results',
     'social_django',
+    'drf_yasg',
 )
 
 # ------------------------------------------------------------------------------
@@ -540,6 +549,91 @@ CELERY_BEAT_SCHEDULE = {
     }
 }
 
+
+# ------------------------------------
+# Hashcode configuration
+# ------------------------------------
+# List of fields used to compute the hash_code
+# The fields must be one of HASHCODE_ALLOWED_FIELDS
+# If not present, default is the legacy behavior: see models.py, compute_hash_code_legacy function
+# legacy is:
+#   static scanner:  ['title', 'cwe', 'line', 'file_path', 'description']
+#   dynamic scanner: ['title', 'cwe', 'line', 'file_path', 'description', 'endpoints']
+HASHCODE_FIELDS_PER_SCANNER = {
+    # In checkmarx, same CWE may appear with different severities: example "sql injection" (high) and "blind sql injection" (low).
+    # Including the severity in the hash_code keeps those findings not duplicate
+    'Checkmarx Scan': ['cwe', 'severity', 'file_path'],
+    'SonarQube Scan': ['cwe', 'severity', 'file_path'],
+    'Dependency Check Scan': ['cve', 'file_path'],
+    # possible improvment: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
+    'NPM Audit Scan': ['title', 'severity'],
+    # possible improvment: in the scanner put the library name into file_path, then dedup on cve + file_path + severity
+    'Whitesource Scan': ['title', 'severity', 'description'],
+    'ZAP Scan': ['cwe', 'endpoints', 'severity'],
+    'Qualys Scan': ['title', 'endpoints', 'severity']
+}
+
+# This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
+# If False and cwe = 0, then the hash_code computation will fallback to legacy algorithm for the concerned finding
+# Default is True (if scanner is not configured here but is configured in HASHCODE_FIELDS_PER_SCANNER, it allows null cwe)
+HASHCODE_ALLOWS_NULL_CWE = {
+    'Checkmarx Scan': False,
+    'SonarQube Scan': False,
+    'Dependency Check Scan': True,
+    'NPM Audit Scan': True,
+    'Whitesource Scan': True,
+    'ZAP Scan': False,
+    'Qualys Scan': True
+}
+
+# List of fields that are known to be usable in hash_code computation)
+# 'endpoints' is a pseudo field that uses the endpoints (for dynamic scanners)
+# 'unique_id_from_tool' is often not needed here as it can be used directly in the dedupe algorithm, but it's also possible to use it for hashing
+HASHCODE_ALLOWED_FIELDS = ['title', 'cwe', 'cve', 'line', 'file_path', 'description', 'endpoints', 'unique_id_from_tool', 'severity']
+
+# ------------------------------------
+# Deduplication configuration
+# ------------------------------------
+# List of algorithms
+# legacy one with multiple conditions (default mode)
+DEDUPE_ALGO_LEGACY = 'legacy'
+# based on dojo_finding.unique_id_from_tool only (for checkmarx detailed, or sonarQube detailed for example)
+DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL = 'unique_id_from_tool'
+# based on dojo_finding.hash_code only
+DEDUPE_ALGO_HASH_CODE = 'hash_code'
+# unique_id_from_tool or hash_code
+# Makes it possible to deduplicate on a technical id (same parser) and also on some functional fields (cross-parsers deduplication)
+DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE = 'unique_id_from_tool_or_hash_code'
+
+# Choice of deduplication algorithm per parser
+# Key = the scan_type from factory.py (= the test_type)
+# Default is DEDUPE_ALGO_LEGACY
+DEDUPLICATION_ALGORITHM_PER_PARSER = {
+    'Checkmarx Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'Checkmarx Scan': DEDUPE_ALGO_HASH_CODE,
+    'SonarQube Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'SonarQube Scan': DEDUPE_ALGO_HASH_CODE,
+    'Dependency Check Scan': DEDUPE_ALGO_HASH_CODE,
+    'NPM Audit Scan': DEDUPE_ALGO_HASH_CODE,
+    'Whitesource Scan': DEDUPE_ALGO_HASH_CODE,
+    'ZAP Scan': DEDUPE_ALGO_HASH_CODE,
+    'Qualys Scan': DEDUPE_ALGO_HASH_CODE
+}
+
+# ------------------------------------------------------------------------------
+# JIRA
+# ------------------------------------------------------------------------------
+# The 'Bug' issue type is mandatory, as it is used as the default choice.
+JIRA_ISSUE_TYPE_CHOICES_CONFIG = (
+    ('Task', 'Task'),
+    ('Story', 'Story'),
+    ('Epic', 'Epic'),
+    ('Spike', 'Spike'),
+    ('Bug', 'Bug'),
+    ('Security', 'Security')
+)
+
+
 # ------------------------------------------------------------------------------
 # LOGGING
 # ------------------------------------------------------------------------------
@@ -587,10 +681,9 @@ LOGGING = {
         },
         'dojo': {
             'handlers': ['console'],
-            'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': False,
         },
-        # Can be very verbose when many findings exist
         'dojo.specific-loggers.deduplication': {
             'handlers': ['console'],
             'level': 'INFO',
