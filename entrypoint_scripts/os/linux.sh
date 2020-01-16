@@ -213,6 +213,8 @@ function create_dojo_settings() {
     sed -i -e 's%#DD_PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST#%'$DD_PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST'%' "$ENV_TARGET_FILE"
     echo "22"
     sed -i -e 's%#DD_PORT_SCAN_SOURCE_IP#%'$DD_PORT_SCAN_SOURCE_IP'%' "$ENV_TARGET_FILE"
+    echo "23"
+    sed -i -e 's%#DD_SECURE_CONTENT_TYPE_NOSNIFF#%'$DD_SECURE_CONTENT_TYPE_NOSNIFF'%' "$ENV_TARGET_FILE"
     # File paths for settings.py
     #sed -i -e 's%#DOJO_ROOT#%'$DOJO_ROOT'%' "$TARGET_SETTINGS_FILE"
     #sed -i -e 's%#MEDIA_ROOT#%'$MEDIA_ROOT'%' "$TARGET_SETTINGS_FILE"
@@ -271,6 +273,7 @@ function ubuntu_dojo_install() {
     python manage.py loaddata language_type
     python manage.py loaddata objects_review
     python manage.py loaddata regulation
+    python manage.py loaddata initial_banner_conf
     
     python manage.py installwatson
     python manage.py buildwatson
