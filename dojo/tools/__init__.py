@@ -4,6 +4,7 @@ SCAN_GENERIC_FINDING = 'Generic Findings Import'
 SCAN_SONARQUBE_API = 'SonarQube API Import'
 SCAN_QUALYS_REPORT = 'Qualys Scan'
 
+
 def requires_file(scan_type):
     return (
         scan_type and scan_type != SCAN_SONARQUBE_API
