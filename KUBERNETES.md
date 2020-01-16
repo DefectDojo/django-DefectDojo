@@ -297,7 +297,8 @@ Helm >= v3
 helm uninstall defectdojo
 ```
 
-In case of failure, you can manually remove all resources:
+To remove persistent objects not removed by uninstall (this will remove any database):  
 ```
-kubectl delete statefulset.apps/defectdojo-rabbitmq deployment.apps/defectdojo-django deployment.apps/defectdojo-celery-worker deployment.apps/defectdojo-celery-beat deployment.apps/defectdojo-mysql deployment.apps/defectdojo-celery job.batch/defectdojo-initializer
+kubectl delete secrets defectdojo defectdojo-redis-specific defectdojo-rabbitmq-specific defectdojo-postgresql-specific defectdojo-mysql-specific
+kubectl delete pvc data-defectdojo-rabbitmq-0 data-defectdojo-postgresql-0
 ```
