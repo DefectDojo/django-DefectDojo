@@ -13,8 +13,10 @@ class HadolintParser(object):
             self.items = []
 
     def parse_json(self, json_output):
+        json_output = json_output.read()
+
         try:
-            tree = json.load(json_output)
+            tree = json.loads(json_output.decode('utf-8').strip())
         except:
             raise Exception("Invalid format")
 
