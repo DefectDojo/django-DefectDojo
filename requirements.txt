@@ -43,7 +43,7 @@ pytz==2019.1
 redis==3.2.1
 requests>=2.22.0
 sqlalchemy  # Required by Celery broker transport
-supervisor==4.0.3
+supervisor==4.1.0
 urllib3==1.25.3
 uWSGI==2.0.18
 vobject==0.9.6.1
