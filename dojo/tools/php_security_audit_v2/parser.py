@@ -13,7 +13,8 @@ class PhpSecurityAuditV2(object):
         dupes = dict()
 
         for filepath, report in list(data["files"].items()):
-            if report["errors"] > 0:
+            # This change below will include in report warnings and errors.
+            if ( report["errors"]  or report["warnings"] ) > 0:
                 for issue in report["messages"]:
                     title = issue["source"]
 
