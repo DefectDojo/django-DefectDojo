@@ -600,6 +600,12 @@ def re_import_scan_results(request, tid):
                 parser = import_parser_factory(file, t, active, verified)
             except ValueError:
                 raise Http404()
+            except Exception as e:
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     "Error importing scan results: {}".format(str(e)),
+                                     extra_tags='alert-danger')
+                return HttpResponseRedirect(reverse('re_import_scan_results', args=(t.id,)))
 
             try:
                 items = parser.items
