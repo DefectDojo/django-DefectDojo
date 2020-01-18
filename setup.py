@@ -23,7 +23,7 @@ setup(
         'django-tastypie-swagger',
         'django-tastypie>=0.12.2',
         'django-rest-swagger==2.1.2',
-        'djangorestframework==3.7.7',
+        'djangorestframework==3.11.0',
         'django-environ==0.4.5',
         'django-axes',
         'gunicorn>=19.1.1',

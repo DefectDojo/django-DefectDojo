@@ -22,7 +22,7 @@ git+https://github.com/Maffooch/django-tastypie-swagger@master#egg=django-tastyp
 django-tastypie==0.14.2
 django-watson==1.5.2
 Django==2.2.4
-djangorestframework==3.9.4
+djangorestframework==3.11.0
 gunicorn==19.9.0
 html2text==2018.1.9
 humanize==0.5.1
