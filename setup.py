@@ -68,7 +68,7 @@ setup(
         'titlecase'
     ],
 
-    extras_require={'mysql': ['mysqlclient==1.3.12']},
+    extras_require={'mysql': ['mysqlclient==1.4.6']},
 
     dependency_links=[
         "https://github.com/grendel513/python-pdfkit/tarball/master#egg=pdfkit-0.5.0"
