@@ -12,7 +12,7 @@ setup(
         'Django==2.2.4',
         'django-auditlog==0.4.0',
         'django-custom-field',
-        'django-filter==1.0.4',
+        'django-filter==2.2.0',
         'django-imagekit',
         'django-multiselectfield',
         'django-overextends==0.4.3',  # Required for extensions
