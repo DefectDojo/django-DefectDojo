@@ -71,8 +71,8 @@ def dashboard(request):
     # make sure all keys are present
     sev_counts = {'Critical': 0,
                   'High': 0,
-                  'Medium': 0,	
-                  'Low': 0,	
+                  'Medium': 0,
+                  'Low': 0,
                   'Info': 0}
 
     for s in severities:
