@@ -1,8 +1,8 @@
 from dojo.tools import SCAN_SONARQUBE_API
-from dojo.tasks import async_tool_issue_updater
 
 def async_tool_issue_update(finding, *args, **kwargs):
     if is_tool_issue_updater_needed(finding):
+        from dojo.tasks import async_tool_issue_updater
         async_tool_issue_updater.delay(finding)
 
 
