@@ -33,16 +33,16 @@ logger = logging.getLogger(__name__)
 
 def product(request):
     if request.user.is_staff:
-        initial_queryset = Product.objects.all().select_related('technical_contact').select_related('product_manager').select_related('prod_type').select_related('team_manager').prefetch_related('jira_pkey_set')
+        initial_queryset = Product.objects.all().select_related('technical_contact').select_related('product_manager').select_related('prod_type').select_related('team_manager').prefetch_related('jira_project_key_product')
         name_words = [product.name for product in
                       Product.objects.all().select_related('technical_contact').select_related('product_manager').select_related('prod_type').select_related('team_manager')
-                      .prefetch_related('jira_pkey_set')]
+                      .prefetch_related('jira_project_key_product')]
     else:
         initial_queryset = Product.objects.filter(
             authorized_users__in=[request.user])
         name_words = [word for product in
                       Product.objects.filter(
-                          authorized_users__in=[request.user]).select_related('technical_contact').select_related('product_manager').select_related('prod_type').select_related('team_manager').prefetch_related('jira_pkey_set')
+                          authorized_users__in=[request.user]).select_related('technical_contact').select_related('product_manager').select_related('prod_type').select_related('team_manager').prefetch_related('jira_project_key_product')
                       for word in product.name.split() if len(word) > 2]
 
     product_type = None
