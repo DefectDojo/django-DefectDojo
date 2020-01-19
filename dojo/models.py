@@ -1327,9 +1327,9 @@ class Finding(models.Model):
             models.Index(fields=['verified']),
             models.Index(fields=['mitigated']),
             models.Index(fields=['active']),
-            models.Index(fields=['numerical_severity']),     
-            models.Index(fields=['date']),     
-            models.Index(fields=['title']),                 
+            models.Index(fields=['numerical_severity']),
+            models.Index(fields=['date']),
+            models.Index(fields=['title']),
         ]
 
     @property
