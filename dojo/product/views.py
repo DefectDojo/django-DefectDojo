@@ -33,15 +33,15 @@ logger = logging.getLogger(__name__)
 
 def product(request):
     if request.user.is_staff:
-        initial_queryset = Product.objects.all().select_related('technical_contact').select_related('product_manager').select_related('prod_type').select_related('team_manager')
+        initial_queryset = Product.objects.all().select_related('technical_contact').select_related('product_manager').select_related('prod_type').select_related('team_manager').select_related('jira_product_conf').select_related('jira_conf')
         name_words = [product.name for product in
-                      Product.objects.all().select_related('technical_contact').select_related('product_manager').select_related('prod_type').select_related('team_manager')]
+                      Product.objects.all().select_related('technical_contact').select_related('product_manager').select_related('prod_type').select_related('team_manager').select_related('jira_product_conf').select_related('jira_conf')]
     else:
         initial_queryset = Product.objects.filter(
             authorized_users__in=[request.user])
         name_words = [word for product in
                       Product.objects.filter(
-                          authorized_users__in=[request.user].select_related('technical_contact').select_related('product_manager').select_related('prod_type').select_related('team_manager'))
+                          authorized_users__in=[request.user]).select_related('technical_contact').select_related('product_manager').select_related('prod_type').select_related('team_manager').select_related('jira_product').select_related('jira_conf')
                       for word in product.name.split() if len(word) > 2]
 
     product_type = None

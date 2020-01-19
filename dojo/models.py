@@ -2072,9 +2072,9 @@ class JIRA_Details_Cache(models.Model):
 
 class JIRA_PKey(models.Model):
     project_key = models.CharField(max_length=200, blank=True)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product')
     conf = models.ForeignKey(JIRA_Conf, verbose_name="JIRA Configuration",
-                             null=True, blank=True, on_delete=models.CASCADE)
+                             null=True, blank=True, on_delete=models.CASCADE, related_name='jira_conf')
     component = models.CharField(max_length=200, blank=True)
     push_all_issues = models.BooleanField(default=False, blank=True)
     enable_engagement_epic_mapping = models.BooleanField(default=False,
