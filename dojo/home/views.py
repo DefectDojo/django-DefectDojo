@@ -68,7 +68,13 @@ def dashboard(request):
     # order_by is needed due to ordering being present in Meta of Finding
     severities = findings.values('severity').annotate(count=Count('severity')).order_by()
 
-    sev_counts = {}
+    # make sure all keys are present
+    sev_counts = {'Critical': 0,
+                  'High': 0,
+                  'Medium': 0,	
+                  'Low': 0,	
+                  'Info': 0}
+
     for s in severities:
         logger.error(s)
         sev_counts[s['severity']] = s['count']
