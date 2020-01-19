@@ -12,6 +12,7 @@ from django.shortcuts import render
 from django.utils import timezone
 
 from dojo.models import Finding, Engagement, Risk_Acceptance
+from django.db.models import Count
 from dojo.utils import add_breadcrumb, get_punchcard_data
 
 from defectDojo_engagement_survey.models import Answered_Survey
@@ -64,15 +65,13 @@ def dashboard(request):
         findings = Finding.objects.filter(reporter=request.user,
                                           verified=True, duplicate=False)
 
-    sev_counts = {'Critical': 0,
-                  'High': 0,
-                  'Medium': 0,
-                  'Low': 0,
-                  'Info': 0}
-
-    for finding in findings:
-        if finding.severity:
-            sev_counts[finding.severity.capitalize()] += 1
+    # order_by is needed due to ordering being present in Meta of Finding
+    severities = findings.values('severity').annotate(count=Count('severity')).order_by()
+  
+    sev_counts = {}
+    for s in severities:
+        logger.error(s)
+        sev_counts[s['severity']] = s['count']
 
     by_month = list()
 
