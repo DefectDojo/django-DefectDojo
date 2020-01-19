@@ -1226,7 +1226,7 @@ class Sonarqube_Product(models.Model):
 
 
 class Finding(models.Model):
-    title = models.TextField(max_length=1000)
+    title = models.CharField(max_length=511)
     date = models.DateField(default=get_current_date)
     cwe = models.IntegerField(default=0, null=True, blank=True)
     cve_regex = RegexValidator(regex=r'^[A-Z]{1,10}-\d{4}-\d{4,12}$',
@@ -1321,7 +1321,15 @@ class Finding(models.Model):
     class Meta:
         ordering = ('numerical_severity', '-date', 'title')
         indexes = [
-            models.Index(fields=('cve',))
+            models.Index(fields=['cve']),
+            models.Index(fields=['out_of_scope']),
+            models.Index(fields=['false_p']),
+            models.Index(fields=['verified']),
+            models.Index(fields=['mitigated']),
+            models.Index(fields=['active']),
+            models.Index(fields=['numerical_severity']),     
+            models.Index(fields=['date']),     
+            models.Index(fields=['title']),                 
         ]
 
     @property
