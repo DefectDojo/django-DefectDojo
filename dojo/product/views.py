@@ -31,18 +31,17 @@ from tagging.utils import get_tag_list
 
 logger = logging.getLogger(__name__)
 
-
 def product(request):
     if request.user.is_staff:
-        initial_queryset = Product.objects.all().select_related('technical_contact').select_related('product_manager').select_related('prod_type').select_related('jira_pkey')
+        initial_queryset = Product.objects.all().select_related('technical_contact').select_related('product_manager').select_related('prod_type').select_related('team_manager')
         name_words = [product.name for product in
-                      Product.objects.all().select_related('technical_contact').select_related('product_manager').select_related('prod_type').select_related('jira_pkey')]
+                      Product.objects.all().select_related('technical_contact').select_related('product_manager').select_related('prod_type').select_related('team_manager')]
     else:
         initial_queryset = Product.objects.filter(
             authorized_users__in=[request.user])
         name_words = [word for product in
                       Product.objects.filter(
-                          authorized_users__in=[request.user].select_related('technical_contact').select_related('product_manager').select_related('prod_type').select_related('jira_pkey'))
+                          authorized_users__in=[request.user].select_related('technical_contact').select_related('product_manager').select_related('prod_type').select_related('team_manager'))
                       for word in product.name.split() if len(word) > 2]
 
     product_type = None
