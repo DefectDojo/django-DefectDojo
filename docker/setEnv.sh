@@ -21,7 +21,15 @@ function show_current {
 function get_current {
     if [ -L ${override_link} ]
     then
-        current_env=$(expr $(basename $(readlink -f docker-compose.override.yml)) : "^docker-compose.override.\(.*\).yml$")
+        # Check for Mac OSX 
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            # readlink is not native to mac, so this will work in it's place.
+            symlink=$(python3 -c "import os; print(os.path.realpath('docker-compose.override.yml'))")
+        else
+            # Maintain the cleaner way
+            symlink=$(readlink -f docker-compose.override.yml)
+        fi
+        current_env=$(expr $(basename symlink) : "^docker-compose.override.\(.*\).yml$")
     else
         current_env=release
     fi

@@ -92,9 +92,9 @@ def view_product(request, pid):
 
     product_metadata = dict(prod.product_meta.order_by('name').values_list('name', 'value'))
 
-    verified_findings = Finding.objects.filter(test__engagement__product=prod,
+    open_findings = Finding.objects.filter(test__engagement__product=prod,
                                                 false_p=False,
-                                                verified=True,
+                                                verified=False,
                                                 active=True,
                                                 duplicate=False,
                                                 out_of_scope=False).order_by('numerical_severity').values('severity').annotate(count=Count('severity'))
@@ -105,7 +105,7 @@ def view_product(request, pid):
     low = 0
     info = 0
 
-    for v in verified_findings:
+    for v in open_findings:
         if v["severity"] == "Critical":
             critical = v["count"]
         elif v["severity"] == "High":
@@ -188,11 +188,11 @@ def view_product_metrics(request, pid):
                                                out_of_scope=False).order_by("date")
 
     week_date = end_date - timedelta(days=7)  # seven days and /newnewer are considered "new"
-
     new_verified_findings = Finding.objects.filter(test__engagement__product=prod,
                                                    date__range=[week_date, end_date],
                                                    false_p=False,
                                                    verified=True,
+                                                   active=True,
                                                    duplicate=False,
                                                    out_of_scope=False).order_by("date")
 
@@ -202,6 +202,15 @@ def view_product_metrics(request, pid):
                                            duplicate=False,
                                            out_of_scope=False,
                                            active=True,
+                                           verified=False,
+                                           mitigated__isnull=True)
+
+    inactive_findings = Finding.objects.filter(test__engagement__product=prod,
+                                           date__range=[start_date, end_date],
+                                           false_p=False,
+                                           duplicate=False,
+                                           out_of_scope=False,
+                                           active=False,
                                            mitigated__isnull=True)
 
     closed_findings = Finding.objects.filter(test__engagement__product=prod,
@@ -210,7 +219,20 @@ def view_product_metrics(request, pid):
                                              verified=False,
                                              duplicate=False,
                                              out_of_scope=False,
+                                             active=False,
                                              mitigated__isnull=False)
+
+    false_positive_findings = Finding.objects.filter(test__engagement__product=prod,
+                                             date__range=[start_date, end_date],
+                                             false_p=True,
+                                             verified=False,
+                                             duplicate=False,
+                                             out_of_scope=False)
+
+    out_of_scope_findings = Finding.objects.filter(test__engagement__product=prod,
+                                             date__range=[start_date, end_date],
+                                             duplicate=False,
+                                             out_of_scope=True)
 
     open_vulnerabilities = Finding.objects.filter(
         test__engagement__product=prod,
@@ -244,7 +266,7 @@ def view_product_metrics(request, pid):
     if weeks_between <= 0:
         weeks_between += 2
 
-    punchcard, ticks, highest_count = get_punchcard_data(verified_findings, weeks_between, start_date)
+    punchcard, ticks, highest_count = get_punchcard_data(open_findings, weeks_between, start_date)
     add_breadcrumb(parent=prod, top_level=False, request=request)
 
     open_close_weekly = OrderedDict()
@@ -335,7 +357,10 @@ def view_product_metrics(request, pid):
                    'scan_sets': scan_sets,
                    'verified_findings': verified_findings,
                    'open_findings': open_findings,
+                   'inactive_findings': inactive_findings,
                    'closed_findings': closed_findings,
+                   'false_positive_findings': false_positive_findings,
+                   'out_of_scope_findings': out_of_scope_findings,
                    'accepted_findings': accepted_findings,
                    'new_findings': new_verified_findings,
                    'open_vulnerabilities': open_vulnerabilities,
@@ -463,7 +488,7 @@ def new_product(request):
         if form.is_valid():
             product = form.save()
             tags = request.POST.getlist('tags')
-            t = ", ".join(tags)
+            t = ", ".join('"{0}"'.format(w) for w in tags)
             product.tags = t
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -524,7 +549,7 @@ def edit_product(request, pid):
         if form.is_valid():
             form.save()
             tags = request.POST.getlist('tags')
-            t = ", ".join(tags)
+            t = ", ".join('"{0}"'.format(w) for w in tags)
             prod.tags = t
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -671,7 +696,7 @@ def new_eng_for_app(request, pid, cicd=False):
 
             new_eng.save()
             tags = request.POST.getlist('tags')
-            t = ", ".join(tags)
+            t = ", ".join('"{0}"'.format(w) for w in tags)
             new_eng.tags = t
             if get_system_setting('enable_jira'):
                 # Test to make sure there is a Jira project associated the product
