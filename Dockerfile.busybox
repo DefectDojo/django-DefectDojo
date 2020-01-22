@@ -1,2 +1,2 @@
-FROM busybox:1.31.0-musl
+FROM busybox:1.31.1-musl
 ENTRYPOINT ["/bin/echo", "hello world"]
