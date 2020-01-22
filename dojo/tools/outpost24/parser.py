@@ -15,7 +15,7 @@ class Outpost24Parser:
             description = detail.findtext('description')
             mitigation = detail.findtext('solution')
             impact = detail.findtext('information')
-            cvss_score = detail.findtext('cvss_v3_score')
+            cvss_score = detail.findtext('cvss_v3_score') or detail.findtext('cvss_score')
             if cvss_score:
                 score = float(cvss_score)
                 if score < 4:
@@ -36,8 +36,12 @@ class Outpost24Parser:
                     severity = 'High'
                 else:
                     severity = 'Critical'
+            cvss_description = detail.findtext('cvss_vector_description')
+            cvss_vector = detail.findtext('cvss_v3_vector') or detail.findtext('cvss_vector')
+            severity_justification = "{}\n{}".format(cvss_score, cvss_description)
             finding = Finding(title=title, test=test, cve=cve, url=url, description=description, mitigation=mitigation,
-                              impact=impact, severity=severity, numerical_severity=cvss_score)
+                              impact=impact, severity=severity, numerical_severity=cvss_score,
+                              severity_justification=severity_justification)
             # endpoint details
             host = detail.findtext('ip')
             if host:
