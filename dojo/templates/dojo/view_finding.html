@@ -204,6 +204,9 @@
                     {% if finding.cve %}
                         <th>CVE</th>
                     {% endif %}
+                  <!--  {% if finding.cvss %}
+                        <th>CVSS</th>
+                    {% endif %}-->
                     <th>Found by</th>
                 </tr>
                 <tr>
@@ -659,6 +662,19 @@
                 </div>
             </div>
         </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>CVSS 3.0<span class="pull-right"><a data-toggle="collapse" href="#vuln_cvss"><i
+                        class="glyphicon glyphicon-chevron-{% if finding.cvss %}up{%else%}down{%endif%}"></i></a></span></h4>
+            </div>
+            <div id="vuln_cvss" class="panel-body collapse {% if finding.cvss %}in{%endif%}">
+                <pre>{{ finding.cvss|markdown_render|default_if_none:"" }}</pre>
+
+             {% include "dojo/cvss_calculator.html" with finding=finding only %}
+            </div>
+        </div>
+
 
         <div class="panel panel-default">
             <div class="panel-heading">
