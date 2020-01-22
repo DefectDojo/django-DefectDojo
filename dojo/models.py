@@ -1205,6 +1205,8 @@ class Finding(models.Model):
     cve_regex = RegexValidator(regex=r'^CVE-\d{4}-\d{4,7}$',
                                  message="CVE must be entered in the format: 'CVE-9999-9999'. ")
     cve = models.TextField(validators=[cve_regex], max_length=20, null=True)
+    cvss_regex = RegexValidator(regex=r'^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]', message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
+    cvss = models.TextField(validators=[cvss_regex],max_length=100,null=True)
     url = models.TextField(null=True, blank=True, editable=False)
     severity = models.CharField(max_length=200, help_text="The severity level of this flaw (Critical, High, Medium, Low, Informational)")
     description = models.TextField()
@@ -1427,6 +1429,7 @@ class Finding(models.Model):
         long_desc += '*' + self.title + '*\n\n'
         long_desc += '*Severity:* ' + str(self.severity) + '\n\n'
         long_desc += '*Cve:* ' + str(self.cve) + '\n\n'
+        long_desc += '*Cve:* ' + str(self.cvss) + '\n\n'
         long_desc += '*Product/Engagement:* ' + self.test.engagement.product.name + ' / ' + self.test.engagement.name + '\n\n'
         if self.test.engagement.branch_tag:
             long_desc += '*Branch/Tag:* ' + self.test.engagement.branch_tag + '\n\n'
@@ -1612,6 +1615,8 @@ class Finding_Template(models.Model):
     cve_regex = RegexValidator(regex=r'^CVE-\d{4}-\d{4,7}$',
                                  message="CVE must be entered in the format: 'CVE-9999-9999'. ")
     cve = models.TextField(validators=[cve_regex], max_length=20, null=True)
+    cvss_regex = RegexValidator(regex=r'^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]', message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
+    cvss = models.TextField(validators=[cvss_regex],max_length=100,null=True)
     severity = models.CharField(max_length=200, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     mitigation = models.TextField(null=True, blank=True)
