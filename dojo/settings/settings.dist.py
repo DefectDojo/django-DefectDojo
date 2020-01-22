@@ -617,7 +617,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'NPM Audit Scan': DEDUPE_ALGO_HASH_CODE,
     'Whitesource Scan': DEDUPE_ALGO_HASH_CODE,
     'ZAP Scan': DEDUPE_ALGO_HASH_CODE,
-    'Qualys Scan': DEDUPE_ALGO_HASH_CODE
+    'Qualys Scan': DEDUPE_ALGO_HASH_CODE,
+    'PHP Symfony Security Check': DEDUPE_ALGO_HASH_CODE
 }
 
 # ------------------------------------------------------------------------------
