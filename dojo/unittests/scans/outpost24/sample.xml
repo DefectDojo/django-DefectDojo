@@ -308,7 +308,7 @@ Paths:
          <risk>2</risk>
          <family>example</family>
          <product>Fake Product</product>
-         <description>A vulnerability in the Stapler web framework used in Fake Product, LTS allowed attackers to access view fragments directly, bypassing permission checks and possibly obtain sensitive information.</description>
+         <description>A vulnerability in the Spring web framework used in Fake Product, LTS allowed attackers to access view fragments directly, bypassing permission checks and possibly obtain sensitive information.</description>
          <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.186
 Paths:
 /</information>
@@ -360,7 +360,7 @@ Paths:
          <risk>2</risk>
          <family>example</family>
          <product>Fake Product</product>
-         <description>A path traversal vulnerability in Fake Product in core/src/main/java/hudson/model/FileParameterValue.java allowed attackers with Job/Configure permission to define a file parameter with a file name outside the intended directory, resulting in an arbitrary file write on the Fake Product master when scheduling a build.</description>
+         <description>A path traversal vulnerability in Fake Product in core/src/main/java/fake_product/model/FileParameterValue.java allowed attackers with Job/Configure permission to define a file parameter with a file name outside the intended directory, resulting in an arbitrary file write on the Fake Product master when scheduling a build.</description>
          <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.186
 Paths:
 /</information>
@@ -456,7 +456,7 @@ Paths:
          <risk>2</risk>
          <family>example</family>
          <product>Fake Product</product>
-         <description>A path traversal vulnerability in Fake Product in core/src/main/java/hudson/model/FileParameterValue.java allowed attackers with Job/Configure permission to define a file parameter with a file name outside the intended directory, resulting in an arbitrary file write on the Fake Product master when scheduling a build.</description>
+         <description>A path traversal vulnerability in Fake Product in core/src/main/java/fake_product/model/FileParameterValue.java allowed attackers with Job/Configure permission to define a file parameter with a file name outside the intended directory, resulting in an arbitrary file write on the Fake Product master when scheduling a build.</description>
          <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.186</information>
          <falsepositive>0</falsepositive>
          <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
@@ -506,7 +506,7 @@ Paths:
          <risk>2</risk>
          <family>example</family>
          <product>Fake Product</product>
-         <description>A vulnerability in the Stapler web framework used in Fake Product, LTS allowed attackers to access view fragments directly, bypassing permission checks and possibly obtain sensitive information.</description>
+         <description>A vulnerability in the Spring web framework used in Fake Product, LTS allowed attackers to access view fragments directly, bypassing permission checks and possibly obtain sensitive information.</description>
          <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.186</information>
          <falsepositive>0</falsepositive>
          <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
