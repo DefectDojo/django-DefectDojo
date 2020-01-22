@@ -53,7 +53,7 @@
             <virtualhost>127.0.0.1</virtualhost>
             <targetopco>PT</targetopco>
             <id>1377090</id>
-            <name>Cloudbees Jenkins: Cross-Site Request Forgery Vulnerability</name>
+            <name>Fake vulnerability in fake product</name>
             <portinfo>
                 <portnumber>443</portnumber>
                 <protocol>TCP</protocol>
@@ -69,33 +69,30 @@
             <cvss_v3_score>7.5</cvss_v3_score>
             <cvss_v3_vector>CVSS:3.0/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:H</cvss_v3_vector>
             <risk>2</risk>
-            <family>cloudbees</family>
-            <product>Cloudbees Jenkins</product>
-            <description>By default, CSRF tokens in Jenkins only checked user authentication and IP address. This
-                allowed attackers able to obtain a CSRF token for another user to implement CSRF attacks as long as the
-                victim’s IP address remained unchanged.
-            </description>
-            <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,
-                2.176.4.3, is less than 2.186
+            <family>example</family>
+            <product>Fake Product</product>
+            <description>CSRF tokens are useful. This application did not think that was the case. Now they do.</description>
+            <information>This vulnerability was identified because (1) the detected version of Fake Product,
+                1.1.0, is less than 1.1.1
                 Paths:
                 /
             </information>
             <falsepositive>0</falsepositive>
-            <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
-            <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+            <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+            <solution>Upgrade to the latest version of Fake Product.</solution>
             <category>Update</category>
             <referencelist>
                 <reference>
                     <type>url</type>
-                    <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+                    <url>https://www.example.com/products/fake</url>
                 </reference>
                 <reference>
                     <type>advisory</type>
-                    <url>https://jenkins.io/security/advisory/2019-04-10/#SECURITY-1327</url>
+                    <url>https://www.example.com/security/advisories/2019-09-09/</url>
                 </reference>
             </referencelist>
             <cve>
-                <id>CVE-2019-10353</id>
+                <id>CVE-2019-9315</id>
             </cve>
             <bug>
                 <id>109373</id>

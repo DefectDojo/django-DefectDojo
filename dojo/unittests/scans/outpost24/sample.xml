@@ -54,7 +54,7 @@
          <virtualhost>127.0.0.1</virtualhost>
          <targetopco>PT</targetopco>
          <id>1377090</id>
-         <name>Cloudbees Jenkins: Cross-Site Request Forgery Vulnerability</name>
+         <name>Fake Product: Cross-Site Request Forgery Vulnerability</name>
          <portinfo>
             <portnumber>443</portnumber>
             <protocol>TCP</protocol>
@@ -66,28 +66,28 @@
          <cvss_v3_score>7.5</cvss_v3_score>
          <cvss_v3_vector>CVSS:3.0/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:H</cvss_v3_vector>
          <risk>2</risk>
-         <family>cloudbees</family>
-         <product>Cloudbees Jenkins</product>
-         <description>By default, CSRF tokens in Jenkins only checked user authentication and IP address. This allowed attackers able to obtain a CSRF token for another user to implement CSRF attacks as long as the victim’s IP address remained unchanged.</description>
-         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than 2.186
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>By default, CSRF tokens in Fake Product only checked user authentication and IP address. This allowed attackers able to obtain a CSRF token for another user to implement CSRF attacks as long as the victim’s IP address remained unchanged.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.186
 Paths:
 /</information>
          <falsepositive>0</falsepositive>
-         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
-         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
          <category>Update</category>
          <referencelist>
             <reference>
                <type>url</type>
-               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
             </reference>
             <reference>
                <type>advisory</type>
-               <url>https://jenkins.io/security/advisory/2019-04-10/#SECURITY-1327</url>
+               <url>https://www.example.com/security/advisory/2019-04-10/</url>
             </reference>
          </referencelist>
          <cve>
-            <id>CVE-2019-10353</id>
+            <id>CVE-2008-10353</id>
          </cve>
          <bug>
             <id>109373</id>
@@ -106,7 +106,7 @@ Paths:
          <virtualhost>127.0.0.1</virtualhost>
          <targetopco>PT</targetopco>
          <id>1380637</id>
-         <name>Cloudbees Jenkins LTS: CSRF Protection Bypass Vulnerability</name>
+         <name>Fake Product LTS: CSRF Protection Bypass Vulnerability</name>
          <portinfo>
             <portnumber>443</portnumber>
             <protocol>TCP</protocol>
@@ -118,22 +118,22 @@ Paths:
          <cvss_v3_score>8.8</cvss_v3_score>
          <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H</cvss_v3_vector>
          <risk>2</risk>
-         <family>cloudbees</family>
-         <product>Cloudbees Jenkins LTS</product>
-         <description>Jenkins, LTS allowed users to obtain CSRF tokens without an associated web session ID, resulting in CSRF tokens that did not expire and could be used to bypass CSRF protection for the anonymous user.</description>
-         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins LTS, 2.176.4, is less than or equal to 2.191</information>
+         <family>example</family>
+         <product>Fake Product LTS</product>
+         <description>Fake Product, LTS allowed users to obtain CSRF tokens without an associated web session ID, resulting in CSRF tokens that did not expire and could be used to bypass CSRF protection for the anonymous user.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product LTS, 1.1.176.4, is less than or equal to 1.1.191</information>
          <falsepositive>0</falsepositive>
-         <solutiontitle>Upgrade to version 2.176.2 or later of Cloudbees Jenkins LTS</solutiontitle>
-         <solution>Upgrade to version 2.176.2 or later of Cloudbees Jenkins LTS.</solution>
+         <solutiontitle>Upgrade to version 1.1.176.2 or later of Fake Product LTS</solutiontitle>
+         <solution>Upgrade to version 1.1.176.2 or later of Fake Product LTS.</solution>
          <category>Update</category>
          <referencelist>
             <reference>
                <type>url</type>
-               <url>https://jenkins.io/download/</url>
+               <url>https://www.example.com/download/</url>
             </reference>
          </referencelist>
          <cve>
-            <id>CVE-2019-10384</id>
+            <id>CVE-2008-10384</id>
          </cve>
          <bug/>
          <verify/>
@@ -150,7 +150,7 @@ Paths:
          <virtualhost>127.0.0.1</virtualhost>
          <targetopco>PT</targetopco>
          <id>1381851</id>
-         <name>Cloudbees Jenkins: Information Disclosure Vulnerability</name>
+         <name>Fake Product: Information Disclosure Vulnerability</name>
          <portinfo>
             <portnumber>443</portnumber>
             <protocol>TCP</protocol>
@@ -162,26 +162,26 @@ Paths:
          <cvss_v3_score>4.3</cvss_v3_score>
          <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N</cvss_v3_vector>
          <risk>2</risk>
-         <family>cloudbees</family>
-         <product>Cloudbees Jenkins</product>
-         <description>Jenkins printed the value of the &quot;Cookie&quot; HTTP request header on the /whoAmI/ URL, allowing attackers exploiting another XSS vulnerability to obtain the HTTP session cookie despite it being marked HttpOnly.</description>
-         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than 2.197</information>
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>Fake Product printed the value of the &quot;Cookie&quot; HTTP request header on the /whoAmI/ URL, allowing attackers exploiting another XSS vulnerability to obtain the HTTP session cookie despite it being marked HttpOnly.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.197</information>
          <falsepositive>0</falsepositive>
-         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
-         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
          <category>Update</category>
          <referencelist>
             <reference>
                <type>url</type>
-               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
             </reference>
             <reference>
                <type>solution</type>
-               <url>https://jenkins.io/security/advisory/2019-09-25/#SECURITY-1505</url>
+               <url>https://www.example.com/security/advisory/2019-09-25/</url>
             </reference>
          </referencelist>
          <cve>
-            <id>CVE-2019-10405</id>
+            <id>CVE-2008-10405</id>
          </cve>
          <bug/>
          <verify/>
@@ -198,7 +198,7 @@ Paths:
          <virtualhost>127.0.0.1</virtualhost>
          <targetopco>PT</targetopco>
          <id>1381851</id>
-         <name>Cloudbees Jenkins: Information Disclosure Vulnerability</name>
+         <name>Fake Product: Information Disclosure Vulnerability</name>
          <portinfo>
             <portnumber>443</portnumber>
             <protocol>TCP</protocol>
@@ -210,28 +210,28 @@ Paths:
          <cvss_v3_score>4.3</cvss_v3_score>
          <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N</cvss_v3_vector>
          <risk>2</risk>
-         <family>cloudbees</family>
-         <product>Cloudbees Jenkins</product>
-         <description>Jenkins printed the value of the &quot;Cookie&quot; HTTP request header on the /whoAmI/ URL, allowing attackers exploiting another XSS vulnerability to obtain the HTTP session cookie despite it being marked HttpOnly.</description>
-         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than 2.197
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>Fake Product printed the value of the &quot;Cookie&quot; HTTP request header on the /whoAmI/ URL, allowing attackers exploiting another XSS vulnerability to obtain the HTTP session cookie despite it being marked HttpOnly.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.197
 Paths:
 /</information>
          <falsepositive>0</falsepositive>
-         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
-         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
          <category>Update</category>
          <referencelist>
             <reference>
                <type>url</type>
-               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
             </reference>
             <reference>
                <type>solution</type>
-               <url>https://jenkins.io/security/advisory/2019-09-25/#SECURITY-1505</url>
+               <url>https://www.example.com/security/advisory/2019-09-25/</url>
             </reference>
          </referencelist>
          <cve>
-            <id>CVE-2019-10405</id>
+            <id>CVE-2008-10405</id>
          </cve>
          <bug/>
          <verify/>
@@ -248,7 +248,7 @@ Paths:
          <virtualhost>127.0.0.1</virtualhost>
          <targetopco>PT</targetopco>
          <id>1380638</id>
-         <name>Cloudbees Jenkins: CSRF Protection Bypass Vulnerability</name>
+         <name>Fake Product: CSRF Protection Bypass Vulnerability</name>
          <portinfo>
             <portnumber>443</portnumber>
             <protocol>TCP</protocol>
@@ -260,24 +260,24 @@ Paths:
          <cvss_v3_score>8.8</cvss_v3_score>
          <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H</cvss_v3_vector>
          <risk>2</risk>
-         <family>cloudbees</family>
-         <product>Cloudbees Jenkins</product>
-         <description>Jenkins, LTS allowed users to obtain CSRF tokens without an associated web session ID, resulting in CSRF tokens that did not expire and could be used to bypass CSRF protection for the anonymous user.</description>
-         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than or equal to 2.191
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>Fake Product, LTS allowed users to obtain CSRF tokens without an associated web session ID, resulting in CSRF tokens that did not expire and could be used to bypass CSRF protection for the anonymous user.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than or equal to 1.1.191
 Paths:
 /</information>
          <falsepositive>0</falsepositive>
-         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
-         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
          <category>Update</category>
          <referencelist>
             <reference>
                <type>url</type>
-               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
             </reference>
          </referencelist>
          <cve>
-            <id>CVE-2019-10384</id>
+            <id>CVE-2008-10384</id>
          </cve>
          <bug/>
          <verify/>
@@ -294,7 +294,7 @@ Paths:
          <virtualhost>127.0.0.1</virtualhost>
          <targetopco>PT</targetopco>
          <id>1377085</id>
-         <name>Cloudbees Jenkins: Permission Bypass Vulnerability</name>
+         <name>Fake Product: Permission Bypass Vulnerability</name>
          <portinfo>
             <portnumber>443</portnumber>
             <protocol>TCP</protocol>
@@ -306,28 +306,28 @@ Paths:
          <cvss_v3_score>4.3</cvss_v3_score>
          <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N</cvss_v3_vector>
          <risk>2</risk>
-         <family>cloudbees</family>
-         <product>Cloudbees Jenkins</product>
-         <description>A vulnerability in the Stapler web framework used in Jenkins, LTS allowed attackers to access view fragments directly, bypassing permission checks and possibly obtain sensitive information.</description>
-         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than 2.186
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>A vulnerability in the Stapler web framework used in Fake Product, LTS allowed attackers to access view fragments directly, bypassing permission checks and possibly obtain sensitive information.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.186
 Paths:
 /</information>
          <falsepositive>0</falsepositive>
-         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
-         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
          <category>Update</category>
          <referencelist>
             <reference>
                <type>url</type>
-               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
             </reference>
             <reference>
                <type>advisory</type>
-               <url>https://jenkins.io/security/advisory/2019-07-17/#SECURITY-534</url>
+               <url>https://www.example.com/security/advisory/2019-07-17/</url>
             </reference>
          </referencelist>
          <cve>
-            <id>CVE-2019-10354</id>
+            <id>CVE-2008-10354</id>
          </cve>
          <bug>
             <id>109373</id>
@@ -346,7 +346,7 @@ Paths:
          <virtualhost>127.0.0.1</virtualhost>
          <targetopco>PT</targetopco>
          <id>1377087</id>
-         <name>Cloudbees Jenkins: Path Traversal Vulnerability</name>
+         <name>Fake Product: Path Traversal Vulnerability</name>
          <portinfo>
             <portnumber>443</portnumber>
             <protocol>TCP</protocol>
@@ -358,28 +358,28 @@ Paths:
          <cvss_v3_score>6.5</cvss_v3_score>
          <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:N</cvss_v3_vector>
          <risk>2</risk>
-         <family>cloudbees</family>
-         <product>Cloudbees Jenkins</product>
-         <description>A path traversal vulnerability in Jenkins in core/src/main/java/hudson/model/FileParameterValue.java allowed attackers with Job/Configure permission to define a file parameter with a file name outside the intended directory, resulting in an arbitrary file write on the Jenkins master when scheduling a build.</description>
-         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than 2.186
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>A path traversal vulnerability in Fake Product in core/src/main/java/hudson/model/FileParameterValue.java allowed attackers with Job/Configure permission to define a file parameter with a file name outside the intended directory, resulting in an arbitrary file write on the Fake Product master when scheduling a build.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.186
 Paths:
 /</information>
          <falsepositive>0</falsepositive>
-         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
-         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
          <category>Update</category>
          <referencelist>
             <reference>
                <type>url</type>
-               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
             </reference>
             <reference>
                <type>advisory</type>
-               <url>https://jenkins.io/security/advisory/2019-04-10/#SECURITY-1327</url>
+               <url>https://www.example.com/security/advisory/2019-04-10/</url>
             </reference>
          </referencelist>
          <cve>
-            <id>CVE-2019-10352</id>
+            <id>CVE-2008-10352</id>
          </cve>
          <bug>
             <id>109299</id>
@@ -398,7 +398,7 @@ Paths:
          <virtualhost>127.0.0.1</virtualhost>
          <targetopco>PT</targetopco>
          <id>1380638</id>
-         <name>Cloudbees Jenkins: CSRF Protection Bypass Vulnerability</name>
+         <name>Fake Product: CSRF Protection Bypass Vulnerability</name>
          <portinfo>
             <portnumber>443</portnumber>
             <protocol>TCP</protocol>
@@ -410,22 +410,22 @@ Paths:
          <cvss_v3_score>8.8</cvss_v3_score>
          <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H</cvss_v3_vector>
          <risk>2</risk>
-         <family>cloudbees</family>
-         <product>Cloudbees Jenkins</product>
-         <description>Jenkins, LTS allowed users to obtain CSRF tokens without an associated web session ID, resulting in CSRF tokens that did not expire and could be used to bypass CSRF protection for the anonymous user.</description>
-         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than or equal to 2.191</information>
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>Fake Product, LTS allowed users to obtain CSRF tokens without an associated web session ID, resulting in CSRF tokens that did not expire and could be used to bypass CSRF protection for the anonymous user.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than or equal to 1.1.191</information>
          <falsepositive>0</falsepositive>
-         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
-         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
          <category>Update</category>
          <referencelist>
             <reference>
                <type>url</type>
-               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
             </reference>
          </referencelist>
          <cve>
-            <id>CVE-2019-10384</id>
+            <id>CVE-2008-10384</id>
          </cve>
          <bug/>
          <verify/>
@@ -442,7 +442,7 @@ Paths:
          <virtualhost>127.0.0.1</virtualhost>
          <targetopco>PT</targetopco>
          <id>1377087</id>
-         <name>Cloudbees Jenkins: Path Traversal Vulnerability</name>
+         <name>Fake Product: Path Traversal Vulnerability</name>
          <portinfo>
             <portnumber>443</portnumber>
             <protocol>TCP</protocol>
@@ -454,26 +454,26 @@ Paths:
          <cvss_v3_score>6.5</cvss_v3_score>
          <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:N</cvss_v3_vector>
          <risk>2</risk>
-         <family>cloudbees</family>
-         <product>Cloudbees Jenkins</product>
-         <description>A path traversal vulnerability in Jenkins in core/src/main/java/hudson/model/FileParameterValue.java allowed attackers with Job/Configure permission to define a file parameter with a file name outside the intended directory, resulting in an arbitrary file write on the Jenkins master when scheduling a build.</description>
-         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than 2.186</information>
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>A path traversal vulnerability in Fake Product in core/src/main/java/hudson/model/FileParameterValue.java allowed attackers with Job/Configure permission to define a file parameter with a file name outside the intended directory, resulting in an arbitrary file write on the Fake Product master when scheduling a build.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.186</information>
          <falsepositive>0</falsepositive>
-         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
-         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
          <category>Update</category>
          <referencelist>
             <reference>
                <type>url</type>
-               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
             </reference>
             <reference>
                <type>advisory</type>
-               <url>https://jenkins.io/security/advisory/2019-04-10/#SECURITY-1327</url>
+               <url>https://www.example.com/security/advisory/2019-04-10/</url>
             </reference>
          </referencelist>
          <cve>
-            <id>CVE-2019-10352</id>
+            <id>CVE-2008-10352</id>
          </cve>
          <bug>
             <id>109299</id>
@@ -492,7 +492,7 @@ Paths:
          <virtualhost>127.0.0.1</virtualhost>
          <targetopco>PT</targetopco>
          <id>1377085</id>
-         <name>Cloudbees Jenkins: Permission Bypass Vulnerability</name>
+         <name>Fake Product: Permission Bypass Vulnerability</name>
          <portinfo>
             <portnumber>443</portnumber>
             <protocol>TCP</protocol>
@@ -504,26 +504,26 @@ Paths:
          <cvss_v3_score>4.3</cvss_v3_score>
          <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N</cvss_v3_vector>
          <risk>2</risk>
-         <family>cloudbees</family>
-         <product>Cloudbees Jenkins</product>
-         <description>A vulnerability in the Stapler web framework used in Jenkins, LTS allowed attackers to access view fragments directly, bypassing permission checks and possibly obtain sensitive information.</description>
-         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than 2.186</information>
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>A vulnerability in the Stapler web framework used in Fake Product, LTS allowed attackers to access view fragments directly, bypassing permission checks and possibly obtain sensitive information.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.186</information>
          <falsepositive>0</falsepositive>
-         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
-         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
          <category>Update</category>
          <referencelist>
             <reference>
                <type>url</type>
-               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
             </reference>
             <reference>
                <type>advisory</type>
-               <url>https://jenkins.io/security/advisory/2019-07-17/#SECURITY-534</url>
+               <url>https://www.example.com/security/advisory/2019-07-17/</url>
             </reference>
          </referencelist>
          <cve>
-            <id>CVE-2019-10354</id>
+            <id>CVE-2008-10354</id>
          </cve>
          <bug>
             <id>109373</id>
@@ -542,7 +542,7 @@ Paths:
          <virtualhost>127.0.0.1</virtualhost>
          <targetopco>PT</targetopco>
          <id>1377090</id>
-         <name>Cloudbees Jenkins: Cross-Site Request Forgery Vulnerability</name>
+         <name>Fake Product: Cross-Site Request Forgery Vulnerability</name>
          <portinfo>
             <portnumber>443</portnumber>
             <protocol>TCP</protocol>
@@ -554,26 +554,26 @@ Paths:
          <cvss_v3_score>7.5</cvss_v3_score>
          <cvss_v3_vector>CVSS:3.0/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:H</cvss_v3_vector>
          <risk>2</risk>
-         <family>cloudbees</family>
-         <product>Cloudbees Jenkins</product>
-         <description>By default, CSRF tokens in Jenkins only checked user authentication and IP address. This allowed attackers able to obtain a CSRF token for another user to implement CSRF attacks as long as the victim’s IP address remained unchanged.</description>
-         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than 2.186</information>
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>By default, CSRF tokens in Fake Product only checked user authentication and IP address. This allowed attackers able to obtain a CSRF token for another user to implement CSRF attacks as long as the victim’s IP address remained unchanged.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.186</information>
          <falsepositive>0</falsepositive>
-         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
-         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
          <category>Update</category>
          <referencelist>
             <reference>
                <type>url</type>
-               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
             </reference>
             <reference>
                <type>advisory</type>
-               <url>https://jenkins.io/security/advisory/2019-04-10/#SECURITY-1327</url>
+               <url>https://www.example.com/security/advisory/2019-04-10/</url>
             </reference>
          </referencelist>
          <cve>
-            <id>CVE-2019-10353</id>
+            <id>CVE-2008-10353</id>
          </cve>
          <bug>
             <id>109373</id>
@@ -592,7 +592,7 @@ Paths:
          <virtualhost>127.0.0.1</virtualhost>
          <targetopco>PT</targetopco>
          <id>1380635</id>
-         <name>Cloudbees Jenkins LTS: Stored Cross-Site Scripting Vulnerability</name>
+         <name>Fake Product LTS: Stored Cross-Site Scripting Vulnerability</name>
          <portinfo>
             <portnumber>443</portnumber>
             <protocol>TCP</protocol>
@@ -604,22 +604,22 @@ Paths:
          <cvss_v3_score>4.8</cvss_v3_score>
          <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
          <risk>1</risk>
-         <family>cloudbees</family>
-         <product>Cloudbees Jenkins LTS</product>
-         <description>A stored cross-site scripting vulnerability in Jenkins, LTS allowed attackers with Overall/Administer permission to configure the update site URL to inject arbitrary HTML and JavaScript in update center web pages.</description>
-         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins LTS, 2.176.4, is less than or equal to 2.191</information>
+         <family>example</family>
+         <product>Fake Product LTS</product>
+         <description>A stored cross-site scripting vulnerability in Fake Product, LTS allowed attackers with Overall/Administer permission to configure the update site URL to inject arbitrary HTML and JavaScript in update center web pages.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product LTS, 1.1.176.4, is less than or equal to 1.1.191</information>
          <falsepositive>0</falsepositive>
-         <solutiontitle>Upgrade to version 2.176.2 or later of Cloudbees Jenkins LTS</solutiontitle>
-         <solution>Upgrade to version 2.176.2 or later of Cloudbees Jenkins LTS.</solution>
+         <solutiontitle>Upgrade to version 1.1.176.2 or later of Fake Product LTS</solutiontitle>
+         <solution>Upgrade to version 1.1.176.2 or later of Fake Product LTS.</solution>
          <category>Update</category>
          <referencelist>
             <reference>
                <type>url</type>
-               <url>https://jenkins.io/download/</url>
+               <url>https://www.example.com/download/</url>
             </reference>
          </referencelist>
          <cve>
-            <id>CVE-2019-10383</id>
+            <id>CVE-2008-10383</id>
          </cve>
          <bug/>
          <verify/>
@@ -636,7 +636,7 @@ Paths:
          <virtualhost>127.0.0.1</virtualhost>
          <targetopco>PT</targetopco>
          <id>1381853</id>
-         <name>Cloudbees Jenkins: Cross-Site Scripting Vulnerability</name>
+         <name>Fake Product: Cross-Site Scripting Vulnerability</name>
          <portinfo>
             <portnumber>443</portnumber>
             <protocol>TCP</protocol>
@@ -648,26 +648,26 @@ Paths:
          <cvss_v3_score>4.8</cvss_v3_score>
          <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
          <risk>1</risk>
-         <family>cloudbees</family>
-         <product>Cloudbees Jenkins</product>
-         <description>Jenkins did not restrict or filter values set as Jenkins URL in the global configuration, resulting in a stored XSS vulnerability exploitable by attackers with Overall/Administer permission.</description>
-         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than 2.197</information>
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>Fake Product did not restrict or filter values set as Fake Product URL in the global configuration, resulting in a stored XSS vulnerability exploitable by attackers with Overall/Administer permission.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.197</information>
          <falsepositive>0</falsepositive>
-         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
-         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
          <category>Update</category>
          <referencelist>
             <reference>
                <type>url</type>
-               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
             </reference>
             <reference>
                <type>solution</type>
-               <url>https://jenkins.io/security/advisory/2019-09-25/#SECURITY-1471</url>
+               <url>https://www.example.com/security/advisory/2019-09-25/</url>
             </reference>
          </referencelist>
          <cve>
-            <id>CVE-2019-10406</id>
+            <id>CVE-2008-10406</id>
          </cve>
          <bug/>
          <verify/>
@@ -684,7 +684,7 @@ Paths:
          <virtualhost>127.0.0.1</virtualhost>
          <targetopco>PT</targetopco>
          <id>1381849</id>
-         <name>Cloudbees Jenkins: Cross-Site Scripting Vulnerability</name>
+         <name>Fake Product: Cross-Site Scripting Vulnerability</name>
          <portinfo>
             <portnumber>443</portnumber>
             <protocol>TCP</protocol>
@@ -696,26 +696,26 @@ Paths:
          <cvss_v3_score>5.4</cvss_v3_score>
          <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
          <risk>1</risk>
-         <family>cloudbees</family>
-         <product>Cloudbees Jenkins</product>
-         <description>Jenkins did not escape the reason why a queue items is blcoked in tooltips, resulting in a stored XSS vulnerability exploitable by users able to control parts of the reason a queue item is blocked, such as label expressions not matching any idle executors.</description>
-         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than 2.197</information>
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>Fake Product did not escape the reason why a queue items is blcoked in tooltips, resulting in a stored XSS vulnerability exploitable by users able to control parts of the reason a queue item is blocked, such as label expressions not matching any idle executors.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.197</information>
          <falsepositive>0</falsepositive>
-         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
-         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
          <category>Update</category>
          <referencelist>
             <reference>
                <type>url</type>
-               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
             </reference>
             <reference>
                <type>solution</type>
-               <url>https://jenkins.io/security/advisory/2019-09-25/#SECURITY-1537%20(2)</url>
+               <url>https://www.example.com/security/advisory/2019-09-25/%20(2)</url>
             </reference>
          </referencelist>
          <cve>
-            <id>CVE-2019-10404</id>
+            <id>CVE-2008-10404</id>
          </cve>
          <bug/>
          <verify/>
@@ -732,7 +732,7 @@ Paths:
          <virtualhost>127.0.0.1</virtualhost>
          <targetopco>PT</targetopco>
          <id>1381843</id>
-         <name>Cloudbees Jenkins: Stored Cross-Site Scripting Vulnerability</name>
+         <name>Fake Product: Stored Cross-Site Scripting Vulnerability</name>
          <portinfo>
             <portnumber>443</portnumber>
             <protocol>TCP</protocol>
@@ -744,26 +744,26 @@ Paths:
          <cvss_v3_score>5.4</cvss_v3_score>
          <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
          <risk>1</risk>
-         <family>cloudbees</family>
-         <product>Cloudbees Jenkins</product>
-         <description>In Jenkins, LTS, the f:expandableTextBox form control interpreted its content as HTML when expanded, resulting in a stored XSS vulnerability exploitable by users with permission to define its contents (typically Job/Configure).</description>
-         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than 2.197</information>
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>In Fake Product, LTS, the f:expandableTextBox form control interpreted its content as HTML when expanded, resulting in a stored XSS vulnerability exploitable by users with permission to define its contents (typically Job/Configure).</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.197</information>
          <falsepositive>0</falsepositive>
-         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
-         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
          <category>Update</category>
          <referencelist>
             <reference>
                <type>url</type>
-               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
             </reference>
             <reference>
                <type>solution</type>
-               <url>https://jenkins.io/security/advisory/2019-09-25/#SECURITY-1498</url>
+               <url>https://www.example.com/security/advisory/2019-09-25/</url>
             </reference>
          </referencelist>
          <cve>
-            <id>CVE-2019-10401</id>
+            <id>CVE-2008-10401</id>
          </cve>
          <bug/>
          <verify/>
@@ -780,7 +780,7 @@ Paths:
          <virtualhost>127.0.0.1</virtualhost>
          <targetopco>PT</targetopco>
          <id>1380636</id>
-         <name>Cloudbees Jenkins: Stored Cross-Site Scripting Vulnerability</name>
+         <name>Fake Product: Stored Cross-Site Scripting Vulnerability</name>
          <portinfo>
             <portnumber>443</portnumber>
             <protocol>TCP</protocol>
@@ -792,24 +792,24 @@ Paths:
          <cvss_v3_score>4.8</cvss_v3_score>
          <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
          <risk>1</risk>
-         <family>cloudbees</family>
-         <product>Cloudbees Jenkins</product>
-         <description>A stored cross-site scripting vulnerability in Jenkins, LTS allowed attackers with Overall/Administer permission to configure the update site URL to inject arbitrary HTML and JavaScript in update center web pages.</description>
-         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than or equal to 2.191
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>A stored cross-site scripting vulnerability in Fake Product, LTS allowed attackers with Overall/Administer permission to configure the update site URL to inject arbitrary HTML and JavaScript in update center web pages.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than or equal to 1.1.191
 Paths:
 /</information>
          <falsepositive>0</falsepositive>
-         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
-         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
          <category>Update</category>
          <referencelist>
             <reference>
                <type>url</type>
-               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
             </reference>
          </referencelist>
          <cve>
-            <id>CVE-2019-10383</id>
+            <id>CVE-2008-10383</id>
          </cve>
          <bug/>
          <verify/>
@@ -826,7 +826,7 @@ Paths:
          <virtualhost>127.0.0.1</virtualhost>
          <targetopco>PT</targetopco>
          <id>1381845</id>
-         <name>Cloudbees Jenkins: Stored Cross-Site Scripting Vulnerability</name>
+         <name>Fake Product: Stored Cross-Site Scripting Vulnerability</name>
          <portinfo>
             <portnumber>443</portnumber>
             <protocol>TCP</protocol>
@@ -838,26 +838,26 @@ Paths:
          <cvss_v3_score>5.4</cvss_v3_score>
          <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
          <risk>1</risk>
-         <family>cloudbees</family>
-         <product>Cloudbees Jenkins</product>
-         <description>In Jenkins, LTS, the f:combobox form control interpreted its item labels as HTML, resulting in a stored XSS vulnerability exploitable by users with permission to define its contents.</description>
-         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than 2.197</information>
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>In Fake Product, LTS, the f:combobox form control interpreted its item labels as HTML, resulting in a stored XSS vulnerability exploitable by users with permission to define its contents.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.197</information>
          <falsepositive>0</falsepositive>
-         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
-         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
          <category>Update</category>
          <referencelist>
             <reference>
                <type>url</type>
-               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
             </reference>
             <reference>
                <type>solution</type>
-               <url>https://jenkins.io/security/advisory/2019-09-25/#SECURITY-1525</url>
+               <url>https://www.example.com/security/advisory/2019-09-25/</url>
             </reference>
          </referencelist>
          <cve>
-            <id>CVE-2019-10402</id>
+            <id>CVE-2008-10402</id>
          </cve>
          <bug/>
          <verify/>
@@ -874,7 +874,7 @@ Paths:
          <virtualhost>127.0.0.1</virtualhost>
          <targetopco>PT</targetopco>
          <id>1381853</id>
-         <name>Cloudbees Jenkins: Cross-Site Scripting Vulnerability</name>
+         <name>Fake Product: Cross-Site Scripting Vulnerability</name>
          <portinfo>
             <portnumber>443</portnumber>
             <protocol>TCP</protocol>
@@ -886,28 +886,28 @@ Paths:
          <cvss_v3_score>4.8</cvss_v3_score>
          <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
          <risk>1</risk>
-         <family>cloudbees</family>
-         <product>Cloudbees Jenkins</product>
-         <description>Jenkins did not restrict or filter values set as Jenkins URL in the global configuration, resulting in a stored XSS vulnerability exploitable by attackers with Overall/Administer permission.</description>
-         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than 2.197
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>Fake Product did not restrict or filter values set as Fake Product URL in the global configuration, resulting in a stored XSS vulnerability exploitable by attackers with Overall/Administer permission.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.197
 Paths:
 /</information>
          <falsepositive>0</falsepositive>
-         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
-         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
          <category>Update</category>
          <referencelist>
             <reference>
                <type>url</type>
-               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
             </reference>
             <reference>
                <type>solution</type>
-               <url>https://jenkins.io/security/advisory/2019-09-25/#SECURITY-1471</url>
+               <url>https://www.example.com/security/advisory/2019-09-25/</url>
             </reference>
          </referencelist>
          <cve>
-            <id>CVE-2019-10406</id>
+            <id>CVE-2008-10406</id>
          </cve>
          <bug/>
          <verify/>
@@ -924,7 +924,7 @@ Paths:
          <virtualhost>127.0.0.1</virtualhost>
          <targetopco>PT</targetopco>
          <id>1380636</id>
-         <name>Cloudbees Jenkins: Stored Cross-Site Scripting Vulnerability</name>
+         <name>Fake Product: Stored Cross-Site Scripting Vulnerability</name>
          <portinfo>
             <portnumber>443</portnumber>
             <protocol>TCP</protocol>
@@ -936,22 +936,22 @@ Paths:
          <cvss_v3_score>4.8</cvss_v3_score>
          <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
          <risk>1</risk>
-         <family>cloudbees</family>
-         <product>Cloudbees Jenkins</product>
-         <description>A stored cross-site scripting vulnerability in Jenkins, LTS allowed attackers with Overall/Administer permission to configure the update site URL to inject arbitrary HTML and JavaScript in update center web pages.</description>
-         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than or equal to 2.191</information>
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>A stored cross-site scripting vulnerability in Fake Product, LTS allowed attackers with Overall/Administer permission to configure the update site URL to inject arbitrary HTML and JavaScript in update center web pages.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than or equal to 1.1.191</information>
          <falsepositive>0</falsepositive>
-         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
-         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
          <category>Update</category>
          <referencelist>
             <reference>
                <type>url</type>
-               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
             </reference>
          </referencelist>
          <cve>
-            <id>CVE-2019-10383</id>
+            <id>CVE-2008-10383</id>
          </cve>
          <bug/>
          <verify/>
@@ -968,7 +968,7 @@ Paths:
          <virtualhost>127.0.0.1</virtualhost>
          <targetopco>PT</targetopco>
          <id>1381847</id>
-         <name>Cloudbees Jenkins: Cross-Site Scripting Vulnerability</name>
+         <name>Fake Product: Cross-Site Scripting Vulnerability</name>
          <portinfo>
             <portnumber>443</portnumber>
             <protocol>TCP</protocol>
@@ -980,26 +980,26 @@ Paths:
          <cvss_v3_score>5.4</cvss_v3_score>
          <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
          <risk>1</risk>
-         <family>cloudbees</family>
-         <product>Cloudbees Jenkins</product>
-         <description>Jenkins did not escape the SCM tag name on the tooltip for SCM tag actions, resulting in a stored XSS vulnerability exploitable by users able to control SCM tag names for these actions.</description>
-         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than 2.197</information>
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>Fake Product did not escape the SCM tag name on the tooltip for SCM tag actions, resulting in a stored XSS vulnerability exploitable by users able to control SCM tag names for these actions.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.197</information>
          <falsepositive>0</falsepositive>
-         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
-         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
          <category>Update</category>
          <referencelist>
             <reference>
                <type>url</type>
-               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
             </reference>
             <reference>
                <type>solution</type>
-               <url>https://jenkins.io/security/advisory/2019-09-25/#SECURITY-1537%20(1)</url>
+               <url>https://www.example.com/security/advisory/2019-09-25/%20(1)</url>
             </reference>
          </referencelist>
          <cve>
-            <id>CVE-2019-10403</id>
+            <id>CVE-2008-10403</id>
          </cve>
          <bug/>
          <verify/>
@@ -1016,7 +1016,7 @@ Paths:
          <virtualhost>127.0.0.1</virtualhost>
          <targetopco>PT</targetopco>
          <id>1381845</id>
-         <name>Cloudbees Jenkins: Stored Cross-Site Scripting Vulnerability</name>
+         <name>Fake Product: Stored Cross-Site Scripting Vulnerability</name>
          <portinfo>
             <portnumber>443</portnumber>
             <protocol>TCP</protocol>
@@ -1028,28 +1028,28 @@ Paths:
          <cvss_v3_score>5.4</cvss_v3_score>
          <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
          <risk>1</risk>
-         <family>cloudbees</family>
-         <product>Cloudbees Jenkins</product>
-         <description>In Jenkins, LTS, the f:combobox form control interpreted its item labels as HTML, resulting in a stored XSS vulnerability exploitable by users with permission to define its contents.</description>
-         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than 2.197
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>In Fake Product, LTS, the f:combobox form control interpreted its item labels as HTML, resulting in a stored XSS vulnerability exploitable by users with permission to define its contents.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.197
 Paths:
 /</information>
          <falsepositive>0</falsepositive>
-         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
-         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
          <category>Update</category>
          <referencelist>
             <reference>
                <type>url</type>
-               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
             </reference>
             <reference>
                <type>solution</type>
-               <url>https://jenkins.io/security/advisory/2019-09-25/#SECURITY-1525</url>
+               <url>https://www.example.com/security/advisory/2019-09-25/</url>
             </reference>
          </referencelist>
          <cve>
-            <id>CVE-2019-10402</id>
+            <id>CVE-2008-10402</id>
          </cve>
          <bug/>
          <verify/>
@@ -1066,7 +1066,7 @@ Paths:
          <virtualhost>127.0.0.1</virtualhost>
          <targetopco>PT</targetopco>
          <id>1381843</id>
-         <name>Cloudbees Jenkins: Stored Cross-Site Scripting Vulnerability</name>
+         <name>Fake Product: Stored Cross-Site Scripting Vulnerability</name>
          <portinfo>
             <portnumber>443</portnumber>
             <protocol>TCP</protocol>
@@ -1078,28 +1078,28 @@ Paths:
          <cvss_v3_score>5.4</cvss_v3_score>
          <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
          <risk>1</risk>
-         <family>cloudbees</family>
-         <product>Cloudbees Jenkins</product>
-         <description>In Jenkins, LTS, the f:expandableTextBox form control interpreted its content as HTML when expanded, resulting in a stored XSS vulnerability exploitable by users with permission to define its contents (typically Job/Configure).</description>
-         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than 2.197
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>In Fake Product, LTS, the f:expandableTextBox form control interpreted its content as HTML when expanded, resulting in a stored XSS vulnerability exploitable by users with permission to define its contents (typically Job/Configure).</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.197
 Paths:
 /</information>
          <falsepositive>0</falsepositive>
-         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
-         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
          <category>Update</category>
          <referencelist>
             <reference>
                <type>url</type>
-               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
             </reference>
             <reference>
                <type>solution</type>
-               <url>https://jenkins.io/security/advisory/2019-09-25/#SECURITY-1498</url>
+               <url>https://www.example.com/security/advisory/2019-09-25/</url>
             </reference>
          </referencelist>
          <cve>
-            <id>CVE-2019-10401</id>
+            <id>CVE-2008-10401</id>
          </cve>
          <bug/>
          <verify/>
@@ -1116,7 +1116,7 @@ Paths:
          <virtualhost>127.0.0.1</virtualhost>
          <targetopco>PT</targetopco>
          <id>1381847</id>
-         <name>Cloudbees Jenkins: Cross-Site Scripting Vulnerability</name>
+         <name>Fake Product: Cross-Site Scripting Vulnerability</name>
          <portinfo>
             <portnumber>443</portnumber>
             <protocol>TCP</protocol>
@@ -1128,28 +1128,28 @@ Paths:
          <cvss_v3_score>5.4</cvss_v3_score>
          <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
          <risk>1</risk>
-         <family>cloudbees</family>
-         <product>Cloudbees Jenkins</product>
-         <description>Jenkins did not escape the SCM tag name on the tooltip for SCM tag actions, resulting in a stored XSS vulnerability exploitable by users able to control SCM tag names for these actions.</description>
-         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than 2.197
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>Fake Product did not escape the SCM tag name on the tooltip for SCM tag actions, resulting in a stored XSS vulnerability exploitable by users able to control SCM tag names for these actions.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.197
 Paths:
 /</information>
          <falsepositive>0</falsepositive>
-         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
-         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
          <category>Update</category>
          <referencelist>
             <reference>
                <type>url</type>
-               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
             </reference>
             <reference>
                <type>solution</type>
-               <url>https://jenkins.io/security/advisory/2019-09-25/#SECURITY-1537%20(1)</url>
+               <url>https://www.example.com/security/advisory/2019-09-25/%20(1)</url>
             </reference>
          </referencelist>
          <cve>
-            <id>CVE-2019-10403</id>
+            <id>CVE-2008-10403</id>
          </cve>
          <bug/>
          <verify/>
@@ -1166,7 +1166,7 @@ Paths:
          <virtualhost>127.0.0.1</virtualhost>
          <targetopco>PT</targetopco>
          <id>1381849</id>
-         <name>Cloudbees Jenkins: Cross-Site Scripting Vulnerability</name>
+         <name>Fake Product: Cross-Site Scripting Vulnerability</name>
          <portinfo>
             <portnumber>443</portnumber>
             <protocol>TCP</protocol>
@@ -1178,28 +1178,28 @@ Paths:
          <cvss_v3_score>5.4</cvss_v3_score>
          <cvss_v3_vector>CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:C/C:L/I:L/A:N</cvss_v3_vector>
          <risk>1</risk>
-         <family>cloudbees</family>
-         <product>Cloudbees Jenkins</product>
-         <description>Jenkins did not escape the reason why a queue items is blcoked in tooltips, resulting in a stored XSS vulnerability exploitable by users able to control parts of the reason a queue item is blocked, such as label expressions not matching any idle executors.</description>
-         <information>This vulnerability was identified because (1) the detected version of Cloudbees Jenkins,  2.176.4.3, is less than 2.197
+         <family>example</family>
+         <product>Fake Product</product>
+         <description>Fake Product did not escape the reason why a queue items is blcoked in tooltips, resulting in a stored XSS vulnerability exploitable by users able to control parts of the reason a queue item is blocked, such as label expressions not matching any idle executors.</description>
+         <information>This vulnerability was identified because (1) the detected version of Fake Product,  1.1.176.4.3, is less than 1.1.197
 Paths:
 /</information>
          <falsepositive>0</falsepositive>
-         <solutiontitle>Upgrade to the latest version of Cloudbees Jenkins</solutiontitle>
-         <solution>Upgrade to the latest version of Cloudbees Jenkins.</solution>
+         <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+         <solution>Upgrade to the latest version of Fake Product.</solution>
          <category>Update</category>
          <referencelist>
             <reference>
                <type>url</type>
-               <url>https://www.cloudbees.com/products/cloudbees-jenkins-platform</url>
+               <url>https://www.example.com/products/example-fake-product-platform</url>
             </reference>
             <reference>
                <type>solution</type>
-               <url>https://jenkins.io/security/advisory/2019-09-25/#SECURITY-1537%20(2)</url>
+               <url>https://www.example.com/security/advisory/2019-09-25/%20(2)</url>
             </reference>
          </referencelist>
          <cve>
-            <id>CVE-2019-10404</id>
+            <id>CVE-2008-10404</id>
          </cve>
          <bug/>
          <verify/>
