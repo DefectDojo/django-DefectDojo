@@ -62,6 +62,7 @@ def get_item(dependency_name, dependency_version, advisory, test):
                       duplicate=False,
                       out_of_scope=False,
                       mitigated=None,
-                      impact="No impact provided")
+                      impact="No impact provided",
+                      dynamic_finding=False)
 
     return finding
