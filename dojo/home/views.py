@@ -1,10 +1,8 @@
 # #  dojo home pages
 import logging
-from calendar import monthrange
-from datetime import datetime, timedelta
-from math import ceil
-
+from datetime import timedelta
 from dateutil.relativedelta import relativedelta
+
 from django.contrib.auth.decorators import user_passes_test
 from django.urls import reverse
 from django.http import HttpResponseRedirect
@@ -16,7 +14,6 @@ from django.db.models import Count
 from dojo.utils import add_breadcrumb, get_punchcard_data
 
 from defectDojo_engagement_survey.models import Answered_Survey
-from dateutil.relativedelta import relativedelta
 
 logger = logging.getLogger(__name__)
 
@@ -66,15 +63,14 @@ def dashboard(request):
         findings = Finding.objects.filter(reporter=request.user,
                                           verified=True, duplicate=False)
 
-
     severity_count_all = get_severities_all(findings)
     severity_count_by_month = get_severities_by_month(findings)
-  
+
     punchcard, ticks, highest_day_count = get_punchcard_data(findings)
 
     unassigned_surveys = Answered_Survey.objects.all().filter(
         assignee_id__isnull=True, completed__gt=0)
-    
+
     add_breadcrumb(request=request, clear=True)
     return render(request,
                   'dojo/dashboard.html',
@@ -93,6 +89,7 @@ def dashboard(request):
                    'surveys': unassigned_surveys,
                    'highest_count': highest_day_count})
 
+
 def get_severities_all(findings):
     # order_by is needed due to ordering being present in Meta of Finding
     severities_all = findings.values('severity').annotate(count=Count('severity')).order_by()
@@ -107,7 +104,7 @@ def get_severities_all(findings):
     for s in severities_all:
         logger.error(s)
         sev_counts_all[s['severity']] = s['count']
-    
+
     return sev_counts_all
 
 
@@ -116,34 +113,33 @@ def get_severities_by_month(findings):
 
     # order_by is needed due to ordering being present in Meta of Finding
     # severities_all = findings.values('severity').annotate(count=Count('severity')).order_by()
-    severities_by_month=findings.filter(created__gte=timezone.localdate()+relativedelta(months=-6)) \
+    severities_by_month = findings.filter(created__gte=timezone.localdate() + relativedelta(months=-6)) \
                                 .values('created__year', 'created__month', 'severity').annotate(count=Count('severity')).order_by('created__year', 'created__month')
 
     results = {}
     for ms in severities_by_month:
-            year = str(ms['created__year'])
-            month = str(ms['created__month']).zfill(2)
-            key = year +'-' + month
+        year = str(ms['created__year'])
+        month = str(ms['created__month']).zfill(2)
+        key = year + '-' + month
 
-            if key not in results:
-                # graph expects a, b, c, d, e instead of Critical, High, ...
-                sourcedata = {'y': key, 'a': 0, 'b': 0,
-                        'c': 0, 'd': 0, 'e': 0}
-                results[key] = sourcedata
+        if key not in results:
+            # graph expects a, b, c, d, e instead of Critical, High, ...
+            sourcedata = {'y': key, 'a': 0, 'b': 0,
+                    'c': 0, 'd': 0, 'e': 0}
+            results[key] = sourcedata
 
-            month_stats = results[key]
+        month_stats = results[key]
 
-            if ms['severity'] == 'Critical':
-                month_stats['a'] = ms['count']
-            elif ms['severity'] == 'High':
-                month_stats['b'] = ms['count']
-            elif ms['severity'] == 'Medium':
-                month_stats['c'] = ms['count']
-            elif ms['severity'] == 'Low':
-                month_stats['d'] = ms['count']
-            elif ms['severity'] == 'Info':
-                month_stats['e'] = ms['count']
+        if ms['severity'] == 'Critical':
+            month_stats['a'] = ms['count']
+        elif ms['severity'] == 'High':
+            month_stats['b'] = ms['count']
+        elif ms['severity'] == 'Medium':
+            month_stats['c'] = ms['count']
+        elif ms['severity'] == 'Low':
+            month_stats['d'] = ms['count']
+        elif ms['severity'] == 'Info':
+            month_stats['e'] = ms['count']
 
-    by_month = [ v for k, v in sorted(results.items()) ]
+    by_month = [v for k, v in sorted(results.items())]
     return by_month
-
