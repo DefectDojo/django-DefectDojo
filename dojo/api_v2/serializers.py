@@ -188,6 +188,7 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
     def get_findings_list(self, obj):
         return obj.open_findings_list()
 
+
 class ProductTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product_Type
