@@ -8,6 +8,7 @@ root = environ.Path(__file__) - 3  # Three folders back
 env = environ.Env(
     # Set casting and default values
     DD_DEBUG=(bool, False),
+    DD_DJANGO_METRICS_ENABLED=(bool, False),
     DD_LOGIN_REDIRECT_URL=(str, '/'),
     DD_DJANGO_ADMIN_ENABLED=(bool, False),
     DD_SESSION_COOKIE_HTTPONLY=(bool, True),
@@ -521,6 +522,18 @@ EMAIL_CONFIG = env.email_url(
     'DD_EMAIL_URL', default='smtp://user@:password@localhost:25')
 
 vars().update(EMAIL_CONFIG)
+
+# address issue when running ./manage.py collectstatic
+# reference: https://github.com/korfuri/django-prometheus/issues/34
+PROMETHEUS_EXPORT_MIGRATIONS = False
+# django metrics for monitoring
+if env('DD_DJANGO_METRICS_ENABLED'):
+    DJANGO_METRICS_ENABLED = env('DD_DJANGO_METRICS_ENABLED')
+    INSTALLED_APPS = INSTALLED_APPS + ('django_prometheus',)
+    MIDDLEWARE = ['django_prometheus.middleware.PrometheusBeforeMiddleware', ] + \
+        MIDDLEWARE + \
+        ['django_prometheus.middleware.PrometheusAfterMiddleware', ]
+    # TODO Add metrics for db and celery broker
 
 # ------------------------------------------------------------------------------
 # CELERY
