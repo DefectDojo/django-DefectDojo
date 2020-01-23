@@ -261,7 +261,8 @@
                             </div>
                         {% endif %}
                     {% endwith %}
-
+                    <h6>CVSS</h6>
+                    <pre>{{ finding.cvss }}</pre>
                     <h6>Description</h6>
                     <pre>{{ finding.description }}</pre>
                     <h6>Mitigation</h6>
