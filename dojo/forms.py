@@ -830,7 +830,7 @@ class AddFindingForm(forms.ModelForm):
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
     cve = forms.CharField(max_length=28, required=False)
-    cvss = forms.CharField(max_length=100, required=False, widget=forms.TextInput(attrs={'class': 'cvsscalculator', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
+    cvss = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'cvsscalculator', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -869,7 +869,7 @@ class AdHocFindingForm(forms.ModelForm):
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
     cve = forms.CharField(max_length=28, required=False)
-    cvss = forms.CharField(max_length=100, required=False, widget=forms.TextInput(attrs={'class': 'cvsscalculator', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
+    cvss = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'cvsscalculator', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -908,7 +908,7 @@ class PromoteFindingForm(forms.ModelForm):
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
     cve = forms.CharField(max_length=28, required=False)
-    cvss = forms.CharField(max_length=100, required=False, widget=forms.TextInput(attrs={'class': 'cvsscalculator', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
+    cvss = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'cvsscalculator', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -934,7 +934,7 @@ class FindingForm(forms.ModelForm):
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
     cve = forms.CharField(max_length=28, required=False)
-    cvss = forms.CharField(max_length=100, required=False, widget=forms.TextInput(attrs={'class': 'cvsscalculator', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
+    cvss = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'cvsscalculator', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -1009,7 +1009,7 @@ class ApplyFindingTemplateForm(forms.Form):
 
     cwe = forms.IntegerField(label="CWE", required=False)
     cve = forms.CharField(label="CVE", max_length=28, required=False)
-    cvss = forms.CharField(label="CVSS",max_length=100, required=False, widget=forms.TextInput(attrs={'class': 'btn btn-secondary dropdown-toggle', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
+    cvss = forms.CharField(label="CVSS",max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'btn btn-secondary dropdown-toggle', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
 
     severity = forms.ChoiceField(required=False, choices=SEVERITY_CHOICES, error_messages={'required': 'Select valid choice: In Progress, On Hold, Completed', 'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
 
@@ -1055,7 +1055,7 @@ class FindingTemplateForm(forms.ModelForm):
                                      "Choose from the list or add new tags.  Press TAB key to add.")
     cwe = forms.IntegerField(label="CWE", required=False)
     cve = forms.CharField(label="CVE", max_length=28, required=False)
-    cvss = forms.CharField(max_length=100, required=False, widget=forms.TextInput(attrs={'class': 'btn btn-secondary dropdown-toggle', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
+    cvss = forms.CharField(max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'btn btn-secondary dropdown-toggle', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
     severity = forms.ChoiceField(
         required=False,
         choices=SEVERITY_CHOICES,
