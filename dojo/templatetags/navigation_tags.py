@@ -9,7 +9,11 @@ register = template.Library()
 
 @register.simple_tag(takes_context=True)
 def alert_count(context):
-    count = Alerts.objects.filter(user_id=context['request'].user).count()
+    count = context.get('dojo_alert_count', None)
+    if count is None:
+        count = Alerts.objects.filter(user_id=context['request'].user).count()
+        context['dojo_alert_count'] = count
+      
     return count if count > 0 else 0
 
 
