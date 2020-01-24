@@ -19,7 +19,7 @@ django-slack==5.14.3
 django-tagging==0.4.6
 django-taggit-serializer==0.1.7
 git+https://github.com/Maffooch/django-tastypie-swagger@master#egg=django-tastypie-swagger
-django-tastypie==0.14.3
+django-tastypie==0.14.2
 django-watson==1.5.3
 Django==2.2.9
 djangorestframework==3.11.0
