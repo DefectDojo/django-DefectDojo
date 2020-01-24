@@ -540,7 +540,7 @@ def get_punchcard_data(findings):
     # use try catch to make sure any teething bugs in the bunchcard don't break the dashboard
     try:
         # gather findings over past half year, make sure to start on a sunday
-        past_sunday = timezone.localdate() - relativedelta(weekday=SU(-1)) 
+        past_sunday = timezone.localdate() - relativedelta(weekday=SU(-1))
         first_sunday = past_sunday - relativedelta(weeks=26)
 
         # reminder: The first week of a year is the one that contains the year’s first Thursday
@@ -550,7 +550,7 @@ def get_punchcard_data(findings):
                                     .values('created__year', 'created__month', 'created__day', 'created__week', 'created__week_day') \
                                     .annotate(count=Count('id')) \
                                     .order_by('created__year', 'created__month', 'created__day')
-        
+
         # return empty stuff if no findings to be statted
         if severities_by_week.count() <= 0:
             return None, None, 0
@@ -616,7 +616,7 @@ def get_punchcard_data(findings):
 
 def get_week_data(week_start_date, tick, day_counts):
     data = []
-    for i in range(0, len(day_counts)): 
+    for i in range(0, len(day_counts)):
         data.append([tick, i, day_counts[i]])
     label = [tick, week_start_date.strftime("<span class='small'>%m/%d<br/>%Y</span>")]
     return data, label
