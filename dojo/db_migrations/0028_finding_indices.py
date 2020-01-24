@@ -30,6 +30,14 @@ class Migration(migrations.Migration):
             model_name='finding',
             index=models.Index(fields=['date'], name='dojo_findin_date_8e9143_idx'),
         ),
+        migrations.AddIndex(
+            model_name='finding',
+            index=models.Index(fields=['out_of_scope'], name='dojo_findin_out_of__26856e_idx'),
+        ),
+        migrations.AddIndex(
+            model_name='finding',
+            index=models.Index(fields=['numerical_severity'], name='dojo_findin_numeric_83d93b_idx'),
+        ),
         migrations.AlterField(
             model_name='finding',
             name='title',
