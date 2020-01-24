@@ -33,10 +33,12 @@ logger = logging.getLogger(__name__)
 
 def product(request):
     if request.user.is_staff:
-        initial_queryset = Product.objects.all().select_related('technical_contact').select_related('product_manager').select_related('prod_type').select_related('team_manager').prefetch_related('jira_project_key_product')
+        initial_queryset = Product.objects.all() \
+                            .select_related('technical_contact').select_related('product_manager').select_related('prod_type').select_related('team_manager')
         name_words = [product.name for product in
-                      Product.objects.all().select_related('technical_contact').select_related('product_manager').select_related('prod_type').select_related('team_manager')
-                      .prefetch_related('jira_project_key_product')]
+                      Product.objects.all() \
+                      .select_related('technical_contact').select_related('product_manager').select_related('prod_type').select_related('team_manager')
+                      ]
     else:
         initial_queryset = Product.objects.filter(
             authorized_users__in=[request.user])
