@@ -387,6 +387,9 @@
                         {% endif %}
                     {% endwith %}
 
+                    <h6>CVSS</h6>
+                    <pre>{{ finding.cvss|markdown_render }}</pre>
+
                     <h6>Description</h6>
                     <pre>{{ finding.description|markdown_render }}</pre>
 
