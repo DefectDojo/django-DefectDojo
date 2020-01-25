@@ -570,7 +570,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     # possible improvment: in the scanner put the library name into file_path, then dedup on cve + file_path + severity
     'Whitesource Scan': ['title', 'severity', 'description'],
     'ZAP Scan': ['cwe', 'endpoints', 'severity'],
-    'Qualys Scan': ['title', 'endpoints', 'severity']
+    'Qualys Scan': ['title', 'endpoints', 'severity'],
     'PHP Symfony Security Check': ['title', 'cve'],
     # for backwards compatibility because someone decided to rename this scanner:
     'Symfony Security Check': ['title', 'cve'],
