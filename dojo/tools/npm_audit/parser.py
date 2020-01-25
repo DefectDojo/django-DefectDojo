@@ -56,6 +56,7 @@ def get_item(item_node, test):
     finding = Finding(title=item_node['title'] + " - " + "(" + item_node['module_name'] + ", " + item_node['vulnerable_versions'] + ")",
                       test=test,
                       severity=severity,
+                      file_path=str(item_node['findings'][0]['paths'][0]),
                       description=item_node['overview'] + "\n Vulnerable Module: " +
                       item_node['module_name'] + "\n Vulnerable Versions: " +
                       str(item_node['vulnerable_versions']) + "\n Patched Version: " +
