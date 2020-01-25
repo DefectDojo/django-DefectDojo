@@ -472,6 +472,7 @@ INSTALLED_APPS = (
     'django_celery_results',
     'social_django',
     'drf_yasg',
+    'cachalot',    
 )
 
 # ------------------------------------------------------------------------------
@@ -698,3 +699,6 @@ SILENCED_SYSTEM_CHECKS = ['mysql.E001']
 
 # Issue on benchmark : "The number of GET/POST parameters exceeded settings.DATA_UPLOAD_MAX_NUMBER_FIELD S"
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
+
+# django-tagging uses raw queries underneath breaking ORM query caching
+CACHALOT_UNCACHABLE_TABLES = frozenset(('django_migrations', 'tagging_tag', 'tagging_taggeditem'))
