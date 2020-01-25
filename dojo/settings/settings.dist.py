@@ -571,6 +571,9 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Whitesource Scan': ['title', 'severity', 'description'],
     'ZAP Scan': ['cwe', 'endpoints', 'severity'],
     'Qualys Scan': ['title', 'endpoints', 'severity']
+    'PHP Symfony Security Check': ['title', 'cve'],
+    # for backwards compatibility because someone decided to rename this scanner:
+    'Symfony Security Check': ['title', 'cve'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
