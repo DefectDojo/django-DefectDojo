@@ -676,7 +676,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                          " as it is not present anymore in recent scans.")
                 Tag.objects.add_tag(old_finding, 'stale')
                 old_finding.save()
-                title = 'An old finding has been closed for "{}", engagement {}.' \
+                title = 'A stale finding has been closed for "{}",\nengagement {}.' \
                         .format(test.engagement.product.name, test.engagement.name)
                 url = reverse('view_finding', args=(old_finding.id, ))
                 description = 'See {}'.format(old_finding.title)
