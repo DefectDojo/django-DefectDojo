@@ -199,7 +199,6 @@ class DependencyTrackParser(object):
             static_finding=True,
             dynamic_finding=False)
 
-
     def __init__(self, file, test):
         # Start with an empty list of findings
         self.items = []
