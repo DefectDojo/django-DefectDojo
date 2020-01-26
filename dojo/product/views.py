@@ -13,7 +13,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
-from django.db.models import Sum, Count, Q
+from django.db.models import Sum, Count, Q, Max
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
 from dojo.templatetags.display_tags import get_level
@@ -37,20 +37,56 @@ def product(request):
         initial_queryset = Product.objects.all() \
                             .select_related('technical_contact').select_related('product_manager').select_related('prod_type').select_related('team_manager')
         name_words = [product.name for product in
-                      Product.objects.all() \
-                      .select_related('technical_contact').select_related('product_manager').select_related('prod_type').select_related('team_manager')
+                      Product.objects.all()
                       ]
     else:
         initial_queryset = Product.objects.filter(
             authorized_users__in=[request.user])
         name_words = [word for product in
                       Product.objects.filter(
-                          authorized_users__in=[request.user]).select_related('technical_contact').select_related('product_manager').select_related('prod_type').select_related('team_manager').prefetch_related('jira_project_key_product')
+                          authorized_users__in=[request.user])
                       for word in product.name.split() if len(word) > 2]
 
-    initial_queryset.prefetch_related('product__engagement')
-    # active_finding_count_query=Finding.objects.filter(mitigated__isnull=True, active=True, false_p=False, duplicate=False, out_of_scope=False).count()
-    # initial_queryset.prefetch_related(Prefetch('product__engagement__test', queryset=active_finding_count_query), to_attr='active_finding_count')
+    prods = initial_queryset
+    # prods = prods.prefetch_related('jira_project_key_product') # TODO
+
+    # prods = prods.prefetch_related(Prefetch('product_engagement', queryset=Engagement.objects.all(), to_attr='engagements'))
+    # prods = prods.prefetch_related(Prefetch('engagement_product', queryset=Engagement.objects.all().annotate(), to_attr='engagement_count'))
+
+    # prods = prods.annotate(engagement_count = Count('product_engagement__id'))
+    # prods = prods.annotate(engagement_count = Sum('engagement_product__active'))
+
+# TODO try when/case
+#  Client.objects.annotate(
+# ...     discount=Case(
+# ...         When(account_type=Client.GOLD, then=Value('5%')),
+# ...         When(account_type=Client.PLATINUM, then=Value('10%')),
+# ...         default=Value('0%'),
+# ...         output_field=CharField(),
+# ...     ),
+
+    prods = prods.annotate(active_engagement_count = Count('product_engagement__id', filter=Q(product_engagement__active=True)))
+    prods = prods.annotate(closed_engagement_count = Count('product_engagement__id', filter=Q(product_engagement__active=False)))
+    prods = prods.annotate(last_engagement_date = Max('product_engagement__target_start'))
+
+    # prods = prods.prefetch_related(Prefetch('product_endpoint', to_attr='endpoints'))
+    active_endpoint_query = Endpoint.objects.filter(
+            finding__active=True,
+            finding__verified=True,
+            finding__mitigated__isnull=True)
+
+    prods = prods.prefetch_related(Prefetch('product_endpoint', queryset=active_endpoint_query, to_attr = 'active_endpoints'))
+
+    prods = prods.annotate(active_finding_count = Count('product_engagement__test__finding__id', filter=Q(product_engagement__test__finding__active=True)))
+    
+    # prods = prods.prefetch_related(Prefetch('p'))
+    #     return Finding.objects.filter(mitigated__isnull=True,
+    #                                   verified=True,
+    #                                   false_p=False,
+    #                                   duplicate=False,
+    #                                   out_of_scope=False,
+    #                                   test__engagement__product=self).count()
+
 
     product_type = None
 
@@ -63,7 +99,7 @@ def product(request):
         tags = request.GET.getlist('tags', [])
         initial_queryset = TaggedItem.objects.get_by_model(initial_queryset, Tag.objects.filter(name__in=tags))
     """
-    prods = ProductFilter(request.GET, queryset=initial_queryset, user=request.user)
+    prods = ProductFilter(request.GET, queryset=prods, user=request.user)
     prod_list = get_page_items(request, prods.qs, 25)
     add_breadcrumb(title="Product List", top_level=not len(request.GET), request=request)
     return render(request,
