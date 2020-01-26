@@ -83,15 +83,15 @@ class Command(BaseCommand):
         # prods = initial_queryset
 
         # prods = prods.prefetch_related(Prefetch('engagement_product', queryset=Engagement.objects.all().filter(active=True), to_attr='engagements'))
-        prods = prods.prefetch_related(Prefetch('product_engagement', queryset=Engagement.objects.all(), to_attr='engagements'))
-        # prods = prods.prefetch_related(Prefetch('engagement_product', queryset=Engagement.objects.all().annotate(), to_attr='engagement_count'))
+        prods = prods.prefetch_related(Prefetch('engagement_set', queryset=Engagement.objects.all(), to_attr='engagements'))
+        prods = prods.prefetch_related(Prefetch('engagement_set', queryset=Engagement.objects.all().annotate(), to_attr='engagement_count'))
 
-        prods = prods.annotate(engagement_count = Count('product_engagement__id'))
+        # prods = prods.annotate(engagement_count = Count('engagement__id'))
         # prods = prods.annotate(engagement_count = Sum('engagement_product__active'))
 
-        prods = prods.annotate(active_engagement_count2 = Count('product_engagement__id', filter=Q(product_engagement__active=True)))
-        prods = prods.annotate(inactive_engagement_count2 = Count('product_engagement__id', filter=Q(product_engagement__active=False)))
-        prods = prods.annotate(last_date = Max('product_engagement__target_start'))        
+        prods = prods.annotate(active_engagement_count2 = Count('engagement__id', filter=Q(engagement__active=True)))
+        prods = prods.annotate(inactive_engagement_count2 = Count('engagement__id', filter=Q(engagement__active=False)))
+        prods = prods.annotate(last_date = Max('engagement__target_start'))        
 # from django.db.models import Q
 # ...
 

@@ -33,28 +33,14 @@ from django.db.models import Prefetch
 logger = logging.getLogger(__name__)
 
 def product(request):
-    if request.user.is_staff:
-        initial_queryset = Product.objects.all() \
-                            .select_related('technical_contact').select_related('product_manager').select_related('prod_type').select_related('team_manager')
-        name_words = [product.name for product in
-                      Product.objects.all()
-                      ]
-    else:
-        initial_queryset = Product.objects.filter(
-            authorized_users__in=[request.user])
-        name_words = [word for product in
-                      Product.objects.filter(
-                          authorized_users__in=[request.user])
-                      for word in product.name.split() if len(word) > 2]
+    prods = Product.objects.all()
 
-    prods = initial_queryset
-    # prods = prods.prefetch_related('jira_project_key_product') # TODO
-
+    if not request.user.is_staff:
+        prods = prods.filter(authorized_users__in=[request.user])
+                      
+    prods = prods.select_related('technical_contact').select_related('product_manager').select_related('prod_type').select_related('team_manager')
     # prods = prods.prefetch_related(Prefetch('product_engagement', queryset=Engagement.objects.all(), to_attr='engagements'))
     # prods = prods.prefetch_related(Prefetch('engagement_product', queryset=Engagement.objects.all().annotate(), to_attr='engagement_count'))
-
-    # prods = prods.annotate(engagement_count = Count('product_engagement__id'))
-    # prods = prods.annotate(engagement_count = Sum('engagement_product__active'))
 
 # TODO try when/case
 #  Client.objects.annotate(
@@ -64,6 +50,8 @@ def product(request):
 # ...         default=Value('0%'),
 # ...         output_field=CharField(),
 # ...     ),
+
+# TODO test reports (scan all code for product__engagement)
 
     prods = prods.annotate(active_engagement_count=Count('product_engagement__id', filter=Q(product_engagement__active=True)))
     prods = prods.annotate(closed_engagement_count=Count('product_engagement__id', filter=Q(product_engagement__active=False)))
@@ -81,14 +69,8 @@ def product(request):
 
     prods = prods.prefetch_related(Prefetch('product_jira_pkey', queryset=JIRA_PKey.objects.all(), to_attr='jira_confs'))
 
-    # prods = prods.prefetch_related(Prefetch('p'))
-    #     return Finding.objects.filter(mitigated__isnull=True,
-    #                                   verified=True,
-    #                                   false_p=False,
-    #                                   duplicate=False,
-    #                                   out_of_scope=False,
-    #                                   test__engagement__product=self).count()
-
+    name_words = [product.name for product in prods
+                    for word in product.name.split() if len(word) > 2]
 
     product_type = None
 
@@ -102,7 +84,12 @@ def product(request):
         initial_queryset = TaggedItem.objects.get_by_model(initial_queryset, Tag.objects.filter(name__in=tags))
     """
     prods = ProductFilter(request.GET, queryset=prods, user=request.user)
-    prod_list = get_page_items(request, prods.qs, 25)
+    prod_list = get_page_items(request, prods.qs, 25) # TODO fix paging as currently it performs the query twice
+
+
+
+    # print(name_words)
+
     add_breadcrumb(title="Product List", top_level=not len(request.GET), request=request)
     return render(request,
                   'dojo/product.html',
