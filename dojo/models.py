@@ -576,12 +576,15 @@ class Product(models.Model):
 
     @property
     def findings_count(self):
-        return Finding.objects.filter(mitigated__isnull=True,
-                                      verified=True,
-                                      false_p=False,
-                                      duplicate=False,
-                                      out_of_scope=False,
-                                      test__engagement__product=self).count()
+        return 0
+        
+        
+        # return Finding.objects.filter(mitigated__isnull=True,
+        #                               verified=True,
+        #                               false_p=False,
+        #                               duplicate=False,
+        #                               out_of_scope=False,
+        #                               test__engagement__product=self).count()
 
     @property
     def active_engagement_count(self):
@@ -849,7 +852,7 @@ class Engagement(models.Model):
     preset = models.ForeignKey(Engagement_Presets, null=True, blank=True, help_text="Settings and notes for performing this engagement.", on_delete=models.CASCADE)
     reason = models.CharField(max_length=2000, null=True, blank=True)
     report_type = models.ForeignKey(Report_Type, null=True, blank=True, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='engagement_product')
     updated = models.DateTimeField(auto_now=True, null=True)
     created = models.DateTimeField(auto_now_add=True, null=True)
     active = models.BooleanField(default=True, editable=False)
@@ -2056,9 +2059,9 @@ class JIRA_Details_Cache(models.Model):
 
 class JIRA_PKey(models.Model):
     project_key = models.CharField(max_length=200, blank=True)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='jira_project_key_product')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
     conf = models.ForeignKey(JIRA_Conf, verbose_name="JIRA Configuration",
-                             null=True, blank=True, on_delete=models.CASCADE, related_name='jira_conf')
+                             null=True, blank=True, on_delete=models.CASCADE)
     component = models.CharField(max_length=200, blank=True)
     push_all_issues = models.BooleanField(default=False, blank=True)
     enable_engagement_epic_mapping = models.BooleanField(default=False,

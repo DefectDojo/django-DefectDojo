@@ -28,6 +28,7 @@ from custom_field.models import CustomFieldValue, CustomField
 from dojo.tasks import add_epic_task, add_issue_task
 from tagging.models import Tag
 from tagging.utils import get_tag_list
+from django.db.models import Prefetch
 
 logger = logging.getLogger(__name__)
 
@@ -46,6 +47,10 @@ def product(request):
                       Product.objects.filter(
                           authorized_users__in=[request.user]).select_related('technical_contact').select_related('product_manager').select_related('prod_type').select_related('team_manager').prefetch_related('jira_project_key_product')
                       for word in product.name.split() if len(word) > 2]
+
+    initial_queryset.prefetch_related('product__engagement')
+    # active_finding_count_query=Finding.objects.filter(mitigated__isnull=True, active=True, false_p=False, duplicate=False, out_of_scope=False).count()
+    # initial_queryset.prefetch_related(Prefetch('product__engagement__test', queryset=active_finding_count_query), to_attr='active_finding_count')
 
     product_type = None
 
