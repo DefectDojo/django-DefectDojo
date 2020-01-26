@@ -576,9 +576,7 @@ class Product(models.Model):
 
     @property
     def findings_count(self):
-        return 0
-        
-        
+        return self.active_finding_count
         # return Finding.objects.filter(mitigated__isnull=True,
         #                               verified=True,
         #                               false_p=False,
@@ -586,25 +584,27 @@ class Product(models.Model):
         #                               out_of_scope=False,
         #                               test__engagement__product=self).count()
 
-    @property
-    def active_engagement_count(self):
-        return Engagement.objects.filter(active=True, product=self).count()
+    # @property
+    # def active_engagement_count(self):
+    #     return Engagement.objects.filter(active=True, product=self).count()
 
-    @property
-    def closed_engagement_count(self):
-        return Engagement.objects.filter(active=False, product=self).count()
+    # @property
+    # def closed_engagement_count(self):
+    #     return Engagement.objects.filter(active=False, product=self).count()
 
-    @property
-    def last_engagement_date(self):
-        return Engagement.objects.filter(product=self).first()
+    # @property
+    # def last_engagement_date(self):
+    #     return Engagement.objects.filter(product=self).first()
 
     @property
     def endpoint_count(self):
-        endpoints = Endpoint.objects.filter(
-            finding__test__engagement__product=self,
-            finding__active=True,
-            finding__verified=True,
-            finding__mitigated__isnull=True)
+        # endpoints = Endpoint.objects.filter(
+        #     finding__test__engagement__product=self,
+        #     finding__active=True,
+        #     finding__verified=True,
+        #     finding__mitigated__isnull=True)
+
+        endpoints = self.active_endpoints
 
         hosts = []
         ids = []
@@ -951,7 +951,7 @@ class Endpoint(models.Model):
     fragment = models.CharField(null=True, blank=True, max_length=500,
                                 help_text="The fragment identifier which follows the hash mark. The hash mark should "
                                           "be omitted. For example 'section-13', 'paragraph-2'.")
-    product = models.ForeignKey(Product, null=True, blank=True, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, null=True, blank=True, on_delete=models.CASCADE, related_name='product_endpoint')
     endpoint_params = models.ManyToManyField(Endpoint_Params, blank=True,
                                              editable=False)
     remediated = models.BooleanField(default=False, blank=True)
