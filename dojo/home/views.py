@@ -102,7 +102,6 @@ def get_severities_all(findings):
                   'Info': 0}
 
     for s in severities_all:
-        logger.error(s)
         sev_counts_all[s['severity']] = s['count']
 
     return sev_counts_all
