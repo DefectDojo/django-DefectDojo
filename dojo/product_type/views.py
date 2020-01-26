@@ -9,7 +9,7 @@ from dojo.filters import ProductTypeFilter
 from dojo.forms import Product_TypeForm, Product_TypeProductForm, Delete_Product_TypeForm
 from dojo.models import Product_Type
 from dojo.utils import get_page_items, add_breadcrumb, create_notification
-
+from django.db.models import Sum, Count, Q, Max
 
 logger = logging.getLogger(__name__)
 
@@ -21,12 +21,23 @@ Product Type views
 
 
 def product_type(request):
-    initial_queryset = Product_Type.objects.all().order_by('name')
-    name_words = [product.name for product in
-                  initial_queryset]
+    # query for names outside of query with prefetch to avoid the complex prefetch query from executing twice
+    name_words = [product.name for product in Product_Type.objects.all().only('name')]
 
-    ptl = ProductTypeFilter(request.GET, queryset=initial_queryset)
-    pts = get_page_items(request, ptl.qs, 25)
+    prod_types = Product_Type.objects.all()
+
+    active_findings_query = Q(prod_type__product_engagement__test__finding__active=True,
+                            prod_type__product_engagement__test__finding__mitigated__isnull=True,
+                            prod_type__product_engagement__test__finding__verified=True,
+                            prod_type__product_engagement__test__finding__false_p=False,
+                            prod_type__product_engagement__test__finding__duplicate=False,
+                            prod_type__product_engagement__test__finding__out_of_scope=False)
+
+    prod_types = prod_types.annotate(findings_count=Count('prod_type__product_engagement__test__finding__id', filter=active_findings_query))
+    prod_types = prod_types.annotate(prod_count=Count('prod_type', distinct=True))
+
+    ptl = ProductTypeFilter(request.GET, queryset=prod_types)
+    pts = get_page_items(request, ptl.qs, 25) # TODO For some reason this line already triggers a query and the render executes the query again
     add_breadcrumb(title="Product Type List", top_level=True, request=request)
     return render(request, 'dojo/product_type.html', {
         'name': 'Product Type List',

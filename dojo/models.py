@@ -374,20 +374,20 @@ class Product_Type(models.Model):
         else:
             return health
 
-    def findings_count(self):
-        return Finding.objects.filter(mitigated__isnull=True,
-                                      verified=True,
-                                      false_p=False,
-                                      duplicate=False,
-                                      out_of_scope=False,
-                                      test__engagement__product__prod_type=self).filter(
-            Q(severity="Critical") |
-            Q(severity="High") |
-            Q(severity="Medium") |
-            Q(severity="Low")).count()
+    # def findings_count(self):
+    #     return Finding.objects.filter(mitigated__isnull=True,
+    #                                   verified=True,
+    #                                   false_p=False,
+    #                                   duplicate=False,
+    #                                   out_of_scope=False,
+    #                                   test__engagement__product__prod_type=self).filter(
+    #         Q(severity="Critical") |
+    #         Q(severity="High") |
+    #         Q(severity="Medium") |
+    #         Q(severity="Low")).count()
 
-    def products_count(self):
-        return Product.objects.filter(prod_type=self).count()
+    # def products_count(self):
+    #     return Product.objects.filter(prod_type=self).count()
 
     def __unicode__(self):
         return self.name
@@ -852,8 +852,8 @@ class Engagement(models.Model):
     preset = models.ForeignKey(Engagement_Presets, null=True, blank=True, help_text="Settings and notes for performing this engagement.", on_delete=models.CASCADE)
     reason = models.CharField(max_length=2000, null=True, blank=True)
     report_type = models.ForeignKey(Report_Type, null=True, blank=True, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_engagement')
-    # product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    # product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_engagement')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
     updated = models.DateTimeField(auto_now=True, null=True)
     created = models.DateTimeField(auto_now_add=True, null=True)
     active = models.BooleanField(default=True, editable=False)
