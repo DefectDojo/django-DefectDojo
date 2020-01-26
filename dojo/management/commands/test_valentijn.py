@@ -16,7 +16,7 @@ from django.shortcuts import render
 from django.utils import timezone
 
 from dojo.models import Finding, Engagement, Risk_Acceptance
-from django.db.models import Count
+from django.db.models import Count, Max
 from dojo.utils import add_breadcrumb, get_punchcard_data
 
 from defectDojo_engagement_survey.models import Answered_Survey
@@ -91,6 +91,7 @@ class Command(BaseCommand):
 
         prods = prods.annotate(active_engagement_count2 = Count('engagement_product__id', filter=Q(engagement_product__active=True)))
         prods = prods.annotate(inactive_engagement_count2 = Count('engagement_product__id', filter=Q(engagement_product__active=False)))
+        prods = prods.annotate(last_date = Max('engagement_product__target_start'))        
 # from django.db.models import Q
 # ...
 
@@ -105,9 +106,10 @@ class Command(BaseCommand):
             print(prod.engagement_count)
             print(prod.active_engagement_count2)
             print(prod.inactive_engagement_count2)
+            print(prod.last_date)
             
             for eng in prod.engagements:
-                print(str(eng.id) + ': ' + eng.name)
+                print(str(eng.id) + ': ' + eng.name + "  : " + str(eng.target_start))
             break
 
         # for prod in prods.all():
