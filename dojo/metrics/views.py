@@ -50,6 +50,7 @@ def critical_product_metrics(request, mtype):
 
 @cache_page(60 * 5)  # cache for 5 minutes
 def metrics(request, mtype):
+    #TODO reenable metrics link in product_type.html
     template = 'dojo/metrics.html'
     page_name = 'Product Type Metrics'
     show_pt_filter = True

@@ -374,20 +374,20 @@ class Product_Type(models.Model):
         else:
             return health
 
-    def findings_count(self):
-        return Finding.objects.filter(mitigated__isnull=True,
-                                      verified=True,
-                                      false_p=False,
-                                      duplicate=False,
-                                      out_of_scope=False,
-                                      test__engagement__product__prod_type=self).filter(
-            Q(severity="Critical") |
-            Q(severity="High") |
-            Q(severity="Medium") |
-            Q(severity="Low")).count()
+    # def findings_count(self):
+    #     return Finding.objects.filter(mitigated__isnull=True,
+    #                                   verified=True,
+    #                                   false_p=False,
+    #                                   duplicate=False,
+    #                                   out_of_scope=False,
+    #                                   test__engagement__product__prod_type=self).filter(
+    #         Q(severity="Critical") |
+    #         Q(severity="High") |
+    #         Q(severity="Medium") |
+    #         Q(severity="Low")).count()
 
-    def products_count(self):
-        return Product.objects.filter(prod_type=self).count()
+    # def products_count(self):
+    #     return Product.objects.filter(prod_type=self).count()
 
     def __unicode__(self):
         return self.name
@@ -576,32 +576,35 @@ class Product(models.Model):
 
     @property
     def findings_count(self):
-        return Finding.objects.filter(mitigated__isnull=True,
-                                      verified=True,
-                                      false_p=False,
-                                      duplicate=False,
-                                      out_of_scope=False,
-                                      test__engagement__product=self).count()
+        return self.active_finding_count
+        # return Finding.objects.filter(mitigated__isnull=True,
+        #                               verified=True,
+        #                               false_p=False,
+        #                               duplicate=False,
+        #                               out_of_scope=False,
+        #                               test__engagement__product=self).count()
 
-    @property
-    def active_engagement_count(self):
-        return Engagement.objects.filter(active=True, product=self).count()
+    # @property
+    # def active_engagement_count(self):
+    #     return Engagement.objects.filter(active=True, product=self).count()
 
-    @property
-    def closed_engagement_count(self):
-        return Engagement.objects.filter(active=False, product=self).count()
+    # @property
+    # def closed_engagement_count(self):
+    #     return Engagement.objects.filter(active=False, product=self).count()
 
-    @property
-    def last_engagement_date(self):
-        return Engagement.objects.filter(product=self).first()
+    # @property
+    # def last_engagement_date(self):
+    #     return Engagement.objects.filter(product=self).first()
 
     @property
     def endpoint_count(self):
-        endpoints = Endpoint.objects.filter(
-            finding__test__engagement__product=self,
-            finding__active=True,
-            finding__verified=True,
-            finding__mitigated__isnull=True)
+        # endpoints = Endpoint.objects.filter(
+        #     finding__test__engagement__product=self,
+        #     finding__active=True,
+        #     finding__verified=True,
+        #     finding__mitigated__isnull=True)
+
+        endpoints = self.active_endpoints
 
         hosts = []
         ids = []
@@ -849,6 +852,7 @@ class Engagement(models.Model):
     preset = models.ForeignKey(Engagement_Presets, null=True, blank=True, help_text="Settings and notes for performing this engagement.", on_delete=models.CASCADE)
     reason = models.CharField(max_length=2000, null=True, blank=True)
     report_type = models.ForeignKey(Report_Type, null=True, blank=True, on_delete=models.CASCADE)
+    # product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_engagement')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     updated = models.DateTimeField(auto_now=True, null=True)
     created = models.DateTimeField(auto_now_add=True, null=True)
@@ -947,7 +951,7 @@ class Endpoint(models.Model):
     fragment = models.CharField(null=True, blank=True, max_length=500,
                                 help_text="The fragment identifier which follows the hash mark. The hash mark should "
                                           "be omitted. For example 'section-13', 'paragraph-2'.")
-    product = models.ForeignKey(Product, null=True, blank=True, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, null=True, blank=True, on_delete=models.CASCADE, related_name='product_endpoint')
     endpoint_params = models.ManyToManyField(Endpoint_Params, blank=True,
                                              editable=False)
     remediated = models.BooleanField(default=False, blank=True)
@@ -2071,7 +2075,7 @@ class JIRA_Details_Cache(models.Model):
 
 class JIRA_PKey(models.Model):
     project_key = models.CharField(max_length=200, blank=True)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name = 'product_jira_pkey')
     conf = models.ForeignKey(JIRA_Conf, verbose_name="JIRA Configuration",
                              null=True, blank=True, on_delete=models.CASCADE)
     component = models.CharField(max_length=200, blank=True)

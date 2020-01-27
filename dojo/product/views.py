@@ -13,7 +13,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
-from django.db.models import Sum, Count, Q
+from django.db.models import Sum, Count, Q, Max
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
 from dojo.templatetags.display_tags import get_level
@@ -28,22 +28,49 @@ from custom_field.models import CustomFieldValue, CustomField
 from dojo.tasks import add_epic_task, add_issue_task
 from tagging.models import Tag
 from tagging.utils import get_tag_list
+from django.db.models import Prefetch
 
 logger = logging.getLogger(__name__)
 
-
 def product(request):
-    if request.user.is_staff:
-        initial_queryset = Product.objects.all()
-        name_words = [product.name for product in
-                      Product.objects.all()]
-    else:
-        initial_queryset = Product.objects.filter(
-            authorized_users__in=[request.user])
-        name_words = [word for product in
-                      Product.objects.filter(
-                          authorized_users__in=[request.user])
-                      for word in product.name.split() if len(word) > 2]
+    prods = Product.objects.all()
+
+    if not request.user.is_staff:
+        prods = prods.filter(authorized_users__in=[request.user])
+                      
+    prods = prods.select_related('technical_contact').select_related('product_manager').select_related('prod_type').select_related('team_manager')
+    # prods = prods.prefetch_related(Prefetch('product_engagement', queryset=Engagement.objects.all(), to_attr='engagements'))
+    # prods = prods.prefetch_related(Prefetch('engagement_product', queryset=Engagement.objects.all().annotate(), to_attr='engagement_count'))
+
+# TODO try when/case
+#  Client.objects.annotate(
+# ...     discount=Case(
+# ...         When(account_type=Client.GOLD, then=Value('5%')),
+# ...         When(account_type=Client.PLATINUM, then=Value('10%')),
+# ...         default=Value('0%'),
+# ...         output_field=CharField(),
+# ...     ),
+
+# TODO test reports (scan all code for product__engagement)
+
+    prods = prods.annotate(active_engagement_count=Count('engagement__id', filter=Q(engagement__active=True)))
+    prods = prods.annotate(closed_engagement_count=Count('engagement__id', filter=Q(engagement__active=False)))
+    prods = prods.annotate(last_engagement_date=Max('engagement__target_start'))
+
+    # prods = prods.prefetch_related(Prefetch('product_endpoint', to_attr='endpoints'))
+    active_endpoint_query = Endpoint.objects.filter(
+            finding__active=True,
+            finding__verified=True,
+            finding__mitigated__isnull=True)
+
+    prods = prods.prefetch_related(Prefetch('product_endpoint', queryset=active_endpoint_query, to_attr='active_endpoints'))
+
+    prods = prods.annotate(active_finding_count=Count('engagement__test__finding__id', filter=Q(engagement__test__finding__active=True)))
+
+    prods = prods.prefetch_related(Prefetch('product_jira_pkey', queryset=JIRA_PKey.objects.all(), to_attr='jira_confs'))
+
+    name_words = [product.name for product in prods
+                    for word in product.name.split() if len(word) > 2]
 
     product_type = None
 
@@ -56,8 +83,13 @@ def product(request):
         tags = request.GET.getlist('tags', [])
         initial_queryset = TaggedItem.objects.get_by_model(initial_queryset, Tag.objects.filter(name__in=tags))
     """
-    prods = ProductFilter(request.GET, queryset=initial_queryset, user=request.user)
-    prod_list = get_page_items(request, prods.qs, 25)
+    prods = ProductFilter(request.GET, queryset=prods, user=request.user)
+    prod_list = get_page_items(request, prods.qs, 25) # TODO fix paging as currently it performs the query twice
+
+
+
+    # print(name_words)
+
     add_breadcrumb(title="Product List", top_level=not len(request.GET), request=request)
     return render(request,
                   'dojo/product.html',
