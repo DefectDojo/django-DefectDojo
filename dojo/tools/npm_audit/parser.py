@@ -56,6 +56,7 @@ def get_item(item_node, test):
     finding = Finding(title=item_node['title'] + " - " + "(" + item_node['module_name'] + ", " + item_node['vulnerable_versions'] + ")",
                       test=test,
                       severity=severity,
+                      file_path=item_node['module_name'],
                       description=item_node['overview'] + "\n Vulnerable Module: " +
                       item_node['module_name'] + "\n Vulnerable Versions: " +
                       str(item_node['vulnerable_versions']) + "\n Patched Version: " +
@@ -63,6 +64,7 @@ def get_item(item_node, test):
                       str(item_node['cwe']) + "\n Access: " +
                       str(item_node['access']),
                       cwe=item_node['cwe'][4:],
+                      cve=item_node['cves'][0] if (len(item_node['cves']) > 0) else None,
                       mitigation=item_node['recommendation'],
                       references=item_node['url'],
                       active=False,
