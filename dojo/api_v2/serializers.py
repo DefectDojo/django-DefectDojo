@@ -188,6 +188,7 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
     def get_findings_list(self, obj):
         return obj.open_findings_list()
 
+
 class ProductTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product_Type
@@ -675,13 +676,13 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                          " as it is not present anymore in recent scans.")
                 Tag.objects.add_tag(old_finding, 'stale')
                 old_finding.save()
-                title = 'An old finding has been closed for "{}".' \
-                        .format(test.engagement.product.name)
-                description = 'See <a href="{}">{}</a>' \
-                        .format(reverse('view_finding', args=(old_finding.id, )),
-                                old_finding.title)
+                title = 'A stale finding has been closed for "{}",\nengagement {}.' \
+                        .format(test.engagement.product.name, test.engagement.name)
+                url = reverse('view_finding', args=(old_finding.id, ))
+                description = 'See {}'.format(old_finding.title)
                 create_notification(event='other',
                                     title=title,
+                                    url=url,
                                     description=description,
                                     icon='bullseye',
                                     objowner=self.context['request'].user)
