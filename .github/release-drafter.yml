@@ -1,4 +1,24 @@
+name-template: 'v$NEXT_PATCH_VERSION 🌈'
+tag-template: 'v$NEXT_PATCH_VERSION'
+categories:
+  - title: '🚀 New scanners'
+    labels:
+      - 'Import Scans'
+  - title: '🚀 Features and enhancements'
+    labels:
+      - 'feature'
+      - 'enhancement'
+  - title: '🐛 Bug Fixes'
+    labels:
+      - 'fix'
+      - 'bugfix'
+      - 'bug'
+  - title: '🧰 Maintenance'
+    labels: 
+      - 'dependencies'
+      - 'maintenance'
+change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 template: |
-  ## What's Changed
+  ## Changes
 
   $CHANGES
