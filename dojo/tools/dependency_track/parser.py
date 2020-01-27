@@ -195,7 +195,9 @@ class DependencyTrackParser(object):
             description=vulnerability_description,
             severity=vulnerability_severity,
             numerical_severity=Finding.get_numerical_severity(vulnerability_severity),
-            false_p=is_false_positive)
+            false_p=is_false_positive,
+            static_finding=True,
+            dynamic_finding=False)
 
     def __init__(self, file, test):
         # Start with an empty list of findings
