@@ -1326,7 +1326,13 @@ class Finding(models.Model):
 
     @property
     def similar_findings(self):
-        filtered = Finding.objects.filter(test__engagement__product=self.test.engagement.product)
+        filtered = Finding.objects.all()
+
+        if self.test.engagement.deduplication_on_engagement:
+            filtered = filtered.filter(test__engagement=self.test.engagement)
+        else:
+            filtered = filtered.filter(test__engagement__product=self.test.engagement.product)
+
         if self.cve:
             filtered = filtered.filter(cve=self.cve)
         if self.cwe:
@@ -1335,6 +1341,7 @@ class Finding(models.Model):
             filtered = filtered.filter(file_path=self.file_path)
         if self.line:
             filtered = filtered.filter(line=self.line)
+
         return filtered.exclude(pk=self.pk)[:10]
 
     def compute_hash_code(self):
