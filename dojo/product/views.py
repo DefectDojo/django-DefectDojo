@@ -53,9 +53,9 @@ def product(request):
 
 # TODO test reports (scan all code for product__engagement)
 
-    prods = prods.annotate(active_engagement_count=Count('product_engagement__id', filter=Q(product_engagement__active=True)))
-    prods = prods.annotate(closed_engagement_count=Count('product_engagement__id', filter=Q(product_engagement__active=False)))
-    prods = prods.annotate(last_engagement_date=Max('product_engagement__target_start'))
+    prods = prods.annotate(active_engagement_count=Count('engagement__id', filter=Q(engagement__active=True)))
+    prods = prods.annotate(closed_engagement_count=Count('engagement__id', filter=Q(engagement__active=False)))
+    prods = prods.annotate(last_engagement_date=Max('engagement__target_start'))
 
     # prods = prods.prefetch_related(Prefetch('product_endpoint', to_attr='endpoints'))
     active_endpoint_query = Endpoint.objects.filter(
@@ -65,7 +65,7 @@ def product(request):
 
     prods = prods.prefetch_related(Prefetch('product_endpoint', queryset=active_endpoint_query, to_attr='active_endpoints'))
 
-    prods = prods.annotate(active_finding_count=Count('product_engagement__test__finding__id', filter=Q(product_engagement__test__finding__active=True)))
+    prods = prods.annotate(active_finding_count=Count('engagement__test__finding__id', filter=Q(engagement__test__finding__active=True)))
 
     prods = prods.prefetch_related(Prefetch('product_jira_pkey', queryset=JIRA_PKey.objects.all(), to_attr='jira_confs'))
 
