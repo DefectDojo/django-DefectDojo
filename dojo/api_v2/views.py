@@ -358,7 +358,7 @@ class ProductViewSet(mixins.ListModelMixin,
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (permissions.UserHasProductPermission,
                           DjangoModelPermissions)
-    # TODO: findings count field
+
     filter_fields = ('id', 'name', 'prod_type', 'created', 'authorized_users')
 
     def get_queryset(self):
