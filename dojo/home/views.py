@@ -66,7 +66,7 @@ def dashboard(request):
     severity_count_all = get_severities_all(findings)
     severity_count_by_month = get_severities_by_month(findings)
 
-    punchcard, ticks, highest_day_count = get_punchcard_data(findings)
+    punchcard, ticks, highest_day_count = get_punchcard_data(findings, 26)
 
     unassigned_surveys = Answered_Survey.objects.all().filter(
         assignee_id__isnull=True, completed__gt=0)
