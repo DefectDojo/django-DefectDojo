@@ -541,7 +541,7 @@ def get_punchcard_data(findings):
     try:
         # gather findings over past half year, make sure to start on a sunday
         past_sunday = timezone.localdate() - relativedelta(weekday=SU(-1))
-        first_sunday = past_sunday - relativedelta(weeks=26)
+        first_sunday = past_sunday - relativedelta(weeks=3)
 
         # reminder: The first week of a year is the one that contains the year’s first Thursday
         # so we could have for 29/12/2019: week=1 and year=2019 :-D
@@ -550,6 +550,8 @@ def get_punchcard_data(findings):
                                     .values('created__year', 'created__month', 'created__day', 'created__week', 'created__week_day') \
                                     .annotate(count=Count('id')) \
                                     .order_by('created__year', 'created__month', 'created__day')
+
+        # print(severities_by_week.all())
 
         # return empty stuff if no findings to be statted
         if severities_by_week.count() <= 0:
@@ -564,23 +566,37 @@ def get_punchcard_data(findings):
         day_counts = [0, 0, 0, 0, 0, 0, 0]
 
         # the javascript has sunday as zero
+
+        # javascript  database python 
+        # sun 0         1       6
+        # mon 6         2       0
+        # tue 5         3       1
+        # wed 4         4       2
+        # thu 3         5       3
+        # fri 2         6       4
+        # sat 1         7       5
+
         # mon 0, tues 1, wed 2, thurs 3, fri 4, sat 5, sun 6
-        # sun 0, mon 6, tue 5, wed 4, thur 3, fri 2, sat 1
-        day_offset = {0: 6, 1: 5, 2: 4, 3: 3, 4: 2, 5: 1, 6: 0}
+        # mon 6, tue 5, wed 4, thur 3, fri 2, sat 1, sun 0
+        day_offset = {1: 6, 2: 5, 3: 4, 4: 3, 5: 2, 6: 1, 7: 0}
 
         # by design our query contains 26 weeks, starting on a sunday.
         for sv in severities_by_week:
             day = sv['created__day']
-            week_day = sv['created__week_day'] - 1  # javascript expects zero based day numbering
+            week_day = sv['created__week_day'] # javascript expects zero based day numbering
             year = sv['created__year']
             month = sv['created__month']
             week = sv['created__week']
             day_count = sv['count']
 
-            # print('%2-%2-%2: %i', year, month, day, day_count)
+            real_date = date(year, month, day)
+            import calendar
+            print('year, month, day, day_count, week_day, real_date.weekday(), calendar.day_name[real_date.weekday()], week)')
+            print('%2-%2-%2: %i', year, month, day, day_count, week_day, real_date.weekday(), calendar.day_name[real_date.weekday()], week)
 
             # add previous (completed) week to punchcard, and reinitialize for next (current) week
             if week != prev_week:
+                
                 if week_count > 0:
                     prev_week_start = first_sunday + relativedelta(weeks=tick)
                     week_data, label = get_week_data(prev_week_start, tick, day_counts)
@@ -601,6 +617,8 @@ def get_punchcard_data(findings):
         week_data, label = get_week_data(prev_week_start, tick, day_counts)
         punchcard.extend(week_data)
         ticks.append(label)
+
+        print(punchcard)
 
         # adjust the size or circles
         ratio = (sqrt(highest_day_count / pi))
