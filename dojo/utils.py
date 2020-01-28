@@ -561,9 +561,8 @@ def get_punchcard_data(findings, weeks_back):
         if severities_by_day.count() <= 0:
             return None, None, 0
 
-
         # day of the week numbers:
-        # javascript  database python 
+        # javascript  database python
         # sun 6         1       6
         # mon 5         2       0
         # tue 4         3       1
@@ -575,7 +574,7 @@ def get_punchcard_data(findings, weeks_back):
         # map from python to javascript, do not use week numbers or day numbers from database.
         day_offset = {0: 5, 1: 4, 2: 3, 3: 2, 4: 1, 5: 0, 6: 6}
 
-        tick = 0;
+        tick = 0
         punchcard = list()
         ticks = list()
         highest_day_count = 0
@@ -618,7 +617,7 @@ def get_punchcard_data(findings, weeks_back):
                     # print('new week values, start_of_week:', start_of_week)
                     day_counts = [0, 0, 0, 0, 0, 0, 0]
                     day_counts[day_offset[created.weekday()]] = day_count
-                    highest_day_count = max(highest_day_count, day_count)                
+                    highest_day_count = max(highest_day_count, day_count)             
 
         # append in progress week
         week_data, label = get_week_data(start_of_week, tick, day_counts)
