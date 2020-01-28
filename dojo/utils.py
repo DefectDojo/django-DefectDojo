@@ -546,15 +546,15 @@ def get_punchcard_data(findings):
         # reminder: The first week of a year is the one that contains the year’s first Thursday
         # so we could have for 29/12/2019: week=1 and year=2019 :-D
         # so we have to order by Y-M-D to make sure the ordering is correct
-        severities_by_week = findings.filter(created__gte=first_sunday) \
-                                    .values('created__year', 'created__month', 'created__day', 'created__week', 'created__week_day') \
+        severities_by_day = findings.filter(created__gte=first_sunday) \
+                                    .values('created__year', 'created__month', 'created__day') \
                                     .annotate(count=Count('id')) \
                                     .order_by('created__year', 'created__month', 'created__day')
 
         # print(severities_by_week.all())
 
         # return empty stuff if no findings to be statted
-        if severities_by_week.count() <= 0:
+        if severities_by_day.count() <= 0:
             return None, None, 0
 
         punchcard = list()
@@ -578,23 +578,29 @@ def get_punchcard_data(findings):
 
         # mon 0, tues 1, wed 2, thurs 3, fri 4, sat 5, sun 6
         # mon 6, tue 5, wed 4, thur 3, fri 2, sat 1, sun 0
-        day_offset = {1: 6, 2: 5, 3: 4, 4: 3, 5: 2, 6: 1, 7: 0}
+        #map from python to javascript, do not use week numbers or day numbers from database.
+        day_offset = {0: 6, 1: 5, 2: 4, 3: 3, 4: 2, 5: 1, 6: 0}
 
         # by design our query contains 26 weeks, starting on a sunday.
-        for sv in severities_by_week:
+        for sv in severities_by_day:
             day = sv['created__day']
-            week_day = sv['created__week_day'] # javascript expects zero based day numbering
+            # week_day = sv['created__week_day'] # javascript expects zero based day numbering
             year = sv['created__year']
             month = sv['created__month']
-            week = sv['created__week']
+            # week = sv['created__week']
             day_count = sv['count']
 
             real_date = date(year, month, day)
             import calendar
-            print('year, month, day, day_count, week_day, real_date.weekday(), calendar.day_name[real_date.weekday()], week)')
-            print('%2-%2-%2: %i', year, month, day, day_count, week_day, real_date.weekday(), calendar.day_name[real_date.weekday()], week)
+            # print('year, month, day, day_count, week_day, real_date.weekday(), calendar.day_name[real_date.weekday()], week)')
+            # print('%2-%2-%2: %i', year, month, day, day_count, week_day, real_date.weekday(), calendar.day_name[real_date.weekday()], week)
+            print('year, month, day, day_count, calendar.day_name[real_date.weekday()])')
+            print('%2-%2-%2: %i', year, month, day, day_count, calendar.day_name[real_date.weekday()])
 
             # add previous (completed) week to punchcard, and reinitialize for next (current) week
+            week_day = real_date.weekday()
+
+            
             if week != prev_week:
                 
                 if week_count > 0:
