@@ -15,10 +15,10 @@ metadata:
 {{ toYaml . | indent 4 }}
 {{- end }}
 spec:
-{{- if .Values.django.ingress.activateTLS -}}
+{{- if .Values.django.ingress.activateTLS }}
   tls:
   - hosts:
-      - {{ .Values.host }}
+    - {{ .Values.host }}
   {{- if .Values.django.ingress.secretName }}
     secretName: {{ .Values.django.ingress.secretName }}
   {{- end }}
