@@ -12,7 +12,7 @@ from datetime import date, datetime
 from math import pi, sqrt
 import vobject
 import requests
-from dateutil.relativedelta import relativedelta, MO
+from dateutil.relativedelta import relativedelta, MO, SU
 from django.conf import settings
 from django.core.mail import send_mail
 from django.core.mail import EmailMessage
@@ -544,60 +544,116 @@ def add_breadcrumb(parent=None,
     request.session['dojo_breadcrumbs'] = crumbs
 
 
-def get_punchcard_data(findings, weeks_between, start_date):
-    punchcard = list()
-    ticks = list()
-    highest_count = 0
-    tick = 0
-    week_count = 1
+def get_punchcard_data(findings, start_date, weeks):
+    # use try catch to make sure any teething bugs in the bunchcard don't break the dashboard
+    try:
+        # gather findings over past half year, make sure to start on a sunday
+        # past_sunday = timezone.localdate() - relativedelta(weekday=SU(-1))
+        # first_sunday = past_sunday - relativedelta(weeks=weeks_back)
+        first_sunday = start_date - relativedelta(weekday=SU(-1))
+        last_sunday = start_date + relativedelta(weeks=weeks)
 
-    # mon 0, tues 1, wed 2, thurs 3, fri 4, sat 5, sun 6
-    # sat 0, sun 6, mon 5, tue 4, wed 3, thur 2, fri 1
-    day_offset = {0: 5, 1: 4, 2: 3, 3: 2, 4: 1, 5: 0, 6: 6}
-    for x in range(-1, weeks_between):
-        # week starts the monday before
-        new_date = start_date + relativedelta(weeks=x, weekday=MO(1))
-        end_date = new_date + relativedelta(weeks=1)
-        append_tick = True
-        days = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0}
-        for finding in findings:
-            try:
-                if new_date < datetime.combine(finding.date, datetime.min.time(
-                )).replace(tzinfo=timezone.get_current_timezone()) <= end_date:
-                    # [0,0,(20*.02)]
-                    # [week, day, weight]
-                    days[day_offset[finding.date.weekday()]] += 1
-                    if days[day_offset[finding.date.weekday()]] > highest_count:
-                        highest_count = days[day_offset[
-                            finding.date.weekday()]]
-            except:
-                if new_date < finding.date <= end_date:
-                    # [0,0,(20*.02)]
-                    # [week, day, weight]
-                    days[day_offset[finding.date.weekday()]] += 1
-                    if days[day_offset[finding.date.weekday()]] > highest_count:
-                        highest_count = days[day_offset[
-                            finding.date.weekday()]]
-                pass
+        # reminder: The first week of a year is the one that contains the year’s first Thursday
+        # so we could have for 29/12/2019: week=1 and year=2019 :-D
+        # so we have to order by Y-M-D to make sure the ordering is correct
+        # severities_by_day = findings.filter(created__gte=first_sunday) \
+        #                             .values('created__year', 'created__month', 'created__day') \
+        #                             .annotate(count=Count('id')) \
+        #                             .order_by('created__year', 'created__month', 'created__day')
 
-        if sum(days.values()) > 0:
-            for day, count in list(days.items()):
-                punchcard.append([tick, day, count])
-                if append_tick:
-                    ticks.append([
-                        tick,
-                        new_date.strftime(
-                            "<span class='small'>%m/%d<br/>%Y</span>")
-                    ])
-                    append_tick = False
-            tick += 1
-        week_count += 1
-    # adjust the size
-    ratio = (sqrt(highest_count / pi))
-    for punch in punchcard:
-        punch[2] = (sqrt(punch[2] / pi)) / ratio
+        severities_by_day = findings.filter(created__gte=first_sunday).filter(created__lt=last_sunday) \
+                                    .values('created__date') \
+                                    .annotate(count=Count('id')) \
+                                    .order_by('created__date')
 
-    return punchcard, ticks, highest_count
+        # print(severities_by_week.all())
+        # return empty stuff if no findings to be statted
+        if severities_by_day.count() <= 0:
+            return None, None, 0
+
+        # day of the week numbers:
+        # javascript  database python
+        # sun 6         1       6
+        # mon 5         2       0
+        # tue 4         3       1
+        # wed 3         4       2
+        # thu 2         5       3
+        # fri 1         6       4
+        # sat 0         7       5
+
+        # map from python to javascript, do not use week numbers or day numbers from database.
+        day_offset = {0: 5, 1: 4, 2: 3, 3: 2, 4: 1, 5: 0, 6: 6}
+
+        tick = 0
+        punchcard = list()
+        ticks = list()
+        highest_day_count = 0
+        tick = 0
+        day_counts = [0, 0, 0, 0, 0, 0, 0]
+
+        start_of_week = first_sunday - relativedelta(weeks=1)  # TODO remove deduction of 1 week which was a test
+        start_of_next_week = start_of_week + relativedelta(weeks=1)
+        day_counts = [0, 0, 0, 0, 0, 0, 0]
+
+        import calendar
+        for day in severities_by_day:
+            created = day['created__date']
+            day_count = day['count']
+
+            print('%s %s %s', created, created.weekday(), calendar.day_name[created.weekday()], day_count)
+
+            if created < start_of_week:
+                raise ValueError('date found outside supported range')
+            else:
+                if created >= start_of_week and created < start_of_next_week:
+                    # add day count to current week data
+                    day_counts[day_offset[created.weekday()]] = day_count
+                    highest_day_count = max(highest_day_count, day_count)
+                    # print(day_counts)
+                else:
+                    # created >= start_of_next_week, so store current week, prepare for next
+                    week_data, label = get_week_data(start_of_week, tick, day_counts)
+                    punchcard.extend(week_data)
+                    ticks.append(label)
+
+                    while created >= start_of_next_week:
+                        # keep moving 1 week forward
+                        start_of_week = start_of_next_week
+                        start_of_next_week += relativedelta(weeks=1)
+                        tick += 1
+                        # print('week up, start_of_next_week:', start_of_next_week)
+
+                    # new week, new values!
+                    # print('new week values, start_of_week:', start_of_week)
+                    day_counts = [0, 0, 0, 0, 0, 0, 0]
+                    day_counts[day_offset[created.weekday()]] = day_count
+                    highest_day_count = max(highest_day_count, day_count)             
+
+        # append in progress week
+        week_data, label = get_week_data(start_of_week, tick, day_counts)
+        punchcard.extend(week_data)
+        ticks.append(label)
+
+        # print(punchcard)
+
+        # adjust the size or circles
+        ratio = (sqrt(highest_day_count / pi))
+        for punch in punchcard:
+            punch[2] = (sqrt(punch[2] / pi)) / ratio
+
+        return punchcard, ticks, highest_day_count
+
+    except Exception as e:
+        logger.exception('Not showing punchcard graph due to exception gathering data', e)
+        return None, None, 0
+
+
+def get_week_data(week_start_date, tick, day_counts):
+    data = []
+    for i in range(0, len(day_counts)):
+        data.append([tick, i, day_counts[i]])
+    label = [tick, week_start_date.strftime("<span class='small'>%m/%d<br/>%Y</span>")]
+    return data, label
 
 
 # 5 params
