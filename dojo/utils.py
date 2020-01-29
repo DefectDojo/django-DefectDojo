@@ -558,12 +558,14 @@ def add_breadcrumb(parent=None,
     request.session['dojo_breadcrumbs'] = crumbs
 
 
-def get_punchcard_data(findings, weeks_back):
+def get_punchcard_data(findings, start_date, weeks):
     # use try catch to make sure any teething bugs in the bunchcard don't break the dashboard
     try:
         # gather findings over past half year, make sure to start on a sunday
-        past_sunday = timezone.localdate() - relativedelta(weekday=SU(-1))
-        first_sunday = past_sunday - relativedelta(weeks=weeks_back)
+        # past_sunday = timezone.localdate() - relativedelta(weekday=SU(-1))
+        # first_sunday = past_sunday - relativedelta(weeks=weeks_back)
+        first_sunday = start_date - relativedelta(weekday=SU(-1))
+        last_sunday = start_date + relativedelta(weeks=weeks)
 
         # reminder: The first week of a year is the one that contains the year’s first Thursday
         # so we could have for 29/12/2019: week=1 and year=2019 :-D
@@ -573,7 +575,7 @@ def get_punchcard_data(findings, weeks_back):
         #                             .annotate(count=Count('id')) \
         #                             .order_by('created__year', 'created__month', 'created__day')
 
-        severities_by_day = findings.filter(created__gte=first_sunday) \
+        severities_by_day = findings.filter(created__gte=first_sunday).filter(created__lt=last_sunday) \
                                     .values('created__date') \
                                     .annotate(count=Count('id')) \
                                     .order_by('created__date')
@@ -656,7 +658,7 @@ def get_punchcard_data(findings, weeks_back):
         return punchcard, ticks, highest_day_count
 
     except Exception as e:
-        logger.exception('Not showing punchcard graph due to exception gathering data')
+        logger.exception('Not showing punchcard graph due to exception gathering data', e)
         return None, None, 0
 
 

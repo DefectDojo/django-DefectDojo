@@ -292,8 +292,12 @@ def view_product_metrics(request, pid):
     )
 
     start_date = timezone.make_aware(datetime.combine(start_date, datetime.min.time()))
+    r = relativedelta(end_date, start_date)
+    weeks_between = int(ceil((((r.years * 12) + r.months) * 4.33) + (r.days / 7)))
+    if weeks_between <= 0:
+        weeks_between += 2
 
-    punchcard, ticks, highest_count = get_punchcard_data(open_findings)
+    punchcard, ticks, highest_count = get_punchcard_data(open_findings, start_date, weeks_between)
 
     add_breadcrumb(parent=prod, top_level=False, request=request)
 
