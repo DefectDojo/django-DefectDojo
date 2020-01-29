@@ -540,28 +540,20 @@ def get_punchcard_data(findings, start_date, weeks):
     # use try catch to make sure any teething bugs in the bunchcard don't break the dashboard
     try:
         # gather findings over past half year, make sure to start on a sunday
-        # past_sunday = timezone.localdate() - relativedelta(weekday=SU(-1))
-        # first_sunday = past_sunday - relativedelta(weeks=weeks_back)
         first_sunday = start_date - relativedelta(weekday=SU(-1))
         last_sunday = start_date + relativedelta(weeks=weeks)
 
         # reminder: The first week of a year is the one that contains the year’s first Thursday
-        # so we could have for 29/12/2019: week=1 and year=2019 :-D
-        # so we have to order by Y-M-D to make sure the ordering is correct
-        # severities_by_day = findings.filter(created__gte=first_sunday) \
-        #                             .values('created__year', 'created__month', 'created__day') \
-        #                             .annotate(count=Count('id')) \
-        #                             .order_by('created__year', 'created__month', 'created__day')
+        # so we could have for 29/12/2019: week=1 and year=2019 :-D. So using week number from db is not practical
 
         severities_by_day = findings.filter(created__gte=first_sunday).filter(created__lt=last_sunday) \
                                     .values('created__date') \
                                     .annotate(count=Count('id')) \
                                     .order_by('created__date')
 
-        # print(severities_by_week.all())
         # return empty stuff if no findings to be statted
         if severities_by_day.count() <= 0:
-            return None, None, 0
+            return None, None
 
         # day of the week numbers:
         # javascript  database python
@@ -587,12 +579,13 @@ def get_punchcard_data(findings, start_date, weeks):
         start_of_next_week = start_of_week + relativedelta(weeks=1)
         day_counts = [0, 0, 0, 0, 0, 0, 0]
 
-        import calendar
         for day in severities_by_day:
             created = day['created__date']
             day_count = day['count']
 
-            print('%s %s %s', created, created.weekday(), calendar.day_name[created.weekday()], day_count)
+            created = timezone.make_aware(datetime.combine(created, datetime.min.time()))
+
+            # print('%s %s %s', created, created.weekday(), calendar.day_name[created.weekday()], day_count)
 
             if created < start_of_week:
                 raise ValueError('date found outside supported range')
@@ -601,7 +594,6 @@ def get_punchcard_data(findings, start_date, weeks):
                     # add day count to current week data
                     day_counts[day_offset[created.weekday()]] = day_count
                     highest_day_count = max(highest_day_count, day_count)
-                    # print(day_counts)
                 else:
                     # created >= start_of_next_week, so store current week, prepare for next
                     week_data, label = get_week_data(start_of_week, tick, day_counts)
@@ -613,31 +605,31 @@ def get_punchcard_data(findings, start_date, weeks):
                         start_of_week = start_of_next_week
                         start_of_next_week += relativedelta(weeks=1)
                         tick += 1
-                        # print('week up, start_of_next_week:', start_of_next_week)
 
                     # new week, new values!
                     # print('new week values, start_of_week:', start_of_week)
                     day_counts = [0, 0, 0, 0, 0, 0, 0]
                     day_counts[day_offset[created.weekday()]] = day_count
-                    highest_day_count = max(highest_day_count, day_count)             
+                    highest_day_count = max(highest_day_count, day_count)
 
         # append in progress week
         week_data, label = get_week_data(start_of_week, tick, day_counts)
         punchcard.extend(week_data)
         ticks.append(label)
 
-        # print(punchcard)
-
         # adjust the size or circles
         ratio = (sqrt(highest_day_count / pi))
         for punch in punchcard:
+            # front-end needs both the count for the label and the ratios of the radii of the circles
+            punch.append(punch[2])
             punch[2] = (sqrt(punch[2] / pi)) / ratio
 
-        return punchcard, ticks, highest_day_count
+        return punchcard, ticks
 
     except Exception as e:
         logger.exception('Not showing punchcard graph due to exception gathering data', e)
-        return None, None, 0
+        raise(e)
+        return None, None
 
 
 def get_week_data(week_start_date, tick, day_counts):
