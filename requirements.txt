@@ -27,7 +27,7 @@ gunicorn==20.0.4
 html2text==2019.9.26
 humanize==0.5.1
 jira==2.0.0
-lxml==4.4.2
+lxml==4.4.3
 Markdown==3.1.1
 mysqlclient==1.4.6
 pandas>=0.24.2
