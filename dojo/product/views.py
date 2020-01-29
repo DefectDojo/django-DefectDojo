@@ -421,21 +421,21 @@ def view_engagements(request, pid, engagement_type="Interactive"):
     # In Progress Engagements
     result_engs = EngagementFilter(
         request.GET,
-        queryset=Engagement.objects.filter(product=prod, active=True, status="In Progress", engagement_type=engagement_type).order_by('-updated'))
+        queryset=Engagement.objects.filter(product=prod, active=True, status="In Progress", engagement_type=engagement_type).prefetch_related('test_set').order_by('-updated'))
 
     engs = get_page_items(request, result_engs.qs, default_page_num, param_name="engs")
 
     # Engagements that are queued because they haven't started or paused
     queued_engs = EngagementFilter(
         request.GET,
-        queryset=Engagement.objects.filter(~Q(status="In Progress"), product=prod, active=True, engagement_type=engagement_type).order_by('-updated'))
+        queryset=Engagement.objects.filter(~Q(status="In Progress"), product=prod, active=True, engagement_type=engagement_type).prefetch_related('test_set').order_by('-updated'))
 
     result_queued_engs = get_page_items(request, queued_engs.qs, default_page_num, param_name="queued_engs")
 
     # Cancelled or Completed Engagements
     result = EngagementFilter(
         request.GET,
-        queryset=Engagement.objects.filter(product=prod, active=False, engagement_type=engagement_type).order_by('-target_end'))
+        queryset=Engagement.objects.filter(product=prod, active=False, engagement_type=engagement_type).prefetch_related('test_set').order_by('-target_end'))
 
     i_engs_page = get_page_items(request, result.qs, default_page_num, param_name="i_engs")
 
