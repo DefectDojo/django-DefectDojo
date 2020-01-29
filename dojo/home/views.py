@@ -1,6 +1,6 @@
 # #  dojo home pages
 import logging
-from datetime import timedelta
+from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 
 from django.contrib.auth.decorators import user_passes_test
@@ -66,8 +66,8 @@ def dashboard(request):
     severity_count_all = get_severities_all(findings)
     severity_count_by_month = get_severities_by_month(findings)
 
-    start_date = timezone.localdate() - relativedelta(weeks=26)
-    punchcard, ticks, highest_day_count = get_punchcard_data(findings, start_date, 26)
+    start_date = timezone.now() - relativedelta(weeks=26)
+    punchcard, ticks = get_punchcard_data(findings, start_date, 26)
 
     unassigned_surveys = Answered_Survey.objects.all().filter(
         assignee_id__isnull=True, completed__gt=0)
@@ -87,8 +87,7 @@ def dashboard(request):
                    'by_month': severity_count_by_month,
                    'punchcard': punchcard,
                    'ticks': ticks,
-                   'surveys': unassigned_surveys,
-                   'highest_count': highest_day_count})
+                   'surveys': unassigned_surveys})
 
 
 def get_severities_all(findings):
@@ -113,7 +112,8 @@ def get_severities_by_month(findings):
 
     # order_by is needed due to ordering being present in Meta of Finding
     # severities_all = findings.values('severity').annotate(count=Count('severity')).order_by()
-    severities_by_month = findings.filter(created__gte=timezone.localdate() + relativedelta(months=-6)) \
+    start_date = timezone.make_aware(datetime.combine(timezone.localdate(), datetime.min.time()))
+    severities_by_month = findings.filter(created__gte=start_date + relativedelta(months=-6)) \
                                 .values('created__year', 'created__month', 'severity').annotate(count=Count('severity')).order_by('created__year', 'created__month')
 
     results = {}
