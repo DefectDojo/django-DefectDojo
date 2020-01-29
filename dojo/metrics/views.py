@@ -285,10 +285,9 @@ def metrics(request, mtype):
 
     punchcard = list()
     ticks = list()
-    highest_count = 0
 
     if 'view' in request.GET and 'dashboard' == request.GET['view']:
-        punchcard, ticks, highest_count = get_punchcard_data(findings.qs, start_date, weeks_between)
+        punchcard, ticks = get_punchcard_data(findings.qs, start_date, weeks_between)
         page_name = (get_system_setting('team_name')) + " Metrics"
         template = 'dojo/dashboard-metrics.html'
 
@@ -314,7 +313,6 @@ def metrics(request, mtype):
         'closed_in_period_details': closed_in_period_details,
         'punchcard': punchcard,
         'ticks': ticks,
-        'highest_count': highest_count,
         'show_pt_filter': show_pt_filter,
     })
 

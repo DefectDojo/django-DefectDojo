@@ -265,7 +265,7 @@ def view_product_metrics(request, pid):
     if weeks_between <= 0:
         weeks_between += 2
 
-    punchcard, ticks, highest_count = get_punchcard_data(open_findings, start_date, weeks_between)
+    punchcard, ticks = get_punchcard_data(open_findings, start_date, weeks_between)
 
     add_breadcrumb(parent=prod, top_level=False, request=request)
 
@@ -368,7 +368,6 @@ def view_product_metrics(request, pid):
                    'start_date': start_date,
                    'punchcard': punchcard,
                    'ticks': ticks,
-                   'highest_count': highest_count,
                    'open_close_weekly': open_close_weekly,
                    'severity_weekly': severity_weekly,
                    'critical_weekly': critical_weekly,
