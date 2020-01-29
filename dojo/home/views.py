@@ -66,8 +66,8 @@ def dashboard(request):
     severity_count_all = get_severities_all(findings)
     severity_count_by_month = get_severities_by_month(findings)
 
-    start_date = timezone.localdate() - relativedelta(weeks=3)
-    punchcard, ticks, highest_day_count = get_punchcard_data(findings, start_date, 3)
+    start_date = timezone.localdate() - relativedelta(weeks=26)
+    punchcard, ticks, highest_day_count = get_punchcard_data(findings, start_date, 26)
 
     unassigned_surveys = Answered_Survey.objects.all().filter(
         assignee_id__isnull=True, completed__gt=0)
