@@ -420,25 +420,34 @@ def view_engagements(request, pid, engagement_type="Interactive"):
     default_page_num = 10
 
     # In Progress Engagements
-    result_engs = EngagementFilter(
-        request.GET,
-        queryset=Engagement.objects.filter(product=prod, active=True, status="In Progress", engagement_type=engagement_type).prefetch_related('test_set').order_by('-updated'))
-
-    engs = get_page_items(request, result_engs.qs, default_page_num, param_name="engs")
-
+    engs = Engagement.objects.filter(product=prod, active=True, status="In Progress", engagement_type=engagement_type).prefetch_related('test_set').order_by('-updated')
+    # prefetch counts to avoid N+1 problem
+    engs = prefetch_counts_for_engagement(engs)
+    print('active ', engs)
+    active_engs = EngagementFilter(request.GET, queryset=engs)
+    result_active_engs = get_page_items(request, active_engs.qs, default_page_num, param_name="engs")
+    print('active')
+    for eng in active_engs.qs:
+        print(eng.id, eng.name, eng.count_findings_all)
+        print(eng.id, eng.name, eng.count_findings_open)
+        print(eng.id, eng.name, eng.count_findings_duplicate)
+    
     # Engagements that are queued because they haven't started or paused
-    queued_engs = EngagementFilter(
-        request.GET,
-        queryset=Engagement.objects.filter(~Q(status="In Progress"), product=prod, active=True, engagement_type=engagement_type).prefetch_related('test_set').order_by('-updated'))
-
+    engs = Engagement.objects.filter(~Q(status="In Progress"), product=prod, active=True, engagement_type=engagement_type).prefetch_related('test_set').order_by('-updated')
+    # prefetch counts to avoid N+1 problem
+    engs = prefetch_counts_for_engagement(engs)
+    queued_engs = EngagementFilter(request.GET, queryset=engs)
     result_queued_engs = get_page_items(request, queued_engs.qs, default_page_num, param_name="queued_engs")
 
     # Cancelled or Completed Engagements
-    result = EngagementFilter(
-        request.GET,
-        queryset=Engagement.objects.filter(product=prod, active=False, engagement_type=engagement_type).prefetch_related('test_set').order_by('-target_end'))
+    engs = Engagement.objects.filter(product=prod, active=False, engagement_type=engagement_type).prefetch_related('test_set').order_by('-target_end')
+    # prefetch counts to avoid N+1 problem
+    engs = prefetch_counts_for_engagement(engs)
 
-    i_engs_page = get_page_items(request, result.qs, default_page_num, param_name="i_engs")
+    # TODO remove template tags used for counting the above
+
+    result_inactive = EngagementFilter(request.GET, queryset=engs)
+    result_inactive_engs_page = get_page_items(request, result_inactive.qs, default_page_num, param_name="i_engs")
 
     title = "All Engagements"
     if engagement_type == "CI/CD":
@@ -450,14 +459,20 @@ def view_engagements(request, pid, engagement_type="Interactive"):
                   {'prod': prod,
                    'product_tab': product_tab,
                    'engagement_type': engagement_type,
-                   'engs': engs,
-                   'engs_count': result_engs.qs.count(),
+                   'engs': result_active_engs,
+                   'engs_count': active_engs.qs.count(),
                    'queued_engs': result_queued_engs,
                    'queued_engs_count': queued_engs.qs.count(),
-                   'i_engs': i_engs_page,
-                   'i_engs_count': result.qs.count(),
+                   'i_engs': result_inactive_engs_page,
+                   'i_engs_count': result_inactive.qs.count(),
                    'user': request.user,
                    'authorized': auth})
+
+def prefetch_counts_for_engagement(engs):
+    prefetched_engs = engs.annotate(count_findings_all=Count('test__finding__id'))
+    prefetched_engs = prefetched_engs.annotate(count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)))
+    prefetched_engs = prefetched_engs.annotate(count_findings_duplicate=Count('test__finding__id', filter=Q(test__finding__duplicate=True)))
+    return prefetched_engs
 
 
 def view_engagements_cicd(request, pid):
