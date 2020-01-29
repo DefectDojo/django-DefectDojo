@@ -23,7 +23,7 @@ from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm
 from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, Finding_Template, \
     Tool_Product_Settings, Cred_Mapping, Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, \
     Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product
-from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, get_system_setting, create_notification, Product_Tab
+from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, create_notification, Product_Tab, get_punchcard_data
 from custom_field.models import CustomFieldValue, CustomField
 from dojo.tasks import add_epic_task, add_issue_task
 from tagging.models import Tag
@@ -260,13 +260,13 @@ def view_product_metrics(request, pid):
     )
 
     start_date = timezone.make_aware(datetime.combine(start_date, datetime.min.time()))
-
     r = relativedelta(end_date, start_date)
     weeks_between = int(ceil((((r.years * 12) + r.months) * 4.33) + (r.days / 7)))
     if weeks_between <= 0:
         weeks_between += 2
 
-    punchcard, ticks, highest_count = get_punchcard_data(open_findings, weeks_between, start_date)
+    punchcard, ticks, highest_count = get_punchcard_data(open_findings, start_date, weeks_between)
+
     add_breadcrumb(parent=prod, top_level=False, request=request)
 
     open_close_weekly = OrderedDict()
