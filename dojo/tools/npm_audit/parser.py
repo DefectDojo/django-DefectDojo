@@ -53,14 +53,19 @@ def get_item(item_node, test):
     else:
         severity = 'Info'
 
+    paths = ''
+    for finding in item_node['findings']:
+        paths += "\n  - " + str(finding['version']) + ":" + str(','.join(finding['paths']))
+
     finding = Finding(title=item_node['title'] + " - " + "(" + item_node['module_name'] + ", " + item_node['vulnerable_versions'] + ")",
                       test=test,
                       severity=severity,
-                      file_path=item_node['module_name'],
+                      file_path=item_node['findings'][0]['paths'][0],
                       description=item_node['overview'] + "\n Vulnerable Module: " +
                       item_node['module_name'] + "\n Vulnerable Versions: " +
                       str(item_node['vulnerable_versions']) + "\n Patched Version: " +
-                      str(item_node['patched_versions']) + "\n Vulnerable Path: " + str(item_node['findings'][0]['paths']) + "\n CWE: " +
+                      str(item_node['patched_versions']) + "\n Vulnerable Paths: " +
+                      str(paths) + "\n CWE: " +
                       str(item_node['cwe']) + "\n Access: " +
                       str(item_node['access']),
                       cwe=item_node['cwe'][4:],
