@@ -2121,6 +2121,11 @@ def get_missing_mandatory_notetypes(finding):
 def mark_finding_duplicate(request, original_id, duplicate_id):
     original = get_object_or_404(Finding, id=original_id)
     duplicate = get_object_or_404(Finding, id=duplicate_id)
+
+    if original.test.engagement != duplicate.test.engagement:
+        if original.test.engagement.deduplication_on_engagement or duplicate.test.engagement.deduplication_on_engagement:
+            raise ValueError('Marking finding {} as duplicate of {} failed as they are not in the same engagement and deduplication_on_engagement is enabled for at least one of them')
+
     duplicate.duplicate = True
     duplicate.active = False
     duplicate.verified = False
