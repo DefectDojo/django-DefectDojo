@@ -361,6 +361,7 @@ class ImportScanForm(forms.Form):
                          ("Aqua Scan", "Aqua Scan"),
                          ("HackerOne Cases", "HackerOne Cases"),
                          ("Xanitizer Scan", "Xanitizer Scan"),
+                         ("Outpost24 Scan", "Outpost24 Scan"),
                          ("Trivy Scan", "Trivy Scan"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
