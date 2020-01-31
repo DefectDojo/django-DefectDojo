@@ -481,7 +481,7 @@
 	},
 	{
 	   "fields": {
-	      "name": "JFrogXray Scan"
+	      "name": "JFrog Xray Scan"
 		},
 		"model": "dojo.test_type",
 		"pk": 161
@@ -492,6 +492,49 @@
     	},
     	"model": "dojo.test_type",
     	"pk": 162
+	},
+	{
+		"fields": {
+			"name": "Aqua Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 163
+	},
+	{
+		"fields": {
+			"name": "Dependency Track Finding Packaging Format (FPF) Export"
+		},
+		"model": "dojo.test_type",
+		"pk": 164
 
+	},
+  {
+      "fields": {
+          "name": "Trivy Scan"
+      },
+      "model": "dojo.test_type",
+      "pk": 165
+  },
+  {
+		"fields": {
+			"name": "Xanitizer Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 166
+	},
+	{
+		"fields": {
+			"name": "HackerOne Cases"
+		},
+		"model": "dojo.test_type",
+		"pk": 167
+	},
+	{
+		"fields": {
+			"name": "Outpost24 Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 168
 	}
 ]
+
