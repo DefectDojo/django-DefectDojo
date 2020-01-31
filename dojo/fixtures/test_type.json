@@ -528,6 +528,13 @@
 		},
 		"model": "dojo.test_type",
 		"pk": 167
+	},
+	{
+		"fields": {
+			"name": "Outpost24 Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 168
 	}
 ]
 
