@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "@yarn_components/JUMFlot": "jumjum123/JUMFlot#*",
-    "@yarn_components/bootstrap": "twbs/bootstrap#~3.3.7",
+    "@yarn_components/bootstrap": "twbs/bootstrap#~3.4.1",
     "@yarn_components/bootstrap-social": "lipis/bootstrap-social#~4.8.0",
     "@yarn_components/bootstrap-wysiwyg-steveathon": "steveathon/bootstrap-wysiwyg#*",
     "@yarn_components/bootswatch-dist": "dbtek/bootswatch-dist#readable",

@@ -14,12 +14,14 @@ from django.utils.dates import MONTHS
 from django.utils.safestring import mark_safe
 from django.utils import timezone
 from tagging.models import Tag
-from dojo.models import Finding, Product_Type, Product, ScanSettings, VA, \
+from dojo.models import Finding, Product_Type, Product, Note_Type, ScanSettings, VA, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
     JIRA_Issue, JIRA_PKey, JIRA_Conf, UserContactInfo, Tool_Type, Tool_Configuration, Tool_Product_Settings, \
     Cred_User, Cred_Mapping, System_Settings, Notifications, Languages, Language_Type, App_Analysis, Objects, \
-    Benchmark_Product, Benchmark_Requirement, Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta
+    Benchmark_Product, Benchmark_Requirement, Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, \
+    DojoMeta, Sonarqube_Product
+from dojo.tools import requires_file, SCAN_SONARQUBE_API
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
 
@@ -80,7 +82,7 @@ class MonthYearWidget(Widget):
             this_year = date.today().year
             self.years = list(range(this_year - 10, this_year + 1))
 
-    def render(self, name, value, attrs=None):
+    def render(self, name, value, attrs=None, renderer=None):
         try:
             year_val, month_val = value.year, value.month
         except AttributeError:
@@ -208,6 +210,38 @@ class DeleteProductForm(forms.ModelForm):
                    'internet_accessible', 'regulations', 'product_meta']
 
 
+class NoteTypeForm(forms.ModelForm):
+    description = forms.CharField(widget=forms.Textarea(attrs={}),
+                                  required=True)
+
+    class Meta:
+        model = Note_Type
+        fields = ['name', 'description', 'is_single', 'is_mandatory']
+
+
+class EditNoteTypeForm(NoteTypeForm):
+
+    def __init__(self, *args, **kwargs):
+        is_single = kwargs.pop('is_single')
+        super(EditNoteTypeForm, self).__init__(*args, **kwargs)
+        if is_single is False:
+            self.fields['is_single'].widget = forms.HiddenInput()
+
+
+class DisableOrEnableNoteTypeForm(NoteTypeForm):
+    def __init__(self, *args, **kwargs):
+        super(DisableOrEnableNoteTypeForm, self).__init__(*args, **kwargs)
+        self.fields['name'].disabled = True
+        self.fields['description'].disabled = True
+        self.fields['is_single'].disabled = True
+        self.fields['is_mandatory'].disabled = True
+        self.fields['is_active'].disabled = True
+
+    class Meta:
+        model = Note_Type
+        fields = '__all__'
+
+
 class DojoMetaDataForm(forms.ModelForm):
     value = forms.CharField(widget=forms.Textarea(attrs={}),
                             required=True)
@@ -265,11 +299,13 @@ class ImportScanForm(forms.Form):
                          ("AppSpider Scan", "AppSpider Scan"),
                          ("Veracode Scan", "Veracode Scan"),
                          ("Checkmarx Scan", "Checkmarx Scan"),
+                         ("Checkmarx Scan detailed", "Checkmarx Scan detailed"),
                          ("Crashtest Security Scan", "Crashtest Security Scan"),
                          ("ZAP Scan", "ZAP Scan"),
                          ("Arachni Scan", "Arachni Scan"),
                          ("VCG Scan", "VCG Scan"),
                          ("Dependency Check Scan", "Dependency Check Scan"),
+                         ("Dependency Track Finding Packaging Format (FPF) Export", "Dependency Track Finding Packaging Format (FPF) Export"),
                          ("Retire.js Scan", "Retire.js Scan"),
                          ("Node Security Platform Scan", "Node Security Platform Scan"),
                          ("NPM Audit Scan", "NPM Audit Scan"),
@@ -287,6 +323,8 @@ class ImportScanForm(forms.Form):
                          ("Fortify Scan", "Fortify Scan"),
                          ("Gosec Scanner", "Gosec Scanner"),
                          ("SonarQube Scan", "SonarQube Scan"),
+                         ("SonarQube Scan detailed", "SonarQube Scan detailed"),
+                         (SCAN_SONARQUBE_API, SCAN_SONARQUBE_API),
                          ("MobSF Scan", "MobSF Scan"),
                          ("Trufflehog Scan", "Trufflehog Scan"),
                          ("Nikto Scan", "Nikto Scan"),
@@ -316,10 +354,15 @@ class ImportScanForm(forms.Form):
                          ("Microfocus Webinspect Scan", "Microfocus Webinspect Scan"),
                          ("Wpscan", "Wpscan"),
                          ("Sslscan", "Sslscan"),
-                         ("JFrogXray Scan", "JFrog Xray Scan"),
+                         ("JFrog Xray Scan", "JFrog Xray Scan"),
                          ("Sslyze Scan", "Sslyze Scan"),
                          ("Testssl Scan", "Testssl Scan"),
-                         ("Hadolint Dockerfile check", "Hadolint Dockerfile check"))
+                         ("Hadolint Dockerfile check", "Hadolint Dockerfile check"),
+                         ("Aqua Scan", "Aqua Scan"),
+                         ("HackerOne Cases", "HackerOne Cases"),
+                         ("Xanitizer Scan", "Xanitizer Scan"),
+                         ("Outpost24 Scan", "Outpost24 Scan"),
+                         ("Trivy Scan", "Trivy Scan"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
     scan_date = forms.DateTimeField(
@@ -334,20 +377,30 @@ class ImportScanForm(forms.Form):
     active = forms.BooleanField(help_text="Select if these findings are currently active.", required=False)
     verified = forms.BooleanField(help_text="Select if these findings have been verified.", required=False)
     scan_type = forms.ChoiceField(required=True, choices=SORTED_SCAN_TYPE_CHOICES)
+    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
+                                               widget=MultipleSelectWithPopPlusMinus(attrs={'size': '5'}))
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False,
                            help_text="Add tags that help describe this scan.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
     file = forms.FileField(widget=forms.widgets.FileInput(
-        attrs={"accept": ".xml, .csv, .nessus, .json, .html, .js"}),
+        attrs={"accept": ".xml, .csv, .nessus, .json, .html, .js, .zip"}),
         label="Choose report file",
-        required=True)
+        required=False)
 
     def __init__(self, *args, **kwargs):
         tags = Tag.objects.usage_for_model(Test)
         t = [(tag.name, tag.name) for tag in tags]
         super(ImportScanForm, self).__init__(*args, **kwargs)
         self.fields['tags'].widget.choices = t
+
+    def clean(self):
+        cleaned_data = super().clean()
+        scan_type = cleaned_data.get("scan_type")
+        file = cleaned_data.get("file")
+        if requires_file(scan_type) and not file:
+            raise forms.ValidationError('Uploading a Report File is required for {}'.format(scan_type))
+        return cleaned_data
 
     # date can only be today or in the past, not the future
     def clean_scan_date(self):
@@ -373,6 +426,8 @@ class ReImportScanForm(forms.Form):
                                          choices=SEVERITY_CHOICES[0:4])
     active = forms.BooleanField(help_text="Select if these findings are currently active.", required=False)
     verified = forms.BooleanField(help_text="Select if these findings have been verified.", required=False)
+    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
+                                               widget=MultipleSelectWithPopPlusMinus(attrs={'size': '5'}))
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False,
                            help_text="Add tags that help describe this scan.  "
@@ -380,13 +435,21 @@ class ReImportScanForm(forms.Form):
     file = forms.FileField(widget=forms.widgets.FileInput(
         attrs={"accept": ".xml, .csv, .nessus, .json, .html"}),
         label="Choose report file",
-        required=True)
+        required=False)
 
     def __init__(self, *args, **kwargs):
         tags = Tag.objects.usage_for_model(Test)
         t = [(tag.name, tag.name) for tag in tags]
         super(ReImportScanForm, self).__init__(*args, **kwargs)
         self.fields['tags'].widget.choices = t
+
+    def clean(self):
+        cleaned_data = super().clean()
+        scan_type = cleaned_data.get("scan_type")
+        file = cleaned_data.get("file")
+        if requires_file(scan_type) and not file:
+            raise forms.ValidationError('Uploading a Report File is required for {}'.format(scan_type))
+        return cleaned_data
 
     # date can only be today or in the past, not the future
     def clean_scan_date(self):
@@ -589,6 +652,9 @@ class EngForm(forms.ModelForm):
                   "listings.")
     description = forms.CharField(widget=forms.Textarea(attrs={}),
                                   required=False, help_text="Description of the engagement and details regarding the engagement.")
+    product = forms.ModelChoiceField(label='Product',
+                                       queryset=Product.objects.all().order_by('name'),
+                                       required=True)
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False,
                            help_text="Add tags that help describe this engagement.  "
@@ -762,7 +828,7 @@ class AddFindingForm(forms.ModelForm):
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
-    cve = forms.CharField(max_length=20, required=False)
+    cve = forms.CharField(max_length=28, required=False)
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -800,7 +866,7 @@ class AdHocFindingForm(forms.ModelForm):
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
-    cve = forms.CharField(max_length=20, required=False)
+    cve = forms.CharField(max_length=28, required=False)
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -838,7 +904,7 @@ class PromoteFindingForm(forms.ModelForm):
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
-    cve = forms.CharField(max_length=20, required=False)
+    cve = forms.CharField(max_length=28, required=False)
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -863,7 +929,7 @@ class FindingForm(forms.ModelForm):
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
-    cve = forms.CharField(max_length=20, required=False)
+    cve = forms.CharField(max_length=28, required=False)
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -909,7 +975,7 @@ class FindingForm(forms.ModelForm):
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
-                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change')
+                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change', 'sonarqube_issue')
 
 
 class StubFindingForm(forms.ModelForm):
@@ -937,7 +1003,7 @@ class ApplyFindingTemplateForm(forms.Form):
     title = forms.CharField(max_length=1000, required=True)
 
     cwe = forms.IntegerField(label="CWE", required=False)
-    cve = forms.CharField(label="CVE", max_length=20, required=False)
+    cve = forms.CharField(label="CVE", max_length=28, required=False)
 
     severity = forms.ChoiceField(required=False, choices=SEVERITY_CHOICES, error_messages={'required': 'Select valid choice: In Progress, On Hold, Completed', 'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
 
@@ -981,7 +1047,7 @@ class FindingTemplateForm(forms.ModelForm):
                            help_text="Add tags that help describe this finding template.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
     cwe = forms.IntegerField(label="CWE", required=False)
-    cve = forms.CharField(label="CVE", max_length=20, required=False)
+    cve = forms.CharField(label="CVE", max_length=28, required=False)
     severity = forms.ChoiceField(
         required=False,
         choices=SEVERITY_CHOICES,
@@ -1076,7 +1142,7 @@ class EditEndpointForm(forms.ModelForm):
         query = cleaned_data['query']
         fragment = cleaned_data['fragment']
 
-        if protocol:
+        if protocol and path:
             endpoint = urlunsplit((protocol, host, path, query, fragment))
         else:
             endpoint = host
@@ -1250,6 +1316,18 @@ class NoteForm(forms.ModelForm):
         fields = ['entry', 'private']
 
 
+class FindingNoteForm(NoteForm):
+
+    def __init__(self, *args, **kwargs):
+        queryset = kwargs.pop('available_note_types')
+        super(FindingNoteForm, self).__init__(*args, **kwargs)
+        self.fields['note_type'] = forms.ModelChoiceField(queryset=queryset, label='Note Type', required=True)
+
+    class Meta():
+        model = Notes
+        fields = ['note_type', 'entry', 'private']
+
+
 class DeleteNoteForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())
@@ -1267,9 +1345,17 @@ class CloseFindingForm(forms.ModelForm):
                                      'required, please use the text area '
                                      'below to provide documentation.')})
 
+    def __init__(self, *args, **kwargs):
+        queryset = kwargs.pop('missing_note_types')
+        super(CloseFindingForm, self).__init__(*args, **kwargs)
+        if len(queryset) == 0:
+            self.fields['note_type'].widget = forms.HiddenInput()
+        else:
+            self.fields['note_type'] = forms.ModelChoiceField(queryset=queryset, label='Note Type', required=True)
+
     class Meta:
         model = Notes
-        fields = ['entry']
+        fields = ['note_type', 'entry']
 
 
 class DefectFindingForm(forms.ModelForm):
@@ -1569,6 +1655,23 @@ class JIRA_PKeyForm(forms.ModelForm):
         exclude = ['product']
 
 
+class Sonarqube_ProductForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(Sonarqube_ProductForm, self).__init__(*args, **kwargs)
+        Tool_Type.objects.get_or_create(name='SonarQube')
+
+    sonarqube_tool_config = forms.ModelChoiceField(
+        label='SonarQube Configuration',
+        queryset=Tool_Configuration.objects.filter(tool_type__name="SonarQube").order_by('name'),
+        required=False
+    )
+
+    class Meta:
+        model = Sonarqube_Product
+        exclude = ['product']
+
+
 class DeleteJIRAConfForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())
@@ -1734,7 +1837,7 @@ class SystemSettingsForm(forms.ModelForm):
 
     class Meta:
         model = System_Settings
-        exclude = ['product_grade']
+        exclude = ['product_grade', 'credentials', 'column_widths', 'drive_folder_ID', 'enable_google_sheets']
 
 
 class BenchmarkForm(forms.ModelForm):
@@ -1817,3 +1920,54 @@ class JIRAFindingForm(forms.Form):
         self.fields['push_to_jira'].help_text = "Checking this will overwrite content of your JIRA issue, or create one."
 
     push_to_jira = forms.BooleanField(required=False)
+
+
+class GoogleSheetFieldsForm(forms.Form):
+    cred_file = forms.FileField(widget=forms.widgets.FileInput(
+        attrs={"accept": ".json"}),
+        label="Google credentials file",
+        required=True,
+        allow_empty_file=False,
+        help_text="Upload the credentials file downloaded from the Google Developer Console")
+    drive_folder_ID = forms.CharField(
+        required=True,
+        label="Google Drive folder ID",
+        help_text="Extract the Drive folder ID from the URL and provide it here")
+    enable_service = forms.BooleanField(
+        initial=False,
+        required=False,
+        help_text='Tick this check box to enable Google Sheets Sync feature')
+
+    def __init__(self, *args, **kwargs):
+        self.credentials_required = kwargs.pop('credentials_required')
+        options = ((0, 'Hide'), (100, 'Small'), (200, 'Medium'), (400, 'Large'))
+        protect = ['reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
+                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change', 'sonarqube_issue', 'is_template']
+        self.all_fields = kwargs.pop('all_fields')
+        super(GoogleSheetFieldsForm, self).__init__(*args, **kwargs)
+        if not self.credentials_required:
+            self.fields['cred_file'].required = False
+        for i in self.all_fields:
+            self.fields[i.name] = forms.ChoiceField(choices=options)
+            if i.name == 'id' or i.editable is False or i.many_to_one or i.name in protect:
+                self.fields['Protect ' + i.name] = forms.BooleanField(initial=True, required=True, disabled=True)
+            else:
+                self.fields['Protect ' + i.name] = forms.BooleanField(initial=False, required=False)
+
+
+class LoginBanner(forms.Form):
+    banner_enable = forms.BooleanField(
+        label="Enable login banner",
+        initial=False,
+        required=False,
+        help_text='Tick this box to enable a text banner on the login page'
+    )
+
+    banner_message = forms.CharField(
+        required=False,
+        label="Message to display on the login page"
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        return cleaned_data

@@ -2,6 +2,7 @@
 {% load humanize %}
 {% load get_endpoint_status %}
 {% load get_note_status %}
+{% load get_notetype_availability %}
 {% load event_tags %}
 {% if endpoints %}
     <h3>== Endpoints ==</h3>
@@ -104,9 +105,15 @@
                     {% if notes.count > 0 %}
                         <p><b>==== Finding Notes: ====</b>
                             <br>
+                            {% if notes|get_notetype_notes_count > 0 %}
+                                {% for note in notes reversed %}
+                                        {{ note.author }} - {{ note.date }} - {% if note.note_type != None %}{{ note.note_type }}{% endif %} - {{ note }} +<br>
+                                {% endfor %}
+                            {% else %}
                                 {% for note in notes reversed %}
                                         {{ note.author }} - {{ note.date }} - {{ note }} +<br>
                                 {% endfor %}
+                            {% endif %}
                         </p><br>
                     {% endif %}
                 {% endwith %}

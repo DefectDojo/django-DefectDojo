@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+{% load navigation_tags %}
+{% block content %}
+    <div class="row" xmlns="http://www.w3.org/1999/html">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading tight">
+                    <h3 class="has-filters">
+                        Engagements
+                        <div class="dropdown pull-right"></div>
+                    </h3>
+                </div>
+                <div id="the-filters" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
+                    {% include "dojo/filter_snippet.html" with form=filtered.form %}
+                </div>
+            </div>
+            {% if products %}
+
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=products page_size=True %}
+                </div>
+
+                <div class="table-responsive panel panel-default">
+                    <table id="engagements" class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
+                        <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Tags</th>
+                            <th>Product Type</th>
+                            <th>Engagement Name</th>
+                            <th>Status</th>
+                            <th>Target Start</th>
+                            <th>Lead</th>
+                            <th>Tests</th>
+                            {% if user.is_staff %}
+                                <th>Engagement</th>
+                            {% endif %}
+                        </tr>
+                        </thead>
+
+                        <tbody>
+                        {% for p in products %}
+                            {% for e in p.engagement_set.all %}
+                                <tr>
+
+                                    <td class="prod_name"><a href="{% url 'view_product' p.id %}">{{ p.name }}</a>
+                                    </td>
+                                    <!-- Tags column -->
+                                    <td>
+                                        <sup>
+                                            {% for tag in p.tags %}
+                                                <a title="Search {{ tag }}" class="tag-label tag-color"
+                                                   href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                            {% endfor %}
+                                        </sup>
+                                    </td>
+                                    <!-- End of Tags Column -->
+                                    <td class="prod_name">
+                                        <a href="{% url 'product_type_metrics' p.prod_type.id %}">{{ p.prod_type.name }}</a>
+                                    </td>
+                                    <td>
+                                        <a style="display: inline" class="eng_link"
+                                           href="{% url 'view_engagement' e.id %}">
+                                            {% if e.name %}{{ e.name }} {% endif %}<br>
+                                        </a>
+                                    </td>
+                                    <td> {{ e.status }} </td>
+                                    <td> {{ e.target_start }} </td>
+                                    <td> {{ e.lead.first_name }}</td>
+                                    <td> {% for test in e.test_set.all %}
+                                        {% if test.lead %}
+                                            <a href="{% url 'view_test' test.id %}"> {{ test }}: {{ test.lead.first_name }} </a>
+                                        {% else %}
+                                            <a href="{% url 'view_test' test.id %}"> {{ test }} </a>
+                                        {% endif %}
+                                        <br>
+                                    {% endfor %}
+                                        <sup>
+                                            {% for tag in e.tags %}
+                                                <a title="Search {{ tag }}" class="tag-label tag-color"
+                                                   href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                            {% endfor %}
+                                        </sup></td>
+                                    {% if user.is_staff %}
+                                        <td>
+                                            <a class="btn btn-sm btn-success" href="{% url 'new_eng_for_prod' p.id %}">
+                                                <i class="fa fa-plus"></i> Add
+                                            </a>
+                                        </td>
+                                    {% endif %}
+                                </tr>
+
+                            {% endfor %}
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=products page_size=True %}
+                </div>
+            {% else %}
+                <h5> No engagements found </h5>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+{% block postscript %}
+
+    <script>
+        $(function () {
+            var availableTags = [
+                {% for word in name_words %}
+                    "{{word}}",
+                {% endfor %}
+            ];
+            var engWords = [
+                {% for word in eng_words %}
+                    "{{word}}",
+                {% endfor %}
+            ];
+            $("#id_name").autocomplete({
+                source: availableTags
+            });
+            $("#id_engagement__name").autocomplete({
+                source: engWords
+            });
+        });
+    </script>
+    <script>
+        // DataTables setup
+        $(document).ready(function() {
+            date =  new Date().toISOString().slice(0, 10);
+            var fileDated = 'Engagements_List_' + date;
+            var buttonCommon = {
+                exportOptions: {
+                    columns: ':not(:eq(8))',
+                    stripHtml: true,
+                    stripNewlines: true,
+                    trim: true,
+                    orthogonal: 'export'
+                },
+                filename: fileDated,
+                title: 'Engagements List'
+            };
+
+            // Mapping of table columns to objects for proper cleanup and data formatting
+            var dojoTable = $('#engagements').DataTable({
+                "columns": [
+                    { "data": "product" , render: function (data, type, row) {
+                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
+                    }},
+                    { "data": "tags" , render: function (data, type, row) {
+                            return type === 'export' ?  getDojoExportValueFromTag(data, 'a') :  data;
+                    }},
+                    { "data": "product_type" , render: function (data, type, row) {
+                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
+                    }},
+                    { "data": "eng_name" , render: function (data, type, row) {
+                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
+                    }},
+                    { "data": "status", render: function (data, type, row) {
+                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
+                    } },
+                    { "data": "target_start", render: function (data, type, row) {
+                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
+                    }},
+                    { "data": "lead", render: function (data, type, row) {
+                            return type === 'export' ? getDojoExportValueFromTag(data, 'td') :  data;
+                    }},
+                    { "data": "tests" , render: function (data, type, row) {
+                            return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
+                    }},
+                    { "data": "action", render: function (data, type, row) {
+                            return type === 'export' ?  "" :  data;
+                    }},
+                ],
+                "columnDefs": [
+                    { "orderable": false, "targets": [8] }
+                ],
+                dom: 'Bfrtip',
+                paging: false,
+                buttons: [
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'colvis'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'copyHtml5'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'excelHtml5',
+                        autoFilter: true,
+                        sheetName: 'Exported data',
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'csvHtml5'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'pdfHtml5',
+                        orientation: 'landscape',
+                        pageSize: 'LETTER'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'print'
+                    }),
+                ],
+            });
+        });
+    </script>
+    {% include "dojo/filter_js_snippet.html" %}
+{% endblock %}

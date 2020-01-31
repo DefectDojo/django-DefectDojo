@@ -109,6 +109,7 @@ function setupdb() {
     python manage.py makemigrations --merge --noinput
     python manage.py migrate
     python manage.py syncdb --noinput
+    python manage.py loaddata initial_banner_conf
     python manage.py loaddata product_type
     python manage.py loaddata test_type
     python manage.py loaddata development_environment
@@ -620,5 +621,5 @@ function slim_defect_dojo_settings() {
   # Copy settings file
   ENV_SETTINGS_FILE=dojo/settings/.env.prod
   cp dojo/settings/template-env ${ENV_SETTINGS_FILE}
-  sed -i'' "s&# DD_TRACK_MIGRATIONS=on&#DD_TRACK_MIGRATIONS=on&g" ${ENV_SETTINGS_FILE}
+  sed -i'' "s&# DD_TRACK_MIGRATIONS=True&#DD_TRACK_MIGRATIONS=True&g" ${ENV_SETTINGS_FILE}
 }

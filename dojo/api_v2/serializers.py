@@ -5,6 +5,7 @@ from dojo.models import Product, Engagement, Test, Finding, \
     Product_Type, JIRA_Conf, Endpoint, BurpRawRequestResponse, JIRA_PKey, \
     Notes, DojoMeta, FindingImage
 from dojo.forms import ImportScanForm, SEVERITY_CHOICES
+from dojo.tools import requires_file
 from dojo.tools.factory import import_parser_factory
 from dojo.utils import create_notification
 from django.urls import reverse
@@ -14,6 +15,7 @@ from django.conf import settings
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+import base64
 import datetime
 import six
 from django.utils.translation import ugettext_lazy as _
@@ -167,6 +169,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
     findings_count = serializers.SerializerMethodField()
+    findings_list = serializers.SerializerMethodField()
+
     tags = TagListSerializerField(required=False)
     product_meta = ProductMetaSerializer(read_only=True, many=True)
 
@@ -181,6 +185,8 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
     def get_findings_count(self, obj):
         return obj.findings_count
 
+    def get_findings_list(self, obj):
+        return obj.open_findings_list()
 
 class ProductTypeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -374,7 +380,19 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class FindingImageSerializer(serializers.ModelSerializer):
+    base64 = serializers.SerializerMethodField()
+
+    class Meta:
+        model = FindingImage
+        fields = ["base64", "caption", "id"]
+
+    def get_base64(self, obj):
+        return base64.b64encode(obj.image.read())
+
+
 class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
+    images = FindingImageSerializer(many=True, read_only=True)
     tags = TagListSerializerField(required=False)
 
     class Meta:
@@ -420,7 +438,7 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Finding
-        fields = '__all__'
+        exclude = ['images']
         extra_kwargs = {
             'reporter': {'default': serializers.CurrentUserDefault()},
         }
@@ -510,8 +528,11 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
     verified = serializers.BooleanField(default=True)
     scan_type = serializers.ChoiceField(
         choices=ImportScanForm.SCAN_TYPE_CHOICES)
+    endpoint_to_add = serializers.PrimaryKeyRelatedField(queryset=Endpoint.objects.all(),
+                                                         required=False,
+                                                         default=None)
     test_type = serializers.CharField(required=False)
-    file = serializers.FileField()
+    file = serializers.FileField(required=False)
     engagement = serializers.PrimaryKeyRelatedField(
         queryset=Engagement.objects.all())
     lead = serializers.PrimaryKeyRelatedField(
@@ -528,6 +549,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         verified = data['verified']
         test_type, created = Test_Type.objects.get_or_create(
             name=data.get('test_type', data['scan_type']))
+        endpoint_to_add = data['endpoint_to_add']
         environment, created = Development_Environment.objects.get_or_create(
             name='Development')
         test = Test(
@@ -547,7 +569,7 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         if 'tags' in data:
             test.tags = ' '.join(data['tags'])
         try:
-            parser = import_parser_factory(data['file'],
+            parser = import_parser_factory(data.get('file'),
                                            test,
                                            active,
                                            verified,
@@ -607,6 +629,9 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
 
                     item.endpoints.add(ep)
 
+                if endpoint_to_add:
+                    item.endpoints.add(endpoint_to_add)
+
                 if item.unsaved_tags is not None:
                     item.tags = item.unsaved_tags
 
@@ -663,6 +688,13 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
 
         return test
 
+    def validate(self, data):
+        scan_type = data.get("scan_type")
+        file = data.get("file")
+        if not file and requires_file(scan_type):
+            raise serializers.ValidationError('Uploading a Report File is required for {}'.format(scan_type))
+        return data
+
     def validate_scan_data(self, value):
         if value.date() > datetime.today().date():
             raise serializers.ValidationError(
@@ -679,8 +711,10 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     verified = serializers.BooleanField(default=True)
     scan_type = serializers.ChoiceField(
         choices=ImportScanForm.SCAN_TYPE_CHOICES)
-    tags = TagListSerializerField(required=False)
-    file = serializers.FileField()
+    endpoint_to_add = serializers.PrimaryKeyRelatedField(queryset=Endpoint.objects.all(),
+                                                          default=None,
+                                                          required=False)
+    file = serializers.FileField(required=False)
     test = serializers.PrimaryKeyRelatedField(
         queryset=Test.objects.all())
 
@@ -688,13 +722,14 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         data = self.validated_data
         test = data['test']
         scan_type = data['scan_type']
+        endpoint_to_add = data['endpoint_to_add']
         min_sev = data['minimum_severity']
         scan_date = data['scan_date']
         verified = data['verified']
         active = data['active']
 
         try:
-            parser = import_parser_factory(data['file'],
+            parser = import_parser_factory(data.get('file'),
                                            test,
                                            active,
                                            verified,
@@ -790,7 +825,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                             fragment=endpoint.fragment,
                             product=test.engagement.product)
                         finding.endpoints.add(ep)
-
+                    if endpoint_to_add:
+                        finding.endpoints.add(endpoint_to_add)
                     if item.unsaved_tags:
                         finding.tags = item.unsaved_tags
 
@@ -819,6 +855,13 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
 
         return test
 
+    def validate(self, data):
+        scan_type = data.get("scan_type")
+        file = data.get("file")
+        if not file and requires_file(scan_type):
+            raise serializers.ValidationError('Uploading a Report File is required for {}'.format(scan_type))
+        return data
+
     def validate_scan_data(self, value):
         if value.date() > datetime.today().date():
             raise serializers.ValidationError(
@@ -836,9 +879,9 @@ class NoteHistorySerializer(serializers.ModelSerializer):
 
 class NoteSerializer(serializers.ModelSerializer):
     author = UserSerializer(
-        many=False, read_only=True)
+        many=False, read_only=False)
     editor = UserSerializer(
-        read_only=True, many=False)
+        read_only=False, many=False, allow_null=True)
 
     history = NoteHistorySerializer(read_only=True, many=True)
 
@@ -847,11 +890,11 @@ class NoteSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class FindingImageSerializer(serializers.ModelSerializer):
+class AddNewNoteOptionSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = FindingImage
-        fields = '__all__'
+        model = Notes
+        fields = ['entry', 'private']
 
 
 class FindingToFindingImagesSerializer(serializers.Serializer):
