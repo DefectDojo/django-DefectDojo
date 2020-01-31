@@ -302,7 +302,7 @@
                                   {% endif %}
                                 </td>
                                 <td>
-                                  <a target="#" data-toggle="tooltip" data-placement="bottom" title="Test: {{ finding.tes }}">{{ finding.get_found_by }}</a>
+                                  <a target="#" data-toggle="tooltip" data-placement="bottom" title="Test: {{ finding.test }}">{{ finding.get_found_by }}</a>
                                 </td>
                                 <td>{% if finding.under_review %}Under Review, {% endif %}{{ finding.status }}{% if finding.duplicate_finding.id %}, <a href="{% url 'view_finding' finding.duplicate_finding.id%}" data-toggle="tooltip" data-placement="top" title="{{ finding.duplicate_finding.title }}, {{ finding.duplicate_finding.created }}">Original</a>
                                   {% endif %}
