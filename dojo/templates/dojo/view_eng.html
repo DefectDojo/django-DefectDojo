@@ -293,7 +293,7 @@
                                        </li>
                                    </ul>
                                 </td>
-                                <td>{{ test.target_start|local_date }} - {{ test.target_end|local_date }}</td>
+                                <td>{{ test.target_start|date }} - {{ test.target_end|date }}</td>
                                 <td>
                                   {% if test.lead.get_full_name and test.lead.get_full_name.strip %}
                                       {{ test.lead.get_full_name }}
