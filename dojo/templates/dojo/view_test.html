@@ -120,7 +120,7 @@
                             <b><i>Unknown</i></b>
                         {% endif %}
                     </td>
-                    <td>{{ test.target_start|local_date }} - {{ test.target_end|local_date }}</td>
+                    <td>{{ test.target_start|date }} - {{ test.target_end|date }}</td>
                     {% if test.percent_complete > 0 %}
                         <td>
                             <div class="progress">
