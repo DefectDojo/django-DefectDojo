@@ -772,8 +772,9 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
 
                 if findings:
                     finding = findings[0]
-                    if finding.mitigated:
+                    if finding.mitigated or finding.is_Mitigated:
                         finding.mitigated = None
+                        finding.is_Mitigated = False
                         finding.mitigated_by = None
                         finding.active = True
                         finding.verified = verified
@@ -835,21 +836,23 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
 
             to_mitigate = set(original_items) - set(new_items)
             for finding in to_mitigate:
-                finding.mitigated = datetime.datetime.combine(
-                    scan_date,
-                    timezone.now().time())
-                if settings.USE_TZ:
-                    finding.mitigated = timezone.make_aware(
-                        finding.mitigated,
-                        timezone.get_default_timezone())
-                finding.mitigated_by = self.context['request'].user
-                finding.active = False
-                finding.save()
-                note = Notes(entry="Mitigated by %s re-upload." % scan_type,
-                             author=self.context['request'].user)
-                note.save()
-                finding.notes.add(note)
-                mitigated_count += 1
+                if not finding.mitigated or not finding.is_Mitigated:
+                    finding.mitigated = datetime.datetime.combine(
+                        scan_date,
+                        timezone.now().time())
+                    if settings.USE_TZ:
+                        finding.mitigated = timezone.make_aware(
+                            finding.mitigated,
+                            timezone.get_default_timezone())
+                    finding.is_Mitigated = True
+                    finding.mitigated_by = self.context['request'].user
+                    finding.active = False
+                    finding.save()
+                    note = Notes(entry="Mitigated by %s re-upload." % scan_type,
+                                author=self.context['request'].user)
+                    note.save()
+                    finding.notes.add(note)
+                    mitigated_count += 1
 
         except SyntaxError:
             raise Exception("Parser SyntaxError")
