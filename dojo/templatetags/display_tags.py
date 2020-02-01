@@ -770,8 +770,8 @@ def get_severity_count(id, table):
 
     return display_counts
 
+
 @register.filter(name='local_date')
 def local_date(the_date):
     the_local_date = the_date.astimezone(timezone.get_current_timezone())
     return the_local_date.strftime("%b %d, %Y")
-
