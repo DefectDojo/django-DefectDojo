@@ -39,7 +39,7 @@ pygments==2.4.2
 python-dateutil==2.8.1
 python-nmap==0.6.1
 pytz==2019.3
-redis==3.3.11
+redis==3.4.1
 requests>=2.22.0
 sqlalchemy  # Required by Celery broker transport
 supervisor==4.1.0
