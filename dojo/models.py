@@ -1569,7 +1569,7 @@ class Finding(models.Model):
         long_desc = ''
         long_desc += '*' + self.title + '*\n\n'
         long_desc += '*Severity:* ' + str(self.severity) + '\n\n'
-        long_desc += '*Cve:* ' + str(self.cve) + '\n\n'
+        long_desc += '*CVE:* ' + str(self.cve) + '\n\n'
         long_desc += '*Product/Engagement:* ' + self.test.engagement.product.name + ' / ' + self.test.engagement.name + '\n\n'
         if self.test.engagement.branch_tag:
             long_desc += '*Branch/Tag:* ' + self.test.engagement.branch_tag + '\n\n'
@@ -1645,7 +1645,7 @@ class Finding(models.Model):
         elif self.cwe is None:
             vulnerability = self.vulnerabilities.first()
             if vulnerability is not None:
-                self.cwe = self.vulnerabilities.first().cwe
+                self.cwe = vulnerability.cwe
         super(Finding, self).save()
         system_settings = System_Settings.objects.get()
         if dedupe_option and self.hash_code is not None:
