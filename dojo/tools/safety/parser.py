@@ -1,4 +1,5 @@
 import json
+import urllib
 from dojo.models import Finding
 
 
@@ -8,7 +9,7 @@ class SafetyParser(object):
         # Grab Safety DB for CVE lookup
         url = "https://raw.githubusercontent.com/pyupio/safety-db/master/data/insecure_full.json"
         response = urllib.request.urlopen(url)
-        safety_db = json.loads(response.read())
+        safety_db = json.loads(response.read().decode('utf-8'))
 
         tree = self.parse_json(json_output)
 

@@ -71,6 +71,8 @@ def get_item(item_node, test):
                       duplicate=False,
                       out_of_scope=False,
                       mitigated=None,
-                      impact="No impact provided")
+                      impact="No impact provided",
+                      static_finding=True,
+                      dynamic_finding=False)
 
     return finding
