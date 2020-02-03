@@ -853,6 +853,10 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     finding.notes.add(note)
                     mitigated_count += 1
 
+            test.updated = scan_date
+            test.target_end = scan_date
+            test.save()
+
         except SyntaxError:
             raise Exception("Parser SyntaxError")
 
