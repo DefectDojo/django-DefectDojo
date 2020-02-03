@@ -2103,16 +2103,16 @@ class Vulnerability(models.Model):
     """
     vulnerability_id = models.CharField(primary_key=True, max_length=200,
                                         help_text='Vulnerability id such as CVE-2000-0001.')
-    url = models.URLField(help_text='URL for more details about this vulnerability.')
+    url = models.URLField(help_text='URL for more details about this vulnerability.', verbose_name='URL')
     title = models.CharField(max_length=1000, help_text='Title or summary of this vulnerability.')
     description = models.TextField(blank=True, help_text='Further details of this vulnerability.')
-    cwe = models.PositiveSmallIntegerField(null=True,
+    cwe = models.PositiveSmallIntegerField(null=True, verbose_name='CWE',
                                            help_text='Common weakness enumeration this vulnerability is categorized under.')
     updated = models.DateTimeField(auto_now=True, help_text='Time this vulnerability entry was last updated.')
 
 
 class VulnerabilityMirrorState(models.Model):
-    remote_url = models.URLField(primary_key=True,
+    remote_url = models.URLField(primary_key=True, verbose_name='Remote Git URL',
                                  help_text='Git remote URL to repository containing vulnerability data.')
     last_processed_revision = models.CharField(max_length=40, blank=True,
                                                help_text='Last revision in vulnerability mirror that was processed.')
