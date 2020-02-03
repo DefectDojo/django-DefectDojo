@@ -827,8 +827,8 @@ class AddFindingForm(forms.ModelForm):
     title = forms.CharField(max_length=1000)
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
-    cwe = forms.IntegerField(required=False)
-    cve = forms.CharField(max_length=28, required=False)
+    cwe = forms.IntegerField(required=False, label='CWE')
+    cve = forms.CharField(max_length=28, required=False, label='CVE')
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -858,15 +858,15 @@ class AddFindingForm(forms.ModelForm):
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
-                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change')
+                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change', 'vulnerabilities')
 
 
 class AdHocFindingForm(forms.ModelForm):
     title = forms.CharField(max_length=1000)
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
-    cwe = forms.IntegerField(required=False)
-    cve = forms.CharField(max_length=28, required=False)
+    cwe = forms.IntegerField(required=False, label='CWE')
+    cve = forms.CharField(max_length=28, required=False, label='CVE')
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -896,15 +896,15 @@ class AdHocFindingForm(forms.ModelForm):
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
-                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change')
+                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change', 'vulnerabilities')
 
 
 class PromoteFindingForm(forms.ModelForm):
     title = forms.CharField(max_length=1000)
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
-    cwe = forms.IntegerField(required=False)
-    cve = forms.CharField(max_length=28, required=False)
+    cwe = forms.IntegerField(required=False, label='CWE')
+    cve = forms.CharField(max_length=28, required=False, label='CVE')
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -921,15 +921,16 @@ class PromoteFindingForm(forms.ModelForm):
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'active', 'false_p', 'verified', 'is_template',
-                   'duplicate', 'out_of_scope', 'images', 'under_review', 'reviewers', 'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change')
+                   'duplicate', 'out_of_scope', 'images', 'under_review', 'reviewers', 'review_requested_by',
+                   'is_Mitigated', 'jira_creation', 'jira_change', 'vulnerabilities')
 
 
 class FindingForm(forms.ModelForm):
     title = forms.CharField(max_length=1000)
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
-    cwe = forms.IntegerField(required=False)
-    cve = forms.CharField(max_length=28, required=False)
+    cwe = forms.IntegerField(required=False, label='CWE')
+    cve = forms.CharField(max_length=28, required=False, label='CVE')
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -975,7 +976,8 @@ class FindingForm(forms.ModelForm):
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
-                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change', 'sonarqube_issue')
+                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change', 'sonarqube_issue',
+                   'vulnerabilities')
 
 
 class StubFindingForm(forms.ModelForm):
