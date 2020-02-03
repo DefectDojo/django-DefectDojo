@@ -321,11 +321,11 @@ def celery_status():
 
 @app.task(ignore_result=True)
 def synchronize_vulnerability_mirrors():
-    s = System_Settings.objects.get()
-    if not s.enable_vulnerability_database:
+    from dojo.utils import get_system_setting
+    if not get_system_setting('enable_vulnerability_database'):
         logger.info('Vulnerability mirror synchronization disabled.')
         raise Ignore
-    remote_url = s.vulnerability_database_remote_url
+    remote_url = get_system_setting('vulnerability_database_remote_url')
     state, _ = VulnerabilityMirrorState.objects.get_or_create(remote_url=remote_url)
     if state.locked:
         logger.info('Vulnerability mirror for %s is currently locked.', remote_url)
