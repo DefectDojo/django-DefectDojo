@@ -130,4 +130,3 @@ class HackerOneJSONParser(object):
             pass
 
         return description
-
