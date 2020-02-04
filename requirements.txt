@@ -49,7 +49,7 @@ vobject==0.9.6.1
 whitenoise>=4.1.2
 titlecase==0.12.0
 social-auth-app-django==3.1.0
-Python-jose==3.0.1
+Python-jose==3.1.0
 git+https://github.com/DefectDojo/defectDojo-engagement-survey@master#egg=defectDojo-engagement-survey
 gitpython>=2.1.13
 ptvsd>=4.2.7
