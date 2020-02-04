@@ -125,7 +125,7 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = NspParser(file, test)
     elif scan_type == 'NPM Audit Scan':
         parser = NpmAuditParser(file, test)
-    elif scan_type == 'Symfony Security Check':
+    elif scan_type == 'PHP Symfony Security Check':
         parser = PhpSymfonySecurityCheckParser(file, test)
     elif scan_type == 'Generic Findings Import':
         parser = GenericFindingUploadCsvParser(file, test, active, verified)
