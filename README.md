@@ -41,7 +41,7 @@ For detailed documentation you can visit
 [Read the Docs](https://defectdojo.readthedocs.io/).
 
 ## Supported Installation Options
-
+* [Kubernetes](KUBERNETES.md)
 * [Setup.bash](https://github.com/DefectDojo/django-DefectDojo/blob/dev/setup/README.MD)
 * [Docker](DOCKER.md)
 
