@@ -1353,6 +1353,7 @@ def choose_finding_template_options(request, tid, fid):
         'product_tab': product_tab,
         'template': template,
         'form': form,
+        'finding_tags': [tag.name for tag in finding.tags.all()],
     })
 
 
