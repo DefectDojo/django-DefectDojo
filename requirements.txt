@@ -35,7 +35,7 @@ pdfkit==0.6.1
 Pillow==7.0.0  # required by django-imagekit
 psycopg2-binary==2.8.4
 cryptography==2.8
-pygments==2.4.2
+pygments==2.5.2
 python-dateutil==2.8.1
 python-nmap==0.6.1
 pytz==2019.3
