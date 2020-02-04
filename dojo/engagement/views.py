@@ -555,7 +555,14 @@ def import_scan_results(request, eid=None, pid=None):
                     new_f.cred_id = cred_user.cred_id
                     new_f.save()
 
-            parser = import_parser_factory(file, t, active, verified)
+            try:
+                parser = import_parser_factory(file, t, active, verified)
+            except Exception as e:
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     "Error importing scan results: {}".format(str(e)),
+                                     extra_tags='alert-danger')
+                return HttpResponseRedirect(reverse('import_scan_results', args=(eid,)))
 
             try:
                 for item in parser.items:
