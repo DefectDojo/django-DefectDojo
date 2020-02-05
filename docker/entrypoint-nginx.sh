@@ -1,7 +1,7 @@
-#!/bin/sh
+#!/bin/bash
 
 umask 0002
-if [${GENERATE_TLS_CERTIFICATE} == true]
+if [ "${GENERATE_TLS_CERTIFICATE}" == "true" ]
 then
   openssl req  \
       -x509 \
@@ -11,11 +11,11 @@ then
       -keyout /etc/nginx/ssl/nginx.key \
       -out /etc/nginx/ssl/nginx.crt \
       -subj "/C=DE/ST=City/L=City/O=Global Security/OU=IT Department/CN=nginx"
-  chown 1001 /etc/nginx/ssl/nginx.key /etc/nginx/ssl/nginx.crt
+
 fi
 echo "uwsgi_pass ${DD_UWSGI_PASS};" > /run/uwsgi_pass
 echo "server ${DD_UWSGI_HOST}:${DD_UWSGI_PORT};" > /run/uwsgi_server
-if [${USE_TLS} == true]
+if [ "${USE_TLS}" == "true" ]
 then
   exec nginx -c /etc/nginx/nginx_TLS.conf -g "daemon off;"
 else

@@ -60,8 +60,13 @@ COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/
 COPY wsgi_params nginx/nginx.conf nginx/nginx_TLS.conf /etc/nginx/
 COPY docker/entrypoint-nginx.sh /
 RUN \
+  apt-get -y update && \
+  apt-get -y install openssl && \
+  apt-get clean && \
   chmod -R g=u /var/cache/nginx && \
   chmod -R g=u /var/run && \
+  mkdir -p /etc/nginx/ssl && \
+  chown 1001 /etc/nginx/ssl/ &&\
   true
 ENV \
   DD_UWSGI_PASS="uwsgi_server" \
