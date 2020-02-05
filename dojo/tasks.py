@@ -291,7 +291,7 @@ def async_update_findings_from_source_issues(*args, **kwargs):
 
 @app.task(bind=True)
 def async_dupe_delete(*args, **kwargs):
-    logger.info("delete excess duplicates")
+    deduplicationLogger.info("delete excess duplicates")
     system_settings = System_Settings.objects.get()
     if system_settings.delete_dupulicates:
         dupe_max = system_settings.max_dupes
@@ -304,6 +304,7 @@ def async_dupe_delete(*args, **kwargs):
                     .filter(duplicate=True).order_by('date')
             dupe_count = len(duplicate_list) - dupe_max
             for finding in duplicate_list:
+                deduplicationLogger.debug('deleting finding {}:{} ({}))'.format(finding.id, finding.title, finding.hash_code))
                 finding.delete()
                 dupe_count = dupe_count - 1
                 if dupe_count == 0:

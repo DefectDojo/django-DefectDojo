@@ -107,6 +107,7 @@ class CheckmarxXMLParser(object):
                            test=self.test,
                            active=False,
                            verified=False,
+                           false_p=result.get('FalsePositive') == "True",
                            # Concatenates the query information with this specific finding information
                            description=findingdetail + '-----\n' + description,
                            severity=sev,
@@ -155,6 +156,7 @@ class CheckmarxXMLParser(object):
         paths = result.findall('Path')
         if(len(paths)) > 1:
             logger.warning("Checkmarx scan: more than one path found: " + str(len(paths)) + ". Only the last one will be used")
+
         for path in paths:
             sourceFilename = ''
             sinkFilename = ''
@@ -182,6 +184,7 @@ class CheckmarxXMLParser(object):
                        test=self.test,
                        active=False,
                        verified=False,
+                       false_p=result.get('FalsePositive') == "True",
                        description=findingdetail,
                        severity=sev,
                        numerical_severity=Finding.get_numerical_severity(sev),
