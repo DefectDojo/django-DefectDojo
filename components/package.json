@@ -28,8 +28,9 @@
     "@yarn_components/mocha": "mochajs/mocha#~1.17.1",
     "@yarn_components/moment": "moment/moment#^2.9.0",
     "@yarn_components/morrisjs": "morrisjs/morris.js#~0.5.1",
+    "@yarn_components/simplemde": "sparksuite/simplemde-markdown-editor#1.11.2",
     "@yarn_components/startbootstrap-sb-admin-2": "BlackrockDigital/startbootstrap-sb-admin-2#~3.3.7+1",
-    "@yarn_components/simplemde": "sparksuite/simplemde-markdown-editor#1.11.2"
+    "bootstrap": "^3.4.1"
   },
   "engines": {
     "yarn": ">= 1.0.0"

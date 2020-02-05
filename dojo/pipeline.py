@@ -52,4 +52,4 @@ def social_uid(backend, details, response, *args, **kwargs):
 
 def modify_permissions(backend, uid, user=None, social=None, *args, **kwargs):
     if kwargs.get('is_new'):
-        user.is_staff = True
+        user.is_staff = False
