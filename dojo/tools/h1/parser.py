@@ -93,7 +93,7 @@ class HackerOneJSONParser(object):
                     dynamic_finding=False,)
                 finding.unsaved_endpoints = list()
                 self.dupes[dupe_key] = finding
-            self.items = self.dupes.values()
+        self.items = self.dupes.values()
 
     def build_description(self, content):
         date = content['attributes']['created_at']
