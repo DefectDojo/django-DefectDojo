@@ -65,13 +65,13 @@
                                         </a>
                                     </td>
                                     <td> {{ e.status }} </td>
-                                    <td> {{ e.target_start }} </td>
+                                    <td> {{ e.target_start|date }} - {{ e.target_end|date }} </td>
                                     <td> {{ e.lead.first_name }}</td>
                                     <td> {% for test in e.test_set.all %}
                                         {% if test.lead %}
-                                            <a href="{% url 'view_test' test.id %}"> {{ test }}: {{ test.lead.first_name }} </a>
+                                            <a href="{% url 'view_test' test.id %}"> {{ test }}: {{ test.lead.first_name }} ({{ test.updated|date}})</a>
                                         {% else %}
-                                            <a href="{% url 'view_test' test.id %}"> {{ test }} </a>
+                                            <a href="{% url 'view_test' test.id %}"> {{ test }} ({{ test.updated|date}})</a>
                                         {% endif %}
                                         <br>
                                     {% endfor %}
