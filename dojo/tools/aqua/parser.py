@@ -96,6 +96,8 @@ def get_item(resource, vuln, test):
         description=description.strip(),
         mitigation=fix_version,
         references=url,
+        artifact_name=resource.get('name'),
+        artifact_version=resource.get('version'),
         impact=severity)
 
     return finding
