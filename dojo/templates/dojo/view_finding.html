@@ -429,6 +429,12 @@
                     {% if finding.nb_occurences %}
                     <th>Nb occurences</th>
                     {% endif %}
+                    {% if finding.artifact_name %}
+                    <th>Artifact Name</th>
+                    {% endif %}
+                    {% if finding.artifact_version %}
+                    <th>Artifact Version</th>
+                    {% endif %}
                 </tr>
                 <tr>
                     <td>
@@ -445,6 +451,21 @@
                     <td>
                         <span>
                            {{ finding.nb_occurences }}
+                        </span>
+                    </td>
+                    {% endif %}
+                    {% if finding.artifact_name %}
+                    <td>
+                        <span>
+                            {{ finding.artifact_name }}
+                        </span>
+                    </td>
+                    {% endif %}
+                    {% if finding.artifact_version %}
+                    <td>
+                    {% endif %}
+                        <span>
+                            {{ finding.artifact_version }}
                         </span>
                     </td>
                     {% endif %}
