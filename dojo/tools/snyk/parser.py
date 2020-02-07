@@ -114,6 +114,8 @@ def get_item(vulnerability, test):
             vulnerability['from']) + "</li></p>" + vulnerability['description'],
         mitigation="A fix (if available) will be provided in the description.",
         references=references,
+        artifact_name=vulnerability['packageName'],
+        artifact_version=vulnerability['version'],
         active=False,
         verified=False,
         false_p=False,
