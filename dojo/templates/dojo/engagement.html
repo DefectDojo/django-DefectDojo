@@ -51,14 +51,14 @@
                                         {% if e.active %}
 						<div class="lineContainer">
 							<a  style="display: inline" class="eng_link" href="{% url 'view_engagement' e.id %}">
-                                                {% if e.name %}{{ e.name }} {% endif %}{{ e.target_start }}</a>
+                                                {% if e.name %}{{ e.name }} {% endif %}{{ e.target_start|date }} - {{ e.target_end|date }}</a>
 							| Lead: {{ e.lead.first_name }}
                                                         |
                                                         {%  for test in e.test_set.all %}
 								{% if test.lead %}
-                                                                <a href="{% url 'view_test' test.id %}"> {{ test }}: {{ test.lead.first_name }} </a> |
+                                                                <a href="{% url 'view_test' test.id %}"> {{ test }}: {{ test.lead.first_name }} ({{ test.updated|date}})</a> |
 								{% else %}
-                                                                <a href="{% url 'view_test' test.id %}"> {{ test }} </a> |
+                                                                <a href="{% url 'view_test' test.id %}"> {{ test }} ({{ test.updated|date}})</a> |
 								{% endif %}
                                                         {% endfor %}
 						</div>
