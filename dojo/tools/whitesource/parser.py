@@ -25,6 +25,8 @@ class WhitesourceJSONParser(object):
             # name --> CVE in manual, library name in pipeline
             project = ""
             cve = None
+            artifact_name = None
+            artifact_version = None
             if 'library' in node:
                 project = node.get('project')
                 description = "**Description** : " + node.get('description', "") + "\n\n" + \
@@ -33,6 +35,8 @@ class WhitesourceJSONParser(object):
                             "**Library Description** : " + node['library'].get('description', "") + "\n\n" + \
                             "**Library Type** : " + node['library'].get('type', "") + "\n"
                 lib_name = node['library'].get('filename')
+                artifact_name = node['library'].get('artifactId')
+                artifact_version = node['library'].get('version')
             else:
                 description = node.get('description')
 
@@ -78,7 +82,9 @@ class WhitesourceJSONParser(object):
                      'cve': cve,
                      'cwe': cwe,
                      'severity_justification': severity_justification,
-                     'file_path': ", ".join(filepaths)
+                     'file_path': ", ".join(filepaths),
+                     'artifact_name': artifact_name,
+                     'artifact_version': artifact_version
                     }
 
         def _dedup_and_create_finding(vuln):
@@ -103,6 +109,8 @@ class WhitesourceJSONParser(object):
                                     vuln.get('severity')),
                                 references=vuln.get('references'),
                                 file_path=vuln.get('file_path'),
+                                artifact_name=vuln.get('artifact_name'),
+                                artifact_version=vuln.get('artifact_version'),
                                 severity_justification=vuln.get('severity_justification'),
                                 dynamic_finding=True)
 
