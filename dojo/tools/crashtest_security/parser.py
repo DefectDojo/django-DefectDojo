@@ -50,7 +50,7 @@ class CrashtestSecurityXmlParser(object):
 
             title = node.get('name')
             # Remove enumeration from title
-            title = re.sub(r' \([0-9]*\)', '', title)
+            title = re.sub(r' \([0-9]*\)$', '', title)
 
             # Attache CVEs
             if "CVE" in title:
