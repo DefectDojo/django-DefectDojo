@@ -576,7 +576,6 @@ def get_punchcard_data(findings, start_date, weeks):
         # map from python to javascript, do not use week numbers or day numbers from database.
         day_offset = {0: 5, 1: 4, 2: 3, 3: 2, 4: 1, 5: 0, 6: 6}
 
-        tick = 0
         punchcard = list()
         ticks = list()
         highest_day_count = 0
@@ -586,6 +585,7 @@ def get_punchcard_data(findings, start_date, weeks):
         start_of_week = first_sunday - relativedelta(weeks=1)  # TODO remove deduction of 1 week which was a test
         start_of_next_week = start_of_week + relativedelta(weeks=1)
         day_counts = [0, 0, 0, 0, 0, 0, 0]
+        #week_is_empty = True # True until we find at least one day in this week with data.        
 
         for day in severities_by_day:
             created = day['created__date']
@@ -598,38 +598,67 @@ def get_punchcard_data(findings, start_date, weeks):
             if created < start_of_week:
                 raise ValueError('date found outside supported range')
             else:
+                # print(start_of_week, start_of_next_week)
                 if created >= start_of_week and created < start_of_next_week:
                     # add day count to current week data
                     day_counts[day_offset[created.weekday()]] = day_count
+                    #week_is_empty = False                    
                     highest_day_count = max(highest_day_count, day_count)
                 else:
                     # created >= start_of_next_week, so store current week, prepare for next
+                    #print(day_counts)
                     week_data, label = get_week_data(start_of_week, tick, day_counts)
+                    # print(week_data, label)
                     punchcard.extend(week_data)
                     ticks.append(label)
+                    start_of_week = start_of_next_week
+                    start_of_next_week += relativedelta(weeks=1)
+                    tick += 1
 
                     while created >= start_of_next_week:
-                        # keep moving 1 week forward
+                        # keep moving 1 week forward, but also add empty week to result
                         start_of_week = start_of_next_week
+                        day_counts = [0, 0, 0, 0, 0, 0, 0]
+                        week_data, label = get_week_data(start_of_week, tick, day_counts)
+                        # print(week_data, label)    
+                        punchcard.extend(week_data)
+                        ticks.append(label)
                         start_of_next_week += relativedelta(weeks=1)
                         tick += 1
 
                     # new week, new values!
                     # print('new week values, start_of_week:', start_of_week)
                     day_counts = [0, 0, 0, 0, 0, 0, 0]
+                    # week_is_empty = True
                     day_counts[day_offset[created.weekday()]] = day_count
                     highest_day_count = max(highest_day_count, day_count)
 
-        # append in progress week
+        # append in progress (last) week
         week_data, label = get_week_data(start_of_week, tick, day_counts)
+        print(week_data, label)
         punchcard.extend(week_data)
         ticks.append(label)
+        tick += 1
+        print(tick)
+        
+        # add empty weeks on the end if needed
+        while tick < weeks + 2:
+            start_of_week = start_of_next_week
+            start_of_next_week += relativedelta(weeks=1)
+            day_counts = [0, 0, 0, 0, 0, 0, 0]
+            week_data, label = get_week_data(start_of_week, tick, day_counts)
+            print(week_data, label)
+            punchcard.extend(week_data)
+            ticks.append(label)
+            tick += 1
+
 
         # adjust the size or circles
         ratio = (sqrt(highest_day_count / pi))
+        # print('PUNCHCARD=', punchcard)
         for punch in punchcard:
             # front-end needs both the count for the label and the ratios of the radii of the circles
-            punch.append(punch[2])
+            # punch.append(punch[2])
             punch[2] = (sqrt(punch[2] / pi)) / ratio
 
         return punchcard, ticks

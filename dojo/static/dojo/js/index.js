@@ -154,7 +154,7 @@ function punchcard(element, data, ticks) {
             bubbles: {
                 active: true,
                 debug: {
-                    active: false
+                    active: true
                 },
                 show: true,
                 bubblelabel: {
@@ -200,7 +200,8 @@ function punchcard(element, data, ticks) {
             content: function (label, xval, yval, flotItem) {
                 for (var x = 0; x < flotItem.series.data.length; x++) {
                     if (xval == flotItem.series.data[x][0] && yval == flotItem.series.data[x][1]) {
-                        yeah = flotItem.series.data[x][3];
+                        // yeah = flotItem.series.data[x][3];
+                        yeah = '12';
                         break;
                     }
                 }
