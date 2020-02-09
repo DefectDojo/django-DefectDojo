@@ -227,7 +227,7 @@
                                       {% endfor %}
                                   </sup>
                                 </td>
-                                <td>{{ engagement.object.target_start }} - {{ engagement.object.target_end }}</td>
+                                <td>{{ engagement.object.target_start|date }} - {{ engagement.object.target_end|date }}</td>
                                 <td>{{ engagement.object.status }}</td>
                             </tr>
                         {% endfor %}
@@ -277,7 +277,7 @@
                                       {% endfor %}
                                   </sup>
                                 </td>
-                                <td>{{ test.object.engagement.target_start }} - {{ test.object.engagement.target_end }}</td>
+                                <td>{{ test.object.engagement.target_start|date }} - {{ test.object.engagement.target_end|date }}</td>
                                 <td>{{ test.object.engagement.status }}</td>
                             </tr>
                         {% endfor %}
