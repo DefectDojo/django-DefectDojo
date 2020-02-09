@@ -1596,8 +1596,8 @@ class Finding(models.Model):
 
             # Run async the tool issue update to update original issue with Defect Dojo updates
             if issue_updater_option:
-                from dojo.tasks import async_tool_issue_updater
-                async_tool_issue_updater.delay(self)
+                from dojo.tools import tool_issue_updater
+                tool_issue_updater.async_tool_issue_update(self)
         if (self.file_path is not None) and (self.endpoints.count() == 0):
             self.static_finding = True
             self.dynamic_finding = False
