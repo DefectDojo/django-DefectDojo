@@ -551,6 +551,9 @@ def get_punchcard_data(findings, start_date, weeks):
         first_sunday = start_date - relativedelta(weekday=SU(-1))
         last_sunday = start_date + relativedelta(weeks=weeks)
 
+        print(first_sunday)
+        print(last_sunday)
+
         # reminder: The first week of a year is the one that contains the year’s first Thursday
         # so we could have for 29/12/2019: week=1 and year=2019 :-D. So using week number from db is not practical
 
@@ -582,10 +585,9 @@ def get_punchcard_data(findings, start_date, weeks):
         tick = 0
         day_counts = [0, 0, 0, 0, 0, 0, 0]
 
-        start_of_week = first_sunday - relativedelta(weeks=1)  # TODO remove deduction of 1 week which was a test
+        start_of_week = timezone.make_aware(datetime.combine(first_sunday, datetime.min.time()))
         start_of_next_week = start_of_week + relativedelta(weeks=1)
         day_counts = [0, 0, 0, 0, 0, 0, 0]
-        #week_is_empty = True # True until we find at least one day in this week with data.        
 
         for day in severities_by_day:
             created = day['created__date']
@@ -596,62 +598,52 @@ def get_punchcard_data(findings, start_date, weeks):
             # print('%s %s %s', created, created.weekday(), calendar.day_name[created.weekday()], day_count)
 
             if created < start_of_week:
-                raise ValueError('date found outside supported range')
+                raise ValueError('date found outside supported range: ' + str(created))
             else:
                 # print(start_of_week, start_of_next_week)
                 if created >= start_of_week and created < start_of_next_week:
                     # add day count to current week data
                     day_counts[day_offset[created.weekday()]] = day_count
-                    #week_is_empty = False                    
                     highest_day_count = max(highest_day_count, day_count)
                 else:
                     # created >= start_of_next_week, so store current week, prepare for next
-                    #print(day_counts)
-                    week_data, label = get_week_data(start_of_week, tick, day_counts)
-                    # print(week_data, label)
-                    punchcard.extend(week_data)
-                    ticks.append(label)
-                    start_of_week = start_of_next_week
-                    start_of_next_week += relativedelta(weeks=1)
-                    tick += 1
-
+                    # print(day_counts)
                     while created >= start_of_next_week:
-                        # keep moving 1 week forward, but also add empty week to result
-                        start_of_week = start_of_next_week
-                        day_counts = [0, 0, 0, 0, 0, 0, 0]
                         week_data, label = get_week_data(start_of_week, tick, day_counts)
-                        # print(week_data, label)    
+                        # print(week_data, label)
                         punchcard.extend(week_data)
                         ticks.append(label)
-                        start_of_next_week += relativedelta(weeks=1)
                         tick += 1
 
-                    # new week, new values!
-                    # print('new week values, start_of_week:', start_of_week)
-                    day_counts = [0, 0, 0, 0, 0, 0, 0]
-                    # week_is_empty = True
+                        # new week, new values!
+                        day_counts = [0, 0, 0, 0, 0, 0, 0]
+                        start_of_week = start_of_next_week
+                        start_of_next_week += relativedelta(weeks=1)
+
+                    # finally a day that falls into the week bracket
                     day_counts[day_offset[created.weekday()]] = day_count
                     highest_day_count = max(highest_day_count, day_count)
 
-        # append in progress (last) week
-        week_data, label = get_week_data(start_of_week, tick, day_counts)
-        print(week_data, label)
-        punchcard.extend(week_data)
-        ticks.append(label)
-        tick += 1
-        print(tick)
+        # # append in progress (last) week
+        # week_data, label = get_week_data(start_of_week, tick, day_counts)
+        # print(week_data, label)
+        # punchcard.extend(week_data)
+        # ticks.append(label)
+        # tick += 1
+        # print(tick)
         
-        # add empty weeks on the end if needed
-        while tick < weeks + 2:
-            start_of_week = start_of_next_week
-            start_of_next_week += relativedelta(weeks=1)
-            day_counts = [0, 0, 0, 0, 0, 0, 0]
+        # add current week + empty weeks on the end if needed
+        while tick < weeks + 1:
+            print(tick)
             week_data, label = get_week_data(start_of_week, tick, day_counts)
             print(week_data, label)
             punchcard.extend(week_data)
             ticks.append(label)
             tick += 1
 
+            day_counts = [0, 0, 0, 0, 0, 0, 0]
+            start_of_week = start_of_next_week
+            start_of_next_week += relativedelta(weeks=1)
 
         # adjust the size or circles
         ratio = (sqrt(highest_day_count / pi))
