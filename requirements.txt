@@ -21,13 +21,13 @@ django-taggit-serializer==0.1.7
 git+https://github.com/Maffooch/django-tastypie-swagger@master#egg=django-tastypie-swagger
 django-tastypie==0.14.2
 django-watson==1.5.3
-Django==2.2.9
+Django==2.2.10
 djangorestframework==3.11.0
 gunicorn==20.0.4
-html2text==2019.9.26
+html2text==2020.1.16
 humanize==0.5.1
 jira==2.0.0
-lxml==4.4.2
+lxml==4.5.0
 Markdown==3.1.1
 mysqlclient==1.4.6
 pandas>=0.24.2
@@ -35,25 +35,25 @@ pdfkit==0.6.1
 Pillow==7.0.0  # required by django-imagekit
 psycopg2-binary==2.8.4
 cryptography==2.8
-pygments==2.4.2
+pygments==2.5.2
 python-dateutil==2.8.1
 python-nmap==0.6.1
 pytz==2019.3
-redis==3.3.11
+redis==3.4.1
 requests>=2.22.0
 sqlalchemy  # Required by Celery broker transport
 supervisor==4.1.0
-urllib3==1.25.7
+urllib3==1.25.8
 uWSGI==2.0.18
 vobject==0.9.6.1
 whitenoise>=4.1.2
 titlecase==0.12.0
 social-auth-app-django==3.1.0
-Python-jose==3.0.1
+Python-jose==3.1.0
 git+https://github.com/DefectDojo/defectDojo-engagement-survey@master#egg=defectDojo-engagement-survey
 gitpython>=2.1.13
 ptvsd>=4.2.7
 google-api-python-client==1.7.11
-google-auth==1.10.0
+google-auth==1.11.0
 google-auth-oauthlib==0.4.1
 drf_yasg==1.17.0
