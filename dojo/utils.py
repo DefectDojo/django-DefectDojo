@@ -267,28 +267,14 @@ def deduplicate_uid_or_hash_code(new_finding):
 
 def set_duplicate(new_finding, existing_finding):
     deduplicationLogger.debug('New finding ' + str(new_finding.id) + ' is a duplicate of existing finding ' + str(existing_finding.id))
-    
     if (existing_finding.is_Mitigated or existing_finding.mitigated) and new_finding.active and not new_finding.is_Mitigated:
         existing_finding.mitigated = new_finding.mitigated
         existing_finding.is_Mitigated = new_finding.is_Mitigated
         existing_finding.active = new_finding.active
         existing_finding.verified = new_finding.verified
         existing_finding.notes.create(author=existing_finding.reporter,
-                                        entry="This finding has been automatically re-openend as it was found in recent scans.")
+                                      entry="This finding has been automatically re-openend as it was found in recent scans.")
         existing_finding.save()
-
-        title = 'An old finding has been reopened for "{}",\nengagement {}.' \
-                .format(test.engagement.product.name, test.engagement.name)
-        url = reverse('view_finding', args=(existing_finding.id, ))
-        description = 'See {}'.format(existing_finding.title)
-        create_notification(event='other',
-                            title=title,
-                            url=url,
-                            description=description,
-                            icon='bullseye',
-                            objowner=self.context['request'].user)
-    
-    
     new_finding.duplicate = True
     new_finding.active = False
     new_finding.verified = False

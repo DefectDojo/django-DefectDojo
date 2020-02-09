@@ -1017,8 +1017,9 @@ class ApplyFindingTemplateForm(forms.Form):
                                      "Choose from the list or add new tags.  Press TAB key to add.")
 
     def __init__(self, template=None, *args, **kwargs):
-        tags = Tag.objects.usage_for_model(Finding_Template)
-        t = [(tag.name, tag.name) for tag in tags]
+        # django-tagging apparently can not filter for multiple models at once
+        tags = Tag.objects.usage_for_model(Finding_Template) + Tag.objects.usage_for_model(Finding)
+        t = sorted({(tag.name, tag.name) for tag in tags})
         super(ApplyFindingTemplateForm, self).__init__(*args, **kwargs)
         self.fields['tags'].widget.choices = t
         self.template = template
