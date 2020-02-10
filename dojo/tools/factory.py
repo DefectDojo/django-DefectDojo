@@ -69,6 +69,7 @@ from dojo.tools.blackduck_v2.parser import BlackduckHubParser
 from dojo.tools.h1.parser import HackerOneJSONParser
 from dojo.tools.xanitizer.parser import XanitizerXMLParser
 from dojo.tools.trivy.parser import TrivyParser
+from dojo.tools.outpost24.parser import Outpost24Parser
 
 
 
@@ -125,7 +126,7 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = NspParser(file, test)
     elif scan_type == 'NPM Audit Scan':
         parser = NpmAuditParser(file, test)
-    elif scan_type == 'Symfony Security Check':
+    elif scan_type == 'PHP Symfony Security Check':
         parser = PhpSymfonySecurityCheckParser(file, test)
     elif scan_type == 'Generic Findings Import':
         parser = GenericFindingUploadCsvParser(file, test, active, verified)
@@ -227,6 +228,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = XanitizerXMLParser(file, test)
     elif scan_type == 'Trivy Scan':
         parser = TrivyParser(file, test)
+    elif scan_type == 'Outpost24 Scan':
+        parser = Outpost24Parser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 

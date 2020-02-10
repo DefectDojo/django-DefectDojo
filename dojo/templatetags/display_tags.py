@@ -675,7 +675,7 @@ def get_severity_count(id, table):
                      output_field=IntegerField())),
         )
     elif table == "engagement":
-        counts = Finding.objects.filter(test__engagement=id, active=True, verified=True, duplicate=False). \
+        counts = Finding.objects.filter(test__engagement=id, active=True, verified=False, duplicate=False). \
             prefetch_related('test__engagement__product').aggregate(
             total=Sum(
                 Case(When(severity__in=('Critical', 'High', 'Medium', 'Low'),
@@ -762,7 +762,7 @@ def get_severity_count(id, table):
     if table == "test":
         display_counts.append("Total: " + str(total) + " Findings")
     elif table == "engagement":
-        display_counts.append("Total: " + str(total) + " Active, Verified Findings")
+        display_counts.append("Total: " + str(total) + " Active Findings")
     elif table == "product":
         display_counts.append("Total: " + str(total) + " Active Findings")
 
