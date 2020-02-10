@@ -270,10 +270,10 @@
                                       " data-placement="right" data-container="body" data-original-title="Endpoints" title=""></i>
                                     {% endif %}
                                   {% endif %}
-                                  {% if finding.artifact_name %}
-                                    <i class="fa dojo-sup fa-file-archive has-popover" data-trigger="hover" data-placement="right"
-                                       data-content="{{ finding.artifact_name }} - {{ finding.artifact_version }}"
-                                       data-container="body" data-original-title="Artifact" title=""></i>
+                                  {% if finding.component_name %}
+                                    <i class="fa dojo-sup fa-file has-popover" data-trigger="hover" data-placement="right"
+                                       data-content="{{ finding.component_name }} - {{ finding.component_version }}"
+                                       data-container="body" data-original-title="Component" title=""></i>
                                   {% endif %}
                                   {% if finding.notes.all %}
                                     <i class="fa fa-comment has-popover" data-trigger="hover" data-content="{{ finding.notes.all.0 }}" data-placement="left" data-container="body" data-original-title="Most Recent Note" title=""></i>

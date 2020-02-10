@@ -429,11 +429,11 @@
                     {% if finding.nb_occurences %}
                     <th>Nb occurences</th>
                     {% endif %}
-                    {% if finding.artifact_name %}
-                    <th>Artifact Name</th>
+                    {% if finding.component_name %}
+                    <th>Component Name</th>
                     {% endif %}
-                    {% if finding.artifact_version %}
-                    <th>Artifact Version</th>
+                    {% if finding.component_version %}
+                    <th>Component Version</th>
                     {% endif %}
                 </tr>
                 <tr>
@@ -454,18 +454,17 @@
                         </span>
                     </td>
                     {% endif %}
-                    {% if finding.artifact_name %}
+                    {% if finding.component_name %}
                     <td>
                         <span>
-                            {{ finding.artifact_name }}
+                            {{ finding.component_name }}
                         </span>
                     </td>
                     {% endif %}
-                    {% if finding.artifact_version %}
+                    {% if finding.component_version %}
                     <td>
-                    {% endif %}
                         <span>
-                            {{ finding.artifact_version }}
+                            {{ finding.component_version }}
                         </span>
                     </td>
                     {% endif %}
