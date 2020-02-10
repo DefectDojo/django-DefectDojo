@@ -106,7 +106,8 @@
                 <tr>
                     <th>Engagement</th>
                     <th>Environment</th>
-                    <th>Date</th>
+                    <th>Dates</th>
+                    <th>Updated</th>
                     {% if test.percent_complete > 0 %}
                         <th>Progress</th>
                     {% endif %}
@@ -121,6 +122,10 @@
                         {% endif %}
                     </td>
                     <td>{{ test.target_start|date }} - {{ test.target_end|date }}</td>
+
+                    <td><a target="_blank" data-toggle="tooltip" data-placement="bottom" title="{{ test.updated }}">
+                        {{ test.updated|date }}</a>
+
                     {% if test.percent_complete > 0 %}
                         <td>
                             <div class="progress">
