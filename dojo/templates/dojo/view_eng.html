@@ -257,8 +257,8 @@
                                 </td>
                                 <td>
                                   <ul>
-                                   <li class="dropdown" style="list-style:none;">
-                                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                   <li class="dropdown" style="list-style:none;position:absolute">
+                                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
                                          <ul class="dropdown-menu">
                                            <li>
                                              <a class="" href="{% url 'view_test' test.id %}">
@@ -293,7 +293,7 @@
                                        </li>
                                    </ul>
                                 </td>
-                                <td>{{ test.target_start.date }} - {{ test.target_end.date }}</td>
+                                <td>{{ test.target_start|date }} - {{ test.target_end|date }}</td>
                                 <td>
                                   {% if test.lead.get_full_name and test.lead.get_full_name.strip %}
                                       {{ test.lead.get_full_name }}
@@ -728,8 +728,8 @@
 </div>
 </div>
 <div class="protip">
-   <i class="fa fa-lightbulb-o"></i> <strong>ProTip!</strong> Type <kbd>e</kbd> to edit this engagement. Type <kbd>i</kbd> to import scan results or <kbd>a</kbd> to add tests.
-</div>
+    <i class="fa fa-lightbulb-o"></i> <strong>ProTip!</strong> Type <kbd>e</kbd> to edit this engagement. Type <kbd>i</kbd> to import scan results or <kbd>a</kbd> to add tests.
+ </div>
 {% endblock %}
 {% block postscript %}
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
@@ -771,9 +771,18 @@
 
                 $('input#simple_search').val(terms);
             }
+
+            $('#shareSurveyModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget) // Button that triggered the modal
+            var path = button.data('whatever') // Extract info from data-* attributes
+            // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+            // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+            var modal = $(this)
+            var http = location.protocol;
+            var slashes = http.concat("//");
+            var host = slashes.concat(window.location.host);
+            modal.find('p#surveyURL').text('Survey URL: ' + host + path)
+            })
         });
-
-
-
     </script>
 {% endblock %}

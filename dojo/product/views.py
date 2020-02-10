@@ -23,7 +23,7 @@ from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm
 from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, Finding_Template, \
     Tool_Product_Settings, Cred_Mapping, Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, \
     Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product
-from dojo.utils import get_page_items, add_breadcrumb, get_punchcard_data, get_system_setting, create_notification, Product_Tab
+from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, create_notification, Product_Tab, get_punchcard_data
 from custom_field.models import CustomFieldValue, CustomField
 from dojo.tasks import add_epic_task, add_issue_task
 from tagging.models import Tag
@@ -92,9 +92,9 @@ def view_product(request, pid):
 
     product_metadata = dict(prod.product_meta.order_by('name').values_list('name', 'value'))
 
-    verified_findings = Finding.objects.filter(test__engagement__product=prod,
+    open_findings = Finding.objects.filter(test__engagement__product=prod,
                                                 false_p=False,
-                                                verified=True,
+                                                verified=False,
                                                 active=True,
                                                 duplicate=False,
                                                 out_of_scope=False).order_by('numerical_severity').values('severity').annotate(count=Count('severity'))
@@ -105,7 +105,7 @@ def view_product(request, pid):
     low = 0
     info = 0
 
-    for v in verified_findings:
+    for v in open_findings:
         if v["severity"] == "Critical":
             critical = v["count"]
         elif v["severity"] == "High":
@@ -188,11 +188,11 @@ def view_product_metrics(request, pid):
                                                out_of_scope=False).order_by("date")
 
     week_date = end_date - timedelta(days=7)  # seven days and /newnewer are considered "new"
-
     new_verified_findings = Finding.objects.filter(test__engagement__product=prod,
                                                    date__range=[week_date, end_date],
                                                    false_p=False,
                                                    verified=True,
+                                                   active=True,
                                                    duplicate=False,
                                                    out_of_scope=False).order_by("date")
 
@@ -202,6 +202,15 @@ def view_product_metrics(request, pid):
                                            duplicate=False,
                                            out_of_scope=False,
                                            active=True,
+                                           verified=False,
+                                           mitigated__isnull=True)
+
+    inactive_findings = Finding.objects.filter(test__engagement__product=prod,
+                                           date__range=[start_date, end_date],
+                                           false_p=False,
+                                           duplicate=False,
+                                           out_of_scope=False,
+                                           active=False,
                                            mitigated__isnull=True)
 
     closed_findings = Finding.objects.filter(test__engagement__product=prod,
@@ -210,7 +219,20 @@ def view_product_metrics(request, pid):
                                              verified=False,
                                              duplicate=False,
                                              out_of_scope=False,
+                                             active=False,
                                              mitigated__isnull=False)
+
+    false_positive_findings = Finding.objects.filter(test__engagement__product=prod,
+                                             date__range=[start_date, end_date],
+                                             false_p=True,
+                                             verified=False,
+                                             duplicate=False,
+                                             out_of_scope=False)
+
+    out_of_scope_findings = Finding.objects.filter(test__engagement__product=prod,
+                                             date__range=[start_date, end_date],
+                                             duplicate=False,
+                                             out_of_scope=True)
 
     open_vulnerabilities = Finding.objects.filter(
         test__engagement__product=prod,
@@ -238,13 +260,13 @@ def view_product_metrics(request, pid):
     )
 
     start_date = timezone.make_aware(datetime.combine(start_date, datetime.min.time()))
-
     r = relativedelta(end_date, start_date)
     weeks_between = int(ceil((((r.years * 12) + r.months) * 4.33) + (r.days / 7)))
     if weeks_between <= 0:
         weeks_between += 2
 
-    punchcard, ticks, highest_count = get_punchcard_data(verified_findings, weeks_between, start_date)
+    punchcard, ticks = get_punchcard_data(open_findings, start_date, weeks_between)
+
     add_breadcrumb(parent=prod, top_level=False, request=request)
 
     open_close_weekly = OrderedDict()
@@ -335,7 +357,10 @@ def view_product_metrics(request, pid):
                    'scan_sets': scan_sets,
                    'verified_findings': verified_findings,
                    'open_findings': open_findings,
+                   'inactive_findings': inactive_findings,
                    'closed_findings': closed_findings,
+                   'false_positive_findings': false_positive_findings,
+                   'out_of_scope_findings': out_of_scope_findings,
                    'accepted_findings': accepted_findings,
                    'new_findings': new_verified_findings,
                    'open_vulnerabilities': open_vulnerabilities,
@@ -343,7 +368,6 @@ def view_product_metrics(request, pid):
                    'start_date': start_date,
                    'punchcard': punchcard,
                    'ticks': ticks,
-                   'highest_count': highest_count,
                    'open_close_weekly': open_close_weekly,
                    'severity_weekly': severity_weekly,
                    'critical_weekly': critical_weekly,

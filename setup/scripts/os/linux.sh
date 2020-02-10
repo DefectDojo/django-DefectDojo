@@ -387,6 +387,7 @@ function ubuntu_dojo_install() {
       python3 manage.py loaddata dojo/fixtures/defect_dojo_sample_data.json
     fi
 
+    $PY manage.py loaddata initial_banner_conf
     $PY manage.py loaddata product_type
     $PY manage.py loaddata test_type
     $PY manage.py loaddata development_environment

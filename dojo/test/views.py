@@ -547,8 +547,8 @@ def finding_bulk_update(request, tid):
                     calculate_grade(test.engagement.product)
 
                 for finding in finds:
-                    from dojo.tasks import async_tool_issue_updater
-                    async_tool_issue_updater.delay(finding)
+                    from dojo.tools import tool_issue_updater
+                    tool_issue_updater.async_tool_issue_update(finding)
 
                     if JIRA_PKey.objects.filter(product=finding.test.engagement.product).count() == 0:
                         log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', finding)
@@ -649,7 +649,8 @@ def re_import_scan_results(request, tid):
                         new_items.append(find.id)
                     else:
                         item.test = t
-                        item.date = scan_date
+                        if item.date == timezone.now().date():
+                            item.date = t.target_start
                         item.reporter = request.user
                         item.last_reviewed = timezone.now()
                         item.last_reviewed_by = request.user
@@ -687,6 +688,14 @@ def re_import_scan_results(request, tid):
                     if find:
                         finding_count += 1
                         for endpoint in item.unsaved_endpoints:
+                            ep, created = Endpoint.objects.get_or_create(protocol=endpoint.protocol,
+                                                                         host=endpoint.host,
+                                                                         path=endpoint.path,
+                                                                         query=endpoint.query,
+                                                                         fragment=endpoint.fragment,
+                                                                         product=t.engagement.product)
+                            find.endpoints.add(ep)
+                        for endpoint in form.cleaned_data['endpoints']:
                             ep, created = Endpoint.objects.get_or_create(protocol=endpoint.protocol,
                                                                          host=endpoint.host,
                                                                          path=endpoint.path,
@@ -747,6 +756,7 @@ def re_import_scan_results(request, tid):
 
     product_tab = Product_Tab(engagement.product.id, title="Re-upload a %s" % scan_type, tab="engagements")
     product_tab.setEngagement(engagement)
+    form.fields['endpoints'].queryset = Endpoint.objects.filter(product__id=product_tab.product.id)
     return render(request,
                   'dojo/import_scan_results.html',
                   {'form': form,

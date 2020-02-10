@@ -109,6 +109,7 @@ function setupdb() {
     python manage.py makemigrations --merge --noinput
     python manage.py migrate
     python manage.py syncdb --noinput
+    python manage.py loaddata initial_banner_conf
     python manage.py loaddata product_type
     python manage.py loaddata test_type
     python manage.py loaddata development_environment

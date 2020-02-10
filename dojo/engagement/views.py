@@ -619,6 +619,17 @@ def import_scan_results(request, eid=None, pid=None):
                             product=t.engagement.product)
 
                         item.endpoints.add(ep)
+                    for endpoint in form.cleaned_data['endpoints']:
+                        ep, created = Endpoint.objects.get_or_create(
+                            protocol=endpoint.protocol,
+                            host=endpoint.host,
+                            path=endpoint.path,
+                            query=endpoint.query,
+                            fragment=endpoint.fragment,
+                            product=t.engagement.product)
+
+                        item.endpoints.add(ep)
+
                     item.save(false_history=True)
 
                     if item.unsaved_tags is not None:
@@ -660,7 +671,7 @@ def import_scan_results(request, eid=None, pid=None):
         prod_id = pid
         custom_breadcrumb = {"", ""}
         product_tab = Product_Tab(prod_id, title=title, tab="findings")
-
+    form.fields['endpoints'].queryset = Endpoint.objects.filter(product__id=product_tab.product.id)
     return render(request, 'dojo/import_scan_results.html', {
         'form': form,
         'product_tab': product_tab,

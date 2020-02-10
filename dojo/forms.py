@@ -362,9 +362,8 @@ class ImportScanForm(forms.Form):
                          ("Aqua Scan", "Aqua Scan"),
                          ("HackerOne Cases", "HackerOne Cases"),
                          ("Xanitizer Scan", "Xanitizer Scan"),
+                         ("Outpost24 Scan", "Outpost24 Scan"),
                          ("Trivy Scan", "Trivy Scan"))
-
-
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
     scan_date = forms.DateTimeField(
@@ -379,6 +378,8 @@ class ImportScanForm(forms.Form):
     active = forms.BooleanField(help_text="Select if these findings are currently active.", required=False)
     verified = forms.BooleanField(help_text="Select if these findings have been verified.", required=False)
     scan_type = forms.ChoiceField(required=True, choices=SORTED_SCAN_TYPE_CHOICES)
+    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
+                                               widget=MultipleSelectWithPopPlusMinus(attrs={'size': '5'}))
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False,
                            help_text="Add tags that help describe this scan.  "
@@ -426,6 +427,8 @@ class ReImportScanForm(forms.Form):
                                          choices=SEVERITY_CHOICES[0:4])
     active = forms.BooleanField(help_text="Select if these findings are currently active.", required=False)
     verified = forms.BooleanField(help_text="Select if these findings have been verified.", required=False)
+    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
+                                               widget=MultipleSelectWithPopPlusMinus(attrs={'size': '5'}))
     tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
                            required=False,
                            help_text="Add tags that help describe this scan.  "
@@ -1015,8 +1018,9 @@ class ApplyFindingTemplateForm(forms.Form):
                                      "Choose from the list or add new tags.  Press TAB key to add.")
 
     def __init__(self, template=None, *args, **kwargs):
-        tags = Tag.objects.usage_for_model(Finding_Template)
-        t = [(tag.name, tag.name) for tag in tags]
+        # django-tagging apparently can not filter for multiple models at once
+        tags = Tag.objects.usage_for_model(Finding_Template) + Tag.objects.usage_for_model(Finding)
+        t = sorted({(tag.name, tag.name) for tag in tags})
         super(ApplyFindingTemplateForm, self).__init__(*args, **kwargs)
         self.fields['tags'].widget.choices = t
         self.template = template
@@ -1951,3 +1955,21 @@ class GoogleSheetFieldsForm(forms.Form):
                 self.fields['Protect ' + i.name] = forms.BooleanField(initial=True, required=True, disabled=True)
             else:
                 self.fields['Protect ' + i.name] = forms.BooleanField(initial=False, required=False)
+
+
+class LoginBanner(forms.Form):
+    banner_enable = forms.BooleanField(
+        label="Enable login banner",
+        initial=False,
+        required=False,
+        help_text='Tick this box to enable a text banner on the login page'
+    )
+
+    banner_message = forms.CharField(
+        required=False,
+        label="Message to display on the login page"
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        return cleaned_data
