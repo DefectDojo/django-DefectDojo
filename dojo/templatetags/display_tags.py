@@ -256,11 +256,6 @@ def count_findings_eng_all(engagement):
     return all_findings
 
 
-@register.filter(name='fetch_system_setting')
-def fetch_system_setting(name):
-    return get_system_setting(name)
-
-
 @register.filter(name='count_findings_eng_duplicate')
 def count_findings_eng_duplicate(engagement):
     duplicate_findings = Finding.objects.filter(test__engagement=engagement,

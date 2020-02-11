@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% load display_tags %}
-{% load get_system_setting %}
 {% load humanize %}
 {% load static from staticfiles %}
 {% block add_styles %}
@@ -359,7 +358,7 @@
                                 <td>{{ risk.created }}</td>
                                 <td>{{ risk.expiration_date|default_if_none:"" }}</td>
                                 <td>{{ risk.accepted_by|default_if_none:"" }}</td>
-                                <td>{{ risk.accepted_findings.all|length }}</td>
+                                <td>{{ risk.accepted_findings.count }}</td>
                                 <td><a href="{% url 'download_risk' eng.id risk.id %}">{{ risk.filename }}</a></td>
                                 <td>
                                     <a class="btn btn-sm btn-primary" href="{% url 'view_risk' eng.id risk.id %}">

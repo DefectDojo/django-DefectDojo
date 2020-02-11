@@ -7,3 +7,7 @@ def globalize_oauth_vars(request):
     return {'GOOGLE_ENABLED': settings.GOOGLE_OAUTH_ENABLED,
             'OKTA_ENABLED': settings.OKTA_OAUTH_ENABLED,
             'AZUREAD_TENANT_OAUTH2_ENABLED': settings.AZUREAD_TENANT_OAUTH2_ENABLED}
+
+def bind_system_settings(request):
+    from dojo.models import System_Settings
+    return {'system_settings': System_Settings.objects.get()}

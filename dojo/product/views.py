@@ -33,16 +33,13 @@ logger = logging.getLogger(__name__)
 
 
 def product(request):
+    products_query = Product.objects.select_related('product_manager', 'technical_contact', 'team_manager', 'prod_type').prefetch_related('engagement_set')
     if request.user.is_staff:
-        initial_queryset = Product.objects.all()
-        name_words = [product.name for product in
-                      Product.objects.all()]
+        initial_queryset = products_query
+        name_words = [product.name for product in products_query]
     else:
-        initial_queryset = Product.objects.filter(
-            authorized_users__in=[request.user])
-        name_words = [word for product in
-                      Product.objects.filter(
-                          authorized_users__in=[request.user])
+        initial_queryset = products_query.prefetch_related('authorized_users').filter(authorized_users__in=[request.user])
+        name_words = [word for product in initial_queryset
                       for word in product.name.split() if len(word) > 2]
 
     product_type = None
