@@ -24,8 +24,6 @@ class LoginRequiredMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        response = self.get_response(request)
-
         assert hasattr(request, 'user'), "The Login Required middleware\
  requires authentication middleware to be installed. Edit your\
  MIDDLEWARE_CLASSES setting to insert\
@@ -40,4 +38,6 @@ class LoginRequiredMiddleware:
                 else:
                     fullURL = "%s?next=%s" % (settings.LOGIN_URL, urlquote(request.get_full_path()))
                 return HttpResponseRedirect(fullURL)
+
+        response = self.get_response(request)
         return response
