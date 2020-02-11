@@ -645,7 +645,6 @@ def get_punchcard_data(findings, start_date, weeks):
 
     except Exception as e:
         logger.exception('Not showing punchcard graph due to exception gathering data', e)
-        raise(e)
         return None, None
 
 
