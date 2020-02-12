@@ -1,6 +1,6 @@
 # Author: apipia
 from dojo.models import Finding
-import dojo.tools.blackduck_v2.importer as import_helper
+import dojo.tools.blackduck_component_risk.importer as import_helper
 
 
 class BlackduckHubParser(object):
@@ -20,13 +20,13 @@ class BlackduckHubParser(object):
 
     def import_data(self, filename) -> (dict, dict):
         """
-        Calls the Importer from dojo/tools/blackduck_v2/importer to
+        Calls the Importer from dojo/tools/blackduck_component_risk/importer to
         parse through the zip file and export needed information from the
         two relevant files (security and components).
         :param filename: Name of the zipfile. Passed in via Defect Dojo
         :return: Returns a tuple of dictionaries, Components and Securities.
         """
-        importer = import_helper.BlackduckV2Importer()
+        importer = import_helper.BlackduckCRImporter()
 
         components, securities = importer.parse_findings(filename)
         return components, securities
