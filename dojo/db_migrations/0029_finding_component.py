@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0027_jira_issue_type_settings'),
+        ('dojo', '0028_finding_component'),
     ]
 
     operations = [
