@@ -6,7 +6,7 @@ import zipfile
 __author__ = 'Apipia'
 
 
-class BlackduckV2Importer(object):
+class BlackduckCRImporter(object):
     """
     Importer for blackduck. V2 is different in that it creates a Finding in defect dojo
     for each vulnerable component version used in a project, and for each license that is
