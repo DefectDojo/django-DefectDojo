@@ -1353,7 +1353,6 @@ class Finding(models.Model):
             filtered = filtered.filter(unique_id_from_tool=self.unique_id_from_tool)
         return filtered.exclude(pk=self.pk)[:10]
 
-
     def compute_hash_code(self):
         if hasattr(settings, 'HASHCODE_FIELDS_PER_SCANNER') and hasattr(settings, 'HASHCODE_ALLOWS_NULL_CWE') and hasattr(settings, 'HASHCODE_ALLOWED_FIELDS'):
             # Default fields
