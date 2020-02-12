@@ -59,7 +59,7 @@ setup(
         'pbr',
         'django-slack',
         'asteval',
-        'Markdown==3.2',
+        'Markdown==3.2.1',
         'pandas>=0.22.0',
         'django-dbbackup>=3.2.0',
         'django-taggit-serializer==0.1.7',
