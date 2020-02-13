@@ -23,18 +23,62 @@ cd django-DefectDojo
 
 minikube start
 minikube addons enable ingress
+```
+Helm <= v2
+```zsh
 helm init
 helm repo update
+```
+
+Helm >= v3
+```zsh
+helm repo add stable https://kubernetes-charts.storage.googleapis.com/
+helm repo update
+```
+Then pull the dependent charts:
+```zsh
 helm dependency update ./helm/defectdojo
 ```
 
-Now, install the helm chart into minikube:
+Now, install the helm chart into minikube.
+
+If you have setup an ingress controller: 
+```zsh
+DJANGO_INGRESS_ENABLED=true
+```
+else: 
+```zsh
+DJANGO_INGRESS_ENABLED=false
+```
+
+If you have configured TLS: 
+```zsh
+DJANGO_INGRESS_ACTIVATE_TLS=true
+```
+else: 
+```zsh
+DJANGO_INGRESS_ACTIVATE_TLS=false
+```
+
+Helm <= v2:
 
 ```zsh
 helm install \
   ./helm/defectdojo \
   --name=defectdojo \
-  --set django.ingress.enabled=false
+  --set django.ingress.enabled=${DJANGO_INGRESS_ENABLED} \
+  --set django.ingress.activateTLS=${DJANGO_INGRESS_ACTIVATE_TLS}
+
+```
+
+Helm >= v3:
+
+```zsh
+helm install \
+  defectdojo \
+  ./helm/defectdojo \
+  --set django.ingress.enabled=${DJANGO_INGRESS_ENABLED} \
+  --set django.ingress.activateTLS=${DJANGO_INGRESS_ACTIVATE_TLS}
 ```
 
 It usually takes up to a minute for the services to startup and the
@@ -75,14 +119,24 @@ Log in with username admin and the password from the previous command.
 ### Minikube with locally built containers
 
 If testing containers locally, then set the imagePullPolicy to Never,
-which ensures containers are not pulled from Docker hub.
-
+which ensures containers are not pulled from Docker hub
+(helm 2) :
 ```zsh
 helm install \
   ./helm/defectdojo \
   --name=defectdojo \
-  --set django.ingress.enabled=false \
+  --set django.ingress.enabled=${DJANGO_INGRESS_ENABLED} \
+  --set django.ingress.activateTLS=${DJANGO_INGRESS_ACTIVATE_TLS} \
   --set imagePullPolicy=Never
+```
+
+### Installing from a private registry
+If you have stored your images in a private registry, you can install defectdojo chart with (helm 3). 
+
+- First create a secret named "defectdojoregistrykey" based on the credentials that can pull from the registry: see https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+- Then install the chart with:
+```zsh
+helm install  defectdojo ./helm/defectdojo/ --set repositoryPrefix=<myregistry.com/path>,imagePullSecrets=defectdojoregistrykey,django.ingress.enabled=${DJANGO_INGRESS_ENABLED},django.ingress.activateTLS=${DJANGO_INGRESS_ACTIVATE_TLS}
 ```
 
 ### Build Images Locally
@@ -91,6 +145,39 @@ helm install \
 # Build images
 docker build -t defectdojo/defectdojo-django -f Dockerfile.django .
 docker build -t defectdojo/defectdojo-nginx -f Dockerfile.nginx .
+```
+
+```zsh
+# Build images behind proxy
+docker build --build-arg http_proxy=http://myproxy.com:8080 --build-arg https_proxy=http://myproxy.com:8080 -t defectdojo/defectdojo-django -f Dockerfile.django .
+docker build --build-arg http_proxy=http://myproxy.com:8080 --build-arg https_proxy=http://myproxy.com:8080 -t defectdojo/defectdojo-nginx -f Dockerfile.nginx .
+```
+
+### Upgrade the chart
+If you want to change kubernetes configuration of use an updated docker image (evolution of defectDojo code), upgrade the application:
+```
+helm upgrade  defectdojo ./helm/defectdojo/
+```
+
+### Re-install the chart
+In case of issue or in any other situation where you need to re-install the chart, you can do it and re-use the same secrets.
+
+**Note that when using mysql, this will create a new database, while with postgresql you'll keep the same database (more information below)**
+
+```zsh
+# helm 3
+helm uninstall defectdojo
+helm install \
+  defectdojo \
+  ./helm/defectdojo \
+  --set django.ingress.enabled=${DJANGO_INGRESS_ENABLED} \
+  --set django.ingress.activateTLS=${DJANGO_INGRESS_ACTIVATE_TLS} \
+  --set createSecret=false \
+  --set createRabbitMqSecret=false \
+  --set createRedisSecret=false \
+  --set createMysqlSecret=false \
+  --set createPostgresqlSecret=false
+
 ```
 
 ## Kubernetes Production
@@ -164,7 +251,7 @@ helm test defectdojo --cleanup
 # Navigate to <https://defectdojo.default.minikube.local>.
 ```
 
-TODO: The MySQL volumes aren't persistent across `helm delete` operations. To
+TODO: The MySQL volumes aren't persistent across `helm uninstall` operations. To
 make them persistent, you need to add an annotation to the persistent volume
 claim:
 
@@ -190,6 +277,8 @@ kubectl logs $(kubectl get pod --selector=defectdojo.org/component=${POD} \
 # Open a shell in a specific pod
 kubectl exec -it $(kubectl get pod --selector=defectdojo.org/component=${POD} \
   -o jsonpath="{.items[0].metadata.name}") -- /bin/bash
+# Or: 
+kubectl exec defectdojo-django-<xxx-xxx> -c uwsgi -it /bin/sh
 
 # Open a Python shell in a specific pod
 kubectl exec -it $(kubectl get pod --selector=defectdojo.org/component=${POD} \
@@ -197,8 +286,19 @@ kubectl exec -it $(kubectl get pod --selector=defectdojo.org/component=${POD} \
 ```
 
 ### Clean up Kubernetes
-
+Helm <= v2
 ```zsh
 # Uninstall Helm chart
 helm delete defectdojo --purge
+```
+
+Helm >= v3
+```
+helm uninstall defectdojo
+```
+
+To remove persistent objects not removed by uninstall (this will remove any database):  
+```
+kubectl delete secrets defectdojo defectdojo-redis-specific defectdojo-rabbitmq-specific defectdojo-postgresql-specific defectdojo-mysql-specific
+kubectl delete pvc data-defectdojo-rabbitmq-0 data-defectdojo-postgresql-0
 ```

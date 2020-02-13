@@ -91,11 +91,14 @@ def get_item(vulnerability, test):
         # Re-assign 'severity' directly
         severity = vulnerability['severity'].title()
 
+    if 'id' in vulnerability:
+        references = "Custom SNYK ID: {}\n\n".format(vulnerability['id'])
+
     if cve_references or cwe_references:
-        references = "Several CVEs or CWEs were reported: \n\n{}\n{}".format(
+        references += "Several CVEs or CWEs were reported: \n\n{}\n{}".format(
             cve_references, cwe_references)
     else:
-        references = "Refer to the description above for references."
+        references += "Refer to the description above for references."
 
     # create the finding object
     finding = Finding(

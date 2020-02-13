@@ -1353,6 +1353,7 @@ def choose_finding_template_options(request, tid, fid):
         'product_tab': product_tab,
         'template': template,
         'form': form,
+        'finding_tags': [tag.name for tag in finding.tags.all()],
     })
 
 
@@ -2060,8 +2061,8 @@ def finding_bulk_update_all(request, pid=None):
                             prev_prod = finding.test.engagement.product.id
 
                 for finding in finds:
-                    from dojo.tasks import async_tool_issue_updater
-                    async_tool_issue_updater.delay(finding)
+                    from dojo.tools import tool_issue_updater
+                    tool_issue_updater.async_tool_issue_update(finding)
 
                     if JIRA_PKey.objects.filter(product=finding.test.engagement.product).count() == 0:
                         log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', finding)
