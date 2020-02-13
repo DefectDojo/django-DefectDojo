@@ -156,11 +156,6 @@ class System_Settings(models.Model):
                                                blank=True)
     mail_notifications_to = models.CharField(max_length=200, default='',
                                              blank=True)
-    enable_vulnerability_database = models.BooleanField(default=False,
-                                                        help_text='Enable vulnerability database mirroring.')
-    vulnerability_database_remote_url = models.CharField(blank=True, max_length=200,
-                                                         default='https://github.com/CVEProject/cvelist.git',
-                                                         help_text='Git repository to synchronize vulnerability data.')
     s_finding_severity_naming = \
         models.BooleanField(default=False, blank=False,
                             help_text='With this setting turned on, Dojo '

@@ -72,3 +72,6 @@ DD_WHITENOISE=True
 
 # Port scan source
 # DD_PORT_SCAN_SOURCE_IP=127.0.0.1
+
+# Enable vulnerability mirror synchronization
+# DD_VULNDB_ENABLED=True

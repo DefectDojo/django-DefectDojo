@@ -80,6 +80,8 @@ env = environ.Env(
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET=(str, ''),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID=(str, ''),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE=(str, 'https://graph.microsoft.com/'),
+    DD_VULNDB_ENABLED=(bool, 'False'),
+    DD_VULNDB_REMOTE_URL=(str, 'https://github.com/CVEProject/cvelist.git'),
     DD_VULNDB_ROOT=(str, root('var/vulndb')),
 )
 
@@ -374,6 +376,8 @@ FORCE_LOWERCASE_TAGS = env('DD_FORCE_LOWERCASE_TAGS')
 MAX_TAG_LENGTH = env('DD_MAX_TAG_LENGTH')
 
 # Vulnerability database settings
+VULNDB_ENABLED = env('DD_VULNDB_ENABLED')
+VULNDB_REMOTE_URL = env('DD_VULNDB_REMOTE_URL')
 VULNDB_ROOT = env('DD_VULNDB_ROOT')
 
 # ------------------------------------------------------------------------------
@@ -550,11 +554,12 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'dojo.tasks.async_update_findings_from_source_issues',
         'schedule': timedelta(hours=3),
     },
-    'synchronize-vulnerability-mirror': {
+}
+if VULNDB_ENABLED:
+    CELERY_BEAT_SCHEDULE['synchronize-vulnerability-mirror'] = {
         'task': 'dojo.tasks.synchronize_vulnerability_mirrors',
         'schedule': timedelta(hours=1)
-    },
-}
+    }
 
 
 # ------------------------------------
