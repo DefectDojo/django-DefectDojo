@@ -32,7 +32,7 @@ from dojo.tasks import add_issue_task, update_issue_task
 from functools import reduce
 
 logger = logging.getLogger(__name__)
-
+parse_logger = logging.getLogger('dojo')
 
 def view_test(request, tid):
     test = Test.objects.get(id=tid)
@@ -603,8 +603,11 @@ def re_import_scan_results(request, tid):
             except Exception as e:
                 messages.add_message(request,
                                      messages.ERROR,
-                                     "Error importing scan results: {}".format(str(e)),
+                                     "An error has occurred in the parser, please see error "
+                                     "log for details.",
                                      extra_tags='alert-danger')
+                parse_logger.exception(e)
+                parse_logger.error("Error in parser: {}".format(str(e)))
                 return HttpResponseRedirect(reverse('re_import_scan_results', args=(t.id,)))
 
             try:
