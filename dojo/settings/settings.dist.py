@@ -553,7 +553,7 @@ CELERY_BEAT_SCHEDULE = {
     'update-findings-from-source-issues': {
         'task': 'dojo.tasks.async_update_findings_from_source_issues',
         'schedule': timedelta(hours=3),
-    },
+    }
 }
 if VULNDB_ENABLED:
     CELERY_BEAT_SCHEDULE['synchronize-vulnerability-mirror'] = {

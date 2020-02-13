@@ -322,7 +322,6 @@ def celery_status():
 
 @app.task(ignore_result=True)
 def synchronize_vulnerability_mirrors():
-    from django.conf import settings
     if not settings.VULNDB_ENABLED:
         logger.info('Vulnerability mirror synchronization disabled.')
         raise Ignore
