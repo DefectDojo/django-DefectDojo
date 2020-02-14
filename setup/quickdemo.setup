@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# This script was created according to
+# https://defectdojo.readthedocs.io/en/latest/running-in-production.html
+# when I tried to create single-server docker image
+# 
+# It s recommended to run inside the new container which run by command:
+# sudo docker run -it -p 8000:8000 ubuntu bash
+
+apt-get update
+apt-get install -y python3-pip git
+
+pip3 install virtualenv
+
+cd /opt
+virtualenv dojo
+cd /opt/dojo
+
+git clone https://github.com/AlexanderTyutin/django-DefectDojo.git
+
+useradd -m dojo
+chown -R dojo /opt/dojo
+source ./bin/activate
+
+cd django-DefectDojo/setup
+./setup.bash -n
+
+DD_DEBUG=true
+DD_ALLOWED_HOSTS=*
+
+cd /opt/dojo/django-DefectDojo
+
+python3 manage.py runserver 0.0.0.0:8000
