@@ -81,6 +81,10 @@ function ubuntu_os_packages() {
     # Install OS packages needed by Defect Dojo
     sudo apt update
     sudo apt install -y apt-transport-https libjpeg-dev gcc libssl-dev python-dev python-pip nodejs yarn build-essential
+    # Added by AlexanderTyutin
+    curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+    apt-get install -y nodejs
+    # ------------------------
 }
 
 function ubuntu_wkhtml_install() {

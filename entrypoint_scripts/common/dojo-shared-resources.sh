@@ -335,6 +335,10 @@ function install_os_dependencies() {
         #Node
         curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash
         sudo DEBIAN_FRONTEND=noninteractive apt-get install -y apt-transport-https libjpeg-dev gcc libssl-dev python-dev python-pip nodejs wkhtmltopdf build-essential
+	# AlexanderTyutin added
+	curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+	apt-get install -y nodejs
+	# ---------------------
 
         #Yarn from cmdtest conflicts
         sudo apt -y remove cmdtest
