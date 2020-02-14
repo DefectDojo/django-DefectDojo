@@ -108,7 +108,7 @@ spec:
           failureThreshold: 12
         resources:
           {{- toYaml .Values.django.nginx.resources | nindent 10 }}
-      {{- with .Values.nodeSelector }}
+      {{- with .Values.django.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
