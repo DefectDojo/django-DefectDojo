@@ -1226,7 +1226,7 @@ class Sonarqube_Product(models.Model):
 
 
 class Finding(models.Model):
-    title = models.TextField(max_length=1000)
+    title = models.CharField(max_length=511)
     date = models.DateField(default=get_current_date)
     cwe = models.IntegerField(default=0, null=True, blank=True)
     cve_regex = RegexValidator(regex=r'^[A-Z]{1,10}-\d{4}-\d{4,12}$',
@@ -1321,7 +1321,15 @@ class Finding(models.Model):
     class Meta:
         ordering = ('numerical_severity', '-date', 'title')
         indexes = [
-            models.Index(fields=('cve',))
+            models.Index(fields=['cve']),
+            models.Index(fields=['out_of_scope']),
+            models.Index(fields=['false_p']),
+            models.Index(fields=['verified']),
+            models.Index(fields=['mitigated']),
+            models.Index(fields=['active']),
+            models.Index(fields=['numerical_severity']),
+            models.Index(fields=['date']),
+            models.Index(fields=['title']),
         ]
 
     @property
@@ -1341,7 +1349,8 @@ class Finding(models.Model):
             filtered = filtered.filter(file_path=self.file_path)
         if self.line:
             filtered = filtered.filter(line=self.line)
-
+        if self.unique_id_from_tool:
+            filtered = filtered.filter(unique_id_from_tool=self.unique_id_from_tool)
         return filtered.exclude(pk=self.pk)[:10]
 
     def compute_hash_code(self):
@@ -1596,8 +1605,8 @@ class Finding(models.Model):
 
             # Run async the tool issue update to update original issue with Defect Dojo updates
             if issue_updater_option:
-                from dojo.tasks import async_tool_issue_updater
-                async_tool_issue_updater.delay(self)
+                from dojo.tools import tool_issue_updater
+                tool_issue_updater.async_tool_issue_update(self)
         if (self.file_path is not None) and (self.endpoints.count() == 0):
             self.static_finding = True
             self.dynamic_finding = False
