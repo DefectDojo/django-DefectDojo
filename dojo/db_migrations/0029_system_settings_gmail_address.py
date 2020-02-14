@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0024_cve_fix_1553'),
+        ('dojo', '0028_finding_indices'),
     ]
 
     operations = [
