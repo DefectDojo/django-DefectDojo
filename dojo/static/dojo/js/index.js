@@ -154,7 +154,7 @@ function punchcard(element, data, ticks) {
             bubbles: {
                 active: true,
                 debug: {
-                    active: false
+                    active: true
                 },
                 show: true,
                 bubblelabel: {
@@ -200,12 +200,9 @@ function punchcard(element, data, ticks) {
             content: function (label, xval, yval, flotItem) {
                 for (var x = 0; x < flotItem.series.data.length; x++) {
                     if (xval == flotItem.series.data[x][0] && yval == flotItem.series.data[x][1]) {
-                        yeah = Math.ceil(flotItem.series.data[x][2] * highest_count);
+                        yeah = flotItem.series.data[x][3];
                         break;
                     }
-                }
-                if (yeah <= 0) {
-                    return;
                 }
                 return yeah + ' Findings';
             },

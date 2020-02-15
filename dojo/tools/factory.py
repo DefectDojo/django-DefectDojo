@@ -65,8 +65,12 @@ from dojo.tools.testssl.parser import TestsslCSVParser
 from dojo.tools.hadolint.parser import HadolintParser
 from dojo.tools import SCAN_SONARQUBE_API
 from dojo.tools.aqua.parser import AquaJSONParser
+from dojo.tools.blackduck_component_risk.parser import BlackduckHubParser
+from dojo.tools.h1.parser import HackerOneJSONParser
 from dojo.tools.xanitizer.parser import XanitizerXMLParser
 from dojo.tools.trivy.parser import TrivyParser
+from dojo.tools.outpost24.parser import Outpost24Parser
+
 
 
 __author__ = 'Jay Paz'
@@ -122,7 +126,7 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = NspParser(file, test)
     elif scan_type == 'NPM Audit Scan':
         parser = NpmAuditParser(file, test)
-    elif scan_type == 'Symfony Security Check':
+    elif scan_type == 'PHP Symfony Security Check':
         parser = PhpSymfonySecurityCheckParser(file, test)
     elif scan_type == 'Generic Findings Import':
         parser = GenericFindingUploadCsvParser(file, test, active, verified)
@@ -186,6 +190,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = KiuwanCSVParser(file, test)
     elif scan_type == 'Blackduck Hub Scan':
         parser = BlackduckHubCSVParser(file, test)
+    elif scan_type == 'Blackduck Component Risk':
+        parser = BlackduckHubParser(file, test)
     elif scan_type == 'Sonatype Application Scan':
         parser = SonatypeJSONParser(file, test)
     elif scan_type == 'Openscap Vulnerability Scan':
@@ -216,10 +222,14 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = HadolintParser(file, test)
     elif scan_type == 'Aqua Scan':
         parser = AquaJSONParser(file, test)
+    elif scan_type == 'HackerOne Cases':
+        parser = HackerOneJSONParser(file, test)
     elif scan_type == 'Xanitizer Scan':
         parser = XanitizerXMLParser(file, test)
     elif scan_type == 'Trivy Scan':
         parser = TrivyParser(file, test)
+    elif scan_type == 'Outpost24 Scan':
+        parser = Outpost24Parser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 

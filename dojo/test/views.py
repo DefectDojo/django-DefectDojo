@@ -32,10 +32,10 @@ from dojo.tasks import add_issue_task, update_issue_task
 from functools import reduce
 
 logger = logging.getLogger(__name__)
-
+parse_logger = logging.getLogger('dojo')
 
 def view_test(request, tid):
-    test = Test.objects.get(id=tid)
+    test = get_object_or_404(Test, pk=tid)
     prod = test.engagement.product
     auth = request.user.is_staff or request.user in prod.authorized_users.all()
     tags = Tag.objects.usage_for_model(Finding)
@@ -549,8 +549,8 @@ def finding_bulk_update(request, tid):
                     calculate_grade(test.engagement.product)
 
                 for finding in finds:
-                    from dojo.tasks import async_tool_issue_updater
-                    async_tool_issue_updater.delay(finding)
+                    from dojo.tools import tool_issue_updater
+                    tool_issue_updater.async_tool_issue_update(finding)
 
                     if JIRA_PKey.objects.filter(product=finding.test.engagement.product).count() == 0:
                         log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', finding)
@@ -602,6 +602,15 @@ def re_import_scan_results(request, tid):
                 parser = import_parser_factory(file, t, active, verified)
             except ValueError:
                 raise Http404()
+            except Exception as e:
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     "An error has occurred in the parser, please see error "
+                                     "log for details.",
+                                     extra_tags='alert-danger')
+                parse_logger.exception(e)
+                parse_logger.error("Error in parser: {}".format(str(e)))
+                return HttpResponseRedirect(reverse('re_import_scan_results', args=(t.id,)))
 
             try:
                 items = parser.items
@@ -651,7 +660,8 @@ def re_import_scan_results(request, tid):
                         new_items.append(find.id)
                     else:
                         item.test = t
-                        item.date = scan_date
+                        if item.date == timezone.now().date():
+                            item.date = t.target_start
                         item.reporter = request.user
                         item.last_reviewed = timezone.now()
                         item.last_reviewed_by = request.user
@@ -689,6 +699,14 @@ def re_import_scan_results(request, tid):
                     if find:
                         finding_count += 1
                         for endpoint in item.unsaved_endpoints:
+                            ep, created = Endpoint.objects.get_or_create(protocol=endpoint.protocol,
+                                                                         host=endpoint.host,
+                                                                         path=endpoint.path,
+                                                                         query=endpoint.query,
+                                                                         fragment=endpoint.fragment,
+                                                                         product=t.engagement.product)
+                            find.endpoints.add(ep)
+                        for endpoint in form.cleaned_data['endpoints']:
                             ep, created = Endpoint.objects.get_or_create(protocol=endpoint.protocol,
                                                                          host=endpoint.host,
                                                                          path=endpoint.path,
@@ -749,6 +767,7 @@ def re_import_scan_results(request, tid):
 
     product_tab = Product_Tab(engagement.product.id, title="Re-upload a %s" % scan_type, tab="engagements")
     product_tab.setEngagement(engagement)
+    form.fields['endpoints'].queryset = Endpoint.objects.filter(product__id=product_tab.product.id)
     return render(request,
                   'dojo/import_scan_results.html',
                   {'form': form,
