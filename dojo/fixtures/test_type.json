@@ -521,6 +521,27 @@
 		},
 		"model": "dojo.test_type",
 		"pk": 166
+	},
+	{
+		"fields": {
+			"name": "HackerOne Cases"
+		},
+		"model": "dojo.test_type",
+		"pk": 167
+	},
+	{
+		"fields": {
+			"name": "Outpost24 Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 168
+	},
+	{
+		"fields": {
+			"name": "Blackduck Component Risk"
+		},
+		"model": "dojo.test_type",
+		"pk": 169
 	}
 ]
 

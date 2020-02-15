@@ -36,6 +36,7 @@ from dojo.tasks import update_epic_task, add_epic_task
 from functools import reduce
 
 logger = logging.getLogger(__name__)
+parse_logger = logging.getLogger('dojo')
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -555,7 +556,17 @@ def import_scan_results(request, eid=None, pid=None):
                     new_f.cred_id = cred_user.cred_id
                     new_f.save()
 
-            parser = import_parser_factory(file, t, active, verified)
+            try:
+                parser = import_parser_factory(file, t, active, verified)
+            except Exception as e:
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     "An error has occurred in the parser, please see error "
+                                     "log for details.",
+                                     extra_tags='alert-danger')
+                parse_logger.exception(e)
+                parse_logger.error("Error in parser: {}".format(str(e)))
+                return HttpResponseRedirect(reverse('import_scan_results', args=(eid,)))
 
             try:
                 for item in parser.items:
@@ -619,6 +630,17 @@ def import_scan_results(request, eid=None, pid=None):
                             product=t.engagement.product)
 
                         item.endpoints.add(ep)
+                    for endpoint in form.cleaned_data['endpoints']:
+                        ep, created = Endpoint.objects.get_or_create(
+                            protocol=endpoint.protocol,
+                            host=endpoint.host,
+                            path=endpoint.path,
+                            query=endpoint.query,
+                            fragment=endpoint.fragment,
+                            product=t.engagement.product)
+
+                        item.endpoints.add(ep)
+
                     item.save(false_history=True)
 
                     if item.unsaved_tags is not None:
@@ -660,7 +682,7 @@ def import_scan_results(request, eid=None, pid=None):
         prod_id = pid
         custom_breadcrumb = {"", ""}
         product_tab = Product_Tab(prod_id, title=title, tab="findings")
-
+    form.fields['endpoints'].queryset = Endpoint.objects.filter(product__id=product_tab.product.id)
     return render(request, 'dojo/import_scan_results.html', {
         'form': form,
         'product_tab': product_tab,
