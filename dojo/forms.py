@@ -997,7 +997,7 @@ class ApplyFindingTemplateForm(forms.Form):
 
     cwe = forms.IntegerField(label="CWE", required=False)
     cve = forms.CharField(label="CVE", max_length=20, required=False)
-    cvss = forms.CharField(label="CVSS",max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'btn btn-secondary dropdown-toggle', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
+    cvss = forms.CharField(label="CVSS", max_length=117, required=False, widget=forms.TextInput(attrs={'class': 'btn btn-secondary dropdown-toggle', 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'false'}))
 
     severity = forms.ChoiceField(required=False, choices=SEVERITY_CHOICES, error_messages={'required': 'Select valid choice: In Progress, On Hold, Completed', 'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
 
@@ -1030,7 +1030,7 @@ class ApplyFindingTemplateForm(forms.Form):
 
     class Meta:
         fields = ['title', 'cwe', 'cve', 'cvss', 'severity', 'description', 'mitigation', 'impact', 'references', 'tags']
-        order = ('title', 'cwe', 'cve', 'cvss','severity', 'description', 'impact', 'is_Mitigated')
+        order = ('title', 'cwe', 'cve', 'cvss', 'severity', 'description', 'impact', 'is_Mitigated')
 
 
 class FindingTemplateForm(forms.ModelForm):
@@ -1060,7 +1060,7 @@ class FindingTemplateForm(forms.ModelForm):
 
     class Meta:
         model = Finding_Template
-        order = ('title', 'cwe', 'cve','cvss', 'severity', 'description', 'impact')
+        order = ('title', 'cwe', 'cve', 'cvss', 'severity', 'description', 'impact')
         exclude = ('numerical_severity', 'is_Mitigated', 'last_used')
 
 
