@@ -1,7 +1,7 @@
 #!/bin/bash
 
 umask 0002
-if [ "${GENERATE_TLS_CERTIFICATE}" == "true" ]
+if [ "${GENERATE_TLS_CERTIFICATE}" == "True" ]
 then
   openssl req  \
       -x509 \
@@ -15,7 +15,7 @@ then
 fi
 echo "uwsgi_pass ${DD_UWSGI_PASS};" > /run/uwsgi_pass
 echo "server ${DD_UWSGI_HOST}:${DD_UWSGI_PORT};" > /run/uwsgi_server
-if [ "${USE_TLS}" == "true" ]
+if [ "${USE_TLS}" == "True" ]
 then
   exec nginx -c /etc/nginx/nginx_TLS.conf -g "daemon off;"
 else
