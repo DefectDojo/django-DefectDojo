@@ -1441,8 +1441,7 @@ class Finding(models.Model):
         return hashlib.sha256(hash_string).hexdigest()
 
     def remove_from_any_risk_acceptance(self):
-        risk_acceptances = Risk_Acceptance.objects.filter(accepted_findings__in=[self])
-        for r in risk_acceptances:
+        for r in self.risk_acceptance_set.all():
             r.accepted_findings.remove(self)
             if not r.accepted_findings.exists():
                 r.delete()
@@ -1515,7 +1514,7 @@ class Finding(models.Model):
             status += ['Out Of Scope']
         if self.duplicate:
             status += ['Duplicate']
-        if len(self.risk_acceptance_set.all()) > 0:
+        if self.risk_acceptance_set.exists():
             status += ['Accepted']
 
         if not len(status):
@@ -1548,12 +1547,7 @@ class Finding(models.Model):
         return sla_calculation
 
     def jira(self):
-        try:
-            jissue = JIRA_Issue.objects.get(finding=self)
-        except:
-            jissue = None
-            pass
-        return jissue
+        return self.jira_issue
 
     def jira_conf(self):
         try:
