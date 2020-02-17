@@ -1,6 +1,6 @@
 #!/bin/sh
 
-umask 0000
+umask 0002
 
 if [ "${DD_INITIALIZE}" = false ]
 then
