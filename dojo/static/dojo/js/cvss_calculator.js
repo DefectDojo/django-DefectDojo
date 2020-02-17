@@ -22,7 +22,7 @@ var response = '<!--'+
 '-->'+
 ''+
 '<style type="text/css">'+
-'  #cvsscalculator31 { position: fixed; height: 70vh; width: 70%; position: absolute; background-color: #ffffff; border: 1px solid #d0d0d0 ;overflow-y:scroll; z-index: 42; padding: 10 px}'+
+'  #cvsscalculator { position: fixed; height: 70vh; width: 70%; position: absolute; background-color: #ffffff; border: 1px solid #d0d0d0 ;overflow-y:scroll; z-index: 42; padding: 10 px}'+
 '  #cvssReference { font-size: 100%; }'+
 '  fieldset { position: relative; background-color: #f2f2f2; margin-top: 50px; border:0; padding: 1em 0; }'+
 '  fieldset legend { background-color: rgba(32, 166, 216, 0.75);; color: #ffffff; margin: 0; width: 100%; padding: 0.5em 0px; text-indent: 1em; }'+
@@ -75,11 +75,11 @@ var response = '<!--'+
 '</style>'+
 ''+
 '<script>'+
-'   document.querySelector("#cvsscalculator31").style.display = "none";'+
+'   document.querySelector("#cvsscalculator").style.display = "none";'+
 '</script>'+
 ''+
 ''+
-'<form action="#" id="cvsscalculator31">'+
+'<form action="#" id="cvsscalculator">'+
 ''+
 ''+
 '<fieldset id="baseMetricGroup">'+
@@ -314,17 +314,14 @@ var response = '<!--'+
 '<!-- CVSS Calculator end -->';
 
 $(".cvsscalculator").parent().append(response);
-
   $(document).ready(function() {
     $("#id_cvss").click(function(){
-      $("#cvsscalculator31").toggle();
+      $("#cvsscalculator").toggle();
   });
-
 });
 
-
 $(document).mouseup(function (e){
-	var container = $("#cvsscalculator31");
+	var container = $("#cvsscalculator");
 	if (!container.is(e.target) && container.has(e.target).length === 0){
 		container.hide();
 	}
@@ -550,7 +547,7 @@ function cvssCalculator() {
         return
     }
     var L, i, n;
-    L = document.querySelectorAll(".col-sm-10 input");
+    L = document.querySelectorAll("#cvsscalculator input");
     i = L.length;
     while (i--) {
         bind(L[i], "click", delayedUpdateScores)
