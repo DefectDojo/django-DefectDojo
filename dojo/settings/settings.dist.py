@@ -579,7 +579,7 @@ if env('DD_DJANGO_METRICS_ENABLED'):
         MIDDLEWARE + \
         ['django_prometheus.middleware.PrometheusAfterMiddleware', ]
     database_engine = DATABASES.get('default').get('ENGINE')
-    DATABASES['default']['ENGINE'] = database_engine.replace('django.','django_prometheus.', 1)
+    DATABASES['default']['ENGINE'] = database_engine.replace('django.', 'django_prometheus.', 1)
     # CELERY_RESULT_BACKEND.replace('django.core','django_prometheus.', 1)
     LOGIN_EXEMPT_URLS += (r'^%sdjango_metrics/' % URL_PREFIX,)
 
