@@ -1004,16 +1004,17 @@ def get_page_items(request, items, page_size, param_name='page'):
     paginator = Paginator(items, size)
     page = request.GET.get(param_name)
 
-    try:
-        page = paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        page = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-        page = paginator.page(paginator.num_pages)
+    # try:
+    #     page = paginator.page(page)
+    # except PageNotAnInteger:
+    #     # If page is not an integer, deliver first page.
+    #     page = paginator.page(1)
+    # except EmptyPage:
+    #     # If page is out of range (e.g. 9999), deliver last page of results.
+    #     page = paginator.page(paginator.num_pages)
 
-    return page
+    # return page
+    return paginator.get_page(page)
 
 
 def handle_uploaded_threat(f, eng):

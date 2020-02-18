@@ -1712,7 +1712,7 @@ class Finding(models.Model):
         return res
 
     def get_found_by(self):
-        scanners = self.found_by.all().distinct()
+        scanners = self.found_by.all()
         return ", ".join([str(scanner) for scanner in scanners])
 
 
