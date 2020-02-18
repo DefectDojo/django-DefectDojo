@@ -523,18 +523,6 @@ EMAIL_CONFIG = env.email_url(
 
 vars().update(EMAIL_CONFIG)
 
-# address issue when running ./manage.py collectstatic
-# reference: https://github.com/korfuri/django-prometheus/issues/34
-PROMETHEUS_EXPORT_MIGRATIONS = False
-# django metrics for monitoring
-if env('DD_DJANGO_METRICS_ENABLED'):
-    DJANGO_METRICS_ENABLED = env('DD_DJANGO_METRICS_ENABLED')
-    INSTALLED_APPS = INSTALLED_APPS + ('django_prometheus',)
-    MIDDLEWARE = ['django_prometheus.middleware.PrometheusBeforeMiddleware', ] + \
-        MIDDLEWARE + \
-        ['django_prometheus.middleware.PrometheusAfterMiddleware', ]
-    # TODO Add metrics for db and celery broker
-
 # ------------------------------------------------------------------------------
 # CELERY
 # ------------------------------------------------------------------------------
@@ -575,6 +563,25 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': timedelta(hours=3),
     }
 }
+
+
+# ------------------------------------
+# Monitoring Metrics
+# ------------------------------------
+# address issue when running ./manage.py collectstatic
+# reference: https://github.com/korfuri/django-prometheus/issues/34
+PROMETHEUS_EXPORT_MIGRATIONS = False
+# django metrics for monitoring
+if env('DD_DJANGO_METRICS_ENABLED'):
+    DJANGO_METRICS_ENABLED = env('DD_DJANGO_METRICS_ENABLED')
+    INSTALLED_APPS = INSTALLED_APPS + ('django_prometheus',)
+    MIDDLEWARE = ['django_prometheus.middleware.PrometheusBeforeMiddleware', ] + \
+        MIDDLEWARE + \
+        ['django_prometheus.middleware.PrometheusAfterMiddleware', ]
+    database_engine = DATABASES.get('default').get('ENGINE')
+    DATABASES['default']['ENGINE'] = database_engine.replace('django.','django_prometheus.', 1)
+    # CELERY_RESULT_BACKEND.replace('django.core','django_prometheus.', 1)
+    LOGIN_EXEMPT_URLS += (r'^%sdjango_metrics/' % URL_PREFIX,)
 
 
 # ------------------------------------
