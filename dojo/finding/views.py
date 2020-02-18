@@ -560,6 +560,7 @@ def open_findings(request, pid=None, eid=None, view=None):
 def prefetch_for_open_findings(findings):
     prefetched_findings = findings
     prefetched_findings = prefetched_findings.prefetch_related('found_by')
+    prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set')
     return prefetched_findings
 
 """
