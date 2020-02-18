@@ -33,68 +33,54 @@ from django.db.models import Prefetch
 logger = logging.getLogger(__name__)
 
 def product(request):
-    prods = Product.objects.all()
 
-    if not request.user.is_staff:
-        prods = prods.filter(authorized_users__in=[request.user])
-                      
-    prods = prods.select_related('technical_contact').select_related('product_manager').select_related('prod_type').select_related('team_manager')
-    # prods = prods.prefetch_related(Prefetch('product_engagement', queryset=Engagement.objects.all(), to_attr='engagements'))
-    # prods = prods.prefetch_related(Prefetch('engagement_product', queryset=Engagement.objects.all().annotate(), to_attr='engagement_count'))
-
-# TODO try when/case
-#  Client.objects.annotate(
-# ...     discount=Case(
-# ...         When(account_type=Client.GOLD, then=Value('5%')),
-# ...         When(account_type=Client.PLATINUM, then=Value('10%')),
-# ...         default=Value('0%'),
-# ...         output_field=CharField(),
-# ...     ),
-
-# TODO test reports (scan all code for product__engagement)
-
-    prods = prods.annotate(active_engagement_count=Count('engagement__id', filter=Q(engagement__active=True)))
-    prods = prods.annotate(closed_engagement_count=Count('engagement__id', filter=Q(engagement__active=False)))
-    prods = prods.annotate(last_engagement_date=Max('engagement__target_start'))
-
-    # prods = prods.prefetch_related(Prefetch('product_endpoint', to_attr='endpoints'))
-    active_endpoint_query = Endpoint.objects.filter(
-            finding__active=True,
-            finding__verified=True,
-            finding__mitigated__isnull=True)
-
-    prods = prods.prefetch_related(Prefetch('product_endpoint', queryset=active_endpoint_query, to_attr='active_endpoints'))
-
-    prods = prods.annotate(active_finding_count=Count('engagement__test__finding__id', filter=Q(engagement__test__finding__active=True)))
-
-    prods = prods.prefetch_related(Prefetch('product_jira_pkey', queryset=JIRA_PKey.objects.all(), to_attr='jira_confs'))
-
-    name_words = [product.name for product in prods
-                    for word in product.name.split() if len(word) > 2]
-
+    # validate prod_type param
     product_type = None
-
     if 'prod_type' in request.GET:
         p = request.GET.getlist('prod_type', [])
         if len(p) == 1:
             product_type = get_object_or_404(Product_Type, id=p[0])
+
+    prods = Product.objects.all()
+
+    if not request.user.is_staff:
+        prods = prods.filter(authorized_users__in=[request.user])
+
+    # perform all stuff for filtering and pagination first, before annotation/prefetching
+    # otherwise the paginator will perform all the annotations/prefetching already only to count the total number of records
+    # see https://code.djangoproject.com/ticket/23771 and https://code.djangoproject.com/ticket/25375
+    name_words = [product.name for product in prods
+                    for word in product.name.split() if len(word) > 2]
+
+    prod_filter = ProductFilter(request.GET, queryset=prods, user=request.user)
+    prod_list = get_page_items(request, prod_filter.qs, 25)   
+
+    # perform annotation/prefetching by replacing the queryset in the page with an annotated/prefetched queryset.
+    prod_qs = prod_list.object_list
+    prod_qs = prod_qs.select_related('technical_contact').select_related('product_manager').select_related('prod_type').select_related('team_manager')
+    prod_qs = prod_qs.annotate(active_engagement_count=Count('engagement__id', filter=Q(engagement__active=True)))
+    prod_qs = prod_qs.annotate(closed_engagement_count=Count('engagement__id', filter=Q(engagement__active=False)))
+    prod_qs = prod_qs.annotate(last_engagement_date=Max('engagement__target_start'))
+    prod_qs = prod_qs.annotate(active_finding_count=Count('engagement__test__finding__id', filter=Q(engagement__test__finding__active=True)))
+    prod_qs = prod_qs.prefetch_related(Prefetch('product_jira_pkey', queryset=JIRA_PKey.objects.all(), to_attr='jira_confs'))
+    active_endpoint_query = Endpoint.objects.filter(
+            finding__active=True,
+            finding__verified=True,
+            finding__mitigated__isnull=True)
+    prod_qs = prod_qs.prefetch_related(Prefetch('product_endpoint', queryset=active_endpoint_query, to_attr='active_endpoints'))
+    prod_list.object_list = prod_qs
+
     """
     if 'tags' in request.GET:
         tags = request.GET.getlist('tags', [])
         initial_queryset = TaggedItem.objects.get_by_model(initial_queryset, Tag.objects.filter(name__in=tags))
     """
-    prods = ProductFilter(request.GET, queryset=prods, user=request.user)
-    prod_list = get_page_items(request, prods.qs, 25) # TODO fix paging as currently it performs the query twice
-
-
-
-    # print(name_words)
 
     add_breadcrumb(title="Product List", top_level=not len(request.GET), request=request)
     return render(request,
                   'dojo/product.html',
                   {'prod_list': prod_list,
-                   'prods': prods,
+                   'prod_filter': prod_filter,
                    'name_words': sorted(set(name_words)),
                    'user': request.user})
 
