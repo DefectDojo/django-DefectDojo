@@ -54,6 +54,9 @@ def product(request):
 
     prod_filter = ProductFilter(request.GET, queryset=prods, user=request.user)
     prod_list = get_page_items(request, prod_filter.qs, 25)   
+    # print(prod_filter.qs)
+    # print(prod_list.object_list)
+    
     # perform annotation/prefetching by replacing the queryset in the page with an annotated/prefetched queryset.
     prod_list.object_list = prefetch_for_product(prod_list.object_list)
 
