@@ -1727,10 +1727,6 @@ class Finding(models.Model):
         res = re.sub(r'\n\s*\n', '\n', res)
         return res
 
-    def get_found_by(self):
-        scanners = self.found_by.all()
-        return ", ".join([str(scanner) for scanner in scanners])
-
 
 Finding.endpoints.through.__unicode__ = lambda \
     x: "Endpoint: " + x.endpoint.host
