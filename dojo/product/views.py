@@ -54,21 +54,8 @@ def product(request):
 
     prod_filter = ProductFilter(request.GET, queryset=prods, user=request.user)
     prod_list = get_page_items(request, prod_filter.qs, 25)   
-
     # perform annotation/prefetching by replacing the queryset in the page with an annotated/prefetched queryset.
-    prod_qs = prod_list.object_list
-    prod_qs = prod_qs.select_related('technical_contact').select_related('product_manager').select_related('prod_type').select_related('team_manager')
-    prod_qs = prod_qs.annotate(active_engagement_count=Count('engagement__id', filter=Q(engagement__active=True)))
-    prod_qs = prod_qs.annotate(closed_engagement_count=Count('engagement__id', filter=Q(engagement__active=False)))
-    prod_qs = prod_qs.annotate(last_engagement_date=Max('engagement__target_start'))
-    prod_qs = prod_qs.annotate(active_finding_count=Count('engagement__test__finding__id', filter=Q(engagement__test__finding__active=True)))
-    prod_qs = prod_qs.prefetch_related(Prefetch('product_jira_pkey', queryset=JIRA_PKey.objects.all(), to_attr='jira_confs'))
-    active_endpoint_query = Endpoint.objects.filter(
-            finding__active=True,
-            finding__verified=True,
-            finding__mitigated__isnull=True)
-    prod_qs = prod_qs.prefetch_related(Prefetch('product_endpoint', queryset=active_endpoint_query, to_attr='active_endpoints'))
-    prod_list.object_list = prod_qs
+    prod_list.object_list = prefetch_for_product(prod_list.object_list)
 
     """
     if 'tags' in request.GET:
@@ -84,6 +71,19 @@ def product(request):
                    'name_words': sorted(set(name_words)),
                    'user': request.user})
 
+def prefetch_for_product(prods):
+    prefetched_prods = prods.select_related('technical_contact').select_related('product_manager').select_related('prod_type').select_related('team_manager')
+    prefetched_prods = prefetched_prods.annotate(active_engagement_count=Count('engagement__id', filter=Q(engagement__active=True)))
+    prefetched_prods = prefetched_prods.annotate(closed_engagement_count=Count('engagement__id', filter=Q(engagement__active=False)))
+    prefetched_prods = prefetched_prods.annotate(last_engagement_date=Max('engagement__target_start'))
+    prefetched_prods = prefetched_prods.annotate(active_finding_count=Count('engagement__test__finding__id', filter=Q(engagement__test__finding__active=True)))
+    prefetched_prods = prefetched_prods.prefetch_related(Prefetch('product_jira_pkey', queryset=JIRA_PKey.objects.all(), to_attr='jira_confs'))
+    active_endpoint_query = Endpoint.objects.filter(
+            finding__active=True,
+            finding__verified=True,
+            finding__mitigated__isnull=True)
+    prefetched_prods = prefetched_prods.prefetch_related(Prefetch('product_endpoint', queryset=active_endpoint_query, to_attr='active_endpoints'))
+    return prefetched_prods
 
 def iso_to_gregorian(iso_year, iso_week, iso_day):
     jan4 = date(iso_year, 1, 4)
@@ -409,19 +409,19 @@ def view_engagements(request, pid, engagement_type="Interactive"):
     active_engs = EngagementFilter(request.GET, queryset=engs)
     result_active_engs = get_page_items(request, active_engs.qs, default_page_num, param_name="engs")
     # prefetch only after creating the filters to avoid https://code.djangoproject.com/ticket/23771 and https://code.djangoproject.com/ticket/25375
-    result_active_engs.object_list = prefetch_for_engagement(result_active_engs.object_list)
+    result_active_engs.object_list = prefetch_for_view_engagements(result_active_engs.object_list)
 
     # Engagements that are queued because they haven't started or paused
     engs = Engagement.objects.filter(~Q(status="In Progress"), product=prod, active=True, engagement_type=engagement_type).order_by('-updated')
     queued_engs = EngagementFilter(request.GET, queryset=engs)
     result_queued_engs = get_page_items(request, queued_engs.qs, default_page_num, param_name="queued_engs")
-    result_queued_engs.object_list = prefetch_for_engagement(result_queued_engs.object_list)
+    result_queued_engs.object_list = prefetch_for_view_engagements(result_queued_engs.object_list)
 
     # Cancelled or Completed Engagements
     engs = Engagement.objects.filter(product=prod, active=False, engagement_type=engagement_type).order_by('-target_end')
     result_inactive = EngagementFilter(request.GET, queryset=engs)
     result_inactive_engs_page = get_page_items(request, result_inactive.qs, default_page_num, param_name="i_engs")
-    result_inactive_engs_page.object_list = prefetch_for_engagement(result_inactive_engs_page.object_list)
+    result_inactive_engs_page.object_list = prefetch_for_view_engagements(result_inactive_engs_page.object_list)
 
     title = "All Engagements"
     if engagement_type == "CI/CD":
@@ -442,7 +442,7 @@ def view_engagements(request, pid, engagement_type="Interactive"):
                    'user': request.user,
                    'authorized': auth})
 
-def prefetch_for_engagement(engs):
+def prefetch_for_view_engagements(engs):
     prefetched_engs = engs.prefetch_related('test_set')
     prefetched_engs = prefetched_engs.annotate(count_findings_all=Count('test__finding__id'))
     prefetched_engs = prefetched_engs.annotate(count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)))
