@@ -403,38 +403,31 @@ def view_engagements(request, pid, engagement_type="Interactive"):
     if not auth:
         raise PermissionDenied
 
-    default_page_num = 10
+    default_page_num = 5
 
     # In Progress Engagements
-    engs = Engagement.objects.filter(product=prod, active=True, status="In Progress", engagement_type=engagement_type).prefetch_related('test_set').order_by('-updated')
-    # prefetch counts to avoid N+1 problem
-    engs = prefetch_counts_for_engagement(engs)
-    # print('active ', engs)
+    engs = Engagement.objects.filter(product=prod, active=True, status="In Progress", engagement_type=engagement_type).order_by('-updated')
     active_engs = EngagementFilter(request.GET, queryset=engs)
     result_active_engs = get_page_items(request, active_engs.qs, default_page_num, param_name="engs")
-    # print('active')
-    # for eng in active_engs.qs:
-    #     print(eng.id, eng.name, eng.count_findings_all)
-    #     print(eng.id, eng.name, eng.count_findings_open)
-    #     print(eng.id, eng.name, eng.count_findings_duplicate)
-    
+    # prefetch only after creating the filters to avoid https://code.djangoproject.com/ticket/23771 and https://code.djangoproject.com/ticket/25375
+    result_active_engs.object_list = prefetch_for_engagement(result_active_engs.object_list)
+
     # Engagements that are queued because they haven't started or paused
-    engs = Engagement.objects.filter(~Q(status="In Progress"), product=prod, active=True, engagement_type=engagement_type).prefetch_related('test_set').order_by('-updated')
-    engs = prefetch_counts_for_engagement(engs)
+    engs = Engagement.objects.filter(~Q(status="In Progress"), product=prod, active=True, engagement_type=engagement_type).order_by('-updated')
     queued_engs = EngagementFilter(request.GET, queryset=engs)
     result_queued_engs = get_page_items(request, queued_engs.qs, default_page_num, param_name="queued_engs")
+    result_queued_engs.object_list = prefetch_for_engagement(result_queued_engs.object_list)
 
     # Cancelled or Completed Engagements
-    engs = Engagement.objects.filter(product=prod, active=False, engagement_type=engagement_type).prefetch_related('test_set').order_by('-target_end')
-    engs = prefetch_counts_for_engagement(engs)
+    engs = Engagement.objects.filter(product=prod, active=False, engagement_type=engagement_type).order_by('-target_end')
     result_inactive = EngagementFilter(request.GET, queryset=engs)
     result_inactive_engs_page = get_page_items(request, result_inactive.qs, default_page_num, param_name="i_engs")
+    result_inactive_engs_page.object_list = prefetch_for_engagement(result_inactive_engs_page.object_list)
 
     title = "All Engagements"
     if engagement_type == "CI/CD":
         title = "CI/CD Engagements"
 
-    # TODO refactor to avoid another query just to count, might be solved by newer pagination
     product_tab = Product_Tab(pid, title=title, tab="engagements")
     return render(request,
                   'dojo/view_engagements.html',
@@ -442,16 +435,17 @@ def view_engagements(request, pid, engagement_type="Interactive"):
                    'product_tab': product_tab,
                    'engagement_type': engagement_type,
                    'engs': result_active_engs,
-                   'engs_count': active_engs.qs.count(),
+                   'engs_count': result_active_engs.paginator.count,
                    'queued_engs': result_queued_engs,
-                   'queued_engs_count': queued_engs.qs.count(),
+                   'queued_engs_count': result_queued_engs.paginator.count,
                    'i_engs': result_inactive_engs_page,
-                   'i_engs_count': result_inactive.qs.count(),
+                   'i_engs_count': result_inactive_engs_page.paginator.count,
                    'user': request.user,
                    'authorized': auth})
 
-def prefetch_counts_for_engagement(engs):
-    prefetched_engs = engs.annotate(count_findings_all=Count('test__finding__id'))
+def prefetch_for_engagement(engs):
+    prefetched_engs = engs.prefetch_related('test_set')
+    prefetched_engs = prefetched_engs.annotate(count_findings_all=Count('test__finding__id'))
     prefetched_engs = prefetched_engs.annotate(count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)))
     prefetched_engs = prefetched_engs.annotate(count_findings_duplicate=Count('test__finding__id', filter=Q(test__finding__duplicate=True)))
     return prefetched_engs
