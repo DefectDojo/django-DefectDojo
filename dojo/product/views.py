@@ -422,29 +422,24 @@ def view_engagements(request, pid, engagement_type="Interactive"):
     engs = Engagement.objects.filter(product=prod, active=True, status="In Progress", engagement_type=engagement_type).prefetch_related('test_set').order_by('-updated')
     # prefetch counts to avoid N+1 problem
     engs = prefetch_counts_for_engagement(engs)
-    print('active ', engs)
+    # print('active ', engs)
     active_engs = EngagementFilter(request.GET, queryset=engs)
     result_active_engs = get_page_items(request, active_engs.qs, default_page_num, param_name="engs")
-    print('active')
-    for eng in active_engs.qs:
-        print(eng.id, eng.name, eng.count_findings_all)
-        print(eng.id, eng.name, eng.count_findings_open)
-        print(eng.id, eng.name, eng.count_findings_duplicate)
+    # print('active')
+    # for eng in active_engs.qs:
+    #     print(eng.id, eng.name, eng.count_findings_all)
+    #     print(eng.id, eng.name, eng.count_findings_open)
+    #     print(eng.id, eng.name, eng.count_findings_duplicate)
     
     # Engagements that are queued because they haven't started or paused
     engs = Engagement.objects.filter(~Q(status="In Progress"), product=prod, active=True, engagement_type=engagement_type).prefetch_related('test_set').order_by('-updated')
-    # prefetch counts to avoid N+1 problem
     engs = prefetch_counts_for_engagement(engs)
     queued_engs = EngagementFilter(request.GET, queryset=engs)
     result_queued_engs = get_page_items(request, queued_engs.qs, default_page_num, param_name="queued_engs")
 
     # Cancelled or Completed Engagements
     engs = Engagement.objects.filter(product=prod, active=False, engagement_type=engagement_type).prefetch_related('test_set').order_by('-target_end')
-    # prefetch counts to avoid N+1 problem
     engs = prefetch_counts_for_engagement(engs)
-
-    # TODO remove template tags used for counting the above
-
     result_inactive = EngagementFilter(request.GET, queryset=engs)
     result_inactive_engs_page = get_page_items(request, result_inactive.qs, default_page_num, param_name="i_engs")
 
@@ -452,6 +447,7 @@ def view_engagements(request, pid, engagement_type="Interactive"):
     if engagement_type == "CI/CD":
         title = "CI/CD Engagements"
 
+    # TODO refactor to avoid another query just to count, might be solved by newer pagination
     product_tab = Product_Tab(pid, title=title, tab="engagements")
     return render(request,
                   'dojo/view_engagements.html',
