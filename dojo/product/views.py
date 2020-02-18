@@ -402,7 +402,7 @@ def view_engagements(request, pid, engagement_type="Interactive"):
     if not auth:
         raise PermissionDenied
 
-    default_page_num = 5
+    default_page_num = 10
 
     # In Progress Engagements
     engs = Engagement.objects.filter(product=prod, active=True, status="In Progress", engagement_type=engagement_type).order_by('-updated')
