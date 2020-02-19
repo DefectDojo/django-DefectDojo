@@ -1547,7 +1547,10 @@ class Finding(models.Model):
         return sla_calculation
 
     def jira(self):
-        return self.jira_issue
+        try:
+            return self.jira_issue
+        except JIRA_Issue.DoesNotExist:
+            return None
 
     def jira_conf(self):
         try:
