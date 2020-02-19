@@ -543,6 +543,17 @@ def open_findings(request, pid=None, eid=None, view=None):
 
     paged_findings.object_list = prefetch_for_open_findings(paged_findings.object_list)
 
+    # for finding in paged_findings.object_list:
+    #     if finding.has_jira_issue():
+    #         print(finding.jira_issue)
+
+    # for finding in paged_findings.object_list:
+    #     print(finding.test.engagement.product.product_jira_pkey.all()[0].conf)
+
+    # for finding in paged_findings.object_list:
+    #     print(finding.jira_conf_new())
+
+
     return render(
         request, 'dojo/findings_list.html', {
             'show_product_column': show_product_column,
@@ -560,12 +571,17 @@ def open_findings(request, pid=None, eid=None, view=None):
 
 def prefetch_for_open_findings(findings):
     prefetched_findings = findings
+
+    prefetched_findings = prefetched_findings.select_related('jira_issue')
+    prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__product_jira_pkey__conf')
+
     prefetched_findings = prefetched_findings.prefetch_related('found_by')
     prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set')
     
     # we could try to prefetch only the latest note with SubQuery and OuterRef, but I'm getting that MySql doesn't support limits in subqueries.
     prefetched_findings = prefetched_findings.prefetch_related('notes')
     # prefetched_findings = prefetched_findings.annotate(notes_count=Count('notes__id'))
+
     return prefetched_findings
 
 """

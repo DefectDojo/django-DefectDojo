@@ -1559,6 +1559,13 @@ class Finding(models.Model):
             pass
         return jissue
 
+    def has_jira_issue(self):
+        try:
+            issue = self.jira_issue
+            return True
+        except JIRA_Issue.DoesNotExist:
+            return False
+
     def jira_conf(self):
         try:
             jpkey = JIRA_PKey.objects.get(product=self.test.engagement.product)
@@ -1567,6 +1574,15 @@ class Finding(models.Model):
             jconf = None
             pass
         return jconf
+
+    # newer version that can work with prefetching
+    def jira_conf_new(self):
+        try:
+            return self.test.engagement.product.product_jira_pkey.all()[0].conf
+        except:
+            return None
+            pass
+
 
     def long_desc(self):
         long_desc = ''
