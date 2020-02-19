@@ -112,9 +112,9 @@ v2_api.register(r'tool_configurations', ToolConfigurationsViewSet)
 v2_api.register(r'tool_product_settings', ToolProductSettingsViewSet)
 v2_api.register(r'tool_types', ToolTypesViewSet)
 v2_api.register(r'users', UsersViewSet)
-v2_api.register(r'import-scan', ImportScanView, base_name='importscan')
-v2_api.register(r'reimport-scan', ReImportScanView, base_name='reimportscan')
-v2_api.register(r'metadata', DojoMetaViewSet, base_name='metadata')
+v2_api.register(r'import-scan', ImportScanView, basename='importscan')
+v2_api.register(r'reimport-scan', ReImportScanView, basename='reimportscan')
+v2_api.register(r'metadata', DojoMetaViewSet, basename='metadata')
 v2_api.register(r'notes', NotesViewSet)
 
 ur = []

@@ -566,11 +566,14 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
     'Dependency Check Scan': ['cve', 'file_path'],
     # possible improvment: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
-    'NPM Audit Scan': ['title', 'severity'],
+    'NPM Audit Scan': ['title', 'severity', 'file_path', 'cve', 'cwe'],
     # possible improvment: in the scanner put the library name into file_path, then dedup on cve + file_path + severity
     'Whitesource Scan': ['title', 'severity', 'description'],
     'ZAP Scan': ['cwe', 'endpoints', 'severity'],
-    'Qualys Scan': ['title', 'endpoints', 'severity']
+    'Qualys Scan': ['title', 'endpoints', 'severity'],
+    'PHP Symfony Security Check': ['title', 'cve'],
+    # for backwards compatibility because someone decided to rename this scanner:
+    'Symfony Security Check': ['title', 'cve'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -617,7 +620,10 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'NPM Audit Scan': DEDUPE_ALGO_HASH_CODE,
     'Whitesource Scan': DEDUPE_ALGO_HASH_CODE,
     'ZAP Scan': DEDUPE_ALGO_HASH_CODE,
-    'Qualys Scan': DEDUPE_ALGO_HASH_CODE
+    'Qualys Scan': DEDUPE_ALGO_HASH_CODE,
+    'PHP Symfony Security Check': DEDUPE_ALGO_HASH_CODE,
+    # for backwards compatibility because someone decided to rename this scanner:
+    'Symfony Security Check': DEDUPE_ALGO_HASH_CODE
 }
 
 # ------------------------------------------------------------------------------

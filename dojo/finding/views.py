@@ -1353,6 +1353,7 @@ def choose_finding_template_options(request, tid, fid):
         'product_tab': product_tab,
         'template': template,
         'form': form,
+        'finding_tags': [tag.name for tag in finding.tags.all()],
     })
 
 
@@ -2060,8 +2061,8 @@ def finding_bulk_update_all(request, pid=None):
                             prev_prod = finding.test.engagement.product.id
 
                 for finding in finds:
-                    from dojo.tasks import async_tool_issue_updater
-                    async_tool_issue_updater.delay(finding)
+                    from dojo.tools import tool_issue_updater
+                    tool_issue_updater.async_tool_issue_update(finding)
 
                     if JIRA_PKey.objects.filter(product=finding.test.engagement.product).count() == 0:
                         log_jira_alert('Finding cannot be pushed to jira as there is no jira configuration for this product.', finding)
@@ -2121,6 +2122,11 @@ def get_missing_mandatory_notetypes(finding):
 def mark_finding_duplicate(request, original_id, duplicate_id):
     original = get_object_or_404(Finding, id=original_id)
     duplicate = get_object_or_404(Finding, id=duplicate_id)
+
+    if original.test.engagement != duplicate.test.engagement:
+        if original.test.engagement.deduplication_on_engagement or duplicate.test.engagement.deduplication_on_engagement:
+            raise ValueError('Marking finding {} as duplicate of {} failed as they are not in the same engagement and deduplication_on_engagement is enabled for at least one of them')
+
     duplicate.duplicate = True
     duplicate.active = False
     duplicate.verified = False

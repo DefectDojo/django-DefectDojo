@@ -4,7 +4,7 @@ from django.utils import timezone
 from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
 from rest_framework.permissions import DjangoModelPermissions
-from rest_framework.decorators import detail_route, action
+from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -43,7 +43,7 @@ class EndPointViewSet(mixins.ListModelMixin,
         else:
             return Endpoint.objects.all()
 
-    @detail_route(methods=['post'], permission_classes=[permissions.UserHasReportGeneratePermission])
+    @action(detail=True, methods=['post'], permission_classes=[permissions.UserHasReportGeneratePermission])
     def generate_report(self, request, pk=None):
         endpoint = get_object_or_404(Endpoint.objects, id=pk)
 
@@ -85,19 +85,19 @@ class EngagementViewSet(mixins.ListModelMixin,
         else:
             return Engagement.objects.all()
 
-    @detail_route(methods=["post"])
+    @action(detail=True, methods=["post"])
     def close(self, request, pk=None):
         eng = get_object_or_404(Engagement.objects, id=pk)
         close_engagement(eng)
         return HttpResponse()
 
-    @detail_route(methods=["post"])
+    @action(detail=True, methods=["post"])
     def reopen(self, request, pk=None):
         eng = get_object_or_404(Engagement.objects, id=pk)
         reopen_engagement(eng)
         return HttpResponse()
 
-    @detail_route(methods=['post'], permission_classes=[permissions.UserHasReportGeneratePermission])
+    @action(detail=True, methods=['post'], permission_classes=[permissions.UserHasReportGeneratePermission])
     def generate_report(self, request, pk=None):
         engagement = get_object_or_404(Engagement.objects, id=pk)
 
@@ -188,7 +188,7 @@ class FindingViewSet(mixins.ListModelMixin,
         serialized_tags = serializers.TagSerializer({"tags": tags})
         return Response(serialized_tags.data)
 
-    @detail_route(methods=["get", "post"])
+    @action(detail=True, methods=["get", "post"])
     def notes(self, request, pk=None):
         finding = get_object_or_404(Finding.objects, id=pk)
         if request.method == 'POST':
@@ -227,7 +227,7 @@ class FindingViewSet(mixins.ListModelMixin,
         return Response(serialized_notes,
                 status=status.HTTP_200_OK)
 
-    @detail_route(methods=["put", "patch"])
+    @action(detail=True, methods=["put", "patch"])
     def remove_note(self, request, pk=None):
         """Remove Note From Finding Note"""
         finding = get_object_or_404(Finding.objects, id=pk)
@@ -250,7 +250,7 @@ class FindingViewSet(mixins.ListModelMixin,
         return Response({"Success": "Selected Note has been Removed successfully"},
             status=status.HTTP_200_OK)
 
-    @detail_route(methods=["put", "patch"])
+    @action(detail=True, methods=["put", "patch"])
     def remove_tags(self, request, pk=None):
         """ Remove Tag(s) from finding list of tags """
         finding = get_object_or_404(Finding.objects, id=pk)
@@ -367,7 +367,7 @@ class ProductViewSet(mixins.ListModelMixin,
         else:
             return Product.objects.all()
 
-    @detail_route(methods=['post'], permission_classes=[permissions.UserHasReportGeneratePermission])
+    @action(detail=True, methods=['post'], permission_classes=[permissions.UserHasReportGeneratePermission])
     def generate_report(self, request, pk=None):
         product = get_object_or_404(Product.objects, id=pk)
 
@@ -405,7 +405,7 @@ class ProductTypeViewSet(mixins.ListModelMixin,
         else:
             return Product_Type.objects.all()
 
-    @detail_route(methods=['post'], permission_classes=[permissions.UserHasReportGeneratePermission])
+    @action(detail=True, methods=['post'], permission_classes=[permissions.UserHasReportGeneratePermission])
     def generate_report(self, request, pk=None):
         product_type = get_object_or_404(Product_Type.objects, id=pk)
 
@@ -532,7 +532,7 @@ class TestsViewSet(mixins.ListModelMixin,
         else:
             return serializers.TestSerializer
 
-    @detail_route(methods=['post'], permission_classes=[permissions.UserHasReportGeneratePermission])
+    @action(detail=True, methods=['post'], permission_classes=[permissions.UserHasReportGeneratePermission])
     def generate_report(self, request, pk=None):
         test = get_object_or_404(Test.objects, id=pk)
 
