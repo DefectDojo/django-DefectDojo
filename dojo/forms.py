@@ -343,6 +343,7 @@ class ImportScanForm(forms.Form):
                          ("Twistlock Image Scan", "Twistlock Image Scan"),
                          ("Kiuwan Scan", "Kiuwan Scan"),
                          ("Blackduck Hub Scan", "Blackduck Hub Scan"),
+                         ("Blackduck Component Risk", "Blackduck Component Risk"),
                          ("Openscap Vulnerability Scan", "Openscap Vulnerability Scan"),
                          ("Wapiti Scan", "Wapiti Scan"),
                          ("Immuniweb Scan", "Immuniweb Scan"),
@@ -361,6 +362,7 @@ class ImportScanForm(forms.Form):
                          ("Aqua Scan", "Aqua Scan"),
                          ("HackerOne Cases", "HackerOne Cases"),
                          ("Xanitizer Scan", "Xanitizer Scan"),
+                         ("Outpost24 Scan", "Outpost24 Scan"),
                          ("Trivy Scan", "Trivy Scan"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
@@ -1016,8 +1018,9 @@ class ApplyFindingTemplateForm(forms.Form):
                                      "Choose from the list or add new tags.  Press TAB key to add.")
 
     def __init__(self, template=None, *args, **kwargs):
-        tags = Tag.objects.usage_for_model(Finding_Template)
-        t = [(tag.name, tag.name) for tag in tags]
+        # django-tagging apparently can not filter for multiple models at once
+        tags = Tag.objects.usage_for_model(Finding_Template) + Tag.objects.usage_for_model(Finding)
+        t = sorted({(tag.name, tag.name) for tag in tags})
         super(ApplyFindingTemplateForm, self).__init__(*args, **kwargs)
         self.fields['tags'].widget.choices = t
         self.template = template

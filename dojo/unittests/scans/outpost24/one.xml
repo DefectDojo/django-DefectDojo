@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE main SYSTEM "https://outscan.outpost24.com/dtd/XMLReport.dtd">
+<main>
+    <report>OUTSCAN Security Report</report>
+    <reportinfo>
+        <type>Vulnerability</type>
+        <id>1234567891234567891234567890ab</id>
+        <reportdate>2019-10-04 19:00</reportdate>
+        <timezone>GMT+0:00</timezone>
+        <creator>Matt Sicker</creator>
+        <date>2019-10-01 19:01 - 2019-10-01 19:01</date>
+        <test>1</test>
+        <threat>0</threat>
+    </reportinfo>
+    <hostlist>
+        <host>
+            <ip>localhost</ip>
+            <name/>
+            <platform/>
+            <high>0</high>
+            <medium>1</medium>
+            <low>0</low>
+            <info>0</info>
+            <port>1</port>
+            <start>2019-10-01 19:01</start>
+            <end>2019-10-01 19:11</end>
+            <updated>2019-10-03 23:35</updated>
+            <template>Normal with webapp</template>
+            <completescan>true</completescan>
+        </host>
+    </hostlist>
+    <portlist>
+        <portlist-host>
+            <ip>localhost</ip>
+            <name/>
+            <date>2019-10-01 19:01</date>
+            <portinfo>
+                <portnumber>443</portnumber>
+                <protocol>TCP</protocol>
+                <service>http</service>
+                <history>
+                    <firstseen>2019-09-10 19:01</firstseen>
+                </history>
+            </portinfo>
+        </portlist-host>
+    </portlist>
+    <detaillist>
+        <detail>
+            <ip>localhost</ip>
+            <hostname/>
+            <platform/>
+            <date>2019-10-01 19:01</date>
+            <virtualhost>127.0.0.1</virtualhost>
+            <targetopco>PT</targetopco>
+            <id>1377090</id>
+            <name>Fake vulnerability in fake product</name>
+            <portinfo>
+                <portnumber>443</portnumber>
+                <protocol>TCP</protocol>
+                <service>http</service>
+            </portinfo>
+            <cvss_score>5.1</cvss_score>
+            <cvss_vector>(AV:N/AC:H/Au:N/C:P/I:P/A:P) (cdp:ND/td:ND/cr:ND/ir:ND/ar:ND)</cvss_vector>
+            <cvss_vector_description>This vulnerability can be exploited with advanced skills and network access to the
+                system by an attacker who does not have access to credentials with some impact on confidentiality, some
+                impact to the integrity of information and some impact on system or information availability. There are
+                currently no exploits in the public domain. However, attacks may be well described or privately held.
+            </cvss_vector_description>
+            <cvss_v3_score>7.5</cvss_v3_score>
+            <cvss_v3_vector>CVSS:3.0/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:H</cvss_v3_vector>
+            <risk>2</risk>
+            <family>example</family>
+            <product>Fake Product</product>
+            <description>CSRF tokens are useful. This application did not think that was the case. Now they do.</description>
+            <information>This vulnerability was identified because (1) the detected version of Fake Product,
+                1.1.0, is less than 1.1.1
+                Paths:
+                /
+            </information>
+            <falsepositive>0</falsepositive>
+            <solutiontitle>Upgrade to the latest version of Fake Product</solutiontitle>
+            <solution>Upgrade to the latest version of Fake Product.</solution>
+            <category>Update</category>
+            <referencelist>
+                <reference>
+                    <type>url</type>
+                    <url>https://www.example.com/products/fake</url>
+                </reference>
+                <reference>
+                    <type>advisory</type>
+                    <url>https://www.example.com/security/advisories/2019-09-09/</url>
+                </reference>
+            </referencelist>
+            <cve>
+                <id>CVE-2019-9315</id>
+            </cve>
+            <bug>
+                <id>109373</id>
+            </bug>
+            <verify/>
+            <history>
+                <firstseen>2019-09-10 19:01</firstseen>
+                <lastseen>2019-10-01 19:01</lastseen>
+            </history>
+        </detail>
+    </detaillist>
+</main>

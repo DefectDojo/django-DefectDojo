@@ -1,12 +1,25 @@
 ---
 # Global settings
+# create defectdojo specific secret
 createSecret: true
+# create rabbitmq secret outside of rabbitmq chart
+createRabbitMqSecret: true
+# create redis secret outside of redis chart
+createRedisSecret: true
+# create mysql secret outside of mysql chart
+createMysqlSecret: true
+# create postgresql secret outside of postgresql chart
+createPostgresqlSecret: true
 ## Configuration value to select database type
 ## Option to use "postgresql" or "mysql" database type, by default "postgresql" is chosen
 ## Set the "enable" field to true of the database type you select (if you want to use internal database) and false of the one you don't select
-database: mysql
+database: postgresql
 host: defectdojo.default.minikube.local
 imagePullPolicy: Always
+# Where to pull the defectDojo images from. Defaults to "defectdojo/*" repositories on hub.docker.com
+repositoryPrefix: defectdojo
+# When using a private registry, name of the secret that holds the registry secret (eg deploy token from gitlab-ci project)
+# imagePullSecrets: defectdojoregistrykey
 tag: latest
 
 admin:
@@ -18,7 +31,6 @@ admin:
 # Components
 celery:
   broker: rabbitmq
-  repository: defectdojo/defectdojo-django
   logLevel: DEBUG
   beat:
     affinity: {}
@@ -30,7 +42,6 @@ celery:
     tolerations: []
   worker:
     affinity: {}
-    repository: defectdojo/defectdojo-django
     logLevel: DEBUG
     nodeSelector: {}
     replicas: 1
@@ -44,11 +55,12 @@ django:
   affinity: {}
   ingress:
     enabled: true
+    activateTLS: true
     secretName: defectdojo-tls
     annotations:
-      kubernetes.io/ingress.class: nginx
+      # Restricts the type of ingress controller that can interact with our chart (nginx, traefik, ...)
+      #kubernetes.io/ingress.class: nginx
   nginx:
-    repository: defectdojo/defectdojo-nginx
     resources:
       requests:
         cpu: 100m
@@ -57,7 +69,6 @@ django:
   replicas: 1
   tolerations: []
   uwsgi:
-    repository: defectdojo/defectdojo-django
     resources:
       requests:
         cpu: 100m
@@ -65,7 +76,6 @@ django:
 
 initializer:
   run: true
-  repository: defectdojo/defectdojo-django
   keepSeconds: 60
   resources:
     requests:
@@ -73,8 +83,9 @@ initializer:
       memory: 128Mi
 
 mysql:
-  enabled: true
+  enabled: false
   mysqlUser: defectdojo
+  existingSecret: defectdojo-mysql-specific
   mysqlDatabase: defectdojo
   service:
     port: 3306  
@@ -86,11 +97,12 @@ mysql:
   # mysqlPasswordSecret: ""  
 
 postgresql:
-  enabled: false
+  enabled: true
   postgresqlUsername: defectdojo
   postgresqlDatabase: defectdojo
+  existingSecret: defectdojo-postgresql-specific
   persistence:
-    enabled: false
+    enabled: true
   replication:
     enabled: false
   service:
@@ -106,8 +118,13 @@ postgresql:
 rabbitmq:
   enabled: true
   replicas: 1
+  rabbitmq:
+    existingPasswordSecret: defectdojo-rabbitmq-specific
+    existingErlangSecret: defectdojo-rabbitmq-specific
 
 redis:
   enabled: false
+  existingSecret: defectdojo-redis-specific
   cluster:
     slaveCount: 1
+
