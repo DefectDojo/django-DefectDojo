@@ -1226,7 +1226,7 @@ class Sonarqube_Product(models.Model):
 
 
 class Finding(models.Model):
-    title = models.CharField(max_length=511)
+    title = models.TextField(max_length=1000)
     date = models.DateField(default=get_current_date)
     cwe = models.IntegerField(default=0, null=True, blank=True)
     cve_regex = RegexValidator(regex=r'^[A-Z]{1,10}-\d{4}-\d{4,12}$',
@@ -1255,7 +1255,7 @@ class Finding(models.Model):
     duplicate_finding = models.ForeignKey('self', editable=False, null=True,
                                           related_name='original_finding',
                                           blank=True, on_delete=models.CASCADE)
-    duplicate_list = models.ManyToManyField("self", editable=False, blank=True)
+    
     out_of_scope = models.BooleanField(default=False)
     under_review = models.BooleanField(default=False)
     review_requested_by = models.ForeignKey(Dojo_User, null=True, blank=True,
@@ -1448,7 +1448,11 @@ class Finding(models.Model):
                 r.delete()
 
     def duplicate_finding_set(self):
-        return self.duplicate_list.all().order_by('title')
+        if self.duplicate:
+          return Finding.objects.get(id=self.duplicate_finding.id).original_finding.all().order_by('title')
+        else:
+          return self.original_finding.all().order_by('title')
+        
 
     def get_scanner_confidence_text(self):
         scanner_confidence_text = ""
@@ -1670,6 +1674,11 @@ class Finding(models.Model):
         calculate_grade(self.test.engagement.product)
 
     def delete(self, *args, **kwargs):
+        if self.id:
+            logger.info("Debug-Delete: Deleting Finding with id: %d", self.id)
+        for find in self.original_finding.all():
+            #explicitely delete duplicate Findings
+            super(Finding, find).delete()
         super(Finding, self).delete(*args, **kwargs)
         from dojo.utils import calculate_grade
         calculate_grade(self.test.engagement.product)

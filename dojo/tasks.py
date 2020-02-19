@@ -3,24 +3,32 @@ from datetime import timedelta
 from django.db.models import Count
 from django.conf import settings
 from django.core.files.base import ContentFile
+from django.core.exceptions import PermissionDenied
 from django.urls import reverse
+from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.utils.http import urlencode
 from celery.utils.log import get_task_logger
 from celery.decorators import task
 from dojo.models import Product, Finding, Engagement, System_Settings
 from django.utils import timezone
+from django.contrib import messages
 from dojo.signals import dedupe_signal
-
+from django.shortcuts import render_to_response, redirect
 import pdfkit
 from dojo.celery import app
 from dojo.tools.tool_issue_updater import tool_issue_updater, update_findings_from_source_issues
 from dojo.utils import sync_false_history, calculate_grade
 from dojo.reports.widgets import report_widget_factory
 from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, \
-                       close_epic, create_notification, sync_rules
+                       close_epic, create_notification, sync_rules, fix_loop_duplicates, \
+                       rename_whitesource_finding, delete_all_alerts
 
+
+from django.http import HttpResponseRedirect
+import time
 import logging
+import requests
 fmt = getattr(settings, 'LOG_FORMAT', None)
 lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
 logging.basicConfig(format=fmt, level=lvl)
@@ -223,6 +231,18 @@ def async_custom_pdf_report(self,
     return True
 
 
+@task(name='fix_loop_task')
+def fix_loop_task(*args, **kwargs):
+    logger.info("Executing Loop Duplicate Fix Job")
+    fix_loop_duplicates()
+
+
+@task(name='rename_whitesource_finding_task')
+def rename_whitesource_finding_task(*args, **kwargs):
+    logger.info("Executing Whitesource renaming and rehashing started.")
+    rename_whitesource_finding()
+
+
 @task(name='add_issue_task')
 def add_issue_task(find, push_to_jira):
     logger.info("add issue task")
@@ -267,7 +287,7 @@ def async_dedupe(new_finding, *args, **kwargs):
 
 @app.task(name='applying rules')
 def async_rules(new_finding, *args, **kwargs):
-    logger.info("applying rules")
+    logger.info("applying rules to Finding: "+str(new_finding.id))
     sync_rules(new_finding, *args, **kwargs)
 
 
@@ -291,20 +311,20 @@ def async_update_findings_from_source_issues(*args, **kwargs):
 
 @app.task(bind=True)
 def async_dupe_delete(*args, **kwargs):
-    deduplicationLogger.info("delete excess duplicates")
+    logger.info("delete excess duplicates")
     system_settings = System_Settings.objects.get()
     if system_settings.delete_dupulicates:
         dupe_max = system_settings.max_dupes
         findings = Finding.objects \
-                .filter(duplicate_list__duplicate=True) \
-                .annotate(num_dupes=Count('duplicate_list')) \
+                .filter(original_finding__duplicate=True) \
+                .annotate(num_dupes=Count('original_finding')) \
                 .filter(num_dupes__gt=dupe_max)
         for finding in findings:
-            duplicate_list = finding.duplicate_list \
+            duplicate_list = finding.original_finding \
                     .filter(duplicate=True).order_by('date')
             dupe_count = len(duplicate_list) - dupe_max
             for finding in duplicate_list:
-                deduplicationLogger.debug('deleting finding {}:{} ({}))'.format(finding.id, finding.title, finding.hash_code))
+                logger.info("Debug-Dupe: Delete Finding with id: %d", finding.id)
                 finding.delete()
                 dupe_count = dupe_count - 1
                 if dupe_count == 0:

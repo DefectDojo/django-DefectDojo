@@ -1,0 +1,21 @@
+from django.core.management.base import BaseCommand
+from pytz import timezone
+
+from dojo.models import Finding
+from dojo.utils import get_system_setting
+from dojo.utils import fix_loop_duplicates
+
+locale = timezone(get_system_setting('time_zone'))
+
+"""
+Author: Marian Gawron
+This script will identify loop dependencies in findings
+"""
+
+
+class Command(BaseCommand):
+    help = 'No input commands for fixing Loop findings.'
+
+    def handle(self, *args, **options):
+    	fix_loop_duplicates()
+        
