@@ -30,5 +30,5 @@ spec:
         - path: /
           backend:
             serviceName: {{ $fullName }}-django
-            servicePort: http
+            servicePort: 80
 {{- end }}
