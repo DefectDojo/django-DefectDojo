@@ -353,7 +353,6 @@ class ProductViewSet(mixins.ListModelMixin,
     serializer_class = serializers.ProductSerializer
     # TODO: prefetch
     queryset = Product.objects.all()
-    print('ProductViewSet.queryset')
     queryset = queryset.annotate(active_finding_count=Count('engagement__test__finding__id', filter=Q(engagement__test__finding__active=True)))
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (permissions.UserHasProductPermission,
@@ -362,7 +361,6 @@ class ProductViewSet(mixins.ListModelMixin,
     filter_fields = ('id', 'name', 'prod_type', 'created', 'authorized_users')
 
     def get_queryset(self):
-        print('ProductViewSet.getqueryset')
         if not self.request.user.is_staff:
             return self.queryset.filter(
                 authorized_users__in=[self.request.user])
@@ -371,7 +369,6 @@ class ProductViewSet(mixins.ListModelMixin,
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.UserHasReportGeneratePermission])
     def generate_report(self, request, pk=None):
-        print('ProductViewSet.generate_report')
         product = get_object_or_404(Product.objects, id=pk)
 
         options = {}

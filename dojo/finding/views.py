@@ -497,8 +497,6 @@ def open_findings(request, pid=None, eid=None, view=None):
             request.GET, queryset=findings, user=request.user, pid=pid)
 
     paged_findings = get_page_items(request, findings_filter.qs, 25)
-    # print(findings_filter.qs)
-    # print(paged_findings.object_list)
 
     product_type = None
     if 'test__engagement__product__prod_type' in request.GET:
@@ -542,17 +540,6 @@ def open_findings(request, pid=None, eid=None, view=None):
         jira_config = jira_config.conf_id
 
     paged_findings.object_list = prefetch_for_open_findings(paged_findings.object_list)
-
-    # for finding in paged_findings.object_list:
-    #     if finding.has_jira_issue():
-    #         print(finding.jira_issue)
-
-    # for finding in paged_findings.object_list:
-    #     print(finding.test.engagement.product.product_jira_pkey.all()[0].conf)
-
-    # for finding in paged_findings.object_list:
-    #     print(finding.jira_conf_new())
-
 
     return render(
         request, 'dojo/findings_list.html', {
