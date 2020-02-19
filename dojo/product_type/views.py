@@ -26,18 +26,11 @@ def product_type(request):
 
     prod_types = Product_Type.objects.all()
 
-    active_findings_query = Q(prod_type__engagement__test__finding__active=True,
-                            prod_type__engagement__test__finding__mitigated__isnull=True,
-                            prod_type__engagement__test__finding__verified=True,
-                            prod_type__engagement__test__finding__false_p=False,
-                            prod_type__engagement__test__finding__duplicate=False,
-                            prod_type__engagement__test__finding__out_of_scope=False)
-
-    prod_types = prod_types.annotate(findings_count=Count('prod_type__engagement__test__finding__id', filter=active_findings_query))
-    prod_types = prod_types.annotate(prod_count=Count('prod_type', distinct=True))
-
     ptl = ProductTypeFilter(request.GET, queryset=prod_types)
-    pts = get_page_items(request, ptl.qs, 25) # TODO For some reason this line already triggers a query and the render executes the query again
+    pts = get_page_items(request, ptl.qs, 25)
+
+    pts.object_list = prefetch_for_product_type(pts.object_list)
+
     add_breadcrumb(title="Product Type List", top_level=True, request=request)
     return render(request, 'dojo/product_type.html', {
         'name': 'Product Type List',
@@ -47,6 +40,20 @@ def product_type(request):
         'ptl': ptl,
         'name_words': name_words})
 
+def prefetch_for_product_type(prod_types):
+    prefetch_prod_types = prod_types
+
+    active_findings_query = Q(prod_type__engagement__test__finding__active=True,
+                            prod_type__engagement__test__finding__mitigated__isnull=True,
+                            prod_type__engagement__test__finding__verified=True,
+                            prod_type__engagement__test__finding__false_p=False,
+                            prod_type__engagement__test__finding__duplicate=False,
+                            prod_type__engagement__test__finding__out_of_scope=False)
+
+    prefetch_prod_types = prefetch_prod_types.annotate(findings_count=Count('prod_type__engagement__test__finding__id', filter=active_findings_query))
+    prefetch_prod_types = prefetch_prod_types.annotate(prod_count=Count('prod_type', distinct=True))
+
+    return prefetch_prod_types
 
 @user_passes_test(lambda u: u.is_staff)
 def add_product_type(request):
