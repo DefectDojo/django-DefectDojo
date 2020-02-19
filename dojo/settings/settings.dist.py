@@ -707,4 +707,4 @@ SILENCED_SYSTEM_CHECKS = ['mysql.E001']
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
 
 # django-tagging uses raw queries underneath breaking ORM query caching
-CACHALOT_UNCACHABLE_TABLES = frozenset(('django_migrations', 'tagging_tag', 'tagging_taggeditem'))
+CACHALOT_UNCACHABLE_TABLES = frozenset(('django_migrations'))
