@@ -22,7 +22,7 @@ class Command(BaseCommand):
         created_question = TextQuestion.objects.create(optional=False, order=1, text='What is love?')
         # Get the ID used in this system
         with connection.cursor() as cursor:
-            cursor.execute("select polymorphic_ctype_id from defectDojo_engagement_survey_question;")
+            cursor.execute("select polymorphic_ctype_id from \"defectDojo_engagement_survey_question\";")
             row = cursor.fetchone()
             ctype_id = row[0]
         # Find the current id in the surveys file
