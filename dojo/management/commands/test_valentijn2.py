@@ -84,7 +84,7 @@ class Command(BaseCommand):
 
         # prods = prods.prefetch_related(Prefetch('engagement_product', queryset=Engagement.objects.all().filter(active=True), to_attr='engagements'))
         prods = prods.prefetch_related(Prefetch('engagement_set', queryset=Engagement.objects.all(), to_attr='engagements'))
-        prods = prods.prefetch_related(Prefetch('engagement_set', queryset=Engagement.objects.all().annotate(), to_attr='engagement_count'))
+        prods = prods.prefetch_related(Prefetch('engagement_set', queryset=Engagement.objects.all().annotate(engagement_count=Count('engagement__id')), to_attr='engagement_count'))
 
         # prods = prods.annotate(engagement_count = Count('engagement__id'))
         # prods = prods.annotate(engagement_count = Sum('engagement_product__active'))
@@ -107,8 +107,8 @@ class Command(BaseCommand):
             print(prod.inactive_engagement_count2)
             print(prod.last_date)
             
-            for eng in prod.engagements:
-                print(str(eng.id) + ': ' + eng.name + "  : " + str(eng.target_start))
+            # for eng in prod.engagements:
+            #     print(str(eng.id) + ': ' + eng.name + "  : " + str(eng.target_start))
             break
 
         # for prod in prods.all():
