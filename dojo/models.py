@@ -1571,7 +1571,7 @@ class Finding(models.Model):
         long_desc += '*' + self.title + '*\n\n'
         long_desc += '*Severity:* ' + str(self.severity) + '\n\n'
         long_desc += '*Cve:* ' + str(self.cve) + '\n\n'
-        long_desc += '*Cve:* ' + str(self.cvss) + '\n\n'
+        long_desc += '*CVSS:* ' + str(self.cvss) + '\n\n'
         long_desc += '*Product/Engagement:* ' + self.test.engagement.product.name + ' / ' + self.test.engagement.name + '\n\n'
         if self.test.engagement.branch_tag:
             long_desc += '*Branch/Tag:* ' + self.test.engagement.branch_tag + '\n\n'
