@@ -3,18 +3,14 @@ from datetime import timedelta
 from django.db.models import Count
 from django.conf import settings
 from django.core.files.base import ContentFile
-from django.core.exceptions import PermissionDenied
 from django.urls import reverse
-from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.utils.http import urlencode
 from celery.utils.log import get_task_logger
 from celery.decorators import task
 from dojo.models import Product, Finding, Engagement, System_Settings
 from django.utils import timezone
-from django.contrib import messages
 from dojo.signals import dedupe_signal
-from django.shortcuts import render_to_response, redirect
 import pdfkit
 from dojo.celery import app
 from dojo.tools.tool_issue_updater import tool_issue_updater, update_findings_from_source_issues
@@ -23,12 +19,8 @@ from dojo.reports.widgets import report_widget_factory
 from dojo.utils import add_comment, add_epic, add_issue, update_epic, update_issue, \
                        close_epic, create_notification, sync_rules, fix_loop_duplicates, \
                        rename_whitesource_finding
-
-
-from django.http import HttpResponseRedirect
-import time
 import logging
-import requests
+
 fmt = getattr(settings, 'LOG_FORMAT', None)
 lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
 logging.basicConfig(format=fmt, level=lvl)
@@ -287,7 +279,7 @@ def async_dedupe(new_finding, *args, **kwargs):
 
 @app.task(name='applying rules')
 def async_rules(new_finding, *args, **kwargs):
-    logger.info("applying rules to Finding: "+str(new_finding.id))
+    logger.info("applying rules to Finding: " + str(new_finding.id))
     sync_rules(new_finding, *args, **kwargs)
 
 

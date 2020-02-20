@@ -1255,7 +1255,7 @@ class Finding(models.Model):
     duplicate_finding = models.ForeignKey('self', editable=False, null=True,
                                           related_name='original_finding',
                                           blank=True, on_delete=models.CASCADE)
-    
+
     out_of_scope = models.BooleanField(default=False)
     under_review = models.BooleanField(default=False)
     review_requested_by = models.ForeignKey(Dojo_User, null=True, blank=True,
@@ -1449,10 +1449,9 @@ class Finding(models.Model):
 
     def duplicate_finding_set(self):
         if self.duplicate:
-          return Finding.objects.get(id=self.duplicate_finding.id).original_finding.all().order_by('title')
+            return Finding.objects.get(id=self.duplicate_finding.id).original_finding.all().order_by('title')
         else:
-          return self.original_finding.all().order_by('title')
-        
+            return self.original_finding.all().order_by('title')
 
     def get_scanner_confidence_text(self):
         scanner_confidence_text = ""
@@ -1675,7 +1674,7 @@ class Finding(models.Model):
 
     def delete(self, *args, **kwargs):
         for find in self.original_finding.all():
-            #Explicitely delete the duplicates
+            # Explicitely delete the duplicates
             super(Finding, find).delete()
         super(Finding, self).delete(*args, **kwargs)
         from dojo.utils import calculate_grade

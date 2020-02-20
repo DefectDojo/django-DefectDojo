@@ -307,10 +307,10 @@ def set_duplicate(new_finding, existing_finding):
 
 def removeLoop(finding_id, counter):
     # get latest status
-    finding = Finding.objects.get(id=finding_id) # 9
-    real_original = finding.duplicate_finding # 10
+    finding = Finding.objects.get(id=finding_id)
+    real_original = finding.duplicate_finding
 
-    if not real_original or real_original == None:
+    if not real_original or real_original is None:
         return
 
     if finding_id == real_original.id:
@@ -319,7 +319,7 @@ def removeLoop(finding_id, counter):
         return
 
     # Only modify the findings if the original ID is lower to get the oldest finding as original
-    if (real_original.id > finding_id) and (real_original.duplicate_finding != None):
+    if (real_original.id > finding_id) and (real_original.duplicate_finding is not None):
         tmp = finding_id
         finding_id = real_original.id
         real_original = Finding.objects.get(id=tmp)
@@ -328,7 +328,7 @@ def removeLoop(finding_id, counter):
     if real_original in finding.original_finding.all():
         # remove the original from the duplicate list if it is there
         finding.original_finding.remove(real_original)
-        super(Finding,finding).save()
+        super(Finding, finding).save()
     if counter <= 0:
         # Maximum recursion depth as safety method to circumvent recursion here
         return
@@ -337,7 +337,8 @@ def removeLoop(finding_id, counter):
         f.duplicate_finding = real_original
         super(Finding, f).save()
         super(Finding, real_original).save()
-        removeLoop(f.id, counter-1)
+        removeLoop(f.id, counter - 1)
+
 
 def fix_loop_duplicates():
     candidates = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).all().order_by("-id")
@@ -346,16 +347,15 @@ def fix_loop_duplicates():
         deduplicationLogger.info("Processing Finding: %d " % find_id)
         removeLoop(find_id, 5)
 
-        
-
     new_originals = Finding.objects.filter(duplicate_finding__isnull=True, duplicate=True)
     for f in new_originals:
         deduplicationLogger.info("New Original: %d " % f.id)
-        f.duplicate=False
+        f.duplicate = False
         super(Finding, f).save()
 
     loop_count = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).count()
     deduplicationLogger.info("%d Finding found with Loops" % loop_count)
+
 
 def rename_whitesource_finding():
     whitesource_id = Test_Type.objects.get(name="Whitesource Scan").id
@@ -364,17 +364,17 @@ def rename_whitesource_finding():
     logger.info("######## Updating Hashcodes - deduplication is done in background using django signals upon finding save ########")
     for finding in findings:
         logger.info("Updating Whitesource Finding with id: %d" % finding.id)
-        lib_name_begin = re.search('\*\*Library Filename\*\* : ', finding.description).span(0)[1]
-        lib_name_end = re.search('\*\*Library Description\*\*', finding.description).span(0)[0]
-        lib_name = finding.description[lib_name_begin:lib_name_end-1]
-        if finding.cve == None:
+        lib_name_begin = re.search('\\*\\*Library Filename\\*\\* : ', finding.description).span(0)[1]
+        lib_name_end = re.search('\\*\\*Library Description\\*\\*', finding.description).span(0)[0]
+        lib_name = finding.description[lib_name_begin:lib_name_end - 1]
+        if finding.cve is None:
             finding.title = "CVE-None | " + lib_name
         else:
             finding.title = finding.cve + " | " + lib_name
         if not finding.cwe:
             logger.debug('Set cwe for finding %d to 1035 if not an cwe Number is set' % finding.id)
             finding.cwe = 1035
-        finding.title = finding.title.rstrip() # delete \n at the end of the title
+        finding.title = finding.title.rstrip()  # delete \n at the end of the title
         finding.hash_code = finding.compute_hash_code()
         finding.save()
 
