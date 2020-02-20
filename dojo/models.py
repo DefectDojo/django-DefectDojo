@@ -1229,9 +1229,10 @@ class Finding(models.Model):
     title = models.CharField(max_length=511)
     date = models.DateField(default=get_current_date)
     cwe = models.IntegerField(default=0, null=True, blank=True)
-    cve_regex = RegexValidator(regex=r'^[A-Z]{1,10}-\d{4}-\d{4,12}$',
-                                 message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'. ")
-    cve = models.CharField(validators=[cve_regex], max_length=28, null=True)
+    cve_regex = RegexValidator(regex=r'^[A-Z]{1,10}(-\d+)+$',
+                               message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'.")
+    cve = models.CharField(validators=[cve_regex], max_length=28, null=True,
+                           help_text="CVE or other vulnerability identifier")
     url = models.TextField(null=True, blank=True, editable=False)
     severity = models.CharField(max_length=200, help_text="The severity level of this flaw (Critical, High, Medium, Low, Informational)")
     description = models.TextField()
@@ -1756,8 +1757,8 @@ class Stub_Finding(models.Model):
 class Finding_Template(models.Model):
     title = models.TextField(max_length=1000)
     cwe = models.IntegerField(default=None, null=True, blank=True)
-    cve_regex = RegexValidator(regex=r'^[A-Z]{1,10}-\d{4}-\d{4,12}$',
-                                 message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'. ")
+    cve_regex = RegexValidator(regex=r'^[A-Z]{1,10}(-\d+)+$',
+                               message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'.")
     cve = models.CharField(validators=[cve_regex], max_length=28, null=True)
     severity = models.CharField(max_length=200, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
