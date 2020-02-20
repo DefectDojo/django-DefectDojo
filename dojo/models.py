@@ -13,7 +13,6 @@ from django.urls import reverse
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import Q
 from django.utils.deconstruct import deconstructible
 from django.utils.timezone import now
 from imagekit.models import ImageSpecField
@@ -1583,7 +1582,6 @@ class Finding(models.Model):
             return None
             pass
 
-
     def long_desc(self):
         long_desc = ''
         long_desc += '*' + self.title + '*\n\n'
@@ -2088,7 +2086,7 @@ class JIRA_Details_Cache(models.Model):
 
 class JIRA_PKey(models.Model):
     project_key = models.CharField(max_length=200, blank=True)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name = 'product_jira_pkey')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_jira_pkey')
     conf = models.ForeignKey(JIRA_Conf, verbose_name="JIRA Configuration",
                              null=True, blank=True, on_delete=models.CASCADE)
     component = models.CharField(max_length=200, blank=True)

@@ -32,6 +32,7 @@ from django.db.models import Prefetch
 
 logger = logging.getLogger(__name__)
 
+
 def product(request):
 
     # validate prod_type param
@@ -53,8 +54,8 @@ def product(request):
                     for word in product.name.split() if len(word) > 2]
 
     prod_filter = ProductFilter(request.GET, queryset=prods, user=request.user)
-    prod_list = get_page_items(request, prod_filter.qs, 25)   
-    
+    prod_list = get_page_items(request, prod_filter.qs, 25)
+
     # perform annotation/prefetching by replacing the queryset in the page with an annotated/prefetched queryset.
     prod_list.object_list = prefetch_for_product(prod_list.object_list)
 
@@ -72,6 +73,7 @@ def product(request):
                    'name_words': sorted(set(name_words)),
                    'user': request.user})
 
+
 def prefetch_for_product(prods):
     prefetched_prods = prods.select_related('technical_contact').select_related('product_manager').select_related('prod_type').select_related('team_manager')
     prefetched_prods = prefetched_prods.annotate(active_engagement_count=Count('engagement__id', filter=Q(engagement__active=True)))
@@ -85,6 +87,7 @@ def prefetch_for_product(prods):
             finding__mitigated__isnull=True)
     prefetched_prods = prefetched_prods.prefetch_related(Prefetch('product_endpoint', queryset=active_endpoint_query, to_attr='active_endpoints'))
     return prefetched_prods
+
 
 def iso_to_gregorian(iso_year, iso_week, iso_day):
     jan4 = date(iso_year, 1, 4)
@@ -441,6 +444,7 @@ def view_engagements(request, pid, engagement_type="Interactive"):
                    'i_engs_count': result_inactive_engs_page.paginator.count,
                    'user': request.user,
                    'authorized': auth})
+
 
 def prefetch_for_view_engagements(engs):
     prefetched_engs = engs.prefetch_related('test_set')
