@@ -8,7 +8,6 @@ import shutil
 
 from collections import OrderedDict
 from django.db import models
-from django.db.models import Count, Max, Prefetch, Subquery, OuterRef, F
 from django.db.models.functions import Length
 from django.conf import settings
 from django.contrib import messages
@@ -556,24 +555,22 @@ def open_findings(request, pid=None, eid=None, view=None):
             'jira_config': jira_config,
         })
 
+
 def prefetch_for_open_findings(findings):
     prefetched_findings = findings
-
     prefetched_findings = prefetched_findings.select_related('jira_issue')
     prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__product_jira_pkey__conf')
-
     prefetched_findings = prefetched_findings.prefetch_related('found_by')
     prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set')
-    
     # we could try to prefetch only the latest note with SubQuery and OuterRef, but I'm getting that MySql doesn't support limits in subqueries.
     prefetched_findings = prefetched_findings.prefetch_related('notes')
-    # prefetched_findings = prefetched_findings.annotate(notes_count=Count('notes__id'))
-
     return prefetched_findings
+
 
 """
 Accepted findings returns all the accepted findings for all products or a specific product
 """
+
 
 @user_passes_test(lambda u: u.is_staff)
 def accepted_findings(request, pid=None):

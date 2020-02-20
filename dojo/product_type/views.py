@@ -9,7 +9,7 @@ from dojo.filters import ProductTypeFilter
 from dojo.forms import Product_TypeForm, Product_TypeProductForm, Delete_Product_TypeForm
 from dojo.models import Product_Type
 from dojo.utils import get_page_items, add_breadcrumb, create_notification
-from django.db.models import Sum, Count, Q, Max
+from django.db.models import Count, Q
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +40,7 @@ def product_type(request):
         'ptl': ptl,
         'name_words': name_words})
 
+
 def prefetch_for_product_type(prod_types):
     prefetch_prod_types = prod_types
 
@@ -54,6 +55,7 @@ def prefetch_for_product_type(prod_types):
     prefetch_prod_types = prefetch_prod_types.annotate(prod_count=Count('prod_type', distinct=True))
 
     return prefetch_prod_types
+
 
 @user_passes_test(lambda u: u.is_staff)
 def add_product_type(request):
