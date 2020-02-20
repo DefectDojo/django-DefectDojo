@@ -12,7 +12,7 @@ from datetime import date, datetime
 from math import pi, sqrt
 import vobject
 import requests
-from dateutil.relativedelta import relativedelta, MO, SU
+from dateutil.relativedelta import relativedelta, MO
 from django.conf import settings
 from django.core.mail import send_mail
 from django.core.mail import EmailMessage
@@ -26,13 +26,11 @@ from jira import JIRA
 from jira.exceptions import JIRAError
 from django.dispatch import receiver
 from dojo.signals import dedupe_signal
-
 from dojo.models import Finding, Engagement, Finding_Template, Product, JIRA_PKey, JIRA_Issue, \
     Dojo_User, User, Alerts, System_Settings, Notifications, UserContactInfo, Endpoint, Benchmark_Type, \
-    Language_Type, Languages, Rule
+    Language_Type, Languages, Rule, Finding, Test_Type
 from asteval import Interpreter
 from requests.auth import HTTPBasicAuth
-
 import logging
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -175,8 +173,12 @@ def deduplicate_legacy(new_finding):
         #    and (endpoints or (line and file_path)
         # ---------------------------------------------------------
         if ((flag_endpoints or flag_line_path) and flag_hash):
-            set_duplicate(new_finding, find)
-            super(Finding, new_finding).save()
+            try:
+                set_duplicate(new_finding, find)
+            except Exception as e:
+                deduplicationLogger.debug(str(e))
+                continue
+
             break
 
 
@@ -204,8 +206,12 @@ def deduplicate_unique_id_from_tool(new_finding):
             deduplicationLogger.debug(
                 'deduplication_on_engagement_mismatch, skipping dedupe.')
             continue
-        set_duplicate(new_finding, find)
-        super(Finding, new_finding).save()
+        try:
+            set_duplicate(new_finding, find)
+        except Exception as e:
+            deduplicationLogger.debug(str(e))
+            continue
+
         break
 
 
@@ -231,8 +237,12 @@ def deduplicate_hash_code(new_finding):
             deduplicationLogger.debug(
                 'deduplication_on_engagement_mismatch, skipping dedupe.')
             continue
-        set_duplicate(new_finding, find)
-        super(Finding, new_finding).save()
+        try:
+            set_duplicate(new_finding, find)
+        except Exception as e:
+            deduplicationLogger.debug(str(e))
+            continue
+
         break
 
 
@@ -260,12 +270,20 @@ def deduplicate_uid_or_hash_code(new_finding):
             deduplicationLogger.debug(
                 'deduplication_on_engagement_mismatch, skipping dedupe.')
             continue
-        set_duplicate(new_finding, find)
-        super(Finding, new_finding).save()
+        try:
+            set_duplicate(new_finding, find)
+        except Exception as e:
+            deduplicationLogger.debug(str(e))
+            continue
+
         break
 
 
 def set_duplicate(new_finding, existing_finding):
+    if existing_finding.duplicate:
+        raise Exception("Existing finding is a duplicate")
+    if existing_finding.id == new_finding.id:
+        raise Exception("Can not add duplicate to itself")
     deduplicationLogger.debug('New finding ' + str(new_finding.id) + ' is a duplicate of existing finding ' + str(existing_finding.id))
     if (existing_finding.is_Mitigated or existing_finding.mitigated) and new_finding.active and not new_finding.is_Mitigated:
         existing_finding.mitigated = new_finding.mitigated
@@ -279,8 +297,87 @@ def set_duplicate(new_finding, existing_finding):
     new_finding.active = False
     new_finding.verified = False
     new_finding.duplicate_finding = existing_finding
-    existing_finding.duplicate_list.add(new_finding)
+    for find in new_finding.original_finding.all():
+        new_finding.original_finding.remove(find)
+        set_duplicate(find, existing_finding)
     existing_finding.found_by.add(new_finding.test.test_type)
+    super(Finding, new_finding).save()
+    super(Finding, existing_finding).save()
+
+
+def removeLoop(finding_id, counter):
+    # get latest status
+    finding = Finding.objects.get(id=finding_id) # 9
+    real_original = finding.duplicate_finding # 10
+
+    if not real_original or real_original == None:
+        return
+
+    if finding_id == real_original.id:
+        finding.duplicate_finding = None
+        super(Finding, finding).save()
+        return
+
+    # Only modify the findings if the original ID is lower to get the oldest finding as original
+    if (real_original.id > finding_id) and (real_original.duplicate_finding != None):
+        tmp = finding_id
+        finding_id = real_original.id
+        real_original = Finding.objects.get(id=tmp)
+        finding = Finding.objects.get(id=finding_id)
+
+    if real_original in finding.original_finding.all():
+        # remove the original from the duplicate list if it is there
+        finding.original_finding.remove(real_original)
+        super(Finding,finding).save()
+    if counter <= 0:
+        # Maximum recursion depth as safety method to circumvent recursion here
+        return
+    for f in finding.original_finding.all():
+        # for all duplicates set the original as their original, get rid of self in between
+        f.duplicate_finding = real_original
+        super(Finding, f).save()
+        super(Finding, real_original).save()
+        removeLoop(f.id, counter-1)
+
+def fix_loop_duplicates():
+    candidates = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).all().order_by("-id")
+    deduplicationLogger.info("Identified %d Findings with Loops" % len(candidates))
+    for find_id in candidates.values_list('id', flat=True):
+        deduplicationLogger.info("Processing Finding: %d " % find.id)
+        removeLoop(find_id, 5)
+
+        
+
+    new_originals = Finding.objects.filter(duplicate_finding__isnull=True, duplicate=True)
+    for f in new_originals:
+        deduplicationLogger.info("New Original: %d " % f.id)
+        f.duplicate=False
+        super(Finding, f).save()
+
+    loop_count = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).count()
+    deduplicationLogger.info("%d Finding found with Loops" % loop_count)
+
+def rename_whitesource_finding():
+    whitesource_id = Test_Type.objects.get(name="Whitesource Scan").id
+    findings = Finding.objects.filter(found_by=whitesource_id)
+    findings = findings.order_by('-pk')
+    logger.info("######## Updating Hashcodes - deduplication is done in background using django signals upon finding save ########")
+    for finding in findings:
+        logger.info("Updating Whitesource Finding with id: %d" % finding.id)
+        lib_name_begin = re.search('\*\*Library Filename\*\* : ', finding.description).span(0)[1]
+        lib_name_end = re.search('\*\*Library Description\*\*', finding.description).span(0)[0]
+        lib_name = finding.description[lib_name_begin:lib_name_end-1]
+        if finding.cve == None:
+            finding.title = "CVE-None | " + lib_name
+        else:
+            finding.title = finding.cve + " | " + lib_name
+        if not finding.cwe:
+            logger.debug('Set cwe for finding %d to 1035 if not an cwe Number is set' % finding.id)
+            finding.cwe = 1035
+        finding.title = finding.title.rstrip() # delete \n at the end of the title
+        finding.hash_code = finding.compute_hash_code()
+        finding.save()
+
 
 
 def sync_rules(new_finding, *args, **kwargs):
@@ -544,116 +641,60 @@ def add_breadcrumb(parent=None,
     request.session['dojo_breadcrumbs'] = crumbs
 
 
-def get_punchcard_data(findings, start_date, weeks):
-    # use try catch to make sure any teething bugs in the bunchcard don't break the dashboard
-    try:
-        # gather findings over past half year, make sure to start on a sunday
-        first_sunday = start_date - relativedelta(weekday=SU(-1))
-        last_sunday = start_date + relativedelta(weeks=weeks)
+def get_punchcard_data(findings, weeks_between, start_date):
+    punchcard = list()
+    ticks = list()
+    highest_count = 0
+    tick = 0
+    week_count = 1
 
-        print(first_sunday)
-        print(last_sunday)
+    # mon 0, tues 1, wed 2, thurs 3, fri 4, sat 5, sun 6
+    # sat 0, sun 6, mon 5, tue 4, wed 3, thur 2, fri 1
+    day_offset = {0: 5, 1: 4, 2: 3, 3: 2, 4: 1, 5: 0, 6: 6}
+    for x in range(-1, weeks_between):
+        # week starts the monday before
+        new_date = start_date + relativedelta(weeks=x, weekday=MO(1))
+        end_date = new_date + relativedelta(weeks=1)
+        append_tick = True
+        days = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0}
+        for finding in findings:
+            try:
+                if new_date < datetime.combine(finding.date, datetime.min.time(
+                )).replace(tzinfo=timezone.get_current_timezone()) <= end_date:
+                    # [0,0,(20*.02)]
+                    # [week, day, weight]
+                    days[day_offset[finding.date.weekday()]] += 1
+                    if days[day_offset[finding.date.weekday()]] > highest_count:
+                        highest_count = days[day_offset[
+                            finding.date.weekday()]]
+            except:
+                if new_date < finding.date <= end_date:
+                    # [0,0,(20*.02)]
+                    # [week, day, weight]
+                    days[day_offset[finding.date.weekday()]] += 1
+                    if days[day_offset[finding.date.weekday()]] > highest_count:
+                        highest_count = days[day_offset[
+                            finding.date.weekday()]]
+                pass
 
-        # reminder: The first week of a year is the one that contains the year’s first Thursday
-        # so we could have for 29/12/2019: week=1 and year=2019 :-D. So using week number from db is not practical
-
-        severities_by_day = findings.filter(created__gte=first_sunday).filter(created__lt=last_sunday) \
-                                    .values('created__date') \
-                                    .annotate(count=Count('id')) \
-                                    .order_by('created__date')
-
-        # return empty stuff if no findings to be statted
-        if severities_by_day.count() <= 0:
-            return None, None
-
-        # day of the week numbers:
-        # javascript  database python
-        # sun 6         1       6
-        # mon 5         2       0
-        # tue 4         3       1
-        # wed 3         4       2
-        # thu 2         5       3
-        # fri 1         6       4
-        # sat 0         7       5
-
-        # map from python to javascript, do not use week numbers or day numbers from database.
-        day_offset = {0: 5, 1: 4, 2: 3, 3: 2, 4: 1, 5: 0, 6: 6}
-
-        punchcard = list()
-        ticks = list()
-        highest_day_count = 0
-        tick = 0
-        day_counts = [0, 0, 0, 0, 0, 0, 0]
-
-        start_of_week = timezone.make_aware(datetime.combine(first_sunday, datetime.min.time()))
-        start_of_next_week = start_of_week + relativedelta(weeks=1)
-        day_counts = [0, 0, 0, 0, 0, 0, 0]
-
-        for day in severities_by_day:
-            created = day['created__date']
-            day_count = day['count']
-
-            created = timezone.make_aware(datetime.combine(created, datetime.min.time()))
-
-            # print('%s %s %s', created, created.weekday(), calendar.day_name[created.weekday()], day_count)
-
-            if created < start_of_week:
-                raise ValueError('date found outside supported range: ' + str(created))
-            else:
-                if created >= start_of_week and created < start_of_next_week:
-                    # add day count to current week data
-                    day_counts[day_offset[created.weekday()]] = day_count
-                    highest_day_count = max(highest_day_count, day_count)
-                else:
-                    # created >= start_of_next_week, so store current week, prepare for next
-                    while created >= start_of_next_week:
-                        week_data, label = get_week_data(start_of_week, tick, day_counts)
-                        punchcard.extend(week_data)
-                        ticks.append(label)
-                        tick += 1
-
-                        # new week, new values!
-                        day_counts = [0, 0, 0, 0, 0, 0, 0]
-                        start_of_week = start_of_next_week
-                        start_of_next_week += relativedelta(weeks=1)
-
-                    # finally a day that falls into the week bracket
-                    day_counts[day_offset[created.weekday()]] = day_count
-                    highest_day_count = max(highest_day_count, day_count)
-
-        # add week in progress + empty weeks on the end if needed
-        while tick < weeks + 1:
-            print(tick)
-            week_data, label = get_week_data(start_of_week, tick, day_counts)
-            print(week_data, label)
-            punchcard.extend(week_data)
-            ticks.append(label)
+        if sum(days.values()) > 0:
+            for day, count in list(days.items()):
+                punchcard.append([tick, day, count])
+                if append_tick:
+                    ticks.append([
+                        tick,
+                        new_date.strftime(
+                            "<span class='small'>%m/%d<br/>%Y</span>")
+                    ])
+                    append_tick = False
             tick += 1
+        week_count += 1
+    # adjust the size
+    ratio = (sqrt(highest_count / pi))
+    for punch in punchcard:
+        punch[2] = (sqrt(punch[2] / pi)) / ratio
 
-            day_counts = [0, 0, 0, 0, 0, 0, 0]
-            start_of_week = start_of_next_week
-            start_of_next_week += relativedelta(weeks=1)
-
-        # adjust the size or circles
-        ratio = (sqrt(highest_day_count / pi))
-        for punch in punchcard:
-            # front-end needs both the count for the label and the ratios of the radii of the circles
-            punch.append(punch[2])
-            punch[2] = (sqrt(punch[2] / pi)) / ratio
-
-        return punchcard, ticks
-
-    except Exception as e:
-        logger.exception('Not showing punchcard graph due to exception gathering data', e)
-        return None, None
-
-
-def get_week_data(week_start_date, tick, day_counts):
-    data = []
-    for i in range(0, len(day_counts)):
-        data.append([tick, i, day_counts[i]])
-    label = [tick, week_start_date.strftime("<span class='small'>%m/%d<br/>%Y</span>")]
-    return data, label
+    return punchcard, ticks, highest_count
 
 
 # 5 params

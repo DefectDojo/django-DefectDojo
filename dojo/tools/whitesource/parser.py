@@ -37,7 +37,11 @@ class WhitesourceJSONParser(object):
                 description = node.get('description')
 
             cve = node.get('name')
-            title = cve + " | " + lib_name
+            if cve == None:
+                title = "CVE-None | " + lib_name
+            else:
+                title = cve + " | " + lib_name
+            
             # cvss2 by default in CLI, but cvss3 in UI. Adapting to have homogeneous behavior.
             if 'cvss3_severity' in node:
                 cvss_sev = node.get('cvss3_severity')
