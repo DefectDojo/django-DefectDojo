@@ -1,26 +1,29 @@
 ---
 # Global settings
 # create defectdojo specific secret
-createSecret: true
+#createSecret: true
 # create rabbitmq secret outside of rabbitmq chart
-createRabbitMqSecret: true
+#createRabbitMqSecret: true
 # create redis secret outside of redis chart
-createRedisSecret: true
+#createRedisSecret: true
 # create mysql secret outside of mysql chart
-createMysqlSecret: true
+#createMysqlSecret: true
 # create postgresql secret outside of postgresql chart
-createPostgresqlSecret: true
+#createPostgresqlSecret: true
 ## Configuration value to select database type
 ## Option to use "postgresql" or "mysql" database type, by default "postgresql" is chosen
 ## Set the "enable" field to true of the database type you select (if you want to use internal database) and false of the one you don't select
 database: postgresql
-host: defectdojo.default.minikube.local
-imagePullPolicy: Always
+host: dojo.sever.in.pan-net.eu
+imagePullPolicy: IfNotPresent
 # Where to pull the defectDojo images from. Defaults to "defectdojo/*" repositories on hub.docker.com
-repositoryPrefix: defectdojo
+repositoryPrefix: dsever
+repositoryPrefixnginx: defectdojo
 # When using a private registry, name of the secret that holds the registry secret (eg deploy token from gitlab-ci project)
 # imagePullSecrets: defectdojoregistrykey
 tag: latest
+
+
 
 admin:
   user: admin
@@ -58,6 +61,7 @@ django:
     activateTLS: true
     secretName: defectdojo-tls
     annotations:
+      nginx.ingress.kubernetes.io/proxy-body-size: 8m
       # Restricts the type of ingress controller that can interact with our chart (nginx, traefik, ...)
       #kubernetes.io/ingress.class: nginx
   nginx:
@@ -66,7 +70,7 @@ django:
         cpu: 100m
         memory: 128Mi
   nodeSelector: {}
-  replicas: 1
+  replicas: 4
   tolerations: []
   uwsgi:
     resources:
@@ -88,13 +92,13 @@ mysql:
   existingSecret: defectdojo-mysql-specific
   mysqlDatabase: defectdojo
   service:
-    port: 3306  
+    port: 3306
   # To use an external mySQL instance, set enabled to false and uncomment
   # the line below:
   # mysqlServer: ""
   # To use an external secret for the password for an external mySQL instance,
   # set enabled to false and provide the name of the secret on the line below:
-  # mysqlPasswordSecret: ""  
+  # mysqlPasswordSecret: ""
 
 postgresql:
   enabled: true
@@ -106,14 +110,14 @@ postgresql:
   replication:
     enabled: false
   service:
-    port: 5432  
+    port: 5432
   # To use an external PostgreSQL instance, set enabled to false and uncomment
   # the line below:
   # postgresServer: ""
   # To use an external secret for the password for PostgreSQL
   # instance, set enabled to false and provide the name of the secret on the
   # line below:
-  # existingSecret: ""    
+  # existingSecret: ""
 
 rabbitmq:
   enabled: true
@@ -127,4 +131,3 @@ redis:
   existingSecret: defectdojo-redis-specific
   cluster:
     slaveCount: 1
-

@@ -62,7 +62,7 @@ Create chart name and version as used by the chart label.
 {{- end -}}
 
 {{- define "django.nginx.repository" -}}
-{{- printf "%s" .Values.repositoryPrefix -}}/defectdojo-nginx
+{{- printf "%s" .Values.repositoryPrefixnginx -}}/defectdojo-nginx
 {{- end -}}
 
 {{- define "django.uwsgi.repository" -}}
@@ -72,4 +72,3 @@ Create chart name and version as used by the chart label.
 {{- define "initializer.repository" -}}
 {{- printf "%s" .Values.repositoryPrefix -}}/defectdojo-django
 {{- end -}}
-
