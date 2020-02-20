@@ -343,7 +343,7 @@ def fix_loop_duplicates():
     candidates = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).all().order_by("-id")
     deduplicationLogger.info("Identified %d Findings with Loops" % len(candidates))
     for find_id in candidates.values_list('id', flat=True):
-        deduplicationLogger.info("Processing Finding: %d " % find.id)
+        deduplicationLogger.info("Processing Finding: %d " % find_id)
         removeLoop(find_id, 5)
 
         
