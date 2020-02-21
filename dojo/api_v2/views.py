@@ -121,7 +121,7 @@ class EngagementViewSet(mixins.ListModelMixin,
         return Response(report.data)
 
     @action(methods=['post'], detail=True, permission_classes=[IsAdminUser],
-            serializer_class=serializers.AcceptedRiskSerializer)
+            serializer_class=ra_api.AcceptedRiskSerializer)
     def accept_risks(self, request, pk=None):
         engagement = get_object_or_404(Engagement, id=pk)
         serializer = ra_api.AcceptedRiskSerializer(data=request.data, many=True)
