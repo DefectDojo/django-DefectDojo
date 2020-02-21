@@ -1,0 +1,11 @@
+FROM ubuntu:18.04
+
+# The aim of this Dockerfile is to create artifacts for further work:
+# * database files
+# * application files
+# Author: Alexander Tyutin <alexander@tyutin.net> https://github.com/AlexanderTyutin
+
+COPY init.sh /opt
+RUN chmod a+x /opt/init.sh
+
+ENTRYPOINT ["/opt/init.sh"]

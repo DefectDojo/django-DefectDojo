@@ -1,0 +1,17 @@
+FROM ubuntu:18.04
+
+# The aim of this Dockerfile is to create usable image for running DefectDojo application
+# over existing artifacts:
+# * database files
+# * application files
+# Author: Alexander Tyutin <alexander@tyutin.net> https://github.com/AlexanderTyutin
+
+COPY install.sh /opt
+COPY run.sh /opt
+
+RUN chmod a+x /opt/install.sh
+RUN chmod a+x /opt/run.sh
+
+RUN /opt/install.sh
+
+ENTRYPOINT ["/opt/run.sh"]
