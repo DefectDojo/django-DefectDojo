@@ -575,13 +575,17 @@ class Product(models.Model):
 
     @property
     def findings_count(self):
-        return self.active_finding_count
-        # return Finding.objects.filter(mitigated__isnull=True,
-        #                               verified=True,
-        #                               false_p=False,
-        #                               duplicate=False,
-        #                               out_of_scope=False,
-        #                               test__engagement__product=self).count()
+        try:
+            # if prefetched, it's already there
+            return self.active_finding_count
+        except AttributeError:
+            # ideally it's always prefetch and we can remove this code
+            return Finding.objects.filter(mitigated__isnull=True,
+                                            verified=True,
+                                            false_p=False,
+                                            duplicate=False,
+                                            out_of_scope=False,
+                                            test__engagement__product=self).count()
 
     # @property
     # def active_engagement_count(self):
