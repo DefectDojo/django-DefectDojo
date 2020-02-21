@@ -948,3 +948,22 @@ class ReportGenerateSerializer(serializers.Serializer):
 
 class TagSerializer(serializers.Serializer):
     tags = TagListSerializerField(required=True)
+
+
+class AcceptedRisk:
+    def __init__(self, cve: str, justification: str, approved_by: str):
+        self.cve = cve
+        self.justification = justification
+        self.approved_by = approved_by
+
+    def __str__(self) -> str:
+        return '{}: {}'.format(self.cve, self.justification)
+
+
+class AcceptedRiskSerializer(serializers.Serializer):
+    cve = serializers.CharField(max_length=28)
+    justification = serializers.CharField()
+    approved_by = serializers.CharField(max_length=200)
+
+    def create(self, validated_data):
+        return AcceptedRisk(**validated_data)

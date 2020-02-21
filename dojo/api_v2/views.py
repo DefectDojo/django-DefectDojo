@@ -1,9 +1,11 @@
+from typing import List, Optional
+
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
-from rest_framework.permissions import DjangoModelPermissions
+from rest_framework.permissions import DjangoModelPermissions, IsAdminUser
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser
 from django_filters.rest_framework import DjangoFilterBackend
@@ -12,7 +14,7 @@ from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Finding, \
     User, ScanSettings, Scan, Stub_Finding, Finding_Template, Notes, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
-    Endpoint, JIRA_PKey, JIRA_Conf, DojoMeta, Development_Environment, Dojo_User
+    Endpoint, JIRA_PKey, JIRA_Conf, DojoMeta, Development_Environment, Dojo_User, Risk_Acceptance
 
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver
@@ -116,6 +118,19 @@ class EngagementViewSet(mixins.ListModelMixin,
         data = report_generate(request, engagement, options)
         report = serializers.ReportGenerateSerializer(data)
         return Response(report.data)
+
+    @action(methods=['post'], detail=True, permission_classes=[IsAdminUser],
+            serializer_class=serializers.AcceptedRiskSerializer)
+    def accept_risks(self, request, pk=None):
+        engagement = get_object_or_404(Engagement, id=pk)
+        serializer = serializers.AcceptedRiskSerializer(data=request.data, many=True)
+        if serializer.is_valid():
+            accepted_risks = serializer.save()
+        else:
+            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        risks = accept_risks(accepted_risks, request.user, engagement)
+        result = serializers.RiskAcceptanceSerializer(instance=risks, many=True)
+        return Response(result.data)
 
 
 class FindingTemplatesViewSet(mixins.ListModelMixin,
@@ -528,6 +543,8 @@ class TestsViewSet(mixins.ListModelMixin,
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
+            if self.action == 'accept_risks':
+                return serializers.AcceptedRiskSerializer
             return serializers.TestCreateSerializer
         else:
             return serializers.TestSerializer
@@ -551,6 +568,19 @@ class TestsViewSet(mixins.ListModelMixin,
         data = report_generate(request, test, options)
         report = serializers.ReportGenerateSerializer(data)
         return Response(report.data)
+
+    @action(methods=['post'], detail=True, permission_classes=[IsAdminUser])
+    def accept_risks(self, request, pk=None):
+        test = get_object_or_404(Test, id=pk)
+        engagement = test.engagement
+        serializer = serializers.AcceptedRiskSerializer(data=request.data, many=True)
+        if serializer.is_valid():
+            accepted_risks = serializer.save()
+        else:
+            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        risks = accept_risks(accepted_risks, request.user, engagement, test)
+        result = serializers.RiskAcceptanceSerializer(instance=risks, many=True)
+        return Response(result.data)
 
 
 class TestTypesViewSet(mixins.ListModelMixin,
@@ -951,3 +981,25 @@ def report_generate(request, obj, options):
         result['executive_summary'] = executive_summary
 
     return result
+
+
+def accept_risks(accepted_risks: List[serializers.AcceptedRisk], reporter: User, engagement: Engagement,
+                 test: Optional[Test] = None) -> List[Risk_Acceptance]:
+    already_accepted = [f.id for f in Finding.objects.filter(risk_acceptance__engagement=engagement)]
+    risks = []
+    for accepted_risk in accepted_risks:
+        if test is not None:
+            findings = test.finding_set
+        else:
+            findings = Finding.objects.filter(test__engagement=engagement)
+        findings = findings.filter(cve=accepted_risk.cve, active=True, verified=True, duplicate=False).exclude(
+            id__in=already_accepted)
+        if findings.exists():
+            risk = Risk_Acceptance.objects.create(reporter=reporter, compensating_control=accepted_risk.justification,
+                                                  accepted_by=accepted_risk.approved_by)
+            risk.accepted_findings.set(findings)
+            risk.save()
+            risks.append(risk)
+    engagement.risk_acceptance.add(*risks)
+    engagement.save()
+    return risks
