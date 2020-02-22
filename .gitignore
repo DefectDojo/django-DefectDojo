@@ -111,8 +111,3 @@ quick.bash
 # pipenv
 Pipfile
 Pipfile*
-
-
-# command used locally by devs
-dojo/management/commands/test_*
-
