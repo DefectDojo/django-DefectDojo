@@ -80,14 +80,14 @@ class ProductTest(unittest.TestCase):
         # Select an option in the poroduct type
         # some wild guess to print some debug info
         print('\nDEBUGGING TEST PROD CREATION FAILURE\n')
-        print(driver.find_element_by_id("id_prod_type").innerHTML)
-        print(driver.find_element_by_id("id_prod_type").outerHTML)
-        print('\nDEBUGGING TEST PROD CREATION FAILURE2\n')
-        print(driver.find_element_by_id("base-content").innerHTML)
-        print(driver.find_element_by_id("base-content").outerHTML)
-        print('\nDEBUGGING TEST PROD CREATION FAILURE3\n')
         print(driver.page_source)
+        print('\nDEBUGGING TEST PROD CREATION FAILURE2\n')
+        print(driver.find_element_by_id("id_prod_type").get_attribute("innerHTML"))
+        print(driver.find_element_by_id("id_prod_type").get_attribute("outerHTML"))
+        print('\nDEBUGGING TEST PROD CREATION FAILURE3\n')
         print('\nDEBUGGING TEST PROD CREATION FAILURE END\n')
+        print(driver.find_element_by_id("base-content").get_attribute("innerHTML"))
+        print(driver.find_element_by_id("base-content").get_attribute("outerHTML"))
         Select(driver.find_element_by_id("id_prod_type")).select_by_visible_text("Research and Development")
         # "Click" the submit button to complete the transaction
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
