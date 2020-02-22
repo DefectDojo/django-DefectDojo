@@ -202,6 +202,7 @@ echo "Running test ${TEST}"
       fi
       echo "Docker compose container status"
       docker-compose -f docker-compose.yml ps
+      docker-compose logs -f uwsgi
       ;;
     integration_tests)
       echo "run integration_test scripts"
