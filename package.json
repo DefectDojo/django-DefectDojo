@@ -5,7 +5,7 @@
     "@yarn_components/bootstrap-social": "lipis/bootstrap-social#~4.8.0",
     "@yarn_components/bootstrap-wysiwyg-steveathon": "steveathon/bootstrap-wysiwyg#*",
     "@yarn_components/bootswatch-dist": "dbtek/bootswatch-dist#readable",
-    "@yarn_components/chosen": "harvesthq/bower-chosen#~1.4.0",
+    "@yarn_components/chosen": "harvesthq/bower-chosen#~1.8.7",
     "@yarn_components/chosen-bootstrap": "dbtek/chosen-bootstrap#*",
     "@yarn_components/datatables": "DataTables/DataTables#~1.10.4",
     "@yarn_components/datatables-plugins": "DataTables/Plugins#~1.0.1",
