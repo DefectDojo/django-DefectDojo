@@ -31,6 +31,8 @@ def product_type(request):
 
     pts.object_list = prefetch_for_product_type(pts.object_list)
 
+    print(pts.object_list.query)
+
     add_breadcrumb(title="Product Type List", top_level=True, request=request)
     return render(request, 'dojo/product_type.html', {
         'name': 'Product Type List',
