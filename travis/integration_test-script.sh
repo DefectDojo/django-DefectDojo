@@ -27,6 +27,9 @@ echo "export DD_ADMIN_USER=admin" >> ~/.profile && \
     docker logs $container_id 2>&1 | grep "Admin password:"| cut -c17- | (read passwordss; echo "export DD_ADMIN_PASSWORD=$passwordss" >> ~/.profile) && \
     source ~/.profile
 
+container_id=(`docker ps -a --filter name=${CONTAINER_NAME}.* | awk 'FNR == 2 {print $1}'`) && \
+    docker logs $container_id
+
 # All available Unittest Scripts are activated below
 # If successful, A success message is printed and the script continues
 # If any script is unsuccessful a failure message is printed and the test script
