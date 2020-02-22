@@ -190,6 +190,9 @@ echo "Running test ${TEST}"
       echo "Waiting for services to start"
       # Wait for services to become available
       sleep 80
+  
+      docker-compose logs --tail=all initializer
+
       echo "Testing DefectDojo Service"
       curl -s -o "/dev/null" http://localhost:8080 -m 120
       CR=$(curl -s -m 10 -I http://localhost:8080/login?next= | egrep "^HTTP" | cut  -d' ' -f2)
