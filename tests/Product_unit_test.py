@@ -78,6 +78,12 @@ class ProductTest(unittest.TestCase):
         # Couldnt find a way to get into the box with selenium
         driver.find_element_by_id("id_name").send_keys("\tThis is just a test. Be very afraid.")
         # Select an option in the poroduct type
+        # some wild guess to print some debug info
+        print('\nDEBUGGING TEST PROD CREATION FAILURE\n')
+        print(driver.find_element_by_id("id_prod_type").text)
+        print('\nDEBUGGING TEST PROD CREATION FAILURE2\n')        
+        print(driver.find_element_by_id("base_content").text)
+        print('\nDEBUGGING TEST PROD CREATION FAILURE END\n')        
         Select(driver.find_element_by_id("id_prod_type")).select_by_visible_text("Research and Development")
         # "Click" the submit button to complete the transaction
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
