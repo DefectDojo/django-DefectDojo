@@ -32,6 +32,12 @@ class ProductTypeTest(unittest.TestCase):
         driver = self.login_page()
         driver.get(self.base_url + "product/type")
         driver.find_element_by_id("dropdownMenu1").click()
+        print('\nDEBUGGING TEST PROD TYPE\n')
+        print(driver.page_source)
+        print('\nDEBUGGING TEST PROD TYPE2\n')
+        print(driver.find_element_by_id("product_types").get_attribute("innerHTML"))
+        print('\nDEBUGGING TEST PROD TYPE END\n')
+
         driver.find_element_by_link_text("Add Product Type").click()
         driver.find_element_by_id("id_name").clear()
         driver.find_element_by_id("id_name").send_keys("product test type")
