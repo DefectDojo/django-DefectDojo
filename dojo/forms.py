@@ -178,9 +178,12 @@ class ProductForm(forms.ModelForm):
                                        queryset=Product_Type.objects.all().order_by('name'),
                                        required=True)
 
-    print('ProductForm:prod_type.queryset.query: ', prod_type.queryset.query)
-    for choice in prod_type.choices:
-        print('ProductForm:prod_type:choice ', choice)
+    try:
+        print('ProductForm:prod_type.queryset.query: ', prod_type.queryset.query)
+        for choice in prod_type.choices:
+            print('ProductForm:prod_type:choice ', choice)
+    except:
+        print('ProductForm:error printing prod_type info')
 
     authorized_users = forms.ModelMultipleChoiceField(
         queryset=None,
