@@ -6,6 +6,19 @@ Run the django-DefectDojo in a single Docker container may be useful if you:
 * want to train with the product but persist your data
 * want to develop and create your small dev environment :)
 
+## Clone repository of django-DefectDojo and switch to dev branch
+```
+git clone https://github.com/DefectDojo/django-DefectDojo.git
+cd django-DefectDojo
+git checkout dev
+```
+
+## Navigate to setup/single-container directory
+```
+cd setup
+cd single-container
+```
+
 ## Create directories for application and database and run defectdojo_init.sh script
 
 ```
