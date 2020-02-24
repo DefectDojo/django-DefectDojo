@@ -9,7 +9,7 @@ from dojo.models import Finding
 logger = logging.getLogger(__name__)
 
 SEVERITY = ['Info', 'Low', 'Medium', 'High', 'Critical']
-
+DESCRIPTION_DEFAULT = "Description not loaded from DependencyCheck"
 
 class DependencyCheckParser(object):
     def get_field_value(self, parent_node, field_name):
@@ -28,9 +28,12 @@ class DependencyCheckParser(object):
         else:
             cwe_field = self.get_field_value(vulnerability, 'cwe')
         description = self.get_field_value(vulnerability, 'description')
+        # Use DESCRIPTION_DEFAULT as fallback
+        if description is None:
+            description = DESCRIPTION_DEFAULT
 
         title = '{0} | {1}'.format(filename, name)
-        cve = name[:28]
+
         # Use CWE-1035 as fallback
         cwe = 1035  # Vulnerable Third Party Component
         if cwe_field:
@@ -73,7 +76,6 @@ class DependencyCheckParser(object):
             file_path=filename,
             test=test,
             cwe=cwe,
-            cve=cve,
             active=False,
             verified=False,
             description=description,
