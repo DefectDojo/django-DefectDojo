@@ -584,8 +584,6 @@ class Product(models.Model):
         except AttributeError:
             # ideally it's always prefetched and we can remove this code in the future
             self.active_finding_count = Finding.objects.filter(mitigated__isnull=True,
-                                            active=True,
-                                            verified=True,
                                             false_p=False,
                                             duplicate=False,
                                             out_of_scope=False,
@@ -1563,6 +1561,13 @@ class Finding(models.Model):
             return self.jira_issue
         except JIRA_Issue.DoesNotExist:
             return None
+
+    def has_jira_issue(self):
+        try:
+            issue = self.jira_issue
+            return True
+        except JIRA_Issue.DoesNotExist:
+            return False
 
     def has_jira_issue(self):
         try:
