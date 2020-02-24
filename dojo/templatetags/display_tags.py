@@ -19,22 +19,45 @@ import datetime
 from ast import literal_eval
 from urllib.parse import urlparse
 import bleach
-from bleach_whitelist import markdown_tags, markdown_attrs
 import git
+
 register = template.Library()
 
+# Tags suitable for rendering markdown
+markdown_tags = [
+    "h1", "h2", "h3", "h4", "h5", "h6",
+    "b", "i", "strong", "em", "tt",
+    "table", "thead", "th", "tbody", "tr", "td",  # enables markdown.extensions.tables
+    "p", "br",
+    "pre", "div",  # used for code highlighting
+    "span", "div", "blockquote", "code", "hr", "pre",
+    "ul", "ol", "li", "dd", "dt",
+    "img",
+    "a",
+    "sub", "sup",
+]
 
-class EscapeHtml(Extension):
-    def extendMarkdown(self, md, md_globals):
-        del md.preprocessors['html_block']
-        del md.inlinePatterns['html']
+markdown_attrs = {
+    "*": ["id"],
+    "img": ["src", "alt", "title"],
+    "a": ["href", "alt", "title"],
+    "span": ["class"],  # used for code highlighting
+    "pre": ["class"],  # used for code highlighting
+    "div": ["class"],  # used for code highlighting
+}
 
 
 @register.filter
 def markdown_render(value):
     if value:
-        value = bleach.clean(markdown.markdown(value), markdown_tags, markdown_attrs)
-        return mark_safe(markdown.markdown(value, extensions=['markdown.extensions.nl2br', 'markdown.extensions.sane_lists', 'markdown.extensions.codehilite', 'markdown.extensions.fenced_code', 'markdown.extensions.toc', 'markdown.extensions.tables']))
+        markdown_text = markdown.markdown(value,
+                                          extensions=['markdown.extensions.nl2br',
+                                                      'markdown.extensions.sane_lists',
+                                                      'markdown.extensions.codehilite',
+                                                      'markdown.extensions.fenced_code',
+                                                      'markdown.extensions.toc',
+                                                      'markdown.extensions.tables'])
+        return mark_safe(bleach.clean(markdown_text, markdown_tags, markdown_attrs))
 
 
 @register.filter(name='ports_open')
@@ -148,21 +171,21 @@ def asvs_calc_level(benchmark_score):
     total = 0
     if benchmark_score:
         total = benchmark_score.asvs_level_1_benchmark + \
-            benchmark_score.asvs_level_2_benchmark + benchmark_score.asvs_level_3_benchmark
+                benchmark_score.asvs_level_2_benchmark + benchmark_score.asvs_level_3_benchmark
         total_pass = benchmark_score.asvs_level_1_score + \
-            benchmark_score.asvs_level_2_score + benchmark_score.asvs_level_3_score
+                     benchmark_score.asvs_level_2_score + benchmark_score.asvs_level_3_score
 
         if benchmark_score.desired_level == "Level 1":
             total = benchmark_score.asvs_level_1_benchmark
             total_pass = benchmark_score.asvs_level_1_score
         elif benchmark_score.desired_level == "Level 2":
             total = benchmark_score.asvs_level_1_benchmark + \
-                benchmark_score.asvs_level_2_benchmark
+                    benchmark_score.asvs_level_2_benchmark
             total_pass = benchmark_score.asvs_level_1_score + \
-                benchmark_score.asvs_level_2_score
+                         benchmark_score.asvs_level_2_score
         elif benchmark_score.desired_level == "Level 3":
             total = benchmark_score.asvs_level_1_benchmark + \
-                benchmark_score.asvs_level_2_benchmark + benchmark_score.asvs_level_3_benchmark
+                    benchmark_score.asvs_level_2_benchmark + benchmark_score.asvs_level_3_benchmark
 
         level = percentage(total_pass, total)
 
@@ -184,7 +207,8 @@ def asvs_level(benchmark_score):
     else:
         level = "(" + level + ")"
 
-    return "ASVS " + str(benchmark_score.desired_level) + " " + level + " Pass: " + str(total_pass) + " Total:  " + total
+    return "ASVS " + str(benchmark_score.desired_level) + " " + level + " Pass: " + str(
+        total_pass) + " Total:  " + total
 
 
 @register.filter(name='get_jira_conf')
@@ -295,18 +319,20 @@ def finding_sla(finding):
         if find_sla and find_sla < 0:
             status = "orange"
             find_sla = abs(find_sla)
-            status_text = 'Out of SLA: Remediatied ' + str(find_sla) + ' days past SLA for ' + severity.lower() + ' findings (' + str(sla_age) + ' days)'
+            status_text = 'Out of SLA: Remediatied ' + str(
+                find_sla) + ' days past SLA for ' + severity.lower() + ' findings (' + str(sla_age) + ' days)'
     else:
         status = "green"
         status_text = 'Remediation for ' + severity.lower() + ' findings in ' + str(sla_age) + ' days or less'
         if find_sla and find_sla < 0:
             status = "red"
             find_sla = abs(find_sla)
-            status_text = 'Overdue: Remediation for ' + severity.lower() + ' findings in ' + str(sla_age) + ' days or less'
+            status_text = 'Overdue: Remediation for ' + severity.lower() + ' findings in ' + str(
+                sla_age) + ' days or less'
 
     if find_sla is not None:
         title = '<a data-toggle="tooltip" data-placement="bottom" title="" href="#" data-original-title="' + status_text + '">' \
-                '<span class="label severity age-' + status + '">' + str(find_sla) + '</span></a>'
+                                                                                                                           '<span class="label severity age-' + status + '">' + str(find_sla) + '</span></a>'
 
     return mark_safe(title)
 
@@ -352,6 +378,7 @@ def finding_status(finding, duplicate):
 @register.simple_tag
 def random_html():
     def r(): return random.randint(0, 255)
+
     return ('#%02X%02X%02X' % (r(), r(), r()))
 
 
@@ -363,7 +390,7 @@ def action_log_entry(value, autoescape=None):
     text = ''
     for k in history.keys():
         text += k.capitalize() + ' changed from "' + \
-            history[k][0] + '" to "' + history[k][1] + '"'
+                history[k][0] + '" to "' + history[k][1] + '"'
 
     return text
 
@@ -648,7 +675,7 @@ def get_severity_count(id, table):
                      output_field=IntegerField())),
         )
     elif table == "engagement":
-        counts = Finding.objects.filter(test__engagement=id, active=True, verified=True, duplicate=False). \
+        counts = Finding.objects.filter(test__engagement=id, active=True, verified=False, duplicate=False). \
             prefetch_related('test__engagement__product').aggregate(
             total=Sum(
                 Case(When(severity__in=('Critical', 'High', 'Medium', 'Low'),
@@ -735,7 +762,7 @@ def get_severity_count(id, table):
     if table == "test":
         display_counts.append("Total: " + str(total) + " Findings")
     elif table == "engagement":
-        display_counts.append("Total: " + str(total) + " Active, Verified Findings")
+        display_counts.append("Total: " + str(total) + " Active Findings")
     elif table == "product":
         display_counts.append("Total: " + str(total) + " Active Findings")
 

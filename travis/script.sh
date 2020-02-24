@@ -200,6 +200,18 @@ echo "Running test ${TEST}"
       echo "Docker compose container status"
       docker-compose -f docker-compose.yml ps
       ;;
+    integration_tests)
+      echo "run integration_test scripts"
+      # change user id withn Docker container to user id of travis user
+      sed -i -e "s/USER\ 1001/USER\ `id -u`/g" ./Dockerfile.django
+      cp ./dojo/settings/settings.dist.py ./dojo/settings/settings.py
+      # incase of failure and you need to debug
+      # change the 'release' mode to 'dev' mode in order to activate debug=True
+      # make sure you remember to change back to 'release' before making a PR
+      source ./docker/setEnv.sh release
+      docker-compose build
+      source ./travis/integration_test-script.sh
+      ;;
     snyk)
       echo "Snyk security testing on containers"
       build_containers

@@ -2,12 +2,15 @@ from django.conf import settings
 from django.conf.urls import include, url
 from django.conf.urls.static import static
 from django.contrib import admin
-from rest_framework_swagger.views import get_swagger_view
 from tastypie.api import Api
 from tastypie_swagger.views import SwaggerView, ResourcesView, SchemaView
 from rest_framework.routers import DefaultRouter
 from rest_framework.authtoken import views as tokenviews
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
 from django.http import HttpResponse
+from defectDojo_engagement_survey.urls import urlpatterns as survey_urls
 
 from dojo import views
 from dojo.api import UserResource, ProductResource, EngagementResource, \
@@ -51,6 +54,9 @@ from dojo.object.urls import urlpatterns as object_urls
 from dojo.benchmark.urls import urlpatterns as benchmark_urls
 from dojo.rules.urls import urlpatterns as rule_urls
 from dojo.notes.urls import urlpatterns as notes_urls
+from dojo.note_type.urls import urlpatterns as note_type_urls
+from dojo.google_sheet.urls import urlpatterns as google_sheets_urls
+from dojo.banner.urls import urlpatterns as banner_urls
 
 admin.autodiscover()
 
@@ -106,9 +112,9 @@ v2_api.register(r'tool_configurations', ToolConfigurationsViewSet)
 v2_api.register(r'tool_product_settings', ToolProductSettingsViewSet)
 v2_api.register(r'tool_types', ToolTypesViewSet)
 v2_api.register(r'users', UsersViewSet)
-v2_api.register(r'import-scan', ImportScanView, base_name='importscan')
-v2_api.register(r'reimport-scan', ReImportScanView, base_name='reimportscan')
-v2_api.register(r'metadata', DojoMetaViewSet, base_name='metadata')
+v2_api.register(r'import-scan', ImportScanView, basename='importscan')
+v2_api.register(r'reimport-scan', ReImportScanView, basename='reimportscan')
+v2_api.register(r'metadata', DojoMetaViewSet, basename='metadata')
 v2_api.register(r'notes', NotesViewSet)
 
 ur = []
@@ -137,6 +143,9 @@ ur += object_urls
 ur += benchmark_urls
 ur += rule_urls
 ur += notes_urls
+ur += note_type_urls
+ur += google_sheets_urls
+ur += banner_urls
 
 swagger_urls = [
     url(r'^$', SwaggerView.as_view(), name='index'),
@@ -145,7 +154,17 @@ swagger_urls = [
     url(r'^schema/$', SchemaView.as_view(), name='schema'),
 ]
 
-schema_view = get_swagger_view(title='Defect Dojo API v2')
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Defect Dojo API",
+        default_version='v2',
+        description="To use the API you need be authorized.",
+    ),
+    # if public=False, includes only endpoints the current user has access to
+    public=True,
+    # The API of a OpenSource project should be public accessible
+    permission_classes=[permissions.AllowAny],
+)
 
 urlpatterns = [
     #  tastypie api
@@ -164,10 +183,11 @@ urlpatterns = [
         name='action_history'),
     url(r'^%s' % get_system_setting('url_prefix'), include(ur)),
     url(r'^api/v2/api-token-auth/', tokenviews.obtain_auth_token),
-    url(r'^api/v2/doc/', schema_view, name="api_v2_schema"),
+    url(r'^api/v2/doc/', schema_view.with_ui('swagger', cache_timeout=0), name='api_v2_schema'),
     url(r'^robots.txt', lambda x: HttpResponse("User-Agent: *\nDisallow: /", content_type="text/plain"), name="robots_file"),
-
 ]
+
+urlpatterns += survey_urls
 
 if hasattr(settings, 'DJANGO_ADMIN_ENABLED'):
     if settings.DJANGO_ADMIN_ENABLED:

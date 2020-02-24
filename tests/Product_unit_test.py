@@ -1,20 +1,46 @@
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.keys import Keys
 import unittest
 import re
 import sys
 import os
+import time
+
+
+class WaitForPageLoad(object):
+    def __init__(self, browser, timeout):
+        self.browser = browser
+        self.timeout = time.time() + timeout
+
+    def __enter__(self):
+        self.old_page = self.browser.find_element_by_tag_name('html')
+
+    def page_has_loaded(self):
+        new_page = self.browser.find_element_by_tag_name('html')
+        return new_page.id != self.old_page.id
+
+    def __exit__(self, *_):
+        while time.time() < self.timeout:
+            if self.page_has_loaded():
+                return True
+            else:
+                time.sleep(0.2)
+        raise Exception(
+            'Timeout waiting for {}s'.format(self.timeout)
+        )
 
 
 class ProductTest(unittest.TestCase):
     def setUp(self):
-        # Initialize the driver
-        self.driver = webdriver.Chrome('chromedriver')
+        self.options = Options()
+        self.options.add_argument("--headless")  # Comment out this line to allow test run with browser visible
+        self.driver = webdriver.Chrome('chromedriver', chrome_options=self.options)
         # Allow a little time for the driver to initialize
         self.driver.implicitly_wait(30)
         # Set the base address of the dojo
-        self.base_url = "http://localhost:8000/"
+        self.base_url = "http://localhost:8080/"
         self.verificationErrors = []
         self.accept_next_alert = True
 
@@ -120,7 +146,7 @@ class ProductTest(unittest.TestCase):
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
         # Query the site to determine if the product has been added
         productTxt = driver.find_element_by_tag_name("BODY").text
-        # Assert ot the query to dtermine status of failure
+        # Assert of the query to dtermine status of failure
         self.assertTrue(re.search(r'Engagement added successfully', productTxt))
 
     def test_add_product_finding(self):
@@ -157,10 +183,11 @@ class ProductTest(unittest.TestCase):
         driver.execute_script("document.getElementsByName('impact')[0].style.display = 'inline'")
         driver.find_element_by_name("impact").send_keys(Keys.TAB, "This has a very critical effect on production")
         # "Click" the Done button to Add the finding with other defaults
-        driver.find_element_by_xpath("//input[@name='_Finished']").click()
+        with WaitForPageLoad(driver, timeout=30):
+            driver.find_element_by_xpath("//input[@name='_Finished']").click()
         # Query the site to determine if the finding has been added
         productTxt = driver.find_element_by_tag_name("BODY").text
-        # Assert ot the query to dtermine status of failure
+        # Assert to the query to dtermine status of failure
         self.assertTrue(re.search(r'App Vulnerable to XSS', productTxt))
 
     def test_add_product_endpoints(self):

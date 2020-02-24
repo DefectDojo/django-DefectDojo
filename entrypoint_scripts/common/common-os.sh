@@ -89,7 +89,7 @@ bootstrap_install() {
 	   # Install user isn't root,  check for sudo privileges
 	   echo "  Checking for sudo access, you may be prompted for your password"
        sudo -v 2>/dev/null
-       SUDO_CHECK=`sudo -v | wc -l`
+       SUDO_CHECK=`sudo -v | wc -l | awk '{$1=$1; print}'`
        if [ "$SUDO_CHECK" = 0 ] ; then
          echo "  Install user has sudo access"
        else

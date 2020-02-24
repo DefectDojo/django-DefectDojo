@@ -21,7 +21,7 @@ Log in with username {{ .Values.admin.user}}.
 To find out the password, run the following command:
 
     echo "DefectDojo {{ .Values.admin.user}} password: $(kubectl \
-      get secret defectdojo \
+      get secret {{ $fullName }} \
       --namespace={{ .Release.Namespace }} \
       --output jsonpath='{.data.DD_ADMIN_PASSWORD}' \
       | base64 --decode)"

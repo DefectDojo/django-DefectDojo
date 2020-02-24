@@ -310,10 +310,11 @@ class OpenVASUploadCsvParser(object):
             self.items = ()
             return
 
-        content = filename.read()
+        content = open(filename.temporary_file_path(), 'rb')
+        reportCSV = io.TextIOWrapper(content, encoding='utf-8 ', errors='replace')
+        reader = csv.reader(reportCSV, delimiter=',', quotechar='"')
 
         row_number = 0
-        reader = csv.reader(io.StringIO(content), delimiter=',', quotechar='"')
         for row in reader:
             finding = Finding(test=test)
 
@@ -335,7 +336,7 @@ class OpenVASUploadCsvParser(object):
                 if finding.description is None:
                     finding.description = ""
 
-                key = hashlib.md5(finding.url + '|' + finding.severity + '|' + finding.title + '|' + finding.description).hexdigest()
+                key = hashlib.md5((finding.url + '|' + finding.severity + '|' + finding.title + '|' + finding.description).encode('utf-8')).hexdigest()
 
                 if key not in self.dupes:
                     self.dupes[key] = finding

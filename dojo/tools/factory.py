@@ -12,6 +12,7 @@ from dojo.tools.appspider.parser import AppSpiderXMLParser
 from dojo.tools.arachni.parser import ArachniJSONParser
 from dojo.tools.vcg.parser import VCGParser
 from dojo.tools.dependency_check.parser import DependencyCheckParser
+from dojo.tools.dependency_track.parser import DependencyTrackParser
 from dojo.tools.retirejs.parser import RetireJsParser
 from dojo.tools.nsp.parser import NspParser
 from dojo.tools.npm_audit.parser import NpmAuditParser
@@ -32,6 +33,7 @@ from dojo.tools.php_security_audit_v2.parser import PhpSecurityAuditV2
 from dojo.tools.acunetix.parser import AcunetixScannerParser
 from dojo.tools.fortify.parser import FortifyXMLParser
 from dojo.tools.sonarqube.parser import SonarQubeHtmlParser
+from dojo.tools.sonarqube_api.importer import SonarQubeApiImporter
 from dojo.tools.clair.parser import ClairParser
 from dojo.tools.mobsf.parser import MobSFParser
 from dojo.tools.aws_scout2.parser import AWSScout2Parser
@@ -61,10 +63,19 @@ from dojo.tools.jfrogxray.parser import XrayJSONParser
 from dojo.tools.sslyze.parser import SslyzeXmlParser
 from dojo.tools.testssl.parser import TestsslCSVParser
 from dojo.tools.hadolint.parser import HadolintParser
+from dojo.tools import SCAN_SONARQUBE_API
+from dojo.tools.aqua.parser import AquaJSONParser
+from dojo.tools.h1.parser import HackerOneJSONParser
+from dojo.tools.xanitizer.parser import XanitizerXMLParser
+from dojo.tools.trivy.parser import TrivyParser
+from dojo.tools.outpost24.parser import Outpost24Parser
+
+
 
 __author__ = 'Jay Paz'
 
 
+# TODO change conditional search of the parser to the mapping
 def import_parser_factory(file, test, active, verified, scan_type=None):
     if scan_type is None:
         scan_type = test.test_type.name
@@ -88,6 +99,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = VeracodeXMLParser(file, test)
     elif scan_type == "Checkmarx Scan":
         parser = CheckmarxXMLParser(file, test)
+    elif scan_type == "Checkmarx Scan detailed":
+        parser = CheckmarxXMLParser(file, test, 'detailed')
     elif scan_type == "Contrast Scan":
         parser = ContrastCSVParser(file, test)
     elif scan_type == "Crashtest Security Scan":
@@ -104,6 +117,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = VCGParser(file, test)
     elif scan_type == 'Dependency Check Scan':
         parser = DependencyCheckParser(file, test)
+    elif scan_type == 'Dependency Track Finding Packaging Format (FPF) Export':
+        parser = DependencyTrackParser(file, test)
     elif scan_type == 'Retire.js Scan':
         parser = RetireJsParser(file, test)
     elif scan_type == 'Node Security Platform Scan':
@@ -144,6 +159,10 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = FortifyXMLParser(file, test)
     elif scan_type == 'SonarQube Scan':
         parser = SonarQubeHtmlParser(file, test)
+    elif scan_type == 'SonarQube Scan detailed':
+        parser = SonarQubeHtmlParser(file, test, 'detailed')
+    elif scan_type == SCAN_SONARQUBE_API:
+        parser = SonarQubeApiImporter(test)
     elif scan_type == 'MobSF Scan':
         parser = MobSFParser(file, test)
     elif scan_type == 'AWS Scout2 Scan':
@@ -198,6 +217,16 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         parser = TestsslCSVParser(file, test)
     elif scan_type == 'Hadolint Dockerfile check':
         parser = HadolintParser(file, test)
+    elif scan_type == 'Aqua Scan':
+        parser = AquaJSONParser(file, test)
+    elif scan_type == 'HackerOne Cases':
+        parser = HackerOneJSONParser(file, test)
+    elif scan_type == 'Xanitizer Scan':
+        parser = XanitizerXMLParser(file, test)
+    elif scan_type == 'Trivy Scan':
+        parser = TrivyParser(file, test)
+    elif scan_type == 'Outpost24 Scan':
+        parser = Outpost24Parser(file, test)
     else:
         raise ValueError('Unknown Test Type')
 
