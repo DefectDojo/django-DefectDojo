@@ -30,9 +30,10 @@ class DedupeTest(unittest.TestCase):
         self.options = Options()
         self.options.add_argument("--headless")
         self.options.add_argument("--window-size=1280,768")
+        # self.options.add_argument("--no-sandbox")
         self.driver = webdriver.Chrome('chromedriver', chrome_options=self.options)
         self.driver.implicitly_wait(30)
-        self.base_url = "http://localhost:8080/"
+        self.base_url = os.environ['DD_BASE_URL']
         self.verificationErrors = []
         self.accept_next_alert = True
         self.relative_path = dir_path = os.path.dirname(os.path.realpath(__file__))
