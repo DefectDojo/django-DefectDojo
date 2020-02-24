@@ -1,8 +1,8 @@
 # Django Debug, don't enable on production!
-DD_DEBUG=off
+DD_DEBUG=False
 
 # Enables Django Admin
-DD_DJANGO_ADMIN_ENABLED=on
+DD_DJANGO_ADMIN_ENABLED=True
 
 # A secret key for a particular Django installation.
 DD_SECRET_KEY=#DD_SECRET_KEY#
@@ -19,7 +19,7 @@ DD_ALLOWED_HOSTS=#DD_ALLOWED_HOSTS#
 # WhiteNoise allows your web app to serve its own static files,
 # making it a self-contained unit that can be deployed anywhere without relying on nginx,
 # if using nginx then disable Whitenoise
-DD_WHITENOISE=on
+DD_WHITENOISE=True
 
 # -------------------------------------------------------
 # Additional Settings / Override defaults in settings.py
@@ -29,22 +29,25 @@ DD_WHITENOISE=on
 # DD_TIME_ZONE=America/New_York
 
 # Track migrations through source control rather than making migrations locally
-# DD_TRACK_MIGRATIONS=on
+# DD_TRACK_MIGRATIONS=False
 
 # Whether to use HTTPOnly flag on the session cookie.
-# DD_SESSION_COOKIE_HTTPONLY=on
+# DD_SESSION_COOKIE_HTTPONLY=True
 
 # Whether to use HttpOnly flag on the CSRF cookie.
-# DD_CSRF_COOKIE_HTTPONLY=on
+# DD_CSRF_COOKIE_HTTPONLY=True
 
 # If True, the SecurityMiddleware redirects all non-HTTPS requests to HTTPS
-# DD_SECURE_SSL_REDIRECT=off
+# DD_SECURE_SSL_REDIRECT=False
 
 # Whether to use a secure cookie for the CSRF cookie.
-# DD_CSRF_COOKIE_SECURE=off
+# DD_CSRF_COOKIE_SECURE=False
 
-# If on, the SecurityMiddleware sets the X-XSS-Protection: 1;
-# DD_SECURE_BROWSER_XSS_FILTER=on
+# If True, the SecurityMiddleware sets the X-XSS-Protection: 1;
+# DD_SECURE_BROWSER_XSS_FILTER=True
+
+# If True, the SecurityMiddleware sets the X-Content-Type-Options: nosniff;
+# DD_SECURE_CONTENT_TYPE_NOSNIFF=True
 
 # Change the default language set
 # DD_LANG=en-us

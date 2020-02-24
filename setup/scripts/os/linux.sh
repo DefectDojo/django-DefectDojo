@@ -318,6 +318,7 @@ function create_dojo_settings() {
     sed -i -e 's%#DD_PORT_SCAN_RESULT_EMAIL_FROM#%'$DD_PORT_SCAN_RESULT_EMAIL_FROM'%' "$ENV_TARGET_FILE"
     sed -i -e 's%#DD_PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST#%'$DD_PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST'%' "$ENV_TARGET_FILE"
     sed -i -e 's%#DD_PORT_SCAN_SOURCE_IP#%'$DD_PORT_SCAN_SOURCE_IP'%' "$ENV_TARGET_FILE"
+    sed -i -e 's%#DD_SECURE_CONTENT_TYPE_NOSNIFF#%'$DD_SECURE_CONTENT_TYPE_NOSNIFF'%' "$ENV_TARGET_FILE"
     # File paths for settings.py
     #sed -i -e 's%#DOJO_ROOT#%'$DOJO_ROOT'%' "$TARGET_SETTINGS_FILE"
     #sed -i -e 's%#MEDIA_ROOT#%'$MEDIA_ROOT'%' "$TARGET_SETTINGS_FILE"
@@ -386,6 +387,7 @@ function ubuntu_dojo_install() {
       python3 manage.py loaddata dojo/fixtures/defect_dojo_sample_data.json
     fi
 
+    $PY manage.py loaddata initial_banner_conf
     $PY manage.py loaddata product_type
     $PY manage.py loaddata test_type
     $PY manage.py loaddata development_environment
@@ -396,7 +398,8 @@ function ubuntu_dojo_install() {
     $PY manage.py loaddata language_type
     $PY manage.py loaddata objects_review
     $PY manage.py loaddata regulation
-
+    $PY manage.py import_surveys
+    $PY manage.py loaddata initial_surveys
     $PY manage.py buildwatson
     $PY manage.py installwatson
 
