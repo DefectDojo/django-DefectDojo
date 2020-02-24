@@ -9,6 +9,10 @@ from dojo.models import Finding
 logger = logging.getLogger(__name__)
 
 SEVERITY = ['Info', 'Low', 'Medium', 'High', 'Critical']
+DESCRIPTION_DEFAULT_MESSAGE = "Description not loaded from DependencyCheck"
+MITIGATION_DEFAULT_MESSAGE = "Upgrade the library or remove unused dependencies, " \
+    "unnecessary features, components, files, and documentation."
+IMPACT_DEFAULT_MESSAGE ="The impact has to be defined for this vulnerability."
 
 
 class DependencyCheckParser(object):
@@ -24,9 +28,13 @@ class DependencyCheckParser(object):
         name = self.get_field_value(vulnerability, 'name')
         cwe_field = self.get_field_value(vulnerability, 'cwe')
         description = self.get_field_value(vulnerability, 'description')
+        # Force description with any value in case of None
+        if description is None:
+            description = DESCRIPTION_DEFAULT_MESSAGE
 
+        mitigation= MITIGATION_DEFAULT_MESSAGE
+        impact = IMPACT_DEFAULT_MESSAGE
         title = '{0} | {1}'.format(filename, name)
-        cve = name
         # Use CWE-1035 as fallback
         cwe = 1035  # Vulnerable Third Party Component
         if cwe_field:
@@ -69,11 +77,12 @@ class DependencyCheckParser(object):
             file_path=filename,
             test=test,
             cwe=cwe,
-            cve=cve,
             active=False,
             verified=False,
             description=description,
+            mitigation=mitigation,
             severity=severity,
+            impact=impact,
             numerical_severity=Finding.get_numerical_severity(severity),
             static_finding=True,
             references=reference_detail)
