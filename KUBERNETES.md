@@ -60,6 +60,8 @@ else:
 DJANGO_INGRESS_ACTIVATE_TLS=false
 ```
 
+Warning: Use the `createSecret*=true` flags only upon first install. For re-installs, see `§Re-install the chart`
+
 Helm <= v2:
 
 ```zsh
@@ -67,8 +69,12 @@ helm install \
   ./helm/defectdojo \
   --name=defectdojo \
   --set django.ingress.enabled=${DJANGO_INGRESS_ENABLED} \
-  --set django.ingress.activateTLS=${DJANGO_INGRESS_ACTIVATE_TLS}
-
+  --set django.ingress.activateTLS=${DJANGO_INGRESS_ACTIVATE_TLS} \
+  --set createSecret=true \
+  --set createRabbitMqSecret=true \
+  --set createRedisSecret=true \
+  --set createMysqlSecret=true \
+  --set createPostgresqlSecret=true
 ```
 
 Helm >= v3:
@@ -78,7 +84,12 @@ helm install \
   defectdojo \
   ./helm/defectdojo \
   --set django.ingress.enabled=${DJANGO_INGRESS_ENABLED} \
-  --set django.ingress.activateTLS=${DJANGO_INGRESS_ACTIVATE_TLS}
+  --set django.ingress.activateTLS=${DJANGO_INGRESS_ACTIVATE_TLS} \
+  --set createSecret=true \
+  --set createRabbitMqSecret=true \
+  --set createRedisSecret=true \
+  --set createMysqlSecret=true \
+  --set createPostgresqlSecret=true
 ```
 
 It usually takes up to a minute for the services to startup and the
@@ -119,14 +130,10 @@ Log in with username admin and the password from the previous command.
 ### Minikube with locally built containers
 
 If testing containers locally, then set the imagePullPolicy to Never,
-which ensures containers are not pulled from Docker hub
-(helm 2) :
+which ensures containers are not pulled from Docker hub.
+
+Use the same commands as before but add:
 ```zsh
-helm install \
-  ./helm/defectdojo \
-  --name=defectdojo \
-  --set django.ingress.enabled=${DJANGO_INGRESS_ENABLED} \
-  --set django.ingress.activateTLS=${DJANGO_INGRESS_ACTIVATE_TLS} \
   --set imagePullPolicy=Never
 ```
 
@@ -134,9 +141,10 @@ helm install \
 If you have stored your images in a private registry, you can install defectdojo chart with (helm 3). 
 
 - First create a secret named "defectdojoregistrykey" based on the credentials that can pull from the registry: see https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-- Then install the chart with:
+- Then install the chart with the same commands as before but adding:
 ```zsh
-helm install  defectdojo ./helm/defectdojo/ --set repositoryPrefix=<myregistry.com/path>,imagePullSecrets=defectdojoregistrykey,django.ingress.enabled=${DJANGO_INGRESS_ENABLED},django.ingress.activateTLS=${DJANGO_INGRESS_ACTIVATE_TLS}
+  --set repositoryPrefix=<myregistry.com/path> \
+  --set imagePullSecrets=defectdojoregistrykey
 ```
 
 ### Build Images Locally
@@ -156,7 +164,9 @@ docker build --build-arg http_proxy=http://myproxy.com:8080 --build-arg https_pr
 ### Upgrade the chart
 If you want to change kubernetes configuration of use an updated docker image (evolution of defectDojo code), upgrade the application:
 ```
-helm upgrade  defectdojo ./helm/defectdojo/
+helm upgrade  defectdojo ./helm/defectdojo/ \
+   --set django.ingress.enabled=${DJANGO_INGRESS_ENABLED} \
+   --set django.ingress.activateTLS=${DJANGO_INGRESS_ACTIVATE_TLS}
 ```
 
 ### Re-install the chart
@@ -171,13 +181,7 @@ helm install \
   defectdojo \
   ./helm/defectdojo \
   --set django.ingress.enabled=${DJANGO_INGRESS_ENABLED} \
-  --set django.ingress.activateTLS=${DJANGO_INGRESS_ACTIVATE_TLS} \
-  --set createSecret=false \
-  --set createRabbitMqSecret=false \
-  --set createRedisSecret=false \
-  --set createMysqlSecret=false \
-  --set createPostgresqlSecret=false
-
+  --set django.ingress.activateTLS=${DJANGO_INGRESS_ACTIVATE_TLS}
 ```
 
 ## Kubernetes Production
@@ -208,7 +212,12 @@ helm install \
   --name=defectdojo \
   --namespace="${K8S_NAMESPACE}" \
   --set host="defectdojo.${TLS_CERT_DOMAIN}" \
-  --set django.ingress.secretName="minikube-tls"
+  --set django.ingress.secretName="minikube-tls" \
+  --set createSecret=true \
+  --set createRabbitMqSecret=true \
+  --set createRedisSecret=true \
+  --set createMysqlSecret=true \
+  --set createPostgresqlSecret=true
 
 # For high availability deploy multiple instances of Django, Celery and RabbitMQ
 helm install \
@@ -219,7 +228,12 @@ helm install \
   --set django.ingress.secretName="minikube-tls" \
   --set django.replicas=3 \
   --set celery.replicas=3 \
-  --set rabbitmq.replicas=3
+  --set rabbitmq.replicas=3 \
+  --set createSecret=true \
+  --set createRabbitMqSecret=true \
+  --set createRedisSecret=true \
+  --set createMysqlSecret=true \
+  --set createPostgresqlSecret=true
 
 # Run highly available PostgreSQL cluster instead of MySQL - recommended setup
 # for production environment.
@@ -236,7 +250,12 @@ helm install \
   --set database=postgresql \
   --set postgresql.enabled=true \
   --set postgresql.replication.enabled=true \
-  --set postgresql.replication.slaveReplicas=3
+  --set postgresql.replication.slaveReplicas=3 \
+  --set createSecret=true \
+  --set createRabbitMqSecret=true \
+  --set createRedisSecret=true \
+  --set createMysqlSecret=true \
+  --set createPostgresqlSecret=true
 
 # Note: If you run `helm install defectdojo before, you will get an error
 # message like `Error: release defectdojo failed: secrets "defectdojo" already
@@ -246,7 +265,10 @@ helm install \
 
 # Run test. If there are any errors, re-run the command without `--cleanup` and
 # inspect the test container.
+# helm 2
 helm test defectdojo --cleanup
+# helm 3
+helm test defectdojo
 
 # Navigate to <https://defectdojo.default.minikube.local>.
 ```
