@@ -43,6 +43,7 @@ from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_
 from dojo.tasks import add_issue_task, update_issue_task, add_comment_task
 from django.template.defaultfilters import pluralize
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -559,7 +560,7 @@ def open_findings(request, pid=None, eid=None, view=None):
 def prefetch_for_open_findings(findings):
     prefetched_findings = findings
     prefetched_findings = prefetched_findings.select_related('jira_issue')
-    prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__product_jira_pkey__conf')
+    prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__jira_pkey_set__conf')
     prefetched_findings = prefetched_findings.prefetch_related('found_by')
     prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set')
     # we could try to prefetch only the latest note with SubQuery and OuterRef, but I'm getting that MySql doesn't support limits in subqueries.

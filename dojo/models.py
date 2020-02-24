@@ -387,6 +387,12 @@ class Product_Type(models.Model):
 
     # def products_count(self):
     #     return Product.objects.filter(prod_type=self).count()
+<<<<<<< HEAD
+=======
+
+    class Meta:
+        ordering = ('name',)
+>>>>>>> performance-prefetching-phase1
 
     def __unicode__(self):
         return self.name
@@ -579,13 +585,22 @@ class Product(models.Model):
             # if prefetched, it's already there
             return self.active_finding_count
         except AttributeError:
+<<<<<<< HEAD
             # ideally it's always prefetch and we can remove this code
             return Finding.objects.filter(mitigated__isnull=True,
+=======
+            # ideally it's always prefetched and we can remove this code in the future
+            self.active_finding_count = Finding.objects.filter(mitigated__isnull=True,
+>>>>>>> performance-prefetching-phase1
                                             verified=True,
                                             false_p=False,
                                             duplicate=False,
                                             out_of_scope=False,
                                             test__engagement__product=self).count()
+<<<<<<< HEAD
+=======
+            return self.active_finding_count
+>>>>>>> performance-prefetching-phase1
 
     # @property
     # def active_engagement_count(self):
@@ -1581,7 +1596,7 @@ class Finding(models.Model):
     # newer version that can work with prefetching
     def jira_conf_new(self):
         try:
-            return self.test.engagement.product.product_jira_pkey.all()[0].conf
+            return self.test.engagement.product.jira_pkey_set.all()[0].conf
         except:
             return None
             pass

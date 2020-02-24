@@ -11,7 +11,7 @@ django-dbbackup>=3.2.0
 django-environ==0.4.5
 django-filter==2.2.0
 django-imagekit==4.0.2
-django-multiselectfield==0.1.11
+django-multiselectfield==0.1.12
 django-overextends==0.4.3
 django-polymorphic==2.1.2
 django-rest-swagger==2.2.0
