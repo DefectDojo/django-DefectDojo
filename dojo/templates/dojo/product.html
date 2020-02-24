@@ -35,7 +35,7 @@
                     </h3>
                 </div>
                 <div id="the-filters" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
-                    {% include "dojo/filter_snippet.html" with form=prods.form %}
+                    {% include "dojo/filter_snippet.html" with form=prod_filter.form %}
                 </div>
             </div>
             {% if prod_list %}
@@ -195,14 +195,14 @@
                                 </td>
                                 {% if "enable_jira"|get_system_setting %}
                                 <td class="text-center">
-                                {% for jira in prod.id|get_jira_conf %}
+                                {% for jira_conf in prod.jira_confs %}
                                 <i class="fa fa-bug has-popover" title="<i class='fa fa-bug'></i> <b>Jira Configuration</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="bottom"
-                                  data-content="<b>Jira:</b> {{ jira.conf }}<br/>
-                                  <b>Project Key:</b> {{ jira.project_key }}<br/>
-                                  <b>Component:</b> {{ jira.component }}<br/>
-                                  <b>Push All Issues:</b> {{ jira.push_all_issues }}<br/>
-                                  <b>Engagement Epic Mapping:</b> {{ jira.enable_engagement_epic_mapping }}<br/>
-                                  <b>Push Notes:</b> {{ jira.push_notes }}">
+                                  data-content="<b>Jira:</b> {{ jira_conf.conf }}<br/>
+                                  <b>Project Key:</b> {{ jira_conf.project_key }}<br/>
+                                  <b>Component:</b> {{ jira_conf.component }}<br/>
+                                  <b>Push All Issues:</b> {{ jira_conf.push_all_issues }}<br/>
+                                  <b>Engagement Epic Mapping:</b> {{ jira_conf.enable_engagement_epic_mapping }}<br/>
+                                  <b>Push Notes:</b> {{ jira_conf.push_notes }}">
                                 </i>
                                 {% endfor %}
                                 </td>
