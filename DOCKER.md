@@ -215,9 +215,6 @@ To secure the application by https, follow those steps
 ```
 chmod 400 nginx/*.key
 ```
-* Rebuild the nginx image in order to place the private key and the certificate where nginx will find them (under / in the nginx container):
-
-```docker build  -t defectdojo/defectdojo-nginx -f Dockerfile.nginx .```
 
 * Run defectDojo with: 
 ```

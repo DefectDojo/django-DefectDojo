@@ -72,8 +72,8 @@ ENV \
   DD_UWSGI_PASS="uwsgi_server" \
   DD_UWSGI_HOST="uwsgi" \
   DD_UWSGI_PORT="3031" \
-  GENERATE_TLS_CERTIFICATE="true" \
-  USE_TLS="false"
+  GENERATE_TLS_CERTIFICATE="False" \
+  USE_TLS="False"
 USER 1001
 EXPOSE 8080
 ENTRYPOINT ["/entrypoint-nginx.sh"]
