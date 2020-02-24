@@ -376,6 +376,7 @@ class Product_Type(models.Model):
 
     def findings_count(self):
         return Finding.objects.filter(mitigated__isnull=True,
+                                      active=True,
                                       verified=True,
                                       false_p=False,
                                       duplicate=False,
@@ -577,6 +578,7 @@ class Product(models.Model):
     @property
     def findings_count(self):
         return Finding.objects.filter(mitigated__isnull=True,
+                                      active=True,
                                       verified=True,
                                       false_p=False,
                                       duplicate=False,
