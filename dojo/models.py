@@ -387,12 +387,9 @@ class Product_Type(models.Model):
 
     # def products_count(self):
     #     return Product.objects.filter(prod_type=self).count()
-<<<<<<< HEAD
-=======
 
     class Meta:
         ordering = ('name',)
->>>>>>> performance-prefetching-phase1
 
     def __unicode__(self):
         return self.name
