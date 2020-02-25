@@ -72,7 +72,7 @@ RUN \
   chmod -R g=u /var/cache/nginx && \
   chmod -R g=u /var/run && \
   mkdir -p /etc/nginx/ssl && \
-  chown 1001 /etc/nginx/ssl/ &&\
+  chmod -R g=u /etc/nginx && \
   true
 ENV \
   DD_UWSGI_PASS="uwsgi_server" \

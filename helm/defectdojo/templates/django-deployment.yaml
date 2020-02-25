@@ -80,6 +80,12 @@ spec:
         envFrom:
         - configMapRef:
             name: {{ $fullName }}
+        env:
+        - name: METRICS_HTTP_AUTH_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ $fullName }}
+              key: METRICS_HTTP_AUTH_PASSWORD
         livenessProbe:
           httpGet:
             path: /
