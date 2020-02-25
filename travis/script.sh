@@ -72,20 +72,22 @@ if [ -z "${TEST}" ]; then
 
   # Set Helm settings for the broker
   case "${BROKER}" in
-      rabbitmq)
-	  HELM_BROKER_SETTINGS=" \
-	      --set redis.enabled=false \
-	      --set rabbitmq.enabled=true \
-	      --set celery.broker=rabbitmq \
-	  "
-	  ;;
-      redis)
-	  HELM_BROKER_SETTINGS=" \
-	      --set redis.enabled=true \
-	      --set rabbitmq.enabled=false \
-              --set celery.broker=redis \
-	  "
-	  ;;
+    rabbitmq)
+      HELM_BROKER_SETTINGS=" \
+        --set redis.enabled=false \
+        --set rabbitmq.enabled=true \
+        --set celery.broker=rabbitmq \
+        --set createRabbitMqSecret=true \
+    "
+    ;;
+    redis)
+      HELM_BROKER_SETTINGS=" \
+        --set redis.enabled=true \
+        --set rabbitmq.enabled=false \
+        --set celery.broker=redis \
+        --set createRedisSecret=true \
+    "
+    ;;
       *)
 	  (>&2 echo "ERROR: 'BROKER' must be 'redis' or 'rabbitmq'")
 	  exit 1
@@ -94,20 +96,22 @@ if [ -z "${TEST}" ]; then
 
   # Set Helm settings for the database
   case "${DATABASE}" in
-      mysql)
-	  HELM_DATABASE_SETTINGS=" \
-	      --set database=mysql \
-	      --set postgresql.enabled=false \
-	      --set mysql.enabled=true \
-	  "
-	  ;;
-      postgresql)
-	  HELM_DATABASE_SETTINGS=" \
-	      --set database=postgresql \
-	      --set postgresql.enabled=true \
-	      --set mysql.enabled=false \
-	  "
-	  ;;
+    mysql)
+      HELM_DATABASE_SETTINGS=" \
+        --set database=mysql \
+        --set postgresql.enabled=false \
+        --set mysql.enabled=true \
+        --set createMysqlSecret=true \
+      "
+      ;;
+    postgresql)
+      HELM_DATABASE_SETTINGS=" \
+        --set database=postgresql \
+        --set postgresql.enabled=true \
+        --set mysql.enabled=false \
+        --set createPostgresqlSecret=true \
+  "
+  ;;
       *)
 	  (>&2 echo "ERROR: 'DATABASE' must be 'mysql' or 'postgresql'")
 	  exit 1
@@ -121,7 +125,9 @@ if [ -z "${TEST}" ]; then
     --set django.ingress.enabled=false \
     --set imagePullPolicy=Never \
     ${HELM_BROKER_SETTINGS} \
-    ${HELM_DATABASE_SETTINGS}
+    ${HELM_DATABASE_SETTINGS} \
+    --set createSecret=true
+
 
   echo -n "Waiting for DefectDojo to become ready "
   i=0

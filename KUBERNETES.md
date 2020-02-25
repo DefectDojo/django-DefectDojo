@@ -91,6 +91,9 @@ helm install \
   --set createMysqlSecret=true \
   --set createPostgresqlSecret=true
 ```
+Note that you need only one of: 
+- postgresql or mysql
+- rabbitmq or redis 
 
 It usually takes up to a minute for the services to startup and the
 status of the containers can be viewed by starting up ```minikube dashboard```.
