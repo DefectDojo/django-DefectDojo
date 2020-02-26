@@ -20,6 +20,7 @@ from ast import literal_eval
 from urllib.parse import urlparse
 import bleach
 import git
+from dateutil.relativedelta import relativedelta
 
 register = template.Library()
 
@@ -427,10 +428,20 @@ def datediff_time(date1, date2):
 
 
 @register.filter(name='overdue')
-def overdue(date1):
+def overdue(eng):
     date_str = ""
-    if date1 < datetime.datetime.now().date():
-        date_str = datediff_time(date1, datetime.datetime.now().date())
+
+    if eng.engagement_type == 'CI/CD':
+        overdue_threshold = 10
+    else:
+        overdue_threshold = 0
+
+    max_end_date = timezone.now() - relativedelta(days=overdue_threshold)
+
+    print(max_end_date)
+
+    if eng.target_end < max_end_date.date():
+        date_str = datediff_time(eng.target_end, datetime.datetime.now().date())
 
     return date_str
 

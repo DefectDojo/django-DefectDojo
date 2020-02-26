@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
+{% load display_tags %}
 {% block content %}
     <div class="row">
         <div class="col-md-12">
@@ -52,6 +53,8 @@
 						<div class="lineContainer">
 							<a  style="display: inline" class="eng_link" href="{% url 'view_engagement' e.id %}">
                                                 {% if e.name %}{{ e.name }} {% endif %}{{ e.target_start|date }} - {{ e.target_end|date }}</a>
+                                                {% if e|overdue %}<sup><div class="tag-label warning-color">{{ e|overdue }} overdue</div></sup>
+                                                {% endif %}                                                
 							| Lead: {{ e.lead.first_name }}
                                                         |
                                                         {%  for test in e.test_set.all %}

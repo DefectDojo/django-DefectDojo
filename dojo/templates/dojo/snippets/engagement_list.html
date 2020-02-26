@@ -132,10 +132,10 @@
                     </td>
                     <td class="nowrap">{{ eng.target_start|datediff_time:eng.target_end }}
                       {% if status == "open" %}
-                        {% if eng.target_end|overdue %}
+                        {% if eng|overdue %}
                         <sup>
                           <div class="tag-label warning-color">
-                            {{ eng.target_end|overdue }} overdue
+                            {{ eng|overdue }} overdue
                           </div>
                         </sup>
                         {% endif %}
