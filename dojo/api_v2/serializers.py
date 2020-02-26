@@ -726,6 +726,9 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         endpoint_to_add = data['endpoint_to_add']
         min_sev = data['minimum_severity']
         scan_date = data['scan_date']
+        scan_date_time = datetime.datetime.combine(scan_date, timezone.now().time())
+        if settings.USE_TZ:
+            scan_date_time = timezone.make_aware(scan_date_time, timezone.get_default_timezone())
         verified = data['verified']
         active = data['active']
 
@@ -837,13 +840,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             to_mitigate = set(original_items) - set(new_items)
             for finding in to_mitigate:
                 if not finding.mitigated or not finding.is_Mitigated:
-                    finding.mitigated = datetime.datetime.combine(
-                        scan_date,
-                        timezone.now().time())
-                    if settings.USE_TZ:
-                        finding.mitigated = timezone.make_aware(
-                            finding.mitigated,
-                            timezone.get_default_timezone())
+                    finding.mitigated = scan_date_time
                     finding.is_Mitigated = True
                     finding.mitigated_by = self.context['request'].user
                     finding.active = False
@@ -854,15 +851,15 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     finding.notes.add(note)
                     mitigated_count += 1
 
-            test.updated = max(scan_date, test.updated)
-            test.engagement.updated = max(scan_date, test.engagment.updated)
+            test.updated = max(scan_date_time, test.updated)
+            test.engagement.updated = max(scan_date_time, test.engagement.updated)
 
-            if test.engagement.engagment_type == 'CI/CD':
-                test.target_end = max(scan_date, test.target_end)
-                test.engagment.target_end = max(scan_date, test.engagement.target_end)
+            if test.engagement.engagement_type == 'CI/CD':
+                test.target_end = max(scan_date_time, test.target_end)
+                test.engagement.target_end = max(scan_date, test.engagement.target_end)
 
             test.save()
-            test.engagment.save()
+            test.engagement.save()
 
         except SyntaxError:
             raise Exception("Parser SyntaxError")
