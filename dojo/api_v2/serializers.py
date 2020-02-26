@@ -854,9 +854,15 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     finding.notes.add(note)
                     mitigated_count += 1
 
-            test.updated = scan_date
-            test.target_end = scan_date
+            test.updated = max(scan_date, test.updated)
+            test.engagement.updated = max(scan_date, test.engagment.updated)
+
+            if test.engagement.engagment_type == 'CI/CD':
+                test.target_end = max(scan_date, test.target_end)
+                test.engagment.target_end = max(scan_date, test.engagement.target_end)
+
             test.save()
+            test.engagment.save()
 
         except SyntaxError:
             raise Exception("Parser SyntaxError")

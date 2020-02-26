@@ -24,6 +24,7 @@ from multiselectfield import MultiSelectField
 from django import forms
 from django.utils.translation import gettext as _
 from dojo.signals import dedupe_signal
+from dateutil.relativedelta import relativedelta
 
 fmt = getattr(settings, 'LOG_FORMAT', None)
 lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
@@ -909,6 +910,22 @@ class Engagement(models.Model):
 
     class Meta:
         ordering = ['-target_start']
+
+    def is_overdue(self):
+        if self.engagement_type == 'CI/CD':
+            overdue_threshold = 10
+        else:
+            overdue_threshold = 0
+
+        max_end_date = timezone.now() - relativedelta(days=overdue_threshold)
+
+        print(max_end_date)
+
+        if self.target_end < max_end_date.date():
+            return True
+
+        return False
+
 
     def __unicode__(self):
         return "Engagement: %s (%s)" % (self.name if self.name else '',
@@ -2344,6 +2361,7 @@ class Objects_Engagement(models.Model):
             data = self.object_id.artifact
 
         return data + " | " + self.engagement.name + " | " + str(self.engagement.id)
+
 
     def __str__(self):
         data = ""
