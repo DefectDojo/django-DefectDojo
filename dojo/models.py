@@ -914,7 +914,6 @@ class Engagement(models.Model):
 
         return False
 
-
     def __unicode__(self):
         return "Engagement: %s (%s)" % (self.name if self.name else '',
                                         self.target_start.strftime(
@@ -2162,6 +2161,7 @@ class Alerts(models.Model):
         ordering = ['-created']
 
 
+
 class Cred_User(models.Model):
     name = models.CharField(max_length=200, null=False)
     username = models.CharField(max_length=200, null=False)
@@ -2335,7 +2335,6 @@ class Objects_Engagement(models.Model):
             data = self.object_id.artifact
 
         return data + " | " + self.engagement.name + " | " + str(self.engagement.id)
-
 
     def __str__(self):
         data = ""
