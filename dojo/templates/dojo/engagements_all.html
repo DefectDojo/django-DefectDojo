@@ -62,7 +62,7 @@
                                     </td>
                                     <td> {{ e.status }} </td>
                                     <td> {{ e.target_start|date }} - {{ e.target_end|date }} 
-                                        {% if e|overdue %}<sup><div class="tag-label warning-color">{{ e|overdue }} overdue</div></sup>
+                                        {% if e.is_overdue %}<sup><div class="tag-label warning-color">{{ e.target_end|overdue }} overdue</div></sup>
                                         {% endif %}
                                     </td>
                                     <td> {{ e.lead.first_name }}</td>
