@@ -36,6 +36,7 @@ from dojo.tasks import update_epic_task, add_epic_task
 from functools import reduce
 
 logger = logging.getLogger(__name__)
+parse_logger = logging.getLogger('dojo')
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -548,7 +549,17 @@ def import_scan_results(request, eid=None, pid=None):
                     new_f.cred_id = cred_user.cred_id
                     new_f.save()
 
-            parser = import_parser_factory(file, t, active, verified)
+            try:
+                parser = import_parser_factory(file, t, active, verified)
+            except Exception as e:
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     "An error has occurred in the parser, please see error "
+                                     "log for details.",
+                                     extra_tags='alert-danger')
+                parse_logger.exception(e)
+                parse_logger.error("Error in parser: {}".format(str(e)))
+                return HttpResponseRedirect(reverse('import_scan_results', args=(eid,)))
 
             try:
                 for item in parser.items:

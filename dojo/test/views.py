@@ -32,10 +32,10 @@ from dojo.tasks import add_issue_task, update_issue_task
 from functools import reduce
 
 logger = logging.getLogger(__name__)
-
+parse_logger = logging.getLogger('dojo')
 
 def view_test(request, tid):
-    test = Test.objects.get(id=tid)
+    test = get_object_or_404(Test, pk=tid)
     prod = test.engagement.product
     auth = request.user.is_staff or request.user in prod.authorized_users.all()
     tags = Tag.objects.usage_for_model(Finding)
@@ -600,6 +600,15 @@ def re_import_scan_results(request, tid):
                 parser = import_parser_factory(file, t, active, verified)
             except ValueError:
                 raise Http404()
+            except Exception as e:
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     "An error has occurred in the parser, please see error "
+                                     "log for details.",
+                                     extra_tags='alert-danger')
+                parse_logger.exception(e)
+                parse_logger.error("Error in parser: {}".format(str(e)))
+                return HttpResponseRedirect(reverse('re_import_scan_results', args=(t.id,)))
 
             try:
                 items = parser.items

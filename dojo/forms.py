@@ -343,6 +343,7 @@ class ImportScanForm(forms.Form):
                          ("Twistlock Image Scan", "Twistlock Image Scan"),
                          ("Kiuwan Scan", "Kiuwan Scan"),
                          ("Blackduck Hub Scan", "Blackduck Hub Scan"),
+                         ("Blackduck Component Risk", "Blackduck Component Risk"),
                          ("Openscap Vulnerability Scan", "Openscap Vulnerability Scan"),
                          ("Wapiti Scan", "Wapiti Scan"),
                          ("Immuniweb Scan", "Immuniweb Scan"),
