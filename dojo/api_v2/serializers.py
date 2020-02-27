@@ -188,6 +188,7 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
     def get_findings_list(self, obj):
         return obj.open_findings_list()
 
+
 class ProductTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product_Type
@@ -566,6 +567,14 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
             pass
 
         test.save()
+
+        test.engagement.updated = max(scan_date_time, test.engagement.updated)
+
+        if test.engagement.engagement_type == 'CI/CD':
+            test.engagement.target_end = max(scan_date, test.engagement.target_end)
+
+        test.engagement.save()
+
         if 'tags' in data:
             test.tags = ' '.join(data['tags'])
         try:
