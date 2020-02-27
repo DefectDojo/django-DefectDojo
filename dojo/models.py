@@ -901,13 +901,11 @@ class Engagement(models.Model):
 
     def is_overdue(self):
         if self.engagement_type == 'CI/CD':
-            overdue_threshold = 10
+            overdue_grace_days = 10
         else:
-            overdue_threshold = 0
+            overdue_grace_days = 0
 
-        max_end_date = timezone.now() - relativedelta(days=overdue_threshold)
-
-        print(max_end_date)
+        max_end_date = timezone.now() - relativedelta(days=overdue_grace_days)
 
         if self.target_end < max_end_date.date():
             return True
