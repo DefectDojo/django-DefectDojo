@@ -731,7 +731,7 @@ class Migration(migrations.Migration):
                 ('engagement_auto_close', models.BooleanField(default=False, help_text='Closes an engagement after 3 days (default) past due date including last update.', verbose_name='Enable Engagement Auto-Close')),
                 ('engagement_auto_close_days', models.IntegerField(default=3, help_text='Closes an engagement after the specified number of days past due date including last update.', verbose_name='Engagement Auto-Close Days')),
                 ('enable_finding_sla', models.BooleanField(default=True, help_text=b"Enables Finding SLA's for time to remediate.", verbose_name=b"Enable Finding SLA's")),
-                ('sla_critical', models.IntegerField(default=7, help_text='# of days to remediate a critical finding.', verbose_name='Crital Finding SLA Days')),
+                ('sla_critical', models.IntegerField(default=7, help_text='# of days to remediate a critical finding.', verbose_name='Critical Finding SLA Days')),
                 ('sla_high', models.IntegerField(default=30, help_text='# of days to remediate a high finding.', verbose_name='High Finding SLA Days')),
                 ('sla_medium', models.IntegerField(default=90, help_text='# of days to remediate a medium finding.', verbose_name='Medium Finding SLA Days')),
                 ('sla_low', models.IntegerField(default=120, help_text='# of days to remediate a low finding.', verbose_name='Low Finding SLA Days')),
