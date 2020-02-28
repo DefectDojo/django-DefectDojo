@@ -1957,3 +1957,7 @@ def apply_cwe_to_template(finding, override=False):
             template.save()
 
     return finding
+
+
+def max_safe(list):
+    return max(i for i in list if i is not None)

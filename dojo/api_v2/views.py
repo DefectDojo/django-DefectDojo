@@ -24,6 +24,7 @@ from dojo.utils import get_period_counts_legacy
 from dojo.api_v2 import serializers, permissions
 from django.db.models import Count, Q
 
+
 class EndPointViewSet(mixins.ListModelMixin,
                       mixins.RetrieveModelMixin,
                       mixins.UpdateModelMixin,
