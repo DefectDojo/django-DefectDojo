@@ -1570,13 +1570,6 @@ class Finding(models.Model):
         except JIRA_Issue.DoesNotExist:
             return False
 
-    def has_jira_issue(self):
-        try:
-            issue = self.jira_issue
-            return True
-        except JIRA_Issue.DoesNotExist:
-            return False
-
     def jira_conf(self):
         try:
             jpkey = JIRA_PKey.objects.get(product=self.test.engagement.product)
