@@ -166,7 +166,7 @@ class CheckmarxXMLParser(object):
             sinkObject = ''
             similarityId = str(path.get("SimilarityId"))
             path_id = str(path.get("PathId"))
-            pathId = similarityId+path_id
+            pathId = similarityId + path_id
             findingdetail = '{}-----\n'.format(findingdetail)
             # Loop over function calls / assignments in the data flow graph
             for pathnode in path.findall('PathNode'):
