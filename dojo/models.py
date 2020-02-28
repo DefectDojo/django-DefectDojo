@@ -912,19 +912,16 @@ class Engagement(models.Model):
 
     def is_overdue(self):
         if self.engagement_type == 'CI/CD':
-            overdue_threshold = 10
+            overdue_grace_days = 10
         else:
-            overdue_threshold = 0
+            overdue_grace_days = 0
 
-        max_end_date = timezone.now() - relativedelta(days=overdue_threshold)
-
-        print(max_end_date)
+        max_end_date = timezone.now() - relativedelta(days=overdue_grace_days)
 
         if self.target_end < max_end_date.date():
             return True
 
         return False
-
 
     def __unicode__(self):
         return "Engagement: %s (%s)" % (self.name if self.name else '',
@@ -2192,6 +2189,7 @@ class Alerts(models.Model):
         self.title = self.title[:200]
         super(Alerts, self).save(*args, **kwargs)
 
+
 class Cred_User(models.Model):
     name = models.CharField(max_length=200, null=False)
     username = models.CharField(max_length=200, null=False)
@@ -2365,7 +2363,6 @@ class Objects_Engagement(models.Model):
             data = self.object_id.artifact
 
         return data + " | " + self.engagement.name + " | " + str(self.engagement.id)
-
 
     def __str__(self):
         data = ""
