@@ -12,7 +12,7 @@
     "@yarn_components/datatables-responsive": "DataTables/Responsive#1.0.6",
     "@yarn_components/flot": "flot/flot#~0.8.3",
     "@yarn_components/flot-axis": "markrcote/flot-axislabels#*",
-    "@yarn_components/flot.tooltip": "krzysu/flot.tooltip#~0.8.4",
+    "@yarn_components/flot.tooltip": "krzysu/flot.tooltip#~0.9.0",
     "@yarn_components/font-awesome": "FortAwesome/Font-Awesome#4.4.0",
     "@yarn_components/fontawesome": "FortAwesome/Font-Awesome#~4.5.0",
     "@yarn_components/fullcalendar": "fullcalendar/fullcalendar#3.9.0",
