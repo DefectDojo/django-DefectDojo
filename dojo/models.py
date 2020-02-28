@@ -13,7 +13,6 @@ from django.urls import reverse
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import Q
 from django.utils.deconstruct import deconstructible
 from django.utils.timezone import now
 from imagekit.models import ImageSpecField
@@ -374,20 +373,23 @@ class Product_Type(models.Model):
         else:
             return health
 
-    def findings_count(self):
-        return Finding.objects.filter(mitigated__isnull=True,
-                                      verified=True,
-                                      false_p=False,
-                                      duplicate=False,
-                                      out_of_scope=False,
-                                      test__engagement__product__prod_type=self).filter(
-            Q(severity="Critical") |
-            Q(severity="High") |
-            Q(severity="Medium") |
-            Q(severity="Low")).count()
+    # def findings_count(self):
+    #     return Finding.objects.filter(mitigated__isnull=True,
+    #                                   verified=True,
+    #                                   false_p=False,
+    #                                   duplicate=False,
+    #                                   out_of_scope=False,
+    #                                   test__engagement__product__prod_type=self).filter(
+    #         Q(severity="Critical") |
+    #         Q(severity="High") |
+    #         Q(severity="Medium") |
+    #         Q(severity="Low")).count()
 
-    def products_count(self):
-        return Product.objects.filter(prod_type=self).count()
+    # def products_count(self):
+    #     return Product.objects.filter(prod_type=self).count()
+
+    class Meta:
+        ordering = ('name',)
 
     def __unicode__(self):
         return self.name
@@ -576,32 +578,41 @@ class Product(models.Model):
 
     @property
     def findings_count(self):
-        return Finding.objects.filter(mitigated__isnull=True,
-                                      verified=True,
-                                      false_p=False,
-                                      duplicate=False,
-                                      out_of_scope=False,
-                                      test__engagement__product=self).count()
+        try:
+            # if prefetched, it's already there
+            return self.active_finding_count
+        except AttributeError:
+            # ideally it's always prefetched and we can remove this code in the future
+            self.active_finding_count = Finding.objects.filter(mitigated__isnull=True,
+                                            active=True,
+                                            verified=True,
+                                            false_p=False,
+                                            duplicate=False,
+                                            out_of_scope=False,
+                                            test__engagement__product=self).count()
+            return self.active_finding_count
 
-    @property
-    def active_engagement_count(self):
-        return Engagement.objects.filter(active=True, product=self).count()
+    # @property
+    # def active_engagement_count(self):
+    #     return Engagement.objects.filter(active=True, product=self).count()
 
-    @property
-    def closed_engagement_count(self):
-        return Engagement.objects.filter(active=False, product=self).count()
+    # @property
+    # def closed_engagement_count(self):
+    #     return Engagement.objects.filter(active=False, product=self).count()
 
-    @property
-    def last_engagement_date(self):
-        return Engagement.objects.filter(product=self).first()
+    # @property
+    # def last_engagement_date(self):
+    #     return Engagement.objects.filter(product=self).first()
 
     @property
     def endpoint_count(self):
-        endpoints = Endpoint.objects.filter(
-            finding__test__engagement__product=self,
-            finding__active=True,
-            finding__verified=True,
-            finding__mitigated__isnull=True)
+        # endpoints = Endpoint.objects.filter(
+        #     finding__test__engagement__product=self,
+        #     finding__active=True,
+        #     finding__verified=True,
+        #     finding__mitigated__isnull=True)
+
+        endpoints = self.active_endpoints
 
         hosts = []
         ids = []
@@ -1553,6 +1564,13 @@ class Finding(models.Model):
         except JIRA_Issue.DoesNotExist:
             return None
 
+    def has_jira_issue(self):
+        try:
+            issue = self.jira_issue
+            return True
+        except JIRA_Issue.DoesNotExist:
+            return False
+
     def jira_conf(self):
         try:
             jpkey = JIRA_PKey.objects.get(product=self.test.engagement.product)
@@ -1561,6 +1579,14 @@ class Finding(models.Model):
             jconf = None
             pass
         return jconf
+
+    # newer version that can work with prefetching
+    def jira_conf_new(self):
+        try:
+            return self.test.engagement.product.jira_pkey_set.all()[0].conf
+        except:
+            return None
+            pass
 
     def long_desc(self):
         long_desc = ''
@@ -1720,10 +1746,6 @@ class Finding(models.Model):
         # Removes all blank lines
         res = re.sub(r'\n\s*\n', '\n', res)
         return res
-
-    def get_found_by(self):
-        scanners = self.found_by.all().distinct()
-        return ", ".join([str(scanner) for scanner in scanners])
 
 
 Finding.endpoints.through.__unicode__ = lambda \
