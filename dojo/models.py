@@ -1258,9 +1258,10 @@ class Finding(models.Model):
     title = models.CharField(max_length=511)
     date = models.DateField(default=get_current_date)
     cwe = models.IntegerField(default=0, null=True, blank=True)
-    cve_regex = RegexValidator(regex=r'^[A-Z]{1,10}-\d{4}-\d{4,12}$',
-                                 message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'. ")
-    cve = models.CharField(validators=[cve_regex], max_length=28, null=True)
+    cve_regex = RegexValidator(regex=r'^[A-Z]{1,10}(-\d+)+$',
+                               message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'.")
+    cve = models.CharField(validators=[cve_regex], max_length=28, null=True,
+                           help_text="CVE or other vulnerability identifier")
     url = models.TextField(null=True, blank=True, editable=False)
     severity = models.CharField(max_length=200, help_text="The severity level of this flaw (Critical, High, Medium, Low, Informational)")
     description = models.TextField()
@@ -1470,8 +1471,7 @@ class Finding(models.Model):
         return hashlib.sha256(hash_string).hexdigest()
 
     def remove_from_any_risk_acceptance(self):
-        risk_acceptances = Risk_Acceptance.objects.filter(accepted_findings__in=[self])
-        for r in risk_acceptances:
+        for r in self.risk_acceptance_set.all():
             r.accepted_findings.remove(self)
             if not r.accepted_findings.exists():
                 r.delete()
@@ -1544,7 +1544,7 @@ class Finding(models.Model):
             status += ['Out Of Scope']
         if self.duplicate:
             status += ['Duplicate']
-        if len(self.risk_acceptance_set.all()) > 0:
+        if self.risk_acceptance_set.exists():
             status += ['Accepted']
 
         if not len(status):
@@ -1578,11 +1578,16 @@ class Finding(models.Model):
 
     def jira(self):
         try:
-            jissue = JIRA_Issue.objects.get(finding=self)
-        except:
-            jissue = None
-            pass
-        return jissue
+            return self.jira_issue
+        except JIRA_Issue.DoesNotExist:
+            return None
+
+    def has_jira_issue(self):
+        try:
+            issue = self.jira_issue
+            return True
+        except JIRA_Issue.DoesNotExist:
+            return False
 
     def has_jira_issue(self):
         try:
@@ -1799,8 +1804,8 @@ class Stub_Finding(models.Model):
 class Finding_Template(models.Model):
     title = models.TextField(max_length=1000)
     cwe = models.IntegerField(default=None, null=True, blank=True)
-    cve_regex = RegexValidator(regex=r'^[A-Z]{1,10}-\d{4}-\d{4,12}$',
-                                 message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'. ")
+    cve_regex = RegexValidator(regex=r'^[A-Z]{1,10}(-\d+)+$',
+                               message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'.")
     cve = models.CharField(validators=[cve_regex], max_length=28, null=True)
     severity = models.CharField(max_length=200, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
