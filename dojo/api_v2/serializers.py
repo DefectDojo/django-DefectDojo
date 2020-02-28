@@ -522,6 +522,7 @@ class ScanSerializer(serializers.ModelSerializer):
 
 class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
     scan_date = serializers.DateField(default=datetime.date.today)
+
     minimum_severity = serializers.ChoiceField(
         choices=SEVERITY_CHOICES,
         default='Info')
@@ -553,6 +554,11 @@ class ImportScanSerializer(TaggitSerializer, serializers.Serializer):
         endpoint_to_add = data['endpoint_to_add']
         environment, created = Development_Environment.objects.get_or_create(
             name='Development')
+        scan_date = data['scan_date']
+        scan_date_time = datetime.datetime.combine(scan_date, timezone.now().time())
+        if settings.USE_TZ:
+            scan_date_time = timezone.make_aware(scan_date_time, timezone.get_default_timezone())
+
         test = Test(
             engagement=data['engagement'],
             lead=data['lead'],
