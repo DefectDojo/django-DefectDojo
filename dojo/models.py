@@ -378,7 +378,7 @@ class Product_Type(models.Model):
             return health
 
 
-          # def findings_count(self):
+    # def findings_count(self):
     #     return Finding.objects.filter(mitigated__isnull=True,
     #                                   verified=True,
     #                                   false_p=False,
@@ -392,6 +392,7 @@ class Product_Type(models.Model):
 
     # def products_count(self):
     #     return Product.objects.filter(prod_type=self).count()
+
 
     class Meta:
         ordering = ('name',)
