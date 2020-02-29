@@ -257,8 +257,8 @@ class System_Settings(models.Model):
     objects = SystemSettingsManager()
 
     def save(self, *args, **kwargs):
-        cache.delete(SystemSettingsManager.CACHE_KEY)
         super(System_Settings, self).save(*args, **kwargs)
+        cache.delete(SystemSettingsManager.CACHE_KEY)
 
 
 class SystemSettingsFormAdmin(forms.ModelForm):
