@@ -132,6 +132,9 @@ def verified_findings(request, pid=None, eid=None, view=None):
         add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
     if jira_config:
         jira_config = jira_config.conf_id
+
+    paged_findings.object_list = prefetch_for_findings(paged_findings.object_list)
+
     return render(
         request, 'dojo/findings_list.html', {
             'show_product_column': show_product_column,
@@ -233,6 +236,9 @@ def out_of_scope_findings(request, pid=None, eid=None, view=None):
         add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
     if jira_config:
         jira_config = jira_config.conf_id
+
+    paged_findings.object_list = prefetch_for_findings(paged_findings.object_list)
+
     return render(
         request, 'dojo/findings_list.html', {
             'show_product_column': show_product_column,
@@ -334,6 +340,9 @@ def false_positive_findings(request, pid=None, eid=None, view=None):
         add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
     if jira_config:
         jira_config = jira_config.conf_id
+
+    paged_findings.object_list = prefetch_for_findings(paged_findings.object_list)
+
     return render(
         request, 'dojo/findings_list.html', {
             'show_product_column': show_product_column,
@@ -435,6 +444,9 @@ def inactive_findings(request, pid=None, eid=None, view=None):
         add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
     if jira_config:
         jira_config = jira_config.conf_id
+
+    paged_findings.object_list = prefetch_for_findings(paged_findings.object_list)
+
     return render(
         request, 'dojo/findings_list.html', {
             'show_product_column': show_product_column,
@@ -539,7 +551,7 @@ def open_findings(request, pid=None, eid=None, view=None):
     if jira_config:
         jira_config = jira_config.conf_id
 
-    paged_findings.object_list = prefetch_for_open_findings(paged_findings.object_list)
+    paged_findings.object_list = prefetch_for_findings(paged_findings.object_list)
 
     return render(
         request, 'dojo/findings_list.html', {
@@ -557,9 +569,11 @@ def open_findings(request, pid=None, eid=None, view=None):
         })
 
 
-def prefetch_for_open_findings(findings):
+def prefetch_for_findings(findings):
     prefetched_findings = findings
+    prefetched_findings = prefetched_findings.select_related('reporter')
     prefetched_findings = prefetched_findings.select_related('jira_issue')
+    prefetched_findings = prefetched_findings.prefetch_related('test__test_type')
     prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__jira_pkey_set__conf')
     prefetched_findings = prefetched_findings.prefetch_related('found_by')
     prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set')
@@ -592,6 +606,8 @@ def accepted_findings(request, pid=None):
     if pid:
         product_tab = Product_Tab(pid, title="Closed Findings", tab="findings")
 
+    paged_findings.object_list = prefetch_for_findings(paged_findings.object_list)
+
     return render(
         request, 'dojo/findings_list.html', {
             "findings": paged_findings,
@@ -617,6 +633,8 @@ def closed_findings(request, pid=None):
     product_tab = None
     if pid:
         product_tab = Product_Tab(pid, title="Closed Findings", tab="findings")
+
+    paged_findings.object_list = prefetch_for_findings(paged_findings.object_list)
 
     return render(
         request, 'dojo/findings_list.html', {
