@@ -15,6 +15,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.deconstruct import deconstructible
 from django.utils.timezone import now
+from django.utils.functional import cached_property
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToCover
 from django.utils import timezone
@@ -344,18 +345,21 @@ class Product_Type(models.Model):
     updated = models.DateTimeField(auto_now=True, null=True)
     created = models.DateTimeField(auto_now_add=True, null=True)
 
+    @cached_property
     def critical_present(self):
         c_findings = Finding.objects.filter(
             test__engagement__product__prod_type=self, severity='Critical')
         if c_findings.count() > 0:
             return True
 
+    @cached_property
     def high_present(self):
         c_findings = Finding.objects.filter(
             test__engagement__product__prod_type=self, severity='High')
         if c_findings.count() > 0:
             return True
 
+    @cached_property
     def calc_health(self):
         h_findings = Finding.objects.filter(
             test__engagement__product__prod_type=self, severity='High')
@@ -577,7 +581,7 @@ class Product(models.Model):
     class Meta:
         ordering = ('name',)
 
-    @property
+    @cached_property
     def findings_count(self):
         try:
             # if prefetched, it's already there
@@ -604,7 +608,7 @@ class Product(models.Model):
     # def last_engagement_date(self):
     #     return Engagement.objects.filter(product=self).first()
 
-    @property
+    @cached_property
     def endpoint_count(self):
         # endpoints = Endpoint.objects.filter(
         #     finding__test__engagement__product=self,
@@ -1049,6 +1053,7 @@ class Endpoint(models.Model):
         else:
             return NotImplemented
 
+    @cached_property
     def finding_count(self):
         host = self.host_no_port
 
@@ -1075,6 +1080,7 @@ class Endpoint(models.Model):
                                       duplicate=False).distinct().order_by(
             'numerical_severity')
 
+    @cached_property
     def finding_count_endpoint(self):
         findings = Finding.objects.filter(endpoints=self,
                                           active=True,
@@ -1201,6 +1207,7 @@ class Test(models.Model):
                 'url': reverse('view_test', args=(self.id,))}]
         return bc
 
+    @cached_property
     def verified_finding_count(self):
         return Finding.objects.filter(test=self, verified=True).count()
 

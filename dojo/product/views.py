@@ -34,7 +34,6 @@ logger = logging.getLogger(__name__)
 
 
 def product(request):
-
     # validate prod_type param
     product_type = None
     if 'prod_type' in request.GET:

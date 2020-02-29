@@ -66,24 +66,17 @@ def engagement_calendar(request):
 
 @user_passes_test(lambda u: u.is_staff)
 def engagement(request):
+    products_with_engagements = Product.objects.filter(~Q(engagement=None), engagement__active=True).distinct()
     filtered = EngagementFilter(
         request.GET,
-        queryset=Product.objects.filter(
-            ~Q(engagement=None),
-            engagement__active=True,
-        ).distinct())
+        queryset=products_with_engagements.prefetch_related('engagement_set', 'prod_type', 'engagement_set__lead',
+                                                            'engagement_set__test_set__lead', 'engagement_set__test_set__test_type'))
     prods = get_page_items(request, filtered.qs, 25)
     name_words = [
-        product.name for product in Product.objects.filter(
-            ~Q(engagement=None),
-            engagement__active=True,
-        ).distinct()
+        product.name for product in products_with_engagements.only('name')
     ]
     eng_words = [
-        engagement.name for product in Product.objects.filter(
-            ~Q(engagement=None),
-            engagement__active=True,
-        ).distinct() for engagement in product.engagement_set.all()
+        engagement.name for engagement in Engagement.objects.filter(active=True)
     ]
 
     add_breadcrumb(
@@ -388,7 +381,7 @@ def view_engagement(request, eid):
             'risk': eng.risk_path,
             'form': form,
             'risks_accepted': risks_accepted,
-            'can_add_risk': len(eng_findings),
+            'can_add_risk': eng_findings.count(),
             'jissue': jissue,
             'jconf': jconf,
             'accepted_findings': accepted_findings,
