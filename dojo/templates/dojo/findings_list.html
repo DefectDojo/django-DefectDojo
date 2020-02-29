@@ -301,16 +301,16 @@
                                   {% endif %}
                                 </td>
                                 <td>
-                                  <a target="#" data-toggle="tooltip" data-placement="bottom" title="Test: {{ finding.test }}">{{ finding.get_found_by }}</a>
+                                  <a target="#" data-toggle="tooltip" data-placement="bottom" title="Test: {{ finding.test }}">{{ finding.found_by.all|join:", " }}</a>
                                 </td>
                                 <td>{% if finding.under_review %}Under Review, {% endif %}{{ finding.status }}{% if finding.duplicate_finding.id %}, <a href="{% url 'view_finding' finding.duplicate_finding.id%}" data-toggle="tooltip" data-placement="top" title="{{ finding.duplicate_finding.title }}, {{ finding.duplicate_finding.created }}">Original</a>
                                   {% endif %}
                                 </td>
                                 <td class="nowrap">
                                   {% if system_settings.enable_jira %}
-                                    {% if finding.jira.jira_key %}
-                                      <a href="{{finding.jira_conf.url}}/browse/{{finding.jira.jira_key}}" target="_blank" 
-                                           alt="Jira Bug - {{finding.jira.jira_key}}" data-toggle="tooltip" data-placement="bottom" title="{{finding.jira.jira_key}}"><i class="fa fa-bug fa-fw"></i></a>
+                                    {% if finding.has_jira_issue %}
+                                      <a href="{{finding.jira_conf_new.url}}/browse/{{finding.jira_issue.jira_key}}" target="_blank" 
+                                           alt="Jira Bug - {{finding.jira_issue.jira_key}}" data-toggle="tooltip" data-placement="bottom" title="{{finding.jira_issue.jira_key}}"><i class="fa fa-bug fa-fw"></i></a>
                                     {% endif %}
                                     {% if finding.notes.count %}
                                       <a href="{% url 'view_finding' finding.id %}#vuln_notes" alt="{{ finding.notes.count }} comment{{ finding.notes.count|pluralize }}">
