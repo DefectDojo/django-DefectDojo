@@ -128,7 +128,11 @@
                             <th class="nowrap">{% dojo_sort request 'Severity' 'numerical_severity' 'asc' %}</th>
                             <th class="nowrap">{% dojo_sort request 'Name' 'title' %}</th>
                             <th>CWE</th>
+                            {% if filter_name == 'Closed' %}
+                            <th class="nowrap">{% dojo_sort request 'Closed Date' 'mitigated'%}</th>
+                            {% else %}
                             <th class="nowrap">{% dojo_sort request 'Date' 'date'%}</th>
+                            {% endif %}
                             <th class="nowrap">Age</th>
                             {% if 'enable_finding_sla'|fetch_system_setting %}
                             <th>SLA</th>
@@ -287,7 +291,11 @@
                                   </a>
                                 {% endif %}
                                 </td>
+                                {% if filter_name == 'Closed' %}
+                                <td class="nowrap">{{ finding.mitigated|date }}</td>
+                                {% else %}
                                 <td class="nowrap">{{ finding.date }}</td>
+                                {% endif %}
                                 <td>{{ finding.age }}</td>
                                 {% if 'enable_finding_sla'|fetch_system_setting %}
                                 <td>

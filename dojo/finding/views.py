@@ -604,7 +604,7 @@ def accepted_findings(request, pid=None):
 
     product_tab = None
     if pid:
-        product_tab = Product_Tab(pid, title="Closed Findings", tab="findings")
+        product_tab = Product_Tab(pid, title="Accepted Findings", tab="findings")
 
     paged_findings.object_list = prefetch_for_findings(paged_findings.object_list)
 
@@ -628,7 +628,7 @@ def closed_findings(request, pid=None):
     ]
 
     title_words = sorted(set(title_words))
-    paged_findings = get_page_items(request, findings.qs, 25)
+    paged_findings = get_page_items(request, findings.qs.order_by('-mitigated'), 25)
 
     product_tab = None
     if pid:
