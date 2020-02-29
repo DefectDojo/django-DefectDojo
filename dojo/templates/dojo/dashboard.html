@@ -81,9 +81,9 @@
                     </div>
                 </div>
                 {% if request.user.is_superuser %}
-                    <a href="{% url 'closed_findings' %}?mitigated=2&o=numerical_severity">
+                    <a href="{% url 'closed_findings' %}?mitigated=2&o=-mitigated">
                 {% else %}
-                    <a href="{% url 'closed_findings' %}?mitigated=2&mitigated_by={{ request.user.id }}&o=numerical_severity">
+                    <a href="{% url 'closed_findings' %}?mitigated=2&mitigated_by={{ request.user.id }}&o=-mitigated">
                 {% endif %}
                     <div class="panel-footer">
                         <span class="pull-left">View Finding Details</span>
