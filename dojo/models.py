@@ -1207,7 +1207,6 @@ class Test(models.Model):
                 'url': reverse('view_test', args=(self.id,))}]
         return bc
 
-    @cached_property
     def verified_finding_count(self):
         return Finding.objects.filter(test=self, verified=True).count()
 
