@@ -102,21 +102,19 @@ def engagement(request):
 
 @user_passes_test(lambda u: u.is_staff)
 def engagements_all(request):
+
+    products_with_engagements = Product.objects.filter(~Q(engagement=None)).distinct()
     filtered = EngagementFilter(
         request.GET,
-        queryset=Product.objects.filter(
-            ~Q(engagement=None),
-        ).distinct())
+        queryset=products_with_engagements.prefetch_related('engagement_set', 'prod_type', 'engagement_set__lead',
+                                                            'engagement_set__test_set__lead', 'engagement_set__test_set__test_type'))
+
     prods = get_page_items(request, filtered.qs, 25)
     name_words = [
-        product.name for product in Product.objects.filter(
-            ~Q(engagement=None),
-        ).distinct()
+        product.name for product in products_with_engagements.only('name')
     ]
     eng_words = [
-        engagement.name for product in Product.objects.filter(
-            ~Q(engagement=None),
-        ).distinct() for engagement in product.engagement_set.all()
+        engagement.name for engagement in Engagement.objects.filter(active=True)
     ]
 
     add_breadcrumb(
