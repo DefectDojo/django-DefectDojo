@@ -90,9 +90,9 @@
                     <!-- /input-group -->
                 </li>
                 <li class="dropdown">
-                    <a class="dropdown-toggle dropdown-toggle-h{% alert_count %}" data-toggle="dropdown" href="#" aria-expanded="false" aria-label="{% alert_count %} Alerts">
+                    <a class="dropdown-toggle dropdown-toggle-h{{ alert_count }}" data-toggle="dropdown" href="#" aria-expanded="false" aria-label="{{ alert_count }} Alerts">
                         <i class="fa fa-bell fa-fw"></i>
-                        <span id="alert_count" class="badge badge-count badge-count{% alert_count %}">{% alert_count %}</span>
+                        <span id="alert_count" class="badge badge-count badge-count{{ alert_count }}">{{ alert_count }}</span>
                         <i class="fa fa-caret-down"></i>
                     </a>
                     <ul class="dropdown-menu dropdown-alerts">
