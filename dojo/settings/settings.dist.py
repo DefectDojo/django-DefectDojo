@@ -432,7 +432,7 @@ TEMPLATES = [
                 'social_django.context_processors.backends',
                 'social_django.context_processors.login_redirect',
                 'dojo.context_processors.globalize_oauth_vars',
-                 'dojo.context_processors.bind_alert_count',
+                'dojo.context_processors.bind_alert_count',
             ],
         },
     },
