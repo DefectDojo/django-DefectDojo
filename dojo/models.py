@@ -94,8 +94,10 @@ class Regulation(models.Model):
 class SystemSettingsManager(models.Manager):
     CACHE_KEY = 'defect_dojo_cache.system_settings'
 
-    def get(self, *args, **kwargs):
+    def get(self, no_cache=False, *args, **kwargs):
         # cache only 30s because django default cache backend is local per process
+        if no_cache:
+            return super(SystemSettingsManager, self).get(*args, **kwargs)
         return cache.get_or_set(self.CACHE_KEY, lambda: super(SystemSettingsManager, self).get(*args, **kwargs), timeout=30)
 
 
@@ -259,8 +261,8 @@ class System_Settings(models.Model):
     objects = SystemSettingsManager()
 
     def save(self, *args, **kwargs):
-        cache.delete(SystemSettingsManager.CACHE_KEY)
         super(System_Settings, self).save(*args, **kwargs)
+        cache.delete(SystemSettingsManager.CACHE_KEY)
 
 
 class SystemSettingsFormAdmin(forms.ModelForm):
