@@ -60,25 +60,35 @@ class BurpEnterpriseHtmlParser(object):
     def get_items(self, tree):
         # Check that there is at least one vulnerability (the vulnerabilities table is absent when no vuln are found)
         items = list()
-        endpoint_text = severities = tree.xpath("/html/body/div/div[contains(@class, 'section')]/h1")
-        url = endpoint_text[0].text[16:]
-        print(url)
-
+        endpoint_text = tree.xpath("/html/body/div/div[contains(@class, 'section')]/h1")
         severities = tree.xpath("/html/body/div/div[contains(@class, 'section')]/table[contains(@class, 'issue-table')]/tbody")
-        sev_table = list(severities[0].iter("tr"))
-        # for sev in sev_table:
-        for item in range(0, len(sev_table), 2):
-            title = list(sev_table[item].iter("td"))[0].text.strip()[:-4]
-            severity = list(sev_table[item + 1].iter("td"))[1].text.strip()
-            vuln = dict()
-            vuln['Severity'] = severity
-            vuln['Title'] = title
-            vuln['Description'] = ''
-            vuln['Impact'] = ''
-            vuln['Mitigation'] = ''
-            vuln['References'] = ''
-            vuln['CWE'] = ''
-            items.append(vuln)
+        endpoint_text = [endpoint for endpoint in endpoint_text if ('Issues found' in ''.join(endpoint.itertext()).strip())]
+        # print('num endpoints :: ', len(endpoint_text))
+        # for container in endpoint_text:
+        #     print(''.join(container.itertext()).strip())
+        # print('num severities :: ', len(severities))
+        # for container in severities:
+        #     print('Count')
+        #     print(''.join(container.itertext()).strip())
+
+        for index in range(0, len(severities)):
+            url = endpoint_text[index].text[16:]
+            sev_table = list(severities[index].iter("tr"))
+            # print('url :: ', url)
+            # print('table size :: ', len(sev_table))
+            for item in range(0, len(sev_table), 2):
+                title = list(sev_table[item].iter("td"))[0].text.strip()[:-4]
+                severity = list(sev_table[item + 1].iter("td"))[1].text.strip()
+                vuln = dict()
+                vuln['Severity'] = severity
+                vuln['Title'] = title
+                vuln['Description'] = ''
+                vuln['Impact'] = ''
+                vuln['Mitigation'] = ''
+                vuln['References'] = ''
+                vuln['CWE'] = ''
+                vuln['Endpoint'] = url
+                items.append(vuln)
 
         vulns = tree.xpath("/html/body/div/div[contains(@class, 'section details')]/div[contains(@class, 'issue-container')]")
         if(len(vulns) > 0):
@@ -86,9 +96,8 @@ class BurpEnterpriseHtmlParser(object):
             description = ['Issue detail:', 'Issue description', 'Request:', 'Response:']
             for issue in vulns:
                 elems = list(issue.iterchildren())
-                print('dict_index :: ', dict_index)
                 vuln = items[dict_index]
-                vuln['Endpoint'] = url + elems[2].text.strip()
+                vuln['Endpoint'] = vuln['Endpoint'] + elems[2].text.strip()
 
                 for index in range(3, len(elems), 2):
                     primary, secondary = elems[index].text.strip(), elems[index + 1]
@@ -116,11 +125,33 @@ class BurpEnterpriseHtmlParser(object):
 
                 dict_index += 1
 
-            print('Printing vulns\n\n')
-            for v in items:
-                for key, value in v.items():
-                    print(key, ' :: ', value)
-                print()
+            # print('Printing vulns\n\n')
+            # for v in items:
+            #     for key, value in v.items():
+            #         # print(key, ' :: ', value)
+            #         if key == 'Endpoint':
+            #             url = value
+            #             parsedUrl = urlparse(url)
+            #             protocol = parsedUrl.scheme
+            #             query = parsedUrl.query
+            #             fragment = parsedUrl.fragment
+            #             path = parsedUrl.path
+            #             port = ""  # Set port to empty string by default
+            #             # Split the returned network address into host and
+            #             try:  # If there is port number attached to host address
+            #                 host, port = parsedUrl.netloc.split(':')
+            #             except:  # there's no port attached to address
+            #                 host = parsedUrl.netloc
+
+            #             print('host :: ', host)
+            #             print('port :: ', port)
+            #             print('path :: ', path)
+            #             print('protocol :: ', protocol)
+            #             print('query :: ', query)
+            #             print('fragment :: ', fragment)
+            #     print()
+
+            # raise Exception("stop")
 
             self.create_findings(items)
             findings = list(self.dupes.values())
@@ -139,7 +170,7 @@ class BurpEnterpriseHtmlParser(object):
     def create_findings(self, items):
         for details in items:
             cwe = self.get_cwe(details.get('CWE'))
-            aggregateKeys = "{}{}{}".format(details.get('Title'), details.get('Description'), cwe)
+            aggregateKeys = "{}{}{}{}".format(details.get('Title'), details.get('Description'), cwe, details.get('Endpoint'))
             find = Finding(title=details.get('Title'),
                            description=details.get('Description'),
                            test=self.test,
