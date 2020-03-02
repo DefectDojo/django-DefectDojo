@@ -4,14 +4,14 @@ bleach>=3.1.0
 celery==4.4.0
 coverage==5.0.2
 defusedxml==0.6.0
-django_celery_results==1.2.0
+django_celery_results==1.2.1
 django-auditlog==0.4.7
 git+https://github.com/DefectDojo/django-custom-field.git@4e095dd9119858e90fd21560e5618c6347e4ef1b#egg=django-custom-field
 django-dbbackup>=3.2.0
 django-environ==0.4.5
 django-filter==2.2.0
 django-imagekit==4.0.2
-django-multiselectfield==0.1.11
+django-multiselectfield==0.1.12
 django-overextends==0.4.3
 django-polymorphic==2.1.2
 django-rest-swagger==2.2.0
@@ -30,7 +30,8 @@ jira==2.0.0
 lxml==4.5.0
 Markdown==3.2.1
 mysqlclient==1.4.6
-pandas>=0.24.2
+pandas>=0.25
+xlrd>=1.0.0
 pdfkit==0.6.1
 Pillow==7.0.0  # required by django-imagekit
 psycopg2-binary==2.8.4
@@ -56,4 +57,4 @@ ptvsd>=4.2.7
 google-api-python-client==1.7.11
 google-auth==1.11.2
 google-auth-oauthlib==0.4.1
-drf_yasg==1.17.0
+drf_yasg==1.17.1

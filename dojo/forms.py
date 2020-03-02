@@ -364,6 +364,7 @@ class ImportScanForm(forms.Form):
                          ("Xanitizer Scan", "Xanitizer Scan"),
                          ("Outpost24 Scan", "Outpost24 Scan"),
                          ("Burp Enterprise Scan", "Burp Enterprise Scan"),
+                         ("DSOP Scan", "DSOP Scan"),
                          ("Trivy Scan", "Trivy Scan"))
 
     SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
@@ -386,7 +387,7 @@ class ImportScanForm(forms.Form):
                            help_text="Add tags that help describe this scan.  "
                                      "Choose from the list or add new tags.  Press TAB key to add.")
     file = forms.FileField(widget=forms.widgets.FileInput(
-        attrs={"accept": ".xml, .csv, .nessus, .json, .html, .js, .zip"}),
+        attrs={"accept": ".xml, .csv, .nessus, .json, .html, .js, .zip, .xlsx"}),
         label="Choose report file",
         required=False)
 

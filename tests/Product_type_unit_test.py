@@ -11,9 +11,11 @@ class ProductTypeTest(unittest.TestCase):
         # change path of chromedriver according to which directory you have chromedriver.
         self.options = Options()
         self.options.add_argument("--headless")
+        # self.options.add_argument("--no-sandbox")
+        # self.options.add_argument("--disable-dev-shm-usage")
         self.driver = webdriver.Chrome('chromedriver', chrome_options=self.options)
         self.driver.implicitly_wait(30)
-        self.base_url = "http://localhost:8080/"
+        self.base_url = os.environ['DD_BASE_URL']
         self.verificationErrors = []
         self.accept_next_alert = True
 
@@ -55,6 +57,7 @@ class ProductTypeTest(unittest.TestCase):
         print("\n\nDebug Print Log: testing 'delete product type' \n")
         driver = self.login_page()
         driver.get(self.base_url + "product/type")
+        # TODO this assumes the first product_type in the list is the one that we just created (and can safely be deleted)
         driver.find_element_by_link_text("Edit Product Type").click()
         driver.find_element_by_css_selector("input.btn.btn-danger").click()
         productTxt = driver.find_element_by_tag_name("BODY").text
