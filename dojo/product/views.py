@@ -23,7 +23,7 @@ from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm
 from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Risk_Acceptance, Test, JIRA_PKey, Finding_Template, \
     Tool_Product_Settings, Cred_Mapping, Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, \
     Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product
-from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, create_notification, Product_Tab, get_punchcard_data
+from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, create_notification, Product_Tab, get_punchcard_data, prefetch_tags
 from custom_field.models import CustomFieldValue, CustomField
 from dojo.tasks import add_epic_task, add_issue_task
 from tagging.models import Tag
@@ -85,6 +85,7 @@ def prefetch_for_product(prods):
             finding__verified=True,
             finding__mitigated__isnull=True)
     prefetched_prods = prefetched_prods.prefetch_related(Prefetch('endpoint_set', queryset=active_endpoint_query, to_attr='active_endpoints'))
+    prefetched_prods = prefetch_tags(prefetched_prods)
     return prefetched_prods
 
 

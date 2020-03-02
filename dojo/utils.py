@@ -32,6 +32,10 @@ from dojo.models import Finding, Engagement, Finding_Template, Product, JIRA_PKe
     Language_Type, Languages, Rule
 from asteval import Interpreter
 from requests.auth import HTTPBasicAuth
+from django.contrib.contenttypes.models import ContentType
+from django.db.models import F
+from tagging.models import Tag
+from collections import defaultdict
 
 import logging
 logger = logging.getLogger(__name__)
@@ -1957,3 +1961,54 @@ def apply_cwe_to_template(finding, override=False):
             template.save()
 
     return finding
+
+
+def prefetch_tags(objs):
+
+    id_list = []
+    for obj in objs:
+        id_list.append(obj.id)
+    
+    if len(id_list) == 0:
+        return objs
+    
+    # print(id_list)
+
+    ctype = ContentType.objects.get_for_model(objs[0])
+    # print(ctype.id)
+
+    # start = len(connection.queries)
+
+    print('initial query for all tags')
+    tags = Tag.objects.filter(items__content_type__pk=ctype.pk,
+                        items__object_id__in=id_list).annotate(obj_id=F('items__object_id')).values('obj_id', 'name').order_by('obj_id')
+    # tags = list(tags)
+    # print(tags)
+
+    # for i in range(start, len(connection.queries)):
+    #     print(connection.queries[i])
+
+    d = defaultdict(list)
+
+    for item in tags:
+        d[item['obj_id']].append(item['name'])
+        # print(d.items())
+        # print(d[368])
+
+    print(d)
+
+    for obj in objs:
+        # delattr(obj, 'tags')
+        # print('setting tags_cache to: ', d.get(obj.id, None))
+        obj.dojo_tags = d.get(obj.id, None)
+
+        # print('printing tags for: ', obj.id)
+        # print(obj.dojo_tags)
+        # for i in range(start, len(connection.queries)):
+        #     print(connection.queries[i])
+
+    return objs
+    # output = [dict(zip(['id', 'tags'], item)) for item in d.items()]
+    # print(output)
+    # return output
+
