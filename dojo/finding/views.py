@@ -1294,7 +1294,7 @@ def mktemplate(request, fid):
             title=finding.title,
             cwe=finding.cwe,
             cve=finding.cve,
-            cvss=finding.cvss,
+            cvssv3=finding.cvssv3,
             severity=finding.severity,
             description=finding.description,
             mitigation=finding.mitigation,

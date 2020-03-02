@@ -315,7 +315,7 @@ var response = '<!--'+
 
 $(".cvsscalculator").parent().append(response);
   $(document).ready(function() {
-    $("#id_cvss").click(function(){
+    $("#id_cvssv3").click(function(){
       $("#cvsscalculator").toggle();
   });
 });
@@ -346,7 +346,7 @@ function updateScores() {
         parentNode(text("#environmentalMetricScore", result.environmentalMetricScore), ".scoreRating").className = "scoreRating " + result.environmentalSeverity.toLowerCase();
         text("#environmentalSeverity", "(" + result.environmentalSeverity + ")");
         show(inputValue("#vectorString", result.vectorString));
-        document.getElementById("id_cvss").value = result.vectorString;
+        document.getElementById("id_cvssv3").value = result.vectorString;
         if (result.environmentalSeverity != 'None'){
             document.getElementById("id_severity").value = result.environmentalSeverity;
         }
@@ -532,7 +532,7 @@ function setMetricsFromVector(vectorString) {
 var CVSSVectorInURL;
 
 function urlhash() {
-    var h = document.getElementById("id_cvss").value;
+    var h = document.getElementById("id_cvssv3").value;
     CVSSVectorInURL = h;
     setMetricsFromVector(h)
 }
