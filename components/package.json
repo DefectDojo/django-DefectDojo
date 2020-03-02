@@ -8,7 +8,7 @@
     "@yarn_components/chosen": "harvesthq/bower-chosen#~1.4.0",
     "@yarn_components/chosen-bootstrap": "dbtek/chosen-bootstrap#*",
     "@yarn_components/datatables": "DataTables/DataTables#~1.10.4",
-    "@yarn_components/datatables-plugins": "DataTables/Plugins#~1.0.1",
+    "@yarn_components/datatables-plugins": "DataTables/Plugins#~1.10.20",
     "@yarn_components/datatables-responsive": "DataTables/Responsive#1.0.6",
     "@yarn_components/flot": "flot/flot#~0.8.3",
     "@yarn_components/flot-axis": "markrcote/flot-axislabels#*",
