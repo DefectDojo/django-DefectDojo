@@ -27,6 +27,7 @@ from django.utils.translation import gettext as _
 from dojo.signals import dedupe_signal
 from dateutil.relativedelta import relativedelta
 from django.core.cache import cache
+from dojo.tag.prefetching_tag_descriptor import PrefetchingTagDescriptor
 
 fmt = getattr(settings, 'LOG_FORMAT', None)
 lvl = getattr(settings, 'LOG_LEVEL', logging.DEBUG)
@@ -2636,6 +2637,9 @@ tag_register(Endpoint)
 tag_register(Finding_Template)
 tag_register(App_Analysis)
 tag_register(Objects)
+
+# Patch to support prefetching
+PrefetchingTagDescriptor.patch()
 
 # Benchmarks
 admin.site.register(Benchmark_Type)
