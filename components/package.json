@@ -15,7 +15,7 @@
     "@yarn_components/flot.tooltip": "krzysu/flot.tooltip#~0.8.4",
     "@yarn_components/font-awesome": "FortAwesome/Font-Awesome#4.4.0",
     "@yarn_components/fontawesome": "FortAwesome/Font-Awesome#~4.5.0",
-    "@yarn_components/fullcalendar": "fullcalendar/fullcalendar#3.9.0",
+    "@yarn_components/fullcalendar": "fullcalendar/fullcalendar#v4.4.1",
     "@yarn_components/google-code-prettify": "tcollard/google-code-prettify#~1.0.4",
     "@yarn_components/holderjs": "imsky/holder#~2.4.1",
     "@yarn_components/jquery": "jquery/jquery-dist#~3.3.1",
