@@ -549,6 +549,13 @@
 		},
 		"model": "dojo.test_type",
 		"pk": 170
+	},
+	{
+		"fields": {
+			"name": "Burp Suite Enterprise"
+		},
+		"model": "dojo.test_type",
+		"pk": 171
 	}
 ]
 
