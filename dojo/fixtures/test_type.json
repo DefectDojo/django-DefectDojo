@@ -542,6 +542,13 @@
 		},
 		"model": "dojo.test_type",
 		"pk": 169
+	},
+	{
+		"fields": {
+			"name": "DSOP Scan"
+		},
+		"model": "dojo.test_type",
+		"pk": 170
 	}
 ]
 

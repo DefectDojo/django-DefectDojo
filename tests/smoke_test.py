@@ -11,11 +11,14 @@ import sys
 
 class DojoTests(unittest.TestCase):
     def setUp(self):
+        # change path of chromedriver according to which directory you have chromedriver.
         self.options = Options()
         self.options.add_argument("--headless")
+        # self.options.add_argument("--no-sandbox")
+        # self.options.add_argument("--disable-dev-shm-usage")
         self.driver = webdriver.Chrome('chromedriver', chrome_options=self.options)
         self.driver.implicitly_wait(30)
-        self.base_url = "http://localhost:8080/"
+        self.base_url = os.environ['DD_BASE_URL']
         self.verificationErrors = []
         self.accept_next_alert = True
 
