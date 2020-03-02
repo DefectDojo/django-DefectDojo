@@ -11,4 +11,6 @@ def globalize_oauth_vars(request):
 
 def bind_alert_count(request):
     from dojo.models import Alerts
+    if not request.user.is_authenticated:
+        return {}
     return {'alert_count': Alerts.objects.filter(user_id=request.user).count()}
